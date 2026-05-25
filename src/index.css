@@ -152,12 +152,19 @@
 @keyframes flicker { 0%, 100% { opacity: 0.55; } 42% { opacity: 0.85; } 50% { opacity: 0.25; } 58% { opacity: 0.8; } }
 .animate-flicker { animation: flicker 4.5s ease-in-out infinite; }
 
+/* cinematic stage transition for the transformation pipeline */
+@keyframes stage-in { from { opacity: 0; transform: translateY(14px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.animate-stage-in { animation: stage-in 0.6s cubic-bezier(0.16,1,0.3,1); }
+
+/* flowing pulse traveling the pipeline connector */
+@keyframes pipe-flow { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+
 /* Honor reduced-motion: stop ambient/infinite motion. */
 @media (prefers-reduced-motion: reduce) {
   .animate-spin-slow, .animate-spin-slower, .animate-spin-rev, .animate-dash,
   .animate-node, .animate-drift, .animate-core, .animate-pulse-slow,
   .animate-float, .animate-scan, .animate-shimmer, .animate-ring, .animate-travel,
-  .animate-haze-a, .animate-haze-b, .animate-flicker {
+  .animate-haze-a, .animate-haze-b, .animate-flicker, .animate-stage-in {
     animation: none !important;
   }
   html { scroll-behavior: auto; }
