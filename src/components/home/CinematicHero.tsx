@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Activity } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct } from '@/lib/types';
-import Globe from '@/components/home/Globe';
+
+// Real-geo globe (d3-geo + world-atlas) is heavy — load it lazily so it never blocks first paint.
+const Globe = lazy(() => import('@/components/home/Globe'));
 
 // Fixed slots around the globe for the floating system chips (benchmark-style).
 const SLOTS = ['top-[6%] left-[1%]', 'top-[4%] right-[3%]', 'top-[40%] right-[-3%]', 'bottom-[16%] left-[-2%]', 'bottom-[10%] right-[5%]'];
@@ -72,7 +74,9 @@ const CinematicHero: React.FC = () => {
         {/* CENTER — living globe + floating systems */}
         <div className="relative h-[400px] sm:h-[600px]" style={{ transform: 'translate(calc(var(--px) * -8px), calc(var(--py) * -8px))' }}>
           <div className="absolute inset-0 flex items-center justify-center">
-            <Globe className="w-full max-w-[620px] h-auto" />
+            <Suspense fallback={<div className="w-full max-w-[620px] aspect-square rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,217,255,0.12), transparent 68%)' }} />}>
+              <Globe className="w-full max-w-[620px] h-auto" />
+            </Suspense>
           </div>
           {chips.map((s, i) => {
             const metric = Array.isArray(s.metrics) && s.metrics[0] ? `${s.metrics[0].label} · ${s.metrics[0].value}` : s.category;
