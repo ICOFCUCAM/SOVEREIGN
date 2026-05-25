@@ -37,7 +37,7 @@ const InstitutionPreview: React.FC<Props> = ({ domain, onAcquire }) => {
         {/* Reframe band */}
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 text-white/45 text-[11px] font-mono uppercase tracking-[0.25em] mb-5">
-            Not a domain · a deployable institution
+            Deployable institution · preview build
           </div>
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tighter text-white mb-4">{bp.type}</h2>
           <p className="text-white/55 text-lg max-w-2xl mx-auto leading-relaxed">{bp.thesis}</p>
@@ -156,7 +156,7 @@ const InstitutionPreview: React.FC<Props> = ({ domain, onAcquire }) => {
             <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">
               You're acquiring <span style={{ color: primary }}>{bp.type.toLowerCase()}</span>.
             </h3>
-            <p className="text-white/50 mb-6">Listed at ${domain.price_usd.toLocaleString()} — a fraction of what the institution it becomes is worth.</p>
+            <p className="text-white/50 mb-6">Listed at ${domain.price_usd.toLocaleString()} — a deployable preview today; it ships in full on acquisition, for a fraction of what the institution becomes.</p>
             <div className="flex flex-wrap gap-3 justify-center">
               <button onClick={() => onAcquire('buy_now')}
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all"
