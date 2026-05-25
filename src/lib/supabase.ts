@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
 
-// Initialize database client
-const supabaseUrl = 'https://csmkvcjpuadxifqksjwy.databasepad.com';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImQ0MTMyZjVhLWUxZDMtNDczNy05YzNjLTc5NzBkYmRkNjYxZiJ9.eyJwcm9qZWN0SWQiOiJjc21rdmNqcHVhZHhpZnFrc2p3eSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzc5NTc2NDc5LCJleHAiOjIwOTQ5MzY0NzksImlzcyI6ImZhbW91cy5kYXRhYmFzZXBhZCIsImF1ZCI6ImZhbW91cy5jbGllbnRzIn0.TQNERfYIfrTL0w8L7LcFnT4i_qXm4EXCPh3DIgo-TEU';
+// Initialize database client (Supabase project: SOVEREIGN)
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? 'https://qvjdivcdefuprnenedje.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2amRpdmNkZWZ1cHJuZW5lZGplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NjMwMjYsImV4cCI6MjA5NTIzOTAyNn0.2cKjQRxnspeySCRwsOGz0ntKZ9LD3BVKR80H1mPOu_c';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 
