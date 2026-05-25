@@ -66,6 +66,16 @@ const SystemPage: React.FC = () => {
   const metrics = Array.isArray(product.metrics) ? product.metrics : [];
   const bp = institutionBlueprint(product.name, SLUG_BLUEPRINT[product.slug] || 'general');
 
+  // Prefer the system's own real data; fall back to the category blueprint.
+  const kpis = metrics.length ? metrics.slice(0, 4) : bp.kpis;
+  const subsystems = caps.length
+    ? caps.slice(0, 6).map((c, i) => ({
+        name: c,
+        status: (['live', 'live', 'arming', 'staged'] as const)[i % 4],
+        value: ['Online', 'Online', 'Arming', 'Staged'][i % 4],
+      }))
+    : bp.systems.map((s) => ({ name: s.name, status: s.status, value: s.metricValue }));
+
   return (
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
@@ -149,7 +159,7 @@ const SystemPage: React.FC = () => {
             </div>
             <div className="p-5">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-                {bp.kpis.map((k) => (
+                {kpis.map((k) => (
                   <div key={k.label} className="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div className="text-2xl font-bold tabular-nums" style={{ color: accent }}>{k.value}</div>
                     <div className="text-[10px] font-mono uppercase tracking-widest text-white/40 mt-1">{k.label}</div>
@@ -168,16 +178,13 @@ const SystemPage: React.FC = () => {
                 <div className="rounded-xl bg-white/5 border border-white/10 p-4">
                   <div className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-3">Systems online</div>
                   <div className="space-y-2.5">
-                    {bp.systems.map((s) => (
+                    {subsystems.map((s) => (
                       <div key={s.name} className="flex items-center justify-between">
                         <div className="flex items-center gap-2 min-w-0">
                           <div className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_COLOR[s.status], boxShadow: `0 0 6px ${STATUS_COLOR[s.status]}` }} />
                           <span className="text-sm text-white/80 truncate">{s.name}</span>
                         </div>
-                        <div className="text-right shrink-0">
-                          <span className="text-xs text-white font-mono tabular-nums">{s.metricValue}</span>
-                          <span className="text-[9px] text-white/35 font-mono ml-1.5 uppercase">{s.metricLabel}</span>
-                        </div>
+                        <span className="text-[10px] text-white/45 font-mono uppercase shrink-0">{s.value}</span>
                       </div>
                     ))}
                   </div>
