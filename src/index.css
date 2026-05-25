@@ -163,12 +163,18 @@
 @keyframes sweep-x { 0% { transform: translateX(-110%); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translateX(110%); opacity: 0; } }
 .animate-sweep { animation: sweep-x 5s linear infinite; }
 
+/* live ecosystem ticker — continuous Bloomberg-style scroll */
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.animate-ticker { animation: ticker 48s linear infinite; }
+.ticker-track:hover .animate-ticker { animation-play-state: paused; }
+
 /* Honor reduced-motion: stop ambient/infinite motion. */
 @media (prefers-reduced-motion: reduce) {
   .animate-spin-slow, .animate-spin-slower, .animate-spin-rev, .animate-dash,
   .animate-node, .animate-drift, .animate-core, .animate-pulse-slow,
   .animate-float, .animate-scan, .animate-shimmer, .animate-ring, .animate-travel,
-  .animate-haze-a, .animate-haze-b, .animate-flicker, .animate-stage-in, .animate-sweep {
+  .animate-haze-a, .animate-haze-b, .animate-flicker, .animate-stage-in, .animate-sweep,
+  .animate-ticker {
     animation: none !important;
   }
   html { scroll-behavior: auto; }

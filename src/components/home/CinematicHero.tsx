@@ -54,7 +54,7 @@ const CinematicHero: React.FC = () => {
   ];
 
   return (
-    <section ref={sectionRef} onMouseMove={onMove} className="relative min-h-screen overflow-hidden" style={{ ['--px' as string]: '0', ['--py' as string]: '0' }}>
+    <section ref={sectionRef} onMouseMove={onMove} className="relative h-[85vh] min-h-[620px] overflow-hidden" style={{ ['--px' as string]: '0', ['--py' as string]: '0' }}>
       {/* ── LAYER 1 · THE WORLD (cinematic environment plate or SVG fallback) ── */}
       <HeroEnvironment />
 
@@ -96,7 +96,7 @@ const CinematicHero: React.FC = () => {
       })}
 
       {/* ── CONTENT (embedded in the world) ── */}
-      <div className="relative z-10 min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center pt-24 pb-28">
+      <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center pt-24 pb-28">
         <div className="max-w-xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/5 text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.3em] mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Sovereign OS · Live
