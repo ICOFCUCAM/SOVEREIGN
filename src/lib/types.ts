@@ -21,8 +21,8 @@ export interface Domain {
   valuation_score: number;
   ssl_verified: boolean;
   ownership_verified: boolean;
-  ai_brand_profile: Record<string, any>;
-  metadata: Record<string, any>;
+  ai_brand_profile: Record<string, unknown>;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   deleted_at?: string | null;
@@ -67,6 +67,23 @@ export interface UserRoleRow {
   created_at: string;
 }
 
+export interface BrandPalette {
+  primary: string;
+  accent: string;
+  neutral: string;
+}
+
+export interface MonetizationModel {
+  model: string;
+  description: string;
+}
+
+export interface LandingCopy {
+  headline: string;
+  subhead: string;
+  cta: string;
+}
+
 export interface ValuationReport {
   overall_score: number;
   brand_strength: number;
@@ -87,4 +104,42 @@ export interface ValuationReport {
   tld_strength?: number;
   length_score?: number;
   model_used?: string;
+  // Phase 2 — intelligence + brand package
+  market_trend_alignment?: number;
+  enterprise_suitability?: number;
+  brand_tone?: string;
+  typography_direction?: string;
+  ui_style?: string;
+  logo_concept?: string;
+  brand_palette?: BrandPalette;
+  monetization?: MonetizationModel[];
+  market_positioning?: string;
+  investor_narrative?: string;
+  elevator_pitch?: string;
+  landing_copy?: LandingCopy;
+}
+
+export interface BrandProfile {
+  id: string;
+  domain_id: string | null;
+  domain_name: string;
+  overall_score: number | null;
+  slogan: string | null;
+  brand_tone: string | null;
+  typography_direction: string | null;
+  ui_style: string | null;
+  logo_concept: string | null;
+  market_positioning: string | null;
+  elevator_pitch: string | null;
+  investor_narrative: string | null;
+  primary_color: string | null;
+  accent_color: string | null;
+  neutral_color: string | null;
+  monetization: MonetizationModel[];
+  startup_concepts: Array<{ title: string; description: string; category: string }>;
+  landing_copy: LandingCopy | Record<string, never>;
+  industry_category: string | null;
+  model_used: string | null;
+  saved_by: string | null;
+  created_at: string;
 }
