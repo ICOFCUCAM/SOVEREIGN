@@ -275,6 +275,22 @@ const AdminPage: React.FC = () => {
     load();
   };
 
+  const updateUserRole = async (u: UserRoleRow, newRole: string) => {
+    if (newRole === u.role) return;
+    if (u.user_id === user.id) { toast.error('You cannot change your own role'); return; }
+    const { error } = await supabase.from('user_roles').update({ role: newRole }).eq('user_id', u.user_id);
+    if (error) { toast.error(error.message); return; }
+    await logAudit({
+      action: 'role.update',
+      resource_type: 'user_role',
+      resource_id: u.user_id,
+      actor_email: user.email,
+      changes: { email: u.email, before: u.role, after: newRole },
+    });
+    toast.success(`Role updated → ${newRole} · logged`);
+    load();
+  };
+
   const actionMeta: Record<string, { icon: LucideIcon; color: string; label: string }> = {
     'domain.create': { icon: PlusCircle, color: '#10B981', label: 'Created domain' },
     'domain.update': { icon: Pencil, color: '#00D9FF', label: 'Updated domain' },
@@ -694,11 +710,20 @@ const AdminPage: React.FC = () => {
                             <div className="text-xs text-white/40">{u.email}</div>
                           </td>
                           <td className="px-3 py-3.5">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase inline-flex items-center gap-1.5 ${
-                              isAdminRole ? 'bg-amber-500/15 text-amber-300' : u.role === 'operator' ? 'bg-cyan-500/15 text-cyan-300' : 'bg-white/5 text-white/50'
-                            }`}>
-                              <RoleIcon className="w-3 h-3" /> {u.role}
-                            </span>
+                            {u.user_id === user.id ? (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase inline-flex items-center gap-1.5 bg-amber-500/15 text-amber-300">
+                                <RoleIcon className="w-3 h-3" /> {u.role} · you
+                              </span>
+                            ) : (
+                              <select value={u.role} onChange={(e) => updateUserRole(u, e.target.value)}
+                                className={`bg-white/5 border rounded px-2 py-1 text-[10px] font-mono uppercase focus:outline-none focus:border-cyan-400/50 ${
+                                  isAdminRole ? 'border-amber-500/30 text-amber-300' : u.role === 'operator' ? 'border-cyan-500/30 text-cyan-300' : 'border-white/10 text-white/70'
+                                }`}>
+                                <option value="admin">admin</option>
+                                <option value="operator">operator</option>
+                                <option value="viewer">viewer</option>
+                              </select>
+                            )}
                           </td>
                           <td className="px-3 py-3.5 text-white/40 text-xs font-mono">{u.user_id.slice(0, 8)}…{u.user_id.slice(-4)}</td>
                           <td className="px-3 py-3.5 text-white/40 text-xs font-mono">{new Date(u.created_at).toLocaleDateString()}</td>
@@ -712,7 +737,7 @@ const AdminPage: React.FC = () => {
                 </table>
               </div>
               <div className="px-5 py-3 border-t border-white/5 text-[11px] text-white/40 font-mono">
-                Role elevation is mutation-gated. Promoting an identity to admin/operator requires a server-side policy change — see platform notes.
+                Role changes are admin-only — enforced by row-level security + a BEFORE UPDATE trigger, and recorded to the immutable audit trail. Your own role is locked to prevent admin lockout.
               </div>
             </div>
           )}
