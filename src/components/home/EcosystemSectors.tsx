@@ -25,11 +25,15 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip
     <div className="relative grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
       {/* cinematic emblem — a single elegant mark in an accent light-field */}
       <div className={`relative ${flip ? 'lg:order-2' : ''}`}>
-        <div className="relative mx-auto w-full max-w-[440px] aspect-square flex items-center justify-center">
+        <div className="relative mx-auto w-full max-w-[480px] aspect-square flex items-center justify-center">
           <div className="absolute inset-[12%] rounded-full blur-[80px] opacity-40" style={{ background: `radial-gradient(circle, ${p.accent}, transparent 70%)` }} />
           <div className="absolute inset-[6%] rounded-full border border-white/[0.06]" />
           <div className="absolute inset-[22%] rounded-full border border-white/[0.04]" />
           <Emblem className="relative w-28 h-28 sm:w-36 sm:h-36" strokeWidth={0.9} style={{ color: p.accent }} />
+          {/* drop a cinematic visual at /systems/<slug>.jpg to replace the emblem; hides if absent */}
+          <img src={`/systems/${p.slug}.jpg`} alt="" aria-hidden loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover rounded-[2rem]"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
         </div>
       </div>
 
