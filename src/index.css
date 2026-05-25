@@ -139,6 +139,16 @@
 }
 .animate-core { animation: core-breathe 6s ease-in-out infinite; }
 
+/* Honor reduced-motion: stop ambient/infinite motion. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow, .animate-spin-slower, .animate-spin-rev, .animate-dash,
+  .animate-node, .animate-drift, .animate-core, .animate-pulse-slow,
+  .animate-float, .animate-scan, .animate-shimmer, .animate-ring {
+    animation: none !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #05071A; }
