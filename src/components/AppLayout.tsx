@@ -6,21 +6,9 @@ import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
 import GlobalInfrastructure from '@/components/home/GlobalInfrastructure';
-import MarketActivity from '@/components/home/MarketActivity';
 import EcosystemMap from '@/components/home/EcosystemMap';
 import MarketplaceRail from '@/components/home/MarketplaceRail';
-import LiveActivityStrip from '@/components/home/LiveActivityStrip';
-import GlobalStatBar from '@/components/home/GlobalStatBar';
 import ClosingCTA from '@/components/home/ClosingCTA';
-
-// Atmospheric transition between sections — a fading hairline + soft glow
-// that gives the page cinematic breathing room and continuity.
-const SectionFade: React.FC = () => (
-  <div className="relative h-px max-w-6xl mx-auto my-4" aria-hidden>
-    <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,194,255,0.18), transparent)' }} />
-    <div className="absolute left-1/2 -translate-x-1/2 -top-12 w-[420px] h-24 rounded-full blur-[60px]" style={{ background: 'rgba(0,150,255,0.06)' }} />
-  </div>
-);
 
 const AppLayout: React.FC = () => {
   return (
@@ -28,19 +16,18 @@ const AppLayout: React.FC = () => {
       <AnimatedBackground intensity="low" />
       <PlatformNav />
       <main className="relative">
+        {/* Act I — the world */}
         <CinematicHero />
-        <LiveActivityStrip />
-        <MarketplaceRail />
-        <SectionFade />
+        {/* Act II — the interconnected ecosystem */}
         <Reveal><EcosystemMap /></Reveal>
-        <SectionFade />
+        {/* Act III — featured deployable systems */}
         <EcosystemSectors />
-        <SectionFade />
+        {/* Act IV — the sovereign marketplace */}
+        <MarketplaceRail />
+        {/* Act V — planetary infrastructure */}
         <Reveal><GlobalInfrastructure /></Reveal>
-        <SectionFade />
-        <Reveal><MarketActivity /></Reveal>
+        {/* Act VI — enter */}
         <ClosingCTA />
-        <GlobalStatBar />
       </main>
       <PlatformFooter />
     </div>
