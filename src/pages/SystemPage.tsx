@@ -25,6 +25,7 @@ const SystemPage: React.FC = () => {
   const [product, setProduct] = useState<EcosystemProduct | null>(null);
   const [domain, setDomain] = useState<Domain | null>(null);
   const [related, setRelated] = useState<EcosystemProduct[]>([]);
+  const [modules, setModules] = useState<EcosystemProduct[]>([]);
   const [loading, setLoading] = useState(true);
   useDocumentTitle(product?.name);
 
@@ -36,7 +37,9 @@ const SystemPage: React.FC = () => {
       setProduct((data as EcosystemProduct) || null);
       const { data: dom } = await supabase.from('domains').select('*').contains('metadata', { ecosystem_slug: slug }).maybeSingle();
       setDomain((dom as Domain) || null);
-      const { data: rel } = await supabase.from('ecosystem_products').select('*').neq('slug', slug).order('sort_order', { ascending: true }).limit(4);
+      const { data: mod } = await supabase.from('ecosystem_products').select('*').like('slug', `${slug}-%`).order('sort_order', { ascending: true });
+      setModules((mod || []) as EcosystemProduct[]);
+      const { data: rel } = await supabase.from('ecosystem_products').select('*').neq('slug', slug).not('slug', 'like', `${slug}-%`).order('sort_order', { ascending: true }).limit(4);
       setRelated((rel || []) as EcosystemProduct[]);
       setLoading(false);
     })();
@@ -245,6 +248,36 @@ const SystemPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Module suite */}
+      {modules.length > 0 && (
+        <section className="px-4 sm:px-6 lg:px-8 py-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-end justify-between gap-4 mb-7">
+              <h2 className="text-2xl font-bold text-white">Deployable modules</h2>
+              <span className="text-[11px] font-mono uppercase tracking-widest text-white/35">{modules.length} systems</span>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {modules.map((m) => {
+                const dep = (m.metrics || []).find((x) => /deployment/i.test(x.label));
+                return (
+                  <Link key={m.id} to={`/systems/${m.slug}`} className="group rounded-2xl border border-white/10 p-5 hover:border-white/25 hover:bg-white/[0.02] transition">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="w-2 h-2 rounded-full" style={{ background: m.accent }} />
+                      {dep && <span className="text-[11px] font-mono tabular-nums" style={{ color: m.accent }}>{dep.value}</span>}
+                    </div>
+                    <div className="text-white font-semibold flex items-center gap-1.5">
+                      {m.name}
+                      <ArrowUpRight className="w-3.5 h-3.5 text-white/30 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                    <div className="text-sm text-white/45 line-clamp-1 mt-1">{m.tagline}</div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Acquisition */}
       <section className="px-4 sm:px-6 lg:px-8 py-12">
