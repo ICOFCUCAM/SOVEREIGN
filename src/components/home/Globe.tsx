@@ -67,6 +67,13 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => (
         <path key={`a${i}`} d={d} fill="none" stroke="url(#garc)" strokeWidth="1.1"
           strokeDasharray="3 5" className="animate-dash" opacity="0.7" />
       ))}
+      {/* live data pulses traveling the routes */}
+      {arcs.map((d, i) => (
+        <circle key={`pulse${i}`} r={i % 2 ? 1.7 : 2.1} fill={i % 2 ? '#00D9FF' : '#ffffff'}>
+          <animateMotion dur={`${3.4 + (i % 4) * 0.9}s`} begin={`${i * 0.6}s`} repeatCount="indefinite" path={d} rotate="auto" />
+          <animate attributeName="opacity" values="0;1;1;0" dur={`${3.4 + (i % 4) * 0.9}s`} begin={`${i * 0.6}s`} repeatCount="indefinite" />
+        </circle>
+      ))}
       {DOTS.map((dt, i) => (
         <circle key={`d${i}`} cx={dt.x} cy={dt.y} r={dt.big ? 2.4 : 1.4}
           fill={i % 3 === 0 ? '#00D9FF' : i % 3 === 1 ? '#7C3AED' : '#10B981'}
