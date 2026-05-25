@@ -228,6 +228,45 @@ const SystemPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Acquisition */}
+      <section className="px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-6xl mx-auto glass-strong rounded-2xl p-8 relative overflow-hidden">
+          <div className="absolute -top-20 right-0 w-80 h-80 rounded-full blur-[120px] opacity-20" style={{ background: accent }} />
+          <div className="relative grid lg:grid-cols-[1fr_320px] gap-8 items-center">
+            <div>
+              <div className="text-[11px] font-mono uppercase tracking-[0.25em] mb-3" style={{ color: accent }}>Acquisition</div>
+              <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tighter mb-4">Acquire {product.name}.</h2>
+              <p className="text-white/55 max-w-xl mb-6 leading-relaxed">A deployable institution — preview the build today; on acquisition it ships in full on sovereign infrastructure. The transfer includes the complete platform and its expansion framework.</p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 max-w-lg">
+                {['Platform infrastructure', 'Operational architecture', 'Expansion automation', 'Brand & IP assets', 'Subscription ecosystem', 'Deployment framework'].map((x) => (
+                  <div key={x} className="flex items-center gap-2 text-sm text-white/70"><CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: accent }} />{x}</div>
+                ))}
+              </div>
+            </div>
+            <div className="lg:text-right">
+              {domain && (
+                <>
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-1">Valuation</div>
+                  <div className="font-display text-4xl font-bold text-white mb-5 tabular-nums">${Number(domain.price_usd).toLocaleString()}</div>
+                </>
+              )}
+              <div className="flex flex-col gap-2 lg:items-end">
+                {domain ? (
+                  <Link to={`/d/${encodeURIComponent(domain.domain_name)}`} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold w-full lg:w-auto" style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)` }}>
+                    <DollarSign className="w-4 h-4" /> Acquire the institution
+                  </Link>
+                ) : (
+                  <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold w-full lg:w-auto" style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)` }}>
+                    <DollarSign className="w-4 h-4" /> Explore acquisition
+                  </Link>
+                )}
+                <span className="text-[11px] font-mono text-white/35">Strategic partnership & investment welcomed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       </Reveal>
 
       <PlatformFooter />
