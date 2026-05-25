@@ -16,6 +16,7 @@ interface Props {
 const DomainCard: React.FC<Props> = ({ domain, rank, opportunity, confidence, momentum }) => {
   const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
   const investor = rank !== undefined;
+  const scope = typeof domain.metadata?.scope === 'string' ? (domain.metadata.scope as string) : null;
 
   return (
     <Link to={`/d/${encodeURIComponent(domain.domain_name)}`}
@@ -45,6 +46,11 @@ const DomainCard: React.FC<Props> = ({ domain, rank, opportunity, confidence, mo
             <div className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10">
               <span className="text-[10px] font-mono uppercase tracking-wider text-white/60">{domain.category}</span>
             </div>
+            {scope && (
+              <div className="px-2 py-0.5 rounded-md border" style={{ background: `${domain.brand_color}14`, borderColor: `${domain.brand_color}33` }}>
+                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: domain.brand_color }}>{scope}</span>
+              </div>
+            )}
           </div>
           <ArrowUpRight className="w-4 h-4 text-white/30 group-hover:text-cyan-400 group-hover:rotate-45 transition-all" />
         </div>
