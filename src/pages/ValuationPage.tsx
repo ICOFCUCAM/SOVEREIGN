@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { supabase } from '@/lib/supabase';
 import type { ValuationReport } from '@/lib/types';
 import PlatformNav from '@/components/PlatformNav';
@@ -8,6 +9,7 @@ import ValuationRing from '@/components/ValuationRing';
 import { Sparkles, Search, Brain, Rocket, Layers, Zap, TrendingUp, AlertCircle } from 'lucide-react';
 
 const ValuationPage: React.FC = () => {
+  useDocumentTitle('AI Valuation');
   const [domain, setDomain] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ValuationReport | null>(null);

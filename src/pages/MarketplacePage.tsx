@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { supabase } from '@/lib/supabase';
 import type { Domain, AnalyticsEvent } from '@/lib/types';
 import PlatformNav from '@/components/PlatformNav';
@@ -12,6 +13,7 @@ const CATEGORIES = ['all', 'fintech', 'ai', 'infra', 'govtech', 'saas', 'logisti
 type Sort = 'opportunity' | 'trending' | 'score' | 'price_low' | 'price_high';
 
 const MarketplacePage: React.FC = () => {
+  useDocumentTitle('Marketplace');
   const [domains, setDomains] = useState<Domain[]>([]);
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [loading, setLoading] = useState(true);

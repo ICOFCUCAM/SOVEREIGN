@@ -4,8 +4,10 @@ import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import EcosystemSection from '@/components/home/EcosystemSection';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const EcosystemHub: React.FC = () => {
+  useDocumentTitle('Ecosystem');
   return (
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />

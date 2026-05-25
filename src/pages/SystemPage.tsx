@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct, Domain } from '@/lib/types';
 import { institutionBlueprint } from '@/lib/institution';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -23,6 +24,7 @@ const SystemPage: React.FC = () => {
   const [product, setProduct] = useState<EcosystemProduct | null>(null);
   const [domain, setDomain] = useState<Domain | null>(null);
   const [loading, setLoading] = useState(true);
+  useDocumentTitle(product?.name);
 
   useEffect(() => {
     if (!slug) return;

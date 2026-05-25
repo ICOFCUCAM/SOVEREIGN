@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { supabase } from '@/lib/supabase';
 import type { Domain, Lead, AnalyticsEvent, UserRoleRow, EcosystemProduct } from '@/lib/types';
 import PlatformNav from '@/components/PlatformNav';
@@ -34,6 +35,7 @@ const DEVICE_META: Record<string, { icon: LucideIcon; color: string }> = {
 };
 
 const AdminPage: React.FC = () => {
+  useDocumentTitle('Command Center');
   const { user, role, isAdmin, loading: authLoading } = useAuth();
   const [authModal, setAuthModal] = useState(false);
   const [tab, setTab] = useState<Tab>('overview');

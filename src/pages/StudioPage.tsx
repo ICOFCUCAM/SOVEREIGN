@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { ValuationReport } from '@/lib/types';
@@ -26,6 +27,7 @@ interface Edits {
 const monogram = (name: string) => name.replace(/[^a-z0-9]/gi, '').slice(0, 2).toUpperCase();
 
 const StudioPage: React.FC = () => {
+  useDocumentTitle('Branding Studio');
   const { domain: routeDomain } = useParams<{ domain: string }>();
   const [domain, setDomain] = useState(routeDomain ? decodeURIComponent(routeDomain) : '');
   const [loading, setLoading] = useState(false);
