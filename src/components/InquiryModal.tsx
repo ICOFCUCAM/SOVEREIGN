@@ -3,6 +3,7 @@ import { X, Send, MessageCircle, DollarSign, Mail, User, Building } from 'lucide
 import { supabase } from '@/lib/supabase';
 import type { Domain } from '@/lib/types';
 import { toast } from 'sonner';
+import { useEscape } from '@/hooks/useEscape';
 
 interface Props {
   domain: Domain;
@@ -14,6 +15,7 @@ const InquiryModal: React.FC<Props> = ({ domain, intent, onClose }) => {
   const [form, setForm] = useState({ name: '', email: '', company: '', phone: '', message: '', offer: domain.price_usd });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  useEscape(onClose);
 
   const titles = {
     inquiry: 'Inquire about this domain',

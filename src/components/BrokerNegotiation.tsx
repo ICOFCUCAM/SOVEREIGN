@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Domain, NegotiationMessage, BrokerResponse } from '@/lib/types';
 import { trackEvent } from '@/lib/analytics';
+import { useEscape } from '@/hooks/useEscape';
 import { X, Send, ShieldCheck, Bot, User, DollarSign, Gauge, Activity, Sparkles, CheckCircle2, ArrowUpRight } from 'lucide-react';
 
 interface Props {
@@ -33,6 +34,7 @@ const BrokerNegotiation: React.FC<Props> = ({ domain, intent, onClose }) => {
   const [leadId, setLeadId] = useState<string | null>(null);
   const [state, setState] = useState({ stage: 'opening', status: 'active' as BrokerResponse['status'], confidence: 45, buyer_score: 50, counter: domain.price_usd });
   const scrollRef = useRef<HTMLDivElement>(null);
+  useEscape(onClose);
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' }); }, [messages, loading]);
 
