@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { supabase } from '@/lib/supabase';
 import type { Domain, AnalyticsEvent } from '@/lib/types';
@@ -126,13 +127,13 @@ const MarketplacePage: React.FC = () => {
               <div className="flex items-center gap-2 mb-3"><Flame className="w-4 h-4 text-amber-400" /><span className="text-sm font-semibold text-white">Trending now</span><span className="text-[10px] text-white/40 font-mono">7-day momentum</span></div>
               <div className="grid sm:grid-cols-3 gap-3">
                 {trending.map((e, i) => (
-                  <a key={e.domain.id} href={`/d/${encodeURIComponent(e.domain.domain_name)}`} className="flex items-center gap-3 rounded-xl bg-white/5 hover:bg-white/10 transition px-3 py-2.5">
+                  <Link key={e.domain.id} to={`/d/${encodeURIComponent(e.domain.domain_name)}`} className="flex items-center gap-3 rounded-xl bg-white/5 hover:bg-white/10 transition px-3 py-2.5">
                     <span className="text-lg font-mono font-bold text-amber-400">{i + 1}</span>
                     <div className="min-w-0">
                       <div className="text-white text-sm font-medium truncate">{e.domain.domain_name}</div>
                       <div className="text-[10px] text-white/40 font-mono">{e.momentum} events · opp {e.opportunity}</div>
                     </div>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>

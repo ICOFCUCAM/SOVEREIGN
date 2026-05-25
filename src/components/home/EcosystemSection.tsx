@@ -28,7 +28,7 @@ const ArtCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
   const inner = (
     <>
       {/* Imagery / cinematic art */}      {p.image_url ? (
-        <img src={p.image_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-75 group-hover:scale-105 transition-all duration-700" />
+        <img src={p.image_url} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-75 group-hover:scale-105 transition-all duration-700" />
       ) : (
         <>
           <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 70% 20%, ${p.accent}40, transparent 60%), linear-gradient(160deg, #0A1024, #05070F)` }} />
