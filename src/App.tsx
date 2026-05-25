@@ -3,33 +3,39 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { resolveTenant } from "@/lib/tenant";
 import DomainLanding from "@/components/DomainLanding";
 import Index from "./pages/Index";
-import DomainPage from "./pages/DomainPage";
-import AdminPage from "./pages/AdminPage";
-import MarketplacePage from "./pages/MarketplacePage";
-import ValuationPage from "./pages/ValuationPage";
-import StudioPage from "./pages/StudioPage";
-import EcosystemHub from "./pages/EcosystemHub";
-import SystemPage from "./pages/SystemPage";
-import DeployPage from "./pages/DeployPage";
-import NotFound from "./pages/NotFound";
+
+// Route-level code splitting — the homepage stays eager; everything else loads on demand.
+const DomainPage = lazy(() => import("./pages/DomainPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const MarketplacePage = lazy(() => import("./pages/MarketplacePage"));
+const ValuationPage = lazy(() => import("./pages/ValuationPage"));
+const StudioPage = lazy(() => import("./pages/StudioPage"));
+const EcosystemHub = lazy(() => import("./pages/EcosystemHub"));
+const SystemPage = lazy(() => import("./pages/SystemPage"));
+const DeployPage = lazy(() => import("./pages/DeployPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
-// Resolved once at boot: the platform host serves the marketplace + console,
-// any other connected custom domain serves that domain's branded landing.
 const tenant = resolveTenant();
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior }); }, [pathname]);
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); }, [pathname]);
   return null;
 };
+
+const PageFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-[#05071A]">
+    <div className="w-10 h-10 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin" />
+  </div>
+);
 
 const PlatformRoutes = () => (
   <Routes>
@@ -62,7 +68,9 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <ScrollToTop />
-            {tenant.mode === "tenant" ? <TenantRoutes /> : <PlatformRoutes />}
+            <Suspense fallback={<PageFallback />}>
+              {tenant.mode === "tenant" ? <TenantRoutes /> : <PlatformRoutes />}
+            </Suspense>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
