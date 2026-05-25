@@ -7,6 +7,7 @@ import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import DomainCard from '@/components/DomainCard';
+import FeaturedAcquisition from '@/components/marketplace/FeaturedAcquisition';
 import { momentumMap, opportunityScore, acquisitionConfidence } from '@/lib/investor';
 import { Search, SlidersHorizontal, Briefcase, Flame, DollarSign, Layers, Gauge } from 'lucide-react';
 
@@ -119,6 +120,11 @@ const MarketplacePage: React.FC = () => {
                 );
               })}
             </div>
+          )}
+
+          {/* Featured cinematic acquisition — top opportunity as a deployable institution */}
+          {!loading && !investorMode && q === '' && cat === 'all' && portfolio.top && (
+            <FeaturedAcquisition domain={portfolio.top.domain} opportunity={portfolio.top.opportunity} confidence={portfolio.top.confidence} />
           )}
 
           {/* Trending strip */}
