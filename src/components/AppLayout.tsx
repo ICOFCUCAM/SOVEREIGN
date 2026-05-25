@@ -4,12 +4,13 @@ import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
-import TransformationFlow from '@/components/home/TransformationFlow';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
 import GlobalInfrastructure from '@/components/home/GlobalInfrastructure';
 import MarketActivity from '@/components/home/MarketActivity';
 import EcosystemMap from '@/components/home/EcosystemMap';
 import MarketplaceRail from '@/components/home/MarketplaceRail';
+import LiveActivityStrip from '@/components/home/LiveActivityStrip';
+import GlobalStatBar from '@/components/home/GlobalStatBar';
 import ClosingCTA from '@/components/home/ClosingCTA';
 
 // Atmospheric transition between sections — a fading hairline + soft glow
@@ -28,17 +29,18 @@ const AppLayout: React.FC = () => {
       <PlatformNav />
       <main className="relative">
         <CinematicHero />
+        <LiveActivityStrip />
         <MarketplaceRail />
+        <SectionFade />
         <Reveal><EcosystemMap /></Reveal>
         <SectionFade />
         <EcosystemSectors />
-        <SectionFade />
-        <Reveal><TransformationFlow /></Reveal>
         <SectionFade />
         <Reveal><GlobalInfrastructure /></Reveal>
         <SectionFade />
         <Reveal><MarketActivity /></Reveal>
         <ClosingCTA />
+        <GlobalStatBar />
       </main>
       <PlatformFooter />
     </div>

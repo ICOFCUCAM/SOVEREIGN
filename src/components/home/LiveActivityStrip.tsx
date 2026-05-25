@@ -37,9 +37,9 @@ const LiveActivityStrip: React.FC = () => {
   return (
     <div className="relative border-y border-white/10 bg-black/30 backdrop-blur-sm overflow-hidden">
       <div className="flex items-stretch">
-        <div className="shrink-0 flex items-center gap-2 px-4 sm:px-6 border-r border-white/10 bg-gradient-to-r from-cyan-500/10 to-transparent">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-node" />
-          <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-emerald-300">Live ecosystem</span>
+        <div className="shrink-0 flex flex-col justify-center px-4 sm:px-6 border-r border-white/10 bg-gradient-to-r from-cyan-500/10 to-transparent">
+          <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.22em] text-cyan-300"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Ecosystem pulse</span>
+          <span className="hidden sm:block text-[9px] font-mono text-white/35 mt-1">Live activity across the sovereign network</span>
         </div>
         <div className="relative flex-1 overflow-hidden ticker-track">
           <div className="flex items-center py-2.5 animate-ticker w-max">
