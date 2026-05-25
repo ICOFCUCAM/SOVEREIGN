@@ -57,18 +57,12 @@ const CinematicHero: React.FC = () => {
         </div>
       </div>
 
-      {/* ── thin operational ribbon (tertiary, quiet) ── */}
-      <div className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10 bg-[#050816]/70 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-          <span className="inline-flex items-center gap-2.5 text-[11px] font-mono text-white/55 min-w-0">
-            <span className="inline-flex items-center gap-1.5 text-emerald-300/80 shrink-0"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live</span>
-            <span className="truncate"><span className="text-white/80">veritas.financial</span> deployed · eu-west · 12s ago</span>
-          </span>
-          <span className="hidden md:flex items-center gap-x-5 text-[11px] font-mono text-white/45 shrink-0 tabular-nums">
-            <span>47 <span className="text-white/30">edge regions</span></span>
-            <span>23 <span className="text-white/30">global regions</span></span>
-            <span>87s <span className="text-white/30">avg deploy</span></span>
-            <span>99.99% <span className="text-white/30">uptime</span></span>
+      {/* ── single quiet live line ── */}
+      <div className="absolute bottom-7 inset-x-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <span className="inline-flex items-center gap-2.5 text-[11px] font-mono text-white/45">
+            <span className="inline-flex items-center gap-1.5 text-emerald-300/80"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live</span>
+            <span><span className="text-white/75">veritas.financial</span> deployed · eu-west · 12s ago</span>
           </span>
         </div>
       </div>
