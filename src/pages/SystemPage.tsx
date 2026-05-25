@@ -8,6 +8,7 @@ import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
+import SystemTelemetry from '@/components/SystemTelemetry';
 import { ArrowLeft, ExternalLink, DollarSign, CheckCircle2, Activity, Globe, Layers, ChevronRight, ArrowUpRight } from 'lucide-react';
 
 const SLUG_BLUEPRINT: Record<string, string> = {
@@ -97,45 +98,58 @@ const SystemPage: React.FC = () => {
             <ArrowLeft className="w-3.5 h-3.5" /> ECOSYSTEM
           </Link>
 
-          <div className="text-[11px] font-mono uppercase tracking-[0.25em] mb-3" style={{ color: accent }}>{product.category}</div>
-          <h1 className="font-display text-5xl sm:text-7xl font-bold tracking-tighter mb-4">{product.name}</h1>
-          <p className="text-2xl text-white/70 font-light max-w-2xl mb-5">{product.tagline}</p>
-          <p className="text-white/50 max-w-2xl leading-relaxed mb-7">{product.description}</p>
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+            {/* identity */}
+            <div>
+              <div className="text-[11px] font-mono uppercase tracking-[0.25em] mb-3" style={{ color: accent }}>{product.category}</div>
+              <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tighter mb-4">{product.name}</h1>
+              <p className="text-2xl text-white/70 font-light max-w-2xl mb-5">{product.tagline}</p>
+              <p className="text-white/50 max-w-2xl leading-relaxed mb-7">{product.description}</p>
 
-          <div className="flex flex-wrap items-center gap-2 mb-7">
-            <span className="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider inline-flex items-center gap-1.5" style={{ background: `${accent}15`, color: accent, border: `1px solid ${accent}33` }}>
-              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: accent }} /> Deployable · preview build
-            </span>
-          </div>
+              <div className="flex flex-wrap items-center gap-2 mb-7">
+                <span className="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider inline-flex items-center gap-1.5" style={{ background: `${accent}15`, color: accent, border: `1px solid ${accent}33` }}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-node" style={{ background: accent }} /> Deployable · preview build
+                </span>
+              </div>
 
-          {metrics.length > 0 && (
-            <div className="grid grid-cols-3 max-w-xl gap-3 mb-8">
-              {metrics.map((m) => (
-                <div key={m.label} className="glass rounded-xl p-4">
-                  <div className="text-2xl font-bold tabular-nums" style={{ color: accent }}>{m.value}</div>
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-white/40 mt-1 truncate">{m.label}</div>
+              {metrics.length > 0 && (
+                <div className="flex flex-wrap rounded-xl overflow-hidden border border-white/10 bg-white/[0.02] max-w-xl mb-8">
+                  {metrics.slice(0, 3).map((m) => (
+                    <div key={m.label} className="flex-1 min-w-[110px] px-4 py-3 border-r border-white/5 last:border-r-0">
+                      <div className="flex items-center gap-1.5 mb-1.5"><span className="w-1 h-1 rounded-full" style={{ background: accent }} /><span className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/40 truncate">{m.label}</span></div>
+                      <div className="text-lg font-mono font-semibold tabular-nums" style={{ color: accent }}>{m.value}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
+              )}
 
-          <div className="flex flex-wrap gap-3">
-            {product.url && (
-              <a href={product.url} target="_blank" rel="noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all"
-                style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)`, boxShadow: `0 0 40px ${accent}30` }}>
-                <ExternalLink className="w-4 h-4" /> View live preview
-              </a>
-            )}
-            {domain ? (
-              <Link to={`/d/${encodeURIComponent(domain.domain_name)}`} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
-                <DollarSign className="w-4 h-4 text-cyan-400" /> Acquire institution · ${Number(domain.price_usd).toLocaleString()}
-              </Link>
-            ) : (
-              <Link to="/marketplace" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
-                <DollarSign className="w-4 h-4 text-cyan-400" /> Explore acquisition <ChevronRight className="w-4 h-4 text-white/40" />
-              </Link>
-            )}
+              <div className="flex flex-wrap gap-3">
+                {product.url && (
+                  <a href={product.url} target="_blank" rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all"
+                    style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)`, boxShadow: `0 0 40px ${accent}30` }}>
+                    <ExternalLink className="w-4 h-4" /> View live preview
+                  </a>
+                )}
+                {domain ? (
+                  <Link to={`/d/${encodeURIComponent(domain.domain_name)}`} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
+                    <DollarSign className="w-4 h-4 text-cyan-400" /> Acquire institution · ${Number(domain.price_usd).toLocaleString()}
+                  </Link>
+                ) : (
+                  <Link to="/marketplace" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
+                    <DollarSign className="w-4 h-4 text-cyan-400" /> Explore acquisition <ChevronRight className="w-4 h-4 text-white/40" />
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* live operational environment */}
+            <div className="relative">
+              <div className="absolute -inset-8 rounded-[2rem] blur-[70px] opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle, ${accent}, transparent 70%)` }} />
+              <div className="relative" style={{ aspectRatio: '16 / 12' }}>
+                <SystemTelemetry category={product.category} accent={accent} className="h-full" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
