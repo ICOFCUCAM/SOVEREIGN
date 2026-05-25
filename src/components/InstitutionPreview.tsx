@@ -39,7 +39,7 @@ const InstitutionPreview: React.FC<Props> = ({ domain, onAcquire }) => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 text-white/45 text-[11px] font-mono uppercase tracking-[0.25em] mb-5">
             Deployable institution · preview build
           </div>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tighter text-white mb-4">{bp.type}</h2>
+          <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-tighter text-white mb-4">{bp.type}</h2>
           <p className="text-white/55 text-lg max-w-2xl mx-auto leading-relaxed">{bp.thesis}</p>
         </div>
 

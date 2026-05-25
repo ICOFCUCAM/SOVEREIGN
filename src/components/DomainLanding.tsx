@@ -207,7 +207,7 @@ const DomainLanding: React.FC<Props> = ({ domainName, variant }) => {
                 )}
               </div>
 
-              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 leading-none">
+              <h1 className="font-display text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 leading-none">
                 <span className="text-white">{d.domain_name.split('.')[0]}</span>
                 <span style={{ color: accent }}>.{d.domain_name.split('.').slice(1).join('.')}</span>
               </h1>
