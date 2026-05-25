@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutGrid, Sparkles, Wand2, BarChart3, ArrowRight, Boxes } from 'lucide-react';
+import { LayoutGrid, Sparkles, Wand2, BarChart3, ArrowRight, Boxes, Rocket } from 'lucide-react';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -26,12 +26,13 @@ const EntryGrid: React.FC = () => {
     { to: '/marketplace', label: 'Marketplace', desc: 'Browse the sovereign inventory.', icon: LayoutGrid },
     { to: '/valuation', label: 'AI Valuation', desc: 'Score any domain in seconds.', icon: Sparkles },
     { to: '/studio', label: 'Branding Studio', desc: 'Turn a domain into a brand.', icon: Wand2 },
+    { to: '/deploy', label: 'Deployment Engine', desc: 'From acquisition to live.', icon: Rocket },
     { to: '/admin', label: 'Command Center', desc: 'Operate the platform.', icon: BarChart3 },
   ];
   return (
     <section className="pb-32 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {entries.map((e) => {
             const Icon = e.icon;
             return (
