@@ -1,60 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Rocket, Cloud, Server, ShieldCheck, ArrowRight, Globe2 } from 'lucide-react';
+import type { MapNode } from '@/components/WorldMap';
+
+const WorldMap = lazy(() => import('@/components/WorldMap'));
 
 const ACCENT = '#00D9FF';
 const VIOLET = '#7C4DFF';
 
-// Edge nodes across a coarse world map (viewBox 0 0 200 100).
-const NODES: Array<[number, number, boolean]> = [
-  [38, 40, true], [30, 55, false], [48, 32, false], [52, 70, false],
-  [96, 30, true], [100, 42, false], [104, 56, false], [92, 44, false],
-  [150, 38, true], [162, 50, false], [140, 64, false], [170, 72, false], [120, 36, false],
+// Edge nodes at real city coordinates [lon, lat].
+const NODES: MapNode[] = [
+  { lon: -74, lat: 40.7, hub: true },   // 0 New York
+  { lon: -46.6, lat: -23.5 },           // 1 São Paulo
+  { lon: -0.1, lat: 51.5, hub: true },  // 2 London
+  { lon: 8.7, lat: 50.1 },              // 3 Frankfurt
+  { lon: 3.4, lat: 6.5 },               // 4 Lagos
+  { lon: 36.8, lat: -1.3 },             // 5 Nairobi
+  { lon: 55.3, lat: 25.2, hub: true },  // 6 Dubai
+  { lon: 72.8, lat: 19 },               // 7 Mumbai
+  { lon: 103.8, lat: 1.3, hub: true },  // 8 Singapore
+  { lon: 139.7, lat: 35.7, hub: true }, // 9 Tokyo
+  { lon: 151.2, lat: -33.9 },           // 10 Sydney
+  { lon: -118, lat: 34 },               // 11 Los Angeles
+  { lon: 28, lat: -26.2 },              // 12 Johannesburg
 ];
-const ARCS: Array<[number, number, number]> = [[0, 4, 0], [4, 8, 0.6], [0, 8, 1.2], [4, 12, 0.3], [8, 9, 0.9], [0, 3, 1.5], [8, 11, 0.5]];
-
-// Dense continent dot-field so the world map reads clearly (viewBox 0 0 200 100).
-function makeRng(seed: number) { let s = seed; return () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff; }
-const BLOBS: Array<[number, number, number, number, number]> = [
-  [38, 34, 16, 15, 24], [52, 72, 9, 14, 15], [96, 30, 11, 9, 13],
-  [104, 58, 13, 17, 19], [150, 38, 26, 17, 32], [174, 76, 11, 8, 11],
+const ARCS: Array<[number, number, number]> = [
+  [0, 2, 0], [2, 6, 0.5], [6, 8, 1], [8, 9, 0.4], [0, 11, 1.2], [2, 3, 0.7],
+  [6, 7, 0.3], [8, 10, 0.9], [2, 4, 1.4], [6, 12, 0.6], [0, 1, 1.1], [9, 8, 1.5],
 ];
-const _rng = makeRng(20260525);
-const CONTINENTS: Array<[number, number]> = BLOBS.flatMap(([cx, cy, rx, ry, n]) =>
-  Array.from({ length: n }, () => {
-    const a = _rng() * Math.PI * 2; const rr = Math.sqrt(_rng());
-    return [cx + Math.cos(a) * rx * rr, cy + Math.sin(a) * ry * rr] as [number, number];
-  }));
 
 const RegionMap: React.FC = () => (
   <div className="relative w-full rounded-2xl border border-white/10 overflow-hidden glass-strong" style={{ aspectRatio: '2 / 1' }}>
     <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 80% at 50% 0%, rgba(0,194,255,0.1), transparent 60%), linear-gradient(160deg, #0A1024, #05070F)' }} />
-    <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 py-2.5 border-b border-white/5">
+    <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 py-2.5 border-b border-white/5 z-10">
       <span className="text-[9px] font-mono uppercase tracking-[0.22em] text-white/45">Sovereign cloud · global mesh</span>
       <span className="inline-flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-emerald-300/80">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> 23 regions online
       </span>
     </div>
-    <svg viewBox="0 0 200 100" className="absolute inset-x-0 bottom-0 top-8 w-full h-full" preserveAspectRatio="xMidYMid meet">
-      {CONTINENTS.map(([x, y], i) => <circle key={`c${i}`} cx={x} cy={y} r="1.05" fill="#4a72b8" opacity={0.4 + (i % 4) * 0.12} />)}
-      {ARCS.map(([a, b, d], i) => {
-        const [x1, y1] = NODES[a]; const [x2, y2] = NODES[b];
-        const mx = (x1 + x2) / 2; const my = Math.min(y1, y2) - 14;
-        const path = `M${x1},${y1} Q${mx},${my} ${x2},${y2}`;
-        return (
-          <g key={`a${i}`}>
-            <path d={path} fill="none" stroke={ACCENT} strokeOpacity="0.25" strokeWidth="0.5" />
-            <path d={path} fill="none" stroke="#fff" strokeWidth="1.1" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${d}s` }} />
-          </g>
-        );
-      })}
-      {NODES.map(([x, y, hub], i) => (
-        <g key={`n${i}`}>
-          {hub && <circle cx={x} cy={y} r="5" fill="none" stroke={ACCENT} strokeWidth="0.7" className="animate-ring" style={{ transformOrigin: `${x}px ${y}px`, animationDelay: `${i * 0.5}s` }} />}
-          <circle cx={x} cy={y} r={hub ? 2.4 : 1.5} fill={hub ? ACCENT : VIOLET} className={hub ? 'animate-node' : 'animate-flicker'} style={{ transformOrigin: `${x}px ${y}px`, animationDelay: `${i * 0.3}s` }} />
-        </g>
-      ))}
-    </svg>
+    <div className="absolute inset-x-0 bottom-0 top-8">
+      <Suspense fallback={<div className="w-full h-full" />}>
+        <WorldMap accent={ACCENT} nodes={NODES} arcs={ARCS} className="w-full h-full" />
+      </Suspense>
+    </div>
   </div>
 );
 
