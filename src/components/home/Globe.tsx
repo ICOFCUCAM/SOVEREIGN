@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { geoOrthographic, geoPath, geoGraticule10 } from 'd3-geo';
+import { geoOrthographic, geoPath, geoGraticule10, geoInterpolate } from 'd3-geo';
 import { feature } from 'topojson-client';
-import landTopo from 'world-atlas/land-110m.json';
-import type { FeatureCollection } from 'geojson';
+import landTopo from 'world-atlas/land-50m.json';
+import type { FeatureCollection, LineString } from 'geojson';
 
 const R = 188;
 const CX = 200;
@@ -12,18 +12,25 @@ const CY = 200;
 const land = feature(landTopo as any, (landTopo as any).objects.land) as unknown as FeatureCollection;
 const graticule = geoGraticule10();
 
-// A few institutional hubs (lon/lat) that glow on the surface.
+// Institutional hubs (lon/lat) that glow on the surface.
 const HUBS: Array<[number, number]> = [
   [-74, 40.7], [-0.1, 51.5], [10.7, 59.9], [2.3, 48.9], [13.4, 52.5],
   [-79.4, 43.7], [55.3, 25.2], [103.8, 1.3], [37.6, 55.7], [-122, 37.8],
 ];
+
+// Routes between hubs — densified into geodesics so they curve over the sphere.
+const ROUTES: Array<[number, number]> = [[0, 1], [0, 5], [1, 2], [1, 4], [6, 1], [9, 0], [8, 6], [3, 2]];
+const routeLines: LineString[] = ROUTES.map(([a, b]) => {
+  const interp = geoInterpolate(HUBS[a], HUBS[b]);
+  return { type: 'LineString', coordinates: Array.from({ length: 32 }, (_, k) => interp(k / 31)) };
+});
 
 const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
   const [lambda, setLambda] = useState(20);
 
   useEffect(() => {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-    const id = setInterval(() => setLambda((l) => (l + 0.5) % 360), 50);
+    const id = setInterval(() => setLambda((l) => (l + 0.4) % 360), 50);
     return () => clearInterval(id);
   }, []);
 
@@ -32,8 +39,7 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
   const spherePath = path({ type: 'Sphere' }) || '';
   const gratPath = path(graticule) || '';
   const landPath = path(land) || '';
-
-  // Visible hubs only (near hemisphere).
+  const routePaths = routeLines.map((l) => path(l) || '');
   const hubPts = HUBS.map((c) => projection(c)).filter((p): p is [number, number] => !!p);
 
   return (
@@ -55,24 +61,30 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
         </linearGradient>
       </defs>
 
-      {/* atmosphere */}
       <circle cx={CX} cy={CY} r={R + 14} fill="url(#g-atmo)" />
-      {/* ocean sphere */}
       <path d={spherePath} fill="url(#g-sphere)" stroke="rgba(0,217,255,0.3)" strokeWidth="1" />
-      {/* graticule */}
-      <path d={gratPath} fill="none" stroke="rgba(0,217,255,0.12)" strokeWidth="0.5" />
-      {/* continents (glowing) */}
-      <path d={landPath} fill="url(#g-land)" fillOpacity="0.32" stroke="rgba(0,217,255,0.55)" strokeWidth="0.5" strokeLinejoin="round" />
-      {/* institutional hubs */}
+      <path d={gratPath} fill="none" stroke="rgba(0,217,255,0.1)" strokeWidth="0.4" />
+      <path d={landPath} fill="url(#g-land)" fillOpacity="0.34" stroke="rgba(0,217,255,0.55)" strokeWidth="0.4" strokeLinejoin="round" />
+
+      {/* routes + traveling light */}
+      {routePaths.map((d, i) => (
+        <g key={i}>
+          <path d={d} fill="none" stroke="url(#g-land)" strokeWidth="0.7" opacity="0.4" strokeLinecap="round" />
+          <path d={d} fill="none" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${i * 0.5}s` }} />
+        </g>
+      ))}
+
+      {/* hubs */}
       {hubPts.map((p, i) => (
         <circle key={i} cx={p[0]} cy={p[1]} r={i % 3 === 0 ? 2.4 : 1.6}
           fill={i % 3 === 0 ? '#00D9FF' : i % 3 === 1 ? '#10B981' : '#F59E0B'}
           className={i % 3 === 0 ? 'animate-node' : ''} style={{ transformOrigin: `${p[0]}px ${p[1]}px` }} />
       ))}
-      {/* specular limb */}
+
       <circle cx={CX} cy={CY} r={R} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
     </svg>
   );
 };
 
 export default Globe;
+
