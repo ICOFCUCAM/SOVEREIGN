@@ -6,6 +6,7 @@ import { institutionBlueprint } from '@/lib/institution';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import Reveal from '@/components/Reveal';
 import { ArrowLeft, ExternalLink, DollarSign, CheckCircle2, Activity, Globe, Layers, ChevronRight } from 'lucide-react';
 
 const SLUG_BLUEPRINT: Record<string, string> = {
@@ -134,6 +135,7 @@ const SystemPage: React.FC = () => {
         </div>
       </section>
 
+      <Reveal>
       {/* Capabilities */}
       <section className="px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-6xl mx-auto">
@@ -224,6 +226,7 @@ const SystemPage: React.FC = () => {
           </div>
         </div>
       </section>
+      </Reveal>
 
       <PlatformFooter />
     </div>

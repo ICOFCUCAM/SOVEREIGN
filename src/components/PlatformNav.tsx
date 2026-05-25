@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Globe, Menu, X, Shield, Sparkles, BarChart3, LayoutGrid, LogIn, LogOut, User as UserIcon, ChevronDown, Wand2, Boxes } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,9 +8,17 @@ const PlatformNav: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [authModal, setAuthModal] = useState<null | 'signin' | 'signup'>(null);
   const [userMenu, setUserMenu] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { user, role, isAdmin, signOut } = useAuth();
   const isActive = (p: string) => location.pathname === p;
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const links = [
     { to: '/', label: 'Platform', icon: Globe },
@@ -23,7 +31,7 @@ const PlatformNav: React.FC = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#05071A]/80 backdrop-blur-xl">
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'border-b border-white/10 bg-[#05071A]/85 backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.6)]' : 'border-b border-transparent bg-transparent'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-2.5 group">
