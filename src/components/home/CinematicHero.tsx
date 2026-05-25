@@ -7,6 +7,7 @@ import Globe from '@/components/home/Globe';
 
 // Fixed slots around the globe for the floating system chips (benchmark-style).
 const SLOTS = ['top-[6%] left-[1%]', 'top-[4%] right-[3%]', 'top-[40%] right-[-3%]', 'bottom-[16%] left-[-2%]', 'bottom-[10%] right-[5%]'];
+const shortName = (n: string) => (n.split(' ').length > 2 ? n.split(' ').slice(0, 2).join(' ') : n);
 
 const CinematicHero: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -69,9 +70,9 @@ const CinematicHero: React.FC = () => {
         </div>
 
         {/* CENTER — living globe + floating systems */}
-        <div className="relative h-[380px] sm:h-[540px]" style={{ transform: 'translate(calc(var(--px) * -8px), calc(var(--py) * -8px))' }}>
+        <div className="relative h-[400px] sm:h-[600px]" style={{ transform: 'translate(calc(var(--px) * -8px), calc(var(--py) * -8px))' }}>
           <div className="absolute inset-0 flex items-center justify-center">
-            <Globe className="w-full max-w-[540px] h-auto" />
+            <Globe className="w-full max-w-[620px] h-auto" />
           </div>
           {chips.map((s, i) => {
             const metric = Array.isArray(s.metrics) && s.metrics[0] ? `${s.metrics[0].label} · ${s.metrics[0].value}` : s.category;
@@ -81,7 +82,7 @@ const CinematicHero: React.FC = () => {
                 <div className={`flex items-center gap-2.5 rounded-xl px-3 py-2 border backdrop-blur transition-all ${on ? 'glass-strong border-white/20 scale-105' : 'bg-white/[0.04] border-white/10 hover:border-white/20'}`}>
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ background: s.accent, boxShadow: on ? `0 0 8px ${s.accent}` : 'none' }} />
                   <div className="leading-tight pr-1">
-                    <div className="text-[11px] font-semibold text-white whitespace-nowrap max-w-[150px] truncate">{s.name}</div>
+                    <div className="text-[11px] font-semibold text-white whitespace-nowrap max-w-[150px] truncate">{shortName(s.name)}</div>
                     <div className="text-[9px] font-mono text-white/40 whitespace-nowrap max-w-[150px] truncate">{metric}</div>
                   </div>
                 </div>
