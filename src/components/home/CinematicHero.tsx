@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, Rocket, Brain, Cloud, ShieldCheck, Layers, Gauge, DollarSign, Boxes } from 'lucide-react';
+import { ArrowRight, Sparkles, Cloud, ShieldCheck, Truck, Wallet, Vote, ShieldAlert, DollarSign, Boxes, Brain, Rocket } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import HeroEnvironment from '@/components/home/HeroEnvironment';
 
@@ -11,15 +11,15 @@ const Globe = lazy(() => import('@/components/home/Globe'));
 // carries its own globe, so this overlay stays off to avoid doubling up.
 const HAS_PLATE = !!((import.meta.env.VITE_HERO_PLATE as string | undefined)?.trim());
 
-interface Panel { title: string; lines: string[]; icon: React.ComponentType<{ className?: string }>; pos: string; side: 'l' | 'r'; delay: string }
-// Positioned across the right ~60% of the scene, woven around the embedded globe.
+interface Panel { system: string; metric: string; detail: string; icon: React.ComponentType<{ className?: string }>; pos: string; side: 'l' | 'r'; delay: string; live?: boolean }
+// Operational-intelligence feeds from live ecosystem systems, woven around the globe.
 const PANELS: Panel[] = [
-  { title: 'Deployment Engine', lines: ['87s average deploy'], icon: Rocket, pos: 'top-[20%] left-[40%]', side: 'r', delay: '0s' },
-  { title: 'AI Intelligence', lines: ['Real-time analysis'], icon: Brain, pos: 'top-[15%] right-[5%]', side: 'l', delay: '1s' },
-  { title: 'Sovereign Cloud', lines: ['47 edge nodes', '23 regions'], icon: Cloud, pos: 'top-[40%] right-[1%]', side: 'l', delay: '2s' },
-  { title: 'Domain Intelligence', lines: ['12.4K valuations'], icon: Gauge, pos: 'top-[50%] left-[38%]', side: 'r', delay: '0.6s' },
-  { title: 'Trust Layer', lines: ['Bank-grade security', 'Sovereign ready'], icon: ShieldCheck, pos: 'top-[58%] right-[7%]', side: 'l', delay: '1.7s' },
-  { title: 'Autonomous Foundry', lines: ['Concept → company'], icon: Layers, pos: 'bottom-[24%] right-[15%]', side: 'l', delay: '2.6s' },
+  { system: 'FlyttGo', metric: '1,284 active routes', detail: 'Logistics orchestration', icon: Truck, pos: 'top-[20%] left-[40%]', side: 'r', delay: '0s', live: true },
+  { system: 'Mobile Pay', metric: '$4.2M settled · 24h', detail: 'Sovereign payment rails', icon: Wallet, pos: 'top-[15%] right-[5%]', side: 'l', delay: '1s', live: true },
+  { system: 'Sovereign Cloud', metric: '47 edge nodes', detail: '23 regions online', icon: Cloud, pos: 'top-[40%] right-[1%]', side: 'l', delay: '2s' },
+  { system: 'ELECPRO', metric: '3 elections live', detail: 'Integrity monitoring', icon: Vote, pos: 'top-[50%] left-[38%]', side: 'r', delay: '0.6s', live: true },
+  { system: 'ACT', metric: '12 anomalies flagged', detail: 'Procurement oversight', icon: ShieldAlert, pos: 'top-[58%] right-[7%]', side: 'l', delay: '1.7s' },
+  { system: 'Trust Layer', metric: 'Bank-grade security', detail: 'Sovereign ready', icon: ShieldCheck, pos: 'bottom-[24%] right-[15%]', side: 'l', delay: '2.6s' },
 ];
 
 const CinematicHero: React.FC = () => {
@@ -72,7 +72,7 @@ const CinematicHero: React.FC = () => {
       {PANELS.map((p) => {
         const Icon = p.icon;
         return (
-          <div key={p.title} className={`hidden md:block absolute z-20 ${p.pos} animate-drift`} style={{ animationDelay: p.delay, transform: 'translate(calc(var(--px) * 14px), calc(var(--py) * 14px))' }}>
+          <div key={p.system} className={`hidden md:block absolute z-20 ${p.pos} animate-drift`} style={{ animationDelay: p.delay, transform: 'translate(calc(var(--px) * 14px), calc(var(--py) * 14px))' }}>
             {/* ecosystem lighting bleed — the panel sits in the atmosphere, casting glow */}
             <span className="pointer-events-none absolute -inset-6 rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,150,255,0.16), transparent 70%)', filter: 'blur(8px)' }} />
             <div className="relative glass-strong rounded-xl px-3.5 py-2.5 border border-white/10 flex items-center gap-2.5 shadow-2xl">
@@ -83,8 +83,12 @@ const CinematicHero: React.FC = () => {
                 <Icon className="w-4 h-4 text-cyan-300" />
               </div>
               <div className="leading-tight pr-1">
-                <div className="text-[12px] font-semibold text-white whitespace-nowrap">{p.title}</div>
-                {p.lines.map((l) => <div key={l} className="text-[9px] font-mono text-white/45 whitespace-nowrap">{l}</div>)}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/40">{p.system}</span>
+                  {p.live && <span className="inline-flex items-center gap-1 text-[7px] font-mono uppercase tracking-wider text-emerald-300/80"><span className="w-1 h-1 rounded-full bg-emerald-400 animate-node" />Live</span>}
+                </div>
+                <div className="text-[12px] font-semibold text-white whitespace-nowrap tabular-nums">{p.metric}</div>
+                <div className="text-[9px] font-mono text-white/45 whitespace-nowrap">{p.detail}</div>
               </div>
             </div>
           </div>
@@ -94,23 +98,23 @@ const CinematicHero: React.FC = () => {
       {/* ── CONTENT (embedded in the world) ── */}
       <div className="relative z-10 min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center pt-24 pb-28">
         <div className="max-w-xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/5 text-cyan-300/75 text-[10px] font-mono uppercase tracking-[0.26em] mb-7">
-            <Sparkles className="w-3 h-3" /> The operating system for digital civilization
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/5 text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.3em] mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Sovereign OS · Live
           </div>
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.95] mb-5">
-            <span className="block text-white">Build the future.</span>
-            <span className="block text-gradient-cyan">Own the infrastructure.</span>
+          <h1 className="font-display text-3xl sm:text-4xl lg:text-[2.9rem] font-bold tracking-tight leading-[1.05] mb-6">
+            <span className="block text-white">The operating layer for</span>
+            <span className="block text-gradient-cyan">future digital civilization.</span>
           </h1>
-          <p className="text-base text-white/60 max-w-md mb-7 leading-relaxed">
-            Sovereign domain intelligence, AI-native deployment infrastructure, and autonomous venture creation — at planetary scale.
+          <p className="text-base text-white/55 max-w-md mb-8 leading-relaxed">
+            Deploy sovereign institutions, operational ecosystems, and AI-native infrastructure at planetary scale.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 mb-7">
-            <Link to="/marketplace" className="group inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl text-white font-semibold transition-all"
-              style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 40px rgba(0,194,255,0.3)' }}>
-              Explore Marketplace <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <div className="flex flex-col sm:flex-row gap-3 mb-8">
+            <Link to="/ecosystem" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold transition-all"
+              style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 40px rgba(0,194,255,0.28)' }}>
+              Enter Ecosystem <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link to="/valuation" className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur text-white font-semibold hover:bg-white/5 transition-all">
-              <Sparkles className="w-4 h-4 text-cyan-400" /> Run AI Valuation
+            <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur text-white font-semibold hover:bg-white/5 transition-all">
+              <Sparkles className="w-4 h-4 text-cyan-400" /> Explore Marketplace
             </Link>
           </div>
           <div className="flex items-center gap-3">
