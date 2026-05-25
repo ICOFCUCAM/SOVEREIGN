@@ -67,6 +67,21 @@ export interface UserRoleRow {
   created_at: string;
 }
 
+export interface EcosystemProduct {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+  tagline: string;
+  description: string | null;
+  capabilities: string[];
+  status: string;
+  accent: string;
+  source_project_ref: string | null;
+  is_featured: boolean;
+  sort_order: number;
+}
+
 export interface BrandPalette {
   primary: string;
   accent: string;

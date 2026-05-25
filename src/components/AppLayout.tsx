@@ -9,6 +9,7 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import CinematicHero from '@/components/home/CinematicHero';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import CompanyShowcase from '@/components/home/CompanyShowcase';
+import EcosystemSection from '@/components/home/EcosystemSection';
 
 /** Minimal, real scale signals — no fabricated metrics. */
 const ScaleStrip: React.FC = () => {
@@ -102,6 +103,7 @@ const AppLayout: React.FC = () => {
         <TransformationFlow />
         <ScaleStrip />
         <CompanyShowcase />
+        <EcosystemSection />
         <VisionStatement />
         <EntryGrid />
       </main>
