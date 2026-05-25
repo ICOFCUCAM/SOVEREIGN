@@ -39,8 +39,8 @@ const HeroEnvironment: React.FC = () => {
             <div key={`pt${i}`} className="absolute w-0.5 h-0.5 rounded-full bg-cyan-300/40 animate-float"
               style={{ left: `${(i * 41) % 100}%`, top: `${(i * 67) % 96}%`, animationDelay: `${i * 0.35}s`, animationDuration: `${7 + (i % 6)}s` }} />
           ))}
-          {/* embedded globe (right of centre) */}
-          <div className="absolute top-[4%] sm:top-0 right-[-6%] lg:right-[2%] h-[78%] aspect-square max-w-[64%]"
+          {/* embedded globe — discovered within the scene, not dominating it */}
+          <div className="absolute top-[9%] right-[-3%] lg:right-[4%] h-[60%] aspect-square max-w-[50%]"
             style={{ transform: 'translate(calc(var(--px) * -10px), calc(var(--py) * -10px))' }}>
             <Suspense fallback={<div className="w-full h-full rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,194,255,0.12), transparent 66%)' }} />}>
               <Globe className="w-full h-full" />

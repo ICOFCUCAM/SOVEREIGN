@@ -95,15 +95,14 @@ const Cityscape: React.FC<{ className?: string }> = ({ className = '' }) => (
     </g>
     {/* fog bank rolling over the distant skyline */}
     <rect x="0" y={VB_H - 250} width={VB_W} height="150" fill="url(#city-fog)" opacity="0.7" />
-    {/* mid layer — slightly softened */}
+    {/* mid layer — moderate haze, still legible structure */}
     <g filter="url(#city-blur-soft)">
-      <Layer towers={midRow} fill="#0a162f" stroke="rgba(0,194,255,0.12)" windows density={0.22} opacity={0.62} seed={202} />
+      <Layer towers={midRow} fill="#0b1838" stroke="rgba(0,194,255,0.18)" windows density={0.26} opacity={0.78} seed={202} />
     </g>
-    {/* near layer — crisp foreground */}
-    <Layer towers={nearRow} fill="#060b1c" stroke="rgba(0,217,255,0.2)" windows density={0.4} opacity={1} seed={303} />
+    {/* near layer — crisp, detailed foreground silhouettes */}
+    <Layer towers={nearRow} fill="#070d22" stroke="rgba(0,217,255,0.28)" windows density={0.42} opacity={1} seed={303} />
 
-    {/* atmospheric concealment: fog drift + flank darkness */}
-    <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#city-fog)" opacity="0.18" />
+    {/* flank darkness — skyline vanishes into shadow at the edges (no full-scene wash) */}
     <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#city-edge)" />
     <rect x="0" y={VB_H - 3} width={VB_W} height="3" fill="rgba(0,194,255,0.4)" opacity="0.45" />
   </svg>

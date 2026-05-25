@@ -98,44 +98,42 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
         </g>
       ))}
 
-      {/* atmosphere rim — soft, diffuse, blurred into the surrounding dark */}
+      {/* atmosphere rim — soft, diffuse, blurred into the surrounding dark (edge only) */}
       <circle cx={CX} cy={CY} r={R + 12} fill="url(#g-atmo)" filter="url(#f-soft)" />
-      {/* sphere body (no hard stroke — the rim glow carries the edge) */}
-      <path d={spherePath} fill="url(#g-sphere)" />
+      {/* sphere body — crisp technical limb */}
+      <path d={spherePath} fill="url(#g-sphere)" stroke="rgba(0,217,255,0.28)" strokeWidth="0.8" />
 
-      {/* everything on the surface is gently softened so it reads as lit terrain, not vector art */}
-      <g filter="url(#f-soft)">
-        <path d={gratPath} fill="none" stroke="rgba(0,217,255,0.08)" strokeWidth="0.35" />
-        <path d={landPath} fill="url(#g-land)" fillOpacity="0.32" stroke="rgba(0,217,255,0.5)" strokeWidth="0.4" strokeLinejoin="round" />
+      {/* SHARP surface — infrastructural, tactical, precise (no global blur) */}
+      <path d={gratPath} fill="none" stroke="rgba(0,217,255,0.1)" strokeWidth="0.35" />
+      <path d={landPath} fill="url(#g-land)" fillOpacity="0.34" stroke="rgba(0,217,255,0.6)" strokeWidth="0.4" strokeLinejoin="round" />
 
-        {/* route bloom underlay */}
-        <g filter="url(#f-bloom)" opacity="0.5">
-          {routePaths.map((d, i) => <path key={`rb${i}`} d={d} fill="none" stroke="#00C2FF" strokeWidth="1.4" strokeLinecap="round" />)}
+      {/* controlled route bloom underlay */}
+      <g filter="url(#f-bloom)" opacity="0.45">
+        {routePaths.map((d, i) => <path key={`rb${i}`} d={d} fill="none" stroke="#00C2FF" strokeWidth="1.2" strokeLinecap="round" />)}
+      </g>
+      {/* crisp routes + traveling light */}
+      {routePaths.map((d, i) => (
+        <g key={`r${i}`}>
+          <path d={d} fill="none" stroke="url(#g-land)" strokeWidth="0.6" opacity="0.45" strokeLinecap="round" />
+          <path d={d} fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${(i % 7) * 0.45}s` }} />
         </g>
-        {/* routes + traveling light */}
-        {routePaths.map((d, i) => (
-          <g key={`r${i}`}>
-            <path d={d} fill="none" stroke="url(#g-land)" strokeWidth="0.6" opacity="0.4" strokeLinecap="round" />
-            <path d={d} fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${(i % 7) * 0.45}s` }} />
-          </g>
-        ))}
+      ))}
 
-        {/* node bloom underlay */}
-        <g filter="url(#f-bloom)" opacity="0.6">
-          {hubPts.map((h, i) => (
-            <circle key={`hb${i}`} cx={h.p[0]} cy={h.p[1]} r={i % 4 === 0 ? 5 : 3}
-              fill={i % 4 === 0 ? '#00C2FF' : i % 4 === 1 ? '#7C4DFF' : i % 4 === 2 ? '#10B981' : '#F59E0B'} />
-          ))}
-        </g>
-        {/* infrastructure nodes */}
+      {/* controlled node bloom underlay */}
+      <g filter="url(#f-bloom)" opacity="0.5">
         {hubPts.map((h, i) => (
-          <circle key={`h${i}`} cx={h.p[0]} cy={h.p[1]} r={i % 4 === 0 ? 3 : 1.8}
-            fill={i % 4 === 0 ? '#00C2FF' : i % 4 === 1 ? '#7C4DFF' : i % 4 === 2 ? '#10B981' : '#F59E0B'}
-            className={i % 4 === 0 ? 'animate-node' : ''} style={{ transformOrigin: `${h.p[0]}px ${h.p[1]}px` }} />
+          <circle key={`hb${i}`} cx={h.p[0]} cy={h.p[1]} r={i % 4 === 0 ? 4 : 2.4}
+            fill={i % 4 === 0 ? '#00C2FF' : i % 4 === 1 ? '#7C4DFF' : i % 4 === 2 ? '#10B981' : '#F59E0B'} />
         ))}
       </g>
+      {/* crisp infrastructure nodes */}
+      {hubPts.map((h, i) => (
+        <circle key={`h${i}`} cx={h.p[0]} cy={h.p[1]} r={i % 4 === 0 ? 3 : 1.8}
+          fill={i % 4 === 0 ? '#00C2FF' : i % 4 === 1 ? '#7C4DFF' : i % 4 === 2 ? '#10B981' : '#F59E0B'}
+          className={i % 4 === 0 ? 'animate-node' : ''} style={{ transformOrigin: `${h.p[0]}px ${h.p[1]}px` }} />
+      ))}
 
-      {/* terminator shadow — the far hemisphere sinks into darkness */}
+      {/* terminator shadow — far hemisphere only; center stays lit + sharp */}
       <path d={spherePath} fill="url(#g-shade)" pointerEvents="none" />
     </svg>
   );

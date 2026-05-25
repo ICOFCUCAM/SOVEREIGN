@@ -60,7 +60,7 @@ const CinematicHero: React.FC = () => {
 
       {/* ── LAYER 2 · THE LIVE SYSTEM (interface over the world) ── */}
       {HAS_PLATE && (
-        <div className="absolute z-[15] top-[4%] sm:top-0 right-[-6%] lg:right-[2%] h-[78%] aspect-square max-w-[64%]"
+        <div className="absolute z-[15] top-[9%] right-[-3%] lg:right-[4%] h-[60%] aspect-square max-w-[50%]"
           style={{ transform: 'translate(calc(var(--px) * -10px), calc(var(--py) * -10px))' }}>
           <Suspense fallback={<div className="w-full h-full rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,194,255,0.12), transparent 66%)' }} />}>
             <Globe className="w-full h-full" />
