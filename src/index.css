@@ -99,6 +99,34 @@
 }
 .animate-ring { animation: ring-pulse 2s ease-out infinite; }
 
+/* ── Cinematic hero ── */
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes spin-rev { to { transform: rotate(-360deg); } }
+.animate-spin-slow { animation: spin-slow 36s linear infinite; }
+.animate-spin-slower { animation: spin-slow 60s linear infinite; }
+.animate-spin-rev { animation: spin-rev 48s linear infinite; }
+
+@keyframes dash-flow { to { stroke-dashoffset: -1000; } }
+.animate-dash { stroke-dasharray: 4 10; animation: dash-flow 14s linear infinite; }
+
+@keyframes node-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+.animate-node { animation: node-pulse 3s ease-in-out infinite; }
+
+@keyframes drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.animate-drift { animation: drift 7s ease-in-out infinite; }
+
+@keyframes core-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.06); }
+}
+.animate-core { animation: core-breathe 6s ease-in-out infinite; }
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #05071A; }
