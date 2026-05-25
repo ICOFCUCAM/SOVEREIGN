@@ -57,6 +57,37 @@ const HeroEnvironment: React.FC = () => {
         </>
       )}
 
+      {/* ── ENVIRONMENTAL COHESION — globe, skyline & atmosphere influence each other ── */}
+      {/* skyline glow spill rising off the city floor */}
+      <div className="absolute inset-x-0 bottom-0 h-[42%] pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 100% at 56% 100%, rgba(0,194,255,0.1), transparent 64%)' }} />
+      {/* cyan illumination cast by the globe into the surrounding atmosphere */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 76% 32%, rgba(0,170,255,0.1), transparent 42%)' }} />
+      {/* violet reflection tying the palette across the lower-left environment */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 34% 82%, rgba(124,77,255,0.08), transparent 52%)' }} />
+
+      {/* depth particle layer — sparse, dim, slow: distant motes for spatial depth */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <div key={`dp${i}`} className="absolute w-px h-px rounded-full bg-cyan-300/20 animate-float pointer-events-none"
+          style={{ left: `${(i * 53) % 100}%`, top: `${(i * 29) % 92}%`, animationDelay: `${i * 0.7}s`, animationDuration: `${12 + (i % 5) * 2}s` }} />
+      ))}
+
+      {/* ── LEFT-SIDE ENVIRONMENTAL PRESENCE — faint topology + distant signals, no content ── */}
+      <svg className="absolute left-0 top-0 h-full w-[46%] pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+        <g stroke="rgba(0,194,255,0.07)" strokeWidth="0.18" fill="none">
+          <path d="M-2,26 C22,20 48,33 102,24" />
+          <path d="M-2,44 C28,52 52,40 102,49" />
+          <path d="M-2,63 C20,58 60,70 102,61" />
+          <path d="M-2,80 C30,86 58,76 102,83" />
+        </g>
+      </svg>
+      {/* distant environmental signals on the left */}
+      {[[10, 30], [22, 58], [7, 72], [16, 44], [27, 84]].map(([l, t], i) => (
+        <div key={`ls${i}`} className={`absolute w-0.5 h-0.5 rounded-full bg-cyan-300/50 pointer-events-none ${i % 2 ? 'animate-flicker' : 'animate-node'}`}
+          style={{ left: `${l}%`, top: `${t}%`, animationDelay: `${i * 0.9}s`, transformOrigin: 'center' }} />
+      ))}
+      {/* soft volumetric presence — subtle light in the left environment */}
+      <div className="absolute left-0 top-[30%] w-[30%] h-[45%] pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 60% at 30% 50%, rgba(0,120,200,0.06), transparent 70%)' }} />
+
       {/* drifting cinematic haze banks — soft fog moving through the scene */}
       <div className="absolute inset-x-0 top-[18%] h-[55%] pointer-events-none animate-haze-a" style={{ background: 'radial-gradient(ellipse 60% 40% at 40% 50%, rgba(40,70,150,0.1), transparent 70%)', filter: 'blur(30px)' }} />
       <div className="absolute inset-x-0 bottom-[20%] h-[50%] pointer-events-none animate-haze-b" style={{ background: 'radial-gradient(ellipse 70% 45% at 62% 60%, rgba(0,120,200,0.09), transparent 72%)', filter: 'blur(36px)' }} />

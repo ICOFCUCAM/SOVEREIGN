@@ -130,8 +130,14 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
       {hubPts.map((h, i) => (
         <circle key={`h${i}`} cx={h.p[0]} cy={h.p[1]} r={i % 4 === 0 ? 3 : 1.8}
           fill={i % 4 === 0 ? '#00C2FF' : i % 4 === 1 ? '#7C4DFF' : i % 4 === 2 ? '#10B981' : '#F59E0B'}
-          className={i % 4 === 0 ? 'animate-node' : ''} style={{ transformOrigin: `${h.p[0]}px ${h.p[1]}px` }} />
+          className={i % 4 === 0 ? 'animate-node' : i % 3 === 0 ? 'animate-flicker' : ''}
+          style={{ transformOrigin: `${h.p[0]}px ${h.p[1]}px`, animationDelay: `${(i % 7) * 0.5}s` }} />
       ))}
+      {/* restrained telemetry — data pings expanding from major hubs */}
+      {hubPts.map((h, i) => i % 4 === 0 ? (
+        <circle key={`pg${i}`} cx={h.p[0]} cy={h.p[1]} r="3" fill="none" stroke="#00C2FF" strokeWidth="0.7"
+          className="animate-ring" style={{ transformOrigin: `${h.p[0]}px ${h.p[1]}px`, animationDelay: `${(i % 5) * 0.8}s` }} />
+      ) : null)}
 
       {/* terminator shadow — far hemisphere only; center stays lit + sharp */}
       <path d={spherePath} fill="url(#g-shade)" pointerEvents="none" />

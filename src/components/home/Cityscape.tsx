@@ -18,18 +18,24 @@ function buildRow(count: number, seed: number, minH: number, maxH: number, maxW:
   const towers: Tower[] = [];
   let x = -10;
   for (let i = 0; i < count; i++) {
+    const spike = rng() > 0.9; // occasional large tower interrupts the skyline
     const w = 12 + rng() * (maxW - 12);
-    const h = minH + rng() * (maxH - minH);
-    towers.push({ x, w, h, setback: rng() > 0.6 ? 0.55 + rng() * 0.25 : 0, antenna: rng() > 0.72 });
-    x += w + 2 + rng() * 10;
+    let h = minH + rng() * (maxH - minH);
+    if (spike) h = Math.min(maxH * 1.55, h * 1.7);
+    towers.push({ x, w, h, setback: rng() > 0.6 ? 0.55 + rng() * 0.25 : 0, antenna: spike || rng() > 0.72 });
+    // irregular spacing: tight clusters, then wide breathing gaps — never a uniform comb
+    const gap = rng() > 0.82 ? 16 + rng() * 30 : rng() > 0.5 ? 1 + rng() * 4 : 3 + rng() * 11;
+    x += w + gap;
     if (x > VB_W + 20) break;
   }
   return towers;
 }
 
+const farSpecks = buildRow(120, 9, 10, 38, 12);  // tiny distant structures lost in haze
 const farRow = buildRow(70, 7, 30, 90, 22);
 const midRow = buildRow(46, 23, 60, 150, 34);
 const nearRow = buildRow(30, 51, 110, 250, 52);
+const frontRow = buildRow(9, 77, 200, 340, 90); // closer foreground silhouettes in shadow
 
 const Layer: React.FC<{ towers: Tower[]; fill: string; stroke: string; windows: boolean; density: number; opacity: number; seed: number }> = ({ towers, fill, stroke, windows, density, opacity, seed }) => {
   const rng = makeRng(seed);
@@ -89,6 +95,10 @@ const Cityscape: React.FC<{ className?: string }> = ({ className = '' }) => (
 
     <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#city-horizon)" />
 
+    {/* tiny distant structures — barely there, dissolving into atmosphere */}
+    <g filter="url(#city-blur)" opacity="0.5">
+      <Layer towers={farSpecks} fill="#0a1228" stroke="transparent" windows={false} density={0} opacity={0.4} seed={88} />
+    </g>
     {/* distant haze layer — blurred so it reads as far-off structure lost in atmosphere */}
     <g filter="url(#city-blur)">
       <Layer towers={farRow} fill="#0a1330" stroke="rgba(60,110,200,0.12)" windows={false} density={0} opacity={0.32} seed={101} />
@@ -99,8 +109,10 @@ const Cityscape: React.FC<{ className?: string }> = ({ className = '' }) => (
     <g filter="url(#city-blur-soft)">
       <Layer towers={midRow} fill="#0b1838" stroke="rgba(0,194,255,0.18)" windows density={0.26} opacity={0.78} seed={202} />
     </g>
-    {/* near layer — crisp, detailed foreground silhouettes */}
+    {/* near layer — crisp, detailed silhouettes */}
     <Layer towers={nearRow} fill="#070d22" stroke="rgba(0,217,255,0.28)" windows density={0.42} opacity={1} seed={303} />
+    {/* foreground silhouettes — closest towers, deep in shadow, sparse lit windows */}
+    <Layer towers={frontRow} fill="#03060f" stroke="rgba(0,217,255,0.16)" windows density={0.16} opacity={1} seed={404} />
 
     {/* flank darkness — skyline vanishes into shadow at the edges (no full-scene wash) */}
     <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#city-edge)" />

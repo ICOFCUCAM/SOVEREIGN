@@ -148,12 +148,16 @@
 .animate-haze-a { animation: haze-a 26s ease-in-out infinite; }
 .animate-haze-b { animation: haze-b 32s ease-in-out infinite; }
 
+/* intelligent node flicker — restrained telemetry, not flashy */
+@keyframes flicker { 0%, 100% { opacity: 0.55; } 42% { opacity: 0.85; } 50% { opacity: 0.25; } 58% { opacity: 0.8; } }
+.animate-flicker { animation: flicker 4.5s ease-in-out infinite; }
+
 /* Honor reduced-motion: stop ambient/infinite motion. */
 @media (prefers-reduced-motion: reduce) {
   .animate-spin-slow, .animate-spin-slower, .animate-spin-rev, .animate-dash,
   .animate-node, .animate-drift, .animate-core, .animate-pulse-slow,
   .animate-float, .animate-scan, .animate-shimmer, .animate-ring, .animate-travel,
-  .animate-haze-a, .animate-haze-b {
+  .animate-haze-a, .animate-haze-b, .animate-flicker {
     animation: none !important;
   }
   html { scroll-behavior: auto; }
