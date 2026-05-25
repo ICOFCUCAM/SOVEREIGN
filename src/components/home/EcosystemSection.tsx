@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct } from '@/lib/types';
 import {
-  ArrowRight, ArrowUpRight, LayoutGrid, Scale, Truck, Banknote, GraduationCap, ShoppingCart,
+  ArrowRight, LayoutGrid, Scale, Truck, Banknote, GraduationCap, ShoppingCart,
   Landmark, Vote, Rocket, Cpu, Network, Activity, Database, ShieldCheck, Server, Globe,
 } from 'lucide-react';
 
@@ -23,12 +23,10 @@ const CAT_ICON: Record<string, React.ComponentType<{ className?: string; style?:
 
 const ArtCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
   const Icon = CAT_ICON[p.category] || Network;
-  const live = !!p.url;
   const cls = 'group relative block overflow-hidden rounded-2xl border border-white/10 hover:border-white/25 transition-all duration-500 h-52';
   const inner = (
     <>
-      {/* Imagery / cinematic art */}
-      {p.image_url ? (
+      {/* Imagery / cinematic art */}      {p.image_url ? (
         <img src={p.image_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-75 group-hover:scale-105 transition-all duration-700" />
       ) : (
         <>
@@ -55,16 +53,13 @@ const ArtCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
           <h3 className="text-xl font-bold text-white">{p.name}</h3>
           <p className="text-sm text-white/55 line-clamp-1">{p.tagline}</p>
           <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-white/70 group-hover:text-white transition">
-            {live ? 'View preview' : 'Explore'}
-            {live ? <ArrowUpRight className="w-3.5 h-3.5" style={{ color: p.accent }} /> : <ArrowRight className="w-3.5 h-3.5" style={{ color: p.accent }} />}
+            Explore system <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" style={{ color: p.accent }} />
           </span>
         </div>
       </div>
     </>
   );
-  return live
-    ? <a href={p.url as string} target="_blank" rel="noreferrer" className={cls}>{inner}</a>
-    : <Link to="/marketplace" className={cls}>{inner}</Link>;
+  return <Link to={`/systems/${p.slug}`} className={cls}>{inner}</Link>;
 };
 
 const Spark: React.FC<{ color: string; seed: number }> = ({ color, seed }) => {

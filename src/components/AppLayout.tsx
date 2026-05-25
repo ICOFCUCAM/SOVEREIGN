@@ -1,55 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutGrid, Sparkles, Wand2, BarChart3, ArrowRight } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import type { Domain } from '@/lib/types';
+import { LayoutGrid, Sparkles, Wand2, BarChart3, ArrowRight, Boxes } from 'lucide-react';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import CinematicHero from '@/components/home/CinematicHero';
 import TransformationFlow from '@/components/home/TransformationFlow';
-import CompanyShowcase from '@/components/home/CompanyShowcase';
-import EcosystemSection from '@/components/home/EcosystemSection';
-
-/** Minimal, real scale signals — no fabricated metrics. */
-const ScaleStrip: React.FC = () => {
-  const [stats, setStats] = useState({ domains: 0, value: 0, identities: 0 });
-
-  useEffect(() => {
-    (async () => {
-      const [d, b] = await Promise.all([
-        supabase.from('domains').select('price_usd').eq('status', 'active'),
-        supabase.from('brand_profiles').select('id', { count: 'exact', head: true }),
-      ]);
-      const rows = (d.data || []) as Pick<Domain, 'price_usd'>[];
-      setStats({
-        domains: rows.length,
-        value: rows.reduce((s, r) => s + Number(r.price_usd || 0), 0),
-        identities: b.count || 0,
-      });
-    })();
-  }, []);
-
-  const items = [
-    { label: 'Premium domains', value: stats.domains.toLocaleString() },
-    { label: 'Portfolio value', value: `$${(stats.value / 1000).toFixed(0)}k` },
-    { label: 'AI identities generated', value: stats.identities.toLocaleString() },
-    { label: 'Intelligence dimensions', value: '12' },
-  ];
-
-  return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 border-y border-white/5">
-      <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-6 text-center">
-        {items.map((m) => (
-          <div key={m.label}>
-            <div className="text-4xl sm:text-5xl font-bold tracking-tighter text-white tabular-nums">{m.value}</div>
-            <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/40 mt-2">{m.label}</div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-};
+import EcosystemPreview from '@/components/home/EcosystemPreview';
 
 const VisionStatement: React.FC = () => (
   <section className="py-32 sm:py-44 px-4">
@@ -64,15 +21,16 @@ const VisionStatement: React.FC = () => (
 
 const EntryGrid: React.FC = () => {
   const entries = [
-    { to: '/marketplace', label: 'Marketplace', desc: 'Browse the sovereign domain inventory.', icon: LayoutGrid },
+    { to: '/ecosystem', label: 'Ecosystem', desc: 'Explore the infrastructure atlas.', icon: Boxes },
+    { to: '/marketplace', label: 'Marketplace', desc: 'Browse the sovereign inventory.', icon: LayoutGrid },
     { to: '/valuation', label: 'AI Valuation', desc: 'Score any domain in seconds.', icon: Sparkles },
-    { to: '/studio', label: 'Branding Studio', desc: 'Turn a domain into a brand identity.', icon: Wand2 },
+    { to: '/studio', label: 'Branding Studio', desc: 'Turn a domain into a brand.', icon: Wand2 },
     { to: '/admin', label: 'Command Center', desc: 'Operate the platform.', icon: BarChart3 },
   ];
   return (
     <section className="pb-32 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {entries.map((e) => {
             const Icon = e.icon;
             return (
@@ -101,9 +59,7 @@ const AppLayout: React.FC = () => {
       <main className="relative">
         <CinematicHero />
         <TransformationFlow />
-        <ScaleStrip />
-        <CompanyShowcase />
-        <EcosystemSection />
+        <EcosystemPreview />
         <VisionStatement />
         <EntryGrid />
       </main>

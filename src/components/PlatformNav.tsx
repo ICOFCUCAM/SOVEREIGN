@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Globe, Menu, X, Shield, Sparkles, BarChart3, LayoutGrid, LogIn, LogOut, User as UserIcon, ChevronDown, Wand2 } from 'lucide-react';
+import { Globe, Menu, X, Shield, Sparkles, BarChart3, LayoutGrid, LogIn, LogOut, User as UserIcon, ChevronDown, Wand2, Boxes } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from './AuthModal';
 
@@ -14,6 +14,7 @@ const PlatformNav: React.FC = () => {
 
   const links = [
     { to: '/', label: 'Platform', icon: Globe },
+    { to: '/ecosystem', label: 'Ecosystem', icon: Boxes },
     { to: '/marketplace', label: 'Marketplace', icon: LayoutGrid },
     { to: '/valuation', label: 'AI Valuation', icon: Sparkles },
     { to: '/studio', label: 'Branding Studio', icon: Wand2 },

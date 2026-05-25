@@ -13,6 +13,8 @@ import AdminPage from "./pages/AdminPage";
 import MarketplacePage from "./pages/MarketplacePage";
 import ValuationPage from "./pages/ValuationPage";
 import StudioPage from "./pages/StudioPage";
+import EcosystemHub from "./pages/EcosystemHub";
+import SystemPage from "./pages/SystemPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const PlatformRoutes = () => (
   <Routes>
     <Route path="/" element={<Index />} />
     <Route path="/marketplace" element={<MarketplacePage />} />
+    <Route path="/ecosystem" element={<EcosystemHub />} />
+    <Route path="/systems/:slug" element={<SystemPage />} />
     <Route path="/valuation" element={<ValuationPage />} />
     <Route path="/studio" element={<StudioPage />} />
     <Route path="/studio/:domain" element={<StudioPage />} />
