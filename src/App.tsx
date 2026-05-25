@@ -16,6 +16,7 @@ import ValuationPage from "./pages/ValuationPage";
 import StudioPage from "./pages/StudioPage";
 import EcosystemHub from "./pages/EcosystemHub";
 import SystemPage from "./pages/SystemPage";
+import DeployPage from "./pages/DeployPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const PlatformRoutes = () => (
     <Route path="/valuation" element={<ValuationPage />} />
     <Route path="/studio" element={<StudioPage />} />
     <Route path="/studio/:domain" element={<StudioPage />} />
+    <Route path="/deploy" element={<DeployPage />} />
     <Route path="/admin" element={<AdminPage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
     <Route path="*" element={<NotFound />} />
