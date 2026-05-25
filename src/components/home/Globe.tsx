@@ -75,9 +75,12 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
       {/* orbital intelligence rings */}
       {ORBITS.map((o, i) => (
         <g key={`o${i}`} transform={`rotate(${o.tilt} ${CX} ${CY})`}>
-          <ellipse cx={CX} cy={CY} rx={o.rx} ry={o.ry} fill="none" stroke={o.c} strokeOpacity="0.16" strokeWidth="0.8" />
-          <circle r="2.4" fill={o.c}>
+          <ellipse cx={CX} cy={CY} rx={o.rx} ry={o.ry} fill="none" stroke={o.c} strokeOpacity="0.18" strokeWidth="0.9" />
+          <circle r="2.6" fill={o.c}>
             <animateMotion dur={`${o.dur}s`} repeatCount="indefinite" path={ellipsePath(o.rx, o.ry)} />
+          </circle>
+          <circle r="1.6" fill="#ffffff">
+            <animateMotion dur={`${o.dur}s`} begin={`${o.dur / 2}s`} repeatCount="indefinite" path={ellipsePath(o.rx, o.ry)} />
           </circle>
         </g>
       ))}
