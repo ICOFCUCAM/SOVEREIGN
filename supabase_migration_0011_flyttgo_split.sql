@@ -1,0 +1,6 @@
+-- SOVEREIGN migration 0011 — split FlyttGo Global (.com) vs Norway (.no)
+-- Applied to project qvjdivcdefuprnenedje (via execute_sql).
+-- flyttgo.com = Global Logistics & Transport Marketplace ($10M, ecosystem
+-- 'flyttgo'). flyttgo.no = Norwegian marketplace ($180k, ecosystem
+-- 'flyttgo-no', live at flyttgo-qo46.vercel.app). Adds the 'flyttgo-no'
+-- ecosystem system and the flyttgo.com institution; restores flyttgo.no.

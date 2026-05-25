@@ -6,7 +6,7 @@ const SECTORS = [
   { n: '01', label: 'Governance & Integrity', systems: 'CivicOS · ACT · ELECPRO', accent: '#6366F1' },
   { n: '02', label: 'Finance & Banking', systems: 'Veritas Financial · Mobile Pay', accent: '#3B82F6' },
   { n: '03', label: 'Knowledge & Intelligence', systems: 'VeritasOS · EduPro', accent: '#22D3EE' },
-  { n: '04', label: 'Logistics & Mobility', systems: 'FlyttGo', accent: '#10B981' },
+  { n: '04', label: 'Logistics & Mobility', systems: 'FlyttGo Global · FlyttGo Norway', accent: '#10B981' },
   { n: '05', label: 'Commerce & Deployment', systems: 'Marketplace · Deployment Engine', accent: '#F59E0B' },
 ];
 
