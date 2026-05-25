@@ -10,6 +10,7 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import SystemTelemetry from '@/components/SystemTelemetry';
 import SystemIntelligence from '@/components/SystemIntelligence';
+import SystemTiers from '@/components/SystemTiers';
 import { ArrowLeft, ExternalLink, DollarSign, CheckCircle2, Activity, Globe, Layers, ChevronRight, ArrowUpRight } from 'lucide-react';
 
 const SLUG_BLUEPRINT: Record<string, string> = {
@@ -159,6 +160,7 @@ const SystemPage: React.FC = () => {
       </section>
 
       <Reveal><SystemIntelligence p={product} domain={domain} /></Reveal>
+      <Reveal><SystemTiers p={product} /></Reveal>
 
       <Reveal>
       {/* Capabilities */}
