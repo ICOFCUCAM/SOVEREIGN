@@ -2,9 +2,14 @@ import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, Rocket, Brain, Cloud, ShieldCheck, Layers, Gauge, DollarSign, Boxes } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import Cityscape from '@/components/home/Cityscape';
+import HeroEnvironment from '@/components/home/HeroEnvironment';
 
 const Globe = lazy(() => import('@/components/home/Globe'));
+
+// When a rendered environment plate is supplied, the live globe is layered
+// over it as part of the interface; without a plate the SVG world already
+// carries its own globe, so this overlay stays off to avoid doubling up.
+const HAS_PLATE = !!((import.meta.env.VITE_HERO_PLATE as string | undefined)?.trim());
 
 interface Panel { title: string; lines: string[]; icon: React.ComponentType<{ className?: string }>; pos: string; side: 'l' | 'r'; delay: string }
 // Positioned across the right ~60% of the scene, woven around the embedded globe.
@@ -50,33 +55,18 @@ const CinematicHero: React.FC = () => {
 
   return (
     <section ref={sectionRef} onMouseMove={onMove} className="relative min-h-screen overflow-hidden" style={{ ['--px' as string]: '0', ['--py' as string]: '0' }}>
-      {/* ── ENVIRONMENT (full bleed) ── */}
-      <div className="absolute inset-0">
-        {/* deep atmosphere */}
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 60% at 68% 34%, rgba(10,20,52,0.95), transparent 60%), radial-gradient(circle at 72% 36%, rgba(0,194,255,0.13), transparent 52%), radial-gradient(circle at 60% 78%, rgba(124,77,255,0.12), transparent 55%)' }} />
-        {/* ambient particles */}
-        {Array.from({ length: 34 }).map((_, i) => (
-          <div key={`pt${i}`} className="absolute w-0.5 h-0.5 rounded-full bg-cyan-300/40 animate-float"
-            style={{ left: `${(i * 41) % 100}%`, top: `${(i * 67) % 96}%`, animationDelay: `${i * 0.35}s`, animationDuration: `${7 + (i % 6)}s` }} />
-        ))}
-        {/* embedded globe (right of centre) */}
-        <div className="absolute top-[4%] sm:top-0 right-[-6%] lg:right-[2%] h-[78%] aspect-square max-w-[64%]"
+      {/* ── LAYER 1 · THE WORLD (cinematic environment plate or SVG fallback) ── */}
+      <HeroEnvironment />
+
+      {/* ── LAYER 2 · THE LIVE SYSTEM (interface over the world) ── */}
+      {HAS_PLATE && (
+        <div className="absolute z-[15] top-[4%] sm:top-0 right-[-6%] lg:right-[2%] h-[78%] aspect-square max-w-[64%]"
           style={{ transform: 'translate(calc(var(--px) * -10px), calc(var(--py) * -10px))' }}>
           <Suspense fallback={<div className="w-full h-full rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,194,255,0.12), transparent 66%)' }} />}>
             <Globe className="w-full h-full" />
           </Suspense>
         </div>
-        {/* full-bleed megacity floor */}
-        <div className="absolute bottom-0 inset-x-0 h-[44%]" style={{ transform: 'translate(calc(var(--px) * 4px), 0)' }}>
-          <Cityscape className="w-full h-full" />
-        </div>
-        {/* haze seam: city tops dissolve into atmosphere + globe */}
-        <div className="absolute bottom-[34%] inset-x-0 h-[20%] pointer-events-none" style={{ background: 'linear-gradient(to top, #050816 12%, rgba(5,8,22,0.55) 50%, transparent)' }} />
-        {/* glow bleed where globe meets city */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 60% 64%, rgba(0,194,255,0.12), transparent 38%)' }} />
-        {/* left legibility scrim — blends copy into the world */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(100deg, #050816 0%, rgba(5,8,22,0.92) 26%, rgba(5,8,22,0.55) 46%, transparent 68%)' }} />
-      </div>
+      )}
 
       {/* ── FLOATING OPERATIONAL PANELS ── */}
       {PANELS.map((p) => {
