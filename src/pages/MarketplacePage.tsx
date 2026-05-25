@@ -81,7 +81,7 @@ const MarketplacePage: React.FC = () => {
               <div className="inline-block px-3 py-1 rounded-full glass mb-3">
                 <span className="text-xs font-mono uppercase tracking-widest text-cyan-300">{investorMode ? 'Investor Intelligence' : 'Sovereign Marketplace'}</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-2">
+              <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight text-white mb-2">
                 {investorMode ? <>The sovereign opportunity <span className="text-gradient-cyan">index.</span></> : <>The premium digital asset <span className="text-gradient-cyan">inventory.</span></>}
               </h1>
               <p className="text-white/50 max-w-2xl">

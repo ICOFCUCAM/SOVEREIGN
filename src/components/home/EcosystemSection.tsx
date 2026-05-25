@@ -157,7 +157,7 @@ const EcosystemSection: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
           <div>
             <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-4">Ecosystem in motion</div>
-            <h2 className="text-4xl sm:text-6xl font-bold tracking-tighter text-white leading-[0.95]">Real systems.<br />Real impact.</h2>
+            <h2 className="font-display text-4xl sm:text-6xl font-bold tracking-tighter text-white leading-[0.95]">Real systems.<br />Real impact.</h2>
             <p className="text-white/50 mt-4 max-w-md leading-relaxed">A connected ecosystem of sovereign infrastructure powering governments, enterprises, and millions of users — domain to startup to civilization.</p>
           </div>
           <Link to="/marketplace" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl glass hover:glass-strong text-white font-semibold text-sm self-start">

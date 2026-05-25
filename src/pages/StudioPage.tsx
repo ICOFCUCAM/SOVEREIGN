@@ -125,7 +125,7 @@ const StudioPage: React.FC = () => {
               <Wand2 className="w-3.5 h-3.5 text-cyan-300" />
               <span className="text-xs font-mono uppercase tracking-widest text-cyan-300">AI Branding Studio</span>
             </div>
-            <h1 className="text-5xl sm:text-6xl font-bold tracking-tighter text-white mb-4">
+            <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tighter text-white mb-4">
               Every domain is <span className="text-gradient-cyan">a company waiting to launch.</span>
             </h1>
             <p className="text-white/60 max-w-2xl mx-auto">

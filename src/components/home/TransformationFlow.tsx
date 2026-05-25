@@ -82,7 +82,7 @@ const TransformationFlow: React.FC = () => {
   return (
     <section className="py-28 sm:py-36 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto text-center mb-14">
-        <h2 className="text-3xl sm:text-5xl font-bold tracking-tighter text-white mb-4">A domain becomes a company.</h2>
+        <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-tighter text-white mb-4">A domain becomes a company.</h2>
         <p className="text-white/50 text-lg max-w-xl mx-auto">Watch one asset move from name to live institution.</p>
       </div>
 

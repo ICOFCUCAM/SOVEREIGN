@@ -18,7 +18,7 @@ const EcosystemPreview: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
           <div>
             <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-4">The ecosystem</div>
-            <h2 className="text-4xl sm:text-6xl font-bold tracking-tighter leading-[0.95]">Sovereign infrastructure,<br />by sector.</h2>
+            <h2 className="font-display text-4xl sm:text-6xl font-bold tracking-tighter leading-[0.95]">Sovereign infrastructure,<br />by sector.</h2>
             <p className="text-white/50 mt-4 max-w-md leading-relaxed">Deployable institutions spanning governance, finance, intelligence, logistics, and commerce — explore the full network.</p>
           </div>
           <Link to="/ecosystem" className="group inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-[#05071A] font-semibold text-sm self-start">

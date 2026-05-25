@@ -4,6 +4,7 @@ import { LayoutGrid, Sparkles, Wand2, BarChart3, ArrowRight, Boxes } from 'lucid
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import EcosystemPreview from '@/components/home/EcosystemPreview';
@@ -11,7 +12,7 @@ import EcosystemPreview from '@/components/home/EcosystemPreview';
 const VisionStatement: React.FC = () => (
   <section className="py-32 sm:py-44 px-4">
     <div className="max-w-3xl mx-auto text-center">
-      <h2 className="text-3xl sm:text-5xl font-semibold tracking-tighter leading-tight text-white/90">
+      <h2 className="font-display text-3xl sm:text-5xl font-semibold tracking-tighter leading-tight text-white/90">
         We are building the operating layer for{' '}
         <span className="text-gradient-cyan">deployable digital institutions.</span>
       </h2>
@@ -58,10 +59,10 @@ const AppLayout: React.FC = () => {
       <PlatformNav />
       <main className="relative">
         <CinematicHero />
-        <TransformationFlow />
-        <EcosystemPreview />
-        <VisionStatement />
-        <EntryGrid />
+        <Reveal><TransformationFlow /></Reveal>
+        <Reveal><EcosystemPreview /></Reveal>
+        <Reveal><VisionStatement /></Reveal>
+        <Reveal><EntryGrid /></Reveal>
       </main>
       <PlatformFooter />
     </div>

@@ -138,7 +138,7 @@ const CinematicHero: React.FC = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/5 text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.3em] mb-7">
             <Sparkles className="w-3 h-3" /> The operating system for digital civilization
           </div>
-          <h1 className="text-[2.6rem] sm:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.95] mb-6">
+          <h1 className="font-display text-[2.6rem] sm:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.95] mb-6">
             The operating layer for
             <br />
             <span className="text-gradient-cyan">future digital civilization.</span>

@@ -31,9 +31,15 @@
   * { @apply border-border; }
   body {
     @apply bg-[#05071A] text-white antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   html { scroll-behavior: smooth; }
+}
+
+@layer utilities {
+  /* Cinematic display type for marquee headings. */
+  .font-display { font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; letter-spacing: -0.02em; }
 }
 
 @layer utilities {

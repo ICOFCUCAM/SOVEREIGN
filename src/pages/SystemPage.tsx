@@ -92,7 +92,7 @@ const SystemPage: React.FC = () => {
           </Link>
 
           <div className="text-[11px] font-mono uppercase tracking-[0.25em] mb-3" style={{ color: accent }}>{product.category}</div>
-          <h1 className="text-5xl sm:text-7xl font-bold tracking-tighter mb-4">{product.name}</h1>
+          <h1 className="font-display text-5xl sm:text-7xl font-bold tracking-tighter mb-4">{product.name}</h1>
           <p className="text-2xl text-white/70 font-light max-w-2xl mb-5">{product.tagline}</p>
           <p className="text-white/50 max-w-2xl leading-relaxed mb-7">{product.description}</p>
 
