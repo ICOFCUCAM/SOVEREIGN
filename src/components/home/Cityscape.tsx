@@ -1,59 +1,91 @@
 import React from 'react';
 
-const NEON = ['#00C2FF', '#7C4DFF', '#10B981', '#F59E0B'];
-const H = 260;
+const VB_W = 1000;
+const VB_H = 340;
+const WARM = ['#FFB257', '#FF8A4C'];
+const COOL = ['#00C2FF', '#7C4DFF', '#10B981'];
 
-// Two depth layers of towers for a dense sovereign skyline.
-const backRow = Array.from({ length: 60 }, (_, i) => ({ x: i * 15.2, w: 9 + ((i * 11) % 12), h: 30 + ((i * 53) % 80) }));
-const frontRow = Array.from({ length: 46 }, (_, i) => ({ x: i * 19.8, w: 13 + ((i * 17) % 18), h: 60 + ((i * 67) % 150), spire: i % 7 === 0 }));
+// Deterministic RNG so the skyline is stable across renders.
+function makeRng(seed: number) {
+  let s = seed;
+  return () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+}
 
-const Cityscape: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <svg viewBox="0 0 900 260" preserveAspectRatio="xMidYMax slice" className={className}>
-    <defs>
-      <linearGradient id="bld-back" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#0a1430" /><stop offset="100%" stopColor="#050a1c" />
-      </linearGradient>
-      <linearGradient id="bld-front" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#0e1c42" /><stop offset="100%" stopColor="#04060f" />
-      </linearGradient>
-      <radialGradient id="horizon" cx="50%" cy="100%" r="80%">
-        <stop offset="0%" stopColor="rgba(0,194,255,0.28)" /><stop offset="60%" stopColor="rgba(124,77,255,0.1)" /><stop offset="100%" stopColor="transparent" />
-      </radialGradient>
-    </defs>
+interface Tower { x: number; w: number; h: number; setback: number; antenna: boolean; }
 
-    <rect x="0" y="20" width="900" height="240" fill="url(#horizon)" />
+function buildRow(count: number, seed: number, minH: number, maxH: number, maxW: number): Tower[] {
+  const rng = makeRng(seed);
+  const towers: Tower[] = [];
+  let x = -10;
+  for (let i = 0; i < count; i++) {
+    const w = 12 + rng() * (maxW - 12);
+    const h = minH + rng() * (maxH - minH);
+    towers.push({ x, w, h, setback: rng() > 0.6 ? 0.55 + rng() * 0.25 : 0, antenna: rng() > 0.72 });
+    x += w + 2 + rng() * 10;
+    if (x > VB_W + 20) break;
+  }
+  return towers;
+}
 
-    {/* back layer (dim) */}
-    <g opacity="0.6">
-      {backRow.map((b, i) => {
-        const top = H - b.h;
-        return <rect key={i} x={b.x} y={top} width={b.w} height={b.h} fill="url(#bld-back)" stroke="rgba(0,194,255,0.1)" strokeWidth="0.4" />;
+const farRow = buildRow(70, 7, 30, 90, 22);
+const midRow = buildRow(46, 23, 60, 150, 34);
+const nearRow = buildRow(30, 51, 110, 250, 52);
+
+const Layer: React.FC<{ towers: Tower[]; fill: string; stroke: string; windows: boolean; density: number; opacity: number; seed: number }> = ({ towers, fill, stroke, windows, density, opacity, seed }) => {
+  const rng = makeRng(seed);
+  return (
+    <g opacity={opacity}>
+      {towers.map((t, i) => {
+        const top = VB_H - t.h;
+        const sbW = t.setback ? t.w * t.setback : 0;
+        const sbX = t.x + (t.w - sbW) / 2;
+        const sbTop = top - (t.setback ? 18 + rng() * 26 : 0);
+        const neon = COOL[i % COOL.length];
+        return (
+          <g key={i}>
+            {t.antenna && <line x1={t.x + t.w / 2} y1={top - 30} x2={t.x + t.w / 2} y2={top} stroke={neon} strokeWidth="0.8" opacity="0.55" />}
+            {t.antenna && <circle cx={t.x + t.w / 2} cy={top - 30} r="1.4" fill={neon} />}
+            {t.setback > 0 && <rect x={sbX} y={sbTop} width={sbW} height={top - sbTop + 2} fill={fill} stroke={stroke} strokeWidth="0.4" />}
+            <rect x={t.x} y={top} width={t.w} height={t.h} fill={fill} stroke={stroke} strokeWidth="0.4" />
+            <line x1={t.x} y1={top} x2={t.x + t.w} y2={top} stroke={neon} strokeWidth="0.9" opacity="0.6" />
+            {windows && Array.from({ length: Math.floor(t.h / 9) }).map((_, r) =>
+              Array.from({ length: Math.max(1, Math.floor(t.w / 7)) }).map((__, c) => {
+                if (rng() > density) return null;
+                const bright = rng() > 0.82;
+                const warm = rng() > 0.78;
+                return <rect key={`${r}-${c}`} x={t.x + 2.5 + c * 7} y={top + 5 + r * 9} width="2.6" height="3.4"
+                  fill={warm ? WARM[i % 2] : neon} opacity={bright ? 0.85 : 0.2} />;
+              }),
+            )}
+          </g>
+        );
       })}
     </g>
+  );
+};
 
-    {/* front layer (bright, windowed) */}
-    {frontRow.map((b, i) => {
-      const top = H - b.h;
-      const neon = NEON[i % 4];
-      return (
-        <g key={i}>
-          {b.spire && <line x1={b.x + b.w / 2} y1={top - 22} x2={b.x + b.w / 2} y2={top} stroke={neon} strokeWidth="1" opacity="0.7" />}
-          {b.spire && <circle cx={b.x + b.w / 2} cy={top - 22} r="1.6" fill={neon} />}
-          <rect x={b.x} y={top} width={b.w - 3} height={b.h} fill="url(#bld-front)" stroke="rgba(0,217,255,0.16)" strokeWidth="0.5" />
-          <line x1={b.x} y1={top} x2={b.x + b.w - 3} y2={top} stroke={neon} strokeWidth="1.2" opacity="0.8" />
-          {/* window grid */}
-          {Array.from({ length: Math.floor(b.h / 11) }).map((_, r) =>
-            Array.from({ length: Math.max(1, Math.floor((b.w - 6) / 5)) }).map((__, cIdx) => (
-              <rect key={`${r}-${cIdx}`} x={b.x + 2 + cIdx * 5} y={top + 5 + r * 11} width="2.4" height="3"
-                fill={neon} opacity={(i + r + cIdx) % 4 === 0 ? 0.6 : 0.12} />
-            )),
-          )}
-        </g>
-      );
-    })}
+const Cityscape: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="xMidYMax slice" className={className}>
+    <defs>
+      <radialGradient id="city-horizon" cx="50%" cy="100%" r="85%">
+        <stop offset="0%" stopColor="rgba(0,194,255,0.3)" /><stop offset="55%" stopColor="rgba(124,77,255,0.08)" /><stop offset="100%" stopColor="transparent" />
+      </radialGradient>
+      <linearGradient id="city-haze" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#050b1c" /><stop offset="100%" stopColor="transparent" />
+      </linearGradient>
+    </defs>
 
-    {/* ground reflection sheen */}
-    <rect x="0" y={H - 4} width="900" height="4" fill="rgba(0,194,255,0.4)" opacity="0.5" />
+    <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#city-horizon)" />
+
+    {/* distant haze layer */}
+    <Layer towers={farRow} fill="#0a1330" stroke="rgba(60,110,200,0.18)" windows={false} density={0} opacity={0.4} seed={101} />
+    <rect x="0" y={VB_H - 240} width={VB_W} height="120" fill="url(#city-haze)" opacity="0.5" />
+    {/* mid layer */}
+    <Layer towers={midRow} fill="#0b1838" stroke="rgba(0,194,255,0.16)" windows density={0.28} opacity={0.7} seed={202} />
+    {/* near layer */}
+    <Layer towers={nearRow} fill="#070d22" stroke="rgba(0,217,255,0.22)" windows density={0.4} opacity={1} seed={303} />
+
+    <rect x="0" y={VB_H - 3} width={VB_W} height="3" fill="rgba(0,194,255,0.45)" opacity="0.5" />
   </svg>
 );
 

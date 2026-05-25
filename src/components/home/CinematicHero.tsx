@@ -93,15 +93,19 @@ const CinematicHero: React.FC = () => {
             <div key={`pt${i}`} className="absolute w-0.5 h-0.5 rounded-full bg-cyan-300/40 animate-float"
               style={{ left: `${(i * 41) % 100}%`, top: `${(i * 67) % 100}%`, animationDelay: `${i * 0.4}s`, animationDuration: `${7 + (i % 5)}s` }} />
           ))}
-          {/* cityscape base */}
-          <div className="absolute bottom-0 -left-16 -right-16 h-[40%] opacity-80" style={{ transform: 'translate(calc(var(--px) * 6px), 0)' }}>
-            <Cityscape className="w-full h-full" />
-          </div>
-          {/* globe */}
-          <div className="absolute inset-0 flex items-center justify-center" style={{ transform: 'translate(calc(var(--px) * -8px), calc(var(--py) * -8px))' }}>
-            <Suspense fallback={<div className="w-full max-w-[600px] aspect-square rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,194,255,0.12), transparent 68%)' }} />}>
-              <Globe className="w-full max-w-[600px] h-auto" />
+          {/* glow bleed behind the scene */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 54% 40%, rgba(0,194,255,0.16), transparent 52%)' }} />
+          {/* globe — smaller, lifted, embedded */}
+          <div className="absolute inset-x-0 top-[1%] bottom-[30%] flex items-center justify-center" style={{ transform: 'translate(calc(var(--px) * -8px), calc(var(--py) * -8px))' }}>
+            <Suspense fallback={<div className="w-full max-w-[430px] aspect-square rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,194,255,0.12), transparent 68%)' }} />}>
+              <Globe className="w-full max-w-[430px] h-auto" />
             </Suspense>
+          </div>
+          {/* atmospheric haze seam blending globe into the city */}
+          <div className="absolute bottom-[22%] inset-x-0 h-[22%] pointer-events-none" style={{ background: 'linear-gradient(to top, #050816 18%, rgba(5,8,22,0.5) 55%, transparent)' }} />
+          {/* cityscape (front, occludes the globe base) */}
+          <div className="absolute bottom-0 -left-20 -right-20 h-[46%]" style={{ transform: 'translate(calc(var(--px) * 5px), 0)' }}>
+            <Cityscape className="w-full h-full" />
           </div>
           {/* floating operational panels */}
           {PANELS.map((p) => {
