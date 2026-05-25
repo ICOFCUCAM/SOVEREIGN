@@ -213,7 +213,7 @@ Deno.serve(async (req) => {
 
     const analysis = analyzeDomain(domain);
     const brand = generateBrand(domain, analysis);
-    const gatewayApiKey = Deno.env.get("GATEWAY_API_KEY");
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
 
     let narrative = '';
     let slogan = '';
@@ -224,7 +224,7 @@ Deno.serve(async (req) => {
     let elevator_pitch = brand.elevator_pitch;
     let landing_copy = brand.landing_copy;
 
-    if (gatewayApiKey) {
+    if (openaiApiKey) {
       try {
         const prompt = `You are an elite domain intelligence + branding analyst. Analyze "${domain}" (overall score ${analysis.overall_score}/100, industry: ${analysis.industry_category}, est. value $${analysis.estimated_value_low.toLocaleString()}-$${analysis.estimated_value_high.toLocaleString()}, brand tone: ${brand.brand_tone}).
 
@@ -243,13 +243,14 @@ Return STRICT JSON only (no markdown, no commentary):
   ]
 }`;
 
-        const aiResp = await fetch('https://ai.gateway.fastrouter.io/api/v1/chat/completions', {
+        const aiResp = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-API-Key': gatewayApiKey },
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + openaiApiKey },
           body: JSON.stringify({
-            model: 'google/gemini-3-flash',
+            model: 'gpt-4o-mini',
             messages: [{ role: 'user', content: prompt }],
-            temperature: 0.8
+            temperature: 0.8,
+            response_format: { type: 'json_object' }
           })
         });
         const aiData = await aiResp.json();
@@ -298,7 +299,7 @@ Return STRICT JSON only (no markdown, no commentary):
       investor_narrative,
       elevator_pitch,
       landing_copy,
-      model_used: gatewayApiKey ? 'gemini-3-flash+kernel-v3' : 'kernel-v3-deterministic'
+      model_used: openaiApiKey ? 'gpt-4o-mini+kernel-v3' : 'kernel-v3-deterministic'
     }), {
       headers: { 'Content-Type': 'application/json', ...corsHeaders }
     });

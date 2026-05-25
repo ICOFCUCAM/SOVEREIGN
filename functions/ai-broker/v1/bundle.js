@@ -122,8 +122,8 @@ Deno.serve(async (req) => {
     const move = computeMove({ asking, intent, offer, rounds, message });
 
     let brokerMessage = brokerLine({ domain, industry, score, asking, offer, move, email });
-    const gatewayApiKey = Deno.env.get('GATEWAY_API_KEY');
-    if (gatewayApiKey) {
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (openaiApiKey) {
       try {
         const directive = move.accepted ? 'accept the deal warmly and move to close'
           : move.escalate ? 'escalate to the principal owner gracefully'
@@ -131,10 +131,10 @@ Deno.serve(async (req) => {
           : move.isLowball ? 'hold firm, the offer is below floor, counter at the given number'
           : 'counter constructively toward a close';
         const prompt = `You are an elite, calm, strategic domain acquisition broker (NOT a chatbot). Asset: ${domain} (${industry}, ${score}/100). Asking ${asking}. Buyer offer: ${offer || 'none yet'}. Your counter: ${move.counter}. Buyer said: "${message}". Directive: ${directive}. Write ONE reply (max 3 sentences), commercially sophisticated, never reveal any reserve price, reference the counter number ${move.counter} if countering. Plain text only.`;
-        const aiResp = await fetch('https://ai.gateway.fastrouter.io/api/v1/chat/completions', {
+        const aiResp = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-API-Key': gatewayApiKey },
-          body: JSON.stringify({ model: 'google/gemini-3-flash', messages: [{ role: 'user', content: prompt }], temperature: 0.7 })
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + openaiApiKey },
+          body: JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: 'user', content: prompt }], temperature: 0.7 })
         });
         const aiData = await aiResp.json();
         const content = aiData?.choices?.[0]?.message?.content?.trim();
@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
       buyer_score: move.buyerScore,
       urgency_score: move.urgencyScore,
       confidence: move.confidence,
-      model_used: gatewayApiKey ? 'gemini-3-flash+broker-v1' : 'broker-v1-deterministic'
+      model_used: openaiApiKey ? 'gpt-4o-mini+broker-v1' : 'broker-v1-deterministic'
     }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   } catch (error) {
     return new Response(JSON.stringify({ error: (error as Error).message }), {
