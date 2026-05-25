@@ -52,7 +52,7 @@ const PlatformNav: React.FC = () => {
               {links.map(l => {
                 const Icon = l.icon;
                 return (
-                  <Link key={l.to} to={l.to}
+                  <Link key={l.to} to={l.to} aria-current={isActive(l.to) ? 'page' : undefined}
                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
                       isActive(l.to) ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white hover:bg-white/5'
                     }`}>
