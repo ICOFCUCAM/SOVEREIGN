@@ -73,6 +73,8 @@ const CinematicHero: React.FC = () => {
         const Icon = p.icon;
         return (
           <div key={p.title} className={`hidden md:block absolute z-20 ${p.pos} animate-drift`} style={{ animationDelay: p.delay, transform: 'translate(calc(var(--px) * 14px), calc(var(--py) * 14px))' }}>
+            {/* ecosystem lighting bleed — the panel sits in the atmosphere, casting glow */}
+            <span className="pointer-events-none absolute -inset-6 rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,150,255,0.16), transparent 70%)', filter: 'blur(8px)' }} />
             <div className="relative glass-strong rounded-xl px-3.5 py-2.5 border border-white/10 flex items-center gap-2.5 shadow-2xl">
               <span className={`pointer-events-none absolute top-1/2 ${p.side === 'r' ? 'left-full' : 'right-full'} w-9 h-px`}
                 style={{ background: p.side === 'r' ? 'linear-gradient(90deg, rgba(0,194,255,0.6), transparent)' : 'linear-gradient(270deg, rgba(0,194,255,0.6), transparent)' }} />

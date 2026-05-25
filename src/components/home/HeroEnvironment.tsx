@@ -57,8 +57,19 @@ const HeroEnvironment: React.FC = () => {
         </>
       )}
 
-      {/* left legibility scrim — blends copy into the world (applies to both) */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(100deg, #050816 0%, rgba(5,8,22,0.92) 26%, rgba(5,8,22,0.55) 46%, transparent 68%)' }} />
+      {/* drifting cinematic haze banks — soft fog moving through the scene */}
+      <div className="absolute inset-x-0 top-[18%] h-[55%] pointer-events-none animate-haze-a" style={{ background: 'radial-gradient(ellipse 60% 40% at 40% 50%, rgba(40,70,150,0.1), transparent 70%)', filter: 'blur(30px)' }} />
+      <div className="absolute inset-x-0 bottom-[20%] h-[50%] pointer-events-none animate-haze-b" style={{ background: 'radial-gradient(ellipse 70% 45% at 62% 60%, rgba(0,120,200,0.09), transparent 72%)', filter: 'blur(36px)' }} />
+
+      {/* the world bleeds behind the typography — a soft pool, not a hard wall */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 58% 70% at 22% 52%, rgba(5,8,22,0.9) 0%, rgba(5,8,22,0.6) 38%, transparent 68%)' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(100deg, #050816 0%, rgba(5,8,22,0.72) 22%, rgba(5,8,22,0.28) 44%, transparent 64%)' }} />
+
+      {/* cinematic vignette — edges sink into darkness for depth + scale */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 90% 85% at 56% 46%, transparent 52%, rgba(3,5,14,0.55) 84%, rgba(2,3,10,0.9) 100%)' }} />
+      {/* letterbox falloff top + bottom */}
+      <div className="absolute inset-x-0 top-0 h-[22%] pointer-events-none" style={{ background: 'linear-gradient(to bottom, #050816, transparent)' }} />
+      <div className="absolute inset-x-0 bottom-0 h-[26%] pointer-events-none" style={{ background: 'linear-gradient(to top, #050816 8%, transparent)' }} />
     </div>
   );
 };

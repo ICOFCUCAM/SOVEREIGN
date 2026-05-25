@@ -142,11 +142,18 @@
 @keyframes arc-travel { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -120; } }
 .animate-travel { stroke-dasharray: 4 116; animation: arc-travel 2.4s linear infinite; }
 
+/* slow drifting atmospheric haze — cinematic fog movement */
+@keyframes haze-a { 0%, 100% { transform: translate3d(0,0,0); opacity: 0.7; } 50% { transform: translate3d(40px,-14px,0); opacity: 1; } }
+@keyframes haze-b { 0%, 100% { transform: translate3d(0,0,0); opacity: 0.65; } 50% { transform: translate3d(-46px,12px,0); opacity: 0.95; } }
+.animate-haze-a { animation: haze-a 26s ease-in-out infinite; }
+.animate-haze-b { animation: haze-b 32s ease-in-out infinite; }
+
 /* Honor reduced-motion: stop ambient/infinite motion. */
 @media (prefers-reduced-motion: reduce) {
   .animate-spin-slow, .animate-spin-slower, .animate-spin-rev, .animate-dash,
   .animate-node, .animate-drift, .animate-core, .animate-pulse-slow,
-  .animate-float, .animate-scan, .animate-shimmer, .animate-ring, .animate-travel {
+  .animate-float, .animate-scan, .animate-shimmer, .animate-ring, .animate-travel,
+  .animate-haze-a, .animate-haze-b {
     animation: none !important;
   }
   html { scroll-behavior: auto; }

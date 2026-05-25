@@ -45,9 +45,10 @@ const Layer: React.FC<{ towers: Tower[]; fill: string; stroke: string; windows: 
           <g key={i}>
             {t.antenna && <line x1={t.x + t.w / 2} y1={top - 30} x2={t.x + t.w / 2} y2={top} stroke={neon} strokeWidth="0.8" opacity="0.55" />}
             {t.antenna && <circle cx={t.x + t.w / 2} cy={top - 30} r="1.4" fill={neon} />}
-            {t.setback > 0 && <rect x={sbX} y={sbTop} width={sbW} height={top - sbTop + 2} fill={fill} stroke={stroke} strokeWidth="0.4" />}
-            <rect x={t.x} y={top} width={t.w} height={t.h} fill={fill} stroke={stroke} strokeWidth="0.4" />
-            <line x1={t.x} y1={top} x2={t.x + t.w} y2={top} stroke={neon} strokeWidth="0.9" opacity="0.6" />
+            {t.setback > 0 && <rect x={sbX} y={sbTop} width={sbW} height={top - sbTop + 2} fill={fill} stroke={stroke} strokeWidth="0.3" strokeOpacity="0.6" />}
+            <rect x={t.x} y={top} width={t.w} height={t.h} fill={fill} stroke={stroke} strokeWidth="0.3" strokeOpacity="0.6" />
+            {/* roof glow only on some towers — breaks the uniform outline */}
+            {rng() > 0.45 && <line x1={t.x} y1={top} x2={t.x + t.w} y2={top} stroke={neon} strokeWidth="0.9" opacity={0.25 + rng() * 0.4} />}
             {windows && Array.from({ length: Math.floor(t.h / 9) }).map((_, r) =>
               Array.from({ length: Math.max(1, Math.floor(t.w / 7)) }).map((__, c) => {
                 if (rng() > density) return null;
@@ -68,24 +69,43 @@ const Cityscape: React.FC<{ className?: string }> = ({ className = '' }) => (
   <svg viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="xMidYMax slice" className={className}>
     <defs>
       <radialGradient id="city-horizon" cx="50%" cy="100%" r="85%">
-        <stop offset="0%" stopColor="rgba(0,194,255,0.3)" /><stop offset="55%" stopColor="rgba(124,77,255,0.08)" /><stop offset="100%" stopColor="transparent" />
+        <stop offset="0%" stopColor="rgba(0,194,255,0.26)" /><stop offset="55%" stopColor="rgba(124,77,255,0.07)" /><stop offset="100%" stopColor="transparent" />
       </radialGradient>
+      {/* depth fog — distant structure dissolves upward into atmosphere */}
+      <linearGradient id="city-fog" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#050816" /><stop offset="60%" stopColor="rgba(5,8,22,0.5)" /><stop offset="100%" stopColor="transparent" />
+      </linearGradient>
       <linearGradient id="city-haze" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="#050b1c" /><stop offset="100%" stopColor="transparent" />
       </linearGradient>
+      {/* edge darkness — the skyline vanishes into shadow at the flanks */}
+      <linearGradient id="city-edge" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stopColor="#050816" /><stop offset="14%" stopColor="rgba(5,8,22,0.2)" /><stop offset="50%" stopColor="transparent" />
+        <stop offset="86%" stopColor="rgba(5,8,22,0.2)" /><stop offset="100%" stopColor="#050816" />
+      </linearGradient>
+      <filter id="city-blur" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="2.4" /></filter>
+      <filter id="city-blur-soft" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="0.9" /></filter>
     </defs>
 
     <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#city-horizon)" />
 
-    {/* distant haze layer */}
-    <Layer towers={farRow} fill="#0a1330" stroke="rgba(60,110,200,0.18)" windows={false} density={0} opacity={0.4} seed={101} />
-    <rect x="0" y={VB_H - 240} width={VB_W} height="120" fill="url(#city-haze)" opacity="0.5" />
-    {/* mid layer */}
-    <Layer towers={midRow} fill="#0b1838" stroke="rgba(0,194,255,0.16)" windows density={0.28} opacity={0.7} seed={202} />
-    {/* near layer */}
-    <Layer towers={nearRow} fill="#070d22" stroke="rgba(0,217,255,0.22)" windows density={0.4} opacity={1} seed={303} />
+    {/* distant haze layer — blurred so it reads as far-off structure lost in atmosphere */}
+    <g filter="url(#city-blur)">
+      <Layer towers={farRow} fill="#0a1330" stroke="rgba(60,110,200,0.12)" windows={false} density={0} opacity={0.32} seed={101} />
+    </g>
+    {/* fog bank rolling over the distant skyline */}
+    <rect x="0" y={VB_H - 250} width={VB_W} height="150" fill="url(#city-fog)" opacity="0.7" />
+    {/* mid layer — slightly softened */}
+    <g filter="url(#city-blur-soft)">
+      <Layer towers={midRow} fill="#0a162f" stroke="rgba(0,194,255,0.12)" windows density={0.22} opacity={0.62} seed={202} />
+    </g>
+    {/* near layer — crisp foreground */}
+    <Layer towers={nearRow} fill="#060b1c" stroke="rgba(0,217,255,0.2)" windows density={0.4} opacity={1} seed={303} />
 
-    <rect x="0" y={VB_H - 3} width={VB_W} height="3" fill="rgba(0,194,255,0.45)" opacity="0.5" />
+    {/* atmospheric concealment: fog drift + flank darkness */}
+    <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#city-fog)" opacity="0.18" />
+    <rect x="0" y="0" width={VB_W} height={VB_H} fill="url(#city-edge)" />
+    <rect x="0" y={VB_H - 3} width={VB_W} height="3" fill="rgba(0,194,255,0.4)" opacity="0.45" />
   </svg>
 );
 

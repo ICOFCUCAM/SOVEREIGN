@@ -61,15 +61,28 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
         <radialGradient id="g-bloom" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="rgba(0,194,255,0.18)" /><stop offset="55%" stopColor="rgba(0,194,255,0.06)" /><stop offset="100%" stopColor="transparent" />
         </radialGradient>
+        {/* wide cinematic scatter — light bleeding into the surrounding atmosphere */}
+        <radialGradient id="g-scatter" cx="50%" cy="50%" r="50%">
+          <stop offset="40%" stopColor="rgba(0,150,255,0.12)" /><stop offset="72%" stopColor="rgba(0,120,255,0.05)" /><stop offset="100%" stopColor="transparent" />
+        </radialGradient>
         <radialGradient id="g-atmo" cx="50%" cy="50%" r="50%">
-          <stop offset="69%" stopColor="transparent" /><stop offset="88%" stopColor="rgba(0,194,255,0.32)" /><stop offset="100%" stopColor="transparent" />
+          <stop offset="69%" stopColor="transparent" /><stop offset="86%" stopColor="rgba(0,194,255,0.28)" /><stop offset="94%" stopColor="rgba(0,194,255,0.1)" /><stop offset="100%" stopColor="transparent" />
+        </radialGradient>
+        {/* terminator: day-side light falls off into the shadowed limb */}
+        <radialGradient id="g-shade" cx="36%" cy="30%" r="78%">
+          <stop offset="0%" stopColor="transparent" /><stop offset="62%" stopColor="transparent" /><stop offset="100%" stopColor="rgba(2,4,12,0.78)" />
         </radialGradient>
         <linearGradient id="g-land" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#00C2FF" /><stop offset="100%" stopColor="#7C4DFF" />
         </linearGradient>
+        {/* atmospheric diffusion so the globe is embedded, not pasted on top */}
+        <filter id="f-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.1" /></filter>
+        <filter id="f-bloom" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5" /></filter>
+        <filter id="f-haze" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="14" /></filter>
       </defs>
 
-      {/* outer bloom */}
+      {/* outer scatter + bloom — soft light spill into atmosphere */}
+      <circle cx={CX} cy={CY} r={R + 46} fill="url(#g-scatter)" filter="url(#f-haze)" />
       <circle cx={CX} cy={CY} r="198" fill="url(#g-bloom)" />
 
       {/* orbital intelligence rings */}
@@ -85,29 +98,45 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
         </g>
       ))}
 
-      {/* atmosphere + sphere */}
-      <circle cx={CX} cy={CY} r={R + 12} fill="url(#g-atmo)" />
-      <path d={spherePath} fill="url(#g-sphere)" stroke="rgba(0,217,255,0.32)" strokeWidth="1" />
-      <path d={gratPath} fill="none" stroke="rgba(0,217,255,0.1)" strokeWidth="0.35" />
-      <path d={landPath} fill="url(#g-land)" fillOpacity="0.36" stroke="rgba(0,217,255,0.6)" strokeWidth="0.4" strokeLinejoin="round" />
+      {/* atmosphere rim — soft, diffuse, blurred into the surrounding dark */}
+      <circle cx={CX} cy={CY} r={R + 12} fill="url(#g-atmo)" filter="url(#f-soft)" />
+      {/* sphere body (no hard stroke — the rim glow carries the edge) */}
+      <path d={spherePath} fill="url(#g-sphere)" />
 
-      {/* routes + traveling light */}
-      {routePaths.map((d, i) => (
-        <g key={`r${i}`}>
-          <path d={d} fill="none" stroke="url(#g-land)" strokeWidth="0.6" opacity="0.4" strokeLinecap="round" />
-          <path d={d} fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${(i % 7) * 0.45}s` }} />
+      {/* everything on the surface is gently softened so it reads as lit terrain, not vector art */}
+      <g filter="url(#f-soft)">
+        <path d={gratPath} fill="none" stroke="rgba(0,217,255,0.08)" strokeWidth="0.35" />
+        <path d={landPath} fill="url(#g-land)" fillOpacity="0.32" stroke="rgba(0,217,255,0.5)" strokeWidth="0.4" strokeLinejoin="round" />
+
+        {/* route bloom underlay */}
+        <g filter="url(#f-bloom)" opacity="0.5">
+          {routePaths.map((d, i) => <path key={`rb${i}`} d={d} fill="none" stroke="#00C2FF" strokeWidth="1.4" strokeLinecap="round" />)}
         </g>
-      ))}
+        {/* routes + traveling light */}
+        {routePaths.map((d, i) => (
+          <g key={`r${i}`}>
+            <path d={d} fill="none" stroke="url(#g-land)" strokeWidth="0.6" opacity="0.4" strokeLinecap="round" />
+            <path d={d} fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${(i % 7) * 0.45}s` }} />
+          </g>
+        ))}
 
-      {/* infrastructure nodes */}
-      {hubPts.map((h, i) => (
-        <g key={`h${i}`}>
-          <circle cx={h.p[0]} cy={h.p[1]} r={i % 4 === 0 ? 3 : 1.8} fill={i % 4 === 0 ? '#00C2FF' : i % 4 === 1 ? '#7C4DFF' : i % 4 === 2 ? '#10B981' : '#F59E0B'}
+        {/* node bloom underlay */}
+        <g filter="url(#f-bloom)" opacity="0.6">
+          {hubPts.map((h, i) => (
+            <circle key={`hb${i}`} cx={h.p[0]} cy={h.p[1]} r={i % 4 === 0 ? 5 : 3}
+              fill={i % 4 === 0 ? '#00C2FF' : i % 4 === 1 ? '#7C4DFF' : i % 4 === 2 ? '#10B981' : '#F59E0B'} />
+          ))}
+        </g>
+        {/* infrastructure nodes */}
+        {hubPts.map((h, i) => (
+          <circle key={`h${i}`} cx={h.p[0]} cy={h.p[1]} r={i % 4 === 0 ? 3 : 1.8}
+            fill={i % 4 === 0 ? '#00C2FF' : i % 4 === 1 ? '#7C4DFF' : i % 4 === 2 ? '#10B981' : '#F59E0B'}
             className={i % 4 === 0 ? 'animate-node' : ''} style={{ transformOrigin: `${h.p[0]}px ${h.p[1]}px` }} />
-        </g>
-      ))}
+        ))}
+      </g>
 
-      <circle cx={CX} cy={CY} r={R} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
+      {/* terminator shadow — the far hemisphere sinks into darkness */}
+      <path d={spherePath} fill="url(#g-shade)" pointerEvents="none" />
     </svg>
   );
 };
