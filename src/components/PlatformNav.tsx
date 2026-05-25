@@ -70,7 +70,7 @@ const PlatformNav: React.FC = () => {
 
               {user ? (
                 <div className="relative">
-                  <button onClick={() => setUserMenu(!userMenu)}
+                  <button onClick={() => setUserMenu(!userMenu)} aria-label="Account menu" aria-expanded={userMenu}
                     className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg glass hover:glass-strong transition">
                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white">
                       {(role?.full_name || user.email || 'U').slice(0,1).toUpperCase()}
@@ -122,7 +122,7 @@ const PlatformNav: React.FC = () => {
               )}
             </div>
 
-            <button onClick={() => setOpen(!open)} className="md:hidden text-white p-2">
+            <button onClick={() => setOpen(!open)} aria-label="Toggle menu" aria-expanded={open} className="md:hidden text-white p-2">
               {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
