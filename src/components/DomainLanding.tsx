@@ -163,7 +163,7 @@ const DomainLanding: React.FC<Props> = ({ domainName, variant }) => {
 
   return (
     <div className="relative min-h-screen text-white">
-      <AnimatedBackground />
+      <AnimatedBackground intensity="low" />
       {variant === 'preview' ? <PlatformNav /> : <TenantBar domainName={d.domain_name} accent={accent} />}
 
       {/* Hero */}
