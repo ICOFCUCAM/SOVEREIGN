@@ -59,8 +59,8 @@ const AppLayout: React.FC = () => {
       <PlatformNav />
       <main className="relative">
         <CinematicHero />
-        <Reveal><TransformationFlow /></Reveal>
         <Reveal><EcosystemPreview /></Reveal>
+        <Reveal><TransformationFlow /></Reveal>
         <Reveal><VisionStatement /></Reveal>
         <Reveal><EntryGrid /></Reveal>
       </main>
