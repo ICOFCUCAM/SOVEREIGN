@@ -7,12 +7,10 @@ import CinematicHero from '@/components/home/CinematicHero';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
 import GlobalInfrastructure from '@/components/home/GlobalInfrastructure';
-import InstitutionalTrust from '@/components/home/InstitutionalTrust';
-import LiveActivityStrip from '@/components/home/LiveActivityStrip';
-import MarketplacePreview from '@/components/home/MarketplacePreview';
 import MarketActivity from '@/components/home/MarketActivity';
 import EcosystemMap from '@/components/home/EcosystemMap';
-import ConsoleEntry from '@/components/home/ConsoleEntry';
+import MarketplaceRail from '@/components/home/MarketplaceRail';
+import ClosingCTA from '@/components/home/ClosingCTA';
 
 // Atmospheric transition between sections — a fading hairline + soft glow
 // that gives the page cinematic breathing room and continuity.
@@ -30,21 +28,17 @@ const AppLayout: React.FC = () => {
       <PlatformNav />
       <main className="relative">
         <CinematicHero />
-        <LiveActivityStrip />
-        <Reveal><MarketplacePreview /></Reveal>
-        <SectionFade />
+        <MarketplaceRail />
         <Reveal><EcosystemMap /></Reveal>
         <SectionFade />
         <EcosystemSectors />
         <SectionFade />
+        <Reveal><TransformationFlow /></Reveal>
+        <SectionFade />
         <Reveal><GlobalInfrastructure /></Reveal>
         <SectionFade />
         <Reveal><MarketActivity /></Reveal>
-        <SectionFade />
-        <Reveal><TransformationFlow /></Reveal>
-        <SectionFade />
-        <Reveal><InstitutionalTrust /></Reveal>
-        <Reveal><ConsoleEntry /></Reveal>
+        <ClosingCTA />
       </main>
       <PlatformFooter />
     </div>

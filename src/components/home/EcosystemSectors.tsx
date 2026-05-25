@@ -52,6 +52,9 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip
   );
 };
 
+// The four flagship institutions, in showcase order.
+const FLAGSHIP = ['veritas-os', 'veritas-banking', 'elecpro', 'flyttgo'];
+
 const EcosystemSectors: React.FC = () => {
   const [products, setProducts] = useState<EcosystemProduct[]>([]);
 
@@ -59,8 +62,9 @@ const EcosystemSectors: React.FC = () => {
     (async () => {
       const { data } = await supabase.from('ecosystem_products').select('*').order('sort_order', { ascending: true });
       const rows = (data || []) as EcosystemProduct[];
-      const featured = rows.filter((r) => r.is_featured);
-      setProducts((featured.length ? featured : rows).slice(0, 6));
+      const pick = FLAGSHIP.map((s) => rows.find((r) => r.slug === s)).filter(Boolean) as EcosystemProduct[];
+      const chosen = pick.length >= 3 ? pick : (rows.filter((r) => r.is_featured).length ? rows.filter((r) => r.is_featured) : rows).slice(0, 4);
+      setProducts(chosen.slice(0, 4));
     })();
   }, []);
 
@@ -72,22 +76,21 @@ const EcosystemSectors: React.FC = () => {
       <div className="absolute inset-0 pointer-events-none" aria-hidden>
         <div className="absolute top-[12%] -left-32 w-[520px] h-[520px] rounded-full blur-[150px] animate-haze-a" style={{ background: 'rgba(0,194,255,0.05)' }} />
         <div className="absolute bottom-[10%] -right-32 w-[520px] h-[520px] rounded-full blur-[150px] animate-haze-b" style={{ background: 'rgba(124,77,255,0.05)' }} />
-        {/* faint infrastructure spine threading the systems */}
         <div className="hidden lg:block absolute top-0 bottom-0 left-1/2 w-px" style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,194,255,0.1) 12%, rgba(0,194,255,0.1) 88%, transparent)' }} />
       </div>
 
       <div className="relative max-w-6xl mx-auto">
-        <div className="max-w-2xl mb-20">
-          <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-5">Ecosystem in motion</div>
+        <div className="max-w-2xl mb-24">
+          <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-5">Featured institutions</div>
           <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.98] mb-5">
-            Infrastructure already in motion.
+            Sovereign systems, ready to deploy.
           </h2>
           <p className="text-lg text-white/55 leading-relaxed">
-            Deployable systems powering sovereign digital civilization — governance, finance, mobility and intelligence, operating at scale.
+            Four flagship institutions — operational today, available for acquisition and sovereign deployment.
           </p>
         </div>
 
-        <div className="space-y-28 sm:space-y-36">
+        <div className="space-y-32 sm:space-y-44">
           {products.map((p, i) => (
             <Reveal key={p.id} y={40}><SectorPanel p={p} flip={i % 2 === 1} /></Reveal>
           ))}
