@@ -13,12 +13,18 @@ const NODES: Array<[number, number, boolean]> = [
 ];
 const ARCS: Array<[number, number, number]> = [[0, 4, 0], [4, 8, 0.6], [0, 8, 1.2], [4, 12, 0.3], [8, 9, 0.9], [0, 3, 1.5], [8, 11, 0.5]];
 
-// Coarse continent dot field for context.
-const CONTINENTS: Array<[number, number]> = [
-  [34, 38], [30, 46], [38, 44], [28, 56], [36, 58], [44, 66], [50, 72],
-  [94, 28], [98, 34], [92, 40], [100, 46], [96, 52], [104, 58], [90, 60],
-  [144, 34], [152, 40], [148, 48], [160, 46], [156, 56], [138, 60], [168, 68], [128, 38], [120, 34],
+// Dense continent dot-field so the world map reads clearly (viewBox 0 0 200 100).
+function makeRng(seed: number) { let s = seed; return () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff; }
+const BLOBS: Array<[number, number, number, number, number]> = [
+  [38, 34, 16, 15, 24], [52, 72, 9, 14, 15], [96, 30, 11, 9, 13],
+  [104, 58, 13, 17, 19], [150, 38, 26, 17, 32], [174, 76, 11, 8, 11],
 ];
+const _rng = makeRng(20260525);
+const CONTINENTS: Array<[number, number]> = BLOBS.flatMap(([cx, cy, rx, ry, n]) =>
+  Array.from({ length: n }, () => {
+    const a = _rng() * Math.PI * 2; const rr = Math.sqrt(_rng());
+    return [cx + Math.cos(a) * rx * rr, cy + Math.sin(a) * ry * rr] as [number, number];
+  }));
 
 const RegionMap: React.FC = () => (
   <div className="relative w-full rounded-2xl border border-white/10 overflow-hidden glass-strong" style={{ aspectRatio: '2 / 1' }}>
@@ -30,7 +36,7 @@ const RegionMap: React.FC = () => (
       </span>
     </div>
     <svg viewBox="0 0 200 100" className="absolute inset-x-0 bottom-0 top-8 w-full h-full" preserveAspectRatio="xMidYMid meet">
-      {CONTINENTS.map(([x, y], i) => <circle key={`c${i}`} cx={x} cy={y} r="1" fill="#3a5a9a" opacity="0.45" />)}
+      {CONTINENTS.map(([x, y], i) => <circle key={`c${i}`} cx={x} cy={y} r="1.05" fill="#4a72b8" opacity={0.4 + (i % 4) * 0.12} />)}
       {ARCS.map(([a, b, d], i) => {
         const [x1, y1] = NODES[a]; const [x2, y2] = NODES[b];
         const mx = (x1 + x2) / 2; const my = Math.min(y1, y2) - 14;

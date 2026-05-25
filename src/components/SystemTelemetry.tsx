@@ -44,7 +44,7 @@ const CONTINENT: [number, number][] = [
   [144, 36], [152, 42], [148, 50], [160, 48], [156, 58], [138, 62], [168, 70], [128, 40], [120, 36], [176, 56],
 ];
 const Continents: React.FC = () => (
-  <>{CONTINENT.map(([x, y], i) => <circle key={`ct${i}`} cx={x} cy={y} r="0.9" fill="#3a5a9a" opacity="0.4" />)}</>
+  <>{CONTINENT.map(([x, y], i) => <circle key={`ct${i}`} cx={x} cy={y} r="1" fill="#4a72b8" opacity={0.4 + (i % 3) * 0.12} />)}</>
 );
 
 export const Frame: React.FC<{ accent: string; tag: string; readout?: string; children: React.ReactNode }> = ({ accent, tag, readout, children }) => (
