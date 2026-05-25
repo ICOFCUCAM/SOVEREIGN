@@ -82,6 +82,7 @@ export interface EcosystemProduct {
   sort_order: number;
   url?: string | null;
   metrics?: Array<{ label: string; value: string }>;
+  image_url?: string | null;
 }
 
 export interface BrandPalette {

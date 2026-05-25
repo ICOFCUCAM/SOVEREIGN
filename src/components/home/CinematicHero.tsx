@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, Brain, Cloud, ShieldCheck, Globe, Rocket, Layers } from 'lucide-react';
+import { ArrowRight, Sparkles, Brain, Cloud, ShieldCheck, Globe, Rocket, Layers, DollarSign } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Domain } from '@/lib/types';
 
@@ -101,12 +101,14 @@ const CinematicHero: React.FC = () => {
     el.style.setProperty('--py', py.toFixed(3));
   };
 
+  // Catalog figures are live from the DB; infrastructure figures are platform specs.
   const ribbon = [
-    { label: 'Premium domains', value: stats.domains.toLocaleString() },
-    { label: 'Value indexed', value: `$${(stats.value / 1_000_000).toFixed(1)}M` },
-    { label: 'AI identities', value: stats.identities.toLocaleString() },
-    { label: 'Ecosystem systems', value: stats.systems.toLocaleString() },
-    { label: 'Intelligence dimensions', value: '12' },
+    { label: 'Premium domains', value: stats.domains.toLocaleString(), icon: Globe },
+    { label: 'Value indexed', value: `$${(stats.value / 1_000_000).toFixed(1)}M`, icon: DollarSign },
+    { label: 'Edge regions', value: '23', icon: Cloud },
+    { label: 'Ecosystem systems', value: stats.systems.toLocaleString(), icon: Layers },
+    { label: 'Avg deploy', value: '< 2 min', icon: Rocket },
+    { label: 'System uptime', value: '99.99%', icon: ShieldCheck },
   ];
 
   return (
@@ -181,13 +183,17 @@ const CinematicHero: React.FC = () => {
 
       {/* Real-metric ribbon */}
       <div className="relative max-w-7xl mx-auto w-full mt-12">
-        <div className="glass rounded-2xl border border-white/5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-white/5">
-          {ribbon.map((m) => (
-            <div key={m.label} className="px-5 py-4">
-              <div className="text-2xl font-bold text-white tabular-nums">{m.value}</div>
-              <div className="text-[10px] font-mono uppercase tracking-widest text-white/40 mt-1">{m.label}</div>
-            </div>
-          ))}
+        <div className="glass rounded-2xl border border-white/5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-x divide-white/5">
+          {ribbon.map((m) => {
+            const Icon = m.icon;
+            return (
+              <div key={m.label} className="px-5 py-4">
+                <Icon className="w-4 h-4 text-cyan-400 mb-2" />
+                <div className="text-2xl font-bold text-white tabular-nums">{m.value}</div>
+                <div className="text-[10px] font-mono uppercase tracking-widest text-white/40 mt-1">{m.label}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
