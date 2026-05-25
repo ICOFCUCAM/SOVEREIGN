@@ -14,17 +14,17 @@ const AnimatedBackground: React.FC<{ intensity?: 'low' | 'high' }> = ({ intensit
         <div className="absolute bottom-[-8%] left-1/3 w-[620px] h-[620px] rounded-full bg-blue-600/[0.06] blur-[140px] animate-pulse-slow" style={{ animationDelay: '5s' }} />
       </div>
 
-      {/* infrastructure grid — faint, masked to centre */}
-      <div className="absolute inset-0 opacity-[0.06]"
+      {/* infrastructure grid — barely there, masked to centre */}
+      <div className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `linear-gradient(rgba(0,217,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(0,217,255,0.5) 1px, transparent 1px)`,
-          backgroundSize: '64px 64px',
-          maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 78%)',
-          WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 78%)',
+          backgroundSize: '72px 72px',
+          maskImage: 'radial-gradient(ellipse at center, black 25%, transparent 72%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at center, black 25%, transparent 72%)',
         }} />
 
       {/* topology contour traces — soft data terrain spanning the page */}
-      <svg className="absolute inset-0 w-full h-full opacity-[0.5]" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+      <svg className="absolute inset-0 w-full h-full opacity-[0.32]" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
         <g stroke="rgba(0,194,255,0.05)" strokeWidth="0.12" fill="none">
           <path d="M-2,18 C30,12 60,26 102,16" />
           <path d="M-2,38 C28,46 64,32 102,42" />
@@ -49,8 +49,8 @@ const AnimatedBackground: React.FC<{ intensity?: 'low' | 'high' }> = ({ intensit
         ))}
       </div>
 
-      {/* persistent vignette — edges sink so the world reads continuous */}
-      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 95% 90% at 50% 42%, transparent 55%, rgba(3,5,14,0.5) 88%, rgba(2,3,10,0.82) 100%)' }} />
+      {/* persistent vignette — edges sink into deep space for cinematic darkness */}
+      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 92% 88% at 50% 40%, transparent 48%, rgba(3,5,14,0.6) 84%, rgba(2,3,10,0.92) 100%)' }} />
 
       {/* noise overlay */}
       <div className="absolute inset-0 opacity-[0.015] mix-blend-overlay"
