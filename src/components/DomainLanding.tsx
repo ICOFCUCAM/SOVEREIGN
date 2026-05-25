@@ -9,6 +9,7 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import ValuationRing from '@/components/ValuationRing';
 import InquiryModal from '@/components/InquiryModal';
 import BrokerNegotiation from '@/components/BrokerNegotiation';
+import InstitutionPreview from '@/components/InstitutionPreview';
 import {
   Shield, Sparkles, Rocket, TrendingUp, Globe, MessageCircle, DollarSign,
   ArrowLeft, CheckCircle2, Activity, Brain, Layers, Zap, Award, Lock, ScanFace, ShieldCheck,
@@ -359,6 +360,8 @@ const DomainLanding: React.FC<Props> = ({ domainName, variant }) => {
           </div>
         </div>
       </section>
+
+      <InstitutionPreview domain={d} onAcquire={openModal} />
 
       <TrustStrip sslVerified={d.ssl_verified} ownershipVerified={d.ownership_verified} />
 
