@@ -19,7 +19,12 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip
         <div className="relative" style={{ aspectRatio: '16 / 11' }}><Frame accent={p.accent} tag={TAG[motif]} readout={READOUT[motif]}><Viz accent={p.accent} /></Frame></div>
       </div>
       <div className={flip ? 'lg:order-1' : ''}>
-        <span className="inline-block text-[10px] font-mono uppercase tracking-[0.24em] px-2.5 py-1 rounded mb-5" style={{ background: `${p.accent}1f`, color: p.accent }}>{p.category}</span>
+        <div className="flex items-center gap-2.5 mb-5">
+          <span className="inline-block text-[10px] font-mono uppercase tracking-[0.24em] px-2.5 py-1 rounded" style={{ background: `${p.accent}1f`, color: p.accent }}>{p.category}</span>
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-emerald-300/80">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Operational · acquisition-ready
+          </span>
+        </div>
         <h3 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.02] mb-4">{p.name}</h3>
         <p className="text-base text-white/55 max-w-md leading-relaxed mb-6">{p.tagline}</p>
         {caps.length > 0 && (

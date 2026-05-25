@@ -34,6 +34,18 @@ const CinematicHero: React.FC = () => {
         </div>
       )}
 
+      {/* single live overlay — operational proof without clutter */}
+      <div className="hidden md:flex absolute z-20 top-[24%] right-[6%] lg:right-[10%] items-center gap-2.5 glass-strong rounded-xl px-3.5 py-2.5 border border-white/10 shadow-2xl animate-drift"
+        style={{ transform: 'translate(calc(var(--px) * 12px), calc(var(--py) * 12px))' }}>
+        <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/25 to-purple-600/25 border border-cyan-500/25 flex items-center justify-center shrink-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" />
+        </span>
+        <div className="leading-tight">
+          <div className="text-[8px] font-mono uppercase tracking-[0.18em] text-emerald-300/80">Sovereign cloud · live</div>
+          <div className="text-[12px] font-semibold text-white tabular-nums">23 regions · 47 nodes</div>
+        </div>
+      </div>
+
       {/* ── THE MESSAGE ── */}
       <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
         <div className="max-w-xl">

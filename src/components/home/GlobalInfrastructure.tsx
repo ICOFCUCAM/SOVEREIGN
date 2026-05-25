@@ -81,52 +81,50 @@ const GlobalInfrastructure: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-[1.5fr_1fr] gap-6 items-stretch">
-          <RegionMap />
+        {/* one massive planetary visualization */}
+        <RegionMap />
 
-          <div className="flex flex-col gap-5">
-            {/* deployment stats */}
-            <div className="grid grid-cols-2 gap-3">
-              {STATS.map((s) => {
-                const Icon = s.icon;
-                return (
-                  <div key={s.label} className="glass-strong rounded-xl border border-white/10 px-4 py-3.5">
-                    <Icon className="w-4 h-4 text-cyan-400 mb-2" />
-                    <div className="text-2xl font-bold text-white tabular-nums leading-none">{s.value}</div>
-                    <div className="text-[9px] font-mono uppercase tracking-widest text-white/40 mt-1.5">{s.label}</div>
-                  </div>
-                );
-              })}
+        {/* four metrics + a single deployment feed */}
+        <div className="grid lg:grid-cols-[1fr_1fr] gap-6 mt-6 items-stretch">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02]">
+            {STATS.map((s) => {
+              const Icon = s.icon;
+              return (
+                <div key={s.label} className="px-5 py-5 bg-white/[0.01]">
+                  <Icon className="w-4 h-4 text-cyan-400 mb-2.5" />
+                  <div className="text-2xl font-bold text-white tabular-nums leading-none">{s.value}</div>
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-white/40 mt-1.5">{s.label}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="glass-strong rounded-2xl border border-white/10 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="inline-flex items-center gap-2 text-white font-semibold text-sm"><Server className="w-4 h-4 text-cyan-400" /> Deployment feed</span>
+              <span className="inline-flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-emerald-300/80"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live</span>
             </div>
-
-            {/* live deployment feed */}
-            <div className="glass-strong rounded-xl border border-white/10 p-4 flex-1">
-              <div className="flex items-center justify-between mb-3">
-                <span className="inline-flex items-center gap-2 text-white font-semibold text-sm"><Server className="w-4 h-4 text-cyan-400" /> Deployment feed</span>
-                <span className="inline-flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-emerald-300/80"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live</span>
-              </div>
-              <div className="space-y-2">
-                {FEED.map((f) => (
-                  <div key={f.sys} className="flex items-center gap-3 text-sm">
-                    <span className="font-mono text-white/70 flex-1 truncate">{f.sys}</span>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-white/35">{f.region}</span>
-                    {f.state === 'live' ? (
-                      <span className="text-[9px] font-mono uppercase tracking-wider text-emerald-300 w-16 text-right">Live</span>
-                    ) : (
-                      <span className="w-16 h-1 rounded-full bg-white/10 overflow-hidden">
-                        <span className="block h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${VIOLET}, ${ACCENT})` }} />
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
+            <div className="space-y-2">
+              {FEED.map((f) => (
+                <div key={f.sys} className="flex items-center gap-3 text-sm">
+                  <span className="font-mono text-white/70 flex-1 truncate">{f.sys}</span>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/35">{f.region}</span>
+                  {f.state === 'live' ? (
+                    <span className="text-[9px] font-mono uppercase tracking-wider text-emerald-300 w-16 text-right">Live</span>
+                  ) : (
+                    <span className="w-16 h-1 rounded-full bg-white/10 overflow-hidden">
+                      <span className="block h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${VIOLET}, ${ACCENT})` }} />
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
-
-            <Link to="/deploy" className="group inline-flex items-center gap-2 text-white font-semibold">
-              Open the deployment engine <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-cyan-400" />
-            </Link>
           </div>
         </div>
+
+        <Link to="/deploy" className="group inline-flex items-center gap-2 text-white font-semibold mt-8">
+          Open the deployment engine <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-cyan-400" />
+        </Link>
       </div>
     </section>
   );

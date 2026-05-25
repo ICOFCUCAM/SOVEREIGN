@@ -23,14 +23,11 @@ const positioned = SECTORS.map((s, i) => {
 const EcosystemMap: React.FC = () => (
   <section className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
     <div className="max-w-6xl mx-auto">
-      <div className="max-w-2xl mb-14">
+      <div className="text-center max-w-2xl mx-auto mb-12">
         <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-5">Ecosystem architecture</div>
-        <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98] mb-4">
-          One interconnected sovereign ecosystem.
+        <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98]">
+          One interconnected ecosystem.
         </h2>
-        <p className="text-lg text-white/55 leading-relaxed">
-          Eight sectors, one operating layer — governance, finance, mobility and intelligence sharing identity, payments and deployment rails.
-        </p>
       </div>
 
       {/* radial constellation (md+) */}
