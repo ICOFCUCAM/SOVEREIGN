@@ -7,7 +7,7 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
 import TransformationFlow from '@/components/home/TransformationFlow';
-import EcosystemPreview from '@/components/home/EcosystemPreview';
+import EcosystemSectors from '@/components/home/EcosystemSectors';
 
 const VisionStatement: React.FC = () => (
   <section className="py-32 sm:py-44 px-4">
@@ -60,7 +60,7 @@ const AppLayout: React.FC = () => {
       <PlatformNav />
       <main className="relative">
         <CinematicHero />
-        <Reveal><EcosystemPreview /></Reveal>
+        <EcosystemSectors />
         <Reveal><TransformationFlow /></Reveal>
         <Reveal><VisionStatement /></Reveal>
         <Reveal><EntryGrid /></Reveal>
