@@ -43,6 +43,7 @@ const AdminPage: React.FC = () => {
   const [users, setUsers] = useState<UserRoleRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
   const [editingSystem, setEditingSystem] = useState<Partial<EcosystemProduct> | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [audit, setAudit] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partial<Domain> | null>(null);
@@ -331,6 +332,19 @@ const AdminPage: React.FC = () => {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Save failed');
     }
+  };
+
+  const uploadSystemImage = async (file: File) => {
+    if (!file) return;
+    setUploadingImage(true);
+    const ext = file.name.split('.').pop() || 'jpg';
+    const path = `${(editingSystem?.slug || 'system').replace(/[^a-z0-9-]/gi, '')}-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('ecosystem').upload(path, file, { upsert: true, cacheControl: '3600' });
+    if (error) { toast.error(error.message); setUploadingImage(false); return; }
+    const { data } = supabase.storage.from('ecosystem').getPublicUrl(path);
+    setEditingSystem((s) => (s ? { ...s, image_url: data.publicUrl } : s));
+    setUploadingImage(false);
+    toast.success('Image uploaded');
   };
 
   const removeSystem = async (s: EcosystemProduct) => {
@@ -1081,8 +1095,17 @@ const AdminPage: React.FC = () => {
                   <input value={editingSystem.url || ''} onChange={(e) => setEditingSystem({ ...editingSystem, url: e.target.value })} placeholder="https://…" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white font-mono focus:border-cyan-400/50 focus:outline-none" />
                 </div>
                 <div>
-                  <label className="text-xs text-white/50 font-medium mb-1.5 block flex items-center gap-1.5"><ImageIcon className="w-3 h-3" /> Image URL</label>
-                  <input value={editingSystem.image_url || ''} onChange={(e) => setEditingSystem({ ...editingSystem, image_url: e.target.value })} placeholder="https://…/cover.jpg" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white font-mono focus:border-cyan-400/50 focus:outline-none" />
+                  <label className="text-xs text-white/50 font-medium mb-1.5 block flex items-center gap-1.5"><ImageIcon className="w-3 h-3" /> Cover image</label>
+                  <div className="flex gap-2">
+                    <input value={editingSystem.image_url || ''} onChange={(e) => setEditingSystem({ ...editingSystem, image_url: e.target.value })} placeholder="paste URL or upload →" className="flex-1 min-w-0 px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white font-mono focus:border-cyan-400/50 focus:outline-none" />
+                    <label className={`shrink-0 px-3 py-2.5 rounded-lg border border-white/10 text-xs font-mono cursor-pointer flex items-center gap-1.5 ${uploadingImage ? 'opacity-50 pointer-events-none' : 'hover:bg-white/10 text-white/70'}`}>
+                      {uploadingImage ? 'Uploading…' : 'Upload'}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadSystemImage(f); }} />
+                    </label>
+                  </div>
+                  {editingSystem.image_url && (
+                    <img src={editingSystem.image_url} alt="" className="mt-2 w-full h-20 object-cover rounded-lg border border-white/10" />
+                  )}
                 </div>
               </div>
               <div>
