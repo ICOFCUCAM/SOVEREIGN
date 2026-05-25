@@ -102,7 +102,7 @@ const ValuationPage: React.FC = () => {
                 <div>→ lexical analysis · vowel ratio · keyword density</div>
                 <div>→ TLD authority scoring · market category mapping</div>
                 <div>→ sovereign-potential modeling · AI relevance fusion</div>
-                <div>→ generating investor narrative via Gemini-3-flash</div>
+                <div>→ synthesizing investor-grade narrative</div>
               </div>
             </div>
           )}

@@ -103,7 +103,7 @@ const MarketplacePage: React.FC = () => {
           {investorMode && !loading && (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-6">
               {[
-                { icon: DollarSign, label: 'Portfolio Value', val: `$${(portfolio.value / 1000).toFixed(0)}k`, color: '#10B981' },
+                { icon: DollarSign, label: 'Portfolio Value', val: portfolio.value >= 1e6 ? `$${(portfolio.value / 1e6).toFixed(1)}M` : `$${(portfolio.value / 1e3).toFixed(0)}k`, color: '#10B981' },
                 { icon: Gauge, label: 'Avg Opportunity', val: `${portfolio.avgOpp}/100`, color: '#00D9FF' },
                 { icon: Layers, label: 'Avg Intelligence', val: `${portfolio.avgScore}/100`, color: '#7C3AED' },
                 { icon: Flame, label: 'Total Demand', val: portfolio.demand.toLocaleString(), color: '#F59E0B' },
