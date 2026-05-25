@@ -75,21 +75,51 @@ const MinistryCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
 
 const MINISTRY_ORDER = ['civicos-treasury', 'civicos-health', 'civicos-justice', 'civicos-education', 'civicos-transport', 'civicos-emergency', 'civicos-police', 'civicos-coordination-engine', 'civicos-anti-corruption'];
 
+const OtherCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
+  const accent = p.accent || '#00C2FF';
+  return (
+    <Link to={`/systems/${p.slug}`} className="group relative block overflow-hidden rounded-2xl glass hover:glass-strong transition-all duration-500 hover:-translate-y-1">
+      <div className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
+      <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full blur-3xl opacity-15 group-hover:opacity-30 transition-all" style={{ background: accent }} />
+      <div className="relative p-6">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[9px] font-mono uppercase tracking-[0.2em] truncate" style={{ color: accent }}>{p.category}</span>
+          <ArrowUpRight className="w-4 h-4 text-white/25 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all shrink-0" />
+        </div>
+        <div className="font-display text-xl font-bold text-white tracking-tight">{p.name}</div>
+        <div className="text-sm text-white/45 line-clamp-2 mb-5 min-h-[2.5rem]">{p.tagline}</div>
+        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+          {(p.metrics && p.metrics[0]) ? (
+            <div>
+              <div className="text-sm font-semibold text-white tabular-nums leading-none">{p.metrics[0].value}</div>
+              <div className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/40 mt-1.5">{p.metrics[0].label}</div>
+            </div>
+          ) : <span />}
+          <span className="inline-flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-emerald-300/80">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Deployable
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
 const InstitutionListings: React.FC = () => {
   const [civicos, setCivicos] = useState<EcosystemProduct | null>(null);
   const [ministries, setMinistries] = useState<EcosystemProduct[]>([]);
+  const [others, setOthers] = useState<EcosystemProduct[]>([]);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from('ecosystem_products').select('*').like('slug', 'civicos%');
+      const { data } = await supabase.from('ecosystem_products').select('*').order('sort_order', { ascending: true });
       const rows = (data || []) as EcosystemProduct[];
       setCivicos(rows.find((r) => r.slug === 'civicos') || null);
-      const byOrder = MINISTRY_ORDER.map((s) => rows.find((r) => r.slug === s)).filter(Boolean) as EcosystemProduct[];
-      setMinistries(byOrder);
+      setMinistries(MINISTRY_ORDER.map((s) => rows.find((r) => r.slug === s)).filter(Boolean) as EcosystemProduct[]);
+      setOthers(rows.filter((r) => !r.slug.startsWith('civicos')));
     })();
   }, []);
 
-  if (!civicos && ministries.length === 0) return null;
+  if (!civicos && ministries.length === 0 && others.length === 0) return null;
 
   return (
     <div className="mt-16 space-y-16">
@@ -117,6 +147,20 @@ const InstitutionListings: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {ministries.map((p) => <MinistryCard key={p.id} p={p} />)}
+          </div>
+        </div>
+      )}
+
+      {/* sovereign & enterprise systems */}
+      {others.length > 0 && (
+        <div>
+          <div className="mb-7">
+            <div className="text-[11px] font-mono uppercase tracking-[0.28em] text-cyan-300/70 mb-2">Sovereign &amp; enterprise systems</div>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">Deployable institutional platforms.</h2>
+            <p className="text-white/50 mt-2 max-w-2xl">Operational systems across intelligence, finance, mobility, education and governance — ready to acquire and deploy.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {others.map((p) => <OtherCard key={p.id} p={p} />)}
           </div>
         </div>
       )}
