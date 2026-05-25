@@ -8,6 +8,7 @@ import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import ValuationRing from '@/components/ValuationRing';
 import InquiryModal from '@/components/InquiryModal';
+import BrokerNegotiation from '@/components/BrokerNegotiation';
 import {
   Shield, Sparkles, Rocket, TrendingUp, Globe, MessageCircle, DollarSign,
   ArrowLeft, CheckCircle2, Activity, Brain, Layers, Zap, Award, Lock, ScanFace, ShieldCheck,
@@ -376,7 +377,10 @@ const DomainLanding: React.FC<Props> = ({ domainName, variant }) => {
         </footer>
       )}
 
-      {modal && <InquiryModal domain={d} intent={modal} onClose={() => setModal(null)} />}
+      {modal === 'buy_now' && <InquiryModal domain={d} intent="buy_now" onClose={() => setModal(null)} />}
+      {(modal === 'inquiry' || modal === 'offer') && (
+        <BrokerNegotiation domain={d} intent={modal} onClose={() => setModal(null)} />
+      )}
     </div>
   );
 };

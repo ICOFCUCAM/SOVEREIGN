@@ -119,6 +119,26 @@ export interface ValuationReport {
   landing_copy?: LandingCopy;
 }
 
+export interface NegotiationMessage {
+  role: 'buyer' | 'broker';
+  text: string;
+  offer?: number | null;
+  ts: string;
+}
+
+export interface BrokerResponse {
+  broker_message: string;
+  counter_offer: number;
+  stage: string;
+  status: 'active' | 'accepted' | 'escalated';
+  accepted: boolean;
+  escalate: boolean;
+  buyer_score: number;
+  urgency_score: number;
+  confidence: number;
+  model_used?: string;
+}
+
 export interface BrandProfile {
   id: string;
   domain_id: string | null;
