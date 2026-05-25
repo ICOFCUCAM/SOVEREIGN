@@ -6,14 +6,14 @@ import Cityscape from '@/components/home/Cityscape';
 
 const Globe = lazy(() => import('@/components/home/Globe'));
 
-interface Panel { title: string; lines: string[]; icon: React.ComponentType<{ className?: string }>; pos: string; delay: string }
+interface Panel { title: string; lines: string[]; icon: React.ComponentType<{ className?: string }>; pos: string; delay: string; side: 'l' | 'r' }
 const PANELS: Panel[] = [
-  { title: 'Deployment Engine', lines: ['87s average deploy'], icon: Rocket, pos: 'top-[7%] left-[-2%]', delay: '0s' },
-  { title: 'AI Intelligence', lines: ['Real-time analysis'], icon: Brain, pos: 'top-[3%] right-[4%]', delay: '1s' },
-  { title: 'Sovereign Cloud', lines: ['47 edge nodes', '23 regions'], icon: Cloud, pos: 'top-[37%] right-[-5%]', delay: '2s' },
-  { title: 'Domain Intelligence', lines: ['12.4K valuations'], icon: Gauge, pos: 'bottom-[32%] left-[-5%]', delay: '0.6s' },
-  { title: 'Trust Layer', lines: ['Bank-grade security', 'Sovereign ready'], icon: ShieldCheck, pos: 'top-[62%] right-[2%]', delay: '1.7s' },
-  { title: 'Autonomous Foundry', lines: ['Concept → company in minutes'], icon: Layers, pos: 'bottom-[12%] right-[8%]', delay: '2.6s' },
+  { title: 'Deployment Engine', lines: ['87s average deploy'], icon: Rocket, pos: 'top-[7%] left-[-2%]', delay: '0s', side: 'r' },
+  { title: 'AI Intelligence', lines: ['Real-time analysis'], icon: Brain, pos: 'top-[3%] right-[4%]', delay: '1s', side: 'l' },
+  { title: 'Sovereign Cloud', lines: ['47 edge nodes', '23 regions'], icon: Cloud, pos: 'top-[37%] right-[-5%]', delay: '2s', side: 'l' },
+  { title: 'Domain Intelligence', lines: ['12.4K valuations'], icon: Gauge, pos: 'bottom-[32%] left-[-5%]', delay: '0.6s', side: 'r' },
+  { title: 'Trust Layer', lines: ['Bank-grade security', 'Sovereign ready'], icon: ShieldCheck, pos: 'top-[62%] right-[2%]', delay: '1.7s', side: 'l' },
+  { title: 'Autonomous Foundry', lines: ['Concept → company in minutes'], icon: Layers, pos: 'bottom-[12%] right-[8%]', delay: '2.6s', side: 'l' },
 ];
 
 const CinematicHero: React.FC = () => {
@@ -60,11 +60,11 @@ const CinematicHero: React.FC = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/5 text-cyan-300/75 text-[10px] font-mono uppercase tracking-[0.26em] mb-7">
             <Sparkles className="w-3 h-3" /> The operating system for digital civilization
           </div>
-          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.92] mb-6">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.95] mb-5">
             <span className="block text-white">Build the future.</span>
             <span className="block text-gradient-cyan">Own the infrastructure.</span>
           </h1>
-          <p className="text-lg text-white/55 max-w-md mb-8 leading-relaxed">
+          <p className="text-base text-white/55 max-w-md mb-7 leading-relaxed">
             Sovereign domain intelligence, AI-native deployment infrastructure, and autonomous venture creation — at planetary scale.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 mb-7">
@@ -87,9 +87,14 @@ const CinematicHero: React.FC = () => {
         </div>
 
         {/* RIGHT — globe scene */}
-        <div className="relative h-[440px] sm:h-[600px]">
+        <div className="relative h-[460px] sm:h-[620px]">
+          {/* ambient particles */}
+          {Array.from({ length: 26 }).map((_, i) => (
+            <div key={`pt${i}`} className="absolute w-0.5 h-0.5 rounded-full bg-cyan-300/40 animate-float"
+              style={{ left: `${(i * 41) % 100}%`, top: `${(i * 67) % 100}%`, animationDelay: `${i * 0.4}s`, animationDuration: `${7 + (i % 5)}s` }} />
+          ))}
           {/* cityscape base */}
-          <div className="absolute bottom-0 inset-x-0 h-[26%] opacity-60" style={{ transform: 'translate(calc(var(--px) * 6px), 0)' }}>
+          <div className="absolute bottom-0 -left-16 -right-16 h-[40%] opacity-80" style={{ transform: 'translate(calc(var(--px) * 6px), 0)' }}>
             <Cityscape className="w-full h-full" />
           </div>
           {/* globe */}
@@ -103,7 +108,11 @@ const CinematicHero: React.FC = () => {
             const Icon = p.icon;
             return (
               <div key={p.title} className={`absolute z-10 ${p.pos} animate-drift`} style={{ animationDelay: p.delay, transform: 'translate(calc(var(--px) * 16px), calc(var(--py) * 16px))' }}>
-                <div className="glass-strong rounded-xl px-3.5 py-2.5 border border-white/10 flex items-center gap-2.5 shadow-xl">
+                <div className="relative glass-strong rounded-xl px-3.5 py-2.5 border border-white/10 flex items-center gap-2.5 shadow-xl">
+                  {/* tether into the globe ecosystem */}
+                  <span className={`pointer-events-none absolute top-1/2 ${p.side === 'r' ? 'left-full' : 'right-full'} w-9 h-px`}
+                    style={{ background: p.side === 'r' ? 'linear-gradient(90deg, rgba(0,194,255,0.6), transparent)' : 'linear-gradient(270deg, rgba(0,194,255,0.6), transparent)' }} />
+                  <span className={`pointer-events-none absolute top-1/2 -translate-y-1/2 ${p.side === 'r' ? 'left-[calc(100%+34px)]' : 'right-[calc(100%+34px)]'} w-1.5 h-1.5 rounded-full bg-cyan-300 animate-node`} />
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/25 to-purple-600/25 border border-cyan-500/25 flex items-center justify-center shrink-0">
                     <Icon className="w-4 h-4 text-cyan-300" />
                   </div>
