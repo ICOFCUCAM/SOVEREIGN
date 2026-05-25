@@ -407,7 +407,7 @@ const AdminPage: React.FC = () => {
                 <span className="w-px h-3 bg-white/20" />
                 <span className="text-xs font-mono text-amber-300">{role?.role}</span>
               </div>
-              <h1 className="text-4xl font-bold tracking-tight">Operational Console</h1>
+              <h1 className="font-display text-4xl font-bold tracking-tight">Operational Console</h1>
               <p className="text-white/50 mt-1">Signed in as <span className="text-cyan-300 font-mono">{user.email}</span> · sovereign-grade RBAC active</p>
             </div>
             <button onClick={() => setEditing({})} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold">
@@ -1106,7 +1106,7 @@ const AdminPage: React.FC = () => {
                     </label>
                   </div>
                   {editingSystem.image_url && (
-                    <img src={editingSystem.image_url} alt="" className="mt-2 w-full h-20 object-cover rounded-lg border border-white/10" />
+                    <img src={editingSystem.image_url} alt="" loading="lazy" decoding="async" className="mt-2 w-full h-20 object-cover rounded-lg border border-white/10" />
                   )}
                 </div>
               </div>
