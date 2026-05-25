@@ -12,6 +12,7 @@ const CAT_ICON: Record<string, React.ComponentType<{ className?: string; style?:
   'Sovereign Government OS': Landmark,
   'Sovereign Electoral Infrastructure': Vote,
   'Transport & Logistics Infrastructure': Truck,
+  'Global Logistics & Transport Marketplace': Truck,
   'Sovereign Payments & Banking': Banknote,
   'Sovereign Financial Operating System': Landmark,
   'Education & Credentialing': GraduationCap,
