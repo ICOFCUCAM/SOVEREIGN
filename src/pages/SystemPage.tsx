@@ -8,7 +8,7 @@ import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
-import { ArrowLeft, ExternalLink, DollarSign, CheckCircle2, Activity, Globe, Layers, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ExternalLink, DollarSign, CheckCircle2, Activity, Globe, Layers, ChevronRight, ArrowUpRight } from 'lucide-react';
 
 const SLUG_BLUEPRINT: Record<string, string> = {
   act: 'govtech', civicos: 'govtech', elecpro: 'govtech',
@@ -23,6 +23,7 @@ const SystemPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [product, setProduct] = useState<EcosystemProduct | null>(null);
   const [domain, setDomain] = useState<Domain | null>(null);
+  const [related, setRelated] = useState<EcosystemProduct[]>([]);
   const [loading, setLoading] = useState(true);
   useDocumentTitle(product?.name);
 
@@ -34,6 +35,8 @@ const SystemPage: React.FC = () => {
       setProduct((data as EcosystemProduct) || null);
       const { data: dom } = await supabase.from('domains').select('*').contains('metadata', { ecosystem_slug: slug }).maybeSingle();
       setDomain((dom as Domain) || null);
+      const { data: rel } = await supabase.from('ecosystem_products').select('*').neq('slug', slug).order('sort_order', { ascending: true }).limit(4);
+      setRelated((rel || []) as EcosystemProduct[]);
       setLoading(false);
     })();
   }, [slug]);
@@ -268,6 +271,28 @@ const SystemPage: React.FC = () => {
         </div>
       </section>
       </Reveal>
+
+      {related.length > 0 && (
+        <Reveal>
+          <section className="px-4 sm:px-6 lg:px-8 py-16 border-t border-white/5">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-white/40 mb-6">More in the ecosystem</div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {related.map((r) => (
+                  <Link key={r.id} to={`/systems/${r.slug}`} className="group rounded-xl border border-white/10 p-5 hover:border-white/25 hover:bg-white/[0.02] transition">
+                    <div className="w-1.5 h-1.5 rounded-full mb-3" style={{ background: r.accent }} />
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-1.5 truncate">{r.category}</div>
+                    <div className="text-white font-semibold flex items-center gap-1.5">
+                      {r.name}
+                      <ArrowUpRight className="w-3.5 h-3.5 text-white/30 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        </Reveal>
+      )}
 
       <PlatformFooter />
     </div>
