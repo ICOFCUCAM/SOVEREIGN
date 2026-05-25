@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { resolveTenant } from "@/lib/tenant";
 import DomainLanding from "@/components/DomainLanding";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 
 // Route-level code splitting — the homepage stays eager; everything else loads on demand.
@@ -68,9 +69,11 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <ScrollToTop />
-            <Suspense fallback={<PageFallback />}>
-              {tenant.mode === "tenant" ? <TenantRoutes /> : <PlatformRoutes />}
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<PageFallback />}>
+                {tenant.mode === "tenant" ? <TenantRoutes /> : <PlatformRoutes />}
+              </Suspense>
+            </ErrorBoundary>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
