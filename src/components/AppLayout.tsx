@@ -8,6 +8,7 @@ import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
+import GlobalInfrastructure from '@/components/home/GlobalInfrastructure';
 
 const VisionStatement: React.FC = () => (
   <section className="py-32 sm:py-44 px-4">
@@ -62,6 +63,7 @@ const AppLayout: React.FC = () => {
         <CinematicHero />
         <EcosystemSectors />
         <Reveal><TransformationFlow /></Reveal>
+        <Reveal><GlobalInfrastructure /></Reveal>
         <Reveal><VisionStatement /></Reveal>
         <Reveal><EntryGrid /></Reveal>
       </main>
