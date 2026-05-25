@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct } from '@/lib/types';
 import Reveal from '@/components/Reveal';
 import { ArrowRight } from 'lucide-react';
-import { Frame, VIZ, TAG, READOUT, motifFor } from '@/components/SystemTelemetry';
+import { VIZ, motifFor } from '@/components/SystemTelemetry';
 
 const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip }) => {
   const motif = motifFor(p.category);
@@ -12,39 +12,36 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip
   const caps = (p.capabilities || []).slice(0, 4);
   const metrics = (p.metrics || []).slice(0, 3);
   return (
-    <div className="relative grid lg:grid-cols-2 gap-8 lg:gap-14 items-center">
+    <div className="relative grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+      {/* chromeless visual — the institution's own visual language, floating in atmosphere */}
       <div className={`relative ${flip ? 'lg:order-2' : ''}`}>
-        {/* accent glow bleed — panel emerges from the ecosystem atmosphere */}
-        <div className="absolute -inset-8 rounded-[2rem] blur-[60px] opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle, ${p.accent}, transparent 70%)` }} />
-        <div className="relative" style={{ aspectRatio: '16 / 11' }}><Frame accent={p.accent} tag={TAG[motif]} readout={READOUT[motif]}><Viz accent={p.accent} /></Frame></div>
+        <div className="absolute inset-0 blur-[90px] opacity-30 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 45%, ${p.accent}, transparent 70%)` }} />
+        <div className="relative mx-auto w-full max-w-[480px] aspect-square"><Viz accent={p.accent} /></div>
       </div>
       <div className={flip ? 'lg:order-1' : ''}>
         <div className="flex items-center gap-2.5 mb-5">
-          <span className="inline-block text-[10px] font-mono uppercase tracking-[0.24em] px-2.5 py-1 rounded" style={{ background: `${p.accent}1f`, color: p.accent }}>{p.category}</span>
-          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-emerald-300/80">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Operational · acquisition-ready
+          <span className="inline-block text-[10px] font-mono uppercase tracking-[0.24em]" style={{ color: p.accent }}>{p.category}</span>
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-emerald-300/70">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Operational
           </span>
         </div>
         <h3 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.02] mb-4">{p.name}</h3>
-        <p className="text-base text-white/55 max-w-md leading-relaxed mb-6">{p.tagline}</p>
+        <p className="text-lg text-white/55 max-w-md leading-relaxed mb-7">{p.tagline}</p>
         {caps.length > 0 && (
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 mb-7 max-w-md">
+          <div className="flex flex-wrap gap-x-6 gap-y-2.5 mb-8 max-w-md">
             {caps.map((c) => (
-              <div key={c} className="flex items-center gap-2 text-sm text-white/70">
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: p.accent }} /> {c}
+              <div key={c} className="flex items-center gap-2 text-sm text-white/65">
+                <span className="w-1 h-1 rounded-full shrink-0" style={{ background: p.accent }} /> {c}
               </div>
             ))}
           </div>
         )}
         {metrics.length > 0 && (
-          <div className="flex flex-wrap gap-x-px gap-y-px mb-7 rounded-lg overflow-hidden border border-white/10 max-w-md bg-white/[0.02]">
+          <div className="flex flex-wrap gap-x-10 gap-y-4 mb-9">
             {metrics.map((m) => (
-              <div key={m.label} className="flex-1 min-w-[110px] px-4 py-3 border-r border-white/5 last:border-r-0">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <span className="w-1 h-1 rounded-full" style={{ background: p.accent }} />
-                  <span className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/40">{m.label}</span>
-                </div>
-                <div className="text-lg font-mono font-semibold text-white tabular-nums leading-none">{m.value}</div>
+              <div key={m.label}>
+                <div className="text-2xl font-bold text-white tabular-nums leading-none mb-1.5">{m.value}</div>
+                <div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40">{m.label}</div>
               </div>
             ))}
           </div>

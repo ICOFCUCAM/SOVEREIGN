@@ -59,29 +59,24 @@ const MarketActivity: React.FC = () => {
           </p>
         </div>
 
-        {/* sovereign asset index band */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02] mb-5">
-          <div className="px-6 py-5 bg-white/[0.01]">
-            <div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40 mb-1.5">Sovereign asset index</div>
-            <div className="text-2xl font-bold text-white tabular-nums leading-none">${(index.total / 1e6).toFixed(1)}M</div>
-          </div>
-          <div className="px-6 py-5 bg-white/[0.01]">
-            <div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40 mb-1.5">24h change</div>
-            <div className="text-2xl font-bold tabular-nums leading-none text-emerald-300">+{index.change}%</div>
-          </div>
-          <div className="px-6 py-5 bg-white/[0.01]">
-            <div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40 mb-1.5">Active assets</div>
-            <div className="text-2xl font-bold text-white tabular-nums leading-none">{domains.length}</div>
-          </div>
-          <div className="px-6 py-5 bg-white/[0.01]">
-            <div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40 mb-1.5">Open inquiries</div>
-            <div className="text-2xl font-bold text-white tabular-nums leading-none">{index.inquiries}</div>
-          </div>
+        {/* sovereign asset index — open ticker band */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-14 pb-10 border-b border-white/10">
+          {[
+            ['Sovereign asset index', `$${(index.total / 1e6).toFixed(1)}M`, 'text-white'],
+            ['24h change', `+${index.change}%`, 'text-emerald-300'],
+            ['Active assets', `${domains.length}`, 'text-white'],
+            ['Open inquiries', `${index.inquiries}`, 'text-white'],
+          ].map(([label, value, color]) => (
+            <div key={label}>
+              <div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40 mb-2">{label}</div>
+              <div className={`text-3xl font-bold tabular-nums leading-none ${color}`}>{value}</div>
+            </div>
+          ))}
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5">
+        <div className="grid md:grid-cols-3 gap-10">
           {/* valuation momentum */}
-          <div className="glass-strong rounded-2xl border border-white/10 p-5">
+          <div className="p-1">
             <div className="flex items-center gap-2 mb-4"><TrendingUp className="w-4 h-4 text-emerald-400" /><span className="text-white font-semibold text-sm">Valuation momentum</span></div>
             <div className="divide-y divide-white/5">
               {movers.map(({ d, change }) => (
@@ -92,7 +87,7 @@ const MarketActivity: React.FC = () => {
           </div>
 
           {/* demand signals */}
-          <div className="glass-strong rounded-2xl border border-white/10 p-5">
+          <div className="p-1">
             <div className="flex items-center gap-2 mb-4"><Flame className="w-4 h-4 text-amber-400" /><span className="text-white font-semibold text-sm">Demand signals</span></div>
             <div className="divide-y divide-white/5">
               {demand.map(({ d, signal }) => (
@@ -103,7 +98,7 @@ const MarketActivity: React.FC = () => {
           </div>
 
           {/* active negotiations */}
-          <div className="glass-strong rounded-2xl border border-white/10 p-5">
+          <div className="p-1">
             <div className="flex items-center gap-2 mb-4"><Gavel className="w-4 h-4 text-cyan-400" /><span className="text-white font-semibold text-sm">Active interest</span></div>
             <div className="divide-y divide-white/5">
               {negotiations.length ? negotiations.map((d) => (
@@ -120,7 +115,7 @@ const MarketActivity: React.FC = () => {
         </div>
 
         {/* sovereign sectors growing */}
-        <div className="mt-5 glass-strong rounded-2xl border border-white/10 p-5">
+        <div className="mt-12 pt-10 border-t border-white/10">
           <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 mb-4">Sovereign sectors · growth</div>
           <div className="flex flex-wrap gap-x-8 gap-y-4">
             {sectors.map((s) => (

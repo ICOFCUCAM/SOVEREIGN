@@ -86,14 +86,14 @@ const GlobalInfrastructure: React.FC = () => {
 
         {/* four metrics + a single deployment feed */}
         <div className="grid lg:grid-cols-[1fr_1fr] gap-6 mt-6 items-stretch">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 content-center">
             {STATS.map((s) => {
               const Icon = s.icon;
               return (
-                <div key={s.label} className="px-5 py-5 bg-white/[0.01]">
+                <div key={s.label}>
                   <Icon className="w-4 h-4 text-cyan-400 mb-2.5" />
-                  <div className="text-2xl font-bold text-white tabular-nums leading-none">{s.value}</div>
-                  <div className="text-[9px] font-mono uppercase tracking-widest text-white/40 mt-1.5">{s.label}</div>
+                  <div className="text-3xl font-bold text-white tabular-nums leading-none">{s.value}</div>
+                  <div className="text-[9px] font-mono uppercase tracking-widest text-white/40 mt-2">{s.label}</div>
                 </div>
               );
             })}
