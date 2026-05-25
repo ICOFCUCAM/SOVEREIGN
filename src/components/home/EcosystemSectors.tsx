@@ -9,7 +9,7 @@ function emblemFor(category: string): React.ComponentType<{ className?: string; 
   const c = (category || '').toLowerCase();
   if (/elector|ballot|voting/.test(c)) return Vote;
   if (/integrit|oversight|anti|procure|forensic/.test(c)) return ShieldAlert;
-  if (/govern|civic|govtech/.test(c)) return Landmark;
+  if (/govern|civic|govtech|operating infrastructure|government runtime/.test(c)) return Landmark;
   if (/pay|bank|financ|settle|fintech|treasury/.test(c)) return Banknote;
   if (/logistic|transport|mobility/.test(c)) return Truck;
   if (/educat|credential/.test(c)) return GraduationCap;
@@ -69,7 +69,7 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip
   );
 };
 
-const FLAGSHIP = ['veritas-os', 'veritas-banking', 'elecpro', 'flyttgo', 'mobile-pay'];
+const FLAGSHIP = ['veritas-os', 'civicos', 'veritas-banking', 'elecpro', 'flyttgo', 'mobile-pay'];
 
 const EcosystemSectors: React.FC = () => {
   const [products, setProducts] = useState<EcosystemProduct[]>([]);
@@ -79,8 +79,8 @@ const EcosystemSectors: React.FC = () => {
       const { data } = await supabase.from('ecosystem_products').select('*').order('sort_order', { ascending: true });
       const rows = (data || []) as EcosystemProduct[];
       const pick = FLAGSHIP.map((s) => rows.find((r) => r.slug === s)).filter(Boolean) as EcosystemProduct[];
-      const chosen = pick.length >= 3 ? pick : (rows.filter((r) => r.is_featured).length ? rows.filter((r) => r.is_featured) : rows).slice(0, 5);
-      setProducts(chosen.slice(0, 5));
+      const chosen = pick.length >= 3 ? pick : (rows.filter((r) => r.is_featured).length ? rows.filter((r) => r.is_featured) : rows).slice(0, 6);
+      setProducts(chosen.slice(0, 6));
     })();
   }, []);
 
