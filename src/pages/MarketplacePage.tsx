@@ -8,6 +8,7 @@ import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import DomainCard from '@/components/DomainCard';
 import FeaturedAcquisition from '@/components/marketplace/FeaturedAcquisition';
+import InstitutionListings from '@/components/marketplace/InstitutionListings';
 import { momentumMap, opportunityScore, acquisitionConfidence } from '@/lib/investor';
 import { Search, SlidersHorizontal, Briefcase, Flame, DollarSign, Layers, Gauge } from 'lucide-react';
 
@@ -204,6 +205,9 @@ const MarketplacePage: React.FC = () => {
               ))}
             </div>
           )}
+
+          {/* Deployable institutions — sovereign systems with deployment price ranges */}
+          {!investorMode && <InstitutionListings />}
         </div>
       </main>
 
