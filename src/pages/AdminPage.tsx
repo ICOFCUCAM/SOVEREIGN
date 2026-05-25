@@ -934,7 +934,7 @@ const AdminPage: React.FC = () => {
                 <div className="text-[10px] font-mono uppercase tracking-widest text-cyan-400">Domain Registry</div>
                 <div className="text-white font-semibold text-lg">{editing.id ? 'Edit Domain' : 'Register New Domain'}</div>
               </div>
-              <button onClick={() => setEditing(null)} className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center">
+              <button onClick={() => setEditing(null)} aria-label="Close" className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center">
                 <X className="w-4 h-4 text-white/60" />
               </button>
             </div>
@@ -1066,7 +1066,7 @@ const AdminPage: React.FC = () => {
                 <div className="text-[10px] font-mono uppercase tracking-widest text-cyan-400">Ecosystem System</div>
                 <div className="text-white font-semibold text-lg">{editingSystem.id ? 'Edit System' : 'New System'}</div>
               </div>
-              <button onClick={() => setEditingSystem(null)} className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center"><X className="w-4 h-4 text-white/60" /></button>
+              <button onClick={() => setEditingSystem(null)} aria-label="Close" className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center"><X className="w-4 h-4 text-white/60" /></button>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-3">

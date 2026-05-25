@@ -82,7 +82,7 @@ const InquiryModal: React.FC<Props> = ({ domain, intent, onClose }) => {
             <div className="text-[10px] font-mono uppercase tracking-widest text-cyan-400">AI Broker · Negotiation Channel</div>
             <div className="text-white font-semibold text-lg">{titles[intent]}</div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-white/60">
+          <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-white/60">
             <X className="w-4 h-4" />
           </button>
         </div>

@@ -184,7 +184,7 @@ const BrokerNegotiation: React.FC<Props> = ({ domain, intent, onClose }) => {
               <div className="text-[10px] font-mono text-white/40">Negotiation channel · {domain.domain_name}</div>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-white/60"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-white/60"><X className="w-4 h-4" /></button>
         </div>
 
         {step === 'identify' ? (
