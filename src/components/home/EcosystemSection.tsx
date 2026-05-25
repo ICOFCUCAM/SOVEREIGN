@@ -28,7 +28,7 @@ const SystemPanel: React.FC<{ p: EcosystemProduct; featured?: boolean }> = ({ p,
           <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/40">{p.category}</div>
           <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border" style={{ background: `${p.accent}12`, borderColor: `${p.accent}33` }}>
             <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: p.accent }} />
-            <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: p.accent }}>{live ? 'Live' : 'Deployable'}</span>
+            <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: p.accent }}>Deployable</span>
           </div>
         </div>
 
@@ -58,9 +58,9 @@ const SystemPanel: React.FC<{ p: EcosystemProduct; featured?: boolean }> = ({ p,
         </div>
 
         <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
-          <span className="text-[11px] font-mono text-white/35">{live ? 'Live deployment' : 'Ship-ready on acquisition'}</span>
+          <span className="text-[11px] font-mono text-white/35">{live ? 'Preview build · ships in full on acquisition' : 'Deployable on acquisition'}</span>
           <span className="inline-flex items-center gap-1 text-sm font-medium text-white/70 group-hover:text-white transition">
-            {live ? 'Visit system' : 'Explore'}
+            {live ? 'View preview' : 'Explore'}
             {live
               ? <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" style={{ color: p.accent }} />
               : <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" style={{ color: p.accent }} />}
@@ -111,7 +111,7 @@ const EcosystemSection: React.FC = () => {
         </div>
 
         <p className="text-center text-white/40 text-sm mt-10 max-w-xl mx-auto">
-          Each system is a deployable institution — acquire it, and it ships on sovereign infrastructure.
+          Each system is a deployable institution — preview the build now; acquire it and it ships in full on sovereign infrastructure.
         </p>
       </div>
     </section>
