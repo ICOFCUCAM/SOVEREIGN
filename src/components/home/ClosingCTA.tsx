@@ -17,13 +17,10 @@ const ClosingCTA: React.FC = () => (
         <span className="block text-white">The operating layer for</span>
         <span className="block text-gradient-cyan">deployable civilization.</span>
       </h2>
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <Link to="/marketplace" className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold text-lg transition-all hover:-translate-y-px"
+      <div className="flex justify-center">
+        <Link to="/ecosystem" className="group inline-flex items-center justify-center gap-2 px-9 py-4 rounded-xl text-white font-semibold text-lg transition-all hover:-translate-y-px"
           style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 48px rgba(0,194,255,0.32)' }}>
-          Acquire an institution <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-        </Link>
-        <Link to="/ecosystem" className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur text-white font-semibold text-lg hover:bg-white/5 transition-all">
-          Enter the ecosystem
+          Launch the ecosystem <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
     </div>

@@ -4,10 +4,11 @@ import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
+import EcosystemPillars from '@/components/home/EcosystemPillars';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
-import GlobalInfrastructure from '@/components/home/GlobalInfrastructure';
-import EcosystemMap from '@/components/home/EcosystemMap';
 import MarketplaceRail from '@/components/home/MarketplaceRail';
+import TransformationFlow from '@/components/home/TransformationFlow';
+import GlobalInfrastructure from '@/components/home/GlobalInfrastructure';
 import ClosingCTA from '@/components/home/ClosingCTA';
 
 const AppLayout: React.FC = () => {
@@ -16,17 +17,19 @@ const AppLayout: React.FC = () => {
       <AnimatedBackground intensity="low" />
       <PlatformNav />
       <main className="relative">
-        {/* Act I — the world */}
+        {/* 1 — cinematic hero */}
         <CinematicHero />
-        {/* Act II — the interconnected ecosystem */}
-        <Reveal><EcosystemMap /></Reveal>
-        {/* Act III — featured deployable systems */}
+        {/* 2 — the ecosystem */}
+        <Reveal><EcosystemPillars /></Reveal>
+        {/* 3 — featured systems */}
         <EcosystemSectors />
-        {/* Act IV — the sovereign marketplace */}
-        <MarketplaceRail />
-        {/* Act V — planetary infrastructure */}
+        {/* 4 — marketplace */}
+        <Reveal><MarketplaceRail /></Reveal>
+        {/* 5 — deployment story */}
+        <Reveal><TransformationFlow /></Reveal>
+        {/* 6 — global infrastructure */}
         <Reveal><GlobalInfrastructure /></Reveal>
-        {/* Act VI — enter */}
+        {/* 7 — final CTA */}
         <ClosingCTA />
       </main>
       <PlatformFooter />

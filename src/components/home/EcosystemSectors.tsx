@@ -20,6 +20,7 @@ function emblemFor(category: string): React.ComponentType<{ className?: string; 
 const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip }) => {
   const Emblem = emblemFor(p.category);
   const metrics = (p.metrics || []).slice(0, 3);
+  const caps = (p.capabilities || []).slice(0, 4);
   return (
     <div className="relative grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
       {/* cinematic emblem — a single elegant mark in an accent light-field */}
@@ -36,7 +37,16 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip
       <div className={flip ? 'lg:order-1' : ''}>
         <div className="text-[10px] font-mono uppercase tracking-[0.26em] mb-6" style={{ color: p.accent }}>{p.category}</div>
         <h3 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.98] mb-6">{p.name}</h3>
-        <p className="text-xl text-white/55 max-w-md leading-relaxed mb-10">{p.tagline}</p>
+        <p className="text-xl text-white/55 max-w-md leading-relaxed mb-9">{p.tagline}</p>
+        {caps.length > 0 && (
+          <div className="grid grid-cols-2 gap-x-8 gap-y-3 mb-10 max-w-md">
+            {caps.map((c) => (
+              <div key={c} className="flex items-center gap-2.5 text-[15px] text-white/65">
+                <span className="w-1 h-1 rounded-full shrink-0" style={{ background: p.accent }} /> {c}
+              </div>
+            ))}
+          </div>
+        )}
         {metrics.length > 0 && (
           <div className="flex flex-wrap gap-x-12 gap-y-5 mb-10">
             {metrics.map((m) => (
@@ -55,7 +65,7 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip
   );
 };
 
-const FLAGSHIP = ['veritas-os', 'veritas-banking', 'elecpro', 'flyttgo'];
+const FLAGSHIP = ['veritas-os', 'veritas-banking', 'elecpro', 'flyttgo', 'mobile-pay'];
 
 const EcosystemSectors: React.FC = () => {
   const [products, setProducts] = useState<EcosystemProduct[]>([]);
@@ -65,8 +75,8 @@ const EcosystemSectors: React.FC = () => {
       const { data } = await supabase.from('ecosystem_products').select('*').order('sort_order', { ascending: true });
       const rows = (data || []) as EcosystemProduct[];
       const pick = FLAGSHIP.map((s) => rows.find((r) => r.slug === s)).filter(Boolean) as EcosystemProduct[];
-      const chosen = pick.length >= 3 ? pick : (rows.filter((r) => r.is_featured).length ? rows.filter((r) => r.is_featured) : rows).slice(0, 4);
-      setProducts(chosen.slice(0, 4));
+      const chosen = pick.length >= 3 ? pick : (rows.filter((r) => r.is_featured).length ? rows.filter((r) => r.is_featured) : rows).slice(0, 5);
+      setProducts(chosen.slice(0, 5));
     })();
   }, []);
 

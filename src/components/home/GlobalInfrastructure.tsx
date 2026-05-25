@@ -39,7 +39,14 @@ const GlobalInfrastructure: React.FC = () => (
         </Suspense>
       </div>
 
-      <div className="text-center mt-12">
+      {/* minimal overlays */}
+      <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 mt-10 text-sm font-mono text-white/45">
+        <span><span className="text-white">47</span> edge nodes</span>
+        <span><span className="text-white">23</span> regions</span>
+        <span><span className="text-white">99.99%</span> sovereign uptime</span>
+      </div>
+
+      <div className="text-center mt-10">
         <Link to="/deploy" className="group inline-flex items-center gap-2 text-white font-semibold">
           Open the deployment engine <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-cyan-400" />
         </Link>

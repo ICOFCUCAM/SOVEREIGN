@@ -6,8 +6,6 @@ import HeroEnvironment from '@/components/home/HeroEnvironment';
 const Globe = lazy(() => import('@/components/home/Globe'));
 const HAS_PLATE = !!((import.meta.env.VITE_HERO_PLATE as string | undefined)?.trim());
 
-const TRUST = ['Gov of Estonia', 'African Union', 'ADB', 'World Bank', 'ITU'];
-
 const CinematicHero: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const onMove = (ev: React.MouseEvent) => {
@@ -33,39 +31,34 @@ const CinematicHero: React.FC = () => {
       {/* ── LEFT 40% · refined content column ── */}
       <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
         <div className="max-w-md lg:max-w-[42%]">
-          <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-7">Sovereign OS · the operating layer</div>
+          <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-7">The operating layer for digital civilization</div>
           <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.08] mb-7">
-            <span className="block text-white">The operating layer for</span>
-            <span className="block text-gradient-cyan">deployable digital institutions.</span>
+            <span className="block text-white">Build sovereign digital</span>
+            <span className="block text-white">systems <span className="text-gradient-cyan">at planetary scale.</span></span>
           </h1>
           <p className="text-base text-white/55 max-w-sm mb-9 leading-relaxed">
-            Build sovereign systems, operational economies and AI-native infrastructure — at planetary scale.
+            Deploy AI-native institutions, sovereign infrastructure and operational ecosystems across governance, finance, mobility and intelligence.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 mb-10">
+          <div className="flex flex-col sm:flex-row gap-3 mb-9">
             <Link to="/ecosystem" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
               style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 40px rgba(0,194,255,0.26)' }}>
-              Enter the Ecosystem <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Launch Ecosystem <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur text-white font-semibold hover:bg-white/5 transition-all">
               Explore Marketplace
             </Link>
           </div>
-          <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-white/30 mb-3">Trusted by governments, enterprises &amp; innovators</div>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            {TRUST.map((t) => <span key={t} className="text-[11px] font-semibold text-white/40 tracking-tight">{t}</span>)}
+          {/* minimal trust indicators */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-mono text-white/45">
+            <span className="inline-flex items-center gap-1.5 text-emerald-300/80"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live network</span>
+            <span>47 <span className="text-white/30">edge nodes</span></span>
+            <span>99.99% <span className="text-white/30">uptime</span></span>
           </div>
         </div>
       </div>
 
-      {/* ── single quiet live line ── */}
-      <div className="absolute bottom-7 inset-x-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="inline-flex items-center gap-2.5 text-[11px] font-mono text-white/45">
-            <span className="inline-flex items-center gap-1.5 text-emerald-300/80"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live</span>
-            <span><span className="text-white/75">veritas.financial</span> deployed · eu-west · 12s ago</span>
-          </span>
-        </div>
-      </div>
+      {/* fade into the next act */}
+      <div className="absolute bottom-0 inset-x-0 h-24 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, #050816)' }} />
     </section>
   );
 };
