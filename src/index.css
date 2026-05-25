@@ -168,13 +168,17 @@
 .animate-ticker { animation: ticker 48s linear infinite; }
 .ticker-track:hover .animate-ticker { animation-play-state: paused; }
 
+/* traveling light along an infrastructure route */
+@keyframes route-flow { 0% { transform: translateX(-120%); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translateX(360%); opacity: 0; } }
+.animate-route { animation: route-flow 6s linear infinite; }
+
 /* Honor reduced-motion: stop ambient/infinite motion. */
 @media (prefers-reduced-motion: reduce) {
   .animate-spin-slow, .animate-spin-slower, .animate-spin-rev, .animate-dash,
   .animate-node, .animate-drift, .animate-core, .animate-pulse-slow,
   .animate-float, .animate-scan, .animate-shimmer, .animate-ring, .animate-travel,
   .animate-haze-a, .animate-haze-b, .animate-flicker, .animate-stage-in, .animate-sweep,
-  .animate-ticker {
+  .animate-ticker, .animate-route {
     animation: none !important;
   }
   html { scroll-behavior: auto; }

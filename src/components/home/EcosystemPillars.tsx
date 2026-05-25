@@ -27,7 +27,7 @@ const EcosystemPillars: React.FC = () => (
         {/* glowing infrastructure route connecting the pillars */}
         <div className="absolute hidden md:block left-0 right-0 top-[34px] h-px bg-white/10" />
         <div className="absolute hidden md:block left-0 right-0 top-[34px] h-px overflow-hidden">
-          <div className="h-px w-[40%] animate-ticker" style={{ background: 'linear-gradient(90deg, transparent, #00D9FF, transparent)' }} />
+          <div className="h-px w-[28%] animate-route" style={{ background: 'linear-gradient(90deg, transparent, #00D9FF, transparent)' }} />
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-y-12 gap-x-4">
