@@ -82,6 +82,7 @@ export interface EcosystemProduct {
   sort_order: number;
   url?: string | null;
   metrics?: Array<{ label: string; value: string }>;
+  tiers?: Array<{ tier: string; price: string; label?: string; scope?: string; timeline?: string }>;
   image_url?: string | null;
 }
 
