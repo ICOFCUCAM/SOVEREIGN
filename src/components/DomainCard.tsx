@@ -1,16 +1,33 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Shield, TrendingUp, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Shield, TrendingUp, Sparkles, Gauge } from 'lucide-react';
 import type { Domain } from '@/lib/types';
+import type { Confidence } from '@/lib/investor';
 
-const DomainCard: React.FC<{ domain: Domain }> = ({ domain }) => {
+interface Props {
+  domain: Domain;
+  /** Investor-mode extras — when provided, the card renders ranked + signal-rich. */
+  rank?: number;
+  opportunity?: number;
+  confidence?: Confidence;
+  momentum?: number;
+}
+
+const DomainCard: React.FC<Props> = ({ domain, rank, opportunity, confidence, momentum }) => {
   const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const investor = rank !== undefined;
 
   return (
     <Link to={`/d/${encodeURIComponent(domain.domain_name)}`}
       className="group relative block overflow-hidden rounded-2xl glass hover:glass-strong transition-all duration-500 hover:-translate-y-1 hover:glow-cyan">
       {/* Top glow gradient */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+      {investor && (
+        <div className="absolute top-3 left-3 z-10 w-7 h-7 rounded-lg bg-black/40 backdrop-blur border border-white/10 flex items-center justify-center">
+          <span className="text-[11px] font-mono font-bold text-cyan-300">#{rank}</span>
+        </div>
+      )}
 
       {/* Background accent */}
       <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full opacity-20 blur-3xl transition-all group-hover:opacity-40"
@@ -66,6 +83,20 @@ const DomainCard: React.FC<{ domain: Domain }> = ({ domain }) => {
           </div>
         </div>
 
+        {/* Investor signal row */}
+        {investor && (
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="rounded-lg bg-white/5 border border-white/10 px-3 py-2">
+              <div className="text-[9px] font-mono uppercase tracking-widest text-white/40 flex items-center gap-1"><Gauge className="w-3 h-3 text-cyan-400" /> Opportunity</div>
+              <div className="text-lg font-bold text-white tabular-nums">{opportunity}<span className="text-xs text-white/30">/100</span></div>
+            </div>
+            <div className="rounded-lg px-3 py-2 border" style={{ background: `${confidence?.color}12`, borderColor: `${confidence?.color}33` }}>
+              <div className="text-[9px] font-mono uppercase tracking-widest text-white/40">Confidence</div>
+              <div className="text-sm font-bold" style={{ color: confidence?.color }}>{confidence?.level}</div>
+            </div>
+          </div>
+        )}
+
         {/* Footer trust signals */}
         <div className="flex items-center gap-3 pt-4 border-t border-white/5">
           <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-mono">
@@ -78,7 +109,7 @@ const DomainCard: React.FC<{ domain: Domain }> = ({ domain }) => {
           </div>
           <div className="flex items-center gap-1 text-[10px] text-purple-400 font-mono ml-auto">
             <TrendingUp className="w-3 h-3" />
-            {domain.view_count} views
+            {investor && momentum ? `${momentum} this week` : `${domain.view_count} views`}
           </div>
         </div>
       </div>
