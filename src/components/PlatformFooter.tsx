@@ -59,31 +59,24 @@ const OpsTerminal: React.FC = () => {
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live
         </span>
       </div>
-      <div className="p-4 font-mono text-xs leading-relaxed space-y-1.5">
-        <div className="text-white/40"><span className="text-cyan-400/80">$</span> sovereign status --all</div>
-        <div className="text-white/70 flex flex-wrap gap-x-5 gap-y-1">
-          <span><span className="text-white/40">regions</span> 23</span>
-          <span><span className="text-white/40">edge_nodes</span> 47</span>
-          <span><span className="text-white/40">avg_deploy</span> 87s</span>
-          <span><span className="text-white/40">uptime</span> 99.99%</span>
+      <div className="p-4 font-mono text-xs leading-relaxed space-y-2.5">
+        <div className="text-white/65 flex flex-wrap gap-x-6 gap-y-1">
+          <span><span className="text-white/35">regions</span> 23</span>
+          <span><span className="text-white/35">edge</span> 47 nodes</span>
+          <span><span className="text-white/35">deploy</span> 87s</span>
+          <span><span className="text-white/35">uptime</span> 99.99%</span>
         </div>
-        <div className="text-white/70 flex flex-wrap gap-x-5 gap-y-1">
-          <span><span className="text-white/40">intelligence</span> kernel·v3</span>
-          <span><span className="text-white/40">negotiation</span> online</span>
-          <span><span className="text-white/40">valuations</span> 12.4K+</span>
-          <span><span className="text-white/40">trust</span> sovereign-grade</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           {REGIONS.map(([r, s]) => (
-            <span key={r} className="inline-flex items-center gap-1.5 text-white/55">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: s === 'online' ? '#10B981' : '#F59E0B', boxShadow: `0 0 6px ${s === 'online' ? '#10B981' : '#F59E0B'}` }} />
+            <span key={r} className="inline-flex items-center gap-1.5 text-white/50">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: s === 'online' ? '#10B981' : '#F59E0B' }} />
               {r}
             </span>
           ))}
         </div>
-        <div className="text-white/40 pt-1">
-          <span className="text-cyan-400/80">$</span> utc {utc} · all systems operational
-          <span className="inline-block ml-1 text-cyan-300 animate-pulse">▮</span>
+        <div className="text-white/35 pt-0.5">
+          utc {utc} · all systems operational
+          <span className="inline-block ml-1 text-cyan-300/80 animate-pulse">▮</span>
         </div>
       </div>
     </div>

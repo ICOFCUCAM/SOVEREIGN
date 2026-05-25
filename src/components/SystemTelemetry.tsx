@@ -25,6 +25,18 @@ export const TAG: Record<Motif, string> = {
   governance: 'Civic mesh · live', deployment: 'Deployment mesh · live',
 };
 
+// Functional readouts — imply real infrastructure logic, not decoration.
+export const READOUT: Record<Motif, string> = {
+  knowledge: 'reasoning 4.2K ops/s · 1.2M docs indexed',
+  electoral: '11/45 districts reporting · verified',
+  logistics: '1,284 routes · 312 shipments in transit',
+  finance: 'settlement $184.6B/24h · clearing',
+  payments: 'circulation $4.2M/24h · 6 corridors',
+  oversight: '4 anomalies flagged · 12 under trace',
+  governance: '7 ministries linked · sync nominal',
+  deployment: '23 regions · 47 edge nodes online',
+};
+
 // Coarse continent dot field shared by map-based environments.
 const CONTINENT: [number, number][] = [
   [30, 40], [26, 50], [34, 46], [24, 60], [32, 62], [40, 70], [46, 78], [22, 44],
@@ -35,7 +47,7 @@ const Continents: React.FC = () => (
   <>{CONTINENT.map(([x, y], i) => <circle key={`ct${i}`} cx={x} cy={y} r="0.9" fill="#3a5a9a" opacity="0.4" />)}</>
 );
 
-export const Frame: React.FC<{ accent: string; tag: string; children: React.ReactNode }> = ({ accent, tag, children }) => (
+export const Frame: React.FC<{ accent: string; tag: string; readout?: string; children: React.ReactNode }> = ({ accent, tag, readout, children }) => (
   <div className="relative w-full h-full rounded-2xl border border-white/10 overflow-hidden glass-strong">
     <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 85% 75% at 28% 8%, ${accent}26, transparent 62%), linear-gradient(160deg, #0A1024, #05070F)` }} />
     <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: `linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
@@ -45,7 +57,12 @@ export const Frame: React.FC<{ accent: string; tag: string; children: React.Reac
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Nominal
       </span>
     </div>
-    <div className="absolute inset-x-0 bottom-0 top-9">{children}</div>
+    <div className="absolute inset-x-0 top-9 bottom-7">{children}</div>
+    {readout && (
+      <div className="absolute bottom-0 inset-x-0 px-4 py-1.5 border-t border-white/5 bg-black/20">
+        <span className="text-[8px] font-mono uppercase tracking-[0.14em] text-white/40 truncate block">{readout}</span>
+      </div>
+    )}
   </div>
 );
 
@@ -266,7 +283,7 @@ export const VIZ: Record<Motif, React.FC<{ accent: string }>> = {
 const SystemTelemetry: React.FC<{ category: string; accent: string; className?: string }> = ({ category, accent, className = '' }) => {
   const motif = motifFor(category);
   const Viz = VIZ[motif];
-  return <div className={className}><Frame accent={accent} tag={TAG[motif]}><Viz accent={accent} /></Frame></div>;
+  return <div className={className}><Frame accent={accent} tag={TAG[motif]} readout={READOUT[motif]}><Viz accent={accent} /></Frame></div>;
 };
 
 export default SystemTelemetry;

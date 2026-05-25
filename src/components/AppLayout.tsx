@@ -9,6 +9,16 @@ import CinematicHero from '@/components/home/CinematicHero';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
 import GlobalInfrastructure from '@/components/home/GlobalInfrastructure';
+import InstitutionalTrust from '@/components/home/InstitutionalTrust';
+
+// Atmospheric transition between sections — a fading hairline + soft glow
+// that gives the page cinematic breathing room and continuity.
+const SectionFade: React.FC = () => (
+  <div className="relative h-px max-w-6xl mx-auto my-4" aria-hidden>
+    <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,194,255,0.18), transparent)' }} />
+    <div className="absolute left-1/2 -translate-x-1/2 -top-12 w-[420px] h-24 rounded-full blur-[60px]" style={{ background: 'rgba(0,150,255,0.06)' }} />
+  </div>
+);
 
 const VisionStatement: React.FC = () => (
   <section className="py-32 sm:py-44 px-4">
@@ -62,8 +72,12 @@ const AppLayout: React.FC = () => {
       <main className="relative">
         <CinematicHero />
         <EcosystemSectors />
+        <SectionFade />
         <Reveal><TransformationFlow /></Reveal>
+        <SectionFade />
         <Reveal><GlobalInfrastructure /></Reveal>
+        <SectionFade />
+        <Reveal><InstitutionalTrust /></Reveal>
         <Reveal><VisionStatement /></Reveal>
         <Reveal><EntryGrid /></Reveal>
       </main>

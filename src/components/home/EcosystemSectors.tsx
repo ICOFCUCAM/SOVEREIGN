@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct } from '@/lib/types';
 import Reveal from '@/components/Reveal';
 import { ArrowRight } from 'lucide-react';
-import { Frame, VIZ, TAG, motifFor } from '@/components/SystemTelemetry';
+import { Frame, VIZ, TAG, READOUT, motifFor } from '@/components/SystemTelemetry';
 
 const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip }) => {
   const motif = motifFor(p.category);
@@ -16,7 +16,7 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip
       <div className={`relative ${flip ? 'lg:order-2' : ''}`}>
         {/* accent glow bleed — panel emerges from the ecosystem atmosphere */}
         <div className="absolute -inset-8 rounded-[2rem] blur-[60px] opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle, ${p.accent}, transparent 70%)` }} />
-        <div className="relative" style={{ aspectRatio: '16 / 11' }}><Frame accent={p.accent} tag={TAG[motif]}><Viz accent={p.accent} /></Frame></div>
+        <div className="relative" style={{ aspectRatio: '16 / 11' }}><Frame accent={p.accent} tag={TAG[motif]} readout={READOUT[motif]}><Viz accent={p.accent} /></Frame></div>
       </div>
       <div className={flip ? 'lg:order-1' : ''}>
         <span className="inline-block text-[10px] font-mono uppercase tracking-[0.24em] px-2.5 py-1 rounded mb-5" style={{ background: `${p.accent}1f`, color: p.accent }}>{p.category}</span>
