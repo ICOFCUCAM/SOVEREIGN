@@ -50,17 +50,21 @@ const InquiryModal: React.FC<Props> = ({ domain, intent, onClose }) => {
         path: `/d/${domain.domain_name}`,
       });
 
-      // CRM subscribe
-      await fetch('https://famous.ai/api/crm/6a122e7fba2cb2e96599de96/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: form.email,
-          name: form.name || undefined,
-          source: intent === 'buy_now' ? 'checkout' : intent === 'offer' ? 'offer' : 'contact-form',
-          tags: [intent, domain.domain_name, domain.category || 'general', 'sovereign-platform']
-        })
-      });
+      // CRM subscribe (best-effort: must never fail the lead capture itself)
+      try {
+        await fetch('https://famous.ai/api/crm/6a122e7fba2cb2e96599de96/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: form.email,
+            name: form.name || undefined,
+            source: intent === 'buy_now' ? 'checkout' : intent === 'offer' ? 'offer' : 'contact-form',
+            tags: [intent, domain.domain_name, domain.category || 'general', 'sovereign-platform']
+          })
+        });
+      } catch {
+        /* non-blocking */
+      }
 
       setSuccess(true);
       toast.success(intent === 'buy_now' ? 'Acquisition request submitted' : 'Inquiry sent to AI Broker');
