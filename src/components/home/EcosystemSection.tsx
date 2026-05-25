@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct } from '@/lib/types';
-import { CheckCircle2, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ArrowRight, ArrowUpRight } from 'lucide-react';
 
 const NARRATIVE = ['Domain', 'Startup', 'Infrastructure', 'Digital civilization'];
 
 const SystemPanel: React.FC<{ p: EcosystemProduct; featured?: boolean }> = ({ p, featured }) => {
   const caps = Array.isArray(p.capabilities) ? p.capabilities : [];
+  const metrics = Array.isArray(p.metrics) ? p.metrics : [];
+  const live = !!p.url;
+  const Wrapper = live ? 'a' : 'div';
+  const wrapperProps = live ? { href: p.url as string, target: '_blank', rel: 'noreferrer' } : {};
   return (
-    <div className={`group relative overflow-hidden rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 ${featured ? 'lg:col-span-2 lg:row-span-2' : ''}`}
+    <Wrapper {...wrapperProps}
+      className={`group relative overflow-hidden rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 block ${featured ? 'lg:col-span-2 lg:row-span-2' : ''}`}
       style={{ background: '#070A18' }}>
-      {/* Accent field */}
-      <div className="absolute -top-24 -right-16 w-72 h-72 rounded-full blur-[110px] opacity-20 group-hover:opacity-35 transition-opacity"
-        style={{ background: p.accent }} />
-      {/* Grid motif */}
+      <div className="absolute -top-24 -right-16 w-72 h-72 rounded-full blur-[110px] opacity-20 group-hover:opacity-35 transition-opacity" style={{ background: p.accent }} />
       <div className="absolute inset-0 opacity-[0.05]" style={{
         backgroundImage: `linear-gradient(${p.accent}55 1px, transparent 1px), linear-gradient(90deg, ${p.accent}55 1px, transparent 1px)`,
         backgroundSize: '38px 38px',
@@ -26,7 +28,7 @@ const SystemPanel: React.FC<{ p: EcosystemProduct; featured?: boolean }> = ({ p,
           <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/40">{p.category}</div>
           <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border" style={{ background: `${p.accent}12`, borderColor: `${p.accent}33` }}>
             <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: p.accent }} />
-            <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: p.accent }}>Deployable</span>
+            <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: p.accent }}>{live ? 'Live' : 'Deployable'}</span>
           </div>
         </div>
 
@@ -34,6 +36,17 @@ const SystemPanel: React.FC<{ p: EcosystemProduct; featured?: boolean }> = ({ p,
         <p className={`text-white/55 leading-relaxed mb-5 ${featured ? 'text-lg max-w-md' : 'text-sm'}`}>
           {featured ? p.description : p.tagline}
         </p>
+
+        {featured && metrics.length > 0 && (
+          <div className="grid grid-cols-3 gap-3 mb-5">
+            {metrics.slice(0, 3).map((m) => (
+              <div key={m.label} className="rounded-lg bg-white/5 border border-white/10 px-3 py-2">
+                <div className="text-base font-bold text-white tabular-nums" style={{ color: p.accent }}>{m.value}</div>
+                <div className="text-[9px] font-mono uppercase tracking-widest text-white/40 mt-0.5 truncate">{m.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className={`grid gap-x-4 gap-y-2 mb-6 ${featured ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {caps.slice(0, featured ? 6 : 4).map((c) => (
@@ -45,13 +58,16 @@ const SystemPanel: React.FC<{ p: EcosystemProduct; featured?: boolean }> = ({ p,
         </div>
 
         <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
-          <span className="text-[11px] font-mono text-white/35">Ship-ready on acquisition</span>
+          <span className="text-[11px] font-mono text-white/35">{live ? 'Live deployment' : 'Ship-ready on acquisition'}</span>
           <span className="inline-flex items-center gap-1 text-sm font-medium text-white/70 group-hover:text-white transition">
-            Explore <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" style={{ color: p.accent }} />
+            {live ? 'Visit system' : 'Explore'}
+            {live
+              ? <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" style={{ color: p.accent }} />
+              : <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" style={{ color: p.accent }} />}
           </span>
         </div>
       </div>
-    </div>
+    </Wrapper>
   );
 };
 

@@ -80,6 +80,8 @@ export interface EcosystemProduct {
   source_project_ref: string | null;
   is_featured: boolean;
   sort_order: number;
+  url?: string | null;
+  metrics?: Array<{ label: string; value: string }>;
 }
 
 export interface BrandPalette {
