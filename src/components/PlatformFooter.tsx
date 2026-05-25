@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Globe, Mail, Send, CheckCircle2 } from 'lucide-react';
 
@@ -35,6 +35,61 @@ const COLUMNS: Array<{ title: string; links: Array<{ label: string; to: string }
   },
 ];
 
+const REGIONS: Array<[string, 'online' | 'scaling']> = [
+  ['us-east', 'online'], ['eu-west', 'online'], ['af-north', 'online'],
+  ['ap-south', 'scaling'], ['sa-east', 'online'], ['oc-1', 'online'],
+];
+
+const OpsTerminal: React.FC = () => {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const utc = now.toISOString().replace('T', ' ').slice(0, 19);
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-black/40 overflow-hidden mb-12">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
+        <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
+        <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
+        <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
+        <span className="ml-2 text-[10px] font-mono text-white/40 tracking-wider">sovereign://operations</span>
+        <span className="ml-auto inline-flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-emerald-300/80">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live
+        </span>
+      </div>
+      <div className="p-4 font-mono text-xs leading-relaxed space-y-1.5">
+        <div className="text-white/40"><span className="text-cyan-400/80">$</span> sovereign status --all</div>
+        <div className="text-white/70 flex flex-wrap gap-x-5 gap-y-1">
+          <span><span className="text-white/40">regions</span> 23</span>
+          <span><span className="text-white/40">edge_nodes</span> 47</span>
+          <span><span className="text-white/40">avg_deploy</span> 87s</span>
+          <span><span className="text-white/40">uptime</span> 99.99%</span>
+        </div>
+        <div className="text-white/70 flex flex-wrap gap-x-5 gap-y-1">
+          <span><span className="text-white/40">intelligence</span> kernel·v3</span>
+          <span><span className="text-white/40">negotiation</span> online</span>
+          <span><span className="text-white/40">valuations</span> 12.4K+</span>
+          <span><span className="text-white/40">trust</span> sovereign-grade</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-1">
+          {REGIONS.map(([r, s]) => (
+            <span key={r} className="inline-flex items-center gap-1.5 text-white/55">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: s === 'online' ? '#10B981' : '#F59E0B', boxShadow: `0 0 6px ${s === 'online' ? '#10B981' : '#F59E0B'}` }} />
+              {r}
+            </span>
+          ))}
+        </div>
+        <div className="text-white/40 pt-1">
+          <span className="text-cyan-400/80">$</span> utc {utc} · all systems operational
+          <span className="inline-block ml-1 text-cyan-300 animate-pulse">▮</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const PlatformFooter: React.FC = () => {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
@@ -60,6 +115,8 @@ const PlatformFooter: React.FC = () => {
     <footer className="relative border-t border-white/5 bg-gradient-to-b from-transparent to-black/40 mt-32">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <OpsTerminal />
+
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2.5 mb-4">
@@ -104,7 +161,7 @@ const PlatformFooter: React.FC = () => {
           <div className="flex items-center gap-4 text-xs text-white/40 font-mono">
             <span>© {new Date().getFullYear()} SOVEREIGN</span>
             <span className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" />
               ALL SYSTEMS OPERATIONAL
             </span>
           </div>
