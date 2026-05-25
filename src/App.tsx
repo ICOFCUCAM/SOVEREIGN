@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { resolveTenant } from "@/lib/tenant";
@@ -22,6 +23,12 @@ const queryClient = new QueryClient();
 // Resolved once at boot: the platform host serves the marketplace + console,
 // any other connected custom domain serves that domain's branded landing.
 const tenant = resolveTenant();
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior }); }, [pathname]);
+  return null;
+};
 
 const PlatformRoutes = () => (
   <Routes>
@@ -52,6 +59,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             {tenant.mode === "tenant" ? <TenantRoutes /> : <PlatformRoutes />}
           </BrowserRouter>
         </TooltipProvider>
