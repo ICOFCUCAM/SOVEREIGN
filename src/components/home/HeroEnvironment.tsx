@@ -45,6 +45,10 @@ const HeroEnvironment: React.FC = () => {
             <Suspense fallback={<div className="w-full h-full rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,194,255,0.12), transparent 66%)' }} />}>
               <Globe className="w-full h-full" />
             </Suspense>
+            {/* optional cinematic globe plate — drop a transparent PNG at /hero-globe.png to use it; hides if absent */}
+            <img src="/hero-globe.png" alt="" aria-hidden loading="lazy"
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
           </div>
           {/* full-bleed megacity floor */}
           <div className="absolute bottom-0 inset-x-0 h-[44%]" style={{ transform: 'translate(calc(var(--px) * 4px), 0)' }}>
