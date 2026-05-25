@@ -2,6 +2,7 @@ import React from 'react';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import Reveal from '@/components/Reveal';
 import EcosystemSection from '@/components/home/EcosystemSection';
 
 const EcosystemHub: React.FC = () => {
@@ -20,7 +21,7 @@ const EcosystemHub: React.FC = () => {
           </p>
         </div>
       </main>
-      <EcosystemSection />
+      <Reveal><EcosystemSection /></Reveal>
       <PlatformFooter />
     </div>
   );
