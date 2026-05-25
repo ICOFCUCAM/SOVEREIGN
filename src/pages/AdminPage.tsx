@@ -9,6 +9,7 @@ import AuthModal from '@/components/AuthModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { logAudit, fetchRecentAuditLogs, AuditLogEntry } from '@/lib/audit';
 import { toast } from 'sonner';
+import { useEscape } from '@/hooks/useEscape';
 import type { LucideIcon } from 'lucide-react';
 import {
   Plus, Edit2, Trash2, Eye, Globe, Users, DollarSign, TrendingUp, X, Save, Activity, Lock,
@@ -46,6 +47,7 @@ const AdminPage: React.FC = () => {
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
   const [editingSystem, setEditingSystem] = useState<Partial<EcosystemProduct> | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  useEscape(() => { setEditing(null); setEditingSystem(null); });
   const [audit, setAudit] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partial<Domain> | null>(null);
