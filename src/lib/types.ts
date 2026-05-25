@@ -25,6 +25,7 @@ export interface Domain {
   metadata: Record<string, any>;
   created_at: string;
   updated_at: string;
+  deleted_at?: string | null;
 }
 
 export interface Lead {
@@ -40,6 +41,29 @@ export interface Lead {
   source: string;
   status: string;
   buyer_score: number;
+  created_at: string;
+}
+
+export interface AnalyticsEvent {
+  id: string;
+  domain_id: string | null;
+  event_type: string;
+  session_id?: string | null;
+  visitor_id?: string | null;
+  device?: string | null;
+  browser?: string | null;
+  referrer?: string | null;
+  path?: string | null;
+  metadata?: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface UserRoleRow {
+  id: string;
+  user_id: string;
+  email: string | null;
+  role: string;
+  full_name: string | null;
   created_at: string;
 }
 
