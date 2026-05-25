@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { Domain, Lead, AnalyticsEvent, UserRoleRow } from '@/lib/types';
+import type { Domain, Lead, AnalyticsEvent, UserRoleRow, EcosystemProduct } from '@/lib/types';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -13,9 +13,10 @@ import {
   Plus, Edit2, Trash2, Eye, Globe, Users, DollarSign, TrendingUp, X, Save, Activity, Lock,
   ShieldAlert, LogIn, FileText, Pencil, PlusCircle, Trash, BarChart3, Monitor, Smartphone, Tablet,
   Radio, Search, Share2, Link2, Mail, Image as ImageIcon, MessageCircle, Crown, ShieldCheck, Fingerprint,
+  Boxes, ExternalLink,
 } from 'lucide-react';
 
-type Tab = 'overview' | 'domains' | 'leads' | 'analytics' | 'team' | 'activity';
+type Tab = 'overview' | 'domains' | 'leads' | 'analytics' | 'ecosystem' | 'team' | 'activity';
 type LeadFilter = 'all' | 'inquiry' | 'offer' | 'buy_now';
 
 const ORIGIN_META: Record<string, { icon: LucideIcon; color: string; label: string }> = {
@@ -40,6 +41,8 @@ const AdminPage: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [users, setUsers] = useState<UserRoleRow[]>([]);
+  const [systems, setSystems] = useState<EcosystemProduct[]>([]);
+  const [editingSystem, setEditingSystem] = useState<Partial<EcosystemProduct> | null>(null);
   const [audit, setAudit] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partial<Domain> | null>(null);
@@ -54,10 +57,12 @@ const AdminPage: React.FC = () => {
       supabase.from('user_roles').select('*').order('created_at', { ascending: true }),
       fetchRecentAuditLogs(50),
     ]);
+    const sys = await supabase.from('ecosystem_products').select('*').order('sort_order', { ascending: true });
     setDomains((d.data || []) as Domain[]);
     setLeads((l.data || []) as Lead[]);
     setEvents((ev.data || []) as AnalyticsEvent[]);
     setUsers((u.data || []) as UserRoleRow[]);
+    setSystems((sys.data || []) as EcosystemProduct[]);
     setAudit(a);
     setLoading(false);
   };
@@ -291,12 +296,61 @@ const AdminPage: React.FC = () => {
     load();
   };
 
+  const saveSystem = async () => {
+    const s = editingSystem;
+    if (!s?.name || !s?.slug) return toast.error('Name and slug required');
+    const capabilities = typeof (s as { capsText?: string }).capsText === 'string'
+      ? (s as { capsText?: string }).capsText!.split('\n').map((x) => x.trim()).filter(Boolean)
+      : (s.capabilities || []);
+    const metrics = typeof (s as { metricsText?: string }).metricsText === 'string'
+      ? (s as { metricsText?: string }).metricsText!.split('\n').map((l) => l.split('=')).filter((p) => p.length === 2).map(([label, value]) => ({ label: label.trim(), value: value.trim() }))
+      : (s.metrics || []);
+    const payload = {
+      slug: s.slug.toLowerCase().trim(),
+      name: s.name, category: s.category || 'Sovereign Infrastructure',
+      tagline: s.tagline || '', description: s.description || '',
+      capabilities, metrics, accent: s.accent || '#00D9FF',
+      url: s.url || null, image_url: s.image_url || null,
+      status: s.status || 'deployable', is_featured: s.is_featured || false,
+      sort_order: Number(s.sort_order) || 100, updated_at: new Date().toISOString(),
+    };
+    try {
+      if (s.id) {
+        const { error } = await supabase.from('ecosystem_products').update(payload).eq('id', s.id);
+        if (error) throw error;
+        await logAudit({ action: 'system.update', resource_type: 'ecosystem', resource_id: s.id, actor_email: user.email, changes: { name: payload.name, slug: payload.slug } });
+        toast.success('System updated · logged');
+      } else {
+        const { data, error } = await supabase.from('ecosystem_products').insert(payload).select('id').single();
+        if (error) throw error;
+        await logAudit({ action: 'system.create', resource_type: 'ecosystem', resource_id: data.id, actor_email: user.email, changes: { name: payload.name, slug: payload.slug } });
+        toast.success('System added · logged');
+      }
+      setEditingSystem(null);
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Save failed');
+    }
+  };
+
+  const removeSystem = async (s: EcosystemProduct) => {
+    if (!confirm(`Delete system "${s.name}"?`)) return;
+    const { error } = await supabase.from('ecosystem_products').delete().eq('id', s.id);
+    if (error) { toast.error(error.message); return; }
+    await logAudit({ action: 'system.delete', resource_type: 'ecosystem', resource_id: s.id, actor_email: user.email, changes: { name: s.name, slug: s.slug } });
+    toast.success('System deleted · logged');
+    load();
+  };
+
   const actionMeta: Record<string, { icon: LucideIcon; color: string; label: string }> = {
     'domain.create': { icon: PlusCircle, color: '#10B981', label: 'Created domain' },
     'domain.update': { icon: Pencil, color: '#00D9FF', label: 'Updated domain' },
     'domain.delete': { icon: Trash, color: '#EF4444', label: 'Archived domain' },
     'lead.update': { icon: Users, color: '#7C3AED', label: 'Updated lead' },
     'role.update': { icon: ShieldAlert, color: '#F59E0B', label: 'Changed role' },
+    'system.create': { icon: PlusCircle, color: '#10B981', label: 'Added system' },
+    'system.update': { icon: Pencil, color: '#22D3EE', label: 'Updated system' },
+    'system.delete': { icon: Trash, color: '#EF4444', label: 'Deleted system' },
   };
 
   const formatRelative = (iso: string) => {
@@ -352,6 +406,7 @@ const AdminPage: React.FC = () => {
               { id: 'domains', label: `Domains (${domains.length})`, icon: Globe },
               { id: 'leads', label: `Inquiries (${leads.length})`, icon: Users },
               { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+              { id: 'ecosystem', label: `Ecosystem (${systems.length})`, icon: Boxes },
               { id: 'team', label: `Access (${users.length})`, icon: ShieldCheck },
               { id: 'activity', label: `Activity (${audit.length})`, icon: FileText },
             ] as Array<{ id: Tab; label: string; icon: LucideIcon }>).map((t) => {
@@ -679,6 +734,63 @@ const AdminPage: React.FC = () => {
             </div>
           )}
 
+          {/* Ecosystem tab */}
+          {tab === 'ecosystem' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-white/50">Manage the ecosystem systems shown on the homepage, hub, and /systems pages.</p>
+                <button onClick={() => setEditingSystem({ accent: '#00D9FF', status: 'deployable', sort_order: 100 })}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold text-sm">
+                  <Plus className="w-4 h-4" /> New System
+                </button>
+              </div>
+              <div className="glass-strong rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/10 text-left text-[10px] font-mono uppercase tracking-widest text-white/40">
+                        <th className="px-5 py-3">System</th>
+                        <th className="px-3 py-3">Category</th>
+                        <th className="px-3 py-3">Status</th>
+                        <th className="px-3 py-3">Featured</th>
+                        <th className="px-3 py-3">Link</th>
+                        <th className="px-3 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {systems.map((s) => (
+                        <tr key={s.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                          <td className="px-5 py-3.5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full" style={{ background: s.accent }} />
+                              <div>
+                                <div className="text-white font-semibold">{s.name}</div>
+                                <div className="text-xs text-white/40 font-mono">/systems/{s.slug}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-3.5 text-white/60 text-xs">{s.category}</td>
+                          <td className="px-3 py-3.5"><span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-white/5 text-white/60">{s.status}</span></td>
+                          <td className="px-3 py-3.5 text-xs">{s.is_featured ? <span className="text-amber-300">★ featured</span> : <span className="text-white/30">—</span>}</td>
+                          <td className="px-3 py-3.5">
+                            {s.url ? <a href={s.url} target="_blank" rel="noreferrer" className="text-cyan-400 hover:text-cyan-300"><ExternalLink className="w-3.5 h-3.5" /></a> : <span className="text-white/20">—</span>}
+                          </td>
+                          <td className="px-3 py-3.5">
+                            <div className="flex items-center gap-1 justify-end">
+                              <button onClick={() => setEditingSystem({ ...s, ...{ capsText: (s.capabilities || []).join('\n'), metricsText: (s.metrics || []).map((m) => `${m.label} = ${m.value}`).join('\n') } } as Partial<EcosystemProduct>)} className="p-1.5 rounded hover:bg-white/10 text-white/60 hover:text-cyan-400"><Edit2 className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => removeSystem(s)} className="p-1.5 rounded hover:bg-white/10 text-white/60 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {systems.length === 0 && <tr><td colSpan={6} className="text-center py-12 text-white/40">No systems yet</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Team / Access tab */}
           {tab === 'team' && (
             <div className="glass-strong rounded-2xl overflow-hidden">
@@ -923,6 +1035,92 @@ const AdminPage: React.FC = () => {
                   <Save className="w-4 h-4" /> {editing.id ? 'Save Changes' : 'Register Domain'}
                 </button>
                 <button onClick={() => setEditing(null)} className="px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 text-white">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* System Editor Modal */}
+      {editingSystem && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md" onClick={() => setEditingSystem(null)}>
+          <div onClick={(e) => e.stopPropagation()} className="glass-strong rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 z-10 px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#0A0E27]/95 backdrop-blur">
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-widest text-cyan-400">Ecosystem System</div>
+                <div className="text-white font-semibold text-lg">{editingSystem.id ? 'Edit System' : 'New System'}</div>
+              </div>
+              <button onClick={() => setEditingSystem(null)} className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center"><X className="w-4 h-4 text-white/60" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-white/50 font-medium mb-1.5 block">Name *</label>
+                  <input value={editingSystem.name || ''} onChange={(e) => setEditingSystem({ ...editingSystem, name: e.target.value })} className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-cyan-400/50 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="text-xs text-white/50 font-medium mb-1.5 block">Slug * <span className="text-white/30">(/systems/…)</span></label>
+                  <input value={editingSystem.slug || ''} onChange={(e) => setEditingSystem({ ...editingSystem, slug: e.target.value })} placeholder="veritas-os" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white font-mono focus:border-cyan-400/50 focus:outline-none" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-white/50 font-medium mb-1.5 block">Category</label>
+                <input value={editingSystem.category || ''} onChange={(e) => setEditingSystem({ ...editingSystem, category: e.target.value })} placeholder="Sovereign Government OS" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-cyan-400/50 focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs text-white/50 font-medium mb-1.5 block">Tagline</label>
+                <input value={editingSystem.tagline || ''} onChange={(e) => setEditingSystem({ ...editingSystem, tagline: e.target.value })} className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-cyan-400/50 focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs text-white/50 font-medium mb-1.5 block">Description</label>
+                <textarea rows={2} value={editingSystem.description || ''} onChange={(e) => setEditingSystem({ ...editingSystem, description: e.target.value })} className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-cyan-400/50 focus:outline-none resize-none" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-white/50 font-medium mb-1.5 block flex items-center gap-1.5"><ExternalLink className="w-3 h-3" /> Live URL</label>
+                  <input value={editingSystem.url || ''} onChange={(e) => setEditingSystem({ ...editingSystem, url: e.target.value })} placeholder="https://…" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white font-mono focus:border-cyan-400/50 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="text-xs text-white/50 font-medium mb-1.5 block flex items-center gap-1.5"><ImageIcon className="w-3 h-3" /> Image URL</label>
+                  <input value={editingSystem.image_url || ''} onChange={(e) => setEditingSystem({ ...editingSystem, image_url: e.target.value })} placeholder="https://…/cover.jpg" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white font-mono focus:border-cyan-400/50 focus:outline-none" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-white/50 font-medium mb-1.5 block">Capabilities <span className="text-white/30">(one per line)</span></label>
+                <textarea rows={4} value={(editingSystem as { capsText?: string }).capsText ?? (editingSystem.capabilities || []).join('\n')} onChange={(e) => setEditingSystem({ ...editingSystem, capsText: e.target.value } as Partial<EcosystemProduct>)} className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-cyan-400/50 focus:outline-none resize-none font-mono" />
+              </div>
+              <div>
+                <label className="text-xs text-white/50 font-medium mb-1.5 block">Metrics <span className="text-white/30">(one per line · "Label = Value")</span></label>
+                <textarea rows={3} value={(editingSystem as { metricsText?: string }).metricsText ?? (editingSystem.metrics || []).map((m) => `${m.label} = ${m.value}`).join('\n')} onChange={(e) => setEditingSystem({ ...editingSystem, metricsText: e.target.value } as Partial<EcosystemProduct>)} placeholder="Documents = 847.3M" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-cyan-400/50 focus:outline-none resize-none font-mono" />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs text-white/50 font-medium mb-1.5 block">Accent</label>
+                  <div className="flex gap-2">
+                    <input type="color" value={editingSystem.accent || '#00D9FF'} onChange={(e) => setEditingSystem({ ...editingSystem, accent: e.target.value })} className="w-12 h-10 rounded-lg border border-white/10 bg-transparent" />
+                    <input value={editingSystem.accent || '#00D9FF'} onChange={(e) => setEditingSystem({ ...editingSystem, accent: e.target.value })} className="flex-1 px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white font-mono focus:border-cyan-400/50 focus:outline-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-white/50 font-medium mb-1.5 block">Status</label>
+                  <select value={editingSystem.status || 'deployable'} onChange={(e) => setEditingSystem({ ...editingSystem, status: e.target.value })} className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-cyan-400/50 focus:outline-none">
+                    <option value="deployable">Deployable</option>
+                    <option value="preview">Preview</option>
+                    <option value="planned">Planned</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-white/50 font-medium mb-1.5 block">Sort order</label>
+                  <input type="number" value={editingSystem.sort_order ?? 100} onChange={(e) => setEditingSystem({ ...editingSystem, sort_order: Number(e.target.value) })} className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:border-cyan-400/50 focus:outline-none" />
+                </div>
+              </div>
+              <label className="flex items-center gap-2 text-sm text-white/70 cursor-pointer">
+                <input type="checkbox" checked={editingSystem.is_featured || false} onChange={(e) => setEditingSystem({ ...editingSystem, is_featured: e.target.checked })} className="w-4 h-4 rounded accent-cyan-500" />
+                Featured (large card)
+              </label>
+              <div className="flex gap-2 pt-2">
+                <button onClick={saveSystem} className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold flex items-center justify-center gap-2"><Save className="w-4 h-4" /> {editingSystem.id ? 'Save Changes' : 'Add System'}</button>
+                <button onClick={() => setEditingSystem(null)} className="px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 text-white">Cancel</button>
               </div>
             </div>
           </div>
