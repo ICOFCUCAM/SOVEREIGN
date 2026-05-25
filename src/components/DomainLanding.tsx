@@ -10,6 +10,7 @@ import ValuationRing from '@/components/ValuationRing';
 import InquiryModal from '@/components/InquiryModal';
 import BrokerNegotiation from '@/components/BrokerNegotiation';
 import InstitutionPreview from '@/components/InstitutionPreview';
+import Reveal from '@/components/Reveal';
 import {
   Shield, Sparkles, Rocket, TrendingUp, Globe, MessageCircle, DollarSign,
   ArrowLeft, CheckCircle2, Activity, Brain, Layers, Zap, Award, Lock, ScanFace, ShieldCheck,
@@ -361,9 +362,9 @@ const DomainLanding: React.FC<Props> = ({ domainName, variant }) => {
         </div>
       </section>
 
-      <InstitutionPreview domain={d} onAcquire={openModal} />
+      <Reveal><InstitutionPreview domain={d} onAcquire={openModal} /></Reveal>
 
-      <TrustStrip sslVerified={d.ssl_verified} ownershipVerified={d.ownership_verified} />
+      <Reveal><TrustStrip sslVerified={d.ssl_verified} ownershipVerified={d.ownership_verified} /></Reveal>
 
       {variant === 'preview' ? (
         <PlatformFooter />
