@@ -1,11 +1,15 @@
 import React from 'react';
-import { ShieldCheck, Landmark, Globe2, Activity, Lock, FileCheck, Database, ServerCog } from 'lucide-react';
+import { ShieldCheck, Landmark, Globe2, Activity, Lock, FileCheck, Database, ServerCog, Fingerprint } from 'lucide-react';
+import { useCountUp } from '@/hooks/useCountUp';
 
-const METRICS = [
-  { icon: Landmark, value: '11', label: 'Deployable institutions' },
-  { icon: Activity, value: '2,847', label: 'Verified deployments' },
-  { icon: Globe2, value: '23', label: 'Operational regions' },
-  { icon: ShieldCheck, value: '99.99%', label: 'Uptime SLA' },
+interface MetricDef { icon: React.ComponentType<{ className?: string }>; value: number; decimals?: number; prefix?: string; suffix?: string; label: string }
+// Deliberately distinct from the deployment-network telemetry bar — these speak
+// to governance, scale and institutional trust, not live network counts.
+const METRICS: MetricDef[] = [
+  { icon: Landmark, value: 11, label: 'Deployable institutions' },
+  { icon: Activity, value: 2847, label: 'Verified deployments' },
+  { icon: Globe2, value: 6, label: 'Continents operational' },
+  { icon: ShieldCheck, value: 4.2, decimals: 1, prefix: '$', suffix: 'B', label: 'Assets under governance' },
 ];
 
 const GOVERNANCE = [
@@ -13,25 +17,41 @@ const GOVERNANCE = [
   { icon: Lock, label: 'Bank-grade encryption' },
   { icon: FileCheck, label: 'Audit-ready logging' },
   { icon: ServerCog, label: 'Tenant isolation (RLS)' },
+  { icon: Fingerprint, label: 'Cryptographic provenance' },
 ];
 
+const Metric: React.FC<{ m: MetricDef; i: number }> = ({ m, i }) => {
+  const { ref, value } = useCountUp(m.value, 1700 + i * 140, m.decimals || 0);
+  const Icon = m.icon;
+  const shown = m.decimals ? value.toFixed(m.decimals) : Math.round(value).toLocaleString();
+  return (
+    <div ref={ref as React.RefObject<HTMLDivElement>} className="relative px-6 py-7 bg-white/[0.01]">
+      <Icon className="w-4 h-4 text-cyan-400 mb-3" />
+      <div className="text-3xl sm:text-4xl font-bold text-white tabular-nums leading-none mb-2 tracking-tight">
+        {m.prefix}{shown}<span className="text-white/45 text-[0.55em] font-semibold ml-0.5">{m.suffix}</span>
+      </div>
+      <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/40">{m.label}</div>
+    </div>
+  );
+};
+
 const InstitutionalTrust: React.FC = () => (
-  <section className="py-28 sm:py-36 px-4 sm:px-6 lg:px-8">
+  <section className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
     <div className="max-w-6xl mx-auto">
-      <div className="grid lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-16 items-center">
+      <div className="grid lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-20 items-center">
         <div>
-          <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-5">Institutional trust</div>
-          <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98] mb-5">
-            Built for institutions that cannot fail.
+          <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-6">Institutional trust</div>
+          <h2 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tighter text-white leading-[0.95] mb-6">
+            Built for institutions<br />that cannot fail.
           </h2>
-          <p className="text-lg text-white/55 leading-relaxed mb-7">
-            Procurement-grade infrastructure with sovereign data residency, audited operations and governed deployment — trusted by governments, enterprises and institutional operators.
+          <p className="text-lg text-white/55 leading-relaxed mb-8 max-w-md">
+            Procurement-grade infrastructure with sovereign data residency, audited operations and governed deployment — engineered for governments, enterprises and institutional operators.
           </p>
           <div className="flex flex-wrap gap-2.5">
             {GOVERNANCE.map((g) => {
               const Icon = g.icon;
               return (
-                <span key={g.label} className="inline-flex items-center gap-2 text-xs text-white/70 px-3 py-2 rounded-lg border border-white/10 bg-white/[0.03]">
+                <span key={g.label} className="inline-flex items-center gap-2 text-xs text-white/70 px-3 py-2 rounded-lg border border-white/10 bg-white/[0.025] hover:border-white/20 transition-colors">
                   <Icon className="w-3.5 h-3.5 text-cyan-400" /> {g.label}
                 </span>
               );
@@ -39,17 +59,12 @@ const InstitutionalTrust: React.FC = () => (
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-px rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02]">
-          {METRICS.map((m) => {
-            const Icon = m.icon;
-            return (
-              <div key={m.label} className="px-6 py-7 bg-white/[0.01]">
-                <Icon className="w-4 h-4 text-cyan-400 mb-3" />
-                <div className="text-3xl font-bold text-white tabular-nums leading-none mb-2">{m.value}</div>
-                <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/40">{m.label}</div>
-              </div>
-            );
-          })}
+        {/* institutional ledger — hairline-divided metric matrix */}
+        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-white/[0.012]">
+          <span className="absolute inset-x-0 top-0 h-px z-10" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,217,255,0.5), transparent)' }} />
+          <div className="grid grid-cols-2 gap-px bg-white/8">
+            {METRICS.map((m, i) => <Metric key={m.label} m={m} i={i} />)}
+          </div>
         </div>
       </div>
     </div>

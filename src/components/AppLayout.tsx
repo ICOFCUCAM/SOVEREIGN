@@ -7,6 +7,7 @@ import CinematicHero from '@/components/home/CinematicHero';
 import EcosystemPanels from '@/components/home/EcosystemPanels';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
 import TransformationFlow from '@/components/home/TransformationFlow';
+import InstitutionalTrust from '@/components/home/InstitutionalTrust';
 import GlobalInfrastructure from '@/components/home/GlobalInfrastructure';
 import ClosingCTA from '@/components/home/ClosingCTA';
 
@@ -25,7 +26,9 @@ const AppLayout: React.FC = () => {
         <EcosystemSectors />
         {/* 4 — deployment story */}
         <Reveal><TransformationFlow /></Reveal>
-        {/* 5 — global infrastructure */}
+        {/* 5 — institutional trust & governance */}
+        <Reveal><InstitutionalTrust /></Reveal>
+        {/* 6 — global infrastructure */}
         <Reveal><GlobalInfrastructure /></Reveal>
         {/* 6 — final CTA */}
         <ClosingCTA />

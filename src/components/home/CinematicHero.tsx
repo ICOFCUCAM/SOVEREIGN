@@ -32,7 +32,7 @@ const CinematicHero: React.FC = () => {
       <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
         <div className="max-w-md lg:max-w-[42%]">
           <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-7">The operating layer for digital civilization</div>
-          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.08] mb-7">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.4rem] font-bold tracking-tight leading-[1.02] mb-7">
             <span className="block text-white">Build sovereign digital</span>
             <span className="block text-white">systems <span className="text-gradient-cyan">at planetary scale.</span></span>
           </h1>
