@@ -56,7 +56,7 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
       {/* operational scan sweep */}
       <div className="absolute inset-y-0 w-1/3 animate-sweep pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,200,255,0.05), transparent)' }} />
 
-      <svg viewBox={`0 0 ${W} ${H}`} className="relative w-full h-full" preserveAspectRatio="xMidYMid meet">
+      <svg viewBox={`0 0 ${W} ${H}`} className="relative w-full h-full" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <defs>
           <filter id="wm-glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.4" /></filter>
           <filter id="wm-zone" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="6" /></filter>

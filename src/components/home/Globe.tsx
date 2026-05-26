@@ -53,7 +53,7 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
   const hubPts = HUBS.filter(visible).map((c) => ({ p: projection(c) as [number, number] }));
 
   return (
-    <svg viewBox="0 0 400 400" className={className}>
+    <svg viewBox="0 0 400 400" className={className} aria-hidden="true">
       <defs>
         <radialGradient id="g-sphere" cx="38%" cy="32%" r="80%">
           <stop offset="0%" stopColor="#14275a" /><stop offset="55%" stopColor="#081334" /><stop offset="100%" stopColor="#03050e" />

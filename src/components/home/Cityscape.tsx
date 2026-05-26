@@ -72,7 +72,7 @@ const Layer: React.FC<{ towers: Tower[]; fill: string; stroke: string; windows: 
 };
 
 const Cityscape: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <svg viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="xMidYMax slice" className={className}>
+  <svg viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="xMidYMax slice" className={className} aria-hidden="true">
     <defs>
       <radialGradient id="city-horizon" cx="50%" cy="100%" r="85%">
         <stop offset="0%" stopColor="rgba(0,194,255,0.26)" /><stop offset="55%" stopColor="rgba(124,77,255,0.07)" /><stop offset="100%" stopColor="transparent" />
