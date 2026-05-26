@@ -32,14 +32,14 @@ const STAGES = [
 ];
 
 const STACKS = [
-  { label: 'SaaS platform', icon: LayoutDashboard },
-  { label: 'AI startup', icon: Cpu },
-  { label: 'Fintech dashboard', icon: Banknote },
-  { label: 'Marketplace', icon: ShoppingCart },
-  { label: 'Government portal', icon: Landmark },
-  { label: 'Logistics platform', icon: Truck },
-  { label: 'Operational dashboard', icon: Briefcase },
-  { label: 'Portfolio', icon: Globe },
+  { label: 'Government runtime', icon: Landmark },
+  { label: 'Financial system', icon: Banknote },
+  { label: 'Intelligence platform', icon: Cpu },
+  { label: 'Logistics network', icon: Truck },
+  { label: 'Sovereign marketplace', icon: ShoppingCart },
+  { label: 'Operations command', icon: LayoutDashboard },
+  { label: 'Institutional console', icon: Briefcase },
+  { label: 'National portal', icon: Globe },
 ];
 
 const INTEGRATIONS = ['Vercel', 'Supabase', 'Stripe', 'Cloudflare', 'Email', 'Redis'];
