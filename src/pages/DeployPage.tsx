@@ -1,6 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import type { MapNode } from '@/components/WorldMap';
 import PlatformNav from '@/components/PlatformNav';
+
+const WorldMap = lazy(() => import('@/components/WorldMap'));
+const EDGE_NODES: MapNode[] = [
+  { lon: -74, lat: 40.7, hub: true }, { lon: -46.6, lat: -23.5 }, { lon: -0.1, lat: 51.5, hub: true },
+  { lon: 8.7, lat: 50.1 }, { lon: 3.4, lat: 6.5 }, { lon: 36.8, lat: -1.3 }, { lon: 55.3, lat: 25.2, hub: true },
+  { lon: 72.8, lat: 19 }, { lon: 103.8, lat: 1.3, hub: true }, { lon: 139.7, lat: 35.7, hub: true },
+  { lon: 151.2, lat: -33.9 }, { lon: -118, lat: 34 }, { lon: 28, lat: -26.2 },
+];
+const EDGE_ARCS: Array<[number, number, number]> = [
+  [0, 2, 0], [2, 6, 0.5], [6, 8, 1], [8, 9, 0.4], [0, 11, 1.2], [6, 7, 0.3], [8, 10, 0.9], [2, 4, 1.4], [0, 1, 1.1],
+];
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
@@ -82,6 +94,28 @@ const DeployPage: React.FC = () => {
             </div>
             <div className="text-center text-[10px] font-mono uppercase tracking-widest text-amber-300/70 flex items-center justify-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" /> Pipeline preview · provisioning integrations are activation-ready
+            </div>
+          </Reveal>
+
+          {/* Global orchestration */}
+          <Reveal>
+            <div className="mt-24">
+              <div className="text-center max-w-2xl mx-auto mb-10">
+                <div className="text-[11px] font-mono uppercase tracking-[0.28em] text-cyan-300/70 mb-4">Global orchestration</div>
+                <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-tighter text-white">Deployed across a sovereign edge mesh.</h2>
+              </div>
+              <div className="relative" style={{ aspectRatio: '2 / 1' }}>
+                <div className="absolute -inset-10 blur-[100px] opacity-20 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 60% at 50% 50%, #00D9FF, transparent 70%)' }} />
+                <Suspense fallback={<div className="w-full h-full" />}>
+                  <WorldMap accent="#00D9FF" nodes={EDGE_NODES} arcs={EDGE_ARCS} className="w-full h-full" />
+                </Suspense>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 mt-8 text-sm font-mono text-white/45">
+                <span><span className="text-white">47</span> edge nodes</span>
+                <span><span className="text-white">23</span> regions</span>
+                <span><span className="text-white">87s</span> avg deploy</span>
+                <span><span className="text-white">99.99%</span> uptime</span>
+              </div>
             </div>
           </Reveal>
 
