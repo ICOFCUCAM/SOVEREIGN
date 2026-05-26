@@ -16,11 +16,12 @@ const COLUMNS: Array<{ title: string; links: Array<{ label: string; to: string }
   {
     title: 'Systems',
     links: [
+      { label: 'CIVICOS', to: '/systems/civicos' },
       { label: 'VeritasOS', to: '/systems/veritas-os' },
       { label: 'Veritas Financial', to: '/systems/veritas-banking' },
       { label: 'ELECPRO', to: '/systems/elecpro' },
-      { label: 'CivicOS', to: '/systems/civicos' },
       { label: 'FlyttGo', to: '/systems/flyttgo' },
+      { label: 'Mobile Pay', to: '/systems/mobile-pay' },
     ],
   },
   {
