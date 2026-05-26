@@ -37,7 +37,8 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
 
   useEffect(() => {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-    const id = setInterval(() => setLambda((l) => (l + 0.32) % 360), 50);
+    // Slow, majestic rotation, smoothed at ~30fps for a premium glide.
+    const id = setInterval(() => setLambda((l) => (l + 0.16) % 360), 33);
     return () => clearInterval(id);
   }, []);
 
@@ -78,6 +79,7 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
         {/* atmospheric diffusion so the globe is embedded, not pasted on top */}
         <filter id="f-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.1" /></filter>
         <filter id="f-bloom" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5" /></filter>
+        <filter id="f-ray" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="1.4" /></filter>
         <filter id="f-haze" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="14" /></filter>
       </defs>
 
@@ -107,17 +109,23 @@ const Globe: React.FC<{ className?: string }> = ({ className = '' }) => {
       <path d={gratPath} fill="none" stroke="rgba(0,217,255,0.1)" strokeWidth="0.35" />
       <path d={landPath} fill="url(#g-land)" fillOpacity="0.34" stroke="rgba(0,217,255,0.6)" strokeWidth="0.4" strokeLinejoin="round" />
 
-      {/* controlled route bloom underlay */}
-      <g filter="url(#f-bloom)" opacity="0.45">
-        {routePaths.map((d, i) => <path key={`rb${i}`} d={d} fill="none" stroke="#00C2FF" strokeWidth="1.2" strokeLinecap="round" />)}
-      </g>
-      {/* crisp routes + traveling light */}
-      {routePaths.map((d, i) => (
-        <g key={`r${i}`}>
-          <path d={d} fill="none" stroke="url(#g-land)" strokeWidth="0.6" opacity="0.45" strokeLinecap="round" />
-          <path d={d} fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${(i % 7) * 0.45}s` }} />
-        </g>
-      ))}
+      {/* sovereign routing — corridors stay dim; a slow, eased luminous packet
+          travels each route, a soft wake fading behind a crisp head */}
+      {routePaths.map((d, i) => {
+        const dur = 5 + (i % 5) * 0.7;
+        const delay = (i % 7) * 0.6;
+        return (
+          <g key={`r${i}`}>
+            <path d={d} fill="none" stroke="url(#g-land)" strokeWidth="0.5" opacity="0.28" strokeLinecap="round" />
+            <path d={d} pathLength={100} fill="none" stroke="#00C2FF" strokeWidth="1.5" strokeLinecap="round"
+              strokeDasharray="9 91" opacity="0.55" filter="url(#f-ray)"
+              className="animate-signal" style={{ animationDuration: `${dur}s`, animationDelay: `${delay + 0.12}s` }} />
+            <path d={d} pathLength={100} fill="none" stroke="#eafcff" strokeWidth="0.9" strokeLinecap="round"
+              strokeDasharray="2.5 97.5" filter="url(#f-ray)"
+              className="animate-signal" style={{ animationDuration: `${dur}s`, animationDelay: `${delay}s` }} />
+          </g>
+        );
+      })}
 
       {/* controlled node bloom underlay */}
       <g filter="url(#f-bloom)" opacity="0.5">
