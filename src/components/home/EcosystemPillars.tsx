@@ -2,15 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Scale, Banknote, Truck, Cpu, GraduationCap, ShoppingCart, Server } from 'lucide-react';
 
-interface Pillar { label: string; desc: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; accent: string }
+interface Pillar { label: string; desc: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; accent: string; anchor: string }
 const PILLARS: Pillar[] = [
-  { label: 'Governance', desc: 'Civic & electoral systems', icon: Scale, accent: '#6366F1' },
-  { label: 'Finance', desc: 'Sovereign banking rails', icon: Banknote, accent: '#10B981' },
-  { label: 'Mobility', desc: 'Logistics & transport', icon: Truck, accent: '#F59E0B' },
-  { label: 'Intelligence', desc: 'AI cognition & knowledge', icon: Cpu, accent: '#7C4DFF' },
-  { label: 'Education', desc: 'Learning & credentials', icon: GraduationCap, accent: '#22D3EE' },
-  { label: 'Commerce', desc: 'Markets & acquisition', icon: ShoppingCart, accent: '#00C2FF' },
-  { label: 'Infrastructure', desc: 'Sovereign cloud & edge', icon: Server, accent: '#00E599' },
+  { label: 'Governance', desc: 'Civic & electoral systems', icon: Scale, accent: '#6366F1', anchor: 'governance' },
+  { label: 'Finance', desc: 'Sovereign banking rails', icon: Banknote, accent: '#10B981', anchor: 'finance' },
+  { label: 'Mobility', desc: 'Logistics & transport', icon: Truck, accent: '#F59E0B', anchor: 'mobility' },
+  { label: 'Intelligence', desc: 'AI cognition & knowledge', icon: Cpu, accent: '#7C4DFF', anchor: 'intelligence' },
+  { label: 'Education', desc: 'Learning & credentials', icon: GraduationCap, accent: '#22D3EE', anchor: 'education' },
+  { label: 'Commerce', desc: 'Markets & acquisition', icon: ShoppingCart, accent: '#00C2FF', anchor: 'commerce' },
+  { label: 'Infrastructure', desc: 'Sovereign cloud & edge', icon: Server, accent: '#00E599', anchor: 'operations' },
 ];
 
 const EcosystemPillars: React.FC = () => (
@@ -34,7 +34,7 @@ const EcosystemPillars: React.FC = () => (
           {PILLARS.map((p) => {
             const Icon = p.icon;
             return (
-              <Link key={p.label} to={`/ecosystem#${p.label.toLowerCase()}`} className="group flex flex-col items-center text-center">
+              <Link key={p.label} to={`/ecosystem#${p.anchor}`} className="group flex flex-col items-center text-center">
                 {/* node */}
                 <span className="relative z-10 w-[68px] h-[68px] rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:-translate-y-1"
                   style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }}>
