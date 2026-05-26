@@ -341,6 +341,18 @@ const MarketplacePage: React.FC = () => {
           </Reveal>
         </section>
 
+        {/* registry loading skeleton — holds layout so cards don't pop / shift */}
+        {loading && (
+          <section className="px-4 sm:px-6 lg:px-8 pb-24">
+            <div className="max-w-7xl mx-auto">
+              <div className="h-8 w-64 rounded bg-white/[0.04] animate-pulse mb-9" />
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {Array.from({ length: 8 }).map((_, i) => <div key={i} className="rounded-2xl border border-white/8 bg-white/[0.02] h-52 animate-pulse" />)}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ── SECTION 4 — sovereign systems (the full sovereign + strategic registry) ── */}
         {!loading && (sovereign.length > 0 || strategic.length > 0) && (
           <section id="sovereign" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 pb-24">
