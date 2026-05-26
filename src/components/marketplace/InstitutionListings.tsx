@@ -15,7 +15,7 @@ const Corners: React.FC<{ c: string }> = ({ c }) => <HudCorners color={c} classN
 const CivicosTierCard: React.FC<{ t: NonNullable<EcosystemProduct['tiers']>[number] }> = ({ t }) => {
   const c = TIER_COLOR[t.tier] || '#00C2FF';
   return (
-    <Link to="/systems/civicos" className="group relative block overflow-hidden rounded-2xl glass hover:glass-strong transition-all duration-500 hover:-translate-y-1">
+    <Link to={`/systems/civicos?tier=${t.tier.toLowerCase()}`} className="group relative block overflow-hidden rounded-2xl glass hover:glass-strong transition-all duration-500 hover:-translate-y-1">
       <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${c}, transparent)` }} />
       <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-all" style={{ background: c }} />
       <Corners c={c} />
