@@ -27,8 +27,19 @@ const queryClient = new QueryClient();
 const tenant = resolveTenant();
 
 const ScrollToTop = () => {
-  const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); }, [pathname]);
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (hash) {
+      let tries = 0;
+      const id = setInterval(() => {
+        const el = document.getElementById(hash.slice(1));
+        if (el) { el.scrollIntoView({ behavior: 'smooth' }); clearInterval(id); }
+        else if (++tries > 12) clearInterval(id);
+      }, 120);
+      return () => clearInterval(id);
+    }
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [pathname, hash]);
   return null;
 };
 
