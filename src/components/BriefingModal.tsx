@@ -57,7 +57,7 @@ const BriefingModal: React.FC<Props> = ({ systemName, slug, tier, accent = '#00C
               <div className="font-display text-2xl font-bold text-white mb-1">{systemName}{tier ? ` · ${tier}` : ''}</div>
               <p className="text-white/45 text-sm mb-6">Sovereign acquisition &amp; deployment — institutional engagements only.</p>
               <form onSubmit={submit} className="space-y-3">
-                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" aria-label="Name"
+                <input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" aria-label="Name"
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
                 <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Official email" aria-label="Email"
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
