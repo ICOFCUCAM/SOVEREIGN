@@ -42,8 +42,8 @@ const InquiryModal: React.FC<Props> = ({ domain, intent, onClose }) => {
         buyer_score: 50 + (form.company ? 15 : 0) + (form.phone ? 10 : 0) + (form.message?.length > 50 ? 15 : 0),
       });
 
-      // Bump inquiry count
-      await supabase.from('domains').update({ inquiry_count: (domain.inquiry_count || 0) + 1 }).eq('id', domain.id);
+      // Bump inquiry count (safe RPC — table writes are admin-only)
+      await supabase.rpc('increment_domain_inquiry', { p_id: domain.id });
 
       // Analytics event
       await supabase.from('analytics_events').insert({

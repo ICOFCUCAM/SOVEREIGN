@@ -63,12 +63,8 @@ export function useDomainProfile(domainName: string | undefined, opts: Options =
 
       setState((s) => ({ ...s, domain: dom, loading: false }));
 
-      // Fire-and-forget: view count + telemetry.
-      supabase
-        .from('domains')
-        .update({ view_count: (dom.view_count || 0) + 1 })
-        .eq('id', dom.id)
-        .then(() => {});
+      // Fire-and-forget: view count (safe RPC) + telemetry.
+      supabase.rpc('increment_domain_view', { p_id: dom.id }).then(() => {});
       trackEvent({
         domainId: dom.id,
         eventType: 'view',

@@ -160,7 +160,7 @@ const BrokerNegotiation: React.FC<Props> = ({ domain, intent, onClose }) => {
           buyer_score: r.buyer_score,
           message: `AI broker · ${r.stage} · counter ${fmt(r.counter_offer)}`,
         }).eq('id', leadId);
-        await supabase.from('domains').update({ inquiry_count: (domain.inquiry_count || 0) + 1 }).eq('id', domain.id);
+        await supabase.rpc('increment_domain_inquiry', { p_id: domain.id });
         trackEvent({ domainId: domain.id, eventType: r.accepted ? 'buy_now' : 'offer', metadata: { surface: 'broker', stage: r.stage, counter: r.counter_offer } });
       }
     }
