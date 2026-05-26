@@ -148,6 +148,10 @@
 @keyframes signal-flow { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
 .animate-signal { animation: signal-flow 3.2s cubic-bezier(0.5,0,0.5,1) infinite; }
 
+/* slow planetary drift — the closing earth breathes, alive but barely moving */
+@keyframes earth-drift { 0%, 100% { transform: translate(-50%, 0) scale(1); } 50% { transform: translate(-50%, -1.1%) scale(1.025); } }
+.animate-earth { animation: earth-drift 26s ease-in-out infinite; }
+
 /* arrival pulse — a destination command center flashes as a packet lands */
 @keyframes arrive-flash { 0%, 74% { opacity: 0; transform: scale(0.4); } 86% { opacity: 0.8; transform: scale(1); } 100% { opacity: 0; transform: scale(2.3); } }
 .animate-arrive { animation: arrive-flash var(--ad, 3s) ease-out infinite; }
@@ -205,7 +209,7 @@
   .animate-float, .animate-scan, .animate-shimmer, .animate-ring, .animate-travel,
   .animate-haze-a, .animate-haze-b, .animate-flicker, .animate-stage-in, .animate-sweep,
   .animate-ticker, .animate-route, .animate-pulse,
-  .animate-signal, .animate-burst, .animate-reactor, .animate-mote, .animate-flow-y, .animate-arrive {
+  .animate-signal, .animate-burst, .animate-reactor, .animate-mote, .animate-flow-y, .animate-arrive, .animate-earth {
     animation: none !important;
   }
   html { scroll-behavior: auto; }

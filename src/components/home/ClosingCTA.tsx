@@ -10,15 +10,16 @@ const ClosingCTA: React.FC = () => (
     {/* sovereign grid floor */}
     <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(rgba(0,217,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(0,217,255,0.5) 1px, transparent 1px)', backgroundSize: '64px 64px', maskImage: 'radial-gradient(ellipse at 50% 100%, black, transparent 70%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 100%, black, transparent 70%)' }} />
 
-    {/* photoreal earth — grounded horizon curving up from the bottom */}
-    <div aria-hidden className="absolute left-1/2 -translate-x-1/2 bottom-[-42%] sm:bottom-[-76%] lg:bottom-[-86%] w-[185%] sm:w-[118%] lg:w-[100%] max-w-[1500px] aspect-square pointer-events-none">
+    {/* photoreal earth — grounded horizon curving up from the bottom, slowly alive */}
+    <div aria-hidden className="absolute left-1/2 -translate-x-1/2 bottom-[-42%] sm:bottom-[-76%] lg:bottom-[-86%] w-[185%] sm:w-[118%] lg:w-[100%] max-w-[1500px] aspect-square pointer-events-none animate-earth">
       <img src="/hero-globe.webp" alt="" decoding="async" className="w-full h-full object-contain"
         style={{ filter: 'drop-shadow(0 -10px 90px rgba(0,150,255,0.25))' }} />
     </div>
     {/* scrim so the headline always reads above the horizon */}
-    <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 32%, rgba(5,8,22,0.55), transparent 60%)' }} />
-    {/* atmospheric rim glow along the horizon */}
-    <div className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 90% at 50% 100%, rgba(0,180,255,0.1), transparent 60%)' }} />
+    <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 30%, rgba(5,8,22,0.6), transparent 58%)' }} />
+    {/* atmospheric limb glow — soft cyan air-band hugging the horizon, then a wide bloom */}
+    <div className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none animate-haze-a" style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 112%, rgba(0,200,255,0.16), rgba(0,150,255,0.05) 45%, transparent 66%)' }} />
+    <div className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none" style={{ background: 'radial-gradient(ellipse 55% 80% at 50% 100%, rgba(120,200,255,0.12), transparent 60%)' }} />
     <div className="absolute inset-x-0 bottom-0 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,194,255,0.6), rgba(124,77,255,0.5), transparent)' }} />
 
     <HudCorners color="#00C2FF" className="opacity-25 max-w-7xl mx-auto inset-x-4 sm:inset-x-8" />
