@@ -424,6 +424,26 @@ const AdminPage: React.FC = () => {
     }
   };
 
+  const generateSystemVisual = async () => {
+    const s = editingSystem;
+    if (!s?.name?.trim()) { toast.error('Add a system name first'); return; }
+    const prompt = `Cover key art for "${s.name}"${s.category ? `, a ${s.category}` : ''}.${s.tagline ? ` ${s.tagline}.` : ''}${s.description ? ` ${s.description}` : ''}`;
+    setUploadingImage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { prompt, mediaClass: 'cinematic', orientation: 'landscape' },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (!data?.url) throw new Error('No image URL returned');
+      setEditingSystem((cur) => (cur ? { ...cur, image_url: data.url } : cur));
+      toast.success('Visual generated');
+    } catch (e) {
+      toast.error(`Image generation failed: ${(e as Error).message}`);
+    }
+    setUploadingImage(false);
+  };
+
   const uploadSystemImage = async (file: File) => {
     if (!file) return;
     setUploadingImage(true);
@@ -1372,9 +1392,12 @@ const AdminPage: React.FC = () => {
                   <div className="flex gap-2">
                     <input value={editingSystem.image_url || ''} onChange={(e) => setEditingSystem({ ...editingSystem, image_url: e.target.value })} placeholder="paste URL or upload →" className="flex-1 min-w-0 px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white font-mono focus:border-cyan-400/50 focus:outline-none" />
                     <label className={`shrink-0 px-3 py-2.5 rounded-lg border border-white/10 text-xs font-mono cursor-pointer flex items-center gap-1.5 ${uploadingImage ? 'opacity-50 pointer-events-none' : 'hover:bg-white/10 text-white/70'}`}>
-                      {uploadingImage ? 'Uploading…' : 'Upload'}
+                      {uploadingImage ? 'Working…' : 'Upload'}
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadSystemImage(f); }} />
                     </label>
+                    <button type="button" disabled={uploadingImage} onClick={generateSystemVisual} title="Generate cover art from this system's name & description" className="shrink-0 px-3 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50">
+                      <Sparkles className="w-3.5 h-3.5" /> {uploadingImage ? '…' : 'Generate'}
+                    </button>
                   </div>
                   {editingSystem.image_url && (
                     <img src={editingSystem.image_url} alt="" loading="lazy" decoding="async" className="mt-2 w-full h-20 object-cover rounded-lg border border-white/10" />
