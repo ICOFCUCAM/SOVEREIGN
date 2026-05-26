@@ -78,11 +78,12 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
         {/* propagation corridors */}
         {arcs.map(([a, b, d], i) => {
           const dd = arcPath(a, b);
+          const pc = pts[a]?.c.color || accent;
           return (
             <g key={`a${i}`}>
-              <path d={dd} fill="none" stroke={accent} strokeOpacity="0.18" strokeWidth="0.4" />
+              <path d={dd} fill="none" stroke={pc} strokeOpacity="0.16" strokeWidth="0.4" />
               <path d={dd} fill="none" stroke="#fff" strokeWidth="0.9" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${d}s` }} />
-              <path d={dd} fill="none" stroke={accent} strokeWidth="1.4" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${d + 1.3}s`, animationDuration: '3s' }} />
+              <path d={dd} fill="none" stroke={pc} strokeWidth="1.4" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${d + 1.3}s`, animationDuration: '3s' }} />
             </g>
           );
         })}
