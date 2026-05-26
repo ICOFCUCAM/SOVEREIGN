@@ -444,6 +444,26 @@ const AdminPage: React.FC = () => {
     setUploadingImage(false);
   };
 
+  const generateDomainHero = async () => {
+    const d = editing;
+    if (!d?.domain_name?.trim()) { toast.error('Add a domain name first'); return; }
+    const prompt = `Hero key art for the premium domain "${d.domain_name}"${d.category ? `, in the ${d.category} category` : ''}.${d.tagline ? ` ${d.tagline}.` : ''} Evoke its brand identity as a flagship digital asset.`;
+    setUploadingImage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { prompt, mediaClass: 'cinematic', orientation: 'landscape' },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (!data?.url) throw new Error('No image URL returned');
+      setEditing((cur) => (cur ? { ...cur, hero_image_url: data.url } : cur));
+      toast.success('Hero art generated');
+    } catch (e) {
+      toast.error(`Image generation failed: ${(e as Error).message}`);
+    }
+    setUploadingImage(false);
+  };
+
   const uploadSystemImage = async (file: File) => {
     if (!file) return;
     setUploadingImage(true);
@@ -1267,8 +1287,13 @@ const AdminPage: React.FC = () => {
                 </div>
                 <div>
                   <label className="text-xs text-white/50 font-medium mb-1.5 block flex items-center gap-1.5"><ImageIcon className="w-3 h-3" /> Hero Image URL</label>
-                  <input value={editing.hero_image_url || ''} onChange={(e) => setEditing({ ...editing, hero_image_url: e.target.value })}
-                    placeholder="https://…/hero.jpg" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white font-mono focus:border-cyan-400/50 focus:outline-none" />
+                  <div className="flex gap-2">
+                    <input value={editing.hero_image_url || ''} onChange={(e) => setEditing({ ...editing, hero_image_url: e.target.value })}
+                      placeholder="https://…/hero.jpg" className="flex-1 min-w-0 px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white font-mono focus:border-cyan-400/50 focus:outline-none" />
+                    <button type="button" disabled={uploadingImage} onClick={generateDomainHero} title="Generate hero art from this domain's name & tagline" className="shrink-0 px-3 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50">
+                      <Sparkles className="w-3.5 h-3.5" /> {uploadingImage ? '…' : 'Generate'}
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
