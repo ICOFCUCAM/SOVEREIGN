@@ -681,7 +681,7 @@ const AdminPage: React.FC = () => {
                       <tr key={b.id} className="border-b border-white/5 hover:bg-white/[0.02] align-top">
                         <td className="px-5 py-3.5 text-cyan-300 text-xs font-mono">{b.system_name || b.system_slug || '—'}</td>
                         <td className="px-3 py-3.5">{b.tier ? <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-purple-500/15 text-purple-300">{b.tier}</span> : <span className="text-white/30">—</span>}</td>
-                        <td className="px-3 py-3.5"><div className="text-white">{b.name || '—'}</div><div className="text-xs text-white/40">{b.email}</div></td>
+                        <td className="px-3 py-3.5"><div className="text-white">{b.name || '—'}</div><a href={`mailto:${b.email}`} className="text-xs text-cyan-300/70 hover:text-cyan-300">{b.email}</a></td>
                         <td className="px-3 py-3.5 text-white/80 text-sm">{b.organization || '—'}</td>
                         <td className="px-3 py-3.5 text-white/55 text-xs max-w-[280px]">{b.message || '—'}</td>
                         <td className="px-3 py-3.5">
