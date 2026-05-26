@@ -171,8 +171,12 @@ const SystemPage: React.FC = () => {
             {/* live operational environment */}
             <div className="relative">
               <div className="absolute -inset-8 rounded-[2rem] blur-[70px] opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle, ${accent}, transparent 70%)` }} />
-              <div className="relative" style={{ aspectRatio: '16 / 12' }}>
+              <div className="relative overflow-hidden rounded-[2rem]" style={{ aspectRatio: '16 / 12' }}>
                 <SystemTelemetry category={product.category} accent={accent} className="h-full" />
+                {/* drop a cinematic scene at /systems/<slug>-scene.jpg to override the telemetry; hides if absent */}
+                <img src={`/systems/${product.slug}-scene.jpg`} alt="" aria-hidden loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
               </div>
             </div>
           </div>

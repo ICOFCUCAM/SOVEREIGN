@@ -36,7 +36,7 @@ const DEVICE_META: Record<string, { icon: LucideIcon; color: string }> = {
 };
 
 const AdminPage: React.FC = () => {
-  useDocumentTitle('Command Center');
+  useDocumentTitle('Command Center', 'Operate the sovereign platform — domains, leads, analytics, ecosystem and deployment governance.');
   const { user, role, isAdmin, loading: authLoading } = useAuth();
   const [authModal, setAuthModal] = useState(false);
   const [tab, setTab] = useState<Tab>('overview');
