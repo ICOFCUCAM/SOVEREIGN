@@ -109,40 +109,29 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
           <circle key={`z${i}`} cx={n.p[0]} cy={n.p[1]} r={n.c.zone} fill={n.c.color} opacity="0.05" filter="url(#wm-zone)" />
         ) : null)}
 
-        {/* sovereign signal propagation — the path stays dark; a luminous packet
-            travels it, a blurred wake trailing the bright head. Timing and
-            intensity vary so it reads as staggered synchronization, not routes. */}
+        {/* nation-to-nation network — links stay faint but visible (the sovereign
+            web), and a luminous packet travels each one leaving a fading comet
+            trail behind a crisp head, illuminating the route as it passes. */}
         {arcs.map(([a, b, d], i) => {
           const dd = arcPath(a, b);
           const pc = pts[a]?.c.color || accent;
-          const dur = 1.9 + (i % 5) * 0.45;
+          const dur = 2.6 + (i % 5) * 0.5;
           return (
             <g key={`a${i}`}>
-              {/* implied corridor — barely-there atmospheric trace */}
-              <path d={dd} fill="none" stroke={pc} strokeOpacity="0.035" strokeWidth="0.16" />
-              {/* segmented intelligence stream — dim packets flowing continuously */}
-              <path d={dd} pathLength={100} fill="none" stroke={pc} strokeWidth="0.4" strokeLinecap="round"
-                strokeDasharray="0.9 7" opacity="0.22"
-                className="animate-signal" style={{ animationDelay: `${d}s`, animationDuration: `${dur * 2.2}s` }} />
-              {/* travelling wake — concentrated glow that fades immediately behind the head */}
+              {/* persistent nation-to-nation link */}
+              <path d={dd} fill="none" stroke={pc} strokeOpacity="0.16" strokeWidth="0.18" strokeLinecap="round" />
+              {/* comet trail — long, dim, blurred streak the light leaves behind */}
+              <path d={dd} pathLength={100} fill="none" stroke={pc} strokeWidth="0.7" strokeLinecap="round"
+                strokeDasharray="16 84" opacity="0.28" filter="url(#wm-glow)"
+                className="animate-signal" style={{ animationDelay: `${d + 0.22}s`, animationDuration: `${dur}s` }} />
+              {/* comet wake — concentrated glow just behind the head */}
               <path d={dd} pathLength={100} fill="none" stroke={pc} strokeWidth="0.9" strokeLinecap="round"
                 strokeDasharray="6 94" opacity="0.6" filter="url(#wm-glow)"
                 className="animate-signal" style={{ animationDelay: `${d + 0.1}s`, animationDuration: `${dur}s` }} />
-              {/* travelling head — crisp luminous packet */}
+              {/* comet head — crisp luminous packet */}
               <path d={dd} pathLength={100} fill="none" stroke="#eafcff" strokeWidth="0.5" strokeLinecap="round"
                 strokeDasharray="1.6 98.4" filter="url(#wm-glow)"
                 className="animate-signal" style={{ animationDelay: `${d}s`, animationDuration: `${dur}s` }} />
-            </g>
-          );
-        })}
-
-        {/* orbital signal layer — faint planetary orbital traces with relays */}
-        {[{ rx: 95, ry: 27, tilt: -13, c: accent, dur: 28 }, { rx: 82, ry: 41, tilt: 19, c: '#7C4DFF', dur: 36 }].map((o, i) => {
-          const ep = `M ${100 + o.rx} 50 A ${o.rx} ${o.ry} 0 1 1 ${100 - o.rx} 50 A ${o.rx} ${o.ry} 0 1 1 ${100 + o.rx} 50`;
-          return (
-            <g key={`orb${i}`} transform={`rotate(${o.tilt} 100 50)`}>
-              <ellipse cx="100" cy="50" rx={o.rx} ry={o.ry} fill="none" stroke={o.c} strokeOpacity="0.1" strokeWidth="0.16" />
-              <circle r="0.7" fill={o.c} filter="url(#wm-glow)"><animateMotion dur={`${o.dur}s`} repeatCount="indefinite" path={ep} /></circle>
             </g>
           );
         })}
