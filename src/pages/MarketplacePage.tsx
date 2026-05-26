@@ -9,8 +9,9 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import DomainCard from '@/components/DomainCard';
 import FeaturedAcquisition from '@/components/marketplace/FeaturedAcquisition';
 import InstitutionListings from '@/components/marketplace/InstitutionListings';
+import BriefingModal from '@/components/BriefingModal';
 import { momentumMap, opportunityScore, acquisitionConfidence } from '@/lib/investor';
-import { Search, SlidersHorizontal, Briefcase, Flame, DollarSign, Layers, Gauge } from 'lucide-react';
+import { Search, SlidersHorizontal, Briefcase, Flame, DollarSign, Layers, Gauge, ShieldCheck } from 'lucide-react';
 
 const CATEGORIES = ['all', 'fintech', 'ai', 'infra', 'govtech', 'saas', 'logistics'];
 type Sort = 'opportunity' | 'trending' | 'score' | 'price_low' | 'price_high';
@@ -25,6 +26,7 @@ const MarketplacePage: React.FC = () => {
   const [sort, setSort] = useState<Sort>('opportunity');
   const [tier, setTier] = useState<'all' | 'premium'>('all');
   const [investorMode, setInvestorMode] = useState(false);
+  const [brief, setBrief] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -93,12 +95,17 @@ const MarketplacePage: React.FC = () => {
                 {investorMode ? `${domains.length} curated domains · AI-scored · ranked by opportunity intelligence` : `Domains, deployable institutions and national runtimes — AI-scored and procurement-ready.`}
               </p>
             </div>
-            <button onClick={() => { setInvestorMode(!investorMode); if (!investorMode) setSort('opportunity'); }}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition ${
-                investorMode ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white' : 'glass text-white/80 hover:glass-strong'
-              }`}>
-              <Briefcase className="w-4 h-4" /> Investor Mode {investorMode ? 'On' : 'Off'}
-            </button>
+            <div className="flex items-center gap-2.5">
+              <button onClick={() => setBrief(true)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl glass hover:glass-strong text-white/80 font-semibold text-sm transition">
+                <ShieldCheck className="w-4 h-4 text-cyan-400" /> Request briefing
+              </button>
+              <button onClick={() => { setInvestorMode(!investorMode); if (!investorMode) setSort('opportunity'); }}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition ${
+                  investorMode ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white' : 'glass text-white/80 hover:glass-strong'
+                }`}>
+                <Briefcase className="w-4 h-4" /> Investor Mode {investorMode ? 'On' : 'Off'}
+              </button>
+            </div>
           </div>
 
           {/* Investor portfolio thesis */}
@@ -219,6 +226,7 @@ const MarketplacePage: React.FC = () => {
       </main>
 
       <PlatformFooter />
+      {brief && <BriefingModal systemName="SOVEREIGN" slug="platform" accent="#00C2FF" onClose={() => setBrief(false)} />}
     </div>
   );
 };
