@@ -142,6 +142,9 @@ const InstitutionListings: React.FC = () => {
             <div className="text-[11px] font-mono uppercase tracking-[0.28em] text-cyan-300/70 mb-2">Sovereign capability acquisition</div>
             <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">CIVICOS — deployable government operating system.</h2>
             <p className="text-white/50 mt-2 max-w-2xl">Acquire by capability tier — from a foundational government stack to civilization-scale sovereign infrastructure.</p>
+            <Link to="/systems/civicos" className="group inline-flex items-center gap-2 mt-4 text-sm font-medium text-white/70 hover:text-white transition">
+              View CIVICOS overview <ArrowUpRight className="w-4 h-4 text-cyan-400 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {civicos.tiers.map((t) => <CivicosTierCard key={t.tier} t={t} />)}
