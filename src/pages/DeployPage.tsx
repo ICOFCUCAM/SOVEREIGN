@@ -12,6 +12,7 @@ const EDGE_NODES: MapNode[] = [
 ];
 const EDGE_ARCS: Array<[number, number, number]> = [
   [0, 2, 0], [2, 6, 0.5], [6, 8, 1], [8, 9, 0.4], [0, 11, 1.2], [6, 7, 0.3], [8, 10, 0.9], [2, 4, 1.4], [0, 1, 1.1],
+  [11, 9, 1.9], [6, 9, 1.6], [2, 8, 1.0], [4, 12, 1.3],
 ];
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
