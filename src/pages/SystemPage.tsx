@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct, Domain } from '@/lib/types';
 import { institutionBlueprint } from '@/lib/institution';
@@ -24,6 +24,8 @@ const STATUS_COLOR: Record<string, string> = { live: '#10B981', arming: '#F59E0B
 
 const SystemPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const tierParam = searchParams.get('tier');
   const [product, setProduct] = useState<EcosystemProduct | null>(null);
   const [domain, setDomain] = useState<Domain | null>(null);
   const [related, setRelated] = useState<EcosystemProduct[]>([]);
@@ -76,6 +78,14 @@ const SystemPage: React.FC = () => {
   const accent = product.accent || '#00D9FF';
   const caps = Array.isArray(product.capabilities) ? product.capabilities : [];
   const metrics = Array.isArray(product.metrics) ? product.metrics : [];
+  const tiers = Array.isArray(product.tiers) ? product.tiers : [];
+  const selectedTier = tierParam ? tiers.find((t) => t.tier.toLowerCase() === tierParam.toLowerCase()) : undefined;
+  // Tiered products price by deployment tier — never by a linked domain asset.
+  const priceDisplay = selectedTier ? selectedTier.price
+    : tiers.length ? `${tiers[0].price} – ${tiers[tiers.length - 1].price}`
+    : domain ? `$${Number(domain.price_usd).toLocaleString()}` : null;
+  const priceLabel = selectedTier ? 'Starting deployment' : tiers.length ? 'Deployment value' : 'Valuation';
+  const acquireHref = tiers.length ? '/marketplace' : domain ? `/d/${encodeURIComponent(domain.domain_name)}` : '/marketplace';
   const bp = institutionBlueprint(product.name, SLUG_BLUEPRINT[product.slug] || 'general');
 
   // Prefer the system's own real data; fall back to the category blueprint.
@@ -107,8 +117,15 @@ const SystemPage: React.FC = () => {
             {/* identity */}
             <div>
               <div className="text-[11px] font-mono uppercase tracking-[0.25em] mb-3" style={{ color: accent }}>{product.category}</div>
-              <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tighter mb-4">{product.name}</h1>
-              <p className="text-2xl text-white/70 font-light max-w-2xl mb-5">{product.tagline}</p>
+              <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tighter mb-4">
+                {product.name}{selectedTier && <span className="text-white/50"> · {selectedTier.tier}</span>}
+              </h1>
+              {selectedTier && (
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4 text-[11px] font-mono uppercase tracking-wider" style={{ background: `${accent}1f`, color: accent, border: `1px solid ${accent}33` }}>
+                  {selectedTier.tier} tier · {selectedTier.price}{selectedTier.scope ? ` · ${selectedTier.scope}` : ''}
+                </div>
+              )}
+              <p className="text-2xl text-white/70 font-light max-w-2xl mb-5">{selectedTier?.label || product.tagline}</p>
               <p className="text-white/50 max-w-2xl leading-relaxed mb-7">{product.description}</p>
 
               <div className="flex flex-wrap items-center gap-2 mb-7">
@@ -136,15 +153,10 @@ const SystemPage: React.FC = () => {
                     <ExternalLink className="w-4 h-4" /> View live preview
                   </a>
                 )}
-                {domain ? (
-                  <Link to={`/d/${encodeURIComponent(domain.domain_name)}`} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
-                    <DollarSign className="w-4 h-4 text-cyan-400" /> Acquire institution · ${Number(domain.price_usd).toLocaleString()}
-                  </Link>
-                ) : (
-                  <Link to="/marketplace" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
-                    <DollarSign className="w-4 h-4 text-cyan-400" /> Explore acquisition <ChevronRight className="w-4 h-4 text-white/40" />
-                  </Link>
-                )}
+                <Link to={acquireHref} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
+                  <DollarSign className="w-4 h-4 text-cyan-400" />
+                  {priceDisplay ? <>Acquire · {priceDisplay}</> : <>Explore acquisition <ChevronRight className="w-4 h-4 text-white/40" /></>}
+                </Link>
               </div>
             </div>
 
@@ -300,23 +312,17 @@ const SystemPage: React.FC = () => {
               </div>
             </div>
             <div className="lg:text-right">
-              {domain && (
+              {priceDisplay && (
                 <>
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-1">Valuation</div>
-                  <div className="font-display text-4xl font-bold text-white mb-5 tabular-nums">${Number(domain.price_usd).toLocaleString()}</div>
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-1">{selectedTier ? `${selectedTier.tier} tier · ${priceLabel}` : priceLabel}</div>
+                  <div className="font-display text-4xl font-bold text-white mb-5 tabular-nums">{priceDisplay}</div>
                 </>
               )}
               <div className="flex flex-col gap-2 lg:items-end">
-                {domain ? (
-                  <Link to={`/d/${encodeURIComponent(domain.domain_name)}`} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold w-full lg:w-auto" style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)` }}>
-                    <DollarSign className="w-4 h-4" /> Acquire the institution
-                  </Link>
-                ) : (
-                  <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold w-full lg:w-auto" style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)` }}>
-                    <DollarSign className="w-4 h-4" /> Explore acquisition
-                  </Link>
-                )}
-                <span className="text-[11px] font-mono text-white/35">Strategic partnership & investment welcomed</span>
+                <Link to={acquireHref} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold w-full lg:w-auto" style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)` }}>
+                  <DollarSign className="w-4 h-4" /> {tiers.length ? 'Request deployment' : domain ? 'Acquire the institution' : 'Explore acquisition'}
+                </Link>
+                <span className="text-[11px] font-mono text-white/35">Strategic partnership &amp; investment welcomed</span>
               </div>
             </div>
           </div>
