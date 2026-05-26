@@ -257,8 +257,8 @@ const MarketplacePage: React.FC = () => {
               </div>
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] font-mono text-white/45">
                 <span className="inline-flex items-center gap-1.5 text-emerald-300/80"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Market operational</span>
-                <span>47 <span className="text-white/30">edge nodes</span></span>
-                <span>23 <span className="text-white/30">regions</span></span>
+                <span>{domains.length} <span className="text-white/30">domain assets</span></span>
+                <span>{products.length} <span className="text-white/30">sovereign systems</span></span>
                 <span>99.99% <span className="text-white/30">uptime</span></span>
               </div>
             </div>
