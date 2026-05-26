@@ -17,7 +17,7 @@ function emblemFor(category: string): React.ComponentType<{ className?: string; 
   return Boxes;
 }
 
-const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip }) => {
+const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean; index: number; total: number }> = ({ p, flip, index, total }) => {
   const Emblem = emblemFor(p.category);
   const metrics = (p.metrics || []).slice(0, 3);
   const caps = (p.capabilities || []).slice(0, 4);
@@ -40,7 +40,10 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip
 
       {/* editorial statement */}
       <div className={flip ? 'lg:order-1' : ''}>
-        <div className="text-[10px] font-mono uppercase tracking-[0.26em] mb-6" style={{ color: p.accent }}>{p.category}</div>
+        <div className="flex items-center gap-3 mb-6">
+          <span className="font-mono text-[11px] tabular-nums text-white/30">{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span>
+          <span className="text-[10px] font-mono uppercase tracking-[0.26em]" style={{ color: p.accent }}>{p.category}</span>
+        </div>
         <h3 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.98] mb-6">{p.name}</h3>
         <p className="text-xl text-white/55 max-w-md leading-relaxed mb-9">{p.tagline}</p>
         {caps.length > 0 && (
@@ -104,7 +107,7 @@ const EcosystemSectors: React.FC = () => {
 
         <div className="space-y-40 sm:space-y-56">
           {products.map((p, i) => (
-            <Reveal key={p.id} y={40}><SectorPanel p={p} flip={i % 2 === 1} /></Reveal>
+            <Reveal key={p.id} y={40}><SectorPanel p={p} flip={i % 2 === 1} index={i} total={products.length} /></Reveal>
           ))}
         </div>
       </div>
