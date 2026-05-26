@@ -1,5 +1,6 @@
 import React from 'react';
 import type { EcosystemProduct } from '@/lib/types';
+import HudCorners from '@/components/HudCorners';
 import { Clock, Layers } from 'lucide-react';
 
 const TIER_COLOR: Record<string, string> = {
@@ -23,6 +24,7 @@ const SystemTiers: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
               <div key={t.tier} className="relative rounded-2xl border border-white/10 bg-white/[0.015] p-5 overflow-hidden">
                 <span className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${c}, transparent)` }} />
                 <span className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl opacity-15" style={{ background: c }} />
+                <HudCorners color={c} className="opacity-30" />
                 <div className="relative">
                   <span className="inline-block text-[10px] font-mono uppercase tracking-[0.2em] px-2.5 py-1 rounded mb-4" style={{ background: `${c}1f`, color: c }}>{t.tier}</span>
                   <div className="text-2xl font-bold text-white tabular-nums leading-none">{t.price}</div>
