@@ -13,7 +13,7 @@ import Reveal from '@/components/Reveal';
 import { useCountUp } from '@/hooks/useCountUp';
 import {
   ArrowUpRight, ArrowRight, ShieldCheck, Cpu, Activity, Globe2, Check, Star,
-  Banknote, Landmark, Truck, Server, Building2,
+  Banknote, Landmark, Truck, Server, Building2, Search, X,
 } from 'lucide-react';
 
 const WorldMap = lazy(() => import('@/components/WorldMap'));
@@ -185,6 +185,7 @@ const MarketplacePage: React.FC = () => {
   const [products, setProducts] = useState<EcosystemProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [brief, setBrief] = useState(false);
+  const [q, setQ] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -206,6 +207,13 @@ const MarketplacePage: React.FC = () => {
   const strategic = useMemo(() => domains.filter((d) => Number(d.price_usd) >= 4e5 && Number(d.price_usd) < 1e6), [domains]);
   const infra = useMemo(() => domains.filter((d) => Number(d.price_usd) < 4e5), [domains]);
   const gradeOf = (d: Domain): keyof typeof GRADE => (Number(d.price_usd) >= 1e6 ? 'sovereign' : Number(d.price_usd) >= 4e5 ? 'strategic' : 'infrastructure');
+
+  // institutional command query — filters across every domain and system
+  const ql = q.trim().toLowerCase();
+  const searching = ql.length > 0;
+  const resultDomains = useMemo(() => (searching ? domains.filter((d) => `${d.domain_name} ${d.category || ''} ${d.tagline || ''}`.toLowerCase().includes(ql)) : []), [domains, ql, searching]);
+  const resultSystems = useMemo(() => (searching ? systems.filter((p) => `${p.name} ${p.category || ''} ${p.tagline || ''}`.toLowerCase().includes(ql)) : []), [systems, ql, searching]);
+  const resultCount = resultDomains.length + resultSystems.length;
 
   return (
     <div className="relative min-h-screen text-white">
@@ -341,6 +349,59 @@ const MarketplacePage: React.FC = () => {
           </Reveal>
         </section>
 
+        {/* ── institutional command query — searches every domain + system ── */}
+        {!loading && (
+          <section className="px-4 sm:px-6 lg:px-8 pb-12">
+            <div className="max-w-7xl mx-auto">
+              <div className="group relative rounded-xl border border-white/10 bg-white/[0.02] focus-within:border-cyan-400/40 transition-colors overflow-hidden">
+                <span className="absolute inset-x-0 top-0 h-px opacity-60" style={{ background: `linear-gradient(90deg, transparent, ${ACCENT}66, transparent)` }} />
+                <div className="flex items-center gap-3 px-4 h-14">
+                  <Search className="w-4 h-4 text-cyan-300/60 shrink-0" />
+                  <input value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search the sovereign exchange"
+                    placeholder="Query the sovereign exchange — system, sector or capability…"
+                    className="flex-1 bg-transparent text-sm font-mono tracking-wide text-white placeholder:text-white/30 focus:outline-none" />
+                  {q ? (
+                    <button onClick={() => setQ('')} aria-label="Clear" className="text-white/40 hover:text-white transition shrink-0"><X className="w-4 h-4" /></button>
+                  ) : (
+                    <span className="hidden sm:inline text-[9px] font-mono uppercase tracking-[0.22em] text-white/30 shrink-0">{domains.length + systems.length} assets indexed</span>
+                  )}
+                </div>
+              </div>
+              {searching && (
+                <div className="mt-3 text-[11px] font-mono uppercase tracking-[0.18em] text-white/40">
+                  {resultCount} {resultCount === 1 ? 'asset' : 'assets'} matched <span className="text-white/25">·</span> "{q}"
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ── search results — unified across domains + systems ── */}
+        {!loading && searching && (
+          <section className="px-4 sm:px-6 lg:px-8 pb-24">
+            <div className="max-w-7xl mx-auto">
+              {resultCount === 0 ? (
+                <div className="rounded-2xl border border-white/8 p-16 text-center text-white/40">No assets match "{q}".</div>
+              ) : (
+                <div className="space-y-10">
+                  {resultDomains.length > 0 && (
+                    <div>
+                      <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-cyan-300/60 mb-5">Domain assets · {resultDomains.length}</div>
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">{resultDomains.map((d) => <SovereignCard key={d.id} d={d} grade={gradeOf(d)} />)}</div>
+                    </div>
+                  )}
+                  {resultSystems.length > 0 && (
+                    <div>
+                      <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-violet-300/60 mb-5">Deployable systems · {resultSystems.length}</div>
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">{resultSystems.map((p) => <SystemProductCard key={p.id} p={p} />)}</div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {/* registry loading skeleton — holds layout so cards don't pop / shift */}
         {loading && (
           <section className="px-4 sm:px-6 lg:px-8 pb-24">
@@ -354,7 +415,7 @@ const MarketplacePage: React.FC = () => {
         )}
 
         {/* ── SECTION 4 — sovereign systems (the full sovereign + strategic registry) ── */}
-        {!loading && (sovereign.length > 0 || strategic.length > 0) && (
+        {!loading && !searching && (sovereign.length > 0 || strategic.length > 0) && (
           <section id="sovereign" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 pb-24">
             <div className="max-w-7xl mx-auto">
               <SectionHead kicker="Sovereign-grade" title="Sovereign systems." to="/ecosystem" cta={`${sovereign.length + strategic.length} systems`} />
@@ -376,7 +437,7 @@ const MarketplacePage: React.FC = () => {
         )}
 
         {/* ── SECTION 5 — infrastructure & deployment systems (all remaining assets) ── */}
-        {!loading && infra.length > 0 && (
+        {!loading && !searching && infra.length > 0 && (
           <section id="infrastructure" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 pb-24">
             <div className="max-w-7xl mx-auto">
               <SectionHead kicker="Infrastructure" title="Infrastructure & deployment systems." to="/ecosystem" cta={`${infra.length} systems`} />
@@ -388,7 +449,7 @@ const MarketplacePage: React.FC = () => {
         )}
 
         {/* ── SECTION 5b — deployable systems (every ecosystem product) ── */}
-        {!loading && systems.length > 0 && (
+        {!loading && !searching && systems.length > 0 && (
           <section id="systems" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 pb-24">
             <div className="max-w-7xl mx-auto">
               <SectionHead kicker="Deployable systems" title="Sovereign & ministry systems." to="/ecosystem" cta={`${systems.length} systems`} />
