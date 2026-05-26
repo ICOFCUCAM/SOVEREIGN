@@ -12,6 +12,7 @@ import SystemTelemetry from '@/components/SystemTelemetry';
 import SystemIntelligence from '@/components/SystemIntelligence';
 import SystemTiers from '@/components/SystemTiers';
 import BriefingModal from '@/components/BriefingModal';
+import SystemGallery from '@/components/SystemGallery';
 import { ArrowLeft, ExternalLink, DollarSign, CheckCircle2, Activity, Globe, Layers, ChevronRight, ArrowUpRight } from 'lucide-react';
 
 const SLUG_BLUEPRINT: Record<string, string> = {
@@ -40,6 +41,8 @@ const SystemPage: React.FC = () => {
   const [modules, setModules] = useState<EcosystemProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [briefing, setBriefing] = useState(false);
+  const [gallery, setGallery] = useState(false);
+  const scrollToTiers = () => document.getElementById('tiers')?.scrollIntoView({ behavior: 'smooth' });
   useDocumentTitle(product?.name, product?.tagline || undefined);
 
   useEffect(() => {
@@ -157,16 +160,14 @@ const SystemPage: React.FC = () => {
               )}
 
               <div className="flex flex-wrap gap-3">
-                {product.url && (
-                  <a href={product.url} target="_blank" rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all"
-                    style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)`, boxShadow: `0 0 40px ${accent}30` }}>
-                    <ExternalLink className="w-4 h-4" /> View live preview
-                  </a>
-                )}
+                <button onClick={() => setGallery(true)}
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all"
+                  style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)`, boxShadow: `0 0 40px ${accent}30` }}>
+                  <ExternalLink className="w-4 h-4" /> View preview
+                </button>
                 {tiers.length ? (
-                  <button onClick={() => setBriefing(true)} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
-                    <DollarSign className="w-4 h-4 text-cyan-400" /> Acquire · {priceDisplay}
+                  <button onClick={() => (selectedTier ? setBriefing(true) : scrollToTiers())} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
+                    <DollarSign className="w-4 h-4 text-cyan-400" /> {selectedTier ? <>Acquire · {priceDisplay}</> : <>Choose a tier · {priceDisplay}</>}
                   </button>
                 ) : (
                   <Link to={acquireHref} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
@@ -397,6 +398,7 @@ const SystemPage: React.FC = () => {
 
       <PlatformFooter />
       {briefing && <BriefingModal systemName={product.name} slug={product.slug} tier={selectedTier?.tier} accent={accent} onClose={() => setBriefing(false)} />}
+      {gallery && <SystemGallery slug={product.slug} systemName={product.name} url={product.url} accent={accent} onClose={() => setGallery(false)} />}
     </div>
   );
 };

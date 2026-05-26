@@ -12,7 +12,7 @@ const SystemTiers: React.FC<{ p: EcosystemProduct; selected?: string }> = ({ p, 
   const tiers = p.tiers || [];
   if (tiers.length === 0) return null;
   return (
-    <section className="px-4 sm:px-6 lg:px-8 py-12">
+    <section id="tiers" className="scroll-mt-24 px-4 sm:px-6 lg:px-8 py-12">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-end justify-between gap-4 mb-7">
           <h2 className="text-2xl font-bold text-white">Acquisition tiers</h2>
