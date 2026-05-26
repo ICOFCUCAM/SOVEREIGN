@@ -161,8 +161,10 @@ const MarketplacePage: React.FC = () => {
     })();
   }, []);
 
-  const sovereign = useMemo(() => domains.filter((d) => Number(d.price_usd) >= 4e5).slice(0, 4), [domains]);
-  const infra = useMemo(() => domains.filter((d) => Number(d.price_usd) < 4e5).slice(0, 6), [domains]);
+  // every active asset is shown, grouped by deployment class (no truncation)
+  const sovereign = useMemo(() => domains.filter((d) => Number(d.price_usd) >= 1e6), [domains]);
+  const strategic = useMemo(() => domains.filter((d) => Number(d.price_usd) >= 4e5 && Number(d.price_usd) < 1e6), [domains]);
+  const infra = useMemo(() => domains.filter((d) => Number(d.price_usd) < 4e5), [domains]);
   const gradeOf = (d: Domain): keyof typeof GRADE => (Number(d.price_usd) >= 1e6 ? 'sovereign' : Number(d.price_usd) >= 4e5 ? 'strategic' : 'infrastructure');
 
   return (
@@ -174,9 +176,9 @@ const MarketplacePage: React.FC = () => {
       <main>
         {/* ── SECTION 1 — acquisition hero (planet stretches ~3/4 and fills the banner) ── */}
         <section className="relative overflow-hidden h-[50vh] min-h-[400px] px-4 sm:px-6 lg:px-8">
-          {/* planet covering ~3/4 of the width, filling banner height, bleeding off right + bottom */}
-          <div className="absolute right-[-10%] sm:right-[-7%] lg:right-[-4%] bottom-[-36%] sm:bottom-[-32%] lg:bottom-[-30%] w-[98vw] sm:w-[84vw] lg:w-[74vw] max-w-[1280px] pointer-events-none animate-breathe" style={{ transformOrigin: '60% 55%' }}>
-            <img src="/hero-globe.webp" alt="" aria-hidden className="w-full h-auto" style={{ filter: 'saturate(1.05) brightness(0.98)' }} />
+          {/* planet sized by the banner height so it compresses to fit, bleeding off the right */}
+          <div className="absolute right-[-8%] sm:right-[-5%] lg:right-[-3%] top-1/2 -translate-y-1/2 h-[128%] pointer-events-none">
+            <img src="/hero-globe.webp" alt="" aria-hidden className="h-full w-auto max-w-none animate-breathe" style={{ transformOrigin: '55% 50%', filter: 'saturate(1.05) brightness(0.98)' }} />
           </div>
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(95deg, #050816 14%, rgba(5,8,22,0.8) 38%, rgba(5,8,22,0.2) 60%, transparent 76%)' }} />
           {/* far-right operational readout */}
@@ -188,17 +190,17 @@ const MarketplacePage: React.FC = () => {
 
           <div className="relative max-w-7xl mx-auto h-full flex flex-col justify-center">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.28em] mb-8">
+              <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.28em] mb-6">
                 <Star className="w-3 h-3" /> Sovereign marketplace
               </div>
-              <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.92] mb-7">
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.94] mb-5">
                 <span className="text-white">Acquire civilization-</span><br />
                 <span className="text-white">scale </span><span className="text-gradient-cyan">systems.</span>
               </h1>
-              <p className="text-lg text-white/55 max-w-lg leading-relaxed mb-9">
-                The world's most advanced sovereign, financial, infrastructure and intelligence systems. Deployable. Interoperable. Sovereign by design.
+              <p className="text-base text-white/55 max-w-md leading-relaxed mb-7">
+                The world's most advanced sovereign, financial and intelligence systems — deployable, interoperable, sovereign by design.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 mb-9">
+              <div className="flex flex-col sm:flex-row gap-3 mb-7">
                 <button onClick={() => setBrief(true)} className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
                   style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 40px rgba(0,194,255,0.26)' }}>
                   Acquire now <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -292,24 +294,34 @@ const MarketplacePage: React.FC = () => {
           </Reveal>
         </section>
 
-        {/* ── SECTION 4 — sovereign systems ── */}
-        {!loading && sovereign.length > 0 && (
+        {/* ── SECTION 4 — sovereign systems (the full sovereign + strategic registry) ── */}
+        {!loading && (sovereign.length > 0 || strategic.length > 0) && (
           <section id="sovereign" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 pb-24">
             <div className="max-w-7xl mx-auto">
-              <SectionHead kicker="Sovereign-grade" title="Sovereign systems." to="/ecosystem" cta="View all systems" />
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {sovereign.map((d) => <SovereignCard key={d.id} d={d} grade={gradeOf(d)} />)}
-              </div>
+              <SectionHead kicker="Sovereign-grade" title="Sovereign systems." to="/ecosystem" cta={`${sovereign.length + strategic.length} systems`} />
+              {sovereign.length > 0 && (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-5">
+                  {sovereign.map((d) => <SovereignCard key={d.id} d={d} grade={gradeOf(d)} />)}
+                </div>
+              )}
+              {strategic.length > 0 && (
+                <>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/40 mb-5 mt-2">Strategic infrastructure · {strategic.length}</div>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    {strategic.map((d) => <SovereignCard key={d.id} d={d} grade={gradeOf(d)} />)}
+                  </div>
+                </>
+              )}
             </div>
           </section>
         )}
 
-        {/* ── SECTION 5 — infrastructure & deployment systems ── */}
+        {/* ── SECTION 5 — infrastructure & deployment systems (all remaining assets) ── */}
         {!loading && infra.length > 0 && (
           <section id="infrastructure" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 pb-24">
             <div className="max-w-7xl mx-auto">
-              <SectionHead kicker="Infrastructure" title="Infrastructure & deployment systems." to="/ecosystem" cta="View all infrastructure" />
-              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+              <SectionHead kicker="Infrastructure" title="Infrastructure & deployment systems." to="/ecosystem" cta={`${infra.length} systems`} />
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {infra.map((d) => <InfraCard key={d.id} d={d} />)}
               </div>
             </div>
