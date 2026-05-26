@@ -393,6 +393,7 @@ const AdminPage: React.FC = () => {
     { icon: DollarSign, label: 'Value Locked', val: `$${(stats.totalValue / 1000).toFixed(1)}k`, sub: `${domains.length ? '$' + Math.round(stats.totalValue / Math.max(1, domains.length)).toLocaleString() : '—'} avg`, color: '#10B981' },
     { icon: Users, label: 'Total Inquiries', val: stats.leadCount, sub: `${stats.newLeadsToday} today`, color: '#7C3AED' },
     { icon: TrendingUp, label: 'Unique Visitors', val: stats.uniqueVisitors, sub: `${stats.totalViews.toLocaleString()} views`, color: '#F59E0B' },
+    { icon: ShieldAlert, label: 'Deployment Briefings', val: briefings.length, sub: `${briefings.filter((b) => (b.status || 'new') === 'new').length} new`, color: '#22D3EE' },
   ];
 
   const leadFilters: Array<{ id: LeadFilter; label: string; count: number }> = [
@@ -453,7 +454,7 @@ const AdminPage: React.FC = () => {
           {/* Overview */}
           {tab === 'overview' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                 {overviewCards.map((m) => {
                   const Icon = m.icon;
                   return (
