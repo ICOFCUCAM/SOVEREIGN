@@ -22,9 +22,14 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, State
             <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-white/40 mb-4">Signal interrupted</div>
             <div className="font-display text-3xl font-bold tracking-tighter mb-3">A subsystem failed to render.</div>
             <p className="text-white/50 mb-7">The channel can be re-established — reload to continue.</p>
-            <a href="/" className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-white text-[#05071A] font-semibold hover:bg-white/90 transition">
-              Return to platform
-            </a>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button onClick={() => window.location.reload()} className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-white text-[#05071A] font-semibold hover:bg-white/90 transition">
+                Reload
+              </button>
+              <a href="/" className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl border border-white/15 text-white font-semibold hover:bg-white/5 transition">
+                Return to platform
+              </a>
+            </div>
           </div>
         </div>
       );
