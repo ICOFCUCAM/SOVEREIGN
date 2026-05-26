@@ -15,7 +15,7 @@ import {
   Plus, Edit2, Trash2, Eye, Globe, Users, DollarSign, TrendingUp, X, Save, Activity, Lock,
   ShieldAlert, LogIn, FileText, Pencil, PlusCircle, Trash, BarChart3, Monitor, Smartphone, Tablet,
   Radio, Search, Share2, Link2, Mail, Image as ImageIcon, MessageCircle, Crown, ShieldCheck, Fingerprint,
-  Boxes, ExternalLink, Film, Play,
+  Boxes, ExternalLink, Film, Play, Sparkles,
 } from 'lucide-react';
 
 type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'channel' | 'narratives' | 'campaigns' | 'analytics' | 'ecosystem' | 'team' | 'activity';
@@ -56,6 +56,8 @@ const AdminPage: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [editNar, setEditNar] = useState<Partial<Narrative> | null>(null);
   const [editCamp, setEditCamp] = useState<Partial<Campaign> | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [genBrief, setGenBrief] = useState('');
   const [editingSystem, setEditingSystem] = useState<Partial<EcosystemProduct> | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   useEscape(() => { setEditing(null); setEditingSystem(null); });
@@ -295,6 +297,26 @@ const AdminPage: React.FC = () => {
     setMedia((prev) => prev.map((m) => (m.id === id ? { ...m, youtube_id: v } : m)));
     const { error } = await supabase.from('media').update({ youtube_id: v }).eq('id', id);
     if (error) toast.error('Could not save video id'); else toast.success('Media updated');
+  };
+
+  const generateContent = async (type: string, mediaClass: string | null, onText: (t: string) => void) => {
+    const brief = genBrief.trim();
+    if (!brief) { toast.error('Add a brief first — what should the AI draft?'); return; }
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: { type, brief, mediaClass: mediaClass || undefined },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const text = (data?.text || '').trim();
+      if (!text) throw new Error('Empty draft returned');
+      onText(text);
+      toast.success('Draft generated');
+    } catch (e) {
+      toast.error(`Generation failed: ${(e as Error).message}`);
+    }
+    setGenerating(false);
   };
 
   const saveNarrative = async () => {
@@ -1421,6 +1443,13 @@ const AdminPage: React.FC = () => {
               </div>
               <input value={editNar.title || ''} onChange={(e) => setEditNar({ ...editNar, title: e.target.value })} placeholder="Title" className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
               <input value={editNar.subtitle || ''} onChange={(e) => setEditNar({ ...editNar, subtitle: e.target.value })} placeholder="Subtitle" className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
+              <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/[0.04] p-3 space-y-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-cyan-300/80"><Sparkles className="w-3.5 h-3.5" /> AI narrative engine</div>
+                <textarea value={genBrief} onChange={(e) => setGenBrief(e.target.value)} placeholder="Brief the engine — subject, angle, tension, the point it must land…" rows={2} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 resize-none" />
+                <button type="button" disabled={generating} onClick={() => generateContent(editNar.kind === 'ad_script' ? 'script' : 'dispatch', editNar.media_class || null, (t) => setEditNar((p) => ({ ...p, body: t })))} className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50">
+                  <Sparkles className="w-3.5 h-3.5" /> {generating ? 'Drafting…' : 'Generate draft'}
+                </button>
+              </div>
               <textarea value={editNar.body || ''} onChange={(e) => setEditNar({ ...editNar, body: e.target.value })} placeholder="Body (line breaks preserved)" rows={10} className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 font-mono leading-relaxed" />
               <div className="flex items-center gap-4">
                 <input value={editNar.read_time || ''} onChange={(e) => setEditNar({ ...editNar, read_time: e.target.value })} placeholder="Read time (e.g. 3 min)" className="flex-1 px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
@@ -1460,7 +1489,14 @@ const AdminPage: React.FC = () => {
                 </select>
                 <input type="date" value={editCamp.scheduled_at ? editCamp.scheduled_at.slice(0, 10) : ''} onChange={(e) => setEditCamp({ ...editCamp, scheduled_at: e.target.value ? new Date(e.target.value).toISOString() : null })} aria-label="Scheduled" className="px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white" />
               </div>
-              <input value={editCamp.asset_ref || ''} onChange={(e) => setEditCamp({ ...editCamp, asset_ref: e.target.value })} placeholder="Asset reference (film, dispatch, note)" className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
+              <textarea value={editCamp.asset_ref || ''} onChange={(e) => setEditCamp({ ...editCamp, asset_ref: e.target.value })} placeholder="Asset reference / copy (film, dispatch, ad copy)" rows={3} className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 resize-none" />
+              <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/[0.04] p-3 space-y-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-cyan-300/80"><Sparkles className="w-3.5 h-3.5" /> AI campaign copy</div>
+                <textarea value={genBrief} onChange={(e) => setGenBrief(e.target.value)} placeholder="Brief the engine — offering, audience, the action you want…" rows={2} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 resize-none" />
+                <button type="button" disabled={generating} onClick={() => generateContent('campaign', editCamp.media_class || null, (t) => setEditCamp((p) => ({ ...p, asset_ref: t })))} className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50">
+                  <Sparkles className="w-3.5 h-3.5" /> {generating ? 'Drafting…' : 'Generate copy'}
+                </button>
+              </div>
             </div>
             <div className="flex justify-end gap-2 mt-6">
               <button onClick={() => setEditCamp(null)} className="px-4 py-2.5 rounded-lg glass text-white/70 text-sm">Cancel</button>
