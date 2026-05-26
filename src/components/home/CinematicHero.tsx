@@ -57,6 +57,12 @@ const CinematicHero: React.FC = () => {
         </div>
       </div>
 
+      {/* scroll cue */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 pointer-events-none">
+        <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30">Enter</span>
+        <span className="w-px h-8 bg-gradient-to-b from-cyan-400/50 to-transparent" />
+      </div>
+
       {/* fade into the next act */}
       <div className="absolute bottom-0 inset-x-0 h-24 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, #050816)' }} />
     </section>
