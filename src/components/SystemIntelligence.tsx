@@ -18,7 +18,7 @@ const deploymentValue = (p: EcosystemProduct): string => {
 };
 
 type Tier = { tier: string; price: string; label?: string; scope?: string; timeline?: string };
-const SystemIntelligence: React.FC<{ p: EcosystemProduct; domain?: Domain | null; tier?: Tier }> = ({ p, domain, tier }) => {
+const SystemIntelligence: React.FC<{ p: EcosystemProduct; domain?: Domain | null; tier?: Tier; onBrief?: () => void }> = ({ p, domain, tier, onBrief }) => {
   const tiered = !!(p.tiers && p.tiers.length);
   const accent = p.accent || '#00D9FF';
   const accent2 = '#7C4DFF';
@@ -37,10 +37,10 @@ const SystemIntelligence: React.FC<{ p: EcosystemProduct; domain?: Domain | null
             <p className="text-white/70 leading-relaxed text-lg mb-7 max-w-2xl">{narrative}</p>
             <div className="flex flex-wrap gap-3">
               {tiered ? (
-                <Link to="/marketplace" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
+                <button onClick={onBrief} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
                   style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})`, boxShadow: `0 0 36px ${accent}44` }}>
                   <DollarSign className="w-4 h-4" /> {tier ? `Acquire · ${tier.price}` : 'Request deployment'}
-                </Link>
+                </button>
               ) : domain ? (
                 <Link to={`/d/${encodeURIComponent(domain.domain_name)}`} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
                   style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})`, boxShadow: `0 0 36px ${accent}44` }}>

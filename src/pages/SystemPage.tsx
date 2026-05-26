@@ -11,6 +11,7 @@ import Reveal from '@/components/Reveal';
 import SystemTelemetry from '@/components/SystemTelemetry';
 import SystemIntelligence from '@/components/SystemIntelligence';
 import SystemTiers from '@/components/SystemTiers';
+import BriefingModal from '@/components/BriefingModal';
 import { ArrowLeft, ExternalLink, DollarSign, CheckCircle2, Activity, Globe, Layers, ChevronRight, ArrowUpRight } from 'lucide-react';
 
 const SLUG_BLUEPRINT: Record<string, string> = {
@@ -31,6 +32,7 @@ const SystemPage: React.FC = () => {
   const [related, setRelated] = useState<EcosystemProduct[]>([]);
   const [modules, setModules] = useState<EcosystemProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [briefing, setBriefing] = useState(false);
   useDocumentTitle(product?.name, product?.tagline || undefined);
 
   useEffect(() => {
@@ -153,10 +155,16 @@ const SystemPage: React.FC = () => {
                     <ExternalLink className="w-4 h-4" /> View live preview
                   </a>
                 )}
-                <Link to={acquireHref} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
-                  <DollarSign className="w-4 h-4 text-cyan-400" />
-                  {priceDisplay ? <>Acquire · {priceDisplay}</> : <>Explore acquisition <ChevronRight className="w-4 h-4 text-white/40" /></>}
-                </Link>
+                {tiers.length ? (
+                  <button onClick={() => setBriefing(true)} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
+                    <DollarSign className="w-4 h-4 text-cyan-400" /> Acquire · {priceDisplay}
+                  </button>
+                ) : (
+                  <Link to={acquireHref} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass hover:glass-strong text-white font-semibold transition">
+                    <DollarSign className="w-4 h-4 text-cyan-400" />
+                    {priceDisplay ? <>Acquire · {priceDisplay}</> : <>Explore acquisition <ChevronRight className="w-4 h-4 text-white/40" /></>}
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -171,7 +179,7 @@ const SystemPage: React.FC = () => {
         </div>
       </section>
 
-      <Reveal><SystemIntelligence p={product} domain={domain} tier={selectedTier} /></Reveal>
+      <Reveal><SystemIntelligence p={product} domain={domain} tier={selectedTier} onBrief={() => setBriefing(true)} /></Reveal>
       <Reveal><SystemTiers p={product} selected={selectedTier?.tier} /></Reveal>
 
       <Reveal>
@@ -319,9 +327,15 @@ const SystemPage: React.FC = () => {
                 </>
               )}
               <div className="flex flex-col gap-2 lg:items-end">
-                <Link to={acquireHref} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold w-full lg:w-auto" style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)` }}>
-                  <DollarSign className="w-4 h-4" /> {tiers.length ? 'Request deployment' : domain ? 'Acquire the institution' : 'Explore acquisition'}
-                </Link>
+                {tiers.length ? (
+                  <button onClick={() => setBriefing(true)} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold w-full lg:w-auto" style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)` }}>
+                    <DollarSign className="w-4 h-4" /> Request deployment
+                  </button>
+                ) : (
+                  <Link to={acquireHref} className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold w-full lg:w-auto" style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)` }}>
+                    <DollarSign className="w-4 h-4" /> {domain ? 'Acquire the institution' : 'Explore acquisition'}
+                  </Link>
+                )}
                 <span className="text-[11px] font-mono text-white/35">Strategic partnership &amp; investment welcomed</span>
               </div>
             </div>
@@ -353,6 +367,7 @@ const SystemPage: React.FC = () => {
       )}
 
       <PlatformFooter />
+      {briefing && <BriefingModal systemName={product.name} slug={product.slug} tier={selectedTier?.tier} accent={accent} onClose={() => setBriefing(false)} />}
     </div>
   );
 };
