@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, Menu, X, BarChart3, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, X, BarChart3, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from './AuthModal';
 
@@ -46,9 +46,7 @@ const PlatformNav: React.FC = () => {
               <Link to="/" aria-label="SOVEREIGN — home" className="flex items-center gap-2.5 group shrink-0">
                 <div className="relative">
                   <div className="absolute inset-0 bg-cyan-400/40 blur-md opacity-40 group-hover:opacity-70 transition-opacity" />
-                  <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center">
-                    <Shield className="w-4 h-4 text-white" />
-                  </div>
+                  <img src="/sovereign-logo.png" alt="" aria-hidden="true" className="relative w-9 h-9 object-contain drop-shadow-[0_0_10px_rgba(0,194,255,0.35)]" />
                 </div>
                 <div className="flex flex-col leading-none">
                   <span className="text-white font-bold text-sm tracking-tight">SOVEREIGN</span>

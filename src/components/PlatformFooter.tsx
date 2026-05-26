@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Globe, Mail, Send, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Globe, Mail, Send, CheckCircle2, ArrowRight } from 'lucide-react';
 import BriefingModal from '@/components/BriefingModal';
 
 const COLUMNS: Array<{ title: string; links: Array<{ label: string; to: string }> }> = [
@@ -116,9 +116,7 @@ const PlatformFooter: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-white" />
-              </div>
+              <img src="/sovereign-logo.png" alt="" aria-hidden="true" className="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(0,194,255,0.35)]" />
               <div>
                 <div className="font-display text-white font-bold tracking-tight">SOVEREIGN</div>
                 <div className="text-[10px] text-cyan-400/60 font-mono tracking-[0.2em]">DIGITAL CIVILIZATION INFRASTRUCTURE</div>
