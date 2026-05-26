@@ -18,8 +18,9 @@ import {
   Boxes, ExternalLink,
 } from 'lucide-react';
 
-type Tab = 'overview' | 'domains' | 'leads' | 'analytics' | 'ecosystem' | 'team' | 'activity';
+type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'analytics' | 'ecosystem' | 'team' | 'activity';
 type LeadFilter = 'all' | 'inquiry' | 'offer' | 'buy_now';
+interface Inquiry { id: string; created_at: string; system_slug: string | null; system_name: string | null; tier: string | null; name: string | null; email: string; organization: string | null; message: string | null }
 
 const ORIGIN_META: Record<string, { icon: LucideIcon; color: string; label: string }> = {
   direct: { icon: Radio, color: '#00D9FF', label: 'Direct' },
@@ -42,6 +43,7 @@ const AdminPage: React.FC = () => {
   const [tab, setTab] = useState<Tab>('overview');
   const [domains, setDomains] = useState<Domain[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [briefings, setBriefings] = useState<Inquiry[]>([]);
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [users, setUsers] = useState<UserRoleRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
@@ -63,8 +65,10 @@ const AdminPage: React.FC = () => {
       fetchRecentAuditLogs(50),
     ]);
     const sys = await supabase.from('ecosystem_products').select('*').order('sort_order', { ascending: true });
+    const inq = await supabase.from('inquiries').select('*').order('created_at', { ascending: false }).limit(200);
     setDomains((d.data || []) as Domain[]);
     setLeads((l.data || []) as Lead[]);
+    setBriefings((inq.data || []) as Inquiry[]);
     setEvents((ev.data || []) as AnalyticsEvent[]);
     setUsers((u.data || []) as UserRoleRow[]);
     setSystems((sys.data || []) as EcosystemProduct[]);
@@ -423,6 +427,7 @@ const AdminPage: React.FC = () => {
               { id: 'overview', label: 'Overview', icon: Activity },
               { id: 'domains', label: `Domains (${domains.length})`, icon: Globe },
               { id: 'leads', label: `Inquiries (${leads.length})`, icon: Users },
+              { id: 'briefings', label: `Briefings (${briefings.length})`, icon: ShieldAlert },
               { id: 'analytics', label: 'Analytics', icon: BarChart3 },
               { id: 'ecosystem', label: `Ecosystem (${systems.length})`, icon: Boxes },
               { id: 'team', label: `Access (${users.length})`, icon: ShieldCheck },
@@ -645,6 +650,41 @@ const AdminPage: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Deployment briefings */}
+          {tab === 'briefings' && (
+            <div className="glass-strong rounded-2xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 text-left text-[10px] font-mono uppercase tracking-widest text-white/40">
+                      <th className="px-5 py-3">System</th>
+                      <th className="px-3 py-3">Tier</th>
+                      <th className="px-3 py-3">Contact</th>
+                      <th className="px-3 py-3">Organization</th>
+                      <th className="px-3 py-3">Context</th>
+                      <th className="px-3 py-3">Received</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {briefings.map((b) => (
+                      <tr key={b.id} className="border-b border-white/5 hover:bg-white/[0.02] align-top">
+                        <td className="px-5 py-3.5 text-cyan-300 text-xs font-mono">{b.system_name || b.system_slug || '—'}</td>
+                        <td className="px-3 py-3.5">{b.tier ? <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-purple-500/15 text-purple-300">{b.tier}</span> : <span className="text-white/30">—</span>}</td>
+                        <td className="px-3 py-3.5"><div className="text-white">{b.name || '—'}</div><div className="text-xs text-white/40">{b.email}</div></td>
+                        <td className="px-3 py-3.5 text-white/80 text-sm">{b.organization || '—'}</td>
+                        <td className="px-3 py-3.5 text-white/55 text-xs max-w-[280px]">{b.message || '—'}</td>
+                        <td className="px-3 py-3.5 text-white/40 text-xs font-mono whitespace-nowrap">{new Date(b.created_at).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                    {briefings.length === 0 && (
+                      <tr><td colSpan={6} className="text-center py-12 text-white/40">No deployment briefings yet · institutional requests will appear here</td></tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
