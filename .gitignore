@@ -26,5 +26,6 @@ dist-ssr
 # local visual-verification tooling (ephemeral)
 .shots/
 .preview-*.mjs
-*-zoom.mjs
+*zoom.mjs
+.mkt*.mjs
 .fav-*.py
