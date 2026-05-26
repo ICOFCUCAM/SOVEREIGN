@@ -65,6 +65,9 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean; index: number;
             ))}
           </div>
         )}
+        {p.tiers && p.tiers.length > 0 && (
+          <div className="text-sm text-white/45 mb-6">From <span className="text-white font-semibold tabular-nums">{p.tiers[0].price}</span> · {p.tiers.length} deployment tiers</div>
+        )}
         <Link to={`/systems/${p.slug}`} className="group inline-flex items-center gap-2 text-white font-semibold text-lg">
           Explore {p.name} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" style={{ color: p.accent }} />
         </Link>
