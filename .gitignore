@@ -28,3 +28,4 @@ dist-ssr
 .preview-*.mjs
 .fav-white.py
 .hero-zoom.mjs
+.close-zoom.mjs
