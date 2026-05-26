@@ -87,10 +87,10 @@ const MarketplacePage: React.FC = () => {
                 <span className="text-xs font-mono uppercase tracking-widest text-cyan-300">{investorMode ? 'Investor Intelligence' : 'Sovereign Marketplace'}</span>
               </div>
               <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight text-white mb-2">
-                {investorMode ? <>The sovereign opportunity <span className="text-gradient-cyan">index.</span></> : <>The premium digital asset <span className="text-gradient-cyan">inventory.</span></>}
+                {investorMode ? <>The sovereign opportunity <span className="text-gradient-cyan">index.</span></> : <>Sovereign capability <span className="text-gradient-cyan">acquisition.</span></>}
               </h1>
               <p className="text-white/50 max-w-2xl">
-                {domains.length} curated domains · AI-scored · ranked by opportunity intelligence
+                {investorMode ? `${domains.length} curated domains · AI-scored · ranked by opportunity intelligence` : `Domains, deployable institutions and national runtimes — AI-scored and procurement-ready.`}
               </p>
             </div>
             <button onClick={() => { setInvestorMode(!investorMode); if (!investorMode) setSort('opportunity'); }}
