@@ -4,7 +4,7 @@ import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import PageSubNav from '@/components/PageSubNav';
-import BriefingModal from '@/components/BriefingModal';
+import SovereignBriefing from '@/components/SovereignBriefing';
 import VideoModal from '@/components/VideoModal';
 import CrisisSimulation from '@/components/CrisisSimulation';
 import HudCorners from '@/components/HudCorners';
@@ -239,7 +239,7 @@ const ChannelPage: React.FC = () => {
 
       <PlatformFooter />
       {playing && <VideoModal title={playing.title} kicker={playing.kicker} accent={playing.accent} videoId={playing.video} onClose={() => setPlaying(null)} onBrief={() => { setPlaying(null); setBrief(true); }} />}
-      {brief && <BriefingModal systemName="SOVEREIGN CHANNEL" slug="channel" accent="#00C2FF" onClose={() => setBrief(false)} />}
+      {brief && <SovereignBriefing accent="#00C2FF" onClose={() => setBrief(false)} />}
     </div>
   );
 };
