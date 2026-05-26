@@ -142,6 +142,24 @@
 @keyframes arc-travel { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -120; } }
 .animate-travel { stroke-dasharray: 4 116; animation: arc-travel 2.4s linear infinite; }
 
+/* ── Sovereign planetary intelligence fabric ── */
+/* A luminous signal packet travels a path that is otherwise dark — only the
+   moving pulse reveals its local section (paths use pathLength="100"). */
+@keyframes signal-flow { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+.animate-signal { animation: signal-flow 3.2s cubic-bezier(0.5,0,0.5,1) infinite; }
+
+/* synchronization burst emitted by reactor nodes — expanding ripple */
+@keyframes sync-burst { 0% { transform: scale(0.3); opacity: 0; } 14% { opacity: 0.5; } 100% { transform: scale(3.8); opacity: 0; } }
+.animate-burst { animation: sync-burst 6s ease-out infinite; }
+
+/* reactor breathing — layered luminosity that swells and settles */
+@keyframes reactor { 0%,100% { opacity: 0.45; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.14); } }
+.animate-reactor { animation: reactor 4.6s ease-in-out infinite; }
+
+/* drifting atmospheric particle — distant depth haze motes */
+@keyframes mote { 0% { transform: translate3d(0,0,0); opacity: 0; } 18% { opacity: var(--pmax, 0.5); } 82% { opacity: var(--pmax, 0.5); } 100% { transform: translate3d(var(--pdx, 8px), var(--pdy, -12px), 0); opacity: 0; } }
+.animate-mote { animation: mote linear infinite; }
+
 /* slow drifting atmospheric haze — cinematic fog movement */
 @keyframes haze-a { 0%, 100% { transform: translate3d(0,0,0); opacity: 0.7; } 50% { transform: translate3d(40px,-14px,0); opacity: 1; } }
 @keyframes haze-b { 0%, 100% { transform: translate3d(0,0,0); opacity: 0.65; } 50% { transform: translate3d(-46px,12px,0); opacity: 0.95; } }
@@ -178,7 +196,8 @@
   .animate-node, .animate-drift, .animate-core, .animate-pulse-slow,
   .animate-float, .animate-scan, .animate-shimmer, .animate-ring, .animate-travel,
   .animate-haze-a, .animate-haze-b, .animate-flicker, .animate-stage-in, .animate-sweep,
-  .animate-ticker, .animate-route, .animate-pulse {
+  .animate-ticker, .animate-route, .animate-pulse,
+  .animate-signal, .animate-burst, .animate-reactor, .animate-mote {
     animation: none !important;
   }
   html { scroll-behavior: auto; }
