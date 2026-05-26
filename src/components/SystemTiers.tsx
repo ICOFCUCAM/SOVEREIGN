@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import type { EcosystemProduct } from '@/lib/types';
 import HudCorners from '@/components/HudCorners';
 import { Clock, Layers } from 'lucide-react';
@@ -7,7 +8,7 @@ const TIER_COLOR: Record<string, string> = {
   Core: '#3B82F6', Professional: '#14B8A6', Elite: '#7C4DFF', Strategic: '#F59E0B', Prime: '#E8C572',
 };
 
-const SystemTiers: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
+const SystemTiers: React.FC<{ p: EcosystemProduct; selected?: string }> = ({ p, selected }) => {
   const tiers = p.tiers || [];
   if (tiers.length === 0) return null;
   return (
@@ -20,9 +21,10 @@ const SystemTiers: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {tiers.map((t) => {
             const c = TIER_COLOR[t.tier] || p.accent || '#00C2FF';
+            const active = selected?.toLowerCase() === t.tier.toLowerCase();
             return (
-              <div key={t.tier} className="relative rounded-2xl border border-white/10 bg-white/[0.015] p-5 overflow-hidden">
-                <span className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${c}, transparent)` }} />
+              <Link key={t.tier} to={`/systems/${p.slug}?tier=${t.tier.toLowerCase()}`} className={`group relative block rounded-2xl border bg-white/[0.015] p-5 overflow-hidden transition-all hover:-translate-y-1 ${active ? 'border-white/30' : 'border-white/10 hover:border-white/25'}`} style={active ? { boxShadow: `0 0 30px ${c}33` } : undefined}>
+                <span className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${c}, transparent)`, opacity: active ? 1 : 0.6 }} />
                 <span className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl opacity-15" style={{ background: c }} />
                 <HudCorners color={c} className="opacity-30" />
                 <div className="relative">
@@ -37,7 +39,7 @@ const SystemTiers: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
                   )}
                   {t.label && <div className="text-[11px] font-mono uppercase tracking-[0.12em] mt-4" style={{ color: c }}>{t.label}</div>}
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

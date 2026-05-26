@@ -172,7 +172,7 @@ const SystemPage: React.FC = () => {
       </section>
 
       <Reveal><SystemIntelligence p={product} domain={domain} tier={selectedTier} /></Reveal>
-      <Reveal><SystemTiers p={product} /></Reveal>
+      <Reveal><SystemTiers p={product} selected={selectedTier?.tier} /></Reveal>
 
       <Reveal>
       {/* Capabilities */}
