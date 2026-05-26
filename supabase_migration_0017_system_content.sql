@@ -7,3 +7,7 @@ update ecosystem_products set
   description='Sovereign provisioning infrastructure — from acquisition to live institution across a global edge mesh, with DNS orchestration, sovereign data residency and AI provisioning in seconds.',
   capabilities='["DNS orchestration","Sovereign data residency","AI provisioning","Global edge deployment","CI/CD pipelines","Rollback & governance"]'::jsonb
 where slug='deployment-engine';
+update ecosystem_products set
+  description='The commerce layer for sovereign assets — AI valuation, escrowed settlement and institutional acquisition for domains and deployable institutions.',
+  capabilities='["AI valuation engine","Escrowed settlement","Institutional acquisition","Opportunity intelligence","Listing orchestration","Transfer governance"]'::jsonb
+where slug='marketplace-infra';
