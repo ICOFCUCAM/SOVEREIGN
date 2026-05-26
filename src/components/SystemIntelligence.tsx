@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import type { EcosystemProduct, Domain } from '@/lib/types';
 import ValuationRing from '@/components/ValuationRing';
+import HudCorners from '@/components/HudCorners';
 import { DollarSign, MessageSquare, FileText } from 'lucide-react';
 
 const hash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
@@ -51,7 +52,8 @@ const SystemIntelligence: React.FC<{ p: EcosystemProduct; domain?: Domain | null
           </div>
 
           {/* score panel */}
-          <div className="glass-strong rounded-2xl p-6 border border-white/10">
+          <div className="relative glass-strong rounded-2xl p-6 border border-white/10 overflow-hidden">
+            <HudCorners color={accent} className="opacity-50" />
             <div className="text-[11px] font-mono uppercase tracking-widest text-white/40 mb-4">Sovereign capability score</div>
             <div className="flex justify-center mb-5"><ValuationRing score={score} size={140} gradient={[accent, accent2]} /></div>
             <div className="text-center pb-5 border-b border-white/10">
