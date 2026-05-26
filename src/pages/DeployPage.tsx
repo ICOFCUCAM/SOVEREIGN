@@ -9,6 +9,8 @@ const EDGE_NODES: MapNode[] = [
   { lon: 8.7, lat: 50.1, cls: 'treasury' }, { lon: 3.4, lat: 6.5, cls: 'treasury' }, { lon: 36.8, lat: -1.3, cls: 'edge' }, { lon: 55.3, lat: 25.2, cls: 'strategic' },
   { lon: 72.8, lat: 19, cls: 'edge' }, { lon: 103.8, lat: 1.3, cls: 'strategic' }, { lon: 139.7, lat: 35.7, cls: 'core' },
   { lon: 151.2, lat: -33.9, cls: 'edge' }, { lon: -118, lat: 34, cls: 'strategic' }, { lon: 28, lat: -26.2, cls: 'emergency' },
+  { lon: 13.4, lat: 52.5, cls: 'edge' }, { lon: 126.9, lat: 37.5, cls: 'strategic' }, { lon: 121.5, lat: 31.2, cls: 'edge' },
+  { lon: -79.4, lat: 43.7, cls: 'edge' }, { lon: 2.3, lat: 48.9, cls: 'edge' },
 ];
 const EDGE_ARCS: Array<[number, number, number]> = [
   [0, 2, 0], [2, 6, 0.5], [6, 8, 1], [8, 9, 0.4], [0, 11, 1.2], [6, 7, 0.3], [8, 10, 0.9], [2, 4, 1.4], [0, 1, 1.1],
