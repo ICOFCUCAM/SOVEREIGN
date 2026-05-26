@@ -5,6 +5,7 @@ import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import PageSubNav from '@/components/PageSubNav';
 import BriefingModal from '@/components/BriefingModal';
+import VideoModal from '@/components/VideoModal';
 import HudCorners from '@/components/HudCorners';
 import Reveal from '@/components/Reveal';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
@@ -14,7 +15,7 @@ interface Episode { title: string; meta: string; len: string }
 interface Channel {
   id: string; cls: string; kicker: string; title: string; desc: string; accent: string;
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
-  feature: string; featureSlug: string; episodes: Episode[];
+  feature: string; featureSlug: string; episodes: Episode[]; video?: string;
 }
 
 const CHANNELS: Channel[] = [
@@ -66,8 +67,9 @@ const DISTRIBUTION = [
   { icon: Youtube, label: 'Cinematic library', note: 'Public narrative' },
 ];
 
-const FilmTile: React.FC<{ ch: Channel }> = ({ ch }) => (
-  <div className="group relative rounded-2xl overflow-hidden border border-white/10 bg-[#06091a]" style={{ aspectRatio: '16 / 9' }}>
+const FilmTile: React.FC<{ ch: Channel; onPlay: () => void }> = ({ ch, onPlay }) => (
+  <button onClick={onPlay} aria-label={`Play ${ch.feature}`}
+    className="group relative block w-full text-left rounded-2xl overflow-hidden border border-white/10 bg-[#06091a]" style={{ aspectRatio: '16 / 9' }}>
     <span className="absolute -top-16 -right-12 w-56 h-56 rounded-full blur-[90px] opacity-25" style={{ background: ch.accent }} />
     {/* drop-in cinematic still at /channel/<slug>.jpg; hides gracefully */}
     <img src={`/channel/${ch.featureSlug}.jpg`} alt="" aria-hidden loading="lazy" decoding="async"
@@ -78,21 +80,22 @@ const FilmTile: React.FC<{ ch: Channel }> = ({ ch }) => (
     <div className="absolute top-4 left-4 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.22em]" style={{ color: ch.accent }}>
       <span className="w-1.5 h-1.5 rounded-full animate-node" style={{ background: ch.accent }} /> {ch.cls} · {ch.kicker}
     </div>
-    <button className="absolute inset-0 flex items-center justify-center" aria-label={`Play ${ch.feature}`}>
+    <span className="absolute inset-0 flex items-center justify-center">
       <span className="w-16 h-16 rounded-full flex items-center justify-center border border-white/20 bg-white/10 backdrop-blur-sm group-hover:scale-110 transition-transform" style={{ boxShadow: `0 0 40px ${ch.accent}55` }}>
         <Play className="w-6 h-6 text-white translate-x-0.5" fill="currentColor" />
       </span>
-    </button>
-    <div className="absolute bottom-4 inset-x-4">
-      <div className="text-white font-semibold leading-tight">{ch.feature}</div>
-      <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/45 mt-1">Featured · {ch.kicker}</div>
-    </div>
-  </div>
+    </span>
+    <span className="absolute bottom-4 inset-x-4 block">
+      <span className="block text-white font-semibold leading-tight">{ch.feature}</span>
+      <span className="block text-[10px] font-mono uppercase tracking-[0.18em] text-white/45 mt-1">Featured · {ch.kicker}</span>
+    </span>
+  </button>
 );
 
 const ChannelPage: React.FC = () => {
   useDocumentTitle('Channel', 'The Sovereign Channel — cinematic, operational, strategic and crisis-response media from the sovereign operating layer.');
   const [brief, setBrief] = useState(false);
+  const [playing, setPlaying] = useState<{ title: string; kicker: string; accent: string; video?: string } | null>(null);
 
   return (
     <div className="relative min-h-screen text-white">
@@ -153,7 +156,7 @@ const ChannelPage: React.FC = () => {
                     <p className="text-white/55 text-lg leading-relaxed max-w-md mb-8">{ch.desc}</p>
                     <div className="space-y-px rounded-xl overflow-hidden border border-white/8">
                       {ch.episodes.map((ep) => (
-                        <div key={ep.title} className="group flex items-center justify-between gap-4 px-4 py-3.5 bg-white/[0.012] hover:bg-white/[0.04] transition-colors cursor-pointer">
+                        <button key={ep.title} onClick={() => setPlaying({ title: ep.title, kicker: `${ch.cls} · ${ch.kicker}`, accent: ch.accent })} className="group w-full text-left flex items-center justify-between gap-4 px-4 py-3.5 bg-white/[0.012] hover:bg-white/[0.04] transition-colors cursor-pointer">
                           <div className="flex items-center gap-3 min-w-0">
                             <Play className="w-3.5 h-3.5 shrink-0 text-white/30 group-hover:text-white transition-colors" fill="currentColor" />
                             <div className="min-w-0">
@@ -162,12 +165,12 @@ const ChannelPage: React.FC = () => {
                             </div>
                           </div>
                           <span className="text-[11px] font-mono tabular-nums text-white/40 shrink-0">{ep.len}</span>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   </div>
                   <div className={flip ? 'lg:order-1' : ''}>
-                    <FilmTile ch={ch} />
+                    <FilmTile ch={ch} onPlay={() => setPlaying({ title: ch.feature, kicker: `${ch.cls} · ${ch.kicker}`, accent: ch.accent, video: ch.video })} />
                   </div>
                 </div>
               </Reveal>
@@ -215,6 +218,7 @@ const ChannelPage: React.FC = () => {
       </main>
 
       <PlatformFooter />
+      {playing && <VideoModal title={playing.title} kicker={playing.kicker} accent={playing.accent} videoId={playing.video} onClose={() => setPlaying(null)} onBrief={() => { setPlaying(null); setBrief(true); }} />}
       {brief && <BriefingModal systemName="SOVEREIGN CHANNEL" slug="channel" accent="#00C2FF" onClose={() => setBrief(false)} />}
     </div>
   );
