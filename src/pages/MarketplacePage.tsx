@@ -170,13 +170,13 @@ const MarketplacePage: React.FC = () => {
       <PlatformNav />
 
       <main>
-        {/* ── SECTION 1 — acquisition hero (planet stretching across the right) ── */}
-        <section className="relative overflow-hidden px-4 sm:px-6 lg:px-8 pt-36 pb-20">
-          {/* enormous planet bleeding off the right, like the exchange command view */}
-          <div className="absolute right-[-14%] top-[-14%] w-[78vw] sm:w-[68vw] lg:w-[62vw] max-w-[1100px] pointer-events-none animate-breathe" style={{ transformOrigin: '60% 50%' }}>
+        {/* ── SECTION 1 — acquisition hero (planet stretches ~3/4 and fills the banner) ── */}
+        <section className="relative overflow-hidden h-[58vh] min-h-[440px] px-4 sm:px-6 lg:px-8">
+          {/* planet covering ~3/4 of the width, filling banner height, bleeding off right + bottom */}
+          <div className="absolute right-[-10%] sm:right-[-7%] lg:right-[-4%] bottom-[-36%] sm:bottom-[-32%] lg:bottom-[-30%] w-[98vw] sm:w-[84vw] lg:w-[74vw] max-w-[1280px] pointer-events-none animate-breathe" style={{ transformOrigin: '60% 55%' }}>
             <img src="/hero-globe.webp" alt="" aria-hidden className="w-full h-auto" style={{ filter: 'saturate(1.05) brightness(0.98)' }} />
           </div>
-          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(95deg, #050816 16%, rgba(5,8,22,0.78) 40%, rgba(5,8,22,0.15) 62%, transparent 78%)' }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(95deg, #050816 14%, rgba(5,8,22,0.8) 38%, rgba(5,8,22,0.2) 60%, transparent 76%)' }} />
           {/* far-right operational readout */}
           <div className="hidden lg:block absolute right-6 top-1/2 -translate-y-1/2 text-right pointer-events-none">
             <div className="text-[10px] font-mono text-white/40 tabular-nums">24.7136° N</div>
@@ -184,7 +184,7 @@ const MarketplacePage: React.FC = () => {
             <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-cyan-300/50 leading-relaxed">Global<br />sovereign<br />infrastructure</div>
           </div>
 
-          <div className="relative max-w-7xl mx-auto min-h-[58vh] flex flex-col justify-center">
+          <div className="relative max-w-7xl mx-auto h-full flex flex-col justify-center">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.28em] mb-8">
                 <Star className="w-3 h-3" /> Sovereign marketplace
