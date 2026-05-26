@@ -281,6 +281,14 @@ const AdminPage: React.FC = () => {
     await supabase.from('inquiries').update({ status }).eq('id', id);
   };
 
+  const exportBriefings = () => {
+    const head = ['Created', 'System', 'Tier', 'Name', 'Email', 'Organization', 'Status', 'Message'];
+    const rows = briefings.map((b) => [b.created_at, b.system_name || b.system_slug || '', b.tier || '', b.name || '', b.email, b.organization || '', b.status || 'new', (b.message || '').replace(/\s+/g, ' ')]);
+    const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    const a = document.createElement('a'); a.href = url; a.download = 'sovereign-briefings.csv'; a.click(); URL.revokeObjectURL(url);
+  };
+
   const updateLeadStatus = async (id: string, status: string) => {
     const target = leads.find((l) => l.id === id);
     await supabase.from('leads').update({ status }).eq('id', id);
@@ -671,6 +679,11 @@ const AdminPage: React.FC = () => {
                   {f} <span className="text-white/40">{f === 'all' ? briefings.length : briefings.filter((b) => (b.status || 'new') === f).length}</span>
                 </button>
               ))}
+              {briefings.length > 0 && (
+                <button onClick={exportBriefings} className="ml-auto px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider glass text-white/60 hover:text-white transition flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" /> Export CSV
+                </button>
+              )}
             </div>
             <div className="glass-strong rounded-2xl overflow-hidden">
               <div className="overflow-x-auto">
