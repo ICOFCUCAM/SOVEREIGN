@@ -27,3 +27,4 @@ dist-ssr
 .shots/
 .preview-*.mjs
 .fav-white.py
+.hero-zoom.mjs

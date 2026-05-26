@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import Cityscape from '@/components/home/Cityscape';
 
 const Globe = lazy(() => import('@/components/home/Globe'));
@@ -12,6 +12,8 @@ const Globe = lazy(() => import('@/components/home/Globe'));
 const PLATE = (import.meta.env.VITE_HERO_PLATE as string | undefined)?.trim() || '';
 
 const HeroEnvironment: React.FC = () => {
+  // Prefer the photoreal globe plate; fall back to the live SVG globe if absent.
+  const [photoGlobe, setPhotoGlobe] = useState(true);
   return (
     <div className="absolute inset-0">
       {/* deep atmosphere */}
@@ -39,17 +41,24 @@ const HeroEnvironment: React.FC = () => {
             <div key={`pt${i}`} className="absolute w-0.5 h-0.5 rounded-full bg-cyan-300/40 animate-float"
               style={{ left: `${(i * 41) % 100}%`, top: `${(i * 67) % 96}%`, animationDelay: `${i * 0.35}s`, animationDuration: `${7 + (i % 6)}s` }} />
           ))}
-          {/* embedded globe — width-driven square so it never collapses or clips */}
-          <div className="absolute z-[5] top-[10%] right-[-6%] sm:right-[-2%] lg:right-[3%] w-[82vw] sm:w-[58vw] lg:w-[44vw] max-w-[600px] aspect-square"
-            style={{ transform: 'translate(calc(var(--px) * -10px), calc(var(--py) * -10px))' }}>
-            <Suspense fallback={<div className="w-full h-full rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,194,255,0.12), transparent 66%)' }} />}>
-              <Globe className="w-full h-full" />
-            </Suspense>
-            {/* optional cinematic globe plate — drop a transparent PNG at /hero-globe.png to use it; hides if absent */}
-            <img src="/hero-globe.png" alt="" aria-hidden loading="lazy" decoding="async"
-              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-          </div>
+          {/* embedded globe — photoreal plate bleeding off the right edge for
+              planetary scale; live SVG globe is the fallback if the plate is absent */}
+          {photoGlobe ? (
+            <div className="absolute z-[5] top-[6%] right-[-12%] sm:right-[-8%] lg:right-[-4%] w-[92vw] sm:w-[66vw] lg:w-[56vw] max-w-[820px] aspect-square pointer-events-none"
+              style={{ transform: 'translate(calc(var(--px) * -12px), calc(var(--py) * -12px))' }}>
+              <img src="/hero-globe.webp" alt="" aria-hidden decoding="async"
+                className="w-full h-full object-contain"
+                style={{ filter: 'drop-shadow(0 0 80px rgba(0,150,255,0.25))' }}
+                onError={() => setPhotoGlobe(false)} />
+            </div>
+          ) : (
+            <div className="absolute z-[5] top-[10%] right-[-6%] sm:right-[-2%] lg:right-[3%] w-[82vw] sm:w-[58vw] lg:w-[44vw] max-w-[600px] aspect-square"
+              style={{ transform: 'translate(calc(var(--px) * -10px), calc(var(--py) * -10px))' }}>
+              <Suspense fallback={<div className="w-full h-full rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,194,255,0.12), transparent 66%)' }} />}>
+                <Globe className="w-full h-full" />
+              </Suspense>
+            </div>
+          )}
           {/* full-bleed megacity floor */}
           <div className="absolute bottom-0 inset-x-0 h-[44%]" style={{ transform: 'translate(calc(var(--px) * 4px), 0)' }}>
             <Cityscape className="w-full h-full" />
