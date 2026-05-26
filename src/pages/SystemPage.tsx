@@ -185,10 +185,11 @@ const SystemPage: React.FC = () => {
               <div className="absolute -inset-8 rounded-[2rem] blur-[70px] opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle, ${accent}, transparent 70%)` }} />
               <div className="relative overflow-hidden rounded-[2rem]" style={{ aspectRatio: '16 / 12' }}>
                 <SystemTelemetry category={product.category} accent={accent} className="h-full" />
-                {/* drop a cinematic scene at /systems/<slug>-scene.jpg to override the telemetry; hides if absent */}
-                <img src={`/systems/${product.slug}-scene.jpg`} alt="" aria-hidden loading="lazy" decoding="async"
+                {/* DB cover (image_url) takes precedence; else a static /systems/<slug>-scene.jpg; hides if neither resolves */}
+                <img src={product.image_url || `/systems/${product.slug}-scene.jpg`} alt="" aria-hidden loading="lazy" decoding="async"
                   className="absolute inset-0 w-full h-full object-cover"
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                {product.image_url && <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(160deg, transparent 40%, ${accent}1a)` }} />}
               </div>
             </div>
           </div>

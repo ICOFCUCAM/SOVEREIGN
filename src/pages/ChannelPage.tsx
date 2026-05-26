@@ -95,7 +95,7 @@ const FilmTile: React.FC<{ ch: Channel; feature: string; onPlay: () => void }> =
   </button>
 );
 
-interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null }
+interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null; cover_image_url: string | null }
 interface Campaign { id: string; name: string; media_class: string | null; channel: string; status: string; scheduled_at: string | null }
 
 const CHANNEL_LABEL: Record<string, string> = { executive: 'Executive briefing', linkedin: 'LinkedIn', youtube: 'YouTube', public: 'Public broadcast' };
@@ -108,9 +108,15 @@ const NarrativeReader: React.FC<{ n: Narrative; onClose: () => void }> = ({ n, o
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-label={n.title}>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-2xl my-10 rounded-2xl border border-white/12 bg-[#070b1c]">
-        <span className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, #00C2FF, transparent)' }} />
+      <div className="relative w-full max-w-2xl my-10 rounded-2xl border border-white/12 bg-[#070b1c] overflow-hidden">
+        <span className="absolute inset-x-0 top-0 h-px z-10" style={{ background: 'linear-gradient(90deg, transparent, #00C2FF, transparent)' }} />
         <HudCorners color="#00C2FF" className="opacity-25" />
+        {n.cover_image_url && (
+          <div className="relative h-44 sm:h-52 overflow-hidden">
+            <img src={n.cover_image_url} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#070b1c] via-[#070b1c]/30 to-transparent" />
+          </div>
+        )}
         <div className="relative p-8 sm:p-10">
           <div className="flex items-center justify-between mb-6">
             <span className="text-[10px] font-mono uppercase tracking-[0.26em] text-cyan-300/70">{KIND_LABEL[n.kind] || 'Dispatch'}{n.read_time ? ` · ${n.read_time}` : ''}</span>
@@ -278,13 +284,21 @@ const ChannelPage: React.FC = () => {
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {narratives.map((n) => (
-                    <button key={n.id} onClick={() => setReading(n)} className="group relative text-left rounded-2xl border border-white/10 bg-white/[0.014] p-6 overflow-hidden hover:border-white/25 hover:-translate-y-1 transition-all">
-                      <span className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(90deg, transparent, #00C2FF, transparent)' }} />
-                      <BookOpen className="w-5 h-5 text-cyan-300/70 mb-5" />
+                    <button key={n.id} onClick={() => setReading(n)} className="group relative text-left rounded-2xl border border-white/10 bg-white/[0.014] overflow-hidden hover:border-white/25 hover:-translate-y-1 transition-all flex flex-col">
+                      <span className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity z-10" style={{ background: 'linear-gradient(90deg, transparent, #00C2FF, transparent)' }} />
+                      {n.cover_image_url && (
+                        <div className="relative h-32 overflow-hidden">
+                          <img src={n.cover_image_url} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0E27] via-transparent to-transparent" />
+                        </div>
+                      )}
+                      <div className="p-6">
+                      {!n.cover_image_url && <BookOpen className="w-5 h-5 text-cyan-300/70 mb-5" />}
                       <div className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/40">{KIND_LABEL[n.kind] || 'Dispatch'}{n.read_time ? ` · ${n.read_time}` : ''}</div>
                       <div className="font-display text-lg font-bold text-white tracking-tight leading-tight mt-1.5">{n.title}</div>
                       {n.subtitle && <p className="text-[12px] text-white/45 leading-snug mt-2 line-clamp-3">{n.subtitle}</p>}
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-white/45 group-hover:text-white mt-5 transition-colors">Read <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" /></span>
+                      </div>
                     </button>
                   ))}
                 </div>

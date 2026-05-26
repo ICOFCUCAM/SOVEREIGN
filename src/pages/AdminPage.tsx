@@ -20,7 +20,7 @@ import {
 
 type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'channel' | 'narratives' | 'campaigns' | 'analytics' | 'ecosystem' | 'team' | 'activity';
 interface MediaItem { id: string; media_class: string; kind: string; title: string; meta: string | null; length: string | null; youtube_id: string | null; sort_order: number }
-interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null; published: boolean; sort_order: number }
+interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null; published: boolean; sort_order: number; cover_image_url: string | null }
 interface Campaign { id: string; name: string; media_class: string | null; channel: string; status: string; asset_ref: string | null; scheduled_at: string | null; created_at: string }
 type LeadFilter = 'all' | 'inquiry' | 'offer' | 'buy_now';
 interface Inquiry { id: string; created_at: string; system_slug: string | null; system_name: string | null; tier: string | null; name: string | null; email: string; organization: string | null; message: string | null; status?: string | null }
@@ -60,6 +60,7 @@ const AdminPage: React.FC = () => {
   const [genBrief, setGenBrief] = useState('');
   const [editingSystem, setEditingSystem] = useState<Partial<EcosystemProduct> | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [genRowId, setGenRowId] = useState<string | null>(null);
   useEscape(() => { setEditing(null); setEditingSystem(null); });
   const [audit, setAudit] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -321,10 +322,28 @@ const AdminPage: React.FC = () => {
 
   const saveNarrative = async () => {
     if (!editNar?.title?.trim() || !editNar?.body?.trim()) { toast.error('Title and body required'); return; }
-    const payload = { kind: editNar.kind || 'dispatch', media_class: editNar.media_class || null, title: editNar.title.trim(), subtitle: editNar.subtitle?.trim() || null, body: editNar.body, read_time: editNar.read_time?.trim() || null, published: editNar.published ?? true, sort_order: editNar.sort_order ?? (narratives.length + 1) };
+    const payload = { kind: editNar.kind || 'dispatch', media_class: editNar.media_class || null, title: editNar.title.trim(), subtitle: editNar.subtitle?.trim() || null, body: editNar.body, read_time: editNar.read_time?.trim() || null, published: editNar.published ?? true, sort_order: editNar.sort_order ?? (narratives.length + 1), cover_image_url: editNar.cover_image_url?.trim() || null };
     const { error } = editNar.id ? await supabase.from('narratives').update(payload).eq('id', editNar.id) : await supabase.from('narratives').insert(payload);
     if (error) { toast.error(error.message); return; }
     toast.success('Dispatch saved'); setEditNar(null); loadAll();
+  };
+  const generateNarrativeCover = async () => {
+    if (!editNar?.title?.trim()) { toast.error('Add a title first'); return; }
+    const prompt = `Cover key art for a sovereign dispatch titled "${editNar.title}".${editNar.subtitle ? ` ${editNar.subtitle}.` : ''} Editorial, cinematic, civilization-scale.`;
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { prompt, mediaClass: editNar.media_class || 'strategic', orientation: 'landscape' },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (!data?.url) throw new Error('No image URL returned');
+      setEditNar((cur) => (cur ? { ...cur, cover_image_url: data.url } : cur));
+      toast.success('Cover art generated');
+    } catch (e) {
+      toast.error(`Image generation failed: ${(e as Error).message}`);
+    }
+    setGenerating(false);
   };
   const deleteNarrative = async (id: string) => {
     if (!confirm('Delete this dispatch?')) return;
@@ -448,6 +467,26 @@ const AdminPage: React.FC = () => {
       toast.error(`Image generation failed: ${(e as Error).message}`);
     }
     setUploadingImage(false);
+  };
+
+  const generateSystemCoverRow = async (s: EcosystemProduct) => {
+    setGenRowId(s.id);
+    const prompt = `Cover key art for "${s.name}"${s.category ? `, a ${s.category}` : ''}.${s.tagline ? ` ${s.tagline}.` : ''}`;
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { prompt, mediaClass: 'cinematic', orientation: 'landscape' },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (!data?.url) throw new Error('No image URL returned');
+      const { error: upErr } = await supabase.from('ecosystem_products').update({ image_url: data.url }).eq('id', s.id);
+      if (upErr) throw upErr;
+      setSystems((cur) => cur.map((x) => (x.id === s.id ? { ...x, image_url: data.url } : x)));
+      toast.success(`Cover generated for ${s.name}`);
+    } catch (e) {
+      toast.error(`Image generation failed: ${(e as Error).message}`);
+    }
+    setGenRowId(null);
   };
 
   const generateDomainHero = async () => {
@@ -1112,6 +1151,9 @@ const AdminPage: React.FC = () => {
                           </td>
                           <td className="px-3 py-3.5">
                             <div className="flex items-center gap-1 justify-end">
+                              <button onClick={() => generateSystemCoverRow(s)} disabled={genRowId !== null} title={s.image_url ? 'Regenerate AI cover' : 'Generate AI cover'} className={`p-1.5 rounded hover:bg-white/10 disabled:opacity-40 ${s.image_url ? 'text-cyan-300' : 'text-white/60 hover:text-cyan-400'}`}>
+                                {genRowId === s.id ? <span className="block w-3.5 h-3.5 rounded-full border border-cyan-300/40 border-t-cyan-300 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                              </button>
                               <button onClick={() => setEditingSystem({ ...s, ...{ capsText: (s.capabilities || []).join('\n'), metricsText: (s.metrics || []).map((m) => `${m.label} = ${m.value}`).join('\n') } } as Partial<EcosystemProduct>)} className="p-1.5 rounded hover:bg-white/10 text-white/60 hover:text-cyan-400"><Edit2 className="w-3.5 h-3.5" /></button>
                               <button onClick={() => removeSystem(s)} className="p-1.5 rounded hover:bg-white/10 text-white/60 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
@@ -1507,6 +1549,16 @@ const AdminPage: React.FC = () => {
                 </button>
               </div>
               <textarea value={editNar.body || ''} onChange={(e) => setEditNar({ ...editNar, body: e.target.value })} placeholder="Body (line breaks preserved)" rows={10} className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 font-mono leading-relaxed" />
+              <div>
+                <label className="text-xs text-white/50 font-medium mb-1.5 block flex items-center gap-1.5"><ImageIcon className="w-3 h-3" /> Cover image</label>
+                <div className="flex gap-2">
+                  <input value={editNar.cover_image_url || ''} onChange={(e) => setEditNar({ ...editNar, cover_image_url: e.target.value || null })} placeholder="paste URL or generate →" className="flex-1 min-w-0 px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white font-mono placeholder:text-white/30" />
+                  <button type="button" disabled={generating} onClick={generateNarrativeCover} title="Generate cover art from this dispatch's title" className="shrink-0 px-3 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50">
+                    <Sparkles className="w-3.5 h-3.5" /> {generating ? '…' : 'Generate'}
+                  </button>
+                </div>
+                {editNar.cover_image_url && <img src={editNar.cover_image_url} alt="" loading="lazy" decoding="async" className="mt-2 w-full h-24 object-cover rounded-lg border border-white/10" />}
+              </div>
               <div className="flex items-center gap-4">
                 <input value={editNar.read_time || ''} onChange={(e) => setEditNar({ ...editNar, read_time: e.target.value })} placeholder="Read time (e.g. 3 min)" className="flex-1 px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
                 <label className="flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={editNar.published ?? true} onChange={(e) => setEditNar({ ...editNar, published: e.target.checked })} /> Published</label>
