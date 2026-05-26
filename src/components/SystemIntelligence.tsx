@@ -17,7 +17,9 @@ const deploymentValue = (p: EcosystemProduct): string => {
   return m?.value || 'On request';
 };
 
-const SystemIntelligence: React.FC<{ p: EcosystemProduct; domain?: Domain | null }> = ({ p, domain }) => {
+type Tier = { tier: string; price: string; label?: string; scope?: string; timeline?: string };
+const SystemIntelligence: React.FC<{ p: EcosystemProduct; domain?: Domain | null; tier?: Tier }> = ({ p, domain, tier }) => {
+  const tiered = !!(p.tiers && p.tiers.length);
   const accent = p.accent || '#00D9FF';
   const accent2 = '#7C4DFF';
   const score = scoreFor(p.slug, 88, 11);
@@ -34,7 +36,12 @@ const SystemIntelligence: React.FC<{ p: EcosystemProduct; domain?: Domain | null
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2.5"><FileText className="w-5 h-5" style={{ color: accent }} /> Capability intelligence</h2>
             <p className="text-white/70 leading-relaxed text-lg mb-7 max-w-2xl">{narrative}</p>
             <div className="flex flex-wrap gap-3">
-              {domain ? (
+              {tiered ? (
+                <Link to="/marketplace" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
+                  style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})`, boxShadow: `0 0 36px ${accent}44` }}>
+                  <DollarSign className="w-4 h-4" /> {tier ? `Acquire · ${tier.price}` : 'Request deployment'}
+                </Link>
+              ) : domain ? (
                 <Link to={`/d/${encodeURIComponent(domain.domain_name)}`} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
                   style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})`, boxShadow: `0 0 36px ${accent}44` }}>
                   <DollarSign className="w-4 h-4" /> Acquire · ${Number(domain.price_usd).toLocaleString()}
@@ -57,8 +64,8 @@ const SystemIntelligence: React.FC<{ p: EcosystemProduct; domain?: Domain | null
             <div className="text-[11px] font-mono uppercase tracking-widest text-white/40 mb-4">Sovereign capability score</div>
             <div className="flex justify-center mb-5"><ValuationRing score={score} size={140} gradient={[accent, accent2]} /></div>
             <div className="text-center pb-5 border-b border-white/10">
-              <div className="text-xs text-white/40 font-mono uppercase tracking-widest mb-1">Deployment value</div>
-              <div className="text-2xl font-bold text-white tabular-nums">{deploymentValue(p)}</div>
+              <div className="text-xs text-white/40 font-mono uppercase tracking-widest mb-1">{tier ? `${tier.tier} tier` : 'Deployment value'}</div>
+              <div className="text-2xl font-bold text-white tabular-nums">{tier ? tier.price : deploymentValue(p)}</div>
             </div>
             <div className="grid grid-cols-2 gap-4 pt-5">
               <div>
