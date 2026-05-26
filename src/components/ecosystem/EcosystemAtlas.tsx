@@ -110,7 +110,7 @@ const EcosystemAtlas: React.FC = () => {
         {/* system index, grouped by sector */}
         <div className="space-y-20">
           {grouped.map(({ sector, items }, i) => (
-            <div key={sector}>
+            <div key={sector} id={sector.toLowerCase()} className="scroll-mt-28">
               <div className="flex items-center gap-4 mb-7">
                 <span className="font-mono text-sm text-cyan-300/50 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
                 <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">{sector}</h2>

@@ -34,7 +34,7 @@ const EcosystemPillars: React.FC = () => (
           {PILLARS.map((p) => {
             const Icon = p.icon;
             return (
-              <Link key={p.label} to="/ecosystem" className="group flex flex-col items-center text-center">
+              <Link key={p.label} to={`/ecosystem#${p.label.toLowerCase()}`} className="group flex flex-col items-center text-center">
                 {/* node */}
                 <span className="relative z-10 w-[68px] h-[68px] rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:-translate-y-1"
                   style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }}>
