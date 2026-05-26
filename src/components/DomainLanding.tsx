@@ -19,6 +19,19 @@ import {
 type Variant = 'tenant' | 'preview';
 type ModalIntent = 'inquiry' | 'offer' | 'buy_now';
 
+const fmtMoney = (n: number) =>
+  n >= 1e6 ? `$${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1)}M` : n >= 1e3 ? `$${Math.round(n / 1e3)}k` : `$${Math.round(n)}`;
+
+// The operator's asking price is authoritative. Trust the AI's estimate only
+// when it brackets that price sensibly; otherwise anchor the range to it so
+// the card can never contradict the headline price (e.g. $5k–$10k vs $850,000).
+const estimatedRange = (price: number, low?: number, high?: number) => {
+  const sane = low && high && high >= price * 0.5 && low <= price * 2;
+  const lo = sane ? (low as number) : price * 0.85;
+  const hi = sane ? (high as number) : price * 1.25;
+  return `${fmtMoney(lo)} - ${fmtMoney(hi)}`;
+};
+
 interface Props {
   /** Domain name to resolve (hostname on a tenant, route param in preview). */
   domainName: string;
@@ -250,7 +263,7 @@ const DomainLanding: React.FC<Props> = ({ domainName, variant }) => {
               <div className="text-center mb-4">
                 <div className="text-xs text-white/40 font-mono uppercase tracking-widest mb-1">Estimated Value</div>
                 <div className="text-white font-bold text-xl">
-                  {val ? `$${(val.estimated_value_low / 1000).toFixed(0)}k - $${(val.estimated_value_high / 1000).toFixed(0)}k` : `$${(d.price_usd * 0.8 / 1000).toFixed(0)}k - $${(d.price_usd * 1.3 / 1000).toFixed(0)}k`}
+                  {estimatedRange(d.price_usd, val?.estimated_value_low, val?.estimated_value_high)}
                 </div>
               </div>
               <div className="pt-4 border-t border-white/10 grid grid-cols-2 gap-3 text-center">
