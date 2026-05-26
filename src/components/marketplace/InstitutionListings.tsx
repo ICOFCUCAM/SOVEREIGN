@@ -3,20 +3,13 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct } from '@/lib/types';
 import { ArrowUpRight, Clock, Layers } from 'lucide-react';
+import HudCorners from '@/components/HudCorners';
 
 const TIER_COLOR: Record<string, string> = {
   Core: '#3B82F6', Professional: '#14B8A6', Elite: '#7C4DFF', Strategic: '#F59E0B', Prime: '#E8C572',
 };
 
-// Command-interface corner brackets — classified infrastructure framing.
-const Corners: React.FC<{ c: string }> = ({ c }) => (
-  <span aria-hidden className="pointer-events-none absolute inset-0 opacity-40 group-hover:opacity-90 transition-opacity duration-500" style={{ color: c }}>
-    <span className="absolute top-2.5 left-2.5 w-3 h-3 border-t border-l border-current" />
-    <span className="absolute top-2.5 right-2.5 w-3 h-3 border-t border-r border-current" />
-    <span className="absolute bottom-2.5 left-2.5 w-3 h-3 border-b border-l border-current" />
-    <span className="absolute bottom-2.5 right-2.5 w-3 h-3 border-b border-r border-current" />
-  </span>
-);
+const Corners: React.FC<{ c: string }> = ({ c }) => <HudCorners color={c} className="opacity-40 group-hover:opacity-90 transition-opacity duration-500" />;
 
 // ── CIVICOS sovereign acquisition tiers (classified infrastructure offerings) ──
 const CivicosTierCard: React.FC<{ t: NonNullable<EcosystemProduct['tiers']>[number] }> = ({ t }) => {
