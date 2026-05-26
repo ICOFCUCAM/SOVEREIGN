@@ -49,6 +49,8 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
       {/* atmospheric depth — drifting haze */}
       <div className="absolute inset-0 animate-haze-a pointer-events-none" style={{ background: 'radial-gradient(ellipse 40% 55% at 50% 28%, rgba(0,160,255,0.12), transparent 70%)', filter: 'blur(24px)' }} />
       <div className="absolute inset-0 animate-haze-b pointer-events-none" style={{ background: 'radial-gradient(ellipse 45% 50% at 72% 55%, rgba(124,77,255,0.1), transparent 72%)', filter: 'blur(28px)' }} />
+      {/* directional environmental lighting — soft illumination upper-left, shadow lower-right */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(130deg, rgba(130,185,255,0.07) 0%, transparent 42%, rgba(2,4,12,0.35) 100%)' }} />
 
       <svg viewBox={`0 0 ${W} ${H}`} className="relative w-full h-full" preserveAspectRatio="xMidYMid meet">
         <defs>
