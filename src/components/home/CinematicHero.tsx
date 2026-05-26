@@ -28,7 +28,7 @@ const CinematicHero: React.FC = () => {
   };
 
   return (
-    <section ref={ref} onMouseMove={onMove} className="relative h-[93vh] min-h-[700px] overflow-hidden"
+    <section ref={ref} onMouseMove={onMove} className="relative h-[80vh] min-h-[600px] overflow-hidden"
       style={{ ['--px' as string]: '0', ['--py' as string]: '0' }}>
       {/* deep-space field, lit from the lower-right where the planet sits */}
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 90% at 78% 72%, #0c1d42 0%, #070f28 40%, #03060f 100%)' }} />
@@ -60,7 +60,7 @@ const CinematicHero: React.FC = () => {
       </svg>
 
       {/* the planet — enormous, anchored to the lower-right, continuing past the edge */}
-      <div aria-hidden className="absolute right-[-14%] sm:right-[-10%] lg:right-[-7%] bottom-[-26%] sm:bottom-[-28%] lg:bottom-[-30%] w-[96vw] sm:w-[78vw] lg:w-[72vw] max-w-[1200px] animate-breathe"
+      <div aria-hidden className="absolute right-[-12%] sm:right-[-9%] lg:right-[-6%] bottom-[-28%] sm:bottom-[-30%] lg:bottom-[-32%] w-[112vw] sm:w-[92vw] lg:w-[82vw] max-w-[1440px] animate-breathe"
         style={{ transform: 'translate(calc(var(--px) * -10px), calc(var(--py) * -8px))', transformOrigin: '60% 55%' }}>
         <img src="/hero-globe.webp" alt="" decoding="async" className="w-full h-auto"
           style={{ filter: 'drop-shadow(-20px 0 120px rgba(0,130,255,0.2)) saturate(1.04) brightness(0.96)' }} />
