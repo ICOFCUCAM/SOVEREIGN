@@ -8,14 +8,26 @@ const TIER_COLOR: Record<string, string> = {
   Core: '#3B82F6', Professional: '#14B8A6', Elite: '#7C4DFF', Strategic: '#F59E0B', Prime: '#E8C572',
 };
 
-// ── CIVICOS sovereign acquisition tiers (resemble the premium domain panels) ──
+// Command-interface corner brackets — classified infrastructure framing.
+const Corners: React.FC<{ c: string }> = ({ c }) => (
+  <span aria-hidden className="pointer-events-none absolute inset-0 opacity-40 group-hover:opacity-90 transition-opacity duration-500" style={{ color: c }}>
+    <span className="absolute top-2.5 left-2.5 w-3 h-3 border-t border-l border-current" />
+    <span className="absolute top-2.5 right-2.5 w-3 h-3 border-t border-r border-current" />
+    <span className="absolute bottom-2.5 left-2.5 w-3 h-3 border-b border-l border-current" />
+    <span className="absolute bottom-2.5 right-2.5 w-3 h-3 border-b border-r border-current" />
+  </span>
+);
+
+// ── CIVICOS sovereign acquisition tiers (classified infrastructure offerings) ──
 const CivicosTierCard: React.FC<{ t: NonNullable<EcosystemProduct['tiers']>[number] }> = ({ t }) => {
   const c = TIER_COLOR[t.tier] || '#00C2FF';
   return (
     <Link to="/systems/civicos" className="group relative block overflow-hidden rounded-2xl glass hover:glass-strong transition-all duration-500 hover:-translate-y-1">
       <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${c}, transparent)` }} />
       <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-all" style={{ background: c }} />
+      <Corners c={c} />
       <div className="relative p-6">
+        <div className="text-[8px] font-mono uppercase tracking-[0.3em] text-white/30 mb-3">Classification · Sovereign</div>
         <div className="flex items-center justify-between mb-5">
           <span className="text-[10px] font-mono uppercase tracking-[0.2em] px-2.5 py-1 rounded" style={{ background: `${c}1f`, color: c }}>{t.tier}</span>
           <ArrowUpRight className="w-4 h-4 text-white/25 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" />
@@ -44,9 +56,10 @@ const MinistryCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
     <Link to={`/systems/${p.slug}`} className="group relative block overflow-hidden rounded-2xl glass hover:glass-strong transition-all duration-500 hover:-translate-y-1">
       <div className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
       <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full blur-3xl opacity-15 group-hover:opacity-30 transition-all" style={{ background: accent }} />
+      <Corners c={accent} />
       <div className="relative p-6">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/45">Ministry runtime</span>
+          <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/45">Ministry runtime · tiered</span>
           <ArrowUpRight className="w-4 h-4 text-white/25 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" />
         </div>
         <div className="font-display text-xl font-bold text-white tracking-tight">{p.name}</div>
