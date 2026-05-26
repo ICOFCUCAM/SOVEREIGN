@@ -133,6 +133,37 @@ const InfraCard: React.FC<{ d: Domain }> = ({ d }) => {
   );
 };
 
+// ── deployable system (ecosystem product) card ──
+const SystemProductCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
+  const accent = p.accent || ACCENT;
+  const start = p.tiers && p.tiers[0]?.price;
+  const metric = p.metrics && p.metrics[0];
+  return (
+    <Link to={`/systems/${p.slug}`}
+      className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.014] hover:border-white/25 transition-all duration-500 hover:-translate-y-1 p-6">
+      <span className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
+      <span className="absolute -top-16 -right-14 w-40 h-40 rounded-full blur-[80px] opacity-[0.1] group-hover:opacity-25 transition-opacity" style={{ background: accent }} />
+      <HudCorners color={accent} className="opacity-15 group-hover:opacity-45 transition-opacity" />
+      <div className="relative">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[9px] font-mono uppercase tracking-[0.2em] truncate pr-2" style={{ color: accent }}>{p.category}</span>
+          <ArrowUpRight className="w-4 h-4 text-white/25 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all shrink-0" />
+        </div>
+        <div className="font-display text-xl font-bold text-white tracking-tight">{p.name}</div>
+        <p className="text-sm text-white/45 leading-relaxed mt-2 line-clamp-2 min-h-[2.5rem]">{p.tagline}</p>
+        <div className="flex items-center justify-between pt-4 mt-4 border-t border-white/8">
+          {start ? (
+            <div><div className="text-base font-bold text-white tabular-nums leading-none">From {start}</div><div className="text-[8px] font-mono uppercase tracking-[0.16em] text-white/40 mt-1.5">Deployment</div></div>
+          ) : metric ? (
+            <div><div className="text-base font-bold text-white tabular-nums leading-none">{metric.value}</div><div className="text-[8px] font-mono uppercase tracking-[0.16em] text-white/40 mt-1.5">{metric.label}</div></div>
+          ) : <span />}
+          <span className="inline-flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-emerald-300/70"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Deployable</span>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
 const SectionHead: React.FC<{ kicker: string; title: string; to?: string; cta?: string }> = ({ kicker, title, to, cta }) => (
   <div className="flex items-end justify-between gap-6 mb-8">
     <div>
@@ -150,16 +181,24 @@ const SectionHead: React.FC<{ kicker: string; title: string; to?: string; cta?: 
 const MarketplacePage: React.FC = () => {
   useDocumentTitle('Marketplace', 'A sovereign systems exchange — acquire deployable civilization-scale institutions, AI-scored and procurement-ready.');
   const [domains, setDomains] = useState<Domain[]>([]);
+  const [products, setProducts] = useState<EcosystemProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [brief, setBrief] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from('domains').select('*').eq('status', 'active').order('valuation_score', { ascending: false });
-      setDomains((data || []) as Domain[]);
+      const [d, p] = await Promise.all([
+        supabase.from('domains').select('*').eq('status', 'active').order('valuation_score', { ascending: false }),
+        supabase.from('ecosystem_products').select('*').order('sort_order', { ascending: true }),
+      ]);
+      setDomains((d.data || []) as Domain[]);
+      setProducts((p.data || []) as EcosystemProduct[]);
       setLoading(false);
     })();
   }, []);
+
+  // deployable systems (CIVICOS ministries, sovereign & enterprise platforms) — all but the flagship
+  const systems = useMemo(() => products.filter((p) => p.slug !== 'civicos'), [products]);
 
   // every active asset is shown, grouped by deployment class (no truncation)
   const sovereign = useMemo(() => domains.filter((d) => Number(d.price_usd) >= 1e6), [domains]);
@@ -171,7 +210,7 @@ const MarketplacePage: React.FC = () => {
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
       <PlatformNav />
-      <PageSubNav label="Exchange" items={[{ id: 'flagship', label: 'Flagship' }, { id: 'sovereign', label: 'Sovereign' }, { id: 'infrastructure', label: 'Infrastructure' }, { id: 'platforms', label: 'Platforms' }]} />
+      <PageSubNav label="Exchange" items={[{ id: 'flagship', label: 'Flagship' }, { id: 'sovereign', label: 'Sovereign' }, { id: 'infrastructure', label: 'Infrastructure' }, { id: 'systems', label: 'Systems' }, { id: 'platforms', label: 'Platforms' }]} />
 
       <main>
         {/* ── SECTION 1 — acquisition hero (planet stretches ~3/4 and fills the banner) ── */}
@@ -330,6 +369,18 @@ const MarketplacePage: React.FC = () => {
               <SectionHead kicker="Infrastructure" title="Infrastructure & deployment systems." to="/ecosystem" cta={`${infra.length} systems`} />
               <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {infra.map((d) => <InfraCard key={d.id} d={d} />)}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── SECTION 5b — deployable systems (every ecosystem product) ── */}
+        {!loading && systems.length > 0 && (
+          <section id="systems" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 pb-24">
+            <div className="max-w-7xl mx-auto">
+              <SectionHead kicker="Deployable systems" title="Sovereign & ministry systems." to="/ecosystem" cta={`${systems.length} systems`} />
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {systems.map((p) => <SystemProductCard key={p.id} p={p} />)}
               </div>
             </div>
           </section>
