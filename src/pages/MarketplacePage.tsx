@@ -187,6 +187,13 @@ const MarketplacePage: React.FC = () => {
             </div>
           </div>
 
+          {!loading && (
+            <div className="flex items-end justify-between gap-4 mb-5">
+              <h2 className="text-[11px] font-mono uppercase tracking-[0.28em] text-cyan-300/70">Domain assets</h2>
+              <span className="text-[11px] font-mono uppercase tracking-widest text-white/35">{filtered.length} of {domains.length}</span>
+            </div>
+          )}
+
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {Array.from({ length: 6 }).map((_, i) => (<div key={i} className="glass rounded-2xl h-64 animate-pulse" />))}
