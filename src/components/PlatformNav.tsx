@@ -20,7 +20,12 @@ const PlatformNav: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { user, role, isAdmin, signOut } = useAuth();
-  const isActive = (p: string) => (p === '/' ? location.pathname === '/' : location.pathname.startsWith(p));
+  const isActive = (p: string) => {
+    const path = location.pathname;
+    if (p === '/') return path === '/';
+    if (p === '/ecosystem') return path.startsWith('/ecosystem') || path.startsWith('/systems');
+    return path.startsWith(p);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
