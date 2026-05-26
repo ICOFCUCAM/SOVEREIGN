@@ -36,7 +36,7 @@ const GlobalInfrastructure: React.FC = () => (
 
       {/* one dominant world visualization — minimal overlays */}
       <div className="relative" style={{ aspectRatio: '2 / 1' }}>
-        <div className="absolute -inset-10 blur-[100px] opacity-20 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 60% at 50% 50%, ${ACCENT}, transparent 70%)` }} />
+        <div className="absolute -inset-4 blur-[70px] opacity-[0.08] pointer-events-none" style={{ background: `radial-gradient(ellipse 55% 55% at 50% 50%, ${ACCENT}, transparent 72%)` }} />
         <Suspense fallback={<div className="w-full h-full" />}>
           <WorldMap accent={ACCENT} nodes={NODES} arcs={ARCS} className="w-full h-full" />
         </Suspense>

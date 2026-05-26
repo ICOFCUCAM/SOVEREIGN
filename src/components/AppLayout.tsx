@@ -5,9 +5,8 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
 import MarketplaceTeaser from '@/components/home/MarketplaceTeaser';
-import EcosystemPillars from '@/components/home/EcosystemPillars';
+import EcosystemPanels from '@/components/home/EcosystemPanels';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
-import MarketplaceRail from '@/components/home/MarketplaceRail';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import GlobalInfrastructure from '@/components/home/GlobalInfrastructure';
 import ClosingCTA from '@/components/home/ClosingCTA';
@@ -21,19 +20,17 @@ const AppLayout: React.FC = () => {
       <main id="main" className="relative">
         {/* 1 — cinematic hero */}
         <CinematicHero />
-        {/* 1b — marketplace assets immediately after the hero */}
+        {/* 1b — live asset ticker immediately after the hero */}
         <MarketplaceTeaser />
-        {/* 2 — the ecosystem */}
-        <Reveal><EcosystemPillars /></Reveal>
+        {/* 2 — unified dual panel: marketplace economy + operating layer */}
+        <Reveal><EcosystemPanels /></Reveal>
         {/* 3 — featured systems */}
         <EcosystemSectors />
-        {/* 4 — marketplace */}
-        <Reveal><MarketplaceRail /></Reveal>
-        {/* 5 — deployment story */}
+        {/* 4 — deployment story */}
         <Reveal><TransformationFlow /></Reveal>
-        {/* 6 — global infrastructure */}
+        {/* 5 — global infrastructure */}
         <Reveal><GlobalInfrastructure /></Reveal>
-        {/* 7 — final CTA */}
+        {/* 6 — final CTA */}
         <ClosingCTA />
       </main>
       <PlatformFooter />

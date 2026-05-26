@@ -156,6 +156,10 @@
 @keyframes reactor { 0%,100% { opacity: 0.45; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.14); } }
 .animate-reactor { animation: reactor 4.6s ease-in-out infinite; }
 
+/* vertical signal trace — pulse travelling down a connector spine */
+@keyframes flow-y { 0% { transform: translateY(-130%); opacity: 0; } 14% { opacity: 1; } 86% { opacity: 1; } 100% { transform: translateY(760%); opacity: 0; } }
+.animate-flow-y { animation: flow-y 4.5s linear infinite; }
+
 /* drifting atmospheric particle — distant depth haze motes */
 @keyframes mote { 0% { transform: translate3d(0,0,0); opacity: 0; } 18% { opacity: var(--pmax, 0.5); } 82% { opacity: var(--pmax, 0.5); } 100% { transform: translate3d(var(--pdx, 8px), var(--pdy, -12px), 0); opacity: 0; } }
 .animate-mote { animation: mote linear infinite; }
@@ -197,7 +201,7 @@
   .animate-float, .animate-scan, .animate-shimmer, .animate-ring, .animate-travel,
   .animate-haze-a, .animate-haze-b, .animate-flicker, .animate-stage-in, .animate-sweep,
   .animate-ticker, .animate-route, .animate-pulse,
-  .animate-signal, .animate-burst, .animate-reactor, .animate-mote {
+  .animate-signal, .animate-burst, .animate-reactor, .animate-mote, .animate-flow-y {
     animation: none !important;
   }
   html { scroll-behavior: auto; }
