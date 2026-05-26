@@ -39,6 +39,8 @@ const EcosystemPillars: React.FC = () => (
                 <span className="relative z-10 w-[68px] h-[68px] rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:-translate-y-1"
                   style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }}>
                   <span className="absolute inset-0 rounded-2xl blur-xl opacity-0 group-hover:opacity-60 transition-opacity" style={{ background: p.accent }} />
+                  <span className="absolute -inset-1 rounded-2xl border opacity-30" style={{ borderColor: `${p.accent}55` }} />
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full animate-node" style={{ background: p.accent }} />
                   <Icon className="relative w-6 h-6" style={{ color: p.accent }} />
                 </span>
                 {/* vertical light beam */}
