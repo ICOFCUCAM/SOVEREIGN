@@ -82,7 +82,7 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
           return (
             <g key={`a${i}`}>
               <path d={dd} fill="none" stroke={pc} strokeOpacity="0.16" strokeWidth="0.4" />
-              <path d={dd} fill="none" stroke="#fff" strokeWidth="0.9" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${d}s` }} />
+              <path d={dd} fill="none" stroke="#fff" strokeWidth="0.9" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${d}s`, animationDuration: `${2 + (i % 4) * 0.7}s` }} />
               <path d={dd} fill="none" stroke={pc} strokeWidth="1.4" strokeLinecap="round" className="animate-travel" style={{ animationDelay: `${d + 1.3}s`, animationDuration: '3s' }} />
             </g>
           );
