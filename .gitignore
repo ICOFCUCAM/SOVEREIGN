@@ -29,3 +29,8 @@ dist-ssr
 *zoom.mjs
 .mkt*.mjs
 .fav-*.py
+/.pgnav.mjs
+/.mkt-shot.mjs
+/.mktzoom.mjs
+/.sec-zoom.mjs
+/.page-zoom.mjs
