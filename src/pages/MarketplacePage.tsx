@@ -123,10 +123,11 @@ const InfraCard: React.FC<{ d: Domain }> = ({ d }) => {
   return (
     <Link to={`/d/${encodeURIComponent(d.domain_name)}`}
       className="group relative block overflow-hidden rounded-xl border border-white/10 bg-white/[0.012] hover:border-white/25 hover:bg-white/[0.03] transition-all p-5">
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-2">
         <span className="font-display text-lg font-bold text-white tracking-tight">{d.domain_name}</span>
         <ArrowRight className="w-3.5 h-3.5 text-white/25 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
       </div>
+      <span className="text-[8px] font-mono uppercase tracking-[0.2em] block mb-3" style={{ color: accent }}>{d.category || 'sovereign'}</span>
       <p className="text-[12px] text-white/45 leading-snug line-clamp-2 min-h-[2.2rem] mb-4">{d.tagline}</p>
       <div className="text-base font-bold text-white tabular-nums" style={{ color: accent }}>{fmtFull(Number(d.price_usd || 0))}</div>
     </Link>
