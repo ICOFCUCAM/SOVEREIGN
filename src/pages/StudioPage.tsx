@@ -376,7 +376,10 @@ const StudioPage: React.FC = () => {
                     <div className="text-xs text-white/50">Save the package, or apply the palette + slogan to the live registry domain.</div>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
+                  <button onClick={() => { window.location.href = '/deploy'; }} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl glass hover:glass-strong text-white font-semibold text-sm">
+                    <Building2 className="w-4 h-4 text-cyan-400" /> Deploy
+                  </button>
                   <button onClick={applyToDomain} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl glass hover:glass-strong text-white font-semibold text-sm">
                     <ExternalLink className="w-4 h-4" /> Apply to domain
                   </button>
