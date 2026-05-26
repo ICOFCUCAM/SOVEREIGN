@@ -26,6 +26,7 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip
       {/* cinematic emblem — a single elegant mark in an accent light-field */}
       <div className={`relative ${flip ? 'lg:order-2' : ''}`}>
         <div className="relative mx-auto w-full max-w-[480px] aspect-square flex items-center justify-center">
+          <span aria-hidden className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center font-display font-bold tracking-tighter text-white/[0.035] whitespace-nowrap select-none" style={{ fontSize: 'clamp(3rem, 9vw, 6rem)' }}>{p.name}</span>
           <div className="absolute inset-[12%] rounded-full blur-[80px] opacity-40" style={{ background: `radial-gradient(circle, ${p.accent}, transparent 70%)` }} />
           <div className="absolute inset-[6%] rounded-full border border-white/[0.06]" />
           <div className="absolute inset-[22%] rounded-full border border-white/[0.04]" />
