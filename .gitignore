@@ -46,3 +46,4 @@ dist-ssr
 /.panelsm.mjs
 /.chan.mjs
 /.chan*.mjs
+/.sim.mjs

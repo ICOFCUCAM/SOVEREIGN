@@ -6,6 +6,7 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import PageSubNav from '@/components/PageSubNav';
 import BriefingModal from '@/components/BriefingModal';
 import VideoModal from '@/components/VideoModal';
+import CrisisSimulation from '@/components/CrisisSimulation';
 import HudCorners from '@/components/HudCorners';
 import Reveal from '@/components/Reveal';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
@@ -103,7 +104,7 @@ const ChannelPage: React.FC = () => {
       <PlatformNav />
       <PageSubNav label="Channel" items={[
         { id: 'cinematic', label: 'Cinematic' }, { id: 'operational', label: 'Operational' },
-        { id: 'strategic', label: 'Strategic' }, { id: 'crisis', label: 'Crisis' }, { id: 'briefing', label: 'Briefing' },
+        { id: 'strategic', label: 'Strategic' }, { id: 'crisis', label: 'Crisis' }, { id: 'simulation', label: 'Simulation' }, { id: 'briefing', label: 'Briefing' },
       ]} />
 
       <main>
@@ -177,6 +178,25 @@ const ChannelPage: React.FC = () => {
             </section>
           );
         })}
+
+        {/* interactive crisis simulation */}
+        <section id="simulation" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <Reveal>
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-end justify-between gap-6 mb-8">
+                <div className="max-w-2xl">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,84,112,0.12)', border: '1px solid rgba(255,84,112,0.3)' }}><ShieldAlert className="w-5 h-5" style={{ color: '#FF5470' }} /></span>
+                    <span className="text-[11px] font-mono uppercase tracking-[0.28em] text-[#FF8FA3]">Interactive · crisis response</span>
+                  </div>
+                  <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98]">Run a national crisis.</h2>
+                  <p className="text-white/55 text-lg leading-relaxed mt-4">A live simulation of grid failure cascading across ministries — and the sovereign operating layer containing it. Play it, or step through each phase.</p>
+                </div>
+              </div>
+              <CrisisSimulation />
+            </div>
+          </Reveal>
+        </section>
 
         {/* distribution architecture */}
         <section className="px-4 sm:px-6 lg:px-8 py-16">
