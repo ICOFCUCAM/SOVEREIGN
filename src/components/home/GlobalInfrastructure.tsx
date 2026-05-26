@@ -42,8 +42,17 @@ const GlobalInfrastructure: React.FC = () => (
         </Suspense>
       </div>
 
+      {/* deployment-class legend */}
+      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mt-8">
+        {[['Core', '#22E0FF'], ['Strategic', '#7C4DFF'], ['Treasury', '#10E5A0'], ['Emergency', '#FF5470'], ['Edge', '#5AA0FF']].map(([l, c]) => (
+          <span key={l} className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-white/45">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: c as string, boxShadow: `0 0 6px ${c}` }} /> {l}
+          </span>
+        ))}
+      </div>
+
       {/* minimal overlays */}
-      <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 mt-10 text-sm font-mono text-white/45">
+      <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 mt-6 text-sm font-mono text-white/45">
         <span><span className="text-white">47</span> edge nodes</span>
         <span><span className="text-white">23</span> regions</span>
         <span><span className="text-white">99.99%</span> sovereign uptime</span>
