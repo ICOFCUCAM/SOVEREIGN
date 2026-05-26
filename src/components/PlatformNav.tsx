@@ -43,7 +43,7 @@ const PlatformNav: React.FC = () => {
           <div className="px-4 sm:px-5">
             <div className="flex items-center justify-between h-[60px]">
               {/* mark */}
-              <Link to="/" className="flex items-center gap-2.5 group shrink-0">
+              <Link to="/" aria-label="SOVEREIGN — home" className="flex items-center gap-2.5 group shrink-0">
                 <div className="relative">
                   <div className="absolute inset-0 bg-cyan-400/40 blur-md opacity-40 group-hover:opacity-70 transition-opacity" />
                   <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center">
