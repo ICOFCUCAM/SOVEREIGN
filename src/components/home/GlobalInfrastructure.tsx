@@ -79,6 +79,8 @@ const GlobalInfrastructure: React.FC = () => (
       <div className="relative rounded-[1.75rem] border border-white/10 overflow-hidden bg-[#04060f]" style={{ boxShadow: '0 40px 120px -40px rgba(0,0,0,0.9)' }}>
         <span className="absolute inset-x-0 top-0 h-px z-10" style={{ background: `linear-gradient(90deg, transparent, ${ACCENT}88, transparent)` }} />
         <HudCorners color={ACCENT} className="opacity-40 z-10" />
+        {/* header legibility scrim */}
+        <div className="absolute top-0 inset-x-0 h-20 z-[5] pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(4,6,15,0.85), transparent)' }} />
         {/* command-bar header */}
         <div className="absolute top-0 inset-x-0 z-10 flex items-center justify-between px-5 sm:px-7 py-4">
           <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/45">Sovereign network · real-time</span>

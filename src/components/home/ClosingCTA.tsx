@@ -11,7 +11,7 @@ const ClosingCTA: React.FC = () => (
     <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(rgba(0,217,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(0,217,255,0.5) 1px, transparent 1px)', backgroundSize: '64px 64px', maskImage: 'radial-gradient(ellipse at 50% 100%, black, transparent 70%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 100%, black, transparent 70%)' }} />
     <HudCorners color="#00C2FF" className="opacity-25 max-w-7xl mx-auto inset-x-4 sm:inset-x-8" />
 
-    <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-40 sm:py-52 text-center">
+    <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-32 sm:py-44 text-center">
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/5 text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.3em] mb-9">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Sovereign infrastructure · operational
       </div>
