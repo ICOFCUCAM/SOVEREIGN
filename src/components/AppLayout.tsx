@@ -8,7 +8,6 @@ import EcosystemPanels from '@/components/home/EcosystemPanels';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import InstitutionalTrust from '@/components/home/InstitutionalTrust';
-import GlobalInfrastructure from '@/components/home/GlobalInfrastructure';
 import ClosingCTA from '@/components/home/ClosingCTA';
 
 const AppLayout: React.FC = () => {
@@ -20,9 +19,7 @@ const AppLayout: React.FC = () => {
       <main id="main" className="relative">
         {/* ACT 1 — civilization-scale vision (cinematic Earth hero) */}
         <CinematicHero />
-        {/* ACT 2 — operational infrastructure proof (deployment theater) */}
-        <Reveal><GlobalInfrastructure /></Reveal>
-        {/* ACT 3 — institutional ecosystem + sovereign acquisition */}
+        {/* ACT 2 — the sovereign infrastructure universe */}
         <Reveal><EcosystemPanels /></Reveal>
         {/* featured institutions */}
         <EcosystemSectors />

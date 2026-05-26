@@ -164,7 +164,7 @@ const EcosystemPanels: React.FC = () => {
 
       <div className="relative max-w-7xl mx-auto">
         <div className="flex items-center gap-3 mb-10">
-          <span className="text-[11px] font-mono uppercase tracking-[0.3em] text-white/45">Sovereign operating universe</span>
+          <span className="text-[11px] font-mono uppercase tracking-[0.3em] text-white/45">Sovereign infrastructure universe</span>
           <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
           <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">Acquire · Operate · Deploy</span>
         </div>
