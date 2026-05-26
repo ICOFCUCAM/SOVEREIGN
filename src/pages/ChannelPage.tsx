@@ -190,7 +190,7 @@ const ChannelPage: React.FC = () => {
                     <span className="text-[11px] font-mono uppercase tracking-[0.28em] text-[#FF8FA3]">Interactive · crisis response</span>
                   </div>
                   <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98]">Run a national crisis.</h2>
-                  <p className="text-white/55 text-lg leading-relaxed mt-4">A live simulation of grid failure cascading across ministries — and the sovereign operating layer containing it. Play it, or step through each phase.</p>
+                  <p className="text-white/55 text-lg leading-relaxed mt-4">Live simulations of national crises cascading across ministries — and the sovereign operating layer containing them. Choose a scenario, play it, or step through each phase.</p>
                 </div>
               </div>
               <CrisisSimulation />

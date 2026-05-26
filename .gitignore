@@ -48,3 +48,4 @@ dist-ssr
 /.chan*.mjs
 /.sim.mjs
 /.brief.mjs
+/.sim2.mjs
