@@ -87,6 +87,7 @@ const OtherCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
     <Link to={`/systems/${p.slug}`} className="group relative block overflow-hidden rounded-2xl glass hover:glass-strong transition-all duration-500 hover:-translate-y-1">
       <div className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
       <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full blur-3xl opacity-15 group-hover:opacity-30 transition-all" style={{ background: accent }} />
+      <Corners c={accent} />
       <div className="relative p-6">
         <div className="flex items-center justify-between mb-4">
           <span className="text-[9px] font-mono uppercase tracking-[0.2em] truncate" style={{ color: accent }}>{p.category}</span>
