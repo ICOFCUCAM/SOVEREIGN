@@ -18,19 +18,19 @@ const AppLayout: React.FC = () => {
       <AnimatedBackground intensity="low" />
       <PlatformNav />
       <main id="main" className="relative">
-        {/* 1 — cinematic hero */}
+        {/* ACT 1 — civilization-scale vision (cinematic Earth hero) */}
         <CinematicHero />
-        {/* 2 — unified dual panel: acquisition terminal + operating architecture */}
-        <Reveal><EcosystemPanels /></Reveal>
-        {/* 3 — featured systems */}
-        <EcosystemSectors />
-        {/* 4 — deployment story */}
-        <Reveal><TransformationFlow /></Reveal>
-        {/* 5 — institutional trust & governance */}
-        <Reveal><InstitutionalTrust /></Reveal>
-        {/* 6 — global infrastructure */}
+        {/* ACT 2 — operational infrastructure proof (deployment theater) */}
         <Reveal><GlobalInfrastructure /></Reveal>
-        {/* 6 — final CTA */}
+        {/* ACT 3 — institutional ecosystem + sovereign acquisition */}
+        <Reveal><EcosystemPanels /></Reveal>
+        {/* featured institutions */}
+        <EcosystemSectors />
+        {/* deployment story */}
+        <Reveal><TransformationFlow /></Reveal>
+        {/* institutional trust & governance */}
+        <Reveal><InstitutionalTrust /></Reveal>
+        {/* closing statement */}
         <ClosingCTA />
       </main>
       <PlatformFooter />

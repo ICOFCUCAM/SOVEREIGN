@@ -1,15 +1,26 @@
-import React, { lazy, Suspense, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import HeroEnvironment from '@/components/home/HeroEnvironment';
 
-const Globe = lazy(() => import('@/components/home/Globe'));
-const HAS_PLATE = !!((import.meta.env.VITE_HERO_PLATE as string | undefined)?.trim());
+// Deterministic starfield — sparse, dim, for deep-space depth.
+const STARS = Array.from({ length: 54 }, (_, i) => {
+  const r = (s: number) => ((Math.sin((i + 1) * s) * 43758.5453) % 1 + 1) % 1;
+  return { x: r(12.9898) * 100, y: r(78.233) * 100, s: 0.5 + r(43.1) * 1.4, o: 0.12 + r(7.7) * 0.45, d: r(3.3) * 6, dur: 5 + r(9.1) * 6 };
+});
+
+// Sovereign orbital traces — arcs centred on the planet's mass (off the lower
+// right) sweeping up into the editorial negative space, each with a relay.
+const ORBITS = [
+  { cx: 1210, cy: 820, rx: 1000, ry: 600, tilt: -16, c: '#00C2FF', dur: 26, dir: 1 },
+  { cx: 1210, cy: 820, rx: 820, ry: 470, tilt: -32, c: '#7C4DFF', dur: 40, dir: -1 },
+];
+const ellipsePath = (cx: number, cy: number, rx: number, ry: number) =>
+  `M ${cx + rx} ${cy} A ${rx} ${ry} 0 1 1 ${cx - rx} ${cy} A ${rx} ${ry} 0 1 1 ${cx + rx} ${cy}`;
 
 const CinematicHero: React.FC = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const onMove = (ev: React.MouseEvent) => {
-    const el = sectionRef.current;
+    const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
     el.style.setProperty('--px', ((ev.clientX - r.left) / r.width - 0.5).toFixed(3));
@@ -17,54 +28,83 @@ const CinematicHero: React.FC = () => {
   };
 
   return (
-    <section ref={sectionRef} onMouseMove={onMove} className="relative h-[90vh] min-h-[660px] overflow-hidden" style={{ ['--px' as string]: '0', ['--py' as string]: '0' }}>
-      <HeroEnvironment />
-      {HAS_PLATE && (
-        <div className="absolute z-[15] top-[8%] right-[-6%] sm:right-[-2%] lg:right-[2%] w-[82vw] sm:w-[58vw] lg:w-[46vw] max-w-[640px] aspect-square"
-          style={{ transform: 'translate(calc(var(--px) * -10px), calc(var(--py) * -10px))' }}>
-          <Suspense fallback={<div className="w-full h-full rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,194,255,0.12), transparent 66%)' }} />}>
-            <Globe className="w-full h-full" />
-          </Suspense>
-        </div>
-      )}
+    <section ref={ref} onMouseMove={onMove} className="relative h-[93vh] min-h-[700px] overflow-hidden"
+      style={{ ['--px' as string]: '0', ['--py' as string]: '0' }}>
+      {/* deep-space field, lit from the lower-right where the planet sits */}
+      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 90% at 78% 72%, #0c1d42 0%, #070f28 40%, #03060f 100%)' }} />
+      {/* layered atmospheric haze for depth */}
+      <div className="absolute inset-0 animate-haze-a pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 45% at 72% 62%, rgba(0,150,255,0.1), transparent 70%)', filter: 'blur(50px)' }} />
+      <div className="absolute inset-0 animate-haze-b pointer-events-none" style={{ background: 'radial-gradient(ellipse 44% 40% at 82% 80%, rgba(124,77,255,0.07), transparent 72%)', filter: 'blur(56px)' }} />
 
-      {/* ── LEFT 40% · refined content column ── */}
+      {/* starfield */}
+      <div className="absolute inset-0 pointer-events-none">
+        {STARS.map((s, i) => (
+          <span key={i} className="absolute rounded-full bg-white animate-float" style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.s, height: s.s, opacity: s.o, animationDelay: `${s.d}s`, animationDuration: `${s.dur}s` }} />
+        ))}
+      </div>
+
+      {/* sovereign orbital traces sweeping out of the planet into negative space */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden>
+        <defs><filter id="hero-orb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" /></filter></defs>
+        {ORBITS.map((o, i) => {
+          const p = ellipsePath(o.cx, o.cy, o.rx, o.ry);
+          return (
+            <g key={i} transform={`rotate(${o.tilt} ${o.cx} ${o.cy})`}>
+              <ellipse cx={o.cx} cy={o.cy} rx={o.rx} ry={o.ry} fill="none" stroke={o.c} strokeOpacity="0.22" strokeWidth="1.1" />
+              <ellipse cx={o.cx} cy={o.cy} rx={o.rx} ry={o.ry} fill="none" stroke={o.c} strokeOpacity="0.05" strokeWidth="3" filter="url(#hero-orb)" />
+              <circle r="2.6" fill={o.c} filter="url(#hero-orb)"><animateMotion dur={`${o.dur}s`} repeatCount="indefinite" path={p} keyPoints={o.dir > 0 ? '0;1' : '1;0'} keyTimes="0;1" /></circle>
+              <circle r="1.5" fill="#eafcff"><animateMotion dur={`${o.dur}s`} repeatCount="indefinite" path={p} keyPoints={o.dir > 0 ? '0;1' : '1;0'} keyTimes="0;1" /></circle>
+            </g>
+          );
+        })}
+      </svg>
+
+      {/* the planet — enormous, anchored to the lower-right, continuing past the edge */}
+      <div aria-hidden className="absolute right-[-14%] sm:right-[-10%] lg:right-[-7%] bottom-[-26%] sm:bottom-[-28%] lg:bottom-[-30%] w-[96vw] sm:w-[78vw] lg:w-[72vw] max-w-[1200px] animate-breathe"
+        style={{ transform: 'translate(calc(var(--px) * -10px), calc(var(--py) * -8px))', transformOrigin: '60% 55%' }}>
+        <img src="/hero-globe.webp" alt="" decoding="async" className="w-full h-auto"
+          style={{ filter: 'drop-shadow(-20px 0 120px rgba(0,130,255,0.2)) saturate(1.04) brightness(0.96)' }} />
+      </div>
+      {/* atmospheric limb glow hugging the planet edge */}
+      <div className="absolute right-0 bottom-0 w-[60%] h-[80%] pointer-events-none animate-haze-a" style={{ background: 'radial-gradient(ellipse 60% 60% at 78% 64%, rgba(0,190,255,0.1), transparent 64%)' }} />
+      {/* exposure restraint — keep the cyan bloom from blowing out */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 90% 90% at 74% 66%, transparent 52%, rgba(3,5,14,0.4) 90%)' }} />
+      {/* left editorial scrim so the planet never competes with type */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(95deg, #050816 14%, rgba(5,8,22,0.82) 34%, rgba(5,8,22,0.35) 52%, transparent 70%)' }} />
+
+      {/* ── editorial column, left ── */}
       <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
-        <div className="max-w-md lg:max-w-[42%]">
-          <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-7">The operating layer for digital civilization</div>
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.4rem] font-bold tracking-tight leading-[1.02] mb-7">
-            <span className="block text-white">Build sovereign digital</span>
-            <span className="block text-white">systems <span className="text-gradient-cyan">at planetary scale.</span></span>
+        <div className="max-w-xl lg:max-w-[46%]">
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.28em] mb-8 backdrop-blur-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The operating layer for digital civilization
+          </div>
+          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.93] mb-7">
+            <span className="block text-white">The operating</span>
+            <span className="block text-white">system for</span>
+            <span className="block text-gradient-cyan">civilization.</span>
           </h1>
-          <p className="text-base text-white/55 max-w-sm mb-9 leading-relaxed">
-            Deploy AI-native institutions, sovereign infrastructure and operational ecosystems across governance, finance, mobility and intelligence.
+          <p className="text-lg text-white/60 max-w-md mb-9 leading-relaxed">
+            Deploy AI-native institutions, sovereign infrastructure and operational ecosystems — across governance, finance, mobility and intelligence, at planetary scale.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 mb-9">
             <Link to="/ecosystem" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
-              style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 40px rgba(0,194,255,0.26)' }}>
+              style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 44px rgba(0,194,255,0.3)' }}>
               Launch Ecosystem <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.03] backdrop-blur text-white font-semibold hover:bg-white/5 transition-all">
+            <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] backdrop-blur text-white font-semibold hover:bg-white/8 transition-all">
               Explore Marketplace
             </Link>
           </div>
-          {/* minimal trust indicators */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-mono text-white/45">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] font-mono text-white/45">
             <span className="inline-flex items-center gap-1.5 text-emerald-300/80"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live network</span>
             <span>47 <span className="text-white/30">edge nodes</span></span>
+            <span>23 <span className="text-white/30">sovereign regions</span></span>
             <span>99.99% <span className="text-white/30">uptime</span></span>
           </div>
         </div>
       </div>
 
-      {/* scroll cue */}
-      <button onClick={() => window.scrollTo({ top: Math.round(window.innerHeight * 0.86), behavior: 'smooth' })} aria-label="Enter the platform"
-        className="group absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
-        <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30 group-hover:text-white/60 transition-colors">Enter</span>
-        <span className="w-px h-8 bg-gradient-to-b from-cyan-400/50 to-transparent group-hover:from-cyan-400 transition-colors" />
-      </button>
-
-      {/* fade into the next act */}
+      {/* fade into the deployment act */}
       <div className="absolute bottom-0 inset-x-0 h-24 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, #050816)' }} />
     </section>
   );
