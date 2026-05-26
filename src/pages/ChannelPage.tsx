@@ -12,7 +12,7 @@ import HudCorners from '@/components/HudCorners';
 import Reveal from '@/components/Reveal';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useEscape } from '@/hooks/useEscape';
-import { Play, ArrowRight, ArrowUpRight, Film, Activity, Landmark, ShieldAlert, Linkedin, Youtube, FileText, X, BookOpen } from 'lucide-react';
+import { Play, ArrowRight, ArrowUpRight, Film, Activity, Landmark, ShieldAlert, Linkedin, Youtube, FileText, X, BookOpen, Radio, CalendarClock } from 'lucide-react';
 
 interface Episode { title: string; meta: string; len: string }
 interface Channel {
@@ -96,6 +96,9 @@ const FilmTile: React.FC<{ ch: Channel; feature: string; onPlay: () => void }> =
 );
 
 interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null }
+interface Campaign { id: string; name: string; media_class: string | null; channel: string; status: string; scheduled_at: string | null }
+
+const CHANNEL_LABEL: Record<string, string> = { executive: 'Executive briefing', linkedin: 'LinkedIn', youtube: 'YouTube', public: 'Public broadcast' };
 
 const KIND_LABEL: Record<string, string> = { manifesto: 'Manifesto', whitepaper: 'Whitepaper', ad_script: 'Film script', dispatch: 'Dispatch' };
 
@@ -129,11 +132,18 @@ const ChannelPage: React.FC = () => {
   const [media, setMedia] = useState<Record<string, { feature?: { title: string; video?: string }; episodes: Array<{ title: string; meta: string; len: string; video?: string }> }>>({});
   const [narratives, setNarratives] = useState<Narrative[]>([]);
   const [reading, setReading] = useState<Narrative | null>(null);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
 
   useEffect(() => {
     (async () => {
       const { data: nar } = await supabase.from('narratives').select('*').eq('published', true).order('sort_order', { ascending: true });
       setNarratives((nar || []) as Narrative[]);
+      const { data: camp } = await supabase
+        .from('campaigns')
+        .select('id, name, media_class, channel, status, scheduled_at')
+        .in('status', ['live', 'scheduled'])
+        .order('scheduled_at', { ascending: true, nullsFirst: false });
+      setCampaigns((camp || []) as Campaign[]);
       const { data } = await supabase.from('media').select('*').order('sort_order', { ascending: true });
       if (!data) return;
       const map: Record<string, { feature?: { title: string; video?: string }; episodes: Array<{ title: string; meta: string; len: string; video?: string }> }> = {};
@@ -161,7 +171,7 @@ const ChannelPage: React.FC = () => {
       <PlatformNav />
       <PageSubNav label="Channel" items={[
         { id: 'cinematic', label: 'Cinematic' }, { id: 'operational', label: 'Operational' },
-        { id: 'strategic', label: 'Strategic' }, { id: 'crisis', label: 'Crisis' }, { id: 'simulation', label: 'Simulation' }, { id: 'dispatches', label: 'Dispatches' }, { id: 'briefing', label: 'Briefing' },
+        { id: 'strategic', label: 'Strategic' }, { id: 'crisis', label: 'Crisis' }, { id: 'simulation', label: 'Simulation' }, { id: 'dispatches', label: 'Dispatches' }, { id: 'schedule', label: 'Schedule' }, { id: 'briefing', label: 'Briefing' },
       ]} />
 
       <main>
@@ -277,6 +287,39 @@ const ChannelPage: React.FC = () => {
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-white/45 group-hover:text-white mt-5 transition-colors">Read <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" /></span>
                     </button>
                   ))}
+                </div>
+              </div>
+            </Reveal>
+          </section>
+        )}
+
+        {/* broadcast schedule — live + upcoming programming (DB-driven) */}
+        {campaigns.length > 0 && (
+          <section id="schedule" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+            <Reveal>
+              <div className="max-w-7xl mx-auto">
+                <div className="flex items-center gap-3 mb-8">
+                  <span className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70">Broadcast schedule</span>
+                  <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">{campaigns.filter((c) => c.status === 'live').length} live · {campaigns.filter((c) => c.status === 'scheduled').length} upcoming</span>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {campaigns.map((c) => {
+                    const live = c.status === 'live';
+                    return (
+                      <div key={c.id} className={`relative rounded-2xl border p-6 overflow-hidden ${live ? 'border-emerald-400/30 bg-emerald-400/[0.04]' : 'border-white/10 bg-white/[0.014]'}`}>
+                        {live && <span className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, #10E5A0, transparent)' }} />}
+                        <div className="flex items-center gap-2 mb-4">
+                          {live ? <Radio className="w-4 h-4 text-emerald-300" /> : <CalendarClock className="w-4 h-4 text-cyan-300/70" />}
+                          <span className={`text-[9px] font-mono uppercase tracking-[0.2em] ${live ? 'text-emerald-300' : 'text-cyan-300/70'}`}>
+                            {live ? 'On air' : c.scheduled_at ? new Date(c.scheduled_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Scheduled'}
+                          </span>
+                        </div>
+                        <div className="font-display text-lg font-bold text-white tracking-tight leading-tight">{c.name}</div>
+                        <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-white/40 mt-2">{CHANNEL_LABEL[c.channel] || c.channel}{c.media_class ? ` · ${c.media_class}` : ''}</div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </Reveal>

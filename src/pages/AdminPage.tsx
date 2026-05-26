@@ -338,6 +338,12 @@ const AdminPage: React.FC = () => {
     if (error) { toast.error(error.message); return; }
     toast.success('Campaign saved'); setEditCamp(null); loadAll();
   };
+  const setCampaignStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from('campaigns').update({ status }).eq('id', id);
+    if (error) { toast.error(error.message); return; }
+    setCampaigns((cs) => cs.map((c) => (c.id === id ? { ...c, status } : c)));
+    toast.success(status === 'live' ? 'Now broadcasting' : `Marked ${status}`);
+  };
   const deleteCampaign = async (id: string) => {
     if (!confirm('Delete this campaign?')) return;
     const { error } = await supabase.from('campaigns').delete().eq('id', id);
@@ -948,7 +954,9 @@ const AdminPage: React.FC = () => {
                   <div key={c.id} className="flex items-center gap-4 px-5 py-3.5">
                     <div className="min-w-0 flex-1"><div className="text-sm text-white truncate">{c.name}</div><div className="text-[10px] font-mono uppercase tracking-wider text-white/35">{c.channel}{c.media_class ? ` · ${c.media_class}` : ''}</div></div>
                     {c.scheduled_at && <span className="text-[10px] font-mono text-white/40 shrink-0">{new Date(c.scheduled_at).toLocaleDateString()}</span>}
-                    <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${c.status === 'live' ? 'bg-emerald-500/15 text-emerald-300' : c.status === 'scheduled' ? 'bg-cyan-500/15 text-cyan-300' : c.status === 'archived' ? 'bg-white/5 text-white/35' : 'bg-amber-500/15 text-amber-300'}`}>{c.status}</span>
+                    <select value={c.status} onChange={(e) => setCampaignStatus(c.id, e.target.value)} aria-label="Status" className={`text-[10px] font-mono uppercase px-2 py-1 rounded shrink-0 border-0 cursor-pointer focus:outline-none ${c.status === 'live' ? 'bg-emerald-500/15 text-emerald-300' : c.status === 'scheduled' ? 'bg-cyan-500/15 text-cyan-300' : c.status === 'archived' ? 'bg-white/5 text-white/35' : 'bg-amber-500/15 text-amber-300'}`}>
+                      {['draft', 'scheduled', 'live', 'archived'].map((s) => <option key={s} value={s} className="bg-[#0A0E27] text-white">{s}</option>)}
+                    </select>
                     <button onClick={() => setEditCamp(c)} aria-label="Edit" className="text-white/40 hover:text-white transition shrink-0"><Edit2 className="w-4 h-4" /></button>
                     <button onClick={() => deleteCampaign(c.id)} aria-label="Delete" className="text-white/40 hover:text-rose-300 transition shrink-0"><Trash2 className="w-4 h-4" /></button>
                   </div>
