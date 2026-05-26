@@ -151,7 +151,7 @@ const MarketplacePage: React.FC = () => {
             <div className="flex flex-col lg:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search domains, tags, narratives..."
+                <input value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search domains" placeholder="Search domains, tags, narratives..."
                   className="w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
               </div>
 
@@ -171,7 +171,7 @@ const MarketplacePage: React.FC = () => {
                   }`}>
                   <SlidersHorizontal className="w-3 h-3" /> Premium
                 </button>
-                <select value={sort} onChange={(e) => setSort(e.target.value as Sort)}
+                <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} aria-label="Sort assets"
                   className="px-3 py-2 rounded-lg text-xs font-mono uppercase tracking-wider bg-white/5 text-white/80 border border-white/10 focus:border-cyan-400/50 focus:outline-none">
                   <option value="opportunity">Sort: Opportunity</option>
                   <option value="trending">Sort: Trending</option>
