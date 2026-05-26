@@ -78,13 +78,12 @@ const CinematicHero: React.FC = () => {
           <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.28em] mb-8 backdrop-blur-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The operating layer for digital civilization
           </div>
-          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.93] mb-7">
-            <span className="block text-white">The operating</span>
-            <span className="block text-white">system for</span>
-            <span className="block text-gradient-cyan">civilization.</span>
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.6rem] font-bold tracking-tight leading-[1.02] mb-7">
+            <span className="block text-white">Build sovereign digital</span>
+            <span className="block text-white">systems <span className="text-gradient-cyan">at planetary scale.</span></span>
           </h1>
-          <p className="text-lg text-white/60 max-w-md mb-9 leading-relaxed">
-            Deploy AI-native institutions, sovereign infrastructure and operational ecosystems — across governance, finance, mobility and intelligence, at planetary scale.
+          <p className="text-base sm:text-lg text-white/60 max-w-md mb-9 leading-relaxed">
+            Deploy AI-native institutions, sovereign infrastructure and operational ecosystems across governance, finance, mobility and intelligence.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 mb-9">
             <Link to="/ecosystem" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
