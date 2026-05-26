@@ -46,6 +46,8 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
     <div className={`relative ${className}`} style={{ maskImage: 'radial-gradient(ellipse 82% 96% at 50% 48%, #000 58%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 82% 96% at 50% 48%, #000 58%, transparent 100%)' }}>
       {/* planetary base — deep oceans + regional tonal variation */}
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 80% at 52% 30%, #0a1b3a 0%, #060e22 45%, #03060f 100%)' }} />
+      {/* high-atmosphere rim */}
+      <div className="absolute inset-x-0 top-0 h-1/3 pointer-events-none" style={{ background: 'radial-gradient(ellipse 75% 100% at 50% -25%, rgba(0,175,255,0.1), transparent 70%)' }} />
       {/* atmospheric depth — drifting haze */}
       <div className="absolute inset-0 animate-haze-a pointer-events-none" style={{ background: 'radial-gradient(ellipse 40% 55% at 50% 28%, rgba(0,160,255,0.12), transparent 70%)', filter: 'blur(24px)' }} />
       <div className="absolute inset-0 animate-haze-b pointer-events-none" style={{ background: 'radial-gradient(ellipse 45% 50% at 72% 55%, rgba(124,77,255,0.1), transparent 72%)', filter: 'blur(28px)' }} />
