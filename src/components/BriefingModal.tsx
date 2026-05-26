@@ -36,7 +36,7 @@ const BriefingModal: React.FC<Props> = ({ systemName, slug, tier, accent = '#00C
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`Request deployment briefing — ${systemName}`}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-md glass-strong rounded-2xl border border-white/10 overflow-hidden">
         <HudCorners color={accent} className="opacity-40" />
