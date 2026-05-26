@@ -175,20 +175,27 @@ const MarketplacePage: React.FC = () => {
 
       <main>
         {/* ── SECTION 1 — acquisition hero (planet stretches ~3/4 and fills the banner) ── */}
-        <section className="relative overflow-hidden h-[50vh] min-h-[400px] px-4 sm:px-6 lg:px-8">
-          {/* planet sized by the banner height so it compresses to fit, bleeding off the right */}
-          <div className="absolute right-[-8%] sm:right-[-5%] lg:right-[-3%] top-1/2 -translate-y-1/2 h-[128%] pointer-events-none">
-            <img src="/hero-globe.webp" alt="" aria-hidden className="h-full w-auto max-w-none animate-breathe" style={{ transformOrigin: '55% 50%', filter: 'saturate(1.05) brightness(0.98)' }} />
+        <section className="relative overflow-hidden h-[54vh] min-h-[440px] px-4 sm:px-6 lg:px-8">
+          {/* planet sized by banner height; edges masked so the uneven crop fades into space */}
+          <div className="absolute right-[-6%] sm:right-[-4%] lg:right-[-2%] top-[56%] -translate-y-1/2 h-[116%] pointer-events-none">
+            <img src="/hero-globe.webp" alt="" aria-hidden className="h-full w-auto max-w-none animate-breathe"
+              style={{ transformOrigin: '55% 50%', filter: 'saturate(1.05) brightness(0.96)',
+                maskImage: 'radial-gradient(ellipse 74% 76% at 47% 50%, #000 58%, transparent 93%)',
+                WebkitMaskImage: 'radial-gradient(ellipse 74% 76% at 47% 50%, #000 58%, transparent 93%)' }} />
           </div>
-          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(95deg, #050816 14%, rgba(5,8,22,0.8) 38%, rgba(5,8,22,0.2) 60%, transparent 76%)' }} />
-          {/* far-right operational readout */}
-          <div className="hidden lg:block absolute right-6 top-1/2 -translate-y-1/2 text-right pointer-events-none">
-            <div className="text-[10px] font-mono text-white/40 tabular-nums">24.7136° N</div>
-            <div className="text-[10px] font-mono text-white/40 tabular-nums mb-3">46.6753° E</div>
-            <div className="text-[9px] font-mono uppercase tracking-[0.24em] text-cyan-300/50 leading-relaxed">Global<br />sovereign<br />infrastructure</div>
+          {/* left scrim for type legibility */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(95deg, #050816 16%, rgba(5,8,22,0.82) 40%, rgba(5,8,22,0.22) 60%, transparent 78%)' }} />
+          {/* top scrim — keep the planet clear of the menu bar */}
+          <div className="absolute inset-x-0 top-0 h-24 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #050816 32%, transparent)' }} />
+          {/* bottom fade into the feed */}
+          <div className="absolute inset-x-0 bottom-0 h-16 pointer-events-none" style={{ background: 'linear-gradient(to top, #050816, transparent)' }} />
+          {/* far-right operational readout — compact, docked low */}
+          <div className="hidden lg:block absolute right-5 bottom-7 text-right pointer-events-none">
+            <div className="text-[8px] font-mono text-white/30 tabular-nums">24.7136°N · 46.6753°E</div>
+            <div className="text-[8px] font-mono uppercase tracking-[0.22em] text-cyan-300/40 mt-1">Global sovereign infrastructure</div>
           </div>
 
-          <div className="relative max-w-7xl mx-auto h-full flex flex-col justify-center">
+          <div className="relative z-10 max-w-7xl mx-auto h-full flex flex-col justify-center pt-14">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.28em] mb-6">
                 <Star className="w-3 h-3" /> Sovereign marketplace
