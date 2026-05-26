@@ -165,6 +165,20 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
             </g>
           );
         })}
+
+        {/* arrival pulses — destination command centers flash as packets land
+            (deduped per destination so hubs don't flicker constantly) */}
+        {Object.values(arcs.reduce((acc, [, b, d], i) => {
+          if (!acc[b]) acc[b] = { b, d, dur: 2.6 + (i % 5) * 0.5 };
+          return acc;
+        }, {} as Record<number, { b: number; d: number; dur: number }>)).map(({ b, d, dur }) => {
+          const nb = pts[b];
+          if (!nb) return null;
+          return (
+            <circle key={`af${b}`} cx={nb.p[0]} cy={nb.p[1]} r={nb.c.r + 1.4} fill="none" stroke="#eafcff" strokeWidth="0.35"
+              className="animate-arrive" style={{ transformOrigin: `${nb.p[0]}px ${nb.p[1]}px`, ['--ad' as string]: `${dur}s`, animationDelay: `${d}s` }} />
+          );
+        })}
       </svg>
 
       {/* cinematic edge darkness — regions fade into atmosphere and shadow */}
