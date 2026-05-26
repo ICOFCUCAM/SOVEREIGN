@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -68,8 +69,8 @@ const DISTRIBUTION = [
   { icon: Youtube, label: 'Cinematic library', note: 'Public narrative' },
 ];
 
-const FilmTile: React.FC<{ ch: Channel; onPlay: () => void }> = ({ ch, onPlay }) => (
-  <button onClick={onPlay} aria-label={`Play ${ch.feature}`}
+const FilmTile: React.FC<{ ch: Channel; feature: string; onPlay: () => void }> = ({ ch, feature, onPlay }) => (
+  <button onClick={onPlay} aria-label={`Play ${feature}`}
     className="group relative block w-full text-left rounded-2xl overflow-hidden border border-white/10 bg-[#06091a]" style={{ aspectRatio: '16 / 9' }}>
     <span className="absolute -top-16 -right-12 w-56 h-56 rounded-full blur-[90px] opacity-25" style={{ background: ch.accent }} />
     {/* drop-in cinematic still at /channel/<slug>.jpg; hides gracefully */}
@@ -87,7 +88,7 @@ const FilmTile: React.FC<{ ch: Channel; onPlay: () => void }> = ({ ch, onPlay })
       </span>
     </span>
     <span className="absolute bottom-4 inset-x-4 block">
-      <span className="block text-white font-semibold leading-tight">{ch.feature}</span>
+      <span className="block text-white font-semibold leading-tight">{feature}</span>
       <span className="block text-[10px] font-mono uppercase tracking-[0.18em] text-white/45 mt-1">Featured · {ch.kicker}</span>
     </span>
   </button>
@@ -97,6 +98,30 @@ const ChannelPage: React.FC = () => {
   useDocumentTitle('Channel', 'The Sovereign Channel — cinematic, operational, strategic and crisis-response media from the sovereign operating layer.');
   const [brief, setBrief] = useState(false);
   const [playing, setPlaying] = useState<{ title: string; kicker: string; accent: string; video?: string } | null>(null);
+  const [media, setMedia] = useState<Record<string, { feature?: { title: string; video?: string }; episodes: Array<{ title: string; meta: string; len: string; video?: string }> }>>({});
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from('media').select('*').order('sort_order', { ascending: true });
+      if (!data) return;
+      const map: Record<string, { feature?: { title: string; video?: string }; episodes: Array<{ title: string; meta: string; len: string; video?: string }> }> = {};
+      for (const r of data as Array<{ media_class: string; kind: string; title: string; meta: string | null; length: string | null; youtube_id: string | null }>) {
+        (map[r.media_class] ||= { episodes: [] });
+        if (r.kind === 'feature') map[r.media_class].feature = { title: r.title, video: r.youtube_id || undefined };
+        else map[r.media_class].episodes.push({ title: r.title, meta: r.meta || '', len: r.length || '', video: r.youtube_id || undefined });
+      }
+      setMedia(map);
+    })();
+  }, []);
+
+  const contentFor = (ch: Channel) => {
+    const m = media[ch.id];
+    return {
+      feature: m?.feature?.title || ch.feature,
+      featureVideo: m?.feature?.video || ch.video,
+      episodes: m && m.episodes.length ? m.episodes : ch.episodes.map((e) => ({ title: e.title, meta: e.meta, len: e.len, video: undefined as string | undefined })),
+    };
+  };
 
   return (
     <div className="relative min-h-screen text-white">
@@ -144,6 +169,7 @@ const ChannelPage: React.FC = () => {
         {CHANNELS.map((ch, i) => {
           const Icon = ch.icon;
           const flip = i % 2 === 1;
+          const c = contentFor(ch);
           return (
             <section key={ch.id} id={ch.id} className="scroll-mt-28 px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
               <Reveal>
@@ -156,8 +182,8 @@ const ChannelPage: React.FC = () => {
                     <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98] mb-5">{ch.title}</h2>
                     <p className="text-white/55 text-lg leading-relaxed max-w-md mb-8">{ch.desc}</p>
                     <div className="space-y-px rounded-xl overflow-hidden border border-white/8">
-                      {ch.episodes.map((ep) => (
-                        <button key={ep.title} onClick={() => setPlaying({ title: ep.title, kicker: `${ch.cls} · ${ch.kicker}`, accent: ch.accent })} className="group w-full text-left flex items-center justify-between gap-4 px-4 py-3.5 bg-white/[0.012] hover:bg-white/[0.04] transition-colors cursor-pointer">
+                      {c.episodes.map((ep) => (
+                        <button key={ep.title} onClick={() => setPlaying({ title: ep.title, kicker: `${ch.cls} · ${ch.kicker}`, accent: ch.accent, video: ep.video })} className="group w-full text-left flex items-center justify-between gap-4 px-4 py-3.5 bg-white/[0.012] hover:bg-white/[0.04] transition-colors cursor-pointer">
                           <div className="flex items-center gap-3 min-w-0">
                             <Play className="w-3.5 h-3.5 shrink-0 text-white/30 group-hover:text-white transition-colors" fill="currentColor" />
                             <div className="min-w-0">
@@ -171,7 +197,7 @@ const ChannelPage: React.FC = () => {
                     </div>
                   </div>
                   <div className={flip ? 'lg:order-1' : ''}>
-                    <FilmTile ch={ch} onPlay={() => setPlaying({ title: ch.feature, kicker: `${ch.cls} · ${ch.kicker}`, accent: ch.accent, video: ch.video })} />
+                    <FilmTile ch={ch} feature={c.feature} onPlay={() => setPlaying({ title: c.feature, kicker: `${ch.cls} · ${ch.kicker}`, accent: ch.accent, video: c.featureVideo })} />
                   </div>
                 </div>
               </Reveal>

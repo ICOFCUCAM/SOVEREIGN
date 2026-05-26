@@ -50,3 +50,4 @@ dist-ssr
 /.brief.mjs
 /.sim2.mjs
 /.ct.mjs
+/.chdb.mjs

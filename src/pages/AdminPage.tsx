@@ -15,10 +15,11 @@ import {
   Plus, Edit2, Trash2, Eye, Globe, Users, DollarSign, TrendingUp, X, Save, Activity, Lock,
   ShieldAlert, LogIn, FileText, Pencil, PlusCircle, Trash, BarChart3, Monitor, Smartphone, Tablet,
   Radio, Search, Share2, Link2, Mail, Image as ImageIcon, MessageCircle, Crown, ShieldCheck, Fingerprint,
-  Boxes, ExternalLink,
+  Boxes, ExternalLink, Film, Play,
 } from 'lucide-react';
 
-type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'analytics' | 'ecosystem' | 'team' | 'activity';
+type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'channel' | 'analytics' | 'ecosystem' | 'team' | 'activity';
+interface MediaItem { id: string; media_class: string; kind: string; title: string; meta: string | null; length: string | null; youtube_id: string | null; sort_order: number }
 type LeadFilter = 'all' | 'inquiry' | 'offer' | 'buy_now';
 interface Inquiry { id: string; created_at: string; system_slug: string | null; system_name: string | null; tier: string | null; name: string | null; email: string; organization: string | null; message: string | null; status?: string | null }
 
@@ -48,6 +49,7 @@ const AdminPage: React.FC = () => {
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [users, setUsers] = useState<UserRoleRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
+  const [media, setMedia] = useState<MediaItem[]>([]);
   const [editingSystem, setEditingSystem] = useState<Partial<EcosystemProduct> | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   useEscape(() => { setEditing(null); setEditingSystem(null); });
@@ -67,6 +69,8 @@ const AdminPage: React.FC = () => {
     ]);
     const sys = await supabase.from('ecosystem_products').select('*').order('sort_order', { ascending: true });
     const inq = await supabase.from('inquiries').select('*').order('created_at', { ascending: false }).limit(200);
+    const med = await supabase.from('media').select('*').order('media_class', { ascending: true }).order('sort_order', { ascending: true });
+    setMedia((med.data || []) as MediaItem[]);
     setDomains((d.data || []) as Domain[]);
     setLeads((l.data || []) as Lead[]);
     setBriefings((inq.data || []) as Inquiry[]);
@@ -276,6 +280,13 @@ const AdminPage: React.FC = () => {
     load();
   };
 
+  const updateMediaVideo = async (id: string, youtube_id: string) => {
+    const v = youtube_id.trim() || null;
+    setMedia((prev) => prev.map((m) => (m.id === id ? { ...m, youtube_id: v } : m)));
+    const { error } = await supabase.from('media').update({ youtube_id: v }).eq('id', id);
+    if (error) toast.error('Could not save video id'); else toast.success('Media updated');
+  };
+
   const updateInquiryStatus = async (id: string, status: string) => {
     setBriefings((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
     await supabase.from('inquiries').update({ status }).eq('id', id);
@@ -443,6 +454,7 @@ const AdminPage: React.FC = () => {
               { id: 'domains', label: `Domains (${domains.length})`, icon: Globe },
               { id: 'leads', label: `Inquiries (${leads.length})`, icon: Users },
               { id: 'briefings', label: `Briefings (${briefings.length})`, icon: ShieldAlert },
+              { id: 'channel', label: `Channel (${media.length})`, icon: Film },
               { id: 'analytics', label: 'Analytics', icon: BarChart3 },
               { id: 'ecosystem', label: `Ecosystem (${systems.length})`, icon: Boxes },
               { id: 'team', label: `Access (${users.length})`, icon: ShieldCheck },
@@ -685,6 +697,44 @@ const AdminPage: React.FC = () => {
                 </button>
               )}
             </div>
+            {/* acquisition funnel */}
+            {briefings.length > 0 && (() => {
+              const sc = (s: string) => briefings.filter((b) => (b.status || 'new') === s).length;
+              const stages = [
+                { label: 'Received', val: briefings.length, c: '#00D9FF' },
+                { label: 'Contacted', val: sc('contacted') + sc('qualified') + sc('briefed') + sc('closed'), c: '#22D3EE' },
+                { label: 'Qualified', val: sc('qualified') + sc('briefed') + sc('closed'), c: '#7C4DFF' },
+                { label: 'Briefed', val: sc('briefed') + sc('closed'), c: '#10E5A0' },
+                { label: 'Closed', val: sc('closed'), c: '#E8C572' },
+              ];
+              const tiers = Array.from(new Set(briefings.map((b) => b.tier).filter(Boolean))) as string[];
+              return (
+                <div className="grid lg:grid-cols-[2fr_1fr] gap-3">
+                  <div className="glass rounded-2xl p-5">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/40 mb-4">Acquisition funnel</div>
+                    <div className="grid grid-cols-5 gap-2">
+                      {stages.map((s) => (
+                        <div key={s.label}>
+                          <div className="text-2xl font-bold text-white tabular-nums leading-none">{s.val}</div>
+                          <div className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/40 mt-1.5">{s.label}</div>
+                          <div className="h-1 rounded-full bg-white/8 mt-2 overflow-hidden"><span className="block h-full rounded-full" style={{ width: `${briefings.length ? Math.round((s.val / briefings.length) * 100) : 0}%`, background: s.c }} /></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="glass rounded-2xl p-5">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/40 mb-4">By deployment scale</div>
+                    {tiers.length ? (
+                      <div className="space-y-2">
+                        {tiers.map((t) => { const n = briefings.filter((b) => b.tier === t).length; return (
+                          <div key={t} className="flex items-center justify-between text-xs"><span className="text-white/70 font-mono uppercase tracking-wider">{t}</span><span className="text-white tabular-nums">{n}</span></div>
+                        ); })}
+                      </div>
+                    ) : <div className="text-white/30 text-xs">No tiered briefings yet.</div>}
+                  </div>
+                </div>
+              );
+            })()}
             <div className="glass-strong rounded-2xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -730,6 +780,38 @@ const AdminPage: React.FC = () => {
                 </table>
               </div>
             </div>
+            </div>
+          )}
+
+          {/* Channel media tab */}
+          {tab === 'channel' && (
+            <div className="space-y-6">
+              <p className="text-sm text-white/50 max-w-2xl">Manage the Sovereign Channel. Paste a YouTube video ID into any item to make it play on the public channel — leave blank to keep the cinematic “in production” state.</p>
+              {['cinematic', 'operational', 'strategic', 'crisis'].map((cls) => {
+                const items = media.filter((m) => m.media_class === cls);
+                if (items.length === 0) return null;
+                return (
+                  <div key={cls} className="glass-strong rounded-2xl overflow-hidden">
+                    <div className="px-5 py-3 border-b border-white/10 text-[11px] font-mono uppercase tracking-[0.24em] text-cyan-300/70">{cls}</div>
+                    <div className="divide-y divide-white/5">
+                      {items.map((m) => (
+                        <div key={m.id} className="flex items-center gap-4 px-5 py-3.5">
+                          <span className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center ${m.kind === 'feature' ? 'bg-cyan-500/15 text-cyan-300' : 'bg-white/5 text-white/40'}`}>{m.kind === 'feature' ? <Film className="w-3.5 h-3.5" /> : <Play className="w-3 h-3" />}</span>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm text-white truncate">{m.title}</div>
+                            <div className="text-[10px] font-mono uppercase tracking-wider text-white/35">{m.kind}{m.length ? ` · ${m.length}` : ''}</div>
+                          </div>
+                          <input defaultValue={m.youtube_id || ''} placeholder="YouTube ID" aria-label={`YouTube ID for ${m.title}`}
+                            onBlur={(e) => { if ((e.target.value.trim() || null) !== (m.youtube_id || null)) updateMediaVideo(m.id, e.target.value); }}
+                            className="w-40 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
+                          {m.youtube_id ? <span className="text-[10px] font-mono text-emerald-300/70 shrink-0">live</span> : <span className="text-[10px] font-mono text-white/25 shrink-0">—</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              {media.length === 0 && <div className="glass rounded-2xl p-12 text-center text-white/40">No media rows.</div>}
             </div>
           )}
 
