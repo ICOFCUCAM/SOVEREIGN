@@ -56,7 +56,7 @@ const EcosystemMap: React.FC = () => (
         {positioned.map((s) => {
           const Icon = s.icon;
           return (
-            <Link key={s.label} to="/ecosystem" className="absolute -translate-x-1/2 -translate-y-1/2 group" style={{ left: `${s.left}%`, top: `${s.top}%` }}>
+            <Link key={s.label} to={`/ecosystem#${s.label.toLowerCase()}`} className="absolute -translate-x-1/2 -translate-y-1/2 group" style={{ left: `${s.left}%`, top: `${s.top}%` }}>
               <div className="glass rounded-xl border border-white/10 px-3.5 py-2.5 flex items-center gap-2.5 hover:border-white/30 hover:bg-white/[0.04] transition-all whitespace-nowrap">
                 <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${s.accent}1f`, border: `1px solid ${s.accent}40` }}>
                   <Icon className="w-4 h-4" style={{ color: s.accent }} />
@@ -76,7 +76,7 @@ const EcosystemMap: React.FC = () => (
         {SECTORS.map((s) => {
           const Icon = s.icon;
           return (
-            <Link key={s.label} to="/ecosystem" className="glass rounded-xl border border-white/10 p-4">
+            <Link key={s.label} to={`/ecosystem#${s.label.toLowerCase()}`} className="glass rounded-xl border border-white/10 p-4">
               <span className="w-8 h-8 rounded-lg flex items-center justify-center mb-3" style={{ background: `${s.accent}1f`, border: `1px solid ${s.accent}40` }}>
                 <Icon className="w-4 h-4" style={{ color: s.accent }} />
               </span>
