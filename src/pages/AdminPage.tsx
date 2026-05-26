@@ -20,7 +20,7 @@ import {
 
 type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'analytics' | 'ecosystem' | 'team' | 'activity';
 type LeadFilter = 'all' | 'inquiry' | 'offer' | 'buy_now';
-interface Inquiry { id: string; created_at: string; system_slug: string | null; system_name: string | null; tier: string | null; name: string | null; email: string; organization: string | null; message: string | null }
+interface Inquiry { id: string; created_at: string; system_slug: string | null; system_name: string | null; tier: string | null; name: string | null; email: string; organization: string | null; message: string | null; status?: string | null }
 
 const ORIGIN_META: Record<string, { icon: LucideIcon; color: string; label: string }> = {
   direct: { icon: Radio, color: '#00D9FF', label: 'Direct' },
@@ -273,6 +273,11 @@ const AdminPage: React.FC = () => {
     });
     toast.success('Archived · logged');
     load();
+  };
+
+  const updateInquiryStatus = async (id: string, status: string) => {
+    setBriefings((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
+    await supabase.from('inquiries').update({ status }).eq('id', id);
   };
 
   const updateLeadStatus = async (id: string, status: string) => {
@@ -666,6 +671,7 @@ const AdminPage: React.FC = () => {
                       <th className="px-3 py-3">Contact</th>
                       <th className="px-3 py-3">Organization</th>
                       <th className="px-3 py-3">Context</th>
+                      <th className="px-3 py-3">Status</th>
                       <th className="px-3 py-3">Received</th>
                     </tr>
                   </thead>
@@ -677,11 +683,21 @@ const AdminPage: React.FC = () => {
                         <td className="px-3 py-3.5"><div className="text-white">{b.name || '—'}</div><div className="text-xs text-white/40">{b.email}</div></td>
                         <td className="px-3 py-3.5 text-white/80 text-sm">{b.organization || '—'}</td>
                         <td className="px-3 py-3.5 text-white/55 text-xs max-w-[280px]">{b.message || '—'}</td>
+                        <td className="px-3 py-3.5">
+                          <select value={b.status || 'new'} onChange={(e) => updateInquiryStatus(b.id, e.target.value)} aria-label="Briefing status"
+                            className="bg-white/5 border border-white/10 rounded px-2 py-1 text-[10px] font-mono uppercase text-white">
+                            <option value="new">new</option>
+                            <option value="contacted">contacted</option>
+                            <option value="qualified">qualified</option>
+                            <option value="briefed">briefed</option>
+                            <option value="closed">closed</option>
+                          </select>
+                        </td>
                         <td className="px-3 py-3.5 text-white/40 text-xs font-mono whitespace-nowrap">{new Date(b.created_at).toLocaleDateString()}</td>
                       </tr>
                     ))}
                     {briefings.length === 0 && (
-                      <tr><td colSpan={6} className="text-center py-12 text-white/40">No deployment briefings yet · institutional requests will appear here</td></tr>
+                      <tr><td colSpan={7} className="text-center py-12 text-white/40">No deployment briefings yet · institutional requests will appear here</td></tr>
                     )}
                   </tbody>
                 </table>
