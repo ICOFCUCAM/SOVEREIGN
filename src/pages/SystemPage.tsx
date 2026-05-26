@@ -22,6 +22,13 @@ const SLUG_BLUEPRINT: Record<string, string> = {
   'deployment-engine': 'general', 'marketplace-infra': 'general',
 };
 const STATUS_COLOR: Record<string, string> = { live: '#10B981', arming: '#F59E0B', staged: '#00D9FF' };
+const CIVICOS_TIER_INCLUDES: Record<string, string[]> = {
+  core: ['National Shell', 'Citizen Portal', 'TreasuryOS', 'EmergencyOS', 'Basic AI governance'],
+  professional: ['National Shell', 'National Coordination Engine', 'HealthOS', 'TreasuryOS', 'EducationOS', 'EmergencyOS', 'TransportOS', 'Interoperability fabric'],
+  elite: ['National Shell', 'National Coordination Engine', 'Interoperability fabric', 'AI governance', 'Crisis propagation', 'Situation room', 'Executive coordination'],
+  strategic: ['National Simulation Engine', 'Strategic intelligence runtime', 'National propagation engine', 'AI command systems', 'National digital twin', 'Sovereign cloud integration'],
+  prime: ['Entire CIVICOS ecosystem', 'Multi-region sovereign cloud', 'National AI governance', 'Cross-border coordination', 'Strategic resilience intelligence', 'Defense-grade runtime'],
+};
 
 const SystemPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -185,6 +192,22 @@ const SystemPage: React.FC = () => {
         </div>
       </section>
 
+      {product.slug === 'civicos' && selectedTier && CIVICOS_TIER_INCLUDES[selectedTier.tier.toLowerCase()] && (
+        <Reveal>
+          <section className="px-4 sm:px-6 lg:px-8 py-12">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-2xl font-bold text-white mb-6">Included in {product.name} {selectedTier.tier}</h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {CIVICOS_TIER_INCLUDES[selectedTier.tier.toLowerCase()].map((x) => (
+                  <div key={x} className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.015] px-4 py-3 text-sm text-white/75">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: accent }} /> {x}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </Reveal>
+      )}
       <Reveal><SystemIntelligence p={product} domain={domain} tier={selectedTier} onBrief={() => setBriefing(true)} /></Reveal>
       <Reveal><SystemTiers p={product} selected={selectedTier?.tier} /></Reveal>
 
