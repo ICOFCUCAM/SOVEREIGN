@@ -44,6 +44,7 @@ const AdminPage: React.FC = () => {
   const [domains, setDomains] = useState<Domain[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [briefings, setBriefings] = useState<Inquiry[]>([]);
+  const [briefingFilter, setBriefingFilter] = useState<string>('all');
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [users, setUsers] = useState<UserRoleRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
@@ -662,6 +663,15 @@ const AdminPage: React.FC = () => {
 
           {/* Deployment briefings */}
           {tab === 'briefings' && (
+            <div className="space-y-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              {(['all', 'new', 'contacted', 'qualified', 'briefed', 'closed']).map((f) => (
+                <button key={f} onClick={() => setBriefingFilter(f)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider transition ${briefingFilter === f ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30' : 'glass text-white/50 hover:text-white'}`}>
+                  {f} <span className="text-white/40">{f === 'all' ? briefings.length : briefings.filter((b) => (b.status || 'new') === f).length}</span>
+                </button>
+              ))}
+            </div>
             <div className="glass-strong rounded-2xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -677,7 +687,7 @@ const AdminPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {briefings.map((b) => (
+                    {briefings.filter((b) => briefingFilter === 'all' || (b.status || 'new') === briefingFilter).map((b) => (
                       <tr key={b.id} className="border-b border-white/5 hover:bg-white/[0.02] align-top">
                         <td className="px-5 py-3.5 text-cyan-300 text-xs font-mono">{b.system_name || b.system_slug || '—'}</td>
                         <td className="px-3 py-3.5">{b.tier ? <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-purple-500/15 text-purple-300">{b.tier}</span> : <span className="text-white/30">—</span>}</td>
@@ -697,12 +707,13 @@ const AdminPage: React.FC = () => {
                         <td className="px-3 py-3.5 text-white/40 text-xs font-mono whitespace-nowrap">{new Date(b.created_at).toLocaleDateString()}</td>
                       </tr>
                     ))}
-                    {briefings.length === 0 && (
-                      <tr><td colSpan={7} className="text-center py-12 text-white/40">No deployment briefings yet · institutional requests will appear here</td></tr>
+                    {briefings.filter((b) => briefingFilter === 'all' || (b.status || 'new') === briefingFilter).length === 0 && (
+                      <tr><td colSpan={7} className="text-center py-12 text-white/40">No {briefingFilter === 'all' ? '' : briefingFilter + ' '}deployment briefings · institutional requests will appear here</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
+            </div>
             </div>
           )}
 
