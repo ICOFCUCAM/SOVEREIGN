@@ -16,7 +16,7 @@ const CATEGORIES = ['all', 'fintech', 'ai', 'infra', 'govtech', 'saas', 'logisti
 type Sort = 'opportunity' | 'trending' | 'score' | 'price_low' | 'price_high';
 
 const MarketplacePage: React.FC = () => {
-  useDocumentTitle('Marketplace');
+  useDocumentTitle('Marketplace', 'Acquire premium domains and deployable sovereign institutions — AI-scored, tier-priced, deployment-ready.');
   const [domains, setDomains] = useState<Domain[]>([]);
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [loading, setLoading] = useState(true);

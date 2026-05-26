@@ -27,7 +27,7 @@ interface Edits {
 const monogram = (name: string) => name.replace(/[^a-z0-9]/gi, '').slice(0, 2).toUpperCase();
 
 const StudioPage: React.FC = () => {
-  useDocumentTitle('Branding Studio');
+  useDocumentTitle('Branding Studio', 'AI-native venture creation — generate sovereign brand identity, narrative and deployable UI from a single domain.');
   const { domain: routeDomain } = useParams<{ domain: string }>();
   const [domain, setDomain] = useState(routeDomain ? decodeURIComponent(routeDomain) : '');
   const [loading, setLoading] = useState(false);

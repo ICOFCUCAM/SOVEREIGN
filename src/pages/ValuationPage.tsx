@@ -9,7 +9,7 @@ import ValuationRing from '@/components/ValuationRing';
 import { Sparkles, Search, Brain, Rocket, Layers, Zap, TrendingUp, AlertCircle } from 'lucide-react';
 
 const ValuationPage: React.FC = () => {
-  useDocumentTitle('AI Valuation');
+  useDocumentTitle('AI Valuation', 'Institutional-grade AI valuation for any domain — intelligence scoring, market positioning and sovereign readiness in seconds.');
   const [domain, setDomain] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ValuationReport | null>(null);

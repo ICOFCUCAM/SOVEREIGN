@@ -29,7 +29,7 @@ const SystemPage: React.FC = () => {
   const [related, setRelated] = useState<EcosystemProduct[]>([]);
   const [modules, setModules] = useState<EcosystemProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  useDocumentTitle(product?.name);
+  useDocumentTitle(product?.name, product?.tagline || undefined);
 
   useEffect(() => {
     if (!slug) return;

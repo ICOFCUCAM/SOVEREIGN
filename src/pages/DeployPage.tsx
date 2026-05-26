@@ -33,7 +33,7 @@ const STACKS = [
 const INTEGRATIONS = ['Vercel', 'Supabase', 'Stripe', 'Cloudflare', 'Email', 'Redis'];
 
 const DeployPage: React.FC = () => {
-  useDocumentTitle('Deployment Engine');
+  useDocumentTitle('Deployment Engine', 'Sovereign provisioning infrastructure — from acquisition to live institution across a global edge mesh in seconds.');
   const [active, setActive] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setActive((a) => (a + 1) % STAGES.length), 2200);

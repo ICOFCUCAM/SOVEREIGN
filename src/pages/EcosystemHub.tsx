@@ -8,7 +8,7 @@ import EcosystemAtlas from '@/components/ecosystem/EcosystemAtlas';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const EcosystemHub: React.FC = () => {
-  useDocumentTitle('Ecosystem');
+  useDocumentTitle('Ecosystem', 'The sovereign infrastructure atlas — governance, finance, mobility and intelligence systems interconnected into one operating layer.');
   return (
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
