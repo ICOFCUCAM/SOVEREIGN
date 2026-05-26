@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { Domain } from '@/lib/types';
 import { ArrowRight } from 'lucide-react';
+import HudCorners from '@/components/HudCorners';
 
 const ACCENT: Record<string, string> = {
   govtech: '#6366F1', fintech: '#10B981', ai: '#7C4DFF', infra: '#00D9FF', logistics: '#F59E0B', saas: '#22D3EE',
@@ -17,6 +18,7 @@ const Card: React.FC<{ d: Domain }> = ({ d }) => {
     <Link to={`/d/${encodeURIComponent(d.domain_name)}`}
       className="group relative block rounded-2xl border border-white/10 bg-white/[0.015] overflow-hidden hover:border-white/25 transition-all">
       <span className="absolute -left-20 top-1/2 -translate-y-1/2 w-60 h-60 rounded-full blur-[90px] opacity-10 group-hover:opacity-25 transition-opacity" style={{ background: accent }} />
+      <HudCorners color={accent} className="opacity-25 group-hover:opacity-60 transition-opacity" />
       <div className="relative grid md:grid-cols-[1.4fr_1fr] gap-8 p-8 sm:p-10 items-center">
         <div>
           <div className="flex items-center gap-3 mb-4">
