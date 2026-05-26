@@ -38,6 +38,7 @@ const TransformationFlow: React.FC = () => {
               const Icon = s.icon; const on = i === active; const done = i < active;
               return (
                 <button key={s.label} onClick={() => setActive(i)} className="relative flex flex-col items-center text-center group">
+                  <span className={`absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-mono tracking-[0.2em] transition-colors ${on ? 'text-cyan-300' : 'text-white/25'}`}>{String(i + 1).padStart(2, '0')}</span>
                   <span className="relative z-10 w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500"
                     style={on ? { background: 'linear-gradient(135deg, #6366F1, #00D9FF)', boxShadow: '0 0 28px rgba(0,217,255,0.5)' } : { background: done ? 'rgba(0,217,255,0.14)' : 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}>
                     {done ? <Check className="w-5 h-5 text-cyan-300" /> : <Icon className={`w-5 h-5 ${on ? 'text-white' : 'text-white/45'}`} />}
