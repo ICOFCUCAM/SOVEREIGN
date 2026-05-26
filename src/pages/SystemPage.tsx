@@ -51,6 +51,8 @@ const SystemPage: React.FC = () => {
     })();
   }, [slug]);
 
+  useEffect(() => { if (tierParam) window.scrollTo({ top: 0, behavior: 'smooth' }); }, [tierParam]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white">
