@@ -48,7 +48,7 @@ const Continents: React.FC = () => (
 );
 
 export const Frame: React.FC<{ accent: string; tag: string; readout?: string; children: React.ReactNode }> = ({ accent, tag, readout, children }) => (
-  <div className="relative w-full h-full rounded-2xl border border-white/10 overflow-hidden glass-strong">
+  <div role="presentation" className="relative w-full h-full rounded-2xl border border-white/10 overflow-hidden glass-strong">
     <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 85% 75% at 28% 8%, ${accent}26, transparent 62%), linear-gradient(160deg, #0A1024, #05070F)` }} />
     <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: `linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
     <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 py-2.5 border-b border-white/5 z-10">
