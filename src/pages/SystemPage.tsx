@@ -176,7 +176,7 @@ const SystemPage: React.FC = () => {
               <div className="relative overflow-hidden rounded-[2rem]" style={{ aspectRatio: '16 / 12' }}>
                 <SystemTelemetry category={product.category} accent={accent} className="h-full" />
                 {/* drop a cinematic scene at /systems/<slug>-scene.jpg to override the telemetry; hides if absent */}
-                <img src={`/systems/${product.slug}-scene.jpg`} alt="" aria-hidden loading="lazy"
+                <img src={`/systems/${product.slug}-scene.jpg`} alt="" aria-hidden loading="lazy" decoding="async"
                   className="absolute inset-0 w-full h-full object-cover"
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
               </div>

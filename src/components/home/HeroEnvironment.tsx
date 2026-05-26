@@ -46,7 +46,7 @@ const HeroEnvironment: React.FC = () => {
               <Globe className="w-full h-full" />
             </Suspense>
             {/* optional cinematic globe plate — drop a transparent PNG at /hero-globe.png to use it; hides if absent */}
-            <img src="/hero-globe.png" alt="" aria-hidden loading="lazy"
+            <img src="/hero-globe.png" alt="" aria-hidden loading="lazy" decoding="async"
               className="absolute inset-0 w-full h-full object-contain pointer-events-none"
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
           </div>

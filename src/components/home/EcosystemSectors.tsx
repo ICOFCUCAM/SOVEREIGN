@@ -32,7 +32,7 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean; index: number;
           <div className="absolute inset-[22%] rounded-full border border-white/[0.04]" />
           <Emblem className="relative w-28 h-28 sm:w-36 sm:h-36" strokeWidth={0.9} style={{ color: p.accent }} />
           {/* drop a cinematic visual at /systems/<slug>.jpg to replace the emblem; hides if absent */}
-          <img src={`/systems/${p.slug}.jpg`} alt="" aria-hidden loading="lazy"
+          <img src={`/systems/${p.slug}.jpg`} alt="" aria-hidden loading="lazy" decoding="async"
             className="absolute inset-0 w-full h-full object-cover rounded-[2rem]"
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
         </div>
