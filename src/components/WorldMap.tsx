@@ -90,6 +90,7 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
         {/* multi-class sovereign infrastructure hubs */}
         {pts.map((n, i) => (
           <g key={`n${i}`} style={{ transformOrigin: `${n.p[0]}px ${n.p[1]}px` }}>
+            {n.c.rings >= 2 && <circle cx={n.p[0]} cy={n.p[1]} r={n.c.glow * 1.7} fill={n.c.color} opacity="0.07" filter="url(#wm-zone)" />}
             <circle cx={n.p[0]} cy={n.p[1]} r={n.c.glow} fill={n.c.color} opacity="0.16" filter="url(#wm-glow)" />
             {Array.from({ length: n.c.rings }).map((_, k) => (
               <circle key={k} cx={n.p[0]} cy={n.p[1]} r={n.c.r + 2.5 + k * 2.6} fill="none" stroke={n.c.color} strokeWidth="0.4"
