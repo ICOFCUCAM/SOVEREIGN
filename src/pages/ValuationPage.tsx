@@ -44,13 +44,13 @@ const ValuationPage: React.FC = () => {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
             <div className="inline-block px-3 py-1 rounded-full glass mb-4">
-              <span className="text-xs font-mono uppercase tracking-widest text-cyan-300">AI Intelligence Engine</span>
+              <span className="text-xs font-mono uppercase tracking-widest text-cyan-300">Sovereign valuation kernel</span>
             </div>
             <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tighter text-white mb-4">
-              Value any domain in <span className="text-gradient-cyan">seconds.</span>
+              Institutional intelligence on <span className="text-gradient-cyan">any domain.</span>
             </h1>
             <p className="text-white/60 max-w-2xl mx-auto">
-              Our scoring kernel evaluates 12 dimensions — brandability, memorability, SEO, AI relevance, market alignment, sovereign potential — then synthesizes an investor-grade narrative.
+              The kernel scores 12 dimensions — brandability, memorability, SEO, AI relevance, market alignment, sovereign potential — and synthesizes an institutional-grade assessment in seconds.
             </p>
           </div>
 
