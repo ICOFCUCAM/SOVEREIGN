@@ -6,3 +6,4 @@ update ecosystem_products set metrics='[{"label":"Credentials issued","value":"1
 update ecosystem_products set metrics='[{"label":"Systems monitored","value":"All"},{"label":"Coordination","value":"Real-time"},{"label":"Uptime","value":"99.99%"}]'::jsonb where slug='veritas-operations';
 update ecosystem_products set metrics='[{"label":"Avg deploy","value":"87s"},{"label":"Edge nodes","value":"47"},{"label":"Regions","value":"23"}]'::jsonb where slug='deployment-engine';
 update ecosystem_products set metrics='[{"label":"AI valuations","value":"12.4K+"},{"label":"Listings","value":"Live"},{"label":"Settlement","value":"Escrowed"}]'::jsonb where slug='marketplace-infra';
+update ecosystem_products set metrics='[{"label":"Coverage","value":"Norway"},{"label":"Routing","value":"AI-optimized"},{"label":"Valuation","value":"$180K"}]'::jsonb where slug='flyttgo-no';
