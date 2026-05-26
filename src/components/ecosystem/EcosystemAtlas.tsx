@@ -98,9 +98,9 @@ const EcosystemAtlas: React.FC = () => {
     <section className="px-4 sm:px-6 lg:px-8 pb-28">
       <div className="max-w-6xl mx-auto">
         {/* live status strip */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02] mb-20">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20 pb-10 border-b border-white/10">
           {stats.map((s) => (
-            <div key={s.label} className="px-6 py-6 bg-white/[0.01]">
+            <div key={s.label}>
               <div className="text-3xl font-bold text-white tabular-nums leading-none mb-2">{s.value}</div>
               <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/40">{s.label}</div>
             </div>
