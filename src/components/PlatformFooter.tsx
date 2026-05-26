@@ -28,11 +28,11 @@ const COLUMNS: Array<{ title: string; links: Array<{ label: string; to: string }
   {
     title: 'Sectors',
     links: [
-      { label: 'Governance & Integrity', to: '/ecosystem' },
-      { label: 'Finance & Banking', to: '/ecosystem' },
-      { label: 'Knowledge & Intelligence', to: '/ecosystem' },
-      { label: 'Logistics & Mobility', to: '/ecosystem' },
-      { label: 'Commerce & Deployment', to: '/ecosystem' },
+      { label: 'Governance & Integrity', to: '/ecosystem#governance' },
+      { label: 'Finance & Banking', to: '/ecosystem#finance' },
+      { label: 'Knowledge & Intelligence', to: '/ecosystem#intelligence' },
+      { label: 'Logistics & Mobility', to: '/ecosystem#mobility' },
+      { label: 'Elections & Civic', to: '/ecosystem#elections' },
     ],
   },
 ];
