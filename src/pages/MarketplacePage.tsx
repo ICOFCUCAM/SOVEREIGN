@@ -176,12 +176,12 @@ const MarketplacePage: React.FC = () => {
       <main>
         {/* ── SECTION 1 — acquisition hero (planet stretches ~3/4 and fills the banner) ── */}
         <section className="relative overflow-hidden h-[54vh] min-h-[440px] px-4 sm:px-6 lg:px-8">
-          {/* planet sized by banner height; edges masked so the uneven crop fades into space */}
-          <div className="absolute right-[-6%] sm:right-[-4%] lg:right-[-2%] top-[56%] -translate-y-1/2 h-[116%] pointer-events-none">
+          {/* planet sized by banner height; only the rim is masked so it stretches wide while the uneven crop fades */}
+          <div className="absolute right-[-8%] sm:right-[-6%] lg:right-[-4%] top-[56%] -translate-y-1/2 h-[132%] pointer-events-none">
             <img src="/hero-globe.webp" alt="" aria-hidden className="h-full w-auto max-w-none animate-breathe"
               style={{ transformOrigin: '55% 50%', filter: 'saturate(1.05) brightness(0.96)',
-                maskImage: 'radial-gradient(ellipse 74% 76% at 47% 50%, #000 58%, transparent 93%)',
-                WebkitMaskImage: 'radial-gradient(ellipse 74% 76% at 47% 50%, #000 58%, transparent 93%)' }} />
+                maskImage: 'radial-gradient(ellipse 84% 84% at 48% 50%, #000 76%, transparent 99%)',
+                WebkitMaskImage: 'radial-gradient(ellipse 84% 84% at 48% 50%, #000 76%, transparent 99%)' }} />
           </div>
           {/* left scrim for type legibility */}
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(95deg, #050816 16%, rgba(5,8,22,0.82) 40%, rgba(5,8,22,0.22) 60%, transparent 78%)' }} />
