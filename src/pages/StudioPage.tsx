@@ -125,13 +125,13 @@ const StudioPage: React.FC = () => {
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass mb-4">
               <Wand2 className="w-3.5 h-3.5 text-cyan-300" />
-              <span className="text-xs font-mono uppercase tracking-widest text-cyan-300">AI Branding Studio</span>
+              <span className="text-xs font-mono uppercase tracking-widest text-cyan-300">AI venture foundry</span>
             </div>
             <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tighter text-white mb-4">
-              Every domain is <span className="text-gradient-cyan">a company waiting to launch.</span>
+              Every domain is <span className="text-gradient-cyan">an institution waiting to deploy.</span>
             </h1>
             <p className="text-white/60 max-w-2xl mx-auto">
-              The intelligence engine scores 12 dimensions, then auto-generates a full brand identity — tone, palette, typography, slogans, startup concepts, monetization, and investor narrative.
+              The intelligence engine scores the asset, then generates a complete sovereign identity — tone, palette, typography, narrative, venture concepts and monetization — ready to deploy.
             </p>
           </div>
 
