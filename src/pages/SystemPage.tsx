@@ -5,6 +5,7 @@ import type { EcosystemProduct, Domain } from '@/lib/types';
 import { institutionBlueprint } from '@/lib/institution';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import PlatformNav from '@/components/PlatformNav';
+import PageSubNav from '@/components/PageSubNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
@@ -116,6 +117,7 @@ const SystemPage: React.FC = () => {
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
       <PlatformNav />
+      <PageSubNav label={product.name} items={[{ id: 'tiers', label: 'Tiers' }, { id: 'capabilities', label: 'Capabilities' }, { id: 'preview', label: 'Preview' }, { id: 'modules', label: 'Modules' }, { id: 'acquire', label: 'Acquire' }]} />
 
       {/* Hero */}
       <section className="relative pt-28 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -214,7 +216,7 @@ const SystemPage: React.FC = () => {
 
       <Reveal>
       {/* Capabilities */}
-      <section className="px-4 sm:px-6 lg:px-8 py-12">
+      <section id="capabilities" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold mb-6">Capabilities</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -229,7 +231,7 @@ const SystemPage: React.FC = () => {
       </section>
 
       {/* Operational command plane */}
-      <section className="px-4 sm:px-6 lg:px-8 py-12">
+      <section id="preview" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-6xl mx-auto">
           <div className="glass-strong rounded-2xl overflow-hidden">
             <div className="px-5 py-3 border-b border-white/10 flex items-center justify-between">
@@ -306,7 +308,7 @@ const SystemPage: React.FC = () => {
 
       {/* Module suite */}
       {modules.length > 0 && (
-        <section className="px-4 sm:px-6 lg:px-8 py-12">
+        <section id="modules" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 py-12">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-end justify-between gap-4 mb-7">
               <h2 className="text-2xl font-bold text-white">Deployable modules</h2>
@@ -335,7 +337,7 @@ const SystemPage: React.FC = () => {
       )}
 
       {/* Acquisition */}
-      <section className="px-4 sm:px-6 lg:px-8 py-12">
+      <section id="acquire" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-6xl mx-auto glass-strong rounded-2xl p-8 relative overflow-hidden">
           <div className="absolute -top-20 right-0 w-80 h-80 rounded-full blur-[120px] opacity-20" style={{ background: accent }} />
           <div className="relative grid lg:grid-cols-[1fr_320px] gap-8 items-center">

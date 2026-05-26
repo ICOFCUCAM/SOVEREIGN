@@ -4,6 +4,7 @@ import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import HeroEnvironment from '@/components/home/HeroEnvironment';
+import PageSubNav from '@/components/PageSubNav';
 import EcosystemMap from '@/components/home/EcosystemMap';
 import EcosystemAtlas from '@/components/ecosystem/EcosystemAtlas';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
@@ -23,9 +24,10 @@ const EcosystemHub: React.FC = () => {
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
       <PlatformNav />
+      <PageSubNav label="Ecosystem" items={[{ id: 'network', label: 'Network' }, { id: 'governance', label: 'Governance' }, { id: 'finance', label: 'Finance' }, { id: 'mobility', label: 'Mobility' }, { id: 'intelligence', label: 'Intelligence' }, { id: 'elections', label: 'Elections' }, { id: 'education', label: 'Education' }, { id: 'commerce', label: 'Commerce' }, { id: 'operations', label: 'Operations' }]} />
 
       {/* header banner — a compact version of the old homepage: live globe + city skyline */}
-      <section ref={bannerRef} onMouseMove={onMove} className="relative h-[56vh] min-h-[440px] overflow-hidden"
+      <section ref={bannerRef} onMouseMove={onMove} className="relative h-[46vh] min-h-[360px] overflow-hidden"
         style={{ ['--px' as string]: '0', ['--py' as string]: '0' }}>
         <HeroEnvironment />
         <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">

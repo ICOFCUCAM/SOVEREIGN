@@ -7,7 +7,7 @@ import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import BriefingModal from '@/components/BriefingModal';
-import ExchangeSubNav from '@/components/marketplace/ExchangeSubNav';
+import PageSubNav from '@/components/PageSubNav';
 import HudCorners from '@/components/HudCorners';
 import Reveal from '@/components/Reveal';
 import { useCountUp } from '@/hooks/useCountUp';
@@ -169,11 +169,11 @@ const MarketplacePage: React.FC = () => {
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
       <PlatformNav />
-      <ExchangeSubNav />
+      <PageSubNav label="Exchange" items={[{ id: 'flagship', label: 'Flagship' }, { id: 'sovereign', label: 'Sovereign' }, { id: 'infrastructure', label: 'Infrastructure' }, { id: 'platforms', label: 'Platforms' }]} />
 
       <main>
         {/* ── SECTION 1 — acquisition hero (planet stretches ~3/4 and fills the banner) ── */}
-        <section className="relative overflow-hidden h-[58vh] min-h-[440px] px-4 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden h-[50vh] min-h-[400px] px-4 sm:px-6 lg:px-8">
           {/* planet covering ~3/4 of the width, filling banner height, bleeding off right + bottom */}
           <div className="absolute right-[-10%] sm:right-[-7%] lg:right-[-4%] bottom-[-36%] sm:bottom-[-32%] lg:bottom-[-30%] w-[98vw] sm:w-[84vw] lg:w-[74vw] max-w-[1280px] pointer-events-none animate-breathe" style={{ transformOrigin: '60% 55%' }}>
             <img src="/hero-globe.webp" alt="" aria-hidden className="w-full h-auto" style={{ filter: 'saturate(1.05) brightness(0.98)' }} />

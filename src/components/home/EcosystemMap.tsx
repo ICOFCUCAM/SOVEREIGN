@@ -21,7 +21,7 @@ const positioned = SECTORS.map((s, i) => {
 });
 
 const EcosystemMap: React.FC = () => (
-  <section className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
+  <section id="network" className="scroll-mt-28 py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
     <div className="max-w-6xl mx-auto">
       <div className="text-center max-w-2xl mx-auto mb-12">
         <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-5">Ecosystem architecture</div>
