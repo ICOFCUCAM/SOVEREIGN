@@ -18,8 +18,10 @@ import {
   Boxes, ExternalLink, Film, Play,
 } from 'lucide-react';
 
-type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'channel' | 'analytics' | 'ecosystem' | 'team' | 'activity';
+type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'channel' | 'narratives' | 'campaigns' | 'analytics' | 'ecosystem' | 'team' | 'activity';
 interface MediaItem { id: string; media_class: string; kind: string; title: string; meta: string | null; length: string | null; youtube_id: string | null; sort_order: number }
+interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null; published: boolean; sort_order: number }
+interface Campaign { id: string; name: string; media_class: string | null; channel: string; status: string; asset_ref: string | null; scheduled_at: string | null; created_at: string }
 type LeadFilter = 'all' | 'inquiry' | 'offer' | 'buy_now';
 interface Inquiry { id: string; created_at: string; system_slug: string | null; system_name: string | null; tier: string | null; name: string | null; email: string; organization: string | null; message: string | null; status?: string | null }
 
@@ -50,6 +52,10 @@ const AdminPage: React.FC = () => {
   const [users, setUsers] = useState<UserRoleRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
   const [media, setMedia] = useState<MediaItem[]>([]);
+  const [narratives, setNarratives] = useState<Narrative[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [editNar, setEditNar] = useState<Partial<Narrative> | null>(null);
+  const [editCamp, setEditCamp] = useState<Partial<Campaign> | null>(null);
   const [editingSystem, setEditingSystem] = useState<Partial<EcosystemProduct> | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   useEscape(() => { setEditing(null); setEditingSystem(null); });
@@ -70,7 +76,11 @@ const AdminPage: React.FC = () => {
     const sys = await supabase.from('ecosystem_products').select('*').order('sort_order', { ascending: true });
     const inq = await supabase.from('inquiries').select('*').order('created_at', { ascending: false }).limit(200);
     const med = await supabase.from('media').select('*').order('media_class', { ascending: true }).order('sort_order', { ascending: true });
+    const nar = await supabase.from('narratives').select('*').order('sort_order', { ascending: true });
+    const camp = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
     setMedia((med.data || []) as MediaItem[]);
+    setNarratives((nar.data || []) as Narrative[]);
+    setCampaigns((camp.data || []) as Campaign[]);
     setDomains((d.data || []) as Domain[]);
     setLeads((l.data || []) as Lead[]);
     setBriefings((inq.data || []) as Inquiry[]);
@@ -287,6 +297,31 @@ const AdminPage: React.FC = () => {
     if (error) toast.error('Could not save video id'); else toast.success('Media updated');
   };
 
+  const saveNarrative = async () => {
+    if (!editNar?.title?.trim() || !editNar?.body?.trim()) { toast.error('Title and body required'); return; }
+    const payload = { kind: editNar.kind || 'dispatch', media_class: editNar.media_class || null, title: editNar.title.trim(), subtitle: editNar.subtitle?.trim() || null, body: editNar.body, read_time: editNar.read_time?.trim() || null, published: editNar.published ?? true, sort_order: editNar.sort_order ?? (narratives.length + 1) };
+    const { error } = editNar.id ? await supabase.from('narratives').update(payload).eq('id', editNar.id) : await supabase.from('narratives').insert(payload);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Dispatch saved'); setEditNar(null); loadAll();
+  };
+  const deleteNarrative = async (id: string) => {
+    if (!confirm('Delete this dispatch?')) return;
+    const { error } = await supabase.from('narratives').delete().eq('id', id);
+    if (error) { toast.error(error.message); return; } toast.success('Deleted'); loadAll();
+  };
+  const saveCampaign = async () => {
+    if (!editCamp?.name?.trim()) { toast.error('Name required'); return; }
+    const payload = { name: editCamp.name.trim(), media_class: editCamp.media_class || null, channel: editCamp.channel || 'executive', status: editCamp.status || 'draft', asset_ref: editCamp.asset_ref?.trim() || null, scheduled_at: editCamp.scheduled_at || null };
+    const { error } = editCamp.id ? await supabase.from('campaigns').update(payload).eq('id', editCamp.id) : await supabase.from('campaigns').insert(payload);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Campaign saved'); setEditCamp(null); loadAll();
+  };
+  const deleteCampaign = async (id: string) => {
+    if (!confirm('Delete this campaign?')) return;
+    const { error } = await supabase.from('campaigns').delete().eq('id', id);
+    if (error) { toast.error(error.message); return; } toast.success('Deleted'); loadAll();
+  };
+
   const updateInquiryStatus = async (id: string, status: string) => {
     setBriefings((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
     await supabase.from('inquiries').update({ status }).eq('id', id);
@@ -455,6 +490,8 @@ const AdminPage: React.FC = () => {
               { id: 'leads', label: `Inquiries (${leads.length})`, icon: Users },
               { id: 'briefings', label: `Briefings (${briefings.length})`, icon: ShieldAlert },
               { id: 'channel', label: `Channel (${media.length})`, icon: Film },
+              { id: 'narratives', label: `Dispatches (${narratives.length})`, icon: FileText },
+              { id: 'campaigns', label: `Campaigns (${campaigns.length})`, icon: Radio },
               { id: 'analytics', label: 'Analytics', icon: BarChart3 },
               { id: 'ecosystem', label: `Ecosystem (${systems.length})`, icon: Boxes },
               { id: 'team', label: `Access (${users.length})`, icon: ShieldCheck },
@@ -812,6 +849,50 @@ const AdminPage: React.FC = () => {
                 );
               })}
               {media.length === 0 && <div className="glass rounded-2xl p-12 text-center text-white/40">No media rows.</div>}
+            </div>
+          )}
+
+          {/* Narratives (dispatches) tab */}
+          {tab === 'narratives' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <p className="text-sm text-white/50">Author the Sovereign Dispatches that appear on the public Channel — manifestos, whitepapers, film scripts and after-action reports.</p>
+                <button onClick={() => setEditNar({ kind: 'dispatch', published: true })} className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 shrink-0"><Plus className="w-3.5 h-3.5" /> New dispatch</button>
+              </div>
+              <div className="glass-strong rounded-2xl overflow-hidden divide-y divide-white/5">
+                {narratives.map((n) => (
+                  <div key={n.id} className="flex items-center gap-4 px-5 py-3.5">
+                    <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 text-white/50 shrink-0">{n.kind}</span>
+                    <div className="min-w-0 flex-1"><div className="text-sm text-white truncate">{n.title}</div><div className="text-[10px] text-white/35 truncate">{n.subtitle}</div></div>
+                    <span className={`text-[10px] font-mono shrink-0 ${n.published ? 'text-emerald-300/70' : 'text-white/30'}`}>{n.published ? 'published' : 'draft'}</span>
+                    <button onClick={() => setEditNar(n)} aria-label="Edit" className="text-white/40 hover:text-white transition shrink-0"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => deleteNarrative(n.id)} aria-label="Delete" className="text-white/40 hover:text-rose-300 transition shrink-0"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                {narratives.length === 0 && <div className="px-5 py-12 text-center text-white/40">No dispatches yet — author the first.</div>}
+              </div>
+            </div>
+          )}
+
+          {/* Campaigns tab */}
+          {tab === 'campaigns' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <p className="text-sm text-white/50">Plan distribution campaigns across executive briefings, LinkedIn and YouTube. (Posting automation activates once a distribution key is connected.)</p>
+                <button onClick={() => setEditCamp({ channel: 'executive', status: 'draft' })} className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 shrink-0"><Plus className="w-3.5 h-3.5" /> New campaign</button>
+              </div>
+              <div className="glass-strong rounded-2xl overflow-hidden divide-y divide-white/5">
+                {campaigns.map((c) => (
+                  <div key={c.id} className="flex items-center gap-4 px-5 py-3.5">
+                    <div className="min-w-0 flex-1"><div className="text-sm text-white truncate">{c.name}</div><div className="text-[10px] font-mono uppercase tracking-wider text-white/35">{c.channel}{c.media_class ? ` · ${c.media_class}` : ''}</div></div>
+                    {c.scheduled_at && <span className="text-[10px] font-mono text-white/40 shrink-0">{new Date(c.scheduled_at).toLocaleDateString()}</span>}
+                    <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${c.status === 'live' ? 'bg-emerald-500/15 text-emerald-300' : c.status === 'scheduled' ? 'bg-cyan-500/15 text-cyan-300' : c.status === 'archived' ? 'bg-white/5 text-white/35' : 'bg-amber-500/15 text-amber-300'}`}>{c.status}</span>
+                    <button onClick={() => setEditCamp(c)} aria-label="Edit" className="text-white/40 hover:text-white transition shrink-0"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => deleteCampaign(c.id)} aria-label="Delete" className="text-white/40 hover:text-rose-300 transition shrink-0"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                {campaigns.length === 0 && <div className="px-5 py-12 text-center text-white/40">No campaigns yet.</div>}
+              </div>
             </div>
           )}
 
@@ -1315,6 +1396,75 @@ const AdminPage: React.FC = () => {
                 <button onClick={saveSystem} className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold flex items-center justify-center gap-2"><Save className="w-4 h-4" /> {editingSystem.id ? 'Save Changes' : 'Add System'}</button>
                 <button onClick={() => setEditingSystem(null)} className="px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 text-white">Cancel</button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Narrative editor */}
+      {editNar && (
+        <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setEditNar(null)} />
+          <div className="relative w-full max-w-2xl my-10 glass-strong rounded-2xl p-7">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-display text-xl font-bold text-white">{editNar.id ? 'Edit dispatch' : 'New dispatch'}</h3>
+              <button onClick={() => setEditNar(null)} aria-label="Close" className="text-white/40 hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <select value={editNar.kind || 'dispatch'} onChange={(e) => setEditNar({ ...editNar, kind: e.target.value })} aria-label="Kind" className="px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white">
+                  {['dispatch', 'manifesto', 'whitepaper', 'ad_script'].map((k) => <option key={k} value={k}>{k}</option>)}
+                </select>
+                <select value={editNar.media_class || ''} onChange={(e) => setEditNar({ ...editNar, media_class: e.target.value || null })} aria-label="Class" className="px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white">
+                  <option value="">— class —</option>{['cinematic', 'operational', 'strategic', 'crisis'].map((k) => <option key={k} value={k}>{k}</option>)}
+                </select>
+              </div>
+              <input value={editNar.title || ''} onChange={(e) => setEditNar({ ...editNar, title: e.target.value })} placeholder="Title" className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
+              <input value={editNar.subtitle || ''} onChange={(e) => setEditNar({ ...editNar, subtitle: e.target.value })} placeholder="Subtitle" className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
+              <textarea value={editNar.body || ''} onChange={(e) => setEditNar({ ...editNar, body: e.target.value })} placeholder="Body (line breaks preserved)" rows={10} className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 font-mono leading-relaxed" />
+              <div className="flex items-center gap-4">
+                <input value={editNar.read_time || ''} onChange={(e) => setEditNar({ ...editNar, read_time: e.target.value })} placeholder="Read time (e.g. 3 min)" className="flex-1 px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
+                <label className="flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={editNar.published ?? true} onChange={(e) => setEditNar({ ...editNar, published: e.target.checked })} /> Published</label>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button onClick={() => setEditNar(null)} className="px-4 py-2.5 rounded-lg glass text-white/70 text-sm">Cancel</button>
+              <button onClick={saveNarrative} className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold inline-flex items-center gap-1.5"><Save className="w-4 h-4" /> Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Campaign editor */}
+      {editCamp && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setEditCamp(null)} />
+          <div className="relative w-full max-w-lg glass-strong rounded-2xl p-7">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-display text-xl font-bold text-white">{editCamp.id ? 'Edit campaign' : 'New campaign'}</h3>
+              <button onClick={() => setEditCamp(null)} aria-label="Close" className="text-white/40 hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="space-y-3">
+              <input value={editCamp.name || ''} onChange={(e) => setEditCamp({ ...editCamp, name: e.target.value })} placeholder="Campaign name" className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
+              <div className="grid grid-cols-2 gap-3">
+                <select value={editCamp.channel || 'executive'} onChange={(e) => setEditCamp({ ...editCamp, channel: e.target.value })} aria-label="Channel" className="px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white">
+                  {['executive', 'linkedin', 'youtube', 'public'].map((k) => <option key={k} value={k}>{k}</option>)}
+                </select>
+                <select value={editCamp.status || 'draft'} onChange={(e) => setEditCamp({ ...editCamp, status: e.target.value })} aria-label="Status" className="px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white">
+                  {['draft', 'scheduled', 'live', 'archived'].map((k) => <option key={k} value={k}>{k}</option>)}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <select value={editCamp.media_class || ''} onChange={(e) => setEditCamp({ ...editCamp, media_class: e.target.value || null })} aria-label="Class" className="px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white">
+                  <option value="">— class —</option>{['cinematic', 'operational', 'strategic', 'crisis'].map((k) => <option key={k} value={k}>{k}</option>)}
+                </select>
+                <input type="date" value={editCamp.scheduled_at ? editCamp.scheduled_at.slice(0, 10) : ''} onChange={(e) => setEditCamp({ ...editCamp, scheduled_at: e.target.value ? new Date(e.target.value).toISOString() : null })} aria-label="Scheduled" className="px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white" />
+              </div>
+              <input value={editCamp.asset_ref || ''} onChange={(e) => setEditCamp({ ...editCamp, asset_ref: e.target.value })} placeholder="Asset reference (film, dispatch, note)" className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button onClick={() => setEditCamp(null)} className="px-4 py-2.5 rounded-lg glass text-white/70 text-sm">Cancel</button>
+              <button onClick={saveCampaign} className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold inline-flex items-center gap-1.5"><Save className="w-4 h-4" /> Save</button>
             </div>
           </div>
         </div>
