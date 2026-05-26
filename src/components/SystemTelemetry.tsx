@@ -10,7 +10,7 @@ export function motifFor(category: string): Motif {
   const c = (category || '').toLowerCase();
   if (/elector|ballot|voting/.test(c)) return 'electoral';
   if (/integrit|oversight|anti|procure|forensic/.test(c)) return 'oversight';
-  if (/govern|civic|govtech/.test(c)) return 'governance';
+  if (/govern|civic|govtech|operating infrastructure|government runtime/.test(c)) return 'governance';
   if (/logistic|transport|mobility/.test(c)) return 'logistics';
   if (/mobile|wallet|circulation/.test(c) || /\bpay/.test(c)) return 'payments';
   if (/bank|financ|settle|treasury|fintech/.test(c)) return 'finance';
