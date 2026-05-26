@@ -15,9 +15,10 @@ import ClosingCTA from '@/components/home/ClosingCTA';
 const AppLayout: React.FC = () => {
   return (
     <div className="relative min-h-screen text-white">
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:top-3 focus:left-3 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-white focus:text-[#05071A] focus:font-semibold">Skip to content</a>
       <AnimatedBackground intensity="low" />
       <PlatformNav />
-      <main className="relative">
+      <main id="main" className="relative">
         {/* 1 — cinematic hero */}
         <CinematicHero />
         {/* 1b — marketplace assets immediately after the hero */}
