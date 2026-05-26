@@ -20,7 +20,7 @@ const BriefingModal: React.FC<Props> = ({ systemName, slug, tier, accent = '#00C
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) { setError('Enter a contact email.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError('Enter a valid contact email.'); return; }
     setError(''); setSending(true);
     try {
       const { error: err } = await supabase.from('inquiries').insert({
