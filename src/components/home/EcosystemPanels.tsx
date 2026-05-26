@@ -51,14 +51,14 @@ const AcquisitionTerminal: React.FC<{ domains: Domain[] }> = ({ domains }) => {
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: statusOf(flag) === 'Available' ? '#10B981' : '#FFB547' }} /> {statusOf(flag)}
             </span>
           </div>
-          <div className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tighter leading-[0.9] mb-4 group-hover:translate-x-0.5 transition-transform">{flag.domain_name}</div>
+          <div className="font-display text-[2.1rem] sm:text-5xl lg:text-7xl font-bold text-white tracking-tighter leading-[0.92] mb-4 break-words group-hover:translate-x-0.5 transition-transform">{flag.domain_name}</div>
           <p className="text-white/55 leading-relaxed text-base sm:text-lg max-w-md">{flag.tagline || 'A deployable sovereign institution, engineered for planetary scale.'}</p>
 
           {/* terminal readout */}
           <div className="grid grid-cols-3 mt-8 rounded-2xl border border-white/10 bg-black/30 overflow-hidden divide-x divide-white/8">
-            <div className="px-4 py-5"><div className="text-3xl font-bold tabular-nums leading-none" style={{ color: accent }}>{flag.valuation_score}<span className="text-base text-white/40">/100</span></div><div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40 mt-2">AI valuation</div></div>
-            <div className="px-4 py-5"><div className="text-3xl font-bold text-white tabular-nums leading-none">{tamOf(flag)}</div><div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40 mt-2">Market</div></div>
-            <div className="px-4 py-5"><div className="text-3xl font-bold text-white tabular-nums leading-none">{price(Number(flag.price_usd || 0))}</div><div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40 mt-2">Asking</div></div>
+            <div className="px-3 sm:px-4 py-5"><div className="text-xl sm:text-3xl font-bold tabular-nums leading-none" style={{ color: accent }}>{flag.valuation_score}<span className="text-sm sm:text-base text-white/40">/100</span></div><div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40 mt-2">AI valuation</div></div>
+            <div className="px-3 sm:px-4 py-5"><div className="text-xl sm:text-3xl font-bold text-white tabular-nums leading-none">{tamOf(flag)}</div><div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40 mt-2">Market</div></div>
+            <div className="px-3 sm:px-4 py-5"><div className="text-xl sm:text-3xl font-bold text-white tabular-nums leading-none">{price(Number(flag.price_usd || 0))}</div><div className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/40 mt-2">Asking</div></div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 mt-7">

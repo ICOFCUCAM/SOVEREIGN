@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# local visual-verification tooling (ephemeral)
+.shots/
+.preview-*.mjs
