@@ -34,3 +34,7 @@ dist-ssr
 /.mktzoom.mjs
 /.sec-zoom.mjs
 /.page-zoom.mjs
+/.surv.mjs
+/.mktm.mjs
+/.mktfull.mjs
+/.*-zoom.mjs
