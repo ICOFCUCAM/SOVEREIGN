@@ -96,7 +96,12 @@ const OtherCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
         <div className="font-display text-xl font-bold text-white tracking-tight">{p.name}</div>
         <div className="text-sm text-white/45 line-clamp-2 mb-5 min-h-[2.5rem]">{p.tagline}</div>
         <div className="flex items-center justify-between pt-4 border-t border-white/5">
-          {(p.metrics && p.metrics[0]) ? (
+          {(p.tiers && p.tiers[0]) ? (
+            <div>
+              <div className="text-sm font-semibold text-white tabular-nums leading-none">From {p.tiers[0].price}</div>
+              <div className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/40 mt-1.5">Deployment</div>
+            </div>
+          ) : (p.metrics && p.metrics[0]) ? (
             <div>
               <div className="text-sm font-semibold text-white tabular-nums leading-none">{p.metrics[0].value}</div>
               <div className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/40 mt-1.5">{p.metrics[0].label}</div>
