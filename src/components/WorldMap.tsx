@@ -105,6 +105,8 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
 
       {/* cinematic edge darkness / partial concealment */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 90% 100% at 50% 50%, transparent 50%, rgba(3,5,14,0.5) 88%, rgba(2,3,10,0.85) 100%)' }} />
+      {/* atmospheric grain */}
+      <div className="absolute inset-0 opacity-[0.025] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence baseFrequency=\'0.9\'/%3E%3C/filter%3E%3Crect width=\'100\' height=\'100\' filter=\'url(%23n)\' opacity=\'0.5\'/%3E%3C/svg%3E")' }} />
     </div>
   );
 };
