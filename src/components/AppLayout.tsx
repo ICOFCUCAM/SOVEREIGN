@@ -7,6 +7,7 @@ import CinematicHero from '@/components/home/CinematicHero';
 import MarketplaceTeaser from '@/components/home/MarketplaceTeaser';
 import EcosystemPanels from '@/components/home/EcosystemPanels';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
+import ChannelTeaser from '@/components/home/ChannelTeaser';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import InstitutionalTrust from '@/components/home/InstitutionalTrust';
 import ClosingCTA from '@/components/home/ClosingCTA';
@@ -26,6 +27,8 @@ const AppLayout: React.FC = () => {
         <Reveal><EcosystemPanels /></Reveal>
         {/* featured institutions */}
         <EcosystemSectors />
+        {/* the sovereign channel — media ecosystem entry */}
+        <Reveal><ChannelTeaser /></Reveal>
         {/* deployment story */}
         <Reveal><TransformationFlow /></Reveal>
         {/* institutional trust & governance */}

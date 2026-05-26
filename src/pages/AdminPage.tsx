@@ -702,11 +702,14 @@ const AdminPage: React.FC = () => {
                   <tbody>
                     {briefings.filter((b) => briefingFilter === 'all' || (b.status || 'new') === briefingFilter).map((b) => (
                       <tr key={b.id} className="border-b border-white/5 hover:bg-white/[0.02] align-top">
-                        <td className="px-5 py-3.5 text-cyan-300 text-xs font-mono">{b.system_name || b.system_slug || '—'}</td>
+                        <td className="px-5 py-3.5 text-cyan-300 text-xs font-mono">
+                          {b.system_name || b.system_slug || '—'}
+                          {b.system_slug === 'sovereign-briefing' && <span className="ml-2 px-1.5 py-0.5 rounded text-[8px] font-mono uppercase tracking-wider bg-cyan-500/15 text-cyan-300 align-middle">Sovereign</span>}
+                        </td>
                         <td className="px-3 py-3.5">{b.tier ? <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-purple-500/15 text-purple-300">{b.tier}</span> : <span className="text-white/30">—</span>}</td>
                         <td className="px-3 py-3.5"><div className="text-white">{b.name || '—'}</div><a href={`mailto:${b.email}`} className="text-xs text-cyan-300/70 hover:text-cyan-300">{b.email}</a></td>
                         <td className="px-3 py-3.5 text-white/80 text-sm">{b.organization || '—'}</td>
-                        <td className="px-3 py-3.5 text-white/55 text-xs max-w-[280px]">{b.message || '—'}</td>
+                        <td className="px-3 py-3.5 text-white/55 text-xs max-w-[300px] whitespace-pre-line leading-relaxed">{b.message || '—'}</td>
                         <td className="px-3 py-3.5">
                           <select value={b.status || 'new'} onChange={(e) => updateInquiryStatus(b.id, e.target.value)} aria-label="Briefing status"
                             className="bg-white/5 border border-white/10 rounded px-2 py-1 text-[10px] font-mono uppercase text-white">

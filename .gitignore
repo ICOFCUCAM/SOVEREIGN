@@ -49,3 +49,4 @@ dist-ssr
 /.sim.mjs
 /.brief.mjs
 /.sim2.mjs
+/.ct.mjs
