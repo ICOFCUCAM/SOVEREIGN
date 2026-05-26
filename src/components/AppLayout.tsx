@@ -4,6 +4,7 @@ import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
+import MarketplaceTeaser from '@/components/home/MarketplaceTeaser';
 import EcosystemPanels from '@/components/home/EcosystemPanels';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
 import TransformationFlow from '@/components/home/TransformationFlow';
@@ -19,6 +20,8 @@ const AppLayout: React.FC = () => {
       <main id="main" className="relative">
         {/* ACT 1 — civilization-scale vision (cinematic Earth hero) */}
         <CinematicHero />
+        {/* live marketplace ticker — sovereign assets streaming under the hero */}
+        <MarketplaceTeaser />
         {/* ACT 2 — the sovereign infrastructure universe */}
         <Reveal><EcosystemPanels /></Reveal>
         {/* featured institutions */}
