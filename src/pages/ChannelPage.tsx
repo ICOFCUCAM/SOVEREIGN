@@ -11,7 +11,8 @@ import CrisisSimulation from '@/components/CrisisSimulation';
 import HudCorners from '@/components/HudCorners';
 import Reveal from '@/components/Reveal';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { Play, ArrowRight, ArrowUpRight, Film, Activity, Landmark, ShieldAlert, Linkedin, Youtube, FileText } from 'lucide-react';
+import { useEscape } from '@/hooks/useEscape';
+import { Play, ArrowRight, ArrowUpRight, Film, Activity, Landmark, ShieldAlert, Linkedin, Youtube, FileText, X, BookOpen } from 'lucide-react';
 
 interface Episode { title: string; meta: string; len: string }
 interface Channel {
@@ -94,14 +95,45 @@ const FilmTile: React.FC<{ ch: Channel; feature: string; onPlay: () => void }> =
   </button>
 );
 
+interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null }
+
+const KIND_LABEL: Record<string, string> = { manifesto: 'Manifesto', whitepaper: 'Whitepaper', ad_script: 'Film script', dispatch: 'Dispatch' };
+
+const NarrativeReader: React.FC<{ n: Narrative; onClose: () => void }> = ({ n, onClose }) => {
+  useEscape(onClose);
+  useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = ''; }; }, []);
+  return (
+    <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-label={n.title}>
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-2xl my-10 rounded-2xl border border-white/12 bg-[#070b1c]">
+        <span className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, #00C2FF, transparent)' }} />
+        <HudCorners color="#00C2FF" className="opacity-25" />
+        <div className="relative p-8 sm:p-10">
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-[10px] font-mono uppercase tracking-[0.26em] text-cyan-300/70">{KIND_LABEL[n.kind] || 'Dispatch'}{n.read_time ? ` · ${n.read_time}` : ''}</span>
+            <button onClick={onClose} aria-label="Close" className="text-white/40 hover:text-white transition"><X className="w-5 h-5" /></button>
+          </div>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tighter text-white leading-[0.98] mb-3">{n.title}</h2>
+          {n.subtitle && <p className="text-white/55 text-lg leading-relaxed mb-7">{n.subtitle}</p>}
+          <div className="text-white/70 leading-relaxed whitespace-pre-line text-[15px]">{n.body}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ChannelPage: React.FC = () => {
   useDocumentTitle('Channel', 'The Sovereign Channel — cinematic, operational, strategic and crisis-response media from the sovereign operating layer.');
   const [brief, setBrief] = useState(false);
   const [playing, setPlaying] = useState<{ title: string; kicker: string; accent: string; video?: string } | null>(null);
   const [media, setMedia] = useState<Record<string, { feature?: { title: string; video?: string }; episodes: Array<{ title: string; meta: string; len: string; video?: string }> }>>({});
+  const [narratives, setNarratives] = useState<Narrative[]>([]);
+  const [reading, setReading] = useState<Narrative | null>(null);
 
   useEffect(() => {
     (async () => {
+      const { data: nar } = await supabase.from('narratives').select('*').eq('published', true).order('sort_order', { ascending: true });
+      setNarratives((nar || []) as Narrative[]);
       const { data } = await supabase.from('media').select('*').order('sort_order', { ascending: true });
       if (!data) return;
       const map: Record<string, { feature?: { title: string; video?: string }; episodes: Array<{ title: string; meta: string; len: string; video?: string }> }> = {};
@@ -129,7 +161,7 @@ const ChannelPage: React.FC = () => {
       <PlatformNav />
       <PageSubNav label="Channel" items={[
         { id: 'cinematic', label: 'Cinematic' }, { id: 'operational', label: 'Operational' },
-        { id: 'strategic', label: 'Strategic' }, { id: 'crisis', label: 'Crisis' }, { id: 'simulation', label: 'Simulation' }, { id: 'briefing', label: 'Briefing' },
+        { id: 'strategic', label: 'Strategic' }, { id: 'crisis', label: 'Crisis' }, { id: 'simulation', label: 'Simulation' }, { id: 'dispatches', label: 'Dispatches' }, { id: 'briefing', label: 'Briefing' },
       ]} />
 
       <main>
@@ -224,6 +256,33 @@ const ChannelPage: React.FC = () => {
           </Reveal>
         </section>
 
+        {/* sovereign dispatches — narrative engine (DB-driven) */}
+        {narratives.length > 0 && (
+          <section id="dispatches" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+            <Reveal>
+              <div className="max-w-7xl mx-auto">
+                <div className="flex items-center gap-3 mb-8">
+                  <span className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70">Sovereign dispatches</span>
+                  <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">Narrative engine</span>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {narratives.map((n) => (
+                    <button key={n.id} onClick={() => setReading(n)} className="group relative text-left rounded-2xl border border-white/10 bg-white/[0.014] p-6 overflow-hidden hover:border-white/25 hover:-translate-y-1 transition-all">
+                      <span className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(90deg, transparent, #00C2FF, transparent)' }} />
+                      <BookOpen className="w-5 h-5 text-cyan-300/70 mb-5" />
+                      <div className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/40">{KIND_LABEL[n.kind] || 'Dispatch'}{n.read_time ? ` · ${n.read_time}` : ''}</div>
+                      <div className="font-display text-lg font-bold text-white tracking-tight leading-tight mt-1.5">{n.title}</div>
+                      {n.subtitle && <p className="text-[12px] text-white/45 leading-snug mt-2 line-clamp-3">{n.subtitle}</p>}
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-white/45 group-hover:text-white mt-5 transition-colors">Read <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" /></span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+          </section>
+        )}
+
         {/* distribution architecture */}
         <section className="px-4 sm:px-6 lg:px-8 py-16">
           <div className="max-w-7xl mx-auto">
@@ -264,6 +323,7 @@ const ChannelPage: React.FC = () => {
       </main>
 
       <PlatformFooter />
+      {reading && <NarrativeReader n={reading} onClose={() => setReading(null)} />}
       {playing && <VideoModal title={playing.title} kicker={playing.kicker} accent={playing.accent} videoId={playing.video} onClose={() => setPlaying(null)} onBrief={() => { setPlaying(null); setBrief(true); }} />}
       {brief && <SovereignBriefing accent="#00C2FF" onClose={() => setBrief(false)} />}
     </div>

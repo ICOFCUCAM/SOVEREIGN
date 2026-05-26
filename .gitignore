@@ -51,3 +51,4 @@ dist-ssr
 /.sim2.mjs
 /.ct.mjs
 /.chdb.mjs
+/.disp.mjs
