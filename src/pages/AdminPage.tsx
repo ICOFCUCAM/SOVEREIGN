@@ -647,7 +647,7 @@ const AdminPage: React.FC = () => {
                           <td className="px-3 py-3.5 text-white/80 text-sm">{l.offer_amount ? `$${Number(l.offer_amount).toLocaleString()}` : '—'}</td>
                           <td className="px-3 py-3.5"><span className="text-amber-300 font-mono text-xs">{l.buyer_score}/100</span></td>
                           <td className="px-3 py-3.5">
-                            <select value={l.status} onChange={(e) => updateLeadStatus(l.id, e.target.value)}
+                            <select value={l.status} onChange={(e) => updateLeadStatus(l.id, e.target.value)} aria-label="Lead status"
                               className="bg-white/5 border border-white/10 rounded px-2 py-1 text-[10px] font-mono uppercase text-white">
                               <option value="new">new</option>
                               <option value="qualified">qualified</option>
