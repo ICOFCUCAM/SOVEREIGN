@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Globe, Mail, Send, CheckCircle2 } from 'lucide-react';
+import { Shield, Globe, Mail, Send, CheckCircle2, ArrowRight } from 'lucide-react';
+import BriefingModal from '@/components/BriefingModal';
 
 const COLUMNS: Array<{ title: string; links: Array<{ label: string; to: string }> }> = [
   {
@@ -88,6 +89,7 @@ const PlatformFooter: React.FC = () => {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [brief, setBrief] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,6 +139,9 @@ const PlatformFooter: React.FC = () => {
                 {sent ? 'Joined' : 'Join'}
               </button>
             </form>
+            <button onClick={() => setBrief(true)} className="group inline-flex items-center gap-2 mt-5 text-sm font-semibold text-white/70 hover:text-white transition">
+              Request a sovereign briefing <ArrowRight className="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
 
           {COLUMNS.map((col) => (
@@ -165,6 +170,7 @@ const PlatformFooter: React.FC = () => {
           </div>
         </div>
       </div>
+      {brief && <BriefingModal systemName="SOVEREIGN" slug="platform" accent="#00C2FF" onClose={() => setBrief(false)} />}
     </footer>
   );
 };
