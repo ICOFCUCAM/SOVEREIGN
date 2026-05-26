@@ -7,6 +7,7 @@ import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import BriefingModal from '@/components/BriefingModal';
+import ExchangeSubNav from '@/components/marketplace/ExchangeSubNav';
 import HudCorners from '@/components/HudCorners';
 import Reveal from '@/components/Reveal';
 import { useCountUp } from '@/hooks/useCountUp';
@@ -168,6 +169,7 @@ const MarketplacePage: React.FC = () => {
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
       <PlatformNav />
+      <ExchangeSubNav />
 
       <main>
         {/* ── SECTION 1 — acquisition hero (planet stretches ~3/4 and fills the banner) ── */}
@@ -234,7 +236,7 @@ const MarketplacePage: React.FC = () => {
         </section>
 
         {/* ── SECTION 3 — flagship acquisition (CIVICOS Core) ── */}
-        <section id="flagship" className="px-4 sm:px-6 lg:px-8 pb-24">
+        <section id="flagship" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 pb-24">
           <Reveal>
             <div className="relative max-w-7xl mx-auto rounded-[1.75rem] border border-white/10 overflow-hidden bg-[#04060f]" style={{ boxShadow: '0 50px 140px -50px rgba(0,0,0,0.9)' }}>
               <span className="absolute inset-x-0 top-0 h-px z-10" style={{ background: `linear-gradient(90deg, transparent, ${ACCENT}, transparent)` }} />
@@ -292,7 +294,7 @@ const MarketplacePage: React.FC = () => {
 
         {/* ── SECTION 4 — sovereign systems ── */}
         {!loading && sovereign.length > 0 && (
-          <section className="px-4 sm:px-6 lg:px-8 pb-24">
+          <section id="sovereign" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 pb-24">
             <div className="max-w-7xl mx-auto">
               <SectionHead kicker="Sovereign-grade" title="Sovereign systems." to="/ecosystem" cta="View all systems" />
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -304,7 +306,7 @@ const MarketplacePage: React.FC = () => {
 
         {/* ── SECTION 5 — infrastructure & deployment systems ── */}
         {!loading && infra.length > 0 && (
-          <section className="px-4 sm:px-6 lg:px-8 pb-24">
+          <section id="infrastructure" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 pb-24">
             <div className="max-w-7xl mx-auto">
               <SectionHead kicker="Infrastructure" title="Infrastructure & deployment systems." to="/ecosystem" cta="View all infrastructure" />
               <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
@@ -315,7 +317,7 @@ const MarketplacePage: React.FC = () => {
         )}
 
         {/* ── SECTION 6 — deployable government platforms ── */}
-        <section className="px-4 sm:px-6 lg:px-8 pb-28">
+        <section id="platforms" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 pb-28">
           <div className="max-w-7xl mx-auto">
             <SectionHead kicker="Civilization deployment" title="Deployable government platforms." to="/systems/civicos" cta="View deployment packages" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
