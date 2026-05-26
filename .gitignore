@@ -26,3 +26,4 @@ dist-ssr
 # local visual-verification tooling (ephemeral)
 .shots/
 .preview-*.mjs
+.fav-white.py

@@ -120,17 +120,13 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
             <g key={`a${i}`}>
               {/* persistent nation-to-nation link */}
               <path d={dd} fill="none" stroke={pc} strokeOpacity="0.16" strokeWidth="0.18" strokeLinecap="round" />
-              {/* comet trail — long, dim, blurred streak the light leaves behind */}
-              <path d={dd} pathLength={100} fill="none" stroke={pc} strokeWidth="0.7" strokeLinecap="round"
-                strokeDasharray="16 84" opacity="0.28" filter="url(#wm-glow)"
-                className="animate-signal" style={{ animationDelay: `${d + 0.22}s`, animationDuration: `${dur}s` }} />
-              {/* comet wake — concentrated glow just behind the head */}
+              {/* contained luminous packet — a soft glow behind a crisp head, no
+                  long streak sweeping the whole route */}
               <path d={dd} pathLength={100} fill="none" stroke={pc} strokeWidth="0.9" strokeLinecap="round"
-                strokeDasharray="6 94" opacity="0.6" filter="url(#wm-glow)"
-                className="animate-signal" style={{ animationDelay: `${d + 0.1}s`, animationDuration: `${dur}s` }} />
-              {/* comet head — crisp luminous packet */}
+                strokeDasharray="3.5 96.5" opacity="0.6" filter="url(#wm-glow)"
+                className="animate-signal" style={{ animationDelay: `${d + 0.08}s`, animationDuration: `${dur}s` }} />
               <path d={dd} pathLength={100} fill="none" stroke="#eafcff" strokeWidth="0.5" strokeLinecap="round"
-                strokeDasharray="1.6 98.4" filter="url(#wm-glow)"
+                strokeDasharray="1.4 98.6" filter="url(#wm-glow)"
                 className="animate-signal" style={{ animationDelay: `${d}s`, animationDuration: `${dur}s` }} />
             </g>
           );
