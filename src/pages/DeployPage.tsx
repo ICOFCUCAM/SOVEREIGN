@@ -5,10 +5,10 @@ import PlatformNav from '@/components/PlatformNav';
 
 const WorldMap = lazy(() => import('@/components/WorldMap'));
 const EDGE_NODES: MapNode[] = [
-  { lon: -74, lat: 40.7, hub: true }, { lon: -46.6, lat: -23.5 }, { lon: -0.1, lat: 51.5, hub: true },
-  { lon: 8.7, lat: 50.1 }, { lon: 3.4, lat: 6.5 }, { lon: 36.8, lat: -1.3 }, { lon: 55.3, lat: 25.2, hub: true },
-  { lon: 72.8, lat: 19 }, { lon: 103.8, lat: 1.3, hub: true }, { lon: 139.7, lat: 35.7, hub: true },
-  { lon: 151.2, lat: -33.9 }, { lon: -118, lat: 34 }, { lon: 28, lat: -26.2 },
+  { lon: -74, lat: 40.7, cls: 'core' }, { lon: -46.6, lat: -23.5, cls: 'emergency' }, { lon: -0.1, lat: 51.5, cls: 'core' },
+  { lon: 8.7, lat: 50.1, cls: 'treasury' }, { lon: 3.4, lat: 6.5, cls: 'treasury' }, { lon: 36.8, lat: -1.3, cls: 'edge' }, { lon: 55.3, lat: 25.2, cls: 'strategic' },
+  { lon: 72.8, lat: 19, cls: 'edge' }, { lon: 103.8, lat: 1.3, cls: 'strategic' }, { lon: 139.7, lat: 35.7, cls: 'core' },
+  { lon: 151.2, lat: -33.9, cls: 'edge' }, { lon: -118, lat: 34, cls: 'strategic' }, { lon: 28, lat: -26.2, cls: 'emergency' },
 ];
 const EDGE_ARCS: Array<[number, number, number]> = [
   [0, 2, 0], [2, 6, 0.5], [6, 8, 1], [8, 9, 0.4], [0, 11, 1.2], [6, 7, 0.3], [8, 10, 0.9], [2, 4, 1.4], [0, 1, 1.1],
