@@ -42,3 +42,5 @@ dist-ssr
 /.mkt*.mjs
 /.surv.mjs
 /.preview-shot-m.mjs
+/.panels.mjs
+/.panelsm.mjs
