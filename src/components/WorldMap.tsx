@@ -119,7 +119,11 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
           return (
             <g key={`a${i}`}>
               {/* implied corridor — barely-there atmospheric trace */}
-              <path d={dd} fill="none" stroke={pc} strokeOpacity="0.04" strokeWidth="0.18" />
+              <path d={dd} fill="none" stroke={pc} strokeOpacity="0.035" strokeWidth="0.16" />
+              {/* segmented intelligence stream — dim packets flowing continuously */}
+              <path d={dd} pathLength={100} fill="none" stroke={pc} strokeWidth="0.4" strokeLinecap="round"
+                strokeDasharray="0.9 7" opacity="0.22"
+                className="animate-signal" style={{ animationDelay: `${d}s`, animationDuration: `${dur * 2.2}s` }} />
               {/* travelling wake — concentrated glow that fades immediately behind the head */}
               <path d={dd} pathLength={100} fill="none" stroke={pc} strokeWidth="0.9" strokeLinecap="round"
                 strokeDasharray="6 94" opacity="0.6" filter="url(#wm-glow)"
@@ -128,6 +132,17 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
               <path d={dd} pathLength={100} fill="none" stroke="#eafcff" strokeWidth="0.5" strokeLinecap="round"
                 strokeDasharray="1.6 98.4" filter="url(#wm-glow)"
                 className="animate-signal" style={{ animationDelay: `${d}s`, animationDuration: `${dur}s` }} />
+            </g>
+          );
+        })}
+
+        {/* orbital signal layer — faint planetary orbital traces with relays */}
+        {[{ rx: 95, ry: 27, tilt: -13, c: accent, dur: 28 }, { rx: 82, ry: 41, tilt: 19, c: '#7C4DFF', dur: 36 }].map((o, i) => {
+          const ep = `M ${100 + o.rx} 50 A ${o.rx} ${o.ry} 0 1 1 ${100 - o.rx} 50 A ${o.rx} ${o.ry} 0 1 1 ${100 + o.rx} 50`;
+          return (
+            <g key={`orb${i}`} transform={`rotate(${o.tilt} 100 50)`}>
+              <ellipse cx="100" cy="50" rx={o.rx} ry={o.ry} fill="none" stroke={o.c} strokeOpacity="0.1" strokeWidth="0.16" />
+              <circle r="0.7" fill={o.c} filter="url(#wm-glow)"><animateMotion dur={`${o.dur}s`} repeatCount="indefinite" path={ep} /></circle>
             </g>
           );
         })}
@@ -153,10 +168,11 @@ const WorldMap: React.FC<{ accent: string; nodes: MapNode[]; arcs: Array<[number
                   strokeOpacity={0.38 - k * 0.12} className="animate-ring" style={{ transformOrigin: `${n.p[0]}px ${n.p[1]}px`, animationDelay: `${(i % 5) * 0.5 + k * 0.4}s`, animationDuration: `${n.c.dur * 0.7}s` }} />
               ))}
 
-              {/* reactor core + white-hot center */}
+              {/* reactor core — energy fill, defined housing ring, white-hot center */}
               <circle cx={n.p[0]} cy={n.p[1]} r={n.c.r} fill={n.c.color} className="animate-reactor"
                 style={{ transformOrigin: `${n.p[0]}px ${n.p[1]}px`, animationDelay: `${(i % 6) * 0.3}s`, animationDuration: `${n.c.dur}s` }} />
-              <circle cx={n.p[0]} cy={n.p[1]} r={n.c.r * 0.42} fill="#ffffff" opacity="0.92" />
+              <circle cx={n.p[0]} cy={n.p[1]} r={n.c.r + 0.7} fill="none" stroke={n.c.color} strokeWidth="0.2" opacity="0.7" />
+              <circle cx={n.p[0]} cy={n.p[1]} r={n.c.r * 0.4} fill="#ffffff" opacity="0.95" />
             </g>
           );
         })}

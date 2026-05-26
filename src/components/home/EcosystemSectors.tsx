@@ -31,10 +31,14 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean; index: number;
           <div className="absolute inset-[6%] rounded-full border border-white/[0.06]" />
           <div className="absolute inset-[22%] rounded-full border border-white/[0.04]" />
           <Emblem className="relative w-28 h-28 sm:w-36 sm:h-36" strokeWidth={0.9} style={{ color: p.accent }} />
-          {/* drop a cinematic visual at /systems/<slug>.jpg to replace the emblem; hides if absent */}
+          {/* cinematic system visual — framed product capture; tries <slug>.jpg then <slug>-1.jpg, hides if absent */}
           <img src={`/systems/${p.slug}.jpg`} alt="" aria-hidden loading="lazy" decoding="async"
-            className="absolute inset-0 w-full h-full object-cover rounded-[2rem]"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+            className="absolute inset-[4%] w-[92%] h-[92%] object-cover rounded-2xl border border-white/10 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]"
+            onError={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              if (!img.dataset.alt) { img.dataset.alt = '1'; img.src = `/systems/${p.slug}-1.jpg`; }
+              else { img.style.display = 'none'; }
+            }} />
         </div>
       </div>
 
@@ -94,21 +98,21 @@ const EcosystemSectors: React.FC = () => {
   if (products.length === 0) return null;
 
   return (
-    <section className="relative py-32 sm:py-48 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section className="relative py-24 sm:py-36 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="absolute inset-0 pointer-events-none" aria-hidden>
         <div className="absolute top-[12%] -left-32 w-[520px] h-[520px] rounded-full blur-[150px] animate-haze-a" style={{ background: 'rgba(0,194,255,0.05)' }} />
         <div className="absolute bottom-[10%] -right-32 w-[520px] h-[520px] rounded-full blur-[150px] animate-haze-b" style={{ background: 'rgba(124,77,255,0.05)' }} />
       </div>
 
       <div className="relative max-w-6xl mx-auto">
-        <div className="max-w-2xl mb-28">
+        <div className="max-w-2xl mb-20">
           <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-5">Featured institutions</div>
           <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.98]">
             Sovereign systems, ready to deploy.
           </h2>
         </div>
 
-        <div className="space-y-40 sm:space-y-56">
+        <div className="space-y-28 sm:space-y-40">
           {products.map((p, i) => (
             <Reveal key={p.id} y={40}><SectorPanel p={p} flip={i % 2 === 1} index={i} total={products.length} /></Reveal>
           ))}

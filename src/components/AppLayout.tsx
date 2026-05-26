@@ -4,7 +4,6 @@ import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
-import MarketplaceTeaser from '@/components/home/MarketplaceTeaser';
 import EcosystemPanels from '@/components/home/EcosystemPanels';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
 import TransformationFlow from '@/components/home/TransformationFlow';
@@ -20,9 +19,7 @@ const AppLayout: React.FC = () => {
       <main id="main" className="relative">
         {/* 1 — cinematic hero */}
         <CinematicHero />
-        {/* 1b — live asset ticker immediately after the hero */}
-        <MarketplaceTeaser />
-        {/* 2 — unified dual panel: marketplace economy + operating layer */}
+        {/* 2 — unified dual panel: acquisition terminal + operating architecture */}
         <Reveal><EcosystemPanels /></Reveal>
         {/* 3 — featured systems */}
         <EcosystemSectors />

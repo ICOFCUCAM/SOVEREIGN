@@ -19,9 +19,9 @@ const TransformationFlow: React.FC = () => {
   const progress = (active / (STAGES.length - 1)) * 100;
 
   return (
-    <section className="py-32 sm:py-44 px-4 sm:px-6 lg:px-8">
+    <section className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        <div className="text-center max-w-2xl mx-auto mb-24">
+        <div className="text-center max-w-2xl mx-auto mb-16">
           <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-5">The deployment story</div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98]">
             A domain becomes a living institution.

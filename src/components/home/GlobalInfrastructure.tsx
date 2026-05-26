@@ -1,6 +1,8 @@
 import React, { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useCountUp } from '@/hooks/useCountUp';
+import HudCorners from '@/components/HudCorners';
 import type { MapNode } from '@/components/WorldMap';
 
 const WorldMap = lazy(() => import('@/components/WorldMap'));
@@ -21,45 +23,90 @@ const ARCS: Array<[number, number, number]> = [
   [11, 9, 2.0], [6, 9, 1.7], [2, 8, 1.1], [3, 6, 0.8], [4, 12, 1.3], [0, 9, 2.3],
 ];
 
+const CLASSES: Array<[string, string]> = [
+  ['Core', '#22E0FF'], ['Strategic', '#7C4DFF'], ['Treasury', '#10E5A0'], ['Emergency', '#FF5470'], ['Edge', '#5AA0FF'],
+];
+
+interface MetricDef { value: number; decimals?: number; prefix?: string; suffix?: string; label: string }
+const METRICS: MetricDef[] = [
+  { value: 47, label: 'Edge nodes' },
+  { value: 23, label: 'Sovereign regions' },
+  { value: 99.99, decimals: 2, suffix: '%', label: 'Network uptime' },
+  { value: 87, suffix: 's', label: 'Median deploy' },
+  { value: 214, label: 'Active routes' },
+];
+
+const Metric: React.FC<{ m: MetricDef; i: number }> = ({ m, i }) => {
+  const { ref, value } = useCountUp(m.value, 1700 + i * 120, m.decimals || 0);
+  const shown = m.decimals ? value.toFixed(m.decimals) : Math.round(value).toLocaleString();
+  return (
+    <div ref={ref as React.RefObject<HTMLDivElement>} className="relative px-5 sm:px-7 py-6 text-center">
+      <div className="text-2xl sm:text-3xl lg:text-[2.6rem] font-bold text-white tabular-nums leading-none tracking-tight">
+        {m.prefix}{shown}<span className="text-white/45 text-[0.5em] font-semibold ml-0.5">{m.suffix}</span>
+      </div>
+      <div className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 mt-3">{m.label}</div>
+      <span className="absolute inset-x-7 bottom-0 h-px opacity-40" style={{ background: `linear-gradient(90deg, transparent, ${ACCENT}, transparent)` }} />
+    </div>
+  );
+};
+
 const GlobalInfrastructure: React.FC = () => (
-  <section className="py-32 sm:py-44 px-4 sm:px-6 lg:px-8">
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center max-w-2xl mx-auto mb-16">
-        <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-5">Global infrastructure</div>
-        <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.98] mb-5">
-          Planetary reach. Sovereign by design.
+  <section className="relative py-28 sm:py-36 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    {/* deep atmospheric field */}
+    <div className="absolute inset-0 pointer-events-none" aria-hidden>
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[60vw] h-[40vw] max-w-[900px] rounded-full blur-[120px] opacity-[0.06]" style={{ background: ACCENT }} />
+    </div>
+
+    <div className="relative max-w-7xl mx-auto">
+      {/* TOP — massive deployment statement */}
+      <div className="max-w-4xl mb-14 sm:mb-20">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70">Global deployment theater</span>
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-emerald-300/70">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live
+          </span>
+        </div>
+        <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter text-white leading-[0.92]">
+          The planet is the
+          <span className="block text-gradient-cyan">deployment surface.</span>
         </h2>
-        <p className="text-lg text-white/55 leading-relaxed">
-          A global edge mesh — institutions deploy across sovereign regions in seconds.
+        <p className="text-lg sm:text-xl text-white/55 leading-relaxed max-w-2xl mt-7">
+          A sovereign edge mesh spanning continents — institutions provision across protected regions in seconds, routed through a living intelligence fabric.
         </p>
       </div>
 
-      {/* one dominant world visualization — minimal overlays */}
-      <div className="relative" style={{ aspectRatio: '2 / 1' }}>
-        <div className="absolute -inset-4 blur-[70px] opacity-[0.08] pointer-events-none" style={{ background: `radial-gradient(ellipse 55% 55% at 50% 50%, ${ACCENT}, transparent 72%)` }} />
-        <Suspense fallback={<div className="w-full h-full" />}>
-          <WorldMap accent={ACCENT} nodes={NODES} arcs={ARCS} className="w-full h-full" />
-        </Suspense>
+      {/* CENTER — large cinematic command display */}
+      <div className="relative rounded-[1.75rem] border border-white/10 overflow-hidden bg-[#04060f]" style={{ boxShadow: '0 40px 120px -40px rgba(0,0,0,0.9)' }}>
+        <span className="absolute inset-x-0 top-0 h-px z-10" style={{ background: `linear-gradient(90deg, transparent, ${ACCENT}88, transparent)` }} />
+        <HudCorners color={ACCENT} className="opacity-40 z-10" />
+        {/* command-bar header */}
+        <div className="absolute top-0 inset-x-0 z-10 flex items-center justify-between px-5 sm:px-7 py-4">
+          <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/45">Sovereign network · real-time</span>
+          <div className="hidden sm:flex items-center gap-x-4 gap-y-1">
+            {CLASSES.map(([l, c]) => (
+              <span key={l} className="inline-flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-white/40">
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: c, boxShadow: `0 0 6px ${c}` }} /> {l}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="relative" style={{ aspectRatio: '2 / 1' }}>
+          <Suspense fallback={<div className="w-full h-full" />}>
+            <WorldMap accent={ACCENT} nodes={NODES} arcs={ARCS} className="w-full h-full" />
+          </Suspense>
+        </div>
       </div>
 
-      {/* deployment-class legend */}
-      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mt-8">
-        {[['Core', '#22E0FF'], ['Strategic', '#7C4DFF'], ['Treasury', '#10E5A0'], ['Emergency', '#FF5470'], ['Edge', '#5AA0FF']].map(([l, c]) => (
-          <span key={l} className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-white/45">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: c as string, boxShadow: `0 0 6px ${c}` }} /> {l}
-          </span>
-        ))}
+      {/* BOTTOM — premium institutional telemetry bar */}
+      <div className="relative mt-7 rounded-2xl border border-white/10 bg-white/[0.012] overflow-hidden">
+        <span className="absolute -left-32 top-1/2 -translate-y-1/2 w-72 h-40 rounded-full blur-[80px] opacity-[0.07] pointer-events-none" style={{ background: ACCENT }} />
+        <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-y sm:divide-y-0 divide-white/8">
+          {METRICS.map((m, i) => <Metric key={m.label} m={m} i={i} />)}
+        </div>
       </div>
 
-      {/* minimal overlays */}
-      <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 mt-6 text-sm font-mono text-white/45">
-        <span><span className="text-white">47</span> edge nodes</span>
-        <span><span className="text-white">23</span> regions</span>
-        <span><span className="text-white">99.99%</span> sovereign uptime</span>
-      </div>
-
-      <div className="text-center mt-10">
-        <Link to="/deploy" className="group inline-flex items-center gap-2 text-white font-semibold">
+      <div className="mt-12 text-center">
+        <Link to="/deploy" className="group inline-flex items-center gap-2 text-white font-semibold text-lg">
           Open the deployment engine <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-cyan-400" />
         </Link>
       </div>
