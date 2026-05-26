@@ -8,6 +8,7 @@ const LINKS = [
   { to: '/', label: 'Platform' },
   { to: '/ecosystem', label: 'Ecosystem' },
   { to: '/marketplace', label: 'Marketplace' },
+  { to: '/channel', label: 'Channel' },
   { to: '/valuation', label: 'AI Valuation' },
   { to: '/studio', label: 'Studio' },
   { to: '/deploy', label: 'Deploy' },

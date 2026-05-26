@@ -20,6 +20,7 @@ const StudioPage = lazy(() => import("./pages/StudioPage"));
 const EcosystemHub = lazy(() => import("./pages/EcosystemHub"));
 const SystemPage = lazy(() => import("./pages/SystemPage"));
 const DeployPage = lazy(() => import("./pages/DeployPage"));
+const ChannelPage = lazy(() => import("./pages/ChannelPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const PlatformRoutes = () => (
     <Route path="/studio" element={<StudioPage />} />
     <Route path="/studio/:domain" element={<StudioPage />} />
     <Route path="/deploy" element={<DeployPage />} />
+    <Route path="/channel" element={<ChannelPage />} />
     <Route path="/admin" element={<AdminPage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
     <Route path="*" element={<NotFound />} />
