@@ -175,9 +175,14 @@ const ValuationPage: React.FC = () => {
                     <div className="text-xs text-white/50">List it in the sovereign marketplace or deploy a startup directly.</div>
                   </div>
                 </div>
-                <button onClick={() => window.location.href = '/marketplace'} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold">
-                  <Zap className="w-4 h-4" /> Explore marketplace
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2.5 shrink-0">
+                  <button onClick={() => window.location.href = `/studio/${encodeURIComponent(analyzedDomain)}`} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold">
+                    <Sparkles className="w-4 h-4" /> Build in Studio
+                  </button>
+                  <button onClick={() => window.location.href = '/marketplace'} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl glass hover:glass-strong text-white font-semibold">
+                    <Zap className="w-4 h-4 text-cyan-400" /> Explore marketplace
+                  </button>
+                </div>
               </div>
             </div>
           )}
