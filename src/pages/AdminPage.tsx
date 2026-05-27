@@ -23,7 +23,7 @@ interface MediaItem { id: string; media_class: string; kind: string; title: stri
 interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null; published: boolean; sort_order: number; cover_image_url: string | null }
 interface Campaign { id: string; name: string; media_class: string | null; channel: string; status: string; asset_ref: string | null; scheduled_at: string | null; created_at: string }
 type LeadFilter = 'all' | 'inquiry' | 'offer' | 'buy_now';
-interface Inquiry { id: string; created_at: string; system_slug: string | null; system_name: string | null; tier: string | null; name: string | null; email: string; organization: string | null; message: string | null; status?: string | null }
+interface Inquiry { id: string; created_at: string; system_slug: string | null; system_name: string | null; tier: string | null; name: string | null; email: string; organization: string | null; message: string | null; status?: string | null; ai_score?: number | null; ai_priority?: string | null; ai_summary?: string | null; ai_reply?: string | null; ai_signals?: string[] | null; analyzed_at?: string | null }
 
 // Image generation can take 20-40s; cap it so a stalled request never freezes the UI.
 async function invokeImage(body: Record<string, unknown>, ms = 90000): Promise<{ url?: string; error?: string }> {
@@ -61,6 +61,8 @@ const AdminPage: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [briefings, setBriefings] = useState<Inquiry[]>([]);
   const [briefingFilter, setBriefingFilter] = useState<string>('all');
+  const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [openAnalysis, setOpenAnalysis] = useState<string | null>(null);
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [users, setUsers] = useState<UserRoleRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
@@ -380,6 +382,33 @@ const AdminPage: React.FC = () => {
   const updateInquiryStatus = async (id: string, status: string) => {
     setBriefings((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
     await supabase.from('inquiries').update({ status }).eq('id', id);
+  };
+
+  const analyzeBriefing = async (b: Inquiry) => {
+    setAnalyzingId(b.id);
+    setOpenAnalysis(b.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-lead', {
+        body: { inquiry: { system_slug: b.system_slug, system_name: b.system_name, tier: b.tier, name: b.name, email: b.email, organization: b.organization, message: b.message } },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const patch = {
+        ai_score: data.score ?? null,
+        ai_priority: data.priority ?? null,
+        ai_summary: data.summary ?? '',
+        ai_reply: data.suggested_reply ?? '',
+        ai_signals: Array.isArray(data.signals) ? data.signals : [],
+        analyzed_at: new Date().toISOString(),
+      };
+      const { error: upErr } = await supabase.from('inquiries').update(patch).eq('id', b.id);
+      if (upErr) throw upErr;
+      setBriefings((prev) => prev.map((x) => (x.id === b.id ? { ...x, ...patch } : x)));
+      toast.success('Briefing analyzed');
+    } catch (e) {
+      toast.error(`Analysis failed: ${(e as Error).message}`);
+    }
+    setAnalyzingId(null);
   };
 
   const exportBriefings = () => {
@@ -883,12 +912,14 @@ const AdminPage: React.FC = () => {
                       <th className="px-3 py-3">Organization</th>
                       <th className="px-3 py-3">Context</th>
                       <th className="px-3 py-3">Status</th>
+                      <th className="px-3 py-3">AI triage</th>
                       <th className="px-3 py-3">Received</th>
                     </tr>
                   </thead>
                   <tbody>
                     {briefings.filter((b) => briefingFilter === 'all' || (b.status || 'new') === briefingFilter).map((b) => (
-                      <tr key={b.id} className="border-b border-white/5 hover:bg-white/[0.02] align-top">
+                      <React.Fragment key={b.id}>
+                      <tr className="border-b border-white/5 hover:bg-white/[0.02] align-top">
                         <td className="px-5 py-3.5 text-cyan-300 text-xs font-mono">
                           {b.system_name || b.system_slug || '—'}
                           {b.system_slug === 'sovereign-briefing' && <span className="ml-2 px-1.5 py-0.5 rounded text-[8px] font-mono uppercase tracking-wider bg-cyan-500/15 text-cyan-300 align-middle">Sovereign</span>}
@@ -907,11 +938,55 @@ const AdminPage: React.FC = () => {
                             <option value="closed">closed</option>
                           </select>
                         </td>
+                        <td className="px-3 py-3.5">
+                          <div className="flex items-center gap-2">
+                            {typeof b.ai_score === 'number' && (
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${b.ai_score >= 80 ? 'bg-emerald-500/15 text-emerald-300' : b.ai_score >= 55 ? 'bg-cyan-500/15 text-cyan-300' : 'bg-white/8 text-white/50'}`}>{b.ai_score}</span>
+                            )}
+                            <button onClick={() => (b.analyzed_at && openAnalysis !== b.id ? setOpenAnalysis(b.id) : analyzeBriefing(b))} disabled={analyzingId !== null}
+                              className="px-2 py-1 rounded text-[10px] font-mono uppercase tracking-wider bg-gradient-to-r from-cyan-500/80 to-purple-600/80 text-white inline-flex items-center gap-1 disabled:opacity-50">
+                              {analyzingId === b.id ? <span className="block w-3 h-3 rounded-full border border-white/40 border-t-white animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                              {b.analyzed_at && openAnalysis !== b.id ? 'View' : analyzingId === b.id ? '' : b.analyzed_at ? 'Redo' : 'Analyze'}
+                            </button>
+                          </div>
+                        </td>
                         <td className="px-3 py-3.5 text-white/40 text-xs font-mono whitespace-nowrap">{new Date(b.created_at).toLocaleDateString()}</td>
                       </tr>
+                      {openAnalysis === b.id && b.analyzed_at && (
+                        <tr className="border-b border-white/5 bg-cyan-500/[0.03]">
+                          <td colSpan={8} className="px-5 py-4">
+                            <div className="flex items-start justify-between gap-4 mb-3">
+                              <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-cyan-300/80">
+                                <Sparkles className="w-3.5 h-3.5" /> AI revenue triage
+                                {b.ai_priority && <span className="px-2 py-0.5 rounded bg-white/8 text-white/60">{b.ai_priority}</span>}
+                              </div>
+                              <button onClick={() => setOpenAnalysis(null)} className="text-white/40 hover:text-white text-xs">Collapse</button>
+                            </div>
+                            {b.ai_summary && <p className="text-white/75 text-sm leading-relaxed mb-3">{b.ai_summary}</p>}
+                            {Array.isArray(b.ai_signals) && b.ai_signals.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mb-4">
+                                {b.ai_signals.map((s, i) => <span key={i} className="px-2 py-0.5 rounded text-[10px] bg-white/5 text-white/55 border border-white/10">{s}</span>)}
+                              </div>
+                            )}
+                            {b.ai_reply && (
+                              <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-[10px] font-mono uppercase tracking-widest text-white/40">Suggested reply</span>
+                                  <div className="flex items-center gap-2">
+                                    <button onClick={() => { navigator.clipboard.writeText(b.ai_reply || ''); toast.success('Reply copied'); }} className="text-[10px] font-mono uppercase tracking-wider text-cyan-300 hover:text-cyan-200">Copy</button>
+                                    <a href={`mailto:${b.email}?subject=${encodeURIComponent('Re: ' + (b.system_name || 'Sovereign briefing'))}&body=${encodeURIComponent(b.ai_reply || '')}`} className="text-[10px] font-mono uppercase tracking-wider text-cyan-300 hover:text-cyan-200">Open in mail</a>
+                                  </div>
+                                </div>
+                                <p className="text-white/70 text-sm leading-relaxed whitespace-pre-line">{b.ai_reply}</p>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                      </React.Fragment>
                     ))}
                     {briefings.filter((b) => briefingFilter === 'all' || (b.status || 'new') === briefingFilter).length === 0 && (
-                      <tr><td colSpan={7} className="text-center py-12 text-white/40">No {briefingFilter === 'all' ? '' : briefingFilter + ' '}deployment briefings · institutional requests will appear here</td></tr>
+                      <tr><td colSpan={8} className="text-center py-12 text-white/40">No {briefingFilter === 'all' ? '' : briefingFilter + ' '}deployment briefings · institutional requests will appear here</td></tr>
                     )}
                   </tbody>
                 </table>
