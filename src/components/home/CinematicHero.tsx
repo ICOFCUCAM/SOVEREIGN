@@ -28,10 +28,12 @@ const CinematicHero: React.FC = () => {
   };
 
   return (
-    <section ref={ref} onMouseMove={onMove} className="relative h-[80vh] min-h-[600px] overflow-hidden"
+    <section ref={ref} onMouseMove={onMove} className="relative h-[88vh] min-h-[660px] max-h-[1100px] overflow-hidden"
       style={{ ['--px' as string]: '0', ['--py' as string]: '0' }}>
       {/* deep-space field, lit from the lower-right where the planet sits */}
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 90% at 78% 72%, #0c1d42 0%, #070f28 40%, #03060f 100%)' }} />
+      {/* top vignette — keeps the navigation legible over the field */}
+      <div className="absolute inset-x-0 top-0 h-40 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(3,5,14,0.7), transparent)' }} />
       {/* layered atmospheric haze for depth */}
       <div className="absolute inset-0 animate-haze-a pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 45% at 72% 62%, rgba(0,150,255,0.1), transparent 70%)', filter: 'blur(50px)' }} />
       <div className="absolute inset-0 animate-haze-b pointer-events-none" style={{ background: 'radial-gradient(ellipse 44% 40% at 82% 80%, rgba(124,77,255,0.07), transparent 72%)', filter: 'blur(56px)' }} />
@@ -75,10 +77,10 @@ const CinematicHero: React.FC = () => {
       {/* ── editorial column, left ── */}
       <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
         <div className="max-w-xl lg:max-w-[46%]">
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.28em] mb-8 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 kicker mb-8 backdrop-blur-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The operating layer for digital civilization
           </div>
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.6rem] font-bold tracking-tight leading-[1.02] mb-7">
+          <h1 className="font-display text-[2.6rem] sm:text-5xl lg:text-[3.6rem] xl:text-[4.25rem] font-bold tracking-cinematic leading-[0.98] text-balance mb-7">
             <span className="block text-white">Build sovereign digital</span>
             <span className="block text-white">systems <span className="text-gradient-cyan">at planetary scale.</span></span>
           </h1>
@@ -86,19 +88,23 @@ const CinematicHero: React.FC = () => {
             Deploy AI-native institutions, sovereign infrastructure and operational ecosystems across governance, finance, mobility and intelligence.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 mb-9">
-            <Link to="/ecosystem" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
-              style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 44px rgba(0,194,255,0.3)' }}>
+            <Link to="/ecosystem" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 14px 44px -12px rgba(0,194,255,0.5)' }}>
               Launch Ecosystem <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] backdrop-blur text-white font-semibold hover:bg-white/8 transition-all">
+            <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] backdrop-blur text-white font-semibold ease-cinematic transition-all duration-500 hover:bg-white/8 hover:border-white/25 hover:-translate-y-0.5">
               Explore Marketplace
             </Link>
           </div>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] font-mono text-white/45">
-            <span className="inline-flex items-center gap-1.5 text-emerald-300/80"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live network</span>
-            <span>47 <span className="text-white/30">edge nodes</span></span>
-            <span>23 <span className="text-white/30">sovereign regions</span></span>
-            <span>99.99% <span className="text-white/30">uptime</span></span>
+          <div className="hairline max-w-md mb-5" />
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-3 max-w-md">
+            <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.22em] text-emerald-300/80"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live network</span>
+            {[['47', 'edge nodes'], ['23', 'sovereign regions'], ['99.99%', 'uptime']].map(([v, l]) => (
+              <span key={l} className="flex flex-col leading-none">
+                <span className="text-lg font-semibold text-white tabular-nums tracking-tight">{v}</span>
+                <span className="text-[9px] font-mono uppercase tracking-[0.18em] text-white/35 mt-1.5">{l}</span>
+              </span>
+            ))}
           </div>
         </div>
       </div>
