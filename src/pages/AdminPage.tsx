@@ -734,7 +734,7 @@ const AdminPage: React.FC = () => {
                 <span className="w-px h-3 bg-white/20" />
                 <span className="text-xs font-mono text-amber-300">{role?.role}</span>
               </div>
-              <h1 className="font-display text-4xl font-bold tracking-tight">Operational Console</h1>
+              <h1 className="font-display text-4xl font-bold tracking-cinematic">Operational Console</h1>
               <p className="text-white/50 mt-1">Signed in as <span className="text-cyan-300 font-mono">{user.email}</span> · sovereign-grade RBAC active</p>
             </div>
             <button onClick={() => setEditing({})} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold">
@@ -778,7 +778,7 @@ const AdminPage: React.FC = () => {
                 {overviewCards.map((m) => {
                   const Icon = m.icon;
                   return (
-                    <div key={m.label} className="glass-strong rounded-xl p-5">
+                    <div key={m.label} className="glass-strong rounded-xl p-5 ease-cinematic transition-all duration-500 hover:-translate-y-1 hover:border-white/20">
                       <div className="flex items-center justify-between mb-3">
                         <div className="w-10 h-10 rounded-lg flex items-center justify-center"
                           style={{ background: `linear-gradient(135deg, ${m.color}30, ${m.color}10)`, border: `1px solid ${m.color}40` }}>
