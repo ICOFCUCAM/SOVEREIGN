@@ -18,8 +18,9 @@ import {
   Boxes, ExternalLink, Film, Play, Sparkles,
 } from 'lucide-react';
 
-type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'channel' | 'narratives' | 'campaigns' | 'scenarios' | 'analytics' | 'ecosystem' | 'team' | 'activity';
+type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'channel' | 'narratives' | 'campaigns' | 'scenarios' | 'pipelines' | 'analytics' | 'ecosystem' | 'team' | 'activity';
 interface Scenario { id: string; label: string; accent: string; icon_key: string; origin: number; down: number[]; respond: number[]; phases: Array<{ label: string; resilience: number; affected: number; clock: string; desc: string }>; published: boolean; sort_order: number; created_at: string }
+interface PipelineJob { id: string; kind: string; status: string; provider: string | null; title: string | null; result_url: string | null; error: string | null; created_at: string }
 interface MediaItem { id: string; media_class: string; kind: string; title: string; meta: string | null; length: string | null; youtube_id: string | null; sort_order: number }
 interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null; published: boolean; sort_order: number; cover_image_url: string | null }
 interface Campaign { id: string; name: string; media_class: string | null; channel: string; status: string; asset_ref: string | null; scheduled_at: string | null; created_at: string }
@@ -67,6 +68,10 @@ const AdminPage: React.FC = () => {
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [scenarioBrief, setScenarioBrief] = useState('');
   const [genScenario, setGenScenario] = useState(false);
+  const [pipelineJobs, setPipelineJobs] = useState<PipelineJob[]>([]);
+  const [pipelineBusy, setPipelineBusy] = useState<string | null>(null);
+  const [filmTitle, setFilmTitle] = useState('');
+  const [filmScript, setFilmScript] = useState('');
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [users, setUsers] = useState<UserRoleRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
@@ -101,10 +106,12 @@ const AdminPage: React.FC = () => {
     const nar = await supabase.from('narratives').select('*').order('sort_order', { ascending: true });
     const camp = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
     const scn = await supabase.from('scenarios').select('*').order('sort_order', { ascending: true });
+    const pj = await supabase.from('pipeline_jobs').select('id, kind, status, provider, title, result_url, error, created_at').order('created_at', { ascending: false }).limit(50);
     setMedia((med.data || []) as MediaItem[]);
     setNarratives((nar.data || []) as Narrative[]);
     setCampaigns((camp.data || []) as Campaign[]);
     setScenarios((scn.data || []) as Scenario[]);
+    setPipelineJobs((pj.data || []) as PipelineJob[]);
     setDomains((d.data || []) as Domain[]);
     setLeads((l.data || []) as Lead[]);
     setBriefings((inq.data || []) as Inquiry[]);
@@ -418,6 +425,44 @@ const AdminPage: React.FC = () => {
     if (error) { toast.error(error.message); return; } toast.success('Deleted'); loadAll();
   };
 
+  const refreshPipelineJobs = async () => {
+    const pj = await supabase.from('pipeline_jobs').select('id, kind, status, provider, title, result_url, error, created_at').order('created_at', { ascending: false }).limit(50);
+    setPipelineJobs((pj.data || []) as PipelineJob[]);
+  };
+  const voiceDispatch = async (n: Narrative) => {
+    setPipelineBusy('voice-' + n.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-narration', { body: { script: n.body, title: n.title, voice: 'onyx' } });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success('Narration generated');
+      refreshPipelineJobs();
+    } catch (e) { toast.error(`Narration failed: ${(e as Error).message}`); }
+    setPipelineBusy(null);
+  };
+  const renderFilm = async () => {
+    if (!filmScript.trim()) { toast.error('Add a script for the film'); return; }
+    setPipelineBusy('film');
+    try {
+      const { data, error } = await supabase.functions.invoke('render-video', { body: { script: filmScript.trim(), title: filmTitle.trim() || 'Untitled film', mediaClass: 'cinematic' } });
+      if (error) throw error;
+      if (data?.error) { toast(data.error + (data.detail ? ` — ${data.detail}` : '')); } else { toast.success('Render submitted'); }
+      setFilmTitle(''); setFilmScript('');
+      refreshPipelineJobs();
+    } catch (e) { toast.error(`Render failed: ${(e as Error).message}`); }
+    setPipelineBusy(null);
+  };
+  const publishCampaignNow = async (c: Campaign) => {
+    setPipelineBusy('pub-' + c.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('post-campaign', { body: { campaign_id: c.id } });
+      if (error) throw error;
+      if (data?.error) { toast(data.error + (data.detail ? ` — ${data.detail}` : '')); } else { toast.success(`Publishing to ${c.channel}`); }
+      refreshPipelineJobs();
+    } catch (e) { toast.error(`Publish failed: ${(e as Error).message}`); }
+    setPipelineBusy(null);
+  };
+
   const updateInquiryStatus = async (id: string, status: string) => {
     setBriefings((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
     await supabase.from('inquiries').update({ status }).eq('id', id);
@@ -661,6 +706,7 @@ const AdminPage: React.FC = () => {
               { id: 'narratives', label: `Dispatches (${narratives.length})`, icon: FileText },
               { id: 'campaigns', label: `Campaigns (${campaigns.length})`, icon: Radio },
               { id: 'scenarios', label: `Scenarios (${scenarios.length})`, icon: ShieldAlert },
+              { id: 'pipelines', label: 'Pipelines', icon: Boxes },
               { id: 'analytics', label: 'Analytics', icon: BarChart3 },
               { id: 'ecosystem', label: `Ecosystem (${systems.length})`, icon: Boxes },
               { id: 'team', label: `Access (${users.length})`, icon: ShieldCheck },
@@ -1080,6 +1126,7 @@ const AdminPage: React.FC = () => {
                     <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 text-white/50 shrink-0">{n.kind}</span>
                     <div className="min-w-0 flex-1"><div className="text-sm text-white truncate">{n.title}</div><div className="text-[10px] text-white/35 truncate">{n.subtitle}</div></div>
                     <span className={`text-[10px] font-mono shrink-0 ${n.published ? 'text-emerald-300/70' : 'text-white/30'}`}>{n.published ? 'published' : 'draft'}</span>
+                    <button onClick={() => voiceDispatch(n)} disabled={pipelineBusy !== null} title="Generate narration audio" className="text-white/40 hover:text-cyan-300 transition shrink-0 disabled:opacity-40">{pipelineBusy === 'voice-' + n.id ? <span className="block w-4 h-4 rounded-full border border-cyan-300/40 border-t-cyan-300 animate-spin" /> : <Play className="w-4 h-4" />}</button>
                     <button onClick={() => setEditNar(n)} aria-label="Edit" className="text-white/40 hover:text-white transition shrink-0"><Edit2 className="w-4 h-4" /></button>
                     <button onClick={() => deleteNarrative(n.id)} aria-label="Delete" className="text-white/40 hover:text-rose-300 transition shrink-0"><Trash2 className="w-4 h-4" /></button>
                   </div>
@@ -1104,6 +1151,7 @@ const AdminPage: React.FC = () => {
                     <select value={c.status} onChange={(e) => setCampaignStatus(c.id, e.target.value)} aria-label="Status" className={`text-[10px] font-mono uppercase px-2 py-1 rounded shrink-0 border-0 cursor-pointer focus:outline-none ${c.status === 'live' ? 'bg-emerald-500/15 text-emerald-300' : c.status === 'scheduled' ? 'bg-cyan-500/15 text-cyan-300' : c.status === 'archived' ? 'bg-white/5 text-white/35' : 'bg-amber-500/15 text-amber-300'}`}>
                       {['draft', 'scheduled', 'live', 'archived'].map((s) => <option key={s} value={s} className="bg-[#0A0E27] text-white">{s}</option>)}
                     </select>
+                    <button onClick={() => publishCampaignNow(c)} disabled={pipelineBusy !== null} title="Publish to channel now" className="text-white/40 hover:text-emerald-300 transition shrink-0 disabled:opacity-40">{pipelineBusy === 'pub-' + c.id ? <span className="block w-4 h-4 rounded-full border border-emerald-300/40 border-t-emerald-300 animate-spin" /> : <Share2 className="w-4 h-4" />}</button>
                     <button onClick={() => setEditCamp(c)} aria-label="Edit" className="text-white/40 hover:text-white transition shrink-0"><Edit2 className="w-4 h-4" /></button>
                     <button onClick={() => deleteCampaign(c.id)} aria-label="Delete" className="text-white/40 hover:text-rose-300 transition shrink-0"><Trash2 className="w-4 h-4" /></button>
                   </div>
@@ -1137,6 +1185,50 @@ const AdminPage: React.FC = () => {
                   </div>
                 ))}
                 {scenarios.length === 0 && <div className="px-5 py-12 text-center text-white/40">No AI scenarios yet — the three built-in simulations always play on the Channel. Generate one to add to them.</div>}
+              </div>
+            </div>
+          )}
+
+          {/* Pipelines tab */}
+          {tab === 'pipelines' && (
+            <div className="space-y-5">
+              <p className="text-sm text-white/50">Media & automation pipelines. Narration is live (OpenAI TTS). Video render and social posting activate once their provider keys are configured — every run is recorded below either way.</p>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/[0.04] p-4 space-y-2">
+                  <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-cyan-300/80"><Film className="w-3.5 h-3.5" /> Render film</div>
+                  <input value={filmTitle} onChange={(e) => setFilmTitle(e.target.value)} placeholder="Film title" className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
+                  <textarea value={filmScript} onChange={(e) => setFilmScript(e.target.value)} placeholder="Script / shot description for the render…" rows={2} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 resize-none" />
+                  <button type="button" disabled={pipelineBusy !== null} onClick={renderFilm} className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50">
+                    <Film className="w-3.5 h-3.5" /> {pipelineBusy === 'film' ? 'Submitting…' : 'Submit render'}
+                  </button>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-xs text-white/55 leading-relaxed">
+                  <div className="text-[11px] font-mono uppercase tracking-widest text-white/40 mb-2">Triggers</div>
+                  <p className="mb-1.5"><span className="text-cyan-300">Voice</span> — the ▶ on any dispatch (Dispatches tab) generates narration audio.</p>
+                  <p className="mb-1.5"><span className="text-emerald-300">Publish</span> — the share icon on any campaign (Campaigns tab) posts to its channel.</p>
+                  <p>Provider keys needed: <span className="font-mono">VIDEO_PROVIDER_URL/KEY</span> for video, <span className="font-mono">LINKEDIN/YOUTUBE_ACCESS_TOKEN</span> for social.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/40">Recent jobs</div>
+                <button onClick={refreshPipelineJobs} className="text-[10px] font-mono uppercase tracking-wider glass px-2.5 py-1 rounded text-white/60 hover:text-white">Refresh</button>
+              </div>
+              <div className="glass-strong rounded-2xl overflow-hidden divide-y divide-white/5">
+                {pipelineJobs.map((j) => (
+                  <div key={j.id} className="flex items-center gap-4 px-5 py-3">
+                    <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 text-white/50 shrink-0 w-20 text-center">{j.kind}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm text-white truncate">{j.title || '—'}{j.provider ? <span className="text-white/35 text-xs font-mono"> · {j.provider}</span> : null}</div>
+                      {j.error && <div className="text-[10px] text-rose-300/70 truncate">{j.error}</div>}
+                    </div>
+                    {j.result_url && <a href={j.result_url} target="_blank" rel="noreferrer" className="text-[10px] font-mono uppercase tracking-wider text-cyan-300 hover:text-cyan-200 shrink-0">Open</a>}
+                    <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${j.status === 'done' ? 'bg-emerald-500/15 text-emerald-300' : j.status === 'processing' ? 'bg-cyan-500/15 text-cyan-300' : j.status === 'failed' ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'}`}>{j.status}</span>
+                    <span className="text-white/35 text-xs font-mono whitespace-nowrap shrink-0">{new Date(j.created_at).toLocaleDateString()}</span>
+                  </div>
+                ))}
+                {pipelineJobs.length === 0 && <div className="px-5 py-12 text-center text-white/40">No pipeline runs yet.</div>}
               </div>
             </div>
           )}
