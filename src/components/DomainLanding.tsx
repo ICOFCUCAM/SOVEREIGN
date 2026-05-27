@@ -221,7 +221,7 @@ const DomainLanding: React.FC<Props> = ({ domainName, variant }) => {
                 )}
               </div>
 
-              <h1 className="font-display text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 leading-none">
+              <h1 className="font-display text-6xl sm:text-7xl lg:text-8xl font-bold tracking-cinematic mb-4 leading-none" style={{ textShadow: `0 0 90px ${accent}22` }}>
                 <span className="text-white">{d.domain_name.split('.')[0]}</span>
                 <span style={{ color: accent }}>.{d.domain_name.split('.').slice(1).join('.')}</span>
               </h1>
@@ -236,8 +236,8 @@ const DomainLanding: React.FC<Props> = ({ domainName, variant }) => {
 
               <div className="flex flex-wrap gap-3">
                 <button onClick={() => openModal('buy_now')}
-                  className="group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all hover:shadow-2xl"
-                  style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})`, boxShadow: `0 0 40px ${accent}30` }}>
+                  className="group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
+                  style={{ background: `linear-gradient(135deg, ${accent}, ${accent2})`, boxShadow: `0 14px 44px -12px ${accent}66` }}>
                   <DollarSign className="w-4 h-4" />
                   Buy Now · ${d.price_usd.toLocaleString()}
                 </button>
