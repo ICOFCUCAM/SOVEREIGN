@@ -198,8 +198,8 @@ const ChannelPage: React.FC = () => {
               Four classes of civilization-scale media — cinematic, operational, strategic and crisis-response — produced from the sovereign operating layer and routed to the institutions that deploy it.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={() => setBrief(true)} className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
-                style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 40px rgba(0,194,255,0.26)' }}>
+              <button onClick={() => setBrief(true)} className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
+                style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 14px 44px -12px rgba(0,194,255,0.5)' }}>
                 Request executive briefing <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
               <a href="#cinematic" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] text-white font-semibold hover:bg-white/8 transition-all">
@@ -368,11 +368,11 @@ const ChannelPage: React.FC = () => {
             <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98] mb-6">Convene a sovereign briefing.</h2>
             <p className="text-white/55 text-lg leading-relaxed mb-9">Every film, simulation and narrative routes here — to a private executive briefing with sovereign-systems specialists, from national strategy to deployment package.</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button onClick={() => setBrief(true)} className="group inline-flex items-center justify-center gap-2 px-9 py-4 rounded-xl text-white font-semibold text-lg transition-all hover:-translate-y-px"
-                style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 48px rgba(0,194,255,0.32)' }}>
-                Request executive briefing <ArrowUpRight className="w-5 h-5" />
+              <button onClick={() => setBrief(true)} className="group inline-flex items-center justify-center gap-2 px-9 py-4 rounded-xl text-white font-semibold text-lg ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
+                style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 18px 56px -16px rgba(0,194,255,0.55)' }}>
+                Request executive briefing <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </button>
-              <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-9 py-4 rounded-xl border border-white/15 bg-white/[0.03] text-white font-semibold text-lg hover:bg-white/5 transition-all">
+              <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-9 py-4 rounded-xl border border-white/15 bg-white/[0.03] text-white font-semibold text-lg ease-cinematic transition-all duration-500 hover:bg-white/5 hover:border-white/25 hover:-translate-y-0.5">
                 Enter the exchange
               </Link>
             </div>
