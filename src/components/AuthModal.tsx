@@ -48,7 +48,8 @@ const AuthModal: React.FC<Props> = ({ onClose, initialMode = 'signin' }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} className="glass-strong rounded-2xl w-full max-w-md overflow-hidden">
+      <div onClick={e => e.stopPropagation()} className="relative glass-strong rounded-2xl w-full max-w-md overflow-hidden animate-stage-in">
+        <span className="absolute inset-x-0 top-0 h-px z-10" style={{ background: 'linear-gradient(90deg, transparent, #00D9FF, #7C4DFF, transparent)' }} />
         {/* Header with brand */}
         <div className="relative px-6 py-5 border-b border-white/10 bg-gradient-to-br from-cyan-500/10 via-transparent to-purple-600/10">
           <button onClick={onClose} className="absolute top-3 right-3 w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-white/60">
@@ -106,7 +107,7 @@ const AuthModal: React.FC<Props> = ({ onClose, initialMode = 'signin' }) => {
           )}
 
           <button type="submit" disabled={loading}
-            className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
+            className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2 ease-cinematic transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-12px_rgba(0,194,255,0.5)]">
             {loading ? (
               <><div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Routing...</>
             ) : (
