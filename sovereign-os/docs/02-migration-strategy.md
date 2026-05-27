@@ -25,7 +25,10 @@ around it.
       `assemble-film`) onto the shared seam; thread `media_class` through `render-video`.
       All pipeline_jobs writes now flow through `_shared/queue` (`insertJob`/`transition`);
       only bespoke gather-selects remain as direct queries.
-- [ ] Build the executive command dashboard (Next.js app) reusing the source `ui/` + cinematic components.
+- [x] Build the executive command dashboard (`apps/command-center`, Next.js App Router + Tailwind).
+      Consumes `@sovereign/core` (media presets, job types, platforms); panels for content
+      classes, live pipeline monitor, distribution grid, intelligence engine. `next build`
+      passes (type-checked). Visual browser verification + Framer Motion/shadcn polish pending.
 
 ## Phase 3 — Layer 2 (Sovereign Distribution Grid)
 

@@ -6,11 +6,14 @@
   "type": "module",
   "workspaces": [
     "packages/*",
+    "apps/*",
     "layers/layer-1-media/worker"
   ],
   "scripts": {
     "build": "tsc -b packages/core",
     "typecheck": "tsc -b packages/core --noEmit",
+    "dashboard:dev": "npm --workspace @sovereign/command-center run dev",
+    "dashboard:build": "npm --workspace @sovereign/command-center run build",
     "worker:dev": "npm --workspace sovereign-ffmpeg-worker run start"
   },
   "engines": {
