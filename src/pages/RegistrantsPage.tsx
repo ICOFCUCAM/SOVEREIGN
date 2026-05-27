@@ -32,8 +32,9 @@ const RegistrantsPage: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [verifying, setVerifying] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
-  const refresh = useCallback(() => { if (user) listRegistrants().then(setRows).catch(() => {}); }, [user]);
+  const refresh = useCallback(() => { if (user) listRegistrants().then(setRows).catch(() => {}).finally(() => setLoaded(true)); }, [user]);
   useEffect(() => { refresh(); }, [refresh]);
 
   const set = (k: keyof RegistrantInput, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -149,7 +150,8 @@ const RegistrantsPage: React.FC = () => {
                 <button aria-label={`Delete identity ${r.company_name || r.first_name + ' ' + r.last_name}`} onClick={() => remove(r.id)} className="text-white/30 hover:text-rose-300 shrink-0"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
-            {rows.length === 0 && <div className="px-5 py-14 text-center text-white/40">No registrant identities yet.</div>}
+            {!loaded && <div className="px-5 py-14 flex items-center justify-center text-white/40"><Loader2 className="w-4 h-4 animate-spin" /></div>}
+            {loaded && rows.length === 0 && <div className="px-5 py-14 text-center text-white/40">No registrant identities yet.</div>}
           </div>
         </div>
       </main>
