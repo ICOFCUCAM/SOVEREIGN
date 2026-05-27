@@ -78,7 +78,7 @@ const InquiryModal: React.FC<Props> = ({ domain, intent, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} className="glass-strong rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div onClick={e => e.stopPropagation()} className="relative glass-strong rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-stage-in">
         <div className="sticky top-0 z-10 px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#0A0E27]/95 backdrop-blur">
           <div>
             <div className="text-[10px] font-mono uppercase tracking-widest text-cyan-400">AI Broker · Negotiation Channel</div>

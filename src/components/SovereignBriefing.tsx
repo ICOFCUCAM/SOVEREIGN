@@ -54,7 +54,7 @@ const SovereignBriefing: React.FC<Props> = ({ accent = '#00C2FF', onClose }) => 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Sovereign executive briefing">
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-xl rounded-2xl border border-white/12 bg-[#070b1c] overflow-hidden">
+      <div className="relative w-full max-w-xl rounded-2xl border border-white/12 bg-[#070b1c] overflow-hidden animate-stage-in">
         <span className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
         <HudCorners color={accent} className="opacity-30" />
         <div className="relative p-7 sm:p-9">
