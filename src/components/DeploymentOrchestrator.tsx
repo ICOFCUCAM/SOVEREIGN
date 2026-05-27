@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import {
   Landmark, Banknote, Vote, Building2, GraduationCap, Cpu, Truck,
   Link2, Globe, Sparkles, Server, ArrowRight, ArrowLeft, Check, Search,
-  ShieldCheck, Network, Route, Loader2, Star, Save, History, Clock,
+  ShieldCheck, Network, Route, Loader2, Star, Save, History, Clock, X,
 } from 'lucide-react';
 import { searchDomains, formatPrice, type DomainResult } from '@/lib/registrar';
-import { listDeployments, createDeployment, type Deployment } from '@/lib/deployments';
+import { listDeployments, createDeployment, archiveDeployment, type Deployment } from '@/lib/deployments';
 import { listRegistrants, type RegistrantProfile } from '@/lib/registrant';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from '@/components/AuthModal';
@@ -157,6 +157,11 @@ const DeploymentOrchestrator: React.FC = () => {
     setExisting(''); setSub(''); setQuery(''); setResults([]); setPicked(null); setSearchErr(null);
   };
 
+  const archive = async (id: string) => {
+    try { await archiveDeployment(id); setMine((m) => m.filter((d) => d.id !== id)); if (savedId === id) setSavedId(null); }
+    catch (e) { toast.error((e as Error).message); }
+  };
+
   const resume = (d: Deployment) => {
     setType(TYPES.find((t) => t.label === d.deployment_type)?.id ?? null);
     setStrategy(d.domain_strategy);
@@ -210,14 +215,17 @@ const DeploymentOrchestrator: React.FC = () => {
               <div className="flex items-center gap-2 kicker text-white/40 mb-3"><History className="w-3.5 h-3.5" /> Resume a deployment</div>
               <div className="grid sm:grid-cols-2 gap-2.5">
                 {mine.slice(0, 4).map((d) => (
-                  <button key={d.id} onClick={() => resume(d)} className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.015] px-4 py-3 text-left hover:border-cyan-400/30 transition-all duration-500 ease-cinematic hover:-translate-y-0.5">
-                    <Clock className="w-4 h-4 text-cyan-300/60 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm text-white truncate">{d.name || d.deployment_type}</div>
-                      <div className="text-[11px] font-mono text-white/40 truncate">{d.domain || d.subdomain || d.domain_strategy} · {d.status}</div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-white/25 shrink-0" />
-                  </button>
+                  <div key={d.id} className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[0.015] px-4 py-3 hover:border-cyan-400/30 transition-all duration-500 ease-cinematic">
+                    <button onClick={() => resume(d)} className="flex items-center gap-3 min-w-0 flex-1 text-left">
+                      <Clock className="w-4 h-4 text-cyan-300/60 shrink-0" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm text-white truncate">{d.name || d.deployment_type}</span>
+                        <span className="block text-[11px] font-mono text-white/40 truncate">{d.domain || d.subdomain || d.domain_strategy} · {d.status}</span>
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-white/25 shrink-0" />
+                    </button>
+                    <button aria-label="Archive deployment" onClick={() => archive(d.id)} className="text-white/25 hover:text-rose-300 shrink-0"><X className="w-3.5 h-3.5" /></button>
+                  </div>
                 ))}
               </div>
             </div>
