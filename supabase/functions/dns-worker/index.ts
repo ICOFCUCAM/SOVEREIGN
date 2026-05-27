@@ -51,13 +51,13 @@ async function handle(admin: SupabaseClient, op: OpenproviderClient, job: Record
       return { ok: true };
     }
     case 'zone.create': {
-      const res: any = await op.createZone({ name: p.name, type: p.type, records: p.records });
-      const opId = res?.data?.id ?? res?.id ?? null;
-      await admin.from('dns_zones').update({ op_id: opId ? String(opId) : null, status: 'active', updated_at: new Date().toISOString() }).eq('id', p.zone_id);
+      // Openprovider create-zone returns { data: { success: true } } — no id; zones are keyed by name.
+      await op.createZone({ name: p.name, type: p.type, records: p.records, secured: p.secured });
+      await admin.from('dns_zones').update({ status: 'active', updated_at: new Date().toISOString() }).eq('id', p.zone_id);
       if (Array.isArray(p.records) && p.records.length) {
         await admin.from('dns_records').insert(p.records.map((r: any) => ({ zone_id: p.zone_id, owner: job.owner, type: r.type, name: r.name ?? '', value: r.value, ttl: r.ttl ?? 3600, prio: r.prio ?? null })));
       }
-      return { op_id: opId };
+      return { ok: true };
     }
     case 'records.modify': {
       await op.modifyRecords(p.name, { add: p.add, remove: p.remove, update: (p.update || []) });

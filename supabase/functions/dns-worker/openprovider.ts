@@ -55,7 +55,7 @@ export class OpenproviderClient {
     const resp = await fetch(this.base + OP.login, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: this.username, password: this.password }),
+      body: JSON.stringify({ username: this.username, password: this.password, ip: '0.0.0.0' }),
     });
     const body = await resp.json().catch(() => ({}));
     if (!resp.ok) throw new OpenproviderError('Openprovider auth failed', resp.status, body, resp.status >= 500);
@@ -90,16 +90,18 @@ export class OpenproviderClient {
       return this.request<T>(method, path, body, attempt + 1);
     }
 
-    const parsed = await resp.json().catch(() => ({}));
-    if (resp.ok) return parsed as T;
+    const parsed = await resp.json().catch(() => ({})) as { code?: number; desc?: string; message?: string };
+    // Openprovider returns HTTP 200 with a non-zero `code` on logical errors.
+    if (resp.ok && (parsed?.code === undefined || parsed.code === 0)) return parsed as T;
 
-    const retryable = resp.status === 429 || resp.status >= 500;
+    const status = resp.ok ? 400 : resp.status;
+    const retryable = status === 429 || status >= 500;
     if (retryable && attempt < 2) {
       await sleep(500 * Math.pow(2, attempt));
       return this.request<T>(method, path, body, attempt + 1);
     }
-    const msg = (parsed as { desc?: string; message?: string })?.desc || (parsed as { message?: string })?.message || `Openprovider ${resp.status}`;
-    throw new OpenproviderError(msg, resp.status, parsed, retryable);
+    const msg = parsed?.desc || parsed?.message || `Openprovider ${status}${parsed?.code ? ` (code ${parsed.code})` : ''}`;
+    throw new OpenproviderError(msg, status, parsed, retryable);
   }
 
   // ── Nameservers ──
@@ -113,12 +115,24 @@ export class OpenproviderClient {
 
   // ── Zones ──
   listZones() { return this.request('GET', OP.zones); }
-  createZone(input: { name: string; type?: string; records?: OpRecord[] }) {
-    return this.request('POST', OP.zones, { name: input.name, type: input.type || 'master', records: input.records || [] });
+  // Openprovider expects the zone as { domain: { name, extension } }. Split on the
+  // first dot: "op-demozone.nl" -> name "op-demozone", extension "nl".
+  createZone(input: { name: string; type?: string; records?: OpRecord[]; secured?: boolean }) {
+    const dot = input.name.indexOf('.');
+    const host = dot === -1 ? input.name : input.name.slice(0, dot);
+    const extension = dot === -1 ? '' : input.name.slice(dot + 1);
+    return this.request('POST', OP.zones, {
+      domain: { name: host, extension },
+      type: input.type || 'master',
+      records: input.records || [],
+      secured: Boolean(input.secured),
+    });
   }
   deleteZone(name: string) { return this.request('DELETE', OP.zone(name)); }
-  // Openprovider modifies records through a zone update with add/remove/update sets.
+  // Records are modified via a zone PUT with add/remove/update sets. The update
+  // set pairs the existing record (original_record) with its replacement (record).
   modifyRecords(name: string, ops: { add?: OpRecord[]; remove?: OpRecord[]; update?: Array<{ original: OpRecord; record: OpRecord }> }) {
-    return this.request('PUT', OP.zone(name), { name, records: { add: ops.add || [], remove: ops.remove || [], update: ops.update || [] } });
+    const update = (ops.update || []).map((u) => ({ original_record: u.original, record: u.record }));
+    return this.request('PUT', OP.zone(name), { name, records: { add: ops.add || [], remove: ops.remove || [], update } });
   }
 }
