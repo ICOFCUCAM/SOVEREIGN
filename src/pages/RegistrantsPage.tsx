@@ -38,7 +38,8 @@ const RegistrantsPage: React.FC = () => {
 
   const set = (k: keyof RegistrantInput, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
-  const valid = form.first_name && form.last_name && form.email && form.phone_country_code && form.phone_subscriber && form.street && form.city && form.zipcode && form.country.length === 2;
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+  const valid = !!(form.first_name && form.last_name && emailOk && form.phone_country_code && form.phone_subscriber && form.street && form.city && form.zipcode && form.country.length === 2);
 
   const save = async () => {
     if (!valid) { toast.error('Complete the required fields.'); return; }
@@ -108,8 +109,8 @@ const RegistrantsPage: React.FC = () => {
                 <Label t="Email *"><input value={form.email} onChange={(e) => set('email', e.target.value)} type="email" className={inputCls} /></Label>
                 <div className="grid grid-cols-3 gap-2">
                   <Label t="Ctry code *"><input value={form.phone_country_code} onChange={(e) => set('phone_country_code', e.target.value)} placeholder="+1" className={inputCls} /></Label>
-                  <Label t="Area *"><input value={form.phone_area_code ?? ''} onChange={(e) => set('phone_area_code', e.target.value)} placeholder="212" className={inputCls} /></Label>
-                  <Label t="Number *"><input value={form.phone_subscriber} onChange={(e) => set('phone_subscriber', e.target.value)} placeholder="7364000" className={inputCls} /></Label>
+                  <Label t="Area *"><input inputMode="numeric" value={form.phone_area_code ?? ''} onChange={(e) => set('phone_area_code', e.target.value)} placeholder="212" className={inputCls} /></Label>
+                  <Label t="Number *"><input inputMode="numeric" value={form.phone_subscriber} onChange={(e) => set('phone_subscriber', e.target.value)} placeholder="7364000" className={inputCls} /></Label>
                 </div>
                 <Label t="Street *"><input value={form.street} onChange={(e) => set('street', e.target.value)} placeholder="350 Fifth Avenue" className={inputCls} /></Label>
                 <Label t="City *"><input value={form.city} onChange={(e) => set('city', e.target.value)} className={inputCls} /></Label>
