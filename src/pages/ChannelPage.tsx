@@ -84,7 +84,8 @@ const FilmTile: React.FC<{ ch: Channel; feature: string; onPlay: () => void }> =
       <span className="w-1.5 h-1.5 rounded-full animate-node" style={{ background: ch.accent }} /> {ch.cls} · {ch.kicker}
     </div>
     <span className="absolute inset-0 flex items-center justify-center">
-      <span className="w-16 h-16 rounded-full flex items-center justify-center border border-white/20 bg-white/10 backdrop-blur-sm group-hover:scale-110 transition-transform" style={{ boxShadow: `0 0 40px ${ch.accent}55` }}>
+      <span className="relative w-16 h-16 rounded-full flex items-center justify-center border border-white/20 bg-white/10 backdrop-blur-sm ease-cinematic transition-all duration-500 group-hover:scale-110 group-hover:bg-white/15" style={{ boxShadow: `0 0 40px ${ch.accent}55` }}>
+        <span className="absolute inset-0 rounded-full border opacity-0 group-hover:opacity-100 animate-ring" style={{ borderColor: `${ch.accent}99` }} />
         <Play className="w-6 h-6 text-white translate-x-0.5" fill="currentColor" />
       </span>
     </span>
