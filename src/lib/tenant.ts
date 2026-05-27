@@ -53,6 +53,14 @@ export function normalizeHostname(host: string): string {
     .replace(/^www\./, ''); // treat www and apex as one tenant
 }
 
+/**
+ * Dedicated registrar infrastructure host (`domains.sovereign.so` and any
+ * `domains.*` subdomain). Renders the sovereign domain platform at its root.
+ */
+export function isRegistrarHost(hostname: string): boolean {
+  return hostname === 'domains.sovereign.so' || hostname.startsWith('domains.');
+}
+
 export function isPlatformHost(hostname: string): boolean {
   if (PLATFORM_HOST_EXACT.has(hostname)) return true;
   if (PLATFORM_HOST_SUFFIXES.some((s) => hostname.endsWith(s))) return true;
