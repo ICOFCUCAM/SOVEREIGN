@@ -270,7 +270,7 @@ const DeploymentOrchestrator: React.FC = () => {
             <div>
               {Kicker(3, 'Connect your domain')}
               <p className="text-white/50 text-sm mb-4 max-w-lg">Enter a domain your institution already controls. Sovereign connects DNS, provisions SSL and routes services — no new registration required.</p>
-              <input aria-label="Existing domain to connect" value={existing} onChange={(e) => setExisting(e.target.value.toLowerCase().trim())} onKeyDown={(e) => { if (e.key === 'Enter' && canAdvance()) setStep((s) => s + 1); }} placeholder="gov.country" autoFocus
+              <input aria-label="Existing domain to connect" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={existing} onChange={(e) => setExisting(e.target.value.toLowerCase().trim())} onKeyDown={(e) => { if (e.key === 'Enter' && canAdvance()) setStep((s) => s + 1); }} placeholder="gov.country" autoFocus
                 className="w-full max-w-md px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white font-mono placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
             </div>
           )}
@@ -279,7 +279,7 @@ const DeploymentOrchestrator: React.FC = () => {
               {Kicker(3, 'Provision a sovereign subdomain')}
               <p className="text-white/50 text-sm mb-4 max-w-lg">Deploy immediately on sovereign infrastructure. Connect a permanent domain whenever you're ready — nothing is lost.</p>
               <div className="flex items-center max-w-md rounded-xl bg-white/5 border border-white/10 focus-within:border-cyan-400/50 overflow-hidden">
-                <input aria-label="Sovereign subdomain label" value={sub} onChange={(e) => setSub(sanitizeSub(e.target.value))} onKeyDown={(e) => { if (e.key === 'Enter' && canAdvance()) setStep((s) => s + 1); }} placeholder="ministry" autoFocus className="flex-1 px-4 py-3.5 bg-transparent text-white font-mono placeholder:text-white/30 focus:outline-none" />
+                <input aria-label="Sovereign subdomain label" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={sub} onChange={(e) => setSub(sanitizeSub(e.target.value))} onKeyDown={(e) => { if (e.key === 'Enter' && canAdvance()) setStep((s) => s + 1); }} placeholder="ministry" autoFocus className="flex-1 px-4 py-3.5 bg-transparent text-white font-mono placeholder:text-white/30 focus:outline-none" />
                 <span className="px-4 text-white/40 font-mono text-sm border-l border-white/10 py-3.5">.sovereign.so</span>
               </div>
             </div>
@@ -289,7 +289,7 @@ const DeploymentOrchestrator: React.FC = () => {
               {Kicker(3, strategy === 'recommend' ? 'Sovereign AI recommendations' : 'Register a new domain')}
               <div className="relative max-w-md mb-5">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
-                <input aria-label="Search the sovereign namespace" value={query} onChange={(e) => runSearch(e.target.value)} autoFocus
+                <input aria-label="Search the sovereign namespace" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={query} onChange={(e) => runSearch(e.target.value)} autoFocus
                   placeholder={strategy === 'recommend' ? 'Describe the institution — e.g. national treasury' : 'Search the namespace'}
                   className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
                 {searching && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-300 animate-spin" />}
