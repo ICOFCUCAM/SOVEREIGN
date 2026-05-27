@@ -56,17 +56,30 @@ Deno.serve(async (req) => {
     const fullPrompt = `${prompt.slice(0, 1800)}. Art direction: ${style}.`;
     const size = orientation === 'portrait' ? '1024x1792' : orientation === 'square' ? '1024x1024' : '1792x1024';
 
-    const resp = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: 'dall-e-3', prompt: fullPrompt, size, n: 1, response_format: 'b64_json' }),
-    });
+    const t0 = Date.now();
+    const ac = new AbortController();
+    const killer = setTimeout(() => ac.abort(), 50000);
+    let resp: Response;
+    try {
+      resp = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: 'dall-e-3', prompt: fullPrompt, size, n: 1, response_format: 'b64_json' }),
+        signal: ac.signal,
+      });
+    } catch (e) {
+      clearTimeout(killer);
+      await logDiag('generate-image:openai-timeout', `aborted after ${Date.now() - t0}ms: ${(e as Error).message}`);
+      return new Response(JSON.stringify({ error: 'OpenAI image request did not respond in time.' }), { status: 504, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+    }
+    clearTimeout(killer);
 
     if (!resp.ok) {
       const errText = await resp.text();
-      await logDiag('generate-image:openai', `status=${resp.status} body=${errText}`);
+      await logDiag('generate-image:openai', `status=${resp.status} ms=${Date.now() - t0} body=${errText}`);
       return new Response(JSON.stringify({ error: `OpenAI image error (${resp.status})`, detail: errText.slice(0, 600) }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
+    await logDiag('generate-image:openai-ok', `status=200 ms=${Date.now() - t0}`);
 
     const data = await resp.json();
     const b64 = data?.data?.[0]?.b64_json;
