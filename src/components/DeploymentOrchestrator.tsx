@@ -401,7 +401,7 @@ const DeploymentOrchestrator: React.FC = () => {
             {savedId ? (
               <span className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500/10 border border-emerald-400/25 text-emerald-300 font-semibold"><Check className="w-4 h-4" /> Saved · resumable</span>
             ) : (
-              <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5 disabled:opacity-50" style={{ background: 'linear-gradient(135deg,#00C2FF,#7C4DFF)', boxShadow: '0 14px 40px -12px rgba(0,194,255,0.5)' }}>
+              <button onClick={save} disabled={saving} aria-busy={saving} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5 disabled:opacity-50" style={{ background: 'linear-gradient(135deg,#00C2FF,#7C4DFF)', boxShadow: '0 14px 40px -12px rgba(0,194,255,0.5)' }}>
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {user ? 'Save deployment' : 'Sign in to save'}
               </button>
             )}

@@ -126,7 +126,7 @@ const RegistrantsPage: React.FC = () => {
                 <Label t="Postal code *"><input autoComplete="postal-code" value={form.zipcode} onChange={(e) => set('zipcode', e.target.value)} className={inputCls} /></Label>
                 <Label t="Country (ISO-2) *"><input autoComplete="country" maxLength={2} value={form.country} onChange={(e) => set('country', e.target.value.toUpperCase().slice(0, 2))} placeholder="US" className={inputCls} /></Label>
               </div>
-              <button disabled={busy || !valid} onClick={save} className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold disabled:opacity-50">
+              <button disabled={busy || !valid} aria-busy={busy} onClick={save} className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold disabled:opacity-50">
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Save identity
               </button>
             </div>
@@ -143,7 +143,7 @@ const RegistrantsPage: React.FC = () => {
                 {r.op_handle ? (
                   <span className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 shrink-0"><BadgeCheck className="w-3.5 h-3.5" /> {r.op_handle}</span>
                 ) : (
-                  <button onClick={() => verify(r.id)} disabled={verifying === r.id} className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border border-cyan-400/30 text-cyan-300 hover:bg-cyan-400/10 shrink-0 disabled:opacity-50">
+                  <button onClick={() => verify(r.id)} disabled={verifying === r.id} aria-busy={verifying === r.id} className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border border-cyan-400/30 text-cyan-300 hover:bg-cyan-400/10 shrink-0 disabled:opacity-50">
                     {verifying === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />} Verify with registry
                   </button>
                 )}
