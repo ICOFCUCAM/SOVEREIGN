@@ -34,6 +34,12 @@ export async function verifyConnection(connectionId: string): Promise<{ verified
   return invokeFunction('connect-domain', { action: 'verify', connection_id: connectionId });
 }
 
+// The authoritative nameservers a connected domain must be delegated to.
+export async function getSovereignNameservers(): Promise<string[]> {
+  const { nameservers } = await invokeFunction<{ nameservers: string[] }>('connect-domain', { action: 'nameservers' });
+  return nameservers;
+}
+
 export async function deleteConnection(id: string): Promise<void> {
   const { error } = await supabase.from('domain_connections').delete().eq('id', id);
   if (error) throw new Error(error.message);

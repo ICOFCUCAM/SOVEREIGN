@@ -43,6 +43,14 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = body?.action as string;
 
+    // The authoritative nameservers an operator must delegate a connected
+    // domain to. Configurable via SOVEREIGN_NAMESERVERS (comma-separated).
+    if (action === 'nameservers') {
+      const ns = (Deno.env.get('SOVEREIGN_NAMESERVERS') || 'ns1.openprovider.nl,ns2.openprovider.be,ns3.openprovider.eu')
+        .split(',').map((s) => s.trim()).filter(Boolean);
+      return json({ nameservers: ns });
+    }
+
     if (action === 'init') {
       const domain = normalizeDomain(body?.domain || '');
       if (!domain) return json({ error: 'Enter a valid domain.' }, 400);

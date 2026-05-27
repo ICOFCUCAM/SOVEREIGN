@@ -11,7 +11,7 @@ import {
   Lock, Rocket, Boxes, Archive, RotateCcw, ArrowRight, Link2, ShieldCheck, Loader2, Copy, Trash2, Server, Globe, Plus,
 } from 'lucide-react';
 import { listAllDeployments, archiveDeployment, restoreDeployment, type Deployment } from '@/lib/deployments';
-import { listConnections, initConnection, verifyConnection, deleteConnection, attachConnectionZone, type DomainConnection, type ChallengeRecord } from '@/lib/connections';
+import { listConnections, initConnection, verifyConnection, deleteConnection, attachConnectionZone, getSovereignNameservers, type DomainConnection, type ChallengeRecord } from '@/lib/connections';
 import { createZone } from '@/lib/dns';
 
 const statusChip = (s: string) => {
@@ -29,9 +29,11 @@ const ConnectionsManager: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [challenge, setChallenge] = useState<{ id: string; record: ChallengeRecord } | null>(null);
   const [verifying, setVerifying] = useState<string | null>(null);
+  const [nameservers, setNameservers] = useState<string[]>([]);
 
   const refresh = useCallback(() => { listConnections().then(setConns).catch(() => {}); }, []);
   useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => { getSovereignNameservers().then(setNameservers).catch(() => {}); }, []);
 
   const init = async () => {
     setBusy(true);
@@ -103,23 +105,39 @@ const ConnectionsManager: React.FC = () => {
 
       <div className="glass-strong rounded-2xl overflow-hidden divide-y divide-white/5">
         {conns.map((c) => (
-          <div key={c.id} className="flex items-center gap-4 px-5 py-3.5">
-            <Globe className="w-4 h-4 text-cyan-300/60 shrink-0" />
-            <div className="min-w-0 flex-1">
-              <div className="text-sm text-white font-mono truncate">{c.domain}</div>
-              <div className="text-[11px] text-white/40 font-mono">{c.verified ? 'control verified' : 'awaiting TXT verification'}</div>
+          <div key={c.id} className="px-5 py-3.5">
+            <div className="flex items-center gap-4">
+              <Globe className="w-4 h-4 text-cyan-300/60 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm text-white font-mono truncate">{c.domain}</div>
+                <div className="text-[11px] text-white/40 font-mono">{c.verified ? 'control verified' : 'awaiting TXT verification'}</div>
+              </div>
+              <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${statusChip(c.status)}`}>{c.status}</span>
+              {!c.verified && (
+                <button onClick={() => verify(c.id)} disabled={verifying === c.id} aria-busy={verifying === c.id} className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border border-cyan-400/30 text-cyan-300 hover:bg-cyan-400/10 shrink-0 disabled:opacity-50">
+                  {verifying === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />} Verify
+                </button>
+              )}
+              {c.verified && !c.zone_id && (
+                <button onClick={() => provision(c)} className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border border-emerald-400/30 text-emerald-300 hover:bg-emerald-400/10 shrink-0"><Server className="w-3.5 h-3.5" /> Provision DNS</button>
+              )}
+              {c.zone_id && <Link to="/dns" className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border border-white/15 text-white/70 hover:text-white shrink-0">Operate <ArrowRight className="w-3 h-3" /></Link>}
+              <button aria-label={`Remove connection ${c.domain}`} onClick={() => remove(c.id)} className="text-white/25 hover:text-rose-300 shrink-0"><Trash2 className="w-4 h-4" /></button>
             </div>
-            <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${statusChip(c.status)}`}>{c.status}</span>
-            {!c.verified && (
-              <button onClick={() => verify(c.id)} disabled={verifying === c.id} aria-busy={verifying === c.id} className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border border-cyan-400/30 text-cyan-300 hover:bg-cyan-400/10 shrink-0 disabled:opacity-50">
-                {verifying === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />} Verify
-              </button>
+            {c.zone_id && nameservers.length > 0 && (
+              <div className="mt-3 rounded-lg border border-emerald-400/15 bg-emerald-400/[0.03] p-3">
+                <div className="text-[11px] font-mono uppercase tracking-wider text-emerald-300/70 mb-2">Delegate {c.domain} to these nameservers</div>
+                <div className="flex flex-wrap gap-2">
+                  {nameservers.map((n) => (
+                    <span key={n} className="inline-flex items-center gap-1.5 font-mono text-xs text-white/80 bg-white/5 border border-white/10 rounded px-2 py-1">
+                      {n}
+                      <button aria-label={`Copy ${n}`} onClick={() => navigator.clipboard?.writeText(n).then(() => toast.success('Copied'))} className="text-white/30 hover:text-cyan-300"><Copy className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                </div>
+                <div className="text-[11px] text-white/40 mt-2">Set these at your current registrar. Propagation can take up to 24–48h — the zone is already live on sovereign infrastructure.</div>
+              </div>
             )}
-            {c.verified && !c.zone_id && (
-              <button onClick={() => provision(c)} className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border border-emerald-400/30 text-emerald-300 hover:bg-emerald-400/10 shrink-0"><Server className="w-3.5 h-3.5" /> Provision DNS</button>
-            )}
-            {c.zone_id && <Link to="/dns" className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border border-white/15 text-white/70 hover:text-white shrink-0">Operate <ArrowRight className="w-3 h-3" /></Link>}
-            <button aria-label={`Remove connection ${c.domain}`} onClick={() => remove(c.id)} className="text-white/25 hover:text-rose-300 shrink-0"><Trash2 className="w-4 h-4" /></button>
           </div>
         ))}
         {conns.length === 0 && <div className="px-5 py-10 text-center text-white/40">No connected domains yet.</div>}
