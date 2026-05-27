@@ -35,6 +35,19 @@ export async function checkDomains(domains: string[]): Promise<DomainResult[]> {
   return results;
 }
 
+export interface AiSuggestion extends DomainResult { why?: string }
+
+// AI-generated sovereign names, enriched with live availability + retail price.
+export async function aiSuggestDomains(prompt: string): Promise<AiSuggestion[]> {
+  const { suggestions } = await invokeFunction<{ suggestions: Array<{ label: string; tld: string; why?: string }> }>('domain-suggest', { prompt });
+  if (!suggestions.length) return [];
+  const why = new Map(suggestions.map((s) => [`${s.label}.${s.tld}`.toLowerCase(), s.why]));
+  const results = await checkDomains(suggestions.map((s) => `${s.label}.${s.tld}`));
+  return results
+    .map((r) => ({ ...r, why: why.get(r.domain.toLowerCase()) }))
+    .sort((a, b) => Number(b.available) - Number(a.available));
+}
+
 export function formatPrice(price: number | null, currency: string | null): string {
   if (price == null) return '—';
   const cur = currency || 'USD';

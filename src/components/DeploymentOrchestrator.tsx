@@ -5,7 +5,7 @@ import {
   Link2, Globe, Sparkles, Server, ArrowRight, ArrowLeft, Check, Search,
   ShieldCheck, Network, Route, Loader2, Star, Save, History, Clock, X,
 } from 'lucide-react';
-import { searchDomains, formatPrice, type DomainResult } from '@/lib/registrar';
+import { searchDomains, aiSuggestDomains, formatPrice, type AiSuggestion } from '@/lib/registrar';
 import { listDeployments, createDeployment, archiveDeployment, type Deployment } from '@/lib/deployments';
 import { listRegistrants, type RegistrantProfile } from '@/lib/registrant';
 import { useAuth } from '@/contexts/AuthContext';
@@ -78,7 +78,7 @@ const DeploymentOrchestrator: React.FC = () => {
   const [existing, setExisting] = useState('');
   const [sub, setSub] = useState('');
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<DomainResult[]>([]);
+  const [results, setResults] = useState<AiSuggestion[]>([]);
   const [picked, setPicked] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
   const [searchErr, setSearchErr] = useState<string | null>(null);
@@ -123,6 +123,25 @@ const DeploymentOrchestrator: React.FC = () => {
         if (latest.current === term) setSearching(false);
       }
     }, 450);
+  }, []);
+
+  // AI naming runs on explicit submit (not per keystroke).
+  const aiGenerate = useCallback(async (q: string) => {
+    const term = q.trim();
+    if (term.length < 2) return;
+    setPicked(null); setSearching(true); setSearchErr(null); latest.current = term;
+    try {
+      const res = await aiSuggestDomains(term);
+      if (latest.current !== term) return;
+      setResults(res.filter((r) => r.available).slice(0, 9));
+      if (!res.some((r) => r.available)) setSearchErr('No available names from that brief — try rephrasing.');
+    } catch (e) {
+      if (latest.current !== term) return;
+      setSearchErr((e as Error).message || 'AI naming unavailable.');
+      setResults([]);
+    } finally {
+      if (latest.current === term) setSearching(false);
+    }
   }, []);
 
   const reset = () => { setStep(1); setType(null); setStrategy(null); setExisting(''); setSub(''); setQuery(''); setResults([]); setPicked(null); setSavedId(null); setRegistrantId(null); };
@@ -295,17 +314,30 @@ const DeploymentOrchestrator: React.FC = () => {
           {(strategy === 'register' || strategy === 'recommend') && (
             <div>
               {Kicker(3, strategy === 'recommend' ? 'Sovereign AI recommendations' : 'Register a new domain')}
-              <div className="relative max-w-md mb-5">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
-                <input aria-label="Search the sovereign namespace" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={query} onChange={(e) => runSearch(e.target.value)} autoFocus
-                  placeholder={strategy === 'recommend' ? 'Describe the institution — e.g. national treasury' : 'Search the namespace'}
-                  className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
-                {searching && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-300 animate-spin" />}
+              <div className="flex max-w-xl gap-2 mb-5">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
+                  <input
+                    aria-label={strategy === 'recommend' ? 'Describe the institution' : 'Search the sovereign namespace'}
+                    autoCapitalize="off" autoCorrect={strategy === 'recommend' ? undefined : 'off'} spellCheck={strategy === 'recommend'}
+                    value={query} autoFocus
+                    onChange={(e) => (strategy === 'recommend' ? (setQuery(e.target.value), setSearchErr(null)) : runSearch(e.target.value))}
+                    onKeyDown={(e) => { if (strategy === 'recommend' && e.key === 'Enter') aiGenerate(query); }}
+                    placeholder={strategy === 'recommend' ? 'Describe the institution — e.g. national digital treasury' : 'Search the namespace'}
+                    className="w-full pl-11 pr-10 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
+                  {searching && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-300 animate-spin" />}
+                </div>
+                {strategy === 'recommend' && (
+                  <button onClick={() => aiGenerate(query)} disabled={searching || query.trim().length < 2} aria-busy={searching}
+                    className="inline-flex items-center gap-2 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold disabled:opacity-50 shrink-0">
+                    <Sparkles className="w-4 h-4" /> Generate
+                  </button>
+                )}
               </div>
               {searchErr && (
                 <div className="text-rose-300/80 text-sm mb-4 flex items-center gap-3">
                   <span>{searchErr}</span>
-                  <button onClick={() => runSearch(query)} className="px-2.5 py-1 rounded border border-rose-300/30 text-rose-100 hover:bg-rose-400/10 transition text-[11px] font-semibold">Retry</button>
+                  <button onClick={() => (strategy === 'recommend' ? aiGenerate(query) : runSearch(query))} className="px-2.5 py-1 rounded border border-rose-300/30 text-rose-100 hover:bg-rose-400/10 transition text-[11px] font-semibold">Retry</button>
                 </div>
               )}
               <div className="grid sm:grid-cols-3 gap-2.5">
@@ -319,6 +351,7 @@ const DeploymentOrchestrator: React.FC = () => {
                         {on && <Check className="w-3.5 h-3.5 text-cyan-300 ml-auto shrink-0" />}
                       </div>
                       <div className="text-[11px] font-mono text-white/45 mt-1">{formatPrice(r.price, r.currency)}<span className="text-white/25"> /yr</span></div>
+                      {r.why && <div className="text-[10px] text-cyan-300/55 mt-1 leading-snug">{r.why}</div>}
                     </button>
                   );
                 })}
