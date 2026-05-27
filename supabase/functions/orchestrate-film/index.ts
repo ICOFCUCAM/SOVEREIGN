@@ -9,13 +9,14 @@ const BUCKET = 'ecosystem';
 const RUNWAY_BASE = 'https://api.dev.runwayml.com/v1';
 const RUNWAY_VERSION = '2024-11-06';
 
-const FILM_SYSTEM =
-  'You are a cinematic director for CIVICOS / SOVEREIGN, a sovereign-civilization infrastructure ecosystem. ' +
-  'Given a brief, design a single continuous ~10-second hero shot. Return STRICT JSON only: ' +
-  '{"title":"<short film title>",' +
-  '"seed_prompt":"<vivid description of the opening frame: composition, subject, palette (deep teal-and-cyan, volumetric light), cinematic, no text/logos>",' +
-  '"motion_prompt":"<the camera move and motion over the shot: e.g. slow dolly-in, parallax, light sweep — one or two sentences>",' +
-  '"narration_script":"<60-110 words of cinematic voiceover in the house voice: institutional, restrained, inevitable, no hype, no emoji>"}';
+function filmSystem(n: number): string {
+  return 'You are a cinematic director for CIVICOS / SOVEREIGN, a sovereign-civilization infrastructure ecosystem. ' +
+    `Break the brief into exactly ${n} sequential scenes that tell one continuous story. Return STRICT JSON only: ` +
+    '{"title":"<short film title>",' +
+    '"narration_script":"<full continuous voiceover across all scenes, house voice: institutional, restrained, inevitable, no hype, no emoji>",' +
+    `"scenes":[{"image_prompt":"<vivid opening frame for this scene: composition, subject, deep teal-and-cyan palette, volumetric light, cinematic, no text/logos>","motion_prompt":"<camera move / motion for this ~5s shot>"}]}. ` +
+    `The scenes array must have exactly ${n} entries, in narrative order.`;
+}
 
 function b64ToBytes(b64: string): Uint8Array {
   const bin = atob(b64);
@@ -36,19 +37,21 @@ Deno.serve(async (req) => {
   const runwayKey = Deno.env.get('RUNWAY_API_KEY') || Deno.env.get('RUNWAYML_API_SECRET') || Deno.env.get('VIDEO_PROVIDER_KEY');
 
   try {
-    const { brief = '' } = await req.json().catch(() => ({}));
+    const { brief = '', scenes = 4, seedImages = [] } = await req.json().catch(() => ({}));
     if (!brief || typeof brief !== 'string') {
       return new Response(JSON.stringify({ error: 'A non-empty "brief" string is required.' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
     if (!anthropicKey || !openaiKey) {
       return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY and OPENAI_API_KEY are required.' }), { status: 503, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
+    const sceneCount = Math.max(1, Math.min(6, Math.round(Number(scenes) || 4)));
+    const overrides: string[] = Array.isArray(seedImages) ? seedImages : [];
 
-    // 1) Director: brief -> shot + narration.
+    // 1) Director: brief -> scenes + narration.
     const dir = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'x-api-key': anthropicKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-opus-4-7', max_tokens: 1200, system: FILM_SYSTEM, thinking: { type: 'adaptive' }, messages: [{ role: 'user', content: `Design a hero film shot for: ${brief}` }] }),
+      body: JSON.stringify({ model: 'claude-opus-4-7', max_tokens: 2500, system: filmSystem(sceneCount), thinking: { type: 'adaptive' }, messages: [{ role: 'user', content: `Design a ${sceneCount}-scene film for: ${brief}` }] }),
     });
     if (!dir.ok) {
       return new Response(JSON.stringify({ error: `Director (Claude) error (${dir.status})`, detail: (await dir.text()).slice(0, 400) }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
@@ -59,71 +62,76 @@ Deno.serve(async (req) => {
     if (!m) return new Response(JSON.stringify({ error: 'Director did not return parseable JSON.' }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     const plan = JSON.parse(m[0]);
     const title = String(plan.title || 'Untitled film').slice(0, 80);
+    const planScenes: Array<{ image_prompt?: string; motion_prompt?: string }> = Array.isArray(plan.scenes) ? plan.scenes.slice(0, sceneCount) : [];
 
-    // Parent film job.
-    const { data: filmJob } = await admin.from('pipeline_jobs').insert({ kind: 'film', status: 'processing', provider: 'runway+openai', title, input: { brief: brief.slice(0, 1000), plan } }).select('id').single();
+    const { data: filmJob } = await admin.from('pipeline_jobs').insert({ kind: 'film', status: 'processing', provider: 'runway+openai', title, input: { brief: brief.slice(0, 1000), scene_count: sceneCount } }).select('id').single();
     const filmId = filmJob?.id as string | undefined;
 
-    // 2) Seed frame (gpt-image-1).
-    const seedResp = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${openaiKey}` },
-      body: JSON.stringify({ model: 'gpt-image-1', prompt: `${plan.seed_prompt}. Cinematic, anamorphic widescreen, no text, no logos.`.slice(0, 1800), size: '1536x1024', n: 1, quality: 'medium' }),
-    });
-    let seedUrl: string | undefined;
-    if (seedResp.ok) {
-      const sd = await seedResp.json();
-      const item = sd?.data?.[0] ?? {};
-      const bytes = item.b64_json ? b64ToBytes(item.b64_json) : new Uint8Array(await (await fetch(item.url)).arrayBuffer());
-      const seedPath = `video-seed/${filmId}.png`;
-      await admin.storage.from(BUCKET).upload(seedPath, bytes, { contentType: 'image/png', upsert: true, cacheControl: '3600' });
-      seedUrl = admin.storage.from(BUCKET).getPublicUrl(seedPath).data.publicUrl;
-    }
-
-    // 3) Runway 10s render (native max). Recorded as a 'video' job so poll-video-jobs finalizes it.
-    let videoTask: string | undefined;
-    let videoErr: string | undefined;
-    if (runwayKey && seedUrl) {
-      const sub = await fetch(`${RUNWAY_BASE}/image_to_video`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${runwayKey}`, 'X-Runway-Version': RUNWAY_VERSION },
-        body: JSON.stringify({ model: 'gen4_turbo', promptImage: seedUrl, promptText: String(plan.motion_prompt || brief).slice(0, 1000), ratio: '1280:720', duration: 10 }),
-      });
-      const subBody = await sub.json().catch(() => ({}));
-      if (sub.ok && subBody?.id) {
-        videoTask = subBody.id;
-        await admin.from('pipeline_jobs').insert({ kind: 'video', status: 'processing', provider: 'runway', title, result: { id: subBody.id, seedUrl, film_id: filmId } });
-      } else {
-        videoErr = JSON.stringify(subBody).slice(0, 400);
+    // 2) Per-scene seed image (override or gpt-image-1) -> Runway clip. Run scenes in parallel.
+    const sceneWork = planScenes.map(async (sc, i) => {
+      let seedUrl: string | undefined = typeof overrides[i] === 'string' && overrides[i] ? overrides[i] : undefined;
+      if (!seedUrl) {
+        const imgResp = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${openaiKey}` },
+          body: JSON.stringify({ model: 'gpt-image-1', prompt: `${sc.image_prompt || brief}. Cinematic, anamorphic widescreen, no text, no logos.`.slice(0, 1800), size: '1536x1024', n: 1, quality: 'medium' }),
+        });
+        if (imgResp.ok) {
+          const sd = await imgResp.json();
+          const item = sd?.data?.[0] ?? {};
+          const bytes = item.b64_json ? b64ToBytes(item.b64_json) : new Uint8Array(await (await fetch(item.url)).arrayBuffer());
+          const seedPath = `video-seed/${filmId}-${i}.png`;
+          await admin.storage.from(BUCKET).upload(seedPath, bytes, { contentType: 'image/png', upsert: true, cacheControl: '3600' });
+          seedUrl = admin.storage.from(BUCKET).getPublicUrl(seedPath).data.publicUrl;
+        }
       }
-    } else {
-      videoErr = !runwayKey ? 'RUNWAY_API_KEY not configured' : 'no seed frame';
-    }
+      let taskId: string | undefined;
+      let err: string | undefined;
+      if (runwayKey && seedUrl) {
+        const sub = await fetch(`${RUNWAY_BASE}/image_to_video`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${runwayKey}`, 'X-Runway-Version': RUNWAY_VERSION },
+          body: JSON.stringify({ model: 'gen4_turbo', promptImage: seedUrl, promptText: String(sc.motion_prompt || brief).slice(0, 1000), ratio: '1280:720', duration: 5 }),
+        });
+        const sb = await sub.json().catch(() => ({}));
+        if (sub.ok && sb?.id) taskId = sb.id; else err = JSON.stringify(sb).slice(0, 300);
+      } else {
+        err = !runwayKey ? 'RUNWAY_API_KEY not configured' : 'no seed frame';
+      }
+      await admin.from('pipeline_jobs').insert({
+        kind: 'video', status: taskId ? 'processing' : 'failed', provider: 'runway', title: `${title} — scene ${i + 1}`,
+        result: { id: taskId, seedUrl, film_id: filmId, scene: i }, error: err ?? null,
+      });
+      return { scene: i, taskId, seedUrl, err };
+    });
 
-    // 4) Narration (OpenAI TTS).
-    let narrationUrl: string | undefined;
-    if (plan.narration_script) {
+    // 3) Narration (full script) in parallel with scene work.
+    const narrationWork = (async () => {
+      if (!plan.narration_script) return undefined;
       const tts = await fetch('https://api.openai.com/v1/audio/speech', {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${openaiKey}` },
         body: JSON.stringify({ model: 'tts-1', voice: 'onyx', input: String(plan.narration_script).slice(0, 4000), response_format: 'mp3' }),
       });
-      if (tts.ok) {
-        const audio = new Uint8Array(await tts.arrayBuffer());
-        const aPath = `narration/${filmId}.mp3`;
-        await admin.storage.from(BUCKET).upload(aPath, audio, { contentType: 'audio/mpeg', upsert: true, cacheControl: '3600' });
-        narrationUrl = admin.storage.from(BUCKET).getPublicUrl(aPath).data.publicUrl;
-        await admin.from('pipeline_jobs').insert({ kind: 'narration', status: 'done', provider: 'openai-tts', title, result_url: narrationUrl });
-      }
-    }
+      if (!tts.ok) return undefined;
+      const audio = new Uint8Array(await tts.arrayBuffer());
+      const aPath = `narration/${filmId}.mp3`;
+      await admin.storage.from(BUCKET).upload(aPath, audio, { contentType: 'audio/mpeg', upsert: true, cacheControl: '3600' });
+      const url = admin.storage.from(BUCKET).getPublicUrl(aPath).data.publicUrl;
+      await admin.from('pipeline_jobs').insert({ kind: 'narration', status: 'done', provider: 'openai-tts', title, result_url: url });
+      return url;
+    })();
+
+    const [sceneResults, narrationUrl] = await Promise.all([Promise.all(sceneWork), narrationWork]);
+    const anyClip = sceneResults.some((s) => s.taskId);
 
     if (filmId) {
       await admin.from('pipeline_jobs').update({
-        status: videoErr ? 'failed' : 'processing',
-        result: { seedUrl, video_task: videoTask, narration_url: narrationUrl },
-        error: videoErr ?? null,
+        status: anyClip ? 'processing' : 'failed',
+        result: { scene_count: sceneCount, narration_url: narrationUrl, scenes: sceneResults },
+        error: anyClip ? null : 'No scene clips were submitted (check RUNWAY_API_KEY / credits).',
         updated_at: new Date().toISOString(),
       }).eq('id', filmId);
     }
 
-    return new Response(JSON.stringify({ film_id: filmId, title, seed_url: seedUrl, video_task: videoTask, narration_url: narrationUrl, video_error: videoErr }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+    return new Response(JSON.stringify({ film_id: filmId, title, scene_count: sceneCount, narration_url: narrationUrl, scenes: sceneResults }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   } catch (error) {
     return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   }

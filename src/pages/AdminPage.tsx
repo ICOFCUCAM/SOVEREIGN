@@ -74,6 +74,9 @@ const AdminPage: React.FC = () => {
   const [filmScript, setFilmScript] = useState('');
   const [filmSeed, setFilmSeed] = useState('');
   const [filmBrief, setFilmBrief] = useState('');
+  const [filmScenes, setFilmScenes] = useState(4);
+  const [sceneSeeds, setSceneSeeds] = useState<string[]>([]);
+  const [sceneUploading, setSceneUploading] = useState<number | null>(null);
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [users, setUsers] = useState<UserRoleRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
@@ -468,16 +471,30 @@ const AdminPage: React.FC = () => {
     } catch (e) { toast.error(`Upload failed: ${(e as Error).message}`); }
     setPipelineBusy(null);
   };
+  const uploadSceneSeed = async (i: number, file: File) => {
+    if (!file) return;
+    setSceneUploading(i);
+    try {
+      const ext = file.name.split('.').pop() || 'png';
+      const path = `video-seed/scene-${Date.now()}-${i}.${ext}`;
+      const { error } = await supabase.storage.from('ecosystem').upload(path, file, { upsert: true, cacheControl: '3600' });
+      if (error) throw error;
+      const url = supabase.storage.from('ecosystem').getPublicUrl(path).data.publicUrl;
+      setSceneSeeds((prev) => { const next = [...prev]; next[i] = url; return next; });
+      toast.success(`Scene ${i + 1} image set`);
+    } catch (e) { toast.error(`Upload failed: ${(e as Error).message}`); }
+    setSceneUploading(null);
+  };
   const produceFilm = async () => {
     if (!filmBrief.trim()) { toast.error('Describe the film to produce'); return; }
     setPipelineBusy('produce');
     try {
-      const { data, error } = await supabase.functions.invoke('orchestrate-film', { body: { brief: filmBrief.trim() } });
+      const seedImages = Array.from({ length: filmScenes }, (_, i) => sceneSeeds[i] || '');
+      const { data, error } = await supabase.functions.invoke('orchestrate-film', { body: { brief: filmBrief.trim(), scenes: filmScenes, seedImages } });
       if (error) throw error;
       if (data?.error) { toast(data.error); }
-      else if (data?.video_error) { toast(`Film "${data.title}": seed + narration done; video — ${data.video_error}`); }
-      else { toast.success(`Producing "${data.title}" — narration ready, video rendering`); }
-      setFilmBrief('');
+      else { toast.success(`Producing "${data.title}" — ${data.scene_count} scenes rendering, narration ready`); }
+      setFilmBrief(''); setSceneSeeds([]);
       refreshPipelineJobs();
     } catch (e) { toast.error(`Production failed: ${(e as Error).message}`); }
     setPipelineBusy(null);
@@ -1224,12 +1241,35 @@ const AdminPage: React.FC = () => {
             <div className="space-y-5">
               <p className="text-sm text-white/50">Media & automation pipelines. Narration is live (OpenAI TTS), video via Runway. Social posting activates once channel tokens are configured — every run is recorded below.</p>
 
-              <div className="rounded-xl border border-purple-400/25 bg-purple-400/[0.04] p-4 space-y-2">
-                <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-purple-300/80"><Film className="w-3.5 h-3.5" /> Produce film — brief → shot + narration + Runway render</div>
-                <textarea value={filmBrief} onChange={(e) => setFilmBrief(e.target.value)} placeholder="One brief — e.g. 'The moment a nation brings treasury, justice and emergency onto one sovereign layer'. Claude directs the shot, gpt-image-1 seeds it, Runway animates 10s, TTS voices it." rows={2} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 resize-none" />
+              <div className="rounded-xl border border-purple-400/25 bg-purple-400/[0.04] p-4 space-y-3">
+                <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-purple-300/80"><Film className="w-3.5 h-3.5" /> Produce long film — script → N scenes → per-scene image → Runway clips → stitched</div>
+                <textarea value={filmBrief} onChange={(e) => setFilmBrief(e.target.value)} placeholder="The story / script. Claude breaks it into scenes, gpt-image-1 frames each (or use your own per scene), Runway animates each, TTS narrates, and the ffmpeg worker stitches them into one long film." rows={3} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 resize-none" />
+                <div className="flex items-center gap-3">
+                  <label className="text-xs text-white/50">Scenes</label>
+                  <select value={filmScenes} onChange={(e) => setFilmScenes(Number(e.target.value))} aria-label="Scene count" className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white">
+                    {[2, 3, 4, 5, 6].map((n) => <option key={n} value={n}>{n} scenes · ~{n * 5}s</option>)}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {Array.from({ length: filmScenes }, (_, i) => (
+                    <div key={i} className="rounded-lg border border-white/10 bg-white/[0.02] p-2">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[9px] font-mono uppercase tracking-wider text-white/40">Scene {i + 1}</span>
+                        <label className={`text-[9px] font-mono uppercase tracking-wider cursor-pointer ${sceneUploading === i ? 'text-white/30' : 'text-cyan-300 hover:text-cyan-200'}`}>
+                          {sceneUploading === i ? '…' : sceneSeeds[i] ? 'replace' : 'add image'}
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadSceneSeed(i, f); }} />
+                        </label>
+                      </div>
+                      {sceneSeeds[i]
+                        ? <img src={sceneSeeds[i]} alt="" loading="lazy" className="w-full h-14 object-cover rounded" />
+                        : <div className="w-full h-14 rounded bg-white/5 flex items-center justify-center text-[8px] font-mono text-white/30 text-center px-1">auto-generated</div>}
+                    </div>
+                  ))}
+                </div>
                 <button type="button" disabled={pipelineBusy !== null} onClick={produceFilm} className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50">
                   <Sparkles className="w-3.5 h-3.5" /> {pipelineBusy === 'produce' ? 'Producing…' : 'Produce film'}
                 </button>
+                <p className="text-[10px] text-white/35">Clips render async; once all scenes finish, the film auto-stitches if the ffmpeg worker is configured.</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
