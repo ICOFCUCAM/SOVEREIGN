@@ -63,8 +63,8 @@ const DeployPage: React.FC = () => {
       <main className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 text-white/45 text-[11px] font-mono uppercase tracking-[0.28em] mb-6">
-              The deployment engine
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/[0.05] text-cyan-300/70 kicker mb-6" style={{ letterSpacing: '0.28em' }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The deployment engine
             </div>
             <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-cinematic text-balance leading-[0.94] mb-5">
               From acquisition to <span className="text-gradient-cyan">live institution.</span>
@@ -83,8 +83,9 @@ const DeployPage: React.FC = () => {
                 return (
                   <div key={s.label} className="relative">
                     <div className={`glass rounded-2xl p-5 h-full transition-all duration-500 ${i === active ? 'glass-strong' : ''}`} style={i === active ? { boxShadow: '0 0 40px rgba(0,217,255,0.15)' } : undefined}>
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-all"
+                      <div className="relative w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-all"
                         style={{ background: on ? 'linear-gradient(135deg,#00D9FF,#7C3AED)' : 'rgba(255,255,255,0.05)' }}>
+                        {i === active && <span className="absolute inset-0 rounded-xl border border-cyan-300/60 animate-ring" />}
                         <Icon className={`w-5 h-5 ${on ? 'text-white' : 'text-white/40'}`} />
                       </div>
                       <div className="text-[9px] font-mono text-white/30 mb-1">{String(i + 1).padStart(2, '0')}</div>
@@ -104,8 +105,8 @@ const DeployPage: React.FC = () => {
           <Reveal>
             <div className="mt-24">
               <div className="text-center max-w-2xl mx-auto mb-10">
-                <div className="text-[11px] font-mono uppercase tracking-[0.28em] text-cyan-300/70 mb-4">Global orchestration</div>
-                <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-tighter text-white">Deployed across a sovereign edge mesh.</h2>
+                <div className="kicker text-cyan-300/70 mb-4" style={{ letterSpacing: '0.28em' }}>Global orchestration</div>
+                <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-cinematic text-balance text-white">Deployed across a sovereign edge mesh.</h2>
               </div>
               <div className="relative" style={{ aspectRatio: '2 / 1' }}>
                 <div className="absolute -inset-10 blur-[100px] opacity-20 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 60% at 50% 50%, #00D9FF, transparent 70%)' }} />
@@ -125,7 +126,7 @@ const DeployPage: React.FC = () => {
           {/* Supported stacks */}
           <Reveal>
             <div className="mt-24">
-              <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-tighter text-center mb-10">Generate any institution.</h2>
+              <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-cinematic text-balance text-center mb-10">Generate any institution.</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {STACKS.map((s) => {
                   const Icon = s.icon;
