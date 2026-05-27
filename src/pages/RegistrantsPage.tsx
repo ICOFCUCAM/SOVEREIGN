@@ -116,7 +116,7 @@ const RegistrantsPage: React.FC = () => {
                 <Label t="Last name *"><input autoComplete="family-name" value={form.last_name} onChange={(e) => set('last_name', e.target.value)} className={inputCls} /></Label>
                 <Label t="Email *"><input autoComplete="email" value={form.email} onChange={(e) => set('email', e.target.value)} type="email" className={inputCls} /></Label>
                 <div className="grid grid-cols-3 gap-2">
-                  <Label t="Ctry code *"><input value={form.phone_country_code} onChange={(e) => set('phone_country_code', e.target.value)} placeholder="+1" className={inputCls} /></Label>
+                  <Label t="Ctry code *"><input inputMode="tel" maxLength={5} value={form.phone_country_code} onChange={(e) => set('phone_country_code', e.target.value)} placeholder="+1" className={inputCls} /></Label>
                   <Label t="Area *"><input inputMode="numeric" value={form.phone_area_code ?? ''} onChange={(e) => set('phone_area_code', e.target.value)} placeholder="212" className={inputCls} /></Label>
                   <Label t="Number *"><input inputMode="numeric" value={form.phone_subscriber} onChange={(e) => set('phone_subscriber', e.target.value)} placeholder="7364000" className={inputCls} /></Label>
                 </div>
@@ -124,9 +124,9 @@ const RegistrantsPage: React.FC = () => {
                 <Label t="City *"><input autoComplete="address-level2" value={form.city} onChange={(e) => set('city', e.target.value)} className={inputCls} /></Label>
                 <Label t="State / region"><input autoComplete="address-level1" value={form.state ?? ''} onChange={(e) => set('state', e.target.value)} placeholder="NY" className={inputCls} /></Label>
                 <Label t="Postal code *"><input autoComplete="postal-code" value={form.zipcode} onChange={(e) => set('zipcode', e.target.value)} className={inputCls} /></Label>
-                <Label t="Country (ISO-2) *"><input autoComplete="country" value={form.country} onChange={(e) => set('country', e.target.value.toUpperCase().slice(0, 2))} placeholder="US" className={inputCls} /></Label>
+                <Label t="Country (ISO-2) *"><input autoComplete="country" maxLength={2} value={form.country} onChange={(e) => set('country', e.target.value.toUpperCase().slice(0, 2))} placeholder="US" className={inputCls} /></Label>
               </div>
-              <button disabled={busy || !valid} onClick={save} className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold disabled:opacity-50">
+              <button disabled={busy || !valid} aria-busy={busy} onClick={save} className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold disabled:opacity-50">
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Save identity
               </button>
             </div>
@@ -143,7 +143,7 @@ const RegistrantsPage: React.FC = () => {
                 {r.op_handle ? (
                   <span className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 shrink-0"><BadgeCheck className="w-3.5 h-3.5" /> {r.op_handle}</span>
                 ) : (
-                  <button onClick={() => verify(r.id)} disabled={verifying === r.id} className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border border-cyan-400/30 text-cyan-300 hover:bg-cyan-400/10 shrink-0 disabled:opacity-50">
+                  <button onClick={() => verify(r.id)} disabled={verifying === r.id} aria-busy={verifying === r.id} className="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded border border-cyan-400/30 text-cyan-300 hover:bg-cyan-400/10 shrink-0 disabled:opacity-50">
                     {verifying === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />} Verify with registry
                   </button>
                 )}

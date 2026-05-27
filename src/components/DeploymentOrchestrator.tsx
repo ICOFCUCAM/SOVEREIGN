@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import {
   Landmark, Banknote, Vote, Building2, GraduationCap, Cpu, Truck,
   Link2, Globe, Sparkles, Server, ArrowRight, ArrowLeft, Check, Search,
-  ShieldCheck, Network, Route, Loader2, Star, Save, History, Clock,
+  ShieldCheck, Network, Route, Loader2, Star, Save, History, Clock, X,
 } from 'lucide-react';
 import { searchDomains, formatPrice, type DomainResult } from '@/lib/registrar';
-import { listDeployments, createDeployment, type Deployment } from '@/lib/deployments';
+import { listDeployments, createDeployment, archiveDeployment, type Deployment } from '@/lib/deployments';
 import { listRegistrants, type RegistrantProfile } from '@/lib/registrant';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from '@/components/AuthModal';
@@ -157,6 +157,11 @@ const DeploymentOrchestrator: React.FC = () => {
     setExisting(''); setSub(''); setQuery(''); setResults([]); setPicked(null); setSearchErr(null);
   };
 
+  const archive = async (id: string) => {
+    try { await archiveDeployment(id); setMine((m) => m.filter((d) => d.id !== id)); if (savedId === id) setSavedId(null); }
+    catch (e) { toast.error((e as Error).message); }
+  };
+
   const resume = (d: Deployment) => {
     setType(TYPES.find((t) => t.label === d.deployment_type)?.id ?? null);
     setStrategy(d.domain_strategy);
@@ -210,14 +215,17 @@ const DeploymentOrchestrator: React.FC = () => {
               <div className="flex items-center gap-2 kicker text-white/40 mb-3"><History className="w-3.5 h-3.5" /> Resume a deployment</div>
               <div className="grid sm:grid-cols-2 gap-2.5">
                 {mine.slice(0, 4).map((d) => (
-                  <button key={d.id} onClick={() => resume(d)} className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.015] px-4 py-3 text-left hover:border-cyan-400/30 transition-all duration-500 ease-cinematic hover:-translate-y-0.5">
-                    <Clock className="w-4 h-4 text-cyan-300/60 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm text-white truncate">{d.name || d.deployment_type}</div>
-                      <div className="text-[11px] font-mono text-white/40 truncate">{d.domain || d.subdomain || d.domain_strategy} · {d.status}</div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-white/25 shrink-0" />
-                  </button>
+                  <div key={d.id} className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[0.015] px-4 py-3 hover:border-cyan-400/30 transition-all duration-500 ease-cinematic">
+                    <button onClick={() => resume(d)} className="flex items-center gap-3 min-w-0 flex-1 text-left">
+                      <Clock className="w-4 h-4 text-cyan-300/60 shrink-0" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm text-white truncate">{d.name || d.deployment_type}</span>
+                        <span className="block text-[11px] font-mono text-white/40 truncate">{d.domain || d.subdomain || d.domain_strategy} · {d.status}</span>
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-white/25 shrink-0" />
+                    </button>
+                    <button aria-label="Archive deployment" onClick={() => archive(d.id)} className="text-white/25 hover:text-rose-300 shrink-0"><X className="w-3.5 h-3.5" /></button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -270,7 +278,7 @@ const DeploymentOrchestrator: React.FC = () => {
             <div>
               {Kicker(3, 'Connect your domain')}
               <p className="text-white/50 text-sm mb-4 max-w-lg">Enter a domain your institution already controls. Sovereign connects DNS, provisions SSL and routes services — no new registration required.</p>
-              <input aria-label="Existing domain to connect" value={existing} onChange={(e) => setExisting(e.target.value.toLowerCase().trim())} onKeyDown={(e) => { if (e.key === 'Enter' && canAdvance()) setStep((s) => s + 1); }} placeholder="gov.country" autoFocus
+              <input aria-label="Existing domain to connect" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={existing} onChange={(e) => setExisting(e.target.value.toLowerCase().trim())} onKeyDown={(e) => { if (e.key === 'Enter' && canAdvance()) setStep((s) => s + 1); }} placeholder="gov.country" autoFocus
                 className="w-full max-w-md px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white font-mono placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
             </div>
           )}
@@ -279,7 +287,7 @@ const DeploymentOrchestrator: React.FC = () => {
               {Kicker(3, 'Provision a sovereign subdomain')}
               <p className="text-white/50 text-sm mb-4 max-w-lg">Deploy immediately on sovereign infrastructure. Connect a permanent domain whenever you're ready — nothing is lost.</p>
               <div className="flex items-center max-w-md rounded-xl bg-white/5 border border-white/10 focus-within:border-cyan-400/50 overflow-hidden">
-                <input aria-label="Sovereign subdomain label" value={sub} onChange={(e) => setSub(sanitizeSub(e.target.value))} onKeyDown={(e) => { if (e.key === 'Enter' && canAdvance()) setStep((s) => s + 1); }} placeholder="ministry" autoFocus className="flex-1 px-4 py-3.5 bg-transparent text-white font-mono placeholder:text-white/30 focus:outline-none" />
+                <input aria-label="Sovereign subdomain label" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={sub} onChange={(e) => setSub(sanitizeSub(e.target.value))} onKeyDown={(e) => { if (e.key === 'Enter' && canAdvance()) setStep((s) => s + 1); }} placeholder="ministry" autoFocus className="flex-1 px-4 py-3.5 bg-transparent text-white font-mono placeholder:text-white/30 focus:outline-none" />
                 <span className="px-4 text-white/40 font-mono text-sm border-l border-white/10 py-3.5">.sovereign.so</span>
               </div>
             </div>
@@ -289,12 +297,17 @@ const DeploymentOrchestrator: React.FC = () => {
               {Kicker(3, strategy === 'recommend' ? 'Sovereign AI recommendations' : 'Register a new domain')}
               <div className="relative max-w-md mb-5">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
-                <input aria-label="Search the sovereign namespace" value={query} onChange={(e) => runSearch(e.target.value)} autoFocus
+                <input aria-label="Search the sovereign namespace" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={query} onChange={(e) => runSearch(e.target.value)} autoFocus
                   placeholder={strategy === 'recommend' ? 'Describe the institution — e.g. national treasury' : 'Search the namespace'}
                   className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
                 {searching && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-300 animate-spin" />}
               </div>
-              {searchErr && <div className="text-rose-300/80 text-sm mb-4">{searchErr}</div>}
+              {searchErr && (
+                <div className="text-rose-300/80 text-sm mb-4 flex items-center gap-3">
+                  <span>{searchErr}</span>
+                  <button onClick={() => runSearch(query)} className="px-2.5 py-1 rounded border border-rose-300/30 text-rose-100 hover:bg-rose-400/10 transition text-[11px] font-semibold">Retry</button>
+                </div>
+              )}
               <div className="grid sm:grid-cols-3 gap-2.5">
                 {results.map((r) => {
                   const on = picked === r.domain;
@@ -378,6 +391,9 @@ const DeploymentOrchestrator: React.FC = () => {
               ) : (
                 <p className="text-sm text-white/45">No registrant identities yet. <Link to="/registrants" className="text-cyan-300 hover:underline">Create one</Link> to attach to this deployment.</p>
               )}
+              {registrantId && !registrants.find((r) => r.id === registrantId)?.op_handle && (
+                <p className="mt-3 text-[12px] text-amber-300/80">This identity isn't verified with the registry yet — <Link to="/registrants" className="underline">verify it</Link> before registration.</p>
+              )}
             </div>
           )}
 
@@ -385,7 +401,7 @@ const DeploymentOrchestrator: React.FC = () => {
             {savedId ? (
               <span className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500/10 border border-emerald-400/25 text-emerald-300 font-semibold"><Check className="w-4 h-4" /> Saved · resumable</span>
             ) : (
-              <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5 disabled:opacity-50" style={{ background: 'linear-gradient(135deg,#00C2FF,#7C4DFF)', boxShadow: '0 14px 40px -12px rgba(0,194,255,0.5)' }}>
+              <button onClick={save} disabled={saving} aria-busy={saving} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5 disabled:opacity-50" style={{ background: 'linear-gradient(135deg,#00C2FF,#7C4DFF)', boxShadow: '0 14px 40px -12px rgba(0,194,255,0.5)' }}>
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {user ? 'Save deployment' : 'Sign in to save'}
               </button>
             )}

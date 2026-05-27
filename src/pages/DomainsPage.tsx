@@ -157,6 +157,8 @@ const DomainsPage: React.FC = () => {
                 placeholder="Search the namespace — e.g. sovereign, your-brand, a full domain…"
                 className="flex-1 bg-transparent px-4 py-4 text-base sm:text-lg text-white placeholder:text-white/30 focus:outline-none font-mono"
                 spellCheck={false}
+                autoCapitalize="off"
+                autoCorrect="off"
               />
               {loading && <Loader2 className="w-5 h-5 text-cyan-300 animate-spin shrink-0" />}
             </div>
@@ -169,8 +171,9 @@ const DomainsPage: React.FC = () => {
 
           {/* Error */}
           {error && (
-            <div className="max-w-2xl mx-auto mb-12 rounded-xl border border-rose-400/20 bg-rose-500/[0.06] px-5 py-4 text-sm text-rose-200/90">
-              {error}
+            <div className="max-w-2xl mx-auto mb-12 rounded-xl border border-rose-400/20 bg-rose-500/[0.06] px-5 py-4 text-sm text-rose-200/90 flex items-center justify-between gap-4">
+              <span>{error}</span>
+              <button onClick={() => run(query)} className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-300/30 text-rose-100 hover:bg-rose-400/10 transition text-xs font-semibold">Retry</button>
             </div>
           )}
 
