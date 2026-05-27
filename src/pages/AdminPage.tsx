@@ -73,6 +73,7 @@ const AdminPage: React.FC = () => {
   const [filmTitle, setFilmTitle] = useState('');
   const [filmScript, setFilmScript] = useState('');
   const [filmSeed, setFilmSeed] = useState('');
+  const [filmBrief, setFilmBrief] = useState('');
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [users, setUsers] = useState<UserRoleRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
@@ -451,6 +452,20 @@ const AdminPage: React.FC = () => {
       setFilmTitle(''); setFilmScript(''); setFilmSeed('');
       refreshPipelineJobs();
     } catch (e) { toast.error(`Render failed: ${(e as Error).message}`); }
+    setPipelineBusy(null);
+  };
+  const produceFilm = async () => {
+    if (!filmBrief.trim()) { toast.error('Describe the film to produce'); return; }
+    setPipelineBusy('produce');
+    try {
+      const { data, error } = await supabase.functions.invoke('orchestrate-film', { body: { brief: filmBrief.trim() } });
+      if (error) throw error;
+      if (data?.error) { toast(data.error); }
+      else if (data?.video_error) { toast(`Film "${data.title}": seed + narration done; video — ${data.video_error}`); }
+      else { toast.success(`Producing "${data.title}" — narration ready, video rendering`); }
+      setFilmBrief('');
+      refreshPipelineJobs();
+    } catch (e) { toast.error(`Production failed: ${(e as Error).message}`); }
     setPipelineBusy(null);
   };
   const publishCampaignNow = async (c: Campaign) => {
@@ -1193,7 +1208,15 @@ const AdminPage: React.FC = () => {
           {/* Pipelines tab */}
           {tab === 'pipelines' && (
             <div className="space-y-5">
-              <p className="text-sm text-white/50">Media & automation pipelines. Narration is live (OpenAI TTS). Video render and social posting activate once their provider keys are configured — every run is recorded below either way.</p>
+              <p className="text-sm text-white/50">Media & automation pipelines. Narration is live (OpenAI TTS), video via Runway. Social posting activates once channel tokens are configured — every run is recorded below.</p>
+
+              <div className="rounded-xl border border-purple-400/25 bg-purple-400/[0.04] p-4 space-y-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-purple-300/80"><Film className="w-3.5 h-3.5" /> Produce film — brief → shot + narration + Runway render</div>
+                <textarea value={filmBrief} onChange={(e) => setFilmBrief(e.target.value)} placeholder="One brief — e.g. 'The moment a nation brings treasury, justice and emergency onto one sovereign layer'. Claude directs the shot, gpt-image-1 seeds it, Runway animates 10s, TTS voices it." rows={2} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 resize-none" />
+                <button type="button" disabled={pipelineBusy !== null} onClick={produceFilm} className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50">
+                  <Sparkles className="w-3.5 h-3.5" /> {pipelineBusy === 'produce' ? 'Producing…' : 'Produce film'}
+                </button>
+              </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/[0.04] p-4 space-y-2">
