@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { invokeFunction } from '@/lib/invoke';
 
 // ── Registrant profiles ───────────────────────────────────────────────
 // Reusable registrant identities for domain registration (regulated PII).
@@ -58,8 +59,6 @@ export async function deleteRegistrant(id: string): Promise<void> {
 
 // Create (or fetch cached) the Openprovider customer handle for a profile.
 export async function verifyRegistrantHandle(profileId: string): Promise<string> {
-  const { data, error } = await supabase.functions.invoke('op-customer', { body: { profile_id: profileId } });
-  if (error) throw new Error(error.message || 'Handle creation failed');
-  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
-  return (data as { handle: string }).handle;
+  const { handle } = await invokeFunction<{ handle: string }>('op-customer', { profile_id: profileId });
+  return handle;
 }
