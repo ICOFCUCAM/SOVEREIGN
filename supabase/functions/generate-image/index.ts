@@ -22,30 +22,12 @@ function b64ToBytes(b64: string): Uint8Array {
   return bytes;
 }
 
-async function logDiag(source: string, detail: string) {
-  try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    await fetch(`${supabaseUrl}/rest/v1/diagnostics`, {
-      method: 'POST',
-      headers: {
-        apikey: serviceKey ?? '',
-        Authorization: `Bearer ${serviceKey}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal',
-      },
-      body: JSON.stringify({ source, detail: detail.slice(0, 2000) }),
-    });
-  } catch (_) { /* best-effort */ }
-}
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
     const apiKey = Deno.env.get('OPENAI_API_KEY');
     if (!apiKey) {
-      await logDiag('generate-image', 'OPENAI_API_KEY not configured');
       return new Response(JSON.stringify({ error: 'OPENAI_API_KEY is not configured on the server.' }), { status: 503, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
 
@@ -58,7 +40,6 @@ Deno.serve(async (req) => {
     const fullPrompt = `${prompt.slice(0, 1800)}. Art direction: ${style}.`;
     const size = orientation === 'portrait' ? '1024x1536' : orientation === 'square' ? '1024x1024' : '1536x1024';
 
-    const t0 = Date.now();
     const ac = new AbortController();
     const killer = setTimeout(() => ac.abort(), 50000);
     let resp: Response;
@@ -69,19 +50,16 @@ Deno.serve(async (req) => {
         body: JSON.stringify({ model: 'gpt-image-1', prompt: fullPrompt, size, n: 1, quality: 'medium' }),
         signal: ac.signal,
       });
-    } catch (e) {
+    } catch {
       clearTimeout(killer);
-      await logDiag('generate-image:openai-timeout', `aborted after ${Date.now() - t0}ms: ${(e as Error).message}`);
       return new Response(JSON.stringify({ error: 'OpenAI image request did not respond in time.' }), { status: 504, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
     clearTimeout(killer);
 
     if (!resp.ok) {
       const errText = await resp.text();
-      await logDiag('generate-image:openai', `status=${resp.status} ms=${Date.now() - t0} body=${errText}`);
       return new Response(JSON.stringify({ error: `OpenAI image error (${resp.status})`, detail: errText.slice(0, 600) }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
-    await logDiag('generate-image:openai-ok', `status=200 ms=${Date.now() - t0}`);
 
     const data = await resp.json();
     const item = data?.data?.[0] ?? {};
@@ -91,14 +69,13 @@ Deno.serve(async (req) => {
     } else if (item.url) {
       const imgResp = await fetch(item.url);
       if (!imgResp.ok) {
-        await logDiag('generate-image:fetch-url', `status=${imgResp.status}`);
         return new Response(JSON.stringify({ error: 'Failed to download generated image.' }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
       }
       bytes = new Uint8Array(await imgResp.arrayBuffer());
     } else {
-      await logDiag('generate-image', 'No b64_json or url in OpenAI response');
       return new Response(JSON.stringify({ error: 'No image returned from provider.' }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const path = `generated/${(mediaClass || 'media')}-${Date.now()}.png`;
@@ -107,16 +84,13 @@ Deno.serve(async (req) => {
     const { error: upErr } = await admin.storage.from(BUCKET).upload(path, bytes, {
       contentType: 'image/png', upsert: true, cacheControl: '3600',
     });
-
     if (upErr) {
-      await logDiag('generate-image:storage', `keyPrefix=${serviceKey.slice(0, 8)} keyLen=${serviceKey.length} msg=${upErr.message}`);
       return new Response(JSON.stringify({ error: 'Image generated but storage upload failed', detail: upErr.message }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
 
     const { data: pub } = admin.storage.from(BUCKET).getPublicUrl(path);
     return new Response(JSON.stringify({ url: pub.publicUrl, model_used: 'gpt-image-1' }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   } catch (error) {
-    await logDiag('generate-image:exception', (error as Error).message);
     return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   }
 });
