@@ -178,10 +178,13 @@ const SystemProductCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
 };
 
 const SectionHead: React.FC<{ kicker: string; title: string; to?: string; cta?: string }> = ({ kicker, title, to, cta }) => (
-  <div className="flex items-end justify-between gap-6 mb-8">
+  <div className="flex items-end justify-between gap-6 mb-9">
     <div>
-      <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-3">{kicker}</div>
-      <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tighter text-white leading-[0.98]">{title}</h2>
+      <div className="flex items-center gap-2.5 mb-3.5">
+        <span className="w-6 h-px bg-cyan-300/50" />
+        <span className="kicker text-cyan-300/70" style={{ letterSpacing: '0.3em' }}>{kicker}</span>
+      </div>
+      <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-cinematic text-white leading-[0.98] text-balance">{title}</h2>
     </div>
     {to && cta && (
       <Link to={to} className="group hidden sm:inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-white/45 hover:text-white transition shrink-0">
@@ -257,10 +260,10 @@ const MarketplacePage: React.FC = () => {
 
           <div className="relative z-10 max-w-7xl mx-auto h-full flex flex-col justify-center pt-14">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.28em] mb-6">
+              <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 kicker mb-6" style={{ letterSpacing: '0.28em' }}>
                 <Star className="w-3 h-3" /> Sovereign marketplace
               </div>
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.94] mb-5">
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-cinematic leading-[0.92] text-balance mb-5">
                 <span className="text-white">Acquire civilization-</span><br />
                 <span className="text-white">scale </span><span className="text-gradient-cyan">systems.</span>
               </h1>
@@ -312,8 +315,8 @@ const MarketplacePage: React.FC = () => {
               <HudCorners color={ACCENT} className="opacity-40 z-10" />
               <div className="grid lg:grid-cols-[1.15fr_1fr]">
                 <div className="relative p-8 sm:p-12 lg:p-14">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-6">Flagship acquisition</div>
-                  <h2 className="font-display text-5xl sm:text-6xl font-bold tracking-tighter text-white leading-[0.9] mb-4">CIVICOS Core</h2>
+                  <div className="kicker text-cyan-300/70 mb-6" style={{ letterSpacing: '0.3em' }}>Flagship acquisition</div>
+                  <h2 className="font-display text-5xl sm:text-6xl font-bold tracking-cinematic text-white leading-[0.9] mb-4" style={{ textShadow: '0 0 80px rgba(0,217,255,0.18)' }}>CIVICOS Core</h2>
                   <p className="text-xl text-white/70 font-light mb-6">The operating system for nations.</p>
                   <div className="flex flex-wrap gap-2 mb-7">
                     {['Sovereign', 'Institutional', 'Civilization-scale'].map((t) => (
