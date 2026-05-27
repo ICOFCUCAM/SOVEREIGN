@@ -20,7 +20,7 @@ const DomainCard: React.FC<Props> = ({ domain, rank, opportunity, confidence, mo
 
   return (
     <Link to={`/d/${encodeURIComponent(domain.domain_name)}`}
-      className="group relative block overflow-hidden rounded-2xl glass hover:glass-strong transition-all duration-500 hover:-translate-y-1 hover:glow-cyan">
+      className="group relative block overflow-hidden rounded-2xl glass hover:glass-strong ease-cinematic transition-all duration-500 hover:-translate-y-1.5 hover:border-cyan-400/25 hover:shadow-[0_44px_96px_-46px_rgba(0,0,0,0.92)]">
       {/* Top glow gradient */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
@@ -57,7 +57,7 @@ const DomainCard: React.FC<Props> = ({ domain, rank, opportunity, confidence, mo
 
         {/* Domain name */}
         <div className="mb-3">
-          <div className="text-2xl font-bold tracking-tight text-white group-hover:text-gradient-cyan transition-all">
+          <div className="font-display text-2xl font-bold tracking-cinematic text-white group-hover:text-gradient-cyan transition-all">
             {domain.domain_name}
           </div>
           <p className="text-sm text-white/50 mt-1 line-clamp-2 min-h-[2.5rem]">
