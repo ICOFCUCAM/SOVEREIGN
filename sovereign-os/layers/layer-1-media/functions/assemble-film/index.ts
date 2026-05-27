@@ -1,4 +1,5 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { transition } from '../_shared/queue.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -44,7 +45,7 @@ Deno.serve(async (req) => {
       }), { status: 503, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
 
-    if (film_job_id) await admin.from('pipeline_jobs').update({ status: 'processing', updated_at: new Date().toISOString() }).eq('id', film_job_id);
+    if (film_job_id) await transition(admin, film_job_id, { status: 'processing' });
 
     const resp = await fetch(workerUrl, {
       method: 'POST',

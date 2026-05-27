@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
       } else {
         err = !runwayKey ? 'RUNWAY_API_KEY not configured' : 'no seed frame';
       }
-      await admin.from('pipeline_jobs').insert({
+      await insertJob(admin, {
         kind: 'video', status: taskId ? 'processing' : 'failed', provider: 'runway', title: `${title} — scene ${i + 1}`,
         media_class: mediaClass, result: { id: taskId, seedUrl, film_id: filmId, scene: i }, error: err ?? null,
       });

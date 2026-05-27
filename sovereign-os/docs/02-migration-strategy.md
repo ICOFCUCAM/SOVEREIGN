@@ -21,8 +21,10 @@ around it.
 - [x] Add the four media classes (cinematic / operational / strategic / crisis) as a typed
       `media_class` on jobs and as director presets in `orchestrate-film`
       (`db/migrations/0002_media_class.sql`, `packages/core/src/media.ts`).
-- [ ] Repoint the remaining media functions (`render-video`, `poll-video-jobs`, `generate-narration`,
-      `assemble-film`) onto the shared seam and thread `media_class` through.
+- [x] Repoint the remaining media functions (`render-video`, `poll-video-jobs`, `generate-narration`,
+      `assemble-film`) onto the shared seam; thread `media_class` through `render-video`.
+      All pipeline_jobs writes now flow through `_shared/queue` (`insertJob`/`transition`);
+      only bespoke gather-selects remain as direct queries.
 - [ ] Build the executive command dashboard (Next.js app) reusing the source `ui/` + cinematic components.
 
 ## Phase 3 — Layer 2 (Sovereign Distribution Grid)

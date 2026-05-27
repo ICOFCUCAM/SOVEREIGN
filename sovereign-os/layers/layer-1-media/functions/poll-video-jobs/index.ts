@@ -1,4 +1,5 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { transition } from '../_shared/queue.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -45,12 +46,12 @@ Deno.serve(async (req) => {
           const path = `video/${job.id}.mp4`;
           await admin.storage.from(BUCKET).upload(path, bytes, { contentType: 'video/mp4', upsert: true, cacheControl: '3600' });
           const pub = admin.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
-          await admin.from('pipeline_jobs').update({ status: 'done', result_url: pub, updated_at: new Date().toISOString() }).eq('id', job.id);
+          await transition(admin, job.id, { status: 'done', result_url: pub });
           finalized++;
           if (typeof r.film_id === 'string') touchedFilms.add(r.film_id);
         }
       } else if (status === 'FAILED' || status === 'CANCELLED') {
-        await admin.from('pipeline_jobs').update({ status: 'failed', error: JSON.stringify(body).slice(0, 500), updated_at: new Date().toISOString() }).eq('id', job.id);
+        await transition(admin, job.id, { status: 'failed', error: JSON.stringify(body).slice(0, 500) });
         if (typeof r.film_id === 'string') touchedFilms.add(r.film_id);
       }
     }

@@ -1,4 +1,5 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { insertJob, transition } from '../_shared/queue.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,10 +26,9 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'A non-empty "script" string is required.' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
 
-    const { data: job } = await admin.from('pipeline_jobs').insert({
-      kind: 'narration', status: 'processing', provider: 'openai-tts', title: title ?? null, input: { voice, chars: script.length },
-    }).select('id').single();
-    const jobId = job?.id as string | undefined;
+    const jobId = await insertJob(admin, {
+      kind: 'narration', status: 'processing', provider: 'openai-tts', title: title ?? undefined, input: { voice, chars: script.length },
+    });
 
     const resp = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
 
     if (!resp.ok) {
       const errText = await resp.text();
-      if (jobId) await admin.from('pipeline_jobs').update({ status: 'failed', error: errText.slice(0, 500), updated_at: new Date().toISOString() }).eq('id', jobId);
+      if (jobId) await transition(admin, jobId, { status: 'failed', error: errText.slice(0, 500) });
       return new Response(JSON.stringify({ error: `OpenAI TTS error (${resp.status})`, detail: errText.slice(0, 500) }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
 
@@ -46,12 +46,12 @@ Deno.serve(async (req) => {
     const path = `narration/${Date.now()}.mp3`;
     const { error: upErr } = await admin.storage.from(BUCKET).upload(path, bytes, { contentType: 'audio/mpeg', upsert: true, cacheControl: '3600' });
     if (upErr) {
-      if (jobId) await admin.from('pipeline_jobs').update({ status: 'failed', error: upErr.message, updated_at: new Date().toISOString() }).eq('id', jobId);
+      if (jobId) await transition(admin, jobId, { status: 'failed', error: upErr.message });
       return new Response(JSON.stringify({ error: 'Audio generated but storage upload failed', detail: upErr.message }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
 
     const { data: pub } = admin.storage.from(BUCKET).getPublicUrl(path);
-    if (jobId) await admin.from('pipeline_jobs').update({ status: 'done', result_url: pub.publicUrl, updated_at: new Date().toISOString() }).eq('id', jobId);
+    if (jobId) await transition(admin, jobId, { status: 'done', result_url: pub.publicUrl });
 
     return new Response(JSON.stringify({ url: pub.publicUrl, job_id: jobId, model_used: 'tts-1' }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   } catch (error) {

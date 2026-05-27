@@ -17,6 +17,7 @@ export interface NewJob {
   input?: Record<string, unknown>;
   result?: Record<string, unknown>;
   result_url?: string;
+  error?: string | null;
 }
 
 export async function insertJob(db: SupabaseClient, job: NewJob): Promise<string | undefined> {

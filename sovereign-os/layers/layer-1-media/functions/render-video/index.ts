@@ -1,4 +1,6 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { insertJob, transition } from '../_shared/queue.ts';
+import { isMediaClass } from '../_shared/media.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,12 +36,12 @@ Deno.serve(async (req) => {
     const runwayKey = Deno.env.get('RUNWAY_API_KEY') || Deno.env.get('RUNWAYML_API_SECRET') || Deno.env.get('VIDEO_PROVIDER_KEY');
     const openaiKey = Deno.env.get('OPENAI_API_KEY');
 
-    const { data: job } = await admin.from('pipeline_jobs').insert({
+    const mc = isMediaClass(mediaClass) ? mediaClass : undefined;
+    const jobId = await insertJob(admin, {
       kind: 'video', status: runwayKey ? 'processing' : 'failed', provider: 'runway',
-      title: title ?? null, input: { script: script.slice(0, 2000), mediaClass: mediaClass ?? null, duration },
+      title: title ?? undefined, media_class: mc, input: { script: script.slice(0, 2000), media_class: mc ?? null, duration },
       error: runwayKey ? null : 'RUNWAY_API_KEY is not configured on the server.',
-    }).select('id').single();
-    const jobId = job?.id as string | undefined;
+    });
 
     if (!runwayKey) {
       return new Response(JSON.stringify({ error: 'Video provider not configured.', detail: 'Set RUNWAY_API_KEY to activate rendering.', job_id: jobId }), { status: 503, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
@@ -49,7 +51,7 @@ Deno.serve(async (req) => {
     let seedUrl: string | undefined = typeof promptImage === 'string' ? promptImage : undefined;
     if (!seedUrl) {
       if (!openaiKey) {
-        if (jobId) await admin.from('pipeline_jobs').update({ status: 'failed', error: 'No seed image and OPENAI_API_KEY missing for auto-seed.', updated_at: new Date().toISOString() }).eq('id', jobId);
+        if (jobId) await transition(admin, jobId, { status: 'failed', error: 'No seed image and OPENAI_API_KEY missing for auto-seed.' });
         return new Response(JSON.stringify({ error: 'No promptImage and no OPENAI_API_KEY to auto-generate a seed frame.' }), { status: 503, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
       }
       const seedPrompt = `Cinematic opening frame for a sovereign-infrastructure film. ${script.slice(0, 800)}. Anamorphic widescreen, volumetric light, deep teal-and-cyan palette, dramatic, no text, no logos.`;
@@ -60,7 +62,7 @@ Deno.serve(async (req) => {
       });
       if (!imgResp.ok) {
         const e = await imgResp.text();
-        if (jobId) await admin.from('pipeline_jobs').update({ status: 'failed', error: `seed image failed: ${e.slice(0, 300)}`, updated_at: new Date().toISOString() }).eq('id', jobId);
+        if (jobId) await transition(admin, jobId, { status: 'failed', error: `seed image failed: ${e.slice(0, 300)}` });
         return new Response(JSON.stringify({ error: 'Seed-frame generation failed', detail: e.slice(0, 400) }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
       }
       const imgData = await imgResp.json();
@@ -79,11 +81,11 @@ Deno.serve(async (req) => {
     });
     const submitBody = await submit.json().catch(() => ({}));
     if (!submit.ok || !submitBody?.id) {
-      if (jobId) await admin.from('pipeline_jobs').update({ status: 'failed', error: JSON.stringify(submitBody).slice(0, 500), result: { seedUrl }, updated_at: new Date().toISOString() }).eq('id', jobId);
+      if (jobId) await transition(admin, jobId, { status: 'failed', error: JSON.stringify(submitBody).slice(0, 500), result: { seedUrl } });
       return new Response(JSON.stringify({ error: `Runway error (${submit.status})`, detail: submitBody }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
 
-    if (jobId) await admin.from('pipeline_jobs').update({ status: 'processing', result: { id: submitBody.id, seedUrl }, updated_at: new Date().toISOString() }).eq('id', jobId);
+    if (jobId) await transition(admin, jobId, { status: 'processing', result: { id: submitBody.id, seedUrl } });
     return new Response(JSON.stringify({ job_id: jobId, runway_task: submitBody.id, seed_url: seedUrl }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   } catch (error) {
     return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
