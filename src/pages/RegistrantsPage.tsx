@@ -98,7 +98,7 @@ const RegistrantsPage: React.FC = () => {
 
           {open && (
             <div className="relative rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.04] p-6 mb-8">
-              <button onClick={() => setOpen(false)} className="absolute top-4 right-4 text-white/40 hover:text-white"><X className="w-4 h-4" /></button>
+              <button aria-label="Close form" onClick={() => setOpen(false)} className="absolute top-4 right-4 text-white/40 hover:text-white"><X className="w-4 h-4" /></button>
               <div className="kicker text-cyan-300/80 mb-5">New registrant identity</div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <Label t="Label (optional)"><input value={form.label ?? ''} onChange={(e) => set('label', e.target.value)} placeholder="HQ contact" className={inputCls} /></Label>
@@ -138,7 +138,7 @@ const RegistrantsPage: React.FC = () => {
                     {verifying === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />} Verify with registry
                   </button>
                 )}
-                <button onClick={() => remove(r.id)} className="text-white/30 hover:text-rose-300 shrink-0"><Trash2 className="w-4 h-4" /></button>
+                <button aria-label={`Delete identity ${r.company_name || r.first_name + ' ' + r.last_name}`} onClick={() => remove(r.id)} className="text-white/30 hover:text-rose-300 shrink-0"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
             {rows.length === 0 && <div className="px-5 py-14 text-center text-white/40">No registrant identities yet.</div>}
