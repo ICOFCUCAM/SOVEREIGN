@@ -520,11 +520,11 @@ const MarketplacePage: React.FC = () => {
         <section className="relative overflow-hidden px-4 sm:px-6 lg:px-8 py-28 sm:py-36">
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 70% at 50% 120%, rgba(0,194,255,0.16), transparent 60%)' }} />
           <div className="relative max-w-3xl mx-auto text-center">
-            <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-6">Strategic acquisition</div>
-            <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98] mb-6">Procure a sovereign system.</h2>
+            <div className="kicker text-cyan-300/70 mb-6" style={{ letterSpacing: '0.3em' }}>Strategic acquisition</div>
+            <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-cinematic text-balance text-white leading-[0.96] mb-6">Procure a sovereign system.</h2>
             <p className="text-white/55 text-lg leading-relaxed mb-9">Acquisition is brokered by sovereign-systems specialists — from single-ministry runtimes to civilization-scale deployment.</p>
-            <button onClick={() => setBrief(true)} className="group inline-flex items-center justify-center gap-2 px-9 py-4 rounded-xl text-white font-semibold text-lg transition-all hover:-translate-y-px"
-              style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 48px rgba(0,194,255,0.32)' }}>
+            <button onClick={() => setBrief(true)} className="group inline-flex items-center justify-center gap-2 px-9 py-4 rounded-xl text-white font-semibold text-lg ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 18px 56px -16px rgba(0,194,255,0.55)' }}>
               Request a sovereign briefing <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
