@@ -123,9 +123,9 @@ const StudioPage: React.FC = () => {
       <main className="pt-28 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/[0.05] mb-5">
               <Wand2 className="w-3.5 h-3.5 text-cyan-300" />
-              <span className="text-xs font-mono uppercase tracking-widest text-cyan-300">AI venture foundry</span>
+              <span className="kicker text-cyan-300/80">AI venture foundry</span>
             </div>
             <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-cinematic text-balance text-white mb-4">
               Every domain is <span className="text-gradient-cyan">an institution waiting to deploy.</span>

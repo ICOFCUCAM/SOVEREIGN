@@ -43,8 +43,9 @@ const ValuationPage: React.FC = () => {
       <main className="pt-28 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
-            <div className="inline-block px-3 py-1 rounded-full glass mb-4">
-              <span className="text-xs font-mono uppercase tracking-widest text-cyan-300">Sovereign valuation kernel</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/[0.05] mb-5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" />
+              <span className="kicker text-cyan-300/80">Sovereign valuation kernel</span>
             </div>
             <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-cinematic text-balance text-white mb-4">
               Institutional intelligence on <span className="text-gradient-cyan">any domain.</span>
