@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { lazy, Suspense, useEffect } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { resolveTenant } from "@/lib/tenant";
+import { resolveTenant, isRegistrarHost } from "@/lib/tenant";
 import DomainLanding from "@/components/DomainLanding";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
@@ -22,6 +22,7 @@ const SystemPage = lazy(() => import("./pages/SystemPage"));
 const DeployPage = lazy(() => import("./pages/DeployPage"));
 const ChannelPage = lazy(() => import("./pages/ChannelPage"));
 const DnsPage = lazy(() => import("./pages/DnsPage"));
+const DomainsPage = lazy(() => import("./pages/DomainsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const PlatformRoutes = () => (
     <Route path="/deploy" element={<DeployPage />} />
     <Route path="/channel" element={<ChannelPage />} />
     <Route path="/dns" element={<DnsPage />} />
+    <Route path="/domains" element={<DomainsPage />} />
     <Route path="/admin" element={<AdminPage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
     <Route path="*" element={<NotFound />} />
@@ -75,6 +77,19 @@ const TenantRoutes = () => (
   </Routes>
 );
 
+// domains.sovereign.so — the dedicated registrar infrastructure layer, rooted
+// at the domain platform but sharing the operate/deploy surfaces.
+const RegistrarRoutes = () => (
+  <Routes>
+    <Route path="/" element={<DomainsPage />} />
+    <Route path="/dns" element={<DnsPage />} />
+    <Route path="/d/:domain" element={<DomainPage />} />
+    <Route path="*" element={<DomainsPage />} />
+  </Routes>
+);
+
+const isRegistrar = isRegistrarHost(tenant.hostname);
+
 const App = () => (
   <ThemeProvider defaultTheme="dark">
     <QueryClientProvider client={queryClient}>
@@ -86,7 +101,7 @@ const App = () => (
             <ScrollToTop />
             <ErrorBoundary>
               <Suspense fallback={<PageFallback />}>
-                {tenant.mode === "tenant" ? <TenantRoutes /> : <PlatformRoutes />}
+                {isRegistrar ? <RegistrarRoutes /> : tenant.mode === "tenant" ? <TenantRoutes /> : <PlatformRoutes />}
               </Suspense>
             </ErrorBoundary>
           </BrowserRouter>
