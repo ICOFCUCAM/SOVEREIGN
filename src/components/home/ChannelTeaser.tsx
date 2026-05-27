@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Play, Film, Activity, Landmark, ShieldAlert } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const CLASSES = [
   { id: 'cinematic', cls: 'Class I', label: 'Cinematic', icon: Film, accent: '#00C2FF' },
@@ -9,7 +10,27 @@ const CLASSES = [
   { id: 'crisis', cls: 'Class IV', label: 'Crisis response', icon: ShieldAlert, accent: '#FF5470' },
 ];
 
-const ChannelTeaser: React.FC = () => (
+const ChannelTeaser: React.FC = () => {
+  const [covers, setCovers] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('narratives')
+        .select('media_class, cover_image_url')
+        .eq('published', true)
+        .not('cover_image_url', 'is', null)
+        .order('sort_order', { ascending: true });
+      if (!data) return;
+      const map: Record<string, string> = {};
+      for (const r of data as Array<{ media_class: string | null; cover_image_url: string | null }>) {
+        if (r.media_class && r.cover_image_url && !map[r.media_class]) map[r.media_class] = r.cover_image_url;
+      }
+      setCovers(map);
+    })();
+  }, []);
+
+  return (
   <section className="relative px-4 sm:px-6 lg:px-8 py-28 sm:py-36 overflow-hidden">
     <div className="absolute inset-0 pointer-events-none" aria-hidden>
       <div className="absolute top-1/2 left-[-8%] -translate-y-1/2 w-[42vw] max-w-[640px] h-[42vw] rounded-full blur-[130px] opacity-[0.07]" style={{ background: '#00C2FF' }} />
@@ -36,6 +57,12 @@ const ChannelTeaser: React.FC = () => (
           const Icon = c.icon;
           return (
             <Link key={c.id} to={`/channel#${c.id}`} className="group relative rounded-2xl border border-white/10 bg-white/[0.014] p-6 overflow-hidden hover:border-white/25 hover:-translate-y-1 transition-all">
+              {covers[c.id] && (
+                <span className="absolute inset-0 opacity-25 group-hover:opacity-40 transition-opacity" aria-hidden>
+                  <img src={covers[c.id]} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                  <span className="absolute inset-0" style={{ background: `linear-gradient(160deg, #0A0E27cc, #0A0E27ee)` }} />
+                </span>
+              )}
               <span className="absolute -top-14 -right-12 w-40 h-40 rounded-full blur-[80px] opacity-[0.12] group-hover:opacity-30 transition-opacity" style={{ background: c.accent }} />
               <span className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${c.accent}, transparent)` }} />
               <div className="relative">
@@ -52,6 +79,7 @@ const ChannelTeaser: React.FC = () => (
       </div>
     </div>
   </section>
-);
+  );
+};
 
 export default ChannelTeaser;

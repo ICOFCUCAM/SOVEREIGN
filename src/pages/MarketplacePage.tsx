@@ -123,6 +123,12 @@ const InfraCard: React.FC<{ d: Domain }> = ({ d }) => {
   return (
     <Link to={`/d/${encodeURIComponent(d.domain_name)}`}
       className="group relative block overflow-hidden rounded-xl border border-white/10 bg-white/[0.012] hover:border-white/25 hover:bg-white/[0.03] transition-all p-5">
+      {d.hero_image_url && (
+        <div className="relative -mt-5 -mx-5 mb-3 h-24 overflow-hidden">
+          <img src={d.hero_image_url} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-75 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0E27] via-[#0A0E27]/20 to-transparent" />
+        </div>
+      )}
       <div className="flex items-start justify-between mb-2">
         <span className="font-display text-lg font-bold text-white tracking-tight">{d.domain_name}</span>
         <ArrowRight className="w-3.5 h-3.5 text-white/25 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
