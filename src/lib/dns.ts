@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { invokeFunction } from '@/lib/invoke';
 
 // ── DNS service client ────────────────────────────────────────────────
 // Reads are owner-scoped table selects (enforced by RLS). Mutations route
@@ -11,12 +12,7 @@ export interface DnsRecordRow { id: string; zone_id: string; type: string; name:
 export interface DnsJob { id: string; action: string; status: string; attempts: number; error: string | null; created_at: string; updated_at: string }
 export interface RecordInput { type: string; name?: string; value: string; ttl?: number; prio?: number }
 
-async function call<T>(body: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.functions.invoke('dns-service', { body });
-  if (error) throw error;
-  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
-  return data as T;
-}
+const call = <T>(body: Record<string, unknown>): Promise<T> => invokeFunction<T>('dns-service', body);
 
 // ── Reads (RLS owner-scoped) ──
 export async function listNameservers(): Promise<Nameserver[]> {
