@@ -368,7 +368,7 @@ const MarketplacePage: React.FC = () => {
         {!loading && (
           <section className="px-4 sm:px-6 lg:px-8 pb-12">
             <div className="max-w-7xl mx-auto">
-              <div className="group relative rounded-xl border border-white/10 bg-white/[0.02] focus-within:border-cyan-400/40 transition-colors overflow-hidden">
+              <div className="group relative rounded-xl border border-white/10 bg-white/[0.02] focus-within:border-cyan-400/40 focus-within:bg-white/[0.035] focus-within:shadow-[0_0_44px_-10px_rgba(0,217,255,0.35)] transition-all duration-500 overflow-hidden">
                 <span className="absolute inset-x-0 top-0 h-px opacity-60" style={{ background: `linear-gradient(90deg, transparent, ${ACCENT}66, transparent)` }} />
                 <div className="flex items-center gap-3 px-4 h-14">
                   <Search className="w-4 h-4 text-cyan-300/60 shrink-0" />
