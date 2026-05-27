@@ -482,12 +482,12 @@ const MarketplacePage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
               {GOV_TIERS.map((t) => (
                 <Link key={t.tier} to={`/systems/civicos?tier=${t.tier.toLowerCase()}`}
-                  className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.014] hover:border-white/25 transition-all duration-500 hover:-translate-y-1 p-6">
+                  className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.014] ease-cinematic transition-all duration-500 hover:border-white/25 hover:-translate-y-1.5 hover:shadow-[0_44px_96px_-46px_rgba(0,0,0,0.92)] p-6">
                   <span className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${t.c}, transparent)` }} />
                   <span className="absolute -top-16 -right-14 w-40 h-40 rounded-full blur-[80px] opacity-15 group-hover:opacity-30 transition-opacity" style={{ background: t.c }} />
                   <HudCorners color={t.c} className="opacity-20 group-hover:opacity-50 transition-opacity" />
                   <div className="relative">
-                    <span className="inline-block text-[9px] font-mono uppercase tracking-[0.2em] px-2 py-1 rounded mb-4" style={{ background: `${t.c}1f`, color: t.c }}>{t.label}</span>
+                    <span className="inline-block kicker px-2 py-1 rounded mb-4" style={{ background: `${t.c}1f`, color: t.c, fontSize: '9px' }}>{t.label}</span>
                     <div className="font-display text-base font-bold text-white tracking-tight uppercase">CIVICOS {t.tier}</div>
                     <p className="text-[12px] text-white/45 leading-snug mt-1.5 mb-5 min-h-[2.4rem]">{t.desc}</p>
                     <div className="text-3xl font-bold text-white tabular-nums leading-none">{t.price}</div>
