@@ -386,6 +386,9 @@ const DeploymentOrchestrator: React.FC = () => {
               ) : (
                 <p className="text-sm text-white/45">No registrant identities yet. <Link to="/registrants" className="text-cyan-300 hover:underline">Create one</Link> to attach to this deployment.</p>
               )}
+              {registrantId && !registrants.find((r) => r.id === registrantId)?.op_handle && (
+                <p className="mt-3 text-[12px] text-amber-300/80">This identity isn't verified with the registry yet — <Link to="/registrants" className="underline">verify it</Link> before registration.</p>
+              )}
             </div>
           )}
 
