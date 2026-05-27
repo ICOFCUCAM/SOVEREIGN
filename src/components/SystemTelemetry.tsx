@@ -52,15 +52,17 @@ export const Frame: React.FC<{ accent: string; tag: string; readout?: string; ch
     <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 85% 75% at 28% 8%, ${accent}26, transparent 62%), linear-gradient(160deg, #0A1024, #05070F)` }} />
     <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: `linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
     <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 py-2.5 border-b border-white/5 z-10">
-      <span className="text-[9px] font-mono uppercase tracking-[0.22em] text-white/45">{tag}</span>
-      <span className="inline-flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-emerald-300/80">
+      <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-white/55">
+        <span className="w-1 h-1 rounded-full" style={{ background: accent, boxShadow: `0 0 6px ${accent}` }} />{tag}
+      </span>
+      <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-emerald-300/80">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Nominal
       </span>
     </div>
-    <div className="absolute inset-x-0 top-9 bottom-7">{children}</div>
+    <div className="absolute inset-x-0 top-9 bottom-8">{children}</div>
     {readout && (
-      <div className="absolute bottom-0 inset-x-0 px-4 py-1.5 border-t border-white/5 bg-black/20">
-        <span className="text-[8px] font-mono uppercase tracking-[0.14em] text-white/40 truncate block">{readout}</span>
+      <div className="absolute bottom-0 inset-x-0 px-4 py-2 border-t border-white/5 bg-black/25">
+        <span className="text-[9px] font-mono uppercase tracking-[0.14em] text-white/50 truncate block">{readout}</span>
       </div>
     )}
   </div>
