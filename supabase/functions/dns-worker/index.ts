@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ auth: 'ok', reseller_id: auth.reseller_id, zone_count: zoneCount }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     } catch (e) {
       const err = e as OpenproviderError;
-      return new Response(JSON.stringify({ auth: 'failed', error: err.message, status: err.status, detail: err.body }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+      return new Response(JSON.stringify({ auth: 'failed', error: err.message, status: err.status, detail: err.body, config: op.debugInfo() }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
   }
 
