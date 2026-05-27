@@ -16,6 +16,10 @@ import {
 } from '@/lib/dns';
 
 const RECORD_TYPES = ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SRV', 'CAA'];
+const VALUE_HINT: Record<string, string> = {
+  A: '1.2.3.4', AAAA: '2606:4700::1111', CNAME: 'target.example.com', MX: 'mail.example.com',
+  TXT: 'v=spf1 include:_spf.example.com ~all', NS: 'ns1.example.com', SRV: '10 5 443 target.example.com', CAA: '0 issue "letsencrypt.org"',
+};
 const TTLS = [900, 3600, 10800, 21600, 43200, 86400];
 
 const statusChip = (s: string) => {
@@ -193,9 +197,9 @@ const DnsPage: React.FC = () => {
                     <Field label="TTL"><select value={rec.ttl} onChange={(e) => setRec({ ...rec, ttl: Number(e.target.value) })} className={inputCls}>{TTLS.map((t) => <option key={t} value={t}>{t}</option>)}</select></Field>
                   </div>
                   <Field label="Name"><input value={rec.name} onChange={(e) => setRec({ ...rec, name: e.target.value })} placeholder="www  ·  @ for apex" className={inputCls} /></Field>
-                  <Field label="Value"><input value={rec.value} onChange={(e) => setRec({ ...rec, value: e.target.value })} placeholder="1.2.3.4" className={inputCls} /></Field>
+                  <Field label="Value"><input value={rec.value} onChange={(e) => setRec({ ...rec, value: e.target.value })} placeholder={VALUE_HINT[rec.type] || 'value'} className={inputCls} /></Field>
                   {rec.type === 'MX' && <Field label="Priority"><input value={rec.prio} onChange={(e) => setRec({ ...rec, prio: e.target.value })} placeholder="10" className={inputCls} /></Field>}
-                  <button disabled={busy || !rec.value} onClick={() => guard(() => modifyRecords({ zone_id: selectedZone.id, add: [{ type: rec.type, name: rec.name === '@' ? '' : rec.name, value: rec.value, ttl: rec.ttl, prio: rec.prio ? Number(rec.prio) : undefined }] }).then(() => setRec({ type: 'A', name: '', value: '', ttl: 3600, prio: '' })), 'Record addition queued')}
+                  <button disabled={busy || !rec.value || (rec.type === 'MX' && !rec.prio)} onClick={() => guard(() => modifyRecords({ zone_id: selectedZone.id, add: [{ type: rec.type, name: rec.name === '@' ? '' : rec.name, value: rec.value, ttl: rec.ttl, prio: rec.prio ? Number(rec.prio) : undefined }] }).then(() => setRec({ type: 'A', name: '', value: '', ttl: 3600, prio: '' })), 'Record addition queued')}
                     className="w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold disabled:opacity-50">Add record</button>
                 </div>
               </div>

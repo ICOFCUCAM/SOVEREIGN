@@ -151,6 +151,12 @@ const DeploymentOrchestrator: React.FC = () => {
     setSaving(false);
   };
 
+  // Switching strategy clears the previous strategy's inputs/selection.
+  const chooseStrategy = (s: Strategy) => {
+    setStrategy(s);
+    setExisting(''); setSub(''); setQuery(''); setResults([]); setPicked(null); setSearchErr(null);
+  };
+
   const resume = (d: Deployment) => {
     setType(TYPES.find((t) => t.label === d.deployment_type)?.id ?? null);
     setStrategy(d.domain_strategy);
@@ -165,7 +171,11 @@ const DeploymentOrchestrator: React.FC = () => {
   const domainDecision = (): { label: string; detail: string } => {
     if (strategy === 'existing') return { label: existing || 'existing domain', detail: 'Connected — no registration required' };
     if (strategy === 'skip') return { label: `${sub || 'tenant'}.sovereign.so`, detail: 'Sovereign subdomain · connect a permanent domain later' };
-    if (picked) return { label: picked, detail: 'Selected for sovereign registration (reservation only)' };
+    if (picked) {
+      const pr = results.find((r) => r.domain === picked);
+      const price = pr?.price != null ? `${formatPrice(pr.price, pr.currency)}/yr · ` : '';
+      return { label: picked, detail: `${price}selected for sovereign registration (reservation only)` };
+    }
     return { label: 'Pending', detail: 'No domain selected' };
   };
 
@@ -239,7 +249,7 @@ const DeploymentOrchestrator: React.FC = () => {
             {STRATEGIES.map((s) => {
               const Icon = s.icon; const on = strategy === s.id;
               return (
-                <button key={s.id} aria-pressed={on} onClick={() => setStrategy(s.id)} className={`${card} ${on ? 'border-cyan-400/50 bg-cyan-400/[0.06]' : 'border-white/8 bg-white/[0.015] hover:border-white/20'}`}>
+                <button key={s.id} aria-pressed={on} onClick={() => chooseStrategy(s.id)} className={`${card} ${on ? 'border-cyan-400/50 bg-cyan-400/[0.06]' : 'border-white/8 bg-white/[0.015] hover:border-white/20'}`}>
                   <div className="flex items-center gap-3 mb-1.5">
                     <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: on ? 'linear-gradient(135deg,#00D9FF,#7C3AED)' : 'rgba(255,255,255,0.05)' }}><Icon className={`w-4 h-4 ${on ? 'text-white' : 'text-cyan-300/70'}`} /></span>
                     <span className="font-semibold text-sm text-white">{s.label}</span>
@@ -260,7 +270,7 @@ const DeploymentOrchestrator: React.FC = () => {
             <div>
               {Kicker(3, 'Connect your domain')}
               <p className="text-white/50 text-sm mb-4 max-w-lg">Enter a domain your institution already controls. Sovereign connects DNS, provisions SSL and routes services — no new registration required.</p>
-              <input aria-label="Existing domain to connect" value={existing} onChange={(e) => setExisting(e.target.value.toLowerCase().trim())} placeholder="gov.country" autoFocus
+              <input aria-label="Existing domain to connect" value={existing} onChange={(e) => setExisting(e.target.value.toLowerCase().trim())} onKeyDown={(e) => { if (e.key === 'Enter' && canAdvance()) setStep((s) => s + 1); }} placeholder="gov.country" autoFocus
                 className="w-full max-w-md px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white font-mono placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
             </div>
           )}
@@ -269,7 +279,7 @@ const DeploymentOrchestrator: React.FC = () => {
               {Kicker(3, 'Provision a sovereign subdomain')}
               <p className="text-white/50 text-sm mb-4 max-w-lg">Deploy immediately on sovereign infrastructure. Connect a permanent domain whenever you're ready — nothing is lost.</p>
               <div className="flex items-center max-w-md rounded-xl bg-white/5 border border-white/10 focus-within:border-cyan-400/50 overflow-hidden">
-                <input aria-label="Sovereign subdomain label" value={sub} onChange={(e) => setSub(sanitizeSub(e.target.value))} placeholder="ministry" autoFocus className="flex-1 px-4 py-3.5 bg-transparent text-white font-mono placeholder:text-white/30 focus:outline-none" />
+                <input aria-label="Sovereign subdomain label" value={sub} onChange={(e) => setSub(sanitizeSub(e.target.value))} onKeyDown={(e) => { if (e.key === 'Enter' && canAdvance()) setStep((s) => s + 1); }} placeholder="ministry" autoFocus className="flex-1 px-4 py-3.5 bg-transparent text-white font-mono placeholder:text-white/30 focus:outline-none" />
                 <span className="px-4 text-white/40 font-mono text-sm border-l border-white/10 py-3.5">.sovereign.so</span>
               </div>
             </div>

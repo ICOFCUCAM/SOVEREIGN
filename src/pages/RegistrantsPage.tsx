@@ -32,8 +32,9 @@ const RegistrantsPage: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [verifying, setVerifying] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
-  const refresh = useCallback(() => { if (user) listRegistrants().then(setRows).catch(() => {}); }, [user]);
+  const refresh = useCallback(() => { if (user) listRegistrants().then(setRows).catch(() => {}).finally(() => setLoaded(true)); }, [user]);
   useEffect(() => { refresh(); }, [refresh]);
 
   const set = (k: keyof RegistrantInput, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -110,20 +111,20 @@ const RegistrantsPage: React.FC = () => {
               <div className="kicker text-cyan-300/80 mb-5">New registrant identity</div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <Label t="Label (optional)"><input value={form.label ?? ''} onChange={(e) => set('label', e.target.value)} placeholder="HQ contact" className={inputCls} /></Label>
-                <Label t="Company (optional)"><input value={form.company_name ?? ''} onChange={(e) => set('company_name', e.target.value)} placeholder="Sovereign Holdings" className={inputCls} /></Label>
-                <Label t="First name *"><input value={form.first_name} onChange={(e) => set('first_name', e.target.value)} className={inputCls} /></Label>
-                <Label t="Last name *"><input value={form.last_name} onChange={(e) => set('last_name', e.target.value)} className={inputCls} /></Label>
-                <Label t="Email *"><input value={form.email} onChange={(e) => set('email', e.target.value)} type="email" className={inputCls} /></Label>
+                <Label t="Company (optional)"><input autoComplete="organization" value={form.company_name ?? ''} onChange={(e) => set('company_name', e.target.value)} placeholder="Sovereign Holdings" className={inputCls} /></Label>
+                <Label t="First name *"><input autoComplete="given-name" value={form.first_name} onChange={(e) => set('first_name', e.target.value)} className={inputCls} /></Label>
+                <Label t="Last name *"><input autoComplete="family-name" value={form.last_name} onChange={(e) => set('last_name', e.target.value)} className={inputCls} /></Label>
+                <Label t="Email *"><input autoComplete="email" value={form.email} onChange={(e) => set('email', e.target.value)} type="email" className={inputCls} /></Label>
                 <div className="grid grid-cols-3 gap-2">
                   <Label t="Ctry code *"><input value={form.phone_country_code} onChange={(e) => set('phone_country_code', e.target.value)} placeholder="+1" className={inputCls} /></Label>
                   <Label t="Area *"><input inputMode="numeric" value={form.phone_area_code ?? ''} onChange={(e) => set('phone_area_code', e.target.value)} placeholder="212" className={inputCls} /></Label>
                   <Label t="Number *"><input inputMode="numeric" value={form.phone_subscriber} onChange={(e) => set('phone_subscriber', e.target.value)} placeholder="7364000" className={inputCls} /></Label>
                 </div>
-                <Label t="Street *"><input value={form.street} onChange={(e) => set('street', e.target.value)} placeholder="350 Fifth Avenue" className={inputCls} /></Label>
-                <Label t="City *"><input value={form.city} onChange={(e) => set('city', e.target.value)} className={inputCls} /></Label>
-                <Label t="State / region"><input value={form.state ?? ''} onChange={(e) => set('state', e.target.value)} placeholder="NY" className={inputCls} /></Label>
-                <Label t="Postal code *"><input value={form.zipcode} onChange={(e) => set('zipcode', e.target.value)} className={inputCls} /></Label>
-                <Label t="Country (ISO-2) *"><input value={form.country} onChange={(e) => set('country', e.target.value.toUpperCase().slice(0, 2))} placeholder="US" className={inputCls} /></Label>
+                <Label t="Street *"><input autoComplete="street-address" value={form.street} onChange={(e) => set('street', e.target.value)} placeholder="350 Fifth Avenue" className={inputCls} /></Label>
+                <Label t="City *"><input autoComplete="address-level2" value={form.city} onChange={(e) => set('city', e.target.value)} className={inputCls} /></Label>
+                <Label t="State / region"><input autoComplete="address-level1" value={form.state ?? ''} onChange={(e) => set('state', e.target.value)} placeholder="NY" className={inputCls} /></Label>
+                <Label t="Postal code *"><input autoComplete="postal-code" value={form.zipcode} onChange={(e) => set('zipcode', e.target.value)} className={inputCls} /></Label>
+                <Label t="Country (ISO-2) *"><input autoComplete="country" value={form.country} onChange={(e) => set('country', e.target.value.toUpperCase().slice(0, 2))} placeholder="US" className={inputCls} /></Label>
               </div>
               <button disabled={busy || !valid} onClick={save} className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold disabled:opacity-50">
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Save identity
@@ -149,7 +150,8 @@ const RegistrantsPage: React.FC = () => {
                 <button aria-label={`Delete identity ${r.company_name || r.first_name + ' ' + r.last_name}`} onClick={() => remove(r.id)} className="text-white/30 hover:text-rose-300 shrink-0"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
-            {rows.length === 0 && <div className="px-5 py-14 text-center text-white/40">No registrant identities yet.</div>}
+            {!loaded && <div className="px-5 py-14 flex items-center justify-center text-white/40"><Loader2 className="w-4 h-4 animate-spin" /></div>}
+            {loaded && rows.length === 0 && <div className="px-5 py-14 text-center text-white/40">No registrant identities yet.</div>}
           </div>
         </div>
       </main>

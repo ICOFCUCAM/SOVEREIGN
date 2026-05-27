@@ -52,6 +52,7 @@ const DeployPage: React.FC = () => {
   useDocumentTitle('Deployment Engine', 'Sovereign provisioning infrastructure — from acquisition to live institution across a global edge mesh in seconds.');
   const [active, setActive] = useState(0);
   useEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setActive(STAGES.length - 1); return; }
     const t = setInterval(() => setActive((a) => (a + 1) % STAGES.length), 2200);
     return () => clearInterval(t);
   }, []);
