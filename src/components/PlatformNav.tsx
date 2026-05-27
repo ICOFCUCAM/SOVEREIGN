@@ -9,6 +9,7 @@ const LINKS = [
   { to: '/ecosystem', label: 'Ecosystem' },
   { to: '/marketplace', label: 'Marketplace' },
   { to: '/channel', label: 'Channel' },
+  { to: '/dns', label: 'DNS' },
   { to: '/valuation', label: 'AI Valuation' },
   { to: '/studio', label: 'Studio' },
   { to: '/deploy', label: 'Deploy' },

@@ -93,6 +93,25 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ note: 'OPENPROVIDER credentials not configured; jobs left queued.' }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   }
 
+  // Read-only health probe: authenticate + list zones, no mutations.
+  const probeBody = await req.json().catch(() => ({}));
+  if (probeBody?.probe === 'auth') {
+    try {
+      const auth = await op.login();
+      let zoneCount: number | null = null;
+      try {
+        const z = await op.listZones() as { data?: { total?: number; results?: unknown[] } };
+        zoneCount = z?.data?.total ?? (Array.isArray(z?.data?.results) ? z.data!.results!.length : null);
+      } catch (e) {
+        return new Response(JSON.stringify({ auth: 'ok', reseller_id: auth.reseller_id, list_zones_error: (e as Error).message }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+      }
+      return new Response(JSON.stringify({ auth: 'ok', reseller_id: auth.reseller_id, zone_count: zoneCount }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+    } catch (e) {
+      const err = e as OpenproviderError;
+      return new Response(JSON.stringify({ auth: 'failed', error: err.message, status: err.status, detail: err.body }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+    }
+  }
+
   const nowIso = new Date().toISOString();
   // Claim a batch of due jobs.
   const { data: jobs } = await admin.from('dns_jobs')

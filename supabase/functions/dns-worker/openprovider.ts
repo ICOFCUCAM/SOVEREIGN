@@ -50,19 +50,19 @@ export class OpenproviderClient {
     }
   }
 
-  async login(): Promise<string> {
+  async login(): Promise<{ token: string; reseller_id?: number }> {
     this.assertConfigured();
     const resp = await fetch(this.base + OP.login, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: this.username, password: this.password, ip: '0.0.0.0' }),
     });
-    const body = await resp.json().catch(() => ({}));
-    if (!resp.ok) throw new OpenproviderError('Openprovider auth failed', resp.status, body, resp.status >= 500);
+    const body = await resp.json().catch(() => ({})) as { code?: number; desc?: string; data?: { token?: string; reseller_id?: number } };
+    if (!resp.ok || (body?.code && body.code !== 0)) throw new OpenproviderError(body?.desc || 'Openprovider auth failed', resp.status, body, resp.status >= 500);
     const token = body?.data?.token;
     if (!token) throw new OpenproviderError('Openprovider auth returned no token', 502, body);
     this.token = token;
-    return token;
+    return { token, reseller_id: body?.data?.reseller_id };
   }
 
   // Core request with auth + bounded in-call retry (durable retry is the worker's job).
