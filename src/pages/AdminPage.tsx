@@ -762,8 +762,8 @@ const AdminPage: React.FC = () => {
               const Icon = t.icon;
               return (
                 <button key={t.id} onClick={() => setTab(t.id)}
-                  className={`px-4 py-2.5 text-sm font-medium flex items-center gap-2 border-b-2 transition whitespace-nowrap ${
-                    tab === t.id ? 'text-cyan-400 border-cyan-400' : 'text-white/50 border-transparent hover:text-white'
+                  className={`px-4 py-2.5 text-sm font-medium flex items-center gap-2 border-b-2 transition-all duration-300 whitespace-nowrap ${
+                    tab === t.id ? 'text-cyan-300 border-cyan-400' : 'text-white/50 border-transparent hover:text-white hover:border-white/15'
                   }`}>
                   <Icon className="w-3.5 h-3.5" /> {t.label}
                 </button>
