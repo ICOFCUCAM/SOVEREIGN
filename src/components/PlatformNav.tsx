@@ -61,9 +61,10 @@ const PlatformNav: React.FC = () => {
                   const active = isActive(l.to);
                   return (
                     <Link key={l.to} to={l.to} aria-current={active ? 'page' : undefined}
-                      className={`relative text-[13px] font-medium tracking-tight transition-colors ${active ? 'text-white' : 'text-white/55 hover:text-white'}`}>
+                      className={`relative text-[13px] font-medium tracking-tight transition-colors duration-300 ${active ? 'text-white' : 'text-white/55 hover:text-white'}`}>
                       {l.label}
                       {active && <span className="absolute -bottom-[20px] left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, #00D9FF, transparent)' }} />}
+                      {active && <span className="absolute -bottom-[21px] left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-cyan-300" style={{ boxShadow: '0 0 8px #00D9FF' }} />}
                     </Link>
                   );
                 })}
@@ -110,8 +111,8 @@ const PlatformNav: React.FC = () => {
                   <>
                     <button onClick={() => setAuthModal('signin')} className="text-[13px] text-white/60 hover:text-white font-medium transition">Sign In</button>
                     <button onClick={() => setAuthModal('signup')}
-                      className="px-4 py-2 rounded-lg text-white text-[13px] font-semibold transition-all hover:-translate-y-px"
-                      style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 28px rgba(0,194,255,0.28)' }}>
+                      className="px-4 py-2 rounded-lg text-white text-[13px] font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
+                      style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 10px 30px -10px rgba(0,194,255,0.5)' }}>
                       Launch Console
                     </button>
                   </>
@@ -124,11 +125,11 @@ const PlatformNav: React.FC = () => {
             </div>
 
             {open && (
-              <div className="lg:hidden py-3 border-t border-white/5 space-y-1">
+              <div className="lg:hidden py-3 mt-1 border-t border-white/5 space-y-0.5">
                 {LINKS.map((l) => (
                   <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
-                    className={`block px-3 py-2 text-sm rounded-lg ${isActive(l.to) ? 'bg-white/10 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}>
-                    {l.label}
+                    className={`flex items-center gap-2.5 px-3 py-2.5 text-sm rounded-lg transition-colors ${isActive(l.to) ? 'bg-white/10 text-white' : 'text-white/70 hover:text-white hover:bg-white/5'}`}>
+                    <span className={`w-1 h-1 rounded-full ${isActive(l.to) ? 'bg-cyan-300' : 'bg-white/20'}`} />{l.label}
                   </Link>
                 ))}
                 <div className="pt-2 mt-2 border-t border-white/5 space-y-1">
