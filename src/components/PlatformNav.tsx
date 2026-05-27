@@ -22,6 +22,7 @@ const REGISTRAR_LINKS = [
   { to: '/', label: 'Domains' },
   { to: '/dns', label: 'DNS' },
   { to: '/registrants', label: 'Identities' },
+  { to: '/deployments', label: 'Console' },
 ];
 
 const LINKS = isRegistrarHost(resolveTenant().hostname) ? REGISTRAR_LINKS : PLATFORM_LINKS;

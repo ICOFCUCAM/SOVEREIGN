@@ -23,6 +23,7 @@ const DeployPage = lazy(() => import("./pages/DeployPage"));
 const ChannelPage = lazy(() => import("./pages/ChannelPage"));
 const DnsPage = lazy(() => import("./pages/DnsPage"));
 const RegistrantsPage = lazy(() => import("./pages/RegistrantsPage"));
+const DeploymentsConsolePage = lazy(() => import("./pages/DeploymentsConsolePage"));
 const DomainsPage = lazy(() => import("./pages/DomainsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -66,6 +67,7 @@ const PlatformRoutes = () => (
     <Route path="/channel" element={<ChannelPage />} />
     <Route path="/dns" element={<DnsPage />} />
     <Route path="/registrants" element={<RegistrantsPage />} />
+    <Route path="/deployments" element={<DeploymentsConsolePage />} />
     <Route path="/domains" element={<DomainsPage />} />
     <Route path="/admin" element={<AdminPage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
@@ -86,6 +88,7 @@ const RegistrarRoutes = () => (
     <Route path="/" element={<DomainsPage />} />
     <Route path="/dns" element={<DnsPage />} />
     <Route path="/registrants" element={<RegistrantsPage />} />
+    <Route path="/deployments" element={<DeploymentsConsolePage />} />
     <Route path="/deploy" element={<DeployPage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
     <Route path="*" element={<DomainsPage />} />
