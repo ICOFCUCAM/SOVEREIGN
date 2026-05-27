@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, BarChart3, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { resolveTenant, isRegistrarHost } from '@/lib/tenant';
 import AuthModal from './AuthModal';
 
-const LINKS = [
+const PLATFORM_LINKS = [
   { to: '/', label: 'Platform' },
   { to: '/ecosystem', label: 'Ecosystem' },
   { to: '/marketplace', label: 'Marketplace' },
@@ -15,6 +16,15 @@ const LINKS = [
   { to: '/studio', label: 'Studio' },
   { to: '/deploy', label: 'Deploy' },
 ];
+
+// On domains.sovereign.so only the registrar surfaces are routed; show those.
+const REGISTRAR_LINKS = [
+  { to: '/', label: 'Domains' },
+  { to: '/dns', label: 'DNS' },
+  { to: '/registrants', label: 'Identities' },
+];
+
+const LINKS = isRegistrarHost(resolveTenant().hostname) ? REGISTRAR_LINKS : PLATFORM_LINKS;
 
 const PlatformNav: React.FC = () => {
   const [open, setOpen] = useState(false);
