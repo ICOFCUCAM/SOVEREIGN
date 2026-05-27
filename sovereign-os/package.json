@@ -20,6 +20,8 @@
     "dashboard:build": "npm --workspace @sovereign/command-center run build",
     "portal:dev": "npm --workspace @sovereign/developer-portal run dev",
     "portal:build": "npm --workspace @sovereign/developer-portal run build",
+    "web:dev": "npm --workspace @sovereign/web run dev",
+    "web:build": "npm --workspace @sovereign/web run build",
     "worker:dev": "npm --workspace sovereign-ffmpeg-worker run start"
   },
   "engines": {
