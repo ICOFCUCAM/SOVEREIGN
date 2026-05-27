@@ -60,7 +60,9 @@ around it.
       encrypt (vault), and store tokens in `social_connections`. Node↔Deno vault format
       verified compatible. `credentialEnv()` resolves a client's decrypted connections into
       adapter env, so publishing runs per-client off the vault.
-- [ ] Usage/billing dashboards; live-endpoint + Deno runtime verification.
+- [x] Developer-portal UX: OAuth connect UI (`/connect` + `/api/connect` → oauth-start) and
+      usage dashboard (`/usage`, 30-day metering by metric). `next build` passes (7 routes).
+- [ ] Billing/plan management; live-endpoint + Deno runtime verification.
 - [ ] Deno edge functions need live-runtime verification (no `deno` in CI yet).
 
 ## Phase 4 — Layer 3 (Strategic Intelligence Engine) (in progress)

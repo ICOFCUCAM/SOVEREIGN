@@ -4,11 +4,14 @@ The developer-facing console for the Sovereign API. Next.js (App Router) + Tailw
 
 ## Features
 
-- **Key management** — issue API keys with selected scopes; the plaintext key is shown once.
-  Lists existing keys (masked `prefix…last4`, scopes, status).
+- **Key management** (`/`) — issue API keys with selected scopes; the plaintext key is shown
+  once. Lists existing keys (masked `prefix…last4`, scopes, status).
+- **Connect accounts** (`/connect`) — start OAuth to link a platform to a client; lists
+  connected accounts (no tokens). Proxies to the `oauth-start` edge function.
+- **Usage** (`/usage`) — 30-day API consumption by metric, from `api_usage`.
 - **API reference** (`/docs`) — auth example + scoped endpoint catalog.
-- **Server route** (`app/api/keys`) — mints keys by proxying to the admin-gated `issue-key`
-  edge function; `ADMIN_SECRET` stays server-side.
+- **Server routes** (`app/api/keys`, `app/api/connect`) — proxy to the admin-gated
+  edge functions; `ADMIN_SECRET` stays server-side.
 
 ## Run
 

@@ -10,6 +10,8 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
         </Link>
         <nav className="flex gap-5 text-xs text-sov-mute">
           <Link href="/" className="hover:text-sov-cyan">Keys</Link>
+          <Link href="/connect" className="hover:text-sov-cyan">Connect</Link>
+          <Link href="/usage" className="hover:text-sov-cyan">Usage</Link>
           <Link href="/docs" className="hover:text-sov-cyan">API Docs</Link>
         </nav>
       </header>
