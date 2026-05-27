@@ -59,7 +59,7 @@ const AcquisitionTerminal: React.FC<{ domains: Domain[] }> = ({ domains }) => {
 
         {/* dominant wordmark */}
         <Link to={`/d/${encodeURIComponent(flag.domain_name)}`} className="group/name block">
-          <h2 className="font-display text-[2rem] sm:text-6xl lg:text-7xl xl:text-[5.25rem] font-bold text-white tracking-tighter leading-[0.9] mb-5 break-words group-hover/name:translate-x-0.5 transition-transform">{flag.domain_name}</h2>
+          <h2 className="font-display text-[2rem] sm:text-6xl lg:text-7xl xl:text-[5.25rem] font-bold text-white tracking-cinematic leading-[0.9] mb-5 break-words group-hover/name:translate-x-0.5 transition-transform" style={{ textShadow: `0 0 80px ${accent}22` }}>{flag.domain_name}</h2>
         </Link>
         <p className="text-white/55 leading-relaxed text-lg max-w-md mb-2">{flag.tagline || 'A deployable sovereign institution, engineered for planetary scale.'}</p>
 
@@ -75,10 +75,10 @@ const AcquisitionTerminal: React.FC<{ domains: Domain[] }> = ({ domains }) => {
 
         {/* institutional CTA system */}
         <div className="flex flex-wrap items-center gap-3 mt-9">
-          <Link to={`/d/${encodeURIComponent(flag.domain_name)}`} className="group/cta inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white text-sm font-semibold transition-all hover:-translate-y-px" style={{ background: `linear-gradient(135deg, ${accent}, #7C4DFF)`, boxShadow: `0 0 34px ${accent}40` }}>
+          <Link to={`/d/${encodeURIComponent(flag.domain_name)}`} className="group/cta inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white text-sm font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5" style={{ background: `linear-gradient(135deg, ${accent}, #7C4DFF)`, boxShadow: `0 14px 40px -12px ${accent}66` }}>
             Enter acquisition <ArrowUpRight className="w-4 h-4 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5 transition-transform" />
           </Link>
-          <Link to={`/d/${encodeURIComponent(flag.domain_name)}`} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-white/15 bg-white/[0.02] text-white/80 text-sm font-semibold hover:bg-white/5 hover:text-white transition">
+          <Link to={`/d/${encodeURIComponent(flag.domain_name)}`} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-white/15 bg-white/[0.02] text-white/80 text-sm font-semibold ease-cinematic transition-all duration-500 hover:bg-white/5 hover:text-white hover:border-white/25 hover:-translate-y-0.5">
             <FileText className="w-4 h-4 text-cyan-300/70" /> Request sovereign review
           </Link>
         </div>
@@ -183,10 +183,10 @@ const EcosystemPanels: React.FC = () => {
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 50% at 32% 45%, rgba(0,160,255,0.05), transparent 70%)' }} />
 
       <div className="relative max-w-7xl mx-auto">
-        <div className="flex items-center gap-3 mb-12">
-          <span className="text-[11px] font-mono uppercase tracking-[0.3em] text-white/45">Sovereign infrastructure universe</span>
+        <div className="flex items-center gap-4 mb-12">
+          <span className="kicker text-white/45" style={{ letterSpacing: '0.3em' }}>Sovereign infrastructure universe</span>
           <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
-          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">Acquire · Operate · Deploy</span>
+          <span className="kicker text-white/30 hidden sm:inline" style={{ fontSize: '10px', letterSpacing: '0.2em' }}>Acquire · Operate · Deploy</span>
         </div>
         <div className="grid lg:grid-cols-[1.62fr_1fr] gap-7 items-stretch">
           <AcquisitionTerminal domains={domains} />
