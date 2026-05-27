@@ -57,10 +57,13 @@ around it.
 - [ ] OAuth connect flows that populate `social_connections`; usage/billing dashboards.
 - [ ] Deno edge functions need live-runtime verification (no `deno` in CI yet).
 
-## Phase 4 — Layer 3 (Strategic Intelligence Engine)
+## Phase 4 — Layer 3 (Strategic Intelligence Engine) (in progress)
 
-- [ ] Consolidate `analyze-lead` + valuation/broker/crm behind the typed agent registry.
-- [ ] Implement the 7 agents incrementally; each runs as a `kind: 'intelligence'` job.
+- [x] Build `@sovereign/intelligence`: typed agent registry + Claude-backed `runAgent`
+      runner (strict-JSON results, dormant without a key). Built + runtime-verified.
+- [x] `run-agent` edge function records each run as a `kind: 'intelligence'` pipeline job.
+- [ ] Consolidate `analyze-lead` + valuation/broker/crm behind the runner.
+- [ ] Live inference verification; agent-specific tools/data sources.
 
 ## What was deliberately NOT migrated yet
 
