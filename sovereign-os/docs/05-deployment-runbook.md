@@ -169,25 +169,31 @@ $ npm run portal:build
 
 ### Launch on Vercel
 
-The repo root already has a Vercel project building the **source platform** (`vercel.json` →
-`vite build`). The two Next apps launch as **two additional Vercel projects**, each pointed at
-its subdirectory. No `vercel.json` is needed in the app dirs — Vercel auto-detects Next.js and
-the npm workspace (lockfile at `sovereign-os/package-lock.json`) and installs at the workspace
-root. Adding build-command overrides usually breaks workspace installs, so don't.
+The platform's customer-facing surface is **three Vercel projects**, each pointed at an app
+subdirectory. The public **web** site is the apex domain; the other two are the
+authenticated areas. No `vercel.json` is needed in the app dirs — Vercel auto-detects Next.js
+and the npm workspace (lockfile at `sovereign-os/package-lock.json`) and installs at the
+workspace root. **Critical:** set the **Root Directory** to the app, NOT the repo root — the
+repo root's `vercel.json` runs `vite build` (the old source platform) and will fail a Next app.
 
-For **each** app — New Project → import this repo → then:
+For **each** app — New Project → import this repo → set Root Directory → then deploy:
 
-| Setting | command-center | developer-portal |
+| App | Root Directory | Suggested domain |
 |---|---|---|
-| **Root Directory** | `sovereign-os/apps/command-center` | `sovereign-os/apps/developer-portal` |
-| Framework Preset | Next.js (auto) | Next.js (auto) |
-| Build / Install / Output | leave default (auto) | leave default (auto) |
-| "Include files outside root directory" | enabled (auto for monorepos) | enabled |
+| **web** (public landing + pricing) | `sovereign-os/apps/web` | `sovereign.example` (apex) |
+| **developer-portal** (console) | `sovereign-os/apps/developer-portal` | `app.sovereign.example` |
+| **command-center** (internal ops) | `sovereign-os/apps/command-center` | `ops.sovereign.example` |
+
+Framework Preset = Next.js (auto). Build / Install / Output = default. For monorepo workspace
+installs, "Include files outside root directory" is enabled automatically.
 
 > If Vercel doesn't auto-detect the workspace, set **Install Command** to
 > `npm install --prefix ../../..` (the `sovereign-os/` root) — but try the defaults first.
 
 **Environment variables** (Project Settings → Environment Variables):
+
+*web* (public site):
+- `NEXT_PUBLIC_PORTAL_URL` — the deployed developer-portal URL (header + plan CTAs target it)
 
 *command-center* (browser-only reads):
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
