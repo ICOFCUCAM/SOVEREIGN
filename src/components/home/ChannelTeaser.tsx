@@ -38,8 +38,8 @@ const ChannelTeaser: React.FC = () => {
     <div className="relative max-w-7xl mx-auto grid lg:grid-cols-[1fr_1fr] gap-12 lg:gap-16 items-center">
       {/* editorial */}
       <div>
-        <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-6">The sovereign channel</div>
-        <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.95] mb-6">
+        <div className="kicker text-cyan-300/70 mb-6" style={{ letterSpacing: '0.3em' }}>The sovereign channel</div>
+        <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-cinematic text-balance text-white leading-[0.94] mb-6">
           Civilization,<br /><span className="text-gradient-cyan">on film.</span>
         </h2>
         <p className="text-lg text-white/55 leading-relaxed max-w-md mb-9">

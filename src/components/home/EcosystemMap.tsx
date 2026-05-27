@@ -24,8 +24,8 @@ const EcosystemMap: React.FC = () => (
   <section id="network" className="scroll-mt-28 py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
     <div className="max-w-6xl mx-auto">
       <div className="text-center max-w-2xl mx-auto mb-12">
-        <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-5">Ecosystem architecture</div>
-        <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98]">
+        <div className="kicker text-cyan-300/70 mb-5" style={{ letterSpacing: '0.3em' }}>Ecosystem architecture</div>
+        <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-cinematic text-balance text-white leading-[0.98]">
           One interconnected ecosystem.
         </h2>
       </div>
