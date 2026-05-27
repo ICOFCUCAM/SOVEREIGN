@@ -48,7 +48,7 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean; index: number;
           <span className="font-mono text-[11px] tabular-nums text-white/30">{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span>
           <span className="text-[10px] font-mono uppercase tracking-[0.26em]" style={{ color: p.accent }}>{p.category}</span>
         </div>
-        <h3 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.98] mb-6">{p.name}</h3>
+        <h3 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-cinematic text-white leading-[0.96] text-balance mb-6">{p.name}</h3>
         <p className="text-xl text-white/55 max-w-md leading-relaxed mb-9">{p.tagline}</p>
         {caps.length > 0 && (
           <div className="grid grid-cols-2 gap-x-8 gap-y-3 mb-10 max-w-md">
@@ -60,19 +60,22 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean; index: number;
           </div>
         )}
         {metrics.length > 0 && (
-          <div className="flex flex-wrap gap-x-12 gap-y-5 mb-10">
-            {metrics.map((m) => (
-              <div key={m.label}>
-                <div className="text-3xl font-bold text-white tabular-nums leading-none mb-2">{m.value}</div>
-                <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/40">{m.label}</div>
-              </div>
-            ))}
+          <div className="mb-10">
+            <div className="hairline max-w-md mb-5" />
+            <div className="flex flex-wrap gap-x-12 gap-y-5">
+              {metrics.map((m) => (
+                <div key={m.label}>
+                  <div className="text-3xl font-bold text-white tabular-nums leading-none mb-2" style={{ textShadow: `0 0 30px ${p.accent}33` }}>{m.value}</div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/40">{m.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         {p.tiers && p.tiers.length > 0 && (
           <div className="text-sm text-white/45 mb-6">From <span className="text-white font-semibold tabular-nums">{p.tiers[0].price}</span> · {p.tiers.length} deployment tiers</div>
         )}
-        <Link to={`/systems/${p.slug}`} className="group inline-flex items-center gap-2 text-white font-semibold text-lg">
+        <Link to={`/systems/${p.slug}`} className="group inline-flex items-center gap-2.5 pl-5 pr-4 py-3 rounded-xl border border-white/15 bg-white/[0.03] text-white font-semibold ease-cinematic transition-all duration-500 hover:bg-white/[0.06] hover:-translate-y-0.5" style={{ ['--a' as string]: p.accent }}>
           Explore {p.name} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" style={{ color: p.accent }} />
         </Link>
       </div>
@@ -106,8 +109,8 @@ const EcosystemSectors: React.FC = () => {
 
       <div className="relative max-w-6xl mx-auto">
         <div className="max-w-2xl mb-20">
-          <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-5">Featured institutions</div>
-          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-white leading-[0.98]">
+          <div className="kicker text-cyan-300/70 mb-5" style={{ letterSpacing: '0.3em' }}>Featured institutions</div>
+          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-cinematic text-white leading-[0.98] text-balance">
             Sovereign systems, ready to deploy.
           </h2>
         </div>
