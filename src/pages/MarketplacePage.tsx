@@ -90,7 +90,7 @@ const SovereignCard: React.FC<{ d: Domain; grade: keyof typeof GRADE }> = ({ d, 
   const g = GRADE[grade];
   return (
     <Link to={`/d/${encodeURIComponent(d.domain_name)}`}
-      className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.014] hover:border-white/25 transition-all duration-500 hover:-translate-y-1 p-6">
+      className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.014] ease-cinematic transition-all duration-500 hover:border-white/25 hover:-translate-y-1.5 hover:shadow-[0_44px_96px_-46px_rgba(0,0,0,0.92)] p-6">
       <span className="absolute inset-x-0 top-0 h-px opacity-60" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
       <span className="absolute -top-16 -right-14 w-44 h-44 rounded-full blur-[80px] opacity-[0.12] group-hover:opacity-25 transition-opacity" style={{ background: accent }} />
       <HudCorners color={accent} className="opacity-20 group-hover:opacity-50 transition-opacity" />
@@ -122,7 +122,7 @@ const InfraCard: React.FC<{ d: Domain }> = ({ d }) => {
   const accent = ACCENTS[d.category || ''] || ACCENT;
   return (
     <Link to={`/d/${encodeURIComponent(d.domain_name)}`}
-      className="group relative block overflow-hidden rounded-xl border border-white/10 bg-white/[0.012] hover:border-white/25 hover:bg-white/[0.03] transition-all p-5">
+      className="group relative block overflow-hidden rounded-xl border border-white/10 bg-white/[0.012] ease-cinematic transition-all duration-500 hover:border-white/25 hover:bg-white/[0.03] hover:-translate-y-1 hover:shadow-[0_32px_70px_-40px_rgba(0,0,0,0.9)] p-5">
       {d.hero_image_url && (
         <div className="relative -mt-5 -mx-5 mb-3 h-24 overflow-hidden">
           <img src={d.hero_image_url} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-75 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
@@ -147,7 +147,7 @@ const SystemProductCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
   const metric = p.metrics && p.metrics[0];
   return (
     <Link to={`/systems/${p.slug}`}
-      className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.014] hover:border-white/25 transition-all duration-500 hover:-translate-y-1 p-6">
+      className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.014] ease-cinematic transition-all duration-500 hover:border-white/25 hover:-translate-y-1.5 hover:shadow-[0_44px_96px_-46px_rgba(0,0,0,0.92)] p-6">
       <span className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
       <span className="absolute -top-16 -right-14 w-40 h-40 rounded-full blur-[80px] opacity-[0.1] group-hover:opacity-25 transition-opacity" style={{ background: accent }} />
       <HudCorners color={accent} className="opacity-15 group-hover:opacity-45 transition-opacity" />
