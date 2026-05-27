@@ -42,7 +42,7 @@ const SystemCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
   const Emblem = emblemFor(p.category);
   const val = deployValue(p);
   return (
-    <Link to={`/systems/${p.slug}`} className="group relative block rounded-2xl border border-white/10 bg-white/[0.015] p-6 overflow-hidden hover:border-white/25 hover:bg-white/[0.03] transition-all hover:-translate-y-0.5">
+    <Link to={`/systems/${p.slug}`} className="group relative block rounded-2xl border border-white/10 bg-white/[0.015] p-6 overflow-hidden ease-cinematic transition-all duration-500 hover:border-white/25 hover:bg-white/[0.03] hover:-translate-y-1.5 hover:shadow-[0_40px_90px_-46px_rgba(0,0,0,0.9)]">
       <span className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
       <span className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl opacity-15 group-hover:opacity-30 transition-opacity" style={{ background: accent }} />
       <div className="relative">
@@ -113,9 +113,9 @@ const EcosystemAtlas: React.FC = () => {
             <div key={sector} id={sector.toLowerCase()} className="scroll-mt-28">
               <div className="flex items-center gap-4 mb-7">
                 <span className="font-mono text-sm text-cyan-300/50 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">{sector}</h2>
-                <div className="flex-1 h-px bg-white/10" />
-                <span className="text-[11px] font-mono uppercase tracking-widest text-white/35">{items.length} system{items.length > 1 ? 's' : ''}</span>
+                <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic text-white">{sector}</h2>
+                <div className="flex-1 hairline" />
+                <span className="kicker text-white/35" style={{ fontSize: '10px' }}>{items.length} system{items.length > 1 ? 's' : ''}</span>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {items.map((p) => <SystemCard key={p.id} p={p} />)}
