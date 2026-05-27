@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { ArrowLeft, Boxes } from 'lucide-react';
 
 const NotFound: React.FC = () => {
+  useDocumentTitle('Not Found', 'This coordinate is not part of the sovereign operating layer.');
   const location = useLocation();
   useEffect(() => {
     if (import.meta.env.DEV) console.warn('404 · unknown route:', location.pathname);

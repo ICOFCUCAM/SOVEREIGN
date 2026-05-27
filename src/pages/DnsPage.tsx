@@ -142,13 +142,14 @@ const DnsPage: React.FC = () => {
             <div className="grid lg:grid-cols-[1fr_340px] gap-6">
               <div className="glass-strong rounded-2xl overflow-hidden divide-y divide-white/5">
                 {zones.map((z) => (
-                  <button key={z.id} onClick={() => { setSelectedZone(z); document.getElementById('records')?.scrollIntoView({ behavior: 'smooth' }); }}
-                    className={`w-full flex items-center gap-4 px-5 py-3.5 text-left transition-colors ${selectedZone?.id === z.id ? 'bg-cyan-500/[0.06]' : 'hover:bg-white/[0.02]'}`}>
-                    <Globe className="w-4 h-4 text-cyan-300/60 shrink-0" />
-                    <div className="min-w-0 flex-1"><div className="text-sm text-white font-mono truncate">{z.name}</div><div className="text-[11px] text-white/40 font-mono uppercase">{z.type}{z.dnssec ? ' · dnssec' : ''}</div></div>
+                  <div key={z.id} className={`flex items-center gap-4 px-5 py-3.5 transition-colors ${selectedZone?.id === z.id ? 'bg-cyan-500/[0.06]' : 'hover:bg-white/[0.02]'}`}>
+                    <button onClick={() => { setSelectedZone(z); document.getElementById('records')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex items-center gap-4 min-w-0 flex-1 text-left">
+                      <Globe className="w-4 h-4 text-cyan-300/60 shrink-0" />
+                      <span className="min-w-0 flex-1"><span className="block text-sm text-white font-mono truncate">{z.name}</span><span className="block text-[11px] text-white/40 font-mono uppercase">{z.type}{z.dnssec ? ' · dnssec' : ''}</span></span>
+                    </button>
                     <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${statusChip(z.status)}`}>{z.status}</span>
-                    {z.status !== 'deleted' && <span onClick={(e) => { e.stopPropagation(); if (confirm(`Delete zone ${z.name}? This is irreversible.`)) guard(() => deleteZone(z.id), 'Zone deletion queued'); }} className="text-white/30 hover:text-rose-300 shrink-0"><Trash2 className="w-4 h-4" /></span>}
-                  </button>
+                    {z.status !== 'deleted' && <button aria-label={`Delete zone ${z.name}`} onClick={() => { if (confirm(`Delete zone ${z.name}? This is irreversible.`)) guard(() => deleteZone(z.id), 'Zone deletion queued'); }} className="text-white/30 hover:text-rose-300 shrink-0"><Trash2 className="w-4 h-4" /></button>}
+                  </div>
                 ))}
                 {zones.length === 0 && <div className="px-5 py-12 text-center text-white/40">No zones yet — create your first.</div>}
               </div>
@@ -178,7 +179,7 @@ const DnsPage: React.FC = () => {
                     <div key={r.id} className="flex items-center gap-4 px-5 py-3">
                       <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-white/5 text-cyan-300/70 w-14 text-center shrink-0">{r.type}</span>
                       <div className="min-w-0 flex-1"><div className="text-sm text-white font-mono truncate">{r.name || '@'}<span className="text-white/30"> → </span>{r.value}</div><div className="text-[10px] text-white/35 font-mono">ttl {r.ttl}{r.prio != null ? ` · prio ${r.prio}` : ''}</div></div>
-                      <button onClick={() => guard(() => modifyRecords({ zone_id: selectedZone.id, remove: [{ type: r.type, name: r.name, value: r.value, ttl: r.ttl, prio: r.prio ?? undefined }] }), 'Record removal queued')} className="text-white/30 hover:text-rose-300 shrink-0"><Trash2 className="w-4 h-4" /></button>
+                      <button aria-label={`Remove ${r.type} record ${r.name || '@'}`} onClick={() => guard(() => modifyRecords({ zone_id: selectedZone.id, remove: [{ type: r.type, name: r.name, value: r.value, ttl: r.ttl, prio: r.prio ?? undefined }] }), 'Record removal queued')} className="text-white/30 hover:text-rose-300 shrink-0"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   ))}
                   {records.length === 0 && <div className="px-5 py-12 text-center text-white/40">No records — add one.</div>}
