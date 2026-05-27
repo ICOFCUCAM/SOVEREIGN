@@ -167,8 +167,39 @@ $ NEXT_PUBLIC_SUPABASE_URL=… NEXT_PUBLIC_SUPABASE_ANON_KEY=… npm run dashboa
 $ npm run portal:build
 ```
 
-Deploy each as its own project. On Vercel set the env vars in Project Settings; the portal's
-`SUPABASE_URL` + `ADMIN_SECRET` must be **server-only** (not `NEXT_PUBLIC_`).
+### Launch on Vercel
+
+The repo root already has a Vercel project building the **source platform** (`vercel.json` →
+`vite build`). The two Next apps launch as **two additional Vercel projects**, each pointed at
+its subdirectory. No `vercel.json` is needed in the app dirs — Vercel auto-detects Next.js and
+the npm workspace (lockfile at `sovereign-os/package-lock.json`) and installs at the workspace
+root. Adding build-command overrides usually breaks workspace installs, so don't.
+
+For **each** app — New Project → import this repo → then:
+
+| Setting | command-center | developer-portal |
+|---|---|---|
+| **Root Directory** | `sovereign-os/apps/command-center` | `sovereign-os/apps/developer-portal` |
+| Framework Preset | Next.js (auto) | Next.js (auto) |
+| Build / Install / Output | leave default (auto) | leave default (auto) |
+| "Include files outside root directory" | enabled (auto for monorepos) | enabled |
+
+> If Vercel doesn't auto-detect the workspace, set **Install Command** to
+> `npm install --prefix ../../..` (the `sovereign-os/` root) — but try the defaults first.
+
+**Environment variables** (Project Settings → Environment Variables):
+
+*command-center* (browser-only reads):
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+*developer-portal*:
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (browser listings)
+- `SUPABASE_URL`, `ADMIN_SECRET` — **server-only**, never prefixed `NEXT_PUBLIC_` (these mint
+  keys / start OAuth by proxying to the admin-gated edge functions)
+
+Push to the branch (or merge) → Vercel builds each project from its Root Directory. The CI
+workflow's green `build-test` job is the same `next build` Vercel runs, so a green PR predicts
+a green Vercel build.
 
 > Portal hardening: the `/api/keys` and `/api/connect` routes currently authorize via the
 > server `ADMIN_SECRET`. Before exposing the portal to real developers, put these behind
