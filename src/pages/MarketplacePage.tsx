@@ -332,10 +332,10 @@ const MarketplacePage: React.FC = () => {
                     ); })}
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    <Link to="/systems/civicos" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px" style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 36px rgba(0,194,255,0.28)' }}>
-                      Acquire CIVICOS Core <ArrowUpRight className="w-4 h-4" />
+                    <Link to="/systems/civicos" className="group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 14px 40px -12px rgba(0,194,255,0.55)' }}>
+                      Acquire CIVICOS Core <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </Link>
-                    <Link to="/systems/civicos" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-white/15 bg-white/[0.03] text-white font-semibold hover:bg-white/5 transition">
+                    <Link to="/systems/civicos" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-white/15 bg-white/[0.03] text-white font-semibold ease-cinematic transition-all duration-500 hover:bg-white/5 hover:border-white/25 hover:-translate-y-0.5">
                       Deployment preview
                     </Link>
                   </div>
@@ -356,7 +356,7 @@ const MarketplacePage: React.FC = () => {
                   </div>
                   <div className="mt-5">
                     <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.18em] mb-2"><span className="text-white/40">Sovereign readiness</span><span className="text-white tabular-nums">98.6%</span></div>
-                    <div className="h-1.5 rounded-full bg-white/8 overflow-hidden"><span className="block h-full rounded-full" style={{ width: '98.6%', background: `linear-gradient(90deg, ${ACCENT}, #7C4DFF)` }} /></div>
+                    <div className="h-1.5 rounded-full bg-white/8 overflow-hidden"><span className="block h-full rounded-full" style={{ width: '98.6%', background: `linear-gradient(90deg, ${ACCENT}, #7C4DFF)`, boxShadow: `0 0 12px ${ACCENT}88` }} /></div>
                   </div>
                 </div>
               </div>
