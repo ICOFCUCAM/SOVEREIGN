@@ -25,6 +25,19 @@ interface Campaign { id: string; name: string; media_class: string | null; chann
 type LeadFilter = 'all' | 'inquiry' | 'offer' | 'buy_now';
 interface Inquiry { id: string; created_at: string; system_slug: string | null; system_name: string | null; tier: string | null; name: string | null; email: string; organization: string | null; message: string | null; status?: string | null }
 
+// Image generation can take 20-40s; cap it so a stalled request never freezes the UI.
+async function invokeImage(body: Record<string, unknown>, ms = 90000): Promise<{ url?: string; error?: string }> {
+  const result = await Promise.race([
+    supabase.functions.invoke('generate-image', { body }),
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timed out — image generation took too long')), ms)),
+  ]);
+  const { data, error } = result as { data: { url?: string; error?: string } | null; error: { message: string } | null };
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  if (!data?.url) throw new Error('No image URL returned');
+  return data;
+}
+
 const ORIGIN_META: Record<string, { icon: LucideIcon; color: string; label: string }> = {
   direct: { icon: Radio, color: '#00D9FF', label: 'Direct' },
   search: { icon: Search, color: '#10B981', label: 'Search' },
@@ -332,12 +345,7 @@ const AdminPage: React.FC = () => {
     const prompt = `Cover key art for a sovereign dispatch titled "${editNar.title}".${editNar.subtitle ? ` ${editNar.subtitle}.` : ''} Editorial, cinematic, civilization-scale.`;
     setGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt, mediaClass: editNar.media_class || 'strategic', orientation: 'landscape' },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      if (!data?.url) throw new Error('No image URL returned');
+      const data = await invokeImage({ prompt, mediaClass: editNar.media_class || 'strategic', orientation: 'landscape' });
       setEditNar((cur) => (cur ? { ...cur, cover_image_url: data.url } : cur));
       toast.success('Cover art generated');
     } catch (e) {
@@ -455,12 +463,7 @@ const AdminPage: React.FC = () => {
     const prompt = `Cover key art for "${s.name}"${s.category ? `, a ${s.category}` : ''}.${s.tagline ? ` ${s.tagline}.` : ''}${s.description ? ` ${s.description}` : ''}`;
     setUploadingImage(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt, mediaClass: 'cinematic', orientation: 'landscape' },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      if (!data?.url) throw new Error('No image URL returned');
+      const data = await invokeImage({ prompt, mediaClass: 'cinematic', orientation: 'landscape' });
       setEditingSystem((cur) => (cur ? { ...cur, image_url: data.url } : cur));
       toast.success('Visual generated');
     } catch (e) {
@@ -473,12 +476,7 @@ const AdminPage: React.FC = () => {
     setGenRowId(s.id);
     const prompt = `Cover key art for "${s.name}"${s.category ? `, a ${s.category}` : ''}.${s.tagline ? ` ${s.tagline}.` : ''}`;
     try {
-      const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt, mediaClass: 'cinematic', orientation: 'landscape' },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      if (!data?.url) throw new Error('No image URL returned');
+      const data = await invokeImage({ prompt, mediaClass: 'cinematic', orientation: 'landscape' });
       const { error: upErr } = await supabase.from('ecosystem_products').update({ image_url: data.url }).eq('id', s.id);
       if (upErr) throw upErr;
       setSystems((cur) => cur.map((x) => (x.id === s.id ? { ...x, image_url: data.url } : x)));
@@ -495,12 +493,7 @@ const AdminPage: React.FC = () => {
     const prompt = `Hero key art for the premium domain "${d.domain_name}"${d.category ? `, in the ${d.category} category` : ''}.${d.tagline ? ` ${d.tagline}.` : ''} Evoke its brand identity as a flagship digital asset.`;
     setUploadingImage(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt, mediaClass: 'cinematic', orientation: 'landscape' },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      if (!data?.url) throw new Error('No image URL returned');
+      const data = await invokeImage({ prompt, mediaClass: 'cinematic', orientation: 'landscape' });
       setEditing((cur) => (cur ? { ...cur, hero_image_url: data.url } : cur));
       toast.success('Hero art generated');
     } catch (e) {
