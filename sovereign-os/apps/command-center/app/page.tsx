@@ -2,6 +2,7 @@ import { MediaClassBar } from '../components/MediaClassBar';
 import { PipelineMonitor } from '../components/PipelineMonitor';
 import { DistributionGrid } from '../components/DistributionGrid';
 import { IntelligencePanel } from '../components/IntelligencePanel';
+import { ApiKeysPanel } from '../components/ApiKeysPanel';
 
 export default function CommandOverview() {
   return (
@@ -22,6 +23,8 @@ export default function CommandOverview() {
           <IntelligencePanel />
         </div>
       </div>
+
+      <ApiKeysPanel />
     </div>
   );
 }

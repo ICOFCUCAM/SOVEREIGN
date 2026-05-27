@@ -44,6 +44,18 @@ around it.
 - [ ] Implement the remaining 8 adapters (X, Instagram, Facebook, TikTok, YouTube, Threads,
       WhatsApp, Pinterest).
 
+### Developer platform (own-your-API, vs Ayrshare)
+
+- [x] `@sovereign/api-platform`: secure API-key issuance (SHA-256 hashed, shown once),
+      HMAC bearer tokens w/ scopes+expiry, usage/rate helpers. Built + runtime-verified.
+- [x] `db/migrations/0003_developer_platform.sql`: api_clients, api_keys, social_connections,
+      api_usage, webhooks.
+- [x] `gateway/functions`: `issue-key` (admin-gated mint) + `_shared/auth.ts` (key verify,
+      scope + monthly-quota enforcement, usage metering). Dashboard API Keys panel.
+- [ ] OAuth flows + encryption-at-rest for the `social_connections` token vault.
+- [ ] HMAC-signed webhook delivery; usage/billing dashboards.
+- [ ] Deno edge functions need live-runtime verification (no `deno` in CI yet).
+
 ## Phase 4 — Layer 3 (Strategic Intelligence Engine)
 
 - [ ] Consolidate `analyze-lead` + valuation/broker/crm behind the typed agent registry.
