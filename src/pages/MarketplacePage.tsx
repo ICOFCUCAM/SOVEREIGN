@@ -291,11 +291,15 @@ const MarketplacePage: React.FC = () => {
 
         {/* ── SECTION 2 — market intelligence feed ── */}
         <section className="px-4 sm:px-6 lg:px-8 pb-20">
-          <div className="max-w-7xl mx-auto rounded-2xl border border-white/10 bg-white/[0.012] p-5 sm:p-6">
-            <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-cyan-300/60 mb-4">Market intelligence</div>
+          <div className="relative max-w-7xl mx-auto rounded-2xl border border-white/10 bg-white/[0.012] p-5 sm:p-6 overflow-hidden">
+            <span className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,217,255,0.4), transparent)' }} />
+            <div className="flex items-center gap-2.5 mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" />
+              <span className="kicker text-cyan-300/60">Market intelligence</span>
+            </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/8 rounded-xl overflow-hidden">
               {INTEL.map((it) => (
-                <div key={it.name} className="bg-[#060b1a] px-5 py-4">
+                <div key={it.name} className="bg-[#060b1a] px-5 py-4 hover:bg-[#0a1226] transition-colors duration-500">
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="inline-flex items-center gap-2 text-sm font-semibold text-white"><span className="w-1.5 h-1.5 rounded-full" style={{ background: it.c }} /> {it.name}</span>
                     <span className="text-[10px] font-mono text-white/35">{it.ago} ago</span>
