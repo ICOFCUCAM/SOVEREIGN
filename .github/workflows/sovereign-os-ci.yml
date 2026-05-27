@@ -1,0 +1,31 @@
+name: sovereign-os CI
+
+# CI for the new sovereign platform under sovereign-os/. Scoped by path so it never
+# runs for changes to the source platform at the repo root.
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths: ['sovereign-os/**', '.github/workflows/sovereign-os-ci.yml']
+  pull_request:
+    paths: ['sovereign-os/**', '.github/workflows/sovereign-os-ci.yml']
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sovereign-os
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: sovereign-os/package-lock.json
+      - run: npm ci
+      - name: Build + unit tests
+        run: npm test
+      - name: Build command-center
+        run: npm run dashboard:build
+      - name: Build developer-portal
+        run: npm run portal:build

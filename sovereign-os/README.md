@@ -32,6 +32,17 @@ for the full design.
 
 To deploy and exercise the live (non-CI) paths, follow `docs/05-deployment-runbook.md`.
 
+## Tests / CI
+
+```bash
+npm test            # builds all packages, runs the node:test suites
+```
+
+Covers the verifiable core logic: media presets, API keys/tokens/scopes/vault/webhooks/OAuth,
+distribution registry/dispatcher/scheduler/credentials/worker, and the intelligence runner.
+GitHub Actions (`.github/workflows/sovereign-os-ci.yml`) runs `npm test` + both Next builds on
+every push touching `sovereign-os/**`.
+
 ## Getting started
 
 ```bash
