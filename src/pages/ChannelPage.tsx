@@ -188,7 +188,7 @@ const ChannelPage: React.FC = () => {
             <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[70vw] max-w-[1000px] h-[40vw] rounded-full blur-[140px] opacity-[0.08]" style={{ background: '#00C2FF' }} />
           </div>
           <div className="relative max-w-5xl mx-auto">
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.28em] mb-8">
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 kicker mb-8" style={{ letterSpacing: '0.28em' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The sovereign channel
             </div>
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-cinematic text-balance leading-[0.92] max-w-3xl mb-7">
@@ -285,7 +285,7 @@ const ChannelPage: React.FC = () => {
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {narratives.map((n) => (
-                    <button key={n.id} onClick={() => setReading(n)} className="group relative text-left rounded-2xl border border-white/10 bg-white/[0.014] overflow-hidden hover:border-white/25 hover:-translate-y-1 transition-all flex flex-col">
+                    <button key={n.id} onClick={() => setReading(n)} className="group relative text-left rounded-2xl border border-white/10 bg-white/[0.014] overflow-hidden ease-cinematic transition-all duration-500 hover:border-white/25 hover:-translate-y-1.5 hover:shadow-[0_40px_90px_-46px_rgba(0,0,0,0.9)] flex flex-col">
                       <span className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity z-10" style={{ background: 'linear-gradient(90deg, transparent, #00C2FF, transparent)' }} />
                       {n.cover_image_url && (
                         <div className="relative h-32 overflow-hidden">
