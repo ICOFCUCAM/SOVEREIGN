@@ -425,9 +425,17 @@ const MarketplacePage: React.FC = () => {
         {loading && (
           <section className="px-4 sm:px-6 lg:px-8 pb-24">
             <div className="max-w-7xl mx-auto">
-              <div className="h-8 w-64 rounded bg-white/[0.04] animate-pulse mb-9" />
+              <div className="flex items-center gap-2.5 mb-9">
+                <span className="w-6 h-px bg-cyan-300/30" />
+                <span className="kicker text-white/25">Indexing sovereign registry…</span>
+              </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {Array.from({ length: 8 }).map((_, i) => <div key={i} className="rounded-2xl border border-white/8 bg-white/[0.02] h-52 animate-pulse" />)}
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="relative rounded-2xl border border-white/8 bg-white/[0.02] h-52 overflow-hidden" style={{ opacity: 1 - i * 0.06 }}>
+                    <div className="absolute inset-0 animate-shimmer" />
+                    <span className="absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
+                  </div>
+                ))}
               </div>
             </div>
           </section>
