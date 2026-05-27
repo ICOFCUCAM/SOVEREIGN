@@ -279,7 +279,7 @@ const ChannelPage: React.FC = () => {
             <Reveal>
               <div className="max-w-7xl mx-auto">
                 <div className="flex items-center gap-3 mb-8">
-                  <span className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70">Sovereign dispatches</span>
+                  <span className="kicker text-cyan-300/70" style={{ letterSpacing: "0.3em" }}>Sovereign dispatches</span>
                   <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
                   <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">Narrative engine</span>
                 </div>
@@ -314,7 +314,7 @@ const ChannelPage: React.FC = () => {
             <Reveal>
               <div className="max-w-7xl mx-auto">
                 <div className="flex items-center gap-3 mb-8">
-                  <span className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70">Broadcast schedule</span>
+                  <span className="kicker text-cyan-300/70" style={{ letterSpacing: "0.3em" }}>Broadcast schedule</span>
                   <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
                   <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">{campaigns.filter((c) => c.status === 'live').length} live · {campaigns.filter((c) => c.status === 'scheduled').length} upcoming</span>
                 </div>
@@ -345,7 +345,7 @@ const ChannelPage: React.FC = () => {
         <section className="px-4 sm:px-6 lg:px-8 py-16">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
-              <span className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70">Distribution architecture</span>
+              <span className="kicker text-cyan-300/70" style={{ letterSpacing: "0.3em" }}>Distribution architecture</span>
               <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
             </div>
             <div className="grid sm:grid-cols-3 gap-4">
