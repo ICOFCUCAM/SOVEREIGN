@@ -45,7 +45,14 @@ const RegistrantsPage: React.FC = () => {
     if (!valid) { toast.error('Complete the required fields.'); return; }
     setBusy(true);
     try {
-      await createRegistrant(form);
+      const norm = (s: string | null | undefined) => (s && s.trim() ? s.trim() : null);
+      await createRegistrant({
+        ...form,
+        label: norm(form.label),
+        company_name: norm(form.company_name),
+        state: norm(form.state),
+        phone_area_code: norm(form.phone_area_code),
+      });
       toast.success('Registrant identity saved');
       setForm(EMPTY); setOpen(false); refresh();
     } catch (e) { toast.error((e as Error).message); }
