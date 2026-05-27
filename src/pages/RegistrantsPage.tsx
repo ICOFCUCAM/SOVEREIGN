@@ -116,7 +116,7 @@ const RegistrantsPage: React.FC = () => {
                 <Label t="Last name *"><input autoComplete="family-name" value={form.last_name} onChange={(e) => set('last_name', e.target.value)} className={inputCls} /></Label>
                 <Label t="Email *"><input autoComplete="email" value={form.email} onChange={(e) => set('email', e.target.value)} type="email" className={inputCls} /></Label>
                 <div className="grid grid-cols-3 gap-2">
-                  <Label t="Ctry code *"><input value={form.phone_country_code} onChange={(e) => set('phone_country_code', e.target.value)} placeholder="+1" className={inputCls} /></Label>
+                  <Label t="Ctry code *"><input inputMode="tel" maxLength={5} value={form.phone_country_code} onChange={(e) => set('phone_country_code', e.target.value)} placeholder="+1" className={inputCls} /></Label>
                   <Label t="Area *"><input inputMode="numeric" value={form.phone_area_code ?? ''} onChange={(e) => set('phone_area_code', e.target.value)} placeholder="212" className={inputCls} /></Label>
                   <Label t="Number *"><input inputMode="numeric" value={form.phone_subscriber} onChange={(e) => set('phone_subscriber', e.target.value)} placeholder="7364000" className={inputCls} /></Label>
                 </div>
@@ -124,7 +124,7 @@ const RegistrantsPage: React.FC = () => {
                 <Label t="City *"><input autoComplete="address-level2" value={form.city} onChange={(e) => set('city', e.target.value)} className={inputCls} /></Label>
                 <Label t="State / region"><input autoComplete="address-level1" value={form.state ?? ''} onChange={(e) => set('state', e.target.value)} placeholder="NY" className={inputCls} /></Label>
                 <Label t="Postal code *"><input autoComplete="postal-code" value={form.zipcode} onChange={(e) => set('zipcode', e.target.value)} className={inputCls} /></Label>
-                <Label t="Country (ISO-2) *"><input autoComplete="country" value={form.country} onChange={(e) => set('country', e.target.value.toUpperCase().slice(0, 2))} placeholder="US" className={inputCls} /></Label>
+                <Label t="Country (ISO-2) *"><input autoComplete="country" maxLength={2} value={form.country} onChange={(e) => set('country', e.target.value.toUpperCase().slice(0, 2))} placeholder="US" className={inputCls} /></Label>
               </div>
               <button disabled={busy || !valid} onClick={save} className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold disabled:opacity-50">
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Save identity
