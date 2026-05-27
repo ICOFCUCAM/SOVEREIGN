@@ -33,7 +33,7 @@ const SystemIntelligence: React.FC<{ p: EcosystemProduct; domain?: Domain | null
         <div className="grid lg:grid-cols-[1fr_360px] gap-6 items-start">
           {/* narrative + acquisition */}
           <div>
-            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2.5"><FileText className="w-5 h-5" style={{ color: accent }} /> Capability intelligence</h2>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic text-white mb-4 flex items-center gap-2.5"><FileText className="w-5 h-5" style={{ color: accent }} /> Capability intelligence</h2>
             <p className="text-white/70 leading-relaxed text-lg mb-7 max-w-2xl">{narrative}</p>
             <div className="flex flex-wrap gap-3">
               {tiered ? (

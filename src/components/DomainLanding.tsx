@@ -286,7 +286,7 @@ const DomainLanding: React.FC<Props> = ({ domainName, variant }) => {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-2 mb-6">
             <Brain className="w-5 h-5 text-cyan-400" />
-            <h2 className="text-2xl font-bold text-white">Domain Intelligence Breakdown</h2>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic text-white">Domain Intelligence Breakdown</h2>
           </div>
 
           {valuationLoading ? (
