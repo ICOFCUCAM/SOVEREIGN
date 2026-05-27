@@ -48,9 +48,9 @@ const PageSubNav: React.FC<{ items: SubNavItem[]; label?: string; offset?: numbe
           </span>
           {present.map((it) => (
             <button key={it.id} onClick={() => go(it.id)} aria-current={active === it.id ? 'true' : undefined}
-              className={`relative px-3 py-2 text-[11px] font-mono uppercase tracking-[0.18em] whitespace-nowrap transition-colors ${active === it.id ? 'text-white' : 'text-white/45 hover:text-white/80'}`}>
+              className={`relative px-3.5 py-2 rounded-lg text-[11px] font-mono uppercase tracking-[0.18em] whitespace-nowrap transition-all duration-300 ${active === it.id ? 'text-white bg-white/[0.06]' : 'text-white/45 hover:text-white/80 hover:bg-white/[0.03]'}`}>
               {it.label}
-              {active === it.id && <span className="absolute inset-x-2.5 -bottom-px h-px" style={{ background: 'linear-gradient(90deg, transparent, #00D9FF, transparent)' }} />}
+              {active === it.id && <span className="absolute inset-x-3 -bottom-px h-px" style={{ background: 'linear-gradient(90deg, transparent, #00D9FF, transparent)' }} />}
             </button>
           ))}
         </div>
