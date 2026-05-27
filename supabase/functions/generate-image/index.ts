@@ -1,3 +1,5 @@
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -97,24 +99,22 @@ Deno.serve(async (req) => {
       await logDiag('generate-image', 'No b64_json or url in OpenAI response');
       return new Response(JSON.stringify({ error: 'No image returned from provider.' }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const path = `generated/${(mediaClass || 'media')}-${Date.now()}.png`;
 
-    const upload = await fetch(`${supabaseUrl}/storage/v1/object/${BUCKET}/${path}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'image/png', 'x-upsert': 'true', 'cache-control': '3600' },
-      body: bytes,
+    const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+    const { error: upErr } = await admin.storage.from(BUCKET).upload(path, bytes, {
+      contentType: 'image/png', upsert: true, cacheControl: '3600',
     });
 
-    if (!upload.ok) {
-      const upErr = await upload.text();
-      await logDiag('generate-image:storage', `status=${upload.status} body=${upErr}`);
-      return new Response(JSON.stringify({ error: 'Image generated but storage upload failed', detail: upErr.slice(0, 400) }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+    if (upErr) {
+      await logDiag('generate-image:storage', `keyPrefix=${serviceKey.slice(0, 8)} keyLen=${serviceKey.length} msg=${upErr.message}`);
+      return new Response(JSON.stringify({ error: 'Image generated but storage upload failed', detail: upErr.message }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
 
-    const url = `${supabaseUrl}/storage/v1/object/public/${BUCKET}/${path}`;
-    return new Response(JSON.stringify({ url, model_used: 'gpt-image-1' }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+    const { data: pub } = admin.storage.from(BUCKET).getPublicUrl(path);
+    return new Response(JSON.stringify({ url: pub.publicUrl, model_used: 'gpt-image-1' }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   } catch (error) {
     await logDiag('generate-image:exception', (error as Error).message);
     return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
