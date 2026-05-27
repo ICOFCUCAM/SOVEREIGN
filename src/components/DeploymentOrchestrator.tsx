@@ -1,11 +1,15 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Landmark, Banknote, Vote, Building2, GraduationCap, Cpu, Truck,
   Link2, Globe, Sparkles, Server, ArrowRight, ArrowLeft, Check, Search,
-  ShieldCheck, Network, Route, Loader2, Star,
+  ShieldCheck, Network, Route, Loader2, Star, Save, History, Clock,
 } from 'lucide-react';
 import { searchDomains, formatPrice, type DomainResult } from '@/lib/registrar';
+import { listDeployments, createDeployment, type Deployment } from '@/lib/deployments';
+import { useAuth } from '@/contexts/AuthContext';
+import AuthModal from '@/components/AuthModal';
+import { toast } from 'sonner';
 
 type Strategy = 'existing' | 'register' | 'recommend' | 'skip';
 
@@ -80,6 +84,14 @@ const DeploymentOrchestrator: React.FC = () => {
   const debounce = useRef<ReturnType<typeof setTimeout>>();
   const latest = useRef('');
 
+  const { user } = useAuth();
+  const [authOpen, setAuthOpen] = useState(false);
+  const [mine, setMine] = useState<Deployment[]>([]);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => { if (user) listDeployments().then(setMine).catch(() => {}); else setMine([]); }, [user]);
+
   const typeMeta = TYPES.find((t) => t.id === type);
 
   const runSearch = useCallback((q: string) => {
@@ -106,7 +118,41 @@ const DeploymentOrchestrator: React.FC = () => {
     }, 450);
   }, []);
 
-  const reset = () => { setStep(1); setType(null); setStrategy(null); setExisting(''); setSub(''); setQuery(''); setResults([]); setPicked(null); };
+  const reset = () => { setStep(1); setType(null); setStrategy(null); setExisting(''); setSub(''); setQuery(''); setResults([]); setPicked(null); setSavedId(null); };
+
+  const save = async () => {
+    if (!user) { setAuthOpen(true); return; }
+    if (!type || !strategy || !typeMeta) return;
+    setSaving(true);
+    try {
+      const dec = domainDecision();
+      const dep = await createDeployment({
+        name: typeMeta.label,
+        deployment_type: typeMeta.label,
+        domain_strategy: strategy,
+        domain: strategy === 'skip' ? null : strategy === 'existing' ? existing : picked,
+        subdomain: strategy === 'skip' ? sub : null,
+        lifecycle: LIFECYCLE_BY_STRATEGY[strategy],
+        blueprint: { typeId: type, typeLabel: typeMeta.label, strategy, domain: dec.label, detail: dec.detail },
+      });
+      setSavedId(dep.id);
+      setMine((m) => [dep, ...m]);
+      toast.success('Deployment saved', { description: 'Your blueprint is persisted and resumable.' });
+    } catch (e) {
+      toast.error((e as Error).message || 'Could not save deployment.');
+    }
+    setSaving(false);
+  };
+
+  const resume = (d: Deployment) => {
+    setType(TYPES.find((t) => t.label === d.deployment_type)?.id ?? null);
+    setStrategy(d.domain_strategy);
+    setExisting(d.domain_strategy === 'existing' ? d.domain ?? '' : '');
+    setSub(d.domain_strategy === 'skip' ? d.subdomain ?? '' : '');
+    setPicked(d.domain_strategy === 'register' || d.domain_strategy === 'recommend' ? d.domain ?? null : null);
+    setSavedId(d.id);
+    setStep(4);
+  };
 
   // Resolved domain decision for the blueprint.
   const domainDecision = (): { label: string; detail: string } => {
@@ -142,6 +188,23 @@ const DeploymentOrchestrator: React.FC = () => {
       {/* STEP 1 — deployment type */}
       {step === 1 && (
         <div>
+          {mine.length > 0 && (
+            <div className="mb-7">
+              <div className="flex items-center gap-2 kicker text-white/40 mb-3"><History className="w-3.5 h-3.5" /> Resume a deployment</div>
+              <div className="grid sm:grid-cols-2 gap-2.5">
+                {mine.slice(0, 4).map((d) => (
+                  <button key={d.id} onClick={() => resume(d)} className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.015] px-4 py-3 text-left hover:border-cyan-400/30 transition-all duration-500 ease-cinematic hover:-translate-y-0.5">
+                    <Clock className="w-4 h-4 text-cyan-300/60 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm text-white truncate">{d.name || d.deployment_type}</div>
+                      <div className="text-[11px] font-mono text-white/40 truncate">{d.domain || d.subdomain || d.domain_strategy} · {d.status}</div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-white/25 shrink-0" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {Kicker(1, 'What would you like to deploy?')}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {TYPES.map((t) => {
@@ -277,13 +340,20 @@ const DeploymentOrchestrator: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link to="/dns" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg,#00C2FF,#7C4DFF)', boxShadow: '0 14px 40px -12px rgba(0,194,255,0.5)' }}>
-              Open DNS & infrastructure console <ArrowRight className="w-4 h-4" />
+            {savedId ? (
+              <span className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500/10 border border-emerald-400/25 text-emerald-300 font-semibold"><Check className="w-4 h-4" /> Saved · resumable</span>
+            ) : (
+              <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5 disabled:opacity-50" style={{ background: 'linear-gradient(135deg,#00C2FF,#7C4DFF)', boxShadow: '0 14px 40px -12px rgba(0,194,255,0.5)' }}>
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {user ? 'Save deployment' : 'Sign in to save'}
+              </button>
+            )}
+            <Link to="/dns" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-white/12 text-white/80 hover:text-white hover:border-white/25 transition">
+              Open DNS console <ArrowRight className="w-4 h-4" />
             </Link>
-            <button onClick={reset} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-white/12 text-white/70 hover:text-white hover:border-white/25 transition">Start over</button>
+            <button onClick={reset} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white/50 hover:text-white transition">Start over</button>
           </div>
           <div className="mt-5 text-[10px] font-mono uppercase tracking-widest text-amber-300/70 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" /> Blueprint captured · provisioning is activation-ready — no purchase is triggered
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" /> Blueprint persisted as a draft · provisioning is activation-ready — no purchase is triggered
           </div>
         </div>
       )}
@@ -300,6 +370,8 @@ const DeploymentOrchestrator: React.FC = () => {
           </button>
         </div>
       )}
+
+      {authOpen && <AuthModal initialMode="signin" onClose={() => setAuthOpen(false)} />}
     </div>
   );
 };
