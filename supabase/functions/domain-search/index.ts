@@ -22,6 +22,8 @@ const REFILL_PER_SEC = 1;
 
 // Discovery TLD set — infrastructure-oriented, not a retail dump.
 const PRIMARY_TLDS = ['com', 'so', 'io', 'ai'];
+// Curated sovereign namespace for the TLD pricing explorer.
+const SOVEREIGN_TLDS = ['com', 'so', 'io', 'ai', 'net', 'org', 'co', 'app', 'dev', 'cloud', 'tech', 'xyz'];
 const SUGGEST_TLDS = ['com', 'so', 'io', 'ai', 'net', 'org', 'co', 'app', 'dev', 'xyz', 'tech', 'cloud', 'systems', 'network'];
 const PREFIXES = ['get', 'try', 'use', 'my', 'go'];
 const SUFFIXES = ['hq', 'app', 'ai', 'labs', 'cloud', 'os'];
@@ -194,6 +196,22 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const action = (body.action as string) || 'search';
+
+    // Indicative annual pricing across the sovereign TLD namespace. Price is
+    // returned by the provider independent of availability, so we probe a fixed
+    // label and read the per-extension price (cached like any other check).
+    if (action === 'tld-pricing') {
+      // Neutral, non-dictionary label so registry-premium names don't skew base pricing.
+      const probe = 'qzx7w9k2m';
+      const resolved = await resolve(admin, op, SOVEREIGN_TLDS.map((t) => `${probe}.${t}`));
+      const pricing = SOVEREIGN_TLDS
+        .map((tld) => {
+          const r = resolved.find((x) => x.domain === `${probe}.${tld}`);
+          return { tld, price: r?.price ?? null, currency: r?.currency ?? null };
+        })
+        .filter((p) => p.price != null);
+      return json({ pricing });
+    }
 
     if (action === 'check') {
       const domains = (body.domains as string[] | undefined)?.filter(Boolean) ?? [];
