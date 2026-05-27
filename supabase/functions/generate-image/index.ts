@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
 
     const style = STYLE[mediaClass as string] || STYLE.default;
     const fullPrompt = `${prompt.slice(0, 1800)}. Art direction: ${style}.`;
-    const size = orientation === 'portrait' ? '1024x1792' : orientation === 'square' ? '1024x1024' : '1792x1024';
+    const size = orientation === 'portrait' ? '1024x1536' : orientation === 'square' ? '1024x1024' : '1536x1024';
 
     const t0 = Date.now();
     const ac = new AbortController();
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
       resp = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({ model: 'dall-e-3', prompt: fullPrompt, size, n: 1, response_format: 'b64_json' }),
+        body: JSON.stringify({ model: 'gpt-image-1', prompt: fullPrompt, size, n: 1, quality: 'medium' }),
         signal: ac.signal,
       });
     } catch (e) {
@@ -82,13 +82,21 @@ Deno.serve(async (req) => {
     await logDiag('generate-image:openai-ok', `status=200 ms=${Date.now() - t0}`);
 
     const data = await resp.json();
-    const b64 = data?.data?.[0]?.b64_json;
-    if (!b64) {
-      await logDiag('generate-image', 'No b64_json in OpenAI response');
+    const item = data?.data?.[0] ?? {};
+    let bytes: Uint8Array;
+    if (item.b64_json) {
+      bytes = b64ToBytes(item.b64_json);
+    } else if (item.url) {
+      const imgResp = await fetch(item.url);
+      if (!imgResp.ok) {
+        await logDiag('generate-image:fetch-url', `status=${imgResp.status}`);
+        return new Response(JSON.stringify({ error: 'Failed to download generated image.' }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+      }
+      bytes = new Uint8Array(await imgResp.arrayBuffer());
+    } else {
+      await logDiag('generate-image', 'No b64_json or url in OpenAI response');
       return new Response(JSON.stringify({ error: 'No image returned from provider.' }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
-
-    const bytes = b64ToBytes(b64);
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const path = `generated/${(mediaClass || 'media')}-${Date.now()}.png`;
@@ -106,7 +114,7 @@ Deno.serve(async (req) => {
     }
 
     const url = `${supabaseUrl}/storage/v1/object/public/${BUCKET}/${path}`;
-    return new Response(JSON.stringify({ url, model_used: 'dall-e-3' }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+    return new Response(JSON.stringify({ url, model_used: 'gpt-image-1' }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   } catch (error) {
     await logDiag('generate-image:exception', (error as Error).message);
     return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
