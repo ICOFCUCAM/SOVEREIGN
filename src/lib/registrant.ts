@@ -13,7 +13,9 @@ export interface RegistrantProfile {
   first_name: string;
   last_name: string;
   email: string;
-  phone: string;
+  phone_country_code: string;
+  phone_area_code: string | null;
+  phone_subscriber: string;
   street: string;
   city: string;
   state: string | null;
@@ -52,4 +54,12 @@ export async function updateRegistrant(id: string, patch: Partial<RegistrantInpu
 export async function deleteRegistrant(id: string): Promise<void> {
   const { error } = await supabase.from('registrant_profiles').delete().eq('id', id);
   if (error) throw new Error(error.message);
+}
+
+// Create (or fetch cached) the Openprovider customer handle for a profile.
+export async function verifyRegistrantHandle(profileId: string): Promise<string> {
+  const { data, error } = await supabase.functions.invoke('op-customer', { body: { profile_id: profileId } });
+  if (error) throw new Error(error.message || 'Handle creation failed');
+  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+  return (data as { handle: string }).handle;
 }

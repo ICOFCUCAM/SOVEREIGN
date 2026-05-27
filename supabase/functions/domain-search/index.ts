@@ -19,6 +19,9 @@ const CHUNK = 10;                 // Openprovider per-request domain cap
 const BUCKET = 'op_search';
 const CAPACITY = 60;
 const REFILL_PER_SEC = 1;
+// Retail = reseller cost x (1 + markup). Configurable; default 15%.
+const MARKUP_BPS = Number(Deno.env.get('DOMAIN_MARKUP_BPS') || '1500');
+const retail = (cost: number | null) => (cost == null ? null : Math.round(cost * (1 + MARKUP_BPS / 10000) * 100) / 100);
 
 // Discovery TLD set — infrastructure-oriented, not a retail dump.
 const PRIMARY_TLDS = ['com', 'so', 'io', 'ai'];
@@ -115,7 +118,7 @@ class Openprovider {
         domain: r.domain,
         available: r.status === 'free',
         premium: Boolean(r.is_premium),
-        price: typeof p?.price === 'number' ? p.price : null,
+        price: retail(typeof p?.price === 'number' ? p.price : null),
         currency: p?.currency ?? null,
         status: r.status,
         source: 'live' as const,
