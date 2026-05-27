@@ -15,15 +15,18 @@ const SystemTiers: React.FC<{ p: EcosystemProduct; selected?: string }> = ({ p, 
     <section id="tiers" className="scroll-mt-24 px-4 sm:px-6 lg:px-8 py-12">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-end justify-between gap-4 mb-7">
-          <h2 className="text-2xl font-bold text-white">Acquisition tiers</h2>
-          <span className="text-[11px] font-mono uppercase tracking-widest text-white/35">{tiers.length} deployment tiers</span>
+          <div className="flex items-center gap-2.5">
+            <span className="w-6 h-px bg-cyan-300/50" />
+            <h2 className="font-display text-2xl font-bold tracking-cinematic text-white">Acquisition tiers</h2>
+          </div>
+          <span className="kicker text-white/35" style={{ fontSize: '10px' }}>{tiers.length} deployment tiers</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {tiers.map((t) => {
             const c = TIER_COLOR[t.tier] || p.accent || '#00C2FF';
             const active = selected?.toLowerCase() === t.tier.toLowerCase();
             return (
-              <Link key={t.tier} to={`/systems/${p.slug}?tier=${t.tier.toLowerCase()}`} className={`group relative block rounded-2xl border bg-white/[0.015] p-5 overflow-hidden transition-all hover:-translate-y-1 ${active ? 'border-white/30' : 'border-white/10 hover:border-white/25'}`} style={active ? { boxShadow: `0 0 30px ${c}33` } : undefined}>
+              <Link key={t.tier} to={`/systems/${p.slug}?tier=${t.tier.toLowerCase()}`} className={`group relative block rounded-2xl border bg-white/[0.015] p-5 overflow-hidden ease-cinematic transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_36px_80px_-44px_rgba(0,0,0,0.9)] ${active ? 'border-white/30' : 'border-white/10 hover:border-white/25'}`} style={active ? { boxShadow: `0 0 30px ${c}33` } : undefined}>
                 <span className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${c}, transparent)`, opacity: active ? 1 : 0.6 }} />
                 <span className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl opacity-15" style={{ background: c }} />
                 <HudCorners color={c} className="opacity-30" />
