@@ -81,10 +81,10 @@ const SovereignBriefing: React.FC<Props> = ({ accent = '#00C2FF', onClose }) => 
                 {STEPS.map((s, i) => (
                   <React.Fragment key={s}>
                     <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold transition-colors" style={{ background: i <= step ? accent : 'rgba(255,255,255,0.06)', color: i <= step ? '#05071A' : 'rgba(255,255,255,0.4)' }}>{i < step ? <Check className="w-3 h-3" /> : i + 1}</span>
+                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold transition-all duration-300" style={{ background: i <= step ? accent : 'rgba(255,255,255,0.06)', color: i <= step ? '#05071A' : 'rgba(255,255,255,0.4)', boxShadow: i === step ? `0 0 14px ${accent}88` : 'none' }}>{i < step ? <Check className="w-3 h-3" /> : i + 1}</span>
                       <span className={`text-[10px] font-mono uppercase tracking-[0.16em] ${i === step ? 'text-white' : 'text-white/35'}`}>{s}</span>
                     </div>
-                    {i < STEPS.length - 1 && <span className="flex-1 h-px bg-white/10" />}
+                    {i < STEPS.length - 1 && <span className="flex-1 h-px transition-colors duration-500" style={{ background: i < step ? `${accent}66` : 'rgba(255,255,255,0.1)' }} />}
                   </React.Fragment>
                 ))}
               </div>
