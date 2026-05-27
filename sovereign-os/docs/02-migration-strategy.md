@@ -39,8 +39,9 @@ around it.
       Remaining 8 platforms are typed dormant seams.
 - [x] Scheduling primitives: pure `dueCampaigns` + `repostSchedule` helpers for AI
       scheduling / smart reposting.
-- [ ] Wire the scheduler+dispatcher into a Node worker that drains `kind: 'campaign'` jobs
-      from the queue; test adapters against live platform endpoints (needs credentials).
+- [x] Wire the scheduler+dispatcher into a Node worker (`worker/`) that drains due campaigns
+      and publishes across the grid. Pure `processDueCampaigns` orchestration is
+      runtime-verified; the worker entry wires Supabase I/O. Live-endpoint test still pending.
 - [x] Implement X, Facebook, Instagram, Pinterest, Threads adapters (now 8/11 live;
       youtube/tiktok/whatsapp remain seams — resumable upload / approval / no public API).
 

@@ -8,6 +8,7 @@
     "packages/*",
     "apps/*",
     "layers/layer-2-distribution",
+    "layers/layer-2-distribution/worker",
     "layers/layer-3-intelligence",
     "layers/layer-1-media/worker"
   ],

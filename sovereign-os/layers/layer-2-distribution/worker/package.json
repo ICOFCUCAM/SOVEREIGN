@@ -1,0 +1,15 @@
+{
+  "name": "@sovereign/distribution-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Drains scheduled campaigns from the queue and dispatches them across the Distribution Grid.",
+  "main": "index.js",
+  "scripts": { "start": "node index.js" },
+  "dependencies": {
+    "@sovereign/distribution": "*",
+    "@supabase/supabase-js": "^2.49.4",
+    "express": "^4.19.2"
+  },
+  "engines": { "node": ">=20" }
+}
