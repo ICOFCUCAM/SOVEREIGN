@@ -190,7 +190,7 @@ const ChannelPage: React.FC = () => {
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 text-[10px] font-mono uppercase tracking-[0.28em] mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The sovereign channel
             </div>
-            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.94] max-w-3xl mb-7">
+            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-cinematic text-balance leading-[0.92] max-w-3xl mb-7">
               The operating mythology of <span className="text-gradient-cyan">sovereign civilization.</span>
             </h1>
             <p className="text-lg sm:text-xl text-white/55 max-w-2xl leading-relaxed mb-10">
@@ -227,7 +227,7 @@ const ChannelPage: React.FC = () => {
                       <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ch.accent}1a`, border: `1px solid ${ch.accent}33` }}><Icon className="w-5 h-5" style={{ color: ch.accent }} /></span>
                       <span className="text-[11px] font-mono uppercase tracking-[0.28em]" style={{ color: ch.accent }}>{ch.cls} · {ch.kicker}</span>
                     </div>
-                    <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98] mb-5">{ch.title}</h2>
+                    <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-cinematic text-balance text-white leading-[0.96] mb-5">{ch.title}</h2>
                     <p className="text-white/55 text-lg leading-relaxed max-w-md mb-8">{ch.desc}</p>
                     <div className="space-y-px rounded-xl overflow-hidden border border-white/8">
                       {c.episodes.map((ep) => (
@@ -263,7 +263,7 @@ const ChannelPage: React.FC = () => {
                     <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(255,84,112,0.12)', border: '1px solid rgba(255,84,112,0.3)' }}><ShieldAlert className="w-5 h-5" style={{ color: '#FF5470' }} /></span>
                     <span className="text-[11px] font-mono uppercase tracking-[0.28em] text-[#FF8FA3]">Interactive · crisis response</span>
                   </div>
-                  <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98]">Run a national crisis.</h2>
+                  <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-cinematic text-balance text-white leading-[0.96]">Run a national crisis.</h2>
                   <p className="text-white/55 text-lg leading-relaxed mt-4">Live simulations of national crises cascading across ministries — and the sovereign operating layer containing them. Choose a scenario, play it, or step through each phase.</p>
                 </div>
               </div>
