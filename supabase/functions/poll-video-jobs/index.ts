@@ -6,51 +6,50 @@ const corsHeaders = {
 };
 
 const BUCKET = 'ecosystem';
+const RUNWAY_BASE = 'https://api.dev.runwayml.com/v1';
+const RUNWAY_VERSION = '2024-11-06';
 
-// Polls processing video jobs against the configured provider and finalizes them.
-// Reads VIDEO_PROVIDER_STATUS_URL (status endpoint, job id appended as /{id})
-// and VIDEO_PROVIDER_KEY. Dormant (no-op) until those are set.
+// Polls processing Runway video tasks and finalizes them into storage + media.
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
-
-  const statusUrl = Deno.env.get('VIDEO_PROVIDER_STATUS_URL');
-  const providerKey = Deno.env.get('VIDEO_PROVIDER_KEY');
+  const runwayKey = Deno.env.get('RUNWAY_API_KEY') || Deno.env.get('RUNWAYML_API_SECRET') || Deno.env.get('VIDEO_PROVIDER_KEY');
 
   try {
     const { data: jobs } = await admin.from('pipeline_jobs').select('*').eq('kind', 'video').eq('status', 'processing').limit(20);
     if (!jobs || jobs.length === 0) {
-      return new Response(JSON.stringify({ checked: 0, note: 'no processing video jobs' }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+      return new Response(JSON.stringify({ checked: 0 }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
-    if (!statusUrl || !providerKey) {
-      return new Response(JSON.stringify({ checked: jobs.length, note: 'video provider status endpoint not configured; left pending' }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+    if (!runwayKey) {
+      return new Response(JSON.stringify({ checked: jobs.length, note: 'RUNWAY_API_KEY not configured; left pending' }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
 
     let finalized = 0;
     for (const job of jobs) {
-      const r = (job.result ?? {}) as Record<string, unknown>;
-      const providerId = (r.id || r.job_id || r.uuid || r.task_id) as string | undefined;
-      if (!providerId) continue;
+      const taskId = ((job.result ?? {}) as Record<string, unknown>).id as string | undefined;
+      if (!taskId) continue;
 
-      const st = await fetch(`${statusUrl.replace(/\/$/, '')}/${providerId}`, { headers: { Authorization: `Bearer ${providerKey}` } });
+      const st = await fetch(`${RUNWAY_BASE}/tasks/${taskId}`, {
+        headers: { Authorization: `Bearer ${runwayKey}`, 'X-Runway-Version': RUNWAY_VERSION },
+      });
       const body = await st.json().catch(() => ({}));
-      const status = String(body.status || body.state || '').toLowerCase();
-      const videoUrl = (body.url || body.output_url || body.video_url || (Array.isArray(body.output) ? body.output[0] : undefined)) as string | undefined;
+      const status = String(body.status || '').toUpperCase();
+      const videoUrl = Array.isArray(body.output) ? body.output[0] : (body.output as string | undefined);
 
-      if (['succeeded', 'completed', 'done', 'success'].includes(status) && videoUrl) {
+      if (status === 'SUCCEEDED' && videoUrl) {
         const vid = await fetch(videoUrl);
         if (vid.ok) {
           const bytes = new Uint8Array(await vid.arrayBuffer());
           const path = `video/${job.id}.mp4`;
           await admin.storage.from(BUCKET).upload(path, bytes, { contentType: 'video/mp4', upsert: true, cacheControl: '3600' });
-          const { data: pub } = admin.storage.from(BUCKET).getPublicUrl(path);
-          await admin.from('pipeline_jobs').update({ status: 'done', result_url: pub.publicUrl, updated_at: new Date().toISOString() }).eq('id', job.id);
+          const pub = admin.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+          await admin.from('pipeline_jobs').update({ status: 'done', result_url: pub, updated_at: new Date().toISOString() }).eq('id', job.id);
           finalized++;
         }
-      } else if (['failed', 'error', 'cancelled'].includes(status)) {
+      } else if (status === 'FAILED' || status === 'CANCELLED') {
         await admin.from('pipeline_jobs').update({ status: 'failed', error: JSON.stringify(body).slice(0, 500), updated_at: new Date().toISOString() }).eq('id', job.id);
       }
     }

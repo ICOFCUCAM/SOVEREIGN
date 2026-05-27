@@ -72,6 +72,7 @@ const AdminPage: React.FC = () => {
   const [pipelineBusy, setPipelineBusy] = useState<string | null>(null);
   const [filmTitle, setFilmTitle] = useState('');
   const [filmScript, setFilmScript] = useState('');
+  const [filmSeed, setFilmSeed] = useState('');
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [users, setUsers] = useState<UserRoleRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
@@ -444,10 +445,10 @@ const AdminPage: React.FC = () => {
     if (!filmScript.trim()) { toast.error('Add a script for the film'); return; }
     setPipelineBusy('film');
     try {
-      const { data, error } = await supabase.functions.invoke('render-video', { body: { script: filmScript.trim(), title: filmTitle.trim() || 'Untitled film', mediaClass: 'cinematic' } });
+      const { data, error } = await supabase.functions.invoke('render-video', { body: { script: filmScript.trim(), title: filmTitle.trim() || 'Untitled film', mediaClass: 'cinematic', promptImage: filmSeed.trim() || undefined } });
       if (error) throw error;
-      if (data?.error) { toast(data.error + (data.detail ? ` — ${data.detail}` : '')); } else { toast.success('Render submitted'); }
-      setFilmTitle(''); setFilmScript('');
+      if (data?.error) { toast(data.error + (data.detail ? ` — ${data.detail}` : '')); } else { toast.success('Render submitted — poller will finalize'); }
+      setFilmTitle(''); setFilmScript(''); setFilmSeed('');
       refreshPipelineJobs();
     } catch (e) { toast.error(`Render failed: ${(e as Error).message}`); }
     setPipelineBusy(null);
@@ -1198,7 +1199,8 @@ const AdminPage: React.FC = () => {
                 <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/[0.04] p-4 space-y-2">
                   <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-cyan-300/80"><Film className="w-3.5 h-3.5" /> Render film</div>
                   <input value={filmTitle} onChange={(e) => setFilmTitle(e.target.value)} placeholder="Film title" className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
-                  <textarea value={filmScript} onChange={(e) => setFilmScript(e.target.value)} placeholder="Script / shot description for the render…" rows={2} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 resize-none" />
+                  <textarea value={filmScript} onChange={(e) => setFilmScript(e.target.value)} placeholder="Script / motion description for the render…" rows={2} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 resize-none" />
+                  <input value={filmSeed} onChange={(e) => setFilmSeed(e.target.value)} placeholder="Optional seed image URL (else auto-generated via gpt-image-1)" className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-white font-mono placeholder:text-white/30" />
                   <button type="button" disabled={pipelineBusy !== null} onClick={renderFilm} className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50">
                     <Film className="w-3.5 h-3.5" /> {pipelineBusy === 'film' ? 'Submitting…' : 'Submit render'}
                   </button>
