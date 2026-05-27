@@ -302,7 +302,12 @@ const DeploymentOrchestrator: React.FC = () => {
                   className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
                 {searching && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-300 animate-spin" />}
               </div>
-              {searchErr && <div className="text-rose-300/80 text-sm mb-4">{searchErr}</div>}
+              {searchErr && (
+                <div className="text-rose-300/80 text-sm mb-4 flex items-center gap-3">
+                  <span>{searchErr}</span>
+                  <button onClick={() => runSearch(query)} className="px-2.5 py-1 rounded border border-rose-300/30 text-rose-100 hover:bg-rose-400/10 transition text-[11px] font-semibold">Retry</button>
+                </div>
+              )}
               <div className="grid sm:grid-cols-3 gap-2.5">
                 {results.map((r) => {
                   const on = picked === r.domain;
