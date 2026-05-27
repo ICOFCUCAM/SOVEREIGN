@@ -184,7 +184,7 @@ const DeploymentOrchestrator: React.FC = () => {
       <div className="absolute -top-24 -right-24 w-72 h-72 blur-[110px] opacity-20 pointer-events-none" style={{ background: 'radial-gradient(circle, #00D9FF, transparent 70%)' }} />
 
       {/* progress */}
-      <div className="flex items-center gap-2 mb-8">
+      <div className="flex items-center gap-2 mb-8" role="progressbar" aria-label="Deployment progress" aria-valuemin={1} aria-valuemax={4} aria-valuenow={step}>
         {[1, 2, 3, 4].map((n) => (
           <div key={n} className="flex-1 h-1 rounded-full overflow-hidden bg-white/8">
             <div className="h-full rounded-full transition-all duration-700 ease-cinematic" style={{ width: step >= n ? '100%' : '0%', background: 'linear-gradient(90deg,#00D9FF,#7C3AED)' }} />
