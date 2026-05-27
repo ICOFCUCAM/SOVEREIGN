@@ -30,6 +30,8 @@ Layer 1 is migrated and operational. Layers 2 and 3 have working seeds + complet
 seams. See `docs/02-migration-strategy.md` for the phased plan and `docs/03-architecture.md`
 for the full design.
 
+To deploy and exercise the live (non-CI) paths, follow `docs/05-deployment-runbook.md`.
+
 ## Getting started
 
 ```bash
