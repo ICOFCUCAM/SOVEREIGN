@@ -454,6 +454,20 @@ const AdminPage: React.FC = () => {
     } catch (e) { toast.error(`Render failed: ${(e as Error).message}`); }
     setPipelineBusy(null);
   };
+  const uploadFilmSeed = async (file: File) => {
+    if (!file) return;
+    setPipelineBusy('seed-upload');
+    try {
+      const ext = file.name.split('.').pop() || 'png';
+      const path = `video-seed/upload-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('ecosystem').upload(path, file, { upsert: true, cacheControl: '3600' });
+      if (error) throw error;
+      const { data } = supabase.storage.from('ecosystem').getPublicUrl(path);
+      setFilmSeed(data.publicUrl);
+      toast.success('Seed image uploaded — it will drive the render');
+    } catch (e) { toast.error(`Upload failed: ${(e as Error).message}`); }
+    setPipelineBusy(null);
+  };
   const produceFilm = async () => {
     if (!filmBrief.trim()) { toast.error('Describe the film to produce'); return; }
     setPipelineBusy('produce');
@@ -1223,7 +1237,14 @@ const AdminPage: React.FC = () => {
                   <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-cyan-300/80"><Film className="w-3.5 h-3.5" /> Render film</div>
                   <input value={filmTitle} onChange={(e) => setFilmTitle(e.target.value)} placeholder="Film title" className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30" />
                   <textarea value={filmScript} onChange={(e) => setFilmScript(e.target.value)} placeholder="Script / motion description for the render…" rows={2} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 resize-none" />
-                  <input value={filmSeed} onChange={(e) => setFilmSeed(e.target.value)} placeholder="Optional seed image URL (else auto-generated via gpt-image-1)" className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-white font-mono placeholder:text-white/30" />
+                  <div className="flex gap-2">
+                    <input value={filmSeed} onChange={(e) => setFilmSeed(e.target.value)} placeholder="Seed image URL — paste, upload, or leave blank to auto-generate" className="flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-white font-mono placeholder:text-white/30" />
+                    <label className={`shrink-0 px-3 py-2 rounded-lg border border-white/10 text-xs font-mono cursor-pointer flex items-center gap-1.5 ${pipelineBusy === 'seed-upload' ? 'opacity-50 pointer-events-none' : 'hover:bg-white/10 text-white/70'}`}>
+                      {pipelineBusy === 'seed-upload' ? 'Uploading…' : 'Upload image'}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFilmSeed(f); }} />
+                    </label>
+                  </div>
+                  {filmSeed && <img src={filmSeed} alt="" loading="lazy" decoding="async" className="w-full h-24 object-cover rounded-lg border border-white/10" />}
                   <button type="button" disabled={pipelineBusy !== null} onClick={renderFilm} className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50">
                     <Film className="w-3.5 h-3.5" /> {pipelineBusy === 'film' ? 'Submitting…' : 'Submit render'}
                   </button>
