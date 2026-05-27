@@ -6,14 +6,13 @@ import { dueCampaigns, isDue } from '../dist/scheduler.js';
 import { credentialEnv } from '../dist/credentials.js';
 import { processDueCampaigns } from '../dist/worker.js';
 
-test('registry: 11 platforms, 8 implemented / 3 seams', async () => {
+test('registry: all 11 platforms implemented (no seams), dormant without env', async () => {
   assert.equal(Object.keys(adapters).length, 11);
-  const seams = [];
   for (const p of Object.keys(adapters)) {
-    const r = await adapters[p].publish({ id: '1', channel: p, title: 't', body: 'b' }, {});
-    if (r.error && r.error.includes('not yet implemented')) seams.push(p);
+    const r = await adapters[p].publish({ id: '1', channel: p, title: 't', body: 'b', media_url: 'https://x/v.mp4' }, {});
+    assert.equal(r.dormant, true, `${p} should be dormant without env`);
+    assert.ok(!(r.error && r.error.includes('not yet implemented')), `${p} is still a seam`);
   }
-  assert.deepEqual(seams.sort(), ['tiktok', 'whatsapp', 'youtube']);
 });
 
 test('registry: liveAdapters gated by env', () => {

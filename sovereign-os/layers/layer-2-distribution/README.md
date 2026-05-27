@@ -6,9 +6,9 @@ Enterprise multi-platform publishing built around Layer 1's media output and the
 ## `src/` — the distribution library
 
 - `types.ts` — `PlatformAdapter` contract + `PublishResult`.
-- `adapters/` — concrete adapters and a `seam` factory:
-  - **Implemented:** `telegram` (Bot API), `bluesky` (AT Protocol), `linkedin` (UGC share).
-  - **Seams (typed, dormant):** x, instagram, facebook, tiktok, youtube, threads, whatsapp, pinterest.
+- `adapters/` — concrete adapters for **all 11 platforms** (no seams remain): telegram,
+  bluesky, linkedin, x, facebook, instagram, pinterest, threads, youtube (resumable upload),
+  tiktok (PULL_FROM_URL), whatsapp (Cloud API message send). All credential-gated.
 - `registry.ts` — every `DistributionPlatform` resolves to an adapter; `liveAdapters(env)`
   reports which are credential-ready.
 - `dispatcher.ts` — `publishCampaign(campaign)` routes to the channel adapter;

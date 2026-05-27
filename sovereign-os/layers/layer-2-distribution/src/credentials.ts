@@ -20,6 +20,9 @@ const MAPPERS: Record<string, (c: ResolvedConnection) => EnvShape> = {
   instagram: (c) => ({ IG_ACCESS_TOKEN: c.access_token, IG_USER_ID: c.meta?.ig_user_id ?? '' }),
   pinterest: (c) => ({ PINTEREST_ACCESS_TOKEN: c.access_token, PINTEREST_BOARD_ID: c.meta?.board_id ?? '' }),
   threads: (c) => ({ THREADS_ACCESS_TOKEN: c.access_token, THREADS_USER_ID: c.meta?.threads_user_id ?? '' }),
+  youtube: (c) => ({ YOUTUBE_ACCESS_TOKEN: c.access_token }),
+  tiktok: (c) => ({ TIKTOK_ACCESS_TOKEN: c.access_token }),
+  whatsapp: (c) => ({ WHATSAPP_ACCESS_TOKEN: c.access_token, WHATSAPP_PHONE_NUMBER_ID: c.meta?.phone_number_id ?? '', WHATSAPP_RECIPIENT: c.meta?.recipient ?? '' }),
 };
 
 /** Build an adapter-ready env from a client's resolved (decrypted) connections. */

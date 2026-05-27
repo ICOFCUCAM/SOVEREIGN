@@ -42,8 +42,10 @@ around it.
 - [x] Wire the scheduler+dispatcher into a Node worker (`worker/`) that drains due campaigns
       and publishes across the grid. Pure `processDueCampaigns` orchestration is
       runtime-verified; the worker entry wires Supabase I/O. Live-endpoint test still pending.
-- [x] Implement X, Facebook, Instagram, Pinterest, Threads adapters (now 8/11 live;
-      youtube/tiktok/whatsapp remain seams — resumable upload / approval / no public API).
+- [x] Implement X, Facebook, Instagram, Pinterest, Threads adapters.
+- [x] Implement youtube (resumable upload), tiktok (PULL_FROM_URL), whatsapp (Cloud API
+      message send) — **all 11 platforms now have adapters, no seams remain**. Follow
+      documented specs; credential-gated; not verified against live endpoints.
 
 ### Developer platform (own-your-API, vs Ayrshare)
 

@@ -9,7 +9,7 @@ strategic intelligence).
 
 | Capability | Ayrshare | Sovereign (now) | Sovereign (planned) |
 |---|---|---|---|
-| Multi-platform publish | all | Telegram, Bluesky, LinkedIn (+8 seams) | all native adapters |
+| Multi-platform publish | all | all 11 native adapters (untested live) | live-verified adapters |
 | Issue API keys to users | ✅ | ✅ `issue-key` + `@sovereign/api-platform` | key rotation UI |
 | Bearer tokens (signed, expiring) | ✅ | ✅ HMAC tokens w/ scopes + exp | refresh flow |
 | Scopes / permissions | ✅ | ✅ scope enforcement in `authenticate` | granular per-route |

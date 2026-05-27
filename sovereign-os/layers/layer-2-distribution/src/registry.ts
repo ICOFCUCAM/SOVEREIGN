@@ -1,5 +1,4 @@
 import type { DistributionPlatform, PlatformAdapter } from './types.js';
-import { seam } from './adapters/seam.js';
 import { telegram } from './adapters/telegram.js';
 import { bluesky } from './adapters/bluesky.js';
 import { linkedin } from './adapters/linkedin.js';
@@ -8,11 +7,14 @@ import { facebook } from './adapters/facebook.js';
 import { instagram } from './adapters/instagram.js';
 import { pinterest } from './adapters/pinterest.js';
 import { threads } from './adapters/threads.js';
+import { youtube } from './adapters/youtube.js';
+import { tiktok } from './adapters/tiktok.js';
+import { whatsapp } from './adapters/whatsapp.js';
 
-// Implemented adapters + typed seams for the remainder. The grid surface is complete:
-// every DistributionPlatform resolves to an adapter, live or dormant.
-// Seams (youtube/tiktok/whatsapp) need resumable upload / content-approval / no public
-// post API respectively, so they stay dormant until those flows are built.
+// Every DistributionPlatform now resolves to an implemented adapter. youtube/tiktok require
+// a video media_url (resumable upload / PULL_FROM_URL); whatsapp uses the Cloud API message
+// send (Channels have no public posting API). Adapters follow documented specs and are
+// credential-gated (dormant without env), but are not verified against live endpoints.
 export const adapters: Record<DistributionPlatform, PlatformAdapter> = {
   linkedin,
   telegram,
@@ -22,9 +24,9 @@ export const adapters: Record<DistributionPlatform, PlatformAdapter> = {
   instagram,
   pinterest,
   threads,
-  youtube: seam('youtube', ['YOUTUBE_ACCESS_TOKEN']),
-  tiktok: seam('tiktok', ['TIKTOK_ACCESS_TOKEN']),
-  whatsapp: seam('whatsapp', ['WHATSAPP_ACCESS_TOKEN']),
+  youtube,
+  tiktok,
+  whatsapp,
 };
 
 export function getAdapter(platform: DistributionPlatform): PlatformAdapter {
