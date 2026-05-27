@@ -322,7 +322,7 @@ const ChannelPage: React.FC = () => {
                   {campaigns.map((c) => {
                     const live = c.status === 'live';
                     return (
-                      <div key={c.id} className={`relative rounded-2xl border p-6 overflow-hidden ${live ? 'border-emerald-400/30 bg-emerald-400/[0.04]' : 'border-white/10 bg-white/[0.014]'}`}>
+                      <div key={c.id} className={`relative rounded-2xl border p-6 overflow-hidden ease-cinematic transition-all duration-500 hover:-translate-y-1 ${live ? 'border-emerald-400/30 bg-emerald-400/[0.04] hover:shadow-[0_36px_80px_-44px_rgba(16,229,160,0.35)]' : 'border-white/10 bg-white/[0.014] hover:border-white/25 hover:shadow-[0_36px_80px_-44px_rgba(0,0,0,0.9)]'}`}>
                         {live && <span className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, #10E5A0, transparent)' }} />}
                         <div className="flex items-center gap-2 mb-4">
                           {live ? <Radio className="w-4 h-4 text-emerald-300" /> : <CalendarClock className="w-4 h-4 text-cyan-300/70" />}
