@@ -1,0 +1,19 @@
+{
+  "name": "sovereign-os",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sovereign AI Media & Acquisition Infrastructure — a three-layer sovereign platform seeded from the migrated Media Acquisition Ecosystem.",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "layers/layer-1-media/worker"
+  ],
+  "scripts": {
+    "build": "tsc -b packages/core",
+    "typecheck": "tsc -b packages/core --noEmit",
+    "worker:dev": "npm --workspace sovereign-ffmpeg-worker run start"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
