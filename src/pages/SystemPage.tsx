@@ -132,8 +132,11 @@ const SystemPage: React.FC = () => {
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             {/* identity */}
             <div>
-              <div className="text-[11px] font-mono uppercase tracking-[0.25em] mb-3" style={{ color: accent }}>{product.category}</div>
-              <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tighter mb-4">
+              <div className="flex items-center gap-2.5 mb-4">
+                <span className="w-6 h-px" style={{ background: accent }} />
+                <span className="kicker" style={{ color: accent, letterSpacing: '0.25em' }}>{product.category}</span>
+              </div>
+              <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-cinematic text-balance mb-4" style={{ textShadow: `0 0 80px ${accent}1f` }}>
                 {product.name}{selectedTier && <span className="text-white/50"> · {selectedTier.tier}</span>}
               </h1>
               {selectedTier && (
@@ -163,8 +166,8 @@ const SystemPage: React.FC = () => {
 
               <div className="flex flex-wrap gap-3">
                 <button onClick={() => setGallery(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all"
-                  style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)`, boxShadow: `0 0 40px ${accent}30` }}>
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
+                  style={{ background: `linear-gradient(135deg, ${accent}, #7C3AED)`, boxShadow: `0 14px 40px -12px ${accent}66` }}>
                   <ExternalLink className="w-4 h-4" /> View preview
                 </button>
                 {tiers.length ? (
