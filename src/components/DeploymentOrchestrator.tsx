@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { searchDomains, formatPrice, type DomainResult } from '@/lib/registrar';
 import { listDeployments, createDeployment, type Deployment } from '@/lib/deployments';
+import { listRegistrants, type RegistrantProfile } from '@/lib/registrant';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from '@/components/AuthModal';
 import { toast } from 'sonner';
@@ -89,8 +90,14 @@ const DeploymentOrchestrator: React.FC = () => {
   const [mine, setMine] = useState<Deployment[]>([]);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [registrants, setRegistrants] = useState<RegistrantProfile[]>([]);
+  const [registrantId, setRegistrantId] = useState<string | null>(null);
 
-  useEffect(() => { if (user) listDeployments().then(setMine).catch(() => {}); else setMine([]); }, [user]);
+  useEffect(() => {
+    if (!user) { setMine([]); setRegistrants([]); return; }
+    listDeployments().then(setMine).catch(() => {});
+    listRegistrants().then(setRegistrants).catch(() => {});
+  }, [user]);
 
   const typeMeta = TYPES.find((t) => t.id === type);
 
@@ -118,7 +125,7 @@ const DeploymentOrchestrator: React.FC = () => {
     }, 450);
   }, []);
 
-  const reset = () => { setStep(1); setType(null); setStrategy(null); setExisting(''); setSub(''); setQuery(''); setResults([]); setPicked(null); setSavedId(null); };
+  const reset = () => { setStep(1); setType(null); setStrategy(null); setExisting(''); setSub(''); setQuery(''); setResults([]); setPicked(null); setSavedId(null); setRegistrantId(null); };
 
   const save = async () => {
     if (!user) { setAuthOpen(true); return; }
@@ -133,7 +140,7 @@ const DeploymentOrchestrator: React.FC = () => {
         domain: strategy === 'skip' ? null : strategy === 'existing' ? existing : picked,
         subdomain: strategy === 'skip' ? sub : null,
         lifecycle: LIFECYCLE_BY_STRATEGY[strategy],
-        blueprint: { typeId: type, typeLabel: typeMeta.label, strategy, domain: dec.label, detail: dec.detail },
+        blueprint: { typeId: type, typeLabel: typeMeta.label, strategy, domain: dec.label, detail: dec.detail, registrant_profile_id: registrantId },
       });
       setSavedId(dep.id);
       setMine((m) => [dep, ...m]);
@@ -339,6 +346,31 @@ const DeploymentOrchestrator: React.FC = () => {
               ))}
             </div>
           </div>
+          {(strategy === 'register' || strategy === 'recommend') && (
+            <div className="rounded-2xl border border-white/8 bg-white/[0.015] p-5 mb-7">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="kicker text-white/35">Registrant identity</div>
+                <Link to="/registrants" className="text-[11px] font-mono text-cyan-300/70 hover:text-cyan-300 inline-flex items-center gap-1">Manage <ArrowRight className="w-3 h-3" /></Link>
+              </div>
+              {registrants.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {registrants.map((r) => {
+                    const on = registrantId === r.id;
+                    return (
+                      <button key={r.id} onClick={() => setRegistrantId(on ? null : r.id)} className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all ${on ? 'border-cyan-400/50 bg-cyan-400/[0.08] text-white' : 'border-white/10 bg-white/[0.02] text-white/70 hover:border-white/25'}`}>
+                        {on && <Check className="w-3.5 h-3.5 text-cyan-300" />}
+                        {r.company_name || `${r.first_name} ${r.last_name}`}
+                        {r.op_handle && <span className="font-mono text-[10px] text-emerald-300/70">· verified</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-white/45">No registrant identities yet. <Link to="/registrants" className="text-cyan-300 hover:underline">Create one</Link> to attach to this deployment.</p>
+              )}
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-3">
             {savedId ? (
               <span className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500/10 border border-emerald-400/25 text-emerald-300 font-semibold"><Check className="w-4 h-4" /> Saved · resumable</span>
