@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import HudCorners from '@/components/HudCorners';
-import { Play, Pause, RotateCcw, Zap, ShieldAlert, HeartPulse } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { Play, Pause, RotateCcw, Zap, ShieldAlert, HeartPulse, AlertTriangle, Droplets, Flame, Globe } from 'lucide-react';
+
+const ICON_BY_KEY: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
+  alert: AlertTriangle, zap: Zap, shield: ShieldAlert, heart: HeartPulse, water: Droplets, flame: Flame, globe: Globe,
+};
 
 interface Phase { label: string; resilience: number; affected: number; clock: string; desc: string }
 interface Scenario {
@@ -66,10 +71,30 @@ const statusFor = (i: number, phase: number, sc: Scenario): Status => {
 };
 
 const CrisisSimulation: React.FC = () => {
+  const [scenarios, setScenarios] = useState<Scenario[]>(SCENARIOS);
   const [scenarioId, setScenarioId] = useState(SCENARIOS[0].id);
   const [phase, setPhase] = useState(0);
   const [playing, setPlaying] = useState(true);
-  const sc = SCENARIOS.find((s) => s.id === scenarioId)!;
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from('scenarios').select('*').eq('published', true).order('sort_order', { ascending: true });
+      if (!data || data.length === 0) return;
+      const mapped: Scenario[] = data.map((r: Record<string, unknown>) => ({
+        id: r.id as string,
+        label: r.label as string,
+        accent: (r.accent as string) || '#FF5470',
+        icon: ICON_BY_KEY[(r.icon_key as string)] || AlertTriangle,
+        origin: (r.origin as number) ?? 0,
+        down: Array.isArray(r.down) ? (r.down as number[]) : [],
+        respond: Array.isArray(r.respond) ? (r.respond as number[]) : [],
+        phases: Array.isArray(r.phases) ? (r.phases as Phase[]) : [],
+      })).filter((s) => s.phases.length === 5);
+      if (mapped.length) setScenarios([...SCENARIOS, ...mapped]);
+    })();
+  }, []);
+
+  const sc = scenarios.find((s) => s.id === scenarioId) ?? scenarios[0];
   const p = sc.phases[phase];
   const headColor = phase === 0 || phase === 4 ? COLOR.ok : phase === 1 ? COLOR.threat : phase === 3 ? COLOR.response : COLOR.down;
 
@@ -90,7 +115,7 @@ const CrisisSimulation: React.FC = () => {
       {/* scenario selector */}
       <div className="relative z-10 flex items-center gap-2 px-5 sm:px-7 pt-5 flex-wrap">
         <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/35 mr-1">Scenario</span>
-        {SCENARIOS.map((s) => {
+        {scenarios.map((s) => {
           const Icon = s.icon; const on = s.id === scenarioId;
           return (
             <button key={s.id} onClick={() => selectScenario(s.id)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-mono uppercase tracking-wider transition border ${on ? 'text-white' : 'text-white/45 border-white/10 hover:border-white/25'}`} style={on ? { background: `${s.accent}1f`, borderColor: `${s.accent}66` } : {}}>

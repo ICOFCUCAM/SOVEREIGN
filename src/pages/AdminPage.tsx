@@ -18,7 +18,8 @@ import {
   Boxes, ExternalLink, Film, Play, Sparkles,
 } from 'lucide-react';
 
-type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'channel' | 'narratives' | 'campaigns' | 'analytics' | 'ecosystem' | 'team' | 'activity';
+type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'channel' | 'narratives' | 'campaigns' | 'scenarios' | 'analytics' | 'ecosystem' | 'team' | 'activity';
+interface Scenario { id: string; label: string; accent: string; icon_key: string; origin: number; down: number[]; respond: number[]; phases: Array<{ label: string; resilience: number; affected: number; clock: string; desc: string }>; published: boolean; sort_order: number; created_at: string }
 interface MediaItem { id: string; media_class: string; kind: string; title: string; meta: string | null; length: string | null; youtube_id: string | null; sort_order: number }
 interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null; published: boolean; sort_order: number; cover_image_url: string | null }
 interface Campaign { id: string; name: string; media_class: string | null; channel: string; status: string; asset_ref: string | null; scheduled_at: string | null; created_at: string }
@@ -63,6 +64,9 @@ const AdminPage: React.FC = () => {
   const [briefingFilter, setBriefingFilter] = useState<string>('all');
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
   const [openAnalysis, setOpenAnalysis] = useState<string | null>(null);
+  const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [scenarioBrief, setScenarioBrief] = useState('');
+  const [genScenario, setGenScenario] = useState(false);
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [users, setUsers] = useState<UserRoleRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
@@ -96,9 +100,11 @@ const AdminPage: React.FC = () => {
     const med = await supabase.from('media').select('*').order('media_class', { ascending: true }).order('sort_order', { ascending: true });
     const nar = await supabase.from('narratives').select('*').order('sort_order', { ascending: true });
     const camp = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
+    const scn = await supabase.from('scenarios').select('*').order('sort_order', { ascending: true });
     setMedia((med.data || []) as MediaItem[]);
     setNarratives((nar.data || []) as Narrative[]);
     setCampaigns((camp.data || []) as Campaign[]);
+    setScenarios((scn.data || []) as Scenario[]);
     setDomains((d.data || []) as Domain[]);
     setLeads((l.data || []) as Lead[]);
     setBriefings((inq.data || []) as Inquiry[]);
@@ -379,6 +385,39 @@ const AdminPage: React.FC = () => {
     if (error) { toast.error(error.message); return; } toast.success('Deleted'); loadAll();
   };
 
+  const generateScenario = async () => {
+    if (!scenarioBrief.trim()) { toast.error('Describe the crisis to simulate'); return; }
+    setGenScenario(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-scenario', { body: { brief: scenarioBrief.trim() } });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const s = data.scenario;
+      if (!s || !Array.isArray(s.phases) || s.phases.length !== 5) throw new Error('Model returned an invalid scenario shape');
+      const { error: insErr } = await supabase.from('scenarios').insert({
+        label: s.label, accent: s.accent, icon_key: s.icon_key, origin: s.origin,
+        down: s.down, respond: s.respond, phases: s.phases, published: true, sort_order: scenarios.length + 1,
+      });
+      if (insErr) throw insErr;
+      toast.success('Scenario generated & published');
+      setScenarioBrief('');
+      loadAll();
+    } catch (e) {
+      toast.error(`Scenario generation failed: ${(e as Error).message}`);
+    }
+    setGenScenario(false);
+  };
+  const toggleScenario = async (s: Scenario) => {
+    const { error } = await supabase.from('scenarios').update({ published: !s.published }).eq('id', s.id);
+    if (error) { toast.error(error.message); return; }
+    setScenarios((prev) => prev.map((x) => (x.id === s.id ? { ...x, published: !x.published } : x)));
+  };
+  const deleteScenario = async (id: string) => {
+    if (!confirm('Delete this scenario?')) return;
+    const { error } = await supabase.from('scenarios').delete().eq('id', id);
+    if (error) { toast.error(error.message); return; } toast.success('Deleted'); loadAll();
+  };
+
   const updateInquiryStatus = async (id: string, status: string) => {
     setBriefings((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
     await supabase.from('inquiries').update({ status }).eq('id', id);
@@ -621,6 +660,7 @@ const AdminPage: React.FC = () => {
               { id: 'channel', label: `Channel (${media.length})`, icon: Film },
               { id: 'narratives', label: `Dispatches (${narratives.length})`, icon: FileText },
               { id: 'campaigns', label: `Campaigns (${campaigns.length})`, icon: Radio },
+              { id: 'scenarios', label: `Scenarios (${scenarios.length})`, icon: ShieldAlert },
               { id: 'analytics', label: 'Analytics', icon: BarChart3 },
               { id: 'ecosystem', label: `Ecosystem (${systems.length})`, icon: Boxes },
               { id: 'team', label: `Access (${users.length})`, icon: ShieldCheck },
@@ -1069,6 +1109,34 @@ const AdminPage: React.FC = () => {
                   </div>
                 ))}
                 {campaigns.length === 0 && <div className="px-5 py-12 text-center text-white/40">No campaigns yet.</div>}
+              </div>
+            </div>
+          )}
+
+          {/* Scenarios tab */}
+          {tab === 'scenarios' && (
+            <div className="space-y-4">
+              <p className="text-sm text-white/50">Generate AI crisis simulations that play live on the public Channel command center. Each renders across the 7-node ministry mesh (Power · Comms · Transport · Emergency · Health · Justice · Treasury).</p>
+              <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/[0.04] p-4 space-y-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-cyan-300/80"><Sparkles className="w-3.5 h-3.5" /> Scenario generator</div>
+                <textarea value={scenarioBrief} onChange={(e) => setScenarioBrief(e.target.value)} placeholder="Describe the crisis — e.g. 'A coordinated ransomware strike on the national treasury during an election', or 'A category-5 storm overwhelming health and transport'…" rows={2} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 resize-none" />
+                <button type="button" disabled={genScenario} onClick={generateScenario} className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 disabled:opacity-50">
+                  <Sparkles className="w-3.5 h-3.5" /> {genScenario ? 'Designing simulation…' : 'Generate & publish'}
+                </button>
+              </div>
+              <div className="glass-strong rounded-2xl overflow-hidden divide-y divide-white/5">
+                {scenarios.map((s) => (
+                  <div key={s.id} className="flex items-center gap-4 px-5 py-3.5">
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: s.accent }} />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm text-white truncate">{s.label}</div>
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-white/35">{Array.isArray(s.phases) ? s.phases.length : 0} phases · origin node {s.origin} · {Array.isArray(s.down) ? s.down.length : 0} affected</div>
+                    </div>
+                    <button onClick={() => toggleScenario(s)} className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${s.published ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/5 text-white/35'}`}>{s.published ? 'live' : 'hidden'}</button>
+                    <button onClick={() => deleteScenario(s.id)} aria-label="Delete" className="text-white/40 hover:text-rose-300 transition shrink-0"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                {scenarios.length === 0 && <div className="px-5 py-12 text-center text-white/40">No AI scenarios yet — the three built-in simulations always play on the Channel. Generate one to add to them.</div>}
               </div>
             </div>
           )}
