@@ -171,7 +171,11 @@ const DeploymentOrchestrator: React.FC = () => {
   const domainDecision = (): { label: string; detail: string } => {
     if (strategy === 'existing') return { label: existing || 'existing domain', detail: 'Connected — no registration required' };
     if (strategy === 'skip') return { label: `${sub || 'tenant'}.sovereign.so`, detail: 'Sovereign subdomain · connect a permanent domain later' };
-    if (picked) return { label: picked, detail: 'Selected for sovereign registration (reservation only)' };
+    if (picked) {
+      const pr = results.find((r) => r.domain === picked);
+      const price = pr?.price != null ? `${formatPrice(pr.price, pr.currency)}/yr · ` : '';
+      return { label: picked, detail: `${price}selected for sovereign registration (reservation only)` };
+    }
     return { label: 'Pending', detail: 'No domain selected' };
   };
 
