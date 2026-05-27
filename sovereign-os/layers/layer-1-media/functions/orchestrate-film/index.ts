@@ -1,4 +1,6 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { insertJob, transition } from '../_shared/queue.ts';
+import { isMediaClass, MEDIA_CLASS_PRESETS, mediaDirective, type MediaClass } from '../_shared/media.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,8 +11,9 @@ const BUCKET = 'ecosystem';
 const RUNWAY_BASE = 'https://api.dev.runwayml.com/v1';
 const RUNWAY_VERSION = '2024-11-06';
 
-function filmSystem(n: number): string {
-  return 'You are a cinematic director for CIVICOS / SOVEREIGN, a sovereign-civilization infrastructure ecosystem. ' +
+function filmSystem(n: number, mediaClass: MediaClass): string {
+  return 'You are a cinematic director for the Sovereign AI Media & Acquisition Infrastructure. ' +
+    `${mediaDirective(mediaClass)} ` +
     `Break the brief into exactly ${n} sequential scenes that tell one continuous story. Return STRICT JSON only: ` +
     '{"title":"<short film title>",' +
     '"narration_script":"<full continuous voiceover across all scenes, house voice: institutional, restrained, inevitable, no hype, no emoji>",' +
@@ -37,21 +40,23 @@ Deno.serve(async (req) => {
   const runwayKey = Deno.env.get('RUNWAY_API_KEY') || Deno.env.get('RUNWAYML_API_SECRET') || Deno.env.get('VIDEO_PROVIDER_KEY');
 
   try {
-    const { brief = '', scenes = 4, seedImages = [] } = await req.json().catch(() => ({}));
+    const { brief = '', scenes, seedImages = [], mediaClass: rawClass } = await req.json().catch(() => ({}));
     if (!brief || typeof brief !== 'string') {
       return new Response(JSON.stringify({ error: 'A non-empty "brief" string is required.' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
     if (!anthropicKey || !openaiKey) {
       return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY and OPENAI_API_KEY are required.' }), { status: 503, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
-    const sceneCount = Math.max(1, Math.min(6, Math.round(Number(scenes) || 4)));
+    const mediaClass: MediaClass = isMediaClass(rawClass) ? rawClass : 'cinematic';
+    const defaultScenes = MEDIA_CLASS_PRESETS[mediaClass].scenes;
+    const sceneCount = Math.max(1, Math.min(6, Math.round(Number(scenes) || defaultScenes)));
     const overrides: string[] = Array.isArray(seedImages) ? seedImages : [];
 
     // 1) Director: brief -> scenes + narration.
     const dir = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'x-api-key': anthropicKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-opus-4-7', max_tokens: 2500, system: filmSystem(sceneCount), thinking: { type: 'adaptive' }, messages: [{ role: 'user', content: `Design a ${sceneCount}-scene film for: ${brief}` }] }),
+      body: JSON.stringify({ model: 'claude-opus-4-7', max_tokens: 2500, system: filmSystem(sceneCount, mediaClass), thinking: { type: 'adaptive' }, messages: [{ role: 'user', content: `Design a ${sceneCount}-scene film for: ${brief}` }] }),
     });
     if (!dir.ok) {
       return new Response(JSON.stringify({ error: `Director (Claude) error (${dir.status})`, detail: (await dir.text()).slice(0, 400) }), { status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
@@ -64,8 +69,7 @@ Deno.serve(async (req) => {
     const title = String(plan.title || 'Untitled film').slice(0, 80);
     const planScenes: Array<{ image_prompt?: string; motion_prompt?: string }> = Array.isArray(plan.scenes) ? plan.scenes.slice(0, sceneCount) : [];
 
-    const { data: filmJob } = await admin.from('pipeline_jobs').insert({ kind: 'film', status: 'processing', provider: 'runway+openai', title, input: { brief: brief.slice(0, 1000), scene_count: sceneCount } }).select('id').single();
-    const filmId = filmJob?.id as string | undefined;
+    const filmId = await insertJob(admin, { kind: 'film', status: 'processing', provider: 'runway+openai', title, media_class: mediaClass, input: { brief: brief.slice(0, 1000), scene_count: sceneCount, media_class: mediaClass } });
 
     // 2) Per-scene seed image (override or gpt-image-1) -> Runway clip. Run scenes in parallel.
     const sceneWork = planScenes.map(async (sc, i) => {
@@ -98,7 +102,7 @@ Deno.serve(async (req) => {
       }
       await admin.from('pipeline_jobs').insert({
         kind: 'video', status: taskId ? 'processing' : 'failed', provider: 'runway', title: `${title} — scene ${i + 1}`,
-        result: { id: taskId, seedUrl, film_id: filmId, scene: i }, error: err ?? null,
+        media_class: mediaClass, result: { id: taskId, seedUrl, film_id: filmId, scene: i }, error: err ?? null,
       });
       return { scene: i, taskId, seedUrl, err };
     });
@@ -115,7 +119,7 @@ Deno.serve(async (req) => {
       const aPath = `narration/${filmId}.mp3`;
       await admin.storage.from(BUCKET).upload(aPath, audio, { contentType: 'audio/mpeg', upsert: true, cacheControl: '3600' });
       const url = admin.storage.from(BUCKET).getPublicUrl(aPath).data.publicUrl;
-      await admin.from('pipeline_jobs').insert({ kind: 'narration', status: 'done', provider: 'openai-tts', title, result_url: url });
+      await insertJob(admin, { kind: 'narration', status: 'done', provider: 'openai-tts', title, media_class: mediaClass, result_url: url });
       return url;
     })();
 
@@ -123,15 +127,14 @@ Deno.serve(async (req) => {
     const anyClip = sceneResults.some((s) => s.taskId);
 
     if (filmId) {
-      await admin.from('pipeline_jobs').update({
+      await transition(admin, filmId, {
         status: anyClip ? 'processing' : 'failed',
-        result: { scene_count: sceneCount, narration_url: narrationUrl, scenes: sceneResults },
+        result: { scene_count: sceneCount, media_class: mediaClass, narration_url: narrationUrl, scenes: sceneResults },
         error: anyClip ? null : 'No scene clips were submitted (check RUNWAY_API_KEY / credits).',
-        updated_at: new Date().toISOString(),
-      }).eq('id', filmId);
+      });
     }
 
-    return new Response(JSON.stringify({ film_id: filmId, title, scene_count: sceneCount, narration_url: narrationUrl, scenes: sceneResults }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+    return new Response(JSON.stringify({ film_id: filmId, title, media_class: mediaClass, scene_count: sceneCount, narration_url: narrationUrl, scenes: sceneResults }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   } catch (error) {
     return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
   }

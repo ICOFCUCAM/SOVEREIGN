@@ -21,6 +21,7 @@ export interface PipelineJob {
   status: JobStatus;
   provider?: string | null;
   title?: string | null;
+  media_class?: MediaClass | null;
   input?: Record<string, unknown> | null;
   result?: Record<string, unknown> | null;
   result_url?: string | null;

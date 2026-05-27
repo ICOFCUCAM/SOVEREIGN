@@ -14,11 +14,15 @@ around it.
 - [x] Reconstruct the foundation DB schema (`db/migrations/0001_pipeline_foundation.sql`).
 - [x] Seed Layer 2 (`post-campaign`) and Layer 3 (`analyze-lead`) with adapter/agent seams.
 
-## Phase 2 — Layer 1 hardening
+## Phase 2 — Layer 1 hardening (in progress)
 
-- [ ] Repoint migrated functions to import `@sovereign/core` helpers (replace inlined queue calls).
-- [ ] Add the four media classes (cinematic / operational / strategic / crisis) as a typed
-      `media_class` on jobs and as director presets in `orchestrate-film`.
+- [x] Introduce a shared queue/media seam for the Deno edge runtime (`functions/_shared/`),
+      mirroring `@sovereign/core` (`jobs.ts`/`media.ts`); repoint `orchestrate-film` onto it.
+- [x] Add the four media classes (cinematic / operational / strategic / crisis) as a typed
+      `media_class` on jobs and as director presets in `orchestrate-film`
+      (`db/migrations/0002_media_class.sql`, `packages/core/src/media.ts`).
+- [ ] Repoint the remaining media functions (`render-video`, `poll-video-jobs`, `generate-narration`,
+      `assemble-film`) onto the shared seam and thread `media_class` through.
 - [ ] Build the executive command dashboard (Next.js app) reusing the source `ui/` + cinematic components.
 
 ## Phase 3 — Layer 2 (Sovereign Distribution Grid)
