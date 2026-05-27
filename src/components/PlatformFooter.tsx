@@ -71,7 +71,7 @@ const OpsTerminal: React.FC = () => {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           {REGIONS.map(([r, s]) => (
             <span key={r} className="inline-flex items-center gap-1.5 text-white/50">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: s === 'online' ? '#10B981' : '#F59E0B' }} />
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: s === 'online' ? '#10B981' : '#F59E0B', boxShadow: `0 0 6px ${s === 'online' ? '#10B981' : '#F59E0B'}` }} />
               {r}
             </span>
           ))}
@@ -144,10 +144,10 @@ const PlatformFooter: React.FC = () => {
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <div className="text-white text-sm font-semibold mb-4">{col.title}</div>
+              <div className="kicker text-white/45 mb-4">{col.title}</div>
               <ul className="space-y-2.5 text-sm text-white/50">
                 {col.links.map((l) => (
-                  <li key={l.label}><Link to={l.to} className="hover:text-cyan-400 transition">{l.label}</Link></li>
+                  <li key={l.label}><Link to={l.to} className="inline-flex items-center gap-1.5 hover:text-cyan-300 transition-all duration-300 hover:translate-x-0.5">{l.label}</Link></li>
                 ))}
               </ul>
             </div>
