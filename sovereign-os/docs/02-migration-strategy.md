@@ -41,8 +41,8 @@ around it.
       scheduling / smart reposting.
 - [ ] Wire the scheduler+dispatcher into a Node worker that drains `kind: 'campaign'` jobs
       from the queue; test adapters against live platform endpoints (needs credentials).
-- [ ] Implement the remaining 8 adapters (X, Instagram, Facebook, TikTok, YouTube, Threads,
-      WhatsApp, Pinterest).
+- [x] Implement X, Facebook, Instagram, Pinterest, Threads adapters (now 8/11 live;
+      youtube/tiktok/whatsapp remain seams — resumable upload / approval / no public API).
 
 ### Developer platform (own-your-API, vs Ayrshare)
 
@@ -52,8 +52,9 @@ around it.
       api_usage, webhooks.
 - [x] `gateway/functions`: `issue-key` (admin-gated mint) + `_shared/auth.ts` (key verify,
       scope + monthly-quota enforcement, usage metering). Dashboard API Keys panel.
-- [ ] OAuth flows + encryption-at-rest for the `social_connections` token vault.
-- [ ] HMAC-signed webhook delivery; usage/billing dashboards.
+- [x] Encryption-at-rest for the token vault (`vault.ts`, AES-256-GCM) — built + verified.
+- [x] HMAC-signed webhook delivery (`webhooks.ts`, sign/verify/deliver) — built + verified.
+- [ ] OAuth connect flows that populate `social_connections`; usage/billing dashboards.
 - [ ] Deno edge functions need live-runtime verification (no `deno` in CI yet).
 
 ## Phase 4 — Layer 3 (Strategic Intelligence Engine)

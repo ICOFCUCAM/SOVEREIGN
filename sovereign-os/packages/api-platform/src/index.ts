@@ -2,4 +2,6 @@ export * from './keys.js';
 export * from './tokens.js';
 export * from './scopes.js';
 export * from './usage.js';
+export * from './vault.js';
+export * from './webhooks.js';
 export * from './types.js';
