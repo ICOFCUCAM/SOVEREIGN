@@ -55,7 +55,12 @@ around it.
       scope + monthly-quota enforcement, usage metering). Dashboard API Keys panel.
 - [x] Encryption-at-rest for the token vault (`vault.ts`, AES-256-GCM) — built + verified.
 - [x] HMAC-signed webhook delivery (`webhooks.ts`, sign/verify/deliver) — built + verified.
-- [ ] OAuth connect flows that populate `social_connections`; usage/billing dashboards.
+- [x] OAuth connect flow: `oauth.ts` helpers (provider configs, authorize-URL, code
+      exchange — runtime-verified) + `gateway/oauth-start`/`oauth-callback` that exchange,
+      encrypt (vault), and store tokens in `social_connections`. Node↔Deno vault format
+      verified compatible. `credentialEnv()` resolves a client's decrypted connections into
+      adapter env, so publishing runs per-client off the vault.
+- [ ] Usage/billing dashboards; live-endpoint + Deno runtime verification.
 - [ ] Deno edge functions need live-runtime verification (no `deno` in CI yet).
 
 ## Phase 4 — Layer 3 (Strategic Intelligence Engine) (in progress)

@@ -4,4 +4,5 @@ export * from './scopes.js';
 export * from './usage.js';
 export * from './vault.js';
 export * from './webhooks.js';
+export * from './oauth.js';
 export * from './types.js';

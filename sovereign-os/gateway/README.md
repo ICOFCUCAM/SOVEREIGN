@@ -37,6 +37,18 @@ if (!auth.ok) return new Response(JSON.stringify({ error: auth.error }), { statu
 // auth.ctx => { clientId, keyId, scopes }
 ```
 
+## Connect a social account (OAuth → vault)
+
+1. `POST gateway/oauth-start` (admin) `{ client_id, platform }` → `{ authorize_url, state }`.
+2. Client authorizes; provider redirects to `gateway/oauth-callback?code=…&state=…`.
+3. Callback exchanges the code, **encrypts** the token with `SOVEREIGN_VAULT_KEY`, and stores
+   it in `social_connections` for that client.
+4. The distribution worker decrypts the connection and `credentialEnv()` turns it into the
+   env each adapter reads — so publishing runs on behalf of that client, not global env.
+
+Supported OAuth providers: x, linkedin, facebook, pinterest, threads. Per provider set
+`<PLATFORM>_OAUTH_CLIENT_ID` / `<PLATFORM>_OAUTH_CLIENT_SECRET` + `OAUTH_REDIRECT_URI`.
+
 ## Status / caveats
 
 `@sovereign/api-platform` is built and its crypto is runtime-verified (hash/verify, token

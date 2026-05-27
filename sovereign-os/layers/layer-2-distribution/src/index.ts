@@ -3,3 +3,4 @@ export * from './registry.js';
 export * from './dispatcher.js';
 export * from './scheduler.js';
 export * from './worker.js';
+export * from './credentials.js';
