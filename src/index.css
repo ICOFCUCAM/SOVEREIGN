@@ -54,13 +54,28 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.06), 0 24px 60px -32px rgba(0,0,0,0.7);
   }
   .glass-strong {
     background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.09), 0 40px 100px -44px rgba(0,0,0,0.85);
   }
+  /* Cinematic motion token — used for premium lifts and reveals. */
+  .ease-cinematic { transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+  /* Premium hover lift for institutional cards. */
+  .elevate { transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.5s, box-shadow 0.5s; will-change: transform; }
+  .elevate:hover { transform: translateY(-4px); box-shadow: 0 50px 110px -48px rgba(0,0,0,0.9); }
+  /* Mono kicker label — the institutional eyebrow rhythm. */
+  .kicker { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; }
+  /* Hairline divider that fades into the void. */
+  .hairline { height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.16), transparent); }
+  /* Balanced headline wrapping for cinematic display type. */
+  .text-balance { text-wrap: balance; }
+  /* Tighter optical tracking for large display headings. */
+  .tracking-cinematic { letter-spacing: -0.035em; }
   .text-gradient-cyan {
     background: linear-gradient(135deg, #00D9FF 0%, #7C3AED 100%);
     -webkit-background-clip: text;
@@ -221,8 +236,8 @@
 
 ::selection { background: rgba(0, 217, 255, 0.28); color: #fff; }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 10px; height: 10px; }
+/* Custom scrollbar — refined to a thin sovereign rail */
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: #05071A; }
-::-webkit-scrollbar-thumb { background: rgba(0,217,255,0.2); border-radius: 5px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0,217,255,0.4); }
+::-webkit-scrollbar-thumb { background: rgba(0,217,255,0.18); border-radius: 4px; border: 2px solid #05071A; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,217,255,0.36); background-clip: padding-box; }
