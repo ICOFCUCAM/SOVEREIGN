@@ -26,12 +26,41 @@ const STRATEGIES: Array<{ id: Strategy; label: string; icon: React.ElementType; 
   { id: 'skip', label: 'Continue Without Domain', icon: Server, hint: 'Deploy now on a sovereign subdomain' },
 ];
 
-const INFRA_STEPS = [
-  { icon: Network, label: 'Connect DNS zone' },
-  { icon: ShieldCheck, label: 'Provision SSL certificate' },
-  { icon: Server, label: 'Configure nameservers' },
-  { icon: Route, label: 'Route services to edge' },
-];
+// Infrastructure provisioning plan, adapted to the institution's domain strategy.
+const INFRA_BY_STRATEGY: Record<Strategy, Array<{ icon: React.ElementType; label: string }>> = {
+  existing: [
+    { icon: Network, label: 'Migrate DNS · point nameservers' },
+    { icon: Server, label: 'Import existing zone records' },
+    { icon: ShieldCheck, label: 'Provision SSL certificate' },
+    { icon: Route, label: 'Route services to edge' },
+  ],
+  register: [
+    { icon: Globe, label: 'Register sovereign identity' },
+    { icon: Network, label: 'Connect DNS zone' },
+    { icon: ShieldCheck, label: 'Provision SSL certificate' },
+    { icon: Route, label: 'Route services to edge' },
+  ],
+  recommend: [
+    { icon: Globe, label: 'Register sovereign identity' },
+    { icon: Network, label: 'Connect DNS zone' },
+    { icon: ShieldCheck, label: 'Provision SSL certificate' },
+    { icon: Route, label: 'Route services to edge' },
+  ],
+  skip: [
+    { icon: Server, label: 'Assign sovereign subdomain' },
+    { icon: ShieldCheck, label: 'Provision SSL certificate' },
+    { icon: Route, label: 'Route services to edge' },
+    { icon: Network, label: 'Attach permanent domain later' },
+  ],
+};
+
+// The lifecycle intelligently adapts to deployment strategy.
+const LIFECYCLE_BY_STRATEGY: Record<Strategy, string[]> = {
+  existing: ['Connect', 'Operate', 'Deploy'],
+  register: ['Acquire', 'Register', 'Connect', 'Operate', 'Deploy'],
+  recommend: ['Acquire', 'Register', 'Connect', 'Operate', 'Deploy'],
+  skip: ['Operate', 'Deploy'],
+};
 
 const sanitizeSub = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9-]/g, '').replace(/^-+|-+$/g, '').slice(0, 40);
 
@@ -222,10 +251,27 @@ const DeploymentOrchestrator: React.FC = () => {
               <div className="text-[11px] text-white/45 mt-1">{domainDecision().detail}</div>
             </div>
           </div>
+          {/* Adaptive lifecycle */}
+          {strategy && (
+            <div className="rounded-2xl border border-white/8 bg-white/[0.015] p-5 mb-3">
+              <div className="kicker text-white/35 mb-4">Adapted deployment lifecycle</div>
+              <div className="flex flex-wrap items-center gap-y-2">
+                {LIFECYCLE_BY_STRATEGY[strategy].map((stage, i, arr) => (
+                  <React.Fragment key={stage}>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-400/[0.08] border border-cyan-400/20 text-sm text-white font-medium">
+                      <span className="font-mono text-[10px] text-cyan-300/60">{String(i + 1).padStart(2, '0')}</span>{stage}
+                    </span>
+                    {i < arr.length - 1 && <ArrowRight className="w-3.5 h-3.5 text-white/25 mx-1.5" />}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.03] p-5 mb-7">
             <div className="kicker text-cyan-300/70 mb-4">Infrastructure provisioning plan</div>
             <div className="grid sm:grid-cols-2 gap-y-3 gap-x-6">
-              {INFRA_STEPS.map((s) => (
+              {(strategy ? INFRA_BY_STRATEGY[strategy] : []).map((s) => (
                 <div key={s.label} className="flex items-center gap-3 text-sm text-white/70"><s.icon className="w-4 h-4 text-cyan-300/70 shrink-0" />{s.label}</div>
               ))}
             </div>

@@ -8,6 +8,11 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { toast } from 'sonner';
 import { Search, Check, X, Sparkles, ArrowRight, ShieldCheck, Globe, Server, Rocket, Loader2, Crown } from 'lucide-react';
 import { searchDomains, getTldPricing, formatPrice, type DomainResult, type SearchResponse, type TldPrice } from '@/lib/registrar';
+import { resolveTenant, isRegistrarHost } from '@/lib/tenant';
+
+// On domains.sovereign.so the namespace is a commercial registrar product; on
+// the main ecosystem it is an infrastructure identity layer, not a product.
+const IS_REGISTRAR = isRegistrarHost(resolveTenant().hostname);
 
 const FLOW = [
   { icon: Search, label: 'Acquire', desc: 'Discover the namespace' },
@@ -115,14 +120,20 @@ const DomainsPage: React.FC = () => {
 
       <main className="pt-32 pb-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
-          {/* Hero */}
+          {/* Hero — adapts to host: commercial registrar vs. identity layer */}
           <div className="text-center mb-10">
-            <div className="kicker text-cyan-300/70 mb-4" style={{ letterSpacing: '0.3em' }}>Sovereign internet infrastructure</div>
+            <div className="kicker text-cyan-300/70 mb-4" style={{ letterSpacing: '0.3em' }}>
+              {IS_REGISTRAR ? 'Sovereign domain registrar' : 'Sovereign internet infrastructure'}
+            </div>
             <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-cinematic text-balance leading-[0.98] mb-5">
-              Claim your place in the<br className="hidden sm:block" /> sovereign namespace.
+              {IS_REGISTRAR
+                ? <>Register your <br className="hidden sm:block" /> sovereign domain.</>
+                : <>Claim your place in the<br className="hidden sm:block" /> sovereign namespace.</>}
             </h1>
             <p className="text-white/55 text-lg leading-relaxed max-w-2xl mx-auto">
-              Domains are not commodities here — they are the foundational layer of your digital sovereignty. Discover, secure, and operate them as infrastructure.
+              {IS_REGISTRAR
+                ? 'Premium domains and transparent pricing on registrar-grade infrastructure — then operate DNS, SSL and deployment natively, all in one sovereign stack.'
+                : 'Domains are not commodities here — they are the foundational identity layer of your digital sovereignty. Discover, connect, and operate them as infrastructure.'}
             </p>
           </div>
 
@@ -144,7 +155,9 @@ const DomainsPage: React.FC = () => {
             </div>
           </div>
           <p className="text-center text-[11px] font-mono uppercase tracking-wider text-white/30 mb-12">
-            Live availability &amp; pricing via sovereign registrar infrastructure · discovery only
+            {IS_REGISTRAR
+              ? 'Live availability & pricing · sovereign registrar infrastructure'
+              : 'Domains as infrastructure identity · discover, connect & operate'}
           </p>
 
           {/* Error */}
@@ -210,6 +223,18 @@ const DomainsPage: React.FC = () => {
                 </div>
               ))}
             </div>
+          )}
+
+          {/* Identity-mode callout: domains are optional — deploy now, connect later */}
+          {showIdle && !IS_REGISTRAR && (
+            <Link to="/deploy" className="group max-w-3xl mx-auto mb-14 flex items-center gap-4 rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.04] px-6 py-5 transition-all duration-500 ease-cinematic hover:-translate-y-0.5 hover:border-cyan-400/40">
+              <Rocket className="w-5 h-5 text-cyan-300 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="font-display font-semibold text-white">A domain isn't required to begin.</div>
+                <div className="text-sm text-white/55 leading-relaxed">Connect an existing domain, or deploy now on a sovereign subdomain and attach a permanent identity later.</div>
+              </div>
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-300 shrink-0">Orchestrate <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></span>
+            </Link>
           )}
 
           {/* Flow */}
