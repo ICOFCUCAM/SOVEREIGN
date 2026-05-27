@@ -16,6 +16,8 @@
     "typecheck": "tsc -b packages/core --noEmit",
     "dashboard:dev": "npm --workspace @sovereign/command-center run dev",
     "dashboard:build": "npm --workspace @sovereign/command-center run build",
+    "portal:dev": "npm --workspace @sovereign/developer-portal run dev",
+    "portal:build": "npm --workspace @sovereign/developer-portal run build",
     "worker:dev": "npm --workspace sovereign-ffmpeg-worker run start"
   },
   "engines": {
