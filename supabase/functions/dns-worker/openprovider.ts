@@ -26,6 +26,16 @@ export class OpenproviderError extends Error {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// Boundary hygiene for secrets: trim whitespace and strip one matched pair of
+// surrounding quotes accidentally captured when the secret was set.
+function clean(v?: string): string | undefined {
+  let s = (v ?? '').trim();
+  if (s.length >= 2 && ((s[0] === '"' && s[s.length - 1] === '"') || (s[0] === "'" && s[s.length - 1] === "'"))) {
+    s = s.slice(1, -1);
+  }
+  return s || undefined;
+}
+
 export interface OpRecord { type: string; name: string; value: string; ttl?: number; prio?: number }
 
 export class OpenproviderClient {
@@ -39,8 +49,8 @@ export class OpenproviderClient {
     // whether the configured base is the host alone or already includes /v1beta.
     const raw = (Deno.env.get('OPENPROVIDER_BASE_URL') || DEFAULT_BASE).trim();
     this.base = raw.replace(/\/+$/, '').replace(/\/v1beta$/i, '');
-    this.username = Deno.env.get('OPENPROVIDER_USERNAME') || undefined;
-    this.password = Deno.env.get('OPENPROVIDER_PASSWORD') || undefined;
+    this.username = clean(Deno.env.get('OPENPROVIDER_USERNAME'));
+    this.password = clean(Deno.env.get('OPENPROVIDER_PASSWORD'));
   }
 
   get configured(): boolean {
