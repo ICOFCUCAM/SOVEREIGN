@@ -72,3 +72,14 @@ export async function updateDeployment(id: string, patch: Partial<DeploymentInpu
 export async function archiveDeployment(id: string): Promise<void> {
   await updateDeployment(id, { status: 'archived' });
 }
+
+// Console listing: includes archived deployments.
+export async function listAllDeployments(): Promise<Deployment[]> {
+  const { data, error } = await supabase.from('deployments').select('*').order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as Deployment[];
+}
+
+export async function restoreDeployment(id: string): Promise<void> {
+  await updateDeployment(id, { status: 'draft' });
+}
