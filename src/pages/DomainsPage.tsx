@@ -157,6 +157,8 @@ const DomainsPage: React.FC = () => {
                 placeholder="Search the namespace — e.g. sovereign, your-brand, a full domain…"
                 className="flex-1 bg-transparent px-4 py-4 text-base sm:text-lg text-white placeholder:text-white/30 focus:outline-none font-mono"
                 spellCheck={false}
+                autoCapitalize="off"
+                autoCorrect="off"
               />
               {loading && <Loader2 className="w-5 h-5 text-cyan-300 animate-spin shrink-0" />}
             </div>
