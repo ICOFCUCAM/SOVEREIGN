@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { ALL_SCOPES } from '@sovereign/api-platform/scopes';
+import { PLAN_CATALOG } from '@sovereign/api-platform/billing';
 import { browserClient } from '../app/lib/supabase';
+
+const PLANS = Object.entries(PLAN_CATALOG) as [string, { label: string; quotaPerMonth: number }][];
 
 interface KeyRow {
   id: string;
@@ -18,6 +21,7 @@ export function KeyManager() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [scopes, setScopes] = useState<string[]>(['publish']);
+  const [plan, setPlan] = useState('free');
   const [issued, setIssued] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -44,7 +48,7 @@ export function KeyManager() {
       const r = await fetch('/api/keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, owner_email: email, scopes }),
+        body: JSON.stringify({ name, owner_email: email, scopes, plan }),
       });
       const body = await r.json();
       if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
@@ -66,6 +70,15 @@ export function KeyManager() {
             className="rounded border border-sov-edge bg-sov-bg px-3 py-2 text-sm outline-none focus:border-sov-cyan" />
           <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="owner@email.com"
             className="rounded border border-sov-edge bg-sov-bg px-3 py-2 text-sm outline-none focus:border-sov-cyan" />
+        </div>
+        <div className="mt-3">
+          <label className="text-[11px] text-sov-mute">Plan (bounds quota + scopes)</label>
+          <select value={plan} onChange={(e) => setPlan(e.target.value)}
+            className="mt-1 block w-full max-w-xs rounded border border-sov-edge bg-sov-bg px-3 py-2 text-sm outline-none focus:border-sov-cyan">
+            {PLANS.map(([id, spec]) => (
+              <option key={id} value={id}>{spec.label} — {spec.quotaPerMonth.toLocaleString()} calls/mo</option>
+            ))}
+          </select>
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
           {ALL_SCOPES.map((s) => (

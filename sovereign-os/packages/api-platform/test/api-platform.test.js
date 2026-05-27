@@ -7,6 +7,7 @@ import { evaluateRate } from '../dist/usage.js';
 import { generateVaultKey, encryptSecret, decryptSecret } from '../dist/vault.js';
 import { buildDelivery, verifyWebhookSignature, signWebhook } from '../dist/webhooks.js';
 import { buildAuthorizeUrl, randomState, exchangeCodeForToken, OAUTH_PROVIDERS } from '../dist/oauth.js';
+import { PLAN_CATALOG, planQuota, planAllowsScope, planAllowsConnection, effectiveScopes } from '../dist/billing.js';
 
 test('api keys: issue/hash/verify', () => {
   const k = generateApiKey('live');
@@ -66,4 +67,21 @@ test('oauth: authorize url + code exchange (injected fetch)', async () => {
   assert.equal(t.access_token, 'tok');
   const failFetch = async () => ({ ok: false, status: 400, json: async () => ({}) });
   await assert.rejects(() => exchangeCodeForToken('x', { code: 'c', clientId: 'i', clientSecret: 's', redirectUri: 'r' }, failFetch));
+});
+
+test('billing: catalog, quota, scope + connection entitlements', () => {
+  assert.deepEqual(Object.keys(PLAN_CATALOG).sort(), ['basic', 'enterprise', 'free', 'pro']);
+  assert.ok(planQuota('pro') > planQuota('basic'));
+  assert.ok(planQuota('basic') > planQuota('free'));
+  // free can publish but not run intelligence; enterprise (*) can do everything.
+  assert.equal(planAllowsScope('free', 'publish'), true);
+  assert.equal(planAllowsScope('free', 'intelligence:run'), false);
+  assert.equal(planAllowsScope('pro', 'intelligence:run'), true);
+  assert.equal(planAllowsScope('enterprise', 'keys:manage'), true);
+  // connection limits
+  assert.equal(planAllowsConnection('free', 1), true);
+  assert.equal(planAllowsConnection('free', 2), false);
+  // requested scopes are clamped to the plan
+  assert.deepEqual(effectiveScopes('free', ['publish', 'intelligence:run']), ['publish']);
+  assert.deepEqual(effectiveScopes('enterprise', ['publish', 'keys:manage']), ['publish', 'keys:manage']);
 });

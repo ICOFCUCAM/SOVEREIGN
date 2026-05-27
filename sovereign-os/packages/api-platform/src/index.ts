@@ -5,4 +5,5 @@ export * from './usage.js';
 export * from './vault.js';
 export * from './webhooks.js';
 export * from './oauth.js';
+export * from './billing.js';
 export * from './types.js';

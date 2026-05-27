@@ -13,13 +13,14 @@ strategic intelligence).
 | Issue API keys to users | ✅ | ✅ `issue-key` + `@sovereign/api-platform` | key rotation UI |
 | Bearer tokens (signed, expiring) | ✅ | ✅ HMAC tokens w/ scopes + exp | refresh flow |
 | Scopes / permissions | ✅ | ✅ scope enforcement in `authenticate` | granular per-route |
-| Usage metering + quotas | ✅ monthly/daily | ✅ `api_usage` + monthly quota enforcement | dashboards, billing |
+| Usage metering + quotas | ✅ monthly/daily | ✅ `api_usage` + monthly quota enforcement + `/usage` dashboard | per-key analytics |
+| Plans / billing | ✅ | ✅ plan catalog + entitlements (quota/scope/connection caps) + Stripe webhook | live Stripe wiring |
 | User profiles / multi-tenant | ✅ | ✅ `api_clients` + inherited RBAC/hostname tenancy | white-label theming |
-| Connected social accounts (token vault) | ✅ | ⚠️ schema + types (`social_connections`) | OAuth flows + encryption |
-| Webhooks | ✅ | ⚠️ schema + types (`webhooks`) | HMAC-signed delivery |
+| Connected social accounts (token vault) | ✅ | ✅ OAuth connect → AES-256-GCM encrypted `social_connections` | more providers |
+| Webhooks | ✅ | ✅ HMAC-signed sign/verify/deliver | delivery retries/UI |
 | Messages / Ads / Feeds | ✅ | ❌ | later |
 | Owned AI media pipeline (Layer 1) | ❌ | ✅ | — |
-| Strategic intelligence (Layer 3) | ❌ | ✅ seams | agents |
+| Strategic intelligence (Layer 3) | ❌ | ✅ 7-agent registry + Claude runner | agent tools/data |
 
 ## How a client uses it
 

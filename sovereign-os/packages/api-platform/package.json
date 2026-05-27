@@ -8,6 +8,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./scopes": "./src/scopes.ts",
+    "./billing": "./src/billing.ts",
     "./types": "./src/types.ts"
   },
   "scripts": {

@@ -86,16 +86,21 @@ supabase secrets set \
   ANTHROPIC_API_KEY=… OPENAI_API_KEY=… RUNWAY_API_KEY=… \
   FFMPEG_WORKER_URL=https://<ffmpeg-worker>/assemble WORKER_SECRET=… BUCKET=ecosystem \
   ADMIN_SECRET=… SOVEREIGN_TOKEN_SECRET=… SOVEREIGN_VAULT_KEY=… \
-  OAUTH_REDIRECT_URI=https://<project>.supabase.co/functions/v1/oauth-callback
+  OAUTH_REDIRECT_URI=https://<project>.supabase.co/functions/v1/oauth-callback \
+  STRIPE_WEBHOOK_SECRET=… STRIPE_PRICE_BASIC=… STRIPE_PRICE_PRO=… STRIPE_PRICE_ENTERPRISE=…
 
 # (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are injected automatically.)
 
 for fn in orchestrate-film render-video poll-video-jobs generate-narration assemble-film \
           generate-image generate-content generate-scenario post-campaign analyze-lead \
-          run-agent issue-key oauth-start oauth-callback; do
+          run-agent issue-key oauth-start oauth-callback billing-webhook; do
   supabase functions deploy "$fn"
 done
 ```
+
+For billing: create Stripe Products/Prices, set `STRIPE_PRICE_<PLAN>` to their Price IDs,
+and point a Stripe webhook endpoint at `billing-webhook`. Subscription events then move
+`api_clients.plan`; keys issued afterward inherit the plan's quota + scope ceiling.
 
 Schedule the pollers (Supabase cron / external scheduler):
 - `poll-video-jobs` every ~1 min (finalizes Runway clips, auto-stitches films).

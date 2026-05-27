@@ -64,8 +64,11 @@ around it.
       adapter env, so publishing runs per-client off the vault.
 - [x] Developer-portal UX: OAuth connect UI (`/connect` + `/api/connect` → oauth-start) and
       usage dashboard (`/usage`, 30-day metering by metric). `next build` passes (7 routes).
-- [ ] Billing/plan management; live-endpoint + Deno runtime verification.
-- [ ] Deno edge functions need live-runtime verification (no `deno` in CI yet).
+- [x] Billing/plan management: plan catalog + entitlements (`billing.ts` — quota/scope/
+      connection caps, runtime-verified), `db/migrations/0004_billing.sql`, `billing-webhook`
+      (Stripe sig verify → plan changes), `issue-key` bounds quota+scopes by plan, portal
+      plan selector. Live Stripe wiring still needs a deployed endpoint + Price IDs.
+- [ ] Live-endpoint + Deno runtime verification (no live creds / `deno` in CI yet).
 
 ## Phase 4 — Layer 3 (Strategic Intelligence Engine) (in progress)
 
