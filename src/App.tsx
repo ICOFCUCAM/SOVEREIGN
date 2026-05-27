@@ -86,6 +86,7 @@ const RegistrarRoutes = () => (
     <Route path="/" element={<DomainsPage />} />
     <Route path="/dns" element={<DnsPage />} />
     <Route path="/registrants" element={<RegistrantsPage />} />
+    <Route path="/deploy" element={<DeployPage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
     <Route path="*" element={<DomainsPage />} />
   </Routes>
