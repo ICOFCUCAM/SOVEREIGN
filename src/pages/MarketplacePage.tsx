@@ -146,6 +146,12 @@ const SystemProductCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
       <span className="absolute -top-16 -right-14 w-40 h-40 rounded-full blur-[80px] opacity-[0.1] group-hover:opacity-25 transition-opacity" style={{ background: accent }} />
       <HudCorners color={accent} className="opacity-15 group-hover:opacity-45 transition-opacity" />
       <div className="relative">
+        {p.image_url && (
+          <div className="relative -mt-6 -mx-6 mb-4 h-28 overflow-hidden">
+            <img src={p.image_url} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0E27] via-[#0A0E27]/20 to-transparent" />
+          </div>
+        )}
         <div className="flex items-center justify-between mb-4">
           <span className="text-[9px] font-mono uppercase tracking-[0.2em] truncate pr-2" style={{ color: accent }}>{p.category}</span>
           <ArrowUpRight className="w-4 h-4 text-white/25 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all shrink-0" />
