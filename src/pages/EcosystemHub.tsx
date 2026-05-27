@@ -32,10 +32,10 @@ const EcosystemHub: React.FC = () => {
         <HeroEnvironment />
         <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
           <div className="max-w-md lg:max-w-[46%]">
-            <div className="inline-flex items-center gap-2.5 text-[10px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-6">
+            <div className="inline-flex items-center gap-2.5 kicker text-cyan-300/70 mb-6" style={{ letterSpacing: '0.3em' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The infrastructure atlas
             </div>
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.98] mb-5">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-cinematic leading-[0.96] text-balance mb-5">
               The sovereign ecosystem.
             </h1>
             <p className="text-white/55 max-w-md text-base sm:text-lg leading-relaxed">

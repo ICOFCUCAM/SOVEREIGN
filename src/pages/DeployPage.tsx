@@ -66,7 +66,7 @@ const DeployPage: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 text-white/45 text-[11px] font-mono uppercase tracking-[0.28em] mb-6">
               The deployment engine
             </div>
-            <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-tighter leading-[0.95] mb-5">
+            <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-cinematic text-balance leading-[0.94] mb-5">
               From acquisition to <span className="text-gradient-cyan">live institution.</span>
             </h1>
             <p className="text-white/55 text-lg leading-relaxed">
