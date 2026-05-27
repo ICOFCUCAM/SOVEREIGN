@@ -203,7 +203,7 @@ const SystemPage: React.FC = () => {
         <Reveal>
           <section className="px-4 sm:px-6 lg:px-8 py-12">
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-2xl font-bold text-white mb-6">Included in {product.name} {selectedTier.tier}</h2>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic text-white mb-6">Included in {product.name} {selectedTier.tier}</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {CIVICOS_TIER_INCLUDES[selectedTier.tier.toLowerCase()].map((x) => (
                   <div key={x} className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.015] px-4 py-3 text-sm text-white/75">
@@ -222,7 +222,7 @@ const SystemPage: React.FC = () => {
       {/* Capabilities */}
       <section id="capabilities" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold mb-6">Capabilities</h2>
+          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic mb-6">Capabilities</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {caps.map((c) => (
               <div key={c} className="glass rounded-xl p-4 flex items-center gap-3">
@@ -315,7 +315,7 @@ const SystemPage: React.FC = () => {
         <section id="modules" className="scroll-mt-28 px-4 sm:px-6 lg:px-8 py-12">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-end justify-between gap-4 mb-7">
-              <h2 className="text-2xl font-bold text-white">Deployable modules</h2>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic text-white">Deployable modules</h2>
               <span className="text-[11px] font-mono uppercase tracking-widest text-white/35">{modules.length} systems</span>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -347,7 +347,7 @@ const SystemPage: React.FC = () => {
           <div className="relative grid lg:grid-cols-[1fr_320px] gap-8 items-center">
             <div>
               <div className="text-[11px] font-mono uppercase tracking-[0.25em] mb-3" style={{ color: accent }}>Acquisition</div>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tighter mb-4">Acquire {product.name}.</h2>
+              <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-cinematic text-balance mb-4">Acquire {product.name}.</h2>
               <p className="text-white/55 max-w-xl mb-6 leading-relaxed">A deployable institution — preview the build today; on acquisition it ships in full on sovereign infrastructure. The transfer includes the complete platform and its expansion framework.</p>
               <div className="grid grid-cols-2 gap-x-6 gap-y-2 max-w-lg">
                 {['Platform infrastructure', 'Operational architecture', 'Expansion automation', 'Brand & IP assets', 'Subscription ecosystem', 'Deployment framework'].map((x) => (
