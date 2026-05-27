@@ -12,14 +12,17 @@ const Card: React.FC<{ d: Domain }> = ({ d }) => {
   const accent = ACCENT[d.category || ''] || '#00C2FF';
   return (
     <Link to={`/d/${encodeURIComponent(d.domain_name)}`}
-      className="group relative shrink-0 w-[240px] rounded-xl border border-white/10 bg-white/[0.02] px-5 py-4 hover:border-white/25 hover:bg-white/[0.04] transition-all overflow-hidden">
-      <span className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
+      className="group relative shrink-0 w-[248px] rounded-xl border border-white/10 bg-white/[0.02] px-5 py-4 hover:border-white/25 hover:bg-white/[0.045] ease-cinematic transition-all duration-500 overflow-hidden">
+      <span className="absolute inset-x-0 bottom-0 h-px opacity-40 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[9px] font-mono uppercase tracking-[0.2em]" style={{ color: accent }}>{d.category || 'sovereign'}</span>
-        <span className="text-[10px] font-mono tabular-nums text-white/45">AI {d.valuation_score}</span>
+        <span className="kicker text-[9px]" style={{ color: accent }}>{d.category || 'sovereign'}</span>
+        <span className="text-[9px] font-mono tabular-nums px-1.5 py-0.5 rounded text-white/55" style={{ background: `${accent}1a` }}>AI {d.valuation_score}</span>
       </div>
       <div className="font-display text-lg font-bold text-white tracking-tight truncate">{d.domain_name}</div>
-      <div className="text-sm text-white/55 tabular-nums mt-1">{price(Number(d.price_usd || 0))}</div>
+      <div className="flex items-baseline justify-between mt-1.5">
+        <span className="text-[15px] font-semibold text-white tabular-nums tracking-tight">{price(Number(d.price_usd || 0))}</span>
+        <span className="text-[9px] font-mono uppercase tracking-[0.16em] text-white/30 group-hover:text-white/50 transition-colors">acquire →</span>
+      </div>
     </Link>
   );
 };
@@ -49,8 +52,8 @@ const MarketplaceTeaser: React.FC = () => {
         <div className="flex gap-4 px-4 animate-ticker w-max">
           {stream.map((d, i) => <Card key={`${d.id}-${i}`} d={d} />)}
         </div>
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-20" style={{ background: 'linear-gradient(90deg, #050816, transparent)' }} />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-20" style={{ background: 'linear-gradient(270deg, #050816, transparent)' }} />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-32" style={{ background: 'linear-gradient(90deg, #050816 10%, transparent)' }} />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-32" style={{ background: 'linear-gradient(270deg, #050816 10%, transparent)' }} />
       </div>
     </section>
   );
