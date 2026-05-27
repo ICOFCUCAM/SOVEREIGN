@@ -35,13 +35,14 @@ const SystemGallery: React.FC<Props> = ({ slug, systemName, url, accent = '#00C2
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`${systemName} preview`}>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-4xl">
+      <div className="relative w-full max-w-4xl animate-stage-in">
         <div className="flex items-center justify-between mb-3">
           <div className="text-[11px] font-mono uppercase tracking-[0.24em] text-white/60">{systemName} · preview</div>
           <button onClick={onClose} aria-label="Close" className="text-white/50 hover:text-white transition"><X className="w-5 h-5" /></button>
         </div>
 
         <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#0A1024]" style={{ aspectRatio: '16 / 9' }}>
+          <span className="absolute inset-x-0 top-0 h-px z-20" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
           {has ? (
             <>
               <img src={images[i]} alt={`${systemName} preview ${i + 1}`} className="w-full h-full object-cover" />
