@@ -350,8 +350,8 @@ const ChannelPage: React.FC = () => {
             </div>
             <div className="grid sm:grid-cols-3 gap-4">
               {DISTRIBUTION.map((d) => { const Icon = d.icon; return (
-                <div key={d.label} className="rounded-2xl border border-white/10 bg-white/[0.012] p-6">
-                  <Icon className="w-5 h-5 text-cyan-300/70 mb-4" />
+                <div key={d.label} className="group rounded-2xl border border-white/10 bg-white/[0.012] p-6 ease-cinematic transition-all duration-500 hover:border-white/25 hover:-translate-y-1 hover:bg-white/[0.025]">
+                  <Icon className="w-5 h-5 text-cyan-300/70 mb-4 group-hover:scale-110 transition-transform duration-500" />
                   <div className="text-white font-semibold">{d.label}</div>
                   <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-white/40 mt-1.5">{d.note}</div>
                 </div>
