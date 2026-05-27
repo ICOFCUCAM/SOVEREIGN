@@ -22,8 +22,8 @@ const TransformationFlow: React.FC = () => {
     <section className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-cyan-300/70 mb-5">The deployment story</div>
-          <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-tighter text-white leading-[0.98]">
+          <div className="kicker text-cyan-300/70 mb-5" style={{ letterSpacing: '0.3em' }}>The deployment story</div>
+          <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-cinematic text-white leading-[0.98] text-balance">
             A domain becomes a living institution.
           </h2>
         </div>
@@ -41,6 +41,7 @@ const TransformationFlow: React.FC = () => {
                   <span className={`absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-mono tracking-[0.2em] transition-colors ${on ? 'text-cyan-300' : 'text-white/25'}`}>{String(i + 1).padStart(2, '0')}</span>
                   <span className="relative z-10 w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500"
                     style={on ? { background: 'linear-gradient(135deg, #6366F1, #00D9FF)', boxShadow: '0 0 28px rgba(0,217,255,0.5)' } : { background: done ? 'rgba(0,217,255,0.14)' : 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    {on && <span className="absolute inset-0 rounded-2xl border border-cyan-300/60 animate-ring" />}
                     {done ? <Check className="w-5 h-5 text-cyan-300" /> : <Icon className={`w-5 h-5 ${on ? 'text-white' : 'text-white/45'}`} />}
                   </span>
                   <div className={`mt-5 text-base font-semibold transition-colors ${on ? 'text-white' : 'text-white/55 group-hover:text-white/80'}`}>{s.label}</div>
