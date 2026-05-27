@@ -184,7 +184,7 @@ const DeploymentOrchestrator: React.FC = () => {
       <div className="absolute -top-24 -right-24 w-72 h-72 blur-[110px] opacity-20 pointer-events-none" style={{ background: 'radial-gradient(circle, #00D9FF, transparent 70%)' }} />
 
       {/* progress */}
-      <div className="flex items-center gap-2 mb-8">
+      <div className="flex items-center gap-2 mb-8" role="progressbar" aria-label="Deployment progress" aria-valuemin={1} aria-valuemax={4} aria-valuenow={step}>
         {[1, 2, 3, 4].map((n) => (
           <div key={n} className="flex-1 h-1 rounded-full overflow-hidden bg-white/8">
             <div className="h-full rounded-full transition-all duration-700 ease-cinematic" style={{ width: step >= n ? '100%' : '0%', background: 'linear-gradient(90deg,#00D9FF,#7C3AED)' }} />
@@ -217,7 +217,7 @@ const DeploymentOrchestrator: React.FC = () => {
             {TYPES.map((t) => {
               const Icon = t.icon; const on = type === t.id;
               return (
-                <button key={t.id} onClick={() => setType(t.id)} className={`${card} ${on ? 'border-cyan-400/50 bg-cyan-400/[0.06]' : 'border-white/8 bg-white/[0.015] hover:border-white/20'}`}>
+                <button key={t.id} aria-pressed={on} onClick={() => setType(t.id)} className={`${card} ${on ? 'border-cyan-400/50 bg-cyan-400/[0.06]' : 'border-white/8 bg-white/[0.015] hover:border-white/20'}`}>
                   <div className="flex items-center gap-3 mb-1.5">
                     <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: on ? 'linear-gradient(135deg,#00D9FF,#7C3AED)' : 'rgba(255,255,255,0.05)' }}><Icon className={`w-4 h-4 ${on ? 'text-white' : 'text-cyan-300/70'}`} /></span>
                     <span className="font-semibold text-sm text-white">{t.label}</span>
@@ -239,7 +239,7 @@ const DeploymentOrchestrator: React.FC = () => {
             {STRATEGIES.map((s) => {
               const Icon = s.icon; const on = strategy === s.id;
               return (
-                <button key={s.id} onClick={() => setStrategy(s.id)} className={`${card} ${on ? 'border-cyan-400/50 bg-cyan-400/[0.06]' : 'border-white/8 bg-white/[0.015] hover:border-white/20'}`}>
+                <button key={s.id} aria-pressed={on} onClick={() => setStrategy(s.id)} className={`${card} ${on ? 'border-cyan-400/50 bg-cyan-400/[0.06]' : 'border-white/8 bg-white/[0.015] hover:border-white/20'}`}>
                   <div className="flex items-center gap-3 mb-1.5">
                     <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: on ? 'linear-gradient(135deg,#00D9FF,#7C3AED)' : 'rgba(255,255,255,0.05)' }}><Icon className={`w-4 h-4 ${on ? 'text-white' : 'text-cyan-300/70'}`} /></span>
                     <span className="font-semibold text-sm text-white">{s.label}</span>
@@ -289,7 +289,7 @@ const DeploymentOrchestrator: React.FC = () => {
                 {results.map((r) => {
                   const on = picked === r.domain;
                   return (
-                    <button key={r.domain} onClick={() => setPicked(r.domain)} className={`relative rounded-xl border px-4 py-3 text-left transition-all duration-300 ${on ? 'border-cyan-400/50 bg-cyan-400/[0.06]' : 'border-white/8 bg-white/[0.015] hover:border-white/20'}`}>
+                    <button key={r.domain} aria-pressed={on} onClick={() => setPicked(r.domain)} className={`relative rounded-xl border px-4 py-3 text-left transition-all duration-300 ${on ? 'border-cyan-400/50 bg-cyan-400/[0.06]' : 'border-white/8 bg-white/[0.015] hover:border-white/20'}`}>
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono text-sm text-white truncate">{r.domain}</span>
                         {r.premium && <Star className="w-3 h-3 text-amber-300 shrink-0" />}
@@ -357,7 +357,7 @@ const DeploymentOrchestrator: React.FC = () => {
                   {registrants.map((r) => {
                     const on = registrantId === r.id;
                     return (
-                      <button key={r.id} onClick={() => setRegistrantId(on ? null : r.id)} className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all ${on ? 'border-cyan-400/50 bg-cyan-400/[0.08] text-white' : 'border-white/10 bg-white/[0.02] text-white/70 hover:border-white/25'}`}>
+                      <button key={r.id} aria-pressed={on} onClick={() => setRegistrantId(on ? null : r.id)} className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all ${on ? 'border-cyan-400/50 bg-cyan-400/[0.08] text-white' : 'border-white/10 bg-white/[0.02] text-white/70 hover:border-white/25'}`}>
                         {on && <Check className="w-3.5 h-3.5 text-cyan-300" />}
                         {r.company_name || `${r.first_name} ${r.last_name}`}
                         {r.op_handle && <span className="font-mono text-[10px] text-emerald-300/70">· verified</span>}

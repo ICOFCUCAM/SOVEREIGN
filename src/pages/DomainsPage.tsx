@@ -100,6 +100,7 @@ const DomainsPage: React.FC = () => {
       const res = await searchDomains(q);
       if (latest.current !== q) return; // a newer query superseded this one
       cache.set(q, res);
+      if (cache.size > 60) cache.delete(cache.keys().next().value); // bound session memory
       setResult(res);
     } catch (e) {
       if (latest.current !== q) return;
