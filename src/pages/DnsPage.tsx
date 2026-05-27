@@ -199,7 +199,7 @@ const DnsPage: React.FC = () => {
                   <Field label="Name"><input value={rec.name} onChange={(e) => setRec({ ...rec, name: e.target.value })} placeholder="www  ·  @ for apex" className={inputCls} /></Field>
                   <Field label="Value"><input value={rec.value} onChange={(e) => setRec({ ...rec, value: e.target.value })} placeholder={VALUE_HINT[rec.type] || 'value'} className={inputCls} /></Field>
                   {rec.type === 'MX' && <Field label="Priority"><input value={rec.prio} onChange={(e) => setRec({ ...rec, prio: e.target.value })} placeholder="10" className={inputCls} /></Field>}
-                  <button disabled={busy || !rec.value} onClick={() => guard(() => modifyRecords({ zone_id: selectedZone.id, add: [{ type: rec.type, name: rec.name === '@' ? '' : rec.name, value: rec.value, ttl: rec.ttl, prio: rec.prio ? Number(rec.prio) : undefined }] }).then(() => setRec({ type: 'A', name: '', value: '', ttl: 3600, prio: '' })), 'Record addition queued')}
+                  <button disabled={busy || !rec.value || (rec.type === 'MX' && !rec.prio)} onClick={() => guard(() => modifyRecords({ zone_id: selectedZone.id, add: [{ type: rec.type, name: rec.name === '@' ? '' : rec.name, value: rec.value, ttl: rec.ttl, prio: rec.prio ? Number(rec.prio) : undefined }] }).then(() => setRec({ type: 'A', name: '', value: '', ttl: 3600, prio: '' })), 'Record addition queued')}
                     className="w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold disabled:opacity-50">Add record</button>
                 </div>
               </div>
