@@ -32,9 +32,14 @@
   body {
     @apply bg-[#05071A] text-white antialiased;
     font-family: 'Inter', system-ui, sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scrollbar-color: rgba(0,217,255,0.2) #05071A; }
+  /* Tabular numerals everywhere they read as instrumentation. */
+  .tabular-nums { font-feature-settings: "tnum"; }
   /* Accessible keyboard focus across interactive elements. */
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
     outline: 2px solid hsl(var(--ring));
