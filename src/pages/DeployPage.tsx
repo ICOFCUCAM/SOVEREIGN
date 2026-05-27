@@ -19,6 +19,7 @@ const EDGE_ARCS: Array<[number, number, number]> = [
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
+import DeploymentOrchestrator from '@/components/DeploymentOrchestrator';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import {
   ShoppingCart, Sparkles, Boxes, Wand2, Rocket, Globe, CheckCircle2, ArrowRight,
@@ -73,6 +74,11 @@ const DeployPage: React.FC = () => {
               Acquire an institution and the engine provisions its full stack — architecture, branding, database, auth, payments, and edge deployment — and brings it live on sovereign infrastructure.
             </p>
           </div>
+
+          {/* Interactive orchestrator */}
+          <Reveal>
+            <div className="mb-24"><DeploymentOrchestrator /></div>
+          </Reveal>
 
           {/* Pipeline */}
           <Reveal>
