@@ -26,6 +26,15 @@ export async function searchDomains(query: string, tlds?: string[]): Promise<Sea
   return data as SearchResponse;
 }
 
+export interface TldPrice { tld: string; price: number | null; currency: string | null }
+
+export async function getTldPricing(): Promise<TldPrice[]> {
+  const { data, error } = await supabase.functions.invoke('domain-search', { body: { action: 'tld-pricing' } });
+  if (error) throw new Error(error.message || 'Pricing lookup failed');
+  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+  return (data as { pricing: TldPrice[] }).pricing;
+}
+
 export async function checkDomains(domains: string[]): Promise<DomainResult[]> {
   const { data, error } = await supabase.functions.invoke('domain-search', { body: { action: 'check', domains } });
   if (error) throw new Error(error.message || 'Check failed');

@@ -7,13 +7,13 @@ import HudCorners from '@/components/HudCorners';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { toast } from 'sonner';
 import { Search, Check, X, Sparkles, ArrowRight, ShieldCheck, Globe, Server, Rocket, Loader2, Crown } from 'lucide-react';
-import { searchDomains, formatPrice, type DomainResult, type SearchResponse } from '@/lib/registrar';
+import { searchDomains, getTldPricing, formatPrice, type DomainResult, type SearchResponse, type TldPrice } from '@/lib/registrar';
 
 const FLOW = [
   { icon: Search, label: 'Acquire', desc: 'Discover the namespace' },
   { icon: Globe, label: 'Register', desc: 'Claim sovereign identity' },
   { icon: Server, label: 'Operate', desc: 'DNS · nameservers · SSL', to: '/dns' },
-  { icon: Rocket, label: 'Deploy', desc: 'Route to infrastructure' },
+  { icon: Rocket, label: 'Deploy', desc: 'Route to infrastructure', to: '/deploy' },
 ];
 
 const cache = new Map<string, SearchResponse>();
@@ -72,7 +72,13 @@ const DomainsPage: React.FC = () => {
   const [result, setResult] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tldPricing, setTldPricing] = useState<TldPrice[]>([]);
   const latest = useRef('');
+
+  // Best-effort TLD pricing explorer for the discovery (idle) state.
+  useEffect(() => {
+    getTldPricing().then(setTldPricing).catch(() => {});
+  }, []);
 
   const run = useCallback(async (raw: string) => {
     const q = raw.trim().toLowerCase();
@@ -171,6 +177,21 @@ const DomainsPage: React.FC = () => {
                   </div>
                 </section>
               )}
+            </div>
+          )}
+
+          {/* Idle: TLD pricing explorer */}
+          {showIdle && tldPricing.length > 0 && (
+            <div className="max-w-3xl mx-auto mb-12">
+              <div className="kicker text-white/40 mb-4 flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> Sovereign namespace · indicative annual pricing</div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
+                {tldPricing.map((t) => (
+                  <div key={t.tld} className="rounded-xl border border-white/8 bg-white/[0.015] px-3 py-3 text-center transition-all duration-500 ease-cinematic hover:-translate-y-0.5 hover:border-cyan-400/30">
+                    <div className="font-mono text-cyan-300/90 text-sm">.{t.tld}</div>
+                    <div className="font-mono text-white/55 text-xs mt-1">{formatPrice(t.price, t.currency)}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
