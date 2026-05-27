@@ -6,7 +6,7 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import HudCorners from '@/components/HudCorners';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { toast } from 'sonner';
-import { Search, Check, X, Sparkles, ArrowRight, ShieldCheck, Globe, Server, Rocket, Loader2, Crown } from 'lucide-react';
+import { Search, Check, X, Sparkles, ArrowRight, ShieldCheck, Globe, Server, Rocket, Loader2, Crown, Copy } from 'lucide-react';
 import { searchDomains, getTldPricing, formatPrice, type DomainResult, type SearchResponse, type TldPrice } from '@/lib/registrar';
 import { resolveTenant, isRegistrarHost } from '@/lib/tenant';
 
@@ -40,6 +40,11 @@ const DomainRow: React.FC<{ r: DomainResult; primary?: boolean }> = ({ r, primar
           {r.premium && <span className="ml-2 inline-flex items-center gap-1 text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-400/15 text-amber-300 align-middle"><Crown className="w-2.5 h-2.5" /> Premium</span>}
         </div>
       </div>
+      <button
+        aria-label={`Copy ${r.domain}`}
+        onClick={() => { navigator.clipboard?.writeText(r.domain).then(() => toast.success(`${r.domain} copied`)).catch(() => {}); }}
+        className="shrink-0 text-white/25 hover:text-cyan-300 transition-colors"
+      ><Copy className="w-3.5 h-3.5" /></button>
       <StatusPill r={r} />
       <div className="text-right shrink-0 w-24">
         <div className={`font-mono ${r.available ? 'text-white' : 'text-white/30'} ${primary ? 'text-base' : 'text-sm'}`}>{formatPrice(r.price, r.currency)}</div>
@@ -144,6 +149,7 @@ const DomainsPage: React.FC = () => {
               <Search className="w-5 h-5 text-white/40 shrink-0" />
               <input
                 autoFocus
+                aria-label="Search the sovereign domain namespace"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && run(query)}
