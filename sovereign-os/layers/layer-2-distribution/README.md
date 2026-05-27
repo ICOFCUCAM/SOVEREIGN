@@ -1,14 +1,30 @@
 # Layer 2 — Sovereign Distribution Grid
 
 Enterprise multi-platform publishing built around Layer 1's media output and the shared
-`pipeline_jobs` queue.
+`pipeline_jobs` queue. Packaged as `@sovereign/distribution` (builds via `tsc`).
 
-- `functions/post-campaign` — migrated working seed. Publishes a campaign to its channel;
-  LinkedIn and YouTube paths are live, others record publish intent and report dormant.
-- `adapters/index.ts` — uniform `PlatformAdapter.publish(campaign)` contract with a typed
-  entry for all 11 target platforms (LinkedIn, X, Instagram, Facebook, TikTok, YouTube,
-  Threads, Telegram, WhatsApp, Pinterest, Bluesky). Each is a seam until its credentials
-  and API calls are implemented.
+## `src/` — the distribution library
 
-Planned: AI scheduling, smart reposting, engagement tracking, campaign synchronization,
-audience targeting, enterprise white-label APIs — each as `kind: 'campaign'` queue jobs.
+- `types.ts` — `PlatformAdapter` contract + `PublishResult`.
+- `adapters/` — concrete adapters and a `seam` factory:
+  - **Implemented:** `telegram` (Bot API), `bluesky` (AT Protocol), `linkedin` (UGC share).
+  - **Seams (typed, dormant):** x, instagram, facebook, tiktok, youtube, threads, whatsapp, pinterest.
+- `registry.ts` — every `DistributionPlatform` resolves to an adapter; `liveAdapters(env)`
+  reports which are credential-ready.
+- `dispatcher.ts` — `publishCampaign(campaign)` routes to the channel adapter;
+  `publishToMany(...)` cross-posts.
+- `scheduler.ts` — pure `dueCampaigns(...)` / `repostSchedule(...)` helpers for AI scheduling
+  and smart reposting (side-effect free, unit-testable).
+
+## Runtime contract
+
+Adapters are credential-gated: with no env they return `{ dormant: true }` instead of
+throwing, so the grid is safe to wire before every integration has keys. Adapter logic is
+implemented against each platform's documented REST/XRPC API but has **not** been tested
+against live endpoints here — that requires real credentials.
+
+## Edge trigger
+
+`functions/post-campaign` (Deno) remains the in-database publish trigger. The Node
+distribution library above is the reusable service core a worker/NestJS service uses to
+fan campaigns out across platforms.

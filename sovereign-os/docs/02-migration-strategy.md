@@ -30,11 +30,19 @@ around it.
       classes, live pipeline monitor, distribution grid, intelligence engine. `next build`
       passes (type-checked). Visual browser verification + Framer Motion/shadcn polish pending.
 
-## Phase 3 — Layer 2 (Sovereign Distribution Grid)
+## Phase 3 — Layer 2 (Sovereign Distribution Grid) (in progress)
 
-- [ ] Implement platform adapters behind a uniform `publish(campaign)` interface
-      (LinkedIn ✅ seam, X, Instagram, Facebook, TikTok, YouTube ✅ seam, Threads, Telegram, WhatsApp, Pinterest, Bluesky).
-- [ ] AI scheduling + smart reposting as `kind: 'campaign'` jobs on the existing queue.
+- [x] Build `@sovereign/distribution`: uniform `PlatformAdapter.publish(campaign)` contract,
+      registry covering all 11 platforms, dispatcher (`publishCampaign`/`publishToMany`).
+      Builds via `tsc`; dispatcher/registry/scheduler runtime-smoke-verified.
+- [x] Implement real adapters: Telegram (Bot API), Bluesky (AT Protocol), LinkedIn (UGC).
+      Remaining 8 platforms are typed dormant seams.
+- [x] Scheduling primitives: pure `dueCampaigns` + `repostSchedule` helpers for AI
+      scheduling / smart reposting.
+- [ ] Wire the scheduler+dispatcher into a Node worker that drains `kind: 'campaign'` jobs
+      from the queue; test adapters against live platform endpoints (needs credentials).
+- [ ] Implement the remaining 8 adapters (X, Instagram, Facebook, TikTok, YouTube, Threads,
+      WhatsApp, Pinterest).
 
 ## Phase 4 — Layer 3 (Strategic Intelligence Engine)
 

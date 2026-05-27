@@ -7,10 +7,11 @@
   "workspaces": [
     "packages/*",
     "apps/*",
+    "layers/layer-2-distribution",
     "layers/layer-1-media/worker"
   ],
   "scripts": {
-    "build": "tsc -b packages/core",
+    "build": "tsc -b packages/core && npm --workspace @sovereign/distribution run build",
     "typecheck": "tsc -b packages/core --noEmit",
     "dashboard:dev": "npm --workspace @sovereign/command-center run dev",
     "dashboard:build": "npm --workspace @sovereign/command-center run build",
