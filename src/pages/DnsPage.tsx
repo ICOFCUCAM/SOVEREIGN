@@ -58,7 +58,9 @@ const DnsPage: React.FC = () => {
     if (!user) return;
     const [n, z, j] = await Promise.all([listNameservers(), listZones(), listDnsJobs()]);
     setNameservers(n); setZones(z); setJobs(j);
-  }, [user]);
+    // Keep the open zone's records in sync (jobs apply asynchronously).
+    if (selectedZone) listRecords(selectedZone.id).then(setRecords).catch(() => {});
+  }, [user, selectedZone]);
 
   useEffect(() => { refresh(); }, [refresh]);
   useEffect(() => { if (selectedZone) listRecords(selectedZone.id).then(setRecords); else setRecords([]); }, [selectedZone]);
