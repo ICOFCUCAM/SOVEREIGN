@@ -35,13 +35,26 @@ export class OpenproviderClient {
   private token: string | null = null;
 
   constructor() {
-    this.base = Deno.env.get('OPENPROVIDER_BASE_URL') || DEFAULT_BASE;
+    // Normalize so endpoint paths (which include the /v1beta prefix) join cleanly
+    // whether the configured base is the host alone or already includes /v1beta.
+    const raw = (Deno.env.get('OPENPROVIDER_BASE_URL') || DEFAULT_BASE).trim();
+    this.base = raw.replace(/\/+$/, '').replace(/\/v1beta$/i, '');
     this.username = Deno.env.get('OPENPROVIDER_USERNAME') || undefined;
     this.password = Deno.env.get('OPENPROVIDER_PASSWORD') || undefined;
   }
 
   get configured(): boolean {
     return Boolean(this.username && this.password);
+  }
+
+  // Non-sensitive shape of the resolved config, for diagnosing credential drift.
+  debugInfo() {
+    const u = this.username || '';
+    return {
+      base: this.base,
+      username_masked: u ? `${u.slice(0, 3)}…(${u.length})` : null,
+      password_len: this.password ? this.password.length : 0,
+    };
   }
 
   private assertConfigured() {
