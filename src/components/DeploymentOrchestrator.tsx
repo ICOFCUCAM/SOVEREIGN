@@ -151,6 +151,12 @@ const DeploymentOrchestrator: React.FC = () => {
     setSaving(false);
   };
 
+  // Switching strategy clears the previous strategy's inputs/selection.
+  const chooseStrategy = (s: Strategy) => {
+    setStrategy(s);
+    setExisting(''); setSub(''); setQuery(''); setResults([]); setPicked(null); setSearchErr(null);
+  };
+
   const resume = (d: Deployment) => {
     setType(TYPES.find((t) => t.label === d.deployment_type)?.id ?? null);
     setStrategy(d.domain_strategy);
@@ -239,7 +245,7 @@ const DeploymentOrchestrator: React.FC = () => {
             {STRATEGIES.map((s) => {
               const Icon = s.icon; const on = strategy === s.id;
               return (
-                <button key={s.id} aria-pressed={on} onClick={() => setStrategy(s.id)} className={`${card} ${on ? 'border-cyan-400/50 bg-cyan-400/[0.06]' : 'border-white/8 bg-white/[0.015] hover:border-white/20'}`}>
+                <button key={s.id} aria-pressed={on} onClick={() => chooseStrategy(s.id)} className={`${card} ${on ? 'border-cyan-400/50 bg-cyan-400/[0.06]' : 'border-white/8 bg-white/[0.015] hover:border-white/20'}`}>
                   <div className="flex items-center gap-3 mb-1.5">
                     <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: on ? 'linear-gradient(135deg,#00D9FF,#7C3AED)' : 'rgba(255,255,255,0.05)' }}><Icon className={`w-4 h-4 ${on ? 'text-white' : 'text-cyan-300/70'}`} /></span>
                     <span className="font-semibold text-sm text-white">{s.label}</span>
