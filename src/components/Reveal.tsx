@@ -45,8 +45,9 @@ const Reveal: React.FC<Props> = ({ children, delay = 0, className = '', y = 28 }
       style={{
         opacity: shown ? 1 : 0,
         transform: shown ? 'translateY(0)' : `translateY(${y}px)`,
-        transition: `opacity 0.9s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.9s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
-        willChange: 'opacity, transform',
+        filter: shown ? 'blur(0px)' : 'blur(8px)',
+        transition: `opacity 0.9s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 1s cubic-bezier(0.16,1,0.3,1) ${delay}ms, filter 0.9s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
+        willChange: 'opacity, transform, filter',
       }}
     >
       {children}
