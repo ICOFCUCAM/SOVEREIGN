@@ -232,7 +232,7 @@ const DomainsPage: React.FC = () => {
             </div>
           )}
 
-          {/* Identity-mode callout: domains are optional — deploy now, connect later */}
+          {/* Idle callout — adapts to host: identity orchestration vs. registrant setup */}
           {showIdle && !IS_REGISTRAR && (
             <Link to="/deploy" className="group max-w-3xl mx-auto mb-14 flex items-center gap-4 rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.04] px-6 py-5 transition-all duration-500 ease-cinematic hover:-translate-y-0.5 hover:border-cyan-400/40">
               <Rocket className="w-5 h-5 text-cyan-300 shrink-0" />
@@ -241,6 +241,16 @@ const DomainsPage: React.FC = () => {
                 <div className="text-sm text-white/55 leading-relaxed">Connect an existing domain, or deploy now on a sovereign subdomain and attach a permanent identity later.</div>
               </div>
               <span className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-300 shrink-0">Orchestrate <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></span>
+            </Link>
+          )}
+          {showIdle && IS_REGISTRAR && (
+            <Link to="/registrants" className="group max-w-3xl mx-auto mb-14 flex items-center gap-4 rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.04] px-6 py-5 transition-all duration-500 ease-cinematic hover:-translate-y-0.5 hover:border-cyan-400/40">
+              <ShieldCheck className="w-5 h-5 text-cyan-300 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="font-display font-semibold text-white">Set up a registrant identity first.</div>
+                <div className="text-sm text-white/55 leading-relaxed">Create and verify a reusable registrant profile so domains can be registered the moment you're ready.</div>
+              </div>
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-300 shrink-0">Manage identities <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></span>
             </Link>
           )}
 
