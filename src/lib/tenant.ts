@@ -54,11 +54,17 @@ export function normalizeHostname(host: string): string {
 }
 
 /**
- * Dedicated registrar infrastructure host (`domains.sovereign.so` and any
- * `domains.*` subdomain). Renders the sovereign domain platform at its root.
+ * Dedicated registrar infrastructure host. Accepts the canonical
+ * `domains.sovereign.so` and `domain.sovereign.so` (or any `domain./domains.`
+ * subdomain). Renders the sovereign domain platform at its root.
  */
 export function isRegistrarHost(hostname: string): boolean {
-  return hostname === 'domains.sovereign.so' || hostname.startsWith('domains.');
+  return (
+    hostname === 'domains.sovereign.so' ||
+    hostname === 'domain.sovereign.so' ||
+    hostname.startsWith('domains.') ||
+    hostname.startsWith('domain.')
+  );
 }
 
 export function isPlatformHost(hostname: string): boolean {
