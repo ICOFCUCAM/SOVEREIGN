@@ -80,7 +80,7 @@ const CinematicHero: React.FC = () => {
           <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 kicker mb-8 backdrop-blur-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The operating layer for digital civilization
           </div>
-          <h1 className="font-display text-[2.6rem] sm:text-5xl lg:text-[3.6rem] xl:text-[4.25rem] font-bold tracking-cinematic leading-[0.98] text-balance mb-7">
+          <h1 className="font-display text-[3rem] sm:text-6xl lg:text-[4.4rem] xl:text-[5.25rem] font-bold tracking-cinematic leading-[0.96] text-balance mb-7">
             <span className="block text-white">Deploy digital</span>
             <span className="block text-white"><span className="text-gradient-cyan">institutions.</span></span>
           </h1>
