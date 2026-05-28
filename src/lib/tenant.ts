@@ -68,8 +68,29 @@ export function isPlatformHost(hostname: string): boolean {
   return false;
 }
 
+/**
+ * Dev host override: visit any URL with `?as=domains.sovereign.so` (or any
+ * other host) to render the app as that host. The override sticks for the
+ * tab via sessionStorage; `?as=` (empty) clears it.
+ */
+const HOST_OVERRIDE_KEY = '__sovereign_host_override';
+function readHostOverride(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('as')) {
+      const v = (params.get('as') || '').trim();
+      if (v) sessionStorage.setItem(HOST_OVERRIDE_KEY, v);
+      else sessionStorage.removeItem(HOST_OVERRIDE_KEY);
+      return v || null;
+    }
+    return sessionStorage.getItem(HOST_OVERRIDE_KEY);
+  } catch { return null; }
+}
+
 export function resolveTenant(): TenantContext {
-  const raw = typeof window !== 'undefined' ? window.location.host : '';
+  const override = readHostOverride();
+  const raw = override || (typeof window !== 'undefined' ? window.location.host : '');
   const hostname = normalizeHostname(raw);
   const mode: TenantMode = !hostname || isPlatformHost(hostname) ? 'platform' : 'tenant';
   return { mode, hostname, raw };
