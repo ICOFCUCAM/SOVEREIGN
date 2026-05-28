@@ -12,6 +12,7 @@ import { Search, Check, X, Sparkles, ArrowRight, ShieldCheck, Globe, Server, Roc
 import { searchDomains, aiSuggestDomains, getTldPricing, formatPrice, type DomainResult, type SearchResponse, type TldPrice, type AiSuggestion } from '@/lib/registrar';
 import { initConnection, type ChallengeRecord } from '@/lib/connections';
 import { resolveTenant, isRegistrarHost } from '@/lib/tenant';
+import { BuyDomainModal } from '@/components/BuyDomainModal';
 
 const IS_REGISTRAR = isRegistrarHost(resolveTenant().hostname);
 
@@ -44,7 +45,8 @@ const StatusPill: React.FC<{ r: DomainResult }> = ({ r }) => (
     : <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 text-white/40"><X className="w-3 h-3" /> Taken</span>
 );
 
-const reserve = (d: string) => toast.success(`${d} noted`, { description: 'Sovereign registration opens soon — discovery only for now.' });
+// "Reserve" now opens the purchase modal — handled by the page-level listener.
+const reserve = (r: DomainResult) => window.dispatchEvent(new CustomEvent('emrg:buy', { detail: r }));
 
 const DomainRow: React.FC<{ r: DomainResult; primary?: boolean }> = ({ r, primary }) => (
   <div className={`flex items-center gap-4 px-5 ${primary ? 'py-4' : 'py-3'} ${primary ? 'bg-white/[0.02]' : ''}`}>
@@ -61,7 +63,7 @@ const DomainRow: React.FC<{ r: DomainResult; primary?: boolean }> = ({ r, primar
       <div className={`font-mono ${r.available ? 'text-white' : 'text-white/30'} ${primary ? 'text-base' : 'text-sm'}`}>{formatPrice(r.price, r.currency)}</div>
       <div className="text-[9px] font-mono uppercase tracking-wider text-white/30">/ yr</div>
     </div>
-    <button onClick={() => reserve(r.domain)} disabled={!r.available}
+    <button onClick={() => reserve(r)} disabled={!r.available}
       className={`shrink-0 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${r.available ? 'text-white hover:-translate-y-0.5' : 'text-white/30 cursor-not-allowed border border-white/5'}`}
       style={r.available ? { background: 'linear-gradient(135deg,#00C2FF,#7C4DFF)', boxShadow: '0 10px 30px -12px rgba(0,194,255,0.5)' } : undefined}>
       {r.available ? 'Reserve' : '—'}
@@ -152,7 +154,7 @@ const AdvisorPanel: React.FC = () => {
                 {r.why && <div className="text-[11px] text-cyan-300/60 leading-snug">{r.why}</div>}
                 <div className="flex items-center justify-between mt-1">
                   <span className="font-mono text-xs text-white/55">{formatPrice(r.price, r.currency)}<span className="text-white/25"> /yr</span></span>
-                  <button onClick={() => reserve(r.domain)} className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white hover:-translate-y-0.5 transition-all" style={{ background: 'linear-gradient(135deg,#00C2FF,#7C4DFF)' }}>Reserve</button>
+                  <button onClick={() => reserve(r)} className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white hover:-translate-y-0.5 transition-all" style={{ background: 'linear-gradient(135deg,#00C2FF,#7C4DFF)' }}>Buy</button>
                 </div>
               </div>
             ))}
@@ -243,6 +245,13 @@ const DomainsPage: React.FC = () => {
   useDocumentTitle('Domains', 'Sovereign deployment identity — search, AI-recommend, connect or temporarily deploy domains as foundational infrastructure.');
   const [mode, setMode] = useState<Path>('search');
   const [authModal, setAuthModal] = useState<null | 'signin' | 'signup'>(null);
+  const [buyTarget, setBuyTarget] = useState<DomainResult | null>(null);
+
+  useEffect(() => {
+    const onBuy = (e: Event) => setBuyTarget((e as CustomEvent<DomainResult>).detail);
+    window.addEventListener('emrg:buy', onBuy as EventListener);
+    return () => window.removeEventListener('emrg:buy', onBuy as EventListener);
+  }, []);
 
   const [query, setQuery] = useState(() => (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('q') || '' : ''));
   const [result, setResult] = useState<SearchResponse | null>(null);
@@ -403,6 +412,7 @@ const DomainsPage: React.FC = () => {
       </main>
       <PlatformFooter />
       {authModal && <AuthModal initialMode={authModal} onClose={() => setAuthModal(null)} />}
+      {buyTarget && <BuyDomainModal domain={buyTarget.domain} price={buyTarget.price} currency={buyTarget.currency} onClose={() => setBuyTarget(null)} onAuth={() => setAuthModal('signin')} />}
     </div>
   );
 };
