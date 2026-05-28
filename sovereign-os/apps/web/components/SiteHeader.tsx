@@ -2,9 +2,8 @@ const PORTAL = process.env.NEXT_PUBLIC_PORTAL_URL ?? '#';
 
 const NAV = [
   { label: 'Platform', href: '#platform' },
-  { label: 'Distribution', href: '#distribution' },
-  { label: 'Intelligence', href: '#intelligence' },
   { label: 'Pricing', href: '#pricing' },
+  { label: 'Enterprise', href: '#trust' },
   { label: 'Docs', href: `${PORTAL}/docs`, external: true },
 ];
 

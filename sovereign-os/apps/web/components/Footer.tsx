@@ -6,31 +6,26 @@ const COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string
   {
     title: 'Platform',
     links: [
-      { label: 'Three sovereign layers', href: '#platform' },
-      { label: 'Four media classes', href: '#media' },
-      { label: 'Eleven platforms', href: '#distribution' },
-      { label: 'Seven intelligence agents', href: '#intelligence' },
-      { label: 'Architecture', href: '#architecture' },
+      { label: 'Capabilities', href: '#platform' },
+      { label: 'Operating layer', href: '#operating-layer' },
+      { label: 'Pricing', href: '#pricing' },
+      { label: 'Enterprise', href: '#trust' },
+      { label: 'Questions', href: '#faq' },
     ],
   },
   {
-    title: 'Pricing & access',
+    title: 'Access',
     links: [
-      { label: 'Plans', href: '#pricing' },
-      { label: 'Why it surpasses', href: '#why' },
-      { label: 'Trust & integrity', href: '#trust' },
-      { label: 'FAQ', href: '#faq' },
       { label: 'Developer Console', href: PORTAL, external: true },
-      { label: 'API docs', href: `${PORTAL}/docs`, external: true },
+      { label: 'Docs', href: `${PORTAL}/docs`, external: true },
+      { label: 'Contact sales', href: 'mailto:sales@sovereign.example?subject=Enterprise%20plan' },
     ],
   },
   {
-    title: 'Sovereign ecosystem',
+    title: 'Sovereign',
     links: [
       { label: 'Sovereign Platform ↗', href: SOVEREIGN_URL, external: true },
       { label: 'Sovereign Domains ↗', href: REGISTRAR_URL, external: true },
-      { label: 'Sovereign ecosystem ↗', href: `${SOVEREIGN_URL}/ecosystem`, external: true },
-      { label: 'Sovereign marketplace ↗', href: `${SOVEREIGN_URL}/marketplace`, external: true },
     ],
   },
 ];
@@ -45,13 +40,8 @@ export function Footer() {
             <div className="wordmark text-base font-semibold tracking-tight">EMERGENCY AI</div>
             <div className="mt-1 text-[10px] tracking-[0.3em] text-sov-mute">SOVEREIGN · MEDIA · INTELLIGENCE</div>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-sov-mute">
-              AI media &amp; acquisition infrastructure, owned end-to-end — generate cinematic media, distribute across every major platform, and run strategic intelligence through one sovereign API you own.
+              Cinematic media infrastructure for institutions, brands and sovereign systems.
             </p>
-            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[10px] tracking-[0.2em] text-sov-mute">
-              <span className="inline-flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-sov-teal" /> OWNED PIPELINE</span>
-              <span className="inline-flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-sov-teal" /> PROVENANCE</span>
-              <span className="inline-flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-sov-teal" /> AUDITED</span>
-            </div>
           </div>
           {COLUMNS.map((col) => (
             <div key={col.title}>
@@ -77,7 +67,7 @@ export function Footer() {
           <span>© {year} Emergency AI · Sovereign media, distribution and intelligence — owned infrastructure.</span>
           <span className="inline-flex items-center gap-2 tracking-[0.2em]">
             <span className="inline-block h-1.5 w-1.5 animate-pulseline rounded-full bg-sov-teal" />
-            SOVEREIGN GRID OPERATIONAL
+            OPERATIONAL
           </span>
         </div>
       </div>
