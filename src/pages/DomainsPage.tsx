@@ -244,7 +244,7 @@ const DomainsPage: React.FC = () => {
   const [mode, setMode] = useState<Path>('search');
   const [authModal, setAuthModal] = useState<null | 'signin' | 'signup'>(null);
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(() => (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('q') || '' : ''));
   const [result, setResult] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
