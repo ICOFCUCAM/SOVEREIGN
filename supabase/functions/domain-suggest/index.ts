@@ -31,10 +31,12 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const prompt = (body?.prompt as string || '').trim();
+    const context = (body?.context as string || '').trim().slice(0, 120);
     if (!prompt || prompt.length < 2) return json({ error: 'A brief is required.' }, 400);
     const count = Math.min(Math.max(Number(body?.count) || 12, 4), 18);
 
     const instruction =
+      (context ? `Deployment context: ${context}.\n` : '') +
       `Brief: "${prompt.slice(0, 400)}"\n\n` +
       `Produce ${count} domain candidates. Each item: {"label": lowercase name without dot/TLD (a-z 0-9 hyphen), ` +
       `"tld": one of ${TLDS.join('/')}, "why": a <=6 word rationale}. ` +

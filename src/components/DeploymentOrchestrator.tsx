@@ -131,7 +131,7 @@ const DeploymentOrchestrator: React.FC = () => {
     if (term.length < 2) return;
     setPicked(null); setSearching(true); setSearchErr(null); latest.current = term;
     try {
-      const res = await aiSuggestDomains(term);
+      const res = await aiSuggestDomains(term, typeMeta?.label);
       if (latest.current !== term) return;
       setResults(res.filter((r) => r.available).slice(0, 9));
       if (!res.some((r) => r.available)) setSearchErr('No available names from that brief — try rephrasing.');
@@ -142,7 +142,7 @@ const DeploymentOrchestrator: React.FC = () => {
     } finally {
       if (latest.current === term) setSearching(false);
     }
-  }, []);
+  }, [typeMeta?.label]);
 
   const reset = () => { setStep(1); setType(null); setStrategy(null); setExisting(''); setSub(''); setQuery(''); setResults([]); setPicked(null); setSavedId(null); setRegistrantId(null); };
 

@@ -12,6 +12,7 @@ const PLATFORM_LINKS = [
   { to: '/channel', label: 'Channel' },
   { to: '/domains', label: 'Domains' },
   { to: '/dns', label: 'DNS' },
+  { to: '/deployments', label: 'Console' },
   { to: '/valuation', label: 'AI Valuation' },
   { to: '/studio', label: 'Studio' },
   { to: '/deploy', label: 'Deploy' },
