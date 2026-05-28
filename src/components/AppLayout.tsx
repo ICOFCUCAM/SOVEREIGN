@@ -5,11 +5,13 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
 import MarketplaceTeaser from '@/components/home/MarketplaceTeaser';
-import EcosystemPanels from '@/components/home/EcosystemPanels';
-import EcosystemSectors from '@/components/home/EcosystemSectors';
-import ChannelTeaser from '@/components/home/ChannelTeaser';
-import TransformationFlow from '@/components/home/TransformationFlow';
-import InstitutionalTrust from '@/components/home/InstitutionalTrust';
+import {
+  DeploymentTypes,
+  FeaturedInfrastructure,
+  OperationalInfrastructure,
+  DeploymentRegions,
+  InstitutionalIntelligence,
+} from '@/components/home/HomeSections';
 import ClosingCTA from '@/components/home/ClosingCTA';
 
 const AppLayout: React.FC = () => {
@@ -19,20 +21,20 @@ const AppLayout: React.FC = () => {
       <AnimatedBackground intensity="low" />
       <PlatformNav />
       <main id="main" className="relative">
-        {/* ACT 1 — civilization-scale vision (cinematic Earth hero) */}
+        {/* 1 — Hero */}
         <CinematicHero />
-        {/* live marketplace ticker — sovereign assets streaming under the hero */}
+        {/* live sovereign assets ticker — preserved as ambient discoverability under the hero */}
         <MarketplaceTeaser />
-        {/* ACT 2 — the sovereign infrastructure universe */}
-        <Reveal><EcosystemPanels /></Reveal>
-        {/* featured institutions */}
-        <EcosystemSectors />
-        {/* the sovereign channel — media ecosystem entry */}
-        <Reveal><ChannelTeaser /></Reveal>
-        {/* deployment story */}
-        <Reveal><TransformationFlow /></Reveal>
-        {/* institutional trust & governance */}
-        <Reveal><InstitutionalTrust /></Reveal>
+        {/* 2 — What would you like to deploy? */}
+        <Reveal><DeploymentTypes /></Reveal>
+        {/* 3 — Featured infrastructure assets */}
+        <Reveal><FeaturedInfrastructure /></Reveal>
+        {/* 4 — Operational infrastructure (Domains · Network · Identity · Security · Deployment) */}
+        <Reveal><OperationalInfrastructure /></Reveal>
+        {/* 5 — Deployment regions */}
+        <Reveal><DeploymentRegions /></Reveal>
+        {/* 6 — Institutional intelligence */}
+        <Reveal><InstitutionalIntelligence /></Reveal>
         {/* closing statement */}
         <ClosingCTA />
       </main>
