@@ -30,11 +30,11 @@ function ctaHref(id: string): string {
 export function Pricing() {
   const plans = Object.entries(PLAN_CATALOG);
   return (
-    <section id="pricing" className="border-t border-sov-edge/40 bg-sov-bg/40">
-      <div className="mx-auto max-w-6xl px-6 py-24">
+    <section id="pricing" className="border-t border-sov-edge/30 bg-sov-bg/40">
+      <div className="mx-auto max-w-6xl px-6 py-36">
         <div className="text-center">
-          <div className="text-[11px] tracking-[0.3em] text-sov-mute">PRICING</div>
-          <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">Choose your plan</h2>
+          <div className="text-[10px] tracking-[0.4em] text-sov-mute">PRICING</div>
+          <h2 className="mt-5 text-balance text-3xl font-semibold leading-[1.05] sm:text-5xl">Choose your plan.</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-sov-mute">
             Every plan includes the full creative, distribution and intelligence platform — plans set scope and scale.
           </p>

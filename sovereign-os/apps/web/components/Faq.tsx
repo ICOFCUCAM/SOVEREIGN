@@ -8,15 +8,15 @@ const FAQ = [
 
 export function Faq() {
   return (
-    <section id="faq" className="border-t border-sov-edge/40 bg-sov-bg/40">
-      <div className="mx-auto max-w-4xl px-6 py-28">
+    <section id="faq" className="border-t border-sov-edge/30 bg-sov-bg/40">
+      <div className="mx-auto max-w-4xl px-6 py-36">
         <div className="text-center">
-          <div className="text-[11px] tracking-[0.3em] text-sov-mute">FREQUENTLY ASKED</div>
-          <h2 className="mt-4 text-3xl font-semibold leading-tight sm:text-5xl">
+          <div className="text-[10px] tracking-[0.4em] text-sov-mute">FREQUENTLY ASKED</div>
+          <h2 className="mt-5 text-balance text-3xl font-semibold leading-[1.05] sm:text-5xl">
             Institutional <span className="wordmark">questions.</span>
           </h2>
         </div>
-        <div className="mx-auto mt-12 divide-y divide-sov-edge/60 overflow-hidden rounded-xl border border-sov-edge bg-sov-panel/50">
+        <div className="mx-auto mt-16 divide-y divide-sov-edge/40 overflow-hidden rounded-2xl border border-sov-edge/40 bg-[#06090e]">
           {FAQ.map((item) => (
             <details key={item.q} className="group">
               <summary className="flex cursor-pointer list-none items-center gap-4 px-6 py-5 transition hover:bg-sov-panel/60">
