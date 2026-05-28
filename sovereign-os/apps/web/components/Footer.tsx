@@ -1,74 +1,59 @@
 const PORTAL = process.env.NEXT_PUBLIC_PORTAL_URL ?? '#';
 const SOVEREIGN_URL = process.env.NEXT_PUBLIC_SOVEREIGN_URL ?? 'https://sovereign.so';
-const REGISTRAR_URL = process.env.NEXT_PUBLIC_REGISTRAR_URL ?? 'https://domain.sovereign.so';
 
-const COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string; external?: boolean }> }> = [
-  {
-    title: 'Platform',
-    links: [
-      { label: 'Capabilities', href: '#platform' },
-      { label: 'Operating layer', href: '#operating-layer' },
-      { label: 'Pricing', href: '#pricing' },
-      { label: 'Enterprise', href: '#trust' },
-      { label: 'Questions', href: '#faq' },
-    ],
-  },
-  {
-    title: 'Access',
-    links: [
-      { label: 'Developer Console', href: PORTAL, external: true },
-      { label: 'Docs', href: `${PORTAL}/docs`, external: true },
-      { label: 'Contact sales', href: 'mailto:sales@sovereign.example?subject=Enterprise%20plan' },
-    ],
-  },
-  {
-    title: 'Sovereign',
-    links: [
-      { label: 'Sovereign Platform ↗', href: SOVEREIGN_URL, external: true },
-      { label: 'Sovereign Domains ↗', href: REGISTRAR_URL, external: true },
-    ],
-  },
+const NAV = [
+  { label: 'Platform', href: '#platform' },
+  { label: 'Solutions', href: '#solutions' },
+  { label: 'Resources', href: '#resources' },
+  { label: 'Company', href: '#company' },
+  { label: 'Docs', href: `${PORTAL}/docs`, external: true },
 ];
+
+function BrandMark() {
+  return (
+    <svg viewBox="0 0 32 32" className="h-6 w-6" aria-hidden>
+      <defs>
+        <linearGradient id="bm-foot" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#efd9b3" />
+          <stop offset="100%" stopColor="#d4a86a" />
+        </linearGradient>
+      </defs>
+      <path d="M16 2 L28 16 L16 30 L4 16 Z" fill="none" stroke="url(#bm-foot)" strokeWidth="1.4" />
+      <path d="M16 9 L22 16 L16 23 L10 16 Z" fill="url(#bm-foot)" opacity="0.8" />
+    </svg>
+  );
+}
 
 export function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="border-t border-sov-edge/40 bg-sov-bg/40">
-      <div className="mx-auto max-w-6xl px-6 py-16">
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
-          <div className="col-span-2">
-            <div className="wordmark text-base font-semibold tracking-tight">EMERGENCY AI</div>
-            <div className="mt-1 text-[10px] tracking-[0.3em] text-sov-mute">SOVEREIGN · MEDIA · INTELLIGENCE</div>
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-sov-mute">
-              Cinematic media infrastructure for institutions, brands and sovereign systems.
-            </p>
-          </div>
-          {COLUMNS.map((col) => (
-            <div key={col.title}>
-              <div className="text-[10px] tracking-[0.3em] text-sov-mute">{col.title.toUpperCase()}</div>
-              <ul className="mt-4 space-y-2 text-sm text-sov-mute">
-                {col.links.map((l) => (
-                  <li key={l.label}>
-                    <a
-                      href={l.href}
-                      target={l.external ? '_blank' : undefined}
-                      rel={l.external ? 'noreferrer' : undefined}
-                      className="inline-flex items-center gap-1.5 transition hover:translate-x-0.5 hover:text-sov-cyan"
-                    >
-                      {l.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="mt-12 flex flex-col gap-3 border-t border-sov-edge/40 pt-6 text-[11px] text-sov-mute sm:flex-row sm:items-center sm:justify-between">
-          <span>© {year} Emergency AI · Sovereign media, distribution and intelligence — owned infrastructure.</span>
-          <span className="inline-flex items-center gap-2 tracking-[0.2em]">
-            <span className="inline-block h-1.5 w-1.5 animate-pulseline rounded-full bg-sov-teal" />
-            OPERATIONAL
+    <footer className="border-t border-emrg-edge/70">
+      <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-6 py-10 md:flex-row md:items-center">
+        <a href="#top" className="flex items-center gap-3">
+          <BrandMark />
+          <span className="leading-tight">
+            <span className="block text-[13px] font-medium tracking-[0.18em] text-emrg-ink">EMERGENCY AI</span>
+            <span className="block text-[9px] tracking-[0.32em] text-emrg-mute">BY SOVEREIGN</span>
           </span>
+        </a>
+        <nav className="flex flex-wrap items-center gap-x-7 gap-y-2 text-[13px] text-emrg-mute">
+          {NAV.map((l) => (
+            <a
+              key={l.label}
+              href={l.href}
+              target={l.external ? '_blank' : undefined}
+              rel={l.external ? 'noreferrer' : undefined}
+              className="transition hover:text-emrg-cream"
+            >
+              {l.label}
+            </a>
+          ))}
+          <a href={SOVEREIGN_URL} target="_blank" rel="noreferrer" className="transition hover:text-emrg-cream">
+            Sovereign ↗
+          </a>
+        </nav>
+        <div className="text-[11px] tracking-[0.18em] text-emrg-mute">
+          © {year} Emergency AI. All rights reserved.
         </div>
       </div>
     </footer>
