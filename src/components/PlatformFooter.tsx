@@ -17,7 +17,7 @@ const PLATFORM_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
     links: [
       { label: 'Ecosystem', to: '/ecosystem' },
       { label: 'Marketplace', to: '/marketplace' },
-      { label: 'Sovereign Domains ↗', to: 'https://domain.sovereign.so/' },
+      { label: 'Sovereign Domains', to: '/sovereign-domains' },
       { label: 'Domain landing', to: '/d/veritasos.ai' },
       { label: 'AI Valuation', to: '/valuation' },
       { label: 'Branding Studio', to: '/studio' },
