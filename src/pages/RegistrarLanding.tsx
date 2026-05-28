@@ -8,6 +8,7 @@ import Reveal from '@/components/Reveal';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import {
   Search, Globe, Compass, Link2, Server, ShieldCheck, Network, Route, Cpu, Rocket, ArrowRight, Sparkles, Cloud, Crown,
+  Landmark, Banknote, Vote, Building2, Truck, BadgeCheck, FileText, Lock, ChevronDown, Activity,
 } from 'lucide-react';
 import { getTldPricing, formatPrice, type TldPrice } from '@/lib/registrar';
 
@@ -34,6 +35,57 @@ const LIFECYCLE = [
   { label: 'Connect', desc: 'Delegate DNS · point nameservers', icon: Link2 },
   { label: 'Operate', desc: 'DNS · SSL · records', icon: Server, to: '/dns' },
   { label: 'Deploy', desc: 'Route to infrastructure', icon: Rocket, to: '/deploy' },
+];
+
+// ── Who deploys here ──
+const ARCHETYPES = [
+  { icon: Landmark, t: 'Governments', d: 'National digital ministries, treasury, civic identity.' },
+  { icon: Banknote, t: 'Central banks & finance', d: 'Settlement, custody, sovereign payment rails.' },
+  { icon: Vote, t: 'Electoral authorities', d: 'Voter registers, civic integrity, verifiable elections.' },
+  { icon: Building2, t: 'Smart cities', d: 'Urban operations, citizen services, transit fabric.' },
+  { icon: Cpu, t: 'AI operations', d: 'Autonomous decision fabric, model governance, observability.' },
+  { icon: Truck, t: 'Logistics & customs', d: 'National supply, ports, mobility, cross-border flows.' },
+];
+
+// ── Operating tiers — activation-ready, no transactional billing yet ──
+const TIERS = [
+  {
+    name: 'Foundation',
+    sub: 'Discover, advise, connect.',
+    features: ['Live namespace search', 'AI sovereign advisor', 'One authoritative zone', 'Temporary subdomain', 'Standard nameservers'],
+    accent: false,
+  },
+  {
+    name: 'Sovereign',
+    sub: 'For ministries, banks, cities.',
+    features: ['Unlimited zones & records', 'DNSSEC by default', 'Managed SSL', 'Connect existing domains', 'Audit log export', 'Priority queue & retries'],
+    accent: true,
+  },
+  {
+    name: 'Elite',
+    sub: 'Civilization-grade tenancy.',
+    features: ['Anycast routing', 'Isolated owner-scoped tenancy', 'Vanity nameservers', 'White-glove provisioning', 'Sovereign jurisdiction', 'Direct registrar relationship'],
+    accent: false,
+  },
+];
+
+// ── Trust & integrity ──
+const TRUST = [
+  { icon: ShieldCheck, t: 'DNSSEC by default', d: 'Authenticated zones — origin integrity baked in.' },
+  { icon: FileText, t: 'Audited operations', d: 'Every mutation appended to immutable audit logs.' },
+  { icon: BadgeCheck, t: 'Direct registrar', d: 'Openprovider-grade infrastructure — not a reseller storefront.' },
+  { icon: Lock, t: 'Owner-scoped tenancy', d: 'RLS-isolated identities, zones, records and orders.' },
+  { icon: Activity, t: 'Queued · retried · rate-limited', d: 'Production-grade async pipeline with backoff and observability.' },
+  { icon: Globe, t: 'Sovereign jurisdiction', d: 'Routed via your chosen edge mesh and operational region.' },
+];
+
+// ── FAQ ──
+const FAQ = [
+  { q: 'Can I use a domain I already own?', a: 'Yes. Connect existing institutional domains via a DNS TXT challenge — no transfer, no registration, no downtime.' },
+  { q: 'Do I have to register a domain to start?', a: 'No. Deploy immediately on a temporary sovereign subdomain (label.sovereign.so) and attach a permanent identity later.' },
+  { q: 'How is pricing structured?', a: 'Transparent: registrar cost plus a configurable institutional markup. No surprise renewals, no upsell pressure.' },
+  { q: 'Who is this for?', a: 'Governments, central banks, electoral authorities, smart cities, AI operations and logistics grids — institutions that treat domains as infrastructure.' },
+  { q: 'When does transactional registration open?', a: 'Activation-ready. Discovery, AI advisory and connection are live now; full registration unlocks per institution under direct relationship.' },
 ];
 
 const RegistrarLanding: React.FC = () => {
@@ -87,9 +139,17 @@ const RegistrarLanding: React.FC = () => {
               </button>
             </div>
           </div>
-          <p className="text-center text-[11px] font-mono uppercase tracking-wider text-white/35 mb-16">
+          <p className="text-center text-[11px] font-mono uppercase tracking-wider text-white/35 mb-6">
             Live availability · retail pricing · registrar-grade infrastructure
           </p>
+          {/* ── Trust strip ── */}
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mb-16 text-[10px] font-mono uppercase tracking-[0.2em] text-white/40">
+            <span className="inline-flex items-center gap-1.5"><BadgeCheck className="w-3 h-3 text-emerald-400/80" /> Direct registrar</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-400/80" /> DNSSEC default</span>
+            <span className="inline-flex items-center gap-1.5"><FileText className="w-3 h-3 text-emerald-400/80" /> Audited</span>
+            <span className="inline-flex items-center gap-1.5"><Activity className="w-3 h-3 text-emerald-400/80" /> 23 sovereign regions</span>
+            <span className="inline-flex items-center gap-1.5"><Lock className="w-3 h-3 text-emerald-400/80" /> Owner-scoped tenancy</span>
+          </div>
 
           {/* ── Four paths ── */}
           <Reveal>
@@ -106,6 +166,25 @@ const RegistrarLanding: React.FC = () => {
                     <div className="text-xs text-white/45 mt-1 leading-relaxed">{p.desc}</div>
                     <div className="absolute top-4 right-4 font-mono text-[10px] text-white/20">0{i + 1}</div>
                   </Link>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+
+          {/* ── Who deploys here ── */}
+          <Reveal>
+            <div className="mb-20">
+              <div className="text-center max-w-2xl mx-auto mb-10">
+                <div className="kicker text-cyan-300/70 mb-3" style={{ letterSpacing: '0.28em' }}>Who deploys here</div>
+                <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-cinematic text-balance">Institutions, not consumers.</h2>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {ARCHETYPES.map((a) => (
+                  <div key={a.t} className="rounded-2xl border border-white/8 bg-white/[0.015] p-5 h-full transition-all duration-500 ease-cinematic hover:-translate-y-0.5 hover:border-cyan-400/30">
+                    <a.icon className="w-5 h-5 text-cyan-300/80 mb-3" />
+                    <div className="font-display font-semibold text-white mb-1">{a.t}</div>
+                    <div className="text-sm text-white/55 leading-relaxed">{a.d}</div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -153,6 +232,40 @@ const RegistrarLanding: React.FC = () => {
             </Reveal>
           )}
 
+          {/* ── Operating tiers ── */}
+          <Reveal>
+            <div className="mb-20">
+              <div className="text-center max-w-2xl mx-auto mb-10">
+                <div className="kicker text-cyan-300/70 mb-3" style={{ letterSpacing: '0.28em' }}>Operating tiers</div>
+                <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-cinematic text-balance">From discovery to civilization-grade.</h2>
+              </div>
+              <div className="grid md:grid-cols-3 gap-3">
+                {TIERS.map((tier) => (
+                  <div key={tier.name} className={`relative rounded-2xl border p-6 h-full overflow-hidden transition-all duration-500 ease-cinematic hover:-translate-y-1 ${tier.accent ? 'border-cyan-400/40 bg-cyan-400/[0.04]' : 'border-white/10 bg-white/[0.02]'}`}>
+                    {tier.accent && <div className="absolute -top-12 -right-12 w-48 h-48 blur-[80px] opacity-30 pointer-events-none" style={{ background: 'radial-gradient(circle,#00D9FF,transparent 70%)' }} />}
+                    <div className="relative">
+                      <div className="kicker text-cyan-300/70 mb-2" style={{ letterSpacing: '0.22em' }}>{tier.accent ? 'Recommended' : 'Tier'}</div>
+                      <div className="font-display text-2xl font-bold text-white mb-1">{tier.name}</div>
+                      <div className="text-sm text-white/55 mb-5">{tier.sub}</div>
+                      <ul className="space-y-2 mb-6 text-sm text-white/70">
+                        {tier.features.map((f) => (
+                          <li key={f} className="flex items-start gap-2"><BadgeCheck className="w-4 h-4 text-cyan-300/80 shrink-0 mt-0.5" /><span>{f}</span></li>
+                        ))}
+                      </ul>
+                      <Link to="/search" className={`inline-flex items-center gap-1.5 w-full justify-center px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-500 ease-cinematic hover:-translate-y-0.5 ${tier.accent ? 'text-white' : 'border border-white/15 text-white/80 hover:text-white hover:border-white/25'}`}
+                        style={tier.accent ? { background: 'linear-gradient(135deg,#00C2FF,#7C4DFF)', boxShadow: '0 14px 40px -12px rgba(0,194,255,0.5)' } : undefined}>
+                        Begin {tier.name} <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-center mt-5 text-[10px] font-mono uppercase tracking-widest text-amber-300/70 flex items-center justify-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" /> Activation-ready · institutional access opens per relationship
+              </div>
+            </div>
+          </Reveal>
+
           {/* ── Lifecycle ── */}
           <Reveal>
             <div className="mb-20">
@@ -172,6 +285,46 @@ const RegistrarLanding: React.FC = () => {
                   );
                   return s.to ? <Link key={s.label} to={s.to}>{inner}</Link> : <div key={s.label}>{inner}</div>;
                 })}
+              </div>
+            </div>
+          </Reveal>
+
+          {/* ── Trust & integrity ── */}
+          <Reveal>
+            <div className="mb-20">
+              <div className="text-center max-w-2xl mx-auto mb-10">
+                <div className="kicker text-cyan-300/70 mb-3" style={{ letterSpacing: '0.28em' }}>Trust & integrity</div>
+                <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-cinematic text-balance">Sovereign-grade by construction.</h2>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {TRUST.map((t) => (
+                  <div key={t.t} className="rounded-2xl border border-white/8 bg-white/[0.015] p-5 transition-all duration-500 ease-cinematic hover:border-cyan-400/30">
+                    <t.icon className="w-5 h-5 text-cyan-300/80 mb-3" />
+                    <div className="font-display font-semibold text-white mb-1">{t.t}</div>
+                    <div className="text-sm text-white/55 leading-relaxed">{t.d}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+
+          {/* ── FAQ ── */}
+          <Reveal>
+            <div className="mb-20">
+              <div className="text-center max-w-2xl mx-auto mb-10">
+                <div className="kicker text-cyan-300/70 mb-3" style={{ letterSpacing: '0.28em' }}>Frequently asked</div>
+                <h2 className="font-display text-2xl sm:text-4xl font-bold tracking-cinematic text-balance">Institutional questions.</h2>
+              </div>
+              <div className="max-w-3xl mx-auto rounded-2xl border border-white/8 bg-white/[0.015] divide-y divide-white/5 overflow-hidden">
+                {FAQ.map((item) => (
+                  <details key={item.q} className="group">
+                    <summary className="cursor-pointer list-none px-5 py-4 flex items-center gap-4 hover:bg-white/[0.02] transition-colors">
+                      <span className="flex-1 font-display font-semibold text-white">{item.q}</span>
+                      <ChevronDown className="w-4 h-4 text-cyan-300/70 transition-transform duration-300 group-open:rotate-180" />
+                    </summary>
+                    <div className="px-5 pb-5 text-sm text-white/60 leading-relaxed">{item.a}</div>
+                  </details>
+                ))}
               </div>
             </div>
           </Reveal>
