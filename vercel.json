@@ -4,6 +4,11 @@
   "installCommand": "npm install",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "build": {
+    "env": {
+      "VITE_PLATFORM_HOSTS": "sovereign.so,domain.sovereign.so,domains.sovereign.so"
+    }
+  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
