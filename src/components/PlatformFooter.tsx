@@ -9,6 +9,7 @@ const COLUMNS: Array<{ title: string; links: Array<{ label: string; to: string }
     links: [
       { label: 'Ecosystem', to: '/ecosystem' },
       { label: 'Marketplace', to: '/marketplace' },
+      { label: 'Domain landing', to: '/d/veritasos.ai' },
       { label: 'AI Valuation', to: '/valuation' },
       { label: 'Branding Studio', to: '/studio' },
       { label: 'Command Center', to: '/admin' },
