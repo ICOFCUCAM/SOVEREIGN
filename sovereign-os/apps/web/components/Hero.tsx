@@ -19,14 +19,15 @@ export function Hero() {
       <div className="relative mx-auto max-w-6xl px-6 py-32 text-center">
         <div className="animate-rise inline-flex items-center gap-2 rounded-full border border-sov-edge bg-sov-panel/60 px-4 py-1.5 text-[11px] tracking-widest text-sov-mute">
           <span className="inline-block h-1.5 w-1.5 animate-pulseline rounded-full bg-sov-teal" />
-          SOVEREIGN INFRASTRUCTURE · MEDIA · DISTRIBUTION · INTELLIGENCE
+          EMERGENCY AI · MEDIA · DISTRIBUTION · INTELLIGENCE
         </div>
-        <h1 className="animate-rise mt-7 text-balance text-5xl font-semibold leading-[1.02] sm:text-7xl">
-          <span className="wordmark">AI Media &amp; Acquisition</span>
-          <br />
-          Infrastructure, owned end-to-end.
+        <h1 className="animate-rise mt-7 text-balance text-6xl font-semibold leading-[1.02] sm:text-8xl">
+          <span className="wordmark">Emergency AI.</span>
         </h1>
-        <p className="animate-rise mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-sov-mute sm:text-base">
+        <p className="animate-rise mx-auto mt-5 max-w-2xl text-base leading-relaxed text-[#cfe3ee] sm:text-lg">
+          AI media &amp; acquisition infrastructure, <span className="text-sov-cyan">owned end-to-end</span>.
+        </p>
+        <p className="animate-rise mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-sov-mute sm:text-base">
           Generate cinematic media, distribute it across every major platform, and run strategic
           intelligence — through one sovereign API <em className="not-italic text-[#cfe3ee]">you own</em>.
           No per-call middleman. No rented grid. No moderation lottery.

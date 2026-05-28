@@ -42,10 +42,10 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
           <div className="col-span-2">
-            <div className="text-[10px] tracking-[0.35em] text-sov-mute">SOVEREIGN</div>
-            <div className="wordmark mt-1 text-base font-semibold">AI MEDIA &amp; ACQUISITION</div>
+            <div className="wordmark text-base font-semibold tracking-tight">EMERGENCY AI</div>
+            <div className="mt-1 text-[10px] tracking-[0.3em] text-sov-mute">SOVEREIGN · MEDIA · INTELLIGENCE</div>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-sov-mute">
-              Generate cinematic media, distribute it across every major platform, and run strategic intelligence — through one sovereign API you own.
+              AI media &amp; acquisition infrastructure, owned end-to-end — generate cinematic media, distribute across every major platform, and run strategic intelligence through one sovereign API you own.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[10px] tracking-[0.2em] text-sov-mute">
               <span className="inline-flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-sov-teal" /> OWNED PIPELINE</span>
@@ -74,7 +74,7 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-12 flex flex-col gap-3 border-t border-sov-edge/40 pt-6 text-[11px] text-sov-mute sm:flex-row sm:items-center sm:justify-between">
-          <span>© {year} SOVEREIGN · Media · Distribution · Intelligence — owned infrastructure.</span>
+          <span>© {year} Emergency AI · Sovereign media, distribution and intelligence — owned infrastructure.</span>
           <span className="inline-flex items-center gap-2 tracking-[0.2em]">
             <span className="inline-block h-1.5 w-1.5 animate-pulseline rounded-full bg-sov-teal" />
             SOVEREIGN GRID OPERATIONAL
