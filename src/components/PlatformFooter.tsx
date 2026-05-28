@@ -2,8 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Globe, Mail, Send, CheckCircle2, ArrowRight } from 'lucide-react';
 import BriefingModal from '@/components/BriefingModal';
+import { resolveTenant, isRegistrarHost, PLATFORM_ORIGIN } from '@/lib/tenant';
 
-const COLUMNS: Array<{ title: string; links: Array<{ label: string; to: string }> }> = [
+// Registrar surfaces link cross-host back to the main ecosystem; default to the
+// canonical sovereign.so origin when no PLATFORM_ORIGIN env is configured.
+const IS_REGISTRAR = isRegistrarHost(resolveTenant().hostname);
+const PLATFORM_HOME = (PLATFORM_ORIGIN || 'https://sovereign.so').replace(/\/$/, '');
+
+type FooterLink = { label: string; to: string };
+
+const PLATFORM_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
   {
     title: 'Platform layers',
     links: [
@@ -37,6 +45,40 @@ const COLUMNS: Array<{ title: string; links: Array<{ label: string; to: string }
     ],
   },
 ];
+
+const REGISTRAR_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
+  {
+    title: 'Domain platform',
+    links: [
+      { label: 'Sovereign Domains', to: '/' },
+      { label: 'Search the namespace', to: '/search' },
+      { label: 'Connect existing domain', to: '/search#connect' },
+      { label: 'Temporary deployment', to: '/search#temporary' },
+      { label: 'Domain landing preview', to: '/d/veritasos.ai' },
+    ],
+  },
+  {
+    title: 'Operate',
+    links: [
+      { label: 'DNS console', to: '/dns' },
+      { label: 'Registrant identities', to: '/registrants' },
+      { label: 'Deployments console', to: '/deployments' },
+      { label: 'Deployment orchestrator', to: '/deploy' },
+    ],
+  },
+  {
+    title: 'Sovereign ecosystem',
+    links: [
+      { label: 'sovereign.so', to: `${PLATFORM_HOME}/` },
+      { label: 'Ecosystem', to: `${PLATFORM_HOME}/ecosystem` },
+      { label: 'Marketplace', to: `${PLATFORM_HOME}/marketplace` },
+      { label: 'AI Valuation', to: `${PLATFORM_HOME}/valuation` },
+      { label: 'Branding Studio', to: `${PLATFORM_HOME}/studio` },
+    ],
+  },
+];
+
+const COLUMNS = IS_REGISTRAR ? REGISTRAR_COLUMNS : PLATFORM_COLUMNS;
 
 const REGIONS: Array<[string, 'online' | 'scaling']> = [
   ['us-east', 'online'], ['eu-west', 'online'], ['af-north', 'online'],
@@ -120,11 +162,15 @@ const PlatformFooter: React.FC = () => {
               <img src="/sovereign-logo.png" alt="" aria-hidden="true" className="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(0,194,255,0.35)]" />
               <div>
                 <div className="font-display text-white font-bold tracking-tight">SOVEREIGN</div>
-                <div className="text-[10px] text-cyan-400/60 font-mono tracking-[0.2em]">DIGITAL CIVILIZATION INFRASTRUCTURE</div>
+                <div className="text-[10px] text-cyan-400/60 font-mono tracking-[0.2em]">
+                  {IS_REGISTRAR ? 'SOVEREIGN DOMAIN INFRASTRUCTURE' : 'DIGITAL CIVILIZATION INFRASTRUCTURE'}
+                </div>
               </div>
             </Link>
             <p className="text-white/50 text-sm leading-relaxed max-w-md mb-6">
-              The operating layer for digital civilization — sovereign domain intelligence, AI-native deployment infrastructure, and deployable institutions, engineered for the next century.
+              {IS_REGISTRAR
+                ? 'Sovereign domain infrastructure — registration, authoritative DNS, SSL and deployment routing for civilization-grade systems.'
+                : 'The operating layer for digital civilization — sovereign domain intelligence, AI-native deployment infrastructure, and deployable institutions, engineered for the next century.'}
             </p>
             <form onSubmit={submit} className="flex gap-2 max-w-sm">
               <div className="relative flex-1">
@@ -147,9 +193,16 @@ const PlatformFooter: React.FC = () => {
             <div key={col.title}>
               <div className="kicker text-white/45 mb-4">{col.title}</div>
               <ul className="space-y-2.5 text-sm text-white/50">
-                {col.links.map((l) => (
-                  <li key={l.label}><Link to={l.to} className="inline-flex items-center gap-1.5 hover:text-cyan-300 transition-all duration-300 hover:translate-x-0.5">{l.label}</Link></li>
-                ))}
+                {col.links.map((l) => {
+                  const cls = "inline-flex items-center gap-1.5 hover:text-cyan-300 transition-all duration-300 hover:translate-x-0.5";
+                  return (
+                    <li key={l.label}>
+                      {/^https?:\/\//.test(l.to)
+                        ? <a href={l.to} target="_blank" rel="noreferrer" className={cls}>{l.label}</a>
+                        : <Link to={l.to} className={cls}>{l.label}</Link>}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
