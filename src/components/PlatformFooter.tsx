@@ -10,7 +10,7 @@ const IS_REGISTRAR = isRegistrarHost(resolveTenant().hostname);
 const PLATFORM_HOME = (PLATFORM_ORIGIN || 'https://sovereign.so').replace(/\/$/, '');
 // The three sovereign landing surfaces. URLs are configurable per environment.
 const REGISTRAR_LANDING_URL = (import.meta.env.VITE_REGISTRAR_LANDING_URL as string | undefined) || '/sovereign-domains';
-const MEDIA_LANDING_URL = (import.meta.env.VITE_MEDIA_LANDING_URL as string | undefined) || '';
+const MEDIA_LANDING_URL = (import.meta.env.VITE_MEDIA_LANDING_URL as string | undefined) || '/emergency-ai';
 
 type FooterLink = { label: string; to: string };
 
@@ -20,7 +20,7 @@ const PLATFORM_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
     links: [
       { label: 'Sovereign Platform', to: '/' },
       { label: 'Sovereign Domains', to: REGISTRAR_LANDING_URL },
-      ...(MEDIA_LANDING_URL ? [{ label: 'AI Media & Acquisition', to: MEDIA_LANDING_URL }] : []),
+      { label: 'Emergency AI', to: MEDIA_LANDING_URL },
       { label: 'Tenant landing preview', to: '/d/veritasos.ai' },
     ],
   },
@@ -69,8 +69,10 @@ const REGISTRAR_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
     ],
   },
   {
-    title: 'Operate',
+    title: 'Subscribed access',
     links: [
+      { label: 'Command Center', to: '/command-center' },
+      { label: 'Developer Portal', to: '/developer' },
       { label: 'DNS console', to: '/dns' },
       { label: 'Registrant identities', to: '/registrants' },
       { label: 'Deployments console', to: '/deployments' },
@@ -81,7 +83,7 @@ const REGISTRAR_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
     title: 'Sovereign ecosystem',
     links: [
       { label: 'Sovereign Platform', to: `${PLATFORM_HOME}/` },
-      ...(MEDIA_LANDING_URL ? [{ label: 'AI Media & Acquisition', to: MEDIA_LANDING_URL }] : []),
+      { label: 'Emergency AI', to: MEDIA_LANDING_URL.startsWith('http') ? MEDIA_LANDING_URL : `${PLATFORM_HOME}${MEDIA_LANDING_URL}` },
       { label: 'Ecosystem', to: `${PLATFORM_HOME}/ecosystem` },
       { label: 'Marketplace', to: `${PLATFORM_HOME}/marketplace` },
       { label: 'AI Valuation', to: `${PLATFORM_HOME}/valuation` },
