@@ -22,9 +22,8 @@ const PLATFORM_LINKS = [
 const REGISTRAR_LINKS = [
   { to: '/', label: 'Sovereign Domains' },
   { to: '/search', label: 'Search' },
-  { to: '/dns', label: 'DNS' },
-  { to: '/registrants', label: 'Identities' },
-  { to: '/deployments', label: 'Console' },
+  { to: '/command-center', label: 'Command Center' },
+  { to: '/developer', label: 'Developer Portal' },
 ];
 
 const LINKS = isRegistrarHost(resolveTenant().hostname) ? REGISTRAR_LINKS : PLATFORM_LINKS;

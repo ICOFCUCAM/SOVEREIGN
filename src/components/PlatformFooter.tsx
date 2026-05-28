@@ -60,8 +60,10 @@ const REGISTRAR_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
     ],
   },
   {
-    title: 'Operate',
+    title: 'Subscribed access',
     links: [
+      { label: 'Command Center', to: '/command-center' },
+      { label: 'Developer Portal', to: '/developer' },
       { label: 'DNS console', to: '/dns' },
       { label: 'Registrant identities', to: '/registrants' },
       { label: 'Deployments console', to: '/deployments' },
