@@ -1,10 +1,8 @@
 import { SiteHeader } from '../components/SiteHeader';
 import { Hero } from '../components/Hero';
+import { TrustBar } from '../components/TrustBar';
 import { Capabilities } from '../components/Capabilities';
-import { OperatingLayer } from '../components/OperatingLayer';
-import { Pricing } from '../components/Pricing';
-import { Trust } from '../components/Trust';
-import { Faq } from '../components/Faq';
+import { Enterprise } from '../components/Enterprise';
 import { ClosingCta } from '../components/ClosingCta';
 import { Footer } from '../components/Footer';
 
@@ -13,11 +11,9 @@ export default function LandingPage() {
     <>
       <SiteHeader />
       <Hero />
+      <TrustBar />
       <Capabilities />
-      <OperatingLayer />
-      <Pricing />
-      <Trust />
-      <Faq />
+      <Enterprise />
       <ClosingCta />
       <Footer />
     </>

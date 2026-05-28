@@ -6,21 +6,15 @@
 
 body {
   background:
-    radial-gradient(1400px 700px at 75% -10%, rgba(34, 211, 238, 0.08), transparent 60%),
-    radial-gradient(1100px 600px at -10% 110%, rgba(20, 184, 166, 0.05), transparent 60%),
-    #05080c;
-  color: #cfe3ee;
+    radial-gradient(1400px 600px at 88% 18%, rgba(212, 168, 106, 0.10), transparent 60%),
+    radial-gradient(900px 600px at -10% 100%, rgba(212, 168, 106, 0.05), transparent 65%),
+    #08080d;
+  color: #dad3c4;
 }
 
-/* Subtle horizon — restrained, not a noisy grid. */
-.hud-grid {
-  background-image:
-    linear-gradient(rgba(34, 211, 238, 0.022) 1px, transparent 1px);
-  background-size: 100% 96px;
-}
-
-.wordmark {
-  background: linear-gradient(90deg, #e8f6fb 0%, #22d3ee 55%, #14b8a6 100%);
+/* A warm cream wash applied to specific headline fragments. */
+.wordmark-cream {
+  background: linear-gradient(180deg, #efd9b3 0%, #d4a86a 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
