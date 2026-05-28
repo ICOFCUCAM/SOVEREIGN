@@ -70,6 +70,8 @@ const PlatformRoutes = () => (
     <Route path="/registrants" element={<RegistrantsPage />} />
     <Route path="/deployments" element={<DeploymentsConsolePage />} />
     <Route path="/domains" element={<DomainsPage />} />
+    <Route path="/sovereign-domains" element={<RegistrarLanding />} />
+    <Route path="/search" element={<DomainsPage />} />
     <Route path="/admin" element={<AdminPage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
     <Route path="*" element={<NotFound />} />
