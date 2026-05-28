@@ -28,6 +28,7 @@ const DomainsPage = lazy(() => import("./pages/DomainsPage"));
 const RegistrarLanding = lazy(() => import("./pages/RegistrarLanding"));
 const RegistrarCommandCenter = lazy(() => import("./pages/RegistrarCommandCenter"));
 const DeveloperPortal = lazy(() => import("./pages/DeveloperPortal"));
+const EmergencyAILanding = lazy(() => import("./pages/EmergencyAILanding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -76,6 +77,7 @@ const PlatformRoutes = () => (
     <Route path="/search" element={<DomainsPage />} />
     <Route path="/command-center" element={<RegistrarCommandCenter />} />
     <Route path="/developer" element={<DeveloperPortal />} />
+    <Route path="/emergency-ai" element={<EmergencyAILanding />} />
     <Route path="/admin" element={<AdminPage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
     <Route path="*" element={<NotFound />} />
@@ -100,6 +102,7 @@ const RegistrarRoutes = () => (
     <Route path="/deployments" element={<DeploymentsConsolePage />} />
     <Route path="/command-center" element={<RegistrarCommandCenter />} />
     <Route path="/developer" element={<DeveloperPortal />} />
+    <Route path="/emergency-ai" element={<EmergencyAILanding />} />
     <Route path="/deploy" element={<DeployPage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
     <Route path="*" element={<RegistrarLanding />} />
