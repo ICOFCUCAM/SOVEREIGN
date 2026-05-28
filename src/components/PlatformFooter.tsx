@@ -10,7 +10,7 @@ const IS_REGISTRAR = isRegistrarHost(resolveTenant().hostname);
 const PLATFORM_HOME = (PLATFORM_ORIGIN || 'https://sovereign.so').replace(/\/$/, '');
 // The three sovereign landing surfaces. URLs are configurable per environment.
 const REGISTRAR_LANDING_URL = (import.meta.env.VITE_REGISTRAR_LANDING_URL as string | undefined) || '/sovereign-domains';
-const MEDIA_LANDING_URL = (import.meta.env.VITE_MEDIA_LANDING_URL as string | undefined) || '/emergency-ai';
+const MEDIA_LANDING_URL = (import.meta.env.VITE_MEDIA_LANDING_URL as string | undefined) || 'https://emergency-icofcucam-3942s-projects.vercel.app/';
 
 type FooterLink = { label: string; to: string };
 
