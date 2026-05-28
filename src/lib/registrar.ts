@@ -38,8 +38,10 @@ export async function checkDomains(domains: string[]): Promise<DomainResult[]> {
 export interface AiSuggestion extends DomainResult { why?: string }
 
 // AI-generated sovereign names, enriched with live availability + retail price.
-export async function aiSuggestDomains(prompt: string): Promise<AiSuggestion[]> {
-  const { suggestions } = await invokeFunction<{ suggestions: Array<{ label: string; tld: string; why?: string }> }>('domain-suggest', { prompt });
+// `context` (optional) biases naming toward a deployment archetype, e.g. the
+// chosen deployment type from the orchestrator.
+export async function aiSuggestDomains(prompt: string, context?: string): Promise<AiSuggestion[]> {
+  const { suggestions } = await invokeFunction<{ suggestions: Array<{ label: string; tld: string; why?: string }> }>('domain-suggest', { prompt, context });
   if (!suggestions.length) return [];
   const why = new Map(suggestions.map((s) => [`${s.label}.${s.tld}`.toLowerCase(), s.why]));
   const results = await checkDomains(suggestions.map((s) => `${s.label}.${s.tld}`));
