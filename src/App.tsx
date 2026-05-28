@@ -25,6 +25,7 @@ const DnsPage = lazy(() => import("./pages/DnsPage"));
 const RegistrantsPage = lazy(() => import("./pages/RegistrantsPage"));
 const DeploymentsConsolePage = lazy(() => import("./pages/DeploymentsConsolePage"));
 const DomainsPage = lazy(() => import("./pages/DomainsPage"));
+const RegistrarLanding = lazy(() => import("./pages/RegistrarLanding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -85,13 +86,15 @@ const TenantRoutes = () => (
 // at the domain platform but sharing the operate/deploy surfaces.
 const RegistrarRoutes = () => (
   <Routes>
-    <Route path="/" element={<DomainsPage />} />
+    <Route path="/" element={<RegistrarLanding />} />
+    <Route path="/search" element={<DomainsPage />} />
+    <Route path="/domains" element={<DomainsPage />} />
     <Route path="/dns" element={<DnsPage />} />
     <Route path="/registrants" element={<RegistrantsPage />} />
     <Route path="/deployments" element={<DeploymentsConsolePage />} />
     <Route path="/deploy" element={<DeployPage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
-    <Route path="*" element={<DomainsPage />} />
+    <Route path="*" element={<RegistrarLanding />} />
   </Routes>
 );
 

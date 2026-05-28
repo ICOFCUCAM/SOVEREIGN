@@ -20,7 +20,8 @@ const PLATFORM_LINKS = [
 
 // On domains.sovereign.so only the registrar surfaces are routed; show those.
 const REGISTRAR_LINKS = [
-  { to: '/', label: 'Domains' },
+  { to: '/', label: 'Sovereign Domains' },
+  { to: '/search', label: 'Search' },
   { to: '/dns', label: 'DNS' },
   { to: '/registrants', label: 'Identities' },
   { to: '/deployments', label: 'Console' },
