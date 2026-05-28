@@ -16,6 +16,10 @@ function sectorFor(category: string): string {
   return 'Operations';
 }
 const SECTOR_ORDER = ['Governance', 'Finance', 'Mobility', 'Intelligence', 'Elections', 'Education', 'Commerce', 'Operations'];
+// Display labels per sector key — the key still drives the id/anchor.
+const SECTOR_LABEL: Record<string, string> = {
+  Mobility: 'Mobility, Transport & Logistics',
+};
 
 function emblemFor(category: string): React.ComponentType<{ className?: string; style?: React.CSSProperties; strokeWidth?: number | string }> {
   const c = (category || '').toLowerCase();
@@ -113,7 +117,7 @@ const EcosystemAtlas: React.FC = () => {
             <div key={sector} id={sector.toLowerCase()} className="scroll-mt-28">
               <div className="flex items-center gap-4 mb-7">
                 <span className="font-mono text-sm text-cyan-300/50 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic text-white">{sector}</h2>
+                <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic text-white">{SECTOR_LABEL[sector] || sector}</h2>
                 <div className="flex-1 hairline" />
                 <span className="kicker text-white/35" style={{ fontSize: '10px' }}>{items.length} system{items.length > 1 ? 's' : ''}</span>
               </div>
