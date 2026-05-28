@@ -7,15 +7,13 @@ import AuthModal from './AuthModal';
 
 const PLATFORM_LINKS = [
   { to: '/', label: 'Platform' },
-  { to: '/ecosystem', label: 'Ecosystem' },
+  { to: '/dns', label: 'Infrastructure' },
   { to: '/marketplace', label: 'Marketplace' },
-  { to: '/channel', label: 'Channel' },
-  { to: '/domains', label: 'Domains' },
-  { to: '/dns', label: 'DNS' },
-  { to: '/deployments', label: 'Console' },
-  { to: '/valuation', label: 'AI Valuation' },
+  { to: '/ecosystem', label: 'Institutions' },
+  { to: '/valuation', label: 'Intelligence' },
   { to: '/studio', label: 'Studio' },
   { to: '/deploy', label: 'Deploy' },
+  { to: '/deployments', label: 'Console' },
 ];
 
 // On domains.sovereign.so only the registrar surfaces are routed; show those.
@@ -69,8 +67,8 @@ const PlatformNav: React.FC = () => {
                 </div>
               </Link>
 
-              {/* command links */}
-              <div className="hidden lg:flex items-center gap-7 absolute left-1/2 -translate-x-1/2">
+              {/* command links — flow naturally between brand and actions to prevent overlap */}
+              <div className="hidden lg:flex items-center gap-6 xl:gap-7 flex-1 justify-center px-8">
                 {LINKS.map((l) => {
                   const active = isActive(l.to);
                   return (

@@ -81,19 +81,22 @@ const CinematicHero: React.FC = () => {
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The operating layer for digital civilization
           </div>
           <h1 className="font-display text-[2.6rem] sm:text-5xl lg:text-[3.6rem] xl:text-[4.25rem] font-bold tracking-cinematic leading-[0.98] text-balance mb-7">
-            <span className="block text-white">Build sovereign digital</span>
-            <span className="block text-white">systems <span className="text-gradient-cyan">at planetary scale.</span></span>
+            <span className="block text-white">Deploy digital</span>
+            <span className="block text-white"><span className="text-gradient-cyan">institutions.</span></span>
           </h1>
-          <p className="text-base sm:text-lg text-white/60 max-w-md mb-9 leading-relaxed">
-            Deploy AI-native institutions, sovereign infrastructure and operational ecosystems across governance, finance, mobility and intelligence.
+          <p className="text-base sm:text-lg text-white/60 max-w-md mb-4 leading-relaxed">
+            Operate nations, enterprises and infrastructure from a unified sovereign platform.
+          </p>
+          <p className="text-sm sm:text-base text-white/45 max-w-md mb-9 leading-relaxed">
+            Acquire, deploy and operate logistics networks, financial systems, public institutions and AI-native infrastructure through a single operational layer.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 mb-9">
-            <Link to="/ecosystem" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
+            <Link to="/deploy" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
               style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 14px 44px -12px rgba(0,194,255,0.5)' }}>
-              Launch Ecosystem <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Deploy Infrastructure <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] backdrop-blur text-white font-semibold ease-cinematic transition-all duration-500 hover:bg-white/8 hover:border-white/25 hover:-translate-y-0.5">
-              Explore Marketplace
+            <Link to="/ecosystem" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] backdrop-blur text-white font-semibold ease-cinematic transition-all duration-500 hover:bg-white/8 hover:border-white/25 hover:-translate-y-0.5">
+              Explore Institutions
             </Link>
           </div>
           <div className="hairline max-w-md mb-5" />
