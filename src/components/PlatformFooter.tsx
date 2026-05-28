@@ -8,17 +8,27 @@ import { resolveTenant, isRegistrarHost, PLATFORM_ORIGIN } from '@/lib/tenant';
 // canonical sovereign.so origin when no PLATFORM_ORIGIN env is configured.
 const IS_REGISTRAR = isRegistrarHost(resolveTenant().hostname);
 const PLATFORM_HOME = (PLATFORM_ORIGIN || 'https://sovereign.so').replace(/\/$/, '');
+// The three sovereign landing surfaces. URLs are configurable per environment.
+const REGISTRAR_LANDING_URL = (import.meta.env.VITE_REGISTRAR_LANDING_URL as string | undefined) || '/sovereign-domains';
+const MEDIA_LANDING_URL = (import.meta.env.VITE_MEDIA_LANDING_URL as string | undefined) || '';
 
 type FooterLink = { label: string; to: string };
 
 const PLATFORM_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
   {
+    title: 'Sovereign landings',
+    links: [
+      { label: 'Sovereign Platform', to: '/' },
+      { label: 'Sovereign Domains', to: REGISTRAR_LANDING_URL },
+      ...(MEDIA_LANDING_URL ? [{ label: 'AI Media & Acquisition', to: MEDIA_LANDING_URL }] : []),
+      { label: 'Tenant landing preview', to: '/d/veritasos.ai' },
+    ],
+  },
+  {
     title: 'Platform layers',
     links: [
       { label: 'Ecosystem', to: '/ecosystem' },
       { label: 'Marketplace', to: '/marketplace' },
-      { label: 'Sovereign Domains', to: '/sovereign-domains' },
-      { label: 'Per-domain landing', to: '/d/veritasos.ai' },
       { label: 'AI Valuation', to: '/valuation' },
       { label: 'Branding Studio', to: '/studio' },
       { label: 'Command Center', to: '/admin' },
@@ -70,11 +80,11 @@ const REGISTRAR_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
   {
     title: 'Sovereign ecosystem',
     links: [
-      { label: 'sovereign.so', to: `${PLATFORM_HOME}/` },
+      { label: 'Sovereign Platform', to: `${PLATFORM_HOME}/` },
+      ...(MEDIA_LANDING_URL ? [{ label: 'AI Media & Acquisition', to: MEDIA_LANDING_URL }] : []),
       { label: 'Ecosystem', to: `${PLATFORM_HOME}/ecosystem` },
       { label: 'Marketplace', to: `${PLATFORM_HOME}/marketplace` },
       { label: 'AI Valuation', to: `${PLATFORM_HOME}/valuation` },
-      { label: 'Branding Studio', to: `${PLATFORM_HOME}/studio` },
     ],
   },
 ];
