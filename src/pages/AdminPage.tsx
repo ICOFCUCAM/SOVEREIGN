@@ -15,10 +15,11 @@ import {
   Plus, Edit2, Trash2, Eye, Globe, Users, DollarSign, TrendingUp, X, Save, Activity, Lock,
   ShieldAlert, LogIn, FileText, Pencil, PlusCircle, Trash, BarChart3, Monitor, Smartphone, Tablet,
   Radio, Search, Share2, Link2, Mail, Image as ImageIcon, MessageCircle, Crown, ShieldCheck, Fingerprint,
-  Boxes, ExternalLink, Film, Play, Sparkles,
+  Boxes, ExternalLink, Film, Play, Sparkles, ShoppingBag,
 } from 'lucide-react';
+import { DomainOrdersAdmin } from '@/components/admin/DomainOrdersAdmin';
 
-type Tab = 'overview' | 'domains' | 'leads' | 'briefings' | 'channel' | 'narratives' | 'campaigns' | 'scenarios' | 'pipelines' | 'analytics' | 'ecosystem' | 'team' | 'activity';
+type Tab = 'overview' | 'domains' | 'orders' | 'leads' | 'briefings' | 'channel' | 'narratives' | 'campaigns' | 'scenarios' | 'pipelines' | 'analytics' | 'ecosystem' | 'team' | 'activity';
 interface Scenario { id: string; label: string; accent: string; icon_key: string; origin: number; down: number[]; respond: number[]; phases: Array<{ label: string; resilience: number; affected: number; clock: string; desc: string }>; published: boolean; sort_order: number; created_at: string }
 interface PipelineJob { id: string; kind: string; status: string; provider: string | null; title: string | null; result_url: string | null; error: string | null; created_at: string }
 interface MediaItem { id: string; media_class: string; kind: string; title: string; meta: string | null; length: string | null; youtube_id: string | null; sort_order: number }
@@ -747,6 +748,7 @@ const AdminPage: React.FC = () => {
             {([
               { id: 'overview', label: 'Overview', icon: Activity },
               { id: 'domains', label: `Domains (${domains.length})`, icon: Globe },
+              { id: 'orders', label: 'Orders', icon: ShoppingBag },
               { id: 'leads', label: `Inquiries (${leads.length})`, icon: Users },
               { id: 'briefings', label: `Briefings (${briefings.length})`, icon: ShieldAlert },
               { id: 'channel', label: `Channel (${media.length})`, icon: Film },
@@ -914,6 +916,9 @@ const AdminPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Domain Orders tab */}
+          {tab === 'orders' && <DomainOrdersAdmin />}
 
           {/* Leads tab */}
           {tab === 'leads' && (

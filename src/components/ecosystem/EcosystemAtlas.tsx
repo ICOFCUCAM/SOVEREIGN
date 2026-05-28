@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct } from '@/lib/types';
 import { ArrowUpRight, Landmark, Vote, ShieldAlert, Banknote, Truck, Cpu, GraduationCap, ShoppingCart, Activity, Boxes } from 'lucide-react';
+import { RelocationMarketplaceCard, flagForSlug } from '@/components/marketplace/RelocationMarketplaceCard';
 
 function sectorFor(category: string): string {
   const c = (category || '').toLowerCase();
@@ -16,6 +17,10 @@ function sectorFor(category: string): string {
   return 'Operations';
 }
 const SECTOR_ORDER = ['Governance', 'Finance', 'Mobility', 'Intelligence', 'Elections', 'Education', 'Commerce', 'Operations'];
+// Display labels per sector key — the key still drives the id/anchor.
+const SECTOR_LABEL: Record<string, string> = {
+  Mobility: 'Mobility, Transport & Logistics',
+};
 
 function emblemFor(category: string): React.ComponentType<{ className?: string; style?: React.CSSProperties; strokeWidth?: number | string }> {
   const c = (category || '').toLowerCase();
@@ -38,9 +43,11 @@ const deployValue = (p: EcosystemProduct): string | null => {
 };
 
 const SystemCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
+  if (/^relocation-[a-z]{2}$/i.test(p.slug)) return <RelocationMarketplaceCard p={p} />;
   const accent = p.accent || '#00D9FF';
   const Emblem = emblemFor(p.category);
   const val = deployValue(p);
+  const flag = flagForSlug(p.slug);
   return (
     <Link to={`/systems/${p.slug}`} className="group relative block rounded-2xl border border-white/10 bg-white/[0.015] p-6 overflow-hidden ease-cinematic transition-all duration-500 hover:border-white/25 hover:bg-white/[0.03] hover:-translate-y-1.5 hover:shadow-[0_40px_90px_-46px_rgba(0,0,0,0.9)]">
       <span className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
@@ -48,7 +55,7 @@ const SystemCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
       <div className="relative">
         <div className="flex items-center justify-between mb-5">
           <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${accent}1a`, border: `1px solid ${accent}33` }}>
-            <Emblem className="w-5 h-5" strokeWidth={1.2} style={{ color: accent }} />
+            {flag ? <span aria-hidden className="text-2xl leading-none" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }}>{flag}</span> : <Emblem className="w-5 h-5" strokeWidth={1.2} style={{ color: accent }} />}
           </span>
           <ArrowUpRight className="w-4 h-4 text-white/25 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" />
         </div>
@@ -113,7 +120,7 @@ const EcosystemAtlas: React.FC = () => {
             <div key={sector} id={sector.toLowerCase()} className="scroll-mt-28">
               <div className="flex items-center gap-4 mb-7">
                 <span className="font-mono text-sm text-cyan-300/50 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic text-white">{sector}</h2>
+                <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic text-white">{SECTOR_LABEL[sector] || sector}</h2>
                 <div className="flex-1 hairline" />
                 <span className="kicker text-white/35" style={{ fontSize: '10px' }}>{items.length} system{items.length > 1 ? 's' : ''}</span>
               </div>
