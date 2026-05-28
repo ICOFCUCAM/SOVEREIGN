@@ -140,24 +140,16 @@ const InfraCard: React.FC<{ d: Domain }> = ({ d }) => {
   );
 };
 
-// Country-coded products (e.g. `relocation-us`) surface a flag emoji.
-function flagForSlug(slug: string): string | null {
-  const m = slug.match(/-([a-z]{2})$/i);
-  if (!m) return null;
-  const cc = m[1].toUpperCase();
-  if (!/^[A-Z]{2}$/.test(cc)) return null;
-  try {
-    const codes = cc.split('').map((c) => 0x1F1E6 + c.charCodeAt(0) - 65);
-    return String.fromCodePoint(...codes);
-  } catch { return null; }
-}
+import { RelocationMarketplaceCard, flagForSlug as flagFor } from '@/components/marketplace/RelocationMarketplaceCard';
 
 // ── deployable system (ecosystem product) card ──
 const SystemProductCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
+  // Country-coded relocation marketplaces get the institutional acquisition layout.
+  if (/^relocation-[a-z]{2}$/i.test(p.slug)) return <RelocationMarketplaceCard p={p} />;
   const accent = p.accent || ACCENT;
   const start = p.tiers && p.tiers[0]?.price;
   const metric = p.metrics && p.metrics[0];
-  const flag = flagForSlug(p.slug);
+  const flag = flagFor(p.slug);
   return (
     <Link to={`/systems/${p.slug}`}
       className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.014] ease-cinematic transition-all duration-500 hover:border-white/25 hover:-translate-y-1.5 hover:shadow-[0_44px_96px_-46px_rgba(0,0,0,0.92)] p-6">

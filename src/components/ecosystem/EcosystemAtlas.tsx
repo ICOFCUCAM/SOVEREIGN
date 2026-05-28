@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct } from '@/lib/types';
 import { ArrowUpRight, Landmark, Vote, ShieldAlert, Banknote, Truck, Cpu, GraduationCap, ShoppingCart, Activity, Boxes } from 'lucide-react';
+import { RelocationMarketplaceCard, flagForSlug } from '@/components/marketplace/RelocationMarketplaceCard';
 
 function sectorFor(category: string): string {
   const c = (category || '').toLowerCase();
@@ -34,19 +35,6 @@ function emblemFor(category: string): React.ComponentType<{ className?: string; 
   if (/operations|command/.test(c)) return Activity;
   return Boxes;
 }
-// Country-coded products (e.g. `relocation-us`) surface a flag emoji in the
-// emblem slot instead of the generic icon.
-function flagForSlug(slug: string): string | null {
-  const m = slug.match(/-([a-z]{2})$/i);
-  if (!m) return null;
-  const cc = m[1].toUpperCase();
-  if (!/^[A-Z]{2}$/.test(cc)) return null;
-  try {
-    const codes = cc.split('').map((c) => 0x1F1E6 + c.charCodeAt(0) - 65);
-    return String.fromCodePoint(...codes);
-  } catch { return null; }
-}
-
 const deployValue = (p: EcosystemProduct): string | null => {
   const t = p.tiers || [];
   if (t.length) return `From ${t[0].price}`;
@@ -55,6 +43,7 @@ const deployValue = (p: EcosystemProduct): string | null => {
 };
 
 const SystemCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
+  if (/^relocation-[a-z]{2}$/i.test(p.slug)) return <RelocationMarketplaceCard p={p} />;
   const accent = p.accent || '#00D9FF';
   const Emblem = emblemFor(p.category);
   const val = deployValue(p);
