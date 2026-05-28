@@ -140,11 +140,24 @@ const InfraCard: React.FC<{ d: Domain }> = ({ d }) => {
   );
 };
 
+// Country-coded products (e.g. `relocation-us`) surface a flag emoji.
+function flagForSlug(slug: string): string | null {
+  const m = slug.match(/-([a-z]{2})$/i);
+  if (!m) return null;
+  const cc = m[1].toUpperCase();
+  if (!/^[A-Z]{2}$/.test(cc)) return null;
+  try {
+    const codes = cc.split('').map((c) => 0x1F1E6 + c.charCodeAt(0) - 65);
+    return String.fromCodePoint(...codes);
+  } catch { return null; }
+}
+
 // ── deployable system (ecosystem product) card ──
 const SystemProductCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
   const accent = p.accent || ACCENT;
   const start = p.tiers && p.tiers[0]?.price;
   const metric = p.metrics && p.metrics[0];
+  const flag = flagForSlug(p.slug);
   return (
     <Link to={`/systems/${p.slug}`}
       className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.014] ease-cinematic transition-all duration-500 hover:border-white/25 hover:-translate-y-1.5 hover:shadow-[0_44px_96px_-46px_rgba(0,0,0,0.92)] p-6">
@@ -162,7 +175,10 @@ const SystemProductCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
           <span className="text-[9px] font-mono uppercase tracking-[0.2em] truncate pr-2" style={{ color: accent }}>{p.category}</span>
           <ArrowUpRight className="w-4 h-4 text-white/25 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all shrink-0" />
         </div>
-        <div className="font-display text-xl font-bold text-white tracking-tight">{p.name}</div>
+        <div className="font-display text-xl font-bold text-white tracking-tight flex items-start gap-2">
+          {flag && <span aria-hidden className="text-[22px] leading-none mt-0.5 shrink-0" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }}>{flag}</span>}
+          <span className="min-w-0">{p.name}</span>
+        </div>
         <p className="text-sm text-white/45 leading-relaxed mt-2 line-clamp-2 min-h-[2.5rem]">{p.tagline}</p>
         <div className="flex items-center justify-between pt-4 mt-4 border-t border-white/8">
           {start ? (

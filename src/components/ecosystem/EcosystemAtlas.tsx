@@ -34,6 +34,19 @@ function emblemFor(category: string): React.ComponentType<{ className?: string; 
   if (/operations|command/.test(c)) return Activity;
   return Boxes;
 }
+// Country-coded products (e.g. `relocation-us`) surface a flag emoji in the
+// emblem slot instead of the generic icon.
+function flagForSlug(slug: string): string | null {
+  const m = slug.match(/-([a-z]{2})$/i);
+  if (!m) return null;
+  const cc = m[1].toUpperCase();
+  if (!/^[A-Z]{2}$/.test(cc)) return null;
+  try {
+    const codes = cc.split('').map((c) => 0x1F1E6 + c.charCodeAt(0) - 65);
+    return String.fromCodePoint(...codes);
+  } catch { return null; }
+}
+
 const deployValue = (p: EcosystemProduct): string | null => {
   const t = p.tiers || [];
   if (t.length) return `From ${t[0].price}`;
@@ -45,6 +58,7 @@ const SystemCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
   const accent = p.accent || '#00D9FF';
   const Emblem = emblemFor(p.category);
   const val = deployValue(p);
+  const flag = flagForSlug(p.slug);
   return (
     <Link to={`/systems/${p.slug}`} className="group relative block rounded-2xl border border-white/10 bg-white/[0.015] p-6 overflow-hidden ease-cinematic transition-all duration-500 hover:border-white/25 hover:bg-white/[0.03] hover:-translate-y-1.5 hover:shadow-[0_40px_90px_-46px_rgba(0,0,0,0.9)]">
       <span className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
@@ -52,7 +66,7 @@ const SystemCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
       <div className="relative">
         <div className="flex items-center justify-between mb-5">
           <span className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${accent}1a`, border: `1px solid ${accent}33` }}>
-            <Emblem className="w-5 h-5" strokeWidth={1.2} style={{ color: accent }} />
+            {flag ? <span aria-hidden className="text-2xl leading-none" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }}>{flag}</span> : <Emblem className="w-5 h-5" strokeWidth={1.2} style={{ color: accent }} />}
           </span>
           <ArrowUpRight className="w-4 h-4 text-white/25 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" />
         </div>
