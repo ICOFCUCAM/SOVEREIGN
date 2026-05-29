@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { SiteHeader } from '../../components/SiteHeader';
 import { Footer } from '../../components/Footer';
+import { PlanCompare } from '../../components/PlanCompare';
 import { PLANS } from '../../lib/plans';
 
 export const metadata = { title: 'Pricing — Emergency AI' };
@@ -61,6 +62,8 @@ export default function PricingPage() {
             </div>
           ))}
         </div>
+
+        <PlanCompare />
 
         <div className="mx-auto mt-20 max-w-3xl rounded-2xl border border-emrg-edge bg-emrg-panel/40 p-8 text-center">
           <h3 className="font-serif text-2xl text-emrg-ink">Need a sovereign deployment?</h3>
