@@ -5,16 +5,16 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
 import MarketplaceTeaser from '@/components/home/MarketplaceTeaser';
-import EcosystemPanels from '@/components/home/EcosystemPanels';
+import HomeVideo from '@/components/home/HomeVideo';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
 import ChannelTeaser from '@/components/home/ChannelTeaser';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import InstitutionalTrust from '@/components/home/InstitutionalTrust';
 import ClosingCTA from '@/components/home/ClosingCTA';
 
-// Restored cinematic act structure (pre-9bcfd48). The seven-infrastructure
-// stack content now lives at /infrastructure for institutional buyers who
-// want the full architecture; the homepage holds the cinematic narrative.
+// Homepage composition. The Acquisition Terminal / Architecture Matrix
+// section (EcosystemPanels) is replaced with a cinematic feature-dispatch
+// video player; the full stack architecture lives on /infrastructure.
 const AppLayout: React.FC = () => {
   return (
     <div className="relative min-h-screen text-white">
@@ -26,8 +26,8 @@ const AppLayout: React.FC = () => {
         <CinematicHero />
         {/* live acquisition ticker — featured sovereign infrastructure under the hero */}
         <MarketplaceTeaser />
-        {/* ACT II — the sovereign infrastructure universe */}
-        <Reveal><EcosystemPanels /></Reveal>
+        {/* feature dispatch — cinematic video showcase */}
+        <Reveal><HomeVideo /></Reveal>
         {/* featured institutions */}
         <EcosystemSectors />
         {/* the sovereign channel — media ecosystem entry */}
