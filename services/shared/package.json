@@ -6,6 +6,7 @@
   "description": "Shared DB access, Principal/auth resolver, and HS256 JWT for Dispatch services.",
   "main": "src/db.mjs",
   "dependencies": {
+    "docx": "^9.7.1",
     "pg": "^8.13.1"
   }
 }

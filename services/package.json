@@ -4,13 +4,20 @@
   "private": true,
   "type": "module",
   "description": "Sovereign Dispatch backbone services (Sprint 1): api, worker, shared.",
-  "workspaces": ["../packages/ddm-schema", "../packages/contract", "dispatch-api", "dispatch-worker", "shared"],
+  "workspaces": [
+    "../packages/ddm-schema",
+    "../packages/contract",
+    "dispatch-api",
+    "dispatch-worker",
+    "shared"
+  ],
   "dependencies": {
-    "@dispatch/ddm-schema": "file:../packages/ddm-schema",
     "@dispatch/contract": "file:../packages/contract",
-    "pg": "^8.13.1",
+    "@dispatch/ddm-schema": "file:../packages/ddm-schema",
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "docx": "^9.7.1",
+    "pg": "^8.13.1"
   },
   "scripts": {
     "api": "node dispatch-api/src/server.mjs",

@@ -2,9 +2,9 @@
 //   claim (SKIP LOCKED) -> lease -> running -> render(LM → outputs) -> store -> succeeded
 //   + retry framework, callback framework, status transitions, audit trail.
 // Sprint 2: the render seam builds the Layout Model (Epic 5) and renders per output.
-// Markdown and PDF (LM → themed HTML → headless Chromium, Epic 6) are live; docx
-// (Epic 7) is declared not-yet-implemented — requesting it yields a per-output
-// failure → `partial` when another output succeeds, isolating the unbuilt format.
+// Markdown, PDF (LM → themed HTML → headless Chromium, Epic 6), and DOCX (LM →
+// `docx` OOXML, Epic 7) are all live. Outputs render independently → one failing
+// isolates to `partial` while the others are still delivered.
 import crypto from "node:crypto";
 import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
 import { putArtifact, signUrl, artifactKey } from "../../shared/src/storage.mjs";
@@ -12,6 +12,7 @@ import { htmlToPdf, normalizePdf, pdfPageCount } from "../../shared/src/pdf.mjs"
 import { buildLayout, ENGINE_VERSION, EngineError } from "@dispatch/ddm-schema/engine";
 import { renderMarkdown } from "@dispatch/ddm-schema/render-md";
 import { renderHtml } from "@dispatch/ddm-schema/render-html";
+import { renderDocx } from "../../shared/src/render-docx.mjs";
 
 const WORKER_ID = process.env.WORKER_ID || `worker-${crypto.randomUUID().slice(0, 8)}`;
 const pool = makePool();
@@ -26,7 +27,7 @@ const RENDERERS = {
     const buf = normalizePdf(htmlToPdf(html));        // deterministic-after-timestamp-normalization
     return { ext: "pdf", bytes: buf, warnings, pages: pdfPageCount(buf) };
   },
-  docx: () => { const e = new Error("docx renderer not yet implemented (Epic 7)"); e.deterministic = true; throw e; },
+  docx: async (lm) => { const { bytes, warnings } = await renderDocx(lm); return { ext: "docx", bytes, warnings }; },
 };
 const sys = (tenantId, fn) => withClaims(pool, { tenant_id: tenantId, dispatch_role: "service", principal_type: "service", actor: WORKER_ID }, fn);
 
@@ -168,7 +169,7 @@ async function processJob(job) {
     const renderer = RENDERERS[fmt];
     try {
       if (!renderer) { const e = new Error(`unsupported output '${fmt}'`); e.deterministic = true; throw e; }
-      const out = renderer(lm);
+      const out = await renderer(lm);   // renderers may be async (docx)
       for (const w of out.warnings || []) warnings.push(w);
       const artifactId = crypto.randomUUID();
       const key = artifactKey({ tenantId: job.tenant_id, documentId: ver.document_id, versionId: job.version_id, artifactId, ext: out.ext });
