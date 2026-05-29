@@ -277,7 +277,7 @@ export default function StudioPage() {
                 </label>
               </div>
               {sceneSeeds[i]
-                ? <img src={sceneSeeds[i]} alt="" loading="lazy" className="h-14 w-full rounded object-cover" />
+                ? <img src={sceneSeeds[i]} alt={`Seed frame for scene ${i + 1}`} loading="lazy" className="h-14 w-full rounded object-cover" />
                 : <div className="flex h-14 w-full items-center justify-center rounded bg-emrg-bg/60 px-1 text-center text-[8px] text-emrg-mute">auto-generated</div>}
             </div>
           ))}
@@ -369,7 +369,7 @@ export default function StudioPage() {
             <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFilmSeed(f); }} />
           </label>
         </div>
-        {filmSeed && <img src={filmSeed} alt="" loading="lazy" decoding="async" className="mt-2 h-24 w-full rounded-md border border-emrg-edge object-cover" />}
+        {filmSeed && <img src={filmSeed} alt="Seed frame for the render" loading="lazy" decoding="async" className="mt-2 h-24 w-full rounded-md border border-emrg-edge object-cover" />}
         <button
           type="button"
           disabled={busy !== null}
