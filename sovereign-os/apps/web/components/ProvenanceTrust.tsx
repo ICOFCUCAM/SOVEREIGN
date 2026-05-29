@@ -1,9 +1,5 @@
-// Trust & Governance — institutional copy. Drops startup framing ("no
-// rented grid", "no surprise quotas") and lifts compliance / mission-critical
-// language. Six cards mapped to real platform properties documented under
-// /security and /docs/security.
-
 import { ShieldCheck, Activity, KeyRound, Server, RefreshCw, Globe } from 'lucide-react';
+import { Reveal } from './Reveal';
 
 const TRUST = [
   {
@@ -14,7 +10,7 @@ const TRUST = [
   {
     icon: Activity,
     title: 'Auditable operations',
-    body: 'Generation, distribution and intelligence calls all write to a unified audit log. Who · what · when · diff — recoverable for every event.',
+    body: 'Generation, distribution and intelligence calls all write to a unified audit log. Who, what, when, diff — recoverable for every event.',
   },
   {
     icon: KeyRound,
@@ -41,20 +37,22 @@ const TRUST = [
 export function ProvenanceTrust() {
   return (
     <section id="trust" className="relative border-t border-emrg-edge/60">
-      <div className="mx-auto max-w-7xl px-6 py-24 sm:py-28">
-        <div className="max-w-2xl">
-          <div className="text-[10px] tracking-[0.32em] text-emrg-mute">TRUST & GOVERNANCE</div>
-          <h2 className="mt-4 font-serif text-4xl font-medium leading-tight text-emrg-ink sm:text-5xl">
-            Sovereign-grade <span className="wordmark-cream italic">by construction.</span>
-          </h2>
-        </div>
+      <div className="mx-auto max-w-7xl px-6 py-28 sm:py-32">
+        <Reveal>
+          <div className="mb-16 max-w-2xl">
+            <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute">TRUST & GOVERNANCE</div>
+            <h2 className="mt-6 font-serif text-[36px] font-medium tracking-[-0.015em] leading-[1.05] text-emrg-ink sm:text-[44px]">
+              Sovereign-grade by construction.
+            </h2>
+          </div>
+        </Reveal>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {TRUST.map((t) => (
-            <div key={t.title} className="rounded-2xl border border-emrg-edge bg-emrg-panel/40 p-6">
-              <t.icon className="h-5 w-5 text-emrg-gold" />
-              <h3 className="mt-4 font-serif text-xl text-emrg-ink">{t.title}</h3>
-              <p className="mt-2 text-[13px] leading-relaxed text-emrg-mute">{t.body}</p>
+            <div key={t.title} className="rounded-2xl bg-emrg-panel/40 p-8 transition duration-500 hover:bg-emrg-panel/60">
+              <t.icon className="h-5 w-5 text-emrg-gold/80" strokeWidth={1.2} />
+              <h3 className="mt-7 font-serif text-[20px] font-medium text-emrg-ink">{t.title}</h3>
+              <p className="mt-5 text-[15px] leading-[1.7] text-emrg-mute">{t.body}</p>
             </div>
           ))}
         </div>

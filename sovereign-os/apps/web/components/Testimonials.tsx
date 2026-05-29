@@ -1,4 +1,4 @@
-// Editorial testimonials block — institutional voice, no logos required.
+import { Reveal } from './Reveal';
 
 const QUOTES = [
   {
@@ -20,24 +20,27 @@ const QUOTES = [
 
 export function Testimonials() {
   return (
-    <section id="testimonials" className="border-t border-emrg-edge/60">
-      <div className="mx-auto max-w-7xl px-6 py-24 sm:py-28">
-        <div className="max-w-2xl">
-          <div className="text-[10px] tracking-[0.32em] text-emrg-gold">FROM THE OPERATORS</div>
-          <h2 className="mt-4 font-serif text-4xl font-medium leading-tight text-emrg-ink sm:text-5xl">
-            Working <span className="wordmark-cream italic">at scale.</span>
-          </h2>
-        </div>
-        <div className="mt-12 grid gap-5 lg:grid-cols-3">
+    <section id="testimonials" className="relative border-t border-emrg-edge/60">
+      <div className="mx-auto max-w-7xl px-6 py-28 sm:py-32">
+        <Reveal>
+          <div className="mb-16 max-w-2xl">
+            <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute">FROM THE OPERATORS</div>
+            <h2 className="mt-6 font-serif text-[36px] font-medium tracking-[-0.015em] leading-[1.05] text-emrg-ink sm:text-[44px]">
+              Working at scale.
+            </h2>
+          </div>
+        </Reveal>
+
+        <div className="grid gap-6 lg:grid-cols-3">
           {QUOTES.map((q) => (
-            <figure key={q.quote} className="rounded-2xl border border-emrg-edge bg-emrg-panel/40 p-7">
-              <svg viewBox="0 0 24 24" className="h-5 w-5 text-emrg-gold" fill="currentColor" aria-hidden>
+            <figure key={q.quote} className="rounded-2xl bg-emrg-panel/40 p-8">
+              <svg viewBox="0 0 24 24" className="h-4 w-4 text-emrg-gold/70" fill="currentColor" aria-hidden>
                 <path d="M9 7H5v6h3c0 2.2-1.8 4-4 4v2c3.3 0 6-2.7 6-6V7zm10 0h-4v6h3c0 2.2-1.8 4-4 4v2c3.3 0 6-2.7 6-6V7z" />
               </svg>
-              <blockquote className="mt-5 font-serif text-xl leading-snug text-emrg-ink">
+              <blockquote className="mt-7 font-serif text-[22px] leading-[1.35] text-emrg-ink">
                 {q.quote}
               </blockquote>
-              <figcaption className="mt-7 border-t border-emrg-edge pt-4 text-[12px] text-emrg-mute">
+              <figcaption className="mt-8 border-t border-emrg-edge/60 pt-5 text-[12px] text-emrg-mute">
                 <span className="block text-emrg-ink">{q.name}</span>
                 <span>{q.role}</span>
               </figcaption>

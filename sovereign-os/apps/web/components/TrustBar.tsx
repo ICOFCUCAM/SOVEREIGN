@@ -39,17 +39,17 @@ const SECTORS = [
 export function TrustBar() {
   return (
     <section className="border-y border-emrg-edge/60">
-      <div className="mx-auto flex max-w-7xl flex-col items-start gap-8 px-6 py-7 md:flex-row md:items-center md:gap-12">
-        <div className="text-[10px] tracking-[0.32em] text-emrg-mute md:max-w-[180px]">
+      <div className="mx-auto flex max-w-7xl flex-col items-start gap-8 px-6 py-10 md:flex-row md:items-center md:gap-12">
+        <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute md:max-w-[200px]">
           TRUSTED BY INSTITUTIONS WORLDWIDE
         </div>
-        <div className="grid w-full grid-cols-2 gap-x-6 gap-y-5 md:flex md:flex-1 md:items-center md:justify-end md:gap-12">
+        <div className="grid w-full grid-cols-2 gap-x-8 gap-y-6 md:flex md:flex-1 md:items-center md:justify-end md:gap-14">
           {SECTORS.map(({ Icon, t, s }) => (
             <div key={t} className="flex items-center gap-3 text-emrg-ink">
-              <span className="text-emrg-dim"><Icon /></span>
+              <span className="text-emrg-dim/80"><Icon /></span>
               <span className="leading-tight">
-                <span className="block text-[12px] tracking-[0.22em] text-emrg-ink">{t}</span>
-                <span className="block text-[10px] tracking-[0.22em] text-emrg-mute">{s}</span>
+                <span className="block text-[12px] uppercase tracking-[0.28em] text-emrg-ink">{t}</span>
+                <span className="block text-[11px] uppercase tracking-[0.28em] text-emrg-mute">{s}</span>
               </span>
             </div>
           ))}

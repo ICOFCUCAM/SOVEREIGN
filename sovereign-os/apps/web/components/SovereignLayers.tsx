@@ -1,8 +1,5 @@
-// Capabilities — the three operational surfaces of the platform, named for
-// what they DO. No "Layer 1/2/3", no FFmpeg/Runway, no platform counts.
-// File name preserved to avoid breaking imports.
-
 import Link from 'next/link';
+import { Reveal } from './Reveal';
 
 const CAPABILITIES = [
   {
@@ -21,7 +18,7 @@ const CAPABILITIES = [
   },
   {
     title: 'Strategic intelligence for decision-makers',
-    body: 'Executive briefings, narrative monitoring, scenario modelling and relationship intelligence — delivered as dispatches inside the console, not as a separately metered API.',
+    body: 'Executive briefings, narrative monitoring, scenario modelling and relationship intelligence — delivered as dispatches inside the console, not a separately metered API.',
     bullets: ['Decision-ready output', 'Continuously audited', 'Sovereign jurisdiction'],
     to: '#intelligence',
     cta: 'Open intelligence',
@@ -31,34 +28,35 @@ const CAPABILITIES = [
 export function SovereignLayers() {
   return (
     <section id="capabilities" className="relative border-t border-emrg-edge/60">
-      <div className="mx-auto max-w-7xl px-6 py-24 sm:py-28">
-        <div className="max-w-2xl">
-          <div className="text-[10px] tracking-[0.32em] text-emrg-mute">CAPABILITIES</div>
-          <h2 className="mt-4 font-serif text-4xl font-medium leading-tight text-emrg-ink sm:text-5xl">
-            Built for the work of <span className="wordmark-cream italic">communications.</span>
-          </h2>
-          <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-emrg-mute">
-            Production, distribution and intelligence — three operational surfaces under one institutional console.
-          </p>
-        </div>
+      <div className="mx-auto max-w-7xl px-6 py-28 sm:py-32">
+        <Reveal>
+          <div className="mb-16 max-w-2xl">
+            <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute">CAPABILITIES</div>
+            <h2 className="mt-6 font-serif text-[36px] font-medium tracking-[-0.015em] leading-[1.05] text-emrg-ink sm:text-[44px]">
+              Built for the work of communications.
+            </h2>
+            <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-emrg-mute">
+              Production, distribution and intelligence — three operational surfaces under one institutional console.
+            </p>
+          </div>
+        </Reveal>
 
-        <div className="mt-12 grid gap-5 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3">
           {CAPABILITIES.map((c) => (
-            <div key={c.title} className="relative flex flex-col rounded-2xl border border-emrg-edge bg-emrg-panel/50 p-7 transition hover:-translate-y-0.5 hover:border-emrg-dim">
-              <h3 className="font-serif text-2xl text-emrg-ink leading-tight">{c.title}</h3>
-              <p className="mt-4 text-[14px] leading-relaxed text-emrg-mute">{c.body}</p>
-              <ul className="mt-6 space-y-2 border-t border-emrg-edge pt-5 text-[12px] text-emrg-ink">
+            <article key={c.title} className="relative flex flex-col rounded-2xl bg-emrg-panel/50 p-8 transition duration-500 hover:-translate-y-1 hover:bg-emrg-panel/70">
+              {/* Single gold hairline — the only accent on the card. */}
+              <span aria-hidden className="h-px w-10 bg-emrg-gold/70" />
+              <h3 className="mt-7 font-serif text-[24px] font-medium leading-[1.15] text-emrg-ink">{c.title}</h3>
+              <p className="mt-5 text-[15px] leading-[1.7] text-emrg-mute">{c.body}</p>
+              <ul className="mt-8 space-y-3 border-t border-emrg-edge/60 pt-6 text-[13px] text-emrg-ink">
                 {c.bullets.map((b) => (
-                  <li key={b} className="flex items-center gap-2.5">
-                    <span className="h-1 w-1 shrink-0 rounded-full bg-emrg-gold" />
-                    {b}
-                  </li>
+                  <li key={b}>{b}</li>
                 ))}
               </ul>
-              <Link href={c.to} className="mt-7 inline-flex items-center gap-1.5 text-[12px] tracking-wide text-emrg-cream transition hover:gap-2.5">
+              <Link href={c.to} className="mt-10 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.22em] text-emrg-cream transition hover:gap-3">
                 {c.cta} →
               </Link>
-            </div>
+            </article>
           ))}
         </div>
       </div>
