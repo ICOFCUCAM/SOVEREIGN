@@ -55,6 +55,15 @@ const PLATFORM_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
       { label: 'Elections & Civic', to: '/ecosystem#elections' },
     ],
   },
+  {
+    title: 'Operate',
+    links: [
+      { label: 'Pricing', to: '/pricing' },
+      { label: 'Security', to: '/security' },
+      { label: 'Changelog', to: '/changelog' },
+      { label: 'Developer Portal', to: '/developer' },
+    ],
+  },
 ];
 
 const REGISTRAR_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
