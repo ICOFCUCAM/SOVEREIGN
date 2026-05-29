@@ -69,8 +69,8 @@ export function Footer() {
                 <span className="block text-[9px] tracking-[0.32em] text-emrg-mute">BY SOVEREIGN</span>
               </span>
             </Link>
-            <p className="mt-5 max-w-xs text-[13px] leading-relaxed text-emrg-mute">
-              Cinematic media, intelligent distribution, and strategic communications — unified in one sovereign platform.
+            <p className="mt-5 max-w-sm text-[13px] leading-[1.7] text-emrg-mute">
+              Strategic communications infrastructure for governments, institutions and enterprises operating under public scrutiny.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">

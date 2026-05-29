@@ -4,7 +4,7 @@ const CAPABILITIES = [
   { title: 'Executive Briefing',        body: 'Decision-ready dispatches synthesized for the people who decide — open-source signal joined with institutional posture.' },
   { title: 'Narrative Monitoring',      body: 'Continuous watch for drift, propagation and threat. The institution sees the story before the story moves.' },
   { title: 'Opportunity Discovery',     body: 'Strategic geometry mapped from open-source intelligence. Where to move, when to hold the line.' },
-  { title: 'Campaign Modelling',        body: 'Multi-step scenario and crisis planning — communications doctrine across days, not posts.' },
+  { title: 'Campaign Modelling',        body: 'Multi-step scenario and crisis planning — narrative operations across days, not posts.' },
   { title: 'Relationship Intelligence', body: 'Stakeholder and revenue posture treated as a first-class governance layer.' },
   { title: 'Operational Coordination',  body: 'Cross-substrate orchestration under one audit trail. Doctrine, dispatch and review in one record.' },
 ];

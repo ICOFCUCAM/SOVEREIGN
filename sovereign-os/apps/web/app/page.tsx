@@ -7,21 +7,21 @@ import { SectionSeparator } from '../components/SectionSeparator';
 import { SovereignLayers } from '../components/SovereignLayers';
 import { IntelligenceAgents } from '../components/IntelligenceAgents';
 import { DistributionGrid } from '../components/DistributionGrid';
+import { InstitutionalDeployments } from '../components/InstitutionalDeployments';
 import { ProvenanceTrust } from '../components/ProvenanceTrust';
 import { Testimonials } from '../components/Testimonials';
 import { Faq } from '../components/Faq';
 import { ClosingCta } from '../components/ClosingCta';
 import { Footer } from '../components/Footer';
 
-// Outcome-led marketing composition. Operational layers (Studio, Billing,
-// Console, Subscriptions) remain untouched and accessible via header / footer.
+// Three-act composition. Operational layers (Studio, Billing, Console,
+// Subscriptions) remain untouched and accessible via header / footer.
 //
-// Chapter structure:
-//   I.  Authority      Hero · TrustBar · Footprint · Outcomes
+//   I.  Authority   Hero · TrustBar · Footprint · Outcomes
 //   ── DOCTRINE ──
-//   II. Operations     Capability · Intelligence · Distribution
+//   II. Operations  Capability · Intelligence · Distribution · Deployments
 //   ── POSTURE ──
-//   III. Governance    Trust · Testimonials · FAQ · Closing
+//   III. Governance Trust · Testimonials · FAQ · Closing
 export default function LandingPage() {
   return (
     <>
@@ -34,6 +34,7 @@ export default function LandingPage() {
       <SovereignLayers />
       <IntelligenceAgents />
       <DistributionGrid />
+      <InstitutionalDeployments />
       <SectionSeparator label="Posture" />
       <ProvenanceTrust />
       <Testimonials />

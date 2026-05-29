@@ -23,24 +23,24 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://emergency.ai';
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: 'Emergency AI — Cinematic Intelligence Infrastructure',
+    default: 'Emergency AI — Institutional Communications Infrastructure',
     template: '%s · Emergency AI',
   },
-  description: 'Cinematic media, intelligent distribution, and strategic communications — unified in one sovereign platform.',
+  description: 'Strategic communications infrastructure for governments, institutions and enterprises operating under public scrutiny.',
   applicationName: 'Emergency AI',
   authors: [{ name: 'SOVEREIGN', url: 'https://sovereign.so' }],
   keywords: ['AI video', 'cinematic AI', 'multi-channel publishing', 'LinkedIn', 'YouTube', 'X', 'sovereign infrastructure'],
   openGraph: {
     type: 'website',
     siteName: 'Emergency AI',
-    title: 'Emergency AI — Cinematic Intelligence Infrastructure',
-    description: 'Produce films, ads, and social cuts. Publish to LinkedIn, YouTube and X in one pass.',
+    title: 'Emergency AI — Institutional Communications Infrastructure',
+    description: 'Strategic communications infrastructure for governments, institutions and enterprises operating under public scrutiny.',
     url: SITE,
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Emergency AI',
-    description: 'Cinematic media + multi-channel distribution under one sovereign console.',
+    description: 'Strategic communications infrastructure for governments, institutions and enterprises operating under public scrutiny.',
   },
   robots: { index: true, follow: true },
 };

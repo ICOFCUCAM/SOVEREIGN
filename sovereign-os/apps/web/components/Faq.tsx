@@ -21,7 +21,7 @@ const ITEMS = [
   },
   {
     q: 'How does it relate to SOVEREIGN and Sovereign Domains?',
-    a: 'Emergency AI is the strategic communications layer of the SOVEREIGN platform. It operates on the same substrate, the same audit log, and the same institutional posture — and integrates with Sovereign Domains for institutional identity and tenant routing.',
+    a: 'Emergency AI is the public-information operating layer of the SOVEREIGN platform. It runs on the same substrate, the same audit log, and the same institutional posture — and integrates with Sovereign Domains for institutional identity and tenant routing.',
   },
 ];
 

@@ -4,7 +4,7 @@ import { ImageResponse } from 'next/og';
 // current brand. 1200×630 follows the standard share-card spec.
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
-export const alt = 'Emergency AI — Cinematic Intelligence Infrastructure';
+export const alt = 'Emergency AI — Institutional Communications Infrastructure';
 
 export default function OG() {
   return new ImageResponse(
@@ -43,13 +43,13 @@ export default function OG() {
 
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', fontSize: 22, letterSpacing: '0.28em', color: '#d4a86a' }}>
-            CINEMATIC INTELLIGENCE INFRASTRUCTURE
+            INSTITUTIONAL COMMUNICATIONS INFRASTRUCTURE
           </div>
           <div style={{ display: 'flex', fontSize: 92, fontWeight: 600, lineHeight: 1.02, marginTop: 24, color: '#dad3c4', maxWidth: 1000 }}>
             Own the&nbsp;<span style={{ fontStyle: 'italic', color: '#efd9b3' }}>narrative.</span>
           </div>
           <div style={{ display: 'flex', fontSize: 30, marginTop: 28, color: '#7d7a72', maxWidth: 880, lineHeight: 1.3 }}>
-            Cinematic media, intelligent distribution, and strategic communications — unified in one sovereign platform.
+            Strategic communications infrastructure for governments, institutions and enterprises operating under public scrutiny.
           </div>
         </div>
 

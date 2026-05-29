@@ -4,14 +4,14 @@ import { Reveal } from './Reveal';
 const CAPABILITIES = [
   {
     title: 'Institutional voice at command speed',
-    body: 'Communications produced under institutional doctrine. The house voice carries through every dispatch. Continuously audited; never improvised.',
+    body: 'Voice produced under institutional doctrine. The house register carries through every dispatch. Continuously audited; never improvised.',
     bullets: ['Doctrine preserved', 'Mandate retained', 'Continuously audited'],
     to: '/console/studio',
     cta: 'Open studio',
   },
   {
     title: 'Sovereign reach under one mandate',
-    body: 'One mandate carries the institutional message across every relevant surface. Provenance travels with the artefact. Coverage state honestly reported.',
+    body: 'One mandate carries the institutional voice across every relevant surface. Provenance travels with the artefact. Coverage state honestly reported.',
     bullets: ['Provenance carried with the artefact', 'Per-tenant mandate isolation', 'Honest coverage posture'],
     to: '/console/studio#publish',
     cta: 'Coordinate release',
@@ -33,10 +33,10 @@ export function SovereignLayers() {
           <div className="mb-16 max-w-2xl">
             <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute">CAPABILITY</div>
             <h2 className="mt-6 font-serif text-[36px] font-medium tracking-[-0.015em] leading-[1.05] text-emrg-ink sm:text-[44px]">
-              The work of strategic communications.
+              The work of institutional voice.
             </h2>
             <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-emrg-mute">
-              Communications doctrine. Sovereign reach. Strategic intelligence. Three operational mandates under one institutional console.
+              Doctrine. Sovereign reach. Decision support. Three operational mandates under one institutional console.
             </p>
           </div>
         </Reveal>

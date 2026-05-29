@@ -7,7 +7,7 @@ const OUTCOMES = [
   { title: 'Watch the narrative',         body: 'Drift, threat and propagation monitored continuously, under audit, across every surface.' },
   { title: 'Brief the institution',       body: 'Decision-ready dispatches assembled from open-source signal and internal posture.' },
   { title: 'Mobilise at speed',           body: 'One staging surface for every stakeholder layer. Communications coordinated, not improvised.' },
-  { title: 'Hold authoritative communications', body: 'One audited record. Every dispatch attributable to the institution behind it.' },
+  { title: 'Hold authoritative ground',         body: 'One audited record. Every dispatch attributable to the institution behind it. Narrative operations without improvisation.' },
 ];
 
 export function Outcomes() {

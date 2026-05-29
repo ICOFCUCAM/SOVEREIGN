@@ -24,8 +24,8 @@ const TRUST = [
   },
   {
     icon: RefreshCw,
-    title: 'Communications continuity',
-    body: 'Queued, audited, retried under backoff. The institutional voice never falls silent under pipeline pressure — failures surface, not disappear.',
+    title: 'Operational continuity',
+    body: 'Queued, audited, retried under backoff. The institutional voice never falls silent under pressure — failures surface, not disappear.',
   },
   {
     icon: Globe,
