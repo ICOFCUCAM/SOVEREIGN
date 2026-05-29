@@ -173,9 +173,11 @@ async function handleGetArtifact(req, res, principal, artifactId, query) {
       pages: row.pages, sha256: row.sha256, classification: row.classification, storage: "signed_url", expiresAt: row.expires_at });
   }
 
+  // Not expired (checked above): bytes should exist. A read failure here is a
+  // storage/integrity problem, NOT expiry — surface it distinctly (don't mask as 410).
   let bytes;
   try { bytes = await getArtifact(row.storage_ref); }
-  catch { return send(res, 410, errEnvelope(null, 410, "ARTIFACT_EXPIRED", "artifact bytes unavailable")); }
+  catch { return send(res, 500, errEnvelope(null, 500, "ARTIFACT_UNAVAILABLE", "artifact bytes could not be read from storage")); }
 
   // ?verify=true → recompute + confirm checksum
   if (query.get("verify") === "true") {

@@ -74,7 +74,9 @@ function renderBlock(b, warnings) {
       return `![${esc(b.altText || "")}](${src})${cap}`;
     }
     case "reference":
-      return ""; // collapses into host text as [^n]; nothing standalone
+      // Standalone reference block → visible endnote marker (inline citeIds are
+      // already rendered on their host blocks).
+      return b.noteRef ? `[^${b.noteRef}]` : "";
     case "pagebreak":
       return "\n---\n";
     case "signature":

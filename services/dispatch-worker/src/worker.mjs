@@ -1,25 +1,31 @@
 // dispatch-worker — operational backbone + render seam (Sprint 1 M7 + Sprint 2 Epic 5/6).
 //   claim (SKIP LOCKED) -> lease -> running -> render(LM → outputs) -> store -> succeeded
 //   + retry framework, callback framework, status transitions, audit trail.
-// Sprint 2: the render seam now builds the Layout Model (Epic 5) and renders per
-// output. Markdown is live (proves the full spine); pdf/docx are declared but not
-// yet implemented (Epics 6/7) — requesting them yields a per-output failure →
-// `partial` when another output succeeds, isolating the unbuilt formats.
+// Sprint 2: the render seam builds the Layout Model (Epic 5) and renders per output.
+// Markdown and PDF (LM → themed HTML → headless Chromium, Epic 6) are live; docx
+// (Epic 7) is declared not-yet-implemented — requesting it yields a per-output
+// failure → `partial` when another output succeeds, isolating the unbuilt format.
 import crypto from "node:crypto";
 import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
 import { putArtifact, signUrl, artifactKey } from "../../shared/src/storage.mjs";
+import { htmlToPdf, normalizePdf, pdfPageCount } from "../../shared/src/pdf.mjs";
 import { buildLayout, ENGINE_VERSION, EngineError } from "@dispatch/ddm-schema/engine";
 import { renderMarkdown } from "@dispatch/ddm-schema/render-md";
+import { renderHtml } from "@dispatch/ddm-schema/render-html";
 
 const WORKER_ID = process.env.WORKER_ID || `worker-${crypto.randomUUID().slice(0, 8)}`;
 const pool = makePool();
 
-// Per-output renderers (LM → bytes). Each returns { ext, bytes, warnings } or
-// throws. PDF/DOCX are Epics 6/7 — declared as not-yet-implemented so requests
-// for them isolate to a per-output failure rather than failing the whole job.
+// Per-output renderers (LM → { ext, bytes, warnings, pages? }) or throw.
+// docx is Epic 7 — declared not-yet-implemented so it isolates to a per-output
+// failure rather than failing the whole job.
 const RENDERERS = {
   md: (lm) => { const { text, warnings } = renderMarkdown(lm); return { ext: "md", bytes: Buffer.from(text, "utf8"), warnings }; },
-  pdf: () => { const e = new Error("pdf renderer not yet implemented (Epic 6)"); e.deterministic = true; throw e; },
+  pdf: (lm) => {
+    const { html, warnings } = renderHtml(lm);
+    const buf = normalizePdf(htmlToPdf(html));        // deterministic-after-timestamp-normalization
+    return { ext: "pdf", bytes: buf, warnings, pages: pdfPageCount(buf) };
+  },
   docx: () => { const e = new Error("docx renderer not yet implemented (Epic 7)"); e.deterministic = true; throw e; },
 };
 const sys = (tenantId, fn) => withClaims(pool, { tenant_id: tenantId, dispatch_role: "service", principal_type: "service", actor: WORKER_ID }, fn);
@@ -120,11 +126,11 @@ async function insertArtifact(job, art) {
   // (version,format,role), keep the existing row's id stable.
   return sys(job.tenant_id, async (c) => {
     const r = await c.query(
-      `insert into dispatch.artifacts (id, tenant_id, version_id, job_id, role, format, storage_ref, sha256, size_bytes, classification, expires_at)
-       values ($1,$2,$3,$4,'primary',$5,$6,$7,$8,$9, now() + interval '7 days')
-       on conflict (version_id, format, role) do update set storage_ref=excluded.storage_ref, sha256=excluded.sha256, size_bytes=excluded.size_bytes
+      `insert into dispatch.artifacts (id, tenant_id, version_id, job_id, role, format, storage_ref, sha256, size_bytes, pages, classification, expires_at)
+       values ($1,$2,$3,$4,'primary',$5,$6,$7,$8,$9,$10, now() + interval '7 days')
+       on conflict (version_id, format, role) do update set storage_ref=excluded.storage_ref, sha256=excluded.sha256, size_bytes=excluded.size_bytes, pages=excluded.pages
        returning id`,
-      [art.artifactId, job.tenant_id, job.version_id, job.id, art.format, art.storageRef, art.sha256, art.sizeBytes, art.classification]);
+      [art.artifactId, job.tenant_id, job.version_id, job.id, art.format, art.storageRef, art.sha256, art.sizeBytes, art.pages ?? null, art.classification]);
     return r.rows[0].id;
   });
 }
@@ -168,9 +174,9 @@ async function processJob(job) {
       const key = artifactKey({ tenantId: job.tenant_id, documentId: ver.document_id, versionId: job.version_id, artifactId, ext: out.ext });
       const stored = await putArtifact(key, out.bytes);
       // Returned id is authoritative (stable across re-render via the unique constraint).
-      const rowId = await insertArtifact(job, { artifactId, format: fmt, ...stored, classification });
+      const rowId = await insertArtifact(job, { artifactId, format: fmt, ...stored, pages: out.pages ?? null, classification });
       const { url, expiresAt } = signUrl(key);
-      artifacts.push({ artifactId: rowId, role: "primary", format: fmt, sizeBytes: stored.sizeBytes, pages: null,
+      artifacts.push({ artifactId: rowId, role: "primary", format: fmt, sizeBytes: stored.sizeBytes, pages: out.pages ?? null,
         sha256: stored.sha256, classification, storage: "signed_url", url, expiresAt });
     } catch (e) {
       failures.push({ code: "RENDER_FAILED", message: `${fmt}: ${e.message}`, field: null });
