@@ -39,7 +39,7 @@ export function DistributionGrid() {
               The institutional voice, carried everywhere it must hold.
             </h2>
             <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-emrg-mute">
-              One mandate. Every relevant surface. The platform carries the institutional message across the channels that matter, holds provenance with the artefact, and reports back per dispatch under audit.
+              One mandate. Every relevant surface. The infrastructure carries the institutional voice across the surfaces that matter, holds provenance with the artefact, and reports back per dispatch under audit.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 text-[11px] uppercase tracking-[0.28em] text-emrg-cream/70">
               <span>Orchestrated coverage</span>

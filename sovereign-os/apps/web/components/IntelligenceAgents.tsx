@@ -20,7 +20,7 @@ export function IntelligenceAgents() {
               Decision support beneath every dispatch.
             </h2>
             <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-emrg-mute">
-              Beneath every communication, the platform synthesizes the signal institutional decision-makers need to read the room, hold the line, and brief their counterparts.
+              Beneath every dispatch, the infrastructure synthesizes the signal institutional decision-makers need to read the room, hold the line, and brief their counterparts.
             </p>
           </div>
         </Reveal>

@@ -9,15 +9,15 @@ const ITEMS = [
   },
   {
     q: 'Which surfaces are live today?',
-    a: 'LinkedIn, YouTube and X are operational under real publishers. Instagram, Facebook and TikTok are activating; Threads and Telegram are coming online; WhatsApp, Pinterest and Bluesky are rolling out. The platform never claims false coverage — non-operational surfaces return a status-tagged error when invoked.',
+    a: 'LinkedIn, YouTube and X are operational under real publishers. Instagram, Facebook and TikTok are activating; Threads and Telegram are coming online; WhatsApp, Pinterest and Bluesky are rolling out. The infrastructure never claims false coverage — non-operational surfaces return a status-tagged error when invoked.',
   },
   {
     q: 'What does the Strategic Intelligence Layer actually deliver?',
     a: 'Executive briefings, narrative monitoring, opportunity discovery, scenario and crisis modelling, relationship and operational coordination — delivered as institutional dispatches inside the console rather than as a metered consumer API.',
   },
   {
-    q: 'Who is the platform for?',
-    a: 'Institutions, agencies, ministries and newsrooms whose communications must hold under audit, scrutiny and pressure. The Institutional mandate carries single-tenant deployments with isolated compute and bring-your-own credentials.',
+    q: 'Who does the infrastructure serve?',
+    a: 'Governments, financial institutions, media networks and enterprise organizations whose voice must hold under audit, scrutiny and pressure. The Institutional mandate carries single-tenant deployments with isolated compute and bring-your-own credentials.',
   },
   {
     q: 'How does it relate to SOVEREIGN and Sovereign Domains?',

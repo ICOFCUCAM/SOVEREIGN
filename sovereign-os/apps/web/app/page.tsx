@@ -8,6 +8,7 @@ import { SovereignLayers } from '../components/SovereignLayers';
 import { IntelligenceAgents } from '../components/IntelligenceAgents';
 import { DistributionGrid } from '../components/DistributionGrid';
 import { InstitutionalDeployments } from '../components/InstitutionalDeployments';
+import { InstitutionalApplications } from '../components/InstitutionalApplications';
 import { ProvenanceTrust } from '../components/ProvenanceTrust';
 import { Testimonials } from '../components/Testimonials';
 import { Faq } from '../components/Faq';
@@ -17,11 +18,12 @@ import { Footer } from '../components/Footer';
 // Three-act composition. Operational layers (Studio, Billing, Console,
 // Subscriptions) remain untouched and accessible via header / footer.
 //
-//   I.  Authority   Hero · TrustBar · Footprint · Outcomes
+//   I.   Authority      Hero · TrustBar · Footprint · Outcomes
 //   ── DOCTRINE ──
-//   II. Operations  Capability · Intelligence · Distribution · Deployments
+//   II.  Operations     Capability · Intelligence · Distribution
+//                       Deployment Surfaces · Institutional Applications
 //   ── POSTURE ──
-//   III. Governance Trust · Testimonials · FAQ · Closing
+//   III. Governance     Trust · Testimonials · FAQ · Closing
 export default function LandingPage() {
   return (
     <>
@@ -35,6 +37,7 @@ export default function LandingPage() {
       <IntelligenceAgents />
       <DistributionGrid />
       <InstitutionalDeployments />
+      <InstitutionalApplications />
       <SectionSeparator label="Posture" />
       <ProvenanceTrust />
       <Testimonials />

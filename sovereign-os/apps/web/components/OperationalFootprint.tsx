@@ -26,7 +26,7 @@ export function OperationalFootprint() {
               </h2>
             </div>
             <p className="text-[15px] leading-[1.75] text-emrg-mute lg:pt-2">
-              Emergency AI runs across seven sovereign regions under continuous audit posture. Tenancy is institutional; provenance is non-negotiable; the platform is configured to respect sovereignty by default and re-configured against it only on explicit mandate.
+              Emergency AI runs across seven sovereign regions under continuous audit posture. Tenancy is institutional; provenance is non-negotiable; the infrastructure is configured to respect sovereignty by default and re-configured against it only on explicit mandate.
             </p>
           </div>
         </Reveal>

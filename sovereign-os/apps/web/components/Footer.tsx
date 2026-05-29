@@ -72,6 +72,9 @@ export function Footer() {
             <p className="mt-5 max-w-sm text-[13px] leading-[1.7] text-emrg-mute">
               Strategic communications infrastructure for governments, institutions and enterprises operating under public scrutiny.
             </p>
+            <p className="mt-4 max-w-sm text-[11px] uppercase tracking-[0.28em] text-emrg-mute/80">
+              Sovereign by mandate · Continuously under audit · Engagement-scoped
+            </p>
           </div>
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {COLUMNS.map((col) => (

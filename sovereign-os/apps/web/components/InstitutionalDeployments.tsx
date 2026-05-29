@@ -1,25 +1,30 @@
 import { Reveal } from './Reveal';
 
-// Deployment Surfaces — the four institutional sectors the platform serves.
-// Typographic only (definition list, no cards). Surface name + one-line
-// operating posture description per sector.
+// Deployment Surfaces — four institutional sectors operating Emergency AI as
+// their strategic-communications infrastructure. Each sector receives a
+// fuller narrative paragraph describing how the institution typically
+// deploys the substrate. Typographic only (definition list, no cards).
 
-const SURFACES: Array<{ name: string; body: string }> = [
+const SURFACES: Array<{ name: string; lead: string; body: string }> = [
   {
     name: 'National Governments',
-    body: 'Coordinate public information, crisis communication and executive messaging.',
+    lead: 'Coordinate public information, crisis communication and executive messaging.',
+    body: 'From electoral cycles through sovereign crises, the infrastructure carries the authoritative voice across ministries, agencies and regions. Provenance is retained on every artefact; the audit trail is institutional; jurisdictional posture is respected by default.',
   },
   {
     name: 'Financial Institutions',
-    body: 'Maintain narrative consistency across regulatory, investor and public channels.',
+    lead: 'Maintain narrative consistency across regulatory, investor and public channels.',
+    body: 'Earnings cycles, supervisory engagement and reputational exposure operate under one doctrine — never improvised under pressure. The substrate coordinates investor relations, regulatory dispatch and executive voice with a single defensible audit posture.',
   },
   {
     name: 'Media Networks',
-    body: 'Operate production, distribution and monitoring from a unified command surface.',
+    lead: 'Operate production, distribution and monitoring from a unified command surface.',
+    body: 'Editorial cadence, format presets and channel orchestration unified end to end. House voice and narrative continuity carried through every output. Newsroom coordination treated as institutional infrastructure rather than improvised workflow.',
   },
   {
     name: 'Enterprise Organizations',
-    body: 'Coordinate communications, stakeholder relations and intelligence under one doctrine.',
+    lead: 'Coordinate communications, stakeholder relations and intelligence under one doctrine.',
+    body: 'Product launches, corporate affairs, crisis posture and executive surfaces operated under the same audit log. Stakeholder intelligence and revenue posture treated as first-class institutional layers — not as marketing tooling.',
   },
 ];
 
@@ -36,16 +41,21 @@ export function InstitutionalDeployments() {
               </h2>
             </div>
             <p className="text-[15px] leading-[1.75] text-emrg-mute lg:pt-2">
-              Four institutional sectors operate Emergency AI as their public-information and strategic-communications substrate. The platform is engagement-scoped; institutional mandates are confirmed on briefing.
+              Four institutional sectors operate Emergency AI as their strategic communications infrastructure. The engagement is institutional; the mandate is confirmed on briefing.
             </p>
           </div>
         </Reveal>
 
         <dl className="divide-y divide-emrg-edge/60 border-y border-emrg-edge/60">
           {SURFACES.map((s) => (
-            <div key={s.name} className="grid grid-cols-1 items-baseline gap-3 py-10 sm:grid-cols-[1fr_2fr] sm:gap-12">
-              <dt className="font-serif text-[24px] font-medium leading-[1.2] tracking-[-0.01em] text-emrg-cream">
-                {s.name}
+            <div key={s.name} className="grid grid-cols-1 gap-6 py-12 sm:grid-cols-[260px_1fr] sm:gap-14">
+              <dt>
+                <div className="font-serif text-[24px] font-medium leading-[1.2] tracking-[-0.01em] text-emrg-cream">
+                  {s.name}
+                </div>
+                <p className="mt-3 text-[13px] leading-[1.65] text-emrg-mute">
+                  {s.lead}
+                </p>
               </dt>
               <dd className="text-[15px] leading-[1.75] text-emrg-ink">
                 {s.body}
