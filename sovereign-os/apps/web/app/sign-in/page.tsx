@@ -103,15 +103,20 @@ function SignInForm() {
           </button>
         </form>
 
-        <div className="mt-6 text-center text-[12px] text-emrg-mute">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-[12px] text-emrg-mute">
           {mode === 'signup' ? (
-            <>Already have an account?{' '}
+            <span>Already have an account?{' '}
               <button onClick={() => setMode('signin')} className="text-emrg-cream underline-offset-4 hover:underline">Sign in</button>
-            </>
+            </span>
           ) : (
-            <>New here?{' '}
+            <span>New here?{' '}
               <button onClick={() => setMode('signup')} className="text-emrg-cream underline-offset-4 hover:underline">Request access</button>
-            </>
+            </span>
+          )}
+          {mode === 'signin' && (
+            <Link href="/auth/reset" className="text-emrg-mute underline-offset-4 hover:text-emrg-cream hover:underline">
+              Forgot password?
+            </Link>
           )}
         </div>
       </div>
