@@ -1,4 +1,5 @@
-const PORTAL = process.env.NEXT_PUBLIC_PORTAL_URL ?? '#';
+import Link from 'next/link';
+import { AuthMenu } from './AuthMenu';
 
 const NAV = [
   { label: 'Platform', href: '#platform' },
@@ -26,13 +27,13 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-emrg-edge/60 bg-emrg-bg/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-5">
-        <a href="#top" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
           <BrandMark />
           <span className="leading-tight">
             <span className="block text-[15px] font-medium tracking-[0.18em] text-emrg-ink">EMERGENCY AI</span>
             <span className="block text-[10px] tracking-[0.32em] text-emrg-mute">BY SOVEREIGN</span>
           </span>
-        </a>
+        </Link>
         <nav className="hidden items-center gap-9 text-[13px] text-emrg-mute md:flex">
           {NAV.map((l) => (
             <a key={l.label} href={l.href} className="transition hover:text-emrg-cream">
@@ -41,22 +42,7 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <a
-            href={PORTAL}
-            className="hidden rounded-md border border-emrg-edgeStrong px-4 py-2 text-[13px] text-emrg-ink transition hover:border-emrg-dim hover:text-emrg-cream sm:inline-flex"
-          >
-            Developer Console
-          </a>
-          <a
-            href="#pricing"
-            className="inline-flex items-center gap-2 rounded-md bg-emrg-gold px-4 py-2 text-[13px] font-medium text-emrg-bg transition hover:-translate-y-0.5 hover:bg-emrg-cream"
-            style={{ boxShadow: '0 10px 30px -10px rgba(212,168,106,0.5)' }}
-          >
-            Get Started
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
+          <AuthMenu />
         </div>
       </div>
     </header>
