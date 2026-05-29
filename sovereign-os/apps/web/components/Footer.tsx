@@ -1,14 +1,43 @@
-const PORTAL = process.env.NEXT_PUBLIC_PORTAL_URL ?? '#';
-const SOVEREIGN_URL = process.env.NEXT_PUBLIC_SOVEREIGN_URL ?? 'https://sovereign.so';
+import Link from 'next/link';
 
+const SOVEREIGN_URL = process.env.NEXT_PUBLIC_SOVEREIGN_URL ?? 'https://sovereign.so';
 const DEVELOPER_PORTAL = process.env.NEXT_PUBLIC_DEVELOPER_PORTAL_URL ?? 'https://sovereign.so/developer';
-const NAV = [
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'Docs', href: '/docs' },
-  { label: 'Console', href: '/console' },
-  { label: 'Developer API', href: DEVELOPER_PORTAL, external: true },
-  { label: 'Terms', href: '/legal/terms' },
-  { label: 'Privacy', href: '/legal/privacy' },
+
+const COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string; external?: boolean }> }> = [
+  {
+    title: 'Platform',
+    links: [
+      { label: 'Studio', href: '/console/studio' },
+      { label: 'Console', href: '/console' },
+      { label: 'Pricing', href: '/pricing' },
+      { label: 'Solutions', href: '/solutions' },
+    ],
+  },
+  {
+    title: 'Resources',
+    links: [
+      { label: 'Docs', href: '/docs' },
+      { label: 'Resources hub', href: '/resources' },
+      { label: 'Developer API', href: DEVELOPER_PORTAL, external: true },
+      { label: 'Security', href: '/security' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { label: 'About', href: '/company' },
+      { label: 'Contact', href: 'mailto:hello@emergency.ai' },
+      { label: 'Sovereign ↗', href: SOVEREIGN_URL, external: true },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { label: 'Terms', href: '/legal/terms' },
+      { label: 'Privacy', href: '/legal/privacy' },
+      { label: 'Security disclosure', href: 'mailto:security@emergency.ai' },
+    ],
+  },
 ];
 
 function BrandMark() {
@@ -30,32 +59,45 @@ export function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer className="border-t border-emrg-edge/70">
-      <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-6 py-10 md:flex-row md:items-center">
-        <a href="#top" className="flex items-center gap-3">
-          <BrandMark />
-          <span className="leading-tight">
-            <span className="block text-[13px] font-medium tracking-[0.18em] text-emrg-ink">EMERGENCY AI</span>
-            <span className="block text-[9px] tracking-[0.32em] text-emrg-mute">BY SOVEREIGN</span>
-          </span>
-        </a>
-        <nav className="flex flex-wrap items-center gap-x-7 gap-y-2 text-[13px] text-emrg-mute">
-          {NAV.map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              target={(l as { external?: boolean }).external ? '_blank' : undefined}
-              rel={(l as { external?: boolean }).external ? 'noreferrer' : undefined}
-              className="transition hover:text-emrg-cream"
-            >
-              {l.label}
-            </a>
-          ))}
-          <a href={SOVEREIGN_URL} target="_blank" rel="noreferrer" className="transition hover:text-emrg-cream">
-            Sovereign ↗
-          </a>
-        </nav>
-        <div className="text-[11px] tracking-[0.18em] text-emrg-mute">
-          © {year} Emergency AI. All rights reserved.
+      <div className="mx-auto max-w-7xl px-6 py-14">
+        <div className="grid gap-10 lg:grid-cols-[1.2fr_2fr]">
+          <div>
+            <Link href="/" className="flex items-center gap-3">
+              <BrandMark />
+              <span className="leading-tight">
+                <span className="block text-[13px] font-medium tracking-[0.18em] text-emrg-ink">EMERGENCY AI</span>
+                <span className="block text-[9px] tracking-[0.32em] text-emrg-mute">BY SOVEREIGN</span>
+              </span>
+            </Link>
+            <p className="mt-5 max-w-xs text-[13px] leading-relaxed text-emrg-mute">
+              Cinematic media, intelligent distribution, and strategic communications — unified in one sovereign platform.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+            {COLUMNS.map((col) => (
+              <div key={col.title}>
+                <div className="text-[10px] uppercase tracking-[0.22em] text-emrg-gold">{col.title}</div>
+                <ul className="mt-4 space-y-2.5 text-[13px]">
+                  {col.links.map((l) => (
+                    <li key={l.label}>
+                      <a
+                        href={l.href}
+                        target={l.external ? '_blank' : undefined}
+                        rel={l.external ? 'noreferrer' : undefined}
+                        className="text-emrg-mute transition hover:text-emrg-cream"
+                      >
+                        {l.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-emrg-edge pt-6 text-[11px] tracking-[0.18em] text-emrg-mute">
+          <span>© {year} Emergency AI. All rights reserved.</span>
+          <span>Built on the SOVEREIGN platform.</span>
         </div>
       </div>
     </footer>
