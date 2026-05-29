@@ -24,18 +24,51 @@ import { verifyJwt, signJwt, decodeUnverified, JwtError } from "./jwt.mjs";
 
 const TENANT_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// NOTE: sha256(secret) compares the presented service secret against
-// service_clients.secret_hash. Production should migrate the at-rest hash to
-// argon2/bcrypt (residual R-S1-1); the *comparison* below is constant-time.
+// Service-secret at-rest hashing (R-S1-1).
+//
+// New secrets are hashed with scrypt — memory-hard, salted, dependency-free
+// (node:crypto), stored as  scrypt$N$r$p$<salt_b64>$<hash_b64>. Legacy values
+// are bare 64-hex sha256 digests; verifySecret() accepts both so existing
+// service_clients keep working and can be re-hashed on rotation. The scrypt N
+// is kept modest (2^14) so auth stays sub-100ms; raise via DISPATCH_SCRYPT_COST.
+const SCRYPT = { N: Number(process.env.DISPATCH_SCRYPT_COST || 16384), r: 8, p: 1, keylen: 32 };
+
+/** Legacy sha256 hex digest (kept for back-compat verification only). */
 export function hashSecret(secret) {
   return crypto.createHash("sha256").update(secret).digest("hex");
 }
 
-function timingSafeStrEqual(a, b) {
-  const ba = Buffer.from(String(a));
-  const bb = Buffer.from(String(b));
-  if (ba.length !== bb.length) return false;
-  return crypto.timingSafeEqual(ba, bb);
+/** Hash a secret with scrypt for storage. Returns the encoded string. */
+export function hashSecretScrypt(secret, opts = SCRYPT) {
+  const salt = crypto.randomBytes(16);
+  const hash = crypto.scryptSync(String(secret), salt, opts.keylen, { N: opts.N, r: opts.r, p: opts.p, maxmem: 64 * 1024 * 1024 });
+  return `scrypt$${opts.N}$${opts.r}$${opts.p}$${salt.toString("base64")}$${hash.toString("base64")}`;
+}
+
+function timingSafeBufEqual(a, b) {
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
+/**
+ * Verify a presented secret against a stored hash, supporting both the new
+ * scrypt format and legacy 64-hex sha256. Constant-time. Returns
+ * { ok, legacy } so callers can opportunistically re-hash legacy secrets.
+ */
+export function verifySecret(secret, stored) {
+  if (typeof stored !== "string" || !stored) return { ok: false, legacy: false };
+  if (stored.startsWith("scrypt$")) {
+    const [, Ns, rs, ps, saltB64, hashB64] = stored.split("$");
+    try {
+      const salt = Buffer.from(saltB64, "base64");
+      const expected = Buffer.from(hashB64, "base64");
+      const actual = crypto.scryptSync(String(secret), salt, expected.length, { N: Number(Ns), r: Number(rs), p: Number(ps), maxmem: 64 * 1024 * 1024 });
+      return { ok: timingSafeBufEqual(actual, expected), legacy: false };
+    } catch { return { ok: false, legacy: false }; }
+  }
+  // Legacy sha256 hex
+  const ok = timingSafeBufEqual(Buffer.from(hashSecret(secret)), Buffer.from(stored));
+  return { ok, legacy: true };
 }
 
 function devTokensAllowed() {
@@ -75,7 +108,7 @@ export async function resolvePrincipal(pool, authHeader, withClaimsAdmin) {
       return r.rows[0];
     });
     if (!row || !row.active) return { error: { status: 401, code: "INVALID_CLIENT", message: "unknown or inactive client" } };
-    if (!timingSafeStrEqual(row.secret_hash, hashSecret(secret))) {
+    if (!verifySecret(secret, row.secret_hash).ok) {
       return { error: { status: 401, code: "INVALID_CLIENT", message: "bad secret" } };
     }
     return { principal: { tenantId: row.tenant_id, principalType: "service", role: "service", scopes: row.scopes, actor: `svc:${clientId}` } };

@@ -74,17 +74,27 @@ DISPATCH_MIGRATE_URL="$ADMIN_DSN" node db/migrate.mjs up --seed
 ```
 
 **Production:** do **not** run `--seed`. Instead provision real tenants and
-service clients (one per machine caller, e.g. Emergency AI):
+service clients (one per machine caller, e.g. Emergency AI). Hash the client
+secret with **scrypt** (R-S1-1) — generate the hash with the helper, then insert
+it (the DB never sees the plaintext):
 
+```bash
+# Generate a strong secret + its scrypt hash (store the secret with the caller,
+# the hash in the DB):
+node -e 'import("./services/shared/src/auth.mjs").then(a=>{const s=require("crypto").randomUUID();console.log("secret:",s);console.log("hash:  ",a.hashSecretScrypt(s));})'
+```
 ```sql
 insert into dispatch.tenants (id, name) values (gen_random_uuid(), 'Acme Gov') returning id;
--- secret_hash = sha256(<client_secret>) (current at-rest scheme; argon2 is the
--- planned upgrade, risk R-S1-1). Generate a strong secret, store it with the caller:
 insert into dispatch.service_clients (tenant_id, name, client_id, secret_hash, scopes)
 values ('<tenant-id>', 'emergency-ai-prod', 'eai-prod',
-        encode(digest('<client_secret>','sha256'),'hex'),
+        '<scrypt$...-hash-from-above>',
         array['dispatch:validate','dispatch:render','dispatch:read']);
 ```
+
+> Legacy sha256 hashes (`encode(digest(secret,'sha256'),'hex')`) still
+> authenticate for back-compat, but new clients should use the scrypt hash above.
+> Provisioning runs as the **admin/owner** DSN (service_clients has no app-role
+> INSERT policy by design).
 
 The migration runner can also run as a one-shot container (`db/Dockerfile`):
 `docker build -f db/Dockerfile -t dispatch-migrate . && docker run --rm -e DISPATCH_MIGRATE_URL=... dispatch-migrate`.
