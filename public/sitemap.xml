@@ -12,6 +12,7 @@
   <url><loc>https://sovereign.so/pricing</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://sovereign.so/security</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://sovereign.so/changelog</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/docs</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://sovereign.so/emergency-ai</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://sovereign.so/sovereign-domains</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://sovereign.so/systems/civicos</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
