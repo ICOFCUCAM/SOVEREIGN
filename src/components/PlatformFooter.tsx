@@ -63,6 +63,7 @@ const PLATFORM_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
       { label: 'Changelog', to: '/changelog' },
       { label: 'Docs', to: '/docs' },
       { label: 'Developer Portal', to: '/developer' },
+      { label: 'Press', to: '/press' },
     ],
   },
 ];
