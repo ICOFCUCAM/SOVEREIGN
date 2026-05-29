@@ -5,14 +5,17 @@ import type { EcosystemProduct } from '@/lib/types';
 import { ArrowRight, ArrowUpRight, FileText, Scale, Banknote, Truck, Cpu, GraduationCap, ShoppingCart, Server } from 'lucide-react';
 import HudCorners from '@/components/HudCorners';
 
-// Featured sovereign infrastructure — flagship first.
+// Featured sovereign infrastructure — canonical seven in dependency-tier order.
+// Flagship default (Civicos at sovereign scale) leads the rotation; foundational
+// (Veritas OS) and terminal (Sovereign Dispatch) bracket the producers.
 const FEATURED_SLUGS = [
-  'civicos-national-shell',
-  'civicos-treasury',
-  'emergency-ai-platform',
-  'veritas-operations',
-  'civicos-emergency',
-  'relocation-us',
+  'civicos',                   // Operating · Sovereign (default flagship)
+  'emergency-ai-platform',     // Producer · Intelligence
+  'veritas-banking',           // Producer · Financial
+  'elecpro',                   // Producer · Electoral
+  'veritas-os',                // Foundational
+  'veritas-operations',        // Operating · Enterprise
+  'sovereign-dispatch',        // Terminal · Publication
 ];
 
 const deployValueOf = (p: EcosystemProduct): string | null => {

@@ -68,7 +68,7 @@ export function Hero() {
 
             <div className="animate-rise flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-emrg-dim">
               <span className="h-px w-8 bg-emrg-dim/70" />
-              OPERATIONAL INFRASTRUCTURE FOR INSTITUTIONS
+              STRATEGIC INTELLIGENCE INFRASTRUCTURE
             </div>
 
             <h1 className="animate-rise mt-12 font-serif text-[64px] font-medium tracking-[-0.015em] leading-[1.02] text-emrg-ink sm:text-[88px]">
@@ -81,7 +81,7 @@ export function Hero() {
             </h1>
 
             <p className="animate-rise mt-12 max-w-md text-[15px] leading-[1.7] text-emrg-mute">
-              One operational infrastructure layer for governments, enterprises and strategic organizations — across intelligence, media and coordinated action. Sovereign by mandate. Continuously under audit.
+              Strategic Intelligence Infrastructure for governments, institutions and enterprises. Intelligence acquisition. Strategic analysis. Institutional intelligence generation. Publications routed through Sovereign Dispatch.
             </p>
 
             <div className="animate-rise mt-12">

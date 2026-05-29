@@ -23,7 +23,7 @@ export function WhyInfrastructure() {
             The result: voice without provenance, dispatch without audit, decisions without recoverable signal — and a procurement surface that grows wider, more brittle and less defensible every year.
           </p>
           <p>
-            Emergency AI exists to consolidate that substrate. Intelligence, media acquisition, monitoring, distribution and operational coordination unified under one infrastructure layer — sovereign by mandate, audited end to end, engagement-scoped to institutional doctrine.
+            Emergency AI exists to consolidate the institutional intelligence layer. Acquisition, analysis and generation unified under one auditable substrate — sovereign by mandate, engagement-scoped to institutional doctrine. Publications are routed to Sovereign Dispatch.
           </p>
         </div>
 

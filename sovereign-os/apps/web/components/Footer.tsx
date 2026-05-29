@@ -70,7 +70,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-5 max-w-sm text-[13px] leading-[1.7] text-emrg-mute">
-              Strategic communications infrastructure for governments, institutions and enterprises operating under public scrutiny.
+              Strategic Intelligence Infrastructure for governments, institutions and enterprises. Publications routed through Sovereign Dispatch.
             </p>
             <p className="mt-4 max-w-sm text-[11px] uppercase tracking-[0.28em] text-emrg-mute/80">
               Sovereign by mandate · Continuously under audit · Engagement-scoped
