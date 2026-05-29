@@ -55,9 +55,16 @@ const ScrollToTop = () => {
   return null;
 };
 
+// Lightweight page-load fallback — keeps the brand visible while the lazy chunk
+// loads, with a kicker that grounds users in what the platform is.
 const PageFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-[#05071A]">
-    <div className="w-10 h-10 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin" />
+  <div className="min-h-screen flex flex-col items-center justify-center bg-[#05071A] text-white">
+    <div className="relative">
+      <div className="absolute inset-0 bg-cyan-400/30 blur-2xl rounded-full" />
+      <img src="/sovereign-logo.png" alt="" aria-hidden="true" className="relative w-12 h-12 object-contain drop-shadow-[0_0_18px_rgba(0,194,255,0.4)] animate-pulse" />
+    </div>
+    <div className="mt-6 text-[10px] font-mono uppercase tracking-[0.32em] text-white/40">SOVEREIGN · ROUTING</div>
+    <div className="mt-3 w-8 h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
   </div>
 );
 
