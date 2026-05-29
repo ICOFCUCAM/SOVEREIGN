@@ -8,5 +8,21 @@
   <url><loc>https://sovereign.so/channel</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://sovereign.so/valuation</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://sovereign.so/studio</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://sovereign.so/developer</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://sovereign.so/emergency-ai</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/sovereign-domains</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://sovereign.so/systems/civicos</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/systems/veritas-os</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/systems/veritas-banking</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/systems/elecpro</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/systems/flyttgo</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/systems/mobile-pay</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/systems/civicos-treasury</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/systems/civicos-national-shell</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/systems/civicos-emergency</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/systems/veritas-operations</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sovereign.so/systems/relocation-us</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://domains.sovereign.so/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://domains.sovereign.so/search</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://domains.sovereign.so/developer</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>
