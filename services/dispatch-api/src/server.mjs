@@ -5,6 +5,9 @@
 // append-only audit, and tenant-scoped artifact retrieval (signed URL / stream).
 import http from "node:http";
 import crypto from "node:crypto";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { validateRequest } from "@dispatch/ddm-schema/validator";
 import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
 import { resolvePrincipal, hasScope, mintServiceToken } from "../../shared/src/auth.mjs";
@@ -15,6 +18,22 @@ const pool = makePool();
 
 const CONTENT_TYPE = { md: "text/markdown; charset=utf-8", pdf: "application/pdf",
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" };
+
+// Minimal Dispatch console (Epic 9): a single static page served at / and /console.
+const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
+let CONSOLE_HTML = null;
+function consoleHtml() {
+  if (CONSOLE_HTML == null) { try { CONSOLE_HTML = readFileSync(join(PUBLIC_DIR, "console.html"), "utf8"); } catch { CONSOLE_HTML = ""; } }
+  return CONSOLE_HTML;
+}
+// Resolve auth from the Authorization header, falling back to a ?token= query
+// param (browser <a> downloads can't set headers). Bearer-only for the fallback.
+function authHeaderFrom(req, url) {
+  const h = req.headers["authorization"];
+  if (h) return h;
+  const t = url.searchParams.get("token");
+  return t ? "Bearer " + t : undefined;
+}
 
 // Admin/system claim used only for pre-tenant lookups (service-client auth).
 const withAdmin = (fn) => withClaims(pool, { principal_type: "system" }, fn);
@@ -201,10 +220,18 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && path === "/v1/health") return send(res, 200, { ok: true, engineVersion: ENGINE_VERSION });
     if (req.method === "GET" && path === "/v1/version") return send(res, 200, { engineVersion: ENGINE_VERSION, schemaVersion: "1.0" });
 
+    // Dispatch console (Epic 9) — static page; no auth (it authenticates client-side).
+    if (req.method === "GET" && (path === "/" || path === "/console")) {
+      const html = consoleHtml();
+      if (!html) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "console unavailable"));
+      res.writeHead(200, { "content-type": "text/html; charset=utf-8" }); return res.end(html);
+    }
+    if (req.method === "GET" && path === "/favicon.ico") { res.writeHead(204); return res.end(); }
+
     // GET retrieve surface (Epic 8) — auth required, tenant-scoped.
     const getMatch = req.method === "GET" && /^\/v1\/(jobs|artifacts|documents)\/([A-Za-z0-9-]+)$/.exec(path);
     if (getMatch) {
-      const auth = await resolvePrincipal(pool, req.headers["authorization"], withAdmin);
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req, url), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       const [, kind, id] = getMatch;
       if (kind === "jobs") return await handleGetJob(res, auth.principal, id);
@@ -223,7 +250,9 @@ const server = http.createServer(async (req, res) => {
       if (ex.error) return send(res, ex.error.status, errEnvelope(null, ex.error.status, ex.error.code, ex.error.message));
       const minted = mintServiceToken(ex.principal);
       if (minted.error) return send(res, minted.error.status, errEnvelope(null, minted.error.status, minted.error.code, minted.error.message));
-      return send(res, 200, { ...minted, tenantId: ex.principal.tenantId, scopes: ex.principal.scopes });
+      // Expose both `token` (legacy) and `access_token` (OAuth2-standard) so the
+      // console/SDKs can use the conventional field name.
+      return send(res, 200, { ...minted, access_token: minted.token, tenantId: ex.principal.tenantId, scopes: ex.principal.scopes });
     }
 
     const auth = await resolvePrincipal(pool, req.headers["authorization"], withAdmin);
