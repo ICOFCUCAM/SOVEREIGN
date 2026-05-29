@@ -15,6 +15,9 @@ export interface Plan {
   features: string[];
 }
 
+/** Yearly price in USD assuming 2 months free (≈ 16.7% discount). */
+export const yearlyPrice = (monthly: number) => monthly === 0 ? 0 : monthly * 10;
+
 export const PLANS: Plan[] = [
   {
     id: 'evaluator',
