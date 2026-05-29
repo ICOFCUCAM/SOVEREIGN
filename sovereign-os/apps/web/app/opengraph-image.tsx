@@ -17,8 +17,9 @@ export default function OG() {
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '80px',
-          background:
-            'radial-gradient(60% 80% at 80% 30%, rgba(212,168,106,0.20), transparent 60%), #08080d',
+          backgroundColor: '#08080d',
+          backgroundImage:
+            'radial-gradient(circle at 80% 30%, rgba(212,168,106,0.20), transparent 60%)',
           color: '#dad3c4',
           fontFamily: 'serif',
         }}
@@ -41,13 +42,13 @@ export default function OG() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ fontSize: 22, letterSpacing: '0.28em', color: '#d4a86a' }}>
+          <div style={{ display: 'flex', fontSize: 22, letterSpacing: '0.28em', color: '#d4a86a' }}>
             CINEMATIC INTELLIGENCE INFRASTRUCTURE
           </div>
-          <div style={{ fontSize: 92, fontWeight: 600, lineHeight: 1.02, marginTop: 24, color: '#dad3c4', maxWidth: 1000 }}>
-            Own the <span style={{ fontStyle: 'italic', color: '#efd9b3' }}>narrative.</span>
+          <div style={{ display: 'flex', fontSize: 92, fontWeight: 600, lineHeight: 1.02, marginTop: 24, color: '#dad3c4', maxWidth: 1000 }}>
+            Own the&nbsp;<span style={{ fontStyle: 'italic', color: '#efd9b3' }}>narrative.</span>
           </div>
-          <div style={{ fontSize: 30, marginTop: 28, color: '#7d7a72', maxWidth: 880, lineHeight: 1.3 }}>
+          <div style={{ display: 'flex', fontSize: 30, marginTop: 28, color: '#7d7a72', maxWidth: 880, lineHeight: 1.3 }}>
             Cinematic media, intelligent distribution, and strategic communications — unified in one sovereign platform.
           </div>
         </div>
