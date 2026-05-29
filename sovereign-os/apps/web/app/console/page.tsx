@@ -105,21 +105,13 @@ export default function ConsolePage() {
         <div className="mb-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-emrg-mute">
           <Activity className="h-3.5 w-3.5" /> Recent activity
         </div>
-        <div className="divide-y divide-emrg-edge/50 overflow-hidden rounded-2xl border border-emrg-edge bg-emrg-panel/40">
+        <div className="overflow-hidden rounded-2xl border border-emrg-edge bg-emrg-panel/40">
           {jobs.length === 0 ? (
             <div className="px-5 py-10 text-center text-sm text-emrg-mute">
               No activity yet. <Link href="/console/studio" className="text-emrg-cream underline-offset-4 hover:underline">Run your first production</Link>.
             </div>
           ) : (
-            jobs.map((j) => (
-              <div key={j.id} className="flex items-center gap-4 px-5 py-3">
-                <span className="w-20 shrink-0 rounded bg-emrg-surface px-2 py-0.5 text-center text-[9px] uppercase tracking-wider text-emrg-mute">{j.kind}</span>
-                <div className="min-w-0 flex-1 truncate text-sm text-emrg-ink">{j.title || '—'}</div>
-                {j.result_url && <a href={j.result_url} target="_blank" rel="noreferrer" className="shrink-0 text-[10px] uppercase tracking-wider text-emrg-gold hover:text-emrg-cream">Open</a>}
-                <span className={`shrink-0 rounded px-2 py-0.5 text-[10px] uppercase ${j.status === 'done' ? 'bg-emerald-500/15 text-emerald-300' : j.status === 'processing' ? 'bg-cyan-500/15 text-cyan-300' : j.status === 'failed' ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'}`}>{j.status}</span>
-                <span className="shrink-0 whitespace-nowrap font-mono text-xs text-emrg-mute">{new Date(j.created_at).toLocaleDateString()}</span>
-              </div>
-            ))
+            jobs.map((j) => <JobRow key={j.id} job={j} />)
           )}
         </div>
       </div>
