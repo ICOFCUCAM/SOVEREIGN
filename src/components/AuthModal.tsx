@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, AlertCircle, Shield, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 interface Props {
@@ -115,12 +116,28 @@ const AuthModal: React.FC<Props> = ({ onClose, initialMode = 'signin' }) => {
             )}
           </button>
 
-          <div className="text-center text-xs text-white/50">
-            {mode === 'signin' ? "Don't have an account?" : 'Already operational?'}
-            <button type="button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); }}
-              className="ml-1.5 text-cyan-400 hover:text-cyan-300 font-semibold">
-              {mode === 'signin' ? 'Create one' : 'Sign in'}
-            </button>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-center text-xs text-white/50">
+            <span>
+              {mode === 'signin' ? "Don't have an account?" : 'Already operational?'}
+              <button type="button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); }}
+                className="ml-1.5 text-cyan-400 hover:text-cyan-300 font-semibold">
+                {mode === 'signin' ? 'Create one' : 'Sign in'}
+              </button>
+            </span>
+            {mode === 'signin' && (
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!email) { setError('Enter your email above first.'); return; }
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined });
+                  if (error) setError(error.message);
+                  else toast.success('Reset link sent — check your inbox');
+                }}
+                className="text-white/40 hover:text-cyan-300"
+              >
+                Forgot password?
+              </button>
+            )}
           </div>
 
           <div className="pt-3 border-t border-white/5 text-center text-[10px] text-white/30 font-mono">
