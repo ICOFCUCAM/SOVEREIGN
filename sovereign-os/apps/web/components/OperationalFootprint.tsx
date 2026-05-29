@@ -6,10 +6,12 @@ import { Reveal } from './Reveal';
 
 const ROWS: Array<{ value: string; label: string; detail: string }> = [
   { value: '7',                 label: 'Operational regions',    detail: 'Carried across four sovereign edge meshes.' },
-  { value: '24 / 7',            label: 'Continuous audit',       detail: 'Generation · Distribution · Intelligence — under one log.' },
+  { value: '11',                label: 'Distribution surfaces',  detail: 'LinkedIn · YouTube · X live; eight additional under activation.' },
+  { value: '24 / 7',            label: 'Continuous audit',       detail: 'Intelligence · Media · Distribution — under one log.' },
   { value: '99.99%',            label: 'Continuity SLA',         detail: 'Operational continuity, not advertised uptime.' },
   { value: 'Sovereign',         label: 'Jurisdiction posture',   detail: 'Default by mandate; tenant-configurable on request.' },
   { value: 'Tenant-isolated',   label: 'Compliance posture',     detail: 'Row-level by default; dedicated databases on mandate.' },
+  { value: 'Multi-region',      label: 'Deployment architecture',detail: 'Independent or composed within Sovereign deployments.' },
   { value: 'Chain-of-custody',  label: 'Provenance',             detail: 'Recorded on every artefact, defensible end to end.' },
 ];
 

@@ -33,10 +33,10 @@ export function SovereignLayers() {
           <div className="mb-16 max-w-2xl">
             <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute">CAPABILITY</div>
             <h2 className="mt-6 font-serif text-[36px] font-medium tracking-[-0.015em] leading-[1.05] text-emrg-ink sm:text-[44px]">
-              The work of institutional voice.
+              The work of institutional advantage.
             </h2>
             <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-emrg-mute">
-              Doctrine. Sovereign reach. Decision support. Three operational mandates under one institutional console.
+              Acquisition. Coordination. Intelligence. Three operational mandates under one institutional console.
             </p>
           </div>
         </Reveal>

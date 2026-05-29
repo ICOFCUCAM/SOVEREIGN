@@ -23,7 +23,7 @@ export function ClosingCta() {
                 Operate the <span className="wordmark-cream font-medium italic">substrate.</span>
               </h2>
               <p className="mt-8 max-w-md text-[15px] leading-[1.75] text-emrg-mute">
-                For governments, institutions and enterprises whose voice carries the mandate behind it. Doctrine-aligned. Continuously audited. Sovereign by default.
+                One operational infrastructure for governments, enterprises and strategic organizations. Doctrine-aligned. Continuously under audit. Sovereign by default.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-6 lg:justify-end">

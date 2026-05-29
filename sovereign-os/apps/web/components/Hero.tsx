@@ -42,14 +42,16 @@ function EarthBackdrop() {
   );
 }
 
+// Verb-led headline triplet — broader operational ambition. Captures
+// intelligence, action and institutional advantage in a single rhythm.
 const OUTCOMES = [
-  { verb: 'Own', object: 'the narrative.' },
-  { verb: 'Coordinate', object: 'distribution.' },
-  { verb: 'Operate', object: 'intelligence.' },
+  { verb: 'Acquire',     object: 'signal.' },
+  { verb: 'Coordinate',  object: 'action.' },
+  { verb: 'Maintain',    object: 'advantage.' },
 ];
 
-// Three institutional signals — keeps operational credibility without
-// the SaaS-style metric parade. One numeric, two qualitative.
+// Three institutional signals — kept compact. Proof-of-scale lives in
+// the dedicated Operational Footprint section.
 const AUTHORITY = [
   { value: '7', label: 'Operational regions' },
   { value: 'Sovereign', label: 'Jurisdiction' },
@@ -66,7 +68,7 @@ export function Hero() {
 
             <div className="animate-rise flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-emrg-dim">
               <span className="h-px w-8 bg-emrg-dim/70" />
-              INSTITUTIONAL COMMUNICATIONS INFRASTRUCTURE
+              OPERATIONAL INFRASTRUCTURE FOR INSTITUTIONS
             </div>
 
             <h1 className="animate-rise mt-12 font-serif text-[64px] font-medium tracking-[-0.015em] leading-[1.02] text-emrg-ink sm:text-[88px]">
@@ -79,7 +81,7 @@ export function Hero() {
             </h1>
 
             <p className="animate-rise mt-12 max-w-md text-[15px] leading-[1.7] text-emrg-mute">
-              Strategic communications infrastructure for institutions whose voice must hold. Sovereign by mandate. Continuously under audit.
+              One operational infrastructure layer for governments, enterprises and strategic organizations — across intelligence, media and coordinated action. Sovereign by mandate. Continuously under audit.
             </p>
 
             <div className="animate-rise mt-12">

@@ -1,12 +1,12 @@
 import { Reveal } from './Reveal';
 
 const CAPABILITIES = [
-  { title: 'Executive Briefing',        body: 'Decision-ready dispatches synthesized for the people who decide — open-source signal joined with institutional posture.' },
-  { title: 'Narrative Monitoring',      body: 'Continuous watch for drift, propagation and threat. The institution sees the story before the story moves.' },
-  { title: 'Opportunity Discovery',     body: 'Strategic geometry mapped from open-source intelligence. Where to move, when to hold the line.' },
-  { title: 'Campaign Modelling',        body: 'Multi-step scenario and crisis planning — narrative operations across days, not posts.' },
-  { title: 'Relationship Intelligence', body: 'Stakeholder and revenue posture treated as a first-class governance layer.' },
-  { title: 'Operational Coordination',  body: 'Cross-substrate orchestration under one audit trail. Doctrine, dispatch and review in one record.' },
+  { title: 'Executive Briefings',     body: 'Decision-ready dispatches assembled from open-source signal and institutional posture — delivered to the principals who must act.' },
+  { title: 'Threat Monitoring',       body: 'Continuous watch on adversarial activity, narrative drift and propagation across every relevant surface.' },
+  { title: 'Market Intelligence',     body: 'Strategic geometry mapped from open-source intelligence. Where the institution moves, when it holds the line.' },
+  { title: 'Scenario Planning',       body: 'Multi-step scenario, contingency and crisis modelling — institutional doctrine across days, not posts.' },
+  { title: 'Stakeholder Intelligence',body: 'Stakeholder posture, relationship mapping and revenue analysis surfaced as a first-class governance layer.' },
+  { title: 'Operational Coordination',body: 'Cross-substrate orchestration under one audit trail. Doctrine, dispatch and review in one defensible record.' },
 ];
 
 export function IntelligenceAgents() {
