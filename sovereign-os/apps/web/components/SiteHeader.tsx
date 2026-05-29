@@ -5,7 +5,7 @@ import { Menu, X } from 'lucide-react';
 import { AuthMenu } from './AuthMenu';
 
 const NAV = [
-  { label: 'Platform', href: '/#platform' },
+  { label: 'Capabilities', href: '/#capabilities' },
   { label: 'Solutions', href: '/solutions' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'Docs', href: '/docs' },

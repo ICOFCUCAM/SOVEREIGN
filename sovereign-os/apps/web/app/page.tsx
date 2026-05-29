@@ -1,31 +1,30 @@
 import { SiteHeader } from '../components/SiteHeader';
 import { Hero } from '../components/Hero';
 import { TrustBar } from '../components/TrustBar';
+import { Outcomes } from '../components/Outcomes';
 import { SovereignLayers } from '../components/SovereignLayers';
-import { MediaClasses } from '../components/MediaClasses';
-import { DistributionGrid } from '../components/DistributionGrid';
 import { IntelligenceAgents } from '../components/IntelligenceAgents';
+import { DistributionGrid } from '../components/DistributionGrid';
 import { ProvenanceTrust } from '../components/ProvenanceTrust';
 import { Testimonials } from '../components/Testimonials';
 import { Faq } from '../components/Faq';
 import { ClosingCta } from '../components/ClosingCta';
 import { Footer } from '../components/Footer';
 
-// Marketing layer composition — outcomes-led hero, three architectural layers,
-// then a progressive reveal of the four media classes, the eleven distribution
-// surfaces, and the seven intelligence agents. Trust + FAQ ground the close.
-// Operational surfaces (Studio, Billing, Console, Subscriptions) are
-// untouched and accessible via the header / footer.
+// Outcome-led marketing composition. Architecture detail is moved deeper into
+// the platform (docs, console). MediaClasses lives at /docs/video-formats.
+// Operational layers (Studio, Billing, Console, Subscriptions) remain
+// untouched and accessible via the header and footer.
 export default function LandingPage() {
   return (
     <>
       <SiteHeader />
       <Hero />
       <TrustBar />
+      <Outcomes />
       <SovereignLayers />
-      <MediaClasses />
-      <DistributionGrid />
       <IntelligenceAgents />
+      <DistributionGrid />
       <ProvenanceTrust />
       <Testimonials />
       <Faq />

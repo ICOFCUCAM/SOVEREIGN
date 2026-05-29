@@ -44,20 +44,21 @@ function EarthBackdrop() {
   );
 }
 
-// Three outcome lines, progressively revealed — the editorial spine of the hero.
+// Outcome lines — the editorial spine of the hero. Three command verbs in
+// institutional voice, no architecture numbers anywhere on this surface.
 const OUTCOMES = [
-  { label: 'Acquire', verb: 'attention.' },
-  { label: 'Orchestrate', verb: 'distribution.' },
-  { label: 'Operate', verb: 'intelligence.' },
+  { verb: 'Own', object: 'the narrative.' },
+  { verb: 'Coordinate', object: 'distribution.' },
+  { verb: 'Operate', object: 'intelligence.' },
 ];
 
-// Stat strip — real, conservative numbers. Counts reflect what's actually
-// surfaced in the platform; activation status is owned by the studio.
-const STATS = [
-  { value: '3',  label: 'Sovereign layers' },
-  { value: '4',  label: 'Media classes' },
-  { value: '7',  label: 'Intelligence agents' },
-  { value: '11', label: 'Distribution surfaces' },
+// Authority strip — replaces the architecture stat strip. Institutional
+// signals: where it runs, under whose authority, how it's governed.
+const AUTHORITY = [
+  { label: 'Operational regions', value: '7' },
+  { label: 'Jurisdiction', value: 'Sovereign' },
+  { label: 'Operations', value: 'Continuously audited' },
+  { label: 'Uptime SLA', value: '99.99%' },
 ];
 
 export function Hero() {
@@ -69,29 +70,29 @@ export function Hero() {
           <div className="relative z-10 max-w-xl py-10">
             <div className="animate-rise flex items-center gap-3 text-[10px] tracking-[0.32em] text-emrg-dim">
               <span className="h-px w-8 bg-emrg-dim/70" />
-              MEDIA · DISTRIBUTION · STRATEGIC INTELLIGENCE INFRASTRUCTURE
+              INSTITUTIONAL COMMUNICATIONS INFRASTRUCTURE
             </div>
 
             <h1 className="animate-rise mt-9 font-serif text-[60px] font-medium leading-[0.98] tracking-tight text-emrg-ink sm:text-[80px]">
               {OUTCOMES.map((o) => (
-                <span key={o.label} className="block">
-                  {o.label}{' '}
-                  <span className="wordmark-cream font-semibold italic">{o.verb}</span>
+                <span key={o.verb} className="block">
+                  {o.verb}{' '}
+                  <span className="wordmark-cream font-semibold italic">{o.object}</span>
                 </span>
               ))}
             </h1>
 
             <p className="animate-rise mt-7 max-w-md text-base leading-relaxed text-emrg-mute sm:text-lg">
-              The operational infrastructure for institutional media. Acquire, orchestrate and govern the substrate that produces, distributes, and reads the room — under one sovereign console.
+              A unified command surface for institutions that coordinate media, distribution, and strategic intelligence at scale. Sovereign-grade. Mission-critical. Owned end to end.
             </p>
 
             <div className="animate-rise mt-9 flex flex-wrap items-center gap-5">
               <Link
-                href="/sign-in?mode=signup"
+                href="mailto:institutional@emergency.ai?subject=Deployment%20briefing"
                 className="inline-flex items-center gap-3 rounded-md bg-emrg-gold px-6 py-3 text-sm font-medium text-emrg-bg transition hover:-translate-y-0.5 hover:bg-emrg-cream"
                 style={{ boxShadow: '0 14px 40px -12px rgba(212,168,106,0.55)' }}
               >
-                Choose a plan
+                Request a deployment briefing
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                   <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -105,9 +106,9 @@ export function Hero() {
             </div>
 
             <dl className="animate-rise mt-12 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-emrg-edge/60 pt-7 sm:grid-cols-4">
-              {STATS.map((s) => (
+              {AUTHORITY.map((s) => (
                 <div key={s.label}>
-                  <dd className="font-serif text-3xl text-emrg-ink tabular-nums">{s.value}</dd>
+                  <dd className="font-serif text-2xl text-emrg-ink">{s.value}</dd>
                   <dt className="mt-1 text-[10px] uppercase tracking-[0.22em] text-emrg-mute">{s.label}</dt>
                 </div>
               ))}

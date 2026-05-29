@@ -1,21 +1,19 @@
-// Eleven distribution surfaces — the operational grid. Live publishers ship
-// against real platform APIs; ACTIVATING surfaces are wired into the studio
-// chip selector but token-gated until institutional credentials land.
-// Nothing here exposes fake functionality — every "ACTIVATING" channel
-// returns a clean dormant error if invoked.
+// Distribution Infrastructure — lead with capability, not count. The
+// eleven-platform coverage grid moves below the headline as transparency,
+// with honest LIVE / ACTIVATING / COMING ONLINE / ROLLING OUT badges.
 
 const SURFACES = [
-  { n: '01', name: 'LinkedIn',  status: 'live' },
+  { n: '01', name: 'LinkedIn',    status: 'live' },
   { n: '02', name: 'X / Twitter', status: 'live' },
-  { n: '03', name: 'YouTube',  status: 'live' },
-  { n: '04', name: 'Instagram', status: 'activating' },
-  { n: '05', name: 'Facebook',  status: 'activating' },
-  { n: '06', name: 'TikTok',    status: 'activating' },
-  { n: '07', name: 'Threads',   status: 'coming-online' },
-  { n: '08', name: 'Telegram',  status: 'coming-online' },
-  { n: '09', name: 'WhatsApp',  status: 'rolling-out' },
-  { n: '10', name: 'Pinterest', status: 'rolling-out' },
-  { n: '11', name: 'Bluesky',   status: 'rolling-out' },
+  { n: '03', name: 'YouTube',     status: 'live' },
+  { n: '04', name: 'Instagram',   status: 'activating' },
+  { n: '05', name: 'Facebook',    status: 'activating' },
+  { n: '06', name: 'TikTok',      status: 'activating' },
+  { n: '07', name: 'Threads',     status: 'coming-online' },
+  { n: '08', name: 'Telegram',    status: 'coming-online' },
+  { n: '09', name: 'WhatsApp',    status: 'rolling-out' },
+  { n: '10', name: 'Pinterest',   status: 'rolling-out' },
+  { n: '11', name: 'Bluesky',     status: 'rolling-out' },
 ] as const;
 
 const STATUS_STYLES: Record<typeof SURFACES[number]['status'], { label: string; cls: string }> = {
@@ -26,20 +24,37 @@ const STATUS_STYLES: Record<typeof SURFACES[number]['status'], { label: string; 
 };
 
 export function DistributionGrid() {
+  const counts = {
+    live: SURFACES.filter((s) => s.status === 'live').length,
+    activating: SURFACES.filter((s) => s.status === 'activating').length,
+    'coming-online': SURFACES.filter((s) => s.status === 'coming-online').length,
+    'rolling-out': SURFACES.filter((s) => s.status === 'rolling-out').length,
+  };
+
   return (
     <section id="distribution" className="relative border-t border-emrg-edge/60">
       <div className="mx-auto max-w-7xl px-6 py-24 sm:py-28">
         <div className="max-w-2xl">
-          <div className="text-[10px] tracking-[0.32em] text-emrg-gold">ELEVEN DISTRIBUTION SURFACES</div>
+          <div className="text-[10px] tracking-[0.32em] text-emrg-mute">DISTRIBUTION</div>
           <h2 className="mt-4 font-serif text-4xl font-medium leading-tight text-emrg-ink sm:text-5xl">
-            One command. <span className="wordmark-cream italic">Every surface.</span>
+            Multi-channel distribution <span className="wordmark-cream italic">infrastructure.</span>
           </h2>
           <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-emrg-mute">
-            Schedule, post and orchestrate from a single sovereign API. Provenance preserved across every output.
+            One command. Every surface where your audience already is. The platform orchestrates release across the channels that matter, preserves provenance, and reports back per dispatch.
           </p>
+          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] uppercase tracking-[0.22em] text-emrg-cream/75">
+            <span>→ Orchestrated coverage</span>
+            <span>→ Audited dispatch</span>
+            <span>→ Sovereign jurisdiction</span>
+          </div>
         </div>
 
-        <div className="mt-12 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 flex items-center gap-3">
+          <span className="text-[10px] uppercase tracking-[0.28em] text-emrg-mute">Coverage today</span>
+          <span className="h-px flex-1 bg-emrg-edge" />
+        </div>
+
+        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {SURFACES.map((s) => {
             const style = STATUS_STYLES[s.status];
             return (
@@ -54,8 +69,14 @@ export function DistributionGrid() {
           })}
         </div>
 
-        <div className="mt-8 text-center text-[10px] uppercase tracking-[0.28em] text-emrg-mute">
-          PER-CLIENT TOKEN VAULT · AI SCHEDULING · CONTINUOUS REPOSTING · PROVENANCE PRESERVED
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[10px] uppercase tracking-[0.22em] text-emrg-mute">
+          <span><span className="text-emerald-300">{counts.live} LIVE</span></span>
+          <span>·</span>
+          <span><span className="text-amber-300">{counts.activating} ACTIVATING</span></span>
+          <span>·</span>
+          <span><span className="text-amber-300/85">{counts['coming-online']} COMING ONLINE</span></span>
+          <span>·</span>
+          <span><span className="text-emrg-cream/80">{counts['rolling-out']} ROLLING OUT</span></span>
         </div>
       </div>
     </section>
