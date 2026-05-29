@@ -13,9 +13,21 @@ import { buildLayout, ENGINE_VERSION, EngineError } from "@dispatch/ddm-schema/e
 import { renderMarkdown } from "@dispatch/ddm-schema/render-md";
 import { renderHtml } from "@dispatch/ddm-schema/render-html";
 import { renderDocx } from "../../shared/src/render-docx.mjs";
+import { inc, observe, log } from "../../shared/src/metrics.mjs";
 
 const WORKER_ID = process.env.WORKER_ID || `worker-${crypto.randomUUID().slice(0, 8)}`;
 const pool = makePool();
+
+// Chromium circuit-breaker (Epic 10): after N consecutive PDF render crashes,
+// stop attempting PDF for a cool-off window so a pathological input / unhealthy
+// Chromium can't crash-loop the fleet. Other formats keep rendering.
+const CB = { fails: 0, openUntil: 0, threshold: Number(process.env.PDF_CB_THRESHOLD || 3), cooloffMs: Number(process.env.PDF_CB_COOLOFF_MS || 30000) };
+export function pdfBreakerOpen() { return Date.now() < CB.openUntil; }
+function pdfBreakerRecord(okResult) {
+  if (okResult) { CB.fails = 0; return; }
+  CB.fails += 1; inc("pdf_render_failures_total");
+  if (CB.fails >= CB.threshold) { CB.openUntil = Date.now() + CB.cooloffMs; CB.fails = 0; inc("pdf_circuit_open_total"); log.warn({ service: "worker", workerId: WORKER_ID, stage: "pdf_circuit", outcome: "open" }); }
+}
 
 // Per-output renderers (LM → { ext, bytes, warnings, pages? }) or throw.
 // docx is Epic 7 — declared not-yet-implemented so it isolates to a per-output
@@ -23,9 +35,14 @@ const pool = makePool();
 const RENDERERS = {
   md: (lm) => { const { text, warnings } = renderMarkdown(lm); return { ext: "md", bytes: Buffer.from(text, "utf8"), warnings }; },
   pdf: (lm) => {
+    if (pdfBreakerOpen()) { const e = new Error("pdf temporarily unavailable (circuit open)"); e.deterministic = false; throw e; }
     const { html, warnings } = renderHtml(lm);
-    const buf = normalizePdf(htmlToPdf(html));        // deterministic-after-timestamp-normalization
-    return { ext: "pdf", bytes: buf, warnings, pages: pdfPageCount(buf) };
+    const t0 = Date.now();
+    try {
+      const buf = normalizePdf(htmlToPdf(html));      // deterministic-after-timestamp-normalization
+      observe("pdf_render_ms", Date.now() - t0); pdfBreakerRecord(true);
+      return { ext: "pdf", bytes: buf, warnings, pages: pdfPageCount(buf) };
+    } catch (e) { pdfBreakerRecord(false); throw e; }
   },
   docx: async (lm) => { const { bytes, warnings } = await renderDocx(lm); return { ext: "docx", bytes, warnings }; },
 };
@@ -179,8 +196,10 @@ async function processJob(job) {
       const { url, expiresAt } = signUrl(key);
       artifacts.push({ artifactId: rowId, role: "primary", format: fmt, sizeBytes: stored.sizeBytes, pages: out.pages ?? null,
         sha256: stored.sha256, classification, storage: "signed_url", url, expiresAt });
+      inc(`render_${fmt}_succeeded_total`);
     } catch (e) {
       failures.push({ code: "RENDER_FAILED", message: `${fmt}: ${e.message}`, field: null });
+      inc(`render_${fmt}_failed_total`);
     }
     i += 1;
     await setProgress(job, 30 + Math.round((i / Math.max(outputs.length, 1)) * 50));
@@ -189,6 +208,9 @@ async function processJob(job) {
   await setProgress(job, 85);
   const state = artifacts.length === 0 ? "failed" : failures.length ? "partial" : "succeeded";
   const error = failures.length ? failures[0] : null;
+  inc(`jobs_${state}_total`);
+  log.info({ service: "worker", workerId: WORKER_ID, jobId: job.id, correlationId: job.correlation_id,
+    stage: "render", state, outputs, blocksRendered: countBlocks(lm), classification });
   await finish(job, state, { artifacts, warnings, error, engineVersion: ENGINE_VERSION,
     templateBinding: lm.templateBinding, renderLog: { blocksRendered: countBlocks(lm), pages: null } });
 }
@@ -201,10 +223,15 @@ function countBlocks(lm) {
 async function tick() {
   const job = await claimOne();
   if (!job) return false;
+  inc("jobs_claimed_total");
+  const t0 = Date.now();
   try {
     await processJob(job);
   } catch (e) {
+    log.error({ service: "worker", workerId: WORKER_ID, jobId: job.id, stage: "process", outcome: "transient_fault", code: "ENGINE_ERROR" });
     await requeueWithBackoff(job, String(e.message));
+  } finally {
+    observe("job_process_ms", Date.now() - t0);
   }
   return true;
 }

@@ -12,6 +12,7 @@ import { validateRequest } from "@dispatch/ddm-schema/validator";
 import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
 import { resolvePrincipal, hasScope, mintServiceToken } from "../../shared/src/auth.mjs";
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
+import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 
 const ENGINE_VERSION = "dispatch-api@1.0.0";
 const pool = makePool();
@@ -214,11 +215,23 @@ async function handleGetArtifact(req, res, principal, artifactId, query) {
 }
 
 const server = http.createServer(async (req, res) => {
+  const t0 = Date.now();
+  const reqId = crypto.randomUUID();
+  let routePath = "?";
+  res.on("finish", () => {
+    inc("api_requests_total");
+    inc(`api_status_${Math.floor(res.statusCode / 100)}xx`);
+    observe("api_request_ms", Date.now() - t0);
+    if (res.statusCode >= 500) inc("api_errors_total");
+    log.info({ service: "api", requestId: reqId, method: req.method, path: routePath, status: res.statusCode, durationMs: Date.now() - t0 });
+  });
   try {
     const url = new URL(req.url, "http://localhost");
     const path = url.pathname;
+    routePath = path.replace(/\/v1\/(jobs|artifacts|documents)\/[^/]+/, "/v1/$1/:id"); // low-cardinality label
     if (req.method === "GET" && path === "/v1/health") return send(res, 200, { ok: true, engineVersion: ENGINE_VERSION });
     if (req.method === "GET" && path === "/v1/version") return send(res, 200, { engineVersion: ENGINE_VERSION, schemaVersion: "1.0" });
+    if (req.method === "GET" && path === "/v1/metrics") return send(res, 200, snapshot());
 
     // Dispatch console (Epic 9) — static page; no auth (it authenticates client-side).
     if (req.method === "GET" && (path === "/" || path === "/console")) {
