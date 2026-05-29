@@ -7,6 +7,7 @@ const TABS = [
   { href: '/console', label: 'Overview' },
   { href: '/console/studio', label: 'Studio' },
   { href: '/console/billing', label: 'Billing' },
+  { href: '/account', label: 'Account' },
 ];
 
 export function ConsoleShell({ children }: { children: React.ReactNode }) {
