@@ -74,6 +74,46 @@ const ENDPOINTS: Endpoint[] = [
   -H 'Content-Type: application/json' \\
   -d '{"action":"create-zone","name":"example.com","type":"master"}'`,
   },
+  {
+    fn: 'render-video',
+    title: 'Render a video (Emergency AI)',
+    desc: 'Image-to-video pipeline. Format presets: short_ad, social_vertical (9:16), social_square (1:1), long_film, custom. Optional aspectRatio + duration override the preset.',
+    auth: 'user',
+    example: `curl -s ${API_BASE}/render-video \\
+  -H 'Authorization: Bearer <USER_JWT>' \\
+  -H 'Content-Type: application/json' \\
+  -d '{"script":"A 10-second cinematic teaser…","format":"social_vertical","duration":10}'`,
+  },
+  {
+    fn: 'orchestrate-film',
+    title: 'Long film orchestration',
+    desc: 'Brief → 2–6 scenes → per-scene image → Runway motion → narration. Returns the parent film job id; scene jobs render asynchronously.',
+    auth: 'user',
+    example: `curl -s ${API_BASE}/orchestrate-film \\
+  -H 'Authorization: Bearer <USER_JWT>' \\
+  -H 'Content-Type: application/json' \\
+  -d '{"brief":"A film about sovereign infrastructure.","scenes":4}'`,
+  },
+  {
+    fn: 'post-campaign',
+    title: 'Multi-channel publish',
+    desc: 'Fan a campaign out to LinkedIn, YouTube, and X in parallel. One pipeline_job is recorded per platform; the parent campaign is marked published if any succeeded.',
+    auth: 'user',
+    example: `curl -s ${API_BASE}/post-campaign \\
+  -H 'Authorization: Bearer <USER_JWT>' \\
+  -H 'Content-Type: application/json' \\
+  -d '{"campaign_id":"<uuid>","channels":["linkedin","x","youtube"]}'`,
+  },
+  {
+    fn: 'subscription-checkout',
+    title: 'Start a subscription (Emergency AI)',
+    desc: 'Creates a Stripe Checkout Session in subscription mode. Returns a URL to redirect the operator to.',
+    auth: 'user',
+    example: `curl -s ${API_BASE}/subscription-checkout \\
+  -H 'Authorization: Bearer <USER_JWT>' \\
+  -H 'Content-Type: application/json' \\
+  -d '{"plan":"operator","user_id":"<uuid>","email":"you@org.com"}'`,
+  },
 ];
 
 const authChip = (a: Endpoint['auth']) => {
