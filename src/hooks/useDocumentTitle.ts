@@ -15,15 +15,37 @@ function setProp(prop: string, content: string) {
   el.setAttribute('content', content);
 }
 
-/** Sets the document title (and optionally the meta + OG description) per route, restoring on unmount. */
+function setCanonical(href: string) {
+  let el = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!el) { el = document.createElement('link'); el.setAttribute('rel', 'canonical'); document.head.appendChild(el); }
+  el.setAttribute('href', href);
+}
+
+/** Sets the document title, meta + OG description, and a canonical link per route. Restores on unmount. */
 export function useDocumentTitle(title?: string, description?: string) {
   useEffect(() => {
     const prevTitle = document.title;
     const prevDesc = document.head.querySelector<HTMLMetaElement>('meta[name="description"]')?.content ?? DEFAULT_DESC;
+    const prevCanonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href ?? '';
     const full = title ? `${title} — ${BASE}` : `${BASE} — The operating layer for digital civilization`;
     document.title = full;
     setProp('og:title', full);
-    if (description) { setMeta('description', description); setProp('og:description', description); }
-    return () => { document.title = prevTitle; setMeta('description', prevDesc); setProp('og:description', prevDesc); setProp('og:title', prevTitle); };
+    setProp('og:type', 'website');
+    setProp('og:url', typeof window !== 'undefined' ? window.location.href : '');
+    setMeta('twitter:title', full);
+    setMeta('twitter:card', 'summary_large_image');
+    if (description) {
+      setMeta('description', description);
+      setProp('og:description', description);
+      setMeta('twitter:description', description);
+    }
+    if (typeof window !== 'undefined') setCanonical(window.location.origin + window.location.pathname);
+    return () => {
+      document.title = prevTitle;
+      setMeta('description', prevDesc);
+      setProp('og:description', prevDesc);
+      setProp('og:title', prevTitle);
+      if (prevCanonical) setCanonical(prevCanonical);
+    };
   }, [title, description]);
 }
