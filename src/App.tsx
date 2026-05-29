@@ -30,6 +30,7 @@ const RegistrarCommandCenter = lazy(() => import("./pages/RegistrarCommandCenter
 const DeveloperPortal = lazy(() => import("./pages/DeveloperPortal"));
 const EmergencyAILanding = lazy(() => import("./pages/EmergencyAILanding"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
+const SecurityPage = lazy(() => import("./pages/SecurityPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -81,6 +82,7 @@ const PlatformRoutes = () => (
     <Route path="/emergency-ai" element={<EmergencyAILanding />} />
     <Route path="/admin" element={<AdminPage />} />
     <Route path="/pricing" element={<PricingPage />} />
+    <Route path="/security" element={<SecurityPage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
