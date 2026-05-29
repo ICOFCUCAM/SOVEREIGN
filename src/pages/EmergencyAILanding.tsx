@@ -207,7 +207,7 @@ const EmergencyAILanding: React.FC = () => {
               <a href="#demo" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white font-semibold transition-all duration-500 hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg,#00C2FF,#7C4DFF)', boxShadow: '0 14px 40px -12px rgba(0,194,255,0.5)' }}>
                 Try the dispatch engine <ArrowRight className="w-4 h-4" />
               </a>
-              <Link to="/sovereign-domains" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-white/15 text-white font-semibold hover:bg-white/5 hover:border-white/25 transition">Acquire your namespace <ArrowRight className="w-4 h-4" /></Link>
+              <Link to="/pricing" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-white/15 text-white font-semibold hover:bg-white/5 hover:border-white/25 transition">See pricing <ArrowRight className="w-4 h-4" /></Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto">
               {METRICS.map((m) => (

@@ -5,21 +5,16 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
 import MarketplaceTeaser from '@/components/home/MarketplaceTeaser';
+import EcosystemPanels from '@/components/home/EcosystemPanels';
+import EcosystemSectors from '@/components/home/EcosystemSectors';
 import ChannelTeaser from '@/components/home/ChannelTeaser';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import InstitutionalTrust from '@/components/home/InstitutionalTrust';
-import {
-  DeploymentTypes,
-  FeaturedInfrastructure,
-  OperationalInfrastructure,
-  DeploymentRegions,
-  InstitutionalIntelligence,
-} from '@/components/home/HomeSections';
 import ClosingCTA from '@/components/home/ClosingCTA';
 
-// Integrated capability flow — five capability grids interleaved with three
-// cinematic pacing pieces (TransformationFlow · ChannelTeaser · InstitutionalTrust)
-// so the home reads as narrative rather than a directory.
+// Restored cinematic act structure (pre-9bcfd48). The seven-infrastructure
+// stack content now lives at /infrastructure for institutional buyers who
+// want the full architecture; the homepage holds the cinematic narrative.
 const AppLayout: React.FC = () => {
   return (
     <div className="relative min-h-screen text-white">
@@ -27,25 +22,19 @@ const AppLayout: React.FC = () => {
       <AnimatedBackground intensity="low" />
       <PlatformNav />
       <main id="main" className="relative">
-        {/* 1 — Cinematic Hero */}
+        {/* ACT I — civilization-scale vision (cinematic Earth hero) */}
         <CinematicHero />
-        {/* live sovereign assets ticker */}
+        {/* live acquisition ticker — featured sovereign infrastructure under the hero */}
         <MarketplaceTeaser />
-        {/* 2 — What would you like to deploy? */}
-        <Reveal><DeploymentTypes /></Reveal>
-        {/* 3 — Featured infrastructure assets */}
-        <Reveal><FeaturedInfrastructure /></Reveal>
-        {/* ⟡ pacing — deployment story arc */}
-        <Reveal><TransformationFlow /></Reveal>
-        {/* 4 — Operational infrastructure (Domains · Network · Identity · Security · Deployment) */}
-        <Reveal><OperationalInfrastructure /></Reveal>
-        {/* 5 — Deployment regions */}
-        <Reveal><DeploymentRegions /></Reveal>
-        {/* ⟡ pacing — media channel preview */}
+        {/* ACT II — the sovereign infrastructure universe */}
+        <Reveal><EcosystemPanels /></Reveal>
+        {/* featured institutions */}
+        <EcosystemSectors />
+        {/* the sovereign channel — media ecosystem entry */}
         <Reveal><ChannelTeaser /></Reveal>
-        {/* 6 — Institutional intelligence */}
-        <Reveal><InstitutionalIntelligence /></Reveal>
-        {/* ⟡ pacing — institutional trust & governance */}
+        {/* deployment story */}
+        <Reveal><TransformationFlow /></Reveal>
+        {/* institutional trust & governance */}
         <Reveal><InstitutionalTrust /></Reveal>
         {/* closing statement */}
         <ClosingCTA />

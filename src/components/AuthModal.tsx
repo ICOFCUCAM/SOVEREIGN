@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, AlertCircle, Shield, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 interface Props {
@@ -83,7 +84,7 @@ const AuthModal: React.FC<Props> = ({ onClose, initialMode = 'signin' }) => {
             <label className="text-xs text-white/50 font-medium mb-1.5 block">Email</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
-              <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="operator@org.com"
+              <input type="email" required autoComplete="email" inputMode="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="operator@org.com"
                 className="w-full pl-9 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
             </div>
           </div>
@@ -91,7 +92,7 @@ const AuthModal: React.FC<Props> = ({ onClose, initialMode = 'signin' }) => {
             <label className="text-xs text-white/50 font-medium mb-1.5 block">Password</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
-              <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••"
+              <input type="password" required autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••"
                 className="w-full pl-9 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
             </div>
             {mode === 'signup' && (
@@ -115,12 +116,28 @@ const AuthModal: React.FC<Props> = ({ onClose, initialMode = 'signin' }) => {
             )}
           </button>
 
-          <div className="text-center text-xs text-white/50">
-            {mode === 'signin' ? "Don't have an account?" : 'Already operational?'}
-            <button type="button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); }}
-              className="ml-1.5 text-cyan-400 hover:text-cyan-300 font-semibold">
-              {mode === 'signin' ? 'Create one' : 'Sign in'}
-            </button>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-center text-xs text-white/50">
+            <span>
+              {mode === 'signin' ? "Don't have an account?" : 'Already operational?'}
+              <button type="button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); }}
+                className="ml-1.5 text-cyan-400 hover:text-cyan-300 font-semibold">
+                {mode === 'signin' ? 'Create one' : 'Sign in'}
+              </button>
+            </span>
+            {mode === 'signin' && (
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!email) { setError('Enter your email above first.'); return; }
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined });
+                  if (error) setError(error.message);
+                  else toast.success('Reset link sent — check your inbox');
+                }}
+                className="text-white/40 hover:text-cyan-300"
+              >
+                Forgot password?
+              </button>
+            )}
           </div>
 
           <div className="pt-3 border-t border-white/5 text-center text-[10px] text-white/30 font-mono">

@@ -29,6 +29,15 @@ const RegistrarLanding = lazy(() => import("./pages/RegistrarLanding"));
 const RegistrarCommandCenter = lazy(() => import("./pages/RegistrarCommandCenter"));
 const DeveloperPortal = lazy(() => import("./pages/DeveloperPortal"));
 const EmergencyAILanding = lazy(() => import("./pages/EmergencyAILanding"));
+const PricingPage = lazy(() => import("./pages/PricingPage"));
+const SecurityPage = lazy(() => import("./pages/SecurityPage"));
+const ChangelogPage = lazy(() => import("./pages/ChangelogPage"));
+const DocsHubPage = lazy(() => import("./pages/DocsHubPage"));
+const PressPage = lazy(() => import("./pages/PressPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const StatusPage = lazy(() => import("./pages/StatusPage"));
+const InfrastructurePage = lazy(() => import("./pages/InfrastructurePage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -52,9 +61,16 @@ const ScrollToTop = () => {
   return null;
 };
 
+// Lightweight page-load fallback — keeps the brand visible while the lazy chunk
+// loads, with a kicker that grounds users in what the platform is.
 const PageFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-[#05071A]">
-    <div className="w-10 h-10 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin" />
+  <div className="min-h-screen flex flex-col items-center justify-center bg-[#05071A] text-white">
+    <div className="relative">
+      <div className="absolute inset-0 bg-cyan-400/30 blur-2xl rounded-full" />
+      <img src="/sovereign-logo.png" alt="" aria-hidden="true" className="relative w-12 h-12 object-contain drop-shadow-[0_0_18px_rgba(0,194,255,0.4)] animate-pulse" />
+    </div>
+    <div className="mt-6 text-[10px] font-mono uppercase tracking-[0.32em] text-white/40">SOVEREIGN · ROUTING</div>
+    <div className="mt-3 w-8 h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
   </div>
 );
 
@@ -79,6 +95,15 @@ const PlatformRoutes = () => (
     <Route path="/developer" element={<DeveloperPortal />} />
     <Route path="/emergency-ai" element={<EmergencyAILanding />} />
     <Route path="/admin" element={<AdminPage />} />
+    <Route path="/pricing" element={<PricingPage />} />
+    <Route path="/security" element={<SecurityPage />} />
+    <Route path="/changelog" element={<ChangelogPage />} />
+    <Route path="/docs" element={<DocsHubPage />} />
+    <Route path="/press" element={<PressPage />} />
+    <Route path="/legal/terms" element={<TermsPage />} />
+    <Route path="/legal/privacy" element={<PrivacyPage />} />
+    <Route path="/status" element={<StatusPage />} />
+    <Route path="/infrastructure" element={<InfrastructurePage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
     <Route path="*" element={<NotFound />} />
   </Routes>

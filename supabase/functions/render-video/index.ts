@@ -26,17 +26,41 @@ Deno.serve(async (req) => {
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 
   try {
-    const { script = '', title, mediaClass, duration = 5, promptImage } = await req.json().catch(() => ({}));
+    const {
+      script = '',
+      title,
+      mediaClass,
+      duration: durationIn,
+      promptImage,
+      aspectRatio,
+      format,
+    } = await req.json().catch(() => ({}));
     if (!script || typeof script !== 'string') {
       return new Response(JSON.stringify({ error: 'A non-empty "script" string is required.' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
+
+    // Format presets — operator-selectable shapes.
+    // Each one decides aspect ratio + clamped duration; explicit fields override.
+    const PRESETS: Record<string, { ratio: string; duration: number; size: string }> = {
+      short_ad:        { ratio: '1280:720',  duration: 10, size: '1536x1024' }, // 16:9 horizontal advert
+      long_film:       { ratio: '1280:720',  duration: 10, size: '1536x1024' }, // 16:9 cinematic
+      social_vertical: { ratio: '720:1280',  duration: 10, size: '1024x1536' }, // 9:16 reels / shorts
+      social_square:   { ratio: '960:960',   duration: 10, size: '1024x1024' }, // 1:1 feed
+      custom:          { ratio: '1280:720',  duration: 10, size: '1536x1024' },
+    };
+    const fmt = typeof format === 'string' && PRESETS[format] ? format : 'short_ad';
+    const preset = PRESETS[fmt];
+    const ratio = typeof aspectRatio === 'string' && /^\d+:\d+$/.test(aspectRatio) ? aspectRatio : preset.ratio;
+    // Runway gen4_turbo currently accepts 5 or 10 second clips.
+    const requested = Number(durationIn ?? preset.duration);
+    const duration = requested >= 8 ? 10 : 5;
 
     const runwayKey = Deno.env.get('RUNWAY_API_KEY') || Deno.env.get('RUNWAYML_API_SECRET') || Deno.env.get('VIDEO_PROVIDER_KEY');
     const openaiKey = Deno.env.get('OPENAI_API_KEY');
 
     const { data: job } = await admin.from('pipeline_jobs').insert({
       kind: 'video', status: runwayKey ? 'processing' : 'failed', provider: 'runway',
-      title: title ?? null, input: { script: script.slice(0, 2000), mediaClass: mediaClass ?? null, duration },
+      title: title ?? null, input: { script: script.slice(0, 2000), mediaClass: mediaClass ?? null, duration, format: fmt, aspect_ratio: ratio },
       error: runwayKey ? null : 'RUNWAY_API_KEY is not configured on the server.',
     }).select('id').single();
     const jobId = job?.id as string | undefined;
@@ -56,7 +80,7 @@ Deno.serve(async (req) => {
       const imgResp = await fetch('https://api.openai.com/v1/images/generations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${openaiKey}` },
-        body: JSON.stringify({ model: 'gpt-image-1', prompt: seedPrompt, size: '1536x1024', n: 1, quality: 'medium' }),
+        body: JSON.stringify({ model: 'gpt-image-1', prompt: seedPrompt, size: preset.size, n: 1, quality: 'medium' }),
       });
       if (!imgResp.ok) {
         const e = await imgResp.text();
@@ -75,7 +99,7 @@ Deno.serve(async (req) => {
     const submit = await fetch(`${RUNWAY_BASE}/image_to_video`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${runwayKey}`, 'X-Runway-Version': RUNWAY_VERSION },
-      body: JSON.stringify({ model: 'gen4_turbo', promptImage: seedUrl, promptText: script.slice(0, 1000), ratio: '1280:720', duration: duration === 10 ? 10 : 5 }),
+      body: JSON.stringify({ model: 'gen4_turbo', promptImage: seedUrl, promptText: script.slice(0, 1000), ratio, duration }),
     });
     const submitBody = await submit.json().catch(() => ({}));
     if (!submit.ok || !submitBody?.id) {

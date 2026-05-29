@@ -1,10 +1,14 @@
-const PORTAL = process.env.NEXT_PUBLIC_PORTAL_URL ?? '#';
+'use client';
+import Link from 'next/link';
+import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
+import { AuthMenu } from './AuthMenu';
 
 const NAV = [
-  { label: 'Platform', href: '#platform' },
-  { label: 'Solutions', href: '#solutions' },
-  { label: 'Resources', href: '#resources' },
-  { label: 'Company', href: '#company' },
+  { label: 'Capabilities', href: '/#capabilities' },
+  { label: 'Solutions', href: '/solutions' },
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'Docs', href: '/docs' },
 ];
 
 function BrandMark() {
@@ -23,42 +27,58 @@ function BrandMark() {
 }
 
 export function SiteHeader() {
+  const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-30 border-b border-emrg-edge/60 bg-emrg-bg/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-5">
-        <a href="#top" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
           <BrandMark />
           <span className="leading-tight">
             <span className="block text-[15px] font-medium tracking-[0.18em] text-emrg-ink">EMERGENCY AI</span>
             <span className="block text-[10px] tracking-[0.32em] text-emrg-mute">BY SOVEREIGN</span>
           </span>
-        </a>
+        </Link>
         <nav className="hidden items-center gap-9 text-[13px] text-emrg-mute md:flex">
           {NAV.map((l) => (
-            <a key={l.label} href={l.href} className="transition hover:text-emrg-cream">
+            <Link key={l.label} href={l.href} className="transition hover:text-emrg-cream">
               {l.label}
-            </a>
+            </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
-          <a
-            href={PORTAL}
-            className="hidden rounded-md border border-emrg-edgeStrong px-4 py-2 text-[13px] text-emrg-ink transition hover:border-emrg-dim hover:text-emrg-cream sm:inline-flex"
-          >
-            Developer Console
-          </a>
-          <a
-            href="#pricing"
-            className="inline-flex items-center gap-2 rounded-md bg-emrg-gold px-4 py-2 text-[13px] font-medium text-emrg-bg transition hover:-translate-y-0.5 hover:bg-emrg-cream"
-            style={{ boxShadow: '0 10px 30px -10px rgba(212,168,106,0.5)' }}
-          >
-            Get Started
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
+        <div className="hidden items-center gap-2 md:flex">
+          <AuthMenu />
         </div>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle menu"
+          aria-expanded={open}
+          className="rounded-md border border-emrg-edgeStrong p-2 text-emrg-ink transition hover:border-emrg-dim md:hidden"
+        >
+          {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        </button>
       </div>
+      {open && (
+        <div className="border-t border-emrg-edge/60 bg-emrg-bg/95 backdrop-blur-xl md:hidden">
+          <div className="mx-auto max-w-7xl px-6 py-4">
+            <nav className="space-y-1">
+              {NAV.map((l) => (
+                <Link
+                  key={l.label}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="block rounded-md px-3 py-2 text-sm text-emrg-ink transition hover:bg-emrg-surface hover:text-emrg-cream"
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="mt-3 flex flex-col gap-2 border-t border-emrg-edge pt-3">
+              <AuthMenu />
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

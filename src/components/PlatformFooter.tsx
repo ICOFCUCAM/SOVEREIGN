@@ -27,6 +27,7 @@ const PLATFORM_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
   {
     title: 'Platform layers',
     links: [
+      { label: 'Infrastructure', to: '/infrastructure' },
       { label: 'Ecosystem', to: '/ecosystem' },
       { label: 'Marketplace', to: '/marketplace' },
       { label: 'AI Valuation', to: '/valuation' },
@@ -53,6 +54,18 @@ const PLATFORM_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
       { label: 'Knowledge & Intelligence', to: '/ecosystem#intelligence' },
       { label: 'Logistics & Mobility', to: '/ecosystem#mobility' },
       { label: 'Elections & Civic', to: '/ecosystem#elections' },
+    ],
+  },
+  {
+    title: 'Operate',
+    links: [
+      { label: 'Pricing', to: '/pricing' },
+      { label: 'Security', to: '/security' },
+      { label: 'Status', to: '/status' },
+      { label: 'Changelog', to: '/changelog' },
+      { label: 'Docs', to: '/docs' },
+      { label: 'Developer Portal', to: '/developer' },
+      { label: 'Press', to: '/press' },
     ],
   },
 ];
@@ -229,9 +242,13 @@ const PlatformFooter: React.FC = () => {
               ALL SYSTEMS OPERATIONAL
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-white/40">
-            <Globe className="w-3.5 h-3.5" />
-            <span>Multi-region · Wildcard SSL · Sovereign-grade</span>
+          <div className="flex items-center gap-4 text-xs text-white/40">
+            <Link to="/legal/terms" className="hover:text-cyan-300 transition">Terms</Link>
+            <Link to="/legal/privacy" className="hover:text-cyan-300 transition">Privacy</Link>
+            <span className="hidden sm:inline-flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5" />
+              Multi-region · Sovereign-grade
+            </span>
           </div>
         </div>
       </div>

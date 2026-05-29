@@ -1,9 +1,14 @@
-// stripe-webhook: verifies Stripe signature and transitions the order on
-// payment events. Auth-hold model:
+// stripe-webhook: verifies Stripe signature and transitions order + subscription
+// state on payment events.
+// Domain orders (auth-hold):
 //   checkout.session.completed     → store payment_intent id
 //   payment_intent.amount_capturable_updated → status = payment_authorized
 //   payment_intent.canceled        → status = voided
 //   charge.refunded                → status = refunded
+// Emergency AI subscriptions:
+//   checkout.session.completed (mode=subscription) → upsert subscription row
+//   customer.subscription.updated  → reconcile plan / status / period end
+//   customer.subscription.deleted  → status = canceled
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
@@ -54,11 +59,64 @@ Deno.serve(async (req) => {
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
+        // Subscription checkouts (Emergency AI) carry mode=subscription.
+        const mode = (obj as { mode?: string }).mode;
+        const app = metadata.app;
+        if (mode === 'subscription' && app === 'emergency-ai') {
+          const subId = (obj as { subscription?: string }).subscription || '';
+          const customerId = (obj as { customer?: string }).customer || '';
+          const userId = metadata.user_id || (obj as { client_reference_id?: string }).client_reference_id || '';
+          const plan = metadata.plan || 'operator';
+          if (userId) {
+            await admin.from('subscriptions').upsert({
+              user_id: userId,
+              plan,
+              status: 'active',
+              stripe_customer_id: customerId || null,
+              stripe_subscription_id: subId || null,
+              metadata: { source: 'checkout.session.completed' },
+            }, { onConflict: 'stripe_subscription_id' });
+            await admin.from('audit_logs').insert({ actor_email: 'stripe-webhook', action: 'stripe.subscription.activated', resource_type: 'subscription', resource_id: subId, changes: { user_id: userId, plan } });
+          }
+          break;
+        }
         if (!orderIdFromMeta) break;
         const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
         if (typeof piFromSession === 'string') patch.stripe_payment_intent = piFromSession;
         await admin.from('domain_orders').update(patch).eq('id', orderIdFromMeta);
         await admin.from('audit_logs').insert({ actor_email: 'stripe-webhook', action: 'stripe.session.completed', resource_type: 'domain_order', resource_id: orderIdFromMeta, changes: { payment_intent: piFromSession } });
+        break;
+      }
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        const subId = (obj as { id?: string }).id || '';
+        const customerId = (obj as { customer?: string }).customer || '';
+        const status = (obj as { status?: string }).status || 'active';
+        const cancelAtPeriodEnd = Boolean((obj as { cancel_at_period_end?: boolean }).cancel_at_period_end);
+        const periodEnd = (obj as { current_period_end?: number }).current_period_end;
+        const plan = metadata.plan || (obj as { items?: { data?: Array<{ price?: { lookup_key?: string } }> } }).items?.data?.[0]?.price?.lookup_key || 'operator';
+        const userId = metadata.user_id || '';
+        if (!subId) break;
+        const patch: Record<string, unknown> = {
+          status,
+          plan,
+          stripe_customer_id: customerId || null,
+          current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+          cancel_at_period_end: cancelAtPeriodEnd,
+        };
+        if (userId) patch.user_id = userId;
+        await admin.from('subscriptions').upsert({
+          stripe_subscription_id: subId,
+          ...patch,
+        }, { onConflict: 'stripe_subscription_id' });
+        await admin.from('audit_logs').insert({ actor_email: 'stripe-webhook', action: `stripe.${event.type}`, resource_type: 'subscription', resource_id: subId, changes: { status, plan, cancel_at_period_end: cancelAtPeriodEnd } });
+        break;
+      }
+      case 'customer.subscription.deleted': {
+        const subId = (obj as { id?: string }).id || '';
+        if (!subId) break;
+        await admin.from('subscriptions').update({ status: 'canceled', cancel_at_period_end: false }).eq('stripe_subscription_id', subId);
+        await admin.from('audit_logs').insert({ actor_email: 'stripe-webhook', action: 'stripe.subscription.deleted', resource_type: 'subscription', resource_id: subId, changes: {} });
         break;
       }
       case 'payment_intent.amount_capturable_updated':

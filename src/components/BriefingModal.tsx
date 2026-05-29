@@ -57,11 +57,11 @@ const BriefingModal: React.FC<Props> = ({ systemName, slug, tier, accent = '#00C
               <div className="font-display text-2xl font-bold text-white mb-1">{systemName}{tier ? ` · ${tier}` : ''}</div>
               <p className="text-white/45 text-sm mb-6">Sovereign acquisition &amp; deployment — institutional engagements only.</p>
               <form onSubmit={submit} className="space-y-3">
-                <input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" aria-label="Name"
+                <input autoFocus autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" aria-label="Name"
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Official email" aria-label="Email"
+                <input type="email" required autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Official email" aria-label="Email"
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
-                <input value={org} onChange={(e) => setOrg(e.target.value)} placeholder="Institution / government / organization" aria-label="Organization"
+                <input value={org} autoComplete="organization" onChange={(e) => setOrg(e.target.value)} placeholder="Institution / government / organization" aria-label="Organization"
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
                 <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Deployment context (optional)" aria-label="Message" rows={3}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none resize-none" />

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Inter } from 'next/font/google';
+import { Toaster } from 'sonner';
 import './globals.css';
+import { AuthProvider } from '../lib/auth-context';
 
 const serif = Cormorant_Garamond({
   subsets: ['latin'],
@@ -16,15 +18,42 @@ const sans = Inter({
   display: 'swap',
 });
 
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://emergency.ai';
+
 export const metadata: Metadata = {
-  title: 'Emergency AI — Cinematic Intelligence Infrastructure',
-  description: 'Cinematic media, intelligent distribution, and strategic communications — unified in one sovereign platform.',
+  metadataBase: new URL(SITE),
+  title: {
+    default: 'Emergency AI — Strategic Intelligence Infrastructure',
+    template: '%s · Emergency AI',
+  },
+  description: 'Strategic Intelligence Infrastructure for governments, institutions and enterprises. Publications routed through Sovereign Dispatch.',
+  applicationName: 'Emergency AI',
+  authors: [{ name: 'SOVEREIGN', url: 'https://sovereign.so' }],
+  keywords: ['AI video', 'cinematic AI', 'multi-channel publishing', 'LinkedIn', 'YouTube', 'X', 'sovereign infrastructure'],
+  openGraph: {
+    type: 'website',
+    siteName: 'Emergency AI',
+    title: 'Emergency AI — Strategic Intelligence Infrastructure',
+    description: 'Strategic Intelligence Infrastructure for governments, institutions and enterprises. Publications routed through Sovereign Dispatch.',
+    url: SITE,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Emergency AI',
+    description: 'Strategic Intelligence Infrastructure for governments, institutions and enterprises. Publications routed through Sovereign Dispatch.',
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable}`}>
-      <body className="min-h-screen bg-emrg-bg font-sans text-emrg-ink antialiased">{children}</body>
+      <body className="min-h-screen bg-emrg-bg font-sans text-emrg-ink antialiased">
+        <AuthProvider>
+          {children}
+          <Toaster position="top-right" theme="dark" toastOptions={{ style: { background: '#0e0e14', border: '1px solid #1d1d28', color: '#dad3c4' } }} />
+        </AuthProvider>
+      </body>
     </html>
   );
 }
