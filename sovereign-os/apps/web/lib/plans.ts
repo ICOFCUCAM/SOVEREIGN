@@ -9,6 +9,7 @@ export interface Plan {
   name: string;
   tagline: string;
   monthlyPrice: number;       // USD
+  monthlyJobQuota: number | null;  // null = unlimited
   highlight?: string;
   priceIdEnv: string;         // env var that holds the Stripe price id
   features: string[];
@@ -20,6 +21,7 @@ export const PLANS: Plan[] = [
     name: 'Evaluator',
     tagline: 'Explore the platform — a working sandbox for solo operators.',
     monthlyPrice: 0,
+    monthlyJobQuota: 5,
     priceIdEnv: 'NEXT_PUBLIC_STRIPE_PRICE_EVALUATOR',
     features: [
       'Up to 5 production jobs / month',
@@ -33,6 +35,7 @@ export const PLANS: Plan[] = [
     name: 'Operator',
     tagline: 'For teams running real campaigns through the sovereign layer.',
     monthlyPrice: 490,
+    monthlyJobQuota: null,
     highlight: 'Most teams start here',
     priceIdEnv: 'NEXT_PUBLIC_STRIPE_PRICE_OPERATOR',
     features: [
@@ -49,6 +52,7 @@ export const PLANS: Plan[] = [
     name: 'Institutional',
     tagline: 'Sovereign-grade deployment for institutions and agencies.',
     monthlyPrice: 4900,
+    monthlyJobQuota: null,
     priceIdEnv: 'NEXT_PUBLIC_STRIPE_PRICE_INSTITUTIONAL',
     features: [
       'Everything in Operator',
