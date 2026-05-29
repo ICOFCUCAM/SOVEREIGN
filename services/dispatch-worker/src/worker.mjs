@@ -115,12 +115,18 @@ async function loadVersion(job) {
 }
 
 async function insertArtifact(job, art) {
-  await sys(job.tenant_id, (c) => c.query(
-    `insert into dispatch.artifacts (tenant_id, version_id, job_id, role, format, storage_ref, sha256, size_bytes, classification, expires_at)
-     values ($1,$2,$3,'primary',$4,$5,$6,$7,$8, now() + interval '7 days')
-     on conflict (version_id, format, role) do update set storage_ref=excluded.storage_ref, sha256=excluded.sha256, size_bytes=excluded.size_bytes
-     returning id`,
-    [job.tenant_id, job.version_id, job.id, art.format, art.storageRef, art.sha256, art.sizeBytes, art.classification]));
+  // Use the caller-supplied artifactId as the row PK so the id reported in the
+  // DocumentResult matches GET /v1/artifacts/{id}. On re-render of the same
+  // (version,format,role), keep the existing row's id stable.
+  return sys(job.tenant_id, async (c) => {
+    const r = await c.query(
+      `insert into dispatch.artifacts (id, tenant_id, version_id, job_id, role, format, storage_ref, sha256, size_bytes, classification, expires_at)
+       values ($1,$2,$3,$4,'primary',$5,$6,$7,$8,$9, now() + interval '7 days')
+       on conflict (version_id, format, role) do update set storage_ref=excluded.storage_ref, sha256=excluded.sha256, size_bytes=excluded.size_bytes
+       returning id`,
+      [art.artifactId, job.tenant_id, job.version_id, job.id, art.format, art.storageRef, art.sha256, art.sizeBytes, art.classification]);
+    return r.rows[0].id;
+  });
 }
 
 async function processJob(job) {
@@ -161,9 +167,10 @@ async function processJob(job) {
       const artifactId = crypto.randomUUID();
       const key = artifactKey({ tenantId: job.tenant_id, documentId: ver.document_id, versionId: job.version_id, artifactId, ext: out.ext });
       const stored = await putArtifact(key, out.bytes);
-      await insertArtifact(job, { format: fmt, ...stored, classification });
+      // Returned id is authoritative (stable across re-render via the unique constraint).
+      const rowId = await insertArtifact(job, { artifactId, format: fmt, ...stored, classification });
       const { url, expiresAt } = signUrl(key);
-      artifacts.push({ artifactId, role: "primary", format: fmt, sizeBytes: stored.sizeBytes, pages: null,
+      artifacts.push({ artifactId: rowId, role: "primary", format: fmt, sizeBytes: stored.sizeBytes, pages: null,
         sha256: stored.sha256, classification, storage: "signed_url", url, expiresAt });
     } catch (e) {
       failures.push({ code: "RENDER_FAILED", message: `${fmt}: ${e.message}`, field: null });

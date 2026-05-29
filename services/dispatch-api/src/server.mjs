@@ -1,14 +1,20 @@
-// dispatch-api — Sprint 1 API foundation (M5/M6).
-// Implements POST /v1/validate and POST /v1/documents over the frozen contract,
-// with auth (Principal), tenant-claim enforcement, idempotency, persistence
-// (documents + versions + jobs), and append-only audit. NO rendering.
+// dispatch-api — API foundation (Sprint 1 M5/M6 + Sprint 2 Epic 8 retrieve).
+// Implements POST /v1/validate, POST /v1/documents, POST /v1/token and the
+// retrieve surface GET /v1/jobs/{id}, /v1/artifacts/{id}, /v1/documents/{id},
+// with auth (Principal), tenant-claim enforcement, idempotency, persistence,
+// append-only audit, and tenant-scoped artifact retrieval (signed URL / stream).
 import http from "node:http";
+import crypto from "node:crypto";
 import { validateRequest } from "@dispatch/ddm-schema/validator";
 import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
 import { resolvePrincipal, hasScope, mintServiceToken } from "../../shared/src/auth.mjs";
+import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
 
-const ENGINE_VERSION = "dispatch-api@1.0.0-sprint1";
+const ENGINE_VERSION = "dispatch-api@1.0.0";
 const pool = makePool();
+
+const CONTENT_TYPE = { md: "text/markdown; charset=utf-8", pdf: "application/pdf",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" };
 
 // Admin/system claim used only for pre-tenant lookups (service-client auth).
 const withAdmin = (fn) => withClaims(pool, { principal_type: "system" }, fn);
@@ -112,13 +118,102 @@ async function handleDocuments(req, res, principal) {
   }
 }
 
+// ---- Retrieve surface (Epic 8) ---------------------------------------------
+// All reads run under the principal's tenant claim, so RLS returns 0 rows for a
+// cross-tenant id → we surface 404 (never leak existence across tenants).
+const claimsFor = (p) => ({ tenant_id: p.tenantId, dispatch_role: p.role, principal_type: p.principalType, actor: p.actor });
+
+async function handleGetJob(res, principal, jobId) {
+  if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+  const row = await withClaims(pool, claimsFor(principal), async (c) => {
+    const r = await c.query("select id, request_id, state, progress, result, error, created_at, updated_at from dispatch.jobs where id=$1", [jobId]);
+    return r.rows[0] || null;
+  });
+  if (!row) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "job not found"));
+  return send(res, 200, {
+    jobId: row.id, requestId: row.request_id, status: row.state, progress: row.progress,
+    result: row.result || null, error: row.error || null,
+    createdAt: row.created_at, updatedAt: row.updated_at,
+  });
+}
+
+async function handleGetDocument(res, principal, documentId) {
+  if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+  const data = await withClaims(pool, claimsFor(principal), async (c) => {
+    const d = await c.query("select id, doc_type, title, status, current_version, correlation_id, created_at, updated_at from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
+    if (!d.rows[0]) return null;
+    const vs = await c.query("select version_no, ddm_version, template_id, template_version, engine_version, created_at from dispatch.document_versions where document_id=$1 order by version_no", [documentId]);
+    const latest = await c.query("select result from dispatch.jobs where document_id=$1 and result is not null order by updated_at desc limit 1", [documentId]);
+    return { doc: d.rows[0], versions: vs.rows, latestResult: latest.rows[0]?.result || null };
+  });
+  if (!data) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "document not found"));
+  const { doc, versions, latestResult } = data;
+  return send(res, 200, {
+    id: doc.id, docType: doc.doc_type, title: doc.title, status: doc.status,
+    currentVersion: doc.current_version, correlationId: doc.correlation_id,
+    versions: versions.map((v) => ({ versionNo: v.version_no, ddmVersion: v.ddm_version,
+      template: v.template_id, templateVersion: v.template_version, engineVersion: v.engine_version, createdAt: v.created_at })),
+    latestResult, createdAt: doc.created_at, updatedAt: doc.updated_at,
+  });
+}
+
+async function handleGetArtifact(req, res, principal, artifactId, query) {
+  if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+  const row = await withClaims(pool, claimsFor(principal), async (c) => {
+    const r = await c.query("select id, format, storage_ref, sha256, size_bytes, pages, classification, expires_at from dispatch.artifacts where id=$1", [artifactId]);
+    return r.rows[0] || null;
+  });
+  if (!row) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "artifact not found"));
+  if (row.expires_at && new Date(row.expires_at) < new Date())
+    return send(res, 410, errEnvelope(null, 410, "ARTIFACT_EXPIRED", "artifact past expiry"));
+
+  // ?disposition=metadata → ArtifactRef JSON (no bytes)
+  if (query.get("disposition") === "metadata") {
+    return send(res, 200, { artifactId: row.id, role: "primary", format: row.format, sizeBytes: Number(row.size_bytes),
+      pages: row.pages, sha256: row.sha256, classification: row.classification, storage: "signed_url", expiresAt: row.expires_at });
+  }
+
+  let bytes;
+  try { bytes = await getArtifact(row.storage_ref); }
+  catch { return send(res, 410, errEnvelope(null, 410, "ARTIFACT_EXPIRED", "artifact bytes unavailable")); }
+
+  // ?verify=true → recompute + confirm checksum
+  if (query.get("verify") === "true") {
+    const actual = sha256Of(bytes);
+    return send(res, 200, { artifactId: row.id, sha256: row.sha256, verified: actual === row.sha256, actual });
+  }
+
+  await withClaims(pool, claimsFor(principal), (c) => writeAudit(c, { tenantId: principal.tenantId,
+    actor: principal.actor, actorType: principal.principalType, action: "artifact.downloaded",
+    targetType: "artifact", targetId: row.id, sha256: row.sha256 }));
+  res.writeHead(200, { "content-type": CONTENT_TYPE[row.format] || "application/octet-stream",
+    "content-disposition": `attachment; filename="${row.id}.${row.format}"`,
+    "content-length": bytes.length, "x-dispatch-sha256": row.sha256 });
+  res.end(bytes);
+}
+
 const server = http.createServer(async (req, res) => {
   try {
-    if (req.method === "GET" && req.url === "/v1/health") return send(res, 200, { ok: true, engineVersion: ENGINE_VERSION });
+    const url = new URL(req.url, "http://localhost");
+    const path = url.pathname;
+    if (req.method === "GET" && path === "/v1/health") return send(res, 200, { ok: true, engineVersion: ENGINE_VERSION });
+    if (req.method === "GET" && path === "/v1/version") return send(res, 200, { engineVersion: ENGINE_VERSION, schemaVersion: "1.0" });
+
+    // GET retrieve surface (Epic 8) — auth required, tenant-scoped.
+    const getMatch = req.method === "GET" && /^\/v1\/(jobs|artifacts|documents)\/([A-Za-z0-9-]+)$/.exec(path);
+    if (getMatch) {
+      const auth = await resolvePrincipal(pool, req.headers["authorization"], withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      const [, kind, id] = getMatch;
+      if (kind === "jobs") return await handleGetJob(res, auth.principal, id);
+      if (kind === "documents") return await handleGetDocument(res, auth.principal, id);
+      if (kind === "artifacts") return await handleGetArtifact(req, res, auth.principal, id, url.searchParams);
+    }
+
     if (req.method !== "POST") return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "not found"));
 
     // Client-credentials: exchange svc client_id/secret for a short-lived JWT (R2).
-    if (req.url === "/v1/token") {
+    if (path === "/v1/token") {
       let cbody;
       try { cbody = JSON.parse(await readBody(req)); }
       catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
@@ -133,8 +228,8 @@ const server = http.createServer(async (req, res) => {
     if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
     const principal = auth.principal;
 
-    if (req.url === "/v1/validate") return await handleValidate(req, res, principal);
-    if (req.url === "/v1/documents") return await handleDocuments(req, res, principal);
+    if (path === "/v1/validate") return await handleValidate(req, res, principal);
+    if (path === "/v1/documents") return await handleDocuments(req, res, principal);
     return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "not found"));
   } catch (e) {
     console.error("server error:", e);
