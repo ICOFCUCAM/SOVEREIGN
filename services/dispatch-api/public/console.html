@@ -148,9 +148,17 @@ $("btnSubmit").onclick = async () => {
       if (st==="succeeded"||st==="partial"||st==="failed"){
         clearInterval(POLL);
         const arts = (j.json.result&&j.json.result.artifacts)||[];
-        if (arts.length) html += '<div class="artifacts">'+arts.map(a=>'<a href="'+API+'/v1/artifacts/'+a.artifactId+'?token='+encodeURIComponent(TOKEN)+'" target="_blank">'+a.format.toUpperCase()+(a.pages?(' · '+a.pages+'p'):'')+'</a>').join('')+'</div>';
+        // Mint a short-lived, single-artifact download grant per file — the link
+        // carries only a grant (one artifact, ~5 min, not render-capable), never
+        // the full token.
+        const links = await Promise.all(arts.map(async a => {
+          const g = await api("POST","/v1/artifacts/"+a.artifactId+"/grant",{ auth:true });
+          const href = g.status===200 ? API+g.json.downloadUrl : "#";
+          return '<a href="'+href+'" target="_blank">'+a.format.toUpperCase()+(a.pages?(' · '+a.pages+'p'):'')+'</a>';
+        }));
+        if (links.length) html += '<div class="artifacts">'+links.join('')+'</div>';
         if (j.json.result&&j.json.result.error) html += '<div class="err">'+j.json.result.error.message+'</div>';
-        html += '<div class="muted" style="margin-top:6px">Download links carry the token as a query param for convenience in this console.</div>';
+        html += '<div class="muted" style="margin-top:6px">Download links use short-lived single-artifact grants (~5 min), not your token.</div>';
       }
       $("result").innerHTML = html;
     }, 1000);

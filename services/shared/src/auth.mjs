@@ -132,6 +132,41 @@ export function mintServiceToken(principal) {
   return { token, tokenType: "Bearer", expiresIn: ttl };
 }
 
+/**
+ * Mint a short-lived DOWNLOAD GRANT for exactly one artifact (Epic-10 hardening).
+ * Unlike the service JWT, a grant is NOT render-capable and is bound to a single
+ * artifact + tenant, so a leaked download URL exposes only that one file for a
+ * short window. Used by POST /v1/artifacts/{id}/grant for browser download links.
+ */
+export function mintDownloadGrant(principal, artifactId) {
+  const secret = process.env.DISPATCH_TOKEN_SECRET;
+  if (!secret) return { error: { status: 500, code: "AUTH_NOT_CONFIGURED", message: "DISPATCH_TOKEN_SECRET not set" } };
+  const ttl = Number(process.env.DISPATCH_GRANT_TTL_SEC || 300); // 5 min default
+  const token = signJwt(
+    { grant: "download", artifact_id: artifactId, tenant_id: principal.tenantId },
+    secret,
+    { expiresIn: ttl, issuer: process.env.DISPATCH_TOKEN_ISSUER || "sovereign-dispatch" },
+  );
+  return { token, expiresIn: ttl };
+}
+
+/**
+ * Verify a download grant for a specific artifact. Returns { tenantId } on
+ * success or { error }. Rejects render JWTs (grant must equal "download") and
+ * grants minted for a different artifact id.
+ */
+export function verifyDownloadGrant(token, artifactId) {
+  const secret = process.env.DISPATCH_TOKEN_SECRET;
+  if (!secret) return { error: { status: 500, code: "AUTH_NOT_CONFIGURED", message: "DISPATCH_TOKEN_SECRET not set" } };
+  let claims;
+  try { claims = verifyJwt(token, secret, { issuer: process.env.DISPATCH_TOKEN_ISSUER || undefined }); }
+  catch (e) { return { error: { status: 401, code: "INVALID_GRANT", message: e.message } }; }
+  if (claims.grant !== "download") return { error: { status: 401, code: "INVALID_GRANT", message: "not a download grant" } };
+  if (claims.artifact_id !== artifactId) return { error: { status: 403, code: "GRANT_MISMATCH", message: "grant is for a different artifact" } };
+  if (!TENANT_RE.test(claims.tenant_id ?? "")) return { error: { status: 401, code: "INVALID_GRANT", message: "grant has no tenant" } };
+  return { tenantId: claims.tenant_id };
+}
+
 export function roleScopes(role) {
   switch (role) {
     case "viewer": return ["dispatch:read"];

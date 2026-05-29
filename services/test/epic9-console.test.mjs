@@ -54,19 +54,32 @@ async function main() {
   const arts = job.result.artifacts;
   ok(arts.length === 3, `three artifacts [${arts.map((a) => a.format).join(",")}]`);
 
-  // 5. download each via ?token= (no Authorization header — the console's <a> path)
+  // 5. download each via a single-artifact GRANT (the console's <a> path) — no
+  // Authorization header, no full token in the URL.
   for (const a of arts) {
-    const r = await fetch(API + `/v1/artifacts/${a.artifactId}?token=${encodeURIComponent(TOKEN)}`);
+    const g = await fetch(API + `/v1/artifacts/${a.artifactId}/grant`, { method: "POST", headers: { authorization: "Bearer " + TOKEN } }).then((r) => r.json());
+    ok(g.downloadUrl && g.downloadUrl.includes("grant="), `mint grant for ${a.format}`);
+    const r = await fetch(API + g.downloadUrl);
     const buf = Buffer.from(await r.arrayBuffer());
     const valid = a.format === "pdf" ? buf.slice(0, 5).toString() === "%PDF-"
       : a.format === "docx" ? (buf[0] === 0x50 && buf[1] === 0x4b)
       : buf.toString("utf8").startsWith("#");
-    ok(r.status === 200 && valid, `download ${a.format} via ?token= → 200 + valid bytes (${buf.length}b)`);
+    ok(r.status === 200 && valid, `download ${a.format} via grant → 200 + valid bytes (${buf.length}b)`);
   }
 
-  // 6. ?token= with a bad token → 401 (the fallback still authenticates)
-  const bad = await fetch(API + `/v1/artifacts/${arts[0].artifactId}?token=not.a.jwt`);
-  ok(bad.status === 401, "bad ?token= → 401");
+  // 6. hardening: a full token in an artifact URL no longer works (?token= dropped)
+  const tokInUrl = await fetch(API + `/v1/artifacts/${arts[0].artifactId}?token=${encodeURIComponent(TOKEN)}`);
+  ok(tokInUrl.status === 401, "full token in artifact ?token= → 401 (no longer accepted)");
+
+  // 7. a grant for artifact A cannot fetch artifact B
+  const gA = await fetch(API + `/v1/artifacts/${arts[0].artifactId}/grant`, { method: "POST", headers: { authorization: "Bearer " + TOKEN } }).then((r) => r.json());
+  const grantTok = new URL(API + gA.downloadUrl).searchParams.get("grant");
+  const cross = await fetch(API + `/v1/artifacts/${arts[1].artifactId}?grant=${encodeURIComponent(grantTok)}`);
+  ok(cross.status === 403, "grant bound to one artifact → 403 on a different artifact");
+
+  // 8. bad grant → 401
+  const bad = await fetch(API + `/v1/artifacts/${arts[0].artifactId}?grant=not.a.jwt`);
+  ok(bad.status === 401, "bad grant → 401");
 
   console.log(`\nTOTAL: ${pass} passed, ${fail} failed`);
   await pool.end();

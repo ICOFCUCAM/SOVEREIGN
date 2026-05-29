@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { validateRequest } from "@dispatch/ddm-schema/validator";
 import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
-import { resolvePrincipal, hasScope, mintServiceToken } from "../../shared/src/auth.mjs";
+import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verifyDownloadGrant } from "../../shared/src/auth.mjs";
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 
@@ -28,12 +28,12 @@ function consoleHtml() {
   return CONSOLE_HTML;
 }
 // Resolve auth from the Authorization header, falling back to a ?token= query
-// param (browser <a> downloads can't set headers). Bearer-only for the fallback.
-function authHeaderFrom(req, url) {
-  const h = req.headers["authorization"];
-  if (h) return h;
-  const t = url.searchParams.get("token");
-  return t ? "Bearer " + t : undefined;
+// Auth comes from the Authorization header. (Browser <a> downloads, which can't
+// set headers, use single-artifact ?grant= tokens instead of the full JWT —
+// minted via POST /v1/artifacts/{id}/grant — so a full render-capable token is
+// never placed in a URL.)
+function authHeaderFrom(req) {
+  return req.headers["authorization"];
 }
 
 // Admin/system claim used only for pre-tenant lookups (service-client auth).
@@ -178,8 +178,21 @@ async function handleGetDocument(res, principal, documentId) {
 }
 
 async function handleGetArtifact(req, res, principal, artifactId, query) {
-  if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
-  const row = await withClaims(pool, claimsFor(principal), async (c) => {
+  // Two ways to read an artifact:
+  //  - principal with dispatch:read (Authorization), or
+  //  - a single-artifact download grant (?grant=) minted by POST .../grant.
+  // The grant path is for browser <a> downloads — scoped to one artifact, short
+  // TTL, NOT render-capable — so a leaked URL exposes only this file briefly.
+  let claims;
+  if (principal) {
+    if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+    claims = claimsFor(principal);
+  } else {
+    const g = verifyDownloadGrant(query.get("grant") || "", artifactId);
+    if (g.error) return send(res, g.error.status, errEnvelope(null, g.error.status, g.error.code, g.error.message));
+    claims = { tenant_id: g.tenantId, dispatch_role: "service", principal_type: "service", actor: "download-grant" };
+  }
+  const row = await withClaims(pool, claims, async (c) => {
     const r = await c.query("select id, format, storage_ref, sha256, size_bytes, pages, classification, expires_at from dispatch.artifacts where id=$1", [artifactId]);
     return r.rows[0] || null;
   });
@@ -205,8 +218,8 @@ async function handleGetArtifact(req, res, principal, artifactId, query) {
     return send(res, 200, { artifactId: row.id, sha256: row.sha256, verified: actual === row.sha256, actual });
   }
 
-  await withClaims(pool, claimsFor(principal), (c) => writeAudit(c, { tenantId: principal.tenantId,
-    actor: principal.actor, actorType: principal.principalType, action: "artifact.downloaded",
+  await withClaims(pool, claims, (c) => writeAudit(c, { tenantId: claims.tenant_id,
+    actor: claims.actor, actorType: claims.principal_type, action: "artifact.downloaded",
     targetType: "artifact", targetId: row.id, sha256: row.sha256 }));
   res.writeHead(200, { "content-type": CONTENT_TYPE[row.format] || "application/octet-stream",
     "content-disposition": `attachment; filename="${row.id}.${row.format}"`,
@@ -244,9 +257,14 @@ const server = http.createServer(async (req, res) => {
     // GET retrieve surface (Epic 8) — auth required, tenant-scoped.
     const getMatch = req.method === "GET" && /^\/v1\/(jobs|artifacts|documents)\/([A-Za-z0-9-]+)$/.exec(path);
     if (getMatch) {
-      const auth = await resolvePrincipal(pool, authHeaderFrom(req, url), withAdmin);
-      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       const [, kind, id] = getMatch;
+      // Artifact download via a single-artifact grant: no principal auth needed
+      // (the grant itself is the capability). Verified inside handleGetArtifact.
+      if (kind === "artifacts" && url.searchParams.get("grant")) {
+        return await handleGetArtifact(req, res, null, id, url.searchParams);
+      }
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       if (kind === "jobs") return await handleGetJob(res, auth.principal, id);
       if (kind === "documents") return await handleGetDocument(res, auth.principal, id);
       if (kind === "artifacts") return await handleGetArtifact(req, res, auth.principal, id, url.searchParams);
@@ -274,6 +292,21 @@ const server = http.createServer(async (req, res) => {
 
     if (path === "/v1/validate") return await handleValidate(req, res, principal);
     if (path === "/v1/documents") return await handleDocuments(req, res, principal);
+
+    // Mint a single-artifact download grant (Epic-10 hardening): the artifact must
+    // belong to the principal's tenant (RLS-checked) and the principal needs read.
+    const grantMatch = /^\/v1\/artifacts\/([A-Za-z0-9-]+)\/grant$/.exec(path);
+    if (grantMatch) {
+      const id = grantMatch[1];
+      if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+      const exists = await withClaims(pool, claimsFor(principal), async (c) => {
+        const r = await c.query("select id from dispatch.artifacts where id=$1", [id]); return !!r.rows[0];
+      });
+      if (!exists) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "artifact not found"));
+      const g = mintDownloadGrant(principal, id);
+      if (g.error) return send(res, g.error.status, errEnvelope(null, g.error.status, g.error.code, g.error.message));
+      return send(res, 200, { downloadUrl: `/v1/artifacts/${id}?grant=${encodeURIComponent(g.token)}`, expiresIn: g.expiresIn });
+    }
     return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "not found"));
   } catch (e) {
     console.error("server error:", e);
