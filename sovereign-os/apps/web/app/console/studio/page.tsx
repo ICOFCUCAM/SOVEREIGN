@@ -4,6 +4,7 @@ import { Film, Sparkles, Loader2, RefreshCw, Megaphone, Smartphone, Square, Slid
 import { toast } from 'sonner';
 import { supabase } from '../../../lib/supabase';
 import { ConsoleShell } from '../../../components/ConsoleShell';
+import { JobRow } from '../../../components/JobRow';
 
 interface PipelineJob {
   id: string; kind: string; status: string; provider: string | null;
@@ -389,22 +390,8 @@ export default function StudioPage() {
           <RefreshCw className="h-3 w-3" /> Refresh
         </button>
       </div>
-      <div className="mt-3 divide-y divide-emrg-edge/50 overflow-hidden rounded-2xl border border-emrg-edge bg-emrg-panel/40">
-        {jobs.map((j) => (
-          <div key={j.id} className="flex items-center gap-4 px-5 py-3">
-            <span className="w-20 shrink-0 rounded bg-emrg-surface px-2 py-0.5 text-center text-[9px] uppercase tracking-wider text-emrg-mute">{j.kind}</span>
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm text-emrg-ink">
-                {j.title || '—'}
-                {j.provider ? <span className="ml-2 font-mono text-xs text-emrg-mute">· {j.provider}</span> : null}
-              </div>
-              {j.error && <div className="truncate text-[10px] text-red-300/70">{j.error}</div>}
-            </div>
-            {j.result_url && <a href={j.result_url} target="_blank" rel="noreferrer" className="shrink-0 text-[10px] uppercase tracking-wider text-emrg-gold hover:text-emrg-cream">Open</a>}
-            <span className={`shrink-0 rounded px-2 py-0.5 text-[10px] uppercase ${j.status === 'done' ? 'bg-emerald-500/15 text-emerald-300' : j.status === 'processing' ? 'bg-cyan-500/15 text-cyan-300' : j.status === 'failed' ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'}`}>{j.status}</span>
-            <span className="shrink-0 whitespace-nowrap font-mono text-xs text-emrg-mute">{new Date(j.created_at).toLocaleDateString()}</span>
-          </div>
-        ))}
+      <div className="mt-3 overflow-hidden rounded-2xl border border-emrg-edge bg-emrg-panel/40">
+        {jobs.map((j) => <JobRow key={j.id} job={j} />)}
         {jobs.length === 0 && (
           <div className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-emrg-mute">
             <Loader2 className="h-3.5 w-3.5 animate-spin" /> No pipeline runs yet.
