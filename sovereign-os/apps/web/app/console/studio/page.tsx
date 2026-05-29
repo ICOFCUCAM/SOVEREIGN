@@ -1,10 +1,66 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { Film, Sparkles, Loader2, RefreshCw, Megaphone, Smartphone, Square, Sliders } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '../../../lib/supabase';
 import { ConsoleShell } from '../../../components/ConsoleShell';
 import { JobRow } from '../../../components/JobRow';
+
+interface JobLikeProps { id: string; kind: string; status: string; provider: string | null; title: string | null; result_url: string | null; error: string | null; created_at: string }
+
+const FILTERS: Array<{ id: string; label: string; match: (j: JobLikeProps) => boolean }> = [
+  { id: 'all',       label: 'All',       match: () => true },
+  { id: 'film',      label: 'Films',     match: (j) => j.kind === 'film' },
+  { id: 'video',     label: 'Videos',    match: (j) => j.kind === 'video' },
+  { id: 'social',    label: 'Posts',     match: (j) => j.kind === 'social' },
+  { id: 'narration', label: 'Narration', match: (j) => j.kind === 'narration' },
+];
+
+function RecentJobs({ jobs, onRefresh }: { jobs: JobLikeProps[]; onRefresh: () => void }) {
+  const [filter, setFilter] = useState<string>('all');
+  const filtered = useMemo(() => {
+    const f = FILTERS.find((x) => x.id === filter) || FILTERS[0];
+    return jobs.filter(f.match);
+  }, [filter, jobs]);
+  return (
+    <>
+      <div className="mt-10 flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <div className="text-[10px] uppercase tracking-[0.24em] text-emrg-mute">Recent jobs</div>
+          <div className="ml-2 flex flex-wrap gap-1">
+            {FILTERS.map((f) => {
+              const active = f.id === filter;
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => setFilter(f.id)}
+                  className={`rounded-md border px-2 py-0.5 text-[10px] uppercase tracking-wider transition ${active ? 'border-emrg-dim bg-emrg-surface text-emrg-cream' : 'border-emrg-edge text-emrg-mute hover:border-emrg-edgeStrong hover:text-emrg-ink'}`}
+                >
+                  {f.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <button
+          onClick={onRefresh}
+          className="inline-flex items-center gap-1.5 rounded border border-emrg-edge px-2.5 py-1 text-[10px] uppercase tracking-wider text-emrg-mute transition hover:border-emrg-dim hover:text-emrg-cream"
+        >
+          <RefreshCw className="h-3 w-3" /> Refresh
+        </button>
+      </div>
+      <div className="mt-3 overflow-hidden rounded-2xl border border-emrg-edge bg-emrg-panel/40">
+        {filtered.map((j) => <JobRow key={j.id} job={j} />)}
+        {filtered.length === 0 && (
+          <div className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-emrg-mute">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" /> {jobs.length === 0 ? 'No pipeline runs yet.' : 'No jobs match this filter.'}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
 
 interface PipelineJob {
   id: string; kind: string; status: string; provider: string | null;
@@ -381,23 +437,7 @@ export default function StudioPage() {
       </div>
 
       {/* Recent jobs */}
-      <div className="mt-10 flex items-center justify-between">
-        <div className="text-[10px] uppercase tracking-[0.24em] text-emrg-mute">Recent jobs</div>
-        <button
-          onClick={refreshJobs}
-          className="inline-flex items-center gap-1.5 rounded border border-emrg-edge px-2.5 py-1 text-[10px] uppercase tracking-wider text-emrg-mute transition hover:border-emrg-dim hover:text-emrg-cream"
-        >
-          <RefreshCw className="h-3 w-3" /> Refresh
-        </button>
-      </div>
-      <div className="mt-3 overflow-hidden rounded-2xl border border-emrg-edge bg-emrg-panel/40">
-        {jobs.map((j) => <JobRow key={j.id} job={j} />)}
-        {jobs.length === 0 && (
-          <div className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-emrg-mute">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" /> No pipeline runs yet.
-          </div>
-        )}
-      </div>
+      <RecentJobs jobs={jobs} onRefresh={refreshJobs} />
     </ConsoleShell>
   );
 }
