@@ -1,11 +1,14 @@
+'use client';
 import Link from 'next/link';
+import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
 import { AuthMenu } from './AuthMenu';
 
 const NAV = [
-  { label: 'Platform', href: '#platform' },
-  { label: 'Solutions', href: '#solutions' },
-  { label: 'Resources', href: '#resources' },
-  { label: 'Company', href: '#company' },
+  { label: 'Platform', href: '/#platform' },
+  { label: 'Solutions', href: '/solutions' },
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'Docs', href: '/docs' },
 ];
 
 function BrandMark() {
@@ -24,6 +27,7 @@ function BrandMark() {
 }
 
 export function SiteHeader() {
+  const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-30 border-b border-emrg-edge/60 bg-emrg-bg/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-5">
@@ -36,15 +40,45 @@ export function SiteHeader() {
         </Link>
         <nav className="hidden items-center gap-9 text-[13px] text-emrg-mute md:flex">
           {NAV.map((l) => (
-            <a key={l.label} href={l.href} className="transition hover:text-emrg-cream">
+            <Link key={l.label} href={l.href} className="transition hover:text-emrg-cream">
               {l.label}
-            </a>
+            </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="hidden items-center gap-2 md:flex">
           <AuthMenu />
         </div>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle menu"
+          aria-expanded={open}
+          className="rounded-md border border-emrg-edgeStrong p-2 text-emrg-ink transition hover:border-emrg-dim md:hidden"
+        >
+          {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        </button>
       </div>
+      {open && (
+        <div className="border-t border-emrg-edge/60 bg-emrg-bg/95 backdrop-blur-xl md:hidden">
+          <div className="mx-auto max-w-7xl px-6 py-4">
+            <nav className="space-y-1">
+              {NAV.map((l) => (
+                <Link
+                  key={l.label}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="block rounded-md px-3 py-2 text-sm text-emrg-ink transition hover:bg-emrg-surface hover:text-emrg-cream"
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="mt-3 flex flex-col gap-2 border-t border-emrg-edge pt-3">
+              <AuthMenu />
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
