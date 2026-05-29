@@ -23,7 +23,7 @@ export function ClosingCta() {
                 Operate the <span className="wordmark-cream font-medium italic">substrate.</span>
               </h2>
               <p className="mt-8 max-w-md text-[15px] leading-[1.75] text-emrg-mute">
-                Strategic communications infrastructure for the institutions that define them.
+                Strategic communications infrastructure for institutions whose voice carries the mandate behind it.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-6 lg:justify-end">

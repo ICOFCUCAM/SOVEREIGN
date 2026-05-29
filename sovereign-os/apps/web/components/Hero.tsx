@@ -79,7 +79,7 @@ export function Hero() {
             </h1>
 
             <p className="animate-rise mt-12 max-w-md text-[15px] leading-[1.7] text-emrg-mute">
-              A unified command surface for the institutions that coordinate media, distribution, and strategic intelligence at scale.
+              Strategic communications infrastructure for institutions whose voice must hold. Sovereign by mandate. Continuously under audit.
             </p>
 
             <div className="animate-rise mt-12">

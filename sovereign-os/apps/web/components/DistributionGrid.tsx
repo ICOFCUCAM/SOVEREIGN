@@ -34,12 +34,12 @@ export function DistributionGrid() {
       <div className="mx-auto max-w-7xl px-6 py-28 sm:py-32">
         <Reveal>
           <div className="mb-16 max-w-2xl">
-            <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute">DISTRIBUTION</div>
+            <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute">SOVEREIGN REACH</div>
             <h2 className="mt-6 font-serif text-[36px] font-medium tracking-[-0.015em] leading-[1.05] text-emrg-ink sm:text-[44px]">
-              Multi-channel distribution infrastructure.
+              The institutional voice, carried everywhere it must hold.
             </h2>
             <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-emrg-mute">
-              One command. Every surface where your audience already is. The platform orchestrates release across the channels that matter, preserves provenance, and reports back per dispatch.
+              One mandate. Every relevant surface. The platform carries the institutional message across the channels that matter, holds provenance with the artefact, and reports back per dispatch under audit.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 text-[11px] uppercase tracking-[0.28em] text-emrg-cream/70">
               <span>Orchestrated coverage</span>

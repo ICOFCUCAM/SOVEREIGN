@@ -1,13 +1,13 @@
 import { Reveal } from './Reveal';
 
 const OUTCOMES = [
-  { title: 'Acquire attention',          body: 'Direct the narrative through cinematic, institutional-grade media.' },
-  { title: 'Coordinate distribution',    body: 'One contract orchestrates release across the channels that matter.' },
-  { title: 'Operate intelligence',       body: 'Brief decision-makers with synthesized signal, not raw noise.' },
-  { title: 'Monitor narratives',         body: 'Watch for the story changing under you, continuously, across channels.' },
-  { title: 'Generate executive briefings', body: 'Decision-ready dispatches assembled from the open web and your own surface.' },
-  { title: 'Execute campaigns at scale', body: 'A single staging surface for every region, channel and stakeholder layer.' },
-  { title: 'Coordinate communications',  body: 'Across teams, regions and stakeholders — one audited record of every dispatch.' },
+  { title: 'Hold the narrative',          body: 'Carry institutional voice under pressure — without chasing trends or improvising posture.' },
+  { title: 'Coordinate distribution',     body: 'A single sovereign mandate across every channel. Provenance preserved; doctrine intact.' },
+  { title: 'Operate intelligence',        body: 'Brief the people who decide with synthesized signal. Read the room before you respond.' },
+  { title: 'Watch the narrative',         body: 'Drift, threat and propagation monitored continuously, under audit, across every surface.' },
+  { title: 'Brief the institution',       body: 'Decision-ready dispatches assembled from open-source signal and internal posture.' },
+  { title: 'Mobilise at speed',           body: 'One staging surface for every stakeholder layer. Communications coordinated, not improvised.' },
+  { title: 'Hold authoritative communications', body: 'One audited record. Every dispatch attributable to the institution behind it.' },
 ];
 
 export function Outcomes() {

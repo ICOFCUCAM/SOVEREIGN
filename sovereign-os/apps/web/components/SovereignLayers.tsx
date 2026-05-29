@@ -3,23 +3,23 @@ import { Reveal } from './Reveal';
 
 const CAPABILITIES = [
   {
-    title: 'Media production at command speed',
-    body: 'Cinematic film, image, narration and editorial — directed, produced and assembled under one command surface. The house voice carries through every output.',
-    bullets: ['Production at scale', 'House-voice control', 'Audit-trailed output'],
+    title: 'Institutional voice at command speed',
+    body: 'Communications produced under institutional doctrine. The house voice carries through every dispatch. Continuously audited; never improvised.',
+    bullets: ['Doctrine preserved', 'Mandate retained', 'Continuously audited'],
     to: '/console/studio',
     cta: 'Open studio',
   },
   {
-    title: 'Coordinated distribution across every channel',
-    body: 'One sovereign contract orchestrates release across the channels that matter. Provenance preserved. One audit trail. Honest coverage state, never fake success.',
-    bullets: ['Orchestrated release', 'Per-tenant credentials', 'Honest coverage state'],
+    title: 'Sovereign reach under one mandate',
+    body: 'One mandate carries the institutional message across every relevant surface. Provenance travels with the artefact. Coverage state honestly reported.',
+    bullets: ['Provenance carried with the artefact', 'Per-tenant mandate isolation', 'Honest coverage posture'],
     to: '/console/studio#publish',
     cta: 'Coordinate release',
   },
   {
     title: 'Strategic intelligence for decision-makers',
-    body: 'Executive briefings, narrative monitoring, scenario modelling and relationship intelligence — delivered as dispatches inside the console, not a separately metered API.',
-    bullets: ['Decision-ready output', 'Continuously audited', 'Sovereign jurisdiction'],
+    body: 'Briefings, monitoring and scenario work assembled from open-source signal and institutional posture — delivered as dispatches to the people who must decide.',
+    bullets: ['Decision-ready output', 'Continuously under audit', 'Sovereign jurisdiction'],
     to: '#intelligence',
     cta: 'Open intelligence',
   },
@@ -31,12 +31,12 @@ export function SovereignLayers() {
       <div className="mx-auto max-w-7xl px-6 py-28 sm:py-32">
         <Reveal>
           <div className="mb-16 max-w-2xl">
-            <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute">CAPABILITIES</div>
+            <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute">CAPABILITY</div>
             <h2 className="mt-6 font-serif text-[36px] font-medium tracking-[-0.015em] leading-[1.05] text-emrg-ink sm:text-[44px]">
-              Built for the work of communications.
+              The work of strategic communications.
             </h2>
             <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-emrg-mute">
-              Production, distribution and intelligence — three operational surfaces under one institutional console.
+              Communications doctrine. Sovereign reach. Strategic intelligence. Three operational mandates under one institutional console.
             </p>
           </div>
         </Reveal>

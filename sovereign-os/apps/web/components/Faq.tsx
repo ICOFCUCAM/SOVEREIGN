@@ -5,23 +5,23 @@ import { Plus, Minus } from 'lucide-react';
 const ITEMS = [
   {
     q: 'How does this fit our institutional posture?',
-    a: 'Emergency AI is institutional infrastructure, not a SaaS tool. Subscriptions are predictable; tenancy is owner-scoped; every dispatch is audited. Institutional plans support single-tenant deployments with isolated compute and bring-your-own keys.',
+    a: 'Emergency AI is strategic communications infrastructure, not a SaaS tool. Subscriptions are predictable, tenancy is owner-scoped, every dispatch is audited. Institutional mandates carry single-tenant deployments with isolated compute and bring-your-own keys.',
   },
   {
-    q: 'Which channels are live today?',
-    a: 'LinkedIn, YouTube and X are live with real publishers. Instagram, Facebook and TikTok are activating; Threads and Telegram are coming online; WhatsApp, Pinterest and Bluesky are rolling out. The platform never claims false coverage — non-live channels return a clean status-tagged error when invoked.',
+    q: 'Which surfaces are live today?',
+    a: 'LinkedIn, YouTube and X are operational under real publishers. Instagram, Facebook and TikTok are activating; Threads and Telegram are coming online; WhatsApp, Pinterest and Bluesky are rolling out. The platform never claims false coverage — non-operational surfaces return a status-tagged error when invoked.',
   },
   {
     q: 'What does the Strategic Intelligence Layer actually deliver?',
-    a: 'Executive briefings, narrative monitoring, opportunity discovery, campaign and crisis modelling, relationship intelligence, and operational coordination — delivered as briefings, dispatches and signal feeds inside the console rather than as a separately metered API.',
+    a: 'Executive briefings, narrative monitoring, opportunity discovery, scenario and crisis modelling, relationship and operational coordination — delivered as institutional dispatches inside the console rather than as a metered consumer API.',
   },
   {
     q: 'Who is the platform for?',
-    a: 'Institutions, agencies, brands and newsrooms that need cinematic media plus multi-channel distribution under one auditable console. The Institutional tier supports single-tenant deployments with isolated compute and bring-your-own credentials.',
+    a: 'Institutions, agencies, ministries and newsrooms whose communications must hold under audit, scrutiny and pressure. The Institutional mandate carries single-tenant deployments with isolated compute and bring-your-own credentials.',
   },
   {
     q: 'How does it relate to SOVEREIGN and Sovereign Domains?',
-    a: 'Emergency AI is the cinematic intelligence layer of the SOVEREIGN platform. It runs on the same backend, the same edge functions, and the same audit log — and integrates with Sovereign Domains for institutional identity and tenant routing.',
+    a: 'Emergency AI is the strategic communications layer of the SOVEREIGN platform. It operates on the same substrate, the same audit log, and the same institutional posture — and integrates with Sovereign Domains for institutional identity and tenant routing.',
   },
 ];
 
