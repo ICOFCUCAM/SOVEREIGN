@@ -2,11 +2,11 @@ const PORTAL = process.env.NEXT_PUBLIC_PORTAL_URL ?? '#';
 const SOVEREIGN_URL = process.env.NEXT_PUBLIC_SOVEREIGN_URL ?? 'https://sovereign.so';
 
 const NAV = [
-  { label: 'Platform', href: '#platform' },
-  { label: 'Solutions', href: '#solutions' },
-  { label: 'Resources', href: '#resources' },
-  { label: 'Company', href: '#company' },
-  { label: 'Docs', href: `${PORTAL}/docs`, external: true },
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'Docs', href: '/docs' },
+  { label: 'Console', href: '/console' },
+  { label: 'Terms', href: '/legal/terms' },
+  { label: 'Privacy', href: '/legal/privacy' },
 ];
 
 function BrandMark() {
@@ -38,13 +38,7 @@ export function Footer() {
         </a>
         <nav className="flex flex-wrap items-center gap-x-7 gap-y-2 text-[13px] text-emrg-mute">
           {NAV.map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              target={l.external ? '_blank' : undefined}
-              rel={l.external ? 'noreferrer' : undefined}
-              className="transition hover:text-emrg-cream"
-            >
+            <a key={l.label} href={l.href} className="transition hover:text-emrg-cream">
               {l.label}
             </a>
           ))}
