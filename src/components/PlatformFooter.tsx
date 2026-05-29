@@ -240,9 +240,13 @@ const PlatformFooter: React.FC = () => {
               ALL SYSTEMS OPERATIONAL
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-white/40">
-            <Globe className="w-3.5 h-3.5" />
-            <span>Multi-region · Wildcard SSL · Sovereign-grade</span>
+          <div className="flex items-center gap-4 text-xs text-white/40">
+            <Link to="/legal/terms" className="hover:text-cyan-300 transition">Terms</Link>
+            <Link to="/legal/privacy" className="hover:text-cyan-300 transition">Privacy</Link>
+            <span className="hidden sm:inline-flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5" />
+              Multi-region · Sovereign-grade
+            </span>
           </div>
         </div>
       </div>
