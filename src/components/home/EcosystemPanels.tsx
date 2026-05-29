@@ -1,17 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import type { Domain } from '@/lib/types';
+import type { EcosystemProduct } from '@/lib/types';
 import { ArrowRight, ArrowUpRight, FileText, Scale, Banknote, Truck, Cpu, GraduationCap, ShoppingCart, Server } from 'lucide-react';
 import HudCorners from '@/components/HudCorners';
 
-const ACCENT: Record<string, string> = {
-  govtech: '#6366F1', fintech: '#10B981', ai: '#7C4DFF', infra: '#00D9FF', logistics: '#F59E0B', saas: '#22D3EE',
+// Featured sovereign infrastructure — flagship first.
+const FEATURED_SLUGS = [
+  'civicos-national-shell',
+  'civicos-treasury',
+  'veritas-operations',
+  'civicos-emergency',
+  'relocation-us',
+];
+
+const deployValueOf = (p: EcosystemProduct): string | null => {
+  const m = (p.metrics || []).find((x) => /value|valuation|infrastructure|deployment|price|asking/i.test(x.label)) || p.metrics?.[0];
+  return m?.value || null;
 };
-const price = (n: number) => (n >= 1e6 ? `$${(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `$${(n / 1e3).toFixed(0)}K` : `$${n}`);
-const tamOf = (d: Domain) => `$${(0.8 + Math.max(0, d.valuation_score - 80) * 0.35).toFixed(1)}B`;
-const statusOf = (d: Domain) => ((d.inquiry_count || 0) > 0 ? 'In negotiation' : 'Available');
-const regionsOf = (d: Domain) => 4 + ((d.domain_name.length * 3 + d.valuation_score) % 16);
+
+const flagshipMetrics = (p: EcosystemProduct): Array<[string, string, string?]> => {
+  const m = p.metrics || [];
+  if (m.length >= 3) return m.slice(0, 3).map((x) => [x.label, x.value]) as Array<[string, string, string?]>;
+  const fill: Array<[string, string]> = [
+    ['Deployment value', deployValueOf(p) || '—'],
+    ['Status', (p.status || 'Operational').replace(/^\w/, (c) => c.toUpperCase())],
+    ['Class', (p.category || 'Sovereign infrastructure')],
+  ];
+  return [...m.map((x) => [x.label, x.value] as [string, string]), ...fill].slice(0, 3) as Array<[string, string, string?]>;
+};
 
 interface Pillar { label: string; desc: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; accent: string; anchor: string }
 const PILLARS: Pillar[] = [
@@ -24,16 +41,12 @@ const PILLARS: Pillar[] = [
   { label: 'Infrastructure', desc: 'Sovereign cloud & edge', icon: Server, accent: '#00E599', anchor: 'operations' },
 ];
 
-// ── LEFT · sovereign acquisition terminal (the dominant centerpiece) ──
-const AcquisitionTerminal: React.FC<{ domains: Domain[] }> = ({ domains }) => {
-  if (domains.length === 0) return null;
-  const [flag, ...rest] = domains;
-  const accent = ACCENT[flag.category || ''] || '#00C2FF';
-  const metrics: Array<[string, React.ReactNode, string?]> = [
-    ['AI valuation', <>{flag.valuation_score}<span className="text-lg text-white/35">/100</span></>, accent],
-    ['Projected market', tamOf(flag)],
-    ['Asking', price(Number(flag.price_usd || 0))],
-  ];
+// ── LEFT · sovereign acquisition terminal (driven by featured infrastructure) ──
+const AcquisitionTerminal: React.FC<{ assets: EcosystemProduct[] }> = ({ assets }) => {
+  if (assets.length === 0) return null;
+  const [flag, ...rest] = assets;
+  const accent = flag.accent || '#00C2FF';
+  const metrics = flagshipMetrics(flag);
   return (
     <div className="group/panel relative h-full flex flex-col rounded-[1.6rem] border border-white/12 bg-gradient-to-b from-white/[0.03] to-white/[0.01] p-7 sm:p-12 lg:p-14 overflow-hidden transition-colors hover:border-white/22">
       <span className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
@@ -46,39 +59,41 @@ const AcquisitionTerminal: React.FC<{ domains: Domain[] }> = ({ domains }) => {
           <span className="inline-flex items-center gap-2.5 text-[10px] font-mono uppercase tracking-[0.28em] text-cyan-300/70">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live acquisition
           </span>
-          <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">AI-brokered</span>
+          <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/35">Sovereign-brokered</span>
         </div>
 
         {/* flagship classification */}
-        <div className="flex items-center gap-3 mb-5">
-          <span className="text-[10px] font-mono uppercase tracking-[0.26em]" style={{ color: accent }}>Flagship · {flag.category || 'sovereign'}</span>
+        <div className="flex items-center gap-3 mb-5 flex-wrap">
+          <span className="text-[10px] font-mono uppercase tracking-[0.26em]" style={{ color: accent }}>Flagship · {flag.category}</span>
           <span className="inline-flex items-center gap-1.5 text-[9px] font-mono uppercase tracking-wider text-white/45">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: statusOf(flag) === 'Available' ? '#10B981' : '#FFB547' }} /> {statusOf(flag)}
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Acquisition ready
           </span>
         </div>
 
         {/* dominant wordmark */}
-        <Link to={`/d/${encodeURIComponent(flag.domain_name)}`} className="group/name block">
-          <h2 className="font-display text-[2rem] sm:text-6xl lg:text-7xl xl:text-[5.25rem] font-bold text-white tracking-cinematic leading-[0.9] mb-5 break-words group-hover/name:translate-x-0.5 transition-transform" style={{ textShadow: `0 0 80px ${accent}22` }}>{flag.domain_name}</h2>
+        <Link to={`/systems/${flag.slug}`} className="group/name block">
+          <h2 className="font-display text-[2rem] sm:text-5xl lg:text-6xl xl:text-[4.4rem] font-bold text-white tracking-cinematic leading-[0.92] mb-5 break-words group-hover/name:translate-x-0.5 transition-transform" style={{ textShadow: `0 0 80px ${accent}22` }}>
+            {flag.name}
+          </h2>
         </Link>
         <p className="text-white/55 leading-relaxed text-lg max-w-md mb-2">{flag.tagline || 'A deployable sovereign institution, engineered for planetary scale.'}</p>
 
         {/* acquisition telemetry — open, editorial, hairline-separated */}
         <div className="grid grid-cols-3 mt-10 pt-8 border-t border-white/10">
-          {metrics.map(([label, value, color], i) => (
-            <div key={label as string} className={i === 0 ? 'pr-5' : 'px-5 border-l border-white/8 last:pr-0'}>
+          {metrics.map(([label, value], i) => (
+            <div key={label} className={i === 0 ? 'pr-5' : 'px-5 border-l border-white/8 last:pr-0'}>
               <div className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/35 mb-2.5">{label}</div>
-              <div className="text-3xl sm:text-4xl lg:text-[2.6rem] font-bold tabular-nums leading-none tracking-tight" style={{ color: (color as string) || '#fff' }}>{value}</div>
+              <div className="text-2xl sm:text-3xl lg:text-[2.1rem] font-bold tabular-nums leading-none tracking-tight text-white" style={{ color: i === 0 ? accent : undefined }}>{value}</div>
             </div>
           ))}
         </div>
 
         {/* institutional CTA system */}
         <div className="flex flex-wrap items-center gap-3 mt-9">
-          <Link to={`/d/${encodeURIComponent(flag.domain_name)}`} className="group/cta inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white text-sm font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5" style={{ background: `linear-gradient(135deg, ${accent}, #7C4DFF)`, boxShadow: `0 14px 40px -12px ${accent}66` }}>
+          <Link to={`/systems/${flag.slug}`} className="group/cta inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-white text-sm font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5" style={{ background: `linear-gradient(135deg, ${accent}, #7C4DFF)`, boxShadow: `0 14px 40px -12px ${accent}66` }}>
             Enter acquisition <ArrowUpRight className="w-4 h-4 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5 transition-transform" />
           </Link>
-          <Link to={`/d/${encodeURIComponent(flag.domain_name)}`} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-white/15 bg-white/[0.02] text-white/80 text-sm font-semibold ease-cinematic transition-all duration-500 hover:bg-white/5 hover:text-white hover:border-white/25 hover:-translate-y-0.5">
+          <Link to={`/systems/${flag.slug}`} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-white/15 bg-white/[0.02] text-white/80 text-sm font-semibold ease-cinematic transition-all duration-500 hover:bg-white/5 hover:text-white hover:border-white/25 hover:-translate-y-0.5">
             <FileText className="w-4 h-4 text-cyan-300/70" /> Request sovereign review
           </Link>
         </div>
@@ -86,24 +101,23 @@ const AcquisitionTerminal: React.FC<{ domains: Domain[] }> = ({ domains }) => {
         {/* secondary strategic acquisitions — present but subordinate */}
         <div className="mt-auto pt-10">
           <div className="text-[9px] font-mono uppercase tracking-[0.26em] text-white/30 mb-2">Secondary acquisitions</div>
-          {rest.slice(0, 2).map((d) => {
-            const ac = ACCENT[d.category || ''] || '#00C2FF';
+          {rest.slice(0, 4).map((p) => {
+            const ac = p.accent || '#00C2FF';
+            const val = deployValueOf(p);
             return (
-              <Link key={d.id} to={`/d/${encodeURIComponent(d.domain_name)}`} className="group/row relative flex items-center justify-between gap-4 py-4 border-t border-white/8 hover:border-white/20 transition-colors">
+              <Link key={p.id} to={`/systems/${p.slug}`} className="group/row relative flex items-center justify-between gap-4 py-4 border-t border-white/8 hover:border-white/20 transition-colors">
                 <div className="min-w-0">
-                  <div className="font-display text-xl font-bold text-white tracking-tight truncate group-hover/row:translate-x-0.5 transition-transform">{d.domain_name}</div>
+                  <div className="font-display text-xl font-bold text-white tracking-tight truncate group-hover/row:translate-x-0.5 transition-transform">{p.name}</div>
                   <div className="flex items-center gap-2.5 mt-1.5 text-[9px] font-mono uppercase tracking-[0.16em]">
-                    <span style={{ color: ac }}>{d.category || 'sovereign'}</span>
+                    <span style={{ color: ac }} className="truncate max-w-[14rem]">{p.category}</span>
                     <span className="text-white/25">·</span>
-                    <span className="text-white/40">AI {d.valuation_score}</span>
-                    <span className="text-white/25">·</span>
-                    <span className="inline-flex items-center gap-1 text-emerald-300/60"><span className="w-1 h-1 rounded-full bg-emerald-400" /> {regionsOf(d)} regions</span>
+                    <span className="inline-flex items-center gap-1 text-emerald-300/60"><span className="w-1 h-1 rounded-full bg-emerald-400" /> Acquisition ready</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 shrink-0 text-right">
                   <div>
-                    <div className="text-lg font-bold text-white tabular-nums leading-none">{price(Number(d.price_usd || 0))}</div>
-                    <div className="text-[8px] font-mono uppercase tracking-[0.16em] text-white/35 mt-1">acquisition</div>
+                    <div className="text-lg font-bold text-white tabular-nums leading-none">{val || '—'}</div>
+                    <div className="text-[8px] font-mono uppercase tracking-[0.16em] text-white/35 mt-1">deployment value</div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-white/25 group-hover/row:text-white group-hover/row:translate-x-0.5 transition-all" />
                 </div>
@@ -168,11 +182,13 @@ const ArchitectureMatrix: React.FC = () => (
 );
 
 const EcosystemPanels: React.FC = () => {
-  const [domains, setDomains] = useState<Domain[]>([]);
+  const [assets, setAssets] = useState<EcosystemProduct[]>([]);
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from('domains').select('*').eq('status', 'active').order('valuation_score', { ascending: false }).limit(3);
-      setDomains((data || []) as Domain[]);
+      const { data } = await supabase.from('ecosystem_products').select('*').in('slug', FEATURED_SLUGS);
+      if (!data) return;
+      const order = new Map(FEATURED_SLUGS.map((s, i) => [s, i]));
+      setAssets([...(data as EcosystemProduct[])].sort((a, b) => (order.get(a.slug) ?? 99) - (order.get(b.slug) ?? 99)));
     })();
   }, []);
 
@@ -189,7 +205,7 @@ const EcosystemPanels: React.FC = () => {
           <span className="kicker text-white/30 hidden sm:inline" style={{ fontSize: '10px', letterSpacing: '0.2em' }}>Acquire · Operate · Deploy</span>
         </div>
         <div className="grid lg:grid-cols-[1.62fr_1fr] gap-7 items-stretch">
-          <AcquisitionTerminal domains={domains} />
+          <AcquisitionTerminal assets={assets} />
           <ArchitectureMatrix />
         </div>
       </div>
