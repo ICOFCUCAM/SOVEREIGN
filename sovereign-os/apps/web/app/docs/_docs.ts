@@ -85,24 +85,104 @@ export const DOCS: DocPage[] = [
   {
     slug: 'distribution',
     section: 'Platform',
-    title: 'Strategic distribution to LinkedIn, X, YouTube',
-    summary: 'Configure channel tokens and publish through the sovereign layer.',
+    title: 'Strategic distribution — LinkedIn, YouTube, X (and beyond)',
+    summary: 'Multi-channel fan-out from one campaign through the sovereign layer.',
     body: [
       {
         paragraphs: [
-          'A finished production becomes a campaign; publishing pushes the asset to one or more channels through the platform-managed credentials.',
+          'A campaign is the unit of distribution. One campaign can target several channels at once; post-campaign fans out in parallel, one pipeline job per platform, with per-channel success/failure recorded against the campaign.',
         ],
       },
       {
-        heading: 'Configure channel tokens',
+        heading: 'Live publishers',
         paragraphs: [
-          'Set LINKEDIN_ACCESS_TOKEN and YOUTUBE_ACCESS_TOKEN as Supabase function secrets. Without them the publish action surfaces a clear error rather than silently failing.',
+          'LinkedIn (UGC Posts API, requires LINKEDIN_ACCESS_TOKEN + LINKEDIN_AUTHOR_URN), YouTube (videos.insert resumable upload, requires YOUTUBE_ACCESS_TOKEN and a hosted MP4), and X (v2 tweets, text-only for now, requires X_ACCESS_TOKEN) are wired with real API calls. Each publisher records the remote post id and a clickable URL back to your Recent jobs feed.',
         ],
       },
       {
-        heading: 'Publish a campaign',
+        heading: 'Token-gated channels',
         paragraphs: [
-          'In the campaigns layer, hit the share icon on any draft. post-campaign dispatches to the relevant channel, records the response, and updates the campaign status.',
+          'Instagram and TikTok are listed in the Studio publisher and accept tokens (INSTAGRAM_ACCESS_TOKEN + INSTAGRAM_USER_ID, TIKTOK_ACCESS_TOKEN). They require business-account credentials and a container/upload flow that is not yet implemented end-to-end — they will surface a clean "not yet implemented" error until that flow ships.',
+        ],
+      },
+      {
+        heading: 'Multi-channel API',
+        paragraphs: [
+          'Programmatically: POST /functions/v1/post-campaign with { campaign_id, channels: ["linkedin","x","youtube"] }. The response is an array of per-channel results; the parent campaign is marked published if any channel succeeded, failed otherwise.',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'video-formats',
+    section: 'Platform',
+    title: 'Video formats — ads, social cuts, long films',
+    summary: 'The shapes Studio can render and how to choose between them.',
+    body: [
+      {
+        paragraphs: [
+          'render-video accepts a format preset, an aspect ratio, and a duration. Each preset chooses sensible defaults; explicit fields always override.',
+        ],
+      },
+      {
+        heading: 'Short ad (16:9)',
+        paragraphs: [
+          'A 5–10 second widescreen clip optimised for pre-roll, banner, and editorial spots. Preset ratio 1280:720; duration 10s default.',
+        ],
+      },
+      {
+        heading: 'Reels / Shorts (9:16)',
+        paragraphs: [
+          'Vertical clip for Instagram Reels, YouTube Shorts, TikTok. Preset ratio 720:1280; duration 10s default.',
+        ],
+      },
+      {
+        heading: 'Square post (1:1)',
+        paragraphs: [
+          'Feed-native square clip. Preset ratio 960:960; duration 10s default.',
+        ],
+      },
+      {
+        heading: 'Long film',
+        paragraphs: [
+          'Multi-scene narration-driven film via orchestrate-film: brief → 2–6 scenes → per-scene image → Runway motion → TTS narration → ffmpeg stitch. Output is cinematic 1280:720 by default.',
+        ],
+      },
+      {
+        heading: 'Custom',
+        paragraphs: [
+          'Operator-defined aspect ratio (e.g. 1080:1080, 1920:1080) and duration (5 or 10s, until the underlying model exposes longer clips).',
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'developer-api',
+    section: 'Developer',
+    title: 'Use Emergency AI from your own apps',
+    summary: 'Public edge functions, authentication, and rate limits.',
+    body: [
+      {
+        paragraphs: [
+          'Emergency AI exposes the same edge-function surface as the sovereign platform. Anyone with a Supabase JWT (anon for public ops, user JWT for owner-scoped ops) can call them; the Developer Portal at sovereign.so/developer documents each endpoint with curl examples, payloads, and auth notes.',
+        ],
+      },
+      {
+        heading: 'Base URL',
+        paragraphs: [
+          'https://qvjdivcdefuprnenedje.supabase.co/functions/v1 — append the function name (orchestrate-film, render-video, post-campaign, etc.).',
+        ],
+      },
+      {
+        heading: 'API keys',
+        paragraphs: [
+          'For programmatic access, issue an API key from the Developer Portal Connect flow. Keys are scoped to your account, can be rotated, and appear in /usage with per-endpoint counters.',
+        ],
+      },
+      {
+        heading: 'Rate limits',
+        paragraphs: [
+          'Plan-based: Evaluator 5 jobs/month, Operator unlimited within fair use, Institutional dedicated capacity. See /pricing for the live limits.',
         ],
       },
     ],
