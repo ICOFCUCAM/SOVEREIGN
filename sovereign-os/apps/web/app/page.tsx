@@ -3,6 +3,7 @@ import { Hero } from '../components/Hero';
 import { TrustBar } from '../components/TrustBar';
 import { Capabilities } from '../components/Capabilities';
 import { Enterprise } from '../components/Enterprise';
+import { Testimonials } from '../components/Testimonials';
 import { ClosingCta } from '../components/ClosingCta';
 import { Footer } from '../components/Footer';
 
@@ -14,6 +15,7 @@ export default function LandingPage() {
       <TrustBar />
       <Capabilities />
       <Enterprise />
+      <Testimonials />
       <ClosingCta />
       <Footer />
     </>
