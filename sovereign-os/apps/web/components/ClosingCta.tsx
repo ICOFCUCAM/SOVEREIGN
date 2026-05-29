@@ -1,4 +1,4 @@
-const PORTAL = process.env.NEXT_PUBLIC_PORTAL_URL ?? '#';
+import Link from 'next/link';
 
 export function ClosingCta() {
   return (
@@ -27,8 +27,8 @@ export function ClosingCta() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-5 lg:justify-end">
-              <a
-                href="#pricing"
+              <Link
+                href="/sign-in?mode=signup"
                 className="inline-flex items-center gap-3 rounded-md bg-emrg-gold px-6 py-3 text-sm font-medium text-emrg-bg transition hover:-translate-y-0.5 hover:bg-emrg-cream"
                 style={{ boxShadow: '0 16px 40px -14px rgba(212,168,106,0.6)' }}
               >
@@ -36,12 +36,12 @@ export function ClosingCta() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                   <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-              </a>
+              </Link>
               <a
-                href={`${PORTAL}/contact`}
+                href="mailto:institutional@emergency.ai"
                 className="inline-flex items-center gap-2 text-sm text-emrg-ink transition hover:text-emrg-cream"
               >
-                Contact Enterprise Sales
+                Contact Institutional Sales
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                   <path d="M7 17L17 7M17 7H8M17 7v9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
