@@ -18,9 +18,31 @@ const sans = Inter({
   display: 'swap',
 });
 
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://emergency.ai';
+
 export const metadata: Metadata = {
-  title: 'Emergency AI — Cinematic Intelligence Infrastructure',
+  metadataBase: new URL(SITE),
+  title: {
+    default: 'Emergency AI — Cinematic Intelligence Infrastructure',
+    template: '%s · Emergency AI',
+  },
   description: 'Cinematic media, intelligent distribution, and strategic communications — unified in one sovereign platform.',
+  applicationName: 'Emergency AI',
+  authors: [{ name: 'SOVEREIGN', url: 'https://sovereign.so' }],
+  keywords: ['AI video', 'cinematic AI', 'multi-channel publishing', 'LinkedIn', 'YouTube', 'X', 'sovereign infrastructure'],
+  openGraph: {
+    type: 'website',
+    siteName: 'Emergency AI',
+    title: 'Emergency AI — Cinematic Intelligence Infrastructure',
+    description: 'Produce films, ads, and social cuts. Publish to LinkedIn, YouTube and X in one pass.',
+    url: SITE,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Emergency AI',
+    description: 'Cinematic media + multi-channel distribution under one sovereign console.',
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
