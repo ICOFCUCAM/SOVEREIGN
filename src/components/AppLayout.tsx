@@ -6,16 +6,15 @@ import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
 import MarketplaceTeaser from '@/components/home/MarketplaceTeaser';
 import EcosystemPanels from '@/components/home/EcosystemPanels';
-import HomeVideo from '@/components/home/HomeVideo';
+import EcosystemSectors from '@/components/home/EcosystemSectors';
 import ChannelTeaser from '@/components/home/ChannelTeaser';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import InstitutionalTrust from '@/components/home/InstitutionalTrust';
 import ClosingCTA from '@/components/home/ClosingCTA';
 
-// Homepage composition. EcosystemPanels (Acquisition Terminal +
-// Architecture Matrix) is restored to its canonical slot; the
-// system-by-system sector panels (EcosystemSectors) are replaced with
-// a cinematic feature-dispatch video player.
+// Canonical homepage composition. EcosystemSectors carries the
+// system-by-system cinematic panels; each panel's visual (right column)
+// is a click-to-play video player.
 const AppLayout: React.FC = () => {
   return (
     <div className="relative min-h-screen text-white">
@@ -29,8 +28,8 @@ const AppLayout: React.FC = () => {
         <MarketplaceTeaser />
         {/* ACT II — the sovereign infrastructure universe */}
         <Reveal><EcosystemPanels /></Reveal>
-        {/* feature dispatch — cinematic video showcase (was EcosystemSectors) */}
-        <Reveal><HomeVideo /></Reveal>
+        {/* featured institutions — cinematic panels with click-to-play visuals */}
+        <EcosystemSectors />
         {/* the sovereign channel — media ecosystem entry */}
         <Reveal><ChannelTeaser /></Reveal>
         {/* deployment story */}
