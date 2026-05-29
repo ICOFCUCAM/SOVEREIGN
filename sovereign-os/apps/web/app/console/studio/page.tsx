@@ -78,13 +78,28 @@ const FORMATS: Array<{ id: Format; label: string; sub: string; aspect: string; d
   { id: 'custom',          label: 'Custom',            sub: 'Operator-defined',          aspect: '1280:720', duration: 10, icon: Sliders },
 ];
 
-const CHANNELS: Array<{ id: string; label: string; live: boolean }> = [
-  { id: 'linkedin',  label: 'LinkedIn',  live: true },
-  { id: 'youtube',   label: 'YouTube',   live: true },
-  { id: 'x',         label: 'X',         live: true },
-  { id: 'instagram', label: 'Instagram', live: false },
-  { id: 'tiktok',    label: 'TikTok',    live: false },
+type ChannelStatus = 'live' | 'activating' | 'coming-online' | 'rolling-out';
+
+const CHANNELS: Array<{ id: string; label: string; status: ChannelStatus }> = [
+  { id: 'linkedin',  label: 'LinkedIn',    status: 'live' },
+  { id: 'youtube',   label: 'YouTube',     status: 'live' },
+  { id: 'x',         label: 'X',           status: 'live' },
+  { id: 'instagram', label: 'Instagram',   status: 'activating' },
+  { id: 'facebook',  label: 'Facebook',    status: 'activating' },
+  { id: 'tiktok',    label: 'TikTok',      status: 'activating' },
+  { id: 'threads',   label: 'Threads',     status: 'coming-online' },
+  { id: 'telegram',  label: 'Telegram',    status: 'coming-online' },
+  { id: 'whatsapp',  label: 'WhatsApp',    status: 'rolling-out' },
+  { id: 'pinterest', label: 'Pinterest',   status: 'rolling-out' },
+  { id: 'bluesky',   label: 'Bluesky',     status: 'rolling-out' },
 ];
+
+const STATUS_BADGE: Record<ChannelStatus, { label: string; cls: string }> = {
+  'live':          { label: '● live publisher',  cls: 'text-emerald-300/80' },
+  'activating':    { label: '○ activating',      cls: 'text-amber-300/85' },
+  'coming-online': { label: '○ coming online',   cls: 'text-amber-300/65' },
+  'rolling-out':   { label: '○ rolling out',     cls: 'text-emrg-cream/60' },
+};
 
 export default function StudioPage() {
   const [jobs, setJobs] = useState<PipelineJob[]>([]);
@@ -389,6 +404,7 @@ export default function StudioPage() {
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
           {CHANNELS.map((c) => {
             const active = publishChannels.includes(c.id);
+            const badge = STATUS_BADGE[c.status];
             return (
               <button
                 key={c.id}
@@ -397,9 +413,7 @@ export default function StudioPage() {
                 className={`relative rounded-lg border px-3 py-3 text-left transition ${active ? 'border-emrg-dim bg-emrg-surface' : 'border-emrg-edge bg-emrg-surface/50 hover:border-emrg-edgeStrong'}`}
               >
                 <div className={`text-[12px] font-medium ${active ? 'text-emrg-cream' : 'text-emrg-ink'}`}>{c.label}</div>
-                <div className={`mt-1 text-[10px] ${c.live ? 'text-emerald-300/70' : 'text-amber-300/60'}`}>
-                  {c.live ? '● live publisher' : '○ token-gated'}
-                </div>
+                <div className={`mt-1 text-[10px] ${badge.cls}`}>{badge.label}</div>
               </button>
             );
           })}
@@ -432,7 +446,7 @@ export default function StudioPage() {
           <Megaphone className="h-3.5 w-3.5" /> {busy === 'publish' ? 'Publishing…' : `Publish to ${publishChannels.length} channel${publishChannels.length === 1 ? '' : 's'}`}
         </button>
         <p className="mt-2 text-[10px] text-emrg-mute">
-          Each channel runs in parallel as its own job. Required secrets: LINKEDIN_ACCESS_TOKEN + LINKEDIN_AUTHOR_URN, YOUTUBE_ACCESS_TOKEN, X_ACCESS_TOKEN. Instagram & TikTok require business-account credentials before they go live.
+          Each channel runs in parallel as its own job. Live publishers: LinkedIn (LINKEDIN_ACCESS_TOKEN + LINKEDIN_AUTHOR_URN), YouTube (YOUTUBE_ACCESS_TOKEN), X (X_ACCESS_TOKEN). Activating / coming-online / rolling-out channels return a clean dormant error until institutional credentials are wired — never fake success.
         </p>
       </div>
 

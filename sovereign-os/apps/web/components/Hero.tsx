@@ -7,7 +7,6 @@ import Link from 'next/link';
 function EarthBackdrop() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* the photographic Earth — masked so it bleeds into the page */}
       <div
         aria-hidden
         className="absolute right-[-12%] top-1/2 h-[160%] w-[80%] -translate-y-1/2"
@@ -18,10 +17,9 @@ function EarthBackdrop() {
           backgroundRepeat: 'no-repeat',
           WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 60% 50%, #000 35%, rgba(0,0,0,0.85) 55%, transparent 90%)',
           maskImage: 'radial-gradient(ellipse 70% 60% at 60% 50%, #000 35%, rgba(0,0,0,0.85) 55%, transparent 90%)',
-          opacity: 0.92,
+          opacity: 0.9,
         }}
       />
-      {/* gold sun-rim warmth pulled out of the photo for the editorial atmosphere */}
       <div
         aria-hidden
         className="absolute right-[-6%] top-[28%] h-[60%] w-[55%]"
@@ -30,7 +28,6 @@ function EarthBackdrop() {
           filter: 'blur(8px)',
         }}
       />
-      {/* gold orbital traces — the Emergency AI signature, kept light */}
       <svg viewBox="0 0 800 800" className="absolute right-[-8%] top-1/2 h-[140%] w-auto -translate-y-1/2" aria-hidden>
         <g fill="none" stroke="#d4a86a" strokeLinecap="round">
           <ellipse cx="400" cy="400" rx="360" ry="350" strokeWidth="0.5" strokeDasharray="1 9" opacity="0.32" />
@@ -38,7 +35,6 @@ function EarthBackdrop() {
           <ellipse cx="400" cy="400" rx="430" ry="406" strokeWidth="0.4" strokeDasharray="1 14" opacity="0.16" transform="rotate(9 400 400)" />
         </g>
       </svg>
-      {/* left editorial scrim — keeps type breathing room over the image */}
       <div
         aria-hidden
         className="absolute inset-0"
@@ -48,51 +44,76 @@ function EarthBackdrop() {
   );
 }
 
+// Three outcome lines, progressively revealed — the editorial spine of the hero.
+const OUTCOMES = [
+  { label: 'Acquire', verb: 'attention.' },
+  { label: 'Orchestrate', verb: 'distribution.' },
+  { label: 'Operate', verb: 'intelligence.' },
+];
+
+// Stat strip — real, conservative numbers. Counts reflect what's actually
+// surfaced in the platform; activation status is owned by the studio.
+const STATS = [
+  { value: '3',  label: 'Sovereign layers' },
+  { value: '4',  label: 'Media classes' },
+  { value: '7',  label: 'Intelligence agents' },
+  { value: '11', label: 'Distribution surfaces' },
+];
+
 export function Hero() {
   return (
     <section id="top" className="relative overflow-hidden">
       <EarthBackdrop />
-      <div className="relative mx-auto max-w-7xl px-6 pt-20 pb-28 sm:pt-28 sm:pb-36">
+      <div className="relative mx-auto max-w-7xl px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-6">
-          {/* Left: text */}
           <div className="relative z-10 max-w-xl py-10">
             <div className="animate-rise flex items-center gap-3 text-[10px] tracking-[0.32em] text-emrg-dim">
               <span className="h-px w-8 bg-emrg-dim/70" />
-              CINEMATIC INTELLIGENCE INFRASTRUCTURE
+              MEDIA · DISTRIBUTION · STRATEGIC INTELLIGENCE INFRASTRUCTURE
             </div>
-            <h1 className="animate-rise mt-9 font-serif text-[64px] font-medium leading-[0.95] tracking-tight text-emrg-ink sm:text-[88px]">
-              Own the
-              <br />
-              <span className="wordmark-cream font-semibold italic">narrative.</span>
+
+            <h1 className="animate-rise mt-9 font-serif text-[60px] font-medium leading-[0.98] tracking-tight text-emrg-ink sm:text-[80px]">
+              {OUTCOMES.map((o) => (
+                <span key={o.label} className="block">
+                  {o.label}{' '}
+                  <span className="wordmark-cream font-semibold italic">{o.verb}</span>
+                </span>
+              ))}
             </h1>
+
             <p className="animate-rise mt-7 max-w-md text-base leading-relaxed text-emrg-mute sm:text-lg">
-              Cinematic media, intelligent distribution, and strategic communications — unified in one sovereign platform.
+              The operational infrastructure for institutional media. Acquire, orchestrate and govern the substrate that produces, distributes, and reads the room — under one sovereign console.
             </p>
+
             <div className="animate-rise mt-9 flex flex-wrap items-center gap-5">
               <Link
                 href="/sign-in?mode=signup"
                 className="inline-flex items-center gap-3 rounded-md bg-emrg-gold px-6 py-3 text-sm font-medium text-emrg-bg transition hover:-translate-y-0.5 hover:bg-emrg-cream"
                 style={{ boxShadow: '0 14px 40px -12px rgba(212,168,106,0.55)' }}
               >
-                Enter the Console
+                Choose a plan
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                   <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </Link>
-              <Link href="#platform" className="inline-flex items-center gap-2 text-sm text-emrg-ink transition hover:text-emrg-cream">
-                Explore Capabilities
+              <Link href="/console" className="inline-flex items-center gap-2 text-sm text-emrg-ink transition hover:text-emrg-cream">
+                Open the console
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                   <path d="M7 17L17 7M17 7H8M17 7v9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </Link>
             </div>
-            <div className="animate-rise mt-16 flex items-center gap-3 text-[10px] tracking-[0.32em] text-emrg-mute">
-              <span className="inline-block h-1.5 w-1.5 animate-pulseline rounded-full border border-emrg-dim" />
-              BUILT FOR INSTITUTIONS. DESIGNED FOR IMPACT.
-            </div>
+
+            <dl className="animate-rise mt-12 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-emrg-edge/60 pt-7 sm:grid-cols-4">
+              {STATS.map((s) => (
+                <div key={s.label}>
+                  <dd className="font-serif text-3xl text-emrg-ink tabular-nums">{s.value}</dd>
+                  <dt className="mt-1 text-[10px] uppercase tracking-[0.22em] text-emrg-mute">{s.label}</dt>
+                </div>
+              ))}
+            </dl>
           </div>
 
-          {/* Right: spacer reserving room for the photographic globe */}
           <div className="relative hidden h-[640px] lg:block" />
         </div>
       </div>

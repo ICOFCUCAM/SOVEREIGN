@@ -144,24 +144,39 @@ async function publishYouTube(c: Campaign): Promise<PublishResult> {
 async function publishInstagram(_c: Campaign): Promise<PublishResult> {
   const t = tokens();
   if (!t.instagram || !t.instagram_user) {
-    return { ok: false, provider: 'instagram', error: 'Instagram publishing requires INSTAGRAM_ACCESS_TOKEN + INSTAGRAM_USER_ID (Graph API container flow). Not yet wired.' };
+    return { ok: false, provider: 'instagram', error: 'Instagram is ACTIVATING — INSTAGRAM_ACCESS_TOKEN + INSTAGRAM_USER_ID required (Graph API container flow).' };
   }
   return { ok: false, provider: 'instagram', error: 'Instagram publisher token present but container flow not yet implemented.' };
 }
 
 async function publishTikTok(_c: Campaign): Promise<PublishResult> {
   const t = tokens();
-  if (!t.tiktok) return { ok: false, provider: 'tiktok', error: 'TIKTOK_ACCESS_TOKEN not configured' };
+  if (!t.tiktok) return { ok: false, provider: 'tiktok', error: 'TikTok is ACTIVATING — TIKTOK_ACCESS_TOKEN required (Content Posting API).' };
   return { ok: false, provider: 'tiktok', error: 'TikTok publisher token present but Content Posting API flow not yet implemented.' };
 }
 
+// Dormant publishers — never fake success. Return a clean status-tagged error
+// so the studio surfaces "ACTIVATING / COMING ONLINE / ROLLING OUT" honestly.
+const dormant = (provider: string, status: string) =>
+  async (_c: Campaign): Promise<PublishResult> => ({
+    ok: false,
+    provider,
+    error: `${provider} is ${status} — institutional credentials and adapter flow not yet wired.`,
+  });
+
 const PUBLISHERS: Record<string, (c: Campaign) => Promise<PublishResult>> = {
-  linkedin: publishLinkedIn,
-  x: publishX,
-  twitter: publishX,
-  youtube: publishYouTube,
+  linkedin:  publishLinkedIn,
+  x:         publishX,
+  twitter:   publishX,
+  youtube:   publishYouTube,
   instagram: publishInstagram,
-  tiktok: publishTikTok,
+  tiktok:    publishTikTok,
+  facebook:  dormant('facebook',  'ACTIVATING'),
+  threads:   dormant('threads',   'COMING ONLINE'),
+  telegram:  dormant('telegram',  'COMING ONLINE'),
+  whatsapp:  dormant('whatsapp',  'ROLLING OUT'),
+  pinterest: dormant('pinterest', 'ROLLING OUT'),
+  bluesky:   dormant('bluesky',   'ROLLING OUT'),
 };
 
 Deno.serve(async (req) => {

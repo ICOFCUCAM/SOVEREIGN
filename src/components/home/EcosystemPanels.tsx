@@ -9,6 +9,7 @@ import HudCorners from '@/components/HudCorners';
 const FEATURED_SLUGS = [
   'civicos-national-shell',
   'civicos-treasury',
+  'emergency-ai-platform',
   'veritas-operations',
   'civicos-emergency',
   'relocation-us',
