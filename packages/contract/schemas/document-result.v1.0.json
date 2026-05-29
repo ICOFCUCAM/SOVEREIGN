@@ -61,7 +61,7 @@
       "properties": {
         "code": { "type": "string", "enum": ["BLOCK_FALLBACK", "CHART_RASTERIZED", "MISSING_ALT_TEXT",
                   "CLASSIFICATION_IGNORED_FIELD", "TRUNCATED", "TTL_CAPPED", "UNUSED_CITATION",
-                  "BLOCK_DISCOURAGED", "ASSET_MISSING", "DOCX_DEGRADED"] },
+                  "BLOCK_DISCOURAGED", "ASSET_MISSING", "DOCX_DEGRADED", "IMAGE_SRC_BLOCKED"] },
         "blockId": { "type": ["string", "null"] },
         "detail": { "type": "string" }
       }

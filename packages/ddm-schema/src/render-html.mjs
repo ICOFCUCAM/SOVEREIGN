@@ -7,6 +7,8 @@
 // as inline SVG (no rasterization for PDF). Presentation only — the engine
 // already resolved numbers/order/refs.
 
+import { imageSrcAllowed } from "./src-policy.mjs";
+
 function esc(s) {
   return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
@@ -107,10 +109,20 @@ function block(b, warnings) {
       return `<ul class="timeline">${b.events.map((e) => `<li><span class="ts">${esc(e.ts)}</span> ${esc(e.label)}${e.detail ? `: ${esc(e.detail)}` : ""}</li>`).join("")}</ul>`;
     case "image": {
       if (!b.altText) warnings.push({ code: "MISSING_ALT_TEXT", blockId: b.nodeId, detail: "image lacks altText" });
-      const src = b.source?.src || (b.source?.evidenceId ? `about:blank#${esc(b.source.evidenceId)}` : "");
       const cap = b.caption ? `<figcaption>${esc(b.number ? b.number + ". " : "")}${esc(b.caption)}${b.credit ? ` — ${esc(b.credit)}` : ""}</figcaption>` : "";
-      // Evidence fetch/embed is Phase-3; render an accessible placeholder for now.
-      return `<figure>${b.source?.src ? `<img src="${esc(src)}" alt="${esc(b.altText)}"/>` : `<div class="imgph" role="img" aria-label="${esc(b.altText)}">[${esc(b.altText)}]</div>`}${cap}</figure>`;
+      const placeholder = `<div class="imgph" role="img" aria-label="${esc(b.altText)}">[${esc(b.altText)}]</div>`;
+      // SSRF gate (R-P1-3): only embed a server-fetchable <img> when the remote
+      // src passes the policy. Blocked/remote-disabled or evidenceId-only → an
+      // accessible placeholder (evidence embedding is Phase-3), never a silent
+      // server-side fetch.
+      if (b.source?.src) {
+        const verdict = imageSrcAllowed(b.source.src);
+        if (verdict.allowed) {
+          return `<figure><img src="${esc(b.source.src)}" alt="${esc(b.altText)}"/>${cap}</figure>`;
+        }
+        warnings.push({ code: "IMAGE_SRC_BLOCKED", blockId: b.nodeId, detail: `image src not fetched: ${verdict.reason}` });
+      }
+      return `<figure>${placeholder}${cap}</figure>`;
     }
     case "reference": return b.noteRef ? `<sup class="ref">[${b.noteRef}]</sup>` : "";
     case "pagebreak": return `<div class="pb"></div>`;

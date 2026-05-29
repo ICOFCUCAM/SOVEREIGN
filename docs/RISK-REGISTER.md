@@ -12,7 +12,7 @@ Severity: Critical / Medium / Low / Accepted.
 |----|------|----------|--------|
 | R-P1-1 | Tenant isolation correctness (RLS/bypass) | Critical | **Mitigated (Sprint 1)** — RLS forced on all 10 tables; SPK-B + E2E prove cross-tenant denial, no-claim-deny, user≡service parity. Two narrow SECURITY DEFINER fns reviewed (ADR-007). |
 | R-P1-2 | PDF render reliability/determinism at load | Critical | Open — SPK-A proved feasibility; renderer is Sprint 2. |
-| R-P1-3 | Security: SSRF/injection/Chromium sandbox | Critical | Open — renderer not yet built; gate before prod. |
+| R-P1-3 | Security: SSRF/injection/Chromium sandbox | Critical | **Partial.** Injection: DDM text is HTML-escaped (render-html) and OOXML-escaped; no `<script>` reaches output (tested). **SSRF: closed** — `src-policy.mjs` gate blocks remote image `src` by default; private/loopback/link-local/IPv6-ULA/CGNAT/metadata(169.254.169.254)/bare-IP/credentialed/non-http always blocked; opt-in allowlist; blocked → placeholder + `IMAGE_SRC_BLOCKED` warning, never a server-side fetch (23/23). **Remaining:** run Chromium with `--no-sandbox` reviewed/seccomp-profiled + network-isolated at print time (deploy hardening); pentest before prod. |
 | R-P1-4 | Integrity & durability (re-derive) | Critical | Partial — immutability + checksums in schema; artifact lifecycle is Sprint 2/Epic 8. |
 | R-P1-5 | Secret management (no leaked service secrets) | Critical | Open — see R-S1-1. |
 
