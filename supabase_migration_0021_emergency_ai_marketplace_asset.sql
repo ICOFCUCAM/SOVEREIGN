@@ -27,14 +27,14 @@ insert into public.ecosystem_products (
   true,
   10,
   'https://emergency.ai',
-  array[
-    'Cinematic media production at command speed',
-    'Coordinated multi-channel distribution',
-    'Strategic Intelligence Layer for decision-makers',
-    'Subscription billing with Stripe Customer Portal',
-    'Owner-scoped tenancy and single-tenant institutional deployments',
-    'Continuously audited, queued and retried operations'
-  ],
+  '[
+    "Cinematic media production at command speed",
+    "Coordinated multi-channel distribution",
+    "Strategic Intelligence Layer for decision-makers",
+    "Subscription billing with Stripe Customer Portal",
+    "Owner-scoped tenancy and single-tenant institutional deployments",
+    "Continuously audited, queued and retried operations"
+  ]'::jsonb,
   '[
     {"label": "Estimated Infrastructure Value", "value": "$8M–$15M"},
     {"label": "Status",                          "value": "Deployable"},
