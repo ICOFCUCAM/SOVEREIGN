@@ -1,0 +1,150 @@
+# Sprint 3 — Publication Governance + Dispatch Console
+
+**Status:** complete (local). **Date:** 2026-05-30.
+
+Sovereign Dispatch gains the governance layer that turns it from a render
+service into **institutional publication infrastructure**, plus its own
+dedicated, Dispatch-branded UI — separate from the Sovereign website.
+
+The organising principle, end to end:
+
+```
+Submit → Govern → Approve → Render → Publish → Retrieve
+```
+
+Dispatch is **not** a word processor. The document body (DDM) is a structured
+payload; the value is the governed passage of that payload to a published,
+provenance-tracked artifact under clearance and approval control.
+
+---
+
+## 1. Backend — governance layer
+
+### Lifecycle state machine (above the render job)
+A new `documents.lifecycle_state` is the governance state; the worker-owned
+`documents.status` (render status) is left untouched.
+
+```
+draft → submitted → in_review → approved → rendered → published → archived
+                          │
+                      (rejected)              (withdrawn ← published/rendered)
+```
+
+- `services/shared/src/governance.mjs` — pure state machine (`canTransition`,
+  `assertTransition`), policy resolution, quorum evaluation, render gating.
+- **Render is gated on `approved`** — a render job is only created once a
+  document is approved.
+
+### Approval workflow (N-eyes + separation of duties)
+- `dispatch.approval_policies` — per (tenant, doc_type, classification level),
+  most-specific-wins: `required_approvals`, `min_approver_clearance`,
+  `auto_approve_service`, `auto_approve_user`.
+- `dispatch.approvals` — immutable decision ledger (unique per actor+version;
+  UPDATE/DELETE blocked by trigger).
+- **Separation of duties:** a document's submitter cannot be a deciding approver.
+- **Quorum:** advance to `approved` only when distinct approver count ≥ policy.
+- **Default policy:** the machine (service) lane auto-approves, so existing
+  integrations (e.g. Emergency AI) render immediately and the Sprint 1/2
+  contract is preserved; the human lane requires review.
+
+### Clearance (extends Sprint 2)
+Approve / publish / inbox / library / audit all enforce
+`clearanceAllows(principal.clearance, doc.classification)`. Under-cleared
+documents are filtered out of lists (no existence leak, mirroring the 404-not-403
+rule).
+
+### Endpoints (added to `dispatch-api`)
+| Method | Path | Scope | Purpose |
+|--------|------|-------|---------|
+| POST | `/v1/documents/{id}/decision` | approve | approve / reject / return; on quorum → render job |
+| POST | `/v1/documents/{id}/publish` | publish | release a rendered document to the library |
+| POST | `/v1/documents/{id}/withdraw` | publish | pull a published/rendered document |
+| GET | `/v1/approvals?state=pending` | approve | approver inbox |
+| GET | `/v1/documents?state=&docType=&q=` | read | library / queues (clearance-scoped) |
+| GET | `/v1/audit?target=&action=` | audit | append-only event trail |
+
+`POST /v1/documents` now sets lifecycle + routes through policy (auto-approve
+lane creates the render job inline; review lane returns `in_review`, no job).
+
+### Roles & scopes
+New scopes: `dispatch:approve`, `dispatch:publish`, `dispatch:audit`,
+`dispatch:admin`. New membership roles: `publisher`, `auditor`. `roleScopes()`
+updated in `services/shared/src/auth.mjs`.
+
+### Migrations
+- `M7__governance.sql` — lifecycle column, approval_policies, approvals,
+  RLS + role gating, audit read policy (auditor/tenant_admin), role vocabulary.
+- `M8__governance_job_insert.sql` — widen `jobs_insert` so approvers can queue
+  the post-approval render job.
+
+### Worker
+On a successful/partial render the worker advances an `approved` document to
+`rendered` (publishable). A hard failure leaves it `approved` for re-render.
+
+---
+
+## 2. Frontend — `services/dispatch-web`
+
+A standalone **Vite + React + Tailwind** SPA — its own deployable, its own
+institutional identity (dense, classification-forward; deliberately not the
+cinematic Sovereign marketing theme). Talks only to `/v1`.
+
+| Route | Page | Purpose |
+|-------|------|---------|
+| `/` | Dashboard | lifecycle queues; "needs my action" first |
+| `/submit` | Submit | classify, choose outputs, dry-run validate, submit (DDM payload) |
+| `/review` | Review & Approve | approval inbox + approve/return/reject |
+| `/library` | Library | published + archived; filter by state/type/title |
+| `/documents/:id` | Document | versions, render status (live poll), artifact download (grants), publish/withdraw, provenance trail |
+| `/audit` | Audit | append-only event trail, filterable |
+
+- **Auth:** client-credentials → short-lived JWT held **in memory only** (never
+  localStorage). Navigation is role-filtered by scope.
+- **Classification-forward:** every row/card carries a colour-banded marking.
+- **Deploy:** multi-stage Dockerfile (nginx static serve) + SPA fallback; added
+  to `docker-compose.yml` as `dispatch-web`.
+
+---
+
+## 3. Test evidence
+
+All suites green (clean queue):
+
+| Suite | Result |
+|-------|--------|
+| sprint1-e2e | 14/14 |
+| sprint1-retry | 3/3 |
+| epic6-pdf | 10/10 |
+| epic7-docx | 17/17 |
+| epic8-retrieve | 14/14 |
+| epic9-console | 16/16 |
+| epic10-hardening | 5/5 |
+| epic10-breaker (CHROMIUM_BIN=/bin/false) | 4/4 |
+| clearance (DISPATCH_ENFORCE_CLEARANCE=1) | 11/11 |
+| r-s1-1-secret-hash | 10/10 |
+| s3-sigv4 | 4/4 |
+| **governance (new)** | **23/23** |
+| ddm-schema package | 25/25 |
+
+`dispatch-web`: `npm run build` ✓, `npm run lint` ✓ (0 errors). Verified
+end-to-end against the live API via headless Chromium (sign-in → dashboard →
+submit → library) and a proxy-driven validate→submit→list flow.
+
+The Sprint 1/2 contract is preserved: the service lane still auto-approves and
+renders immediately; the only test change was re-keying the `document.submitted`
+audit assertion from the job id to the (more correct) document id.
+
+---
+
+## 4. Honest gaps / next
+
+- **Admin surface** (manage clients, users, role & clearance assignment,
+  templates, retention policy) is specified in the plan but not yet built — the
+  approval_policies are settable via SQL/API but have no UI yet.
+- **Retention enforcement job** (archive → purge bytes at `retention_until`,
+  keeping metadata+audit) is modelled (`retention_until` is set on publish) but
+  the purge worker is not implemented.
+- **Human SSO** (Supabase user JWT) plugs into `auth.tsx`/`auth.mjs`; today the
+  console signs in via service client credentials.
+- Docker image builds for `dispatch-web` validated by local `npm run build`; the
+  nginx image build itself is unexercised here.
