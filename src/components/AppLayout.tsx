@@ -39,10 +39,10 @@ const AppLayout: React.FC = () => {
         <Reveal><TransformationFlow /></Reveal>
         {/* institutional trust & governance */}
         <Reveal><InstitutionalTrust /></Reveal>
-        {/* closing statement — "Deploy the operating layer for sovereign civilization" */}
-        <ClosingCTA />
         {/* deployment reach — sovereign edge mesh regions */}
         <Reveal><DeploymentRegions /></Reveal>
+        {/* closing statement — "Deploy the operating layer for sovereign civilization" */}
+        <ClosingCTA />
       </main>
       <PlatformFooter />
     </div>

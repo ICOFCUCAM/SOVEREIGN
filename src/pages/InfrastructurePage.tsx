@@ -6,17 +6,17 @@ import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import SovereignInfrastructureStack from '@/components/home/SovereignInfrastructureStack';
-import InfrastructureFlow from '@/components/home/InfrastructureFlow';
-import InfrastructureDependency from '@/components/home/InfrastructureDependency';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
-// /infrastructure — the canonical architecture surface for institutional
-// buyers. Customer-led framing (Government · Organizations · Companies)
-// leads the page; the seven infrastructures are presented as substrates
-// institutions deploy to run their critical functions.
+// /infrastructure — the public featured-infrastructures surface for
+// institutional buyers. Customer-led framing (Government · Organizations
+// · Companies) leads the page; each flagship is presented as an
+// independent sovereign infrastructure. Internal architecture diagrams
+// and dependency maps live behind the gated /infrastructure/architecture
+// surface — they are not part of the public proposition.
 
 const InfrastructurePage: React.FC = () => {
-  useDocumentTitle('Sovereign Infrastructure', 'Seven sovereign infrastructures any institution can run their critical functions on — independently, securely and at any scale.');
+  useDocumentTitle('Sovereign Infrastructure', 'A platform for building, operating, deploying and governing institutional-grade infrastructures. Deploy individually. Operate together.');
 
   return (
     <div className="relative min-h-screen text-white">
@@ -43,16 +43,16 @@ const InfrastructurePage: React.FC = () => {
             </div>
 
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-cinematic leading-[0.96] mb-6">
-              Run everything. <span className="text-gradient-cyan">Sovereign scale or enterprise scale.</span>
+              Deploy individually. <span className="text-gradient-cyan">Operate together.</span>
             </h1>
 
             <p className="text-white/60 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-              Any institution can run all critical functions on sovereign infrastructures — independently, securely and at any scale. Seven composable layers, each operating as a standalone substrate.
+              A platform for building, operating, deploying and governing institutional-grade infrastructures. Procure one, several or the full portfolio — each system is sovereign by default, independently deployable and built to compose at the operator's discretion.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <a href="#stack" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/15 bg-white/[0.02] text-white/80 font-semibold hover:bg-white/5 hover:text-white text-sm transition">
-                Explore the stack <ArrowRight className="w-4 h-4" />
+                Explore the portfolio <ArrowRight className="w-4 h-4" />
               </a>
               <Link to="/marketplace" className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-300 hover:text-white transition">
                 Acquire an infrastructure →
@@ -60,10 +60,13 @@ const InfrastructurePage: React.FC = () => {
             </div>
           </div>
 
-          {/* The three architecture sections — full editorial */}
+          {/* Featured infrastructures — public editorial register */}
           <Reveal><SovereignInfrastructureStack /></Reveal>
-          <Reveal><InfrastructureFlow /></Reveal>
-          <Reveal><InfrastructureDependency /></Reveal>
+
+          {/* Portfolio expansion note */}
+          <p className="mt-12 text-center text-[11px] font-mono uppercase tracking-[0.28em] text-white/40 max-w-2xl mx-auto">
+            The portfolio is expanding. New flagships join as Sovereign deploys them.
+          </p>
 
           {/* Closing — institutional briefing path */}
           <div className="mt-24 max-w-3xl mx-auto text-center">

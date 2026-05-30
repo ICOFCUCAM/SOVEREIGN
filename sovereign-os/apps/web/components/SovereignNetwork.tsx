@@ -1,8 +1,8 @@
 import { Reveal } from './Reveal';
 
-// Sovereign Infrastructure Network — Emergency AI's reference to the
-// canonical seven flagships of the Sovereign substrate. Each row uses the
-// official positioning verbatim. No cards — typographic definition list.
+// Featured infrastructures from Sovereign — Emergency AI's editorial
+// reference to flagship systems available through the Sovereign portfolio.
+// Each entry stands on its own as an independent infrastructure.
 
 const STACK: Array<{ name: string; position: string }> = [
   { name: 'Veritas OS',                          position: 'Knowledge & Organizational Intelligence Infrastructure' },
@@ -21,13 +21,13 @@ export function SovereignNetwork() {
         <Reveal>
           <div className="mb-16 grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute">SOVEREIGN INFRASTRUCTURE STACK</div>
+              <div className="text-[11px] uppercase tracking-[0.28em] text-emrg-mute">FEATURED INFRASTRUCTURES</div>
               <h2 className="mt-6 font-serif text-[36px] font-medium tracking-[-0.015em] leading-[1.05] text-emrg-ink sm:text-[44px]">
-                Seven infrastructures. One sovereign substrate.
+                Featured infrastructures from Sovereign.
               </h2>
             </div>
             <p className="text-[15px] leading-[1.75] text-emrg-mute lg:pt-2">
-              Emergency AI is one of seven flagship infrastructures in the Sovereign substrate. Each operates independently and composes into broader sovereign deployments. Every artifact carries the same audit posture, the same sovereign jurisdiction and the same institutional tenancy model.
+              Emergency AI is one flagship in a broader portfolio of institutional-grade infrastructures available through Sovereign. Each is a standalone deployment surface. Deploy individually. Operate together.
             </p>
           </div>
         </Reveal>
@@ -46,7 +46,7 @@ export function SovereignNetwork() {
         </dl>
 
         <p className="mt-12 text-center text-[11px] uppercase tracking-[0.28em] text-emrg-mute">
-          One ecosystem · one audit posture · one sovereign jurisdiction
+          Featured portfolio · expanding · sovereign jurisdiction · continuous audit posture
         </p>
       </div>
     </section>

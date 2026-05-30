@@ -5,18 +5,18 @@ import type { EcosystemProduct } from '@/lib/types';
 import { ArrowRight, ArrowUpRight, FileText, Scale, Banknote, Truck, Cpu, GraduationCap, ShoppingCart, Server } from 'lucide-react';
 import HudCorners from '@/components/HudCorners';
 
-// Featured sovereign infrastructure — National Shell leads the flagship
-// rotation as the dominant centerpiece (Civicos sub-module operating at
-// whole-of-government scope). The canonical seven flagships follow.
+// Featured sovereign infrastructures — independent flagships available
+// for deployment. National Shell leads the rotation as the cinematic
+// centerpiece; ordering here is editorial, not a hierarchy claim.
 const FEATURED_SLUGS = [
-  'civicos-national-shell',    // Flagship · Sovereign Government Runtime
-  'civicos',                   // Operating · Sovereign
-  'emergency-ai-platform',     // Producer · Intelligence
-  'veritas-banking',           // Producer · Financial
-  'elecpro',                   // Producer · Electoral
-  'veritas-os',                // Foundational
-  'veritas-operations',        // Operating · Enterprise
-  'sovereign-dispatch',        // Terminal · Publication
+  'civicos-national-shell',
+  'civicos',
+  'emergency-ai-platform',
+  'veritas-banking',
+  'elecpro',
+  'veritas-os',
+  'veritas-operations',
+  'sovereign-dispatch',
 ];
 
 const deployValueOf = (p: EcosystemProduct): string | null => {

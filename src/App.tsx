@@ -38,6 +38,7 @@ const TermsPage = lazy(() => import("./pages/TermsPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const StatusPage = lazy(() => import("./pages/StatusPage"));
 const InfrastructurePage = lazy(() => import("./pages/InfrastructurePage"));
+const InfrastructureArchitecturePage = lazy(() => import("./pages/InfrastructureArchitecturePage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -104,6 +105,7 @@ const PlatformRoutes = () => (
     <Route path="/legal/privacy" element={<PrivacyPage />} />
     <Route path="/status" element={<StatusPage />} />
     <Route path="/infrastructure" element={<InfrastructurePage />} />
+    <Route path="/infrastructure/architecture" element={<InfrastructureArchitecturePage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
