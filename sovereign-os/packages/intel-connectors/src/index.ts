@@ -1,0 +1,12 @@
+export { parseFeed } from './parse/rss.js';
+export { stripHtml } from './parse/strip-html.js';
+export { hackerNewsConnector } from './connectors/hacker-news.js';
+export { rssConnector, isRssConfig } from './connectors/rss.js';
+export type { RssConfig } from './connectors/rss.js';
+export { gdeltDocConnector, isGdeltConfig } from './connectors/gdelt-doc.js';
+export type { GdeltConfig } from './connectors/gdelt-doc.js';
+export { CONNECTOR_REGISTRY, lookupConnector, listConnectors } from './registry.js';
+export { persist, openIngestRun, closeIngestRun } from './normalizer.js';
+export type { NormalizerContext, PersistOutcome } from './normalizer.js';
+export { runSource, runEnabledSources } from './runner.js';
+export type { RunSourceOptions, RunOutcome } from './runner.js';
