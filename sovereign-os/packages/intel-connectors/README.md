@@ -4,15 +4,45 @@ Sprint 1.2 deliverable for the **Strategic Intelligence Substrate**.
 Three free, no-auth connectors landed, plus a signal normalizer and a
 source runner.
 
-| Connector | Family | Signal class | Cadence | Auth | Config |
+| Connector | Family | Signal class | Sprint | Auth | Config |
 |---|---|---|---|---|---|
-| `hacker-news` | social | `social_post` | every poll | none | `{ }` (uses ctx.limit) |
-| `rss`         | news (or override) | `news_article` (or override) | every poll | none | `{ feed_url, signal_class?, source_family?, language? }` |
-| `gdelt-doc`   | news | `news_article` | every poll | none | `{ query, maxrecords?, timespan?, sort? }` |
+| `hacker-news` | social | `social_post` | 1.2 | none | `{ }` (uses ctx.limit) |
+| `rss`         | news (or override) | `news_article` (or override) | 1.2 | none | `{ feed_url, signal_class?, source_family?, language? }` |
+| `gdelt-doc`   | news | `news_article` | 1.2 | none | `{ query, maxrecords?, timespan?, sort? }` |
+| `newsapi`     | news | `news_article` | 1.4 | `NEWSAPI_KEY` env (or `source.auth_ref` override) | `{ query, sources?, domains?, language?, sortBy?, pageSize?, costPerRequestUsd? }` |
+| `edgar`       | regulatory | `regulatory_filing` | 1.4 | none (UA-identified) | `{ cik, formTypes?, limit?, contactEmail? }` |
+| `fred`        | financial | `financial_disclosure` | 1.4 | `FRED_API_KEY` env | `{ seriesId, observationStart?, observationEnd?, limit? }` |
+| `apify`       | web | `news_article` (or override) | 1.4 | `APIFY_TOKEN` env | `{ actorId, input, signalClass?, mapping?, costPerRunUsd? }` |
 
-The `rss` connector is generic — point it at any RSS or Atom feed
-(government press releases, news outlets, blogs, regulatory wires) and
-it produces normalized signals at no extra engineering cost.
+The `rss` and `apify` connectors are generic — point them at any RSS/Atom
+feed or any Apify actor (LinkedIn scraper, Companies House, press
+wires) and they produce normalized signals via config alone.
+
+## Rate-limit middleware
+
+`rateLimitedFetch({ key, policy, fetchImpl?, clock?, sleep? })` wraps
+fetch with a per-source token bucket honouring `requestsPerMinute`,
+`requestsPerHour`, and `burst`. The runner applies it automatically
+when `intel_sources.rate_limit_policy` is non-empty; multiple
+connectors keyed off the same `source.id` share the bucket. `clock`
+and `sleep` are injectable so tests drive the bucket deterministically.
+
+## Cost telemetry
+
+Connectors that incur per-pull cost (`newsapi`, `apify`) report a
+`costEstimateUsd` field in `ConnectorPullResult.metadata`. The runner
+writes the connector's full metadata into `intel_ingest_runs.metadata`
+so per-tenant / per-source cost rollups become trivial:
+
+```sql
+select
+  s.connector,
+  sum((r.metadata ->> 'costEstimateUsd')::numeric * r.pulled_count) as cost_usd
+from public.intel_ingest_runs r
+join public.intel_sources s on s.id = r.source_id
+where s.tenant_id = :tenant
+group by s.connector;
+```
 
 ## Module surface
 

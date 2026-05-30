@@ -3,6 +3,7 @@ import type { ConnectorContext, ConnectorLogger, SourceRecord } from '@sovereign
 import { consoleLogger } from '@sovereign/intel-core';
 import { lookupConnector } from './registry.js';
 import { closeIngestRun, openIngestRun, persist, type PersistOutcome } from './normalizer.js';
+import { isRateLimitPolicy, rateLimitedFetch } from './rate-limit.js';
 
 export interface RunSourceOptions {
   readonly supabase: SupabaseClient;
@@ -41,14 +42,27 @@ export async function runSource(opts: RunSourceOptions): Promise<RunOutcome> {
 
   const ingestRunId = await openIngestRun(supabase, source.tenantId, source.id, `${connector.name}@${connector.version}`);
 
-  const ctx: ConnectorContext = {
+  // Apply per-source rate-limit policy if one was registered on the
+  // source row. The middleware wraps fetch with a token-bucket scoped
+  // to source.id, so multiple connectors against the same provider
+  // share the bucket.
+  const wrappedFetch = isRateLimitPolicy(source.rateLimitPolicy)
+    ? rateLimitedFetch({ key: source.id, policy: source.rateLimitPolicy, fetchImpl })
+    : fetchImpl;
+
+  const ctxBase: ConnectorContext = {
     sourceId: source.id,
     tenantId: source.tenantId,
     ...(opts.limit !== undefined ? { limit: opts.limit } : {}),
     now: () => new Date(),
-    fetch: fetchImpl,
+    fetch: wrappedFetch,
     logger: log,
   };
+  // Pipe the source's auth_ref to connectors that need it (newsapi,
+  // fred, apify read env keys keyed off auth_ref).
+  const ctx = source.authRef
+    ? Object.assign({}, ctxBase, { authRef: source.authRef })
+    : ctxBase;
 
   const pullFn = connector.pull as (c: ConnectorContext, cfg?: unknown) => Promise<Awaited<ReturnType<typeof connector.pull>>>;
   try {
@@ -57,8 +71,19 @@ export async function runSource(opts: RunSourceOptions): Promise<RunOutcome> {
       { supabase, tenantId: source.tenantId, sourceId: source.id, ...(ingestRunId !== undefined ? { ingestRunId } : {}) },
       result,
     );
+
+    // Cost telemetry: write the connector-reported cost estimate and
+    // any provider metadata into intel_ingest_runs.metadata.
+    const meta = result.metadata && typeof result.metadata === 'object' ? result.metadata : {};
+    const costEstimateUsd = typeof (meta as { costEstimateUsd?: unknown }).costEstimateUsd === 'number'
+      ? (meta as { costEstimateUsd: number }).costEstimateUsd
+      : undefined;
+
     if (ingestRunId) {
-      await closeIngestRun(supabase, ingestRunId, outcome);
+      await closeIngestRun(supabase, ingestRunId, outcome, undefined, {
+        ...meta,
+        ...(costEstimateUsd !== undefined ? { costEstimateUsd } : {}),
+      });
     }
     log.info('runner: complete', {
       connector: connector.name,
@@ -66,6 +91,7 @@ export async function runSource(opts: RunSourceOptions): Promise<RunOutcome> {
       inserted: outcome.inserted,
       duplicates: outcome.duplicates,
       errors: outcome.errors.length,
+      ...(costEstimateUsd !== undefined ? { costEstimateUsd } : {}),
     });
     return {
       sourceId: source.id,

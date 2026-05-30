@@ -136,6 +136,7 @@ export async function closeIngestRun(
   runId: string,
   outcome: PersistOutcome,
   errorText?: string,
+  metadata?: Readonly<Record<string, unknown>>,
 ): Promise<void> {
   await supabase
     .from('intel_ingest_runs')
@@ -145,6 +146,7 @@ export async function closeIngestRun(
       inserted_count:  outcome.inserted,
       duplicate_count: outcome.duplicates,
       ...(errorText !== undefined ? { error: errorText } : {}),
+      ...(metadata !== undefined ? { metadata } : {}),
     })
     .eq('id', runId);
 }
