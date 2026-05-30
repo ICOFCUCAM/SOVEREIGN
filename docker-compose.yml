@@ -112,6 +112,20 @@ services:
       dispatch-migrate:
         condition: service_completed_successfully
 
+  # The Dispatch console (standalone SPA). Built with the API URL baked in and
+  # served by nginx. Separate deployable from the Sovereign website; in this
+  # single-host compose it is reached directly and calls the API on :8787.
+  dispatch-web:
+    build:
+      context: services/dispatch-web
+      dockerfile: Dockerfile
+      args:
+        VITE_DISPATCH_API_URL: ${VITE_DISPATCH_API_URL:-http://localhost:8787}
+    ports:
+      - "5174:80"
+    depends_on:
+      - dispatch-api
+
 volumes:
   dispatch-pgdata:
   dispatch-artifacts:

@@ -14,6 +14,7 @@ import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verify
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
+import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition } from "../../shared/src/governance.mjs";
 
 const ENGINE_VERSION = "dispatch-api@1.0.0";
 const pool = makePool();
@@ -93,7 +94,6 @@ async function handleDocuments(req, res, principal) {
   const claims = { tenant_id: principal.tenantId, dispatch_role: principal.role, principal_type: principal.principalType, actor: principal.actor };
   const doc = body.document;
   const outputs = body.outputs;
-  const lane = principal.principalType === "user" ? "interactive" : "service";
 
   try {
     const result = await withClaims(pool, claims, async (client) => {
@@ -102,12 +102,12 @@ async function handleDocuments(req, res, principal) {
       if (existing.rows[0]) {
         return { replay: true, jobId: existing.rows[0].id, requestId: existing.rows[0].request_id, state: existing.rows[0].state };
       }
-      // Persist document
+      // Persist document (governance lifecycle starts at 'submitted').
       const dres = await client.query(
-        `insert into dispatch.documents (tenant_id, doc_type, title, classification, status, source_system, correlation_id, owner_user_id)
-         values ($1,$2,$3,$4,'rendering',$5,$6,$7) returning id`,
+        `insert into dispatch.documents (tenant_id, doc_type, title, classification, status, lifecycle_state, submitted_at, submitted_by, source_system, correlation_id, owner_user_id)
+         values ($1,$2,$3,$4,'draft','submitted',now(),$5,$6,$7,$8) returning id`,
         [principal.tenantId, doc.docType, doc.metadata?.title || "", JSON.stringify(doc.classification || {}),
-         body.source?.system || "internal", body.source?.correlationId || null, null]
+         principal.actor, body.source?.system || "internal", body.source?.correlationId || null, null]
       );
       const documentId = dres.rows[0].id;
       // Persist immutable version 1
@@ -118,25 +118,259 @@ async function handleDocuments(req, res, principal) {
       );
       const versionId = vres.rows[0].id;
       await client.query("update dispatch.documents set current_version=1 where id=$1", [documentId]);
-      // Create job
-      const jres = await client.query(
-        `insert into dispatch.jobs (tenant_id, document_id, version_id, request_id, idempotency_key, lane, outputs, correlation_id, callback_url, state)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,'queued') returning id`,
-        [principal.tenantId, documentId, versionId, requestId, idem, lane, outputs,
-         body.source?.correlationId || null, body.delivery?.callbackUrl || null]
-      );
-      const jobId = jres.rows[0].id;
       await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
-        action: "document.submitted", targetType: "job", targetId: jobId, requestId, correlationId: body.source?.correlationId });
-      return { replay: false, jobId, requestId, documentId, versionId };
+        action: "document.submitted", targetType: "document", targetId: documentId, requestId, correlationId: body.source?.correlationId });
+
+      // Govern: resolve the approval policy. The machine (service) lane
+      // auto-approves by default so existing integrations render immediately;
+      // the human lane goes to review unless policy says otherwise.
+      const policy = await resolvePolicy(client, { docType: doc.docType, classificationLevel: doc.classification?.level });
+      if (autoApproves(policy, principal.principalType)) {
+        assertTransition("submitted", "approved");
+        await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now() where id=$1", [documentId]);
+        await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
+          action: "document.approved", targetType: "document", targetId: documentId, requestId, correlationId: body.source?.correlationId });
+        const jobId = await createRenderJob(client, { principal, documentId, versionId, requestId, idem, outputs,
+          correlationId: body.source?.correlationId || null, callbackUrl: body.delivery?.callbackUrl || null });
+        return { replay: false, governed: false, jobId, requestId, documentId, versionId, lifecycle: "approved" };
+      }
+      // Awaiting human review: no render job yet (gated on approval).
+      await client.query("update dispatch.documents set lifecycle_state='in_review' where id=$1", [documentId]);
+      return { replay: false, governed: true, requestId, documentId, versionId, lifecycle: "in_review",
+        requiredApprovals: policy.required_approvals };
     });
 
-    return send(res, 202, { requestId: result.requestId, jobId: result.jobId, status: result.replay ? (result.state || "queued") : "queued", statusUrl: `/v1/jobs/${result.jobId}`, replay: !!result.replay });
+    if (result.governed) {
+      return send(res, 202, { requestId: result.requestId, documentId: result.documentId, status: "in_review",
+        lifecycle: result.lifecycle, requiredApprovals: result.requiredApprovals,
+        message: "submitted for review; render is gated on approval", reviewUrl: `/v1/documents/${result.documentId}` });
+    }
+    return send(res, 202, { requestId: result.requestId, jobId: result.jobId, documentId: result.documentId,
+      status: result.replay ? (result.state || "queued") : "queued", statusUrl: `/v1/jobs/${result.jobId}`, replay: !!result.replay });
   } catch (e) {
     if (String(e.message).includes("idempotency")) return send(res, 409, errEnvelope(requestId, 409, "IDEMPOTENCY_CONFLICT", "duplicate idempotency key with different body"));
     console.error("documents error:", e);
     return send(res, 500, errEnvelope(requestId, 500, "ENGINE_ERROR", "internal error"));
   }
+}
+
+// Create a queued render job for an approved document version. Shared by the
+// auto-approve lane (submit) and the human-approval lane (after quorum).
+// `idem` may be a fresh uuid when minted post-approval.
+async function createRenderJob(client, { principal, documentId, versionId, requestId, idem, outputs, correlationId, callbackUrl }) {
+  const lane = principal.principalType === "user" ? "interactive" : "service";
+  await client.query("update dispatch.documents set status='rendering' where id=$1", [documentId]);
+  const jres = await client.query(
+    `insert into dispatch.jobs (tenant_id, document_id, version_id, request_id, idempotency_key, lane, outputs, correlation_id, callback_url, state)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,'queued') returning id`,
+    [principal.tenantId, documentId, versionId, requestId, idem, lane, outputs, correlationId, callbackUrl]
+  );
+  const jobId = jres.rows[0].id;
+  await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+    action: "render.queued", targetType: "job", targetId: jobId, requestId, correlationId });
+  return jobId;
+}
+
+// ---- Governance surface (approvals, publish, library, audit) ---------------
+const govClaims = (p) => ({ tenant_id: p.tenantId, dispatch_role: p.role, principal_type: p.principalType, actor: p.actor });
+
+// POST /v1/documents/{id}/decision  { decision: approve|reject|return, comment? }
+// Records an immutable approval decision, evaluates quorum against policy, and
+// advances lifecycle_state. On quorum-approve it creates the render job.
+async function handleDecision(req, res, principal, documentId) {
+  if (!hasScope(principal, "dispatch:approve"))
+    return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "approve scope required"));
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  const decision = body?.decision;
+  if (!["approve", "reject", "return"].includes(decision))
+    return send(res, 400, errEnvelope(null, 400, "BAD_DECISION", "decision must be approve|reject|return"));
+
+  try {
+    const out = await withClaims(pool, govClaims(principal), async (client) => {
+      const d = await client.query(
+        "select id, doc_type, title, classification, lifecycle_state, current_version, submitted_by, correlation_id from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
+      const docRow = d.rows[0];
+      if (!docRow) return { http: 404, body: errEnvelope(null, 404, "NOT_FOUND", "document not found") };
+
+      // Clearance: an approver must be cleared for the document's classification.
+      const cl = clearanceAllows(principal.clearance, docRow.classification || {});
+      if (!cl.allowed) { inc("clearance_denied_total"); return { http: 403, body: errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", cl.reason) }; }
+
+      if (!["submitted", "in_review"].includes(docRow.lifecycle_state))
+        return { http: 409, body: errEnvelope(null, 409, "NOT_IN_REVIEW", `document is '${docRow.lifecycle_state}', not awaiting review`) };
+
+      // Separation of duties: the submitter cannot decide their own document.
+      if (decision === "approve" && docRow.submitted_by && docRow.submitted_by === principal.actor)
+        return { http: 403, body: errEnvelope(null, 403, "SELF_APPROVAL_FORBIDDEN", "submitter cannot approve their own document") };
+
+      const versionNo = docRow.current_version;
+      // Record the decision (immutable; unique per actor+version).
+      try {
+        await client.query(
+          `insert into dispatch.approvals (tenant_id, document_id, version_no, decision, actor, actor_clearance, comment)
+           values ($1,$2,$3,$4,$5,$6,$7)`,
+          [principal.tenantId, documentId, versionNo, decision, principal.actor, principal.clearance || null, body.comment || null]);
+      } catch (e) {
+        if (String(e.message).includes("duplicate key"))
+          return { http: 409, body: errEnvelope(null, 409, "ALREADY_DECIDED", "this approver already recorded a decision for this version") };
+        throw e;
+      }
+      await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: `approval.${decision}`, targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
+
+      // Re-evaluate quorum over all decisions for this version.
+      const policy = await resolvePolicy(client, { docType: docRow.doc_type, classificationLevel: docRow.classification?.level });
+      const all = await client.query("select decision, actor from dispatch.approvals where document_id=$1 and version_no=$2", [documentId, versionNo]);
+      const q = evaluateQuorum(all.rows, policy, { submitter: docRow.submitted_by });
+
+      if (q.outcome === "rejected") {
+        assertTransition(docRow.lifecycle_state, "rejected");
+        await client.query("update dispatch.documents set lifecycle_state='rejected', decided_at=now() where id=$1", [documentId]);
+        return { http: 200, body: { documentId, decision, lifecycle: "rejected", approvals: q.approvals, required: q.required } };
+      }
+      if (q.outcome === "returned") {
+        // back to draft for re-work (a new version on re-submit)
+        await client.query("update dispatch.documents set lifecycle_state='draft' where id=$1", [documentId]);
+        return { http: 200, body: { documentId, decision, lifecycle: "draft", approvals: q.approvals, required: q.required } };
+      }
+      if (q.outcome === "approved") {
+        assertTransition(docRow.lifecycle_state === "submitted" ? "submitted" : "in_review", "approved");
+        await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now() where id=$1", [documentId]);
+        await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
+          action: "document.approved", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
+        // Create the render job now that quorum is met.
+        const versionId = (await client.query("select id from dispatch.document_versions where document_id=$1 and version_no=$2", [documentId, versionNo])).rows[0]?.id;
+        const jobId = await createRenderJob(client, { principal, documentId, versionId, requestId: crypto.randomUUID(),
+          idem: crypto.randomUUID(), outputs: body.outputs || ["pdf"], correlationId: docRow.correlation_id, callbackUrl: null });
+        return { http: 200, body: { documentId, decision, lifecycle: "approved", approvals: q.approvals, required: q.required, jobId, statusUrl: `/v1/jobs/${jobId}` } };
+      }
+      // still pending more approvals
+      if (docRow.lifecycle_state === "submitted")
+        await client.query("update dispatch.documents set lifecycle_state='in_review' where id=$1", [documentId]);
+      return { http: 200, body: { documentId, decision, lifecycle: "in_review", approvals: q.approvals, required: q.required } };
+    });
+    return send(res, out.http, out.body);
+  } catch (e) {
+    if (e.code === "ILLEGAL_TRANSITION") return send(res, 409, errEnvelope(null, 409, "ILLEGAL_TRANSITION", e.message));
+    console.error("decision error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
+// POST /v1/documents/{id}/publish   release a rendered document to the library
+// POST /v1/documents/{id}/withdraw  pull a published document
+async function handleLifecycleAction(req, res, principal, documentId, action) {
+  if (!hasScope(principal, "dispatch:publish"))
+    return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "publish scope required"));
+  try {
+    const out = await withClaims(pool, govClaims(principal), async (client) => {
+      const d = await client.query("select id, classification, lifecycle_state, status, correlation_id from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
+      const docRow = d.rows[0];
+      if (!docRow) return { http: 404, body: errEnvelope(null, 404, "NOT_FOUND", "document not found") };
+      const cl = clearanceAllows(principal.clearance, docRow.classification || {});
+      if (!cl.allowed) { inc("clearance_denied_total"); return { http: 403, body: errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", cl.reason) }; }
+
+      if (action === "publish") {
+        // A document is publishable once approved AND the render completed.
+        if (docRow.lifecycle_state !== "rendered")
+          return { http: 409, body: errEnvelope(null, 409, "NOT_RENDERED", `document is '${docRow.lifecycle_state}'; must be 'rendered' to publish`) };
+        assertTransition("rendered", "published");
+        const ret = await client.query("select retention_days from dispatch.tenants where id=$1", [principal.tenantId]);
+        const days = ret.rows[0]?.retention_days || 365;
+        await client.query("update dispatch.documents set lifecycle_state='published', published_at=now(), retention_until=now() + ($2 || ' days')::interval where id=$1", [documentId, String(days)]);
+        await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+          action: "document.published", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
+        return { http: 200, body: { documentId, lifecycle: "published" } };
+      }
+      // withdraw
+      if (!["published", "rendered"].includes(docRow.lifecycle_state))
+        return { http: 409, body: errEnvelope(null, 409, "NOT_WITHDRAWABLE", `document is '${docRow.lifecycle_state}'`) };
+      assertTransition(docRow.lifecycle_state, "withdrawn");
+      await client.query("update dispatch.documents set lifecycle_state='withdrawn', withdrawn_at=now() where id=$1", [documentId]);
+      await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: "document.withdrawn", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
+      return { http: 200, body: { documentId, lifecycle: "withdrawn" } };
+    });
+    return send(res, out.http, out.body);
+  } catch (e) {
+    if (e.code === "ILLEGAL_TRANSITION") return send(res, 409, errEnvelope(null, 409, "ILLEGAL_TRANSITION", e.message));
+    console.error("lifecycle error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
+// GET /v1/approvals?state=pending  the approver inbox (documents awaiting review)
+async function handleApprovalsInbox(res, principal, query) {
+  if (!hasScope(principal, "dispatch:approve"))
+    return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "approve scope required"));
+  const rows = await withClaims(pool, govClaims(principal), async (c) => {
+    const r = await c.query(
+      `select id, doc_type, title, classification, lifecycle_state, current_version, submitted_at, submitted_by, correlation_id
+         from dispatch.documents
+        where deleted_at is null and lifecycle_state in ('submitted','in_review')
+        order by submitted_at asc nulls last limit 200`);
+    return r.rows;
+  });
+  // Filter out items the principal isn't cleared to see (no existence leak).
+  const items = rows.filter((r) => clearanceAllows(principal.clearance, r.classification || {}).allowed)
+    .map((r) => ({ documentId: r.id, docType: r.doc_type, title: r.title, classification: r.classification,
+      lifecycle: r.lifecycle_state, version: r.current_version, submittedAt: r.submitted_at, submittedBy: r.submitted_by }));
+  return send(res, 200, { items, count: items.length });
+}
+
+// GET /v1/documents?state=&docType=&q=&limit=  the library / queues
+async function handleListDocuments(res, principal, query) {
+  if (!hasScope(principal, "dispatch:read"))
+    return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+  const state = query.get("state");
+  const docType = query.get("docType");
+  const q = query.get("q");
+  const limit = Math.min(Number(query.get("limit") || 100), 500);
+  const rows = await withClaims(pool, govClaims(principal), async (c) => {
+    const where = ["deleted_at is null"]; const params = []; let i = 1;
+    if (state) { where.push(`lifecycle_state = $${i++}`); params.push(state); }
+    if (docType) { where.push(`doc_type = $${i++}`); params.push(docType); }
+    if (q) { where.push(`title ilike $${i++}`); params.push(`%${q}%`); }
+    params.push(limit);
+    const r = await c.query(
+      `select id, doc_type, title, classification, status, lifecycle_state, current_version,
+              submitted_at, published_at, retention_until, correlation_id, created_at, updated_at
+         from dispatch.documents where ${where.join(" and ")}
+        order by updated_at desc limit $${i}`, params);
+    return r.rows;
+  });
+  const items = rows.filter((r) => clearanceAllows(principal.clearance, r.classification || {}).allowed)
+    .map((r) => ({ documentId: r.id, docType: r.doc_type, title: r.title, classification: r.classification,
+      renderStatus: r.status, lifecycle: r.lifecycle_state, version: r.current_version,
+      submittedAt: r.submitted_at, publishedAt: r.published_at, retentionUntil: r.retention_until,
+      createdAt: r.created_at, updatedAt: r.updated_at }));
+  return send(res, 200, { items, count: items.length });
+}
+
+// GET /v1/audit?target=&action=&limit=  append-only event trail (auditor)
+async function handleAudit(res, principal, query) {
+  if (!hasScope(principal, "dispatch:audit"))
+    return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "audit scope required"));
+  const target = query.get("target");
+  const action = query.get("action");
+  const limit = Math.min(Number(query.get("limit") || 200), 1000);
+  const rows = await withClaims(pool, govClaims(principal), async (c) => {
+    const where = ["tenant_id = $1"]; const params = [principal.tenantId]; let i = 2;
+    if (target) { where.push(`target_id = $${i++}`); params.push(target); }
+    if (action) { where.push(`action = $${i++}`); params.push(action); }
+    params.push(limit);
+    const r = await c.query(
+      `select event_id, actor, actor_type, action, target_type, target_id, classification,
+              request_id, correlation_id, sha256, ts
+         from dispatch.audit_events where ${where.join(" and ")}
+        order by ts desc limit $${i}`, params);
+    return r.rows;
+  });
+  return send(res, 200, { events: rows.map((r) => ({ eventId: r.event_id, actor: r.actor, actorType: r.actor_type,
+    action: r.action, targetType: r.target_type, targetId: r.target_id, classification: r.classification,
+    requestId: r.request_id, correlationId: r.correlation_id, sha256: r.sha256, ts: r.ts })), count: rows.length });
 }
 
 // ---- Retrieve surface (Epic 8) ---------------------------------------------
@@ -270,6 +504,15 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && path === "/v1/version") return send(res, 200, { engineVersion: ENGINE_VERSION, schemaVersion: "1.0" });
     if (req.method === "GET" && path === "/v1/metrics") return send(res, 200, snapshot());
 
+    // Governance GET surface (auth required, tenant-scoped).
+    if (req.method === "GET" && (path === "/v1/approvals" || path === "/v1/documents" || path === "/v1/audit")) {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      if (path === "/v1/approvals") return await handleApprovalsInbox(res, auth.principal, url.searchParams);
+      if (path === "/v1/documents") return await handleListDocuments(res, auth.principal, url.searchParams);
+      if (path === "/v1/audit") return await handleAudit(res, auth.principal, url.searchParams);
+    }
+
     // Dispatch console (Epic 9) — static page; no auth (it authenticates client-side).
     if (req.method === "GET" && (path === "/" || path === "/console")) {
       const html = consoleHtml();
@@ -316,6 +559,15 @@ const server = http.createServer(async (req, res) => {
 
     if (path === "/v1/validate") return await handleValidate(req, res, principal);
     if (path === "/v1/documents") return await handleDocuments(req, res, principal);
+
+    // Governance actions on a document: decision (approve/reject/return),
+    // publish, withdraw.
+    const govMatch = /^\/v1\/documents\/([A-Za-z0-9-]+)\/(decision|publish|withdraw)$/.exec(path);
+    if (govMatch) {
+      const [, id, action] = govMatch;
+      if (action === "decision") return await handleDecision(req, res, principal, id);
+      return await handleLifecycleAction(req, res, principal, id, action);
+    }
 
     // Mint a single-artifact download grant (Epic-10 hardening): the artifact must
     // belong to the principal's tenant (RLS-checked) and the principal needs read.

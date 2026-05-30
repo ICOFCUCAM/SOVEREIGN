@@ -80,9 +80,10 @@ async function main() {
   const sub = await api("/v1/documents", { token: tokA, idem, body: req });
   ok(sub.status === 202 && sub.json.jobId, `submit -> 202 jobId=${sub.json?.jobId?.slice(0,8)} status=${sub.json?.status}`);
   const jobId = sub.json.jobId;
+  const documentId = sub.json.documentId;
 
-  // 4. document.submitted audit present
-  ok((await countAudit(TENANT_A, "document.submitted", jobId)) === 1, "audit: document.submitted written");
+  // 4. document.submitted audit present (governance: keyed to the document, not the job)
+  ok((await countAudit(TENANT_A, "document.submitted", documentId)) === 1, "audit: document.submitted written");
 
   // 5. idempotency replay (same key+body) -> same jobId
   const sub2 = await api("/v1/documents", { token: tokA, idem, body: req });

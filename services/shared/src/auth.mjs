@@ -200,12 +200,30 @@ export function verifyDownloadGrant(token, artifactId) {
   return { tenantId: claims.tenant_id };
 }
 
+// Scope vocabulary:
+//   dispatch:validate  dry-run validation
+//   dispatch:render    submit a document / create a render job
+//   dispatch:read      retrieve jobs/documents/artifacts
+//   dispatch:approve   act on the approval queue (approve/reject/return)
+//   dispatch:publish   release approved+rendered docs / withdraw
+//   dispatch:audit     read the audit trail (auditor)
+//   dispatch:admin     manage clients, users, roles, clearance, policy, retention
+const READ = "dispatch:read", VALIDATE = "dispatch:validate", RENDER = "dispatch:render";
+const APPROVE = "dispatch:approve", PUBLISH = "dispatch:publish", AUDIT = "dispatch:audit", ADMIN = "dispatch:admin";
+
 export function roleScopes(role) {
   switch (role) {
-    case "viewer": return ["dispatch:read"];
-    case "author":
-    case "tenant_admin": return ["dispatch:validate", "dispatch:render", "dispatch:read"];
-    case "service": return ["dispatch:validate", "dispatch:render", "dispatch:read"];
+    case "viewer": return [READ];
+    case "author": return [VALIDATE, RENDER, READ];
+    case "reviewer": return [VALIDATE, RENDER, READ, APPROVE];
+    case "approver": return [VALIDATE, RENDER, READ, APPROVE];
+    case "publisher": return [VALIDATE, RENDER, READ, APPROVE, PUBLISH];
+    case "auditor": return [READ, AUDIT];
+    case "template_admin": return [VALIDATE, RENDER, READ];
+    case "tenant_admin": return [VALIDATE, RENDER, READ, APPROVE, PUBLISH, AUDIT, ADMIN];
+    // Machine principals keep the Sprint-1/2 surface; governance scopes are
+    // granted explicitly per service_client via the scopes[] column when needed.
+    case "service": return [VALIDATE, RENDER, READ];
     default: return [];
   }
 }

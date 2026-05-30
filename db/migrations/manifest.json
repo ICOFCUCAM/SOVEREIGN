@@ -6,6 +6,8 @@
     "M4__jobs_artifacts_audit.sql",
     "M2__rls_policies.sql",
     "M5__roles_grants.sql",
-    "M6__clearance.sql"
+    "M6__clearance.sql",
+    "M7__governance.sql",
+    "M8__governance_job_insert.sql"
   ]
 }

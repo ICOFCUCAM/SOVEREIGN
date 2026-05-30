@@ -76,7 +76,15 @@ async function finish(job, state, { artifacts = [], warnings = [], error = null,
     await client.query("update dispatch.jobs set state=$2, progress=$3, result=$4, error=$5, locked_at=null, updated_at=now() where id=$1",
       [job.id, state, state === "succeeded" ? 100 : job.progress, JSON.stringify(result), error ? JSON.stringify(error) : null]);
     const docStatus = state === "succeeded" || state === "partial" ? "complete" : state === "failed" ? "failed" : "rendering";
-    if (job.document_id) await client.query("update dispatch.documents set status=$2 where id=$1", [job.document_id, docStatus]);
+    if (job.document_id) {
+      await client.query("update dispatch.documents set status=$2 where id=$1", [job.document_id, docStatus]);
+      // Advance the governance lifecycle: an approved document whose render
+      // completed becomes 'rendered' (publishable). Only move forward from
+      // 'approved' so re-renders / manual states are not clobbered. A hard
+      // render failure leaves lifecycle at 'approved' for re-render.
+      if ((state === "succeeded" || state === "partial"))
+        await client.query("update dispatch.documents set lifecycle_state='rendered' where id=$1 and lifecycle_state='approved'", [job.document_id]);
+    }
     await writeAudit(client, { tenantId: job.tenant_id, actor: WORKER_ID, actorType: "service",
       action: `render.${state}`, targetType: "job", targetId: job.id, requestId: job.request_id, correlationId: job.correlation_id });
   });
