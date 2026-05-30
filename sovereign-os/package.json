@@ -13,8 +13,8 @@
     "layers/layer-1-media/worker"
   ],
   "scripts": {
-    "build": "tsc -b packages/core && npm --workspace @sovereign/api-platform run build && npm --workspace @sovereign/distribution run build && npm --workspace @sovereign/intelligence run build",
-    "typecheck": "tsc -b packages/core --noEmit",
+    "build": "tsc -b packages/core packages/intel-knowledge-contract && npm --workspace @sovereign/api-platform run build && npm --workspace @sovereign/distribution run build && npm --workspace @sovereign/intelligence run build",
+    "typecheck": "tsc -b packages/core packages/intel-knowledge-contract --noEmit",
     "test": "npm run build && node --test packages/*/test/*.test.js layers/*/test/*.test.js",
     "dashboard:dev": "npm --workspace @sovereign/command-center run dev",
     "dashboard:build": "npm --workspace @sovereign/command-center run build",
