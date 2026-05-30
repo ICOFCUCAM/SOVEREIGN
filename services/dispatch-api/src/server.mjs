@@ -13,6 +13,7 @@ import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
 import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verifyDownloadGrant } from "../../shared/src/auth.mjs";
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
+import { clearanceAllows } from "../../shared/src/clearance.mjs";
 
 const ENGINE_VERSION = "dispatch-api@1.0.0";
 const pool = makePool();
@@ -146,10 +147,19 @@ const claimsFor = (p) => ({ tenant_id: p.tenantId, dispatch_role: p.role, princi
 async function handleGetJob(res, principal, jobId) {
   if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
   const row = await withClaims(pool, claimsFor(principal), async (c) => {
-    const r = await c.query("select id, request_id, state, progress, result, error, created_at, updated_at from dispatch.jobs where id=$1", [jobId]);
+    // Join the document classification so the job (which carries artifact refs in
+    // its result) is gated by the same clearance rule as the artifacts.
+    const r = await c.query(
+      `select j.id, j.request_id, j.state, j.progress, j.result, j.error, j.created_at, j.updated_at,
+              d.classification as doc_classification
+         from dispatch.jobs j
+         left join dispatch.documents d on d.id = j.document_id
+        where j.id = $1`, [jobId]);
     return r.rows[0] || null;
   });
   if (!row) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "job not found"));
+  const jcl = clearanceAllows(principal.clearance, row.doc_classification || {});
+  if (!jcl.allowed) { inc("clearance_denied_total"); return send(res, 403, errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", jcl.reason)); }
   return send(res, 200, {
     jobId: row.id, requestId: row.request_id, status: row.state, progress: row.progress,
     result: row.result || null, error: row.error || null,
@@ -160,7 +170,7 @@ async function handleGetJob(res, principal, jobId) {
 async function handleGetDocument(res, principal, documentId) {
   if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
   const data = await withClaims(pool, claimsFor(principal), async (c) => {
-    const d = await c.query("select id, doc_type, title, status, current_version, correlation_id, created_at, updated_at from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
+    const d = await c.query("select id, doc_type, title, classification, status, current_version, correlation_id, created_at, updated_at from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
     if (!d.rows[0]) return null;
     const vs = await c.query("select version_no, ddm_version, template_id, template_version, engine_version, created_at from dispatch.document_versions where document_id=$1 order by version_no", [documentId]);
     const latest = await c.query("select result from dispatch.jobs where document_id=$1 and result is not null order by updated_at desc limit 1", [documentId]);
@@ -168,6 +178,8 @@ async function handleGetDocument(res, principal, documentId) {
   });
   if (!data) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "document not found"));
   const { doc, versions, latestResult } = data;
+  const dcl = clearanceAllows(principal.clearance, doc.classification || {});
+  if (!dcl.allowed) { inc("clearance_denied_total"); return send(res, 403, errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", dcl.reason)); }
   return send(res, 200, {
     id: doc.id, docType: doc.doc_type, title: doc.title, status: doc.status,
     currentVersion: doc.current_version, correlationId: doc.correlation_id,
@@ -193,12 +205,24 @@ async function handleGetArtifact(req, res, principal, artifactId, query) {
     claims = { tenant_id: g.tenantId, dispatch_role: "service", principal_type: "service", actor: "download-grant" };
   }
   const row = await withClaims(pool, claims, async (c) => {
-    const r = await c.query("select id, format, storage_ref, sha256, size_bytes, pages, classification, expires_at from dispatch.artifacts where id=$1", [artifactId]);
+    // Pull the document's full classification ({scheme,level}) for clearance gating.
+    const r = await c.query(
+      `select a.id, a.format, a.storage_ref, a.sha256, a.size_bytes, a.pages, a.classification, a.expires_at,
+              d.classification as doc_classification
+         from dispatch.artifacts a
+         join dispatch.document_versions v on v.id = a.version_id
+         join dispatch.documents d on d.id = v.document_id
+        where a.id = $1`, [artifactId]);
     return r.rows[0] || null;
   });
   if (!row) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "artifact not found"));
   if (row.expires_at && new Date(row.expires_at) < new Date())
     return send(res, 410, errEnvelope(null, 410, "ARTIFACT_EXPIRED", "artifact past expiry"));
+  // Clearance gate (principal path only — a grant was already cleared at mint).
+  if (principal) {
+    const cl = clearanceAllows(principal.clearance, row.doc_classification || {});
+    if (!cl.allowed) { inc("clearance_denied_total"); return send(res, 403, errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", cl.reason)); }
+  }
 
   // ?disposition=metadata → ArtifactRef JSON (no bytes)
   if (query.get("disposition") === "metadata") {
@@ -299,10 +323,19 @@ const server = http.createServer(async (req, res) => {
     if (grantMatch) {
       const id = grantMatch[1];
       if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
-      const exists = await withClaims(pool, claimsFor(principal), async (c) => {
-        const r = await c.query("select id from dispatch.artifacts where id=$1", [id]); return !!r.rows[0];
+      const arow = await withClaims(pool, claimsFor(principal), async (c) => {
+        const r = await c.query(
+          `select a.id, d.classification as doc_classification
+             from dispatch.artifacts a
+             join dispatch.document_versions v on v.id = a.version_id
+             join dispatch.documents d on d.id = v.document_id
+            where a.id = $1`, [id]);
+        return r.rows[0] || null;
       });
-      if (!exists) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "artifact not found"));
+      if (!arow) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "artifact not found"));
+      // Enforce clearance at mint time so a grant can't bypass the gate.
+      const gcl = clearanceAllows(principal.clearance, arow.doc_classification || {});
+      if (!gcl.allowed) { inc("clearance_denied_total"); return send(res, 403, errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", gcl.reason)); }
       const g = mintDownloadGrant(principal, id);
       if (g.error) return send(res, g.error.status, errEnvelope(null, g.error.status, g.error.code, g.error.message));
       return send(res, 200, { downloadUrl: `/v1/artifacts/${id}?grant=${encodeURIComponent(g.token)}`, expiresIn: g.expiresIn });

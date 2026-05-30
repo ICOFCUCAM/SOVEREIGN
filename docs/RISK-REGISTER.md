@@ -51,7 +51,11 @@ locally, not pushed.
 | R-A9-3 | Container images unbuilt here | Low | No Docker daemon in this environment; Dockerfiles/compose validated by config only. First real build happens in CI / on a Docker host before deploy. |
 
 ## Accepted (Phase 1 scope)
-PPTX/packaging (Phase 3); classification/clearance/legal-hold enforcement inert
-(Phase 4); Veritas integration (Phase 3); Sovereign OIDC (post-P1); single-region
-residency (Phase 4); reviewer/approver sign-off inert (Phase 4); Dispatch Engine
+PPTX/packaging (Phase 3); **clearance enforcement now built (opt-in
+`DISPATCH_ENFORCE_CLEARANCE=1`, `clearance.mjs`): reads gated by
+principal.clearance ≥ doc classification level within scheme — verified 11/11**;
+classification banners render (descriptive); caveats/portion-marking + legal-hold
+still inert (Phase 4); Veritas integration (Phase 3); Sovereign OIDC (post-P1);
+single-region residency (Phase 4); reviewer/approver sign-off inert (Phase 4);
+Dispatch Engine
 + renderers (Sprint 2).

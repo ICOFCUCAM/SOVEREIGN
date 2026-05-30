@@ -5,6 +5,7 @@
     "M3__documents.sql",
     "M4__jobs_artifacts_audit.sql",
     "M2__rls_policies.sql",
-    "M5__roles_grants.sql"
+    "M5__roles_grants.sql",
+    "M6__clearance.sql"
   ]
 }

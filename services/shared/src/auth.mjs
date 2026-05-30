@@ -111,7 +111,7 @@ export async function resolvePrincipal(pool, authHeader, withClaimsAdmin) {
     if (!verifySecret(secret, row.secret_hash).ok) {
       return { error: { status: 401, code: "INVALID_CLIENT", message: "bad secret" } };
     }
-    return { principal: { tenantId: row.tenant_id, principalType: "service", role: "service", scopes: row.scopes, actor: `svc:${clientId}` } };
+    return { principal: { tenantId: row.tenant_id, principalType: "service", role: "service", scopes: row.scopes, clearance: row.clearance || "none", actor: `svc:${clientId}` } };
   }
 
   return { error: { status: 401, code: "UNAUTHENTICATED", message: "unknown token kind" } };
@@ -142,10 +142,10 @@ function resolveJwt(token) {
     return { error: { status: 401, code: "UNAUTHENTICATED", message: "token has no valid tenant_id" } };
   }
   if (isService) {
-    return { principal: { tenantId, principalType: "service", role: "service", scopes: claims.scopes ?? [], actor: `svc:${claims.client_id || claims.sub || "service"}` } };
+    return { principal: { tenantId, principalType: "service", role: "service", scopes: claims.scopes ?? [], clearance: claims.clearance || "none", actor: `svc:${claims.client_id || claims.sub || "service"}` } };
   }
   const role = claims.dispatch_role || claims.role || "viewer";
-  return { principal: { tenantId, principalType: "user", role, scopes: claims.scopes ?? roleScopes(role), actor: `user:${role}` } };
+  return { principal: { tenantId, principalType: "user", role, scopes: claims.scopes ?? roleScopes(role), clearance: claims.clearance || "none", actor: `user:${role}` } };
 }
 
 /**
@@ -158,7 +158,7 @@ export function mintServiceToken(principal) {
   const ttl = Number(process.env.DISPATCH_TOKEN_TTL_SEC || 900);
   const clientId = (principal.actor || "").replace(/^svc:/, "") || principal.clientId;
   const token = signJwt(
-    { principal_type: "service", sub: clientId, client_id: clientId, tenant_id: principal.tenantId, scopes: principal.scopes ?? [] },
+    { principal_type: "service", sub: clientId, client_id: clientId, tenant_id: principal.tenantId, scopes: principal.scopes ?? [], clearance: principal.clearance || "none" },
     secret,
     { expiresIn: ttl, issuer: process.env.DISPATCH_TOKEN_ISSUER || "sovereign-dispatch" },
   );
