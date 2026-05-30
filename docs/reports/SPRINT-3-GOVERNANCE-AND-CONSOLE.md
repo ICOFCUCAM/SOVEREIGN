@@ -163,10 +163,30 @@ Two of the Sprint 3 gaps are now closed.
 **Tests:** new `admin-retention.test.mjs` — 18/18 (admin CRUD + gating, archive,
 purge, idempotency, provenance retained).
 
-## 5. Honest gaps / next
+## 6. Human SSO (close-out)
 
-- **Human SSO** (Supabase user JWT) plugs into `auth.tsx`/`auth.mjs`; today the
-  console signs in via service client credentials.
+The console now signs in two ways; in both, **the API is the authority** on
+role/scopes/clearance.
+
+- **Backend (`auth.mjs` + `M10`):** a Supabase user JWT is verified
+  (`SUPABASE_JWT_SECRET`), but ROLE and CLEARANCE are resolved from the
+  `memberships` row via a SECURITY DEFINER `lookup_membership(tenant, sub)` —
+  the token can NOT self-assert a role/clearance/scope. No membership → 403
+  `NO_MEMBERSHIP`; disabled → 403 `MEMBERSHIP_DISABLED`. `actor` is now
+  `user:<uuid>`.
+- **`GET /v1/whoami`** resolves the caller's identity for either token kind.
+- **Console:** sign-in has a "Single sign-on" / "Service client" toggle; SSO
+  takes an identity-provider JWT and builds the session from `/v1/whoami` (never
+  from the token's own claims). Token held in memory only.
+
+**Tests:** `sso.test.mjs` — 9/9 (membership-authoritative role/clearance,
+self-escalation ignored, no-membership / wrong-tenant / disabled → 403, tampered
+token → 401, scope works end-to-end). Verified in-browser end to end.
+
+## 7. Honest gaps / next
+
+- SSO accepts a pasted/redirect-back identity JWT; a full OAuth redirect/PKCE
+  flow with the IdP is the production follow-up (the session plumbing is ready).
 - Docker image builds for `dispatch-web` validated by local `npm run build`; the
   nginx image build itself is unexercised here.
 - Retention runs on a fixed interval; no per-tenant schedule override yet.

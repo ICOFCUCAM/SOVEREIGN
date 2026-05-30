@@ -651,6 +651,17 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && path === "/v1/version") return send(res, 200, { engineVersion: ENGINE_VERSION, schemaVersion: "1.0" });
     if (req.method === "GET" && path === "/v1/metrics") return send(res, 200, snapshot());
 
+    // whoami — resolve the caller's identity/role/scopes/clearance from the
+    // bearer token (service JWT or Supabase user JWT). Used by the console to
+    // render the role-filtered UI after SSO.
+    if (req.method === "GET" && path === "/v1/whoami") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      const p = auth.principal;
+      return send(res, 200, { tenantId: p.tenantId, principalType: p.principalType, role: p.role,
+        scopes: p.scopes, clearance: p.clearance || "none", actor: p.actor });
+    }
+
     // Governance GET surface (auth required, tenant-scoped).
     if (req.method === "GET" && (path === "/v1/approvals" || path === "/v1/documents" || path === "/v1/audit")) {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);

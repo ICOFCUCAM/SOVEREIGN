@@ -36,6 +36,10 @@ export interface TokenResponse { access_token: string; token: string; tokenType:
 export const exchangeToken = (client_id: string, secret: string) =>
   request<TokenResponse>("POST", "/v1/token", { body: { client_id, secret } });
 
+// ---- whoami (resolve identity for either token kind) ----
+export interface WhoAmI { tenantId: string; principalType: "user" | "service"; role: string; scopes: string[]; clearance: string; actor: string }
+export const whoami = (token?: string) => request<WhoAmI>("GET", "/v1/whoami", token ? { token } : {});
+
 // ---- documents / lifecycle ----
 export type Lifecycle = "draft" | "submitted" | "in_review" | "approved" | "rejected" | "rendered" | "published" | "withdrawn" | "archived";
 export interface DocListItem {
