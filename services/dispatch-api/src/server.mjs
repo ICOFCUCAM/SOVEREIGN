@@ -15,6 +15,7 @@ import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/stora
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
 import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition } from "../../shared/src/governance.mjs";
+import { oauthConfig, exchangeCode } from "../../shared/src/oauth.mjs";
 
 const ENGINE_VERSION = "dispatch-api@1.0.0";
 const pool = makePool();
@@ -650,6 +651,33 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && path === "/v1/health") return send(res, 200, { ok: true, engineVersion: ENGINE_VERSION });
     if (req.method === "GET" && path === "/v1/version") return send(res, 200, { engineVersion: ENGINE_VERSION, schemaVersion: "1.0" });
     if (req.method === "GET" && path === "/v1/metrics") return send(res, 200, snapshot());
+
+    // OAuth config (public): the SPA reads the IdP authorize URL + client_id to
+    // start a PKCE redirect. No secrets here. { enabled:false } hides the button.
+    if (req.method === "GET" && path === "/v1/auth/config") {
+      const cfg = oauthConfig();
+      return send(res, 200, cfg.enabled
+        ? { enabled: true, authorizeUrl: cfg.authorizeUrl, clientId: cfg.clientId, scopes: cfg.scopes, redirectUri: cfg.redirectUri }
+        : { enabled: false });
+    }
+
+    // OAuth callback (public): exchange the authorization code (+ PKCE verifier)
+    // for the IdP access token, server-side. The returned token is then used as
+    // a normal Bearer — role/clearance still resolved from the membership row.
+    if (req.method === "POST" && path === "/v1/auth/callback") {
+      let cb;
+      try { cb = JSON.parse(await readBody(req)); }
+      catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+      const ex = await exchangeCode({ code: cb.code, codeVerifier: cb.codeVerifier || cb.code_verifier, redirectUri: cb.redirectUri || cb.redirect_uri });
+      if (ex.error) return send(res, ex.error.status, errEnvelope(null, ex.error.status, ex.error.code, ex.error.message));
+      // Resolve identity now so the SPA gets the principal in one round-trip and
+      // a non-member is rejected here rather than after redirect.
+      const who = await resolvePrincipal(pool, `Bearer ${ex.accessToken}`, withAdmin);
+      if (who.error) return send(res, who.error.status, errEnvelope(null, who.error.status, who.error.code, who.error.message));
+      const p = who.principal;
+      return send(res, 200, { accessToken: ex.accessToken, tokenType: ex.tokenType, expiresIn: ex.expiresIn,
+        principal: { tenantId: p.tenantId, principalType: p.principalType, role: p.role, scopes: p.scopes, clearance: p.clearance || "none", actor: p.actor } });
+    }
 
     // whoami — resolve the caller's identity/role/scopes/clearance from the
     // bearer token (service JWT or Supabase user JWT). Used by the console to

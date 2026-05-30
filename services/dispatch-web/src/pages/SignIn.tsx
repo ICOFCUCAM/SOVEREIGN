@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../lib/auth";
 import { Button, Field, inputCls } from "../lib/ui";
+import { fetchAuthConfig, beginLogin, type AuthConfig } from "../lib/oauth";
 
 // Two ways in:
 //   - Service client credentials (machine / operator integrations).
@@ -13,6 +14,17 @@ const SignIn: React.FC = () => {
   const [clientId, setClientId] = useState("");
   const [secret, setSecret] = useState("");
   const [jwt, setJwt] = useState("");
+  const [oauth, setOauth] = useState<AuthConfig>({ enabled: false });
+  const [redirecting, setRedirecting] = useState(false);
+  const [oauthErr, setOauthErr] = useState<string | null>(null);
+
+  useEffect(() => { fetchAuthConfig().then(setOauth).catch(() => setOauth({ enabled: false })); }, []);
+
+  const startOauth = async () => {
+    setOauthErr(null); setRedirecting(true);
+    try { await beginLogin(oauth); }
+    catch (e) { setOauthErr(e instanceof Error ? e.message : "could not start sign-in"); setRedirecting(false); }
+  };
 
   return (
     <div className="flex min-h-full items-center justify-center px-4">
@@ -47,16 +59,28 @@ const SignIn: React.FC = () => {
             </Button>
           </form>
         ) : (
-          <form onSubmit={(e) => { e.preventDefault(); signInSso(jwt).catch(() => {}); }}
-            className="space-y-4 rounded-lg border border-white/10 bg-ink-800/60 p-6">
-            <Field label="Identity token (JWT)" hint="From your organisation's identity provider. Role and clearance are resolved from your Dispatch membership.">
-              <textarea className={`${inputCls} h-28 font-mono text-xs`} value={jwt} onChange={(e) => setJwt(e.target.value)} placeholder="eyJhbGciOi…" autoFocus />
-            </Field>
-            {error && <div className="rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</div>}
-            <Button type="submit" disabled={loading || !jwt.trim()} className="w-full">
-              {loading ? "Verifying…" : "Continue"}
-            </Button>
-          </form>
+          <div className="space-y-4 rounded-lg border border-white/10 bg-ink-800/60 p-6">
+            {oauth.enabled && (
+              <>
+                <Button onClick={startOauth} disabled={redirecting} className="w-full">
+                  {redirecting ? "Redirecting…" : "Sign in with your organisation"}
+                </Button>
+                {oauthErr && <div className="rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{oauthErr}</div>}
+                <div className="flex items-center gap-3 text-[11px] uppercase tracking-wide text-white/30">
+                  <span className="h-px flex-1 bg-white/10" />or paste a token<span className="h-px flex-1 bg-white/10" />
+                </div>
+              </>
+            )}
+            <form onSubmit={(e) => { e.preventDefault(); signInSso(jwt).catch(() => {}); }} className="space-y-4">
+              <Field label="Identity token (JWT)" hint="From your organisation's identity provider. Role and clearance are resolved from your Dispatch membership.">
+                <textarea className={`${inputCls} h-28 font-mono text-xs`} value={jwt} onChange={(e) => setJwt(e.target.value)} placeholder="eyJhbGciOi…" />
+              </Field>
+              {error && <div className="rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</div>}
+              <Button type="submit" disabled={loading || !jwt.trim()} className="w-full">
+                {loading ? "Verifying…" : "Continue"}
+              </Button>
+            </form>
+          </div>
         )}
         <p className="mt-4 text-center text-[11px] text-white/30">Sessions are held in memory and expire automatically.</p>
       </div>

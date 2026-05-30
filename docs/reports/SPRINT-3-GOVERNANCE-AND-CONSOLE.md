@@ -183,10 +183,34 @@ role/scopes/clearance.
 self-escalation ignored, no-membership / wrong-tenant / disabled → 403, tampered
 token → 401, scope works end-to-end). Verified in-browser end to end.
 
-## 7. Honest gaps / next
+## 7. OAuth Authorization Code + PKCE (close-out)
 
-- SSO accepts a pasted/redirect-back identity JWT; a full OAuth redirect/PKCE
-  flow with the IdP is the production follow-up (the session plumbing is ready).
+Full redirect SSO, on top of the membership-authoritative auth from §6.
+
+- **Backend (`oauth.mjs` + server):** `GET /v1/auth/config` (public — IdP
+  authorize URL + client_id + scopes; never a secret) and `POST /v1/auth/callback`
+  (mediates the code→token exchange server-side, so an optional confidential
+  `client_secret` stays off the browser and IdP CORS is avoided). The exchanged
+  token is then run through the same membership-authoritative resolver, so a
+  non-member is rejected at callback (`403 NO_MEMBERSHIP`).
+- **Console (`oauth.ts`, `Callback.tsx`, `SignIn.tsx`):** standard public-client
+  PKCE — generate verifier + S256 challenge, persist verifier + CSRF `state` in
+  sessionStorage, redirect to the IdP; `/console/callback` verifies `state`,
+  exchanges via the API, and establishes the in-memory session. "Sign in with
+  your organisation" appears only when the API reports OAuth configured; the
+  paste-a-token path remains as a fallback.
+- **Config:** operator-set `OAUTH_*` env (see `.env.example` + docker-compose).
+  IdP endpoints are operator-configured (not user-supplied) → no SSRF surface.
+
+**Tests:** `oauth.test.mjs` 14/14 (config gating, PKCE shape, exchange success +
+all error paths, confidential-secret handling) and `oauth-callback.test.mjs` 6/6
+(live API + stub IdP: config, callback → membership-authoritative principal,
+rejected code → 401, non-member → 403). Full redirect flow verified in-browser
+(authorize → 302 → callback → exchange → dashboard as the seeded tenant_admin).
+
+## 8. Honest gaps / next
+
+- Refresh-token rotation is not wired; sessions expire and re-auth via redirect.
 - Docker image builds for `dispatch-web` validated by local `npm run build`; the
   nginx image build itself is unexercised here.
 - Retention runs on a fixed interval; no per-tenant schedule override yet.

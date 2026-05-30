@@ -62,6 +62,13 @@ services:
       DISPATCH_TOKEN_SECRET: ${DISPATCH_TOKEN_SECRET:-dev-dispatch-token-secret-change-me}
       DISPATCH_TOKEN_ISSUER: sovereign-dispatch
       SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:-}
+      # Human SSO (OAuth Authorization Code + PKCE). Unset → console hides SSO.
+      OAUTH_AUTHORIZE_URL: ${OAUTH_AUTHORIZE_URL:-}
+      OAUTH_TOKEN_URL: ${OAUTH_TOKEN_URL:-}
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID:-}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET:-}
+      OAUTH_REDIRECT_URI: ${OAUTH_REDIRECT_URI:-}
+      OAUTH_SCOPES: ${OAUTH_SCOPES:-openid email profile}
       # Storage — MUST match the worker (same backend + creds) so the API can
       # read what the worker wrote. fs backend shares the dispatch-artifacts volume.
       DISPATCH_STORAGE_BACKEND: ${DISPATCH_STORAGE_BACKEND:-fs}

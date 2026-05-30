@@ -14,6 +14,7 @@ interface AuthCtx {
   session: Session | null;
   signIn: (clientId: string, secret: string) => Promise<void>;
   signInSso: (userJwt: string) => Promise<void>;
+  signInWithToken: (token: string, expiresInSec?: number | null) => Promise<void>;
   signOut: () => void;
   has: (scope: string) => boolean;
   loading: boolean;
@@ -66,6 +67,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally { setLoading(false); }
   }, [establish]);
 
+  // Establish a session from a token already obtained out-of-band (OAuth code
+  // exchange). expiresIn falls back to the token's own exp.
+  const signInWithToken = useCallback(async (token: string, expiresInSec?: number | null) => {
+    setLoading(true); setError(null);
+    try {
+      await establish(token, expiresInSec ? Date.now() + expiresInSec * 1000 : tokenExp(token));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "sign-in failed");
+      throw e;
+    } finally { setLoading(false); }
+  }, [establish]);
+
   const signOut = useCallback(() => setSession(null), []);
 
   // Auto sign-out a moment before expiry so the UI doesn't 401 mid-action.
@@ -78,8 +91,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const has = useCallback((scope: string) => !!session?.scopes.includes(scope), [session]);
 
-  const value = useMemo<AuthCtx>(() => ({ session, signIn, signInSso, signOut, has, loading, error }),
-    [session, signIn, signInSso, signOut, has, loading, error]);
+  const value = useMemo<AuthCtx>(() => ({ session, signIn, signInSso, signInWithToken, signOut, has, loading, error }),
+    [session, signIn, signInSso, signInWithToken, signOut, has, loading, error]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 
