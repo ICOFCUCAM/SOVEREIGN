@@ -35,14 +35,14 @@ const PLATFORM_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
     ],
   },
   {
-    title: 'Systems',
+    title: 'Example infrastructures',
     links: [
       { label: 'CIVICOS', to: '/systems/civicos' },
       { label: 'VeritasOS', to: '/systems/veritas-os' },
       { label: 'Veritas Financial', to: '/systems/veritas-banking' },
       { label: 'ELECPRO', to: '/systems/elecpro' },
       { label: 'FlyttGo', to: '/systems/flyttgo' },
-      { label: 'Mobile Pay', to: '/systems/mobile-pay' },
+      { label: 'Browse all →', to: '/marketplace' },
     ],
   },
   {
@@ -183,7 +183,7 @@ const PlatformFooter: React.FC = () => {
             <p className="text-white/50 text-sm leading-relaxed max-w-md mb-6">
               {IS_REGISTRAR
                 ? 'Sovereign domain infrastructure — registration, authoritative DNS, SSL and deployment routing for civilization-grade systems.'
-                : 'The operating layer for digital civilization — sovereign domain intelligence, AI-native deployment infrastructure, and deployable institutions, engineered for the next century.'}
+                : 'An institutional infrastructure company — Sovereign builds and delivers the infrastructure governments, enterprises and institutions deploy and operate. Our flagship systems are examples of what you can launch, not the limit of it.'}
             </p>
             <form onSubmit={submit} className="flex gap-2 max-w-sm">
               <div className="relative flex-1">

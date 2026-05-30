@@ -17,13 +17,13 @@ const ClosingCTA: React.FC = () => (
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Sovereign infrastructure · operational
       </div>
       <h2 className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-cinematic leading-[0.96] text-balance mb-10">
-        <span className="block text-white">Deploy the operating layer for</span>
-        <span className="block text-gradient-cyan">sovereign civilization.</span>
+        <span className="block text-white">Build your institution on</span>
+        <span className="block text-gradient-cyan">sovereign infrastructure.</span>
       </h2>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <Link to="/ecosystem" className="group inline-flex items-center justify-center gap-2 px-9 py-4 rounded-xl text-white font-semibold text-lg ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
+        <Link to="/marketplace" className="group inline-flex items-center justify-center gap-2 px-9 py-4 rounded-xl text-white font-semibold text-lg ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
           style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 18px 56px -16px rgba(0,194,255,0.55)' }}>
-          Launch the ecosystem <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          Explore infrastructures <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </Link>
         <Link to="/deploy" className="inline-flex items-center justify-center gap-2 px-9 py-4 rounded-xl border border-white/15 bg-white/[0.03] text-white font-semibold text-lg ease-cinematic transition-all duration-500 hover:bg-white/5 hover:border-white/25 hover:-translate-y-0.5">
           Open the deployment engine
