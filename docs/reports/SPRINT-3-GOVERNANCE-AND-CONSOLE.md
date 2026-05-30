@@ -234,10 +234,34 @@ role-change-on-refresh, reuse → family revoked, logout, unknown token). OAuth 
 SSO / governance canaries green. Verified in-browser: a session with a 20s
 access TTL stayed alive across navigation 25s later via silent refresh.
 
-## 9. Honest gaps / next
+## 9. Per-tenant / per-classification retention (close-out)
+
+Retention is no longer one global number. `M12` adds an admin-editable
+`retention_policies` table resolved most-specific-wins (exact classification
+level > wildcard > the tenant's `retention_days`), with separate
+`retention_days` and `purge_grace_days`.
+
+- **At publish** the resolved policy is baked into the document as two explicit
+  timestamps — `retention_until` (→ archived) and `purge_after` (→ bytes
+  purged) — so the cross-tenant purge sweeper stays a pure timestamp comparison
+  with no per-tenant policy context. Legacy rows (no `purge_after`) fall back to
+  `retention_until + DISPATCH_PURGE_GRACE_DAYS`.
+- **API:** `GET/POST /v1/admin/retention-policies` (dispatch:admin).
+- **Console:** a "Retention" tab in Admin (classification / retain days / purge
+  grace).
+- `resolveRetention()` lives in `governance.mjs` alongside the approval-policy
+  resolver.
+
+**Tests:** `retention-policy.test.mjs` 10/10 (admin gating + upsert/list,
+most-specific resolution, publish bakes both timestamps from the policy, sweep
+honours per-document `purge_after`). admin-retention + governance canaries green.
+Verified in-browser (Retention tab).
+
+## 10. Honest gaps / next
 
 - Docker image builds for `dispatch-web` validated by local `npm run build`; the
-  nginx image build itself is unexercised here.
-- Retention runs on a fixed interval; no per-tenant schedule override yet.
+  nginx image build itself is unexercised here (no Docker daemon in this env).
 - Refresh tokens live in memory (lost on tab close); persisting them would need
   secure storage and is deliberately deferred for classified contexts.
+- Retention sweeper still runs on a fixed wall-clock interval; the *windows* are
+  now per-policy, but the sweep cadence itself is global.

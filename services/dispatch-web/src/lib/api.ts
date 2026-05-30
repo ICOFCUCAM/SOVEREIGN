@@ -105,6 +105,11 @@ export const listPolicies = () => request<{ items: AdminPolicy[]; count: number 
 export const upsertPolicy = (p: { docType?: string; classificationLevel?: string; requiredApprovals: number; minApproverClearance?: string; autoApproveService?: boolean; autoApproveUser?: boolean }) =>
   request<{ id: string; requiredApprovals: number }>("POST", "/v1/admin/policies", { body: p });
 
+export interface RetentionPolicy { id: string; classificationLevel: string | null; retentionDays: number; purgeGraceDays: number }
+export const listRetention = () => request<{ items: RetentionPolicy[]; count: number }>("GET", "/v1/admin/retention-policies");
+export const upsertRetention = (p: { classificationLevel?: string; retentionDays: number; purgeGraceDays: number }) =>
+  request<{ id: string; retentionDays: number; purgeGraceDays: number }>("POST", "/v1/admin/retention-policies", { body: p });
+
 // ---- audit ----
 export interface AuditEvent { eventId: string; actor: string; actorType: string; action: string; targetType?: string; targetId?: string; classification?: string; requestId?: string; correlationId?: string; sha256?: string; ts: string }
 export const audit = (params: { target?: string; action?: string; limit?: number } = {}) => {

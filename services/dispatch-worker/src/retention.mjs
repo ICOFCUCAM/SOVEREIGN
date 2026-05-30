@@ -54,10 +54,13 @@ export async function sweep(pool, { graceDays = GRACE_DAYS, now = "now()" } = {}
         [d.tenant_id, d.id, d.correlation_id]);
     }
 
-    // 2. archived documents past the grace window → purge artifact BYTES.
-    //    We expire the artifacts (expires_at=now → GET returns 410) and flag
-    //    integrity_status so it's clear the bytes are intentionally gone. The
-    //    document, its versions and the audit trail are retained forever.
+    // 2. archived documents past their purge boundary → purge artifact BYTES.
+    //    purge_after is computed per-document at publish (tenant + classification
+    //    retention + grace), so the sweep is a pure timestamp comparison with no
+    //    per-tenant policy context here. Legacy rows without purge_after fall
+    //    back to retention_until + the global grace env. We expire the artifacts
+    //    (expires_at=now → GET 410) and flag integrity_status; the document, its
+    //    versions and the audit trail are retained forever.
     const purge = await client.query(
       `update dispatch.artifacts a
           set expires_at = ${now}, integrity_status='unrecoverable'
@@ -65,8 +68,7 @@ export async function sweep(pool, { graceDays = GRACE_DAYS, now = "now()" } = {}
          join dispatch.documents d on d.id = v.document_id
         where a.version_id = v.id
           and d.lifecycle_state = 'archived'
-          and d.retention_until is not null
-          and d.retention_until <= (${now} - ($1 || ' days')::interval)
+          and coalesce(d.purge_after, d.retention_until + ($1 || ' days')::interval) <= ${now}
           and a.integrity_status <> 'unrecoverable'
         returning a.id, a.tenant_id, a.sha256, d.id as document_id, d.correlation_id`,
       [String(graceDays)]);

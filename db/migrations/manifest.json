@@ -11,6 +11,7 @@
     "M8__governance_job_insert.sql",
     "M9__admin_and_retention.sql",
     "M10__membership_lookup.sql",
-    "M11__refresh_tokens.sql"
+    "M11__refresh_tokens.sql",
+    "M12__retention_policies.sql"
   ]
 }

@@ -14,7 +14,7 @@ import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verify
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
-import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition } from "../../shared/src/governance.mjs";
+import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition, resolveRetention } from "../../shared/src/governance.mjs";
 import { oauthConfig, exchangeCode } from "../../shared/src/oauth.mjs";
 import { issueSession, rotateSession, revokeSession } from "../../shared/src/session.mjs";
 
@@ -279,12 +279,21 @@ async function handleLifecycleAction(req, res, principal, documentId, action) {
         if (docRow.lifecycle_state !== "rendered")
           return { http: 409, body: errEnvelope(null, 409, "NOT_RENDERED", `document is '${docRow.lifecycle_state}'; must be 'rendered' to publish`) };
         assertTransition("rendered", "published");
-        const ret = await client.query("select retention_days from dispatch.tenants where id=$1", [principal.tenantId]);
-        const days = ret.rows[0]?.retention_days || 365;
-        await client.query("update dispatch.documents set lifecycle_state='published', published_at=now(), retention_until=now() + ($2 || ' days')::interval where id=$1", [documentId, String(days)]);
+        // Resolve retention per (tenant, classification) and bake BOTH boundaries
+        // into the document so the cross-tenant purge sweeper stays a pure
+        // timestamp comparison: retention_until (→ archived) and purge_after
+        // (archived + grace → bytes purged).
+        const level = (docRow.classification && docRow.classification.level) || null;
+        const ret = await resolveRetention(client, { tenantId: principal.tenantId, classificationLevel: level });
+        await client.query(
+          `update dispatch.documents set lifecycle_state='published', published_at=now(),
+             retention_until = now() + ($2 || ' days')::interval,
+             purge_after     = now() + (($2::int + $3::int) || ' days')::interval
+           where id=$1`,
+          [documentId, String(ret.retention_days), String(ret.purge_grace_days)]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
           action: "document.published", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
-        return { http: 200, body: { documentId, lifecycle: "published" } };
+        return { http: 200, body: { documentId, lifecycle: "published", retentionDays: ret.retention_days, purgeGraceDays: ret.purge_grace_days } };
       }
       // withdraw
       if (!["published", "rendered"].includes(docRow.lifecycle_state))
@@ -522,6 +531,46 @@ async function handleUpsertPolicy(req, res, principal) {
   }
 }
 
+// GET /v1/admin/retention-policies — list retention policies.
+async function handleListRetention(res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  const rows = await withClaims(pool, govClaims(principal), (c) =>
+    c.query("select id, classification_level, retention_days, purge_grace_days from dispatch.retention_policies order by classification_level nulls first").then((r) => r.rows));
+  return send(res, 200, { items: rows.map((r) => ({ id: r.id, classificationLevel: r.classification_level,
+    retentionDays: r.retention_days, purgeGraceDays: r.purge_grace_days })), count: rows.length });
+}
+
+// POST /v1/admin/retention-policies — upsert a retention policy for a level.
+async function handleUpsertRetention(req, res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  const retDays = Number.isInteger(body?.retentionDays) ? body.retentionDays : 365;
+  const grace = Number.isInteger(body?.purgeGraceDays) ? body.purgeGraceDays : 30;
+  if (retDays < 0 || retDays > 36500 || grace < 0 || grace > 36500)
+    return send(res, 400, errEnvelope(null, 400, "BAD_DAYS", "retentionDays/purgeGraceDays out of range (0..36500)"));
+  const lvl = body.classificationLevel ? String(body.classificationLevel).toLowerCase() : null;
+  try {
+    const id = await withClaims(pool, govClaims(principal), async (c) => {
+      const r = await c.query(
+        `insert into dispatch.retention_policies (tenant_id, classification_level, retention_days, purge_grace_days)
+         values ($1,$2,$3,$4)
+         on conflict (tenant_id, classification_level)
+           do update set retention_days=excluded.retention_days, purge_grace_days=excluded.purge_grace_days
+         returning id`,
+        [principal.tenantId, lvl, retDays, grace]);
+      await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: "admin.retention.upserted", targetType: "retention_policy", targetId: r.rows[0].id });
+      return r.rows[0].id;
+    });
+    return send(res, 200, { id, classificationLevel: lvl, retentionDays: retDays, purgeGraceDays: grace });
+  } catch (e) {
+    console.error("upsert retention error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
 // ---- Retrieve surface (Epic 8) ---------------------------------------------
 // All reads run under the principal's tenant claim, so RLS returns 0 rows for a
 // cross-tenant id → we surface 404 (never leak existence across tenants).
@@ -729,12 +778,13 @@ const server = http.createServer(async (req, res) => {
     }
 
     // Admin GET surface (dispatch:admin, tenant-scoped).
-    if (req.method === "GET" && (path === "/v1/admin/clients" || path === "/v1/admin/members" || path === "/v1/admin/policies")) {
+    if (req.method === "GET" && (path === "/v1/admin/clients" || path === "/v1/admin/members" || path === "/v1/admin/policies" || path === "/v1/admin/retention-policies")) {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       if (path === "/v1/admin/clients") return await handleListClients(res, auth.principal);
       if (path === "/v1/admin/members") return await handleListMembers(res, auth.principal);
       if (path === "/v1/admin/policies") return await handleListPolicies(res, auth.principal);
+      if (path === "/v1/admin/retention-policies") return await handleListRetention(res, auth.principal);
     }
 
     // PATCH (admin client update).
@@ -808,6 +858,7 @@ const server = http.createServer(async (req, res) => {
     if (path === "/v1/admin/clients") return await handleCreateClient(req, res, principal);
     if (path === "/v1/admin/members") return await handleUpsertMember(req, res, principal);
     if (path === "/v1/admin/policies") return await handleUpsertPolicy(req, res, principal);
+    if (path === "/v1/admin/retention-policies") return await handleUpsertRetention(req, res, principal);
 
     // Mint a single-artifact download grant (Epic-10 hardening): the artifact must
     // belong to the principal's tenant (RLS-checked) and the principal needs read.
