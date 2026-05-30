@@ -136,15 +136,37 @@ audit assertion from the job id to the (more correct) document id.
 
 ---
 
-## 4. Honest gaps / next
+## 4. Admin surface + retention (close-out)
 
-- **Admin surface** (manage clients, users, role & clearance assignment,
-  templates, retention policy) is specified in the plan but not yet built — the
-  approval_policies are settable via SQL/API but have no UI yet.
-- **Retention enforcement job** (archive → purge bytes at `retention_until`,
-  keeping metadata+audit) is modelled (`retention_until` is set on publish) but
-  the purge worker is not implemented.
+Two of the Sprint 3 gaps are now closed.
+
+### Admin surface
+`dispatch:admin`-gated, tenant-scoped API + UI (`/console/admin`, three tabs):
+- **Service clients** — `GET/POST /v1/admin/clients`, `PATCH .../{id}`. Provision
+  a client (secret shown **once**, scrypt-hashed at rest), list (no secret
+  leak), enable/disable, rotate scopes/clearance.
+- **Members** — `GET/POST /v1/admin/members`. Upsert a member's role + clearance.
+- **Approval policies** — `GET/POST /v1/admin/policies`. Upsert per
+  (docType, classificationLevel), most-specific-wins.
+- Migration `M9` adds the tenant_admin write RLS for memberships + service_clients.
+
+### Retention sweeper
+`services/dispatch-worker/src/retention.mjs`, run as the privileged
+`dispatch_purge` role (BYPASSRLS + immutability-exempt, granted in `M9`):
+- `published` past `retention_until` → `archived` (read-only, metadata kept).
+- `archived` past a grace window (`DISPATCH_PURGE_GRACE_DAYS`, default 30) →
+  artifact **bytes expired** (`expires_at=now`, `integrity_status=unrecoverable`
+  → `GET` returns 410). The document, versions and audit are **kept forever**.
+- Idempotent; writes `document.archived` / `artifact.purged` audit events.
+- Added to `docker-compose.yml` as `dispatch-retention`.
+
+**Tests:** new `admin-retention.test.mjs` — 18/18 (admin CRUD + gating, archive,
+purge, idempotency, provenance retained).
+
+## 5. Honest gaps / next
+
 - **Human SSO** (Supabase user JWT) plugs into `auth.tsx`/`auth.mjs`; today the
   console signs in via service client credentials.
 - Docker image builds for `dispatch-web` validated by local `npm run build`; the
   nginx image build itself is unexercised here.
+- Retention runs on a fixed interval; no per-tenant schedule override yet.

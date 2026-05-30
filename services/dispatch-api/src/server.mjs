@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { validateRequest } from "@dispatch/ddm-schema/validator";
 import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
-import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verifyDownloadGrant } from "../../shared/src/auth.mjs";
+import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verifyDownloadGrant, hashSecretScrypt, roleScopes } from "../../shared/src/auth.mjs";
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
@@ -373,6 +373,153 @@ async function handleAudit(res, principal, query) {
     requestId: r.request_id, correlationId: r.correlation_id, sha256: r.sha256, ts: r.ts })), count: rows.length });
 }
 
+// ---- Admin surface (clients, members, policies) ----------------------------
+// All admin endpoints require dispatch:admin and are tenant-scoped via RLS.
+function requireAdmin(res, principal) {
+  if (!hasScope(principal, "dispatch:admin")) { send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required")); return false; }
+  return true;
+}
+
+// GET /v1/admin/clients — list this tenant's service clients (no secrets).
+async function handleListClients(res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  const rows = await withClaims(pool, govClaims(principal), (c) =>
+    c.query("select id, name, client_id, scopes, clearance, active, created_at, last_used_at from dispatch.service_clients order by created_at desc")
+      .then((r) => r.rows));
+  return send(res, 200, { items: rows.map((r) => ({ id: r.id, name: r.name, clientId: r.client_id, scopes: r.scopes,
+    clearance: r.clearance, active: r.active, createdAt: r.created_at, lastUsedAt: r.last_used_at })), count: rows.length });
+}
+
+// POST /v1/admin/clients — provision a service client. Returns the generated
+// secret ONCE (never stored in plaintext; scrypt-hashed at rest).
+async function handleCreateClient(req, res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  if (!body?.name) return send(res, 400, errEnvelope(null, 400, "NAME_REQUIRED", "client name required"));
+  const clientId = body.clientId || `svc-${crypto.randomBytes(5).toString("hex")}`;
+  const secret = crypto.randomBytes(24).toString("base64url");
+  const scopes = Array.isArray(body.scopes) && body.scopes.length ? body.scopes : roleScopes("service");
+  const clearance = body.clearance || "none";
+  try {
+    const id = await withClaims(pool, govClaims(principal), async (c) => {
+      const r = await c.query(
+        `insert into dispatch.service_clients (tenant_id, name, client_id, secret_hash, scopes, clearance, active)
+         values ($1,$2,$3,$4,$5,$6,true) returning id`,
+        [principal.tenantId, body.name, clientId, hashSecretScrypt(secret), scopes, clearance]);
+      await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: "admin.client.created", targetType: "service_client", targetId: r.rows[0].id });
+      return r.rows[0].id;
+    });
+    // secret returned exactly once
+    return send(res, 201, { id, clientId, secret, scopes, clearance,
+      message: "store this secret now — it is not recoverable" });
+  } catch (e) {
+    if (String(e.message).includes("duplicate key")) return send(res, 409, errEnvelope(null, 409, "CLIENT_EXISTS", "client_id already in use"));
+    console.error("create client error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
+// PATCH /v1/admin/clients/{id} — toggle active / rotate scopes/clearance.
+async function handleUpdateClient(req, res, principal, id) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  const sets = []; const params = []; let i = 1;
+  if (typeof body.active === "boolean") { sets.push(`active=$${i++}`); params.push(body.active); }
+  if (Array.isArray(body.scopes)) { sets.push(`scopes=$${i++}`); params.push(body.scopes); }
+  if (body.clearance) { sets.push(`clearance=$${i++}`); params.push(body.clearance); }
+  if (!sets.length) return send(res, 400, errEnvelope(null, 400, "NO_FIELDS", "nothing to update"));
+  params.push(id);
+  const updated = await withClaims(pool, govClaims(principal), async (c) => {
+    const r = await c.query(`update dispatch.service_clients set ${sets.join(", ")} where id=$${i} returning id`, params);
+    if (r.rows[0]) await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+      action: "admin.client.updated", targetType: "service_client", targetId: id });
+    return r.rows[0];
+  });
+  if (!updated) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "client not found"));
+  return send(res, 200, { id, updated: true });
+}
+
+// GET /v1/admin/members — list tenant memberships (role + clearance).
+async function handleListMembers(res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  const rows = await withClaims(pool, govClaims(principal), (c) =>
+    c.query("select id, user_id, role, clearance, status, created_at from dispatch.memberships order by created_at desc").then((r) => r.rows));
+  return send(res, 200, { items: rows.map((r) => ({ id: r.id, userId: r.user_id, role: r.role,
+    clearance: r.clearance, status: r.status, createdAt: r.created_at })), count: rows.length });
+}
+
+// POST /v1/admin/members — add or update a member's role/clearance (upsert).
+async function handleUpsertMember(req, res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  if (!body?.userId || !body?.role) return send(res, 400, errEnvelope(null, 400, "FIELDS_REQUIRED", "userId and role required"));
+  try {
+    const id = await withClaims(pool, govClaims(principal), async (c) => {
+      const r = await c.query(
+        `insert into dispatch.memberships (tenant_id, user_id, role, clearance)
+         values ($1,$2,$3,$4)
+         on conflict (tenant_id, user_id) do update set role=excluded.role, clearance=excluded.clearance
+         returning id`,
+        [principal.tenantId, body.userId, body.role, body.clearance || "none"]);
+      await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: "admin.member.upserted", targetType: "membership", targetId: r.rows[0].id });
+      return r.rows[0].id;
+    });
+    return send(res, 200, { id, userId: body.userId, role: body.role, clearance: body.clearance || "none" });
+  } catch (e) {
+    console.error("upsert member error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
+// GET /v1/admin/policies — list approval policies.
+async function handleListPolicies(res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  const rows = await withClaims(pool, govClaims(principal), (c) =>
+    c.query("select id, doc_type, classification_level, required_approvals, min_approver_clearance, auto_approve_service, auto_approve_user from dispatch.approval_policies order by doc_type nulls first, classification_level nulls first").then((r) => r.rows));
+  return send(res, 200, { items: rows.map((r) => ({ id: r.id, docType: r.doc_type, classificationLevel: r.classification_level,
+    requiredApprovals: r.required_approvals, minApproverClearance: r.min_approver_clearance,
+    autoApproveService: r.auto_approve_service, autoApproveUser: r.auto_approve_user })), count: rows.length });
+}
+
+// POST /v1/admin/policies — upsert an approval policy for (docType, level).
+async function handleUpsertPolicy(req, res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  const required = Number.isInteger(body?.requiredApprovals) ? body.requiredApprovals : 1;
+  if (required < 0 || required > 5) return send(res, 400, errEnvelope(null, 400, "BAD_REQUIRED", "requiredApprovals 0..5"));
+  const lvl = body.classificationLevel ? String(body.classificationLevel).toLowerCase() : null;
+  try {
+    const id = await withClaims(pool, govClaims(principal), async (c) => {
+      const r = await c.query(
+        `insert into dispatch.approval_policies (tenant_id, doc_type, classification_level, required_approvals, min_approver_clearance, auto_approve_service, auto_approve_user)
+         values ($1,$2,$3,$4,$5,$6,$7)
+         on conflict (tenant_id, doc_type, classification_level)
+           do update set required_approvals=excluded.required_approvals, min_approver_clearance=excluded.min_approver_clearance,
+                         auto_approve_service=excluded.auto_approve_service, auto_approve_user=excluded.auto_approve_user
+         returning id`,
+        [principal.tenantId, body.docType || null, lvl, required, body.minApproverClearance || null,
+         body.autoApproveService !== false, body.autoApproveUser === true]);
+      await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: "admin.policy.upserted", targetType: "approval_policy", targetId: r.rows[0].id });
+      return r.rows[0].id;
+    });
+    return send(res, 200, { id, docType: body.docType || null, classificationLevel: lvl, requiredApprovals: required });
+  } catch (e) {
+    console.error("upsert policy error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
 // ---- Retrieve surface (Epic 8) ---------------------------------------------
 // All reads run under the principal's tenant claim, so RLS returns 0 rows for a
 // cross-tenant id → we surface 404 (never leak existence across tenants).
@@ -513,6 +660,26 @@ const server = http.createServer(async (req, res) => {
       if (path === "/v1/audit") return await handleAudit(res, auth.principal, url.searchParams);
     }
 
+    // Admin GET surface (dispatch:admin, tenant-scoped).
+    if (req.method === "GET" && (path === "/v1/admin/clients" || path === "/v1/admin/members" || path === "/v1/admin/policies")) {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      if (path === "/v1/admin/clients") return await handleListClients(res, auth.principal);
+      if (path === "/v1/admin/members") return await handleListMembers(res, auth.principal);
+      if (path === "/v1/admin/policies") return await handleListPolicies(res, auth.principal);
+    }
+
+    // PATCH (admin client update).
+    if (req.method === "PATCH") {
+      const m = /^\/v1\/admin\/clients\/([A-Za-z0-9-]+)$/.exec(path);
+      if (m) {
+        const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+        if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+        return await handleUpdateClient(req, res, auth.principal, m[1]);
+      }
+      return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "not found"));
+    }
+
     // Dispatch console (Epic 9) — static page; no auth (it authenticates client-side).
     if (req.method === "GET" && (path === "/" || path === "/console")) {
       const html = consoleHtml();
@@ -568,6 +735,11 @@ const server = http.createServer(async (req, res) => {
       if (action === "decision") return await handleDecision(req, res, principal, id);
       return await handleLifecycleAction(req, res, principal, id, action);
     }
+
+    // Admin POST surface.
+    if (path === "/v1/admin/clients") return await handleCreateClient(req, res, principal);
+    if (path === "/v1/admin/members") return await handleUpsertMember(req, res, principal);
+    if (path === "/v1/admin/policies") return await handleUpsertPolicy(req, res, principal);
 
     // Mint a single-artifact download grant (Epic-10 hardening): the artifact must
     // belong to the principal's tenant (RLS-checked) and the principal needs read.

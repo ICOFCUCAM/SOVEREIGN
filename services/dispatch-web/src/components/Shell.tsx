@@ -12,6 +12,7 @@ const NAV: { to: string; label: string; scope?: string }[] = [
   { to: "/console/review", label: "Review & Approve", scope: "dispatch:approve" },
   { to: "/console/library", label: "Library", scope: "dispatch:read" },
   { to: "/console/audit", label: "Audit", scope: "dispatch:audit" },
+  { to: "/console/admin", label: "Admin", scope: "dispatch:admin" },
 ];
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
