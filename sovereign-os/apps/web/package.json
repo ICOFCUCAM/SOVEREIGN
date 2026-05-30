@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@sovereign/api-platform": "*",
+    "@sovereign/intel-core": "*",
     "@sovereign/intel-knowledge-contract": "*",
     "@sovereign/intel-knowledge-reference": "*",
     "@supabase/supabase-js": "^2.106.2",
