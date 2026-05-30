@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sovereign Dispatch — Console</title>
+<style>
+  :root { --navy:#0b1f3a; --green:#0b6; --bg:#f6f7f9; --line:#dde2e8; }
+  * { box-sizing:border-box; } body { margin:0; font:14px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:#15202b; background:var(--bg); }
+  header { background:var(--navy); color:#fff; padding:14px 22px; display:flex; align-items:center; gap:12px; }
+  header h1 { font-size:16px; margin:0; font-weight:600; letter-spacing:.02em; }
+  header .cat { font-size:11px; color:#9fb3cc; }
+  main { max-width:980px; margin:22px auto; padding:0 18px; display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px; }
+  .card h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:#5b6b7d; margin:0 0 12px; }
+  label { display:block; font-size:12px; color:#5b6b7d; margin:10px 0 3px; }
+  input, textarea, select { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px; font:inherit; }
+  textarea { min-height:90px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; }
+  .row { display:flex; gap:10px; } .row > * { flex:1; }
+  .checks { display:flex; gap:14px; margin-top:6px; } .checks label { display:flex; align-items:center; gap:5px; margin:0; font-size:13px; color:#15202b; }
+  button { background:var(--navy); color:#fff; border:0; border-radius:6px; padding:9px 16px; font:inherit; font-weight:600; cursor:pointer; margin-top:14px; }
+  button.secondary { background:#fff; color:var(--navy); border:1px solid var(--navy); }
+  button:disabled { opacity:.5; cursor:default; }
+  pre { background:#0d1117; color:#c9d1d9; padding:12px; border-radius:6px; overflow:auto; font-size:12px; max-height:280px; }
+  .pill { display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:600; }
+  .pill.queued{background:#fff3cd;color:#7a5b00;} .pill.running{background:#cfe8ff;color:#0a4a8a;}
+  .pill.succeeded{background:#d6f5e3;color:#0a6b3b;} .pill.partial{background:#ffe3c2;color:#8a4b00;} .pill.failed{background:#ffd6d6;color:#8a0000;}
+  .artifacts a { display:inline-block; margin:4px 8px 0 0; padding:6px 12px; border:1px solid var(--green); color:var(--green); border-radius:6px; text-decoration:none; font-weight:600; font-size:13px; }
+  .muted { color:#7a8794; font-size:12px; } .err { color:#b00020; }
+  footer { max-width:980px; margin:8px auto 30px; padding:0 18px; color:#7a8794; font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>◈ Sovereign Dispatch</h1>
+  <span class="cat">Institutional Document Intelligence Infrastructure</span>
+</header>
+<main>
+  <section class="card">
+    <h2>1 · Authenticate (service client)</h2>
+    <div class="row"><div><label>client_id</label><input id="cid" value="svc-a" /></div>
+      <div><label>secret</label><input id="secret" type="password" value="secret-A" /></div></div>
+    <button id="btnToken" class="secondary">Get token</button>
+    <div id="tokState" class="muted">no token</div>
+
+    <h2 style="margin-top:18px">2 · Submit a document</h2>
+    <label>docType</label>
+    <select id="docType">
+      <option value="executive_briefing">executive_briefing</option>
+      <option value="situation_report">situation_report</option>
+      <option value="policy_paper">policy_paper</option>
+    </select>
+    <label>Document (DDM JSON)</label>
+    <textarea id="ddm"></textarea>
+    <label>Outputs</label>
+    <div class="checks">
+      <label><input type="checkbox" class="out" value="pdf" checked /> pdf</label>
+      <label><input type="checkbox" class="out" value="docx" checked /> docx</label>
+      <label><input type="checkbox" class="out" value="md" checked /> md</label>
+    </div>
+    <button id="btnSubmit" disabled>Dispatch →</button>
+    <button id="btnValidate" class="secondary" disabled>Validate only</button>
+  </section>
+
+  <section class="card">
+    <h2>3 · Result</h2>
+    <div id="result"><span class="muted">Submit a document to see status + artifacts.</span></div>
+    <h2 style="margin-top:18px">Raw</h2>
+    <pre id="raw">—</pre>
+  </section>
+</main>
+<footer>API base: <span id="apibase"></span> · This console drives the public Dispatch Contract (/v1). Tokens are short-lived. Workspace Tools (CV/letter/book) live in the Polished Pages SaaS.</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const API = location.origin;
+$("apibase").textContent = API;
+let TOKEN = null, TENANT = null, POLL = null;
+
+const sample = {
+  executive_briefing: {
+    ddmVersion:"1.0", docType:"executive_briefing",
+    metadata:{ title:"Regional Stability Brief", date:"2026-05-29", status:"final", referenceCode:"INT-2026-0142" },
+    classification:{ scheme:"uk_gov", level:"OFFICIAL-SENSITIVE" },
+    sections:[
+      { id:"s1", role:"executive_summary", heading:"Executive Summary", level:1, blocks:[{id:"b1",type:"paragraph",text:"BLUF: situation stable; risk concentrated in Q3.",style:"lead"}] },
+      { id:"s2", role:"key_judgements", heading:"Key Judgements", level:1, blocks:[{id:"b2",type:"bullets",ordered:true,items:[{text:"Primary risk is logistical."},{text:"Window closes in 60 days."}]}] },
+      { id:"s3", role:"analysis", heading:"Analysis", level:1, blocks:[
+        {id:"b3",type:"paragraph",text:"Detailed analysis body."},
+        {id:"b4",type:"chart",chartType:"bar",caption:"Readiness trend",spec:{xKey:"m",series:[{key:"v",label:"Index"}],data:[{m:"Jan",v:3},{m:"Feb",v:5},{m:"Mar",v:6}]}},
+        {id:"b5",type:"reference",citeId:"c1"} ] },
+      { id:"s4", role:"recommendation", heading:"Recommendation", level:1, blocks:[{id:"b6",type:"callout",style:"recommendation",text:"Proceed with Option A."}] }
+    ],
+    citations:[{ id:"c1", type:"web", title:"Source A", url:"https://example.org/a" }]
+  }
+};
+function loadSample(){ $("ddm").value = JSON.stringify(sample.executive_briefing, null, 2); }
+loadSample();
+
+async function api(method, path, { body, auth } = {}) {
+  const headers = {};
+  if (auth) headers.authorization = "Bearer " + TOKEN;
+  if (body) { headers["content-type"]="application/json"; headers["idempotency-key"]=crypto.randomUUID(); }
+  const r = await fetch(API+path,{ method, headers, body: body?JSON.stringify(body):undefined });
+  const ct = r.headers.get("content-type")||"";
+  return { status:r.status, json: ct.includes("json")? await r.json().catch(()=>null):null };
+}
+function show(obj){ $("raw").textContent = JSON.stringify(obj,null,2); }
+
+$("btnToken").onclick = async () => {
+  const r = await api("POST","/v1/token",{ body:{ client_id:$("cid").value, secret:$("secret").value } });
+  show(r.json);
+  if (r.status===200){ TOKEN=r.json.access_token; TENANT=r.json.tenantId; $("tokState").innerHTML='token acquired · tenant '+(r.json.tenantId||'').slice(0,8)+' · scopes: '+(r.json.scopes||[]).join(', ');
+    $("btnSubmit").disabled=false; $("btnValidate").disabled=false; }
+  else { $("tokState").innerHTML='<span class="err">'+(r.json?.error?.message||'auth failed')+'</span>'; }
+};
+
+function buildReq(){
+  let doc; try { doc = JSON.parse($("ddm").value); } catch(e){ throw new Error("DDM JSON invalid: "+e.message); }
+  doc.docType = $("docType").value;
+  const outputs = [...document.querySelectorAll(".out:checked")].map(c=>c.value);
+  return { schemaVersion:"1.0", idempotencyKey:crypto.randomUUID(),
+    source:{ system:"saas-ui", tenantId: TENANT },  // contract requires tenantId; must match the token tenant
+    document:doc, outputs, delivery:{ mode:"async", storage:"signed_url", ttlSeconds:604800 } };
+}
+
+$("btnValidate").onclick = async () => {
+  try { const req = buildReq(); const r = await api("POST","/v1/validate",{ body:req, auth:true }); show(r.json);
+    $("result").innerHTML = r.json.valid ? '<span class="pill succeeded">valid</span>' : '<span class="pill failed">invalid</span> '+(r.json.errors||[]).map(e=>e.code).join(", ');
+  } catch(e){ $("result").innerHTML='<span class="err">'+e.message+'</span>'; }
+};
+
+$("btnSubmit").onclick = async () => {
+  clearInterval(POLL);
+  try {
+    const req = buildReq();
+    const r = await api("POST","/v1/documents",{ body:req, auth:true });
+    show(r.json);
+    if (r.status!==202){ $("result").innerHTML='<span class="err">'+(r.json?.error?.message||('HTTP '+r.status))+'</span>'; return; }
+    const jobId = r.json.jobId;
+    $("result").innerHTML = 'job <code>'+jobId.slice(0,8)+'</code> <span class="pill queued">queued</span>';
+    POLL = setInterval(async () => {
+      const j = await api("GET","/v1/jobs/"+jobId,{ auth:true });
+      if (j.status!==200) return;
+      show(j.json);
+      const st = j.json.status;
+      let html = 'job <code>'+jobId.slice(0,8)+'</code> <span class="pill '+st+'">'+st+'</span> <span class="muted">'+(j.json.progress||0)+'%</span>';
+      if (st==="succeeded"||st==="partial"||st==="failed"){
+        clearInterval(POLL);
+        const arts = (j.json.result&&j.json.result.artifacts)||[];
+        // Mint a short-lived, single-artifact download grant per file — the link
+        // carries only a grant (one artifact, ~5 min, not render-capable), never
+        // the full token.
+        const links = await Promise.all(arts.map(async a => {
+          const g = await api("POST","/v1/artifacts/"+a.artifactId+"/grant",{ auth:true });
+          const href = g.status===200 ? API+g.json.downloadUrl : "#";
+          return '<a href="'+href+'" target="_blank">'+a.format.toUpperCase()+(a.pages?(' · '+a.pages+'p'):'')+'</a>';
+        }));
+        if (links.length) html += '<div class="artifacts">'+links.join('')+'</div>';
+        if (j.json.result&&j.json.result.error) html += '<div class="err">'+j.json.result.error.message+'</div>';
+        html += '<div class="muted" style="margin-top:6px">Download links use short-lived single-artifact grants (~5 min), not your token.</div>';
+      }
+      $("result").innerHTML = html;
+    }, 1000);
+  } catch(e){ $("result").innerHTML='<span class="err">'+e.message+'</span>'; }
+};
+</script>
+</body>
+</html>
