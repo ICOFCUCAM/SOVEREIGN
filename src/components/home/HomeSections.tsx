@@ -72,12 +72,13 @@ export const FeaturedInfrastructure: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-end justify-between gap-6 mb-12 flex-wrap">
           <div>
-            <div className="kicker text-cyan-300/70 mb-3" style={{ letterSpacing: '0.3em' }}>Featured</div>
+            <div className="kicker text-cyan-300/70 mb-3" style={{ letterSpacing: '0.3em' }}>Examples</div>
             <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-cinematic">
-              Infrastructure <span className="text-gradient-cyan">assets.</span>
+              Infrastructure you can <span className="text-gradient-cyan">deploy.</span>
             </h2>
+            <p className="text-sm text-white/45 mt-3 max-w-lg leading-relaxed">A few examples of what Sovereign delivers — representative, not exhaustive. New infrastructures are added continually.</p>
           </div>
-          <Link to="/marketplace" className="inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-300 hover:text-white transition">View all <ArrowRight className="w-4 h-4" /></Link>
+          <Link to="/marketplace" className="inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-300 hover:text-white transition">Browse all infrastructures <ArrowRight className="w-4 h-4" /></Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {items.map((p) => {

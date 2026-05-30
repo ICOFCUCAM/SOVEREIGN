@@ -10,7 +10,7 @@ import EcosystemAtlas from '@/components/ecosystem/EcosystemAtlas';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const EcosystemHub: React.FC = () => {
-  useDocumentTitle('Ecosystem', 'The sovereign infrastructure atlas — governance, finance, mobility and intelligence systems interconnected into one operating layer.');
+  useDocumentTitle('Infrastructures', 'Deployable infrastructures available through Sovereign — governance, finance, mobility and intelligence systems your institution can launch. Examples, not a closed list.');
   const bannerRef = useRef<HTMLDivElement>(null);
   const onMove = (ev: React.MouseEvent) => {
     const el = bannerRef.current;
@@ -33,13 +33,13 @@ const EcosystemHub: React.FC = () => {
         <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
           <div className="max-w-md lg:max-w-[46%]">
             <div className="inline-flex items-center gap-2.5 kicker text-cyan-300/70 mb-6" style={{ letterSpacing: '0.3em' }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The infrastructure atlas
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Deployable infrastructures
             </div>
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-cinematic leading-[0.96] text-balance mb-5">
-              The sovereign ecosystem.
+              Infrastructure for institutions.
             </h1>
             <p className="text-white/55 max-w-md text-base sm:text-lg leading-relaxed">
-              A network of deployable institutions — governance, finance, intelligence, logistics and commerce — interconnected into one civilization-scale operating layer.
+              Examples of what your institution can deploy through Sovereign — governance, finance, intelligence, logistics and commerce. Representative, not exhaustive; the catalog is open and always growing.
             </p>
           </div>
         </div>

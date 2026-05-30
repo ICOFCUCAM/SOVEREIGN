@@ -7,9 +7,9 @@ import AuthModal from './AuthModal';
 
 const PLATFORM_LINKS = [
   { to: '/', label: 'Platform' },
-  { to: '/dns', label: 'Infrastructure' },
+  { to: '/dns', label: 'Operations' },
   { to: '/marketplace', label: 'Marketplace' },
-  { to: '/ecosystem', label: 'Institutions' },
+  { to: '/ecosystem', label: 'Infrastructures' },
   { to: '/valuation', label: 'Intelligence' },
   { to: '/studio', label: 'Studio' },
   { to: '/deploy', label: 'Deploy' },

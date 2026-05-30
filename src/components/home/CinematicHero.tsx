@@ -78,25 +78,25 @@ const CinematicHero: React.FC = () => {
       <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
         <div className="max-w-xl lg:max-w-[46%]">
           <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 kicker mb-8 backdrop-blur-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The operating layer for digital civilization
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> An institutional infrastructure company
           </div>
           <h1 className="font-display text-[3rem] sm:text-6xl lg:text-[4.4rem] xl:text-[5.25rem] font-bold tracking-cinematic leading-[0.96] text-balance mb-7">
-            <span className="block text-white">Deploy digital</span>
-            <span className="block text-white"><span className="text-gradient-cyan">institutions.</span></span>
+            <span className="block text-white">The infrastructure</span>
+            <span className="block text-white">your institution <span className="text-gradient-cyan">runs on.</span></span>
           </h1>
           <p className="text-base sm:text-lg text-white/60 max-w-md mb-4 leading-relaxed">
-            Operate nations, enterprises and infrastructure from a unified sovereign platform.
+            Sovereign builds and delivers institutional-grade infrastructure for governments, enterprises and institutions.
           </p>
           <p className="text-sm sm:text-base text-white/45 max-w-md mb-9 leading-relaxed">
-            Acquire, deploy and operate logistics networks, financial systems, public institutions and AI-native infrastructure through a single operational layer.
+            Deploy and operate the systems your organization depends on — finance, logistics, public services, intelligence and more. Our flagship infrastructures are examples of what you can launch through Sovereign, not the limit of it.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 mb-9">
             <Link to="/deploy" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
               style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 14px 44px -12px rgba(0,194,255,0.5)' }}>
               Deploy Infrastructure <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link to="/ecosystem" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] backdrop-blur text-white font-semibold ease-cinematic transition-all duration-500 hover:bg-white/8 hover:border-white/25 hover:-translate-y-0.5">
-              Explore Institutions
+            <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] backdrop-blur text-white font-semibold ease-cinematic transition-all duration-500 hover:bg-white/8 hover:border-white/25 hover:-translate-y-0.5">
+              Explore Infrastructures
             </Link>
           </div>
           <div className="hairline max-w-md mb-5" />

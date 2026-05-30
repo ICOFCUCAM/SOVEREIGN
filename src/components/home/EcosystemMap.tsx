@@ -1,17 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Scale, Banknote, Truck, Cpu, GraduationCap, ShoppingCart, Vote, Activity } from 'lucide-react';
+import { Scale, Banknote, Truck, Cpu, GraduationCap, ShoppingCart, Vote, Plus } from 'lucide-react';
 
+// Institutional functions Sovereign delivers infrastructure for. The named
+// systems are EXAMPLES of deployable infrastructure available through Sovereign
+// (hence "e.g."), not a fixed or exhaustive internal portfolio.
 interface Sector { label: string; systems: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; accent: string }
 const SECTORS: Sector[] = [
-  { label: 'Governance', systems: 'CivicOS · ACT', icon: Scale, accent: '#6366F1' },
-  { label: 'Finance', systems: 'Veritas Financial', icon: Banknote, accent: '#10B981' },
-  { label: 'Mobility', systems: 'FlyttGo', icon: Truck, accent: '#F59E0B' },
-  { label: 'Intelligence', systems: 'VeritasOS', icon: Cpu, accent: '#7C4DFF' },
-  { label: 'Education', systems: 'EduPro', icon: GraduationCap, accent: '#22D3EE' },
-  { label: 'Commerce', systems: 'Marketplace', icon: ShoppingCart, accent: '#00C2FF' },
-  { label: 'Elections', systems: 'ELECPRO', icon: Vote, accent: '#06B6D4' },
-  { label: 'Operations', systems: 'Mobile Pay', icon: Activity, accent: '#00E599' },
+  { label: 'Governance', systems: 'e.g. CivicOS', icon: Scale, accent: '#6366F1' },
+  { label: 'Finance', systems: 'e.g. Veritas Financial', icon: Banknote, accent: '#10B981' },
+  { label: 'Mobility', systems: 'e.g. FlyttGo', icon: Truck, accent: '#F59E0B' },
+  { label: 'Intelligence', systems: 'e.g. VeritasOS', icon: Cpu, accent: '#7C4DFF' },
+  { label: 'Education', systems: 'e.g. EduPro', icon: GraduationCap, accent: '#22D3EE' },
+  { label: 'Commerce', systems: 'e.g. Marketplace', icon: ShoppingCart, accent: '#00C2FF' },
+  { label: 'Elections', systems: 'e.g. ELECPRO', icon: Vote, accent: '#06B6D4' },
+  { label: 'And more', systems: 'an open catalog', icon: Plus, accent: '#00E599' },
 ];
 
 // radial geometry — angle per sector, starting at top, clockwise.
@@ -24,10 +27,13 @@ const EcosystemMap: React.FC = () => (
   <section id="network" className="scroll-mt-28 py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
     <div className="max-w-6xl mx-auto">
       <div className="text-center max-w-2xl mx-auto mb-12">
-        <div className="kicker text-cyan-300/70 mb-5" style={{ letterSpacing: '0.3em' }}>Ecosystem architecture</div>
+        <div className="kicker text-cyan-300/70 mb-5" style={{ letterSpacing: '0.3em' }}>Infrastructure for institutions</div>
         <h2 className="font-display text-4xl sm:text-5xl font-bold tracking-cinematic text-balance text-white leading-[0.98]">
-          One interconnected ecosystem.
+          Infrastructure for every institutional function.
         </h2>
+        <p className="text-white/55 mt-5 max-w-xl mx-auto leading-relaxed">
+          Whatever your institution operates, Sovereign delivers the infrastructure to run it. The systems below are examples available through Sovereign — the catalog is open and always growing.
+        </p>
       </div>
 
       {/* radial constellation (md+) */}
@@ -44,11 +50,13 @@ const EcosystemMap: React.FC = () => (
           <circle cx="100" cy="100" r="9" fill="none" stroke="#00D9FF" strokeWidth="0.7" className="animate-ring" style={{ transformOrigin: '100px 100px' }} />
         </svg>
 
-        {/* core */}
-        <Link to="/ecosystem" className="absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 z-10">
+        {/* core — the customer institution is the operator at the centre;
+            infrastructures are delivered to it. Sovereign is the provider, not
+            the consuming core. */}
+        <Link to="/deploy" className="absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 z-10">
           <div className="glass-strong rounded-2xl border border-cyan-400/30 px-5 py-4 text-center shadow-2xl" style={{ boxShadow: '0 0 40px rgba(0,194,255,0.25)' }}>
-            <div className="font-display text-white font-bold tracking-tight leading-none">SOVEREIGN</div>
-            <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-cyan-300/70 mt-1.5">Operating layer</div>
+            <div className="font-display text-white font-bold tracking-tight leading-none">YOUR INSTITUTION</div>
+            <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-cyan-300/70 mt-1.5">Deploys through Sovereign</div>
           </div>
         </Link>
 
