@@ -20,7 +20,7 @@ const CAPABILITIES = [
     title: 'Strategic intelligence for decision-makers',
     body: 'Briefings, monitoring and scenario work assembled from open-source signal and institutional posture — delivered as dispatches to the people who must decide.',
     bullets: ['Decision-ready output', 'Continuously under audit', 'Sovereign jurisdiction'],
-    to: '#intelligence',
+    to: '/intelligence',
     cta: 'Open intelligence',
   },
 ];

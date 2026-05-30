@@ -6,6 +6,7 @@ import { AuthMenu } from './AuthMenu';
 
 const NAV = [
   { label: 'Capabilities', href: '/#capabilities' },
+  { label: 'Intelligence', href: '/intelligence' },
   { label: 'Solutions', href: '/solutions' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'Docs', href: '/docs' },

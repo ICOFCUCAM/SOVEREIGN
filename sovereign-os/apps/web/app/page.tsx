@@ -7,6 +7,7 @@ import { Outcomes } from '../components/Outcomes';
 import { SectionSeparator } from '../components/SectionSeparator';
 import { SovereignLayers } from '../components/SovereignLayers';
 import { IntelligenceAgents } from '../components/IntelligenceAgents';
+import { IntelligenceStack } from '../components/IntelligenceStack';
 import { DistributionGrid } from '../components/DistributionGrid';
 import { InstitutionalDeployments } from '../components/InstitutionalDeployments';
 import { InstitutionalApplications } from '../components/InstitutionalApplications';
@@ -38,6 +39,7 @@ export default function LandingPage() {
       <SectionSeparator label="Doctrine" />
       <SovereignLayers />
       <IntelligenceAgents />
+      <IntelligenceStack />
       <DistributionGrid />
       <InstitutionalDeployments />
       <InstitutionalApplications />
