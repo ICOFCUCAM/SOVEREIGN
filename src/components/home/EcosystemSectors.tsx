@@ -18,6 +18,14 @@ const POSTER_OVERRIDES: Record<string, string> = {
   civicos: '/Sovereign logo2.png',
 };
 
+// Where the play affordance sits inside the frame. Used to land the
+// triangle precisely over the focal point of the poster image (e.g. the
+// S of the Sovereign logo). Values are percentages from the top of the
+// inset frame; default is 50 (geometric centre).
+const PLAY_FOCAL_PCT: Record<string, number> = {
+  civicos: 36,
+};
+
 function emblemFor(category: string): React.ComponentType<{ className?: string; style?: React.CSSProperties; strokeWidth?: number | string }> {
   const c = (category || '').toLowerCase();
   if (/elector|ballot|voting/.test(c)) return Vote;
@@ -36,6 +44,7 @@ const SystemPlayer: React.FC<{ p: EcosystemProduct; posterSrc: string }> = ({ p,
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
+  const focalPct = PLAY_FOCAL_PCT[p.slug] ?? 50;
 
   const start = async () => {
     const v = videoRef.current; if (!v) return;
@@ -66,14 +75,16 @@ const SystemPlayer: React.FC<{ p: EcosystemProduct; posterSrc: string }> = ({ p,
           type="button"
           onClick={start}
           aria-label={`Play ${p.name} dispatch`}
-          className="absolute inset-[4%] w-[92%] h-[92%] flex flex-col items-center justify-center group/play rounded-2xl"
+          className="absolute inset-[4%] w-[92%] h-[92%] group/play rounded-2xl"
         >
           <span aria-hidden className="absolute inset-0 rounded-2xl pointer-events-none" style={{
             background: 'linear-gradient(180deg, transparent 50%, rgba(5,7,15,0.55) 100%)',
           }} />
           <span
-            className="relative inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full backdrop-blur-md transition-all duration-500 group-hover/play:scale-105"
+            className="absolute left-1/2 inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full backdrop-blur-md transition-all duration-500 group-hover/play:scale-105"
             style={{
+              top: `${focalPct}%`,
+              transform: 'translate(-50%, -50%)',
               background: `linear-gradient(135deg, ${p.accent}33, rgba(255,255,255,0.08))`,
               border: `1px solid ${p.accent}66`,
               boxShadow: `0 24px 60px -28px ${p.accent}aa`,
@@ -82,7 +93,9 @@ const SystemPlayer: React.FC<{ p: EcosystemProduct; posterSrc: string }> = ({ p,
             <span aria-hidden className="absolute inset-0 rounded-full animate-pulse-slow" style={{ background: `radial-gradient(circle, ${p.accent}33, transparent 70%)` }} />
             <Play className="relative w-7 h-7 sm:w-8 sm:h-8 text-white ml-1" strokeWidth={1.5} fill="white" style={{ filter: `drop-shadow(0 0 14px ${p.accent})` }} />
           </span>
-          <span className="relative mt-5 text-[10px] font-mono uppercase tracking-[0.28em] text-white/80">Play dispatch</span>
+          <span
+            className="absolute left-1/2 -translate-x-1/2 bottom-[7%] text-[10px] font-mono uppercase tracking-[0.28em] text-white/80 whitespace-nowrap"
+          >Play dispatch</span>
         </button>
       )}
       {/* mute toggle while playing */}
