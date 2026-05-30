@@ -8,7 +8,7 @@ import { useAuth } from "../lib/auth";
 // shows the reason with a way back to sign-in.
 const Callback: React.FC = () => {
   const nav = useNavigate();
-  const { signInWithToken } = useAuth();
+  const { signInWithSession } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const ran = useRef(false); // guard StrictMode double-invoke (code is single-use)
 
@@ -18,13 +18,13 @@ const Callback: React.FC = () => {
     (async () => {
       try {
         const r = await completeLogin(window.location.search);
-        await signInWithToken(r.accessToken, r.expiresIn);
+        signInWithSession(r);
         nav("/console", { replace: true });
       } catch (e) {
         setError(e instanceof Error ? e.message : "sign-in failed");
       }
     })();
-  }, [nav, signInWithToken]);
+  }, [nav, signInWithSession]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-ink-900 px-4 text-center">

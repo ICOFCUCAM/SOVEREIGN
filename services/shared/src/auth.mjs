@@ -127,9 +127,16 @@ async function resolveJwt(token, withClaimsAdmin) {
     return { error: { status: 401, code: "UNAUTHENTICATED", message: "malformed bearer token" } };
   }
   const isService = header.principal_type === "service";
-  const secret = isService ? process.env.DISPATCH_TOKEN_SECRET : process.env.SUPABASE_JWT_SECRET;
+  // Dispatch-issued user access tokens (from the session/refresh flow) are
+  // signed with our own secret and carry authoritative claims already resolved
+  // from the membership at issue/refresh time — so they verify like a service
+  // token and we trust their baked-in role/clearance (no per-request DB hit).
+  // An external IdP user JWT (no dispatch_issued flag) still resolves authority
+  // from the membership row below.
+  const isDispatchUser = !isService && header.dispatch_issued === true;
+  const secret = (isService || isDispatchUser) ? process.env.DISPATCH_TOKEN_SECRET : process.env.SUPABASE_JWT_SECRET;
   if (!secret) {
-    return { error: { status: 401, code: "AUTH_NOT_CONFIGURED", message: `${isService ? "DISPATCH_TOKEN_SECRET" : "SUPABASE_JWT_SECRET"} not set` } };
+    return { error: { status: 401, code: "AUTH_NOT_CONFIGURED", message: `${(isService || isDispatchUser) ? "DISPATCH_TOKEN_SECRET" : "SUPABASE_JWT_SECRET"} not set` } };
   }
   let claims;
   try {
@@ -144,6 +151,14 @@ async function resolveJwt(token, withClaimsAdmin) {
   }
   if (isService) {
     return { principal: { tenantId, principalType: "service", role: "service", scopes: claims.scopes ?? [], clearance: claims.clearance || "none", actor: `svc:${claims.client_id || claims.sub || "service"}` } };
+  }
+
+  // Dispatch-issued user access token: claims were resolved from the membership
+  // at issue/refresh time and are trusted for the (short) access TTL. Role
+  // changes / revocation take effect at the next refresh.
+  if (isDispatchUser) {
+    const role = claims.dispatch_role || "viewer";
+    return { principal: { tenantId, principalType: "user", role, scopes: claims.scopes ?? roleScopes(role), clearance: claims.clearance || "none", actor: `user:${claims.sub}` } };
   }
 
   // Human SSO: ROLE + CLEARANCE are Dispatch's authority, NOT the identity

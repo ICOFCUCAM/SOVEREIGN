@@ -53,7 +53,25 @@ export async function beginLogin(cfg: AuthConfig): Promise<void> {
   window.location.assign(u.toString());
 }
 
-export interface CallbackResult { accessToken: string; expiresIn: number | null; principal: { tenantId: string; role: string; scopes: string[]; clearance: string; actor: string; principalType: "user" | "service" } }
+export interface CallbackResult { accessToken: string; expiresIn: number | null; refreshToken?: string; principal: { tenantId: string; role: string; scopes: string[]; clearance: string; actor: string; principalType: "user" | "service" } }
+
+export interface RefreshResult { accessToken: string; expiresIn: number | null; refreshToken: string; principal: CallbackResult["principal"] }
+
+// Rotate the refresh token for a fresh access + refresh pair.
+export async function refreshSession(refreshToken: string): Promise<RefreshResult> {
+  const r = await fetch(BASE + "/v1/auth/refresh", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ refreshToken }) });
+  const json = await r.json();
+  if (!r.ok) throw new Error(json?.error?.code || json?.error?.message || "refresh failed");
+  return json as RefreshResult;
+}
+
+// Revoke a refresh token server-side (logout). Best-effort.
+export async function revokeSession(refreshToken: string, everywhere = false): Promise<void> {
+  try {
+    await fetch(BASE + "/v1/auth/logout" + (everywhere ? "?everywhere=true" : ""), {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ refreshToken }) });
+  } catch { /* best-effort */ }
+}
 
 // Handle the IdP redirect back: verify state, exchange code via the API.
 export async function completeLogin(search: string): Promise<CallbackResult> {

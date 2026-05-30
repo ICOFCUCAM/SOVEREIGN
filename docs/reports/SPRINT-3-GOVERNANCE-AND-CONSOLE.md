@@ -208,9 +208,36 @@ all error paths, confidential-secret handling) and `oauth-callback.test.mjs` 6/6
 rejected code → 401, non-member → 403). Full redirect flow verified in-browser
 (authorize → 302 → callback → exchange → dashboard as the seeded tenant_admin).
 
-## 8. Honest gaps / next
+## 8. Refresh-token rotation (close-out)
 
-- Refresh-token rotation is not wired; sessions expire and re-auth via redirect.
+After SSO the API issues its OWN Dispatch session, so it survives access-token
+expiry without re-redirecting to the IdP.
+
+- **Access token:** short-lived (default 15 min) Dispatch-signed USER JWT
+  (`dispatch_issued:true`, authoritative role/clearance/scopes baked in). The
+  resolver verifies it with `DISPATCH_TOKEN_SECRET` and trusts its claims for the
+  access window — no per-request DB hit.
+- **Refresh token (`session.mjs` + `M11`):** opaque high-entropy string stored
+  only as its SHA-256, long-lived (default 30 days), **rotating** on every use.
+  Each refresh re-resolves role/clearance from the membership (so a role change
+  or disable takes effect at refresh) and returns a new pair.
+- **Reuse detection:** rotations share a `family_id`; presenting an
+  already-rotated (or revoked) token revokes the whole family → `401
+  REFRESH_REUSE_DETECTED`. `POST /v1/auth/logout` revokes the presented token
+  (or `?everywhere=true` the family).
+- **Console:** stores the refresh token in memory, refreshes ~30s before access
+  expiry, and falls back to sign-out if refresh fails. Logout revokes server-side.
+- Endpoints: `POST /v1/auth/refresh`, `POST /v1/auth/logout`.
+
+**Tests:** `refresh.test.mjs` 11/11 (rotation, rotated-token authenticates,
+role-change-on-refresh, reuse → family revoked, logout, unknown token). OAuth /
+SSO / governance canaries green. Verified in-browser: a session with a 20s
+access TTL stayed alive across navigation 25s later via silent refresh.
+
+## 9. Honest gaps / next
+
 - Docker image builds for `dispatch-web` validated by local `npm run build`; the
   nginx image build itself is unexercised here.
 - Retention runs on a fixed interval; no per-tenant schedule override yet.
+- Refresh tokens live in memory (lost on tab close); persisting them would need
+  secure storage and is deliberately deferred for classified contexts.

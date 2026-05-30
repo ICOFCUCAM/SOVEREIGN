@@ -16,6 +16,7 @@ import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
 import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition } from "../../shared/src/governance.mjs";
 import { oauthConfig, exchangeCode } from "../../shared/src/oauth.mjs";
+import { issueSession, rotateSession, revokeSession } from "../../shared/src/session.mjs";
 
 const ENGINE_VERSION = "dispatch-api@1.0.0";
 const pool = makePool();
@@ -661,22 +662,50 @@ const server = http.createServer(async (req, res) => {
         : { enabled: false });
     }
 
-    // OAuth callback (public): exchange the authorization code (+ PKCE verifier)
-    // for the IdP access token, server-side. The returned token is then used as
-    // a normal Bearer — role/clearance still resolved from the membership row.
+    // OAuth callback (public): exchange the code for the IdP token, resolve the
+    // membership-authoritative principal, then issue a DISPATCH session (short
+    // access token + rotating refresh token). The IdP token is not handed back.
     if (req.method === "POST" && path === "/v1/auth/callback") {
       let cb;
       try { cb = JSON.parse(await readBody(req)); }
       catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
       const ex = await exchangeCode({ code: cb.code, codeVerifier: cb.codeVerifier || cb.code_verifier, redirectUri: cb.redirectUri || cb.redirect_uri });
       if (ex.error) return send(res, ex.error.status, errEnvelope(null, ex.error.status, ex.error.code, ex.error.message));
-      // Resolve identity now so the SPA gets the principal in one round-trip and
-      // a non-member is rejected here rather than after redirect.
       const who = await resolvePrincipal(pool, `Bearer ${ex.accessToken}`, withAdmin);
       if (who.error) return send(res, who.error.status, errEnvelope(null, who.error.status, who.error.code, who.error.message));
+      const sess = await issueSession(who.principal, withAdmin);
+      if (sess.error) return send(res, sess.error.status, errEnvelope(null, sess.error.status, sess.error.code, sess.error.message));
       const p = who.principal;
-      return send(res, 200, { accessToken: ex.accessToken, tokenType: ex.tokenType, expiresIn: ex.expiresIn,
+      return send(res, 200, { ...sess, tokenType: "Bearer",
         principal: { tenantId: p.tenantId, principalType: p.principalType, role: p.role, scopes: p.scopes, clearance: p.clearance || "none", actor: p.actor } });
+    }
+
+    // Refresh: rotate the refresh token, re-resolve authority, return a fresh
+    // access + refresh pair. Reuse of a rotated token revokes the whole family.
+    if (req.method === "POST" && path === "/v1/auth/refresh") {
+      let rb;
+      try { rb = JSON.parse(await readBody(req)); }
+      catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+      const resolveMember = async (tenantId, userId) => withAdmin(async (c) => {
+        const r = await c.query("select role, clearance, status from dispatch.lookup_membership($1,$2)", [tenantId, userId]);
+        const m = r.rows[0]; if (!m) return null;
+        return { ...m, _scopes: roleScopes(m.role || "viewer") };
+      });
+      const rot = await rotateSession(rb.refreshToken || rb.refresh_token, withAdmin, resolveMember);
+      if (rot.error) return send(res, rot.error.status, errEnvelope(null, rot.error.status, rot.error.code, rot.error.message));
+      const p = rot.principal;
+      return send(res, 200, { accessToken: rot.accessToken, expiresIn: rot.expiresIn, refreshToken: rot.refreshToken,
+        refreshExpiresAt: rot.refreshExpiresAt, tokenType: "Bearer",
+        principal: { tenantId: p.tenantId, principalType: p.principalType, role: p.role, scopes: p.scopes, clearance: p.clearance || "none", actor: p.actor } });
+    }
+
+    // Logout: revoke the presented refresh token (or the whole family with
+    // ?everywhere=true). Public — the refresh token itself is the credential.
+    if (req.method === "POST" && path === "/v1/auth/logout") {
+      let lb = {};
+      try { lb = JSON.parse(await readBody(req)); } catch { /* empty body ok */ }
+      await revokeSession(lb.refreshToken || lb.refresh_token, withAdmin, { everywhere: url.searchParams.get("everywhere") === "true" });
+      return send(res, 200, { ok: true });
     }
 
     // whoami — resolve the caller's identity/role/scopes/clearance from the
