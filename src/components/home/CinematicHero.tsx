@@ -28,7 +28,7 @@ const CinematicHero: React.FC = () => {
   };
 
   return (
-    <section ref={ref} onMouseMove={onMove} className="relative min-h-[100svh] lg:min-h-[860px] overflow-hidden"
+    <section ref={ref} onMouseMove={onMove} className="relative h-[88vh] min-h-[660px] max-h-[1100px] overflow-hidden"
       style={{ ['--px' as string]: '0', ['--py' as string]: '0' }}>
       {/* deep-space field, lit from the lower-right where the planet sits */}
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 90% at 78% 72%, #0c1d42 0%, #070f28 40%, #03060f 100%)' }} />
@@ -75,27 +75,28 @@ const CinematicHero: React.FC = () => {
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(95deg, #050816 14%, rgba(5,8,22,0.82) 34%, rgba(5,8,22,0.35) 52%, transparent 70%)' }} />
 
       {/* ── editorial column, left ── */}
-      <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center pt-20 lg:pt-16">
-        <div className="w-full max-w-xl lg:max-w-[52%]">
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 kicker mb-5 backdrop-blur-sm max-w-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node shrink-0" /> <span className="truncate">An institutional infrastructure company</span>
+      <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
+        <div className="max-w-xl lg:max-w-[46%]">
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 kicker mb-8 backdrop-blur-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The operating layer for digital civilization
           </div>
-          <h1 className="font-display text-[2rem] sm:text-5xl lg:text-[3.7rem] xl:text-[4.3rem] font-bold tracking-cinematic leading-[1.05] sm:leading-[1.0] text-balance mb-5">
-            The infrastructure your institution <span className="text-gradient-cyan">runs on.</span>
+          <h1 className="font-display text-[3rem] sm:text-6xl lg:text-[4.4rem] xl:text-[5.25rem] font-bold tracking-cinematic leading-[0.96] text-balance mb-7">
+            <span className="block text-white">Deploy digital</span>
+            <span className="block text-white"><span className="text-gradient-cyan">institutions.</span></span>
           </h1>
-          <p className="text-base sm:text-lg text-white/60 max-w-md mb-3.5 leading-relaxed">
-            Sovereign builds and delivers institutional-grade infrastructure for governments, enterprises and institutions.
+          <p className="text-base sm:text-lg text-white/60 max-w-md mb-4 leading-relaxed">
+            Operate nations, enterprises and infrastructure from a unified sovereign platform.
           </p>
           <p className="text-sm sm:text-base text-white/45 max-w-md mb-9 leading-relaxed">
-            Deploy and operate the systems your organization depends on — finance, logistics, public services, intelligence and more. Our flagship infrastructures are examples of what you can launch through Sovereign, not the limit of it.
+            Acquire, deploy and operate logistics networks, financial systems, public institutions and AI-native infrastructure through a single operational layer.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 mb-9">
             <Link to="/deploy" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
               style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 14px 44px -12px rgba(0,194,255,0.5)' }}>
               Deploy Infrastructure <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link to="/marketplace" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] backdrop-blur text-white font-semibold ease-cinematic transition-all duration-500 hover:bg-white/8 hover:border-white/25 hover:-translate-y-0.5">
-              Explore Infrastructures
+            <Link to="/ecosystem" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] backdrop-blur text-white font-semibold ease-cinematic transition-all duration-500 hover:bg-white/8 hover:border-white/25 hover:-translate-y-0.5">
+              Explore Institutions
             </Link>
           </div>
           <div className="hairline max-w-md mb-5" />

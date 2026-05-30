@@ -51,13 +51,12 @@ const FLAGSHIP_CAPS = [
   { icon: Globe2, label: 'Global interoperability' },
 ];
 
-// ── market intelligence feed ── (deployments are attributed to the customer
-// institutions that operate them — Sovereign is the provider, not the operator).
+// ── market intelligence feed ──
 const INTEL = [
-  { name: 'A ministry of finance', note: 'deployed Veritas Financial in the Singapore region', ago: '2m', c: '#10B981' },
-  { name: 'A national government', note: 'launched a CivicOS governance deployment', ago: '17m', c: '#6366F1' },
-  { name: 'An election authority', note: 'brought ElecPro online for a new mandate', ago: '1h', c: '#22D3EE' },
-  { name: 'A logistics operator', note: 'expanded a FlyttGo network across 12 regions', ago: '2h', c: '#F59E0B' },
+  { name: 'Veritas.Financial', note: 'New institutional deployment in Singapore region', ago: '2m', c: '#10B981' },
+  { name: 'CIVICOS Core', note: 'Sovereign upgrade package released', ago: '17m', c: '#6366F1' },
+  { name: 'ElecPro.AI', note: 'New energy optimization model now available', ago: '1h', c: '#22D3EE' },
+  { name: 'Flytgo', note: 'Expanded logistics network live in 12 regions', ago: '2h', c: '#F59E0B' },
 ];
 
 // ── government platform tiers (with feature manifests, matching the exchange spec) ──
@@ -204,7 +203,7 @@ const SectionHead: React.FC<{ kicker: string; title: string; to?: string; cta?: 
 );
 
 const MarketplacePage: React.FC = () => {
-  useDocumentTitle('Marketplace', 'An open exchange of deployable infrastructures available through Sovereign — examples your institution can launch and operate, with new infrastructures added continually.');
+  useDocumentTitle('Marketplace', 'A sovereign systems exchange — acquire deployable civilization-scale institutions, AI-scored and procurement-ready.');
   const [domains, setDomains] = useState<Domain[]>([]);
   const [products, setProducts] = useState<EcosystemProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -270,14 +269,14 @@ const MarketplacePage: React.FC = () => {
           <div className="relative z-10 max-w-7xl mx-auto h-full flex flex-col justify-center pt-14">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2.5 px-3 py-1 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 kicker mb-6" style={{ letterSpacing: '0.28em' }}>
-                <Star className="w-3 h-3" /> An open infrastructure exchange
+                <Star className="w-3 h-3" /> Sovereign marketplace
               </div>
               <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-cinematic leading-[0.92] text-balance mb-5">
-                <span className="text-white">Infrastructure your</span><br />
-                <span className="text-white">institution can </span><span className="text-gradient-cyan">deploy.</span>
+                <span className="text-white">Acquire civilization-</span><br />
+                <span className="text-white">scale </span><span className="text-gradient-cyan">systems.</span>
               </h1>
               <p className="text-base text-white/55 max-w-md leading-relaxed mb-7">
-                Examples of deployable infrastructure available through Sovereign — financial, governance and intelligence systems your institution can launch and operate. The exchange is open and always growing.
+                The world's most advanced sovereign, financial and intelligence systems — deployable, interoperable, sovereign by design.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 mb-7">
                 <button onClick={() => setBrief(true)} className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"

@@ -42,9 +42,9 @@ const MarketplaceTeaser: React.FC = () => {
     <section className="relative py-7 border-y border-white/10 bg-black/20 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between mb-5">
         <span className="inline-flex items-center gap-3 text-[10px] font-mono uppercase tracking-[0.24em] text-cyan-300/70">
-          <span className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Deployable infrastructures · an open exchange</span>
+          <span className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Featured sovereign assets</span>
           <span className="text-white/30">·</span>
-          <span className="text-white/40 tabular-nums">{domains.length}+ and growing</span>
+          <span className="text-white/40 tabular-nums">{domains.length} live</span>
         </span>
         <Link to="/marketplace" className="text-[11px] font-mono uppercase tracking-widest text-white/45 hover:text-white transition">Marketplace →</Link>
       </div>
