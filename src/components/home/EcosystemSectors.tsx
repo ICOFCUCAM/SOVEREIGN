@@ -11,6 +11,13 @@ import { ArrowRight, Landmark, Vote, ShieldAlert, Banknote, Truck, Cpu, Graduati
 // existing poster image when no video is published yet.
 const VIDEO_SLUGS = new Set(['civicos']);
 
+// Per-slug poster overrides. When present, the cinematic emblem image
+// and click-to-play poster both pull from this map instead of the
+// default /systems/<slug>.jpg convention.
+const POSTER_OVERRIDES: Record<string, string> = {
+  civicos: '/Sovereign logo2.png',
+};
+
 function emblemFor(category: string): React.ComponentType<{ className?: string; style?: React.CSSProperties; strokeWidth?: number | string }> {
   const c = (category || '').toLowerCase();
   if (/elector|ballot|voting/.test(c)) return Vote;
@@ -107,8 +114,8 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean; index: number;
           <div className="absolute inset-[6%] rounded-full border border-white/[0.06]" />
           <div className="absolute inset-[22%] rounded-full border border-white/[0.04]" />
           <Emblem className="relative w-28 h-28 sm:w-36 sm:h-36" strokeWidth={0.9} style={{ color: p.accent }} />
-          {/* cinematic system visual — framed product capture; tries <slug>.jpg then <slug>-1.jpg, hides if absent */}
-          <img src={`/systems/${p.slug}.jpg`} alt="" aria-hidden loading="lazy" decoding="async"
+          {/* cinematic system visual — framed product capture; tries override, then <slug>.jpg, then <slug>-1.jpg, hides if absent */}
+          <img src={POSTER_OVERRIDES[p.slug] || `/systems/${p.slug}.jpg`} alt="" aria-hidden loading="lazy" decoding="async"
             className="absolute inset-[4%] w-[92%] h-[92%] object-cover rounded-2xl border border-white/10 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]"
             onError={(e) => {
               const img = e.currentTarget as HTMLImageElement;
@@ -116,7 +123,7 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean; index: number;
               else { img.style.display = 'none'; }
             }} />
           {VIDEO_SLUGS.has(p.slug) && (
-            <SystemPlayer p={p} posterSrc={`/systems/${p.slug}.jpg`} />
+            <SystemPlayer p={p} posterSrc={POSTER_OVERRIDES[p.slug] || `/systems/${p.slug}.jpg`} />
           )}
         </div>
       </div>
