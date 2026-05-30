@@ -11,10 +11,13 @@ import ChannelTeaser from '@/components/home/ChannelTeaser';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import InstitutionalTrust from '@/components/home/InstitutionalTrust';
 import ClosingCTA from '@/components/home/ClosingCTA';
+import { DeploymentRegions } from '@/components/home/HomeSections';
 
-// Canonical homepage composition. EcosystemSectors carries the
-// system-by-system cinematic panels; each panel's visual (right column)
-// is a click-to-play video player.
+// Canonical homepage composition. EcosystemSectors restored to its original
+// design (cinematic emblem + framed system image on the right). The
+// DeploymentRegions section sits after the ClosingCTA per the operator
+// instruction — "Deploy regions" appears after "Deploy the operating layer
+// for sovereign civilization".
 const AppLayout: React.FC = () => {
   return (
     <div className="relative min-h-screen text-white">
@@ -28,7 +31,7 @@ const AppLayout: React.FC = () => {
         <MarketplaceTeaser />
         {/* ACT II — the sovereign infrastructure universe */}
         <Reveal><EcosystemPanels /></Reveal>
-        {/* featured institutions — cinematic panels with click-to-play visuals */}
+        {/* featured institutions — cinematic emblem panels with system imagery */}
         <EcosystemSectors />
         {/* the sovereign channel — media ecosystem entry */}
         <Reveal><ChannelTeaser /></Reveal>
@@ -36,8 +39,10 @@ const AppLayout: React.FC = () => {
         <Reveal><TransformationFlow /></Reveal>
         {/* institutional trust & governance */}
         <Reveal><InstitutionalTrust /></Reveal>
-        {/* closing statement */}
+        {/* closing statement — "Deploy the operating layer for sovereign civilization" */}
         <ClosingCTA />
+        {/* deployment reach — sovereign edge mesh regions */}
+        <Reveal><DeploymentRegions /></Reveal>
       </main>
       <PlatformFooter />
     </div>

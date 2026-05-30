@@ -1,163 +1,46 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct } from '@/lib/types';
 import Reveal from '@/components/Reveal';
-import { ArrowRight, Play, Volume2, VolumeX } from 'lucide-react';
+import { ArrowRight, Landmark, Vote, ShieldAlert, Banknote, Truck, Cpu, GraduationCap, Boxes } from 'lucide-react';
 
-// Right-column visual — a click-to-play video player using a conventional
-// video-poster design: cinematic background + typographic title overlay +
-// dark gradient + centered play button. Source defaults to
-// /systems/<slug>.mp4 (drop the file into public/systems/ to enable);
-// until then the conventional poster sits in place and the player
-// gracefully waits for the asset.
-const SystemVisual: React.FC<{ p: EcosystemProduct; flip: boolean }> = ({ p, flip }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(true);
-
-  const start = async () => {
-    const v = videoRef.current;
-    if (!v) return;
-    try {
-      v.muted = muted;
-      await v.play();
-      setPlaying(true);
-    } catch {
-      setPlaying(true);
-    }
-  };
-
-  const toggleMute = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.muted = !v.muted;
-    setMuted(v.muted);
-  };
-
-  return (
-    <div className={`relative ${flip ? 'lg:order-2' : ''}`}>
-      <div className="relative mx-auto w-full max-w-[480px] aspect-video sm:aspect-square">
-        {/* the player frame */}
-        <div className="absolute inset-0 rounded-2xl border border-white/10 overflow-hidden shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] bg-[#05071A]">
-
-          {/* conventional video poster — cinematic background, dark scrim, title overlay */}
-          {!playing && (
-            <>
-              {/* cinematic background — accent-tinted starfield */}
-              <div
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                  background:
-                    `radial-gradient(ellipse 70% 60% at 70% 35%, ${p.accent}40, transparent 65%),` +
-                    `radial-gradient(ellipse 80% 70% at 30% 85%, ${p.accent}1f, transparent 70%),` +
-                    'radial-gradient(ellipse 100% 100% at 50% 50%, #0c1d42 0%, #070f28 55%, #03060f 100%)',
-                }}
-              />
-              {/* depth grid */}
-              <div
-                aria-hidden
-                className="absolute inset-0 opacity-[0.18]"
-                style={{
-                  backgroundImage:
-                    `linear-gradient(${p.accent}30 1px, transparent 1px), ` +
-                    `linear-gradient(90deg, ${p.accent}30 1px, transparent 1px)`,
-                  backgroundSize: '52px 52px',
-                  maskImage: 'radial-gradient(ellipse 60% 70% at 50% 50%, #000 25%, transparent 80%)',
-                  WebkitMaskImage: 'radial-gradient(ellipse 60% 70% at 50% 50%, #000 25%, transparent 80%)',
-                }}
-              />
-              {/* glow halo behind the play button */}
-              <div
-                aria-hidden
-                className="absolute inset-0 pointer-events-none"
-                style={{ background: `radial-gradient(circle 200px at 50% 45%, ${p.accent}33, transparent 70%)` }}
-              />
-              {/* dark scrim — keeps title + play button legible */}
-              <div
-                aria-hidden
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background:
-                    'linear-gradient(180deg, rgba(5,7,15,0.45) 0%, rgba(5,7,15,0.0) 35%, rgba(5,7,15,0.0) 65%, rgba(5,7,15,0.7) 100%)',
-                }}
-              />
-              {/* category kicker — top-left */}
-              <div className="absolute top-5 left-5 right-5 flex items-start justify-between gap-3">
-                <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.28em]" style={{ color: p.accent }}>
-                  <span className="w-1.5 h-1.5 rounded-full animate-node" style={{ background: p.accent }} />
-                  {p.category}
-                </span>
-                <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">Dispatch</span>
-              </div>
-              {/* title overlay — bottom-left */}
-              <div className="absolute bottom-5 left-5 right-5">
-                <div className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white leading-[1.05]">
-                  {p.name}
-                </div>
-                <div className="mt-2 text-[11px] font-mono uppercase tracking-[0.24em] text-white/55">
-                  Play feature dispatch
-                </div>
-              </div>
-
-              {/* centered play button */}
-              <button
-                type="button"
-                onClick={start}
-                aria-label={`Play ${p.name} dispatch`}
-                className="absolute inset-0 flex items-center justify-center group/play"
-              >
-                <span
-                  className="relative inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full backdrop-blur-md transition-all duration-500 group-hover/play:scale-105"
-                  style={{
-                    background: `linear-gradient(135deg, ${p.accent}33, rgba(255,255,255,0.08))`,
-                    border: `1px solid ${p.accent}66`,
-                    boxShadow: `0 24px 60px -28px ${p.accent}aa`,
-                  }}
-                >
-                  <span aria-hidden className="absolute inset-0 rounded-full animate-pulse-slow" style={{ background: `radial-gradient(circle, ${p.accent}33, transparent 70%)` }} />
-                  <Play className="relative w-7 h-7 sm:w-8 sm:h-8 text-white ml-1" strokeWidth={1.5} fill="white" style={{ filter: `drop-shadow(0 0 14px ${p.accent})` }} />
-                </span>
-              </button>
-            </>
-          )}
-
-          {/* the video — sits above the poster when playing */}
-          <video
-            ref={videoRef}
-            src={`/systems/${p.slug}.mp4`}
-            preload="metadata"
-            playsInline
-            controls={playing}
-            onEnded={() => setPlaying(false)}
-            className={`absolute inset-0 w-full h-full object-cover bg-black transition-opacity duration-500 ${playing ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-          />
-
-          {/* mute control while playing */}
-          {playing && (
-            <button
-              type="button"
-              onClick={toggleMute}
-              aria-label={muted ? 'Unmute' : 'Mute'}
-              className="absolute top-3 right-3 w-9 h-9 rounded-lg flex items-center justify-center bg-black/40 backdrop-blur border border-white/15 text-white/80 hover:text-white hover:border-white/30 transition"
-            >
-              {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+function emblemFor(category: string): React.ComponentType<{ className?: string; style?: React.CSSProperties; strokeWidth?: number | string }> {
+  const c = (category || '').toLowerCase();
+  if (/elector|ballot|voting/.test(c)) return Vote;
+  if (/integrit|oversight|anti|procure|forensic/.test(c)) return ShieldAlert;
+  if (/govern|civic|govtech|operating infrastructure|government runtime/.test(c)) return Landmark;
+  if (/pay|bank|financ|settle|fintech|treasury/.test(c)) return Banknote;
+  if (/logistic|transport|mobility/.test(c)) return Truck;
+  if (/educat|credential/.test(c)) return GraduationCap;
+  if (/knowledge|intellig|\bai\b|learn/.test(c)) return Cpu;
+  return Boxes;
+}
 
 const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean; index: number; total: number }> = ({ p, flip, index, total }) => {
+  const Emblem = emblemFor(p.category);
   const metrics = (p.metrics || []).slice(0, 3);
   const caps = (p.capabilities || []).slice(0, 4);
   return (
     <div className="relative grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-      {/* cinematic video — single elegant click-to-play in an accent light-field */}
-      <SystemVisual p={p} flip={flip} />
+      {/* cinematic emblem — a single elegant mark in an accent light-field */}
+      <div className={`relative ${flip ? 'lg:order-2' : ''}`}>
+        <div className="relative mx-auto w-full max-w-[480px] aspect-square flex items-center justify-center">
+          <span aria-hidden className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center font-display font-bold tracking-tighter text-white/[0.035] whitespace-nowrap select-none" style={{ fontSize: 'clamp(3rem, 9vw, 6rem)' }}>{p.name}</span>
+          <div className="absolute inset-[12%] rounded-full blur-[80px] opacity-40" style={{ background: `radial-gradient(circle, ${p.accent}, transparent 70%)` }} />
+          <div className="absolute inset-[6%] rounded-full border border-white/[0.06]" />
+          <div className="absolute inset-[22%] rounded-full border border-white/[0.04]" />
+          <Emblem className="relative w-28 h-28 sm:w-36 sm:h-36" strokeWidth={0.9} style={{ color: p.accent }} />
+          {/* cinematic system visual — framed product capture; tries <slug>.jpg then <slug>-1.jpg, hides if absent */}
+          <img src={`/systems/${p.slug}.jpg`} alt="" aria-hidden loading="lazy" decoding="async"
+            className="absolute inset-[4%] w-[92%] h-[92%] object-cover rounded-2xl border border-white/10 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]"
+            onError={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              if (!img.dataset.alt) { img.dataset.alt = '1'; img.src = `/systems/${p.slug}-1.jpg`; }
+              else { img.style.display = 'none'; }
+            }} />
+        </div>
+      </div>
 
       {/* editorial statement */}
       <div className={flip ? 'lg:order-1' : ''}>
