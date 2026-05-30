@@ -1,12 +1,13 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Film, CreditCard, ArrowRight, Activity } from 'lucide-react';
+import { Film, CreditCard, Brain, ArrowRight, Activity } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth-context';
 import { ConsoleShell } from '../../components/ConsoleShell';
 import { UsageMeter } from '../../components/UsageMeter';
 import { JobRow } from '../../components/JobRow';
+import { KnowledgeStatusBanner } from '../../components/KnowledgeStatusBanner';
 import { planById } from '../../lib/plans';
 
 interface JobSummary { id: string; kind: string; status: string; provider: string | null; title: string | null; created_at: string; result_url: string | null; error: string | null }
@@ -45,6 +46,7 @@ export default function ConsolePage() {
 
   return (
     <ConsoleShell>
+      <KnowledgeStatusBanner />
       <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
         <div>
           <div className="text-[10px] tracking-[0.32em] text-emrg-gold">CONSOLE</div>
@@ -78,7 +80,7 @@ export default function ConsolePage() {
         <UsageMeter used={monthlyCount} limit={quota} label="Jobs this month" />
       </div>
 
-      <div className="mt-8 grid gap-5 lg:grid-cols-2">
+      <div className="mt-8 grid gap-5 lg:grid-cols-3">
         <Link href="/console/studio" className="group rounded-2xl border border-emrg-edge bg-emrg-panel/60 p-7 transition hover:-translate-y-0.5 hover:border-emrg-dim">
           <Film className="h-6 w-6 text-emrg-gold" />
           <h2 className="mt-5 font-serif text-2xl text-emrg-ink">Studio</h2>
@@ -87,6 +89,16 @@ export default function ConsolePage() {
           </p>
           <div className="mt-6 inline-flex items-center gap-1.5 text-[12px] text-emrg-cream transition group-hover:gap-2.5">
             Open studio <ArrowRight className="h-3.5 w-3.5" />
+          </div>
+        </Link>
+        <Link href="/console/intelligence" className="group rounded-2xl border border-emrg-edge bg-emrg-panel/60 p-7 transition hover:-translate-y-0.5 hover:border-emrg-dim">
+          <Brain className="h-6 w-6 text-emrg-gold" />
+          <h2 className="mt-5 font-serif text-2xl text-emrg-ink">Intelligence</h2>
+          <p className="mt-2 text-[13px] leading-relaxed text-emrg-mute">
+            Probe institutional doctrine through the Tier 00 knowledge provider; inspect provider state.
+          </p>
+          <div className="mt-6 inline-flex items-center gap-1.5 text-[12px] text-emrg-cream transition group-hover:gap-2.5">
+            Open intelligence <ArrowRight className="h-3.5 w-3.5" />
           </div>
         </Link>
         <Link href="/console/billing" className="group rounded-2xl border border-emrg-edge bg-emrg-panel/60 p-7 transition hover:-translate-y-0.5 hover:border-emrg-dim">

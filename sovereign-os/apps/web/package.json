@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@sovereign/api-platform": "*",
+    "@sovereign/intel-knowledge-contract": "*",
+    "@sovereign/intel-knowledge-reference": "*",
     "@supabase/supabase-js": "^2.106.2",
     "lucide-react": "^0.460.0",
     "next": "^14.2.5",
