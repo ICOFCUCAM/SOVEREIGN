@@ -59,7 +59,7 @@ const Submit: React.FC = () => {
     try {
       const req = buildRequest();
       const r = await submitDocument(req, req.idempotencyKey);
-      nav(`/documents/${r.documentId}`);
+      nav(`/console/documents/${r.documentId}`);
     } catch (e) { setErr(e instanceof Error ? e.message : "submit failed"); }
     finally { setBusy(false); }
   };

@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {has("dispatch:approve") && (
-        <Queue title="Needs your review" items={counts["in_review"] ?? []} empty="Nothing awaiting review." cta={{ to: "/review", label: "Open review queue →" }} />
+        <Queue title="Needs your review" items={counts["in_review"] ?? []} empty="Nothing awaiting review." cta={{ to: "/console/review", label: "Open review queue →" }} />
       )}
       <Queue title="Ready to publish" items={counts["rendered"] ?? []} empty="Nothing waiting to publish." />
       <Queue title="Recently published" items={counts["published"] ?? []} empty="No published documents yet." />
@@ -71,7 +71,7 @@ const Queue: React.FC<{ title: string; items: DocListItem[]; empty: string; cta?
         <ul className="divide-y divide-white/5">
           {items.slice(0, 6).map((d) => (
             <li key={d.documentId}>
-              <Link to={`/documents/${d.documentId}`} className="flex items-center gap-3 px-4 py-3 hover:bg-white/5">
+              <Link to={`/console/documents/${d.documentId}`} className="flex items-center gap-3 px-4 py-3 hover:bg-white/5">
                 <ClassBadge level={d.classification?.level} scheme={d.classification?.scheme} />
                 <span className="flex-1 truncate text-sm font-medium text-white">{d.title || "(untitled)"}</span>
                 <span className="hidden text-xs text-white/40 sm:inline">{d.docType}</span>

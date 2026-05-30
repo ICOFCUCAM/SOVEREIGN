@@ -60,7 +60,7 @@ const Library: React.FC = () => {
                 {items.map((d) => (
                   <tr key={d.documentId} className="hover:bg-white/5">
                     <td className="px-4 py-2.5"><ClassBadge level={d.classification?.level} scheme={d.classification?.scheme} /></td>
-                    <td className="px-4 py-2.5"><Link to={`/documents/${d.documentId}`} className="font-medium text-white hover:text-seal-light">{d.title || "(untitled)"}</Link></td>
+                    <td className="px-4 py-2.5"><Link to={`/console/documents/${d.documentId}`} className="font-medium text-white hover:text-seal-light">{d.title || "(untitled)"}</Link></td>
                     <td className="px-4 py-2.5 text-white/50">{d.docType}</td>
                     <td className="px-4 py-2.5"><LifecycleBadge state={d.lifecycle} /></td>
                     <td className="px-4 py-2.5 text-right text-xs text-white/40">{timeAgo(d.updatedAt)}</td>

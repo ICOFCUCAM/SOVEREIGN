@@ -4,3 +4,6 @@ dist
 *.local
 .env
 .env.*
+
+# placeholder hero — replace with the real Dispatchhero.png artwork
+public/Dispatchhero.png

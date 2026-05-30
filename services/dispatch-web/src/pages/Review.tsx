@@ -82,7 +82,7 @@ const Review: React.FC = () => {
                 <div className="flex justify-between"><dt>Submitted by</dt><dd className="text-white/70">{sel.submittedBy ?? "—"}</dd></div>
                 <div className="flex justify-between"><dt>Submitted</dt><dd className="text-white/70">{timeAgo(sel.submittedAt)}</dd></div>
               </dl>
-              <Link to={`/documents/${sel.documentId}`} className="mt-3 inline-block text-xs font-semibold text-seal-light hover:underline">Open full document →</Link>
+              <Link to={`/console/documents/${sel.documentId}`} className="mt-3 inline-block text-xs font-semibold text-seal-light hover:underline">Open full document →</Link>
 
               <div className="mt-4">
                 <Field label="Decision comment (optional)">

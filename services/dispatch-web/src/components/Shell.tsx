@@ -7,11 +7,11 @@ import { useAuth } from "../lib/auth";
 // faces. The lifecycle ordering (Submit → Review → Render → Library) is the
 // information architecture, not a file browser.
 const NAV: { to: string; label: string; scope?: string }[] = [
-  { to: "/", label: "Dashboard" },
-  { to: "/submit", label: "Submit", scope: "dispatch:render" },
-  { to: "/review", label: "Review & Approve", scope: "dispatch:approve" },
-  { to: "/library", label: "Library", scope: "dispatch:read" },
-  { to: "/audit", label: "Audit", scope: "dispatch:audit" },
+  { to: "/console", label: "Dashboard" },
+  { to: "/console/submit", label: "Submit", scope: "dispatch:render" },
+  { to: "/console/review", label: "Review & Approve", scope: "dispatch:approve" },
+  { to: "/console/library", label: "Library", scope: "dispatch:read" },
+  { to: "/console/audit", label: "Audit", scope: "dispatch:audit" },
 ];
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -35,7 +35,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
           <nav className="flex-1 space-y-1 px-3 py-2">
             {items.map((n) => (
-              <NavLink key={n.to} to={n.to} end={n.to === "/"}
+              <NavLink key={n.to} to={n.to} end={n.to === "/console"}
                 className={({ isActive }) =>
                   `block rounded-md px-3 py-2 text-sm font-medium transition ${isActive ? "bg-seal/30 text-white ring-1 ring-seal-light/40" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>
                 {n.label}
@@ -51,6 +51,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               ))}
             </div>
             <button onClick={() => { signOut(); nav("/"); }} className="text-xs font-semibold text-white/50 hover:text-white">Sign out</button>
+            <a href="/" className="ml-3 text-xs font-semibold text-white/30 hover:text-white/60">Home</a>
           </div>
         </aside>
         {/* main */}

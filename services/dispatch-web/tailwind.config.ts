@@ -16,6 +16,16 @@ export default {
         },
         paper: "#f6f7fb",
         seal: { DEFAULT: "#1f4b8e", deep: "#163a6e", light: "#3a6fc4" },
+        // Dispatch institutional gold — the marketing/brand accent.
+        gold: {
+          50: "#fbf6e9",
+          200: "#ecd9a3",
+          300: "#e0c476",
+          400: "#d4af52",
+          500: "#c9a24b",
+          600: "#a9852f",
+          700: "#856722",
+        },
         // classification banding
         cls: {
           unclassified: "#2f7d4f",
@@ -28,7 +38,7 @@ export default {
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
-        serif: ["Georgia", "ui-serif", "serif"],
+        serif: ["Fraunces", "Georgia", "ui-serif", "serif"],
       },
     },
   },
