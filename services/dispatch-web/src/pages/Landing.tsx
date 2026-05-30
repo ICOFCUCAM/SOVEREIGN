@@ -25,23 +25,25 @@ const Landing: React.FC = () => {
   const nav = useNavigate();
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#070707] text-white">
-      {/* hero artwork — full-bleed, anchored right */}
+      {/* hero artwork — full-bleed scene (globe + document covers), centred on
+          the right two-thirds so the fan of covers stays fully visible. */}
       <div
-        className="pointer-events-none absolute inset-0 bg-cover bg-right bg-no-repeat"
-        style={{ backgroundImage: "url(/Dispatchhero.png)" }}
+        className="pointer-events-none absolute inset-0 bg-cover bg-no-repeat"
+        style={{ backgroundImage: "url(/Dispatchhero.png)", backgroundPosition: "70% 38%" }}
         aria-hidden
       />
-      {/* legibility gradients: darken left for text, fade top/bottom edges */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/85 to-transparent" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#070707] to-transparent" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
+      {/* legibility gradients: black wash over the left ~third for the headline,
+          clearing quickly so the document fan stays bright; feathered edges. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] from-20% via-[#070707]/55 via-42% to-transparent to-65%" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#070707] to-transparent" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] via-[#070707]/50 to-transparent" aria-hidden />
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[1500px] flex-col px-8 lg:px-12">
         {/* top nav */}
         <header className="flex items-center justify-between py-7">
           <div className="flex items-center gap-3">
-            <DispatchMark className="h-9 w-9 text-gold-400" />
-            <span className="text-xl font-bold tracking-tight">
+            <DispatchMark className="h-8 w-8 text-gold-400 sm:h-9 sm:w-9" />
+            <span className="text-base font-bold tracking-tight sm:text-xl">
               SOVEREIGN <span className="text-gold-400">DISPATCH</span>
             </span>
           </div>
@@ -50,8 +52,8 @@ const Landing: React.FC = () => {
               <a key={n} href={`#${n.toLowerCase()}`} className="text-[13px] font-medium uppercase tracking-wide text-white/70 transition hover:text-white">{n}</a>
             ))}
           </nav>
-          <div className="flex items-center gap-4">
-            <button onClick={() => nav("/console")} className="text-[13px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-white">Log in</button>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <button onClick={() => nav("/console")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-white sm:block">Log in</button>
             <button onClick={() => nav("/console")}
               className="group inline-flex items-center gap-2 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-lg shadow-gold-700/20 transition hover:from-gold-200 hover:to-gold-500">
               Launch Dispatch
