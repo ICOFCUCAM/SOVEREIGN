@@ -4,6 +4,7 @@ import {
   listMembers, upsertMember, type AdminMember,
   listPolicies, upsertPolicy, type AdminPolicy,
   listRetention, upsertRetention, type RetentionPolicy,
+  listTemplates, upsertTemplate, deleteTemplate, type Template,
 } from "../lib/api";
 import { Button, Card, Field, inputCls, timeAgo } from "../lib/ui";
 
@@ -14,15 +15,15 @@ const ROLES = ["viewer", "author", "reviewer", "approver", "publisher", "auditor
 const CLEARANCES = ["none", "official", "official_sensitive", "secret", "top_secret"];
 
 const Admin: React.FC = () => {
-  const [tab, setTab] = useState<"clients" | "members" | "policies" | "retention">("clients");
+  const [tab, setTab] = useState<"clients" | "members" | "policies" | "retention" | "templates">("clients");
   return (
     <div>
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-white">Admin</h1>
-        <p className="text-sm text-white/50">Service clients, member roles &amp; clearance, approval &amp; retention policies.</p>
+        <p className="text-sm text-white/50">Service clients, member roles &amp; clearance, approval &amp; retention policies, document templates.</p>
       </header>
       <div className="mb-6 flex gap-1 border-b border-white/10">
-        {(["clients", "members", "policies", "retention"] as const).map((t) => (
+        {(["clients", "members", "policies", "retention", "templates"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold capitalize transition ${tab === t ? "border-gold-400 text-white" : "border-transparent text-white/45 hover:text-white"}`}>
             {t}
@@ -33,6 +34,7 @@ const Admin: React.FC = () => {
       {tab === "members" && <Members />}
       {tab === "policies" && <Policies />}
       {tab === "retention" && <Retention />}
+      {tab === "templates" && <Templates />}
     </div>
   );
 };
@@ -260,6 +262,73 @@ const Retention: React.FC = () => {
               </tr>
             ))}
             {items.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-sm text-white/30">No retention policies (tenant default applies).</td></tr>}
+          </tbody>
+        </table>
+      </Card>
+    </div>
+  );
+};
+
+// ---- Document templates (scaffolds) ----
+const Templates: React.FC = () => {
+  const [items, setItems] = useState<Template[]>([]);
+  const [builtins, setBuiltins] = useState<string[]>([]);
+  const [docType, setDocType] = useState("");
+  const [title, setTitle] = useState("");
+  const [required, setRequired] = useState("");
+  const [optional, setOptional] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    try { const r = await listTemplates(); setItems(r.items); setBuiltins(r.builtins); }
+    catch (e) { setErr(e instanceof Error ? e.message : "load failed"); }
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const csv = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
+  const save = async () => {
+    setErr(null);
+    const req = csv(required);
+    if (!docType.trim() || req.length === 0) { setErr("docType and at least one required role are needed"); return; }
+    try { await upsertTemplate({ docType: docType.trim(), title: title || docType.trim(), requiredRoles: req, optionalRoles: csv(optional) });
+      setDocType(""); setTitle(""); setRequired(""); setOptional(""); await load(); }
+    catch (e) { setErr(e instanceof Error ? e.message : "save failed"); }
+  };
+  const remove = async (dt: string) => { try { await deleteTemplate(dt); await load(); } catch (e) { setErr(e instanceof Error ? e.message : "delete failed"); } };
+  const edit = (t: Template) => { setDocType(t.docType); setTitle(t.title); setRequired(t.requiredRoles.join(", ")); setOptional(t.optionalRoles.join(", ")); };
+
+  return (
+    <div>
+      {err && <Banner kind="err">{err}</Banner>}
+      <Card className="mb-6 p-4">
+        <Field label="Define / override a document template" hint={`Required section roles a document must contain to be publishable. Overriding a built-in (${builtins.join(", ") || "none"}) replaces its scaffold.`}>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <input className={inputCls} value={docType} onChange={(e) => setDocType(e.target.value)} placeholder="docType (e.g. incident_report)" />
+            <input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title (e.g. Incident Report)" />
+            <input className={inputCls} value={required} onChange={(e) => setRequired(e.target.value)} placeholder="required roles (comma-separated)" />
+            <input className={inputCls} value={optional} onChange={(e) => setOptional(e.target.value)} placeholder="optional roles (comma-separated)" />
+          </div>
+          <div className="mt-3"><Button onClick={save}>Save template</Button></div>
+        </Field>
+      </Card>
+      <Card>
+        <table className="w-full text-sm">
+          <thead><tr className="border-b border-white/10 text-left text-[11px] uppercase tracking-wide text-white/40">
+            <th className="px-4 py-2">Doc type</th><th className="px-4 py-2">Required roles</th><th className="px-4 py-2">Kind</th><th className="px-4 py-2"></th>
+          </tr></thead>
+          <tbody className="divide-y divide-white/5">
+            {items.map((t) => (
+              <tr key={t.id} className="hover:bg-white/5">
+                <td className="px-4 py-2.5"><span className="font-medium text-white">{t.docType}</span><div className="text-xs text-white/40">{t.title}</div></td>
+                <td className="px-4 py-2.5 text-white/60">{t.requiredRoles.join(", ")}</td>
+                <td className="px-4 py-2.5">{t.overrides ? <span className="text-amber-300">override</span> : <span className="text-emerald-300">custom</span>}</td>
+                <td className="px-4 py-2.5 text-right">
+                  <button onClick={() => edit(t)} className="mr-3 text-xs font-semibold text-white/50 hover:text-white">Edit</button>
+                  <button onClick={() => remove(t.docType)} className="text-xs font-semibold text-red-300/70 hover:text-red-300">Delete</button>
+                </td>
+              </tr>
+            ))}
+            {items.length === 0 && <tr><td colSpan={4} className="px-4 py-8 text-center text-sm text-white/30">No custom templates. Built-ins in use: {builtins.join(", ") || "—"}.</td></tr>}
           </tbody>
         </table>
       </Card>

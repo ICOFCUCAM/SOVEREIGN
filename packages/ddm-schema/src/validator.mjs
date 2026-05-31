@@ -20,6 +20,25 @@ const requestSchema = JSON.parse(readFileSync(join(CONTRACT_DIR, "document-reque
 const resultSchema = JSON.parse(readFileSync(join(CONTRACT_DIR, "document-result.v1.0.json"), "utf8"));
 const scaffolds = JSON.parse(readFileSync(join(SCHEMA_DIR, "scaffolds.v1.0.json"), "utf8")).profiles;
 
+// The built-in docType profiles (Object.keys = supported doc types).
+export function listDocTypes() {
+  return Object.keys(scaffolds);
+}
+
+// Resolve the effective scaffold set, optionally OVERLAID with tenant-defined
+// templates. A tenant overlay entry { title?, requiredRoles, optionalRoles? }
+// overrides a built-in profile or adds a new docType. Returns a merged object;
+// pure (does not mutate the built-ins).
+export function resolveScaffolds(overlay) {
+  if (!overlay || typeof overlay !== "object") return scaffolds;
+  const merged = { ...scaffolds };
+  for (const [docType, def] of Object.entries(overlay)) {
+    const base = scaffolds[docType] || { docType, template: docType, version: 1 };
+    merged[docType] = { ...base, ...def, docType };
+  }
+  return merged;
+}
+
 // Frozen size limits (Epic 1 §1.3 / ambiguity #3)
 const LIMITS = {
   sections: 80, blocksTotal: 400, paragraphChars: 5000,
@@ -90,8 +109,8 @@ function checkCrossFields(req, errors) {
   if (d.callbackAuth && !d.callbackUrl) errors.push(err("CALLBACK_URL_REQUIRED", "callbackAuth requires callbackUrl", "/delivery/callbackUrl"));
 }
 
-function checkScaffold(doc, errors, warnings) {
-  const profile = scaffolds[doc.docType];
+function checkScaffold(doc, errors, warnings, SC = scaffolds) {
+  const profile = SC[doc.docType];
   if (!profile) { errors.push(err("DOC_TYPE_UNSUPPORTED", `docType '${doc.docType}' not supported in P1`, "/document/docType")); return null; }
   const roles = new Set((doc.sections || []).map((s) => s.role).filter(Boolean));
   const missing = profile.requiredRoles.filter((r) => !roles.has(r));
@@ -112,7 +131,8 @@ function checkScaffold(doc, errors, warnings) {
  * Validate a full DocumentRequest. Returns the canonical verdict object used by
  * /v1/validate (200 body) and internally by /v1/documents and the worker.
  */
-export function validateRequest(req) {
+export function validateRequest(req, opts = {}) {
+  const SC = opts.scaffolds && typeof opts.scaffolds === "object" ? opts.scaffolds : scaffolds;
   const errors = [];
   const warnings = [];
   // 1. Schema
@@ -125,8 +145,8 @@ export function validateRequest(req) {
   }
   // 2. Size limits
   checkSizeLimits(req.document, errors);
-  // 3. Scaffold completeness
-  const resolved = checkScaffold(req.document, errors, warnings);
+  // 3. Scaffold completeness (built-ins, optionally overlaid with tenant templates)
+  const resolved = checkScaffold(req.document, errors, warnings, SC);
   // 4. Cross-references
   checkCrossRefs(req.document, errors, warnings);
   // 5. Cross-field
@@ -135,7 +155,8 @@ export function validateRequest(req) {
 }
 
 /** Validate a bare DDM document (no envelope). Used by the worker on stored versions. */
-export function validateDocument(doc) {
+export function validateDocument(doc, opts = {}) {
+  const SC = opts.scaffolds && typeof opts.scaffolds === "object" ? opts.scaffolds : scaffolds;
   const errors = [];
   const warnings = [];
   const ok = validateDocumentSchema(doc);
@@ -144,7 +165,7 @@ export function validateDocument(doc) {
     return { valid: false, errors, warnings, resolved: null };
   }
   checkSizeLimits(doc, errors);
-  const resolved = checkScaffold(doc, errors, warnings);
+  const resolved = checkScaffold(doc, errors, warnings, SC);
   checkCrossRefs(doc, errors, warnings);
   return { valid: errors.length === 0, errors, warnings, resolved };
 }

@@ -110,6 +110,13 @@ export const listRetention = () => request<{ items: RetentionPolicy[]; count: nu
 export const upsertRetention = (p: { classificationLevel?: string; retentionDays: number; purgeGraceDays: number }) =>
   request<{ id: string; retentionDays: number; purgeGraceDays: number }>("POST", "/v1/admin/retention-policies", { body: p });
 
+export interface Template { id: string; docType: string; title: string; requiredRoles: string[]; optionalRoles: string[]; active: boolean; overrides: boolean }
+export const listTemplates = () => request<{ builtins: string[]; items: Template[]; count: number }>("GET", "/v1/admin/templates");
+export const upsertTemplate = (p: { docType: string; title?: string; requiredRoles: string[]; optionalRoles?: string[]; active?: boolean }) =>
+  request<{ id: string; docType: string }>("POST", "/v1/admin/templates", { body: p });
+export const deleteTemplate = (docType: string) =>
+  request<{ docType: string; deleted: boolean }>("DELETE", `/v1/admin/templates/${encodeURIComponent(docType)}`);
+
 // ---- audit ----
 export interface AuditEvent { eventId: string; actor: string; actorType: string; action: string; targetType?: string; targetId?: string; classification?: string; requestId?: string; correlationId?: string; sha256?: string; ts: string }
 export const audit = (params: { target?: string; action?: string; limit?: number } = {}) => {

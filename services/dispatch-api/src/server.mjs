@@ -8,7 +8,7 @@ import crypto from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { validateRequest } from "@dispatch/ddm-schema/validator";
+import { validateRequest, resolveScaffolds, listDocTypes } from "@dispatch/ddm-schema/validator";
 import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
 import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verifyDownloadGrant, hashSecretScrypt, roleScopes } from "../../shared/src/auth.mjs";
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
@@ -59,6 +59,19 @@ async function readBody(req) {
   return Buffer.concat(chunks).toString("utf8");
 }
 
+// Load the tenant's ACTIVE templates and build a scaffolds overlay keyed by
+// docType (overrides/adds to the built-in v1.0 scaffolds). Returns the merged
+// effective scaffold set used by validation. Failures fall back to built-ins.
+async function tenantScaffolds(principal) {
+  try {
+    const rows = await withClaims(pool, govClaims(principal), (c) =>
+      c.query("select doc_type, title, required_roles, optional_roles from dispatch.templates where active = true").then((r) => r.rows));
+    const overlay = {};
+    for (const r of rows) overlay[r.doc_type] = { title: r.title, requiredRoles: r.required_roles, optionalRoles: r.optional_roles };
+    return resolveScaffolds(overlay);
+  } catch { return resolveScaffolds(null); }
+}
+
 async function handleValidate(req, res, principal) {
   if (!hasScope(principal, "dispatch:validate")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "validate scope required"));
   let body;
@@ -67,7 +80,8 @@ async function handleValidate(req, res, principal) {
   // tenant guard: body source.tenantId must match the principal's tenant
   if (body?.source?.tenantId && body.source.tenantId !== principal.tenantId)
     return send(res, 403, errEnvelope(body.requestId, 403, "TENANT_MISMATCH", "source.tenantId != token tenant"));
-  const v = validateRequest(body);            // shared module — identical to worker
+  const scaffolds = await tenantScaffolds(principal);
+  const v = validateRequest(body, { scaffolds });   // built-ins overlaid with tenant templates
   return send(res, 200, { valid: v.valid, errors: v.errors, warnings: v.warnings, resolved: v.resolved });
 }
 
@@ -84,8 +98,9 @@ async function handleDocuments(req, res, principal) {
   if (body?.source?.tenantId && body.source.tenantId !== principal.tenantId)
     return send(res, 403, errEnvelope(requestId, 403, "TENANT_MISMATCH", "source.tenantId != token tenant"));
 
-  // Validate (same module as /validate and worker)
-  const v = validateRequest(body);
+  // Validate (same module as /validate and worker), with tenant templates.
+  const scaffolds = await tenantScaffolds(principal);
+  const v = validateRequest(body, { scaffolds });
   if (!v.valid) {
     const primary = v.errors[0];
     const statusByCode = { SCAFFOLD_INCOMPLETE: 422, DOC_TYPE_UNSUPPORTED: 422, DOC_TOO_LARGE: 400 };
@@ -571,6 +586,80 @@ async function handleUpsertRetention(req, res, principal) {
   }
 }
 
+// GET /v1/admin/templates — list this tenant's templates (overrides/additions)
+// alongside the built-in defaults so the console can show the effective set.
+async function handleListTemplates(res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  const rows = await withClaims(pool, govClaims(principal), (c) =>
+    c.query("select id, doc_type, title, required_roles, optional_roles, active from dispatch.templates order by doc_type").then((r) => r.rows));
+  const builtins = listDocTypes();
+  return send(res, 200, {
+    builtins,
+    items: rows.map((r) => ({ id: r.id, docType: r.doc_type, title: r.title,
+      requiredRoles: r.required_roles, optionalRoles: r.optional_roles, active: r.active,
+      overrides: builtins.includes(r.doc_type) })),
+    count: rows.length,
+  });
+}
+
+// POST /v1/admin/templates — upsert a template for a docType.
+async function handleUpsertTemplate(req, res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  const docType = String(body?.docType || "").trim();
+  if (!docType) return send(res, 400, errEnvelope(null, 400, "DOCTYPE_REQUIRED", "docType required"));
+  if (!Array.isArray(body.requiredRoles) || body.requiredRoles.length === 0)
+    return send(res, 400, errEnvelope(null, 400, "ROLES_REQUIRED", "requiredRoles must be a non-empty array"));
+  const required = body.requiredRoles.map((s) => String(s).trim()).filter(Boolean);
+  const optional = Array.isArray(body.optionalRoles) ? body.optionalRoles.map((s) => String(s).trim()).filter(Boolean) : [];
+  try {
+    const id = await withClaims(pool, govClaims(principal), async (c) => {
+      const r = await c.query(
+        `insert into dispatch.templates (tenant_id, doc_type, title, required_roles, optional_roles, active)
+         values ($1,$2,$3,$4,$5, coalesce($6,true))
+         on conflict (tenant_id, doc_type)
+           do update set title=excluded.title, required_roles=excluded.required_roles,
+                         optional_roles=excluded.optional_roles, active=excluded.active
+         returning id`,
+        [principal.tenantId, docType, body.title || docType, required, optional, body.active]);
+      await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: "admin.template.upserted", targetType: "template", targetId: r.rows[0].id });
+      return r.rows[0].id;
+    });
+    return send(res, 200, { id, docType, title: body.title || docType, requiredRoles: required, optionalRoles: optional });
+  } catch (e) {
+    console.error("upsert template error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
+// DELETE /v1/admin/templates/{docType} — remove a tenant template (a built-in
+// docType reverts to its default; a custom docType disappears).
+async function handleDeleteTemplate(res, principal, docType) {
+  if (!requireAdmin(res, principal)) return;
+  const removed = await withClaims(pool, govClaims(principal), async (c) => {
+    const r = await c.query("delete from dispatch.templates where doc_type=$1 returning id", [docType]);
+    if (r.rows[0]) await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+      action: "admin.template.deleted", targetType: "template", targetId: r.rows[0].id });
+    return r.rows[0];
+  });
+  if (!removed) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "template not found"));
+  return send(res, 200, { docType, deleted: true });
+}
+
+// GET /v1/doctypes — the EFFECTIVE doc types for this tenant (built-ins overlaid
+// with active templates). Any authenticated principal with read may list them.
+async function handleListDocTypes(res, principal) {
+  if (!hasScope(principal, "dispatch:read") && !hasScope(principal, "dispatch:validate"))
+    return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read or validate scope required"));
+  const sc = await tenantScaffolds(principal);
+  const items = Object.entries(sc).map(([docType, def]) => ({ docType, title: def.title || docType,
+    requiredRoles: def.requiredRoles || [], optionalRoles: def.optionalRoles || [] }));
+  return send(res, 200, { items, count: items.length });
+}
+
 // ---- Retrieve surface (Epic 8) ---------------------------------------------
 // All reads run under the principal's tenant claim, so RLS returns 0 rows for a
 // cross-tenant id → we surface 404 (never leak existence across tenants).
@@ -778,13 +867,21 @@ const server = http.createServer(async (req, res) => {
     }
 
     // Admin GET surface (dispatch:admin, tenant-scoped).
-    if (req.method === "GET" && (path === "/v1/admin/clients" || path === "/v1/admin/members" || path === "/v1/admin/policies" || path === "/v1/admin/retention-policies")) {
+    if (req.method === "GET" && (path === "/v1/admin/clients" || path === "/v1/admin/members" || path === "/v1/admin/policies" || path === "/v1/admin/retention-policies" || path === "/v1/admin/templates")) {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       if (path === "/v1/admin/clients") return await handleListClients(res, auth.principal);
       if (path === "/v1/admin/members") return await handleListMembers(res, auth.principal);
       if (path === "/v1/admin/policies") return await handleListPolicies(res, auth.principal);
       if (path === "/v1/admin/retention-policies") return await handleListRetention(res, auth.principal);
+      if (path === "/v1/admin/templates") return await handleListTemplates(res, auth.principal);
+    }
+
+    // Effective doc types (built-ins + tenant templates) for any read principal.
+    if (req.method === "GET" && path === "/v1/doctypes") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleListDocTypes(res, auth.principal);
     }
 
     // PATCH (admin client update).
@@ -794,6 +891,17 @@ const server = http.createServer(async (req, res) => {
         const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
         if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
         return await handleUpdateClient(req, res, auth.principal, m[1]);
+      }
+      return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "not found"));
+    }
+
+    // DELETE (admin template removal).
+    if (req.method === "DELETE") {
+      const m = /^\/v1\/admin\/templates\/([A-Za-z0-9_-]+)$/.exec(path);
+      if (m) {
+        const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+        if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+        return await handleDeleteTemplate(res, auth.principal, m[1]);
       }
       return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "not found"));
     }
@@ -859,6 +967,7 @@ const server = http.createServer(async (req, res) => {
     if (path === "/v1/admin/members") return await handleUpsertMember(req, res, principal);
     if (path === "/v1/admin/policies") return await handleUpsertPolicy(req, res, principal);
     if (path === "/v1/admin/retention-policies") return await handleUpsertRetention(req, res, principal);
+    if (path === "/v1/admin/templates") return await handleUpsertTemplate(req, res, principal);
 
     // Mint a single-artifact download grant (Epic-10 hardening): the artifact must
     // belong to the principal's tenant (RLS-checked) and the principal needs read.

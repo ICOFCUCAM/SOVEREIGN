@@ -257,7 +257,36 @@ most-specific resolution, publish bakes both timestamps from the policy, sweep
 honours per-document `purge_after`). admin-retention + governance canaries green.
 Verified in-browser (Retention tab).
 
-## 10. Honest gaps / next
+## 10. Document templates / scaffolds (close-out)
+
+Institutions can define their own report formats without code. The built-in
+scaffolds (`schemas/scaffolds.v1.0.json`) define, per docType, the required
+section ROLES a document must contain to be publishable. `M13` adds a
+tenant-editable `templates` table; the API overlays active tenant templates onto
+the built-ins at validate time.
+
+- **Validator:** `validateRequest(req, { scaffolds })` / `validateDocument(doc,
+  { scaffolds })` accept an override; `resolveScaffolds(overlay)` merges tenant
+  templates onto built-ins; `listDocTypes()` lists the built-ins. Pure +
+  backward-compatible (existing one-arg callers unchanged).
+- **DDM schema:** the frozen `docType` enum was relaxed to a string pattern, so
+  the SCAFFOLD PROFILE SET (built-in + tenant) is the authority on supported
+  types — an unsupported docType is still reported as `DOC_TYPE_UNSUPPORTED` by
+  the post-schema scaffold check. Widening, backward-compatible.
+- **API:** `tenantScaffolds(principal)` loads active templates under the tenant
+  claim and feeds both validate sites (`/v1/validate`, `/v1/documents`). Admin
+  CRUD `GET/POST /v1/admin/templates`, `DELETE /v1/admin/templates/{docType}`
+  (dispatch:admin). `GET /v1/doctypes` returns the effective set for any reader.
+- **Console:** a "Templates" tab in Admin (define/override docType, required +
+  optional roles, edit/delete; built-in overrides flagged).
+
+**Tests:** `templates.test.mjs` 12/12 (admin gating, custom docType validates,
+custom docType missing a role → SCAFFOLD_INCOMPLETE, built-in override adds a
+required role, effective doctypes, delete reverts to built-in, tenant
+isolation). ddm-schema 25/25 (+ engine/render/policy 81) and the full services
+sweep green. Build + lint clean; Templates tab verified in-browser.
+
+## 11. Honest gaps / next
 
 - Docker image builds for `dispatch-web` validated by local `npm run build`; the
   nginx image build itself is unexercised here (no Docker daemon in this env).

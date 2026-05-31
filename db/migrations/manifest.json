@@ -12,6 +12,7 @@
     "M9__admin_and_retention.sql",
     "M10__membership_lookup.sql",
     "M11__refresh_tokens.sql",
-    "M12__retention_policies.sql"
+    "M12__retention_policies.sql",
+    "M13__templates.sql"
   ]
 }
