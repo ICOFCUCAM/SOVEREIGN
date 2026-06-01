@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import ContactModal from '@/components/ContactModal';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const PrivacyPage: React.FC = () => {
   useDocumentTitle('Privacy Policy', 'Privacy Policy for the SOVEREIGN platform.');
+  const [open, setOpen] = useState(false);
   return (
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
@@ -37,7 +39,7 @@ const PrivacyPage: React.FC = () => {
             </section>
             <section>
               <h2 className="font-display text-2xl font-bold text-white">5. Your rights</h2>
-              <p className="mt-3">You may request access, correction, deletion, or export of your data. Email <a className="text-cyan-300 hover:text-white" href="mailto:privacy@sovereigndo.com">privacy@sovereigndo.com</a> with the request and the account email on file.</p>
+              <p className="mt-3">You may request access, correction, deletion, or export of your data. <button onClick={() => setOpen(true)} className="text-cyan-300 hover:text-white underline-offset-2 hover:underline">Submit a privacy request</button> and include the account email on file.</p>
             </section>
             <section>
               <h2 className="font-display text-2xl font-bold text-white">6. Security</h2>
@@ -45,12 +47,13 @@ const PrivacyPage: React.FC = () => {
             </section>
             <section>
               <h2 className="font-display text-2xl font-bold text-white">7. Contact</h2>
-              <p className="mt-3"><a className="text-cyan-300 hover:text-white" href="mailto:privacy@sovereigndo.com">privacy@sovereigndo.com</a></p>
+              <p className="mt-3"><button onClick={() => setOpen(true)} className="text-cyan-300 hover:text-white underline-offset-2 hover:underline">Contact the privacy desk</button></p>
             </section>
           </div>
         </div>
       </main>
       <PlatformFooter />
+      {open && <ContactModal purpose="privacy" onClose={() => setOpen(false)} />}
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-react';
 import BriefingModal from '@/components/BriefingModal';
+import ContactModal from '@/components/ContactModal';
 import { resolveTenant, isRegistrarHost, PLATFORM_ORIGIN } from '@/lib/tenant';
 
 // Registrar surfaces link cross-host back to the main ecosystem; default to the
@@ -127,6 +128,7 @@ const PlatformFooter: React.FC = () => {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [brief, setBrief] = useState(false);
+  const [contact, setContact] = useState(false);
   const [year, setYear] = useState<number>(() => new Date().getFullYear());
 
   useEffect(() => { setYear(new Date().getFullYear()); }, []);
@@ -225,9 +227,9 @@ const PlatformFooter: React.FC = () => {
                 <ArrowRight className="w-3.5 h-3.5 text-cyan-300 group-hover:translate-x-0.5 transition-transform" />
               </button>
               <span className="hidden sm:inline-block w-px h-3 bg-white/15" aria-hidden />
-              <a href="mailto:institutional@sovereigndo.com" className="hidden sm:inline-flex text-white/45 hover:text-white/80 transition">
-                institutional@sovereigndo.com
-              </a>
+              <button onClick={() => setContact(true)} className="hidden sm:inline-flex text-white/45 hover:text-white/80 transition">
+                Institutional contact
+              </button>
             </div>
           </div>
         </div>
@@ -270,6 +272,7 @@ const PlatformFooter: React.FC = () => {
       </div>
 
       {brief && <BriefingModal systemName="SOVEREIGN" slug="platform" accent="#00C2FF" onClose={() => setBrief(false)} />}
+      {contact && <ContactModal purpose="institutional" onClose={() => setContact(false)} />}
     </footer>
   );
 };

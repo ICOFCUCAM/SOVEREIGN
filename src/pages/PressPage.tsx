@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Download, ExternalLink } from 'lucide-react';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import ContactModal from '@/components/ContactModal';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const PressPage: React.FC = () => {
   useDocumentTitle('Press', 'Press resources, brand assets, and contact for journalists and analysts covering SOVEREIGN.');
+  const [open, setOpen] = useState(false);
   return (
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
@@ -62,14 +64,15 @@ const PressPage: React.FC = () => {
 
           <section className="mt-5 rounded-2xl border border-white/10 bg-white/[0.015] p-7">
             <h2 className="font-display text-2xl font-bold">Editorial contact</h2>
-            <a className="mt-3 inline-flex items-center gap-2 text-cyan-300 hover:text-white" href="mailto:press@sovereigndo.com">
-              <Mail className="w-4 h-4" /> press@sovereigndo.com
-            </a>
+            <button onClick={() => setOpen(true)} className="mt-3 inline-flex items-center gap-2 text-cyan-300 hover:text-white">
+              <Mail className="w-4 h-4" /> Open press desk
+            </button>
             <p className="mt-3 text-xs text-white/40">Response within one business day. Embargoes honoured.</p>
           </section>
         </div>
       </main>
       <PlatformFooter />
+      {open && <ContactModal purpose="press" onClose={() => setOpen(false)} />}
     </div>
   );
 };

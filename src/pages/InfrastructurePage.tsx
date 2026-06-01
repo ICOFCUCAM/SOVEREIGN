@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Landmark, Users, Building2, ArrowRight } from 'lucide-react';
 import PlatformNav from '@/components/PlatformNav';
@@ -6,6 +6,7 @@ import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Reveal from '@/components/Reveal';
 import SovereignInfrastructureStack from '@/components/home/SovereignInfrastructureStack';
+import ContactModal from '@/components/ContactModal';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 // /infrastructure — the public featured-infrastructures surface for
@@ -17,6 +18,7 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const InfrastructurePage: React.FC = () => {
   useDocumentTitle('Sovereign Infrastructure', 'A platform for building, operating, deploying and governing institutional-grade infrastructures. Deploy individually. Operate together.');
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="relative min-h-screen text-white">
@@ -77,19 +79,20 @@ const InfrastructurePage: React.FC = () => {
             <p className="text-white/55 text-base leading-relaxed max-w-2xl mx-auto mb-7">
               Single-tenant institutional deployments scoped on briefing. Each infrastructure carries its own audit posture, sovereign jurisdiction and tenant isolation by default.
             </p>
-            <a
-              href="mailto:institutional@sovereigndo.com?subject=Sovereign%20infrastructure%20deployment%20briefing"
+            <button
+              onClick={() => setOpen(true)}
               className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
               style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 14px 40px -12px rgba(0,194,255,0.5)' }}
             >
               Request a deployment briefing
               <ArrowRight className="w-4 h-4" />
-            </a>
+            </button>
           </div>
         </div>
       </main>
 
       <PlatformFooter />
+      {open && <ContactModal purpose="institutional" subjectHint="Sovereign infrastructure deployment briefing" onClose={() => setOpen(false)} />}
     </div>
   );
 };

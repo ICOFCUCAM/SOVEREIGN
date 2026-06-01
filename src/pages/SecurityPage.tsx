@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Lock, KeyRound, FileLock, Server, Network } from 'lucide-react';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import ContactModal from '@/components/ContactModal';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const PILLARS = [
@@ -17,6 +18,7 @@ const PILLARS = [
 
 const SecurityPage: React.FC = () => {
   useDocumentTitle('Security', 'Sovereign-grade security by default — isolation, encryption, audit logs, and institutional deployment options.');
+  const [open, setOpen] = useState(false);
   return (
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
@@ -47,8 +49,8 @@ const SecurityPage: React.FC = () => {
           <div className="mt-14 rounded-2xl border border-white/10 bg-white/[0.015] p-8">
             <h2 className="font-display text-2xl font-bold">Vulnerability disclosure</h2>
             <p className="mt-3 text-sm text-white/55 leading-relaxed">
-              Report security issues to{' '}
-              <a className="text-cyan-300 hover:text-white" href="mailto:security@sovereigndo.com">security@sovereigndo.com</a>.
+              Report security issues through the{' '}
+              <button onClick={() => setOpen(true)} className="text-cyan-300 hover:text-white underline-offset-2 hover:underline">security disclosure desk</button>.
               We acknowledge within 48 hours; PGP key available on request.
             </p>
             <div className="mt-5 flex flex-wrap gap-3 text-[13px]">
@@ -59,6 +61,7 @@ const SecurityPage: React.FC = () => {
         </div>
       </main>
       <PlatformFooter />
+      {open && <ContactModal purpose="security" onClose={() => setOpen(false)} />}
     </div>
   );
 };

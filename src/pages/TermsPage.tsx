@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import ContactModal from '@/components/ContactModal';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const TermsPage: React.FC = () => {
   useDocumentTitle('Terms of Service', 'Terms of Service for the SOVEREIGN platform.');
+  const [open, setOpen] = useState(false);
   return (
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
@@ -53,12 +55,13 @@ const TermsPage: React.FC = () => {
             </section>
             <section>
               <h2 className="font-display text-2xl font-bold text-white">9. Contact</h2>
-              <p className="mt-3">Questions about these Terms: <a className="text-cyan-300 hover:text-white" href="mailto:legal@sovereigndo.com">legal@sovereigndo.com</a></p>
+              <p className="mt-3">Questions about these Terms: <button onClick={() => setOpen(true)} className="text-cyan-300 hover:text-white underline-offset-2 hover:underline">Open legal desk</button></p>
             </section>
           </div>
         </div>
       </main>
       <PlatformFooter />
+      {open && <ContactModal purpose="legal" onClose={() => setOpen(false)} />}
     </div>
   );
 };

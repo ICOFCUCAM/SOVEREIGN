@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import ContactModal from '@/components/ContactModal';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 // Operational status — purely declarative. A real incident feed can replace
@@ -28,6 +29,7 @@ const REGIONS: Array<{ id: string; label: string; status: 'online' | 'scaling' }
 
 const StatusPage: React.FC = () => {
   useDocumentTitle('Status', 'Live operational status across the SOVEREIGN platform — APIs, DNS, billing and regional capacity.');
+  const [open, setOpen] = useState(false);
   return (
     <div className="relative min-h-screen text-white">
       <AnimatedBackground intensity="low" />
@@ -40,7 +42,7 @@ const StatusPage: React.FC = () => {
               All systems <span className="text-gradient-cyan">operational.</span>
             </h1>
             <p className="text-white/55 leading-relaxed">
-              Live operational state across the sovereign platform. Subscribe to incident updates at <a className="text-cyan-300 hover:text-white" href="mailto:status@sovereigndo.com">status@sovereigndo.com</a>.
+              Live operational state across the sovereign platform. <button onClick={() => setOpen(true)} className="text-cyan-300 hover:text-white underline-offset-2 hover:underline">Subscribe to incident updates</button>.
             </p>
           </div>
 
@@ -79,6 +81,7 @@ const StatusPage: React.FC = () => {
         </div>
       </main>
       <PlatformFooter />
+      {open && <ContactModal purpose="status" onClose={() => setOpen(false)} />}
     </div>
   );
 };
