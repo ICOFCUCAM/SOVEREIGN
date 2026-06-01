@@ -5,11 +5,11 @@ import BriefingModal from '@/components/BriefingModal';
 import { resolveTenant, isRegistrarHost, PLATFORM_ORIGIN } from '@/lib/tenant';
 
 // Registrar surfaces link cross-host back to the main ecosystem; default to the
-// canonical sovereign.so origin when no PLATFORM_ORIGIN env is configured.
+// canonical sovereigndo.com origin when no PLATFORM_ORIGIN env is configured.
 const IS_REGISTRAR = isRegistrarHost(resolveTenant().hostname);
-const PLATFORM_HOME = (PLATFORM_ORIGIN || 'https://sovereign.so').replace(/\/$/, '');
+const PLATFORM_HOME = (PLATFORM_ORIGIN || 'https://sovereigndo.com').replace(/\/$/, '');
 const REGISTRAR_LANDING_URL = (import.meta.env.VITE_REGISTRAR_LANDING_URL as string | undefined) || '/sovereign-domains';
-const MEDIA_LANDING_URL = (import.meta.env.VITE_MEDIA_LANDING_URL as string | undefined) || 'https://emergency-icofcucam-3942s-projects.vercel.app/';
+const MEDIA_LANDING_URL = (import.meta.env.VITE_MEDIA_LANDING_URL as string | undefined) || 'https://emergency.sovereigndo.com';
 
 type FooterLink = { label: string; to: string };
 
@@ -225,8 +225,8 @@ const PlatformFooter: React.FC = () => {
                 <ArrowRight className="w-3.5 h-3.5 text-cyan-300 group-hover:translate-x-0.5 transition-transform" />
               </button>
               <span className="hidden sm:inline-block w-px h-3 bg-white/15" aria-hidden />
-              <a href="mailto:institutional@sovereign.so" className="hidden sm:inline-flex text-white/45 hover:text-white/80 transition">
-                institutional@sovereign.so
+              <a href="mailto:institutional@sovereigndo.com" className="hidden sm:inline-flex text-white/45 hover:text-white/80 transition">
+                institutional@sovereigndo.com
               </a>
             </div>
           </div>

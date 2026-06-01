@@ -62,8 +62,8 @@ const PressPage: React.FC = () => {
 
           <section className="mt-5 rounded-2xl border border-white/10 bg-white/[0.015] p-7">
             <h2 className="font-display text-2xl font-bold">Editorial contact</h2>
-            <a className="mt-3 inline-flex items-center gap-2 text-cyan-300 hover:text-white" href="mailto:press@sovereign.so">
-              <Mail className="w-4 h-4" /> press@sovereign.so
+            <a className="mt-3 inline-flex items-center gap-2 text-cyan-300 hover:text-white" href="mailto:press@sovereigndo.com">
+              <Mail className="w-4 h-4" /> press@sovereigndo.com
             </a>
             <p className="mt-3 text-xs text-white/40">Response within one business day. Embargoes honoured.</p>
           </section>

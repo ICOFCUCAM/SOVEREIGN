@@ -117,7 +117,7 @@ const TenantRoutes = () => (
   </Routes>
 );
 
-// domains.sovereign.so — the dedicated registrar infrastructure layer, rooted
+// domains.sovereigndo.com — the dedicated registrar infrastructure layer, rooted
 // at the domain platform but sharing the operate/deploy surfaces.
 const RegistrarRoutes = () => (
   <Routes>

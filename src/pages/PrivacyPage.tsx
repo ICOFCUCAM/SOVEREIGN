@@ -37,7 +37,7 @@ const PrivacyPage: React.FC = () => {
             </section>
             <section>
               <h2 className="font-display text-2xl font-bold text-white">5. Your rights</h2>
-              <p className="mt-3">You may request access, correction, deletion, or export of your data. Email <a className="text-cyan-300 hover:text-white" href="mailto:privacy@sovereign.so">privacy@sovereign.so</a> with the request and the account email on file.</p>
+              <p className="mt-3">You may request access, correction, deletion, or export of your data. Email <a className="text-cyan-300 hover:text-white" href="mailto:privacy@sovereigndo.com">privacy@sovereigndo.com</a> with the request and the account email on file.</p>
             </section>
             <section>
               <h2 className="font-display text-2xl font-bold text-white">6. Security</h2>
@@ -45,7 +45,7 @@ const PrivacyPage: React.FC = () => {
             </section>
             <section>
               <h2 className="font-display text-2xl font-bold text-white">7. Contact</h2>
-              <p className="mt-3"><a className="text-cyan-300 hover:text-white" href="mailto:privacy@sovereign.so">privacy@sovereign.so</a></p>
+              <p className="mt-3"><a className="text-cyan-300 hover:text-white" href="mailto:privacy@sovereigndo.com">privacy@sovereigndo.com</a></p>
             </section>
           </div>
         </div>

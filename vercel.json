@@ -6,9 +6,9 @@
   "outputDirectory": "dist",
   "build": {
     "env": {
-      "VITE_PLATFORM_HOSTS": "sovereign.so,domain.sovereign.so,domains.sovereign.so",
-      "VITE_REGISTRAR_LANDING_URL": "https://domain.sovereign.so/",
-      "VITE_MEDIA_LANDING_URL": "https://emergency-icofcucam-3942s-projects.vercel.app/"
+      "VITE_PLATFORM_HOSTS": "sovereigndo.com,domain.sovereigndo.com,domains.sovereigndo.com",
+      "VITE_REGISTRAR_LANDING_URL": "https://domain.sovereigndo.com/",
+      "VITE_MEDIA_LANDING_URL": "https://emergency.sovereigndo.com"
     }
   },
   "rewrites": [

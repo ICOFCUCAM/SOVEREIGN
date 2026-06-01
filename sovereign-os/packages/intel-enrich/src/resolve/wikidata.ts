@@ -47,7 +47,7 @@ export class WikidataClient {
 
   constructor(opts: WikidataClientOptions = {}) {
     this.baseUrl = opts.baseUrl ?? 'https://www.wikidata.org';
-    this.userAgent = opts.userAgent ?? 'sovereign-intel-enrich/0.1.0 (institutional@sovereign.so)';
+    this.userAgent = opts.userAgent ?? 'sovereign-intel-enrich/0.1.0 (institutional@sovereigndo.com)';
     this.fetchImpl = opts.fetchImpl ?? fetch;
   }
 

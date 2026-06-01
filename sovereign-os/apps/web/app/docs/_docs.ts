@@ -164,7 +164,7 @@ export const DOCS: DocPage[] = [
     body: [
       {
         paragraphs: [
-          'Emergency AI exposes the same edge-function surface as the sovereign platform. Anyone with a Supabase JWT (anon for public ops, user JWT for owner-scoped ops) can call them; the Developer Portal at sovereign.so/developer documents each endpoint with curl examples, payloads, and auth notes.',
+          'Emergency AI exposes the same edge-function surface as the sovereign platform. Anyone with a Supabase JWT (anon for public ops, user JWT for owner-scoped ops) can call them; the Developer Portal at sovereigndo.com/developer documents each endpoint with curl examples, payloads, and auth notes.',
         ],
       },
       {

@@ -82,7 +82,7 @@ const TRUST = [
 // ── FAQ ──
 const FAQ = [
   { q: 'Can I use a domain I already own?', a: 'Yes. Connect existing institutional domains via a DNS TXT challenge — no transfer, no registration, no downtime.' },
-  { q: 'Do I have to register a domain to start?', a: 'No. Deploy immediately on a temporary sovereign subdomain (label.sovereign.so) and attach a permanent identity later.' },
+  { q: 'Do I have to register a domain to start?', a: 'No. Deploy immediately on a temporary sovereign subdomain (label.sovereigndo.com) and attach a permanent identity later.' },
   { q: 'How is pricing structured?', a: 'Transparent: registrar cost plus a configurable institutional markup. No surprise renewals, no upsell pressure.' },
   { q: 'Who is this for?', a: 'Governments, central banks, electoral authorities, smart cities, AI operations and logistics grids — institutions that treat domains as infrastructure.' },
   { q: 'When does transactional registration open?', a: 'Activation-ready. Discovery, AI advisory and connection are live now; full registration unlocks per institution under direct relationship.' },

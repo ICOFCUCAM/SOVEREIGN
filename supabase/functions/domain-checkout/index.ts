@@ -11,7 +11,7 @@ const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: 
 
 const DEFAULT_BASE = 'https://api.openprovider.eu';
 const MARKUP_BPS = Number(Deno.env.get('DOMAIN_MARKUP_BPS') || '1500');
-const SITE_URL = Deno.env.get('SITE_URL') || Deno.env.get('PUBLIC_SITE_URL') || 'https://sovereign.so';
+const SITE_URL = Deno.env.get('SITE_URL') || Deno.env.get('PUBLIC_SITE_URL') || 'https://sovereigndo.com';
 const STRIPE_KEY = Deno.env.get('STRIPE_SECRET_KEY') || '';
 
 function clean(v?: string): string | undefined {

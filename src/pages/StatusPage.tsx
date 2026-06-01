@@ -40,7 +40,7 @@ const StatusPage: React.FC = () => {
               All systems <span className="text-gradient-cyan">operational.</span>
             </h1>
             <p className="text-white/55 leading-relaxed">
-              Live operational state across the sovereign platform. Subscribe to incident updates at <a className="text-cyan-300 hover:text-white" href="mailto:status@sovereign.so">status@sovereign.so</a>.
+              Live operational state across the sovereign platform. Subscribe to incident updates at <a className="text-cyan-300 hover:text-white" href="mailto:status@sovereigndo.com">status@sovereigndo.com</a>.
             </p>
           </div>
 

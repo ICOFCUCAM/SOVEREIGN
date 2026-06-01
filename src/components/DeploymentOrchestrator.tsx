@@ -194,7 +194,7 @@ const DeploymentOrchestrator: React.FC = () => {
   // Resolved domain decision for the blueprint.
   const domainDecision = (): { label: string; detail: string } => {
     if (strategy === 'existing') return { label: existing || 'existing domain', detail: 'Connected — no registration required' };
-    if (strategy === 'skip') return { label: `${sub || 'tenant'}.sovereign.so`, detail: 'Sovereign subdomain · connect a permanent domain later' };
+    if (strategy === 'skip') return { label: `${sub || 'tenant'}.sovereigndo.com`, detail: 'Sovereign subdomain · connect a permanent domain later' };
     if (picked) {
       const pr = results.find((r) => r.domain === picked);
       const price = pr?.price != null ? `${formatPrice(pr.price, pr.currency)}/yr · ` : '';
@@ -307,7 +307,7 @@ const DeploymentOrchestrator: React.FC = () => {
               <p className="text-white/50 text-sm mb-4 max-w-lg">Deploy immediately on sovereign infrastructure. Connect a permanent domain whenever you're ready — nothing is lost.</p>
               <div className="flex items-center max-w-md rounded-xl bg-white/5 border border-white/10 focus-within:border-cyan-400/50 overflow-hidden">
                 <input aria-label="Sovereign subdomain label" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={sub} onChange={(e) => setSub(sanitizeSub(e.target.value))} onKeyDown={(e) => { if (e.key === 'Enter' && canAdvance()) setStep((s) => s + 1); }} placeholder="ministry" autoFocus className="flex-1 px-4 py-3.5 bg-transparent text-white font-mono placeholder:text-white/30 focus:outline-none" />
-                <span className="px-4 text-white/40 font-mono text-sm border-l border-white/10 py-3.5">.sovereign.so</span>
+                <span className="px-4 text-white/40 font-mono text-sm border-l border-white/10 py-3.5">.sovereigndo.com</span>
               </div>
             </div>
           )}

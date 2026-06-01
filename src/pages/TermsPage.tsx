@@ -53,7 +53,7 @@ const TermsPage: React.FC = () => {
             </section>
             <section>
               <h2 className="font-display text-2xl font-bold text-white">9. Contact</h2>
-              <p className="mt-3">Questions about these Terms: <a className="text-cyan-300 hover:text-white" href="mailto:legal@sovereign.so">legal@sovereign.so</a></p>
+              <p className="mt-3">Questions about these Terms: <a className="text-cyan-300 hover:text-white" href="mailto:legal@sovereigndo.com">legal@sovereigndo.com</a></p>
             </section>
           </div>
         </div>

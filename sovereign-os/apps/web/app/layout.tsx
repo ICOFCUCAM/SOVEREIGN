@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   description: 'Strategic Intelligence Infrastructure for governments, institutions and enterprises. Publications routed through Sovereign Dispatch.',
   applicationName: 'Emergency AI',
-  authors: [{ name: 'SOVEREIGN', url: 'https://sovereign.so' }],
+  authors: [{ name: 'SOVEREIGN', url: 'https://sovereigndo.com' }],
   keywords: ['AI video', 'cinematic AI', 'multi-channel publishing', 'LinkedIn', 'YouTube', 'X', 'sovereign infrastructure'],
   openGraph: {
     type: 'website',

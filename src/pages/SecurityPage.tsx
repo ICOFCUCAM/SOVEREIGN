@@ -48,7 +48,7 @@ const SecurityPage: React.FC = () => {
             <h2 className="font-display text-2xl font-bold">Vulnerability disclosure</h2>
             <p className="mt-3 text-sm text-white/55 leading-relaxed">
               Report security issues to{' '}
-              <a className="text-cyan-300 hover:text-white" href="mailto:security@sovereign.so">security@sovereign.so</a>.
+              <a className="text-cyan-300 hover:text-white" href="mailto:security@sovereigndo.com">security@sovereigndo.com</a>.
               We acknowledge within 48 hours; PGP key available on request.
             </p>
             <div className="mt-5 flex flex-wrap gap-3 text-[13px]">

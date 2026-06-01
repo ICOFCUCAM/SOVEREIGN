@@ -78,7 +78,7 @@ const InfrastructurePage: React.FC = () => {
               Single-tenant institutional deployments scoped on briefing. Each infrastructure carries its own audit posture, sovereign jurisdiction and tenant isolation by default.
             </p>
             <a
-              href="mailto:institutional@sovereign.so?subject=Sovereign%20infrastructure%20deployment%20briefing"
+              href="mailto:institutional@sovereigndo.com?subject=Sovereign%20infrastructure%20deployment%20briefing"
               className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold ease-cinematic transition-all duration-500 hover:-translate-y-0.5"
               style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 14px 40px -12px rgba(0,194,255,0.5)' }}
             >

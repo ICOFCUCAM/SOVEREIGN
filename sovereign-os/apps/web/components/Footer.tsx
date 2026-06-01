@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
-const SOVEREIGN_URL = process.env.NEXT_PUBLIC_SOVEREIGN_URL ?? 'https://sovereign.so';
-const DEVELOPER_PORTAL = process.env.NEXT_PUBLIC_DEVELOPER_PORTAL_URL ?? 'https://sovereign.so/developer';
+const SOVEREIGN_URL = process.env.NEXT_PUBLIC_SOVEREIGN_URL ?? 'https://sovereigndo.com';
+const DEVELOPER_PORTAL = process.env.NEXT_PUBLIC_DEVELOPER_PORTAL_URL ?? 'https://sovereigndo.com/developer';
 
 const COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string; external?: boolean }> }> = [
   {

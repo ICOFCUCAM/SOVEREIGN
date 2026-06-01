@@ -116,7 +116,7 @@ insert into public.ecosystem_products (
   'deployable',
   true,
   70,
-  'https://dispatch.sovereign.so',
+  'https://dispatch.sovereigndo.com',
   '[
     "PDF · DOCX · PPTX rendering for institutional artifacts",
     "Briefing packages, board reports, policy documents, regulatory submissions",

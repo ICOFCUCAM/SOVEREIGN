@@ -230,10 +230,10 @@ const TemporaryPanel: React.FC = () => {
         <div className="flex items-center max-w-md rounded-xl bg-white/5 border border-white/10 focus-within:border-cyan-400/50 overflow-hidden mb-4">
           <input value={sub} onChange={(e) => setSub(sanitizeSub(e.target.value))} placeholder="ministry" autoFocus autoCapitalize="off" autoCorrect="off" spellCheck={false} aria-label="Sovereign subdomain label"
             className="flex-1 px-4 py-3 bg-transparent text-white font-mono placeholder:text-white/30 focus:outline-none" />
-          <span className="px-4 text-white/40 font-mono text-sm border-l border-white/10 py-3">.sovereign.so</span>
+          <span className="px-4 text-white/40 font-mono text-sm border-l border-white/10 py-3">.sovereigndo.com</span>
         </div>
         <div className="flex items-center gap-3">
-          <div className="font-mono text-sm text-cyan-300/80 flex-1 truncate">{(sub || 'tenant')}.sovereign.so</div>
+          <div className="font-mono text-sm text-cyan-300/80 flex-1 truncate">{(sub || 'tenant')}.sovereigndo.com</div>
           <Link to="/deploy" className="shrink-0 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-sm font-semibold">Continue in orchestrator <ArrowRight className="w-4 h-4" /></Link>
         </div>
       </div>

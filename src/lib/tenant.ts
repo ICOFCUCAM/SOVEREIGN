@@ -38,9 +38,9 @@ const PLATFORM_HOST_SUFFIXES = [
 
 /**
  * Additional canonical platform hosts, configurable per environment.
- * e.g. VITE_PLATFORM_HOSTS="sovereign.os,app.sovereign.os"
+ * e.g. VITE_PLATFORM_HOSTS="sovereigndo.com,app.sovereigndo.com"
  */
-const CONFIGURED_PLATFORM_HOSTS = (import.meta.env.VITE_PLATFORM_HOSTS ?? '')
+const CONFIGURED_PLATFORM_HOSTS = (import.meta.env.VITE_PLATFORM_HOSTS ?? 'sovereigndo.com')
   .split(',')
   .map((h) => normalizeHostname(h))
   .filter(Boolean);
@@ -55,13 +55,14 @@ export function normalizeHostname(host: string): string {
 
 /**
  * Dedicated registrar infrastructure host. Accepts the canonical
- * `domains.sovereign.so` and `domain.sovereign.so` (or any `domain./domains.`
- * subdomain). Renders the sovereign domain platform at its root.
+ * `domains.sovereigndo.com` and `domain.sovereigndo.com` (or any
+ * `domain./domains.` subdomain). Renders the sovereign domain platform
+ * at its root.
  */
 export function isRegistrarHost(hostname: string): boolean {
   return (
-    hostname === 'domains.sovereign.so' ||
-    hostname === 'domain.sovereign.so' ||
+    hostname === 'domains.sovereigndo.com' ||
+    hostname === 'domain.sovereigndo.com' ||
     hostname.startsWith('domains.') ||
     hostname.startsWith('domain.')
   );
@@ -75,9 +76,9 @@ export function isPlatformHost(hostname: string): boolean {
 }
 
 /**
- * Dev host override: visit any URL with `?as=domains.sovereign.so` (or any
- * other host) to render the app as that host. The override sticks for the
- * tab via sessionStorage; `?as=` (empty) clears it.
+ * Dev host override: visit any URL with `?as=domains.sovereigndo.com`
+ * (or any other host) to render the app as that host. The override
+ * sticks for the tab via sessionStorage; `?as=` (empty) clears it.
  */
 const HOST_OVERRIDE_KEY = '__sovereign_host_override';
 function readHostOverride(): string | null {

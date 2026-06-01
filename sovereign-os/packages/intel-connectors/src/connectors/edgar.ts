@@ -60,7 +60,7 @@ export const edgarConnector: Connector = {
     if (!isEdgarConfig(config)) throw new Error('edgar: missing or invalid config.cik');
     const contact = config.contactEmail
       ?? process.env.SEC_EDGAR_CONTACT
-      ?? 'institutional@sovereign.so';
+      ?? 'institutional@sovereigndo.com';
     const cik = padCik(config.cik);
     const limit = Math.max(1, Math.min(config.limit ?? 40, 200));
 
