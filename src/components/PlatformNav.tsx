@@ -50,7 +50,7 @@ const PlatformNav: React.FC = () => {
   return (
     <>
       <nav className={`fixed inset-x-0 top-0 z-50 px-3 sm:px-4 transition-all duration-500 ${scrolled ? 'pt-3' : 'pt-0'}`}>
-        <div className={`mx-auto max-w-7xl transition-all duration-500 ${scrolled ? 'rounded-2xl border border-white/10 bg-[#070b1c]/80 backdrop-blur-xl shadow-[0_16px_50px_-20px_rgba(0,0,0,0.8)]' : 'border-b border-white/[0.06] bg-transparent'}`}>
+        <div className={`mx-auto max-w-7xl transition-all duration-500 ${scrolled ? 'rounded-2xl border border-white/10 bg-[#070b1c]/80 backdrop-blur-xl shadow-[0_16px_50px_-20px_rgba(0,0,0,0.8)]' : 'border-b border-white/[0.06] bg-[#050816]/55 backdrop-blur-md'}`}>
           {/* top hairline accent */}
           <div className={`h-px transition-opacity duration-500 ${scrolled ? 'opacity-100' : 'opacity-0'}`} style={{ background: 'linear-gradient(90deg, transparent, rgba(0,194,255,0.4), rgba(124,77,255,0.3), transparent)' }} />
           <div className="px-4 sm:px-5">
