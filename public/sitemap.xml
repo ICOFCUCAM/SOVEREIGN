@@ -31,6 +31,8 @@
   <url><loc>https://sovereigndo.com/systems/civicos-emergency</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://sovereigndo.com/systems/veritas-operations</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://sovereigndo.com/systems/relocation-us</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://sovereigndo.com/systems/exit-os</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://exit.sovereigndo.com/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://domains.sovereigndo.com/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://domains.sovereigndo.com/search</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://domains.sovereigndo.com/developer</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>

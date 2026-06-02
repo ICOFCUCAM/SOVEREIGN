@@ -1,0 +1,33 @@
+{
+  "name": "@exit/exit-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ExitOS — the operating system founders interact with to run an exit. Acquisition intelligence, virtual data room, buyer marketplace, investor CRM, AI deal negotiator, document generation, NDA automation, acquisition pipeline, founder dashboard, deal closing.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "globals": "^15.14.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.18.2",
+    "vite": "^5.4.10"
+  }
+}
