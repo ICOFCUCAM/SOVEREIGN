@@ -1,0 +1,28 @@
+{
+  "name": "@exit/engines",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ExitOS engines — Valuation, Memorandum Generator, Strategic Buyer Discovery, Due Diligence, Exit Readiness Score, Acquisition Marketplace. Computational core consumed by exit-web (SPA) and exit-api (when it ships).",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./valuation":    { "types": "./dist/valuation/index.d.ts",    "import": "./dist/valuation/index.js" },
+    "./memorandum":   { "types": "./dist/memorandum/index.d.ts",   "import": "./dist/memorandum/index.js" },
+    "./buyers":       { "types": "./dist/buyers/index.d.ts",       "import": "./dist/buyers/index.js" },
+    "./diligence":    { "types": "./dist/diligence/index.d.ts",    "import": "./dist/diligence/index.js" },
+    "./readiness":    { "types": "./dist/readiness/index.d.ts",    "import": "./dist/readiness/index.js" },
+    "./marketplace":  { "types": "./dist/marketplace/index.d.ts",  "import": "./dist/marketplace/index.js" }
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b",
+    "test": "npm run build && node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.5",
+    "typescript": "^5.5.3"
+  }
+}

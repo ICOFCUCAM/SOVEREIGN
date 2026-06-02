@@ -1,0 +1,68 @@
+// Shared sample company used across the engine tests.
+
+export const SAMPLE_SAAS = {
+  id: 'cmp-1',
+  name: 'Ledgerline',
+  jurisdiction: 'US',
+  businessModel: 'saas',
+  sector: 'vertical_saas',
+  foundedYear: 2018,
+  revenue: {
+    annualRecurringRevenueUsd: 12_000_000,
+    trailingTwelveMonthsRevenueUsd: 11_200_000,
+    grossMarginPct: 0.78,
+    ebitdaMarginPct: 0.12,
+    grossRetentionPct: 0.92,
+    netRetentionPct: 1.22,
+    customerConcentrationTop10Pct: 0.32,
+  },
+  growth: {
+    arrGrowthYoyPct: 0.62,
+    arrGrowthMomPct: 0.04,
+    customerGrowthYoyPct: 0.5,
+    netNewArrUsd: 4_500_000,
+  },
+  users: {
+    totalCustomers: 480,
+    activeMonthly: 460,
+    paidCustomers: 480,
+    averageRevenuePerCustomerUsd: 25_000,
+    churnAnnualizedPct: 0.08,
+  },
+  market: {
+    addressableMarketUsd: 14_000_000_000,
+    serviceableMarketUsd: 3_500_000_000,
+    competitiveDensity: 'medium',
+    marketGrowthPct: 0.22,
+    regulatoryRisk: 'medium',
+  },
+  product: {
+    defensibility: 'high',
+    differentiation: 'leader',
+    intellectualProperty: { patentsGranted: 2, patentsPending: 4 },
+    technicalArchitecture: 'modular_monolith',
+    aiNative: true,
+    hasNetworkEffects: false,
+    hasDataMoat: true,
+  },
+  team: {
+    headcount: 84,
+    foundersStillActive: true,
+    leadershipBenchStrength: 'adequate',
+    engineeringHeadcount: 32,
+    tenureMedianYears: 2.6,
+  },
+  cap: {
+    fullyDilutedShares: 12_500_000,
+    foundersOwnershipPct: 0.32,
+    investorOwnershipPct: 0.45,
+    esopOwnershipPct: 0.18,
+    preferenceStackUsd: 18_000_000,
+    priorRoundsValuationUsd: 64_000_000,
+  },
+  drivers: [
+    { name: 'Net revenue retention', weight: 0.30, trend: 'improving' },
+    { name: 'Logo growth', weight: 0.25, trend: 'stable' },
+    { name: 'Magic number', weight: 0.20, trend: 'improving' },
+  ],
+};
