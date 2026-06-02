@@ -1,70 +1,118 @@
-import React from "react";
-import { Button, Card, Kpi, SectionHeader, timeAgo } from "../lib/ui";
+import React, { useState } from "react";
+import { Button, Card, Kpi, SectionHeader } from "../lib/ui";
+import { useMemorandum } from "../lib/engines";
+import type { MemorandumKind } from "@exit/engines";
 
-interface Template { name: string; kind: "Term sheet" | "LOI" | "SPA" | "Disclosure" | "Side letter"; version: string; updatedAt: string; used: number }
+// Document Generator surface — wired to TemplateMemorandumGenerator
+// from @exit/engines. Selecting a kind triggers useMemorandum() which
+// regenerates the document (the template generator is synchronous;
+// useEffect just provides a clean refresh boundary for future Claude
+// adapter wiring).
 
-const TEMPLATES: readonly Template[] = [
-  { name: "Term Sheet — Strategic Acquisition",          kind: "Term sheet", version: "v3.1", updatedAt: new Date(Date.now() - 8  * 86400_000).toISOString(), used: 12 },
-  { name: "Letter of Intent — Bilateral, Confidential",  kind: "LOI",        version: "v2.4", updatedAt: new Date(Date.now() - 14 * 86400_000).toISOString(), used: 9  },
-  { name: "Share Purchase Agreement (Stock Sale)",       kind: "SPA",        version: "v5.0", updatedAt: new Date(Date.now() - 3  * 86400_000).toISOString(), used: 5  },
-  { name: "Disclosure Schedule Index",                   kind: "Disclosure", version: "v1.2", updatedAt: new Date(Date.now() - 18 * 86400_000).toISOString(), used: 3  },
-  { name: "Founder Side Letter — Retention & Earn-out",  kind: "Side letter", version: "v1.0", updatedAt: new Date(Date.now() - 26 * 86400_000).toISOString(), used: 2 },
+const KINDS: Array<{ key: MemorandumKind; label: string; description: string; accent: string }> = [
+  { key: "cim",                label: "Confidential Information Memorandum", description: "Long-form acquisition document — 10 sections, banker register.",   accent: "text-deal-300" },
+  { key: "executive_summary",  label: "Executive Summary",                  description: "One-pager. Lead with proposition, headline financials, valuation.", accent: "text-loi-300" },
+  { key: "investor_deck",      label: "Investor Deck",                       description: "Ten-slide outline: title → opportunity → traction → process.",     accent: "text-stage-loi" },
+  { key: "buyer_teaser",       label: "Anonymized Buyer Teaser",            description: "1–2 pages, anonymized as Project Cipher. Issued pre-NDA.",          accent: "text-stage-engaged" },
+  { key: "dd_room_index",      label: "Data Room Index",                     description: "Index of the diligence package contents organised by package.",    accent: "text-white/65" },
 ];
 
-const KIND_STYLE: Record<Template["kind"], string> = {
-  "Term sheet": "text-deal-300",
-  "LOI":        "text-loi-300",
-  "SPA":        "text-stage-loi",
-  "Disclosure": "text-white/65",
-  "Side letter":"text-stage-engaged",
+const Documents: React.FC = () => {
+  const [kind, setKind] = useState<MemorandumKind>("cim");
+  const doc = useMemorandum(kind);
+
+  return (
+    <div>
+      <SectionHeader
+        kicker="Module 06 · Workspace"
+        title="Document Generator"
+        description="Term sheets, LOIs, SPAs, CIMs and buyer teasers — generated from the company profile and the valuation, readiness, buyer and diligence engines."
+        actions={<Button variant="ghost">Library</Button>}
+      />
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <Kpi label="Templates"          value={String(KINDS.length)} sub="acquisition document kinds" />
+        <Kpi label="Generated"          value={doc ? "1" : "0"}      sub={doc ? doc.kind.replace(/_/g, " ") : "select a template"} accent="#34d399" />
+        <Kpi label="Word count"         value={doc ? String(doc.wordCount) : "—"} sub="current document" />
+        <Kpi label="Anonymized"         value={doc?.anonymized ? "Yes" : "No"} sub={doc?.kind === "buyer_teaser" ? "teaser default" : "founder-named"} />
+      </div>
+
+      <div className="mt-10 grid gap-6 lg:grid-cols-[280px_1fr]">
+        <div className="space-y-2">
+          {KINDS.map((k) => (
+            <button
+              key={k.key}
+              onClick={() => setKind(k.key)}
+              className={`block w-full rounded-lg border p-4 text-left transition ${
+                kind === k.key
+                  ? "border-deal-400/50 bg-deal-600/10"
+                  : "border-white/10 bg-ink-800/40 hover:border-white/20 hover:bg-ink-800/60"
+              }`}
+            >
+              <div className={`text-[11px] font-semibold uppercase tracking-wide ${k.accent}`}>{k.key.replace(/_/g, " ")}</div>
+              <div className="mt-1 text-sm font-medium text-white">{k.label}</div>
+              <div className="mt-1 text-[11px] leading-relaxed text-white/55">{k.description}</div>
+            </button>
+          ))}
+        </div>
+
+        <Card className="p-7">
+          {!doc ? (
+            <div className="flex h-full items-center justify-center py-20 text-sm text-white/40">Generating…</div>
+          ) : (
+            <article className="prose-invert max-w-none">
+              <header className="mb-6 border-b border-white/10 pb-4">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-deal-400">
+                  Generated by {doc.producedBy}
+                </div>
+                <h2 className="mt-2 font-serif text-2xl font-bold text-white">{doc.title}</h2>
+                <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-white/45">
+                  <span>{doc.sections.length} sections</span>
+                  <span>·</span>
+                  <span>{doc.wordCount} words</span>
+                  {doc.anonymized && (<><span>·</span><span className="rounded bg-loi-500/15 px-1.5 py-0.5 font-mono text-[10px] text-loi-400">ANONYMIZED</span></>)}
+                </div>
+              </header>
+              <div className="space-y-6">
+                {doc.sections.map((s, i) => (
+                  <section key={`${i}-${s.heading}`}>
+                    <h3 className="font-serif text-lg font-bold text-white">{s.heading}</h3>
+                    <p className="mt-2 text-[14px] leading-relaxed text-white/75">{s.body}</p>
+                    {s.bullets && s.bullets.length > 0 && (
+                      <ul className="mt-3 space-y-1.5 text-[13px] text-white/65">
+                        {s.bullets.map((b) => (
+                          <li key={b} className="flex items-baseline gap-2">
+                            <span className="mt-1 inline-block h-1 w-1 rounded-full bg-deal-400" /> {b}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {s.tables && s.tables.map((t, ti) => (
+                      <div key={ti} className="mt-3 overflow-hidden rounded-lg border border-white/10">
+                        <table className="w-full text-[12px]">
+                          <thead className="bg-white/[0.03] text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
+                            <tr>{t.headers.map((h) => <th key={h} className="px-3 py-2">{h}</th>)}</tr>
+                          </thead>
+                          <tbody>
+                            {t.rows.map((row, ri) => (
+                              <tr key={ri} className="border-t border-white/5">
+                                {row.map((cell, ci) => <td key={ci} className="px-3 py-2 font-mono text-white/85">{cell}</td>)}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        {t.caption && <div className="border-t border-white/10 bg-white/[0.02] px-3 py-1.5 text-[10px] uppercase tracking-wide text-white/40">{t.caption}</div>}
+                      </div>
+                    ))}
+                  </section>
+                ))}
+              </div>
+            </article>
+          )}
+        </Card>
+      </div>
+    </div>
+  );
 };
-
-const Documents: React.FC = () => (
-  <div>
-    <SectionHeader
-      kicker="Module 06 · Workspace"
-      title="Document Generator"
-      description="Term sheets, LOIs, SPAs, disclosure schedules and side letters from doctrine templates. Versioned, citation-tracked, signature-ready."
-      actions={<><Button variant="ghost">Open library</Button><Button>Generate document</Button></>}
-    />
-
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      <Kpi label="Templates"          value={String(TEMPLATES.length)} sub="versioned · doctrine-aligned" />
-      <Kpi label="Documents generated" value="31" sub="this exit" accent="#34d399" />
-      <Kpi label="In counsel review"   value="2"  sub="Helios SPA · disclosure schedule" accent="#fbbf24" />
-      <Kpi label="Signature-ready"     value="1"  sub="Sentinel side letter" />
-    </div>
-
-    <div className="mt-10">
-      <h2 className="mb-3 font-serif text-lg font-bold">Template library</h2>
-      <Card>
-        <table className="w-full text-sm">
-          <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-            <tr className="border-b border-white/10">
-              <th className="px-5 py-3">Template</th>
-              <th className="px-5 py-3">Kind</th>
-              <th className="px-5 py-3">Version</th>
-              <th className="px-5 py-3 text-right">Used</th>
-              <th className="px-5 py-3">Updated</th>
-              <th className="px-5 py-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {TEMPLATES.map((t) => (
-              <tr key={t.name} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                <td className="px-5 py-3.5 font-medium text-white">{t.name}</td>
-                <td className={`px-5 py-3.5 text-[12px] font-semibold uppercase tracking-wide ${KIND_STYLE[t.kind]}`}>{t.kind}</td>
-                <td className="px-5 py-3.5 font-mono text-[12px] text-white/70">{t.version}</td>
-                <td className="px-5 py-3.5 text-right font-mono tabular-nums text-white/85">{t.used}</td>
-                <td className="px-5 py-3.5 text-xs text-white/45">{timeAgo(t.updatedAt)}</td>
-                <td className="px-5 py-3.5"><button className="text-[12px] font-semibold uppercase tracking-wide text-deal-400 hover:text-deal-300">Use &rarr;</button></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
-    </div>
-  </div>
-);
 
 export default Documents;

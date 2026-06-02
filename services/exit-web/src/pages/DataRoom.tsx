@@ -1,65 +1,114 @@
-import React from "react";
-import { Button, Card, Kpi, SectionHeader, timeAgo } from "../lib/ui";
+import React, { useState } from "react";
+import { Button, Card, Kpi, SectionHeader } from "../lib/ui";
+import { DILIGENCE } from "../lib/engines";
 
-interface DocRow { name: string; section: string; size: string; access: number; updatedAt: string; classified?: boolean; }
+// Virtual Data Room — backed by the diligence engine output. Each
+// diligence package becomes a folder in the room, with artifacts
+// listed as the documents inside.
 
-const DOCS: readonly DocRow[] = [
-  { name: "01_corporate/Cap_Table_v17.xlsx",        section: "Corporate",   size: "146 KB", access: 7, updatedAt: new Date(Date.now() - 4 * 3600_000).toISOString() },
-  { name: "01_corporate/Articles_of_Association.pdf", section: "Corporate", size: "892 KB", access: 5, updatedAt: new Date(Date.now() - 1 * 86400_000).toISOString() },
-  { name: "02_financials/Audited_FY25.pdf",         section: "Financials",  size: "3.4 MB", access: 6, updatedAt: new Date(Date.now() - 2 * 86400_000).toISOString() },
-  { name: "02_financials/Management_Pack_Q1.xlsx",  section: "Financials",  size: "812 KB", access: 6, updatedAt: new Date(Date.now() - 6 * 3600_000).toISOString() },
-  { name: "03_customers/Top_50_Revenue.xlsx",       section: "Customers",   size: "120 KB", access: 4, updatedAt: new Date(Date.now() - 3 * 86400_000).toISOString(), classified: true },
-  { name: "04_technical/Architecture_Overview.pdf", section: "Technical",   size: "1.7 MB", access: 3, updatedAt: new Date(Date.now() - 5 * 86400_000).toISOString() },
-  { name: "05_legal/Material_Contracts/Index.pdf",  section: "Legal",       size: "624 KB", access: 4, updatedAt: new Date(Date.now() - 8 * 86400_000).toISOString() },
-];
+const CLASS_STYLE: Record<string, string> = {
+  unclassified: "bg-deal-600/20 text-deal-300 ring-deal-400/40",
+  sensitive:    "bg-loi-500/15 text-loi-400 ring-loi-400/40",
+  confidential: "bg-red-500/15 text-red-300 ring-red-400/40",
+};
 
-const DataRoom: React.FC = () => (
-  <div>
-    <SectionHeader
-      kicker="Module 02 · Workspace"
-      title="Virtual Data Room"
-      description="Watermarked rooms with deal-stage access policies, audit trail per artifact, and one-click reversion when a buyer drops out."
-      actions={<><Button variant="ghost">New room</Button><Button>Upload</Button></>}
-    />
+const DataRoom: React.FC = () => {
+  const [activeKind, setActiveKind] = useState(DILIGENCE.documents[0]?.kind ?? "financial");
+  const active = DILIGENCE.documents.find((d) => d.kind === activeKind) ?? DILIGENCE.documents[0];
 
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      <Kpi label="Active rooms"     value="4"   sub="one per buyer in diligence" />
-      <Kpi label="Documents"        value="142" sub="across all rooms" />
-      <Kpi label="Pending requests" value="2"   sub="Helios + Forum"  accent="#fbbf24" />
-      <Kpi label="Watermark policy" value="ON"  sub="per-buyer signature" accent="#34d399" />
+  const totalArtifacts = DILIGENCE.documents.reduce((s, d) => s + d.artifacts.length, 0);
+  const requiredArtifacts = DILIGENCE.documents.reduce((s, d) => s + d.artifacts.filter((a) => a.required).length, 0);
+  const confidentialCount = DILIGENCE.documents.filter((d) => d.classification === "confidential").length;
+
+  return (
+    <div>
+      <SectionHeader
+        kicker="Module 02 · Workspace"
+        title="Virtual Data Room"
+        description="Diligence packages auto-generated from the company profile. Each artifact is watermarked and access-tracked once a buyer enters."
+        actions={<><Button variant="ghost">New room</Button><Button>Upload</Button></>}
+      />
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <Kpi label="Diligence packages" value={String(DILIGENCE.documents.length)} sub="financial · market · ux · tech · sec · legal · comm" />
+        <Kpi label="Required artifacts" value={`${requiredArtifacts} / ${totalArtifacts}`} sub="upload before opening room" accent="#fbbf24" />
+        <Kpi label="Confidential packages" value={String(confidentialCount)} sub="ring-1 access policy" accent="#f87171" />
+        <Kpi label="Critical questions"  value={String(DILIGENCE.criticalQuestions.length)} sub="from the diligence engine" />
+      </div>
+
+      <div className="mt-10 grid gap-6 lg:grid-cols-[280px_1fr]">
+        <div className="space-y-2">
+          {DILIGENCE.documents.map((doc) => (
+            <button
+              key={doc.kind}
+              onClick={() => setActiveKind(doc.kind)}
+              className={`block w-full rounded-lg border p-3 text-left transition ${
+                activeKind === doc.kind
+                  ? "border-deal-400/50 bg-deal-600/10"
+                  : "border-white/10 bg-ink-800/40 hover:border-white/20 hover:bg-ink-800/60"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="text-sm font-medium leading-tight text-white">{doc.title}</div>
+                <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ring-1 ${CLASS_STYLE[doc.classification]}`}>
+                  {doc.classification}
+                </span>
+              </div>
+              <div className="mt-1 text-[11px] text-white/45">{doc.sections.length} sections · {doc.artifacts.length} artifacts</div>
+            </button>
+          ))}
+        </div>
+
+        {active && (
+          <Card className="p-6">
+            <div className="mb-5 border-b border-white/10 pb-4">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-deal-400">{active.kind.replace(/_/g, " ")}</div>
+              <h2 className="mt-2 font-serif text-2xl font-bold text-white">{active.title}</h2>
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                <span className={`rounded-full px-2.5 py-0.5 font-semibold uppercase tracking-wide ring-1 ${CLASS_STYLE[active.classification]}`}>
+                  {active.classification}
+                </span>
+                <span className="text-white/45">{active.artifacts.length} artifact{active.artifacts.length === 1 ? "" : "s"}</span>
+              </div>
+            </div>
+
+            <h3 className="mb-3 font-serif text-base font-bold text-white">Required artifacts</h3>
+            <div className="space-y-2">
+              {active.artifacts.map((a) => (
+                <div key={a.filename} className="flex items-baseline justify-between rounded border border-white/10 bg-ink-900/40 px-3 py-2">
+                  <div>
+                    <div className="font-mono text-[12px] text-white">{a.filename}</div>
+                    <div className="mt-0.5 text-[11px] text-white/50">{a.description}</div>
+                  </div>
+                  {a.required ? (
+                    <span className="rounded bg-loi-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-loi-400">Required</span>
+                  ) : (
+                    <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/45">Optional</span>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <h3 className="mb-3 mt-6 font-serif text-base font-bold text-white">Sections & questions</h3>
+            <div className="space-y-4">
+              {active.sections.map((s, i) => (
+                <div key={`${i}-${s.heading}`}>
+                  <div className="font-medium text-white">{s.heading}</div>
+                  <ul className="mt-2 space-y-1 text-[12px] text-white/65">
+                    {s.questions.map((q) => (
+                      <li key={q} className="flex items-baseline gap-2">
+                        <span className="mt-1 inline-block h-1 w-1 rounded-full bg-deal-400" /> {q}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+      </div>
     </div>
-
-    <div className="mt-10">
-      <h2 className="mb-3 font-serif text-lg font-bold">Recent activity · Helios room</h2>
-      <Card>
-        <table className="w-full text-sm">
-          <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-            <tr className="border-b border-white/10">
-              <th className="px-5 py-3">Artifact</th>
-              <th className="px-5 py-3">Section</th>
-              <th className="px-5 py-3">Size</th>
-              <th className="px-5 py-3 text-right">Accesses</th>
-              <th className="px-5 py-3">Updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            {DOCS.map((d) => (
-              <tr key={d.name} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                <td className="px-5 py-3.5 font-mono text-[12px] text-white">
-                  {d.name}
-                  {d.classified && <span className="ml-2 inline-block rounded bg-loi-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-loi-400">Sensitive</span>}
-                </td>
-                <td className="px-5 py-3.5 text-white/65">{d.section}</td>
-                <td className="px-5 py-3.5 text-white/55">{d.size}</td>
-                <td className="px-5 py-3.5 text-right font-mono tabular-nums text-white/85">{d.access}</td>
-                <td className="px-5 py-3.5 text-xs text-white/45">{timeAgo(d.updatedAt)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
-    </div>
-  </div>
-);
+  );
+};
 
 export default DataRoom;

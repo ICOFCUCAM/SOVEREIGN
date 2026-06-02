@@ -1,103 +1,179 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Card, Kpi, SectionHeader, StageBadge, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
+import { Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
 import { useAuth } from "../lib/auth";
+import {
+  VALUATION_STANDARD, VALUATION_STRATEGIC, VALUATION_REPLACEMENT,
+  READINESS, BUYERS, DILIGENCE,
+} from "../lib/engines";
+import { SAMPLE_COMPANY } from "../lib/profile";
 
-interface DealRow {
-  id: string;
-  buyer: string;
-  stage: DealStage;
-  amount?: number;
-  updatedAt: string;
-  nextAction: string;
-}
+// Founder dashboard — wired to @exit/engines. The deterministic
+// engines (valuation, readiness, buyer discovery, diligence) all run
+// on module load against SAMPLE_COMPANY; the dashboard summarises the
+// run and links into the deep surfaces for each engine.
 
-// Sample deal pipeline — placeholder until exit-api ships. The shape mirrors
-// what the production /v1/deals?summary=founder endpoint will return so swap
-// is mechanical.
-const DEALS: readonly DealRow[] = [
-  { id: "d-001", buyer: "Helios Acquisition Group",     stage: "loi",       amount: 18_500_000, updatedAt: new Date(Date.now() - 2 * 3600_000).toISOString(),  nextAction: "Counter LOI by EOD Friday" },
-  { id: "d-002", buyer: "Astra Strategic",              stage: "diligence", amount: 22_000_000, updatedAt: new Date(Date.now() - 6 * 3600_000).toISOString(),  nextAction: "Customer references — 3 to send" },
-  { id: "d-003", buyer: "Forum Equity Partners",        stage: "engaged",   amount: 16_750_000, updatedAt: new Date(Date.now() - 26 * 3600_000).toISOString(), nextAction: "Mutual NDA — countersigned today" },
-  { id: "d-004", buyer: "Northbound Capital",           stage: "sourcing",  amount: undefined,  updatedAt: new Date(Date.now() - 5 * 86400_000).toISOString(), nextAction: "Outreach — second touch" },
-  { id: "d-005", buyer: "Sentinel Holdings",            stage: "signed",    amount: 24_000_000, updatedAt: new Date(Date.now() - 14 * 86400_000).toISOString(), nextAction: "Closing checklist — 12 items remain" },
-];
+const BAND_LABEL: Record<typeof READINESS["band"], string> = {
+  not_ready:              "Not ready",
+  seed_acquisition:       "Seed acquisition",
+  growth_acquisition:     "Growth acquisition",
+  strategic_acquisition:  "Strategic acquisition",
+};
+
+const BAND_STYLE: Record<typeof READINESS["band"], string> = {
+  not_ready:              "text-white/60 bg-white/5 ring-white/15",
+  seed_acquisition:       "text-loi-300 bg-loi-500/15 ring-loi-400/40",
+  growth_acquisition:     "text-stage-engaged bg-stage-engaged/15 ring-stage-engaged/40",
+  strategic_acquisition:  "text-deal-300 bg-deal-600/20 ring-deal-400/40",
+};
 
 const Dashboard: React.FC = () => {
   const { session } = useAuth();
-  const active = DEALS.filter((d) => d.stage !== "dead" && d.stage !== "closed");
-  const open   = DEALS.filter((d) => d.stage === "loi" || d.stage === "signed" || d.stage === "diligence");
-  const sumOpen = open.reduce((s, d) => s + (d.amount ?? 0), 0);
+  const topBuyers = BUYERS.candidates.slice(0, 5);
+  const criticalQs = DILIGENCE.criticalQuestions;
+  const redFlags = DILIGENCE.redFlags;
+  const arrM = SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd / 1_000_000;
 
   return (
     <div>
       <SectionHeader
         kicker="Founder Dashboard"
         title={`Good morning, ${session?.founderId ?? "founder"}.`}
-        description="One screen at 8am. Live deal stage, this-week milestones, blockers, and the next decision the founder owns."
+        description={`${SAMPLE_COMPANY.name} · ${SAMPLE_COMPANY.sector.replace(/_/g, " ")} · ${arrM.toFixed(1)}M ARR · ${SAMPLE_COMPANY.jurisdiction}`}
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Active deals"        value={String(active.length)} sub={`${DEALS.length - active.length} closed/dead`} />
-        <Kpi label="Open value"          value={fmtMoney(sumOpen)}    sub="diligence + LOI + signed" accent="#34d399" />
-        <Kpi label="In diligence"        value={String(DEALS.filter((d) => d.stage === "diligence").length)} sub="active workstreams" />
-        <Kpi label="This week's actions" value={String(active.length)} sub="founder-owned only" accent="#fbbf24" />
+        <Kpi
+          label="Strategic valuation (mid)"
+          value={fmtMoney(VALUATION_STRATEGIC.headline.mid)}
+          sub={`band ${fmtMoney(VALUATION_STRATEGIC.headline.low)} – ${fmtMoney(VALUATION_STRATEGIC.headline.high)}`}
+          accent="#34d399"
+        />
+        <Kpi
+          label="Readiness"
+          value={`${READINESS.overallScore.toFixed(0)}/100`}
+          sub={BAND_LABEL[READINESS.band]}
+          accent="#fbbf24"
+        />
+        <Kpi
+          label="Qualifying buyers"
+          value={String(BUYERS.candidates.length)}
+          sub={`${BUYERS.byType.strategic} strategic · ${BUYERS.byType.pe} PE · ${BUYERS.byType.family_office} family office`}
+        />
+        <Kpi
+          label="Implied price"
+          value={fmtMoney(BUYERS.companyHeadlineUsd)}
+          sub="ranking basis"
+          accent="#10b981"
+        />
       </div>
 
-      <div className="mt-10">
-        <div className="mb-4 flex items-end justify-between">
-          <div>
-            <h2 className="font-serif text-xl font-bold text-white">Live pipeline</h2>
-            <p className="text-xs text-white/45">Sorted by last activity. The dashboard is read-only; deal edits happen in the relevant module.</p>
+      <div className="mt-10 grid gap-5 lg:grid-cols-3">
+        <Card className="p-6 lg:col-span-2">
+          <div className="mb-4 flex items-end justify-between">
+            <div>
+              <h2 className="font-serif text-xl font-bold text-white">Top buyers · ranked</h2>
+              <p className="text-xs text-white/45">Probability scored by sector × check × geography × activity.</p>
+            </div>
+            <Link to="/console/intelligence" className="text-[12px] font-semibold uppercase tracking-wide text-deal-400 hover:text-deal-300">
+              Open intelligence →
+            </Link>
           </div>
-          <Link to="/console/pipeline" className="text-[12px] font-semibold uppercase tracking-wide text-deal-400 hover:text-deal-300">Open pipeline &rarr;</Link>
-        </div>
-        <Card>
           <table className="w-full text-sm">
             <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
               <tr className="border-b border-white/10">
-                <th className="px-5 py-3">Buyer</th>
-                <th className="px-5 py-3">Stage</th>
-                <th className="px-5 py-3 text-right">Indicated value</th>
-                <th className="px-5 py-3">Updated</th>
-                <th className="px-5 py-3">Next action (founder)</th>
+                <th className="py-3">Acquirer</th>
+                <th className="py-3">Type</th>
+                <th className="py-3 text-right">Check size</th>
+                <th className="py-3 text-right">Probability</th>
               </tr>
             </thead>
             <tbody>
-              {DEALS.map((d) => (
-                <tr key={d.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                  <td className="px-5 py-3.5 font-medium text-white">{d.buyer}</td>
-                  <td className="px-5 py-3.5"><StageBadge stage={d.stage} /></td>
-                  <td className="px-5 py-3.5 text-right font-mono tabular-nums text-white/85">{fmtMoney(d.amount)}</td>
-                  <td className="px-5 py-3.5 text-xs text-white/50">{timeAgo(d.updatedAt)}</td>
-                  <td className="px-5 py-3.5 text-xs text-white/70">{d.nextAction}</td>
+              {topBuyers.map((c) => (
+                <tr key={c.buyer.name} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                  <td className="py-3.5 font-medium text-white">{c.buyer.name}</td>
+                  <td className="py-3.5 text-xs uppercase tracking-wide text-white/55">{c.buyer.buyerType.replace(/_/g, " ")}</td>
+                  <td className="py-3.5 text-right font-mono tabular-nums text-white/85">{fmtMoney(c.estimatedCheck.low)} – {fmtMoney(c.estimatedCheck.high)}</td>
+                  <td className="py-3.5 text-right font-mono tabular-nums text-deal-300">{(c.probability * 100).toFixed(0)}%</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </Card>
+
+        <Card className="p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-serif text-xl font-bold text-white">Readiness</h2>
+            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ring-1 ${BAND_STYLE[READINESS.band]}`}>
+              {BAND_LABEL[READINESS.band]}
+            </span>
+          </div>
+          <div className="space-y-3">
+            {READINESS.dimensions.map((d) => (
+              <div key={d.name}>
+                <div className="mb-1 flex items-baseline justify-between text-[12px]">
+                  <span className="text-white/70">{d.name}</span>
+                  <span className="font-mono text-white/85">{d.score.toFixed(0)}/100</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+                  <div className="h-full rounded-full bg-gradient-to-r from-deal-700 to-deal-400" style={{ width: `${Math.max(2, d.score)}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
 
-      <div className="mt-10 grid gap-4 lg:grid-cols-2">
+      <div className="mt-8 grid gap-4 lg:grid-cols-3">
         <Card className="p-6">
-          <h3 className="font-serif text-lg font-bold text-white">This week</h3>
-          <ul className="mt-4 space-y-3 text-sm text-white/75">
-            <li className="flex items-baseline gap-3"><span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-deal-400" /> Counter Helios LOI by Friday EOD</li>
-            <li className="flex items-baseline gap-3"><span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-loi-400" /> Send Astra three customer references</li>
-            <li className="flex items-baseline gap-3"><span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-white/50" /> Sentinel — closing checklist review (Tuesday)</li>
-            <li className="flex items-baseline gap-3"><span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-white/50" /> Board update — circulate Thursday</li>
-          </ul>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Valuation reports</div>
+          <div className="mt-4 space-y-3 text-[13px]">
+            <ValRow label="Standard"        v={VALUATION_STANDARD.headline} />
+            <ValRow label="Strategic buyer" v={VALUATION_STRATEGIC.headline} />
+            <ValRow label="Asset replacement" v={VALUATION_REPLACEMENT.headline} />
+          </div>
+          <p className="mt-4 text-[11px] text-white/45">Country adjustment for {SAMPLE_COMPANY.jurisdiction}: {(VALUATION_STRATEGIC.countryAdjustment * 100).toFixed(0)}%.</p>
         </Card>
+
         <Card className="p-6">
-          <h3 className="font-serif text-lg font-bold text-white">Blockers</h3>
-          <ul className="mt-4 space-y-3 text-sm text-white/75">
-            <li className="flex items-baseline gap-3"><span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-red-400" /> Forum Equity — counsel review pending on disclosure schedule</li>
-            <li className="flex items-baseline gap-3"><span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-loi-400" /> Two open data-room access requests (Helios diligence team)</li>
-          </ul>
+          <h3 className="font-serif text-lg font-bold text-white">Critical diligence questions</h3>
+          {criticalQs.length === 0 ? (
+            <p className="mt-3 text-sm text-white/55">No critical questions surfaced — clean diligence posture.</p>
+          ) : (
+            <ul className="mt-4 space-y-3 text-sm text-white/75">
+              {criticalQs.map((q) => (
+                <li key={q} className="flex items-baseline gap-3">
+                  <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-loi-400" /> {q}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="font-serif text-lg font-bold text-white">Red flags</h3>
+          {redFlags.length === 0 ? (
+            <p className="mt-3 text-sm text-white/55">No red flags. Buyer-facing posture is defensible.</p>
+          ) : (
+            <ul className="mt-4 space-y-3 text-sm text-white/75">
+              {redFlags.map((f) => (
+                <li key={f} className="flex items-baseline gap-3">
+                  <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-red-400" /> {f}
+                </li>
+              ))}
+            </ul>
+          )}
         </Card>
       </div>
     </div>
   );
 };
+
+const ValRow: React.FC<{ label: string; v: { low: number; mid: number; high: number } }> = ({ label, v }) => (
+  <div className="flex items-baseline justify-between">
+    <span className="text-white/55">{label}</span>
+    <span className="font-mono text-white/85">{fmtMoney(v.low)} · {fmtMoney(v.mid)} · {fmtMoney(v.high)}</span>
+  </div>
+);
 
 export default Dashboard;
