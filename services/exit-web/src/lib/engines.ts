@@ -5,9 +5,14 @@ import {
   evaluateOffer, compareOffers, deriveNegotiationState,
   createListing, matchBuyersToListing,
   TemplateMemorandumGenerator,
+  runCapTableAnalysis, signatoryRoster, computeWaterfall,
+  dragAlongCheck, foundersNetFromOffer,
+  issueNda, recordSignature, revokeNda, rosterFor, ndaCoverageFor,
   type MemorandumDocument, type MemorandumKind, type MemorandumInputs,
+  type NdaInstance,
 } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile.js";
+import { SAMPLE_CAPTABLE } from "./captable-sample.js";
 
 // Pre-compute the deterministic results once per module load.
 export const VALUATION_STANDARD     = runValuation(SAMPLE_COMPANY, { reportType: "standard" });
@@ -102,6 +107,65 @@ export const NEGOTIATION_STATE = deriveNegotiationState({
   daysSinceLastMove: 3,
   hasExclusivity: false,
 });
+
+// ── Cap-table CRM ──────────────────────────────────────────────────
+export { SAMPLE_CAPTABLE };
+export const CAPTABLE_ANALYSIS  = runCapTableAnalysis(SAMPLE_CAPTABLE);
+export const CAPTABLE_SIGNATORY = signatoryRoster(SAMPLE_CAPTABLE);
+export const CAPTABLE_DRAGALONG = dragAlongCheck(SAMPLE_CAPTABLE);
+// Per-offer waterfall against the same offers shown on the Negotiator.
+export const OFFER_WATERFALLS = SAMPLE_OFFERS.map((o) => ({
+  offerId: o.offerId,
+  waterfall: computeWaterfall(SAMPLE_CAPTABLE, {
+    headlinePriceUsd: o.headlinePriceUsd,
+    cashPct: o.cashPct,
+    stockPct: o.stockPct,
+    earnoutPct: o.earnoutPct,
+  }),
+  foundersNet: foundersNetFromOffer(SAMPLE_CAPTABLE, o),
+}));
+
+// ── NDA lifecycle ──────────────────────────────────────────────────
+// Seed a small portfolio of NDAs against the marketplace listing so the
+// Nda page renders with active / pending / expired / revoked rows and
+// the Marketplace gate (ndaCoverageFor) returns realistic visibility.
+const FOUNDER_PARTY = { id: "founder-helios", name: "Helios Freight, Inc.", representativeName: "Anne Kovac", representativeEmail: "anne@helios.example" };
+
+function buildSeedNda(
+  templateId: string,
+  buyer: { id: string; name: string },
+  daysAgo: number,
+  state: "active" | "pending" | "revoked",
+): NdaInstance {
+  const issued = new Date(Date.now() - daysAgo * 86400_000);
+  let nda = issueNda({
+    templateId,
+    listingId: LISTING_PRIVATE.listingId,
+    disclosing: FOUNDER_PARTY,
+    receiving: { ...buyer, representativeName: "Authorized signatory" },
+  });
+  nda = { ...nda, issuedAt: issued.toISOString() };
+  if (state === "pending") return nda;
+  nda = recordSignature(nda, "disclosing", "Anne Kovac");
+  nda = recordSignature(nda, "receiving",  "Authorized signatory");
+  if (state === "revoked") nda = revokeNda(nda, "mutual termination after talks ended");
+  return nda;
+}
+
+export const SAMPLE_NDAS: readonly NdaInstance[] = [
+  buildSeedNda("tpl-bilateral-standard-v3",   { id: "buyer-helios-ag",  name: "Helios Acquisition Group" }, 18,  "active"),
+  buildSeedNda("tpl-bilateral-standard-v3",   { id: "buyer-astra",       name: "Astra Strategic" },          11,  "active"),
+  buildSeedNda("tpl-bilateral-standard-v3",   { id: "buyer-forum",       name: "Forum Equity Partners" },     2,  "pending"),
+  buildSeedNda("tpl-oneway-buyer-receipt-v2", { id: "buyer-northbound",  name: "Northbound Capital" },       45,  "active"),
+  buildSeedNda("tpl-bilateral-standard-v3",   { id: "buyer-sentinel",    name: "Sentinel Holdings" },       120,  "revoked"),
+  buildSeedNda("tpl-oneway-buyer-receipt-v2", { id: "buyer-lehnen",      name: "Lehnen Family Holdings" },    9,  "active"),
+];
+
+export const NDA_ROSTER = rosterFor(SAMPLE_NDAS);
+
+export function buyerVisibility(buyerId: string): "public_anonymized" | "private_full" {
+  return ndaCoverageFor(buyerId, LISTING_PRIVATE.listingId, SAMPLE_NDAS).visibility;
+}
 
 const memoGen = new TemplateMemorandumGenerator();
 
