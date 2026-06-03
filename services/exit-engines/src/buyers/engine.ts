@@ -3,6 +3,8 @@ import type { BuyerEntry, BuyerType } from './registry.js';
 import { BUYER_REGISTRY } from './registry.js';
 import type { BuyerHistoryRollup, ConfidenceTier } from './history-types.js';
 import { rollupBuyerHistory } from './history-rollup.js';
+import type { BuyerDealOutcomeRollup } from './outcomes.js';
+import { rollupBuyerOutcomes } from './outcomes.js';
 
 export interface BuyerSignal {
   readonly text: string;
@@ -28,6 +30,7 @@ export interface BuyerCandidate {
     readonly historyFit: number;             // evidence-weighted M&A track record fit
   };
   readonly history: BuyerHistoryRollup;
+  readonly outcomes: BuyerDealOutcomeRollup;
 }
 
 function tierToKind(t: ConfidenceTier | undefined): 'verified' | 'unverified' | 'estimated' {
@@ -145,7 +148,8 @@ export function runBuyerDiscovery(company: CompanyProfile, opts: RunOptions = {}
 
   const candidates: BuyerCandidate[] = [];
   for (const buyer of BUYER_REGISTRY) {
-    const history = rollupBuyerHistory(buyer.name);
+    const history  = rollupBuyerHistory(buyer.name);
+    const outcomes = rollupBuyerOutcomes(buyer.name);
     const dims = {
       sectorFit:     sectorFit(buyer, company),
       modelFit:      modelFit(buyer, company),
@@ -213,6 +217,7 @@ export function runBuyerDiscovery(company: CompanyProfile, opts: RunOptions = {}
       estimatedCheck: { low: buyer.checkSizeLowUsd, high: buyer.checkSizeHighUsd, currency: 'USD' },
       fitDimensions: dims,
       history,
+      outcomes,
     });
   }
 

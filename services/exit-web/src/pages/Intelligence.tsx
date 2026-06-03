@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Card, Kpi, SectionHeader, Field, inputCls, fmtMoney } from "../lib/ui";
 import { BUYERS, VALUATION_STRATEGIC } from "../lib/engines";
+import { compareOutcomes } from "@exit/engines";
 
 // Acquisition Intelligence Engine surface — wired to runBuyerDiscovery.
 // Free-text refinement filters the engine output client-side.
@@ -122,6 +123,40 @@ const Intelligence: React.FC = () => {
         </div>
       </Card>
 
+      {(() => {
+        const standouts = compareOutcomes(BUYERS.candidates.map((c) => c.outcomes));
+        if (!standouts.fastestCloser && !standouts.highestPremium && !standouts.bestCloseRate) return null;
+        const fmtPct = (n: number) => `${(n * 100).toFixed(0)}%`;
+        return (
+          <Card className="mt-8 p-5">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Deal outcome standouts</div>
+            <div className="mt-3 grid gap-3 text-sm md:grid-cols-3">
+              {standouts.highestPremium && (
+                <div>
+                  <div className="text-[11px] uppercase tracking-wide text-white/45">Pays the highest premium</div>
+                  <div className="mt-1 text-white">{standouts.highestPremium.buyerName}</div>
+                  <div className="text-xs text-deal-300">avg {fmtPct(standouts.highestPremium.avgPremiumPct)} over prior reference</div>
+                </div>
+              )}
+              {standouts.fastestCloser && (
+                <div>
+                  <div className="text-[11px] uppercase tracking-wide text-white/45">Closes fastest</div>
+                  <div className="mt-1 text-white">{standouts.fastestCloser.buyerName}</div>
+                  <div className="text-xs text-white/65">median {standouts.fastestCloser.medianCloseDays} days announced → closed</div>
+                </div>
+              )}
+              {standouts.bestCloseRate && (
+                <div>
+                  <div className="text-[11px] uppercase tracking-wide text-white/45">Highest close rate</div>
+                  <div className="mt-1 text-white">{standouts.bestCloseRate.buyerName}</div>
+                  <div className="text-xs text-white/65">{fmtPct(standouts.bestCloseRate.closeRatePct)} of {standouts.bestCloseRate.resolved} resolved LOIs</div>
+                </div>
+              )}
+            </div>
+          </Card>
+        );
+      })()}
+
       <div className="mt-8">
         <h2 className="mb-3 font-serif text-lg font-bold">Top candidates</h2>
         <Card>
@@ -133,6 +168,7 @@ const Intelligence: React.FC = () => {
                 <th className="px-5 py-3">Appetite</th>
                 <th className="px-5 py-3">Check size</th>
                 <th className="px-5 py-3">Signals</th>
+                <th className="px-5 py-3 text-right">Outcomes</th>
                 <th className="px-5 py-3 text-right">Match</th>
               </tr>
             </thead>
@@ -158,11 +194,31 @@ const Intelligence: React.FC = () => {
                       ))}
                     </ul>
                   </td>
+                  <td className="px-5 py-3.5 text-right align-top text-[11px]">
+                    {c.outcomes.loiCount === 0 ? (
+                      <span className="text-white/30">—</span>
+                    ) : (
+                      <div className="space-y-0.5 font-mono tabular-nums">
+                        {c.outcomes.closeRatePct != null && (
+                          <div className="text-white/85">
+                            {(c.outcomes.closeRatePct * 100).toFixed(0)}% close
+                            <span className="ml-1 text-[10px] text-white/40">({c.outcomes.closedCount}W · {c.outcomes.withdrawnCount}D)</span>
+                          </div>
+                        )}
+                        {c.outcomes.medianCloseDays != null && (
+                          <div className="text-white/55 text-[10px]">~{c.outcomes.medianCloseDays}d median close</div>
+                        )}
+                        {c.outcomes.avgPremiumPct != null && (
+                          <div className="text-deal-300 text-[10px]">+{(c.outcomes.avgPremiumPct * 100).toFixed(0)}% premium <span className="text-white/35">(n={c.outcomes.premiumSampleSize})</span></div>
+                        )}
+                      </div>
+                    )}
+                  </td>
                   <td className="px-5 py-3.5 text-right align-top font-mono tabular-nums text-deal-300">{c.probability.toFixed(2)}</td>
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={6} className="px-5 py-10 text-center text-sm text-white/40">No candidates match the filter.</td></tr>
+                <tr><td colSpan={7} className="px-5 py-10 text-center text-sm text-white/40">No candidates match the filter.</td></tr>
               )}
             </tbody>
           </table>

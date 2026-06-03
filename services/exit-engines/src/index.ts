@@ -29,8 +29,15 @@ export type {
 } from './valuation/engine.js';
 export type { ReadinessReport, ReadinessBand, ReadinessDimension } from './readiness/engine.js';
 export type { ReadinessAnalysis, ImprovementPlan, ImprovementEffort } from './readiness/improvements.js';
-export type { BuyerDiscoveryReport, BuyerCandidate } from './buyers/engine.js';
+export type { BuyerDiscoveryReport, BuyerCandidate, BuyerSignal } from './buyers/engine.js';
 export type { BuyerEntry, BuyerType } from './buyers/registry.js';
+
+// Buyer M&A history + deal outcomes
+export { rollupBuyerHistory, rollupBuyerOutcomes, compareOutcomes, closeDurationDays, premiumPct, ACQUISITION_HISTORY } from './buyers/index.js';
+export type {
+  AcquisitionEvent, AcquisitionSource, BuyerHistoryRollup, ConfidenceTier,
+  BuyerDealOutcomeRollup, OutcomeStandouts,
+} from './buyers/index.js';
 export type {
   DueDiligenceReport, DiligenceDocumentSpec, DiligenceDocumentKind, DiligenceSection, DiligenceArtifact,
 } from './diligence/engine.js';

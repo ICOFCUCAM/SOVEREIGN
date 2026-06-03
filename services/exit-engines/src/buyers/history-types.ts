@@ -32,9 +32,15 @@ export interface AcquisitionEvent {
   readonly announcedDate: string;              // ISO date
   readonly closedDate?: string;
   readonly headlinePriceUsd?: number;          // null when undisclosed
+  // Reference price the deal premium is measured against — typical
+  // basis: pre-announcement market cap for public targets, last
+  // priced round for private targets. Optional.
+  readonly priorReferencePriceUsd?: number;
   readonly sector?: SectorTag;
   readonly targetGeography?: string;           // ISO country
-  readonly status: 'closed' | 'announced' | 'terminated' | 'pending';
+  readonly status: 'closed' | 'announced' | 'terminated' | 'pending' | 'lost_bid';
+  // Populated when status === 'lost_bid' — the rival acquirer that won.
+  readonly winningBuyerName?: string;
   readonly sourceRefs: readonly AcquisitionSource[];
   readonly confidence: ConfidenceTier;         // event-level provenance tier
   readonly priceConfidence?: ConfidenceTier;   // tier for headlinePriceUsd specifically; defaults to confidence
