@@ -9,6 +9,7 @@ import {
 import { SAMPLE_COMPANY } from "../lib/profile";
 import ExitProcessModal from "../components/ExitProcessModal";
 import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
+import { emitTelemetry } from "../lib/telemetry";
 
 // Founder dashboard — wired to @exit/engines. The deterministic
 // engines (valuation, readiness, buyer discovery, diligence) all run
@@ -43,8 +44,19 @@ const Dashboard: React.FC = () => {
     if (!modalOpen) setRun(loadRun());
   }, [modalOpen]);
 
-  const startExit = (): void => setModalOpen(true);
-  const resetExit = (): void => { clearRun(); setRun(null); };
+  useEffect(() => {
+    emitTelemetry("dashboard_viewed", undefined, "/console");
+  }, []);
+
+  const startExit = (): void => {
+    emitTelemetry("exit_process_clicked", undefined, "/console");
+    setModalOpen(true);
+  };
+  const resetExit = (): void => {
+    emitTelemetry("exit_process_reset", undefined, "/console");
+    clearRun();
+    setRun(null);
+  };
 
   return (
     <div>

@@ -22,6 +22,7 @@ import {
 import { SAMPLE_COMPANY } from "./profile";
 import { RESERVATION_LINES, SAMPLE_OFFERS } from "./engines";
 import { listDocuments } from "./data-room";
+import { emitRunStarted, emitRunStep, emitRunCompleted, emitOffer, flush } from "./telemetry";
 
 export type ExitStepId =
   | "profile" | "valuation" | "readiness" | "cim" | "teaser"
@@ -145,17 +146,24 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
   const emit = (): void => { opts.onStepChange?.(run); persist(run); };
   const delay = opts.fastMode ? 0 : STEP_DELAY_MS;
 
+  // Telemetry · register the run start with the moat warehouse
+  emitRunStarted(run.id, run.steps.length);
+
   async function runStep<T>(id: ExitStepId, body: () => Promise<T> | T, summarize: (out: T) => string): Promise<T> {
     const step = run.steps.find((s) => s.id === id)!;
+    const stepIndex = run.steps.indexOf(step);
     step.status = "running";
     step.startedAt = new Date().toISOString();
     emit();
+    emitRunStep(run.id, id, stepIndex, "running");
     try {
       const out = await body();
       step.status = "done";
       step.finishedAt = new Date().toISOString();
       step.summary = summarize(out);
+      const duration = new Date(step.finishedAt).getTime() - new Date(step.startedAt!).getTime();
       emit();
+      emitRunStep(run.id, id, stepIndex, "done", step.summary, duration);
       if (delay > 0) await sleep(delay);
       return out;
     } catch (err) {
@@ -163,6 +171,7 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
       step.error = (err as Error).message;
       step.finishedAt = new Date().toISOString();
       emit();
+      emitRunStep(run.id, id, stepIndex, "error", undefined, undefined, step.error);
       throw err;
     }
   }
@@ -266,11 +275,64 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
     run.status = "complete";
     run.finishedAt = new Date().toISOString();
     emit();
+
+    // Telemetry · capture the run's prediction snapshot (the valuation
+    // mid that exit_close_events will eventually be compared against)
+    // and one event per offer so the negotiator's scoring is recorded.
+    const durationMs = new Date(run.finishedAt).getTime() - new Date(run.startedAt).getTime();
+    emitRunCompleted(run.id, "complete", run.finishedAt, durationMs,
+      run.steps.filter((s) => s.status === "done").length, {
+        valuation: {
+          low:  valuation.strategic.headline.low,
+          mid:  valuation.strategic.headline.mid,
+          high: valuation.strategic.headline.high,
+        },
+        readiness: { score: readiness.report.overallScore, band: readiness.report.band },
+        qualifiedBuyers: buyers.candidates.length,
+        buyersByType: buyers.byType as unknown as Record<string, number>,
+        artifactsSummary: {
+          cimWordCount:    cim.wordCount,
+          teaserWordCount: teaser.wordCount,
+          dataRoomDocs:    dataRoomDocs,
+          ndasIssued:      ndas.length,
+          listingId:       listingPrivate.listingId,
+          leader:          negotiation.comparison.leader ?? null,
+        },
+      });
+
+    // Emit one offer event per scored offer so the offer table accrues
+    // from day one. Score lookup is by offerId on the comparison.
+    const evalById = new Map(negotiation.comparison.offers.map((e) => [e.offer.offerId, e]));
+    for (const o of SAMPLE_OFFERS) {
+      const evaluation = evalById.get(o.offerId);
+      emitOffer({
+        offerId: o.offerId,
+        buyerName: o.buyerName,
+        buyerType: o.buyerType,
+        stage: "scored",
+        occurredAt: o.receivedAt,
+        headlinePriceUsd: o.headlinePriceUsd,
+        cashPct: o.cashPct, stockPct: o.stockPct, earnoutPct: o.earnoutPct,
+        terms: o.terms,
+        ...(evaluation ? {
+          evaluationScore: evaluation.score,
+          reservationViolated: evaluation.conflicts.length > 0,
+          netNpvUsd: evaluation.impliedNetToFoundersUsd,
+        } : {}),
+        clientRunId: run.id,
+      });
+    }
+
+    void flush();
     return run;
   } catch (err) {
     run.status = "errored";
     run.finishedAt = new Date().toISOString();
     emit();
+    const durationMs = new Date(run.finishedAt!).getTime() - new Date(run.startedAt).getTime();
+    emitRunCompleted(run.id, "errored", run.finishedAt!, durationMs,
+      run.steps.filter((s) => s.status === "done").length);
+    void flush();
     throw err;
   }
 }
