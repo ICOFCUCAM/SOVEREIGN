@@ -5,6 +5,8 @@ import type { BuyerHistoryRollup, ConfidenceTier } from './history-types.js';
 import { rollupBuyerHistory } from './history-rollup.js';
 import type { BuyerDealOutcomeRollup } from './outcomes.js';
 import { rollupBuyerOutcomes } from './outcomes.js';
+import type { ExpectedOutcome } from './expected-outcome.js';
+import { computeExpectedOutcome } from './expected-outcome.js';
 
 export interface BuyerSignal {
   readonly text: string;
@@ -31,6 +33,7 @@ export interface BuyerCandidate {
   };
   readonly history: BuyerHistoryRollup;
   readonly outcomes: BuyerDealOutcomeRollup;
+  readonly expectedOutcome: ExpectedOutcome;
 }
 
 function tierToKind(t: ConfidenceTier | undefined): 'verified' | 'unverified' | 'estimated' {
@@ -44,6 +47,7 @@ export interface BuyerDiscoveryReport {
   readonly companyHeadlineUsd: number;       // implied price the buyer ranks against
   readonly candidates: readonly BuyerCandidate[];
   readonly byType: Readonly<Record<BuyerType, number>>;
+  readonly rankBy: 'probability' | 'expected_outcome';
   readonly summary: string;
 }
 
@@ -135,6 +139,10 @@ export interface RunOptions {
   readonly impliedPriceUsd?: number;          // expected headline; if omitted we derive from ARR
   readonly minProbability?: number;           // filter
   readonly limit?: number;                    // top-N
+  // Ranking dimension. 'probability' is the historical default (fit
+  // score). 'expected_outcome' ranks by probability-weighted closing
+  // value (the founder's actual take-home expectation).
+  readonly sortBy?: 'probability' | 'expected_outcome';
 }
 
 export function runBuyerDiscovery(company: CompanyProfile, opts: RunOptions = {}): BuyerDiscoveryReport {
@@ -150,6 +158,7 @@ export function runBuyerDiscovery(company: CompanyProfile, opts: RunOptions = {}
   for (const buyer of BUYER_REGISTRY) {
     const history  = rollupBuyerHistory(buyer.name);
     const outcomes = rollupBuyerOutcomes(buyer.name);
+    const expectedOutcome = computeExpectedOutcome(buyer, outcomes, implied);
     const dims = {
       sectorFit:     sectorFit(buyer, company),
       modelFit:      modelFit(buyer, company),
@@ -218,10 +227,16 @@ export function runBuyerDiscovery(company: CompanyProfile, opts: RunOptions = {}
       fitDimensions: dims,
       history,
       outcomes,
+      expectedOutcome,
     });
   }
 
-  candidates.sort((a, b) => b.probability - a.probability);
+  const sortBy = opts.sortBy ?? 'probability';
+  if (sortBy === 'expected_outcome') {
+    candidates.sort((a, b) => b.expectedOutcome.expectedClosingUsd - a.expectedOutcome.expectedClosingUsd);
+  } else {
+    candidates.sort((a, b) => b.probability - a.probability);
+  }
   const top = candidates.slice(0, limit);
 
   const byType = top.reduce<Record<BuyerType, number>>((acc, c) => {
@@ -234,10 +249,11 @@ export function runBuyerDiscovery(company: CompanyProfile, opts: RunOptions = {}
     : `${top.length} qualifying buyer${top.length === 1 ? '' : 's'} ranked — ${byType.strategic} strategic, ${byType.pe} PE, ${byType.vc} VC, ${byType.family_office} family office.`;
 
   return {
-    meta: { engine: ENGINE, version: VERSION, runAt: new Date().toISOString(), inputs: { impliedPriceUsd: implied, sector: company.sector } },
+    meta: { engine: ENGINE, version: VERSION, runAt: new Date().toISOString(), inputs: { impliedPriceUsd: implied, sector: company.sector, sortBy } },
     companyHeadlineUsd: implied,
     candidates: top,
     byType,
+    rankBy: sortBy,
     summary,
   };
 }

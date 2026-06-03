@@ -97,3 +97,28 @@ export function fmtMoney(n?: number | null, currency = "USD"): string {
   if (n == null) return "—";
   return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
 }
+
+// Confidence chip — surfaces the sample size and tier behind every
+// statistic. "75% close rate (n=24)" reads very differently from
+// "100% close rate (n=1)"; this primitive enforces the distinction
+// everywhere stats are quoted.
+type ConfidenceTier = "experimental" | "low" | "medium" | "high";
+const CONF_STYLE: Record<ConfidenceTier, string> = {
+  experimental: "bg-white/5 text-white/40 ring-white/10",
+  low:          "bg-loi-500/15 text-loi-300 ring-loi-400/30",
+  medium:       "bg-stage-engaged/15 text-stage-engaged ring-stage-engaged/30",
+  high:         "bg-deal-600/25 text-deal-200 ring-deal-500/40",
+};
+const CONF_LABEL: Record<ConfidenceTier, string> = {
+  experimental: "Exp.", low: "Low", medium: "Med.", high: "High",
+};
+
+export const ConfidenceChip: React.FC<{ tier: ConfidenceTier; sample?: number; compact?: boolean; title?: string }> = ({ tier, sample, compact = false, title }) => (
+  <span
+    title={title ?? `${CONF_LABEL[tier]} confidence${sample != null ? ` · n=${sample}` : ""}`}
+    className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono font-bold uppercase tracking-wider ring-1 ${CONF_STYLE[tier]} ${compact ? "text-[8.5px]" : "text-[9.5px]"}`}
+  >
+    {sample != null && <span className="opacity-80">n={sample}</span>}
+    <span>{CONF_LABEL[tier]}</span>
+  </span>
+);

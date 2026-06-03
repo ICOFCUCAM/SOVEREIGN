@@ -32,11 +32,12 @@ export type { ReadinessAnalysis, ImprovementPlan, ImprovementEffort } from './re
 export type { BuyerDiscoveryReport, BuyerCandidate, BuyerSignal } from './buyers/engine.js';
 export type { BuyerEntry, BuyerType } from './buyers/registry.js';
 
-// Buyer M&A history + deal outcomes
-export { rollupBuyerHistory, rollupBuyerOutcomes, compareOutcomes, closeDurationDays, premiumPct, ACQUISITION_HISTORY } from './buyers/index.js';
+// Buyer M&A history + deal outcomes + expected outcome
+export { rollupBuyerHistory, rollupBuyerOutcomes, compareOutcomes, closeDurationDays, premiumPct, computeExpectedOutcome, confidenceFromSample, ACQUISITION_HISTORY } from './buyers/index.js';
 export type {
   AcquisitionEvent, AcquisitionSource, BuyerHistoryRollup, ConfidenceTier,
   BuyerDealOutcomeRollup, OutcomeStandouts,
+  ExpectedOutcome, ConfidenceLabel, StatConfidence,
 } from './buyers/index.js';
 export type {
   DueDiligenceReport, DiligenceDocumentSpec, DiligenceDocumentKind, DiligenceSection, DiligenceArtifact,
