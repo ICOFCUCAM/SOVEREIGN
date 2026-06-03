@@ -23,7 +23,8 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b",
-    "test": "npm run build && node --test test/*.test.js"
+    "test": "npm run build && node --test test/*.test.js",
+    "refresh-buyer-history": "npm run build && node dist/scripts/refresh-buyer-history.js"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",

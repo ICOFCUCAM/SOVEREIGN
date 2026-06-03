@@ -33,20 +33,18 @@ const Intelligence: React.FC = () => {
   const avgProb = BUYERS.candidates.length > 0
     ? BUYERS.candidates.reduce((s, c) => s + c.probability, 0) / BUYERS.candidates.length
     : 0;
-  const sectorSet = new Set(BUYERS.candidates.flatMap((c) => c.buyer.sectorsActive));
-
   return (
     <div>
       <SectionHeader
         kicker="Module 01 · Sourcing"
         title="Acquisition Intelligence Engine"
-        description={`Ranked against an implied price of ${fmtMoney(VALUATION_STRATEGIC.headline.mid)}. Probability = sector × model × check × geography × activity.`}
+        description={`Ranked against an implied price of ${fmtMoney(VALUATION_STRATEGIC.headline.mid)}. Probability = sector × model × check × geography × activity × M&A track record (EDGAR 8-K + Wikidata).`}
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi label="Candidates ranked" value={String(BUYERS.candidates.length)} sub="qualifying ≥ 15% probability" />
         <Kpi label="Active acquirers"  value={String(activeCount)} sub="recent-12mo activity" accent="#34d399" />
-        <Kpi label="Sectoral coverage" value={String(sectorSet.size)} sub="across registry" />
+        <Kpi label="Tracked deals"     value={String(BUYERS.candidates.reduce((s, c) => s + c.history.totalDeals, 0))} sub="across registry · sourced" />
         <Kpi label="Average match"     value={avgProb.toFixed(2)} sub="probability × fit" />
       </div>
 
@@ -90,7 +88,15 @@ const Intelligence: React.FC = () => {
                   <td className="px-5 py-3.5 text-xs text-white/70">{fmtMoney(c.buyer.checkSizeLowUsd)} – {fmtMoney(c.buyer.checkSizeHighUsd)}</td>
                   <td className="px-5 py-3.5 align-top">
                     <ul className="space-y-1 text-[11px] text-white/55">
-                      {c.signals.slice(0, 3).map((s) => <li key={s}>· {s}</li>)}
+                      {c.signals.slice(0, 5).map((s) => {
+                        const isEvidence = s.startsWith("Last deal:") || /disclosed deal/.test(s) || /prior acquisition/.test(s);
+                        const isCaution  = s.startsWith("Caution:");
+                        return (
+                          <li key={s} className={isEvidence ? "text-white/75" : isCaution ? "text-loi-400" : ""}>
+                            · {s}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </td>
                   <td className="px-5 py-3.5 text-right align-top font-mono tabular-nums text-deal-300">{c.probability.toFixed(2)}</td>

@@ -1,6 +1,8 @@
 import type { CompanyProfile, EngineMeta } from '../types.js';
 import type { BuyerEntry, BuyerType } from './registry.js';
 import { BUYER_REGISTRY } from './registry.js';
+import type { BuyerHistoryRollup } from './history-types.js';
+import { rollupBuyerHistory } from './history-rollup.js';
 
 export interface BuyerCandidate {
   readonly buyer: BuyerEntry;
@@ -14,7 +16,9 @@ export interface BuyerCandidate {
     readonly checkFit: number;
     readonly geographyFit: number;
     readonly activityFit: number;
+    readonly historyFit: number;             // evidence-weighted M&A track record fit
   };
+  readonly history: BuyerHistoryRollup;
 }
 
 export interface BuyerDiscoveryReport {
@@ -79,6 +83,36 @@ function activityFit(buyer: BuyerEntry): number {
   return clamp01(base + appBonus);
 }
 
+// historyFit rewards an acquirer whose recent disclosed deals match the
+// seller's sector and check-size band. Evidence-weighted: a buyer with
+// no recorded history gets 0.35 (mild skepticism, not neutral) so real
+// track record always beats absence. Check-size proximity is asymmetric
+// — a buyer with a much larger median deal isn't disqualified (they
+// can go down-market), but a buyer whose ceiling is below the implied
+// price gets penalized hard (they can't write the check).
+function historyFit(
+  history: BuyerHistoryRollup,
+  company: CompanyProfile,
+  impliedPriceUsd: number,
+): number {
+  if (history.totalDeals === 0) return 0.35;
+  const sectorMatches  = history.sectorMix[company.sector] ?? 0;
+  const sectorWeight   = Math.min(1, sectorMatches / 2) * 0.45;
+  const recencyWeight  = Math.min(1, history.dealsLast3Years / 4) * 0.30;
+  // Asymmetric check fit: only penalize when median << implied (can't write the check).
+  // When median >> implied (oversized buyer for the target), apply only a 25% discount.
+  let checkProximity = 0.7;
+  if (history.medianDisclosedCheckUsd && history.medianDisclosedCheckUsd > 0 && impliedPriceUsd > 0) {
+    const ratio = history.medianDisclosedCheckUsd / impliedPriceUsd;
+    if (ratio >= 0.5 && ratio <= 4) checkProximity = 1.0;          // sweet spot
+    else if (ratio > 4) checkProximity = 0.75;                       // oversized
+    else checkProximity = clamp01(ratio * 1.5);                      // undersized → linear penalty
+  }
+  const checkWeight    = checkProximity * 0.20;
+  const terminationPenalty = Math.min(0.15, history.terminatedDeals * 0.05);
+  return clamp01(sectorWeight + recencyWeight + checkWeight + 0.05 - terminationPenalty);
+}
+
 export interface RunOptions {
   readonly impliedPriceUsd?: number;          // expected headline; if omitted we derive from ARR
   readonly minProbability?: number;           // filter
@@ -96,20 +130,23 @@ export function runBuyerDiscovery(company: CompanyProfile, opts: RunOptions = {}
 
   const candidates: BuyerCandidate[] = [];
   for (const buyer of BUYER_REGISTRY) {
+    const history = rollupBuyerHistory(buyer.name);
     const dims = {
       sectorFit:     sectorFit(buyer, company),
       modelFit:      modelFit(buyer, company),
       checkFit:      checkFit(buyer, implied),
       geographyFit:  geographyFit(buyer, company),
       activityFit:   activityFit(buyer),
+      historyFit:    historyFit(history, company, implied),
     };
     // Weighted probability
     const prob = clamp01(
-      dims.sectorFit    * 0.30 +
-      dims.modelFit     * 0.15 +
-      dims.checkFit     * 0.25 +
-      dims.geographyFit * 0.10 +
-      dims.activityFit  * 0.20,
+      dims.sectorFit    * 0.25 +
+      dims.modelFit     * 0.10 +
+      dims.checkFit     * 0.20 +
+      dims.geographyFit * 0.08 +
+      dims.activityFit  * 0.15 +
+      dims.historyFit   * 0.22,
     );
     if (prob < minProb) continue;
 
@@ -121,6 +158,23 @@ export function runBuyerDiscovery(company: CompanyProfile, opts: RunOptions = {}
     if (dims.geographyFit === 1) signals.push(`Strong geography fit (${company.jurisdiction})`);
     if (company.product.hasDataMoat && buyer.sectorsActive.includes('ai_infra')) signals.push(`Data moat aligns with AI-infra thesis`);
 
+    // Evidence-grade history signals
+    if (history.lastTargetName && history.lastAcquiredAt) {
+      const year = history.lastAcquiredAt.slice(0, 4);
+      const priceTag = history.largestDealUsd ? ` ($${(history.largestDealUsd / 1_000_000_000).toFixed(1)}B largest)` : '';
+      signals.push(`Last deal: ${history.lastTargetName} (${year})${priceTag}`);
+    }
+    if (history.dealsLast3Years > 0) {
+      signals.push(`${history.dealsLast3Years} disclosed deal${history.dealsLast3Years === 1 ? '' : 's'} in last 3 years`);
+    }
+    const sectorMatches = history.sectorMix[company.sector] ?? 0;
+    if (sectorMatches > 0) {
+      signals.push(`${sectorMatches} prior acquisition${sectorMatches === 1 ? '' : 's'} in ${company.sector}`);
+    }
+    if (history.terminatedDeals > 0) {
+      signals.push(`Caution: ${history.terminatedDeals} terminated deal${history.terminatedDeals === 1 ? '' : 's'} on record`);
+    }
+
     candidates.push({
       buyer,
       probability: prob,
@@ -128,6 +182,7 @@ export function runBuyerDiscovery(company: CompanyProfile, opts: RunOptions = {}
       signals,
       estimatedCheck: { low: buyer.checkSizeLowUsd, high: buyer.checkSizeHighUsd, currency: 'USD' },
       fitDimensions: dims,
+      history,
     });
   }
 
