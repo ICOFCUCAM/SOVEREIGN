@@ -18,6 +18,7 @@ const NAV: Array<{ to: string; label: string; group: string; scope?: string }> =
   { to: "/console/negotiator",     label: "AI Deal Negotiator",     group: "Operator" },
   { to: "/console/closing",        label: "Deal Closing Center",    group: "Operator" },
   { to: "/console/marketplace",    label: "Exit Marketplace",       group: "Marketplace" },
+  { to: "/console/calibration",    label: "Calibration · internal", group: "Internal" },
 ];
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -16,6 +16,7 @@ import Nda from "./pages/Nda";
 import Pipeline from "./pages/Pipeline";
 import Closing from "./pages/Closing";
 import Marketplace from "./pages/Marketplace";
+import Calibration from "./pages/Calibration";
 
 const Console: React.FC = () => {
   const { session } = useAuth();
@@ -34,6 +35,7 @@ const Console: React.FC = () => {
         <Route path="pipeline" element={<Pipeline />} />
         <Route path="closing" element={<Closing />} />
         <Route path="marketplace" element={<Marketplace />} />
+        <Route path="calibration" element={<Calibration />} />
         <Route path="*" element={<Navigate to="/console" replace />} />
       </Routes>
     </Shell>
