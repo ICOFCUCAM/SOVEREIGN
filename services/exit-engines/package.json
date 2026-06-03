@@ -13,7 +13,9 @@
     "./buyers":       { "types": "./dist/buyers/index.d.ts",       "import": "./dist/buyers/index.js" },
     "./diligence":    { "types": "./dist/diligence/index.d.ts",    "import": "./dist/diligence/index.js" },
     "./readiness":    { "types": "./dist/readiness/index.d.ts",    "import": "./dist/readiness/index.js" },
-    "./marketplace":  { "types": "./dist/marketplace/index.d.ts",  "import": "./dist/marketplace/index.js" }
+    "./marketplace":  { "types": "./dist/marketplace/index.d.ts",  "import": "./dist/marketplace/index.js" },
+    "./negotiation":  { "types": "./dist/negotiation/index.d.ts",  "import": "./dist/negotiation/index.js" },
+    "./listing":      { "types": "./dist/listing/index.d.ts",      "import": "./dist/listing/index.js" }
   },
   "files": ["dist", "src"],
   "scripts": {

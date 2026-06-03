@@ -137,11 +137,11 @@ export function runBuyerDiscovery(company: CompanyProfile, opts: RunOptions = {}
   const byType = top.reduce<Record<BuyerType, number>>((acc, c) => {
     acc[c.buyer.buyerType] = (acc[c.buyer.buyerType] ?? 0) + 1;
     return acc;
-  }, { strategic: 0, pe: 0, family_office: 0, sponsor: 0 });
+  }, { strategic: 0, pe: 0, vc: 0, family_office: 0, sponsor: 0 });
 
   const summary = top.length === 0
     ? 'No qualifying buyers — refine company profile or expand criteria.'
-    : `${top.length} qualifying buyer${top.length === 1 ? '' : 's'} ranked — ${byType.strategic} strategic, ${byType.pe} PE, ${byType.family_office} family office.`;
+    : `${top.length} qualifying buyer${top.length === 1 ? '' : 's'} ranked — ${byType.strategic} strategic, ${byType.pe} PE, ${byType.vc} VC, ${byType.family_office} family office.`;
 
   return {
     meta: { engine: ENGINE, version: VERSION, runAt: new Date().toISOString(), inputs: { impliedPriceUsd: implied, sector: company.sector } },

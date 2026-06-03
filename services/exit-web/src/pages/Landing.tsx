@@ -51,7 +51,9 @@ const Landing: React.FC = () => {
           </div>
           <nav className="hidden items-center gap-9 lg:flex">
             {NAV.map((n) => (
-              <a key={n} href={`#${n.toLowerCase()}`} className="text-[13px] font-medium uppercase tracking-wide text-white/70 transition hover:text-white">{n}</a>
+              n === "Pricing"
+                ? <button key={n} onClick={() => nav("/pricing")} className="text-[13px] font-medium uppercase tracking-wide text-white/70 transition hover:text-white">{n}</button>
+                : <a key={n} href={`#${n.toLowerCase()}`} className="text-[13px] font-medium uppercase tracking-wide text-white/70 transition hover:text-white">{n}</a>
             ))}
           </nav>
           <div className="flex items-center gap-4">

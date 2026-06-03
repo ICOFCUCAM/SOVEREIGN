@@ -22,7 +22,7 @@ test('buyer discovery filters by minProbability', () => {
 
 test('byType breakdown sums to candidate count', () => {
   const r = runBuyerDiscovery(SAMPLE_SAAS, { limit: 50 });
-  const sum = r.byType.strategic + r.byType.pe + r.byType.family_office + r.byType.sponsor;
+  const sum = r.byType.strategic + r.byType.pe + r.byType.vc + r.byType.family_office + r.byType.sponsor;
   assert.equal(sum, r.candidates.length);
 });
 

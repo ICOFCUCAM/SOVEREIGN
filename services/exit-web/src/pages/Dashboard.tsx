@@ -4,7 +4,7 @@ import { Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import {
   VALUATION_STANDARD, VALUATION_STRATEGIC, VALUATION_REPLACEMENT,
-  READINESS, BUYERS, DILIGENCE,
+  READINESS, READINESS_ANALYSIS, BUYERS, DILIGENCE,
 } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 
@@ -123,6 +123,41 @@ const Dashboard: React.FC = () => {
           </div>
         </Card>
       </div>
+
+      {READINESS_ANALYSIS.weaknesses.length > 0 && (
+        <Card className="mt-8 p-6">
+          <div className="mb-4 flex items-end justify-between">
+            <div>
+              <h2 className="font-serif text-xl font-bold text-white">Readiness analysis · improvement plan</h2>
+              <p className="text-xs text-white/45">{READINESS_ANALYSIS.headline}</p>
+            </div>
+            <div className="text-right text-[11px]">
+              <div className="text-white/40 uppercase tracking-[0.2em]">Projected mid</div>
+              <div className="font-mono text-lg text-deal-300">{fmtMoney(READINESS_ANALYSIS.projectedStrategicMid)}</div>
+              <div className="text-[10px] text-white/40">vs current {fmtMoney(READINESS_ANALYSIS.currentStrategicMid)}</div>
+            </div>
+          </div>
+          <div className="space-y-3">
+            {READINESS_ANALYSIS.weaknesses.slice(0, 4).map((w) => (
+              <div key={w.dimension} className="rounded border border-white/10 bg-ink-900/40 p-3">
+                <div className="flex items-baseline justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-white/45">{w.dimension}</span>
+                    <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${
+                      w.severity === 'high' ? 'bg-red-500/15 text-red-300 ring-red-400/40' :
+                      w.severity === 'medium' ? 'bg-loi-500/15 text-loi-300 ring-loi-400/40' :
+                      'bg-white/5 text-white/65 ring-white/15'
+                    }`}>{w.severity}</span>
+                  </div>
+                  <div className="font-mono text-[12px] text-deal-300">+{fmtMoney(w.valuationUpliftUsd)} <span className="text-white/40">· {w.effort}</span></div>
+                </div>
+                <p className="mt-1 text-[13px] text-white/70">{w.weakness}</p>
+                <p className="mt-1 text-[12px] text-white/55">→ {w.recommendation}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <div className="mt-8 grid gap-4 lg:grid-cols-3">
         <Card className="p-6">
