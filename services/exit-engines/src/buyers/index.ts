@@ -5,6 +5,8 @@ export { ACQUISITION_HISTORY } from './history.js';
 export { rollupBuyerHistory } from './history-rollup.js';
 export { rollupBuyerOutcomes, compareOutcomes, closeDurationDays, premiumPct } from './outcomes.js';
 export { computeExpectedOutcome, confidenceFromSample } from './expected-outcome.js';
+export { runStrategySimulator } from './strategy.js';
 export type { AcquisitionEvent, AcquisitionSource, BuyerHistoryRollup, ConfidenceTier } from './history-types.js';
 export type { BuyerDealOutcomeRollup, OutcomeStandouts } from './outcomes.js';
 export type { ExpectedOutcome, ConfidenceLabel, StatConfidence } from './expected-outcome.js';
+export type { StrategyConstraints, StrategyOutput, ProcessStructure } from './strategy.js';
