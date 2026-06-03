@@ -63,6 +63,12 @@ export interface BuyerDealOutcomeRollup {
   readonly avgPremiumPct?:    number;
   readonly medianPremiumPct?: number;
   readonly premiumSampleSize: number;    // how many deals had a computable premium
+  // Retrade detection — average drop from initial LOI to final close.
+  // Populated from exit_offer_events ⨝ exit_close_events when both
+  // exist for the same (run, buyer). Negative means the buyer cut
+  // their offer between LOI and signing.
+  readonly avgRetradePct?:    number;
+  readonly retradeSampleSize: number;
   // Recent loss to a rival, for the UI to flag.
   readonly mostRecentLoss?:  { readonly targetName: string; readonly winningBuyerName: string; readonly announcedDate: string };
 }
@@ -150,6 +156,11 @@ export function rollupBuyerOutcomes(
     ...(medianPremium   != null ? { medianPremiumPct: medianPremium } : {}),
     premiumSampleSize:  premiums.length,
     ...(mostRecentLoss ? { mostRecentLoss } : {}),
+    // Retrade is not derivable from the static snapshot — snapshot
+    // events carry only the final headline price. The SPA merge layer
+    // overrides this when live exit_offer_events + exit_close_events
+    // data flows from real tenants.
+    retradeSampleSize: 0,
   };
 }
 

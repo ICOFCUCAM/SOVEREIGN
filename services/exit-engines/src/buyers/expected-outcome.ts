@@ -38,18 +38,24 @@ export function confidenceFromSample(n: number, label = 'observations'): Confide
 // Neutral defaults used when a buyer has no track record. These are
 // sector-blind priors; once exit_close_events accrues real data, the
 // orchestration layer can swap these for tenant-aggregated values.
-const NEUTRAL_PREMIUM = 0.20;        // public-market M&A premiums historically cluster around 20-30%
-const NEUTRAL_CLOSE_RATE = 0.55;     // mid-range close rate for non-PE acquirers
+const NEUTRAL_PREMIUM       = 0.20;  // public-market M&A premiums historically cluster around 20-30%
+const NEUTRAL_CLOSE_RATE    = 0.55;  // mid-range close rate for non-PE acquirers
+const NEUTRAL_DAYS_TO_CASH  = 150;   // 5-month median for mid-market software M&A
+const NEUTRAL_RETRADE       = 0;     // assume no retrade until data says otherwise
 
 export interface ExpectedOutcome {
   readonly impliedPriceUsd:    number;
-  readonly expectedHeadlineUsd: number;
-  readonly expectedClosingUsd:  number;          // probability-weighted
+  readonly expectedHeadlineUsd: number;          // what they'd offer (LOI)
+  readonly expectedClosingUsd:  number;          // probability-weighted final cash to founders
+  readonly expectedDaysToCash:  number;          // median announced → closed
   readonly premiumPct:         number;            // applied
   readonly closeRatePct:       number;            // applied
+  readonly retradePct:         number;            // applied (negative = drop from LOI to close)
   readonly premiumConfidence:  ConfidenceLabel;
   readonly closeRateConfidence: ConfidenceLabel;
-  readonly overallConfidence:  ConfidenceLabel;   // floor of premium + closeRate
+  readonly retradeConfidence:  ConfidenceLabel;
+  readonly daysToCashConfidence: ConfidenceLabel;
+  readonly overallConfidence:  ConfidenceLabel;   // floor of all inputs
   readonly usedFallback:       boolean;           // true when any input was a neutral prior
 }
 
@@ -79,18 +85,38 @@ export function computeExpectedOutcome(
   if (closeRate == null) { closeRate = NEUTRAL_CLOSE_RATE; closeN = 0; usedFallback = true; }
   const closeRateConfidence = confidenceFromSample(closeN, 'resolved LOIs');
 
+  let retrade = outcomes.avgRetradePct;
+  let retradeN = outcomes.retradeSampleSize;
+  if (retrade == null) { retrade = NEUTRAL_RETRADE; retradeN = 0; usedFallback = true; }
+  const retradeConfidence = confidenceFromSample(retradeN, 'LOI→close pairs');
+
+  let daysToCash = outcomes.medianCloseDays ?? outcomes.avgCloseDays;
+  let daysN = outcomes.closedCount;
+  if (daysToCash == null) { daysToCash = NEUTRAL_DAYS_TO_CASH; daysN = 0; usedFallback = true; }
+  const daysToCashConfidence = confidenceFromSample(daysN, 'closed deals');
+
+  // expectedHeadline = the LOI we'd expect.
+  // expectedClosing  = LOI × (1 + retrade) × closeRate.
+  // Retrade is typically negative — buyer cuts price between LOI and signing.
   const expectedHeadline = impliedPriceUsd * (1 + premium);
-  const expectedClosing  = expectedHeadline * closeRate;
+  const expectedClosing  = expectedHeadline * (1 + retrade) * closeRate;
+
+  const overallConfidence = [premiumConfidence, closeRateConfidence, retradeConfidence, daysToCashConfidence]
+    .reduce(lowerTier);
 
   return {
     impliedPriceUsd,
     expectedHeadlineUsd: expectedHeadline,
     expectedClosingUsd:  expectedClosing,
+    expectedDaysToCash:  Math.round(daysToCash),
     premiumPct: premium,
     closeRatePct: closeRate,
+    retradePct: retrade,
     premiumConfidence,
     closeRateConfidence,
-    overallConfidence: lowerTier(premiumConfidence, closeRateConfidence),
+    retradeConfidence,
+    daysToCashConfidence,
+    overallConfidence,
     usedFallback,
   };
 }

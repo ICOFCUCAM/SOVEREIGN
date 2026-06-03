@@ -25,32 +25,56 @@ test('confidenceFromSample tiers calibrate against M&A small-n reality', () => {
 test('computeExpectedOutcome falls back to neutral priors when no data', () => {
   const empty = { buyerName: 'X', aggregateTier: 'unverified',
     loiCount: 0, closedCount: 0, lostCount: 0, withdrawnCount: 0, pendingCount: 0,
-    premiumSampleSize: 0 };
+    premiumSampleSize: 0, retradeSampleSize: 0 };
   const eo = computeExpectedOutcome(FAKE_BUYER, empty, 100_000_000);
   assert.equal(eo.usedFallback, true);
   assert.equal(eo.premiumPct, 0.20);                      // neutral default
   assert.equal(eo.closeRatePct, 0.55);                    // neutral default
+  assert.equal(eo.retradePct, 0);                          // neutral default
+  assert.equal(eo.expectedDaysToCash, 150);                // neutral default
   assert.ok(Math.abs(eo.expectedHeadlineUsd - 120_000_000) < 1);
+  // 100M × 1.20 × (1 + 0) × 0.55 = 66M
   assert.ok(Math.abs(eo.expectedClosingUsd  -  66_000_000) < 1);
   assert.equal(eo.premiumConfidence.tier, 'experimental');
   assert.equal(eo.closeRateConfidence.tier, 'experimental');
+  assert.equal(eo.retradeConfidence.tier, 'experimental');
+  assert.equal(eo.daysToCashConfidence.tier, 'experimental');
   assert.equal(eo.overallConfidence.tier, 'experimental');
 });
 
 test('computeExpectedOutcome uses real data when present, overall = min of inputs', () => {
   const rich = { buyerName: 'X', aggregateTier: 'unverified',
     loiCount: 5, closedCount: 4, lostCount: 1, withdrawnCount: 0, pendingCount: 0,
-    closeRatePct: 0.80, avgPremiumPct: 0.35, premiumSampleSize: 2 };
+    closeRatePct: 0.80, avgPremiumPct: 0.35, premiumSampleSize: 2,
+    medianCloseDays: 90, avgRetradePct: -0.05, retradeSampleSize: 3 };
   const eo = computeExpectedOutcome(FAKE_BUYER, rich, 100_000_000);
   assert.equal(eo.usedFallback, false);
   assert.equal(eo.premiumPct, 0.35);
   assert.equal(eo.closeRatePct, 0.80);
+  assert.equal(eo.retradePct, -0.05);
+  assert.equal(eo.expectedDaysToCash, 90);
   assert.ok(Math.abs(eo.expectedHeadlineUsd - 135_000_000) < 1);
-  assert.ok(Math.abs(eo.expectedClosingUsd  - 108_000_000) < 1);
-  // 5 resolved → medium; 2 priced → low. Overall = low (the floor).
-  assert.equal(eo.closeRateConfidence.tier, 'medium');
+  // 100M × 1.35 × (1 - 0.05) × 0.80 = 102.6M
+  assert.ok(Math.abs(eo.expectedClosingUsd - 102_600_000) < 100,
+    `expected ~102.6M, got ${eo.expectedClosingUsd}`);
+  // 5 resolved → medium; 2 priced → low; 3 retrades → medium; 4 closes → medium.
+  // Floor = low.
   assert.equal(eo.premiumConfidence.tier, 'low');
   assert.equal(eo.overallConfidence.tier, 'low');
+});
+
+test('computeExpectedOutcome retrade drag — bad retrade reduces expectedClosing', () => {
+  const badRetrade = { buyerName: 'X', aggregateTier: 'unverified',
+    loiCount: 3, closedCount: 3, lostCount: 0, withdrawnCount: 0, pendingCount: 0,
+    closeRatePct: 1.0, avgPremiumPct: 0.30, premiumSampleSize: 3,
+    medianCloseDays: 120, avgRetradePct: -0.18, retradeSampleSize: 3 };
+  const cleanRetrade = { ...badRetrade, avgRetradePct: -0.02 };
+  const bad   = computeExpectedOutcome(FAKE_BUYER, badRetrade,   100_000_000);
+  const clean = computeExpectedOutcome(FAKE_BUYER, cleanRetrade, 100_000_000);
+  // Same headline LOI; bad-retrade buyer closes for materially less.
+  assert.equal(bad.expectedHeadlineUsd, clean.expectedHeadlineUsd);
+  assert.ok(bad.expectedClosingUsd < clean.expectedClosingUsd * 0.90,
+    `expected bad retrade to drop closing > 10%, got bad=${bad.expectedClosingUsd} clean=${clean.expectedClosingUsd}`);
 });
 
 test('runBuyerDiscovery attaches expectedOutcome to every candidate', () => {

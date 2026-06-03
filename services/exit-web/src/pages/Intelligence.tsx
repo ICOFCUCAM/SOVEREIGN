@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card, Kpi, SectionHeader, Field, inputCls, fmtMoney, ConfidenceChip } from "../lib/ui";
 import { VALUATION_STRATEGIC } from "../lib/engines";
-import { compareOutcomes, runBuyerDiscovery } from "@exit/engines";
+import { compareOutcomes, runBuyerDiscovery, type BuyerCandidate } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import { fetchBuyerStats, mergeLiveStatsIntoCandidates, type BuyerLiveStat } from "../lib/buyer-stats";
 
 // Acquisition Intelligence Engine surface — wired to runBuyerDiscovery.
 // Free-text refinement filters the engine output client-side.
@@ -37,18 +38,38 @@ const SIGNAL_TEXT: Record<SignalKind, string> = {
 const Intelligence: React.FC = () => {
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<"probability" | "expected_outcome">("probability");
+  const [liveStats, setLiveStats] = useState<readonly BuyerLiveStat[]>([]);
   const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
 
-  // Re-run discovery when the sort dimension changes so the engine
-  // does the ranking (single source of truth).
+  // Fetch tenant-measured per-buyer stats once on mount. Failure is
+  // non-fatal — the page falls back to the static snapshot.
+  useEffect(() => {
+    let alive = true;
+    fetchBuyerStats()
+      .then((s) => { if (alive) setLiveStats(s); })
+      .catch(() => { /* silent — snapshot is the fallback */ });
+    return () => { alive = false; };
+  }, []);
+
+  // Re-run discovery when the sort dimension changes, then merge live
+  // stats over the snapshot. The merge re-sorts by the same dimension
+  // so live-data-bumped rankings settle correctly.
   const report = useMemo(
     () => runBuyerDiscovery(SAMPLE_COMPANY, { limit: 20, sortBy }),
     [sortBy],
   );
+  const candidates = useMemo<readonly BuyerCandidate[]>(() => {
+    const merged = mergeLiveStatsIntoCandidates(report.candidates, liveStats, report.companyHeadlineUsd);
+    if (sortBy === "expected_outcome") {
+      return [...merged].sort((a, b) => b.expectedOutcome.expectedClosingUsd - a.expectedOutcome.expectedClosingUsd);
+    }
+    return merged;
+  }, [report, liveStats, sortBy]);
+  const liveCoverage = liveStats.filter((s) => s.closedCount > 0 || s.retradeSampleSize > 0).length;
 
   const filtered = useMemo(() => {
-    if (tokens.length === 0) return report.candidates;
-    return report.candidates.filter((c) => {
+    if (tokens.length === 0) return candidates;
+    return candidates.filter((c) => {
       const hay = [
         c.buyer.name,
         c.buyer.buyerType,
@@ -60,9 +81,9 @@ const Intelligence: React.FC = () => {
     });
   }, [tokens, report]);
 
-  const activeCount = report.candidates.filter((c) => c.buyer.appetite === "active").length;
-  const avgProb = report.candidates.length > 0
-    ? report.candidates.reduce((s, c) => s + c.probability, 0) / report.candidates.length
+  const activeCount = candidates.filter((c) => c.buyer.appetite === "active").length;
+  const avgProb = candidates.length > 0
+    ? candidates.reduce((s, c) => s + c.probability, 0) / candidates.length
     : 0;
   return (
     <div>
@@ -112,7 +133,7 @@ const Intelligence: React.FC = () => {
       })()}
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Candidates ranked" value={String(report.candidates.length)} sub="qualifying ≥ 15% probability" />
+        <Kpi label="Candidates ranked" value={String(candidates.length)} sub="qualifying ≥ 15% probability" />
         <Kpi label="Active acquirers"  value={String(activeCount)} sub="recent-12mo activity" accent="#34d399" />
         <Kpi label="Tracked deals"     value={String(report.candidates.reduce((s, c) => s + c.history.totalDeals, 0))} sub="across registry · sourced" />
         <Kpi label="Average match"     value={avgProb.toFixed(2)} sub="probability × fit" />
@@ -128,16 +149,16 @@ const Intelligence: React.FC = () => {
           />
         </Field>
         <div className="mt-3 text-xs text-white/40">
-          {filtered.length} of {report.candidates.length} candidates match. {report.summary}
+          {filtered.length} of {candidates.length} candidates match. {report.summary}
         </div>
       </Card>
 
       {(() => {
-        const standouts = compareOutcomes(report.candidates.map((c) => c.outcomes));
+        const standouts = compareOutcomes(candidates.map((c) => c.outcomes));
         if (!standouts.fastestCloser && !standouts.highestPremium && !standouts.bestCloseRate) return null;
         const fmtPct = (n: number) => `${(n * 100).toFixed(0)}%`;
         // Resolve sample sizes from the matching candidate rollup.
-        const lookup = (name: string) => report.candidates.find((c) => c.buyer.name === name)?.outcomes;
+        const lookup = (name: string) => candidates.find((c) => c.buyer.name === name)?.outcomes;
         const premiumN = standouts.highestPremium ? (lookup(standouts.highestPremium.buyerName)?.premiumSampleSize ?? 0) : 0;
         const closeN   = standouts.fastestCloser  ? (lookup(standouts.fastestCloser.buyerName)?.closedCount ?? 0)      : 0;
         const tierFrom = (n: number) => n === 0 ? "experimental" : n <= 2 ? "low" : n <= 9 ? "medium" : "high";
@@ -180,6 +201,18 @@ const Intelligence: React.FC = () => {
         );
       })()}
 
+      {liveCoverage > 0 && (
+        <Card className="mt-8 border-deal-500/40 bg-deal-600/5 p-4 text-[12px]">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-block rounded bg-deal-600/30 px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-deal-200 ring-1 ring-deal-500/40">Live data</span>
+            <span className="text-white/85">{liveCoverage}</span>
+            <span className="text-white/65">
+              buyer{liveCoverage === 1 ? "" : "s"} sharpened with tenant-measured close rate, time-to-cash, and retrade — overrides the static snapshot per buyer.
+            </span>
+          </div>
+        </Card>
+      )}
+
       <div className="mt-8">
         <div className="mb-3 flex items-end justify-between gap-4">
           <div>
@@ -220,10 +253,24 @@ const Intelligence: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((c) => (
+              {filtered.map((c) => {
+                // Rank badge — #1/#2/#3 for top three in the active sort.
+                const rank = candidates.findIndex((x) => x.buyer.name === c.buyer.name);
+                const showRankBadge = rank < 3 && tokens.length === 0;
+                const rankBg = rank === 0 ? "bg-deal-600/30 text-deal-200 ring-deal-500/40"
+                              : rank === 1 ? "bg-stage-engaged/15 text-stage-engaged ring-stage-engaged/40"
+                              : "bg-white/5 text-white/55 ring-white/15";
+                return (
                 <tr key={c.buyer.name} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
                   <td className="px-5 py-3.5 align-top">
-                    <div className="font-medium text-white">{c.buyer.name}</div>
+                    <div className="flex items-center gap-2">
+                      {showRankBadge && (
+                        <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-mono font-bold ring-1 ${rankBg}`}>
+                          {rank + 1}
+                        </span>
+                      )}
+                      <div className="font-medium text-white">{c.buyer.name}</div>
+                    </div>
                     <div className="mt-1 max-w-md text-xs leading-snug text-white/45">{c.buyer.thesis}</div>
                   </td>
                   <td className="px-5 py-3.5 text-[12px] uppercase tracking-wide text-white/65">{c.buyer.buyerType.replace(/_/g, " ")}</td>
@@ -242,7 +289,7 @@ const Intelligence: React.FC = () => {
                     </ul>
                   </td>
                   <td className="px-5 py-3.5 text-right align-top text-[11px]">
-                    {c.outcomes.loiCount === 0 ? (
+                    {c.outcomes.loiCount === 0 && c.outcomes.retradeSampleSize === 0 ? (
                       <span className="text-white/30">—</span>
                     ) : (
                       <div className="space-y-0.5 font-mono tabular-nums">
@@ -258,13 +305,18 @@ const Intelligence: React.FC = () => {
                         {c.outcomes.avgPremiumPct != null && (
                           <div className="text-deal-300 text-[10px]">+{(c.outcomes.avgPremiumPct * 100).toFixed(0)}% premium <span className="text-white/35">(n={c.outcomes.premiumSampleSize})</span></div>
                         )}
+                        {c.outcomes.avgRetradePct != null && (
+                          <div className={`text-[10px] ${c.outcomes.avgRetradePct < -0.02 ? "text-red-300" : "text-white/55"}`}>
+                            {c.outcomes.avgRetradePct >= 0 ? "+" : ""}{(c.outcomes.avgRetradePct * 100).toFixed(1)}% retrade <span className="text-white/35">(n={c.outcomes.retradeSampleSize})</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </td>
                   <td className="px-5 py-3.5 text-right align-top">
                     <div className="font-mono tabular-nums font-semibold text-deal-300">{fmtMoney(c.expectedOutcome.expectedClosingUsd)}</div>
                     <div className="mt-0.5 text-[10px] text-white/40 font-mono tabular-nums">
-                      {fmtMoney(c.expectedOutcome.expectedHeadlineUsd)} · {(c.expectedOutcome.closeRatePct * 100).toFixed(0)}%
+                      {fmtMoney(c.expectedOutcome.expectedHeadlineUsd)} · {(c.expectedOutcome.closeRatePct * 100).toFixed(0)}% · ~{c.expectedOutcome.expectedDaysToCash}d
                     </div>
                     <div className="mt-1 flex justify-end">
                       <ConfidenceChip
@@ -279,7 +331,8 @@ const Intelligence: React.FC = () => {
                   </td>
                   <td className="px-5 py-3.5 text-right align-top font-mono tabular-nums text-deal-300">{c.probability.toFixed(2)}</td>
                 </tr>
-              ))}
+              );
+              })}
               {filtered.length === 0 && (
                 <tr><td colSpan={8} className="px-5 py-10 text-center text-sm text-white/40">No candidates match the filter.</td></tr>
               )}
