@@ -22,7 +22,7 @@ import {
 import { SAMPLE_COMPANY } from "./profile";
 import { RESERVATION_LINES, SAMPLE_OFFERS } from "./engines";
 import { listDocuments } from "./data-room";
-import { emitRunStarted, emitRunStep, emitRunCompleted, emitOffer, flush } from "./telemetry";
+import { emitRunStarted, emitRunStep, emitRunCompleted, emitOffer, emitBuyerResponse, flush } from "./telemetry";
 
 export type ExitStepId =
   | "profile" | "valuation" | "readiness" | "cim" | "teaser"
@@ -234,12 +234,23 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
     const ndas = await runStep("nda", () => {
       const issued: NdaInstance[] = [];
       for (const c of buyersPreliminary.candidates.slice(0, 5)) {
+        const buyerId = `buyer-${c.buyer.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
         issued.push(issueNda({
           templateId: "tpl-bilateral-standard-v3",
           listingId: listingPrivate.listingId,
           disclosing: founderParty,
-          receiving: { id: `buyer-${c.buyer.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`, name: c.buyer.name },
+          receiving: { id: buyerId, name: c.buyer.name },
         }));
+        // Telemetry · the funnel begins. Each pre-issued NDA opens
+        // a per-buyer pipeline that exit_buyer_response_events tracks
+        // through signed → CIM → LOI → close/walk.
+        emitBuyerResponse({
+          buyerId, buyerName: c.buyer.name,
+          listingId: listingPrivate.listingId,
+          clientRunId: run.id,
+          stage: "nda_issued",
+          occurredAt: new Date().toISOString(),
+        });
       }
       return issued;
     }, (issued) => `${STANDARD_TEMPLATES.length} templates loaded · ${issued.length} NDAs pre-issued to top buyers (pending signature)`);

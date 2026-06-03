@@ -27,9 +27,17 @@ const corsHeaders = {
 
 const MAX_EVENTS_PER_BATCH = 200;
 
-type EventKind = 'run_started' | 'run_completed' | 'run_step' | 'offer' | 'close' | 'telemetry';
+type EventKind = 'run_started' | 'run_completed' | 'run_step' | 'offer' | 'close' | 'telemetry' | 'buyer_response';
 
-interface BaseEvent { kind: EventKind }
+type EventSource = 'founder_reported' | 'broker_reported' | 'verified_filing' | 'legal_doc' | 'system_generated';
+const VALID_SOURCES: ReadonlySet<EventSource> = new Set(['founder_reported', 'broker_reported', 'verified_filing', 'legal_doc', 'system_generated']);
+
+interface BaseEvent {
+  kind: EventKind;
+  // Provenance tier for the event. Defaults to 'system_generated'
+  // when omitted — i.e. emitted by the SPA from in-app activity.
+  source?: EventSource;
+}
 
 interface RunStartedEvent extends BaseEvent {
   kind: 'run_started';
@@ -109,7 +117,27 @@ interface TelemetryEvent extends BaseEvent {
   metadata?: Record<string, unknown>;
 }
 
-type IngestEvent = RunStartedEvent | RunCompletedEvent | RunStepEvent | OfferEvent | CloseEvent | TelemetryEvent;
+interface BuyerResponseEvent extends BaseEvent {
+  kind: 'buyer_response';
+  buyerId: string;
+  buyerName: string;
+  listingId?: string;
+  clientRunId?: string;
+  stage:
+    | 'outreach' | 'nda_issued' | 'nda_signed' | 'teaser_sent'
+    | 'cim_requested' | 'cim_sent' | 'loi_received' | 'loi_countered'
+    | 'diligence_started' | 'diligence_complete' | 'closed' | 'walked' | 'declined';
+  occurredAt: string;
+  latencyDays?: number;
+  metadata?: Record<string, unknown>;
+}
+
+type IngestEvent = RunStartedEvent | RunCompletedEvent | RunStepEvent | OfferEvent | CloseEvent | TelemetryEvent | BuyerResponseEvent;
+
+function safeSource(ev: BaseEvent): EventSource {
+  const s = ev.source ?? 'system_generated';
+  return VALID_SOURCES.has(s) ? s : 'system_generated';
+}
 
 function err(status: number, message: string): Response {
   return new Response(JSON.stringify({ ok: false, error: message }), {
@@ -223,6 +251,7 @@ Deno.serve(async (req) => {
           stage: ev.stage,
           occurred_at: ev.occurredAt,
           headline_price_usd: ev.headlinePriceUsd,
+          source: safeSource(ev),
           ...(ev.cashPct    != null ? { cash_pct:    ev.cashPct }    : {}),
           ...(ev.stockPct   != null ? { stock_pct:   ev.stockPct }   : {}),
           ...(ev.earnoutPct != null ? { earnout_pct: ev.earnoutPct } : {}),
@@ -251,6 +280,7 @@ Deno.serve(async (req) => {
           ...(runId ? { run_id: runId } : {}),
           outcome: ev.outcome,
           closed_at: ev.closedAt,
+          source: safeSource(ev),
           ...(ev.buyerName ? { buyer_name: ev.buyerName } : {}),
           ...(ev.buyerType ? { buyer_type: ev.buyerType } : {}),
           ...(ev.finalPriceUsd   != null ? { final_price_usd:   ev.finalPriceUsd }   : {}),
@@ -266,10 +296,27 @@ Deno.serve(async (req) => {
         const ins = await admin.from('exit_telemetry_events').insert({
           tenant_id: tenantId,
           event_type: ev.eventType,
+          source: safeSource(ev),
           ...(ev.occurredAt ? { occurred_at: ev.occurredAt } : {}),
           ...(ev.sessionId  ? { session_id:  ev.sessionId }  : {}),
           ...(ev.page       ? { page: ev.page } : {}),
           ...(ev.metadata   ? { metadata: ev.metadata } : {}),
+        });
+        if (ins.error) throw ins.error;
+      } else if (ev.kind === 'buyer_response') {
+        let runId: string | null = null;
+        if (ev.clientRunId) runId = await resolveRunId(ev.clientRunId);
+        const ins = await admin.from('exit_buyer_response_events').insert({
+          tenant_id: tenantId,
+          ...(runId ? { run_id: runId } : {}),
+          buyer_id: ev.buyerId,
+          buyer_name: ev.buyerName,
+          ...(ev.listingId ? { listing_id: ev.listingId } : {}),
+          stage: ev.stage,
+          occurred_at: ev.occurredAt,
+          source: safeSource(ev),
+          ...(ev.latencyDays != null ? { latency_days: ev.latencyDays } : {}),
+          ...(ev.metadata    != null ? { metadata: ev.metadata } : {}),
         });
         if (ins.error) throw ins.error;
       } else {

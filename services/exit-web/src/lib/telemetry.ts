@@ -16,9 +16,14 @@ const APP_VERSION = "0.1.0";
 const FLUSH_INTERVAL_MS = 1500;
 const MAX_BATCH = 50;
 
-export type EventKind = "run_started" | "run_completed" | "run_step" | "offer" | "close" | "telemetry";
+export type EventKind = "run_started" | "run_completed" | "run_step" | "offer" | "close" | "telemetry" | "buyer_response";
 
-export interface RunStartedEvent { kind: "run_started"; clientRunId: string; startedAt: string; stepsTotal: number; appVersion?: string }
+// Source tier — defaults to system_generated for SPA-emitted events.
+// Founder-reported updates (e.g. "I just got a verbal LOI") tag
+// founder_reported so calibration weighting can de-prioritize them.
+export type EventSource = "founder_reported" | "broker_reported" | "verified_filing" | "legal_doc" | "system_generated";
+
+export interface RunStartedEvent { kind: "run_started"; clientRunId: string; startedAt: string; stepsTotal: number; appVersion?: string; source?: EventSource }
 export interface RunCompletedEvent {
   kind: "run_completed";
   clientRunId: string;
@@ -31,6 +36,7 @@ export interface RunCompletedEvent {
   qualifiedBuyers?: number;
   buyersByType?: Record<string, number>;
   artifactsSummary?: Record<string, unknown>;
+  source?: EventSource;
 }
 export interface RunStepEvent {
   kind: "run_step";
@@ -44,6 +50,7 @@ export interface RunStepEvent {
   summary?: string;
   error?: string;
   metadata?: Record<string, unknown>;
+  source?: EventSource;
 }
 export interface OfferEventInput {
   kind: "offer";
@@ -62,6 +69,7 @@ export interface OfferEventInput {
   netNpvUsd?: number;
   clientRunId?: string;
   metadata?: Record<string, unknown>;
+  source?: EventSource;
 }
 export interface CloseEventInput {
   kind: "close";
@@ -75,6 +83,7 @@ export interface CloseEventInput {
   finalEarnoutPct?: number;
   clientRunId?: string;
   metadata?: Record<string, unknown>;
+  source?: EventSource;
 }
 export interface TelemetryEventInput {
   kind: "telemetry";
@@ -83,11 +92,31 @@ export interface TelemetryEventInput {
   sessionId?: string;
   page?: string;
   metadata?: Record<string, unknown>;
+  source?: EventSource;
+}
+
+export type BuyerResponseStage =
+  | "outreach" | "nda_issued" | "nda_signed" | "teaser_sent"
+  | "cim_requested" | "cim_sent" | "loi_received" | "loi_countered"
+  | "diligence_started" | "diligence_complete" | "closed" | "walked" | "declined";
+
+export interface BuyerResponseEventInput {
+  kind: "buyer_response";
+  buyerId: string;
+  buyerName: string;
+  listingId?: string;
+  clientRunId?: string;
+  stage: BuyerResponseStage;
+  occurredAt: string;
+  latencyDays?: number;
+  metadata?: Record<string, unknown>;
+  source?: EventSource;
 }
 
 export type TelemetryEvent =
   | RunStartedEvent | RunCompletedEvent | RunStepEvent
-  | OfferEventInput | CloseEventInput | TelemetryEventInput;
+  | OfferEventInput | CloseEventInput | TelemetryEventInput
+  | BuyerResponseEventInput;
 
 const queue: TelemetryEvent[] = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
@@ -187,6 +216,10 @@ export function emitTelemetry(eventType: string, metadata?: Record<string, unkno
     ...(metadata ? { metadata } : {}),
     ...(page     ? { page } : {}),
   });
+}
+
+export function emitBuyerResponse(input: Omit<BuyerResponseEventInput, "kind">): void {
+  emit({ kind: "buyer_response", ...input });
 }
 
 // Flush on tab close — best effort.
