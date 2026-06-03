@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, fmtMoney, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import {
   VALUATION_STANDARD, VALUATION_STRATEGIC, VALUATION_REPLACEMENT,
   READINESS, READINESS_ANALYSIS, BUYERS, DILIGENCE,
 } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import ExitProcessModal from "../components/ExitProcessModal";
+import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
 
 // Founder dashboard — wired to @exit/engines. The deterministic
 // engines (valuation, readiness, buyer discovery, diligence) all run
@@ -34,13 +36,58 @@ const Dashboard: React.FC = () => {
   const redFlags = DILIGENCE.redFlags;
   const arrM = SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd / 1_000_000;
 
+  const [run, setRun] = useState<ExitRun | null>(() => loadRun());
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!modalOpen) setRun(loadRun());
+  }, [modalOpen]);
+
+  const startExit = (): void => setModalOpen(true);
+  const resetExit = (): void => { clearRun(); setRun(null); };
+
   return (
     <div>
       <SectionHeader
         kicker="Founder Dashboard"
         title={`Good morning, ${session?.founderId ?? "founder"}.`}
         description={`${SAMPLE_COMPANY.name} · ${SAMPLE_COMPANY.sector.replace(/_/g, " ")} · ${arrM.toFixed(1)}M ARR · ${SAMPLE_COMPANY.jurisdiction}`}
+        actions={
+          run?.status === "complete" ? (
+            <>
+              <Button variant="ghost" onClick={resetExit}>Reset</Button>
+              <Button onClick={startExit}>Re-run exit process</Button>
+            </>
+          ) : (
+            <Button onClick={startExit}>Start Exit Process →</Button>
+          )
+        }
       />
+
+      {run?.status === "complete" && (
+        <Card className="mb-8 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-deal-600/20 text-deal-300 ring-1 ring-deal-400/40">✓</span>
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-400">Exit process active</div>
+                <div className="text-sm font-medium text-white">
+                  Initialized {timeAgo(run.startedAt)} · {run.steps.filter((s) => s.status === "done").length}/{run.steps.length} engines complete
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 text-[11px]">
+              {run.artifacts.cim && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">CIM · {run.artifacts.cim.wordCount.toLocaleString()} words</span>}
+              {run.artifacts.teaser && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">Teaser ready</span>}
+              {run.artifacts.ndasIssued && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">{run.artifacts.ndasIssued.length} NDAs pre-issued</span>}
+              {run.artifacts.listing && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">Listing {run.artifacts.listing.private.listingId.slice(0, 18)}…</span>}
+              {run.artifacts.offerLeaderName && <span className="rounded-full bg-deal-600/20 px-2.5 py-0.5 text-deal-300 ring-1 ring-deal-400/40">Leader: {run.artifacts.offerLeaderName}</span>}
+            </div>
+          </div>
+        </Card>
+      )}
+
+      <ExitProcessModal open={modalOpen} onClose={() => setModalOpen(false)} />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi
