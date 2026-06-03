@@ -11,6 +11,27 @@ const APPETITE_STYLE: Record<"active" | "warm" | "dormant", string> = {
   dormant: "text-white/45",
 };
 
+// Provenance tier badges for each signal. Verified (sourced live from
+// EDGAR/Wikidata) reads green; unverified (curated, plausible, not
+// confirmed) reads white-on-grey; estimated (regex-extracted) reads
+// amber; derived (from the static registry) reads as a plain dot;
+// caution (negative signal like terminated deals) reads red.
+type SignalKind = "derived" | "verified" | "unverified" | "estimated" | "caution";
+const SIGNAL_CHIP: Record<SignalKind, string> = {
+  derived:    "bg-white/5 text-white/35 ring-1 ring-white/5",
+  verified:   "bg-deal-600/30 text-deal-200 ring-1 ring-deal-500/40",
+  unverified: "bg-white/10 text-white/50 ring-1 ring-white/15",
+  estimated:  "bg-loi-500/15 text-loi-300 ring-1 ring-loi-400/30",
+  caution:    "bg-red-500/15 text-red-300 ring-1 ring-red-400/40",
+};
+const SIGNAL_LABEL: Record<SignalKind, string> = {
+  derived: "·", verified: "Verified", unverified: "Unverified", estimated: "Est.", caution: "!",
+};
+const SIGNAL_TEXT: Record<SignalKind, string> = {
+  derived: "text-white/55", verified: "text-white/85", unverified: "text-white/65",
+  estimated: "text-white/65", caution: "text-loi-300",
+};
+
 const Intelligence: React.FC = () => {
   const [query, setQuery] = useState("");
   const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -40,6 +61,45 @@ const Intelligence: React.FC = () => {
         title="Acquisition Intelligence Engine"
         description={`Ranked against an implied price of ${fmtMoney(VALUATION_STRATEGIC.headline.mid)}. Probability = sector × model × check × geography × activity × M&A track record (EDGAR 8-K + Wikidata).`}
       />
+
+      {(() => {
+        const tally = { verified: 0, unverified: 0, estimated: 0 };
+        for (const c of BUYERS.candidates) {
+          tally.verified   += c.history.coverageByTier.verified;
+          tally.unverified += c.history.coverageByTier.unverified;
+          tally.estimated  += c.history.coverageByTier.estimated;
+        }
+        const total = tally.verified + tally.unverified + tally.estimated;
+        if (total === 0) return null;
+        return (
+          <Card className="mb-8 p-4 text-[12px] text-white/65">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Data provenance</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block rounded bg-deal-600/30 px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-deal-200 ring-1 ring-deal-500/40">Verified</span>
+                <span className="font-mono text-white/85">{tally.verified}</span>
+                <span className="text-white/40">deals from live EDGAR/Wikidata fetch</span>
+              </span>
+              <span className="text-white/20">·</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block rounded bg-white/10 px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-white/50 ring-1 ring-white/15">Unverified</span>
+                <span className="font-mono text-white/85">{tally.unverified}</span>
+                <span className="text-white/40">curated, source-cited, not yet refreshed</span>
+              </span>
+              {tally.estimated > 0 && (
+                <>
+                  <span className="text-white/20">·</span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-block rounded bg-loi-500/15 px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider text-loi-300 ring-1 ring-loi-400/30">Est.</span>
+                    <span className="font-mono text-white/85">{tally.estimated}</span>
+                    <span className="text-white/40">prices regex-extracted from filings</span>
+                  </span>
+                </>
+              )}
+            </div>
+          </Card>
+        );
+      })()}
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi label="Candidates ranked" value={String(BUYERS.candidates.length)} sub="qualifying ≥ 15% probability" />
@@ -87,16 +147,15 @@ const Intelligence: React.FC = () => {
                   <td className={`px-5 py-3.5 text-[12px] font-semibold uppercase tracking-wide ${APPETITE_STYLE[c.buyer.appetite]}`}>{c.buyer.appetite}</td>
                   <td className="px-5 py-3.5 text-xs text-white/70">{fmtMoney(c.buyer.checkSizeLowUsd)} – {fmtMoney(c.buyer.checkSizeHighUsd)}</td>
                   <td className="px-5 py-3.5 align-top">
-                    <ul className="space-y-1 text-[11px] text-white/55">
-                      {c.signals.slice(0, 5).map((s) => {
-                        const isEvidence = s.startsWith("Last deal:") || /disclosed deal/.test(s) || /prior acquisition/.test(s);
-                        const isCaution  = s.startsWith("Caution:");
-                        return (
-                          <li key={s} className={isEvidence ? "text-white/75" : isCaution ? "text-loi-400" : ""}>
-                            · {s}
-                          </li>
-                        );
-                      })}
+                    <ul className="space-y-1 text-[11px]">
+                      {c.signals.slice(0, 5).map((s) => (
+                        <li key={s.text} className={`flex items-baseline gap-1.5 ${SIGNAL_TEXT[s.kind]}`}>
+                          <span className={`mt-0.5 inline-block rounded px-1 text-[8.5px] font-mono font-bold uppercase tracking-wider leading-3 ${SIGNAL_CHIP[s.kind]}`}>
+                            {SIGNAL_LABEL[s.kind]}
+                          </span>
+                          <span className="leading-snug">{s.text}</span>
+                        </li>
+                      ))}
                     </ul>
                   </td>
                   <td className="px-5 py-3.5 text-right align-top font-mono tabular-nums text-deal-300">{c.probability.toFixed(2)}</td>

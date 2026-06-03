@@ -1,14 +1,23 @@
 import type { CompanyProfile, EngineMeta } from '../types.js';
 import type { BuyerEntry, BuyerType } from './registry.js';
 import { BUYER_REGISTRY } from './registry.js';
-import type { BuyerHistoryRollup } from './history-types.js';
+import type { BuyerHistoryRollup, ConfidenceTier } from './history-types.js';
 import { rollupBuyerHistory } from './history-rollup.js';
+
+export interface BuyerSignal {
+  readonly text: string;
+  // 'derived' = computed from the static registry (always reliable).
+  // 'verified' / 'unverified' / 'estimated' = sourced from
+  // ACQUISITION_HISTORY at that confidence tier.
+  // 'caution' = a negative signal (terminated deals, etc.).
+  readonly kind: 'derived' | 'verified' | 'unverified' | 'estimated' | 'caution';
+}
 
 export interface BuyerCandidate {
   readonly buyer: BuyerEntry;
   readonly probability: number;              // 0..1 acquisition probability
   readonly rationale: string;
-  readonly signals: readonly string[];
+  readonly signals: readonly BuyerSignal[];
   readonly estimatedCheck: { readonly low: number; readonly high: number; readonly currency: 'USD' };
   readonly fitDimensions: {
     readonly sectorFit: number;
@@ -19,6 +28,12 @@ export interface BuyerCandidate {
     readonly historyFit: number;             // evidence-weighted M&A track record fit
   };
   readonly history: BuyerHistoryRollup;
+}
+
+function tierToKind(t: ConfidenceTier | undefined): 'verified' | 'unverified' | 'estimated' {
+  if (t === 'verified') return 'verified';
+  if (t === 'estimated') return 'estimated';
+  return 'unverified';
 }
 
 export interface BuyerDiscoveryReport {
@@ -150,29 +165,44 @@ export function runBuyerDiscovery(company: CompanyProfile, opts: RunOptions = {}
     );
     if (prob < minProb) continue;
 
-    const signals: string[] = [];
-    if (dims.sectorFit === 1) signals.push(`Active in ${company.sector}`);
-    else if (dims.sectorFit > 0) signals.push(`Adjacent sector activity`);
-    if (dims.checkFit === 1) signals.push(`Implied price $${(implied / 1_000_000).toFixed(0)}M sits inside check-size band`);
-    if (buyer.appetite === 'active') signals.push(`Acquirer appetite: active in last 12 months`);
-    if (dims.geographyFit === 1) signals.push(`Strong geography fit (${company.jurisdiction})`);
-    if (company.product.hasDataMoat && buyer.sectorsActive.includes('ai_infra')) signals.push(`Data moat aligns with AI-infra thesis`);
+    const signals: BuyerSignal[] = [];
+    if (dims.sectorFit === 1)       signals.push({ text: `Active in ${company.sector}`, kind: 'derived' });
+    else if (dims.sectorFit > 0)    signals.push({ text: `Adjacent sector activity`, kind: 'derived' });
+    if (dims.checkFit === 1)        signals.push({ text: `Implied price $${(implied / 1_000_000).toFixed(0)}M sits inside check-size band`, kind: 'derived' });
+    if (buyer.appetite === 'active') signals.push({ text: `Acquirer appetite: active in last 12 months`, kind: 'derived' });
+    if (dims.geographyFit === 1)    signals.push({ text: `Strong geography fit (${company.jurisdiction})`, kind: 'derived' });
+    if (company.product.hasDataMoat && buyer.sectorsActive.includes('ai_infra'))
+      signals.push({ text: `Data moat aligns with AI-infra thesis`, kind: 'derived' });
 
-    // Evidence-grade history signals
+    // Evidence-grade history signals — tier inherited from the underlying data.
+    const histKind = tierToKind(history.aggregateTier);
     if (history.lastTargetName && history.lastAcquiredAt) {
       const year = history.lastAcquiredAt.slice(0, 4);
       const priceTag = history.largestDealUsd ? ` ($${(history.largestDealUsd / 1_000_000_000).toFixed(1)}B largest)` : '';
-      signals.push(`Last deal: ${history.lastTargetName} (${year})${priceTag}`);
+      // Specific deal inherits its own confidence, not the aggregate's.
+      signals.push({
+        text: `Last deal: ${history.lastTargetName} (${year})${priceTag}`,
+        kind: tierToKind(history.lastTargetConfidence),
+      });
     }
     if (history.dealsLast3Years > 0) {
-      signals.push(`${history.dealsLast3Years} disclosed deal${history.dealsLast3Years === 1 ? '' : 's'} in last 3 years`);
+      signals.push({
+        text: `${history.dealsLast3Years} disclosed deal${history.dealsLast3Years === 1 ? '' : 's'} in last 3 years`,
+        kind: histKind,
+      });
     }
     const sectorMatches = history.sectorMix[company.sector] ?? 0;
     if (sectorMatches > 0) {
-      signals.push(`${sectorMatches} prior acquisition${sectorMatches === 1 ? '' : 's'} in ${company.sector}`);
+      signals.push({
+        text: `${sectorMatches} prior acquisition${sectorMatches === 1 ? '' : 's'} in ${company.sector}`,
+        kind: histKind,
+      });
     }
     if (history.terminatedDeals > 0) {
-      signals.push(`Caution: ${history.terminatedDeals} terminated deal${history.terminatedDeals === 1 ? '' : 's'} on record`);
+      signals.push({
+        text: `Caution: ${history.terminatedDeals} terminated deal${history.terminatedDeals === 1 ? '' : 's'} on record`,
+        kind: 'caution',
+      });
     }
 
     candidates.push({

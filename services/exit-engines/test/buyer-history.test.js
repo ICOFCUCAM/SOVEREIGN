@@ -55,19 +55,45 @@ test('runBuyerDiscovery attaches history rollup to each candidate', () => {
 
 test('candidates with real M&A history surface evidence-grade signals', () => {
   const r = runBuyerDiscovery(SAMPLE_SAAS, { limit: 20 });
-  // At least one strategic buyer with a known deal in our snapshot
   const sf = r.candidates.find((c) => c.buyer.name === 'Salesforce Acquisition Office');
   assert.ok(sf, 'Salesforce should rank for an enterprise SaaS sample');
-  assert.ok(sf.signals.some((s) => s.startsWith('Last deal:')), `expected last-deal signal, got: ${JSON.stringify(sf.signals)}`);
-  assert.ok(sf.signals.some((s) => /\d+ disclosed deal/.test(s)));
+  assert.ok(sf.signals.some((s) => s.text.startsWith('Last deal:')), `expected last-deal signal, got: ${JSON.stringify(sf.signals)}`);
+  assert.ok(sf.signals.some((s) => /\d+ disclosed deal/.test(s.text)));
 });
 
-test('terminated deals add a caution signal', () => {
+test('history-derived signals carry the underlying confidence tier', () => {
+  const r = runBuyerDiscovery(SAMPLE_SAAS, { limit: 20 });
+  const sf = r.candidates.find((c) => c.buyer.name === 'Salesforce Acquisition Office');
+  assert.ok(sf);
+  const lastDeal = sf.signals.find((s) => s.text.startsWith('Last deal:'));
+  assert.ok(lastDeal);
+  // Snapshot ships everything as unverified until the refresh script runs against live EDGAR/Wikidata.
+  assert.equal(lastDeal.kind, 'unverified');
+  const derived = sf.signals.find((s) => s.text === `Active in ${SAMPLE_SAAS.sector}`);
+  if (derived) assert.equal(derived.kind, 'derived');
+});
+
+test('terminated deals add a caution-kind signal', () => {
   const r = runBuyerDiscovery(SAMPLE_SAAS, { limit: 20 });
   const adobe = r.candidates.find((c) => c.buyer.name === 'Adobe Strategic');
   if (adobe) {
-    assert.ok(adobe.signals.some((s) => /terminated deal/i.test(s)));
+    const caution = adobe.signals.find((s) => /terminated deal/i.test(s.text));
+    assert.ok(caution);
+    assert.equal(caution.kind, 'caution');
   }
+});
+
+test('rollupBuyerHistory reports the aggregate tier and refuses to mix tiers', () => {
+  // Default minTier is 'unverified' — snapshot is unverified, so includes everything in our snapshot.
+  const r = rollupBuyerHistory('Salesforce Acquisition Office');
+  assert.equal(r.aggregateTier, 'unverified');
+  assert.ok(r.totalDeals > 0);
+  assert.ok(r.coverageByTier.unverified > 0);
+  // Promote to 'verified' — should drop to zero deals since nothing in the snapshot is verified.
+  const verifiedOnly = rollupBuyerHistory('Salesforce Acquisition Office', { minTier: 'verified' });
+  assert.equal(verifiedOnly.aggregateTier, 'verified');
+  assert.equal(verifiedOnly.totalDeals, 0);
+  assert.equal(verifiedOnly.avgDisclosedCheckUsd, undefined);
 });
 
 test('historyFit rewards buyers with sector-matching prior deals', () => {

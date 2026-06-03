@@ -135,13 +135,19 @@ export async function extractAcquisitionFromFiling(
 
   if (config.throttleMs) await sleep(config.throttleMs);
 
+  const retrievedAt = new Date().toISOString();
   return {
     buyerName: filing.buyerName,
     targetName: target,
     announcedDate: filing.filingDate,
     ...(price != null ? { headlinePriceUsd: price } : {}),
     status: 'announced',
-    sourceRefs: [{ kind: 'edgar_8k', ref: filing.accessionNumber, retrievedAt: new Date().toISOString() }],
+    sourceRefs: [{ kind: 'edgar_8k', ref: filing.accessionNumber, retrievedAt, verified: true }],
+    confidence: 'verified',
+    // Price is regex-extracted from the filing body, not a structured
+    // disclosure field — tag it down a tier so consumers can refuse
+    // to mix it into a verified-only aggregate.
+    ...(price != null ? { priceConfidence: 'estimated' as const } : {}),
   };
 }
 

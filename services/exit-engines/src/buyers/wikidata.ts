@@ -94,7 +94,8 @@ export async function fetchWikidataAcquisitions(
       ...(price != null && !Number.isNaN(price) ? { headlinePriceUsd: price } : {}),
       ...(targetGeography ? { targetGeography } : {}),
       status: 'closed',
-      sourceRefs: [{ kind: 'wikidata', ref: b.sub.value.split('/').pop() ?? buyer.qid, retrievedAt }],
+      sourceRefs: [{ kind: 'wikidata', ref: b.sub.value.split('/').pop() ?? buyer.qid, retrievedAt, verified: true }],
+      confidence: 'verified',
     });
   }
   return events;
