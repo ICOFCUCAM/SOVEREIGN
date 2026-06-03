@@ -6,7 +6,7 @@
   "description": "ExitOS — the operating system founders interact with to run an exit. Acquisition intelligence, virtual data room, buyer marketplace, investor CRM, AI deal negotiator, document generation, NDA automation, acquisition pipeline, founder dashboard, deal closing.",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "(cd ../exit-engines && npm install --no-audit --no-fund && npm run build) && tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint ."
   },
