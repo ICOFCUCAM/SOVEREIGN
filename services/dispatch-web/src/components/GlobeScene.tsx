@@ -51,6 +51,23 @@ function isLand(lat: number, lon: number): boolean {
   return false;
 }
 
+// Glowing surface hotspots ("active signals") at notable [lat, lon] points —
+// world cities/hubs — that brighten as they rotate to the front face.
+const HOTSPOTS: [number, number][] = [
+  [40.7, -74.0],  // New York
+  [51.5, -0.1],   // London
+  [35.7, 139.7],  // Tokyo
+  [1.3, 103.8],   // Singapore
+  [-23.5, -46.6], // São Paulo
+  [25.2, 55.3],   // Dubai
+  [-33.9, 151.2], // Sydney
+  [22.3, 114.2],  // Hong Kong
+  [37.8, -122.4], // San Francisco
+  [52.5, 13.4],   // Berlin
+  [19.1, 72.9],   // Mumbai
+  [-26.2, 28.0],  // Johannesburg
+];
+
 const TAU = Math.PI * 2;
 
 const GlobeCanvas: React.FC = () => {
@@ -157,8 +174,8 @@ const GlobeCanvas: React.FC = () => {
         }
       }
 
-      // land pass — fine grid, bright cyan, depth-shaded dots
-      const landStep = 1.9;
+      // land pass — fine grid, bright cyan, depth-shaded square dots
+      const landStep = 1.7;
       for (let lat = -86; lat <= 86; lat += landStep) {
         const latR = (lat * Math.PI) / 180;
         const cosLat = Math.cos(latR);
@@ -171,11 +188,39 @@ const GlobeCanvas: React.FC = () => {
           const x = cosLat * Math.sin(lonR);
           const sx = cx + R * x;
           const sy = cy - R * y;
-          const a = 0.5 + 0.48 * z;
-          ctx.fillStyle = `rgba(130,236,255,${a.toFixed(3)})`;
-          const s = 1.5 + 1.0 * z;
-          ctx.fillRect(sx - s / 2, sy - s / 2, s, s);
+          const a = 0.55 + 0.45 * z;
+          ctx.fillStyle = `rgba(134,238,255,${a.toFixed(3)})`;
+          const s = 1.6 + 1.05 * z; // crisp squares, larger toward the centre
+          ctx.fillRect(Math.round(sx - s / 2), Math.round(sy - s / 2), Math.ceil(s), Math.ceil(s));
         }
+      }
+
+      // glowing surface hotspots ("active signals") — brighten on the front face
+      const t = rot; // reuse rotation as a slow phase for the twinkle
+      for (let i = 0; i < HOTSPOTS.length; i++) {
+        const [hlat, hlon] = HOTSPOTS[i];
+        const latR = (hlat * Math.PI) / 180;
+        const cosLat = Math.cos(latR);
+        const lonR = ((hlon + rot) * Math.PI) / 180;
+        const z = cosLat * Math.cos(lonR);
+        if (z <= 0.05) continue;
+        const sx = cx + R * cosLat * Math.sin(lonR);
+        const sy = cy - R * Math.sin(latR);
+        const twinkle = 0.65 + 0.35 * Math.sin((t * 0.08) + i * 1.7);
+        const a = (0.7 + 0.3 * z) * twinkle;
+        const rad = 8;
+        const halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, rad);
+        halo.addColorStop(0, `rgba(200,251,255,${(a).toFixed(3)})`);
+        halo.addColorStop(0.35, `rgba(130,236,255,${(a * 0.55).toFixed(3)})`);
+        halo.addColorStop(1, "rgba(120,232,255,0)");
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(sx, sy, rad, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = `rgba(235,254,255,${Math.min(1, a + 0.1).toFixed(3)})`;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.4, 0, TAU);
+        ctx.fill();
       }
 
       // crisp limb highlight
@@ -328,13 +373,16 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
 
       {/* six floating data labels — all six readings from the brief, arranged
           around the top / right / bottom-right arc so they stay clear of the
-          headline (left column) and the top nav. */}
-      <Label pos="left-[34%] top-[19%]" title="Acquisition Intelligence" value="12.4K active signals" />
-      <Label pos="right-[2%] top-[23%]" align="right" title="Predictive Outcomes" value="94.7% model accuracy" />
-      <Label pos="right-[1%] top-[42%]" align="right" title="Live Deal Flow" value="$2.7T in tracked value" />
-      <Label pos="right-[2%] top-[56%]" align="right" title="Closed Deals" value="$187.6B realized" />
-      <Label pos="right-[6%] top-[79%]" align="right" title="AI Negotiator" value="17.3% value uplift" />
-      <Label pos="left-[35%] top-[86%]" title="Global Buyer Network" value="58,341 buyers" />
+          headline (left column) and the top nav. Hidden on narrow screens
+          where there's no room beside the headline. */}
+      <div className="hidden lg:block">
+        <Label pos="left-[34%] top-[19%]" title="Acquisition Intelligence" value="12.4K active signals" />
+        <Label pos="right-[2%] top-[23%]" align="right" title="Predictive Outcomes" value="94.7% model accuracy" />
+        <Label pos="right-[1%] top-[42%]" align="right" title="Live Deal Flow" value="$2.7T in tracked value" />
+        <Label pos="right-[2%] top-[56%]" align="right" title="Closed Deals" value="$187.6B realized" />
+        <Label pos="right-[6%] top-[79%]" align="right" title="AI Negotiator" value="17.3% value uplift" />
+        <Label pos="left-[35%] top-[86%]" title="Global Buyer Network" value="58,341 buyers" />
+      </div>
     </div>
   );
 };
