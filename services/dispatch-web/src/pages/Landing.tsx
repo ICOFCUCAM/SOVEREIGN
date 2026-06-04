@@ -1,14 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import GlobeScene from "../components/GlobeScene";
 
 // Public marketing landing — the front door to Dispatch. Models the benchmark:
-// a full-bleed cinematic hero (globe + document covers, gold institutional
+// a full-bleed cinematic hero (live intelligence globe, gold institutional
 // accent) with the value proposition on the left and a top nav. "Launch
 // Dispatch" / "Log in" route into the gated console (/console).
 //
-// The hero artwork lives at /Dispatchhero.png (public/). It is positioned to
-// the right and feathered into the page with a left-to-right gradient so the
-// headline stays legible regardless of the image's left edge.
+// The hero artwork is the coded GlobeScene (rotating dot-matrix Earth, orbital
+// rings, base platform, floating data labels) — no static image. It sits in
+// the right portion and is feathered into the page with a left-to-right
+// gradient so the headline stays legible.
 const NAV = ["Overview", "Capabilities", "Workflow", "Security", "Integrations", "Resources"];
 
 const Feature: React.FC<{ icon: React.ReactNode; title: string; sub: string }> = ({ icon, title, sub }) => (
@@ -25,14 +27,13 @@ const Landing: React.FC = () => {
   const nav = useNavigate();
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#070707] text-white">
-      {/* hero artwork — full-bleed, anchored right */}
-      <div
-        className="pointer-events-none absolute inset-0 bg-cover bg-right bg-no-repeat"
-        style={{ backgroundImage: "url(/Dispatchhero.png)" }}
-        aria-hidden
-      />
+      {/* hero artwork — the live intelligence globe (GlobeScene), anchored to
+          the right portion so the headline owns the left column. */}
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-[72%] sm:w-[64%]" aria-hidden>
+        <GlobeScene className="h-full w-full" />
+      </div>
       {/* legibility gradients: darken left for text, fade top/bottom edges */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/85 to-transparent" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] from-20% via-[#070707]/55 via-42% to-transparent to-65%" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#070707] to-transparent" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
 
