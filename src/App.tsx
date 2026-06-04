@@ -41,6 +41,18 @@ const InfrastructurePage = lazy(() => import("./pages/InfrastructurePage"));
 const InfrastructureArchitecturePage = lazy(() => import("./pages/InfrastructureArchitecturePage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+// Back office (Phase 1 ledger foundation — superadmin + 8 roles +
+// double-entry + multi-currency + audit log). Mounted under
+// /back-office/* with its own layout shell.
+const BackOfficeShell = lazy(() => import("./components/BackOfficeShell"));
+const BackOfficeLogin = lazy(() => import("./pages/back-office/Login"));
+const BoDashboard = lazy(() => import("./pages/back-office/Dashboard"));
+const BoUsers = lazy(() => import("./pages/back-office/Users"));
+const BoAccounts = lazy(() => import("./pages/back-office/Accounts"));
+const BoJournal = lazy(() => import("./pages/back-office/Journal"));
+const BoReports = lazy(() => import("./pages/back-office/Reports"));
+const BoAudit = lazy(() => import("./pages/back-office/Audit"));
+
 const queryClient = new QueryClient();
 
 const tenant = resolveTenant();
@@ -107,6 +119,15 @@ const PlatformRoutes = () => (
     <Route path="/infrastructure" element={<InfrastructurePage />} />
     <Route path="/infrastructure/architecture" element={<InfrastructureArchitecturePage />} />
     <Route path="/d/:domain" element={<DomainPage />} />
+    <Route path="/back-office/login" element={<BackOfficeLogin />} />
+    <Route path="/back-office" element={<BackOfficeShell />}>
+      <Route index element={<BoDashboard />} />
+      <Route path="users" element={<BoUsers />} />
+      <Route path="accounts" element={<BoAccounts />} />
+      <Route path="journal" element={<BoJournal />} />
+      <Route path="reports" element={<BoReports />} />
+      <Route path="audit" element={<BoAudit />} />
+    </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

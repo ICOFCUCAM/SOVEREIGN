@@ -63,7 +63,7 @@ const PlatformNav: React.FC = () => {
                 </div>
                 <div className="flex flex-col leading-none">
                   <span className="text-white font-bold text-sm tracking-tight">SOVEREIGN</span>
-                  <span className="text-cyan-400/60 text-[9px] tracking-[0.24em] font-mono">DOMAIN.OS</span>
+                  <span className="text-cyan-400/60 text-[9px] tracking-[0.24em] font-mono">INTELLIGENCE</span>
                 </div>
               </Link>
 
