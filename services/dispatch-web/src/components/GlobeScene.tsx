@@ -12,26 +12,36 @@ import React, { useEffect, useRef } from "react";
 // the same centre so everything stays registered as the scene scales.
 // ---------------------------------------------------------------------------
 
-// Coarse land mask as lat/lon bounding boxes [latMin, latMax, lonMin, lonMax].
-// Not survey-grade — just enough boxes that the rotating sphere reads as Earth
-// (the Americas, Europe/Africa, Asia, Australia all swing past recognisably).
+// Land mask as lat/lon bounding boxes [latMin, latMax, lonMin, lonMax]. Not
+// survey-grade, but finer than a few rectangles so the rotating sphere reads as
+// a real Earth — continents taper toward the poles and have rough coastlines.
 const LAND: [number, number, number, number][] = [
-  // North America
-  [48, 72, -168, -52], [30, 49, -126, -64], [16, 30, -112, -83], [8, 18, -92, -77],
-  [60, 83, -55, -18], // Greenland
-  // South America
-  [-4, 12, -80, -50], [-20, -4, -73, -38], [-35, -20, -72, -52], [-52, -35, -75, -64],
-  // Europe
-  [40, 60, -10, 40], [54, 71, 5, 42], [36, 44, -8, 28],
-  // Africa
-  [18, 35, -14, 32], [4, 18, -16, 44], [-18, 4, 9, 42], [-35, -18, 14, 33],
-  [-25, -12, 43, 50], // Madagascar
-  // Middle East + Asia
-  [12, 42, 34, 60], [38, 72, 44, 180], [20, 40, 60, 122],
-  [6, 22, 73, 100], // India
-  [-10, 8, 95, 141], // Indonesia / SE Asia
-  // Australia + NZ + Japan
-  [-39, -11, 113, 154], [-47, -34, 166, 179], [31, 45, 130, 146],
+  // --- North America (tapers north→south, narrows through Central America) ---
+  [60, 72, -165, -95], [55, 68, -140, -60], [49, 60, -128, -58],
+  [42, 50, -124, -66], [34, 44, -122, -75], [28, 36, -116, -80],
+  [22, 30, -110, -82], [16, 24, -105, -88], [12, 18, -94, -83], [8, 14, -84, -77],
+  [60, 83, -55, -20], // Greenland
+  // --- South America (wide north, tapering to a point) ---
+  [4, 12, -78, -60], [-2, 7, -80, -50], [-10, 0, -79, -40], [-18, -8, -74, -38],
+  [-26, -17, -71, -44], [-34, -25, -72, -52], [-43, -33, -74, -58], [-52, -42, -75, -66],
+  // --- Europe ---
+  [54, 66, -8, 30], [46, 58, -6, 30], [40, 50, -8, 28], [58, 70, 8, 42],
+  [36, 44, -8, 18], [38, 46, 18, 42],
+  [50, 60, 30, 60], // western Russia
+  // --- Africa (broad north, tapering south) ---
+  [24, 36, -10, 32], [16, 28, -16, 36], [8, 18, -16, 42], [0, 10, -10, 44],
+  [-10, 2, 9, 42], [-20, -8, 12, 40], [-30, -20, 15, 36], [-35, -28, 17, 30],
+  [-26, -12, 43, 50], // Madagascar
+  // --- Middle East + Asia ---
+  [12, 30, 34, 60], [30, 45, 44, 78], [45, 65, 44, 120], [55, 72, 60, 178],
+  [35, 50, 78, 122], [20, 36, 70, 120],
+  [8, 22, 73, 90], // India peninsula
+  [10, 24, 95, 110], // Indochina
+  // --- Maritime SE Asia ---
+  [-8, 6, 96, 120], [-10, 0, 118, 141],
+  // --- Australia + NZ + Japan ---
+  [-30, -12, 114, 148], [-39, -28, 116, 154], [-47, -38, 166, 179], [-41, -34, 172, 178],
+  [31, 46, 129, 146], // Japan
 ];
 
 function isLand(lat: number, lon: number): boolean {
@@ -69,7 +79,7 @@ const GlobeCanvas: React.FC = () => {
     const draw = () => {
       const cx = w / 2;
       const cy = h / 2;
-      const R = Math.min(w, h) * 0.42;
+      const R = Math.min(w, h) * 0.44;
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
@@ -212,13 +222,16 @@ const Label: React.FC<{
   pos: string; // tailwind positioning classes
   align?: "left" | "right";
 }> = ({ title, value, pos, align = "left" }) => {
+  // a hollow ring-marker (as in the brief) wrapping a pulsing core, then a
+  // short leader line fading toward the globe.
   const node = (
     <span className="flex shrink-0 items-center" aria-hidden>
-      <span className="relative inline-flex h-1.5 w-1.5">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-300/70" />
-        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-200 shadow-[0_0_6px_2px_rgba(120,232,255,0.7)]" />
+      <span className="relative inline-flex h-3 w-3 items-center justify-center">
+        <span className="absolute inline-flex h-3 w-3 rounded-full border border-cyan-300/70" />
+        <span className="absolute inline-flex h-3 w-3 animate-ping rounded-full border border-cyan-300/40" />
+        <span className="relative inline-flex h-1 w-1 rounded-full bg-cyan-100 shadow-[0_0_6px_2px_rgba(120,232,255,0.8)]" />
       </span>
-      <span className={`h-px w-7 bg-gradient-to-r from-cyan-300/70 to-transparent ${align === "right" ? "rotate-180" : ""}`} />
+      <span className={`h-px w-8 bg-gradient-to-r from-cyan-300/70 to-transparent ${align === "right" ? "rotate-180" : ""}`} />
     </span>
   );
   return (
@@ -239,6 +252,12 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
     <div className={`relative ${className}`}>
       {/* centred globe + rings + platform, sized to the shorter axis */}
       <div className="absolute left-1/2 top-1/2 aspect-square w-[min(78vmin,820px)] -translate-x-1/2 -translate-y-1/2">
+        {/* soft radial backglow behind the sphere */}
+        <div
+          className="absolute inset-[8%] rounded-full"
+          style={{ background: "radial-gradient(circle at 50% 46%, rgba(40,150,200,0.22), rgba(20,90,140,0.08) 55%, transparent 72%)" }}
+          aria-hidden
+        />
         <GlobeCanvas />
 
         {/* orbital rings + traveling nodes + base platform (SVG overlay) */}
@@ -264,10 +283,10 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
 
           {/* tilted orbital rings */}
           <g
-            stroke="rgba(110,210,245,0.40)"
-            strokeWidth="0.35"
+            stroke="rgba(120,216,250,0.55)"
+            strokeWidth="0.4"
             fill="none"
-            style={{ filter: "drop-shadow(0 0 1px rgba(120,232,255,0.5))" }}
+            style={{ filter: "drop-shadow(0 0 1.4px rgba(120,232,255,0.7))" }}
           >
             <use href="#orbitA" transform="rotate(-12 50 50)" />
             <use href="#orbitB" transform="rotate(8 50 50)" />
