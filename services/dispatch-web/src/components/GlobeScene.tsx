@@ -61,21 +61,21 @@ type Panel = {
   side: "left" | "right";
   hue: number; // 0 = cyan, 1 = amber accent (for variety)
 };
-// Globe is the centre of a radial intelligence constellation. The headline
-// owns the far left, so the 8 panels arc around the globe's top → right →
-// bottom (~245°) rather than sitting in a vertical stack. Each is wired back
-// into the core through a multi-stage signal path (card → relay node → globe).
-const GLOBE_CX = 0.64;
+// Centered globe with 6 small text labels — three left, three right — exactly
+// as the benchmark. Pure cyan, no amber. Each label is plain text (bold title +
+// thin value line) wired to the globe by a hairline connector ending in a small
+// hollow ring node on the inner orbit.
+const GLOBE_CX = 0.6;
 const GLOBE_CY = 0.5;
 const PANELS: Panel[] = [
-  { id: "acq", title: "Acquisition Intelligence", value: "12,438", delta: "active signals", x: 0.44, y: 0.20, side: "left", hue: 0 },
-  { id: "pred", title: "Predictive Outcomes", value: "94.7%", delta: "model accuracy", x: 0.985, y: 0.26, side: "right", hue: 0 },
-  { id: "flow", title: "Live Deal Flow", value: "$2.7T", delta: "in tracked value", x: 0.985, y: 0.43, side: "right", hue: 1 },
-  { id: "closed", title: "Closed Transactions", value: "$187.6B", delta: "realized", x: 0.985, y: 0.60, side: "right", hue: 0 },
-  { id: "resp", title: "Buyer Response Analytics", value: "61.2%", delta: "engagement rate", x: 0.965, y: 0.78, side: "right", hue: 0 },
-  { id: "neg", title: "AI Negotiator", value: "+17.3%", delta: "value uplift", x: 0.875, y: 0.92, side: "right", hue: 1 },
-  { id: "exp", title: "Expected Outcome Engine", value: "0.91", delta: "confidence index", x: 0.60, y: 0.93, side: "left", hue: 0 },
-  { id: "net", title: "Global Buyer Network", value: "58,341", delta: "verified buyers", x: 0.47, y: 0.86, side: "left", hue: 0 },
+  // the 6 benchmark metrics, arced around the free top/right/bottom of the
+  // globe (the headline owns the left column).
+  { id: "acq", title: "Acquisition Intelligence", value: "12.4K", delta: "active signals", x: 0.42, y: 0.14, side: "left", hue: 0 },
+  { id: "pred", title: "Predictive Outcomes", value: "94.7%", delta: "model accuracy", x: 0.955, y: 0.24, side: "right", hue: 0 },
+  { id: "closed", title: "Closed Deals", value: "$187.6B", delta: "realized", x: 0.97, y: 0.50, side: "right", hue: 0 },
+  { id: "neg", title: "AI Negotiator", value: "17.3%", delta: "value uplift", x: 0.955, y: 0.76, side: "right", hue: 0 },
+  { id: "net", title: "Global Buyer Network", value: "58,341", delta: "buyers", x: 0.51, y: 0.90, side: "left", hue: 0 },
+  { id: "flow", title: "Live Deal Flow", value: "$2.7T", delta: "in tracked value", x: 0.685, y: 0.93, side: "left", hue: 0 },
 ];
 
 const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
@@ -190,7 +190,7 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       // particle budget scales with area, capped for perf
-      const count = Math.max(5000, Math.min(15000, Math.round((w * h) / 70)));
+      const count = Math.max(7000, Math.min(20000, Math.round((w * h) / 52)));
       buildSphere(count);
       buildAmbient();
     };
@@ -341,11 +341,10 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
         const q = project(p.x, p.y, p.z);
         const df = (q.depth + 1) / 2; // 0 back → 1 front
         if (p.land) {
-          // crisp, bright illuminated points — front face reads strongly,
-          // back face still glints through (holographic, not occluded).
-          const a = Math.min(1, 0.30 + 1.15 * df * df); // brighter core (+~40%)
-          ctx.fillStyle = `rgba(165,246,255,${a.toFixed(3)})`;
-          const s = 0.65 + 1.6 * df;
+          // dense, bright dot-matrix continents (benchmark reads them clearly)
+          const a = Math.min(1, 0.45 + 1.05 * df * df);
+          ctx.fillStyle = `rgba(180,248,255,${a.toFixed(3)})`;
+          const s = 0.8 + 1.7 * df;
           ctx.fillRect(q.sx - s / 2, q.sy - s / 2, s, s);
         } else {
           // ocean dust — almost invisible; just enough to imply the volume
@@ -488,13 +487,18 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
         ctx.lineTo(cx + k * R * 0.012, cy - R * 0.1);
         ctx.stroke();
       }
-      // concentric command rings (some rotating w/ tick marks → reactor feel)
+      // concentric command rings — a brightness pulse sweeps OUTWARD through
+      // them (this is "which ones light up"): the ring nearest the expanding
+      // wavefront glows, the others sit at a calm base level.
       const baseRings = [0.30, 0.50, 0.72, 0.96, 1.18];
+      const wave = reduce ? 0.5 : ((t * 0.012) % 1.4) - 0.2; // 0→1.2 wavefront
       for (let k = 0; k < baseRings.length; k++) {
         const rad = R * baseRings[k];
-        const a = 0.44 - k * 0.06;
-        ctx.strokeStyle = `rgba(150,238,255,${a})`;
-        ctx.lineWidth = k === 0 ? 1.5 : (k % 2 ? 0.7 : 1.0);
+        const ringPos = k / (baseRings.length - 1); // 0..1
+        const near = Math.max(0, 1 - Math.abs(ringPos - wave) * 4); // glow factor
+        const a = (0.30 - k * 0.03) + near * 0.6;
+        ctx.strokeStyle = `rgba(${160 + near * 60 | 0},${240},255,${Math.min(1, a).toFixed(3)})`;
+        ctx.lineWidth = (k === 0 ? 1.5 : 0.9) + near * 1.2;
         ctx.beginPath();
         ctx.ellipse(cx, py, rad, rad * FLAT, 0, 0, TAU);
         ctx.stroke();
@@ -533,98 +537,51 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
       ctx.beginPath(); ctx.ellipse(cx, py, R * 0.55, R * 0.14, 0, 0, TAU); ctx.fill();
       ctx.globalCompositeOperation = "source-over";
 
-      // ---- layer 5: telemetry connectors panel → globe ---------------------
+      // ---- layer 5: label connectors (benchmark style) --------------------
+      // Each label gets a thin cyan leader: a short horizontal stub from the
+      // label, then a line to a small hollow ring node sitting just outside the
+      // globe rim, with a faint pulse running inward to the globe.
       ctx.globalCompositeOperation = "lighter";
+      const col = "130,228,255";
       for (let i = 0; i < PANELS.length; i++) {
         const pn = PANELS[i];
-        const ax = pn.x * w;
+        const edge = pn.side === "right";
+        // label anchor (inner edge of the text, facing the globe)
+        const ax = pn.x * w + (edge ? -150 : 150);
         const ay = pn.y * h;
-        const col = pn.hue === 1 ? "212,175,82" : "120,225,255";
-        // direction from globe centre out to the card
+        // node sits just outside the globe rim, on the line from centre to label
         let dx = ax - cx, dy = ay - cy;
         const dl = Math.hypot(dx, dy) || 1;
         dx /= dl; dy /= dl;
-        // STAGE 1: globe rim node (where the signal leaves the core)
-        const rimX = cx + dx * (R + 3);
-        const rimY = cy + dy * (R + 3);
-        // STAGE 2: a relay node out on an intermediate orbit between rim & card
-        const relayDist = R + (dl - R) * 0.52;
-        const relayX = cx + dx * relayDist;
-        const relayY = cy + dy * relayDist;
-        // STAGE 3: card anchor (the side of the card facing the globe)
-        const anchorX = ax;
-        const anchorY = ay;
+        const nodeX = cx + dx * (R + Math.min(46, (dl - R) * 0.5));
+        const nodeY = cy + dy * (R + Math.min(46, (dl - R) * 0.5));
+        // short horizontal stub from the label
+        const stubX = ax + (edge ? 14 : -14);
 
-        // signal path drawn as two gently-curved segments: rim → relay → card,
-        // each bowed slightly tangentially so it reads as an orbital trajectory
-        // rather than a straight wire.
-        const tnx = -dy, tny = dx; // tangent
-        const bow1 = (dl - R) * 0.10;
-        const c1x = (rimX + relayX) / 2 + tnx * bow1;
-        const c1y = (rimY + relayY) / 2 + tny * bow1;
-        const bow2 = (dl - R) * 0.08;
-        const c2x = (relayX + anchorX) / 2 - tnx * bow2;
-        const c2y = (relayY + anchorY) / 2 - tny * bow2;
-
-        ctx.strokeStyle = `rgba(${col},0.30)`;
+        ctx.strokeStyle = `rgba(${col},0.34)`;
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(rimX, rimY);
-        ctx.quadraticCurveTo(c1x, c1y, relayX, relayY);
-        ctx.quadraticCurveTo(c2x, c2y, anchorX, anchorY);
-        ctx.stroke();
-        // brighter inner core of the path near the globe
-        ctx.strokeStyle = `rgba(${col},0.5)`;
-        ctx.lineWidth = 0.6;
-        ctx.beginPath();
-        ctx.moveTo(rimX, rimY);
-        ctx.quadraticCurveTo(c1x, c1y, relayX, relayY);
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(stubX, ay);
+        ctx.lineTo(nodeX, nodeY);
         ctx.stroke();
 
-        // rim node (emission point on the core)
-        const rg = ctx.createRadialGradient(rimX, rimY, 0, rimX, rimY, 8);
-        rg.addColorStop(0, `rgba(235,253,255,0.95)`);
-        rg.addColorStop(0.4, `rgba(${col},0.5)`);
-        rg.addColorStop(1, `rgba(${col},0)`);
-        ctx.fillStyle = rg;
-        ctx.beginPath(); ctx.arc(rimX, rimY, 8, 0, TAU); ctx.fill();
-        ctx.fillStyle = `rgba(245,254,255,0.95)`;
-        ctx.beginPath(); ctx.arc(rimX, rimY, 1.7, 0, TAU); ctx.fill();
+        // small hollow ring node (the benchmark's signature marker)
+        const pulse = 0.6 + 0.4 * Math.sin(t * 0.05 + i * 1.5);
+        ctx.strokeStyle = `rgba(${col},${(0.85 * pulse).toFixed(3)})`;
+        ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(nodeX, nodeY, 3.4, 0, TAU); ctx.stroke();
+        ctx.fillStyle = `rgba(225,250,255,${(0.5 * pulse).toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(nodeX, nodeY, 1.0, 0, TAU); ctx.fill();
 
-        // relay node (a small hollow ring waypoint)
-        const relayPulse = 0.6 + 0.4 * Math.sin(t * 0.05 + i * 1.3);
-        ctx.strokeStyle = `rgba(${col},${0.7 * relayPulse})`;
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(relayX, relayY, 3.2, 0, TAU); ctx.stroke();
-        ctx.fillStyle = `rgba(235,253,255,${0.85 * relayPulse})`;
-        ctx.beginPath(); ctx.arc(relayX, relayY, 1.1, 0, TAU); ctx.fill();
-
-        // traveling telemetry packets along the full path (multiple, staggered)
-        const segPath = (s: number) => {
-          // s in [0,1] over the whole two-quad path; first half rim→relay
-          if (s < 0.5) {
-            const u = s / 0.5;
-            const mx = (1 - u) * (1 - u) * rimX + 2 * (1 - u) * u * c1x + u * u * relayX;
-            const my = (1 - u) * (1 - u) * rimY + 2 * (1 - u) * u * c1y + u * u * relayY;
-            return [mx, my];
-          }
-          const u = (s - 0.5) / 0.5;
-          const mx = (1 - u) * (1 - u) * relayX + 2 * (1 - u) * u * c2x + u * u * anchorX;
-          const my = (1 - u) * (1 - u) * relayY + 2 * (1 - u) * u * c2y + u * u * anchorY;
-          return [mx, my];
-        };
-        for (let pk = 0; pk < 2; pk++) {
-          const prog = reduce ? 0.4 + pk * 0.3 : ((t * 0.006 + i * 0.21 + pk * 0.5) % 1);
-          const [pxp, pyp] = segPath(prog);
-          const fade = 1 - Math.abs(prog - 0.5) * 0.8;
-          ctx.fillStyle = `rgba(235,253,255,${(0.9 * fade).toFixed(3)})`;
-          ctx.beginPath(); ctx.arc(pxp, pyp, 1.5, 0, TAU); ctx.fill();
-          const pg = ctx.createRadialGradient(pxp, pyp, 0, pxp, pyp, 5);
-          pg.addColorStop(0, `rgba(${col},${0.6 * fade})`);
-          pg.addColorStop(1, `rgba(${col},0)`);
-          ctx.fillStyle = pg;
-          ctx.beginPath(); ctx.arc(pxp, pyp, 5, 0, TAU); ctx.fill();
-        }
+        // faint pulse running from the node inward to the globe rim
+        const rimX = cx + dx * R;
+        const rimY = cy + dy * R;
+        const prog = reduce ? 0.5 : ((t * 0.01 + i * 0.3) % 1);
+        const ppx = nodeX + (rimX - nodeX) * prog;
+        const ppy = nodeY + (rimY - nodeY) * prog;
+        ctx.fillStyle = `rgba(220,250,255,${(0.7 * (1 - prog)).toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(ppx, ppy, 1.3, 0, TAU); ctx.fill();
       }
       ctx.globalCompositeOperation = "source-over";
 
@@ -686,36 +643,27 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
   );
 };
 
-// A single holographic intelligence panel.
+// A single intelligence label — small, text-only, exactly like the benchmark:
+// a bold white uppercase title with a thin gray value line beneath. No box, no
+// border, no fill. The connector + node are drawn on the canvas.
 const IntelPanel: React.FC<{ panel: Panel }> = ({ panel }) => {
-  const accent = panel.hue === 1 ? "text-gold-300" : "text-cyan-200";
-  const valueCol = panel.hue === 1 ? "text-gold-200" : "text-cyan-50";
   const edge = panel.side === "right";
   return (
     <div
-      className={`absolute z-10 w-[172px] -translate-y-1/2 ${edge ? "-translate-x-full text-right" : "text-left"}`}
+      className={`absolute z-10 w-[150px] -translate-y-1/2 ${edge ? "-translate-x-full text-right" : "text-left"}`}
       style={{ left: `${panel.x * 100}%`, top: `${panel.y * 100}%` }}
     >
       <div
-        className={`relative rounded-[3px] border px-3 py-2 backdrop-blur-[2px] ${
-          panel.hue === 1 ? "border-gold-400/25" : "border-cyan-300/20"
-        }`}
-        style={{
-          background: "linear-gradient(180deg, rgba(10,28,46,0.55), rgba(8,20,36,0.32))",
-          boxShadow: panel.hue === 1
-            ? "0 0 18px rgba(212,175,82,0.10), inset 0 0 12px rgba(212,175,82,0.05)"
-            : "0 0 18px rgba(80,200,255,0.10), inset 0 0 12px rgba(80,200,255,0.05)",
-        }}
+        className="text-[11px] font-bold uppercase tracking-[0.08em] leading-tight text-white"
+        style={{ textShadow: "0 0 8px rgba(0,8,16,0.95), 0 0 18px rgba(0,8,16,0.8)" }}
       >
-        {/* corner ticks */}
-        <span className={`pointer-events-none absolute left-0 top-0 h-1.5 w-1.5 border-l border-t ${panel.hue === 1 ? "border-gold-300/60" : "border-cyan-300/60"}`} />
-        <span className={`pointer-events-none absolute bottom-0 right-0 h-1.5 w-1.5 border-b border-r ${panel.hue === 1 ? "border-gold-300/60" : "border-cyan-300/60"}`} />
-        <div className={`flex items-center gap-1.5 ${edge ? "flex-row-reverse" : ""}`}>
-          <span className={`inline-block h-1 w-1 rounded-full ${panel.hue === 1 ? "bg-gold-300" : "bg-cyan-300"} animate-pulse`} />
-          <div className={`text-[9.5px] font-semibold uppercase tracking-[0.16em] ${accent}`}>{panel.title}</div>
-        </div>
-        <div className={`mt-0.5 font-mono text-[19px] font-semibold leading-none ${valueCol}`}>{panel.value}</div>
-        <div className="mt-0.5 text-[9.5px] uppercase tracking-wider text-white/35">{panel.delta}</div>
+        {panel.title}
+      </div>
+      <div
+        className="mt-1 whitespace-nowrap text-[11px] font-medium leading-tight text-cyan-100/55"
+        style={{ textShadow: "0 0 8px rgba(0,8,16,0.95)" }}
+      >
+        <span className="text-cyan-50">{panel.value}</span> {panel.delta}
       </div>
     </div>
   );

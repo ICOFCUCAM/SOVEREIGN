@@ -32,9 +32,11 @@ const Landing: React.FC = () => {
       <div className="absolute inset-0" aria-hidden>
         <GlobeScene className="h-full w-full" />
       </div>
-      {/* legibility gradient: darken the left column for the headline while
-          leaving the command core bright on the right. */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] from-12% via-[#070707]/60 via-38% to-transparent to-60%" aria-hidden />
+      {/* legibility: darken the left column for the headline while the command
+          core stays bright on the right; gentle darkening at the bottom so the
+          lower labels stay readable. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#020407] from-10% via-[#020407]/55 via-34% to-transparent to-56%" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#020407] to-transparent" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#070707] to-transparent" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
 
@@ -64,18 +66,18 @@ const Landing: React.FC = () => {
 
         {/* hero body */}
         <div className="flex flex-1 items-center">
-          <div className="max-w-2xl py-10">
+          <div className="max-w-xl py-10">
             <p className="mb-6 text-sm font-semibold uppercase tracking-[0.25em] text-gold-400">Institutional Publication Infrastructure</p>
             <h1 className="font-serif text-6xl font-bold leading-[1.02] tracking-tight sm:text-7xl">
               From Information
               <br />to <span className="text-gold-400">Official Record.</span>
             </h1>
-            <p className="mt-7 max-w-xl text-lg leading-relaxed text-white/60">
-              Generate briefings, board reports, policy papers, regulatory submissions, operational packages and official records at sovereign scale.
+            <p className="mt-7 max-w-md text-lg leading-relaxed text-white/60">
+              Generate briefings, board reports, policy papers, regulatory submissions and official records at sovereign scale.
             </p>
 
             {/* trust strip */}
-            <div className="mt-10 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-4">
+            <div className="mt-10 grid max-w-xl grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-2">
               <Feature icon={<ShieldCheck />} title="Trusted" sub="by Institutions That Cannot Fail" />
               <Feature icon={<Lock />} title="Sovereign by Design" sub="Data. Residency. Operations." />
               <Feature icon={<DocFlow />} title="Governed End to End" sub="From Draft to Publication." />
@@ -83,7 +85,7 @@ const Landing: React.FC = () => {
             </div>
 
             {/* CTAs */}
-            <div className="mt-11 flex flex-wrap items-center gap-4">
+            <div className="mt-10 flex flex-wrap items-center gap-4">
               <button onClick={() => nav("/console")}
                 className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
                 Launch Dispatch
@@ -91,7 +93,7 @@ const Landing: React.FC = () => {
               </button>
               <a href="#capabilities"
                 className="inline-flex items-center rounded border border-white/20 px-7 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/40 hover:bg-white/5">
-                View Publication Infrastructure
+                View Infrastructure
               </a>
             </div>
           </div>
