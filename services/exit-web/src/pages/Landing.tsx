@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import GlobeScene from "../components/GlobeScene";
 
 // Public marketing landing — the front door to ExitOS. Mirrors the Dispatch
 // landing rhythm (full-bleed hero, top nav, modular grid below the fold) but
@@ -32,12 +33,23 @@ const TAG_STYLE: Record<string, string> = {
 const Landing: React.FC = () => {
   const nav = useNavigate();
   return (
-    <div className="relative min-h-screen overflow-hidden bg-ink-900 text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[#04070c] text-white">
       {/* atmospheric haze */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-32 top-[10%] h-[520px] w-[520px] rounded-full opacity-30 blur-[140px]" style={{ background: "rgba(16,185,129,0.35)" }} />
-        <div className="absolute -right-32 bottom-[8%] h-[520px] w-[520px] rounded-full opacity-25 blur-[140px]" style={{ background: "rgba(245,158,11,0.30)" }} />
+        <div className="absolute -left-32 top-[10%] h-[520px] w-[520px] rounded-full opacity-25 blur-[140px]" style={{ background: "rgba(16,185,129,0.30)" }} />
+        <div className="absolute -right-32 bottom-[8%] h-[520px] w-[520px] rounded-full opacity-20 blur-[140px]" style={{ background: "rgba(16,185,129,0.22)" }} />
       </div>
+
+      {/* hero artwork — the live acquisition-intelligence globe command core
+          (GlobeScene), full-bleed behind the hero content. Spans only the
+          hero viewport height so the module grid below stays clean. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-screen" aria-hidden>
+        <GlobeScene className="h-full w-full" />
+      </div>
+      {/* legibility: darken the left column for the headline while the command
+          core stays bright on the right; gentle darkening at the bottom. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-screen bg-gradient-to-r from-[#04070c] from-10% via-[#04070c]/55 via-34% to-transparent to-56%" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 top-[calc(100vh-7rem)] h-28 bg-gradient-to-b from-transparent to-[#04070c]" aria-hidden />
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[1500px] flex-col px-6 lg:px-12">
         {/* top nav */}
@@ -69,14 +81,14 @@ const Landing: React.FC = () => {
 
         {/* hero */}
         <section className="flex flex-1 items-center py-12">
-          <div className="max-w-3xl">
+          <div className="max-w-xl">
             <p className="mb-6 text-sm font-semibold uppercase tracking-[0.28em] text-deal-400">The operating system for company exits</p>
             <h1 className="font-serif text-6xl font-bold leading-[1.02] tracking-tight sm:text-7xl">
               From founder to <span className="text-deal-400">closed deal</span>,
               <br />on one console.
             </h1>
-            <p className="mt-7 max-w-2xl text-lg leading-relaxed text-white/65">
-              ExitOS is the substrate founders run an exit on. Acquisition intelligence, virtual data room, buyer marketplace, investor CRM, AI deal negotiator, document generator, NDA automation, acquisition pipeline, founder dashboard and the closing center — one console, one audit trail, one source of truth.
+            <p className="mt-7 max-w-md text-lg leading-relaxed text-white/65">
+              The substrate founders run an exit on — acquisition intelligence, data room, buyer marketplace, AI negotiator and the closing center. One console, one audit trail, one source of truth.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-4">
               <button
