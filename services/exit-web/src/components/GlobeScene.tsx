@@ -61,21 +61,22 @@ type Panel = {
   side: "left" | "right";
   hue: number; // 0 = cyan, 1 = amber accent (for variety)
 };
-// Centered globe with 6 small text labels — three left, three right — exactly
-// as the benchmark. Pure cyan, no amber. Each label is plain text (bold title +
-// thin value line) wired to the globe by a hairline connector ending in a small
-// hollow ring node on the inner orbit.
-const GLOBE_CX = 0.6;
-const GLOBE_CY = 0.5;
+// Globe sits right-of-centre and high enough that its holographic base platform
+// reads fully beneath it (as in the target). 6 small text labels in a clean
+// 3-left / 3-right arrangement hugging the globe. Pure cyan, no amber. Each
+// label is plain text (bold title + thin value line) wired to the globe by a
+// hairline connector ending in a small hollow ring node on the inner orbit.
+const GLOBE_CX = 0.635;
+const GLOBE_CY = 0.43;
 const PANELS: Panel[] = [
-  // the 6 benchmark metrics, arced around the free top/right/bottom of the
-  // globe (the headline owns the left column).
-  { id: "acq", title: "Acquisition Intelligence", value: "12.4K", delta: "active signals", x: 0.42, y: 0.14, side: "left", hue: 0 },
-  { id: "pred", title: "Predictive Outcomes", value: "94.7%", delta: "model accuracy", x: 0.955, y: 0.24, side: "right", hue: 0 },
-  { id: "closed", title: "Closed Deals", value: "$187.6B", delta: "realized", x: 0.97, y: 0.50, side: "right", hue: 0 },
-  { id: "neg", title: "AI Negotiator", value: "17.3%", delta: "value uplift", x: 0.955, y: 0.76, side: "right", hue: 0 },
-  { id: "net", title: "Global Buyer Network", value: "58,341", delta: "buyers", x: 0.51, y: 0.90, side: "left", hue: 0 },
-  { id: "flow", title: "Live Deal Flow", value: "$2.7T", delta: "in tracked value", x: 0.685, y: 0.93, side: "left", hue: 0 },
+  // left column (between the headline and the globe)
+  { id: "acq", title: "Acquisition Intelligence", value: "12.4K", delta: "active signals", x: 0.42, y: 0.17, side: "left", hue: 0 },
+  { id: "flow", title: "Live Deal Flow", value: "$2.7T", delta: "in tracked value", x: 0.42, y: 0.40, side: "left", hue: 0 },
+  { id: "net", title: "Global Buyer Network", value: "58,341", delta: "buyers", x: 0.42, y: 0.62, side: "left", hue: 0 },
+  // right column (hugging the globe's right side, not the screen edge)
+  { id: "pred", title: "Predictive Outcomes", value: "94.7%", delta: "model accuracy", x: 0.86, y: 0.21, side: "right", hue: 0 },
+  { id: "closed", title: "Closed Deals", value: "$187.6B", delta: "realized", x: 0.875, y: 0.43, side: "right", hue: 0 },
+  { id: "neg", title: "AI Negotiator", value: "17.3%", delta: "value uplift", x: 0.86, y: 0.63, side: "right", hue: 0 },
 ];
 
 const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
