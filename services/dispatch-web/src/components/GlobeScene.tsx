@@ -1,387 +1,519 @@
 import React, { useEffect, useRef } from "react";
 
 // ---------------------------------------------------------------------------
-// GlobeScene — a faithful, dependency-free reproduction of the cinematic
-// "intelligence globe" hero: a rotating dot-matrix Earth (continents picked
-// out in brighter cyan over a faint full-sphere grid), tilted orbital rings
-// with traveling nodes, a luminous base platform, and six floating data
-// labels with connectors. Pure <canvas> + SVG + CSS — no WebGL, no libraries.
+// GlobeScene — a 2036 acquisition-intelligence command core, not a marketing
+// illustration. Everything is rendered in real time on a single full-bleed
+// <canvas> (tens of thousands of depth-shaded particles per frame), with the
+// intelligence panels as crisp DOM overlaid on top and wired back into the
+// globe with luminous telemetry connectors drawn on the canvas.
 //
-// The globe is drawn on a canvas (thousands of depth-shaded dots per frame);
-// the rings, platform glow and labels are SVG/HTML layered on top, all sharing
-// the same centre so everything stays registered as the scene scales.
+// Reference language: Palantir Gotham / Anduril Lattice / a Bloomberg terminal
+// imagined for 2036 — volumetric, holographic, alive.
+//
+// Render layers (back → front):
+//   0. background telemetry grid + far particle dust
+//   1. atmospheric volumetric glow
+//   2. orbital rings (3D, depth-shaded) + nodes that pass front & behind
+//   3. the particle globe (see-through holographic sphere, ~14k points)
+//   4. surface intelligence nodes (pulsing) + scan sweep
+//   5. telemetry connectors from each panel to the globe + traveling pulses
+//   6. foreground bokeh particles
+// DOM panels sit above all of it.
 // ---------------------------------------------------------------------------
 
-// Land mask as lat/lon bounding boxes [latMin, latMax, lonMin, lonMax]. Not
-// survey-grade, but finer than a few rectangles so the rotating sphere reads as
-// a real Earth — continents taper toward the poles and have rough coastlines.
+// Coarse land mask (lat/lon boxes) — used only to brighten continent particles
+// so the sphere still reads as *global*, without becoming a literal map.
 const LAND: [number, number, number, number][] = [
-  // --- North America (tapers north→south, narrows through Central America) ---
-  [60, 72, -165, -95], [55, 68, -140, -60], [49, 60, -128, -58],
-  [42, 50, -124, -66], [34, 44, -122, -75], [28, 36, -116, -80],
-  [22, 30, -110, -82], [16, 24, -105, -88], [12, 18, -94, -83], [8, 14, -84, -77],
-  [60, 83, -55, -20], // Greenland
-  // --- South America (wide north, tapering to a point) ---
+  [60, 72, -165, -95], [55, 68, -140, -60], [49, 60, -128, -58], [42, 50, -124, -66],
+  [34, 44, -122, -75], [28, 36, -116, -80], [22, 30, -110, -82], [12, 18, -94, -83],
+  [60, 83, -55, -20],
   [4, 12, -78, -60], [-2, 7, -80, -50], [-10, 0, -79, -40], [-18, -8, -74, -38],
   [-26, -17, -71, -44], [-34, -25, -72, -52], [-43, -33, -74, -58], [-52, -42, -75, -66],
-  // --- Europe ---
-  [54, 66, -8, 30], [46, 58, -6, 30], [40, 50, -8, 28], [58, 70, 8, 42],
-  [36, 44, -8, 18], [38, 46, 18, 42],
-  [50, 60, 30, 60], // western Russia
-  // --- Africa (broad north, tapering south) ---
+  [54, 66, -8, 30], [46, 58, -6, 30], [40, 50, -8, 28], [58, 70, 8, 42], [38, 46, 18, 42],
+  [50, 60, 30, 60],
   [24, 36, -10, 32], [16, 28, -16, 36], [8, 18, -16, 42], [0, 10, -10, 44],
   [-10, 2, 9, 42], [-20, -8, 12, 40], [-30, -20, 15, 36], [-35, -28, 17, 30],
-  [-26, -12, 43, 50], // Madagascar
-  // --- Middle East + Asia ---
   [12, 30, 34, 60], [30, 45, 44, 78], [45, 65, 44, 120], [55, 72, 60, 178],
-  [35, 50, 78, 122], [20, 36, 70, 120],
-  [8, 22, 73, 90], // India peninsula
-  [10, 24, 95, 110], // Indochina
-  // --- Maritime SE Asia ---
+  [35, 50, 78, 122], [20, 36, 70, 120], [8, 22, 73, 90], [10, 24, 95, 110],
   [-8, 6, 96, 120], [-10, 0, 118, 141],
-  // --- Australia + NZ + Japan ---
-  [-30, -12, 114, 148], [-39, -28, 116, 154], [-47, -38, 166, 179], [-41, -34, 172, 178],
-  [31, 46, 129, 146], // Japan
+  [-30, -12, 114, 148], [-39, -28, 116, 154], [-47, -38, 166, 179], [31, 46, 129, 146],
 ];
-
 function isLand(lat: number, lon: number): boolean {
-  for (const [a, b, c, d] of LAND) {
-    if (lat >= a && lat <= b && lon >= c && lon <= d) return true;
+  for (let i = 0; i < LAND.length; i++) {
+    const b = LAND[i];
+    if (lat >= b[0] && lat <= b[1] && lon >= b[2] && lon <= b[3]) return true;
   }
   return false;
 }
 
-// Glowing surface hotspots ("active signals") at notable [lat, lon] points —
-// world cities/hubs — that brighten as they rotate to the front face.
-const HOTSPOTS: [number, number][] = [
-  [40.7, -74.0],  // New York
-  [51.5, -0.1],   // London
-  [35.7, 139.7],  // Tokyo
-  [1.3, 103.8],   // Singapore
-  [-23.5, -46.6], // São Paulo
-  [25.2, 55.3],   // Dubai
-  [-33.9, 151.2], // Sydney
-  [22.3, 114.2],  // Hong Kong
-  [37.8, -122.4], // San Francisco
-  [52.5, 13.4],   // Berlin
-  [19.1, 72.9],   // Mumbai
-  [-26.2, 28.0],  // Johannesburg
+const TAU = Math.PI * 2;
+const DEG = Math.PI / 180;
+
+// Intelligence panels — each anchored at a fraction of the scene and wired to
+// the globe. `side` controls which edge the card text/marker hangs off.
+type Panel = {
+  id: string;
+  title: string;
+  value: string;
+  delta: string;
+  x: number; // fraction of scene width
+  y: number; // fraction of scene height
+  side: "left" | "right";
+  hue: number; // 0 = cyan, 1 = amber accent (for variety)
+};
+// Globe is centred right-of-centre (GLOBE_CX) so the headline owns the left
+// column. Panels ring the globe strictly OUTSIDE its disc and clear of the
+// text: two across the top, four down the right edge, two along the bottom.
+const GLOBE_CX = 0.605;
+const GLOBE_CY = 0.52;
+const PANELS: Panel[] = [
+  // top (below the nav)
+  { id: "acq", title: "Acquisition Intelligence", value: "12,438", delta: "active signals", x: 0.52, y: 0.20, side: "left", hue: 0 },
+  // right edge stack
+  { id: "pred", title: "Predictive Outcomes", value: "94.7%", delta: "model accuracy", x: 0.985, y: 0.27, side: "right", hue: 0 },
+  { id: "flow", title: "Live Deal Flow", value: "$2.7T", delta: "in tracked value", x: 0.985, y: 0.42, side: "right", hue: 1 },
+  { id: "closed", title: "Closed Transactions", value: "$187.6B", delta: "realized", x: 0.985, y: 0.57, side: "right", hue: 0 },
+  { id: "resp", title: "Buyer Response Analytics", value: "61.2%", delta: "engagement rate", x: 0.985, y: 0.72, side: "right", hue: 0 },
+  { id: "neg", title: "AI Negotiator", value: "+17.3%", delta: "value uplift", x: 0.93, y: 0.88, side: "right", hue: 1 },
+  // bottom
+  { id: "net", title: "Global Buyer Network", value: "58,341", delta: "verified buyers", x: 0.54, y: 0.90, side: "left", hue: 0 },
+  { id: "exp", title: "Expected Outcome Engine", value: "0.91", delta: "confidence index", x: 0.73, y: 0.90, side: "left", hue: 0 },
 ];
 
-const TAU = Math.PI * 2;
-
-const GlobeCanvas: React.FC = () => {
-  const ref = useRef<HTMLCanvasElement>(null);
+const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = ref.current;
+    const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    let raf = 0;
-    let rot = 0; // current rotation (degrees) about the polar axis
-    let w = 0, h = 0, dpr = 1;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0;
+    let w = 0, h = 0, dpr = 1;
+    let t = 0; // frame time
 
-    const resize = () => {
-      const r = canvas.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = Math.max(1, Math.round(r.width));
-      h = Math.max(1, Math.round(r.height));
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
+    // --- precompute the globe particle field (Fibonacci sphere) --------------
+    type P = { x: number; y: number; z: number; land: boolean };
+    let sphere: P[] = [];
+    let nodes: { x: number; y: number; z: number; phase: number }[] = [];
+    const buildSphere = (count: number) => {
+      sphere = new Array(count);
+      const golden = Math.PI * (3 - Math.sqrt(5));
+      for (let i = 0; i < count; i++) {
+        const y = 1 - (i / (count - 1)) * 2;
+        const r = Math.sqrt(Math.max(0, 1 - y * y));
+        const th = i * golden;
+        const x = Math.cos(th) * r;
+        const z = Math.sin(th) * r;
+        const lat = Math.asin(y) / DEG;
+        const lon = Math.atan2(z, x) / DEG;
+        sphere[i] = { x, y, z, land: isLand(lat, lon) };
+      }
+      // surface intelligence nodes — distinct points that pulse + anchor data
+      nodes = [];
+      const NODES = 26;
+      for (let i = 0; i < NODES; i++) {
+        const y = 1 - (i / (NODES - 1)) * 2;
+        const r = Math.sqrt(Math.max(0, 1 - y * y));
+        const th = i * golden * 2.1;
+        nodes.push({ x: Math.cos(th) * r, y, z: Math.sin(th) * r, phase: i * 0.7 });
+      }
     };
 
+    // --- background far dust + foreground bokeh ------------------------------
+    let dust: { x: number; y: number; z: number; s: number }[] = [];
+    let bokeh: { x: number; y: number; r: number; vx: number; vy: number; a: number }[] = [];
+    const buildAmbient = () => {
+      dust = [];
+      const DN = Math.round((w * h) / 7000);
+      for (let i = 0; i < DN; i++) {
+        dust.push({ x: Math.random() * w, y: Math.random() * h, z: Math.random(), s: Math.random() * 1.2 + 0.3 });
+      }
+      bokeh = [];
+      for (let i = 0; i < 46; i++) {
+        bokeh.push({
+          x: Math.random() * w, y: Math.random() * h,
+          r: Math.random() * 26 + 8,
+          vx: (Math.random() - 0.5) * 0.12, vy: (Math.random() - 0.5) * 0.08,
+          a: Math.random() * 0.05 + 0.015,
+        });
+      }
+    };
+
+    // --- orbital rings (3D planes, each its own normal + spin) ---------------
+    type Ring = { n: [number, number, number]; rad: number; spin: number; seg: number; nodes: number };
+    const RINGS: Ring[] = [
+      { n: [0.05, 1, 0.08], rad: 1.20, spin: 0.0006, seg: 140, nodes: 2 },
+      { n: [0.55, 0.80, 0.0], rad: 1.34, spin: -0.0009, seg: 140, nodes: 2 },
+      { n: [-0.40, 0.72, 0.35], rad: 1.48, spin: 0.0011, seg: 150, nodes: 1 },
+      { n: [0.25, 0.86, -0.45], rad: 1.27, spin: -0.0007, seg: 140, nodes: 2 },
+    ];
+    // build an orthonormal basis (u, v) for each ring plane
+    const ringBasis = RINGS.map((rg) => {
+      const n = rg.n;
+      const nl = Math.hypot(n[0], n[1], n[2]);
+      const nn: [number, number, number] = [n[0] / nl, n[1] / nl, n[2] / nl];
+      const ax: [number, number, number] = Math.abs(nn[1]) < 0.95 ? [0, 1, 0] : [1, 0, 0];
+      // u = normalize(cross(ax, nn)); v = cross(nn, u)
+      const u: [number, number, number] = [
+        ax[1] * nn[2] - ax[2] * nn[1],
+        ax[2] * nn[0] - ax[0] * nn[2],
+        ax[0] * nn[1] - ax[1] * nn[0],
+      ];
+      const ul = Math.hypot(u[0], u[1], u[2]);
+      const uu: [number, number, number] = [u[0] / ul, u[1] / ul, u[2] / ul];
+      const v: [number, number, number] = [
+        nn[1] * uu[2] - nn[2] * uu[1],
+        nn[2] * uu[0] - nn[0] * uu[2],
+        nn[0] * uu[1] - nn[1] * uu[0],
+      ];
+      return { u: uu, v };
+    });
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = Math.max(1, Math.round(rect.width));
+      h = Math.max(1, Math.round(rect.height));
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      // particle budget scales with area, capped for perf
+      const count = Math.max(5000, Math.min(15000, Math.round((w * h) / 70)));
+      buildSphere(count);
+      buildAmbient();
+    };
+
+    // camera tilt (look slightly down on the globe)
+    const TILT = -0.34;
+    const cosT = Math.cos(TILT), sinT = Math.sin(TILT);
+
     const draw = () => {
-      const cx = w / 2;
-      const cy = h / 2;
-      const R = Math.min(w, h) * 0.44;
+      const cx = w * GLOBE_CX;
+      const cy = h * GLOBE_CY;
+      const R = Math.min(w, h) * 0.30;
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
 
-      // soft inner atmosphere (filled disc) — gives the sphere body its depth
-      const glow = ctx.createRadialGradient(cx, cy, R * 0.1, cx, cy, R * 1.05);
-      glow.addColorStop(0, "rgba(28,120,165,0.22)");
-      glow.addColorStop(0.65, "rgba(18,80,125,0.10)");
-      glow.addColorStop(1, "rgba(6,30,52,0.0)");
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(cx, cy, R, 0, TAU);
-      ctx.fill();
+      const rot = reduce ? 0.6 : t * 0.0022; // globe spin (radians)
+      const cosR = Math.cos(rot), sinR = Math.sin(rot);
 
-      // outer atmospheric halo — a brighter band hugging the limb, as in the brief
-      const halo = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.18);
-      halo.addColorStop(0, "rgba(90,200,240,0.0)");
-      halo.addColorStop(0.55, "rgba(96,206,245,0.16)");
-      halo.addColorStop(1, "rgba(96,206,245,0.0)");
+      // ---- layer 0: background telemetry grid + far dust -------------------
+      ctx.save();
+      ctx.strokeStyle = "rgba(40,110,150,0.06)";
+      ctx.lineWidth = 1;
+      const gridStep = Math.max(48, Math.min(w, h) / 12);
+      for (let gx = (cx % gridStep); gx < w; gx += gridStep) {
+        ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke();
+      }
+      for (let gy = (cy % gridStep); gy < h; gy += gridStep) {
+        ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
+      }
+      ctx.restore();
+
+      ctx.globalCompositeOperation = "lighter";
+      for (let i = 0; i < dust.length; i++) {
+        const d = dust[i];
+        const tw = 0.4 + 0.6 * Math.abs(Math.sin(t * 0.01 + i));
+        ctx.fillStyle = `rgba(110,180,220,${(0.05 + d.z * 0.10) * tw})`;
+        ctx.fillRect(d.x, d.y, d.s, d.s);
+      }
+      ctx.globalCompositeOperation = "source-over";
+
+      // ---- layer 1: atmospheric volumetric glow ----------------------------
+      ctx.globalCompositeOperation = "lighter";
+      const atmo = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R * 1.7);
+      atmo.addColorStop(0, "rgba(40,150,205,0.20)");
+      atmo.addColorStop(0.45, "rgba(30,120,180,0.10)");
+      atmo.addColorStop(1, "rgba(10,40,70,0)");
+      ctx.fillStyle = atmo;
+      ctx.beginPath(); ctx.arc(cx, cy, R * 1.7, 0, TAU); ctx.fill();
+      // bright limb halo
+      const halo = ctx.createRadialGradient(cx, cy, R * 0.95, cx, cy, R * 1.16);
+      halo.addColorStop(0, "rgba(120,225,255,0)");
+      halo.addColorStop(0.6, "rgba(120,225,255,0.16)");
+      halo.addColorStop(1, "rgba(120,225,255,0)");
       ctx.fillStyle = halo;
-      ctx.beginPath();
-      ctx.arc(cx, cy, R * 1.18, 0, TAU);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, R * 1.16, 0, TAU); ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
 
-      // faint great-circle grid (parallels + meridians) under the dot field
-      ctx.strokeStyle = "rgba(70,160,200,0.10)";
-      ctx.lineWidth = 0.6;
-      for (let lat = -60; lat <= 60; lat += 30) {
-        const latR = (lat * Math.PI) / 180;
-        ctx.beginPath();
-        let started = false;
-        for (let lon = -180; lon <= 180; lon += 6) {
-          const lonR = ((lon + rot) * Math.PI) / 180;
-          const z = Math.cos(latR) * Math.cos(lonR);
-          if (z <= 0) { started = false; continue; }
-          const sx = cx + R * Math.cos(latR) * Math.sin(lonR);
-          const sy = cy - R * Math.sin(latR);
-          if (!started) { ctx.moveTo(sx, sy); started = true; } else ctx.lineTo(sx, sy);
+      // helper: rotate a unit point by globe spin (Y) then camera tilt (X)
+      const project = (x: number, y: number, z: number) => {
+        // spin about Y
+        const xr = x * cosR + z * sinR;
+        const zr = -x * sinR + z * cosR;
+        // tilt about X
+        const yr = y * cosT - zr * sinT;
+        const zt = y * sinT + zr * cosT;
+        return { sx: cx + xr * R, sy: cy - yr * R, depth: zt };
+      };
+      // project without globe spin (for rings, which spin independently)
+      const projectStatic = (x: number, y: number, z: number) => {
+        const yr = y * cosT - z * sinT;
+        const zt = y * sinT + z * cosT;
+        return { sx: cx + x * R, sy: cy - yr * R, depth: zt };
+      };
+
+      // ---- layer 2: orbital rings (behind half) ----------------------------
+      const drawRing = (ri: number, frontPass: boolean) => {
+        const rg = RINGS[ri];
+        const { u, v } = ringBasis[ri];
+        const spin = reduce ? 0.8 : t * rg.spin;
+        ctx.globalCompositeOperation = "lighter";
+        for (let s = 0; s < rg.seg; s++) {
+          const a0 = (s / rg.seg) * TAU + spin;
+          const a1 = ((s + 1) / rg.seg) * TAU + spin;
+          const p0x = (Math.cos(a0) * u[0] + Math.sin(a0) * v[0]) * rg.rad;
+          const p0y = (Math.cos(a0) * u[1] + Math.sin(a0) * v[1]) * rg.rad;
+          const p0z = (Math.cos(a0) * u[2] + Math.sin(a0) * v[2]) * rg.rad;
+          const p1x = (Math.cos(a1) * u[0] + Math.sin(a1) * v[0]) * rg.rad;
+          const p1y = (Math.cos(a1) * u[1] + Math.sin(a1) * v[1]) * rg.rad;
+          const p1z = (Math.cos(a1) * u[2] + Math.sin(a1) * v[2]) * rg.rad;
+          const q0 = projectStatic(p0x, p0y, p0z);
+          const q1 = projectStatic(p1x, p1y, p1z);
+          const front = q0.depth >= 0;
+          if (front !== frontPass) continue;
+          const df = (q0.depth + 1) / 2;
+          const a = front ? 0.10 + 0.42 * df : 0.05 + 0.10 * df;
+          ctx.strokeStyle = `rgba(125,220,255,${a.toFixed(3)})`;
+          ctx.lineWidth = front ? 1.1 : 0.7;
+          ctx.beginPath(); ctx.moveTo(q0.sx, q0.sy); ctx.lineTo(q1.sx, q1.sy); ctx.stroke();
         }
+        // traveling nodes on this ring
+        for (let nidx = 0; nidx < rg.nodes; nidx++) {
+          const a = (reduce ? 0.3 : t * (0.0009 + ri * 0.0004)) + (nidx / rg.nodes) * TAU + ri;
+          const px = (Math.cos(a) * u[0] + Math.sin(a) * v[0]) * rg.rad;
+          const py = (Math.cos(a) * u[1] + Math.sin(a) * v[1]) * rg.rad;
+          const pz = (Math.cos(a) * u[2] + Math.sin(a) * v[2]) * rg.rad;
+          const q = projectStatic(px, py, pz);
+          const front = q.depth >= 0;
+          if (front !== frontPass) continue;
+          const df = (q.depth + 1) / 2;
+          const rr = 1.6 + 2.2 * df;
+          const g = ctx.createRadialGradient(q.sx, q.sy, 0, q.sx, q.sy, rr * 3);
+          g.addColorStop(0, `rgba(210,250,255,${0.9 * df})`);
+          g.addColorStop(0.4, `rgba(120,225,255,${0.45 * df})`);
+          g.addColorStop(1, "rgba(120,225,255,0)");
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(q.sx, q.sy, rr * 3, 0, TAU); ctx.fill();
+          ctx.fillStyle = `rgba(235,253,255,${0.85 * df})`;
+          ctx.beginPath(); ctx.arc(q.sx, q.sy, rr * 0.5, 0, TAU); ctx.fill();
+        }
+        ctx.globalCompositeOperation = "source-over";
+      };
+      for (let ri = 0; ri < RINGS.length; ri++) drawRing(ri, false); // back halves
+
+      // ---- layer 3: the particle globe -------------------------------------
+      // inner body fill so the back particles read through a tinted sphere
+      const body = ctx.createRadialGradient(cx - R * 0.25, cy - R * 0.3, R * 0.1, cx, cy, R);
+      body.addColorStop(0, "rgba(18,70,110,0.35)");
+      body.addColorStop(1, "rgba(6,24,44,0.55)");
+      ctx.fillStyle = body;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.fill();
+
+      ctx.globalCompositeOperation = "lighter";
+      for (let i = 0; i < sphere.length; i++) {
+        const p = sphere[i];
+        const q = project(p.x, p.y, p.z);
+        const df = (q.depth + 1) / 2; // 0 back → 1 front
+        if (p.land) {
+          const a = 0.10 + 0.85 * df;
+          ctx.fillStyle = `rgba(130,236,255,${a.toFixed(3)})`;
+          const s = 0.7 + 1.5 * df;
+          ctx.fillRect(q.sx - s / 2, q.sy - s / 2, s, s);
+        } else {
+          // ocean/grid particles — faint, see-through on the back face
+          const a = 0.03 + 0.18 * df;
+          ctx.fillStyle = `rgba(70,165,210,${a.toFixed(3)})`;
+          ctx.fillRect(q.sx - 0.5, q.sy - 0.5, 1, 1);
+        }
+      }
+      ctx.globalCompositeOperation = "source-over";
+
+      // ---- layer 4: surface intelligence nodes + scan sweep ----------------
+      ctx.globalCompositeOperation = "lighter";
+      const litNodes: { sx: number; sy: number; df: number }[] = [];
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        const q = project(n.x, n.y, n.z);
+        const df = (q.depth + 1) / 2;
+        if (q.depth <= 0.04) continue; // front face only
+        const pulse = 0.55 + 0.45 * Math.sin(t * 0.05 + n.phase * 3);
+        const a = (0.5 + 0.5 * df) * pulse;
+        const rr = 7 * df;
+        const g = ctx.createRadialGradient(q.sx, q.sy, 0, q.sx, q.sy, rr);
+        g.addColorStop(0, `rgba(215,250,255,${a})`);
+        g.addColorStop(0.4, `rgba(120,225,255,${a * 0.5})`);
+        g.addColorStop(1, "rgba(120,225,255,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(q.sx, q.sy, rr, 0, TAU); ctx.fill();
+        ctx.fillStyle = `rgba(240,254,255,${a})`;
+        ctx.beginPath(); ctx.arc(q.sx, q.sy, 1.2 * df, 0, TAU); ctx.fill();
+        litNodes.push({ sx: q.sx, sy: q.sy, df });
+      }
+
+      // scan sweep — a bright horizontal band travelling down the globe
+      const scanY = cy - R + ((reduce ? 0.5 : (t * 0.6) % (R * 2)) );
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.clip();
+      const sg = ctx.createLinearGradient(0, scanY - 14, 0, scanY + 14);
+      sg.addColorStop(0, "rgba(120,225,255,0)");
+      sg.addColorStop(0.5, "rgba(150,240,255,0.22)");
+      sg.addColorStop(1, "rgba(120,225,255,0)");
+      ctx.fillStyle = sg;
+      ctx.fillRect(cx - R, scanY - 14, R * 2, 28);
+      ctx.restore();
+      ctx.globalCompositeOperation = "source-over";
+
+      // crisp limb
+      ctx.strokeStyle = "rgba(130,232,255,0.40)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
+
+      // ---- rings: front halves (over the globe) ----------------------------
+      for (let ri = 0; ri < RINGS.length; ri++) drawRing(ri, true);
+
+      // ---- holographic projection platform beneath -------------------------
+      ctx.globalCompositeOperation = "lighter";
+      const py = cy + R * 1.18;
+      // light beam
+      const beam = ctx.createLinearGradient(0, py, 0, cy);
+      beam.addColorStop(0, "rgba(150,240,255,0.30)");
+      beam.addColorStop(1, "rgba(150,240,255,0)");
+      ctx.fillStyle = beam;
+      ctx.beginPath();
+      ctx.moveTo(cx - R * 0.16, py); ctx.lineTo(cx + R * 0.16, py);
+      ctx.lineTo(cx + R * 0.05, cy); ctx.lineTo(cx - R * 0.05, cy); ctx.closePath(); ctx.fill();
+      for (let k = 0; k < 5; k++) {
+        const rad = R * (0.35 + k * 0.22);
+        const a = 0.32 - k * 0.05;
+        ctx.strokeStyle = `rgba(135,235,255,${a})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.ellipse(cx, py, rad, rad * 0.22, 0, 0, TAU);
         ctx.stroke();
       }
-      for (let lon = -150; lon <= 180; lon += 30) {
-        ctx.beginPath();
-        let started = false;
-        for (let lat = -90; lat <= 90; lat += 4) {
-          const latR = (lat * Math.PI) / 180;
-          const lonR = ((lon + rot) * Math.PI) / 180;
-          const z = Math.cos(latR) * Math.cos(lonR);
-          if (z <= 0) { started = false; continue; }
-          const sx = cx + R * Math.cos(latR) * Math.sin(lonR);
-          const sy = cy - R * Math.sin(latR);
-          if (!started) { ctx.moveTo(sx, sy); started = true; } else ctx.lineTo(sx, sy);
-        }
-        ctx.stroke();
-      }
+      const plat = ctx.createRadialGradient(cx, py, 0, cx, py, R * 1.1);
+      plat.addColorStop(0, "rgba(120,225,255,0.22)");
+      plat.addColorStop(1, "rgba(120,225,255,0)");
+      ctx.fillStyle = plat;
+      ctx.beginPath(); ctx.ellipse(cx, py, R * 1.1, R * 0.26, 0, 0, TAU); ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
 
-      // Two passes: a fine faint ocean grid for the sphere read, then a denser,
-      // much brighter land pass so the continents clearly pop as on the brief.
-      const oceanStep = 3.4;
-      for (let lat = -86; lat <= 86; lat += oceanStep) {
-        const latR = (lat * Math.PI) / 180;
-        const cosLat = Math.cos(latR);
-        const y = Math.sin(latR);
-        for (let lon = -180; lon < 180; lon += oceanStep) {
-          if (isLand(lat, lon)) continue;
-          const lonR = ((lon + rot) * Math.PI) / 180;
-          const z = cosLat * Math.cos(lonR);
-          if (z <= 0.02) continue; // front hemisphere only
-          const x = cosLat * Math.sin(lonR);
-          const sx = cx + R * x;
-          const sy = cy - R * y;
-          const a = 0.05 + 0.11 * z;
-          ctx.fillStyle = `rgba(82,176,214,${a.toFixed(3)})`;
-          ctx.fillRect(sx - 0.55, sy - 0.55, 1.1, 1.1);
-        }
+      // ---- layer 5: telemetry connectors panel → globe ---------------------
+      ctx.globalCompositeOperation = "lighter";
+      for (let i = 0; i < PANELS.length; i++) {
+        const pn = PANELS[i];
+        const ax = pn.x * w;
+        const ay = pn.y * h;
+        // connect to the globe rim point in the panel's direction
+        let dx = ax - cx, dy = ay - cy;
+        const dl = Math.hypot(dx, dy) || 1;
+        dx /= dl; dy /= dl;
+        const rimX = cx + dx * (R + 4);
+        const rimY = cy + dy * (R + 4);
+        // start the line a touch inside the card toward the globe
+        const startX = ax - dx * 6;
+        const startY = ay - dy * 6;
+        const col = pn.hue === 1 ? "212,175,82" : "120,225,255";
+        const grad = ctx.createLinearGradient(startX, startY, rimX, rimY);
+        grad.addColorStop(0, `rgba(${col},0.05)`);
+        grad.addColorStop(0.5, `rgba(${col},0.32)`);
+        grad.addColorStop(1, `rgba(${col},0.55)`);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(rimX, rimY); ctx.stroke();
+        // rim node
+        ctx.fillStyle = `rgba(${col},0.9)`;
+        ctx.beginPath(); ctx.arc(rimX, rimY, 1.8, 0, TAU); ctx.fill();
+        const rg = ctx.createRadialGradient(rimX, rimY, 0, rimX, rimY, 7);
+        rg.addColorStop(0, `rgba(${col},0.6)`);
+        rg.addColorStop(1, `rgba(${col},0)`);
+        ctx.fillStyle = rg;
+        ctx.beginPath(); ctx.arc(rimX, rimY, 7, 0, TAU); ctx.fill();
+        // traveling telemetry pulse along the connector
+        const prog = reduce ? 0.5 : ((t * 0.012 + i * 0.37) % 1);
+        const px2 = startX + (rimX - startX) * prog;
+        const py2 = startY + (rimY - startY) * prog;
+        ctx.fillStyle = `rgba(${col},${0.85 * (1 - Math.abs(prog - 0.5) * 1.2)})`;
+        ctx.beginPath(); ctx.arc(px2, py2, 1.6, 0, TAU); ctx.fill();
       }
+      ctx.globalCompositeOperation = "source-over";
 
-      // land pass — fine grid, bright cyan, depth-shaded square dots
-      const landStep = 1.7;
-      for (let lat = -86; lat <= 86; lat += landStep) {
-        const latR = (lat * Math.PI) / 180;
-        const cosLat = Math.cos(latR);
-        const y = Math.sin(latR);
-        for (let lon = -180; lon < 180; lon += landStep) {
-          if (!isLand(lat, lon)) continue;
-          const lonR = ((lon + rot) * Math.PI) / 180;
-          const z = cosLat * Math.cos(lonR);
-          if (z <= 0.02) continue;
-          const x = cosLat * Math.sin(lonR);
-          const sx = cx + R * x;
-          const sy = cy - R * y;
-          const a = 0.55 + 0.45 * z;
-          ctx.fillStyle = `rgba(134,238,255,${a.toFixed(3)})`;
-          const s = 1.6 + 1.05 * z; // crisp squares, larger toward the centre
-          ctx.fillRect(Math.round(sx - s / 2), Math.round(sy - s / 2), Math.ceil(s), Math.ceil(s));
-        }
+      // ---- layer 6: foreground bokeh particles -----------------------------
+      ctx.globalCompositeOperation = "lighter";
+      for (let i = 0; i < bokeh.length; i++) {
+        const b = bokeh[i];
+        if (!reduce) { b.x += b.vx; b.y += b.vy; }
+        if (b.x < -40) b.x = w + 40; if (b.x > w + 40) b.x = -40;
+        if (b.y < -40) b.y = h + 40; if (b.y > h + 40) b.y = -40;
+        const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+        g.addColorStop(0, `rgba(140,220,255,${b.a})`);
+        g.addColorStop(1, "rgba(140,220,255,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, TAU); ctx.fill();
       }
-
-      // glowing surface hotspots ("active signals") — brighten on the front face
-      const t = rot; // reuse rotation as a slow phase for the twinkle
-      for (let i = 0; i < HOTSPOTS.length; i++) {
-        const [hlat, hlon] = HOTSPOTS[i];
-        const latR = (hlat * Math.PI) / 180;
-        const cosLat = Math.cos(latR);
-        const lonR = ((hlon + rot) * Math.PI) / 180;
-        const z = cosLat * Math.cos(lonR);
-        if (z <= 0.05) continue;
-        const sx = cx + R * cosLat * Math.sin(lonR);
-        const sy = cy - R * Math.sin(latR);
-        const twinkle = 0.65 + 0.35 * Math.sin((t * 0.08) + i * 1.7);
-        const a = (0.7 + 0.3 * z) * twinkle;
-        const rad = 8;
-        const halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, rad);
-        halo.addColorStop(0, `rgba(200,251,255,${(a).toFixed(3)})`);
-        halo.addColorStop(0.35, `rgba(130,236,255,${(a * 0.55).toFixed(3)})`);
-        halo.addColorStop(1, "rgba(120,232,255,0)");
-        ctx.fillStyle = halo;
-        ctx.beginPath();
-        ctx.arc(sx, sy, rad, 0, TAU);
-        ctx.fill();
-        ctx.fillStyle = `rgba(235,254,255,${Math.min(1, a + 0.1).toFixed(3)})`;
-        ctx.beginPath();
-        ctx.arc(sx, sy, 1.4, 0, TAU);
-        ctx.fill();
-      }
-
-      // crisp limb highlight
-      ctx.strokeStyle = "rgba(125,228,255,0.35)";
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      ctx.arc(cx, cy, R, 0, TAU);
-      ctx.stroke();
+      ctx.globalCompositeOperation = "source-over";
     };
 
     const tick = () => {
-      rot = (rot + 0.18) % 360;
+      t += 1;
       draw();
       raf = requestAnimationFrame(tick);
     };
 
     resize();
-    if (reduce) {
-      draw();
-    } else {
-      raf = requestAnimationFrame(tick);
-    }
-
-    const ro = new ResizeObserver(() => {
-      resize();
-      if (reduce) draw();
-    });
+    if (reduce) { draw(); } else { raf = requestAnimationFrame(tick); }
+    const ro = new ResizeObserver(() => { resize(); if (reduce) draw(); });
     ro.observe(canvas);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-    };
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
   }, []);
 
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full" aria-hidden />;
-};
-
-// One floating data label with a glowing connector node + short leader line
-// on the side facing the globe — matching the reference's annotation style.
-const Label: React.FC<{
-  title: string;
-  value: string;
-  pos: string; // tailwind positioning classes
-  align?: "left" | "right";
-}> = ({ title, value, pos, align = "left" }) => {
-  // a hollow ring-marker (as in the brief) wrapping a pulsing core, then a
-  // short leader line fading toward the globe.
-  const node = (
-    <span className="flex shrink-0 items-center" aria-hidden>
-      <span className="relative inline-flex h-3 w-3 items-center justify-center">
-        <span className="absolute inline-flex h-3 w-3 rounded-full border border-cyan-300/70" />
-        <span className="absolute inline-flex h-3 w-3 animate-ping rounded-full border border-cyan-300/40" />
-        <span className="relative inline-flex h-1 w-1 rounded-full bg-cyan-100 shadow-[0_0_6px_2px_rgba(120,232,255,0.8)]" />
-      </span>
-      <span className={`h-px w-8 bg-gradient-to-r from-cyan-300/70 to-transparent ${align === "right" ? "rotate-180" : ""}`} />
-    </span>
-  );
   return (
-    <div className={`absolute ${pos} flex items-center gap-2 ${align === "right" ? "flex-row-reverse" : ""}`}>
-      {node}
-      <div className={align === "right" ? "text-right" : "text-left"}>
-        <div className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-100/95 sm:text-xs">
-          {title}
-        </div>
-        <div className="mt-0.5 whitespace-nowrap text-[13px] font-medium text-cyan-200/70 sm:text-sm">{value}</div>
+    <div className={`relative ${className}`}>
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" aria-hidden />
+      {/* intelligence panels — crisp DOM holographic cards over the canvas */}
+      <div className="hidden lg:block">
+        {PANELS.map((p) => (
+          <IntelPanel key={p.id} panel={p} />
+        ))}
       </div>
     </div>
   );
 };
 
-const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
+// A single holographic intelligence panel.
+const IntelPanel: React.FC<{ panel: Panel }> = ({ panel }) => {
+  const accent = panel.hue === 1 ? "text-gold-300" : "text-cyan-200";
+  const valueCol = panel.hue === 1 ? "text-gold-200" : "text-cyan-50";
+  const edge = panel.side === "right";
   return (
-    <div className={`relative ${className}`}>
-      {/* centred globe + rings + platform, sized to the shorter axis */}
-      <div className="absolute left-1/2 top-1/2 aspect-square w-[min(78vmin,820px)] -translate-x-1/2 -translate-y-1/2">
-        {/* soft radial backglow behind the sphere */}
-        <div
-          className="absolute inset-[8%] rounded-full"
-          style={{ background: "radial-gradient(circle at 50% 46%, rgba(40,150,200,0.22), rgba(20,90,140,0.08) 55%, transparent 72%)" }}
-          aria-hidden
-        />
-        <GlobeCanvas />
-
-        {/* orbital rings + traveling nodes + base platform (SVG overlay) */}
-        <svg
-          viewBox="0 0 100 100"
-          className="absolute inset-0 h-full w-full overflow-visible"
-          aria-hidden
-        >
-          <defs>
-            <path id="orbitA" d="M50,50 m-48,0 a48,15 0 1,0 96,0 a48,15 0 1,0 -96,0" />
-            <path id="orbitB" d="M50,50 m-45,0 a45,11 0 1,0 90,0 a45,11 0 1,0 -90,0" />
-            <path id="orbitC" d="M50,50 m-49,0 a49,19 0 1,0 98,0 a49,19 0 1,0 -98,0" />
-            <radialGradient id="platform" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(150,240,255,0.70)" />
-              <stop offset="40%" stopColor="rgba(70,180,230,0.26)" />
-              <stop offset="100%" stopColor="rgba(0,0,0,0)" />
-            </radialGradient>
-            <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="0%" stopColor="rgba(150,240,255,0.45)" />
-              <stop offset="100%" stopColor="rgba(150,240,255,0)" />
-            </linearGradient>
-          </defs>
-
-          {/* tilted orbital rings */}
-          <g
-            stroke="rgba(120,216,250,0.55)"
-            strokeWidth="0.4"
-            fill="none"
-            style={{ filter: "drop-shadow(0 0 1.4px rgba(120,232,255,0.7))" }}
-          >
-            <use href="#orbitA" transform="rotate(-12 50 50)" />
-            <use href="#orbitB" transform="rotate(8 50 50)" />
-            <use href="#orbitC" transform="rotate(-26 50 50)" />
-          </g>
-
-          {/* nodes traveling along the orbits */}
-          <g fill="#bdf3ff">
-            <circle r="0.9" transform="rotate(-12 50 50)">
-              <animateMotion dur="14s" repeatCount="indefinite">
-                <mpath href="#orbitA" />
-              </animateMotion>
-            </circle>
-            <circle r="0.7" transform="rotate(8 50 50)">
-              <animateMotion dur="11s" repeatCount="indefinite" keyPoints="0.4;1.4" keyTimes="0;1" calcMode="linear">
-                <mpath href="#orbitB" />
-              </animateMotion>
-            </circle>
-            <circle r="0.8" transform="rotate(-26 50 50)">
-              <animateMotion dur="18s" repeatCount="indefinite" keyPoints="0.7;1.7" keyTimes="0;1" calcMode="linear">
-                <mpath href="#orbitC" />
-              </animateMotion>
-            </circle>
-          </g>
-
-          {/* soft vertical light beam rising from the platform */}
-          <rect x="46.5" y="58" width="7" height="28" fill="url(#beam)" opacity="0.5" />
-
-          {/* luminous base platform: stacked concentric ellipses + glow */}
-          <g transform="translate(50 86)">
-            <ellipse cx="0" cy="0" rx="42" ry="9.5" fill="url(#platform)" />
-            <ellipse cx="0" cy="0" rx="34" ry="7.6" fill="none" stroke="rgba(140,238,255,0.65)" strokeWidth="0.45" />
-            <ellipse cx="0" cy="0" rx="26" ry="5.8" fill="none" stroke="rgba(135,236,255,0.48)" strokeWidth="0.38" />
-            <ellipse cx="0" cy="0" rx="18" ry="4.0" fill="none" stroke="rgba(130,234,255,0.34)" strokeWidth="0.32" />
-            <ellipse cx="0" cy="0" rx="10" ry="2.2" fill="none" stroke="rgba(125,232,255,0.24)" strokeWidth="0.3" />
-          </g>
-        </svg>
-      </div>
-
-      {/* six floating data labels — all six readings from the brief, arranged
-          around the top / right / bottom-right arc so they stay clear of the
-          headline (left column) and the top nav. Hidden on narrow screens
-          where there's no room beside the headline. */}
-      <div className="hidden lg:block">
-        <Label pos="left-[34%] top-[19%]" title="Acquisition Intelligence" value="12.4K active signals" />
-        <Label pos="right-[2%] top-[23%]" align="right" title="Predictive Outcomes" value="94.7% model accuracy" />
-        <Label pos="right-[1%] top-[42%]" align="right" title="Live Deal Flow" value="$2.7T in tracked value" />
-        <Label pos="right-[2%] top-[56%]" align="right" title="Closed Deals" value="$187.6B realized" />
-        <Label pos="right-[6%] top-[79%]" align="right" title="AI Negotiator" value="17.3% value uplift" />
-        <Label pos="left-[35%] top-[86%]" title="Global Buyer Network" value="58,341 buyers" />
+    <div
+      className={`absolute z-10 w-[190px] -translate-y-1/2 ${edge ? "-translate-x-full text-right" : "text-left"}`}
+      style={{ left: `${panel.x * 100}%`, top: `${panel.y * 100}%` }}
+    >
+      <div
+        className={`relative rounded-[3px] border px-3 py-2 backdrop-blur-[2px] ${
+          panel.hue === 1 ? "border-gold-400/25" : "border-cyan-300/20"
+        }`}
+        style={{
+          background: "linear-gradient(180deg, rgba(10,28,46,0.55), rgba(8,20,36,0.32))",
+          boxShadow: panel.hue === 1
+            ? "0 0 18px rgba(212,175,82,0.10), inset 0 0 12px rgba(212,175,82,0.05)"
+            : "0 0 18px rgba(80,200,255,0.10), inset 0 0 12px rgba(80,200,255,0.05)",
+        }}
+      >
+        {/* corner ticks */}
+        <span className={`pointer-events-none absolute left-0 top-0 h-1.5 w-1.5 border-l border-t ${panel.hue === 1 ? "border-gold-300/60" : "border-cyan-300/60"}`} />
+        <span className={`pointer-events-none absolute bottom-0 right-0 h-1.5 w-1.5 border-b border-r ${panel.hue === 1 ? "border-gold-300/60" : "border-cyan-300/60"}`} />
+        <div className={`flex items-center gap-1.5 ${edge ? "flex-row-reverse" : ""}`}>
+          <span className={`inline-block h-1 w-1 rounded-full ${panel.hue === 1 ? "bg-gold-300" : "bg-cyan-300"} animate-pulse`} />
+          <div className={`text-[9.5px] font-semibold uppercase tracking-[0.16em] ${accent}`}>{panel.title}</div>
+        </div>
+        <div className={`mt-0.5 font-mono text-[19px] font-semibold leading-none ${valueCol}`}>{panel.value}</div>
+        <div className="mt-0.5 text-[9.5px] uppercase tracking-wider text-white/35">{panel.delta}</div>
       </div>
     </div>
   );

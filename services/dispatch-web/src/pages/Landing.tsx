@@ -7,10 +7,10 @@ import GlobeScene from "../components/GlobeScene";
 // accent) with the value proposition on the left and a top nav. "Launch
 // Dispatch" / "Log in" route into the gated console (/console).
 //
-// The hero artwork is the coded GlobeScene (rotating dot-matrix Earth, orbital
-// rings, base platform, floating data labels) — no static image. It sits in
-// the right portion and is feathered into the page with a left-to-right
-// gradient so the headline stays legible.
+// The hero artwork is the coded GlobeScene — a full-bleed 2036 acquisition-
+// intelligence command core (volumetric particle globe, orbital rings,
+// telemetry grid, holographic platform, connected intelligence panels). No
+// static image. A left-to-right gradient keeps the headline legible over it.
 const NAV = ["Overview", "Capabilities", "Workflow", "Security", "Integrations", "Resources"];
 
 const Feature: React.FC<{ icon: React.ReactNode; title: string; sub: string }> = ({ icon, title, sub }) => (
@@ -27,13 +27,14 @@ const Landing: React.FC = () => {
   const nav = useNavigate();
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#070707] text-white">
-      {/* hero artwork — the live intelligence globe (GlobeScene), anchored to
-          the right portion so the headline owns the left column. */}
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-[72%] sm:w-[64%]" aria-hidden>
+      {/* hero artwork — the live intelligence command core (GlobeScene),
+          full-bleed behind the hero content. */}
+      <div className="absolute inset-0" aria-hidden>
         <GlobeScene className="h-full w-full" />
       </div>
-      {/* legibility gradients: darken left for text, fade top/bottom edges */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] from-20% via-[#070707]/55 via-42% to-transparent to-65%" aria-hidden />
+      {/* legibility gradient: darken the left column for the headline while
+          leaving the command core bright on the right. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] from-12% via-[#070707]/60 via-38% to-transparent to-60%" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#070707] to-transparent" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
 
