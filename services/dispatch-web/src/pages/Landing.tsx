@@ -1,16 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import GlobeScene from "../components/GlobeScene";
 
 // Public marketing landing — the front door to Dispatch. Models the benchmark:
-// a full-bleed cinematic hero (live intelligence globe, gold institutional
+// a full-bleed cinematic hero (globe + document covers, gold institutional
 // accent) with the value proposition on the left and a top nav. "Launch
 // Dispatch" / "Log in" route into the gated console (/console).
 //
-// The hero artwork is the coded GlobeScene — a full-bleed 2036 acquisition-
-// intelligence command core (volumetric particle globe, orbital rings,
-// telemetry grid, holographic platform, connected intelligence panels). No
-// static image. A left-to-right gradient keeps the headline legible over it.
+// The hero artwork lives at /Dispatchhero.png (public/). It is positioned to
+// the right and feathered into the page with a left-to-right gradient so the
+// headline stays legible regardless of the image's left edge.
 const NAV = ["Overview", "Capabilities", "Workflow", "Security", "Integrations", "Resources"];
 
 const Feature: React.FC<{ icon: React.ReactNode; title: string; sub: string }> = ({ icon, title, sub }) => (
@@ -26,17 +24,15 @@ const Feature: React.FC<{ icon: React.ReactNode; title: string; sub: string }> =
 const Landing: React.FC = () => {
   const nav = useNavigate();
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#020407] text-white">
-      {/* hero artwork — the live intelligence command core (GlobeScene),
-          full-bleed behind the hero content. */}
-      <div className="absolute inset-0" aria-hidden>
-        <GlobeScene className="h-full w-full" />
-      </div>
-      {/* legibility: darken the left column for the headline while the command
-          core stays bright on the right; gentle darkening at the bottom so the
-          lower labels stay readable. */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#020407] from-10% via-[#020407]/55 via-34% to-transparent to-56%" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#020407] to-transparent" aria-hidden />
+    <div className="relative min-h-screen overflow-hidden bg-[#070707] text-white">
+      {/* hero artwork — full-bleed, anchored right */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-cover bg-right bg-no-repeat"
+        style={{ backgroundImage: "url(/Dispatchhero.png)" }}
+        aria-hidden
+      />
+      {/* legibility gradients: darken left for text, fade top/bottom edges */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/85 to-transparent" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#070707] to-transparent" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
 
@@ -66,18 +62,18 @@ const Landing: React.FC = () => {
 
         {/* hero body */}
         <div className="flex flex-1 items-center">
-          <div className="max-w-xl py-10">
+          <div className="max-w-2xl py-10">
             <p className="mb-6 text-sm font-semibold uppercase tracking-[0.25em] text-gold-400">Institutional Publication Infrastructure</p>
             <h1 className="font-serif text-6xl font-bold leading-[1.02] tracking-tight sm:text-7xl">
               From Information
               <br />to <span className="text-gold-400">Official Record.</span>
             </h1>
-            <p className="mt-7 max-w-md text-lg leading-relaxed text-white/60">
-              Generate briefings, board reports, policy papers, regulatory submissions and official records at sovereign scale.
+            <p className="mt-7 max-w-xl text-lg leading-relaxed text-white/60">
+              Generate briefings, board reports, policy papers, regulatory submissions, operational packages and official records at sovereign scale.
             </p>
 
             {/* trust strip */}
-            <div className="mt-10 grid max-w-xl grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-2">
+            <div className="mt-10 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-4">
               <Feature icon={<ShieldCheck />} title="Trusted" sub="by Institutions That Cannot Fail" />
               <Feature icon={<Lock />} title="Sovereign by Design" sub="Data. Residency. Operations." />
               <Feature icon={<DocFlow />} title="Governed End to End" sub="From Draft to Publication." />
@@ -85,7 +81,7 @@ const Landing: React.FC = () => {
             </div>
 
             {/* CTAs */}
-            <div className="mt-10 flex flex-wrap items-center gap-4">
+            <div className="mt-11 flex flex-wrap items-center gap-4">
               <button onClick={() => nav("/console")}
                 className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
                 Launch Dispatch
@@ -93,7 +89,7 @@ const Landing: React.FC = () => {
               </button>
               <a href="#capabilities"
                 className="inline-flex items-center rounded border border-white/20 px-7 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/40 hover:bg-white/5">
-                View Infrastructure
+                View Publication Infrastructure
               </a>
             </div>
           </div>
