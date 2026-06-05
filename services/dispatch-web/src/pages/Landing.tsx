@@ -26,7 +26,7 @@ const Feature: React.FC<{ icon: React.ReactNode; title: string; sub: string }> =
 const Landing: React.FC = () => {
   const nav = useNavigate();
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#070707] text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[#020407] text-white">
       {/* hero artwork — the live intelligence command core (GlobeScene),
           full-bleed behind the hero content. */}
       <div className="absolute inset-0" aria-hidden>

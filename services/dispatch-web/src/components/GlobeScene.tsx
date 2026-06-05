@@ -64,7 +64,7 @@ type Panel = {
 // Globe is centred right-of-centre (GLOBE_CX) so the headline owns the left
 // column. Panels ring the globe strictly OUTSIDE its disc and clear of the
 // text: two across the top, four down the right edge, two along the bottom.
-const GLOBE_CX = 0.605;
+const GLOBE_CX = 0.66;
 const GLOBE_CY = 0.52;
 const PANELS: Panel[] = [
   // top (below the nav)
@@ -74,10 +74,10 @@ const PANELS: Panel[] = [
   { id: "flow", title: "Live Deal Flow", value: "$2.7T", delta: "in tracked value", x: 0.985, y: 0.42, side: "right", hue: 1 },
   { id: "closed", title: "Closed Transactions", value: "$187.6B", delta: "realized", x: 0.985, y: 0.57, side: "right", hue: 0 },
   { id: "resp", title: "Buyer Response Analytics", value: "61.2%", delta: "engagement rate", x: 0.985, y: 0.72, side: "right", hue: 0 },
-  { id: "neg", title: "AI Negotiator", value: "+17.3%", delta: "value uplift", x: 0.93, y: 0.88, side: "right", hue: 1 },
+  { id: "neg", title: "AI Negotiator", value: "+17.3%", delta: "value uplift", x: 0.985, y: 0.86, side: "right", hue: 1 },
   // bottom
-  { id: "net", title: "Global Buyer Network", value: "58,341", delta: "verified buyers", x: 0.54, y: 0.90, side: "left", hue: 0 },
-  { id: "exp", title: "Expected Outcome Engine", value: "0.91", delta: "confidence index", x: 0.73, y: 0.90, side: "left", hue: 0 },
+  { id: "net", title: "Global Buyer Network", value: "58,341", delta: "verified buyers", x: 0.53, y: 0.90, side: "left", hue: 0 },
+  { id: "exp", title: "Expected Outcome Engine", value: "0.91", delta: "confidence index", x: 0.72, y: 0.90, side: "left", hue: 0 },
 ];
 
 const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
@@ -192,7 +192,7 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
     const draw = () => {
       const cx = w * GLOBE_CX;
       const cy = h * GLOBE_CY;
-      const R = Math.min(w, h) * 0.30;
+      const R = Math.min(w, h) * 0.275;
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
@@ -202,7 +202,7 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
 
       // ---- layer 0: background telemetry grid + far dust -------------------
       ctx.save();
-      ctx.strokeStyle = "rgba(40,110,150,0.06)";
+      ctx.strokeStyle = "rgba(40,110,150,0.045)";
       ctx.lineWidth = 1;
       const gridStep = Math.max(48, Math.min(w, h) / 12);
       for (let gx = (cx % gridStep); gx < w; gx += gridStep) {
@@ -222,21 +222,17 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
       }
       ctx.globalCompositeOperation = "source-over";
 
-      // ---- layer 1: atmospheric volumetric glow ----------------------------
+      // ---- layer 1: sharp volumetric light (not foggy atmosphere) ----------
+      // A tight, defined limb ring of light — the projection's edge — rather
+      // than a broad soft wash. Keeps the background dark for high contrast.
       ctx.globalCompositeOperation = "lighter";
-      const atmo = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R * 1.7);
-      atmo.addColorStop(0, "rgba(40,150,205,0.20)");
-      atmo.addColorStop(0.45, "rgba(30,120,180,0.10)");
-      atmo.addColorStop(1, "rgba(10,40,70,0)");
-      ctx.fillStyle = atmo;
-      ctx.beginPath(); ctx.arc(cx, cy, R * 1.7, 0, TAU); ctx.fill();
-      // bright limb halo
-      const halo = ctx.createRadialGradient(cx, cy, R * 0.95, cx, cy, R * 1.16);
-      halo.addColorStop(0, "rgba(120,225,255,0)");
-      halo.addColorStop(0.6, "rgba(120,225,255,0.16)");
-      halo.addColorStop(1, "rgba(120,225,255,0)");
+      const halo = ctx.createRadialGradient(cx, cy, R * 0.86, cx, cy, R * 1.06);
+      halo.addColorStop(0, "rgba(120,228,255,0)");
+      halo.addColorStop(0.72, "rgba(150,238,255,0.10)");
+      halo.addColorStop(0.92, "rgba(170,244,255,0.28)");
+      halo.addColorStop(1, "rgba(120,228,255,0)");
       ctx.fillStyle = halo;
-      ctx.beginPath(); ctx.arc(cx, cy, R * 1.16, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, R * 1.06, 0, TAU); ctx.fill();
       ctx.globalCompositeOperation = "source-over";
 
       // helper: rotate a unit point by globe spin (Y) then camera tilt (X)
@@ -276,9 +272,19 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
           const front = q0.depth >= 0;
           if (front !== frontPass) continue;
           const df = (q0.depth + 1) / 2;
-          const a = front ? 0.10 + 0.42 * df : 0.05 + 0.10 * df;
-          ctx.strokeStyle = `rgba(125,220,255,${a.toFixed(3)})`;
-          ctx.lineWidth = front ? 1.1 : 0.7;
+          // energy trajectory: a moving hot crest races around each ring so the
+          // line reads as flowing energy, not a static decorative curve.
+          const seg01 = (s / rg.seg + spin / TAU) % 1;
+          const crest = (reduce ? 0.3 : (t * 0.004 + ri * 0.2) % 1);
+          let pulse = Math.abs(((seg01 - crest + 1) % 1) - 0); // 0 at crest
+          pulse = Math.max(0, 1 - pulse * 6); // sharp comet head
+          const baseA = front ? 0.14 + 0.5 * df : 0.05 + 0.12 * df;
+          const a = Math.min(1, baseA + pulse * (front ? 0.85 : 0.3));
+          const bright = pulse > 0.15;
+          ctx.strokeStyle = bright
+            ? `rgba(210,250,255,${a.toFixed(3)})`
+            : `rgba(120,222,255,${a.toFixed(3)})`;
+          ctx.lineWidth = front ? (bright ? 1.7 : 1.0) : 0.7;
           ctx.beginPath(); ctx.moveTo(q0.sx, q0.sy); ctx.lineTo(q1.sx, q1.sy); ctx.stroke();
         }
         // traveling nodes on this ring
@@ -306,33 +312,39 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
       for (let ri = 0; ri < RINGS.length; ri++) drawRing(ri, false); // back halves
 
       // ---- layer 3: the particle globe -------------------------------------
-      // inner body fill so the back particles read through a tinted sphere
-      const body = ctx.createRadialGradient(cx - R * 0.25, cy - R * 0.3, R * 0.1, cx, cy, R);
-      body.addColorStop(0, "rgba(18,70,110,0.35)");
-      body.addColorStop(1, "rgba(6,24,44,0.55)");
-      ctx.fillStyle = body;
-      ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.fill();
-
+      // NO solid body fill — the sphere exists only as suspended light. The
+      // continents are dense bright particles; the ocean is a barely-there
+      // dust so there is no visible surface, only data hanging in space.
       ctx.globalCompositeOperation = "lighter";
       for (let i = 0; i < sphere.length; i++) {
         const p = sphere[i];
         const q = project(p.x, p.y, p.z);
         const df = (q.depth + 1) / 2; // 0 back → 1 front
         if (p.land) {
-          const a = 0.10 + 0.85 * df;
-          ctx.fillStyle = `rgba(130,236,255,${a.toFixed(3)})`;
-          const s = 0.7 + 1.5 * df;
+          // crisp, bright illuminated points — front face reads strongly,
+          // back face still glints through (holographic, not occluded).
+          const a = Math.min(1, 0.30 + 1.15 * df * df); // brighter core (+~40%)
+          ctx.fillStyle = `rgba(165,246,255,${a.toFixed(3)})`;
+          const s = 0.65 + 1.6 * df;
           ctx.fillRect(q.sx - s / 2, q.sy - s / 2, s, s);
         } else {
-          // ocean/grid particles — faint, see-through on the back face
-          const a = 0.03 + 0.18 * df;
-          ctx.fillStyle = `rgba(70,165,210,${a.toFixed(3)})`;
+          // ocean dust — almost invisible; just enough to imply the volume
+          const a = 0.015 + 0.09 * df * df;
+          if (a < 0.02) continue;
+          ctx.fillStyle = `rgba(70,170,215,${a.toFixed(3)})`;
           ctx.fillRect(q.sx - 0.5, q.sy - 0.5, 1, 1);
         }
       }
+      // bright core bloom at the centre — the projection's energy source
+      const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.55);
+      core.addColorStop(0, "rgba(170,244,255,0.32)");
+      core.addColorStop(0.5, "rgba(100,210,250,0.10)");
+      core.addColorStop(1, "rgba(60,170,220,0)");
+      ctx.fillStyle = core;
+      ctx.beginPath(); ctx.arc(cx, cy, R * 0.5, 0, TAU); ctx.fill();
       ctx.globalCompositeOperation = "source-over";
 
-      // ---- layer 4: surface intelligence nodes + scan sweep ----------------
+      // ---- layer 4: surface intelligence nodes + network traffic + scan ----
       ctx.globalCompositeOperation = "lighter";
       const litNodes: { sx: number; sy: number; df: number }[] = [];
       for (let i = 0; i < nodes.length; i++) {
@@ -341,65 +353,135 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
         const df = (q.depth + 1) / 2;
         if (q.depth <= 0.04) continue; // front face only
         const pulse = 0.55 + 0.45 * Math.sin(t * 0.05 + n.phase * 3);
-        const a = (0.5 + 0.5 * df) * pulse;
-        const rr = 7 * df;
+        const a = Math.min(1, (0.7 + 0.55 * df) * pulse); // ~+40% brighter
+        const rr = 8 * df;
         const g = ctx.createRadialGradient(q.sx, q.sy, 0, q.sx, q.sy, rr);
-        g.addColorStop(0, `rgba(215,250,255,${a})`);
-        g.addColorStop(0.4, `rgba(120,225,255,${a * 0.5})`);
+        g.addColorStop(0, `rgba(225,252,255,${a})`);
+        g.addColorStop(0.35, `rgba(140,235,255,${a * 0.55})`);
         g.addColorStop(1, "rgba(120,225,255,0)");
         ctx.fillStyle = g;
         ctx.beginPath(); ctx.arc(q.sx, q.sy, rr, 0, TAU); ctx.fill();
-        ctx.fillStyle = `rgba(240,254,255,${a})`;
-        ctx.beginPath(); ctx.arc(q.sx, q.sy, 1.2 * df, 0, TAU); ctx.fill();
+        ctx.fillStyle = `rgba(248,255,255,${Math.min(1, a + 0.1)})`;
+        ctx.beginPath(); ctx.arc(q.sx, q.sy, 1.4 * df, 0, TAU); ctx.fill();
         litNodes.push({ sx: q.sx, sy: q.sy, df });
       }
+      // network traffic: faint bright links between nearby front-face nodes
+      const linkMax = R * 0.6;
+      for (let i = 0; i < litNodes.length; i++) {
+        for (let j = i + 1; j < litNodes.length; j++) {
+          const dx = litNodes[i].sx - litNodes[j].sx;
+          const dy = litNodes[i].sy - litNodes[j].sy;
+          const d = Math.hypot(dx, dy);
+          if (d > linkMax) continue;
+          const a = (1 - d / linkMax) * 0.22 * Math.min(litNodes[i].df, litNodes[j].df);
+          ctx.strokeStyle = `rgba(150,235,255,${a.toFixed(3)})`;
+          ctx.lineWidth = 0.6;
+          ctx.beginPath(); ctx.moveTo(litNodes[i].sx, litNodes[i].sy); ctx.lineTo(litNodes[j].sx, litNodes[j].sy); ctx.stroke();
+        }
+      }
 
-      // scan sweep — a bright horizontal band travelling down the globe
-      const scanY = cy - R + ((reduce ? 0.5 : (t * 0.6) % (R * 2)) );
+      // holographic scan — a sharp bright line + thin trailing glow sweeping
+      // through the projection (two passes, offset, for a CRT-hologram feel)
       ctx.save();
       ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.clip();
-      const sg = ctx.createLinearGradient(0, scanY - 14, 0, scanY + 14);
-      sg.addColorStop(0, "rgba(120,225,255,0)");
-      sg.addColorStop(0.5, "rgba(150,240,255,0.22)");
-      sg.addColorStop(1, "rgba(120,225,255,0)");
-      ctx.fillStyle = sg;
-      ctx.fillRect(cx - R, scanY - 14, R * 2, 28);
+      for (let pass = 0; pass < 2; pass++) {
+        const period = R * 2;
+        const off = pass * period * 0.5;
+        const scanY = cy - R + (reduce ? period * 0.4 : ((t * 0.7 + off) % period));
+        const sg = ctx.createLinearGradient(0, scanY - 10, 0, scanY + 10);
+        sg.addColorStop(0, "rgba(150,240,255,0)");
+        sg.addColorStop(0.5, `rgba(180,248,255,${pass === 0 ? 0.16 : 0.08})`);
+        sg.addColorStop(1, "rgba(150,240,255,0)");
+        ctx.fillStyle = sg;
+        ctx.fillRect(cx - R, scanY - 10, R * 2, 20);
+        // the crisp leading edge
+        ctx.fillStyle = `rgba(205,250,255,${pass === 0 ? 0.5 : 0.22})`;
+        ctx.fillRect(cx - R, scanY, R * 2, 1);
+      }
       ctx.restore();
       ctx.globalCompositeOperation = "source-over";
 
-      // crisp limb
-      ctx.strokeStyle = "rgba(130,232,255,0.40)";
-      ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
+      // NO solid limb stroke — the edge is defined by light (halo) + particles
+      // only, so the sphere never reads as a hard rendered ball.
 
       // ---- rings: front halves (over the globe) ----------------------------
       for (let ri = 0; ri < RINGS.length; ri++) drawRing(ri, true);
 
+      // ---- bright node intersections where orbital paths cross -------------
+      // Sample each ring's front-facing screen points, then flare wherever two
+      // different rings nearly coincide — energy crossing energy.
+      ctx.globalCompositeOperation = "lighter";
+      const SAMP = 90;
+      const pts: { sx: number; sy: number; ri: number }[] = [];
+      for (let ri = 0; ri < RINGS.length; ri++) {
+        const rg = RINGS[ri];
+        const { u, v } = ringBasis[ri];
+        const spin = reduce ? 0.8 : t * rg.spin;
+        for (let s = 0; s < SAMP; s++) {
+          const a = (s / SAMP) * TAU + spin;
+          const px = (Math.cos(a) * u[0] + Math.sin(a) * v[0]) * rg.rad;
+          const py2 = (Math.cos(a) * u[1] + Math.sin(a) * v[1]) * rg.rad;
+          const pz = (Math.cos(a) * u[2] + Math.sin(a) * v[2]) * rg.rad;
+          const q = projectStatic(px, py2, pz);
+          if (q.depth < 0) continue; // front crossings only
+          pts.push({ sx: q.sx, sy: q.sy, ri });
+        }
+      }
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          if (pts[i].ri === pts[j].ri) continue;
+          const dx = pts[i].sx - pts[j].sx;
+          const dy = pts[i].sy - pts[j].sy;
+          if (dx * dx + dy * dy > 9) continue; // within ~3px = a crossing
+          const mx = (pts[i].sx + pts[j].sx) / 2;
+          const my = (pts[i].sy + pts[j].sy) / 2;
+          const tw = 0.6 + 0.4 * Math.sin(t * 0.06 + i);
+          const g = ctx.createRadialGradient(mx, my, 0, mx, my, 9);
+          g.addColorStop(0, `rgba(225,252,255,${0.95 * tw})`);
+          g.addColorStop(0.35, `rgba(150,235,255,${0.5 * tw})`);
+          g.addColorStop(1, "rgba(150,235,255,0)");
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(mx, my, 9, 0, TAU); ctx.fill();
+          ctx.fillStyle = `rgba(245,254,255,${0.9 * tw})`;
+          ctx.beginPath(); ctx.arc(mx, my, 1.3, 0, TAU); ctx.fill();
+        }
+      }
+      ctx.globalCompositeOperation = "source-over";
+
       // ---- holographic projection platform beneath -------------------------
       ctx.globalCompositeOperation = "lighter";
-      const py = cy + R * 1.18;
-      // light beam
-      const beam = ctx.createLinearGradient(0, py, 0, cy);
-      beam.addColorStop(0, "rgba(150,240,255,0.30)");
-      beam.addColorStop(1, "rgba(150,240,255,0)");
-      ctx.fillStyle = beam;
-      ctx.beginPath();
-      ctx.moveTo(cx - R * 0.16, py); ctx.lineTo(cx + R * 0.16, py);
-      ctx.lineTo(cx + R * 0.05, cy); ctx.lineTo(cx - R * 0.05, cy); ctx.closePath(); ctx.fill();
-      for (let k = 0; k < 5; k++) {
-        const rad = R * (0.35 + k * 0.22);
-        const a = 0.32 - k * 0.05;
-        ctx.strokeStyle = `rgba(135,235,255,${a})`;
+      const py = cy + R * 1.12;
+      // emanation: thin vertical light strands rising from the projector ring
+      // into the core — energy feeding the projection, not a solid cone.
+      for (let k = -2; k <= 2; k++) {
+        const sx0 = cx + k * R * 0.06;
+        const strand = ctx.createLinearGradient(0, py, 0, cy - R * 0.2);
+        const sa = 0.30 - Math.abs(k) * 0.06;
+        strand.addColorStop(0, `rgba(170,244,255,${sa})`);
+        strand.addColorStop(1, "rgba(170,244,255,0)");
+        ctx.strokeStyle = strand;
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.ellipse(cx, py, rad, rad * 0.22, 0, 0, TAU);
+        ctx.moveTo(sx0, py);
+        ctx.lineTo(cx + k * R * 0.015, cy - R * 0.2);
         ctx.stroke();
       }
-      const plat = ctx.createRadialGradient(cx, py, 0, cx, py, R * 1.1);
-      plat.addColorStop(0, "rgba(120,225,255,0.22)");
-      plat.addColorStop(1, "rgba(120,225,255,0)");
-      ctx.fillStyle = plat;
-      ctx.beginPath(); ctx.ellipse(cx, py, R * 1.1, R * 0.26, 0, 0, TAU); ctx.fill();
+      // thin energy projector rings (sharp, not a filled glow disc)
+      for (let k = 0; k < 4; k++) {
+        const rad = R * (0.42 + k * 0.26);
+        const a = 0.40 - k * 0.08;
+        ctx.strokeStyle = `rgba(160,240,255,${a})`;
+        ctx.lineWidth = k === 0 ? 1.4 : 0.8;
+        ctx.beginPath();
+        ctx.ellipse(cx, py, rad, rad * 0.20, 0, 0, TAU);
+        ctx.stroke();
+      }
+      // a tight bright focus where the projection meets the platform
+      const focus = ctx.createRadialGradient(cx, py, 0, cx, py, R * 0.5);
+      focus.addColorStop(0, "rgba(180,246,255,0.30)");
+      focus.addColorStop(1, "rgba(180,246,255,0)");
+      ctx.fillStyle = focus;
+      ctx.beginPath(); ctx.ellipse(cx, py, R * 0.5, R * 0.12, 0, 0, TAU); ctx.fill();
       ctx.globalCompositeOperation = "source-over";
 
       // ---- layer 5: telemetry connectors panel → globe ---------------------
