@@ -2,38 +2,38 @@ import React, { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 
-// Stage-based rail. Founders think in stages, not modules — so the navigation
-// mirrors the arc of a sale: Prepare → Find Buyers → Diligence → Negotiate →
-// Close. Each item maps to a real surface; facets that live inside a page
-// (Readiness, Signatures, Escrow) link to an anchor on that page.
+// Six command centers. The console is organized the way a founder runs an
+// exit — Prepare → Discover → Engage → Negotiate → Close → Wealth — with
+// Overview and Internal as bookends. Each item maps to a real surface;
+// facets that live inside a page (Signatures, Escrow) link to an anchor.
 const NAV: Array<{ to: string; label: string; group: string; scope?: string }> = [
-  { to: "/console/commander",          label: "Exit Commander",   group: "Overview" },
-  { to: "/console",                    label: "Dashboard",        group: "Overview" },
-  { to: "/console/autopilot",          label: "Autonomous Exit",  group: "Overview" },
+  { to: "/console/commander",          label: "Exit Commander",       group: "Overview" },
+  { to: "/console",                    label: "Dashboard",            group: "Overview" },
+  { to: "/console/autopilot",          label: "Autonomous Exit",      group: "Overview" },
   { to: "/console/network",            label: "Network Intelligence", group: "Overview" },
 
   { to: "/console/valuation",          label: "Valuation",        group: "Prepare" },
   { to: "/console/readiness",          label: "Readiness",        group: "Prepare" },
-  { to: "/console/exit-timing",        label: "Exit Timing",      group: "Prepare" },
+  { to: "/console/diligence-ai",       label: "Diligence",        group: "Prepare" },
   { to: "/console/investors",          label: "Cap Table",        group: "Prepare" },
+  { to: "/console/exit-timing",        label: "Exit Timing",      group: "Prepare" },
 
-  { to: "/console/intelligence",       label: "Intelligence",     group: "Find Buyers" },
-  { to: "/console/buyer-copilot",      label: "Buyer Copilot",    group: "Find Buyers" },
-  { to: "/console/buyers",             label: "Buyers",           group: "Find Buyers" },
-  { to: "/console/marketplace",        label: "Marketplace",      group: "Find Buyers" },
-  { to: "/console/banker",             label: "Outreach",         group: "Find Buyers" },
+  { to: "/console/buyer-copilot",      label: "Buyer Intelligence", group: "Discover" },
+  { to: "/console/buyers",             label: "Buyer Profiles",     group: "Discover" },
+  { to: "/console/marketplace",        label: "Marketplace",        group: "Discover" },
+  { to: "/console/intelligence",       label: "Acquisition Radar",  group: "Discover" },
 
-  { to: "/console/diligence-ai",       label: "Diligence",        group: "Diligence" },
-  { to: "/console/deal-room",          label: "Live Deal Room",   group: "Diligence" },
-  { to: "/console/data-room",          label: "Data Room",        group: "Diligence" },
-  { to: "/console/documents",          label: "Documents",        group: "Diligence" },
-  { to: "/console/nda",                label: "NDA",              group: "Diligence" },
+  { to: "/console/banker",             label: "Outreach",         group: "Engage" },
+  { to: "/console/nda",                label: "NDA",              group: "Engage" },
+  { to: "/console/pipeline",           label: "Pipeline",         group: "Engage" },
+  { to: "/console/deal-room",          label: "Live Deal Room",   group: "Engage" },
 
-  { to: "/console/pipeline",           label: "Offers",           group: "Negotiate" },
-  { to: "/console/negotiator",         label: "Negotiator",       group: "Negotiate" },
-  { to: "/console/simulator",          label: "Simulator",        group: "Negotiate" },
+  { to: "/console/negotiator",         label: "AI Banker · Offers", group: "Negotiate" },
+  { to: "/console/simulator",          label: "Scenario Simulator", group: "Negotiate" },
 
   { to: "/console/closing",            label: "Closing Center",   group: "Close" },
+  { to: "/console/data-room",          label: "Data Room",        group: "Close" },
+  { to: "/console/documents",          label: "Documents",        group: "Close" },
   { to: "/console/closing#signatures", label: "Signatures",       group: "Close" },
   { to: "/console/closing#escrow",     label: "Escrow",           group: "Close" },
 
@@ -43,8 +43,7 @@ const NAV: Array<{ to: string; label: string; group: string; scope?: string }> =
   { to: "/console/calibration",        label: "Calibration",      group: "Internal" },
 ];
 
-// Preserve the founder-stage order rather than insertion-bucketed order.
-const GROUP_ORDER = ["Overview", "Prepare", "Find Buyers", "Diligence", "Negotiate", "Close", "Wealth", "Internal"];
+const GROUP_ORDER = ["Overview", "Prepare", "Discover", "Engage", "Negotiate", "Close", "Wealth", "Internal"];
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session, signOut, has } = useAuth();
