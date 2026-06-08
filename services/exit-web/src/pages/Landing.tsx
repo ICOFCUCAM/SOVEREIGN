@@ -232,48 +232,41 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 03 · HOW EXITOS WORKS ===== */}
+      {/* ===== ROW 5 · PIPELINE / WORKFLOW (process 70% + timeline 30%) ===== */}
       <section id="platform" className="border-b border-slate-200">
-        <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <div className="flex-1">
+        <div className="mx-auto grid max-w-[1320px] gap-10 px-6 py-16 lg:grid-cols-[7fr_3fr] lg:px-10">
+          {/* left · 6 process cards */}
+          <div>
             <h2 className="font-serif text-[2rem] font-bold tracking-tight text-ink-900">Run your entire company sale from discovery to closing.</h2>
-            <div className="mt-12 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3">
               {STEPS.map((st, i) => (
                 <div key={st.title} className="relative">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-ink-900 text-white"><Glyph name={st.icon} /></div>
-                  <div className="mt-4 text-sm font-bold text-ink-900">{st.title}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-ink-900 text-white"><Glyph name={st.icon} /></div>
+                    <span className="font-mono text-[11px] font-bold text-slate-300">{String(i + 1).padStart(2, "0")}</span>
+                  </div>
+                  <div className="mt-3 text-sm font-bold text-ink-900">{st.title}</div>
                   <div className="mt-1.5 text-[12px] leading-snug text-slate-500">{st.body}</div>
-                  {i < STEPS.length - 1 && <div className="absolute right-[-10px] top-7 hidden text-slate-300 lg:block">&rarr;</div>}
                 </div>
               ))}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ===== 03B · EXCHANGE / WORKFLOW VISUALIZATION ===== */}
-      <section className="border-b border-slate-200 bg-ink-900 text-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
-          <div className="text-center">
+          {/* right · vertical Founder → Exit timeline */}
+          <div className="rounded-2xl p-6 text-white" style={{ background: "linear-gradient(180deg,#08203B,#06182E)" }}>
             <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-300">The exchange</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold tracking-tight">One pipeline, from founder to exit.</h2>
-          </div>
-          <div className="mt-12 flex flex-col items-stretch gap-3 lg:flex-row lg:items-center">
-            {EXCHANGE_FLOW.map((s, i) => (
-              <React.Fragment key={s.title}>
-                <div className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-5 text-center">
-                  <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/15 text-blue-300"><Glyph name={s.icon} /></span>
-                  <div className="mt-3 text-sm font-bold text-white">{s.title}</div>
-                  <div className="mt-1 text-[11px] leading-snug text-white/50">{s.sub}</div>
-                </div>
-                {i < EXCHANGE_FLOW.length - 1 && (
-                  <div className="flex shrink-0 items-center justify-center text-blue-300/60">
-                    <span className="hidden lg:block">&rarr;</span>
-                    <span className="lg:hidden">&darr;</span>
+            <div className="mt-1 text-sm font-bold">Founder → Exit</div>
+            <ol className="mt-5 space-y-0">
+              {EXCHANGE_FLOW.map((s, i) => (
+                <li key={s.title} className="relative flex gap-3 pb-5 last:pb-0">
+                  {i < EXCHANGE_FLOW.length - 1 && <span className="absolute left-[13px] top-7 h-full w-px bg-white/15" aria-hidden />}
+                  <span className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 ring-1 ring-blue-400/30"><Glyph name={s.icon} small /></span>
+                  <div className="pt-0.5">
+                    <div className="text-[13px] font-bold text-white">{s.title}</div>
+                    <div className="text-[10px] leading-snug text-white/50">{s.sub}</div>
                   </div>
-                )}
-              </React.Fragment>
-            ))}
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
       </section>
