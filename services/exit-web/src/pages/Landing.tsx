@@ -331,17 +331,19 @@ const Landing: React.FC = () => {
                 Real-time intelligence, buyer activity, transaction tracking, valuation insights, and market demand &mdash; on one acquisition infrastructure.
               </p>
               <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">Explore the Platform &rarr;</a>
-              <ul className="mt-7 space-y-5">
+              {/* dense signal grid — Bloomberg-style live readouts */}
+              <div className="mt-7 grid grid-cols-2 gap-2.5">
                 {COMMAND_FEATURES.map((f) => (
-                  <li key={f.title} className="flex gap-3">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><Glyph name={f.icon} small /></span>
-                    <div>
-                      <div className="text-sm font-bold text-ink-900">{f.title}</div>
-                      <div className="text-[12px] text-slate-500">{f.body}</div>
+                  <div key={f.title} className="rounded-lg border border-slate-200 bg-white p-3 transition hover:border-blue-300">
+                    <div className="flex items-center justify-between">
+                      <span className="flex h-6 w-6 items-center justify-center rounded bg-blue-50 text-blue-600"><Glyph name={f.icon} small /></span>
+                      <span className="font-mono text-[13px] font-bold text-ink-900">{f.value}</span>
                     </div>
-                  </li>
+                    <div className="mt-2 text-[12px] font-bold leading-tight text-ink-900">{f.title}</div>
+                    <div className="text-[10.5px] leading-snug text-slate-500">{f.body}</div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -355,12 +357,24 @@ const Landing: React.FC = () => {
               <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Institutional-grade<br />data rooms.</h2>
               <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-600">Secure, permissioned, and built for high-stakes transactions.</p>
               <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">Learn more &rarr;</a>
-              <div className="mt-8 grid grid-cols-3 gap-4 sm:grid-cols-6">
+              <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {DATA_ROOMS.map((d) => (
-                  <div key={d.title} className="text-center">
-                    <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-white text-ink-700 shadow-sm"><Glyph name={d.icon} /></span>
-                    <div className="mt-2.5 text-[11px] font-semibold leading-snug text-ink-800">{d.title}</div>
+                  <div key={d.title} className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition hover:border-blue-300">
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-ink-700"><Glyph name={d.icon} small /></span>
+                      <div className="text-[12px] font-semibold leading-tight text-ink-800">{d.title}</div>
+                    </div>
+                    <div className="mt-2.5 flex items-center gap-1.5 text-[9px] font-medium uppercase tracking-wide text-slate-400">
+                      <span className="flex items-center gap-1 text-emerald-600"><span className="h-1 w-1 rounded-full bg-emerald-500" /> Secured</span>
+                      <span className="text-slate-300">·</span><span>Audit trail</span>
+                    </div>
                   </div>
+                ))}
+              </div>
+              {/* security posture row */}
+              <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[11px] text-slate-500">
+                {[["lock", "Permission controls"], ["check", "Full audit trails"], ["shield", "Access logs"]].map(([ic, t]) => (
+                  <span key={t} className="flex items-center gap-1.5"><span className="text-blue-600"><Glyph name={ic} small /></span>{t}</span>
                 ))}
               </div>
             </div>
@@ -799,10 +813,12 @@ const BUYERS = [
   { name: "Thoma Bravo", kind: "Private Equity", appetite: 90, rows: [["Check Size", "$250M – $5B+"], ["Activity Score", "88/100"], ["Focus Areas", "Software, Tech, Services"]] },
 ];
 const COMMAND_FEATURES = [
-  { icon: "chart", title: "Live deal tracking", body: "from LOI to closing." },
-  { icon: "spark", title: "AI-driven valuation", body: "and offer forecasting." },
-  { icon: "users", title: "Buyer signals", body: "and intent monitoring." },
-  { icon: "fire", title: "Market heat", body: "and liquidity scores." },
+  { icon: "chart", value: "1,249", title: "Live Deal Tracking", body: "LOI to closing" },
+  { icon: "users", value: "58,341", title: "Buyer Signals", body: "intent monitoring" },
+  { icon: "spark", value: "94.7%", title: "Valuation Intelligence", body: "AI forecasting" },
+  { icon: "fire", value: "High", title: "Market Heat", body: "liquidity scores" },
+  { icon: "globe", value: "$4.2T", title: "Acquisition Demand", body: "appetite indexed" },
+  { icon: "doc", value: "3,410", title: "Data Room Activity", body: "documents in review" },
 ];
 const DATA_ROOMS = [
   { icon: "chart", title: "Financial Statements" },
