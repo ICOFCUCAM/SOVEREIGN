@@ -25,6 +25,7 @@ import BuyerPortal from "./pages/BuyerPortal";
 import Autopilot from "./pages/Autopilot";
 import Readiness from "./pages/Readiness";
 import Wealth from "./pages/Wealth";
+import BuyerCopilot from "./pages/BuyerCopilot";
 
 const Console: React.FC = () => {
   const { session } = useAuth();
@@ -36,6 +37,7 @@ const Console: React.FC = () => {
         <Route path="autopilot" element={<Autopilot />} />
         <Route path="readiness" element={<Readiness />} />
         <Route path="wealth" element={<Wealth />} />
+        <Route path="buyer-copilot" element={<BuyerCopilot />} />
         <Route path="intelligence" element={<Intelligence />} />
         <Route path="data-room" element={<DataRoom />} />
         <Route path="buyers" element={<Buyers />} />

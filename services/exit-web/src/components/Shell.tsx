@@ -15,6 +15,7 @@ const NAV: Array<{ to: string; label: string; group: string; scope?: string }> =
   { to: "/console/investors",          label: "Cap Table",        group: "Prepare" },
 
   { to: "/console/intelligence",       label: "Intelligence",     group: "Find Buyers" },
+  { to: "/console/buyer-copilot",      label: "Buyer Copilot",    group: "Find Buyers" },
   { to: "/console/buyers",             label: "Buyers",           group: "Find Buyers" },
   { to: "/console/marketplace",        label: "Marketplace",      group: "Find Buyers" },
   { to: "/console/banker",             label: "Outreach",         group: "Find Buyers" },
