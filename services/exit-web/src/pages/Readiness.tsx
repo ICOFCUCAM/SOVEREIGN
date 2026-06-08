@@ -1,9 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button, Card, SectionHeader, fmtMoney } from "../lib/ui";
-import { READINESS, READINESS_ANALYSIS } from "../lib/engines";
+import { READINESS_ANALYSIS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
-import { exitReadinessCategories } from "../lib/exit-readiness-ai";
+import { EXIT_SCORE, READINESS_BAND, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VALUE_LEFT_USD, READINESS_CATEGORIES } from "../lib/deal-context";
 
 // Exit Readiness Score — the category-defining surface. Not a generic score:
 // it ties the readiness number directly to money. Current valuation, the
@@ -14,14 +14,14 @@ import { exitReadinessCategories } from "../lib/exit-readiness-ai";
 const EFFORT_LABEL: Record<string, string> = { weeks: "~weeks", months: "~months", quarters: "~quarters" };
 
 const Readiness: React.FC = () => {
-  const score = READINESS.overallScore;
-  const current = READINESS_ANALYSIS.currentStrategicMid;
-  const potential = READINESS_ANALYSIS.projectedStrategicMid;
-  const left = Math.max(0, potential - current);
+  const score = EXIT_SCORE;
+  const current = CURRENT_VALUE_USD;
+  const potential = POTENTIAL_VALUE_USD;
+  const left = VALUE_LEFT_USD;
   const upliftPct = current > 0 ? (left / current) * 100 : 0;
   const fixes = [...READINESS_ANALYSIS.weaknesses].sort((a, b) => b.valuationUpliftUsd - a.valuationUpliftUsd);
   const topFix = fixes[0];
-  const categories = exitReadinessCategories(left).sort((a, b) => b.impactUsd - a.impactUsd);
+  const categories = [...READINESS_CATEGORIES].sort((a, b) => b.impactUsd - a.impactUsd);
 
   const scoreColor = score >= 70 ? "#34d399" : score >= 50 ? "#fbbf24" : "#f87171";
   const R = 52;
@@ -94,7 +94,7 @@ const Readiness: React.FC = () => {
                 <div className="text-[10px] uppercase tracking-wide text-white/40">/ 100</div>
               </div>
             </div>
-            <div className="mt-3 text-[12px] font-semibold uppercase tracking-wide text-white/60">{READINESS.band.replace(/_/g, " ")}</div>
+            <div className="mt-3 text-[12px] font-semibold uppercase tracking-wide text-white/60">{READINESS_BAND.replace(/_/g, " ")}</div>
           </div>
 
           {/* money cascade */}

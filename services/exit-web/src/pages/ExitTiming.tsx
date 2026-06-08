@@ -1,8 +1,9 @@
 import React from "react";
 import { Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
 import BankerTake from "../components/BankerTake";
-import { VALUATION_STRATEGIC, READINESS, READINESS_ANALYSIS, BUYERS } from "../lib/engines";
+import { READINESS_ANALYSIS, BUYERS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import { EXIT_SCORE, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD } from "../lib/deal-context";
 
 // Exit Timing Engine — most founders don't know *when* to sell. The engine
 // monitors the market signals that move valuation (multiples, deal activity,
@@ -21,8 +22,8 @@ const IMPACT_STYLE: Record<Impact, { color: string; label: string }> = {
 const EFFORT_MONTHS: Record<string, number> = { weeks: 2, months: 6, quarters: 9 };
 
 const ExitTiming: React.FC = () => {
-  const current = VALUATION_STRATEGIC.headline.mid;
-  const potential = READINESS_ANALYSIS.projectedStrategicMid;
+  const current = CURRENT_VALUE_USD;
+  const potential = POTENTIAL_VALUE_USD;
   const upliftPct = current > 0 ? Math.round((potential / current - 1) * 100) : 0;
   const growthYoy = SAMPLE_COMPANY.growth.arrGrowthYoyPct;
   const activeBuyers = BUYERS.candidates.filter((c) => c.buyer.appetite === "active").length;
@@ -38,7 +39,7 @@ const ExitTiming: React.FC = () => {
   // Score climbs as fixes mature (~+25 then +43 from base); value compounds
   // ~30%/yr (ARR growth tempered + the readiness lift).
   const baseYear = new Date().getFullYear();
-  const yearScores = [READINESS.overallScore, READINESS.overallScore + 25, READINESS.overallScore + 43].map((s) => Math.min(95, Math.round(s)));
+  const yearScores = [EXIT_SCORE, EXIT_SCORE + 22, EXIT_SCORE + 38].map((s) => Math.min(95, Math.round(s)));
   const timeline = [0, 1, 2].map((i) => ({
     year: baseYear + i,
     score: yearScores[i],

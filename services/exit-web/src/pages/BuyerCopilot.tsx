@@ -1,18 +1,9 @@
 import React from "react";
 import { Card, SectionHeader, fmtMoney } from "../lib/ui";
 import { VALUATION_STRATEGIC } from "../lib/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
+import { DEAL_BUYERS } from "../lib/deal-context";
 import BankerTake from "../components/BankerTake";
-import { runBuyerDiscovery, type BuyerCandidate } from "@exit/engines";
-
-// Anchor the buyer pool to the strategic valuation so the expected ranges and
-// opening offers line up with the rest of the console (rather than the engine's
-// raw ARR-derived implied price).
-const REPORT = runBuyerDiscovery(SAMPLE_COMPANY, {
-  impliedPriceUsd: VALUATION_STRATEGIC.headline.mid,
-  limit: 8,
-  sortBy: "expected_outcome",
-});
+import { type BuyerCandidate } from "@exit/engines";
 
 // Buyer Copilot — buyer intelligence, not a directory. For every acquirer it
 // computes the things a founder could never see: acquisition likelihood, the
@@ -100,7 +91,7 @@ const TYPE_STYLE: Record<string, string> = {
 };
 
 const BuyerCopilot: React.FC = () => {
-  const candidates = REPORT.candidates.slice(0, 8);
+  const candidates = DEAL_BUYERS.slice(0, 8);
   const top = candidates[0];
   const topD = top ? dossier(top) : null;
 

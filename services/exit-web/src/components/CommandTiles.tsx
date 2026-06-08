@@ -48,8 +48,8 @@ const CommandTiles: React.FC<CommandTilesProps> = ({
         <div className="text-3xl font-bold" style={{ color: demandColor }}>{demandLabel}</div>
       </Tile>
 
-      <Tile label="Time to exit" accent="#60a5fa"
-        sub="estimated to close">
+      <Tile label="Time to close" accent="#60a5fa"
+        sub="once a buyer is engaged">
         <div className="font-mono text-3xl font-bold text-white">{timeToExitMonths}<span className="ml-1 text-lg text-white/50">mo</span></div>
       </Tile>
     </div>

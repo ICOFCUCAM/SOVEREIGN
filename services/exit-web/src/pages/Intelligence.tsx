@@ -73,7 +73,7 @@ const Intelligence: React.FC = () => {
   // stats over the snapshot. The merge re-sorts by the same dimension
   // so live-data-bumped rankings settle correctly.
   const report = useMemo(
-    () => runBuyerDiscovery(SAMPLE_COMPANY, { limit: 20, sortBy }),
+    () => runBuyerDiscovery(SAMPLE_COMPANY, { impliedPriceUsd: VALUATION_STRATEGIC.headline.mid, limit: 20, sortBy }),
     [sortBy],
   );
   const candidates = useMemo<readonly BuyerCandidate[]>(() => {
@@ -97,7 +97,7 @@ const Intelligence: React.FC = () => {
       ].join(" ").toLowerCase();
       return tokens.every((t) => hay.includes(t));
     });
-  }, [tokens, report]);
+  }, [tokens, candidates]);
 
   const activeCount = candidates.filter((c) => c.buyer.appetite === "active").length;
   const avgProb = candidates.length > 0
