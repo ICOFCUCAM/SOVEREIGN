@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Button, Card, Kpi, SectionHeader, timeAgo } from "../lib/ui";
 import { SAMPLE_NDAS, NDA_ROSTER } from "../lib/engines";
 import { evaluateNdaStatus, generateBreachNotice, type NdaInstance, type NdaState } from "@exit/engines";
+import BankerTake from "../components/BankerTake";
 
 const STATUS_STYLE: Record<NdaState, string> = {
   active:            "bg-deal-600/20 text-deal-300",
@@ -51,6 +52,7 @@ const TIER_STYLE: Record<BuyerTrust["tier"], string> = {
 const Nda: React.FC = () => {
   const roster = NDA_ROSTER;
   const ndas = SAMPLE_NDAS;
+  const verifiedCount = ndas.filter((n) => buyerTrust(n, evaluateNdaStatus(n)).tier === "Verified").length;
   const [openId, setOpenId] = useState<string | null>(null);
 
   const openNda = useMemo<NdaInstance | null>(
@@ -79,6 +81,16 @@ const Nda: React.FC = () => {
         title="NDA &amp; Buyer Trust"
         description="The NDA is the first gate of buyer qualification — not just a document. Every counterparty earns a Buyer Trust Score from four verification gates before data-room access is granted."
         actions={<><Button variant="ghost">Templates</Button><Button>Issue NDA</Button></>}
+      />
+
+      <BankerTake
+        next={roster.pending > 0
+          ? <>Chase countersignatures on the <span className="text-white">{roster.pending} pending NDA{roster.pending === 1 ? "" : "s"}</span> to lift each buyer into the room.</>
+          : <>All NDAs executed — qualification gates are the gating step now.</>}
+        stake={<><span className="font-mono font-bold text-deal-300">{verifiedCount}</span> fully-verified buyer{verifiedCount === 1 ? "" : "s"} cleared for the data room; {roster.active} active.</>}
+        inaction={<>An unqualified buyer in the data room is an information leak and a wasted slot in your process.</>}
+        buyer={<>Pursue <span className="text-white">Verified-tier</span> buyers first — they've cleared all four trust gates.</>}
+        automate={<>ExitOS scores every counterparty on four verification gates and gates data-room access automatically.</>}
       />
 
       {(() => {

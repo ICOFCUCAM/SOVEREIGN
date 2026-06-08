@@ -4,6 +4,7 @@ import { VALUATION_STRATEGIC } from "../lib/engines";
 import { compareOutcomes, runBuyerDiscovery, type BuyerCandidate } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { fetchBuyerStats, mergeLiveStatsIntoCandidates, type BuyerLiveStat } from "../lib/buyer-stats";
+import BankerTake from "../components/BankerTake";
 
 // Acquisition Intelligence Engine surface — wired to runBuyerDiscovery.
 // Free-text refinement filters the engine output client-side.
@@ -109,6 +110,17 @@ const Intelligence: React.FC = () => {
         title="Acquisition Intelligence Engine"
         description={`Ranked against an implied price of ${fmtMoney(VALUATION_STRATEGIC.headline.mid)}. Probability = sector × model × check × geography × activity × M&A track record (EDGAR 8-K + Wikidata).`}
       />
+
+      {candidates[0] && (
+        <BankerTake
+          next={<>Open conversations with the <span className="text-white">{activeCount} active</span> acquirer{activeCount === 1 ? "" : "s"}, lead with the top-ranked fit.</>}
+          stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(candidates[0].expectedOutcome.expectedClosingUsd)}</span> expected take-home from the best-fit buyer.</>}
+          inaction={<>Appetite windows close — active acquirers redeploy capital into the next target while you wait.</>}
+          buyer={<><span className="text-white">{candidates[0].buyer.name}</span> — {(candidates[0].probability * 100).toFixed(0)}% match, {candidates[0].buyer.appetite} appetite.</>}
+          automate={<>ExitOS scores every buyer on live EDGAR/Wikidata signals and drafts the personalized intro.</>}
+          cta={{ label: "Hand it to the banker", to: "/console/banker" }}
+        />
+      )}
 
       {(() => {
         const tally = { verified: 0, unverified: 0, estimated: 0 };

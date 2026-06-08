@@ -4,6 +4,7 @@ import { runStrategySimulator, runValuation, type BuyerType, type CompanyProfile
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { VALUATION_STRATEGIC } from "../lib/engines";
 import { emitTelemetry } from "../lib/telemetry";
+import BankerTake from "../components/BankerTake";
 
 // ExitOS Scenario Engine — the founder simulates futures. The baseline
 // trajectory is whatever the founder inputs describe today; each scenario
@@ -240,6 +241,16 @@ const Simulator: React.FC = () => {
         kicker="Module 10 · Decision Engine"
         title="ExitOS Scenario Engine"
         description="Define today's trajectory, then simulate futures. Wait six months, hit $25M ARR, strip the earnout, bring in a marquee strategic — each scenario re-runs the valuation and strategy engines and diffs the outcome against your baseline."
+      />
+
+      <BankerTake
+        next={<>Stress-test the plan before you commit — model waiting, scaling to $25M ARR, or a marquee entrant.</>}
+        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(baseline.sim.expectedRealizedValueUsd)}</span> expected realized on today's baseline trajectory.</>}
+        inaction={<>The default path is rarely the optimal one — unexamined timing and structure leave value unmodeled.</>}
+        buyer={baseline.sim.recommendedBuyers[0]
+          ? <><span className="text-white">{baseline.sim.recommendedBuyers[0].buyer.name}</span> leads the baseline set at {(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}% close.</>
+          : <>No buyers clear the baseline constraints — loosen them to rebuild the set.</>}
+        automate={<>ExitOS re-runs valuation and strategy for every scenario and diffs the outcome against your baseline.</>}
       />
 
       <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
 import { DILIGENCE, VALUATION_STRATEGIC } from "../lib/engines";
 import { listDocuments, uploadDocument, fmtBytes, type DataRoomDocument, type RoomKind } from "../lib/data-room";
+import BankerTake from "../components/BankerTake";
 
 // Completeness model — buyers care about how complete each package is, not how
 // many files were uploaded. Completeness = uploaded ÷ required specs (capped),
@@ -81,6 +82,7 @@ const DataRoom: React.FC = () => {
   });
   const overallPct = perPkg.length ? Math.round(perPkg.reduce((s, p) => s + p.pct, 0) / perPkg.length) : 0;
   const atRiskUsd = perPkg.reduce((s, p) => s + p.impact, 0);
+  const worstPkg = perPkg.filter((p) => p.missing > 0).sort((a, b) => b.impact - a.impact)[0];
   const activePkg = perPkg.find((p) => p.kind === activeKind);
   // missing required artifacts for the active package
   const uploadedNames = new Set(docsForActive.map((d) => d.filename.toLowerCase()));
@@ -112,6 +114,17 @@ const DataRoom: React.FC = () => {
           {error}
         </div>
       )}
+
+      <BankerTake
+        next={worstPkg
+          ? <>Upload the <span className="text-white">{worstPkg.missing} missing artifact{worstPkg.missing === 1 ? "" : "s"}</span> in {worstPkg.title} — the biggest gap in the room.</>
+          : <>Room is complete — keep it current as new diligence requests land.</>}
+        stake={<><span className="font-mono font-bold text-red-300">-{fmtMoney(atRiskUsd)}</span> at risk while gaps stay open · {overallPct}% complete.</>}
+        inaction={<>Every empty package lets a buyer discount the bid or stall in diligence until it's filled.</>}
+        buyer={<>A buyer in diligence probes the weakest package first{worstPkg ? <> — <span className="text-white">{worstPkg.title}</span></> : null}.</>}
+        automate={<>ExitOS maps every engine-required artifact, scores completeness and prices the dollar impact of each gap.</>}
+        cta={{ label: "Run the risk scan", to: "/console/diligence-ai" }}
+      />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi label="Data room completeness" value={`${overallPct}%`} sub={`${requiredArtifacts} required specs across ${DILIGENCE.documents.length} packages`} accent={overallPct >= 80 ? "#34d399" : overallPct >= 50 ? "#fbbf24" : "#f87171"} />

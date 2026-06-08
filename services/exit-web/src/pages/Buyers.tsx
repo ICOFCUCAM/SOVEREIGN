@@ -3,6 +3,7 @@ import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
 import { BUYERS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import type { BuyerCandidate } from "@exit/engines";
+import BankerTake from "../components/BankerTake";
 
 // Buyer Marketplace — buyer profile cards (not a directory). Each card surfaces
 // the signals a founder actually decides on: interest level, appetite, average
@@ -65,6 +66,22 @@ const Buyers: React.FC = () => {
         description="Buyer profiles ranked against your company — interest, appetite, deal size, speed and founder-friendliness at a glance. Generate a warm introduction in one click."
         actions={<Button variant="ghost">Filter</Button>}
       />
+
+      {candidates[0] && (() => {
+        const top = candidates[0];
+        const it = interest(top);
+        const topCheck = (top.buyer.checkSizeLowUsd + top.buyer.checkSizeHighUsd) / 2;
+        return (
+          <BankerTake
+            next={<>Fire a warm intro to the hottest buyer and open the conversation this week.</>}
+            stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(topCheck)}</span> typical check from {top.buyer.name}; {activeBucket.length} active mandate{activeBucket.length === 1 ? "" : "s"} in play.</>}
+            inaction={<>Hot interest cools — buyers redeploy and the warm window closes without a touch.</>}
+            buyer={<><span className="text-white">{top.buyer.name}</span> — {it.label.toLowerCase()} interest at {it.pct}%, {top.buyer.buyerType.replace(/_/g, " ")}.</>}
+            automate={<>ExitOS drafts a personalized warm introduction for each buyer and routes it through the banker.</>}
+            cta={{ label: "Send via AI Banker", to: "/console/banker" }}
+          />
+        );
+      })()}
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi label="Active mandates"     value={String(activeBucket.length)} sub="recent-12mo activity" accent="#34d399" />

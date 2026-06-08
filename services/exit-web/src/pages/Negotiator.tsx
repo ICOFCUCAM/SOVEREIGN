@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
 import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_STRATEGIC } from "../lib/engines";
+import BankerTake from "../components/BankerTake";
 
 const REC_STYLE: Record<string, string> = {
   accept:  "bg-deal-600/20 text-deal-300 ring-deal-400/40",
@@ -64,6 +65,17 @@ const Negotiator: React.FC = () => {
         description={`Evaluating ${OFFER_EVALUATIONS.length} active offers against the founder's reservation lines (floor ${fmtMoney(RESERVATION_LINES.minHeadlinePriceUsd)}; min cash ${(RESERVATION_LINES.minCashPct * 100).toFixed(0)}%; max earnout ${(RESERVATION_LINES.maxEarnoutPct * 100).toFixed(0)}%).`}
         actions={<><Button variant="ghost">Edit reservation lines</Button><Button>Generate counter</Button></>}
       />
+
+      {active && counter && (
+        <BankerTake
+          next={NEGOTIATION_STATE.nextMove}
+          stake={<>Counter at <span className="font-mono font-bold text-deal-300">{fmtMoney(counter.counterPrice)}</span> — <span className="text-deal-300">+{counter.upliftPct.toFixed(0)}%</span> on the {fmtMoney(active.offer.headlinePriceUsd)} bid.</>}
+          inaction={<>Accepting the first bid leaves the strategic premium on the table; leverage is {NEGOTIATION_STATE.leverage}.</>}
+          buyer={<>Lead with <span className="text-white">{active.offer.buyerName}</span> — your strongest bid at {active.score.toFixed(0)}/100.</>}
+          automate={<>ExitOS scores every offer, drafts the counter and writes the ready-to-send response for you.</>}
+          cta={{ label: "Draft the response", onClick: () => setDraftOpen(true) }}
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi label="Active offers"    value={String(NEGOTIATION_STATE.activeOffers)} sub={`Stage: ${NEGOTIATION_STATE.stage}`} />

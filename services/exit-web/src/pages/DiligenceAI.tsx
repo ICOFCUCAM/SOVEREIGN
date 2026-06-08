@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Button, Card, Kpi, SectionHeader } from "../lib/ui";
-import { DILIGENCE } from "../lib/engines";
+import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { DILIGENCE, VALUATION_STRATEGIC } from "../lib/engines";
+import BankerTake from "../components/BankerTake";
 
 // Due Diligence AI — inspects the diligence package and surfaces risks before
 // buyers find them. Bound to runDueDiligence (@exit/engines): red flags become
@@ -35,6 +36,17 @@ const DiligenceAI: React.FC = () => {
         title="Due Diligence AI"
         description="Inspects the diligence package and flags legal, financial, customer-concentration and compliance risks before a buyer discovers them — with the critical questions each acquirer will ask."
         actions={<Button>Re-scan package</Button>}
+      />
+
+      <BankerTake
+        next={high > 0
+          ? <>Resolve the <span className="text-white">{high} high-severity finding{high === 1 ? "" : "s"}</span> before you grant any buyer data-room access.</>
+          : <>No high-severity risks — package is clean enough to open to buyers.</>}
+        stake={<>A <span className="font-mono font-bold text-deal-300">{fmtMoney(VALUATION_STRATEGIC.headline.mid)}</span> valuation is what unresolved risk discounts.</>}
+        inaction={<>Buyers who find these in diligence retrade or walk — surfacing them first protects the price.</>}
+        buyer={<>Clear the high-severity findings — they're the gaps a buyer's analyst attacks first.</>}
+        automate={<>ExitOS scans the package like a hostile analyst and classifies every risk by severity and category.</>}
+        cta={{ label: "Open the data room", to: "/console/data-room" }}
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

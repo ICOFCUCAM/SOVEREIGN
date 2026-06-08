@@ -4,6 +4,7 @@ import {
   CAPTABLE_ANALYSIS, CAPTABLE_SIGNATORY, CAPTABLE_DRAGALONG,
   SAMPLE_CAPTABLE, OFFER_WATERFALLS, SAMPLE_OFFERS, fmt,
 } from "../lib/engines";
+import BankerTake from "../components/BankerTake";
 
 const ROLE_STYLE: Record<string, string> = {
   founder:        "text-deal-300",
@@ -42,6 +43,18 @@ const Investors: React.FC = () => {
         title="Investor CRM · Cap-table"
         description="Cap-table-aware relationship graph. Board, leads, observers, signatories, drag-along holdouts and per-offer founder waterfall — all in one stack."
         actions={<Button>Add stakeholder</Button>}
+      />
+
+      <BankerTake
+        next={signatory.meetsThreshold
+          ? <>Keep signatory coverage locked and pre-clear the drag-along before signing.</>
+          : <>Secure the <span className="text-white">{drag.holdouts.length} drag-along holdout{drag.holdouts.length === 1 ? "" : "s"}</span> to clear the {Math.round(signatory.coverageOfShares * 100)}% threshold.</>}
+        stake={<><span className="font-mono font-bold text-deal-300">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span> net to founders on the {selectedOffer.buyerName} offer (after the preference stack).</>}
+        inaction={<>Holdouts and missing signatures can block or delay the close after terms are agreed.</>}
+        buyer={drag.holdouts.length > 0
+          ? <>Chase the holdouts: <span className="text-white">{drag.holdouts.map((h) => h.name).join(", ")}</span>.</>
+          : <>Coverage met — every required signatory is aligned.</>}
+        automate={<>ExitOS runs the waterfall per offer, tracks signatory coverage and flags drag-along gaps automatically.</>}
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

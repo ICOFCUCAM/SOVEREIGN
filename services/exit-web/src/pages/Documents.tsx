@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader } from "../lib/ui";
-import { useMemorandum } from "../lib/engines";
+import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { useMemorandum, VALUATION_STRATEGIC } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
+import BankerTake from "../components/BankerTake";
 
 // AI Red Team — reads the generated document like a hostile buyer's analyst.
 // It scans every section for numeric claims (growth, margin, retention, ARR,
@@ -95,6 +96,16 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
         title="Document Generator"
         description="Term sheets, LOIs, SPAs, CIMs and buyer teasers — generated from the company profile and the valuation, readiness, buyer and diligence engines."
         actions={<Button variant="ghost">Library</Button>}
+      />
+
+      <BankerTake
+        next={flags.length > 0
+          ? <>Reconcile the <span className="text-white">{flags.length} Red Team flag{flags.length === 1 ? "" : "s"}</span> before this document reaches a buyer.</>
+          : <>This draft is defensible — issue it to the process.</>}
+        stake={<>A <span className="font-mono font-bold text-deal-300">{fmtMoney(VALUATION_STRATEGIC.headline.mid)}</span> outcome hinges on a narrative buyers can't pick apart.</>}
+        inaction={<>Every unreconciled claim is a retrade lever a buyer's analyst finds in diligence.</>}
+        buyer={<>The buyer's analyst reads this adversarially — close the gaps before they do.</>}
+        automate={<>ExitOS generates each document from the engines and red-teams it against your real financials.</>}
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

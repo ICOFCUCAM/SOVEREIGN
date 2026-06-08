@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
 import { LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES, useMemorandum } from "../lib/engines";
+import BankerTake from "../components/BankerTake";
 
 // Exit Marketplace — "Become the banker." Most founders never hire a
 // banker because bankers are expensive; ExitOS does the banker's job.
@@ -81,6 +82,19 @@ const Marketplace: React.FC = () => {
         kicker="Module 11 · Marketplace"
         title="Exit Marketplace"
         description="Most founders never hire a banker — because bankers are expensive. ExitOS is the banker. Publish once and the operating system runs the entire sell-side process for you."
+      />
+
+      <BankerTake
+        next={phase === "done"
+          ? <>You're live — review the {matches.length} buyers entering outreach and approve the first conversations.</>
+          : <>Publish the opportunity and let ExitOS run the sell-side process end to end.</>}
+        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(listing.askingPriceUsd.mid)}</span> asking · band {fmtMoney(listing.askingPriceUsd.low)}–{fmtMoney(listing.askingPriceUsd.high)}.</>}
+        inaction={<>Without a live process, qualified buyers never learn you're sellable — and bankers charge 1–2% to run it.</>}
+        buyer={matches[0]
+          ? <><span className="text-white">{matches[0].buyerName}</span> — {(matches[0].matchScore * 100).toFixed(0)}% match, top of {matches.length}.</>
+          : "No matches yet — publish to surface the buyer set."}
+        automate={<>One click writes the teaser and CIM, anonymizes the data, identifies buyers and starts outreach.</>}
+        cta={{ label: phase === "done" ? "Re-run" : "Publish Opportunity", onClick: phase === "done" ? reset : publish }}
       />
 
       {/* ── Become the banker · Publish Opportunity ─────────────── */}
