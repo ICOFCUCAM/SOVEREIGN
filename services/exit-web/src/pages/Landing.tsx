@@ -192,12 +192,20 @@ const Landing: React.FC = () => {
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-[1320px] px-6 py-12 lg:px-10">
           <div className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">The acquisition ecosystem</div>
-          <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
-            {ECOSYSTEM.map((e) => (
-              <div key={e.label} className="flex flex-col items-center text-center">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600"><Glyph name={e.icon} small /></span>
-                <div className="mt-2.5 text-[12px] font-semibold text-ink-800">{e.label}</div>
-              </div>
+          {/* horizontal institutional network — nodes joined by connecting lines */}
+          <div className="mt-8 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center">
+            {ECOSYSTEM.map((e, i) => (
+              <React.Fragment key={e.label}>
+                <div className="group flex flex-1 flex-col items-center rounded-xl border border-slate-200 bg-white px-3 py-4 text-center transition hover:border-blue-300 hover:shadow-sm">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 ring-1 ring-blue-100"><Glyph name={e.icon} small /></span>
+                  <div className="mt-2.5 text-[12px] font-semibold text-ink-800">{e.label}</div>
+                </div>
+                {i < ECOSYSTEM.length - 1 && (
+                  <div className="flex shrink-0 items-center justify-center text-blue-300">
+                    <span className="hidden h-px w-6 bg-blue-200 lg:block" /><span className="px-1 lg:px-0">&rarr;</span><span className="hidden h-px w-6 bg-blue-200 lg:block" />
+                  </div>
+                )}
+              </React.Fragment>
             ))}
           </div>
           <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-slate-200 sm:grid-cols-4">
@@ -440,31 +448,29 @@ const Landing: React.FC = () => {
 
       {/* ===== 9B · WHY FOUNDERS LOSE MILLIONS ===== */}
       <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
-          <div className="grid items-start gap-10 lg:grid-cols-2">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">The cost of running blind</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Why founders lose millions on exit.</h2>
-              <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
-                A company is sold once. Most founders run that process with a fraction of the market in the room — and the spread shows up in the final number.
-              </p>
+        <div className="mx-auto max-w-[1100px] px-6 py-16 lg:px-10">
+          <div className="text-center">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">The cost of running blind</div>
+            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Why founders lose millions on exit.</h2>
+          </div>
+          {/* comparison matrix: Traditional vs ExitOS */}
+          <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+            <div className="grid grid-cols-[1.1fr_1fr_1fr]">
+              <div className="bg-slate-50 px-5 py-4" />
+              <div className="bg-slate-100 px-5 py-4 text-center text-[12px] font-bold uppercase tracking-wide text-slate-500">Traditional Sale</div>
+              <div className="bg-ink-900 px-5 py-4 text-center text-[12px] font-bold uppercase tracking-wide text-white">With ExitOS</div>
             </div>
-            <div className="grid gap-px overflow-hidden rounded-2xl bg-slate-200 sm:grid-cols-2">
-              {LOSSES.map((l) => (
-                <div key={l.problem} className="bg-white p-5">
-                  <div className="flex items-center gap-2 text-[12px] font-semibold text-red-500">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-50"><Glyph name="x" small /></span>
-                    Most founders
-                  </div>
-                  <div className="mt-2 text-[13px] font-medium text-ink-800">{l.problem}</div>
-                  <div className="mt-3 flex items-center gap-2 text-[12px] font-semibold text-blue-600">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-50"><Glyph name="check" small /></span>
-                    With ExitOS
-                  </div>
-                  <div className="mt-1.5 text-[13px] text-slate-600">{l.fix}</div>
+            {LOSSES.map((l, i) => (
+              <div key={l.problem} className={"grid grid-cols-[1.1fr_1fr_1fr] " + (i % 2 ? "bg-white" : "bg-slate-50/40")}>
+                <div className="flex items-center px-5 py-4 text-[13px] font-semibold text-ink-800">{l.dimension}</div>
+                <div className="flex items-center gap-2 border-l border-slate-100 px-5 py-4 text-[12.5px] text-slate-500">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500"><Glyph name="x" small /></span>{l.problem}
                 </div>
-              ))}
-            </div>
+                <div className="flex items-center gap-2 border-l border-slate-100 bg-blue-50/30 px-5 py-4 text-[12.5px] font-medium text-ink-800">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600"><Glyph name="check" small /></span>{l.fix}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -605,10 +611,10 @@ const EXCHANGE_FLOW = [
 ];
 // why founders lose millions (problem → fix)
 const LOSSES = [
-  { problem: "Talk to too few buyers", fix: "Run a full competitive process across 58,000+ verified acquirers." },
-  { problem: "Enter negotiations unprepared", fix: "AI-modelled valuation, comps and reservation lines before the first call." },
-  { problem: "Lose leverage mid-process", fix: "Live buyer signals and parallel offers keep tension in your favour." },
-  { problem: "Accept discounted offers", fix: "Offer optimisation surfaces the premium left on the table." },
+  { dimension: "Buyer reach", problem: "A handful of known contacts", fix: "Full process across 58,000+ verified acquirers" },
+  { dimension: "Preparation", problem: "Negotiate unprepared", fix: "AI valuation, comps and reservation lines up front" },
+  { dimension: "Leverage", problem: "Leverage erodes mid-process", fix: "Live signals + parallel offers hold tension" },
+  { dimension: "Final price", problem: "Accept discounted offers", fix: "Offer optimisation captures the premium" },
 ];
 // proof — representative transactions
 const CASE_STUDIES = [
