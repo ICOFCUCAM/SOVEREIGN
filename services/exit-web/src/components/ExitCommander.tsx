@@ -33,13 +33,15 @@ const ExitCommander: React.FC<ExitCommanderProps> = ({
   const name = founderName.charAt(0).toUpperCase() + founderName.slice(1);
   return (
     <div className="mb-8 overflow-hidden rounded-2xl border border-deal-500/30 bg-gradient-to-br from-deal-600/12 via-ink-800/60 to-ink-800/60">
-      <div className="flex items-center gap-2 border-b border-white/10 px-6 py-3">
+      <div className="flex items-center gap-2.5 border-b border-white/10 px-6 py-3">
         <span className="relative inline-flex h-7 w-7 items-center justify-center rounded-lg bg-deal-600/30 text-[11px] font-bold text-deal-200 ring-1 ring-deal-400/40">
-          AI
+          CB
           <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-ink-800 bg-deal-400" />
         </span>
-        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-deal-300">AI Exit Commander</span>
-        <span className="text-[11px] text-white/35">· live</span>
+        <div className="leading-tight">
+          <div className="text-[12px] font-bold tracking-tight text-white">Chief Investment Banker</div>
+          <div className="text-[9px] uppercase tracking-[0.18em] text-white/40">Powered by ExitOS Intelligence · live</div>
+        </div>
       </div>
 
       <div className="grid gap-0 lg:grid-cols-[1.6fr_1fr]">

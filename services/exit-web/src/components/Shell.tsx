@@ -8,7 +8,7 @@ import { Toast } from "../lib/ui";
 // Overview and Internal as bookends. Each item maps to a real surface;
 // facets that live inside a page (Signatures, Escrow) link to an anchor.
 const NAV: Array<{ to: string; label: string; group: string; scope?: string }> = [
-  { to: "/console/commander",          label: "Exit Commander",       group: "Overview" },
+  { to: "/console/commander",          label: "Chief Investment Banker", group: "Overview" },
   { to: "/console",                    label: "Dashboard",            group: "Overview" },
   { to: "/console/autopilot",          label: "Autonomous Exit",      group: "Overview" },
   { to: "/console/network",            label: "Network Intelligence", group: "Overview" },
