@@ -279,7 +279,7 @@ const Landing: React.FC = () => {
             <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">View all buyers &rarr;</a>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {BUYERS.map((b) => (
-                <div key={b.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div key={b.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md">
                   <div className="flex items-center gap-2.5">
                     <Mark name={b.name} />
                     <div>
@@ -287,9 +287,19 @@ const Landing: React.FC = () => {
                       <div className="text-[10px] text-slate-400">{b.kind}</div>
                     </div>
                   </div>
-                  <dl className="mt-4 space-y-2 text-[11px]">
+                  {/* appetite meter */}
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="text-slate-400">Acquisition Appetite</span>
+                      <span className="font-semibold text-blue-600">{b.appetite >= 90 ? "Very High" : "High"}</span>
+                    </div>
+                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-600" style={{ width: `${b.appetite}%` }} />
+                    </div>
+                  </div>
+                  <dl className="mt-3 space-y-2 text-[11px]">
                     {b.rows.map((r) => (
-                      <div key={r[0]} className="flex items-baseline justify-between gap-2 border-t border-slate-100 pt-2 first:border-0 first:pt-0">
+                      <div key={r[0]} className="flex items-baseline justify-between gap-2 border-t border-slate-100 pt-2">
                         <dt className="text-slate-400">{r[0]}</dt>
                         <dd className="text-right font-semibold text-ink-800">{r[1]}</dd>
                       </div>
@@ -471,16 +481,17 @@ const Landing: React.FC = () => {
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-3">
             {CASE_STUDIES.map((c) => (
-              <div key={c.name} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="inline-block rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">{c.sector}</div>
-                <div className="mt-4 font-serif text-3xl font-bold text-ink-900">{c.value}</div>
-                <div className="mt-1 text-[12px] uppercase tracking-wide text-slate-400">Exit value</div>
-                <div className="mt-4 border-t border-slate-100 pt-4 text-sm font-bold text-ink-900">{c.name}</div>
-                <div className="mt-3 grid grid-cols-2 gap-3 text-[11px]">
-                  <div><div className="text-slate-400">Buyers engaged</div><div className="font-semibold text-ink-800">{c.buyers}</div></div>
-                  <div><div className="text-slate-400">Premium captured</div><div className="font-semibold text-blue-600">{c.premium}</div></div>
-                  <div><div className="text-slate-400">Time to close</div><div className="font-semibold text-ink-800">{c.time}</div></div>
-                  <div><div className="text-slate-400">Acquirer</div><div className="font-semibold text-ink-800">{c.buyer}</div></div>
+              <div key={c.name} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">{c.sector}</div>
+                <div className="mt-4 text-[11px] font-medium uppercase tracking-wide text-slate-500">{c.name} &mdash; acquired by</div>
+                <div className="mt-1 text-base font-bold text-ink-900">{c.buyer}</div>
+                <div className="mx-auto my-5 h-px w-12 bg-slate-200" />
+                <div className="font-serif text-4xl font-bold text-ink-900">{c.value}</div>
+                <div className="mt-1 text-[11px] uppercase tracking-[0.2em] text-slate-400">Transaction Value</div>
+                <div className="mt-6 grid grid-cols-3 gap-2 border-t border-slate-100 pt-5 text-[11px]">
+                  <div><div className="font-serif text-lg font-bold text-blue-600">{c.premium}</div><div className="mt-0.5 text-slate-400">Premium</div></div>
+                  <div><div className="font-serif text-lg font-bold text-ink-900">{c.buyers}</div><div className="mt-0.5 text-slate-400">Buyers</div></div>
+                  <div><div className="font-serif text-lg font-bold text-ink-900">{c.time}</div><div className="mt-0.5 text-slate-400">To close</div></div>
                 </div>
               </div>
             ))}
@@ -775,11 +786,11 @@ const STEPS = [
   { icon: "lock", title: "Closing & Payout", body: "Streamline closing, documents, and funds transfer." },
 ];
 const BUYERS = [
-  { name: "Microsoft", kind: "Enterprise Software", rows: [["Acquisition Appetite", "Very High"], ["Check Size", "$100M – $2B+"], ["Activity Score", "95/100"], ["Focus Areas", "AI, Cloud, DevTools"]] },
-  { name: "Salesforce", kind: "CRM / AI / Data", rows: [["Acquisition Appetite", "Very High"], ["Check Size", "$50M – $1.5B+"], ["Activity Score", "92/100"], ["Focus Areas", "AI, Data, Automation"]] },
-  { name: "SAP", kind: "Enterprise Software", rows: [["Acquisition Appetite", "High"], ["Check Size", "$80M – $1.5B+"], ["Activity Score", "90/100"], ["Focus Areas", "Enterprise, Cloud, Data"]] },
-  { name: "Oracle", kind: "Cloud / Infrastructure", rows: [["Acquisition Appetite", "High"], ["Check Size", "$100M – $2B+"], ["Activity Score", "88/100"], ["Focus Areas", "Cloud, Infrastructure, AI"]] },
-  { name: "Thoma Bravo", kind: "Private Equity", rows: [["Acquisition Appetite", "Very High"], ["Check Size", "$250M – $5B+"], ["Activity Score", "88/100"], ["Focus Areas", "Software, Tech, Services"]] },
+  { name: "Microsoft", kind: "Enterprise Software", appetite: 95, rows: [["Check Size", "$100M – $2B+"], ["Activity Score", "95/100"], ["Focus Areas", "AI, Cloud, DevTools"]] },
+  { name: "Salesforce", kind: "CRM / AI / Data", appetite: 92, rows: [["Check Size", "$50M – $1.5B+"], ["Activity Score", "92/100"], ["Focus Areas", "AI, Data, Automation"]] },
+  { name: "SAP", kind: "Enterprise Software", appetite: 84, rows: [["Check Size", "$80M – $1.5B+"], ["Activity Score", "90/100"], ["Focus Areas", "Enterprise, Cloud, Data"]] },
+  { name: "Oracle", kind: "Cloud / Infrastructure", appetite: 82, rows: [["Check Size", "$100M – $2B+"], ["Activity Score", "88/100"], ["Focus Areas", "Cloud, Infrastructure, AI"]] },
+  { name: "Thoma Bravo", kind: "Private Equity", appetite: 90, rows: [["Check Size", "$250M – $5B+"], ["Activity Score", "88/100"], ["Focus Areas", "Software, Tech, Services"]] },
 ];
 const COMMAND_FEATURES = [
   { icon: "chart", title: "Live deal tracking", body: "from LOI to closing." },
