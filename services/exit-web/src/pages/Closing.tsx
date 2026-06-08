@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, fmtMoney, preview } from "../lib/ui";
 import { DILIGENCE, OFFER_EVALUATIONS } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -78,7 +78,7 @@ const Closing: React.FC = () => {
         kicker="Module 10 · Operator"
         title="Deal Closing Center"
         description="Signature orchestration, escrow choreography, regulatory filings, share-transfer mechanics — the closing checklist that doesn't drop."
-        actions={<><Button variant="ghost">Print checklist</Button><Button>Closing call</Button></>}
+        actions={<><Button variant="ghost" onClick={() => window.print()}>Print checklist</Button><Button onClick={preview}>Closing call</Button></>}
       />
 
       <BankerTake

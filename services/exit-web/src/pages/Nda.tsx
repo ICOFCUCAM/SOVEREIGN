@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, timeAgo } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, timeAgo, preview } from "../lib/ui";
 import { SAMPLE_NDAS, NDA_ROSTER } from "../lib/engines";
 import { evaluateNdaStatus, generateBreachNotice, type NdaInstance, type NdaState } from "@exit/engines";
 import BankerTake from "../components/BankerTake";
@@ -80,7 +80,7 @@ const Nda: React.FC = () => {
         kicker="Module 07 · Workspace"
         title="NDA &amp; Buyer Trust"
         description="The NDA is the first gate of buyer qualification — not just a document. Every counterparty earns a Buyer Trust Score from four verification gates before data-room access is granted."
-        actions={<><Button variant="ghost">Templates</Button><Button>Issue NDA</Button></>}
+        actions={<><Button variant="ghost" onClick={preview}>Templates</Button><Button onClick={preview}>Issue NDA</Button></>}
       />
 
       <BankerTake

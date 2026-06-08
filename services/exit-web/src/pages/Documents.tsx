@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, fmtMoney, preview } from "../lib/ui";
 import { useMemorandum, VALUATION_STRATEGIC } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
@@ -95,7 +95,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
         kicker="Module 06 · Workspace"
         title="Document Generator"
         description="Term sheets, LOIs, SPAs, CIMs and buyer teasers — generated from the company profile and the valuation, readiness, buyer and diligence engines."
-        actions={<Button variant="ghost">Library</Button>}
+        actions={<Button variant="ghost" onClick={preview}>Library</Button>}
       />
 
       <BankerTake

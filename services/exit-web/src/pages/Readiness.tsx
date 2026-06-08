@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Button, Card, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, SectionHeader, fmtMoney, preview } from "../lib/ui";
 import { READINESS_ANALYSIS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { EXIT_SCORE, READINESS_BAND, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VALUE_LEFT_USD, READINESS_CATEGORIES } from "../lib/deal-context";
@@ -57,7 +57,7 @@ const Readiness: React.FC = () => {
         kicker="Prepare · Exit readiness"
         title="Exit Readiness Score"
         description="One number that tells you what your company is worth today, what it could be worth, and exactly what to fix to close the gap — every fix priced in dollars."
-        actions={<Button>Re-score</Button>}
+        actions={<Button onClick={preview}>Re-score</Button>}
       />
 
       {/* ── Recommended action lead ──────────────────────────────── */}

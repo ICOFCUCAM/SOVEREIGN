@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, preview } from "../lib/ui";
 import {
   CAPTABLE_ANALYSIS, CAPTABLE_SIGNATORY, CAPTABLE_DRAGALONG,
   SAMPLE_CAPTABLE, OFFER_WATERFALLS, SAMPLE_OFFERS, fmt,
@@ -42,7 +42,7 @@ const Investors: React.FC = () => {
         kicker="Module 04 · Workspace"
         title="Investor CRM · Cap-table"
         description="Cap-table-aware relationship graph. Board, leads, observers, signatories, drag-along holdouts and per-offer founder waterfall — all in one stack."
-        actions={<Button>Add stakeholder</Button>}
+        actions={<Button onClick={preview}>Add stakeholder</Button>}
       />
 
       <BankerTake

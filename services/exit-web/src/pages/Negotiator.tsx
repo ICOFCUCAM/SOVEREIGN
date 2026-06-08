@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Card, Kpi, SectionHeader, Field, inputCls, fmtMoney } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, Field, inputCls, fmtMoney, copyText, preview } from "../lib/ui";
 import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_STRATEGIC } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -91,13 +91,34 @@ const Negotiator: React.FC = () => {
   const [idealUsd, setIdealUsd] = useState(Math.round(VALUATION_STRATEGIC.headline.high));
   const terms = autonomousTerms(active?.offer, { minUsd, idealUsd, walkUsd });
 
+  const draftText = active && counter
+    ? `Re: Acquisition of Helios Freight — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
+
+Dear ${active.offer.buyerName} team,
+
+Thank you for the proposal. We value the engagement and believe a transaction is achievable. After review against our valuation and the competitive process underway, we are countering as follows:
+
+  • Headline consideration: ${fmtMoney(counter.counterPrice)} (a ${counter.upliftPct.toFixed(0)}% increase on the submitted bid)
+  • Consideration mix: ${(counter.cashPct * 100).toFixed(0)}% cash / ${(counter.stockPct * 100).toFixed(0)}% stock / ${(counter.earnoutPct * 100).toFixed(0)}% earnout
+
+This reflects:
+  - ${SAMPLE_GROWTH * 100}% ARR growth and the forward trajectory of the business
+  - a strategic-buyer valuation midpoint of ${fmtMoney(counter.strategicMid)}
+  - ${NEGOTIATION_STATE.activeOffers} active offer(s) currently in our process
+
+We are prepared to move quickly toward a definitive agreement on these terms. We propose a call this week to align on structure and timeline.
+
+Best regards,
+James — on behalf of Helios Freight`
+    : "";
+
   return (
     <div>
       <SectionHeader
         kicker="Module 05 · Operator"
         title="AI Deal Negotiator"
         description={`Evaluating ${OFFER_EVALUATIONS.length} active offers against the founder's reservation lines (floor ${fmtMoney(RESERVATION_LINES.minHeadlinePriceUsd)}; min cash ${(RESERVATION_LINES.minCashPct * 100).toFixed(0)}%; max earnout ${(RESERVATION_LINES.maxEarnoutPct * 100).toFixed(0)}%).`}
-        actions={<><Button variant="ghost">Edit reservation lines</Button><Button>Generate counter</Button></>}
+        actions={<><Button variant="ghost" onClick={preview}>Edit reservation lines</Button><Button onClick={() => setDraftOpen(true)}>Generate counter</Button></>}
       />
 
       {active && counter && (
@@ -244,7 +265,7 @@ const Negotiator: React.FC = () => {
                 </div>
                 <div className="mt-4 flex gap-2">
                   <Button onClick={() => setDraftOpen(true)}>✦ Generate response draft</Button>
-                  <Button variant="ghost">Adjust counter</Button>
+                  <Button variant="ghost" onClick={preview}>Adjust counter</Button>
                 </div>
               </div>
             )}
@@ -325,29 +346,10 @@ const Negotiator: React.FC = () => {
               <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Counter response · {active.offer.buyerName}</div>
               <button onClick={() => setDraftOpen(false)} className="text-white/40 hover:text-white">✕</button>
             </div>
-            <pre className="mt-4 whitespace-pre-wrap rounded-md border border-white/10 bg-ink-900/70 p-4 text-[13px] leading-relaxed text-white/80">{
-`Re: Acquisition of Helios Freight — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
-
-Dear ${active.offer.buyerName} team,
-
-Thank you for the proposal. We value the engagement and believe a transaction is achievable. After review against our valuation and the competitive process underway, we are countering as follows:
-
-  • Headline consideration: ${fmtMoney(counter.counterPrice)} (a ${counter.upliftPct.toFixed(0)}% increase on the submitted bid)
-  • Consideration mix: ${(counter.cashPct * 100).toFixed(0)}% cash / ${(counter.stockPct * 100).toFixed(0)}% stock / ${(counter.earnoutPct * 100).toFixed(0)}% earnout
-
-This reflects:
-  - ${SAMPLE_GROWTH * 100}% ARR growth and the forward trajectory of the business
-  - a strategic-buyer valuation midpoint of ${fmtMoney(counter.strategicMid)}
-  - ${NEGOTIATION_STATE.activeOffers} active offer(s) currently in our process
-
-We are prepared to move quickly toward a definitive agreement on these terms. We propose a call this week to align on structure and timeline.
-
-Best regards,
-James — on behalf of Helios Freight`
-            }</pre>
+            <pre className="mt-4 whitespace-pre-wrap rounded-md border border-white/10 bg-ink-900/70 p-4 text-[13px] leading-relaxed text-white/80">{draftText}</pre>
             <div className="mt-4 flex justify-end gap-2">
-              <Button variant="ghost" onClick={() => navigator.clipboard?.writeText("counter")}>Copy</Button>
-              <Button>Send counter →</Button>
+              <Button variant="ghost" onClick={() => copyText(draftText)}>Copy</Button>
+              <Button onClick={preview}>Send counter →</Button>
             </div>
           </div>
         </div>

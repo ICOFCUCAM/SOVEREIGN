@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { Toast } from "../lib/ui";
 
 // Six command centers. The console is organized the way a founder runs an
 // exit — Prepare → Discover → Engage → Negotiate → Close → Wealth — with
@@ -126,6 +127,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <div className="mx-auto max-w-6xl px-8 py-10">{children}</div>
         </main>
       </div>
+      <Toast />
     </div>
   );
 };

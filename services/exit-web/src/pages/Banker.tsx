@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, SectionHeader, fmtMoney, preview } from "../lib/ui";
 import { BUYERS, DILIGENCE, VALUATION_STRATEGIC, useMemorandum } from "../lib/engines";
 
 // AI Banker Agent — a permanent, always-on investment banker working the
@@ -71,7 +71,7 @@ const Banker: React.FC = () => {
         kicker="Always-on · Operator"
         title="AI Banker"
         description="Your permanent investment banker. It finds and scores buyers, drafts the outreach, writes the teaser and CIM, fields buyer questions, sets valuation strategy and coordinates diligence — then reports back, in the first person, like a service."
-        actions={<Button>Brief the banker</Button>}
+        actions={<Button onClick={preview}>Brief the banker</Button>}
       />
 
       {/* ── Agent status — first-person briefing ─────────────────── */}
@@ -99,8 +99,8 @@ const Banker: React.FC = () => {
               Next, I'll send the CIM to the two engaged buyers and drive them to competing indications of interest to build leverage.
             </p>
             <div className="mt-4 flex flex-wrap gap-2.5">
-              <Button>Approve next step</Button>
-              <Button variant="ghost">Adjust strategy</Button>
+              <Button onClick={preview}>Approve next step</Button>
+              <Button variant="ghost" onClick={preview}>Adjust strategy</Button>
             </div>
           </div>
 
@@ -235,7 +235,7 @@ const Banker: React.FC = () => {
                   <p className="mt-2 text-[12px] leading-relaxed text-white/70">
                     Suggested intro: position {teaser ? "Project Cipher" : "the company"} to {b.buyer.name} — {b.rationale}
                   </p>
-                  <Button variant="ghost" className="mt-3 text-[12px]">Draft introduction</Button>
+                  <Button variant="ghost" className="mt-3 text-[12px]" onClick={preview}>Draft introduction</Button>
                 </Card>
               ))}
             </div>

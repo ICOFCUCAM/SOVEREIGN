@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Card, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, SectionHeader, fmtMoney, preview } from "../lib/ui";
 import { VALUATION_STRATEGIC, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON } from "../lib/engines";
 import { discoverFindings, buildSellerReport } from "../lib/diligence-intel";
 import { emitTelemetry } from "../lib/telemetry";
@@ -214,7 +214,7 @@ const Autopilot: React.FC = () => {
                       <p className="mt-1 text-[13.5px] text-white/85">{a.decision}</p>
                       <div className="mt-3 flex flex-wrap gap-2.5">
                         <Button onClick={() => approve(i)}>{a.approveLabel}</Button>
-                        <Button variant="ghost">Adjust</Button>
+                        <Button variant="ghost" onClick={preview}>Adjust</Button>
                       </div>
                     </div>
                   )}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, fmtMoney, copyText, preview } from "../lib/ui";
 import { BUYERS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import type { BuyerCandidate } from "@exit/engines";
@@ -64,7 +64,7 @@ const Buyers: React.FC = () => {
         kicker="Module 03 · Sourcing"
         title="Buyer Marketplace"
         description="Buyer profiles ranked against your company — interest, appetite, deal size, speed and founder-friendliness at a glance. Generate a warm introduction in one click."
-        actions={<Button variant="ghost">Filter</Button>}
+        actions={<Button variant="ghost" onClick={preview}>Filter</Button>}
       />
 
       {candidates[0] && (() => {
@@ -151,7 +151,7 @@ const Buyers: React.FC = () => {
             </div>
             <pre className="mt-4 whitespace-pre-wrap rounded-md border border-white/10 bg-ink-900/70 p-4 text-[13px] leading-relaxed text-white/80">{intro.text}</pre>
             <div className="mt-4 flex justify-end gap-2">
-              <Button variant="ghost" onClick={() => navigator.clipboard?.writeText(intro.text)}>Copy</Button>
+              <Button variant="ghost" onClick={() => copyText(intro.text)}>Copy</Button>
               <Button>Send via Banker AI →</Button>
             </div>
           </div>

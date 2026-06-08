@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, fmtMoney, preview } from "../lib/ui";
 import { LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES, useMemorandum } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -267,7 +267,7 @@ const Marketplace: React.FC = () => {
             {phase === "done"
               ? <Button variant="ghost" disabled>● Published to marketplace</Button>
               : <Button onClick={publish}>Publish Opportunity</Button>}
-            <Button variant="ghost">Edit listing</Button>
+            <Button variant="ghost" onClick={preview}>Edit listing</Button>
             {view === "public" && <Button variant="ghost">Request NDA</Button>}
           </div>
         </Card>

@@ -62,6 +62,56 @@ export const Button: React.FC<
   );
 };
 
+// ── Toast + actions ───────────────────────────────────────────────
+// A transient bottom-right toast, driven by a window event so any module can
+// fire one without prop-drilling. notify() shows a message; preview() marks a
+// control that isn't wired in the demo; copyText/download* perform the real,
+// cheap browser actions so Export and Copy buttons actually do something.
+export function notify(message: string): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("exitos:toast", { detail: message }));
+}
+export const preview = (): void => notify("Preview — not wired in this demo");
+
+export function copyText(text: string): void {
+  try { void navigator.clipboard?.writeText(text); } catch { /* clipboard unavailable */ }
+  notify("Copied to clipboard");
+}
+
+function triggerDownload(filename: string, blob: Blob): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  notify(`Downloaded ${filename}`);
+}
+export function downloadText(filename: string, text: string): void {
+  triggerDownload(filename, new Blob([text], { type: "text/plain;charset=utf-8" }));
+}
+export function downloadJson(filename: string, data: unknown): void {
+  triggerDownload(filename, new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+}
+
+export const Toast: React.FC = () => {
+  const [msg, setMsg] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const handler = (e: Event): void => {
+      setMsg((e as CustomEvent<string>).detail);
+      clearTimeout(timer);
+      timer = setTimeout(() => setMsg(null), 2600);
+    };
+    window.addEventListener("exitos:toast", handler);
+    return () => { window.removeEventListener("exitos:toast", handler); clearTimeout(timer); };
+  }, []);
+  if (!msg) return null;
+  return (
+    <div role="status" aria-live="polite"
+      className="pointer-events-none fixed bottom-6 right-6 z-[100] rounded-lg border border-deal-400/30 bg-ink-800/95 px-4 py-2.5 text-[13px] font-medium text-white shadow-xl shadow-black/40">
+      {msg}
+    </div>
+  );
+};
+
 export const Field: React.FC<{ label: string; children: React.ReactNode; hint?: string }> = ({ label, children, hint }) => (
   <label className="block">
     <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/50">{label}</span>

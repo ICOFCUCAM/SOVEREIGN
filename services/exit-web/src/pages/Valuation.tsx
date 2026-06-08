@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, Field, fmtMoney } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, Field, fmtMoney, downloadJson } from "../lib/ui";
 import { VALUATION_STANDARD, VALUATION_STRATEGIC } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import BankerTake from "../components/BankerTake";
@@ -54,7 +54,14 @@ const Valuation: React.FC = () => {
         kicker="Module · Operator"
         title="Deal Valuation Engine"
         description="Live valuation from four methodologies — DCF, comparable transactions, revenue multiples and EBITDA multiples — recomputed as assumptions change. Multiples bands come from the valuation engine; DCF is modelled from company financials."
-        actions={<Button variant="ghost">Export model</Button>}
+        actions={<Button variant="ghost" onClick={() => downloadJson("exitos-valuation-model.json", {
+          company: C.name,
+          blended, dcf: dcfValue, comparables: compMid,
+          assumptions: { growthPct: growth, discountPct: discount },
+          methodologies: VALUATION_STANDARD.methodologies,
+          strategic: VALUATION_STRATEGIC.headline,
+          comps: COMPS,
+        })}>Export model</Button>}
       />
 
       <BankerTake

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, fmtMoney, downloadText, downloadJson, preview } from "../lib/ui";
 import { DILIGENCE } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 import {
@@ -35,6 +35,11 @@ const DiligenceAI: React.FC = () => {
   const buyerDiscount = findings.reduce((s, f) => s + f.impactUsd, 0);
   const report = reports.find((r) => r.key === reportKey) ?? reports[0];
 
+  const reportMarkdown = (r: typeof report): string =>
+    `# ${r.title}\n\n${r.headline}\n\nHeadline metric: ${r.metric}\n\n## Findings\n` +
+    (r.points.length ? r.points.map((p) => `- **${p.title}** — ${p.body}`).join("\n") : "- None on this dimension.") +
+    `\n\n## Recommendation\n${r.recommendation}\n`;
+
   // findings grouped by the source file that surfaced them
   const bySource = SOURCE_FILES.map((s) => ({ ...s, count: findings.filter((f) => f.source === s.label).length }));
 
@@ -44,7 +49,7 @@ const DiligenceAI: React.FC = () => {
         kicker="Phase 2 · AI Due Diligence"
         title="AI Due Diligence"
         description="Upload financial reports, contracts, tax records, customer and employment agreements. ExitOS discovers the financial, legal and operational risks a buyer will find and writes both the Buyer Diligence Report and the Seller Risk Report — the work an investment bank charges tens of thousands and weeks for, in minutes."
-        actions={<Button>Re-run analysis</Button>}
+        actions={<Button onClick={preview}>Re-run analysis</Button>}
       />
 
       <BankerTake
@@ -87,7 +92,7 @@ const DiligenceAI: React.FC = () => {
             <div className="font-mono text-sm font-bold text-deal-300">{findings.length} findings · 2 reports · seconds</div>
           </div>
         </div>
-        <button className="inline-flex items-center rounded-md bg-deal-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-500">Export both reports →</button>
+        <button onClick={() => downloadJson("exitos-diligence-reports.json", reports)} className="inline-flex items-center rounded-md bg-deal-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-500">Export both reports →</button>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -155,7 +160,7 @@ const DiligenceAI: React.FC = () => {
           <div className="p-6">
             <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Recommendation</div>
             <p className="mt-3 text-[13px] leading-relaxed text-white/75">{report.recommendation}</p>
-            <Button variant="ghost" className="mt-4 text-[12px]">Export this report</Button>
+            <Button variant="ghost" className="mt-4 text-[12px]" onClick={() => downloadText(`exitos-${report.key}-report.md`, reportMarkdown(report))}>Export this report</Button>
           </div>
         </div>
       </Card>
