@@ -416,15 +416,22 @@ const Landing: React.FC = () => {
             <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">View all opportunities &rarr;</a>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {OPPORTUNITIES.map((o) => (
-                <div key={o.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-                  <div className="inline-block rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">{o.sector}</div>
+                <div key={o.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md">
+                  <div className="flex items-center justify-between">
+                    <div className="inline-block rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">{o.sector}</div>
+                    <span className="flex items-center gap-1 text-[9.5px] font-semibold uppercase tracking-wide text-emerald-600"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />{o.status}</span>
+                  </div>
                   <div className="mt-3 text-sm font-bold text-ink-900">{o.name}</div>
-                  <div className="mt-4 flex justify-between text-[11px]">
+                  <div className="mt-1 text-[10px] text-slate-400">Active mandate &middot; {o.region}</div>
+                  <div className="mt-4 grid grid-cols-3 gap-2 border-t border-slate-100 pt-3 text-[11px]">
                     <div><div className="text-slate-400">Revenue</div><div className="font-semibold text-ink-800">{o.rev}</div></div>
                     <div><div className="text-slate-400">EBITDA</div><div className="font-semibold text-ink-800">{o.ebitda}</div></div>
-                    <div className="text-right"><div className="text-slate-400">Asking Price</div><div className="font-serif text-base font-bold text-ink-900">{o.price}</div></div>
+                    <div className="text-right"><div className="text-slate-400">Asking</div><div className="font-serif text-base font-bold text-ink-900">{o.price}</div></div>
                   </div>
-                  <a href="#" className="mt-4 inline-block text-[12px] font-semibold text-blue-600 hover:text-blue-700">View Details &rarr;</a>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-[10px] font-medium text-slate-500">{o.interest} engaged</span>
+                    <a href="#" className="text-[12px] font-semibold text-blue-600 hover:text-blue-700">View Details &rarr;</a>
+                  </div>
                 </div>
               ))}
             </div>
@@ -834,10 +841,10 @@ const NEGOTIATION_FEATURES = [
   { icon: "doc", title: "Term sheet generation", body: "Create investor-grade documents." },
 ];
 const OPPORTUNITIES = [
-  { sector: "Logistics", name: "Logistics Platform", rev: "$68M", ebitda: "$18M", price: "$108M" },
-  { sector: "Healthcare", name: "Healthcare SaaS", rev: "$132M", ebitda: "$34M", price: "$220M" },
-  { sector: "Cybersecurity", name: "Cybersecurity Platform", rev: "$101M", ebitda: "$31M", price: "$340M" },
-  { sector: "AI / SaaS", name: "AI Automation Platform", rev: "$87M", ebitda: "$27M", price: "$195M" },
+  { sector: "Logistics", name: "Logistics Platform", rev: "$68M", ebitda: "$18M", price: "$108M", interest: "14 buyers", status: "Open", region: "North America" },
+  { sector: "Healthcare", name: "Healthcare SaaS", rev: "$132M", ebitda: "$34M", price: "$220M", interest: "21 buyers", status: "In Diligence", region: "Europe" },
+  { sector: "Cybersecurity", name: "Cybersecurity Platform", rev: "$101M", ebitda: "$31M", price: "$340M", interest: "18 buyers", status: "Open", region: "Global" },
+  { sector: "AI / SaaS", name: "AI Automation Platform", rev: "$87M", ebitda: "$27M", price: "$195M", interest: "26 buyers", status: "LOI Stage", region: "Asia-Pacific" },
 ];
 const GLOBAL_STATS = [
   { value: "125+", label: "Countries" },
