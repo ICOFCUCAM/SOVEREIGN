@@ -118,15 +118,14 @@ const Landing: React.FC = () => {
               <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-ink-800">Launch ExitOS <Arrow /></button>
               <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-6 py-3 text-sm font-semibold text-ink-900 backdrop-blur transition hover:border-slate-400 hover:bg-white">Request a Demo</button>
             </div>
-            {/* trust strip — what ExitOS stands on */}
-            <div className="mt-10 grid max-w-md grid-cols-2 gap-x-6 gap-y-4">
+            {/* trust strip — 4 institutional glass metric cards */}
+            <div className="mt-10 grid max-w-lg grid-cols-2 gap-3">
               {HERO_TRUST.map((t) => (
-                <div key={t.title} className="flex items-start gap-2.5">
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/70 text-ink-700 ring-1 ring-slate-200 backdrop-blur"><Glyph name={t.icon} small /></span>
-                  <div>
-                    <div className="text-[13px] font-bold leading-tight text-ink-900">{t.title}</div>
-                    <div className="text-[11px] leading-snug text-slate-500">{t.sub}</div>
-                  </div>
+                <div key={t.title} className="rounded-xl border border-slate-200 bg-white/70 p-3.5 shadow-sm backdrop-blur transition hover:border-blue-300 hover:shadow-md">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-blue-600"><Glyph name={t.icon} small /></span>
+                  <div className="mt-2.5 font-serif text-lg font-bold leading-none text-ink-900">{t.metric}</div>
+                  <div className="mt-1 text-[12px] font-semibold leading-tight text-ink-800">{t.title}</div>
+                  <div className="text-[10.5px] leading-snug text-slate-500">{t.sub}</div>
                 </div>
               ))}
             </div>
@@ -217,14 +216,15 @@ const Landing: React.FC = () => {
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
           <div className="flex-1">
             <h2 className="font-serif text-[2rem] font-bold tracking-tight text-ink-900">The world&rsquo;s acquisition marketplace.</h2>
-            <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               {MARKET_STATS.map((s) => (
-                <div key={s.label} className="flex items-start gap-2.5">
-                  <span className="mt-1 flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-blue-600"><Glyph name={s.icon} small /></span>
-                  <div>
-                    <div className="font-serif text-2xl font-bold text-blue-600">{s.value}</div>
-                    <div className="mt-0.5 text-[11px] leading-snug text-slate-500">{s.label}</div>
+                <div key={s.label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md">
+                  <div className="flex items-center justify-between">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-blue-600"><Glyph name={s.icon} small /></span>
+                    <span className={`text-[10px] font-semibold ${s.up ? "text-emerald-600" : "text-slate-400"}`}>{s.trend}</span>
                   </div>
+                  <div className="mt-3 font-serif text-2xl font-bold text-ink-900">{s.value}</div>
+                  <div className="mt-0.5 text-[11px] leading-snug text-slate-500">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -555,10 +555,10 @@ const BOARD_STATS = [
   { label: "Total Acquisition Value", value: "$4.2B+" },
 ];
 const HERO_TRUST = [
-  { icon: "globe", title: "Global Buyer Network", sub: "58,000+ verified acquirers" },
-  { icon: "lock", title: "Institutional Security", sub: "SOC 2 · data residency" },
-  { icon: "users", title: "Founder First", sub: "you own every decision" },
-  { icon: "check", title: "Auditable Process", sub: "every action, every artifact" },
+  { icon: "globe", metric: "58,341+", title: "Verified Buyers", sub: "global acquirer network" },
+  { icon: "lock", metric: "SOC 2", title: "Compliant Infrastructure", sub: "security + data residency" },
+  { icon: "users", metric: "100%", title: "Founder Controlled", sub: "you own every decision" },
+  { icon: "check", metric: "Every Action", title: "Auditable", sub: "every action, every artifact" },
 ];
 // live activity ticker (very bottom of the board)
 const ACTIVITY = [
@@ -759,12 +759,12 @@ const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right
 // SECTION DATA
 // ===========================================================================
 const MARKET_STATS = [
-  { icon: "users", value: "58,341+", label: "Active Buyers" },
-  { icon: "spark", value: "$4.2T+", label: "Acquisition Appetite Indexed" },
-  { icon: "chart", value: "13,240", label: "Active Mandates Tracked" },
-  { icon: "shield", value: "4,800+", label: "Strategic Acquirers Indexed" },
-  { icon: "doc", value: "212", label: "Sectors Monitored" },
-  { icon: "globe", value: "125+", label: "Countries with Buyer Activity" },
+  { icon: "users", value: "58,341+", label: "Active Buyers", trend: "↑ 12% YoY", up: true },
+  { icon: "spark", value: "$4.2T+", label: "Acquisition Appetite Indexed", trend: "↑ Rising", up: true },
+  { icon: "chart", value: "13,240", label: "Active Mandates Tracked", trend: "↑ 8% QoQ", up: true },
+  { icon: "shield", value: "4,800+", label: "Strategic Acquirers Indexed", trend: "↑ 5% YoY", up: true },
+  { icon: "doc", value: "212", label: "Sectors Monitored", trend: "Stable", up: false },
+  { icon: "globe", value: "125+", label: "Countries with Buyer Activity", trend: "↑ Expanding", up: true },
 ];
 const STEPS = [
   { icon: "chart", title: "Company Analysis", body: "AI-powered valuation, market positioning, and readiness scoring." },
