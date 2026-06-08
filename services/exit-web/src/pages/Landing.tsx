@@ -86,8 +86,11 @@ const Landing: React.FC = () => {
             <h1 className="font-serif text-4xl font-bold leading-[1.06] tracking-tight text-ink-900 sm:text-5xl">
               THE OPERATING SYSTEM<br />FOR COMPANY SALES
             </h1>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-slate-700">
-              Built for founders. Trusted by acquirers.<br />Designed to close.
+            <p className="mt-6 max-w-md font-serif text-xl font-semibold leading-snug text-ink-900">
+              Source buyers. Run diligence. Negotiate offers. Close transactions.
+            </p>
+            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-slate-600">
+              One acquisition infrastructure. One audit trail. One source of truth.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-ink-800">Launch ExitOS <Arrow /></button>
@@ -121,27 +124,26 @@ const Landing: React.FC = () => {
                   border: "1px solid rgba(255,255,255,0.10)",
                 }}
               >
-                {/* top mount rail with status LEDs */}
-                <div className="mb-1.5 flex items-center justify-between px-2 py-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_1px_rgba(80,230,140,0.8)]" />
-                    <span className="text-[8px] font-semibold uppercase tracking-[0.22em] text-white/45">ExitOS Acquisition Exchange · Live</span>
+                {/* Bloomberg-style exchange ribbon */}
+                <div className="mb-1.5 flex items-center justify-between gap-3 rounded-md bg-black/25 px-3 py-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/90">ExitOS Acquisition Exchange</span>
+                    <span className="hidden items-center gap-1 rounded-sm bg-emerald-400/15 px-1.5 py-0.5 sm:inline-flex">
+                      <span className="h-1 w-1 animate-pulse rounded-full bg-emerald-400" />
+                      <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live Market</span>
+                    </span>
+                    <span className="hidden font-mono text-[9px] uppercase tracking-[0.14em] text-white/45 md:inline">13,240 active mandates</span>
                   </div>
-                  <span className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/30">Floor 01 · Deal Board</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/40">System Status</span>
+                    <span className="relative inline-flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    </span>
+                    <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live</span>
+                  </div>
                 </div>
                 {/* live deal-activity ticker (motion layer) */}
-                <div className="mb-1.5 overflow-hidden rounded-md border border-white/5 bg-black/20">
-                  <div className="flex w-max items-center gap-8 whitespace-nowrap px-3 py-1.5" style={{ animation: "exTicker 30s linear infinite" }}>
-                    {[...DEAL_TICKER, ...DEAL_TICKER].map((d, i) => (
-                      <span key={i} className="flex items-center gap-1.5 text-[10px]">
-                        <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: d.color, boxShadow: `0 0 5px 1px ${d.color}` }} />
-                        <span className="font-semibold text-white/80">{d.company}</span>
-                        <span className="text-white/40">{d.event}</span>
-                        <span className="font-mono text-white/60">{d.value}</span>
-                      </span>
-                    ))}
-                  </div>
-                </div>
                 <CommandBoard />
                 {/* bottom mount bracket */}
                 <div className="mx-auto mt-1.5 h-1 w-1/3 rounded-full bg-white/10" />
@@ -486,14 +488,14 @@ const HERO_TRUST = [
   { icon: "users", title: "Founder First", sub: "you own every decision" },
   { icon: "check", title: "Auditable Process", sub: "every action, every artifact" },
 ];
-// live deal-activity ticker (hero board motion layer)
-const DEAL_TICKER = [
-  { company: "Helios Freight", event: "LOI received · Microsoft", value: "$261M", color: "#45E38A" },
-  { company: "DataMind AI", event: "negotiation · Google", value: "$315M", color: "#FF8A3D" },
-  { company: "SecureLayer", event: "diligence · Palo Alto", value: "$198M", color: "#FFB14A" },
-  { company: "CareSphere", event: "data room · UnitedHealth", value: "$175M", color: "#58C6FF" },
-  { company: "Atlas Fintech", event: "mandate indexed", value: "$420M", color: "#5AD1FF" },
-  { company: "Verdant Bio", event: "closed", value: "$540M", color: "#45E38A" },
+// live activity ticker (very bottom of the board)
+const ACTIVITY = [
+  { text: "Microsoft acquired an AI-infrastructure company — LOI received", meta: "2m ago", color: "#45E38A" },
+  { text: "Vista reviewing a logistics platform", meta: "$132M indication", color: "#58C6FF" },
+  { text: "New strategic buyer added to the network", meta: "just now", color: "#A8FFFF" },
+  { text: "DataMind AI entered negotiation with Google", meta: "$315M · 12m ago", color: "#FF8A3D" },
+  { text: "SecureLayer opened its data room", meta: "Palo Alto Networks", color: "#FFB14A" },
+  { text: "Verdant Bio closed", meta: "$540M · 1h ago", color: "#45E38A" },
 ];
 // acquisition ecosystem (below hero)
 const ECOSYSTEM = [
@@ -652,6 +654,19 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
           <div className="mt-1.5 text-[9px] uppercase tracking-[0.12em] text-white/45">{s.label}</div>
         </div>
       ))}
+    </div>
+
+    {/* ---- VERY BOTTOM · live activity ticker ---- */}
+    <div className="overflow-hidden border-t border-white/10" style={{ background: "#040f1f" }}>
+      <div className="flex w-max items-center gap-10 whitespace-nowrap px-4 py-2" style={{ animation: "exTicker 36s linear infinite" }}>
+        {[...ACTIVITY, ...ACTIVITY].map((a, i) => (
+          <span key={i} className="flex items-center gap-2 text-[10.5px]">
+            <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: a.color, boxShadow: `0 0 5px 1px ${a.color}` }} />
+            <span className="text-white/75">{a.text}</span>
+            <span className="font-mono text-white/40">{a.meta}</span>
+          </span>
+        ))}
+      </div>
     </div>
   </div>
 );
