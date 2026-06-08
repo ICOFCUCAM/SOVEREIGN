@@ -214,7 +214,7 @@ export function buildBuyerReport(findings: readonly DiligenceFinding[]): RiskRep
   const escrowPct = Math.min(20, Math.round((total / MID) * 100));
   return {
     audience: "buyer",
-    title: "Buyer Risk Report",
+    title: "Buyer Diligence Report",
     headline: `${findings.length} findings across financial, legal and operational diligence. ${bySeverity.high} are high-severity and shape price and structure.`,
     totalImpactUsd: total,
     bySeverity,

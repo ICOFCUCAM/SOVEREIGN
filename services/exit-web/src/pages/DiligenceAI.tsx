@@ -42,9 +42,9 @@ const DiligenceAI: React.FC = () => {
   return (
     <div>
       <SectionHeader
-        kicker="Phase 2 · Operator"
-        title="Diligence Intelligence Engine"
-        description="Ingests financial statements, contracts, employment agreements, customer lists and tax filings — then discovers the financial, legal and operational risks a buyer will find, and writes both the Buyer and Seller risk reports before anyone sees the company."
+        kicker="Phase 2 · AI Due Diligence"
+        title="AI Due Diligence"
+        description="Upload financial reports, contracts, tax records, customer and employment agreements. ExitOS discovers the financial, legal and operational risks a buyer will find and writes both the Buyer Diligence Report and the Seller Risk Report — the work an investment bank charges tens of thousands and weeks for, in minutes."
         actions={<Button>Re-run analysis</Button>}
       />
 
@@ -73,6 +73,22 @@ const DiligenceAI: React.FC = () => {
             <div className="text-[10px] uppercase tracking-wide text-white/40">finding{s.count === 1 ? "" : "s"}</div>
           </Card>
         ))}
+      </div>
+
+      {/* Value prop — what a bank charges vs. what ExitOS just did */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-deal-500/30 bg-gradient-to-r from-deal-600/12 to-transparent px-5 py-4">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px]">
+          <div>
+            <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">Investment bank</div>
+            <div className="font-mono text-sm text-white/70 line-through decoration-white/30">$40,000+ · 4–6 weeks</div>
+          </div>
+          <span className="text-xl text-white/25">→</span>
+          <div>
+            <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-deal-300">ExitOS</div>
+            <div className="font-mono text-sm font-bold text-deal-300">{findings.length} findings · 2 reports · seconds</div>
+          </div>
+        </div>
+        <button className="inline-flex items-center rounded-md bg-deal-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-500">Export both reports →</button>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -104,8 +120,8 @@ const DiligenceAI: React.FC = () => {
       {/* ── Dual risk reports ────────────────────────────────────── */}
       <div className="mt-12 flex items-center justify-between">
         <div>
-          <h2 className="font-serif text-lg font-bold text-white">Generated risk reports</h2>
-          <p className="text-xs text-white/45">The same findings, written for each side of the table.</p>
+          <h2 className="font-serif text-lg font-bold text-white">Generated diligence reports</h2>
+          <p className="text-xs text-white/45">The same findings, written for each side of the table — Buyer Diligence Report and Seller Risk Report.</p>
         </div>
         <div className="inline-flex rounded-md border border-white/15 bg-ink-800/40 p-1">
           <button onClick={() => setAudience("seller")} className={`rounded px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${audience === "seller" ? "bg-deal-600/30 text-white" : "text-white/55 hover:text-white"}`}>Seller report</button>
