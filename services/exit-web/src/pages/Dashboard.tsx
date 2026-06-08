@@ -10,6 +10,7 @@ import { SAMPLE_COMPANY } from "../lib/profile";
 import ExitProcessModal from "../components/ExitProcessModal";
 import JourneyMap from "../components/JourneyMap";
 import ExitCommander from "../components/ExitCommander";
+import { LiquidityScore, AcquisitionHeatMap, LiveBuyerActivity, ValuationScenarios, ProbabilityFunnel } from "../components/DashboardModules";
 import CommandTiles from "../components/CommandTiles";
 import { commanderMetrics } from "../lib/commander-metrics";
 import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
@@ -133,16 +134,14 @@ const Dashboard: React.FC = () => {
 
       <ExitProcessModal open={modalOpen} onClose={() => setModalOpen(false)} />
 
-      {/* Live signals the Commander is reading — the buyer/diligence activity
-          behind the brief above. */}
-      <Card className="mb-8 p-5">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Since yesterday</div>
-        <ul className="mt-3 grid gap-2.5 text-[13px] text-white/75 sm:grid-cols-3">
-          <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-deal-400" />{Math.min(BUYERS.candidates.length, 3)} buyers viewed your profile</li>
-          <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-loi-400" />1 buyer requested diligence access</li>
-          <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-stage-engaged" />{DILIGENCE.criticalQuestions.length} critical diligence question{DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} to resolve</li>
-        </ul>
-      </Card>
+      {/* Market position — liquidity, demand geography and who's looking now. */}
+      <div className="mb-6 grid gap-4 lg:grid-cols-3">
+        <LiquidityScore />
+        <LiveBuyerActivity />
+        <AcquisitionHeatMap />
+      </div>
+      <div className="mb-6"><ValuationScenarios /></div>
+      <div className="mb-8"><ProbabilityFunnel /></div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi
