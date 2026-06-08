@@ -409,31 +409,30 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 09 · GLOBAL ACQUISITION NETWORK ===== */}
-      <section className="border-b border-slate-200 bg-ink-900 text-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
-          <div className="text-center">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-300">Global Acquisition Network</div>
-            <h2 className="mx-auto mt-3 max-w-2xl font-serif text-[2rem] font-bold leading-tight tracking-tight">Acquisition flows across every major market.</h2>
-            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/60">Buyers, capital and mandates moving between North America, Europe, Asia and the Middle East — indexed in real time.</p>
+      {/* ===== 09 · GLOBAL REACH ===== */}
+      <section className="border-b border-slate-200 bg-white">
+        <div className="mx-auto grid max-w-[1320px] items-center gap-0 lg:grid-cols-[1.05fr_1.35fr]">
+          {/* blue acquisition-network world map panel */}
+          <div className="relative overflow-hidden lg:rounded-r-2xl" style={{ background: "linear-gradient(135deg,#0a2a52 0%,#05182f 60%,#081f3a 100%)" }}>
+            <div className="px-6 py-12 lg:px-10 lg:py-16">
+              <WorldDots />
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent lg:block" aria-hidden />
           </div>
-          <div className="mt-10"><WorldDots /></div>
-          <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-4">
-            {REGIONS.map((r) => (
-              <div key={r.name} className="rounded-xl border border-white/10 bg-white/5 px-5 py-4 text-center">
-                <div className="text-sm font-bold text-white">{r.name}</div>
-                <div className="mt-1 font-serif text-xl font-bold text-blue-300">{r.value}</div>
-                <div className="mt-0.5 text-[10px] uppercase tracking-wide text-white/45">{r.label}</div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-white/10 pt-8 sm:grid-cols-4">
-            {GLOBAL_STATS.map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="font-serif text-2xl font-bold text-blue-300">{s.value}</div>
-                <div className="mt-1 text-[12px] text-white/55">{s.label}</div>
-              </div>
-            ))}
+          {/* headline + inline stats */}
+          <div className="px-6 py-14 lg:px-12 lg:py-20">
+            <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Global reach.<br />Institutional network.</h2>
+            <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
+              ExitOS connects founders with buyers across <span className="font-semibold text-ink-800">125+ countries</span> and every major industry.
+            </p>
+            <div className="mt-10 grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4">
+              {GLOBAL_STATS.map((s) => (
+                <div key={s.label}>
+                  <div className="font-serif text-3xl font-bold text-ink-900">{s.value}</div>
+                  <div className="mt-1 text-[12px] text-slate-500">{s.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -614,13 +613,6 @@ const CASE_STUDIES = [
   { sector: "Logistics", name: "Logistics Platform", value: "$132M", buyers: "14", premium: "+24%", time: "11 wks", buyer: "Strategic" },
   { sector: "AI Infrastructure", name: "AI Infrastructure Co.", value: "$261M", buyers: "21", premium: "+31%", time: "9 wks", buyer: "Microsoft*" },
   { sector: "Healthcare SaaS", name: "Healthcare SaaS", value: "$175M", buyers: "12", premium: "+26%", time: "13 wks", buyer: "UnitedHealth*" },
-];
-// global acquisition network regions
-const REGIONS = [
-  { name: "North America", value: "24,100", label: "Active Buyers" },
-  { name: "Europe", value: "16,540", label: "Active Buyers" },
-  { name: "Asia", value: "12,880", label: "Active Buyers" },
-  { name: "Middle East", value: "4,820", label: "Active Buyers" },
 ];
 const LEAN_STATS = [
   { label: "Buyers", value: "58,341" },
