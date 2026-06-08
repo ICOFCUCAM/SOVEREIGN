@@ -37,12 +37,37 @@ const OWNER_STYLE: Record<ChecklistItem["owner"], string> = {
   Banker:  "text-white/70",
 };
 
+// Closing Risk Meter — a computed close probability and the live risks
+// standing between the deal and the wire. Probability starts from checklist
+// completion (done = full weight, in-progress = partial), then takes a penalty
+// for each blocker and each open diligence red flag. The outstanding-risk list
+// is the set of not-done checklist items that gate the close.
+function closeProbability(done: number, inProgress: number, total: number, blocked: number, redFlags: number): number {
+  const base = total === 0 ? 1 : (done + inProgress * 0.5) / total; // 0..1 progress
+  const penalty = blocked * 0.08 + redFlags * 0.04;
+  return Math.max(0.05, Math.min(0.99, base - penalty));
+}
+function openRisks(items: readonly ChecklistItem[]): { title: string; owner: string; severity: "high" | "medium" }[] {
+  return items
+    .filter((c) => c.status !== "done")
+    .map((c) => ({
+      title: c.title,
+      owner: c.owner,
+      // consent, escrow funding, regulatory and board approvals are hard gates
+      severity: (/consent|escrow|regulatory|board approval|bring-down/i.test(c.title) ? "high" : "medium") as "high" | "medium",
+    }))
+    .sort((a, b) => (a.severity === "high" ? -1 : 1) - (b.severity === "high" ? -1 : 1));
+}
+
 const Closing: React.FC = () => {
   const done       = CLOSING.filter((c) => c.status === "done").length;
   const inProgress = CLOSING.filter((c) => c.status === "in_progress").length;
   const blocked    = CLOSING.filter((c) => c.status === "blocked").length;
   const criticalQs = DILIGENCE.criticalQuestions;
   const redFlags = DILIGENCE.redFlags;
+  const prob = closeProbability(done, inProgress, CLOSING.length, blocked, redFlags.length);
+  const risks = openRisks(CLOSING);
+  const probColor = prob >= 0.8 ? "#34d399" : prob >= 0.6 ? "#fbbf24" : "#f87171";
 
   return (
     <div>
@@ -59,6 +84,44 @@ const Closing: React.FC = () => {
         <Kpi label="In progress"  value={String(inProgress)} sub="active workstreams" accent="#fbbf24" />
         <Kpi label="Blockers"     value={String(blocked + redFlags.length)} sub="checklist + diligence red flags" />
       </div>
+
+      {/* Closing Risk Meter — close probability + the risks gating the wire */}
+      <Card className="mt-8 p-6">
+        <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+          <div className="flex flex-col items-center justify-center border-b border-white/10 pb-5 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Current close probability</div>
+            <div className="relative mt-3 flex h-32 w-32 items-center justify-center">
+              <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="9" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke={probColor} strokeWidth="9" strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 42}`} strokeDashoffset={`${2 * Math.PI * 42 * (1 - prob)}`} />
+              </svg>
+              <div className="absolute text-center">
+                <div className="font-mono text-3xl font-bold" style={{ color: probColor }}>{Math.round(prob * 100)}%</div>
+                <div className="text-[9px] uppercase tracking-wide text-white/40">to close</div>
+              </div>
+            </div>
+            <div className="mt-3 text-[11px] text-white/45">{done}/{CLOSING.length} items signed off</div>
+          </div>
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Risks gating the close</div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {risks.slice(0, 6).map((r) => (
+                <div key={r.title} className="flex items-start gap-2.5 rounded-lg border border-white/10 bg-ink-900/40 p-3">
+                  <span className={`mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full ${r.severity === "high" ? "bg-red-400" : "bg-loi-400"}`} />
+                  <div>
+                    <div className="text-[12.5px] leading-snug text-white/85">{r.title}</div>
+                    <div className="text-[10px] uppercase tracking-wide text-white/40">{r.owner} · {r.severity} risk</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {redFlags.length > 0 && (
+              <div className="mt-3 text-[12px] text-red-300/80">+ {redFlags.length} diligence red flag{redFlags.length === 1 ? "" : "s"} weighing on the close.</div>
+            )}
+          </div>
+        </div>
+      </Card>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_320px]">
         <div>
