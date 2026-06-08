@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button, Card, SectionHeader, fmtMoney } from "../lib/ui";
 import { VALUATION_STRATEGIC, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON } from "../lib/engines";
 import { discoverFindings, buildSellerReport } from "../lib/diligence-intel";
@@ -79,6 +80,11 @@ const Autopilot: React.FC = () => {
       work: <>Assembled the closing checklist; tracking signatures, escrow funding and regulatory filings to the wire.</>,
       decision: "Approve proceeding to signing and funding the escrow?", approveLabel: "Approve close",
     },
+    {
+      id: "wealth", name: "Wealth Agent", role: "Manages the proceeds after the wire.",
+      work: <>Modeled proceeds through tax, scheduled the liquidity and drafted the diversification plan in WealthOS.</>,
+      decision: "Approve the wealth transition plan?", approveLabel: "Approve & finish",
+    },
   ];
 
   const [started, setStarted] = useState(false);
@@ -119,7 +125,7 @@ const Autopilot: React.FC = () => {
       <SectionHeader
         kicker="Phase 3 · Autonomous"
         title="Autonomous Exit"
-        description="Sell your company — don't manage the sale. Seven specialist agents run the process end to end; you only approve the decisions."
+        description="You uploaded revenue, financials and a cap table. ExitOS does the rest — value, readiness, buyers, data room, documents, outreach, negotiation, closing and wealth. Your job is three words: approve, approve, approve."
       />
 
       {/* ── Mission control ──────────────────────────────────────── */}
@@ -129,9 +135,15 @@ const Autopilot: React.FC = () => {
             <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-deal-400">One instruction</div>
             <h2 className="mt-2 font-serif text-3xl font-bold leading-tight text-white">"Sell my company."</h2>
             <p className="mt-3 text-[13.5px] leading-relaxed text-white/65">
-              ExitOS launches seven agents — valuation, buyer discovery, outreach, data room, diligence, negotiation and
-              closing — and runs them autonomously. Each pauses only to put one decision in front of you.
+              ExitOS launches {AGENTS.length} agents — valuation, buyer discovery, outreach, data room, diligence,
+              negotiation, closing and wealth — and runs them autonomously. Each pauses only to put one decision in
+              front of you. Approve. Approve. Approve. Money arrives.
             </p>
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {["revenue", "financials", "cap table"].map((u) => (
+                <span key={u} className="rounded-full bg-deal-600/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-deal-300 ring-1 ring-deal-400/30">✓ {u}</span>
+              ))}
+            </div>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               {!started && <Button onClick={start}>Start Exit Process →</Button>}
               {started && !allDone && (
@@ -218,14 +230,25 @@ const Autopilot: React.FC = () => {
       </div>
 
       {allDone && (
-        <Card className="mt-8 p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Exit complete</div>
-          <h3 className="mt-1.5 font-serif text-xl font-bold text-white">ExitOS ran your exit end to end.</h3>
-          <p className="mt-2 text-[13.5px] leading-relaxed text-white/65">
-            Seven agents took the company from valuation to signed close. You made {AGENTS.length} approval decisions —
-            the platform did the rest. That's the difference between selling your company and managing its sale.
-          </p>
-          <Button variant="ghost" className="mt-4" onClick={() => { setStarted(false); setStatuses(AGENTS.map(() => "queued")); }}>Run again</Button>
+        <Card className="mt-8 overflow-hidden p-0">
+          <div className="border-b border-white/10 bg-gradient-to-r from-deal-600/20 to-transparent px-6 py-5">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Money arrives</div>
+            <div className="mt-1 flex flex-wrap items-baseline gap-3">
+              <span className="font-mono text-3xl font-bold text-deal-300">{fmtMoney(VALUATION_STRATEGIC.headline.mid)}</span>
+              <span className="text-[13px] text-white/60">wired to escrow → your account</span>
+            </div>
+          </div>
+          <div className="p-6">
+            <h3 className="font-serif text-xl font-bold text-white">ExitOS ran your exit end to end.</h3>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-white/65">
+              {AGENTS.length} agents took the company from your uploads to money in the bank. You made {AGENTS.length} approval
+              decisions — the platform did the rest. Now WealthOS takes it from here.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2.5">
+              <Link to="/console/wealth" className="rounded-md bg-deal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">Open WealthOS →</Link>
+              <Button variant="ghost" onClick={() => { setStarted(false); setStatuses(AGENTS.map(() => "queued")); }}>Run again</Button>
+            </div>
+          </div>
         </Card>
       )}
     </div>
