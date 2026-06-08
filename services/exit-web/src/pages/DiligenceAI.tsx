@@ -1,78 +1,155 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
-import { DILIGENCE, VALUATION_STRATEGIC } from "../lib/engines";
+import { DILIGENCE } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
+import {
+  discoverFindings, buildBuyerReport, buildSellerReport, SOURCE_FILES,
+  type DiligenceFinding, type RiskCategory, type Severity, type RiskReport,
+} from "../lib/diligence-intel";
 
-// Due Diligence AI — inspects the diligence package and surfaces risks before
-// buyers find them. Bound to runDueDiligence (@exit/engines): red flags become
-// scored findings; each diligence document spec becomes a reviewable category
-// with its critical questions and required evidence.
+// Diligence Intelligence Engine — ingests the uploaded document set, discovers
+// the risks a buyer's analyst would find across Financial, Legal and
+// Operational categories, and produces dual Buyer / Seller risk reports from
+// the same findings, before any buyer sees the company.
 
-// classify each engine red-flag into a risk category + severity heuristically
-type Sev = "high" | "medium" | "low";
-function classify(flag: string): { cat: string; sev: Sev } {
-  const f = flag.toLowerCase();
-  if (f.includes("concentration")) return { cat: "Customer concentration", sev: "high" };
-  if (f.includes("regulat") || f.includes("compliance")) return { cat: "Compliance", sev: "high" };
-  if (f.includes("margin") || f.includes("revenue") || f.includes("retention") || f.includes("cash")) return { cat: "Financial", sev: "medium" };
-  if (f.includes("ip") || f.includes("patent") || f.includes("legal") || f.includes("contract")) return { cat: "Legal", sev: "medium" };
-  return { cat: "Operational", sev: "low" };
-}
-const SEV_STYLE: Record<Sev, string> = {
-  high: "bg-red-500/15 text-red-300 ring-red-400/40",
+const SEV_STYLE: Record<Severity, string> = {
+  high:   "bg-red-500/15 text-red-300 ring-red-400/40",
   medium: "bg-loi-500/15 text-loi-300 ring-loi-400/40",
-  low: "bg-white/5 text-white/50 ring-white/15",
+  low:    "bg-white/5 text-white/50 ring-white/15",
 };
+const SEV_DOT: Record<Severity, string> = { high: "bg-red-400", medium: "bg-loi-400", low: "bg-white/40" };
+
+const CATEGORIES: { key: RiskCategory; blurb: string }[] = [
+  { key: "Financial",   blurb: "Concentration, revenue quality, cash flow, recurring mix" },
+  { key: "Legal",       blurb: "Missing contracts, IP ownership, compliance, litigation" },
+  { key: "Operational", blurb: "Founder dependency, vendor & key-employee exposure" },
+];
 
 const DiligenceAI: React.FC = () => {
-  const findings = DILIGENCE.redFlags.map((f) => ({ flag: f, ...classify(f) }));
-  const high = findings.filter((f) => f.sev === "high").length;
+  const findings = useMemo(() => discoverFindings(), []);
+  const buyerReport  = useMemo(() => buildBuyerReport(findings), [findings]);
+  const sellerReport = useMemo(() => buildSellerReport(findings), [findings]);
+  const [audience, setAudience] = useState<"buyer" | "seller">("seller");
   const [open, setOpen] = useState<string | null>(DILIGENCE.documents[0]?.kind ?? null);
+
+  const high = findings.filter((f) => f.severity === "high").length;
+  const buyerDiscount = buyerReport.totalImpactUsd;
+  const report: RiskReport = audience === "buyer" ? buyerReport : sellerReport;
+
+  // findings grouped by the source file that surfaced them
+  const bySource = SOURCE_FILES.map((s) => ({ ...s, count: findings.filter((f) => f.source === s.label).length }));
 
   return (
     <div>
       <SectionHeader
-        kicker="Module · Operator"
-        title="Due Diligence AI"
-        description="Inspects the diligence package and flags legal, financial, customer-concentration and compliance risks before a buyer discovers them — with the critical questions each acquirer will ask."
-        actions={<Button>Re-scan package</Button>}
+        kicker="Phase 2 · Operator"
+        title="Diligence Intelligence Engine"
+        description="Ingests financial statements, contracts, employment agreements, customer lists and tax filings — then discovers the financial, legal and operational risks a buyer will find, and writes both the Buyer and Seller risk reports before anyone sees the company."
+        actions={<Button>Re-run analysis</Button>}
       />
 
       <BankerTake
         next={high > 0
-          ? <>Resolve the <span className="text-white">{high} high-severity finding{high === 1 ? "" : "s"}</span> before you grant any buyer data-room access.</>
-          : <>No high-severity risks — package is clean enough to open to buyers.</>}
-        stake={<>A <span className="font-mono font-bold text-deal-300">{fmtMoney(VALUATION_STRATEGIC.headline.mid)}</span> valuation is what unresolved risk discounts.</>}
-        inaction={<>Buyers who find these in diligence retrade or walk — surfacing them first protects the price.</>}
-        buyer={<>Clear the high-severity findings — they're the gaps a buyer's analyst attacks first.</>}
-        automate={<>ExitOS scans the package like a hostile analyst and classifies every risk by severity and category.</>}
+          ? <>Clear the <span className="text-white">{high} high-severity finding{high === 1 ? "" : "s"}</span> in the Seller Risk Report before opening the data room.</>
+          : <>No high-severity risks — the package is clean enough to open to buyers.</>}
+        stake={<><span className="font-mono font-bold text-red-300">-{fmtMoney(buyerDiscount)}</span> is the discount a buyer would seek against these findings.</>}
+        inaction={<>Buyers who discover these in their own diligence retrade or walk — surfacing them first protects the price.</>}
+        buyer={<>Resolve founder dependency and customer concentration first — they drive the structure a buyer demands.</>}
+        automate={<>ExitOS reads every uploaded file, classifies the risk, prices the impact and drafts both risk reports.</>}
         cta={{ label: "Open the data room", to: "/console/data-room" }}
       />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Risks detected" value={String(findings.length)} sub="across the package" accent={high ? "#f87171" : "#34d399"} />
-        <Kpi label="High severity" value={String(high)} sub="resolve before buyer access" accent="#f87171" />
-        <Kpi label="Critical questions" value={String(DILIGENCE.criticalQuestions.length)} sub="acquirers will ask" />
-        <Kpi label="Document categories" value={String(DILIGENCE.documents.length)} sub="diligence packages" />
-      </div>
-
-      {/* risk findings */}
-      <h2 className="mt-10 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Risk findings</h2>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {findings.map((f) => (
-          <Card key={f.flag} className="flex items-start gap-3 p-4">
-            <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ring-1 ${SEV_STYLE[f.sev]}`}>{f.sev}</span>
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-white/45">{f.cat}</div>
-              <div className="mt-0.5 text-[13px] leading-snug text-white/80">{f.flag}</div>
+      {/* ── Ingestion ────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        {bySource.map((s) => (
+          <Card key={s.key} className="p-4">
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-deal-300">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-deal-400" /> Analyzed
             </div>
+            <div className="mt-1.5 text-[13px] font-semibold leading-tight text-white">{s.label}</div>
+            <div className="mt-0.5 text-[10px] text-white/40">{s.note}</div>
+            <div className="mt-2 font-mono text-lg font-bold text-white">{s.count}</div>
+            <div className="text-[10px] uppercase tracking-wide text-white/40">finding{s.count === 1 ? "" : "s"}</div>
           </Card>
         ))}
-        {findings.length === 0 && <Card className="p-4 text-sm text-white/50">No material red flags detected.</Card>}
       </div>
 
-      {/* document categories */}
-      <h2 className="mt-10 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Diligence categories</h2>
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <Kpi label="Risks discovered" value={String(findings.length)} sub="across 3 categories" accent={high ? "#f87171" : "#34d399"} />
+        <Kpi label="High severity" value={String(high)} sub="resolve before buyer access" accent="#f87171" />
+        <Kpi label="Est. buyer discount" value={`-${fmtMoney(buyerDiscount)}`} sub="value buyers would deduct" accent="#f87171" />
+        <Kpi label="Critical questions" value={String(DILIGENCE.criticalQuestions.length)} sub="acquirers will ask" />
+      </div>
+
+      {/* ── Discovered risks by category ─────────────────────────── */}
+      <h2 className="mt-10 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Discovered risks</h2>
+      <div className="grid gap-4 lg:grid-cols-3">
+        {CATEGORIES.map((cat) => {
+          const items = findings.filter((f) => f.category === cat.key);
+          return (
+            <div key={cat.key}>
+              <div className="mb-2">
+                <h3 className="font-serif text-base font-bold text-white">{cat.key} risks</h3>
+                <p className="text-[11px] text-white/45">{cat.blurb}</p>
+              </div>
+              <div className="space-y-3">
+                {items.map((f) => <FindingCard key={f.id} f={f} audience={audience} />)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Dual risk reports ────────────────────────────────────── */}
+      <div className="mt-12 flex items-center justify-between">
+        <div>
+          <h2 className="font-serif text-lg font-bold text-white">Generated risk reports</h2>
+          <p className="text-xs text-white/45">The same findings, written for each side of the table.</p>
+        </div>
+        <div className="inline-flex rounded-md border border-white/15 bg-ink-800/40 p-1">
+          <button onClick={() => setAudience("seller")} className={`rounded px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${audience === "seller" ? "bg-deal-600/30 text-white" : "text-white/55 hover:text-white"}`}>Seller report</button>
+          <button onClick={() => setAudience("buyer")} className={`rounded px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${audience === "buyer" ? "bg-deal-600/30 text-white" : "text-white/55 hover:text-white"}`}>Buyer report</button>
+        </div>
+      </div>
+
+      <Card className={`mt-4 overflow-hidden p-0 ring-1 ${audience === "buyer" ? "ring-red-400/30" : "ring-deal-400/30"}`}>
+        <div className={`border-b border-white/10 px-6 py-4 ${audience === "buyer" ? "bg-red-500/10" : "bg-deal-600/10"}`}>
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-[12px] font-bold ring-1 ${audience === "buyer" ? "bg-red-500/25 text-red-200 ring-red-400/40" : "bg-deal-600/30 text-deal-200 ring-deal-400/40"}`}>
+              {audience === "buyer" ? "B" : "S"}
+            </span>
+            <span className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${audience === "buyer" ? "text-red-200" : "text-deal-300"}`}>{report.title}</span>
+          </div>
+          <p className="mt-3 text-sm leading-relaxed text-white/80">{report.headline}</p>
+          <div className="mt-3 flex flex-wrap gap-4 text-[12px]">
+            <span className="text-white/55">{report.bySeverity.high} high</span>
+            <span className="text-white/55">{report.bySeverity.medium} medium</span>
+            <span className="text-white/55">{report.bySeverity.low} low</span>
+            <span className="font-mono font-semibold text-white">{audience === "buyer" ? `-${fmtMoney(report.totalImpactUsd)} sought` : `${fmtMoney(report.totalImpactUsd)} protected`}</span>
+          </div>
+        </div>
+        <div className="grid gap-0 lg:grid-cols-[1.4fr_1fr]">
+          <div className="border-b border-white/10 p-6 lg:border-b-0 lg:border-r">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">{audience === "buyer" ? "What we'll diligence & discount" : "Fix before going to market"}</div>
+            <ul className="mt-3 space-y-3">
+              {report.points.map((p) => (
+                <li key={p.title}>
+                  <div className="text-[12px] font-semibold uppercase tracking-wide text-white/55">{p.title}</div>
+                  <div className="mt-0.5 text-[13px] leading-snug text-white/80">{p.body}</div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="p-6">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Recommendation</div>
+            <p className="mt-3 text-[13px] leading-relaxed text-white/75">{report.recommendation}</p>
+            <Button variant="ghost" className="mt-4 text-[12px]">Export {audience === "buyer" ? "buyer" : "seller"} report</Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* ── Diligence question bank ──────────────────────────────── */}
+      <h2 className="mt-12 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Diligence question bank</h2>
       <div className="space-y-2">
         {DILIGENCE.documents.map((d) => (
           <Card key={d.kind} className="overflow-hidden">
@@ -103,5 +180,27 @@ const DiligenceAI: React.FC = () => {
     </div>
   );
 };
+
+const FindingCard: React.FC<{ f: DiligenceFinding; audience: "buyer" | "seller" }> = ({ f, audience }) => (
+  <Card className="p-4">
+    <div className="flex items-start justify-between gap-2">
+      <div className="flex items-center gap-2">
+        <span className={`h-1.5 w-1.5 rounded-full ${SEV_DOT[f.severity]}`} />
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-white/45">{f.subcategory}</span>
+      </div>
+      <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ring-1 ${SEV_STYLE[f.severity]}`}>{f.severity}</span>
+    </div>
+    <div className="mt-1.5 text-[13px] font-semibold leading-snug text-white">{f.title}</div>
+    <p className="mt-1 text-[11.5px] leading-snug text-white/55">{f.detail}</p>
+    <div className="mt-3 rounded-md border border-white/10 bg-ink-900/50 p-2.5">
+      <div className="flex items-center justify-between">
+        <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">{audience === "buyer" ? "Buyer view" : "Your move"}</span>
+        <span className="font-mono text-[11px] text-red-300/80">-{fmtMoney(f.impactUsd)}</span>
+      </div>
+      <p className="mt-1 text-[11.5px] leading-snug text-white/70">{audience === "buyer" ? f.buyerView : f.sellerAction}</p>
+    </div>
+    <div className="mt-2 text-[10px] text-white/35">Source: {f.source}</div>
+  </Card>
+);
 
 export default DiligenceAI;
