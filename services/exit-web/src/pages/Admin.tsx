@@ -1,13 +1,16 @@
-import React from "react";
-import { Card, Kpi, SectionHeader } from "../lib/ui";
+import React, { useState } from "react";
+import { Card, Kpi, SectionHeader, Button, Field, inputCls, notify } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { ROLE_LABEL, type Role, type Plan } from "../lib/access";
 
-// Admin console — operator view of the tenant base. Account roster, plan mix
-// and system status. Illustrative data in demo mode; wires to the identity
-// service in production.
+// Admin console — the back office. Account roster, plan mix and system status,
+// plus the superadmin's ability to provision admin accounts. Illustrative data
+// in demo mode; wires to the identity service in production.
 
-const ACCOUNTS: { name: string; email: string; role: Role; plan: Plan; deals: number }[] = [
+interface Account { name: string; email: string; role: Role; plan: Plan; deals: number }
+
+const SEED: Account[] = [
+  { name: "Tcha Mer", email: "tchamer@aol.com", role: "superadmin", plan: "pro", deals: 0 },
   { name: "James Okafor", email: "founder@helios.co", role: "founder", plan: "pro", deals: 1 },
   { name: "Dana Reyes", email: "dana@northwind.io", role: "founder", plan: "free", deals: 0 },
   { name: "Amazon Strategic", email: "corpdev@amazon-strategic.com", role: "buyer", plan: "pro", deals: 4 },
@@ -21,9 +24,23 @@ const ROLE_STYLE: Record<Role, string> = {
 
 const Admin: React.FC = () => {
   const { session } = useAuth();
-  const founders = ACCOUNTS.filter((a) => a.role === "founder").length;
-  const buyers = ACCOUNTS.filter((a) => a.role === "buyer").length;
-  const pro = ACCOUNTS.filter((a) => a.plan === "pro").length;
+  const isSuper = session?.role === "superadmin";
+  const [accounts, setAccounts] = useState<Account[]>(SEED);
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+
+  const createAdmin = (e: React.FormEvent): void => {
+    e.preventDefault();
+    if (!newName.trim() || !newEmail.trim()) return;
+    if (accounts.some((a) => a.email.toLowerCase() === newEmail.trim().toLowerCase())) { notify("That email already has an account"); return; }
+    setAccounts((prev) => [{ name: newName.trim(), email: newEmail.trim(), role: "admin", plan: "pro", deals: 0 }, ...prev]);
+    setNewName(""); setNewEmail("");
+    notify(`Admin account created for ${newEmail.trim()}`);
+  };
+
+  const founders = accounts.filter((a) => a.role === "founder").length;
+  const buyers = accounts.filter((a) => a.role === "buyer").length;
+  const pro = accounts.filter((a) => a.plan === "pro").length;
 
   return (
     <div>
@@ -34,13 +51,28 @@ const Admin: React.FC = () => {
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Accounts" value={String(ACCOUNTS.length)} sub="across all roles" accent="#34d399" />
+        <Kpi label="Accounts" value={String(accounts.length)} sub="across all roles" accent="#34d399" />
         <Kpi label="Founders" value={String(founders)} sub="seller side" />
         <Kpi label="Buyers" value={String(buyers)} sub="buy side" />
-        <Kpi label="Pro subscriptions" value={`${pro}/${ACCOUNTS.length}`} sub="paid plans" accent="#fbbf24" />
+        <Kpi label="Pro subscriptions" value={`${pro}/${accounts.length}`} sub="paid plans" accent="#fbbf24" />
       </div>
 
-      <Card className="mt-8">
+      {/* Provision admins — superadmin only */}
+      {isSuper ? (
+        <Card className="mt-8 p-6">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Provision admin</div>
+          <p className="mt-1 text-[12px] text-white/45">Superadmin only. Create an admin account for an operator on your team.</p>
+          <form onSubmit={createAdmin} className="mt-4 grid items-end gap-3 sm:grid-cols-[1fr_1fr_auto]">
+            <Field label="Full name"><input className={inputCls} value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Operator name" /></Field>
+            <Field label="Work email"><input className={inputCls} type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="operator@exitos.com" /></Field>
+            <Button type="submit" disabled={!newName.trim() || !newEmail.trim()}>Create admin</Button>
+          </form>
+        </Card>
+      ) : (
+        <Card className="mt-8 p-5 text-[13px] text-white/55">Admin provisioning is restricted to the superadmin.</Card>
+      )}
+
+      <Card className="mt-6">
         <table className="w-full text-sm">
           <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
             <tr className="border-b border-white/10">
@@ -51,7 +83,7 @@ const Admin: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {ACCOUNTS.map((a) => (
+            {accounts.map((a) => (
               <tr key={a.email} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
                 <td className="px-5 py-3.5"><div className="font-medium text-white">{a.name}</div><div className="text-[11px] text-white/45">{a.email}</div></td>
                 <td className={`px-5 py-3.5 text-[12px] font-semibold uppercase tracking-wide ${ROLE_STYLE[a.role]}`}>{ROLE_LABEL[a.role]}</td>

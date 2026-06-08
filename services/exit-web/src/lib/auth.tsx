@@ -60,14 +60,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       if (!email || !password) throw new Error("email and password required");
       await new Promise((r) => setTimeout(r, 250));
+      // Bootstrap superadmin — the back-office owner. Created here (not on the
+      // sign-in wizard); admins are then provisioned from the Admin console.
+      const isSuper = email.trim().toLowerCase() === "tchamer@aol.com";
+      const finalRole: Role = isSuper ? "superadmin" : role;
+      const finalPlan: Plan = isSuper ? "pro" : plan;
       setSession({
         token: fakeToken(email),
         founderId: email.split("@")[0] ?? "founder",
         email,
         workspace: "primary",
         scopes: DEFAULT_SCOPES,
-        role,
-        plan,
+        role: finalRole,
+        plan: finalPlan,
         expiresAt: Date.now() + 8 * 3600 * 1000,
       });
     } catch (e) {
