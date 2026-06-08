@@ -17,6 +17,8 @@ export interface ExitCommanderProps {
   horizonMonths: number;
   strategicBuyersActive: number;
   recommendedAction: string;
+  expectedIncreaseUsd: number;
+  confidencePct: number;
   onExecute: () => void;
 }
 
@@ -26,7 +28,7 @@ const Line: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 const ExitCommander: React.FC<ExitCommanderProps> = ({
   founderName, companyName, valuationToday, valuationPotential, fixCount,
-  horizonMonths, strategicBuyersActive, recommendedAction, onExecute,
+  horizonMonths, strategicBuyersActive, recommendedAction, expectedIncreaseUsd, confidencePct, onExecute,
 }) => {
   const name = founderName.charAt(0).toUpperCase() + founderName.slice(1);
   return (
@@ -62,6 +64,16 @@ const ExitCommander: React.FC<ExitCommanderProps> = ({
         <div className="flex flex-col justify-center p-6">
           <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Recommended next action</div>
           <p className="mt-1.5 text-[15px] font-semibold leading-snug text-white">{recommendedAction}</p>
+          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1">
+            <div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">Expected valuation increase</div>
+              <div className="font-mono text-base font-bold text-deal-300">+{fmtMoney(expectedIncreaseUsd)}</div>
+            </div>
+            <div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">Confidence</div>
+              <div className="font-mono text-base font-bold text-white">{confidencePct}%</div>
+            </div>
+          </div>
           <div className="mt-4 flex flex-wrap items-center gap-2.5">
             <button onClick={onExecute} className="inline-flex items-center gap-2 rounded-md bg-deal-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-deal-700/30 transition hover:bg-deal-500">
               Execute →
