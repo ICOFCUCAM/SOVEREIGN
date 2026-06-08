@@ -103,7 +103,7 @@ const Landing: React.FC = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 opacity-50" aria-hidden style={{ background: "linear-gradient(to top, rgba(255,255,255,0.5), transparent)" }} />
         <div className="pointer-events-none absolute bottom-[6%] right-[6%] h-72 w-[60%] rounded-[50%] opacity-70 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.40), rgba(70,150,220,0) 70%)" }} aria-hidden />
 
-        <div className="relative mx-auto grid max-w-[1440px] items-center gap-6 px-6 py-16 lg:grid-cols-[0.62fr_1.5fr] lg:px-10 lg:py-24">
+        <div className="relative mx-auto grid max-w-[1480px] items-center gap-4 px-6 py-16 lg:grid-cols-[0.5fr_1.7fr] lg:px-10 lg:py-24">
           <div className="lg:pr-2">
             <h1 className="font-serif text-4xl font-bold leading-[1.06] tracking-tight text-ink-900 sm:text-5xl">
               THE OPERATING SYSTEM<br />FOR COMPANY SALES
@@ -631,11 +631,11 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
   >
     <div className={"grid grid-cols-1 " + (lean ? "lg:grid-cols-[44%_56%]" : "lg:grid-cols-[25%_45%_30%]")}>
       {/* ---- COL 1 · STRATEGIC BUYERS ---- */}
-      <div className="border-b border-white/5 px-5 py-4 lg:border-b-0 lg:border-r">
+      <div className="border-b border-white/5 px-5 py-3 lg:border-b-0 lg:border-r">
         <BoardHeader title="Strategic Buyers" right="Match Score" />
         <div className="mt-1">
           {(lean ? STRATEGIC_BUYERS.filter((b) => ["Microsoft", "Salesforce", "Oracle", "Thoma Bravo"].includes(b[0])) : STRATEGIC_BUYERS).map(([name, sector, match, status]) => (
-            <div key={name} className="group flex items-center justify-between gap-2 border-b border-white/5 py-2 transition last:border-0 hover:translate-x-1" style={{ transitionDuration: ".25s" }}>
+            <div key={name} className="group flex items-center justify-between gap-2 border-b border-white/5 py-1.5 transition last:border-0 hover:translate-x-1" style={{ transitionDuration: ".25s" }}>
               <div className="flex items-center gap-2">
                 <Mark name={name} size={22} />
                 <div>
@@ -655,7 +655,7 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
 
       {/* ---- COL 2 · LIVE TRANSACTIONS (full board only) ---- */}
       {!lean && (
-      <div className="border-b border-white/5 px-5 py-4 lg:border-b-0 lg:border-r">
+      <div className="border-b border-white/5 px-5 py-3 lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="inline-block h-2 w-2 animate-pulse rounded-full" style={{ background: "#45E38A" }} />
@@ -667,7 +667,7 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
         </div>
         <div className="mt-1">
           {TRANSACTIONS.map((t) => (
-            <div key={t.company} className="grid grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 border-b border-white/5 py-2 last:border-0">
+            <div key={t.company} className="grid grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 border-b border-white/5 py-1.5 last:border-0">
               <div>
                 <div className="text-[12.5px] font-medium text-white/90">{t.company}</div>
                 <div className="text-[10px] text-white/45">{t.industry}</div>
@@ -692,7 +692,7 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
       )}
 
       {/* ---- COL 3 · ACQUISITION DEMAND ---- */}
-      <div className="px-5 py-4">
+      <div className="px-5 py-3">
         <BoardHeader title="Acquisition Demand" right="Market Heat" />
         <div className="mt-3 space-y-2">
           {(lean ? DEMAND.slice(0, 4) : DEMAND).map(([label, heat, bars]) => (
