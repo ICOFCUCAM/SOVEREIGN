@@ -44,15 +44,19 @@ const Wealth: React.FC = () => {
 
   const portfolioUsd = afterTax * ALLOC[0].pct;
 
-  // WealthOS tracker — the six threads ExitOS keeps after the wire.
+  // WealthOS — the nine threads ExitOS keeps after the wire, owning the
+  // founder lifecycle from exit into long-term wealth.
   const foViable = afterTax >= 50_000_000;
   const tracker: { label: string; value: string; note: string; pill: string; tint: string }[] = [
-    { label: "Proceeds",      value: fmtMoney(afterTax),                 note: "after-tax net, scheduled across tranches",   pill: "Tracked",     tint: "#34d399" },
-    { label: "Taxes",         value: fmtMoney(taxDue),                   note: `reserved · ~${(TAX * 100).toFixed(1)}% blended`, pill: "Reserved",  tint: "#fbbf24" },
-    { label: "Trusts",        value: fmtMoney(Math.round(afterTax * 0.15)), note: "GRAT / family trust for estate efficiency", pill: "Recommended", tint: "#a78bfa" },
-    { label: "Family office", value: foViable ? "Single-family office" : "Multi-family office", note: foViable ? "liquidity supports a dedicated SFO" : "MFO / OCIO until scale", pill: "Setup", tint: "#60a5fa" },
-    { label: "Reinvestments", value: fmtMoney(afterTax * ALLOC[1].pct),  note: "next venture · angel portfolio",             pill: "Allocated",   tint: "#34d399" },
-    { label: "Philanthropy",  value: fmtMoney(afterTax * ALLOC[3].pct),  note: "donor-advised fund · tax-efficient",         pill: "Allocated",   tint: "#fbbf24" },
+    { label: "Tax Planning",            value: fmtMoney(taxDue),                       note: `reserved · QSBS + installment review`,        pill: "Reserved",    tint: "#fbbf24" },
+    { label: "Trust Structures",        value: fmtMoney(Math.round(afterTax * 0.12)),  note: "GRAT / family trust for estate efficiency",   pill: "Recommended", tint: "#a78bfa" },
+    { label: "Family Office",           value: foViable ? "Single-family office" : "Multi-family office", note: foViable ? "liquidity supports a dedicated SFO" : "MFO / OCIO until scale", pill: "Setup", tint: "#60a5fa" },
+    { label: "Investment Opportunities", value: fmtMoney(Math.round(afterTax * 0.30)), note: "diversified market portfolio",                pill: "Allocated",   tint: "#34d399" },
+    { label: "Angel Investing",         value: fmtMoney(Math.round(afterTax * 0.08)),  note: "operator-edge angel checks",                  pill: "Allocated",   tint: "#34d399" },
+    { label: "Private Equity",          value: fmtMoney(Math.round(afterTax * 0.10)),  note: "co-invest / fund commitments",                pill: "Allocated",   tint: "#34d399" },
+    { label: "Real Estate",             value: fmtMoney(Math.round(afterTax * 0.12)),  note: "property · inflation hedge",                  pill: "Allocated",   tint: "#a78bfa" },
+    { label: "Philanthropy",            value: fmtMoney(Math.round(afterTax * 0.08)),  note: "donor-advised fund · tax-efficient",          pill: "Allocated",   tint: "#fbbf24" },
+    { label: "Next Venture",            value: fmtMoney(Math.round(afterTax * 0.10)),  note: "the next company · holdco",                   pill: "Reserved",    tint: "#60a5fa" },
   ];
 
   return (
@@ -87,8 +91,8 @@ const Wealth: React.FC = () => {
         </div>
       </Card>
 
-      {/* ── WealthOS tracker ─────────────────────────────────────── */}
-      <h2 className="mt-8 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">WealthOS tracker</h2>
+      {/* ── WealthOS tracker — nine lifecycle threads ────────────── */}
+      <h2 className="mt-8 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">WealthOS · founder lifecycle</h2>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {tracker.map((t) => (
           <Card key={t.label} className="relative overflow-hidden p-5">

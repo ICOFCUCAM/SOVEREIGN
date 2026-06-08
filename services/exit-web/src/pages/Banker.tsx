@@ -157,6 +157,44 @@ const Banker: React.FC = () => {
         </div>
       </Card>
 
+      {/* ── AI Banker · Strategy advisory ────────────────────────── */}
+      {(() => {
+        const target = VALUATION_STRATEGIC.headline.high;
+        const bestBuyer = ranked[0]?.buyer.name ?? "the top strategic";
+        const advice = [
+          { q: "Best buyer", a: `${bestBuyer} — highest fit and expected outcome in the pool.` },
+          { q: "Best timing", a: "Months 7–13 — after the readiness gap closes and while multiples hold." },
+          { q: "Best structure", a: "Cash-heavy: ≥75% cash, earnout capped at 15% on audited milestones." },
+          { q: "Best outreach", a: "Anonymized teaser → 7-buyer shortlist → competitive indications of interest." },
+          { q: "Best valuation", a: `Anchor at the strategic band — ${fmtMoney(VALUATION_STRATEGIC.headline.mid)} mid, ${fmtMoney(target)} stretch.` },
+          { q: "Best negotiation", a: "Run all buyers in parallel; counter above strategic-mid with a leverage premium." },
+          { q: "Best closing", a: "Escrow ≤8% released in 12 months; reverse break-fee; 30–45 day sign-to-close." },
+        ];
+        return (
+          <Card className="mb-8 p-6">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-deal-600/30 text-[10px] font-bold text-deal-200 ring-1 ring-deal-400/40">AI</span>
+              <h2 className="font-serif text-base font-bold text-white">Ask your banker</h2>
+            </div>
+            <div className="mt-3 rounded-lg border border-deal-500/30 bg-deal-600/[0.07] p-4">
+              <div className="text-[12px] text-white/55">"What is the fastest path to a {fmtMoney(target)} exit?"</div>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-white/85">
+                Shortlist 7 strategics, run a 6-week teaser → IOI → LOI process in parallel, and anchor at{" "}
+                <span className="font-mono font-semibold text-deal-300">{fmtMoney(target)}</span>. Close cash-heavy with a tight escrow — the readiness fixes and competitive tension carry the rest.
+              </p>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {advice.map((x) => (
+                <div key={x.q} className="rounded-lg border border-white/10 bg-ink-900/40 p-3.5">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-deal-300">{x.q}</div>
+                  <div className="mt-1 text-[12.5px] leading-snug text-white/75">{x.a}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        );
+      })()}
+
       {/* ── Deliverables ─────────────────────────────────────────── */}
       <div className="mt-8">
         <h2 className="font-serif text-lg font-bold text-white">Deliverables</h2>

@@ -150,9 +150,9 @@ const Readiness: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-deal-600/30 text-[10px] font-bold text-deal-200 ring-1 ring-deal-400/40">AI</span>
-            <h2 className="font-serif text-lg font-bold text-white">Exit Readiness AI</h2>
+            <h2 className="font-serif text-lg font-bold text-white">Exit Readiness AI · Value Impact Simulator</h2>
           </div>
-          <p className="mt-1 text-xs text-white/45">Scored across the six categories buyers underwrite — every gap priced. {READINESS_ANALYSIS.headline}</p>
+          <p className="mt-1 text-xs text-white/45">Scored across the ten categories buyers underwrite — every fix priced. {READINESS_ANALYSIS.headline}</p>
         </div>
         <div className="text-right text-[11px]">
           <div className="uppercase tracking-[0.2em] text-white/40">Total upside</div>

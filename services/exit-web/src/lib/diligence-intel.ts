@@ -223,6 +223,52 @@ export function buildBuyerReport(findings: readonly DiligenceFinding[]): RiskRep
   };
 }
 
+// The six named reports a bank + law firm would produce, all from one scan.
+export interface NamedReport {
+  key: string;
+  title: string;
+  headline: string;
+  metric: string;
+  points: readonly { title: string; body: string }[];
+  recommendation: string;
+  accent: "buyer" | "seller";
+}
+
+const m1 = (n: number): string => `$${(n / 1_000_000).toFixed(1)}M`;
+
+export function allReports(findings: readonly DiligenceFinding[]): NamedReport[] {
+  const buyer = buildBuyerReport(findings);
+  const seller = buildSellerReport(findings);
+  const high = findings.filter((f) => f.severity === "high");
+  const legal = findings.filter((f) => f.category === "Legal");
+  const total = findings.reduce((s, f) => s + f.impactUsd, 0);
+  const byImpact = [...findings].sort((a, b) => b.impactUsd - a.impactUsd);
+  const readyPct = findings.length ? Math.round((1 - high.length / findings.length) * 100) : 100;
+
+  return [
+    { key: "buyer", title: "Buyer Diligence Report", accent: "buyer", metric: `${m1(total)} sought`,
+      headline: buyer.headline, points: buyer.points, recommendation: buyer.recommendation },
+    { key: "seller", title: "Seller Risk Report", accent: "seller", metric: `${m1(total)} protected`,
+      headline: seller.headline, points: seller.points, recommendation: seller.recommendation },
+    { key: "readiness", title: "Deal Readiness Report", accent: "seller", metric: `${readyPct}% ready`,
+      headline: `${high.length} gating item${high.length === 1 ? "" : "s"} and ${findings.length - high.length} secondary. ${high.length === 0 ? "Clear to open the room." : "Resolve the gating items before buyer access."}`,
+      points: high.map((f) => ({ title: `${f.subcategory} — gating`, body: f.sellerAction })),
+      recommendation: "Open the data room once the gating items are resolved; the rest can be disclosed with mitigations attached." },
+    { key: "redflag", title: "Red Flag Report", accent: "buyer", metric: `${high.length} red flags`,
+      headline: `${high.length} red flag${high.length === 1 ? "" : "s"} a buyer's analyst will raise first.`,
+      points: high.map((f) => ({ title: `${f.subcategory} — ${f.severity}`, body: f.detail })),
+      recommendation: "Get ahead of every red flag with a disclosure and a mitigation in the CIM before buyers find them." },
+    { key: "valuation", title: "Valuation Impact Report", accent: "buyer", metric: `-${m1(total)}`,
+      headline: `Unresolved findings carry an estimated ${m1(total)} discount to the headline.`,
+      points: byImpact.slice(0, 5).map((f) => ({ title: `${f.subcategory} · -${m1(f.impactUsd)}`, body: f.buyerView })),
+      recommendation: "Fix the highest-impact items first — each one closes part of the discount a buyer would otherwise take." },
+    { key: "legal", title: "Legal Exposure Report", accent: "seller", metric: `${legal.length} items`,
+      headline: `${legal.length} legal item${legal.length === 1 ? "" : "s"} shape the reps, indemnity cap and escrow.`,
+      points: legal.map((f) => ({ title: f.subcategory, body: f.sellerAction })),
+      recommendation: "Backfill IP assignments and missing contracts now to shrink the indemnity and escrow ask at close." },
+  ];
+}
+
 // Seller Risk Report — the same findings as a pre-market fix list.
 export function buildSellerReport(findings: readonly DiligenceFinding[]): RiskReport {
   const bySeverity = tally(findings);

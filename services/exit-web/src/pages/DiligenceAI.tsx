@@ -3,8 +3,8 @@ import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
 import { DILIGENCE } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 import {
-  discoverFindings, buildBuyerReport, buildSellerReport, SOURCE_FILES,
-  type DiligenceFinding, type RiskCategory, type Severity, type RiskReport,
+  discoverFindings, allReports, SOURCE_FILES,
+  type DiligenceFinding, type RiskCategory, type Severity,
 } from "../lib/diligence-intel";
 
 // Diligence Intelligence Engine — ingests the uploaded document set, discovers
@@ -27,14 +27,13 @@ const CATEGORIES: { key: RiskCategory; blurb: string }[] = [
 
 const DiligenceAI: React.FC = () => {
   const findings = useMemo(() => discoverFindings(), []);
-  const buyerReport  = useMemo(() => buildBuyerReport(findings), [findings]);
-  const sellerReport = useMemo(() => buildSellerReport(findings), [findings]);
-  const [audience, setAudience] = useState<"buyer" | "seller">("seller");
+  const reports = useMemo(() => allReports(findings), [findings]);
+  const [reportKey, setReportKey] = useState<string>("seller");
   const [open, setOpen] = useState<string | null>(DILIGENCE.documents[0]?.kind ?? null);
 
   const high = findings.filter((f) => f.severity === "high").length;
-  const buyerDiscount = buyerReport.totalImpactUsd;
-  const report: RiskReport = audience === "buyer" ? buyerReport : sellerReport;
+  const buyerDiscount = findings.reduce((s, f) => s + f.impactUsd, 0);
+  const report = reports.find((r) => r.key === reportKey) ?? reports[0];
 
   // findings grouped by the source file that surfaced them
   const bySource = SOURCE_FILES.map((s) => ({ ...s, count: findings.filter((f) => f.source === s.label).length }));
@@ -110,46 +109,42 @@ const DiligenceAI: React.FC = () => {
                 <p className="text-[11px] text-white/45">{cat.blurb}</p>
               </div>
               <div className="space-y-3">
-                {items.map((f) => <FindingCard key={f.id} f={f} audience={audience} />)}
+                {items.map((f) => <FindingCard key={f.id} f={f} audience={report.accent} />)}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* ── Dual risk reports ────────────────────────────────────── */}
-      <div className="mt-12 flex items-center justify-between">
-        <div>
-          <h2 className="font-serif text-lg font-bold text-white">Generated diligence reports</h2>
-          <p className="text-xs text-white/45">The same findings, written for each side of the table — Buyer Diligence Report and Seller Risk Report.</p>
-        </div>
-        <div className="inline-flex rounded-md border border-white/15 bg-ink-800/40 p-1">
-          <button onClick={() => setAudience("seller")} className={`rounded px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${audience === "seller" ? "bg-deal-600/30 text-white" : "text-white/55 hover:text-white"}`}>Seller report</button>
-          <button onClick={() => setAudience("buyer")} className={`rounded px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${audience === "buyer" ? "bg-deal-600/30 text-white" : "text-white/55 hover:text-white"}`}>Buyer report</button>
+      {/* ── Generated reports — six, from one scan ───────────────── */}
+      <div className="mt-12">
+        <h2 className="font-serif text-lg font-bold text-white">Generated reports</h2>
+        <p className="text-xs text-white/45">Six reports an investment bank and law firm would bill thousands for — produced from one scan.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {reports.map((r) => (
+            <button key={r.key} onClick={() => setReportKey(r.key)}
+              className={`rounded-md px-3 py-1.5 text-[12px] font-semibold transition ${report.key === r.key ? "bg-deal-600/25 text-white ring-1 ring-deal-400/40" : "text-white/55 hover:bg-white/5 hover:text-white"}`}>
+              {r.title}
+            </button>
+          ))}
         </div>
       </div>
 
-      <Card className={`mt-4 overflow-hidden p-0 ring-1 ${audience === "buyer" ? "ring-red-400/30" : "ring-deal-400/30"}`}>
-        <div className={`border-b border-white/10 px-6 py-4 ${audience === "buyer" ? "bg-red-500/10" : "bg-deal-600/10"}`}>
-          <div className="flex items-center gap-2">
-            <span className={`inline-flex h-6 w-6 items-center justify-center rounded-md text-[12px] font-bold ring-1 ${audience === "buyer" ? "bg-red-500/25 text-red-200 ring-red-400/40" : "bg-deal-600/30 text-deal-200 ring-deal-400/40"}`}>
-              {audience === "buyer" ? "B" : "S"}
-            </span>
-            <span className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${audience === "buyer" ? "text-red-200" : "text-deal-300"}`}>{report.title}</span>
+      <Card className={`mt-4 overflow-hidden p-0 ring-1 ${report.accent === "buyer" ? "ring-red-400/30" : "ring-deal-400/30"}`}>
+        <div className={`border-b border-white/10 px-6 py-4 ${report.accent === "buyer" ? "bg-red-500/10" : "bg-deal-600/10"}`}>
+          <div className="flex items-center justify-between gap-3">
+            <span className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${report.accent === "buyer" ? "text-red-200" : "text-deal-300"}`}>{report.title}</span>
+            <span className="font-mono text-sm font-bold text-white">{report.metric}</span>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-white/80">{report.headline}</p>
-          <div className="mt-3 flex flex-wrap gap-4 text-[12px]">
-            <span className="text-white/55">{report.bySeverity.high} high</span>
-            <span className="text-white/55">{report.bySeverity.medium} medium</span>
-            <span className="text-white/55">{report.bySeverity.low} low</span>
-            <span className="font-mono font-semibold text-white">{audience === "buyer" ? `-${fmtMoney(report.totalImpactUsd)} sought` : `${fmtMoney(report.totalImpactUsd)} protected`}</span>
-          </div>
         </div>
         <div className="grid gap-0 lg:grid-cols-[1.4fr_1fr]">
           <div className="border-b border-white/10 p-6 lg:border-b-0 lg:border-r">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">{audience === "buyer" ? "What we'll diligence & discount" : "Fix before going to market"}</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Findings</div>
             <ul className="mt-3 space-y-3">
-              {report.points.map((p) => (
+              {report.points.length === 0 ? (
+                <li className="text-[13px] text-white/55">Nothing flagged in this report — clean on this dimension.</li>
+              ) : report.points.map((p) => (
                 <li key={p.title}>
                   <div className="text-[12px] font-semibold uppercase tracking-wide text-white/55">{p.title}</div>
                   <div className="mt-0.5 text-[13px] leading-snug text-white/80">{p.body}</div>
@@ -160,7 +155,7 @@ const DiligenceAI: React.FC = () => {
           <div className="p-6">
             <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Recommendation</div>
             <p className="mt-3 text-[13px] leading-relaxed text-white/75">{report.recommendation}</p>
-            <Button variant="ghost" className="mt-4 text-[12px]">Export {audience === "buyer" ? "buyer" : "seller"} report</Button>
+            <Button variant="ghost" className="mt-4 text-[12px]">Export this report</Button>
           </div>
         </div>
       </Card>
