@@ -33,8 +33,8 @@ export const StageBadge: React.FC<{ stage: DealStage }> = ({ stage }) => (
   </span>
 );
 
-export const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
-  <div className={`rounded-lg border border-white/10 bg-ink-800/60 ${className}`}>{children}</div>
+export const Card: React.FC<{ children: React.ReactNode; className?: string; id?: string }> = ({ children, className = "", id }) => (
+  <div id={id} className={`rounded-lg border border-white/10 bg-ink-800/60 ${className}`}>{children}</div>
 );
 
 export const Kpi: React.FC<{ label: string; value: string; sub?: string; accent?: string }> = ({ label, value, sub, accent }) => (

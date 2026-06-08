@@ -195,7 +195,7 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
-      <div className="mt-10 grid gap-5 lg:grid-cols-3">
+      <div id="readiness" className="mt-10 grid gap-5 lg:grid-cols-3">
         <Card className="p-6 lg:col-span-2">
           <div className="mb-4 flex items-end justify-between">
             <div>

@@ -98,7 +98,7 @@ const Closing: React.FC = () => {
       </div>
 
       {/* Closing Risk Meter — close probability + the risks gating the wire */}
-      <Card className="mt-8 p-6">
+      <Card className="mt-8 p-6" id="escrow">
         <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
           <div className="flex flex-col items-center justify-center border-b border-white/10 pb-5 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6">
             <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Current close probability</div>
@@ -136,7 +136,7 @@ const Closing: React.FC = () => {
       </Card>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_320px]">
-        <div>
+        <div id="signatures">
           <h2 className="mb-3 font-serif text-lg font-bold">Closing checklist — Sentinel Holdings</h2>
           <Card>
             <table className="w-full text-sm">
