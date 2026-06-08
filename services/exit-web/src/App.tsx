@@ -28,6 +28,7 @@ import Wealth from "./pages/Wealth";
 import BuyerCopilot from "./pages/BuyerCopilot";
 import DealRoom from "./pages/DealRoom";
 import ExitTiming from "./pages/ExitTiming";
+import Commander from "./pages/Commander";
 
 const Console: React.FC = () => {
   const { session } = useAuth();
@@ -36,6 +37,7 @@ const Console: React.FC = () => {
     <Shell>
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="commander" element={<Commander />} />
         <Route path="autopilot" element={<Autopilot />} />
         <Route path="readiness" element={<Readiness />} />
         <Route path="exit-timing" element={<ExitTiming />} />

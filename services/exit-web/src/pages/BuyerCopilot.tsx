@@ -59,6 +59,37 @@ function dossier(c: BuyerCandidate): Dossier {
   return { likelihood, rangeLow, rangeHigh, days, risk, synergy, priorDeals, recommendedOpen };
 }
 
+// Buyer DNA — the behavioral profile a founder could never assemble alone:
+// how this acquirer treats founders, prices, structures and integrates.
+interface BuyerDNA {
+  founderFriendly: number;     // 0..100
+  typicalPremiumPct: number;
+  earnoutUsage: "Low" | "Medium" | "High";
+  negotiationStyle: string;
+  integration: string;
+  legalAggression: "Low" | "Moderate" | "High";
+  decisionMakers: string;
+}
+
+const DNA_BY_TYPE: Record<string, Omit<BuyerDNA, "founderFriendly" | "typicalPremiumPct">> = {
+  strategic:     { earnoutUsage: "Low",    negotiationStyle: "Collaborative · synergy-led", integration: "Full integration",   legalAggression: "Moderate", decisionMakers: "Corp dev → BU GM → CFO" },
+  pe:            { earnoutUsage: "High",   negotiationStyle: "Disciplined · price-led",     integration: "Standalone platform", legalAggression: "High",     decisionMakers: "Deal partner → Investment committee" },
+  vc:            { earnoutUsage: "Medium", negotiationStyle: "Speed-led · founder-aligned", integration: "Light-touch",         legalAggression: "Low",      decisionMakers: "Partner → Fund principals" },
+  family_office: { earnoutUsage: "Low",    negotiationStyle: "Relationship-led · patient",  integration: "Hands-off / hold",    legalAggression: "Low",      decisionMakers: "Principal → Family board" },
+  sponsor:       { earnoutUsage: "High",   negotiationStyle: "Structured · returns-led",    integration: "Buy-and-build",       legalAggression: "High",     decisionMakers: "Operating partner → IC" },
+};
+
+function buyerDNA(c: BuyerCandidate): BuyerDNA {
+  const t = c.buyer.buyerType;
+  const baseFriendly: Record<string, number> = { strategic: 78, pe: 64, vc: 80, family_office: 90, sponsor: 60 };
+  const retrade = c.outcomes.avgRetradePct ?? 0;
+  const founderFriendly = Math.max(35, Math.min(96, Math.round((baseFriendly[t] ?? 70) + (retrade >= 0 ? 8 : retrade < -0.05 ? -16 : -6))));
+  const premiumDefault: Record<string, number> = { strategic: 28, pe: 12, vc: 18, family_office: 15, sponsor: 10 };
+  const typicalPremiumPct = c.outcomes.avgPremiumPct != null ? Math.round(Math.min(0.4, c.outcomes.avgPremiumPct) * 100) : (premiumDefault[t] ?? 15);
+  const rest = DNA_BY_TYPE[t] ?? DNA_BY_TYPE.strategic;
+  return { founderFriendly, typicalPremiumPct, ...rest };
+}
+
 const RISK_COLOR: Record<string, string> = { Low: "#34d399", Medium: "#fbbf24", High: "#f87171" };
 const SYN_COLOR: Record<string, string> = { High: "#34d399", Medium: "#fbbf24", Low: "#94a3b8" };
 const TYPE_STYLE: Record<string, string> = {
@@ -129,6 +160,31 @@ const BuyerCopilot: React.FC = () => {
                 </div>
                 <div className="font-mono text-xl font-bold text-deal-300">{fmtMoney(d.recommendedOpen)}</div>
               </div>
+
+              {/* Buyer DNA */}
+              {(() => {
+                const dna = buyerDNA(c);
+                return (
+                  <div className="mt-4 border-t border-white/10 pt-4">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Buyer DNA</div>
+                    <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2.5 text-[12px] sm:grid-cols-3">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide text-white/40">Founder-friendly</div>
+                        <div className="mt-0.5 flex items-center gap-1.5">
+                          <div className="h-1 w-10 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-deal-400" style={{ width: `${dna.founderFriendly}%` }} /></div>
+                          <span className="font-mono font-semibold text-white">{dna.founderFriendly}%</span>
+                        </div>
+                      </div>
+                      <Metric label="Typical premium" value={`+${dna.typicalPremiumPct}%`} color="#34d399" />
+                      <Metric label="Earnout usage" value={dna.earnoutUsage} />
+                      <Metric label="Negotiation" value={dna.negotiationStyle} />
+                      <Metric label="Integration" value={dna.integration} />
+                      <Metric label="Legal posture" value={dna.legalAggression} />
+                    </div>
+                    <div className="mt-2.5 text-[11px] text-white/45">Decision makers: <span className="text-white/70">{dna.decisionMakers}</span></div>
+                  </div>
+                );
+              })()}
             </Card>
           );
         })}

@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
 import BankerTake from "../components/BankerTake";
-import { VALUATION_STRATEGIC, READINESS_ANALYSIS, BUYERS } from "../lib/engines";
+import { VALUATION_STRATEGIC, READINESS, READINESS_ANALYSIS, BUYERS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 
 // Exit Timing Engine — most founders don't know *when* to sell. The engine
@@ -33,6 +33,19 @@ const ExitTiming: React.FC = () => {
   const windowLo = Math.max(2, monthsToReady - 2);
   const windowHi = monthsToReady + 4;
   const sweet = monthsToReady;
+
+  // ── Multi-year readiness timeline ────────────────────────────
+  // Score climbs as fixes mature (~+25 then +43 from base); value compounds
+  // ~30%/yr (ARR growth tempered + the readiness lift).
+  const baseYear = new Date().getFullYear();
+  const yearScores = [READINESS.overallScore, READINESS.overallScore + 25, READINESS.overallScore + 43].map((s) => Math.min(95, Math.round(s)));
+  const timeline = [0, 1, 2].map((i) => ({
+    year: baseYear + i,
+    score: yearScores[i],
+    value: Math.round(current * Math.pow(1.3, i)),
+  }));
+  const windowIdx = yearScores.findIndex((s) => s >= 85);
+  const windowRow = timeline[windowIdx === -1 ? timeline.length - 1 : windowIdx];
 
   const signals: { label: string; value: string; trend: string; impact: Impact; note: string }[] = [
     { label: "Industry multiples", value: "3.4× revenue", trend: "+11% YoY", impact: "tailwind", note: "Sector multiples expanding as logistics-tech consolidates." },
@@ -108,6 +121,41 @@ const ExitTiming: React.FC = () => {
               cycle turning. The window balances both.
             </p>
           </div>
+        </div>
+      </Card>
+
+      {/* ── Exit Readiness Timeline ──────────────────────────────── */}
+      <Card className="mt-8 p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Exit readiness timeline</div>
+            <p className="mt-1 text-[12px] text-white/45">Where readiness and value head as the gaps close and the business compounds.</p>
+          </div>
+          <div className="rounded-lg border border-deal-500/30 bg-deal-600/[0.07] px-4 py-2 text-right">
+            <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-deal-300">Recommended exit window</div>
+            <div className="font-mono text-base font-bold text-white">Q2 {windowRow.year} · {fmtMoney(windowRow.value)}</div>
+          </div>
+        </div>
+        <div className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-xl bg-white/10">
+          {timeline.map((t) => {
+            const isWindow = t.year === windowRow.year;
+            const c = t.score >= 85 ? "#34d399" : t.score >= 60 ? "#fbbf24" : "#f87171";
+            return (
+              <div key={t.year} className={`bg-ink-800/95 p-4 ${isWindow ? "ring-1 ring-inset ring-deal-400/50" : ""}`}>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-lg font-bold text-white">{t.year}</span>
+                  {isWindow && <span className="rounded-full bg-deal-600/25 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-deal-200">Window</span>}
+                </div>
+                <div className="mt-3 text-[10px] uppercase tracking-wide text-white/40">Ready score</div>
+                <div className="font-mono text-2xl font-bold" style={{ color: c }}>{t.score}</div>
+                <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full rounded-full" style={{ width: `${t.score}%`, background: c }} />
+                </div>
+                <div className="mt-3 text-[10px] uppercase tracking-wide text-white/40">Expected value</div>
+                <div className="font-mono text-base font-semibold text-white">{fmtMoney(t.value)}</div>
+              </div>
+            );
+          })}
         </div>
       </Card>
 

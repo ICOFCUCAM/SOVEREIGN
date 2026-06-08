@@ -7,6 +7,7 @@ import { useAuth } from "../lib/auth";
 // Close. Each item maps to a real surface; facets that live inside a page
 // (Readiness, Signatures, Escrow) link to an anchor on that page.
 const NAV: Array<{ to: string; label: string; group: string; scope?: string }> = [
+  { to: "/console/commander",          label: "Exit Commander",   group: "Overview" },
   { to: "/console",                    label: "Dashboard",        group: "Overview" },
   { to: "/console/autopilot",          label: "Autonomous Exit",  group: "Overview" },
 

@@ -4,13 +4,14 @@ import { Button, Card, Kpi, SectionHeader, fmtMoney, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import {
   VALUATION_STANDARD, VALUATION_STRATEGIC, VALUATION_REPLACEMENT,
-  READINESS, READINESS_ANALYSIS, BUYERS, DILIGENCE, NEGOTIATION_STATE,
+  READINESS, READINESS_ANALYSIS, BUYERS, DILIGENCE,
 } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import ExitProcessModal from "../components/ExitProcessModal";
 import JourneyMap from "../components/JourneyMap";
 import ExitCommander from "../components/ExitCommander";
 import CommandTiles from "../components/CommandTiles";
+import { commanderMetrics } from "../lib/commander-metrics";
 import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
 import { emitTelemetry } from "../lib/telemetry";
 
@@ -41,31 +42,7 @@ const Dashboard: React.FC = () => {
   const arrM = SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd / 1_000_000;
 
   const navigate = useNavigate();
-  const topMove = READINESS_ANALYSIS.weaknesses[0];
-  const strategicActive = BUYERS.candidates.filter((c) => c.buyer.buyerType === "strategic" && c.buyer.appetite === "active").length;
-  const recommendedAction = strategicActive > 0
-    ? `Launch soft outreach to the ${strategicActive} strategic buyer${strategicActive === 1 ? "" : "s"} already circling.`
-    : topMove
-      ? topMove.recommendation.split(".")[0] + "."
-      : "Start the process — your posture is strong.";
-
-  // ── Command Center metrics — all engine-derived ──────────────
-  const companyValue = VALUATION_STRATEGIC.headline.mid;
-  const potential = READINESS_ANALYSIS.projectedStrategicMid;
-  const activeBuyers = BUYERS.candidates.filter((c) => c.buyer.appetite === "active").length;
-  const demandLabel: "High" | "Medium" | "Low" = activeBuyers >= 5 ? "High" : activeBuyers >= 2 ? "Medium" : "Low";
-  // exit probability — blend of readiness, buyer demand and negotiation leverage
-  const readinessNorm = READINESS.overallScore / 100;
-  const demandNorm = Math.min(1, activeBuyers / 6);
-  const levNorm = NEGOTIATION_STATE.leverage === "high" ? 1 : NEGOTIATION_STATE.leverage === "medium" ? 0.6 : 0.3;
-  const exitProbability = Math.round((0.35 * readinessNorm + 0.4 * demandNorm + 0.25 * levNorm) * 100);
-  // time to exit — median expected days to cash across the buyer pool, in months
-  const dayList = BUYERS.candidates.map((c) => c.expectedOutcome.expectedDaysToCash).filter((n) => n > 0).sort((a, b) => a - b);
-  const medianDays = dayList.length ? dayList[Math.floor(dayList.length / 2)] : 120;
-  const timeToExitMonths = (medianDays / 30).toFixed(1);
-  // recommendation economics
-  const expectedIncreaseUsd = topMove ? topMove.valuationUpliftUsd : Math.round(companyValue * 0.1);
-  const confidencePct = Math.min(92, 64 + activeBuyers * 3 + Math.round(levNorm * 12));
+  const m = commanderMetrics();
 
   const [run, setRun] = useState<ExitRun | null>(() => loadRun());
   const [modalOpen, setModalOpen] = useState(false);
@@ -109,25 +86,25 @@ const Dashboard: React.FC = () => {
       <JourneyMap current={run?.status === "complete" ? "run" : "monitor"} />
 
       <CommandTiles
-        companyValue={companyValue}
-        potential={potential}
-        exitProbability={exitProbability}
-        demandLabel={demandLabel}
-        buyersMatching={activeBuyers}
-        timeToExitMonths={timeToExitMonths}
+        companyValue={m.companyValue}
+        potential={m.potential}
+        exitProbability={m.exitProbability}
+        demandLabel={m.demandLabel}
+        buyersMatching={m.activeBuyers}
+        timeToExitMonths={m.timeToExitMonths}
       />
 
       <ExitCommander
         founderName={session?.founderId ?? "founder"}
         companyName={SAMPLE_COMPANY.name}
-        valuationToday={companyValue}
-        valuationPotential={potential}
-        fixCount={READINESS_ANALYSIS.weaknesses.length}
+        valuationToday={m.companyValue}
+        valuationPotential={m.potential}
+        fixCount={m.fixCount}
         horizonMonths={6}
-        strategicBuyersActive={strategicActive}
-        recommendedAction={recommendedAction}
-        expectedIncreaseUsd={expectedIncreaseUsd}
-        confidencePct={confidencePct}
+        strategicBuyersActive={m.strategicActive}
+        recommendedAction={m.recommendedAction}
+        expectedIncreaseUsd={m.expectedIncreaseUsd}
+        confidencePct={m.confidencePct}
         onExecute={() => navigate("/console/autopilot")}
       />
 

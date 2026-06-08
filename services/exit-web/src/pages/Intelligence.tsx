@@ -103,6 +103,21 @@ const Intelligence: React.FC = () => {
   const avgProb = candidates.length > 0
     ? candidates.reduce((s, c) => s + c.probability, 0) / candidates.length
     : 0;
+
+  // Acquisition Radar — live market signals (illustrative in demo mode) that
+  // move the probability of a successful outreach. Buyer names are pulled from
+  // the discovery pool so the feed reads as real.
+  const b0 = candidates[0]?.buyer.name ?? "A strategic acquirer";
+  const b1 = candidates[1]?.buyer.name ?? "A second acquirer";
+  const b2 = candidates[2]?.buyer.name ?? "A third acquirer";
+  const radar: { tag: string; text: string; lift: number }[] = [
+    { tag: "Recent acquisitions", text: `${b0} completed 3 acquisitions in your category this year.`, lift: 6 },
+    { tag: "Buyer activity",      text: `${b1} increased acquisition activity 42% over the last two quarters.`, lift: 5 },
+    { tag: "Strategic expansion", text: `${b2} announced a strategic infrastructure expansion adjacent to your space.`, lift: 3 },
+    { tag: "PE dry powder",       text: "Two sponsors in your sector closed new funds — fresh capital to deploy.", lift: 2 },
+    { tag: "M&A trend",           text: "Sector M&A volume is up 18% quarter-over-quarter.", lift: 2 },
+  ];
+  const radarLift = radar.reduce((s, r) => s + r.lift, 0);
   return (
     <div>
       <SectionHeader
@@ -110,6 +125,29 @@ const Intelligence: React.FC = () => {
         title="Acquisition Intelligence Engine"
         description={`Ranked against an implied price of ${fmtMoney(VALUATION_STRATEGIC.headline.mid)}. Probability = sector × model × check × geography × activity × M&A track record (EDGAR 8-K + Wikidata).`}
       />
+
+      {/* ── Acquisition Radar — live market signals ─────────────── */}
+      <Card className="mb-8 overflow-hidden p-0">
+        <div className="flex items-center justify-between border-b border-white/10 bg-deal-600/10 px-5 py-3">
+          <div className="flex items-center gap-2">
+            <span className="relative inline-flex h-6 w-6 items-center justify-center rounded-full bg-deal-600/30 text-[12px] text-deal-200 ring-1 ring-deal-400/40">
+              ◎<span className="absolute -right-0.5 -top-0.5 h-2 w-2 animate-pulse rounded-full bg-deal-400" />
+            </span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-deal-300">Acquisition Radar · live</span>
+          </div>
+          <span className="text-[11px] text-white/55">Outreach success <span className="font-mono font-bold text-deal-300">+{radarLift}%</span></span>
+        </div>
+        <ul className="divide-y divide-white/5">
+          {radar.map((r) => (
+            <li key={r.text} className="flex items-start gap-3 px-5 py-3">
+              <span className="mt-0.5 shrink-0 rounded bg-white/5 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/50 ring-1 ring-white/10">{r.tag}</span>
+              <span className="flex-1 text-[13px] leading-snug text-white/80">{r.text}</span>
+              <span className="shrink-0 font-mono text-[12px] font-semibold text-deal-300">+{r.lift}%</span>
+            </li>
+          ))}
+        </ul>
+        <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">Signals are illustrative in demo mode; production wires live EDGAR / news / fund-formation feeds.</div>
+      </Card>
 
       {candidates[0] && (
         <BankerTake
