@@ -363,6 +363,24 @@ const DEMAND: [string, string, number][] = [
   ["Industrial Tech", "Medium", 5],
   ["Fintech", "Medium", 4],
 ];
+// command-center indices (top strip) + live deal-feed (bottom ticker)
+const INDICES = [
+  { label: "LOIs (30d)", value: "47", color: "#45E38A" },
+  { label: "Buyer Appetite", value: "8.6", color: "#5AD1FF" },
+  { label: "Sector Liquidity", value: "High", color: "#5AD1FF" },
+  { label: "Median Multiple", value: "6.8x", color: "#FFFFFF" },
+  { label: "Cross-Border", value: "72", color: "#FF9F43" },
+  { label: "Founder Readiness", value: "91%", color: "#7CFF9F" },
+];
+const DEAL_FEED = [
+  { company: "Helios Freight", event: "LOI received from Microsoft", value: "$261M", color: "#45E38A" },
+  { company: "DataMind AI", event: "entered negotiation with Google", value: "$315M", color: "#FF8A3D" },
+  { company: "SecureLayer", event: "diligence opened · Palo Alto Networks", value: "$198M", color: "#FFB14A" },
+  { company: "CareSphere", event: "data room access · UnitedHealth", value: "$175M", color: "#58C6FF" },
+  { company: "Atlas Fintech", event: "new mandate indexed", value: "$420M", color: "#5AD1FF" },
+  { company: "NextGen Robotics", event: "initial review · Rockwell", value: "$142M", color: "rgba(255,255,255,.6)" },
+  { company: "Verdant Bio", event: "closed · strategic acquirer", value: "$540M", color: "#45E38A" },
+];
 const heatGradient = (bars: number) =>
   bars >= 9 ? "linear-gradient(90deg,#FF5A5A,#FF3434)"
   : bars >= 8 ? "linear-gradient(90deg,#FF9A3D,#FF7030)"
@@ -378,6 +396,22 @@ const CommandBoard: React.FC<{ compact?: boolean }> = ({ compact }) => (
       boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
     }}
   >
+    {/* ---- TOP STATUS STRIP · live indices + LOI counter ---- */}
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-white/5 px-5 py-2.5" style={{ background: "rgba(255,255,255,.02)" }}>
+      <div className="flex items-center gap-2">
+        <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: "#45E38A" }} />
+        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">Acquisition Command Center</span>
+      </div>
+      <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1.5">
+        {INDICES.map((ix) => (
+          <div key={ix.label} className="flex items-baseline gap-1.5">
+            <span className="font-bold leading-none" style={{ color: ix.color, fontSize: 12 }}>{ix.value}</span>
+            <span className="text-[9px] uppercase tracking-wide text-white/40">{ix.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
     <div className="grid grid-cols-1 lg:grid-cols-[25%_45%_30%]">
       {/* ---- COL 1 · STRATEGIC BUYERS ---- */}
       <div className="border-b border-white/5 p-5 lg:border-b-0 lg:border-r">
@@ -468,6 +502,21 @@ const CommandBoard: React.FC<{ compact?: boolean }> = ({ compact }) => (
         </div>
       </div>
     </div>
+
+    {/* ---- BOTTOM · live deal-feed ticker ---- */}
+    <div className="overflow-hidden border-t border-white/5" style={{ background: "rgba(255,255,255,.02)" }}>
+      <div className="flex items-center gap-6 whitespace-nowrap px-5 py-2" style={{ animation: "boardTicker 38s linear infinite", width: "max-content" }}>
+        {[...DEAL_FEED, ...DEAL_FEED].map((d, i) => (
+          <span key={i} className="flex items-center gap-1.5 text-[10px]">
+            <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: d.color }} />
+            <span className="font-semibold text-white/80">{d.company}</span>
+            <span className="text-white/40">{d.event}</span>
+            <span className="font-mono text-white/60">{d.value}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+    <style>{`@keyframes boardTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
   </div>
 );
 const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right }) => (
