@@ -65,14 +65,21 @@ const Landing: React.FC = () => {
           in perspective, with a structural mount, a big soft shadow, a polished
           floor reflection and ambient light spilling onto the floor. */}
       <section className="relative overflow-hidden border-b border-slate-200">
-        {/* office trading-hall photograph as the hero environment */}
+        {/* trading-hall photograph as the hero environment */}
         <div className="pointer-events-none absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/command-center.png)" }} aria-hidden />
+        {/* architectural framing: ceiling light grid + glass-wall mullions +
+            floor sheen, to read as an exchange hall rather than a stock office */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-40" aria-hidden
+          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(255,255,255,0.5) 0 2px, transparent 2px 96px)", maskImage: "linear-gradient(to bottom, #000, transparent)", WebkitMaskImage: "linear-gradient(to bottom, #000, transparent)" }} />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-2/3 opacity-[0.12]" aria-hidden
+          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(40,70,110,0.6) 0 1px, transparent 1px 140px), repeating-linear-gradient(0deg, rgba(40,70,110,0.4) 0 1px, transparent 1px 180px)" }} />
         {/* wash: strong on the left for the headline, light on the right so the
             hall (desks, analysts, windows) stays visible around the board. */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/92 from-5% via-white/45 via-40% to-white/5" aria-hidden />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#eef2f7]/90 to-transparent" aria-hidden />
-        {/* ambient light the board emits onto the floor */}
-        <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-64 w-[58%] rounded-[50%] opacity-60 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.35), rgba(70,150,220,0) 70%)" }} aria-hidden />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#eef2f7] via-[#eef2f7]/70 to-transparent" aria-hidden />
+        {/* floor sheen + ambient light the board emits onto the floor */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 opacity-50" aria-hidden style={{ background: "linear-gradient(to top, rgba(255,255,255,0.5), transparent)" }} />
+        <div className="pointer-events-none absolute bottom-[6%] right-[6%] h-72 w-[60%] rounded-[50%] opacity-70 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.40), rgba(70,150,220,0) 70%)" }} aria-hidden />
 
         <div className="relative mx-auto grid max-w-[1440px] items-center gap-6 px-6 py-16 lg:grid-cols-[0.62fr_1.5fr] lg:px-10 lg:py-24">
           <div className="lg:pr-2">
@@ -122,6 +129,19 @@ const Landing: React.FC = () => {
                   </div>
                   <span className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/30">Floor 01 · Deal Board</span>
                 </div>
+                {/* live deal-activity ticker (motion layer) */}
+                <div className="mb-1.5 overflow-hidden rounded-md border border-white/5 bg-black/20">
+                  <div className="flex w-max items-center gap-8 whitespace-nowrap px-3 py-1.5" style={{ animation: "exTicker 30s linear infinite" }}>
+                    {[...DEAL_TICKER, ...DEAL_TICKER].map((d, i) => (
+                      <span key={i} className="flex items-center gap-1.5 text-[10px]">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: d.color, boxShadow: `0 0 5px 1px ${d.color}` }} />
+                        <span className="font-semibold text-white/80">{d.company}</span>
+                        <span className="text-white/40">{d.event}</span>
+                        <span className="font-mono text-white/60">{d.value}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
                 <CommandBoard />
                 {/* bottom mount bracket */}
                 <div className="mx-auto mt-1.5 h-1 w-1/3 rounded-full bg-white/10" />
@@ -142,6 +162,30 @@ const Landing: React.FC = () => {
                 }}
               />
             </div>
+          </div>
+        </div>
+        <style>{`@keyframes exTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
+      </section>
+
+      {/* ===== 1B · ACQUISITION ECOSYSTEM ===== */}
+      <section className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-[1320px] px-6 py-12 lg:px-10">
+          <div className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">The acquisition ecosystem</div>
+          <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
+            {ECOSYSTEM.map((e) => (
+              <div key={e.label} className="flex flex-col items-center text-center">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600"><Glyph name={e.icon} small /></span>
+                <div className="mt-2.5 text-[12px] font-semibold text-ink-800">{e.label}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-slate-200 sm:grid-cols-4">
+            {ECO_STATS.map((s) => (
+              <div key={s.label} className="bg-white px-5 py-5 text-center">
+                <div className="font-serif text-2xl font-bold text-blue-600">{s.value}</div>
+                <div className="mt-1 text-[11px] uppercase tracking-wide text-slate-500">{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -181,6 +225,33 @@ const Landing: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 03B · EXCHANGE / WORKFLOW VISUALIZATION ===== */}
+      <section className="border-b border-slate-200 bg-ink-900 text-white">
+        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
+          <div className="text-center">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-300">The exchange</div>
+            <h2 className="mt-3 font-serif text-[2rem] font-bold tracking-tight">One pipeline, from founder to exit.</h2>
+          </div>
+          <div className="mt-12 flex flex-col items-stretch gap-3 lg:flex-row lg:items-center">
+            {EXCHANGE_FLOW.map((s, i) => (
+              <React.Fragment key={s.title}>
+                <div className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-5 text-center">
+                  <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/15 text-blue-300"><Glyph name={s.icon} /></span>
+                  <div className="mt-3 text-sm font-bold text-white">{s.title}</div>
+                  <div className="mt-1 text-[11px] leading-snug text-white/50">{s.sub}</div>
+                </div>
+                {i < EXCHANGE_FLOW.length - 1 && (
+                  <div className="flex shrink-0 items-center justify-center text-blue-300/60">
+                    <span className="hidden lg:block">&rarr;</span>
+                    <span className="lg:hidden">&darr;</span>
+                  </div>
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </section>
@@ -314,23 +385,31 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 09 · GLOBAL INFRASTRUCTURE ===== */}
+      {/* ===== 09 · GLOBAL ACQUISITION NETWORK ===== */}
       <section className="border-b border-slate-200 bg-ink-900 text-white">
-        <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <div className="grid flex-1 items-center gap-10 lg:grid-cols-2">
-            <div className="flex items-center justify-center"><WorldDots /></div>
-            <div>
-              <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight">Global reach.<br />Institutional network.</h2>
-              <p className="mt-4 max-w-md text-base leading-relaxed text-white/65">ExitOS connects founders with buyers across 125+ countries and every major industry.</p>
-              <div className="mt-9 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
-                {GLOBAL_STATS.map((s) => (
-                  <div key={s.label}>
-                    <div className="font-serif text-2xl font-bold text-blue-300">{s.value}</div>
-                    <div className="mt-1 text-[12px] text-white/55">{s.label}</div>
-                  </div>
-                ))}
+        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
+          <div className="text-center">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-300">Global Acquisition Network</div>
+            <h2 className="mx-auto mt-3 max-w-2xl font-serif text-[2rem] font-bold leading-tight tracking-tight">Acquisition flows across every major market.</h2>
+            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/60">Buyers, capital and mandates moving between North America, Europe, Asia and the Middle East — indexed in real time.</p>
+          </div>
+          <div className="mt-10"><WorldDots /></div>
+          <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-4">
+            {REGIONS.map((r) => (
+              <div key={r.name} className="rounded-xl border border-white/10 bg-white/5 px-5 py-4 text-center">
+                <div className="text-sm font-bold text-white">{r.name}</div>
+                <div className="mt-1 font-serif text-xl font-bold text-blue-300">{r.value}</div>
+                <div className="mt-0.5 text-[10px] uppercase tracking-wide text-white/45">{r.label}</div>
               </div>
-            </div>
+            ))}
+          </div>
+          <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-white/10 pt-8 sm:grid-cols-4">
+            {GLOBAL_STATS.map((s) => (
+              <div key={s.label} className="text-center">
+                <div className="font-serif text-2xl font-bold text-blue-300">{s.value}</div>
+                <div className="mt-1 text-[12px] text-white/55">{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -406,6 +485,45 @@ const HERO_TRUST = [
   { icon: "lock", title: "Institutional Security", sub: "SOC 2 · data residency" },
   { icon: "users", title: "Founder First", sub: "you own every decision" },
   { icon: "check", title: "Auditable Process", sub: "every action, every artifact" },
+];
+// live deal-activity ticker (hero board motion layer)
+const DEAL_TICKER = [
+  { company: "Helios Freight", event: "LOI received · Microsoft", value: "$261M", color: "#45E38A" },
+  { company: "DataMind AI", event: "negotiation · Google", value: "$315M", color: "#FF8A3D" },
+  { company: "SecureLayer", event: "diligence · Palo Alto", value: "$198M", color: "#FFB14A" },
+  { company: "CareSphere", event: "data room · UnitedHealth", value: "$175M", color: "#58C6FF" },
+  { company: "Atlas Fintech", event: "mandate indexed", value: "$420M", color: "#5AD1FF" },
+  { company: "Verdant Bio", event: "closed", value: "$540M", color: "#45E38A" },
+];
+// acquisition ecosystem (below hero)
+const ECOSYSTEM = [
+  { icon: "shield", label: "Strategic Acquirers" },
+  { icon: "spark", label: "Private Equity" },
+  { icon: "users", label: "Family Offices" },
+  { icon: "chart", label: "Investment Banks" },
+  { icon: "doc", label: "Corporate Development" },
+];
+const ECO_STATS = [
+  { value: "18,340", label: "Acquirers" },
+  { value: "58,341", label: "Buyers" },
+  { value: "4,800", label: "Strategic Buyers" },
+  { value: "$4.2T", label: "Acquisition Appetite" },
+];
+// founder → exit workflow chain
+const EXCHANGE_FLOW = [
+  { icon: "users", title: "Founder", sub: "lists the company" },
+  { icon: "chart", title: "Acquisition Intelligence", sub: "valuation & positioning" },
+  { icon: "globe", title: "Buyer Network", sub: "matched acquirers" },
+  { icon: "spark", title: "Negotiation", sub: "AI-assisted terms" },
+  { icon: "lock", title: "Closing", sub: "signature & escrow" },
+  { icon: "check", title: "Exit", sub: "funds transferred" },
+];
+// global acquisition network regions
+const REGIONS = [
+  { name: "North America", value: "24,100", label: "Active Buyers" },
+  { name: "Europe", value: "16,540", label: "Active Buyers" },
+  { name: "Asia", value: "12,880", label: "Active Buyers" },
+  { name: "Middle East", value: "4,820", label: "Active Buyers" },
 ];
 const LEAN_STATS = [
   { label: "Buyers", value: "58,341" },
@@ -636,19 +754,48 @@ const Vault: React.FC = () => (
   </svg>
 );
 
+// Global acquisition network — dot map with named regional hubs and animated
+// acquisition-flow arcs connecting the regions.
+const HUBS: Record<string, [number, number]> = {
+  na: [210, 95], eu: [470, 90], me: [560, 130], asia: [720, 120], sa: [270, 195], au: [780, 205],
+};
+const FLOWS: [keyof typeof HUBS, keyof typeof HUBS][] = [
+  ["na", "eu"], ["eu", "me"], ["me", "asia"], ["na", "asia"], ["eu", "asia"], ["sa", "na"], ["asia", "au"], ["eu", "na"],
+];
 const WorldDots: React.FC = () => {
   const dots = React.useMemo(() => {
     const out: { x: number; y: number; r: number }[] = [];
-    for (let i = 0; i < 560; i++) {
-      const x = Math.random() * 460 + 10, y = Math.random() * 240 + 10;
-      const band = Math.abs(((y - 40) % 90) - 45) / 45;
-      if (Math.random() > 0.34 + band * 0.42) out.push({ x, y, r: Math.random() < 0.12 ? 1.8 : 1 });
+    for (let i = 0; i < 900; i++) {
+      const x = Math.random() * 900 + 10, y = Math.random() * 300 + 10;
+      const band = Math.abs(((y - 40) % 100) - 50) / 50;
+      if (Math.random() > 0.4 + band * 0.4) out.push({ x, y, r: Math.random() < 0.1 ? 1.6 : 0.9 });
     }
     return out;
   }, []);
   return (
-    <svg viewBox="0 0 480 260" className="w-full max-w-md">
-      {dots.map((d, i) => <circle key={i} cx={d.x} cy={d.y} r={d.r} fill="#5AD1FF" opacity={d.r > 1.2 ? 0.95 : 0.4} />)}
+    <svg viewBox="0 0 920 320" className="w-full">
+      {dots.map((d, i) => <circle key={i} cx={d.x} cy={d.y} r={d.r} fill="#5AD1FF" opacity={d.r > 1.2 ? 0.8 : 0.28} />)}
+      {/* acquisition-flow arcs with travelling pulses */}
+      {FLOWS.map(([a, b], i) => {
+        const [x1, y1] = HUBS[a], [x2, y2] = HUBS[b];
+        const mx = (x1 + x2) / 2, my = Math.min(y1, y2) - Math.abs(x2 - x1) * 0.18 - 20;
+        const d = `M${x1},${y1} Q${mx},${my} ${x2},${y2}`;
+        return (
+          <g key={i}>
+            <path d={d} fill="none" stroke="#2E8BD6" strokeWidth="1" opacity="0.45" />
+            <circle r="2.6" fill="#A8FFFF">
+              <animateMotion dur={`${4 + (i % 4)}s`} repeatCount="indefinite" path={d} />
+            </circle>
+          </g>
+        );
+      })}
+      {/* region hubs */}
+      {Object.values(HUBS).map(([x, y], i) => (
+        <g key={i}>
+          <circle cx={x} cy={y} r="9" fill="#2E8BD6" opacity="0.25" />
+          <circle cx={x} cy={y} r="3.2" fill="#A8FFFF" />
+        </g>
+      ))}
     </svg>
   );
 };
