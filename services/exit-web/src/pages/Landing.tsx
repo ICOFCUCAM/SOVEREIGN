@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import GlobeScene from "../components/GlobeScene";
 
 // Public marketing landing — the front door to ExitOS. Mirrors the Dispatch
 // landing rhythm (full-bleed hero, top nav, modular grid below the fold) but
@@ -40,16 +39,19 @@ const Landing: React.FC = () => {
         <div className="absolute -right-32 bottom-[8%] h-[520px] w-[520px] rounded-full opacity-20 blur-[140px]" style={{ background: "rgba(16,185,129,0.22)" }} />
       </div>
 
-      {/* hero artwork — the live acquisition-intelligence globe command core
-          (GlobeScene), full-bleed behind the hero content. Spans only the
-          hero viewport height so the module grid below stays clean. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-screen" aria-hidden>
-        <GlobeScene className="h-full w-full" />
-      </div>
-      {/* legibility: darken the left column for the headline while the command
-          core stays bright on the right; gentle darkening at the bottom. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-screen bg-gradient-to-r from-[#04070c] from-10% via-[#04070c]/55 via-34% to-transparent to-56%" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 top-[calc(100vh-7rem)] h-28 bg-gradient-to-b from-transparent to-[#04070c]" aria-hidden />
+      {/* hero artwork — command-center background image, anchored to the right
+          two-thirds, spanning the hero viewport so the module grid below stays
+          clean. */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-screen bg-cover bg-no-repeat"
+        style={{ backgroundImage: "url(/command-center.png)", backgroundPosition: "75% 30%" }}
+        aria-hidden
+      />
+      {/* legibility: the image is bright, so wash the left column hard for the
+          headline and clear toward the right; feather the bottom into the page. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-screen bg-gradient-to-r from-[#04070c] from-22% via-[#04070c]/75 via-45% to-[#04070c]/25 to-72%" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-screen bg-gradient-to-t from-[#04070c] via-[#04070c]/35 to-[#04070c]/45" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 top-[calc(100vh-9rem)] h-36 bg-gradient-to-b from-transparent to-[#04070c]" aria-hidden />
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[1500px] flex-col px-6 lg:px-12">
         {/* top nav */}
