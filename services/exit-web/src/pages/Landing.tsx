@@ -8,28 +8,50 @@ import { useNavigate } from "react-router-dom";
 
 const NAV = ["Platform", "Solutions", "Resources", "Company", "Pricing"];
 
-// ---- company marks : brand-coloured monogram badges (logo placeholders) ----
-const MARKS: Record<string, { bg: string; fg?: string; label: string }> = {
-  Microsoft: { bg: "#0067B8", label: "MS" },
-  Salesforce: { bg: "#00A1E0", label: "SF" },
-  SAP: { bg: "#1170B6", label: "SAP" },
-  Oracle: { bg: "#C74634", label: "O" },
-  "Thoma Bravo": { bg: "#1A2B5E", label: "TB" },
-  "Vista Equity Partners": { bg: "#2E3192", label: "V" },
-  "Palo Alto Networks": { bg: "#FA582D", label: "PA" },
-  Google: { bg: "#4285F4", label: "G" },
-  "UnitedHealth Group": { bg: "#002677", label: "UH" },
-  "Rockwell Automation": { bg: "#CC0000", label: "RA" },
+// ---- company marks ---------------------------------------------------------
+// Brand-coloured icon tiles — abstract geometric glyphs on a white chip, in
+// each company's brand colour. These are placeholders that EVOKE the brand,
+// NOT the trademarked logos; swap for licensed logo SVGs before launch.
+type MarkDef = { tint: string; label: string; glyph: "grid" | "cloud" | "ring" | "tri" | "v" | "bars" | "g" | "shield" | "cross" | "gear" };
+const MARKS: Record<string, MarkDef> = {
+  Microsoft: { tint: "#0067B8", label: "MS", glyph: "grid" },
+  Salesforce: { tint: "#00A1E0", label: "SF", glyph: "cloud" },
+  SAP: { tint: "#0A6ED1", label: "SAP", glyph: "bars" },
+  Oracle: { tint: "#C74634", label: "OR", glyph: "ring" },
+  "Thoma Bravo": { tint: "#1A2B5E", label: "TB", glyph: "tri" },
+  "Vista Equity Partners": { tint: "#2E3192", label: "VE", glyph: "v" },
+  "Palo Alto Networks": { tint: "#FA582D", label: "PA", glyph: "shield" },
+  Google: { tint: "#4285F4", label: "G", glyph: "g" },
+  "UnitedHealth Group": { tint: "#002677", label: "UH", glyph: "cross" },
+  "Rockwell Automation": { tint: "#CC0000", label: "RA", glyph: "gear" },
+};
+const MarkGlyph: React.FC<{ g: MarkDef["glyph"]; c: string; s: number }> = ({ g, c, s }) => {
+  const p: Record<MarkDef["glyph"], React.ReactNode> = {
+    grid: <><rect x="3" y="3" width="7.5" height="7.5" fill={c} /><rect x="13.5" y="3" width="7.5" height="7.5" fill="#7FBA00" /><rect x="3" y="13.5" width="7.5" height="7.5" fill="#00A4EF" /><rect x="13.5" y="13.5" width="7.5" height="7.5" fill="#FFB900" /></>,
+    cloud: <path d="M7 16a4 4 0 010-8 5 5 0 019.5-1.5A4 4 0 1117 16z" fill={c} />,
+    bars: <><rect x="3" y="6" width="18" height="3.4" rx="1.5" fill={c} /><rect x="3" y="14.6" width="18" height="3.4" rx="1.5" fill={c} opacity="0.6" /></>,
+    ring: <ellipse cx="12" cy="12" rx="9" ry="6" fill="none" stroke={c} strokeWidth="3" />,
+    tri: <path d="M12 4l8 16H4z" fill={c} />,
+    v: <path d="M4 5l8 15L20 5h-4l-4 8-4-8z" fill={c} />,
+    g: <path d="M21 12a9 9 0 11-3-6.7l-3 2.6A5 5 0 1017 13h-5v-2.6h8.7A9 9 0 0121 12z" fill={c} />,
+    shield: <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill={c} />,
+    cross: <path d="M9 4h6v5h5v6h-5v5H9v-5H4V9h5z" fill={c} />,
+    gear: <path d="M12 8a4 4 0 100 8 4 4 0 000-8zm9 4l-2-1 1-2-2-2-2 1-1-2h-2l-1 2-2-1-2 2 1 2-2 1v2l2 1-1 2 2 2 2-1 1 2h2l1-2 2 1 2-2-1-2 2-1z" fill={c} />,
+  };
+  return <svg width={s} height={s} viewBox="0 0 24 24" aria-hidden>{p[g]}</svg>;
 };
 const Mark: React.FC<{ name: string; size?: number }> = ({ name, size = 26 }) => {
-  const m = MARKS[name] ?? { bg: "#475569", label: name.slice(0, 2).toUpperCase() };
+  const m = MARKS[name];
+  if (!m) {
+    return (
+      <span className="inline-flex shrink-0 items-center justify-center rounded bg-slate-500 font-bold text-white" style={{ width: size, height: size, fontSize: size * 0.38 }} aria-hidden>
+        {name.slice(0, 2).toUpperCase()}
+      </span>
+    );
+  }
   return (
-    <span
-      className="inline-flex shrink-0 items-center justify-center rounded font-bold"
-      style={{ width: size, height: size, background: m.bg, color: m.fg ?? "#fff", fontSize: size * 0.4 }}
-      aria-hidden
-    >
-      {m.label}
+    <span className="inline-flex shrink-0 items-center justify-center rounded bg-white shadow-sm ring-1 ring-black/5" style={{ width: size, height: size }} aria-hidden>
+      <MarkGlyph g={m.glyph} c={m.tint} s={size * 0.66} />
     </span>
   );
 };
@@ -117,7 +139,7 @@ const Landing: React.FC = () => {
               <div
                 className="relative rounded-[20px] p-2.5"
                 style={{
-                  transform: "rotateY(-7deg) rotateX(2.5deg)",
+                  transform: "rotateY(-11deg) rotateX(2.5deg)",
                   transformOrigin: "center right",
                   background: "linear-gradient(145deg,#1c2c44,#0a1626)",
                   boxShadow: "0 60px 90px -30px rgba(8,20,40,0.55), 0 20px 40px -20px rgba(8,20,40,0.45), inset 0 1px 0 rgba(255,255,255,0.08)",
@@ -154,7 +176,7 @@ const Landing: React.FC = () => {
                 aria-hidden
                 className="pointer-events-none absolute inset-x-0 top-full h-40 overflow-hidden"
                 style={{
-                  transform: "rotateY(-7deg) rotateX(2.5deg) scaleY(-1)",
+                  transform: "rotateY(-11deg) rotateX(2.5deg) scaleY(-1)",
                   transformOrigin: "center right",
                   opacity: 0.16,
                   filter: "blur(3px)",
@@ -626,11 +648,11 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
   >
     <div className={"grid grid-cols-1 " + (lean ? "lg:grid-cols-[44%_56%]" : "lg:grid-cols-[25%_45%_30%]")}>
       {/* ---- COL 1 · STRATEGIC BUYERS ---- */}
-      <div className="border-b border-white/5 p-5 lg:border-b-0 lg:border-r">
+      <div className="border-b border-white/5 px-5 py-4 lg:border-b-0 lg:border-r">
         <BoardHeader title="Strategic Buyers" right="Match Score" />
         <div className="mt-1">
           {(lean ? STRATEGIC_BUYERS.filter((b) => ["Microsoft", "Salesforce", "Oracle", "Thoma Bravo"].includes(b[0])) : STRATEGIC_BUYERS).map(([name, sector, match, status]) => (
-            <div key={name} className="group flex items-center justify-between gap-2 border-b border-white/5 py-2.5 transition last:border-0 hover:translate-x-1" style={{ transitionDuration: ".25s" }}>
+            <div key={name} className="group flex items-center justify-between gap-2 border-b border-white/5 py-2 transition last:border-0 hover:translate-x-1" style={{ transitionDuration: ".25s" }}>
               <div className="flex items-center gap-2">
                 <Mark name={name} size={22} />
                 <div>
@@ -650,7 +672,7 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
 
       {/* ---- COL 2 · LIVE TRANSACTIONS (full board only) ---- */}
       {!lean && (
-      <div className="border-b border-white/5 p-5 lg:border-b-0 lg:border-r">
+      <div className="border-b border-white/5 px-5 py-4 lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="inline-block h-2 w-2 animate-pulse rounded-full" style={{ background: "#45E38A" }} />
@@ -662,7 +684,7 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
         </div>
         <div className="mt-1">
           {TRANSACTIONS.map((t) => (
-            <div key={t.company} className="grid grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 border-b border-white/5 py-2.5 last:border-0">
+            <div key={t.company} className="grid grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 border-b border-white/5 py-2 last:border-0">
               <div>
                 <div className="text-[12.5px] font-medium text-white/90">{t.company}</div>
                 <div className="text-[10px] text-white/45">{t.industry}</div>
@@ -687,9 +709,9 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
       )}
 
       {/* ---- COL 3 · ACQUISITION DEMAND ---- */}
-      <div className="p-5">
+      <div className="px-5 py-4">
         <BoardHeader title="Acquisition Demand" right="Market Heat" />
-        <div className="mt-3 space-y-2.5">
+        <div className="mt-3 space-y-2">
           {(lean ? DEMAND.slice(0, 4) : DEMAND).map(([label, heat, bars]) => (
             <div key={label}>
               <div className="flex items-center justify-between text-[10.5px]">
@@ -844,46 +866,77 @@ const Vault: React.FC = () => (
 
 // Global acquisition network — dot map with named regional hubs and animated
 // acquisition-flow arcs connecting the regions.
-const HUBS: Record<string, [number, number]> = {
-  na: [210, 95], eu: [470, 90], me: [560, 130], asia: [720, 120], sa: [270, 195], au: [780, 205],
+// Equirectangular geomap: a dot grid masked to coarse continent polygons so all
+// continents read (like a network world-map). [lon,lat] → SVG via project().
+const MAP_W = 960, MAP_H = 480;
+const project = (lon: number, lat: number): [number, number] => [((lon + 180) / 360) * MAP_W, ((90 - lat) / 180) * MAP_H];
+const LANDMASS: [number, number][][] = [
+  // North America
+  [[-168,66],[-150,70],[-120,70],[-95,69],[-80,73],[-60,83],[-55,60],[-66,49],[-72,46],[-76,38],[-81,31],[-81,25],[-90,29],[-97,26],[-105,22],[-114,30],[-124,40],[-124,48],[-130,55],[-140,60],[-155,58],[-166,55]],
+  // Greenland
+  [[-46,60],[-22,70],[-30,82],[-50,82],[-58,76],[-54,68]],
+  // South America
+  [[-78,8],[-66,11],[-55,5],[-50,0],[-44,-3],[-40,-12],[-38,-23],[-48,-27],[-58,-35],[-66,-46],[-73,-53],[-75,-46],[-71,-33],[-76,-14],[-81,-5],[-80,2]],
+  // Africa
+  [[-16,15],[-6,24],[10,31],[20,33],[32,31],[44,11],[51,12],[43,-2],[40,-12],[33,-26],[25,-34],[18,-35],[12,-17],[9,4],[-8,5],[-16,15]],
+  // Europe
+  [[-10,43],[-5,38],[5,38],[12,38],[18,40],[26,40],[28,45],[42,46],[40,55],[30,60],[24,66],[12,64],[6,58],[2,51],[-5,49]],
+  // Asia
+  [[26,40],[30,46],[42,48],[48,52],[60,66],[80,73],[105,76],[140,73],[170,68],[180,64],[165,60],[155,52],[140,48],[130,42],[122,38],[120,30],[110,21],[105,9],[95,6],[88,21],[78,8],[72,18],[60,25],[50,30],[44,38],[36,36],[28,37]],
+  // Australia
+  [[114,-22],[124,-17],[133,-12],[142,-11],[146,-18],[150,-25],[153,-31],[148,-38],[138,-37],[129,-32],[118,-35],[114,-30]],
+  // misc
+  [[130,31],[140,38],[142,44],[138,40],[133,34]], // Japan
+  [[166,-46],[174,-41],[178,-38],[172,-45]],        // NZ
+  [[43,-25],[50,-15],[50,-22],[46,-26]],            // Madagascar
+  [[95,2],[110,0],[120,-2],[120,-8],[105,-8],[98,-3]], // Indonesia
+];
+const inPoly = (x: number, y: number, poly: [number, number][]) => {
+  let c = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1];
+    if (((yi > y) !== (yj > y)) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c;
+  }
+  return c;
 };
-const FLOWS: [keyof typeof HUBS, keyof typeof HUBS][] = [
-  ["na", "eu"], ["eu", "me"], ["me", "asia"], ["na", "asia"], ["eu", "asia"], ["sa", "na"], ["asia", "au"], ["eu", "na"],
+const isLandLL = (lon: number, lat: number) => LANDMASS.some((p) => inPoly(lon, lat, p));
+// regional hubs at real coordinates
+const HUBS: { name: string; lon: number; lat: number }[] = [
+  { name: "na", lon: -98, lat: 39 }, { name: "eu", lon: 9, lat: 50 }, { name: "me", lon: 45, lat: 26 },
+  { name: "asia", lon: 110, lat: 30 }, { name: "sa", lon: -58, lat: -15 }, { name: "au", lon: 134, lat: -25 },
+];
+const FLOWS: [string, string][] = [
+  ["na", "eu"], ["eu", "me"], ["me", "asia"], ["na", "asia"], ["eu", "asia"], ["sa", "na"], ["asia", "au"], ["na", "sa"],
 ];
 const WorldDots: React.FC = () => {
   const dots = React.useMemo(() => {
-    const out: { x: number; y: number; r: number }[] = [];
-    for (let i = 0; i < 900; i++) {
-      const x = Math.random() * 900 + 10, y = Math.random() * 300 + 10;
-      const band = Math.abs(((y - 40) % 100) - 50) / 50;
-      if (Math.random() > 0.4 + band * 0.4) out.push({ x, y, r: Math.random() < 0.1 ? 1.6 : 0.9 });
+    const out: [number, number][] = [];
+    for (let lat = 78; lat >= -56; lat -= 2.6) {
+      for (let lon = -178; lon <= 180; lon += 2.6) {
+        if (isLandLL(lon, lat)) { const [x, y] = project(lon, lat); out.push([x, y]); }
+      }
     }
     return out;
   }, []);
+  const hub = (n: string) => { const h = HUBS.find((x) => x.name === n)!; return project(h.lon, h.lat); };
   return (
-    <svg viewBox="0 0 920 320" className="w-full">
-      {dots.map((d, i) => <circle key={i} cx={d.x} cy={d.y} r={d.r} fill="#5AD1FF" opacity={d.r > 1.2 ? 0.8 : 0.28} />)}
+    <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="w-full">
+      {dots.map(([x, y], i) => <rect key={i} x={x - 0.9} y={y - 0.9} width={1.8} height={1.8} fill="#5AD1FF" opacity={0.5} />)}
       {/* acquisition-flow arcs with travelling pulses */}
       {FLOWS.map(([a, b], i) => {
-        const [x1, y1] = HUBS[a], [x2, y2] = HUBS[b];
-        const mx = (x1 + x2) / 2, my = Math.min(y1, y2) - Math.abs(x2 - x1) * 0.18 - 20;
+        const [x1, y1] = hub(a), [x2, y2] = hub(b);
+        const mx = (x1 + x2) / 2, my = Math.min(y1, y2) - Math.abs(x2 - x1) * 0.16 - 24;
         const d = `M${x1},${y1} Q${mx},${my} ${x2},${y2}`;
         return (
           <g key={i}>
-            <path d={d} fill="none" stroke="#2E8BD6" strokeWidth="1" opacity="0.45" />
-            <circle r="2.6" fill="#A8FFFF">
-              <animateMotion dur={`${4 + (i % 4)}s`} repeatCount="indefinite" path={d} />
-            </circle>
+            <path d={d} fill="none" stroke="#2E8BD6" strokeWidth="1.1" opacity="0.5" />
+            <circle r="2.8" fill="#A8FFFF"><animateMotion dur={`${4 + (i % 4)}s`} repeatCount="indefinite" path={d} /></circle>
           </g>
         );
       })}
-      {/* region hubs */}
-      {Object.values(HUBS).map(([x, y], i) => (
-        <g key={i}>
-          <circle cx={x} cy={y} r="9" fill="#2E8BD6" opacity="0.25" />
-          <circle cx={x} cy={y} r="3.2" fill="#A8FFFF" />
-        </g>
-      ))}
+      {HUBS.map((h, i) => { const [x, y] = project(h.lon, h.lat); return (
+        <g key={i}><circle cx={x} cy={y} r="10" fill="#2E8BD6" opacity="0.22" /><circle cx={x} cy={y} r="3.4" fill="#A8FFFF" /></g>
+      ); })}
     </svg>
   );
 };
