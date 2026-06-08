@@ -87,6 +87,7 @@ const Closing: React.FC = () => {
         inaction={<>{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</>}
         buyer={<><span className="text-white">Sentinel Holdings</span> — in signing, 6 days to close.</>}
         automate={<>ExitOS tracks every signature, escrow movement and filing, and nudges the owner before each due date.</>}
+        impact={<span style={{ color: probColor }}>{Math.round(prob * 100)}%</span>}
         cta={{ label: "Generate closing docs", to: "/console/documents" }}
       />
 

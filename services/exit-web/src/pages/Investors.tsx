@@ -55,6 +55,7 @@ const Investors: React.FC = () => {
           ? <>Chase the holdouts: <span className="text-white">{drag.holdouts.map((h) => h.name).join(", ")}</span>.</>
           : <>Coverage met — every required signatory is aligned.</>}
         automate={<>ExitOS runs the waterfall per offer, tracks signatory coverage and flags drag-along gaps automatically.</>}
+        impact={<>{fmt(selectedWf.waterfall.netToFoundersUsd)}</>}
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

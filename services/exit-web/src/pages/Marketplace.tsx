@@ -94,6 +94,7 @@ const Marketplace: React.FC = () => {
           ? <><span className="text-white">{matches[0].buyerName}</span> — {(matches[0].matchScore * 100).toFixed(0)}% match, top of {matches.length}.</>
           : "No matches yet — publish to surface the buyer set."}
         automate={<>One click writes the teaser and CIM, anonymizes the data, identifies buyers and starts outreach.</>}
+        impact={<>{fmtMoney(listing.askingPriceUsd.mid)}</>}
         cta={{ label: phase === "done" ? "Re-run" : "Publish Opportunity", onClick: phase === "done" ? reset : publish }}
       />
 

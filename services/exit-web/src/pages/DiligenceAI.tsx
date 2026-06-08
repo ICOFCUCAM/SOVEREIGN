@@ -56,6 +56,7 @@ const DiligenceAI: React.FC = () => {
         inaction={<>Buyers who discover these in their own diligence retrade or walk — surfacing them first protects the price.</>}
         buyer={<>Resolve founder dependency and customer concentration first — they drive the structure a buyer demands.</>}
         automate={<>ExitOS reads every uploaded file, classifies the risk, prices the impact and drafts both risk reports.</>}
+        impact={<>-{fmtMoney(buyerDiscount)}</>}
         cta={{ label: "Open the data room", to: "/console/data-room" }}
       />
 

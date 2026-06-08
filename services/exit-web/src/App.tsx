@@ -23,6 +23,7 @@ import DiligenceAI from "./pages/DiligenceAI";
 import Banker from "./pages/Banker";
 import BuyerPortal from "./pages/BuyerPortal";
 import Autopilot from "./pages/Autopilot";
+import Readiness from "./pages/Readiness";
 
 const Console: React.FC = () => {
   const { session } = useAuth();
@@ -32,6 +33,7 @@ const Console: React.FC = () => {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="autopilot" element={<Autopilot />} />
+        <Route path="readiness" element={<Readiness />} />
         <Route path="intelligence" element={<Intelligence />} />
         <Route path="data-room" element={<DataRoom />} />
         <Route path="buyers" element={<Buyers />} />

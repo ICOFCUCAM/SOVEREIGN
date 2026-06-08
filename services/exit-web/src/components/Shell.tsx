@@ -11,7 +11,7 @@ const NAV: Array<{ to: string; label: string; group: string; scope?: string }> =
   { to: "/console/autopilot",          label: "Autonomous Exit",  group: "Overview" },
 
   { to: "/console/valuation",          label: "Valuation",        group: "Prepare" },
-  { to: "/console#readiness",          label: "Readiness",        group: "Prepare" },
+  { to: "/console/readiness",          label: "Readiness",        group: "Prepare" },
   { to: "/console/investors",          label: "Cap Table",        group: "Prepare" },
 
   { to: "/console/intelligence",       label: "Intelligence",     group: "Find Buyers" },

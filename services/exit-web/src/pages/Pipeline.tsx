@@ -129,6 +129,7 @@ const Pipeline: React.FC = () => {
           ? <><span className="text-white">{lead.buyer}</span> — {(lead.probability * 100).toFixed(0)}% close{lead.amount ? <>, {fmtMoney(lead.amount)} indicated</> : null}.</>
           : "Re-engage the sourcing column to rebuild the funnel."}
         automate={<>ExitOS scores every deal, drafts the counter and sequences buyer follow-ups automatically.</>}
+        impact={<>{fmtMoney(totalWeighted)}</>}
         cta={{ label: "Open the negotiator", to: "/console/negotiator" }}
       />
 

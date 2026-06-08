@@ -251,6 +251,7 @@ const Simulator: React.FC = () => {
           ? <><span className="text-white">{baseline.sim.recommendedBuyers[0].buyer.name}</span> leads the baseline set at {(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}% close.</>
           : <>No buyers clear the baseline constraints — loosen them to rebuild the set.</>}
         automate={<>ExitOS re-runs valuation and strategy for every scenario and diffs the outcome against your baseline.</>}
+        impact={<>{fmtMoney(baseline.sim.expectedRealizedValueUsd)}</>}
       />
 
       <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">

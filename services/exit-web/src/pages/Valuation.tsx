@@ -63,6 +63,7 @@ const Valuation: React.FC = () => {
         inaction={<>Pricing off the standard band leaves <span className="font-mono text-red-300">{fmtMoney(premiumGap)}</span> of strategic premium unclaimed.</>}
         buyer={<><span className="text-white">Strategic acquirers</span> pay the premium — financial buyers underwrite cash flow, not synergy.</>}
         automate={<>ExitOS recomputes the full model as assumptions move and packages it straight into the CIM.</>}
+        impact={<>+{fmtMoney(premiumGap)}</>}
         cta={{ label: "Build the CIM", to: "/console/documents" }}
       />
 

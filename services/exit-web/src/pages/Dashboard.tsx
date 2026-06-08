@@ -91,6 +91,7 @@ const Dashboard: React.FC = () => {
           ? <><span className="text-white">{topBuyer.buyer.name}</span> — {(topBuyer.probability * 100).toFixed(0)}% fit, {topBuyer.buyer.buyerType.replace(/_/g, " ")}.</>
           : "No qualified buyers yet — widen the search."}
         automate={<>One click runs the exit: ExitOS drafts the CIM, issues NDAs and sequences buyer outreach for you.</>}
+        impact={topMove ? <>+{fmtMoney(valGap)}</> : undefined}
         cta={{ label: run?.status === "complete" ? "Re-run exit process" : "Start Exit Process", onClick: startExit }}
       />
 

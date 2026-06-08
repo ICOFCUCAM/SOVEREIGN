@@ -73,6 +73,7 @@ const Negotiator: React.FC = () => {
           inaction={<>Accepting the first bid leaves the strategic premium on the table; leverage is {NEGOTIATION_STATE.leverage}.</>}
           buyer={<>Lead with <span className="text-white">{active.offer.buyerName}</span> — your strongest bid at {active.score.toFixed(0)}/100.</>}
           automate={<>ExitOS scores every offer, drafts the counter and writes the ready-to-send response for you.</>}
+          impact={<>+{counter.upliftPct.toFixed(0)}%</>}
           cta={{ label: "Draft the response", onClick: () => setDraftOpen(true) }}
         />
       )}

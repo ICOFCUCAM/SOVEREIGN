@@ -123,6 +123,7 @@ const DataRoom: React.FC = () => {
         inaction={<>Every empty package lets a buyer discount the bid or stall in diligence until it's filled.</>}
         buyer={<>A buyer in diligence probes the weakest package first{worstPkg ? <> — <span className="text-white">{worstPkg.title}</span></> : null}.</>}
         automate={<>ExitOS maps every engine-required artifact, scores completeness and prices the dollar impact of each gap.</>}
+        impact={<>-{fmtMoney(atRiskUsd)}</>}
         cta={{ label: "Run the risk scan", to: "/console/diligence-ai" }}
       />
 

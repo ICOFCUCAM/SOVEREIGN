@@ -118,6 +118,7 @@ const Intelligence: React.FC = () => {
           inaction={<>Appetite windows close — active acquirers redeploy capital into the next target while you wait.</>}
           buyer={<><span className="text-white">{candidates[0].buyer.name}</span> — {(candidates[0].probability * 100).toFixed(0)}% match, {candidates[0].buyer.appetite} appetite.</>}
           automate={<>ExitOS scores every buyer on live EDGAR/Wikidata signals and drafts the personalized intro.</>}
+          impact={<>{fmtMoney(candidates[0].expectedOutcome.expectedClosingUsd)}</>}
           cta={{ label: "Hand it to the banker", to: "/console/banker" }}
         />
       )}
