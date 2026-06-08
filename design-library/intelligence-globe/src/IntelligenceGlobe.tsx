@@ -1,24 +1,37 @@
 import React, { useEffect, useRef } from "react";
 
 // ---------------------------------------------------------------------------
-// GlobeScene — a 2036 acquisition-intelligence command core, not a marketing
-// illustration. Everything is rendered in real time on a single full-bleed
-// <canvas> (tens of thousands of depth-shaded particles per frame), with the
-// intelligence panels as crisp DOM overlaid on top and wired back into the
-// globe with luminous telemetry connectors drawn on the canvas.
+// IntelligenceGlobe — a reusable, dependency-free holographic intelligence
+// globe / command core. Everything is rendered in real time on a single
+// full-bleed <canvas> (tens of thousands of depth-shaded particles per frame),
+// with HUD intelligence panels as crisp DOM overlaid on top and wired back into
+// the globe with luminous telemetry connectors drawn on the canvas.
 //
 // Reference language: Palantir Gotham / Anduril Lattice / a Bloomberg terminal
 // imagined for 2036 — volumetric, holographic, alive.
 //
+// Dependencies: React 18 + Tailwind (the DOM panels use Tailwind utility
+// classes + `cyan-*` colors). No 3D libs, no canvas libs. Pure canvas/SVG/CSS.
+//
 // Render layers (back → front):
-//   0. background telemetry grid + far particle dust
-//   1. atmospheric volumetric glow
+//   0. background telemetry grid + far particle dust + distant blinking lights
+//   1. atmospheric volumetric glow + bloom (depth)
 //   2. orbital rings (3D, depth-shaded) + nodes that pass front & behind
-//   3. the particle globe (see-through holographic sphere, ~14k points)
-//   4. surface intelligence nodes (pulsing) + scan sweep
-//   5. telemetry connectors from each panel to the globe + traveling pulses
+//   3. the particle globe — continents emerge from PARTICLE DENSITY alone
+//      (no outlines/strokes), low-contrast, embedded in the data field
+//   4. surface intelligence nodes (pulsing) + holographic scan sweep
+//   5. ~320 micro-telemetry markers + panel connectors with traveling packets
 //   6. foreground bokeh particles
-// DOM panels sit above all of it.
+//   plus a holographic projection reactor beneath (beam + multi-ring platform)
+// DOM HUD panels sit above all of it.
+//
+// Usage:
+//   import IntelligenceGlobe from "./IntelligenceGlobe";
+//   <div className="relative h-screen w-full bg-[#04070c]">
+//     <IntelligenceGlobe className="absolute inset-0" />
+//   </div>
+// Customize the data readouts by editing the PANELS array below; tune the
+// globe centre/size via GLOBE_CX / GLOBE_CY / the `R` constant in draw().
 // ---------------------------------------------------------------------------
 
 // Continent outlines as coarse polygons of [lon, lat] vertices. Point-in-
@@ -109,7 +122,7 @@ const PANELS: Panel[] = [
   { id: "neg", title: "AI Negotiator", value: "17.3%", delta: "value uplift", x: 0.86, y: 0.63, side: "right", hue: 0 },
 ];
 
-const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
+const IntelligenceGlobe: React.FC<{ className?: string }> = ({ className = "" }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -862,4 +875,4 @@ const IntelPanel: React.FC<{ panel: Panel }> = ({ panel }) => {
   );
 };
 
-export default GlobeScene;
+export default IntelligenceGlobe;
