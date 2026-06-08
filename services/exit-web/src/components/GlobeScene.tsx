@@ -604,26 +604,29 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
       //   7 environmental glow · 4 processing rings · 5 circuit lanes ·
       //   6 scan sweeps · 3 inner command ring · 2 projection beam · 1 core.
       ctx.globalCompositeOperation = "lighter";
-      const py = cy + R * 0.98; // reactor sits right under the globe
-      const FLAT = 0.20; // ellipse foreshortening
+      // reactor sits LOWER so its rings fan out below the globe and the machine
+      // is the dominant visual (not half-hidden behind the sphere).
+      const py = cy + R * 1.16;
+      const FLAT = 0.22; // ellipse foreshortening
       const rt = reduce ? 0 : t; // reactor clock (frozen when reduced-motion)
 
-      // ── LAYER 7 · Environmental glow ─ large, very diffuse, makes it alive ──
-      const env = ctx.createRadialGradient(cx, py, 0, cx, py, R * 2.2);
-      env.addColorStop(0, "rgba(70,190,240,0.16)");
-      env.addColorStop(0.4, "rgba(45,150,210,0.07)");
+      // ── LAYER 7 · Environmental glow ─ large diffuse bloom beyond outer ring ─
+      const env = ctx.createRadialGradient(cx, py, 0, cx, py, R * 2.7);
+      env.addColorStop(0, "rgba(80,200,245,0.22)");
+      env.addColorStop(0.4, "rgba(50,160,215,0.10)");
       env.addColorStop(1, "rgba(30,110,170,0)");
       ctx.fillStyle = env;
-      ctx.beginPath(); ctx.ellipse(cx, py, R * 2.2, R * 2.2 * FLAT * 1.4, 0, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx, py, R * 2.7, R * 2.7 * FLAT * 1.3, 0, 0, TAU); ctx.fill();
 
-      // ── LAYER 4 · Processing rings ─ several, varied radius / opacity / spin ─
+      // ── LAYER 4 · Processing rings ─ many, wider, varied radius/opacity/spin ─
       const procRings = [
-        { r: 0.40, a: 0.40, lw: 0.8, sp: 0.0030 },
-        { r: 0.62, a: 0.26, lw: 0.7, sp: -0.0022 },
-        { r: 0.86, a: 0.34, lw: 1.1, sp: 0.0016 }, // a brighter processing ring
-        { r: 1.12, a: 0.20, lw: 0.7, sp: -0.0012 },
-        { r: 1.40, a: 0.28, lw: 0.9, sp: 0.0009 },
-        { r: 1.72, a: 0.16, lw: 0.7, sp: -0.0007 },
+        { r: 0.44, a: 0.50, lw: 1.0, sp: 0.0030 },
+        { r: 0.70, a: 0.34, lw: 0.8, sp: -0.0022 },
+        { r: 0.98, a: 0.46, lw: 1.4, sp: 0.0016 }, // a brighter processing ring
+        { r: 1.30, a: 0.26, lw: 0.8, sp: -0.0012 },
+        { r: 1.64, a: 0.36, lw: 1.1, sp: 0.0009 },
+        { r: 2.00, a: 0.20, lw: 0.8, sp: -0.0007 },
+        { r: 2.38, a: 0.14, lw: 0.7, sp: 0.0005 },
       ];
       for (let k = 0; k < procRings.length; k++) {
         const pr = procRings[k];
@@ -749,23 +752,35 @@ const GlobeScene: React.FC<{ className?: string }> = ({ className = "" }) => {
         ctx.fillRect(xx - 0.6, yy - 0.6, 1.2, 1.2);
       }
 
-      // ── LAYER 1 · Energy core ─ the bright intelligence reactor / source ────
-      const halo2 = ctx.createRadialGradient(cx, py, 0, cx, py, R * 0.7);
-      halo2.addColorStop(0, "rgba(220,251,255,0.6)");
-      halo2.addColorStop(0.4, "rgba(150,232,255,0.18)");
+      // ── LAYER 1 · Energy core ─ brightest element; emits volumetric light ───
+      const corePulse = 0.85 + 0.15 * Math.sin(rt * 0.06);
+      // broad emission halo
+      const halo2 = ctx.createRadialGradient(cx, py, 0, cx, py, R * 0.92);
+      halo2.addColorStop(0, `rgba(225,252,255,${(0.78 * corePulse).toFixed(3)})`);
+      halo2.addColorStop(0.35, "rgba(160,236,255,0.24)");
       halo2.addColorStop(1, "rgba(120,220,255,0)");
       ctx.fillStyle = halo2;
-      ctx.beginPath(); ctx.ellipse(cx, py, R * 0.7, R * 0.18, 0, 0, TAU); ctx.fill();
-      const corePulse = 0.85 + 0.15 * Math.sin(rt * 0.06);
-      const dot = ctx.createRadialGradient(cx, py, 0, cx, py, R * 0.15);
-      dot.addColorStop(0, `rgba(245,255,255,${(0.98 * corePulse).toFixed(3)})`);
-      dot.addColorStop(0.5, "rgba(205,248,255,0.5)");
+      ctx.beginPath(); ctx.ellipse(cx, py, R * 0.92, R * 0.24, 0, 0, TAU); ctx.fill();
+      // radial emission spikes — the core actively throwing light outward
+      for (let s = 0; s < 12; s++) {
+        const ang = (s / 12) * TAU + rt * 0.01;
+        const len = R * (0.34 + 0.12 * Math.sin(rt * 0.05 + s));
+        const g = ctx.createLinearGradient(cx, py, cx + Math.cos(ang) * len, py + Math.sin(ang) * len * FLAT);
+        g.addColorStop(0, "rgba(225,252,255,0.5)");
+        g.addColorStop(1, "rgba(200,246,255,0)");
+        ctx.strokeStyle = g; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(cx, py);
+        ctx.lineTo(cx + Math.cos(ang) * len, py + Math.sin(ang) * len * FLAT); ctx.stroke();
+      }
+      const dot = ctx.createRadialGradient(cx, py, 0, cx, py, R * 0.2);
+      dot.addColorStop(0, `rgba(248,255,255,${corePulse.toFixed(3)})`);
+      dot.addColorStop(0.5, "rgba(210,249,255,0.55)");
       dot.addColorStop(1, "rgba(185,246,255,0)");
       ctx.fillStyle = dot;
-      ctx.beginPath(); ctx.ellipse(cx, py, R * 0.15, R * 0.07, 0, 0, TAU); ctx.fill();
-      // tiny white-hot nucleus
-      ctx.fillStyle = `rgba(255,255,255,${(0.9 * corePulse).toFixed(3)})`;
-      ctx.beginPath(); ctx.ellipse(cx, py, R * 0.035, R * 0.018, 0, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx, py, R * 0.2, R * 0.09, 0, 0, TAU); ctx.fill();
+      // white-hot nucleus
+      ctx.fillStyle = `rgba(255,255,255,${corePulse.toFixed(3)})`;
+      ctx.beginPath(); ctx.ellipse(cx, py, R * 0.05, R * 0.025, 0, 0, TAU); ctx.fill();
       ctx.globalCompositeOperation = "source-over";
 
       // ---- micro telemetry field — hundreds of faint markers around the core,
