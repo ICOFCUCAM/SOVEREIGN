@@ -135,6 +135,38 @@ const Investors: React.FC = () => {
             </select>
           </div>
 
+          {/* What the founder actually walks away with — the question founders
+              really ask. Cascade from headline → founder gross → after
+              preferences (NPV) → after tax. Tax is an illustrative blended
+              long-term capital-gains estimate; the engine has no tax model. */}
+          {(() => {
+            const TAX = 0.238; // blended LTCG + NIIT estimate
+            const founderGross = selectedWf.waterfall.distributions.filter((d) => d.role === "founder").reduce((s, d) => s + d.grossProceedsUsd, 0);
+            const afterPref = selectedWf.waterfall.netToFoundersUsd; // NPV after preference stack
+            const afterTax = afterPref * (1 - TAX);
+            const steps = [
+              { label: "Offer headline", value: selectedOffer.headlinePriceUsd, color: "text-white", note: selectedOffer.buyerName },
+              { label: "Your gross proceeds", value: founderGross, color: "text-white/85", note: `${(analysis.ownershipByRole.founder * 100).toFixed(1)}% founder stake` },
+              { label: "After preferences", value: afterPref, color: "text-loi-300", note: `pref stack ${fmt(selectedWf.waterfall.preferenceTotalUsd)}` },
+              { label: "After taxes", value: afterTax, color: "text-deal-300", note: `~${(TAX * 100).toFixed(1)}% est. capital gains` },
+            ];
+            return (
+              <div className="mt-5 rounded-lg border border-deal-500/20 bg-deal-600/5 p-4">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">What you walk away with</div>
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {steps.map((s, i) => (
+                    <div key={s.label} className="relative">
+                      {i > 0 && <span className="absolute -left-2 top-3 hidden text-white/20 sm:block">→</span>}
+                      <div className="text-[10px] uppercase tracking-wide text-white/40">{s.label}</div>
+                      <div className={`mt-1 font-mono text-xl font-bold ${s.color}`}>{fmt(s.value)}</div>
+                      <div className="mt-0.5 text-[10px] text-white/40">{s.note}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
           <div className="mt-5 grid grid-cols-3 gap-4 text-sm">
             <div>
               <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Headline</div>

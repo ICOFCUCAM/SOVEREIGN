@@ -18,6 +18,10 @@ import Closing from "./pages/Closing";
 import Marketplace from "./pages/Marketplace";
 import Calibration from "./pages/Calibration";
 import Simulator from "./pages/Simulator";
+import Valuation from "./pages/Valuation";
+import DiligenceAI from "./pages/DiligenceAI";
+import Banker from "./pages/Banker";
+import BuyerPortal from "./pages/BuyerPortal";
 
 const Console: React.FC = () => {
   const { session } = useAuth();
@@ -36,6 +40,10 @@ const Console: React.FC = () => {
         <Route path="pipeline" element={<Pipeline />} />
         <Route path="closing" element={<Closing />} />
         <Route path="marketplace" element={<Marketplace />} />
+        <Route path="valuation" element={<Valuation />} />
+        <Route path="diligence-ai" element={<DiligenceAI />} />
+        <Route path="banker" element={<Banker />} />
+        <Route path="buyer-portal" element={<BuyerPortal />} />
         <Route path="calibration" element={<Calibration />} />
         <Route path="simulator" element={<Simulator />} />
         <Route path="*" element={<Navigate to="/console" replace />} />

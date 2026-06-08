@@ -9,16 +9,20 @@ import { useAuth } from "../lib/auth";
 const NAV: Array<{ to: string; label: string; group: string; scope?: string }> = [
   { to: "/console",                label: "Founder Dashboard",      group: "Overview" },
   { to: "/console/intelligence",   label: "Acquisition Intelligence", group: "Sourcing" },
+  { to: "/console/banker",         label: "Banker AI",              group: "Sourcing" },
   { to: "/console/buyers",         label: "Buyer Marketplace",      group: "Sourcing" },
   { to: "/console/pipeline",       label: "Acquisition Pipeline",   group: "Sourcing" },
+  { to: "/console/valuation",      label: "Deal Valuation Engine",  group: "Analysis" },
+  { to: "/console/diligence-ai",   label: "Due Diligence AI",       group: "Analysis" },
+  { to: "/console/simulator",      label: "Strategy Simulator",     group: "Analysis" },
   { to: "/console/data-room",      label: "Virtual Data Room",      group: "Workspace" },
   { to: "/console/investors",      label: "Investor CRM",           group: "Workspace" },
   { to: "/console/documents",      label: "Document Generator",     group: "Workspace" },
   { to: "/console/nda",            label: "NDA Automation",         group: "Workspace" },
   { to: "/console/negotiator",     label: "AI Deal Negotiator",     group: "Operator" },
   { to: "/console/closing",        label: "Deal Closing Center",    group: "Operator" },
-  { to: "/console/simulator",      label: "Strategy Simulator",     group: "Operator" },
   { to: "/console/marketplace",    label: "Exit Marketplace",       group: "Marketplace" },
+  { to: "/console/buyer-portal",   label: "Buyer Portal",           group: "Marketplace" },
   { to: "/console/calibration",    label: "Calibration · internal", group: "Internal" },
 ];
 

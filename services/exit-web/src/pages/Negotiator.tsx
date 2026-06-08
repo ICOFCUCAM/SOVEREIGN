@@ -20,10 +20,41 @@ const LEV_STYLE: Record<string, string> = {
   low:    "text-red-300",
 };
 
+// Counteroffer generator — produces an ACTUAL draft counter, not advice. The
+// counter price anchors above the strategic-mid (with a leverage-scaled
+// premium), the structure shifts toward the founder's reservation lines, and a
+// justification is composed from growth, strategic premium and the leverage
+// posture. Output is a ready-to-send response.
+type Offer = typeof OFFER_EVALUATIONS[number]["offer"];
+function generateCounter(offer: Offer) {
+  const strategicMid = VALUATION_STRATEGIC.headline.mid;
+  const strategicHigh = VALUATION_STRATEGIC.headline.high;
+  const lev = NEGOTIATION_STATE.leverage;
+  // anchor: max of strategic-mid and the offer, plus a leverage-scaled premium
+  const premiumPct = lev === "high" ? 0.18 : lev === "medium" ? 0.12 : 0.07;
+  const anchor = Math.max(strategicMid, offer.headlinePriceUsd) * (1 + premiumPct);
+  const counterPrice = Math.min(strategicHigh * 1.05, Math.round(anchor / 1_000_000) * 1_000_000);
+  const upliftPct = ((counterPrice - offer.headlinePriceUsd) / offer.headlinePriceUsd) * 100;
+  // structure: pull cash up to the reservation floor, earnout down to the cap
+  const cashPct = Math.max(offer.cashPct, RESERVATION_LINES.minCashPct);
+  const earnoutPct = Math.min(offer.earnoutPct, RESERVATION_LINES.maxEarnoutPct);
+  const stockPct = Math.max(0, 1 - cashPct - earnoutPct);
+  const justification = [
+    `${(SAMPLE_GROWTH * 100).toFixed(0)}% ARR growth supports a forward multiple above the submitted bid`,
+    `strategic-buyer valuation midpoint is ${fmtMoney(strategicMid)} — the offer sits below intrinsic strategic value`,
+    `${lev} competitive leverage: ${NEGOTIATION_STATE.activeOffers} active offer${NEGOTIATION_STATE.activeOffers === 1 ? "" : "s"} in process`,
+    `cash weighting raised to ${(cashPct * 100).toFixed(0)}% and earnout capped at ${(earnoutPct * 100).toFixed(0)}% to align with deal-certainty requirements`,
+  ];
+  return { counterPrice, upliftPct, cashPct, stockPct, earnoutPct, justification, strategicMid };
+}
+const SAMPLE_GROWTH = 0.42; // ARR growth from company profile (Helios)
+
 const Negotiator: React.FC = () => {
   const [activeId, setActiveId] = useState(OFFER_EVALUATIONS[0]?.offer.offerId ?? "");
   const active = OFFER_EVALUATIONS.find((e) => e.offer.offerId === activeId) ?? OFFER_EVALUATIONS[0];
   const reserveMid = VALUATION_STRATEGIC.headline.mid;
+  const counter = active ? generateCounter(active.offer) : null;
+  const [draftOpen, setDraftOpen] = useState(false);
 
   return (
     <div>
@@ -103,6 +134,44 @@ const Negotiator: React.FC = () => {
               </div>
             </div>
 
+            {/* AI counteroffer — an actual draft, not advice */}
+            {counter && (
+              <div className="mb-6 rounded-lg border border-deal-500/30 bg-deal-600/5 p-5">
+                <div className="flex items-center justify-between">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">AI Counteroffer</div>
+                  <span className="text-[11px] text-white/45">leverage: {NEGOTIATION_STATE.leverage}</span>
+                </div>
+                <div className="mt-3 flex flex-wrap items-end gap-x-8 gap-y-3">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-wide text-white/40">Their offer</div>
+                    <div className="font-mono text-lg text-white/70">{fmtMoney(active.offer.headlinePriceUsd)}</div>
+                  </div>
+                  <div className="text-2xl text-white/30">→</div>
+                  <div>
+                    <div className="text-[10px] uppercase tracking-wide text-white/40">Counter at</div>
+                    <div className="font-mono text-3xl font-bold text-deal-300">{fmtMoney(counter.counterPrice)}</div>
+                    <div className="mt-0.5 text-[11px] text-deal-300">+{counter.upliftPct.toFixed(0)}% uplift</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] uppercase tracking-wide text-white/40">Structure</div>
+                    <div className="font-mono text-sm text-white/80">{(counter.cashPct * 100).toFixed(0)}% cash · {(counter.stockPct * 100).toFixed(0)}% stock · {(counter.earnoutPct * 100).toFixed(0)}% earnout</div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Justification</div>
+                  <ul className="mt-1.5 space-y-1 text-[12px] text-white/70">
+                    {counter.justification.map((j) => (
+                      <li key={j} className="flex items-baseline gap-2"><span className="mt-1 inline-block h-1 w-1 rounded-full bg-deal-400" />{j}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <Button onClick={() => setDraftOpen(true)}>✦ Generate response draft</Button>
+                  <Button variant="ghost">Adjust counter</Button>
+                </div>
+              </div>
+            )}
+
             <h3 className="mb-3 font-serif text-base font-bold text-white">Score breakdown</h3>
             <div className="space-y-2">
               {Object.entries(active.dimensions).map(([k, d]) => (
@@ -170,6 +239,42 @@ const Negotiator: React.FC = () => {
           </div>
         </Card>
       </div>
+
+      {/* ready-to-send counter draft */}
+      {draftOpen && active && counter && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setDraftOpen(false)}>
+          <div className="max-h-[85vh] max-w-2xl overflow-auto rounded-lg border border-white/10 bg-ink-800/95 p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Counter response · {active.offer.buyerName}</div>
+              <button onClick={() => setDraftOpen(false)} className="text-white/40 hover:text-white">✕</button>
+            </div>
+            <pre className="mt-4 whitespace-pre-wrap rounded-md border border-white/10 bg-ink-900/70 p-4 text-[13px] leading-relaxed text-white/80">{
+`Re: Acquisition of Helios Freight — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
+
+Dear ${active.offer.buyerName} team,
+
+Thank you for the proposal. We value the engagement and believe a transaction is achievable. After review against our valuation and the competitive process underway, we are countering as follows:
+
+  • Headline consideration: ${fmtMoney(counter.counterPrice)} (a ${counter.upliftPct.toFixed(0)}% increase on the submitted bid)
+  • Consideration mix: ${(counter.cashPct * 100).toFixed(0)}% cash / ${(counter.stockPct * 100).toFixed(0)}% stock / ${(counter.earnoutPct * 100).toFixed(0)}% earnout
+
+This reflects:
+  - ${SAMPLE_GROWTH * 100}% ARR growth and the forward trajectory of the business
+  - a strategic-buyer valuation midpoint of ${fmtMoney(counter.strategicMid)}
+  - ${NEGOTIATION_STATE.activeOffers} active offer(s) currently in our process
+
+We are prepared to move quickly toward a definitive agreement on these terms. We propose a call this week to align on structure and timeline.
+
+Best regards,
+James — on behalf of Helios Freight`
+            }</pre>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => navigator.clipboard?.writeText("counter")}>Copy</Button>
+              <Button>Send counter →</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

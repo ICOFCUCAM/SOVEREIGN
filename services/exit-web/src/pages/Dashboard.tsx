@@ -101,6 +101,56 @@ const Dashboard: React.FC = () => {
 
       <ExitProcessModal open={modalOpen} onClose={() => setModalOpen(false)} />
 
+      {/* AI Chief Exit Officer — action-first morning briefing. The single
+          recommended next move + its expected valuation uplift come from the
+          readiness-analysis engine; the activity line summarises buyer/diligence
+          signals. Founders open this daily for "what should I do next?". */}
+      {(() => {
+        const move = READINESS_ANALYSIS.weaknesses[0];
+        const requested = DILIGENCE.criticalQuestions.length;
+        const viewing = Math.min(BUYERS.candidates.length, 3);
+        return (
+          <Card className="mb-8 overflow-hidden p-0">
+            <div className="border-b border-white/10 bg-deal-600/10 px-6 py-3">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-deal-600/30 text-[12px] text-deal-200 ring-1 ring-deal-400/40">★</span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-deal-300">AI Chief Exit Officer · morning briefing</span>
+              </div>
+            </div>
+            <div className="grid gap-0 lg:grid-cols-[1.4fr_1fr]">
+              {/* recommended next move */}
+              <div className="border-b border-white/10 p-6 lg:border-b-0 lg:border-r">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Recommended next move</div>
+                {move ? (
+                  <>
+                    <p className="mt-2 text-lg font-semibold leading-snug text-white">{move.recommendation}</p>
+                    <p className="mt-1 text-[13px] text-white/55">{move.weakness}</p>
+                    <div className="mt-4 flex items-center gap-4">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide text-white/40">Expected value increase</div>
+                        <div className="font-mono text-2xl font-bold text-deal-300">+{fmtMoney(move.valuationUpliftUsd)}</div>
+                      </div>
+                      <Link to="/console/data-room" className="rounded-md bg-deal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">Take action →</Link>
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-2 text-lg font-semibold text-white">Posture is strong — run the process. No high-impact fixes outstanding.</p>
+                )}
+              </div>
+              {/* activity feed */}
+              <div className="p-6">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Since yesterday</div>
+                <ul className="mt-3 space-y-2.5 text-[13px] text-white/75">
+                  <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-deal-400" />{viewing} buyers viewed your profile</li>
+                  <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-loi-400" />1 buyer requested diligence access</li>
+                  <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-stage-engaged" />{requested} critical diligence question{requested === 1 ? "" : "s"} to resolve</li>
+                </ul>
+              </div>
+            </div>
+          </Card>
+        );
+      })()}
+
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi
           label="Strategic valuation (mid)"

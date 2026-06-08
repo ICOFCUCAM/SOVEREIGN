@@ -35,6 +35,23 @@ const SIGNAL_TEXT: Record<SignalKind, string> = {
   estimated: "text-white/65", caution: "text-loi-300",
 };
 
+// Compose a short strategic narrative from the candidate's real engine fields
+// — the strongest fit dimension, the buyer's thesis, and the company's sector —
+// so each card reads like a banker's one-line rationale, not a stat.
+function narrative(c: BuyerCandidate): string {
+  const dims: [string, number][] = [
+    ["sector overlap", c.fitDimensions.sectorFit],
+    ["business-model fit", c.fitDimensions.modelFit],
+    ["check-size fit", c.fitDimensions.checkFit],
+    ["geographic footprint", c.fitDimensions.geographyFit],
+    ["recent acquisition activity", c.fitDimensions.activityFit],
+    ["M&A track record", c.fitDimensions.historyFit],
+  ];
+  const top = dims.sort((a, b) => b[1] - a[1])[0][0];
+  const sector = SAMPLE_COMPANY.sector.replace(/_/g, " ");
+  return `${c.buyer.name} likely values ${SAMPLE_COMPANY.name} for its ${sector} position — strongest on ${top}. ${c.buyer.thesis}`;
+}
+
 const Intelligence: React.FC = () => {
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<"probability" | "expected_outcome">("probability");
@@ -137,6 +154,52 @@ const Intelligence: React.FC = () => {
         <Kpi label="Active acquirers"  value={String(activeCount)} sub="recent-12mo activity" accent="#34d399" />
         <Kpi label="Tracked deals"     value={String(report.candidates.reduce((s, c) => s + c.history.totalDeals, 0))} sub="across registry · sourced" />
         <Kpi label="Average match"     value={avgProb.toFixed(2)} sub="probability × fit" />
+      </div>
+
+      {/* Buyer match explanations — the "why", not just the score. The reason
+          bullets are real engine signals; the strategic narrative is composed
+          from the buyer thesis, the strongest fit dimension and the company
+          profile. Banker-level intelligence ahead of the ranked table. */}
+      <div className="mt-8">
+        <h2 className="font-serif text-lg font-bold text-white">Buyer match explanations</h2>
+        <p className="mt-1 text-xs text-white/45">Why these acquirers fit — ranked reasoning, not just a number.</p>
+        <div className="mt-4 grid gap-4 lg:grid-cols-3">
+          {candidates.slice(0, 3).map((c) => {
+            const reasons = c.signals.filter((s) => s.kind !== "caution").slice(0, 4);
+            const conf = c.expectedOutcome.overallConfidence.tier;
+            return (
+              <Card key={c.buyer.name} className="p-5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="text-sm font-bold text-white">{c.buyer.name}</div>
+                  <div className="text-right">
+                    <div className="font-mono text-xl font-bold text-deal-300">{(c.probability * 100).toFixed(0)}%</div>
+                    <div className="text-[9px] uppercase tracking-wide text-white/40">match</div>
+                  </div>
+                </div>
+                <div className="mt-0.5 text-[11px] uppercase tracking-wide text-white/45">{c.buyer.buyerType.replace(/_/g, " ")}</div>
+
+                <div className="mt-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Reasons</div>
+                <ul className="mt-1.5 space-y-1.5 text-[12px]">
+                  {reasons.map((s) => (
+                    <li key={s.text} className={`flex items-baseline gap-1.5 ${SIGNAL_TEXT[s.kind]}`}>
+                      <span className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-deal-400" />
+                      <span className="leading-snug">{s.text}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-3 rounded-md border border-deal-500/20 bg-deal-600/5 p-3">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-deal-300">Strategic narrative</div>
+                  <p className="mt-1 text-[12px] leading-relaxed text-white/75">{narrative(c)}</p>
+                </div>
+
+                <div className="mt-3 flex items-center gap-2 text-[11px] text-white/45">
+                  Confidence <ConfidenceChip tier={conf} sample={c.expectedOutcome.overallConfidence.sample} compact />
+                </div>
+              </Card>
+            );
+          })}
+        </div>
       </div>
 
       <Card className="mt-8 p-6">
