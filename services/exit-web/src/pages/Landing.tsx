@@ -297,7 +297,7 @@ const Landing: React.FC = () => {
             <div>
               <h2 className="font-serif text-[2rem] font-bold tracking-tight text-ink-900">Your Acquisition Command Center.</h2>
               <p className="mt-4 text-base leading-relaxed text-slate-600">
-                Real-time intelligence, buyer activity, transaction tracking, valuation insights, and market demand &mdash; all in one institutional platform.
+                Real-time intelligence, buyer activity, transaction tracking, valuation insights, and market demand &mdash; on one acquisition infrastructure.
               </p>
               <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">Explore the Platform &rarr;</a>
               <ul className="mt-7 space-y-5">
@@ -416,6 +416,66 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
+      {/* ===== 9B · WHY FOUNDERS LOSE MILLIONS ===== */}
+      <section className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
+          <div className="grid items-start gap-10 lg:grid-cols-2">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">The cost of running blind</div>
+              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Why founders lose millions on exit.</h2>
+              <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
+                A company is sold once. Most founders run that process with a fraction of the market in the room — and the spread shows up in the final number.
+              </p>
+            </div>
+            <div className="grid gap-px overflow-hidden rounded-2xl bg-slate-200 sm:grid-cols-2">
+              {LOSSES.map((l) => (
+                <div key={l.problem} className="bg-white p-5">
+                  <div className="flex items-center gap-2 text-[12px] font-semibold text-red-500">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-50"><Glyph name="x" small /></span>
+                    Most founders
+                  </div>
+                  <div className="mt-2 text-[13px] font-medium text-ink-800">{l.problem}</div>
+                  <div className="mt-3 flex items-center gap-2 text-[12px] font-semibold text-blue-600">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-50"><Glyph name="check" small /></span>
+                    With ExitOS
+                  </div>
+                  <div className="mt-1.5 text-[13px] text-slate-600">{l.fix}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 9C · PROOF · CASE STUDIES ===== */}
+      <section className="border-b border-slate-200 bg-[#f6f8fb]">
+        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">Proof</div>
+              <h2 className="mt-3 font-serif text-[2rem] font-bold tracking-tight text-ink-900">Companies sold on the exchange.</h2>
+            </div>
+            <p className="max-w-sm text-[13px] leading-relaxed text-slate-500">Representative transactions run end-to-end on ExitOS — sourcing through closing wire.</p>
+          </div>
+          <div className="mt-10 grid gap-5 sm:grid-cols-3">
+            {CASE_STUDIES.map((c) => (
+              <div key={c.name} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="inline-block rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">{c.sector}</div>
+                <div className="mt-4 font-serif text-3xl font-bold text-ink-900">{c.value}</div>
+                <div className="mt-1 text-[12px] uppercase tracking-wide text-slate-400">Exit value</div>
+                <div className="mt-4 border-t border-slate-100 pt-4 text-sm font-bold text-ink-900">{c.name}</div>
+                <div className="mt-3 grid grid-cols-2 gap-3 text-[11px]">
+                  <div><div className="text-slate-400">Buyers engaged</div><div className="font-semibold text-ink-800">{c.buyers}</div></div>
+                  <div><div className="text-slate-400">Premium captured</div><div className="font-semibold text-blue-600">{c.premium}</div></div>
+                  <div><div className="text-slate-400">Time to close</div><div className="font-semibold text-ink-800">{c.time}</div></div>
+                  <div><div className="text-slate-400">Acquirer</div><div className="font-semibold text-ink-800">{c.buyer}</div></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ===== 10 · FINAL CTA ===== */}
       <section className="relative overflow-hidden bg-white">
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center gap-24 opacity-[0.05]" aria-hidden>
@@ -424,7 +484,7 @@ const Landing: React.FC = () => {
         <div className="relative mx-auto max-w-[1320px] px-6 py-24 text-center lg:px-10">
           <h2 className="font-serif text-4xl font-bold tracking-tight text-ink-900 sm:text-5xl">Ready to run your company sale?</h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600">
-            ExitOS brings acquisition intelligence, buyer discovery, diligence, negotiation and closing into a single institutional operating system.
+            ExitOS is the acquisition infrastructure for company sales &mdash; sourcing, diligence, negotiation and closing on one exchange.
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Launch ExitOS <Arrow /></button>
@@ -519,6 +579,19 @@ const EXCHANGE_FLOW = [
   { icon: "spark", title: "Negotiation", sub: "AI-assisted terms" },
   { icon: "lock", title: "Closing", sub: "signature & escrow" },
   { icon: "check", title: "Exit", sub: "funds transferred" },
+];
+// why founders lose millions (problem → fix)
+const LOSSES = [
+  { problem: "Talk to too few buyers", fix: "Run a full competitive process across 58,000+ verified acquirers." },
+  { problem: "Enter negotiations unprepared", fix: "AI-modelled valuation, comps and reservation lines before the first call." },
+  { problem: "Lose leverage mid-process", fix: "Live buyer signals and parallel offers keep tension in your favour." },
+  { problem: "Accept discounted offers", fix: "Offer optimisation surfaces the premium left on the table." },
+];
+// proof — representative transactions
+const CASE_STUDIES = [
+  { sector: "Logistics", name: "Logistics Platform", value: "$132M", buyers: "14", premium: "+24%", time: "11 wks", buyer: "Strategic" },
+  { sector: "AI Infrastructure", name: "AI Infrastructure Co.", value: "$261M", buyers: "21", premium: "+31%", time: "9 wks", buyer: "Microsoft*" },
+  { sector: "Healthcare SaaS", name: "Healthcare SaaS", value: "$175M", buyers: "12", premium: "+26%", time: "13 wks", buyer: "UnitedHealth*" },
 ];
 // global acquisition network regions
 const REGIONS = [
@@ -830,6 +903,7 @@ const Glyph: React.FC<{ name: string; small?: boolean }> = ({ name, small }) => 
     fire: <><path d="M12 3c1 3-2 4-2 7a4 4 0 008 0c0-4-3-5-3-8M12 21a5 5 0 01-3-9c0 4 3 4 3 7" /></>,
     shield: <><path d="M12 3l7 2.5V11c0 4.6-3 8-7 9.5C9 19 5 15.6 5 11V5.5z" /></>,
     globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" /></>,
+    x: <><path d="M6 6l12 12M18 6L6 18" /></>,
   };
   return (
     <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
