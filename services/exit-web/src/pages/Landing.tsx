@@ -185,7 +185,7 @@ const Landing: React.FC = () => {
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
           <SectionTag n="05" label="Command Center Preview" />
           <div className="grid flex-1 items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="scale-90 lg:scale-100"><CommandBoard compact /></div>
+            <div className="min-w-0 scale-90 lg:scale-100"><CommandBoard compact /></div>
             <div>
               <h2 className="font-serif text-[2rem] font-bold tracking-tight text-ink-900">Your Acquisition Command Center.</h2>
               <p className="mt-4 text-base leading-relaxed text-slate-600">
@@ -389,7 +389,7 @@ const heatGradient = (bars: number) =>
 
 const CommandBoard: React.FC<{ compact?: boolean }> = ({ compact }) => (
   <div
-    className="overflow-hidden rounded-3xl text-white"
+    className="min-w-0 overflow-hidden rounded-3xl text-white"
     style={{
       background: "linear-gradient(180deg,#08203B 0%,#06182E 100%)",
       border: "1px solid rgba(255,255,255,0.06)",
