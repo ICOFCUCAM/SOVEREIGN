@@ -44,7 +44,7 @@ const Landing: React.FC = () => {
           clean. */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-screen bg-cover bg-no-repeat"
-        style={{ backgroundImage: "url(/command-center.png)", backgroundPosition: "75% 30%" }}
+        style={{ backgroundImage: "url(/command-center.png)", backgroundPosition: "82% 42%" }}
         aria-hidden
       />
       {/* legibility: the image is bright, so wash the left column hard for the
