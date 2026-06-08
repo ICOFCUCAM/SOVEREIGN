@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, Kpi, SectionHeader, StageBadge, STAGE_ORDER, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
 import { OFFER_EVALUATIONS, NEGOTIATION_STATE } from "../lib/engines";
+import BankerTake from "../components/BankerTake";
 
 // Acquisition Pipeline — kanban over the six negotiation stages.
 // Live offers from evaluateOffer feed the LOI / engaged columns;
@@ -107,6 +108,8 @@ const LEV_STYLE: Record<string, string> = {
 const Pipeline: React.FC = () => {
   const live = DEALS.filter((d) => d.stage !== 'dead');
   const totalWeighted = weighted(live);
+  const lead = live.slice().sort((a, b) => b.probability - a.probability)[0];
+  const leadF = lead ? forecast(lead) : null;
 
   return (
     <div>
@@ -114,6 +117,19 @@ const Pipeline: React.FC = () => {
         kicker="Module 08 · Sourcing"
         title="Acquisition Pipeline"
         description={`${live.length} live deals across the six negotiation stages. Probability-weighted forecast ${fmtMoney(totalWeighted)}. Leverage: ${NEGOTIATION_STATE.leverage}.`}
+      />
+
+      <BankerTake
+        next={NEGOTIATION_STATE.nextMove}
+        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(totalWeighted)}</span> probability-weighted across {live.length} live deals.</>}
+        inaction={lead && leadF
+          ? <>Your lead, <span className="text-white">{lead.buyer}</span>, closes in ~{leadF.expectedDays}d. Lose tempo and a single-threaded process retrades the price.</>
+          : <>No live offers — without competing bids you have no leverage to hold price.</>}
+        buyer={lead
+          ? <><span className="text-white">{lead.buyer}</span> — {(lead.probability * 100).toFixed(0)}% close{lead.amount ? <>, {fmtMoney(lead.amount)} indicated</> : null}.</>
+          : "Re-engage the sourcing column to rebuild the funnel."}
+        automate={<>ExitOS scores every deal, drafts the counter and sequences buyer follow-ups automatically.</>}
+        cta={{ label: "Open the negotiator", to: "/console/negotiator" }}
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

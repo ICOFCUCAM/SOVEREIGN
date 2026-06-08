@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, Card, Kpi, SectionHeader } from "../lib/ui";
-import { DILIGENCE } from "../lib/engines";
+import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { DILIGENCE, OFFER_EVALUATIONS } from "../lib/engines";
+import BankerTake from "../components/BankerTake";
 
 // Deal Closing Center. The static closing checklist drives day-of
 // orchestration; the diligence engine surfaces pre-close critical
@@ -68,6 +69,8 @@ const Closing: React.FC = () => {
   const prob = closeProbability(done, inProgress, CLOSING.length, blocked, redFlags.length);
   const risks = openRisks(CLOSING);
   const probColor = prob >= 0.8 ? "#34d399" : prob >= 0.6 ? "#fbbf24" : "#f87171";
+  const dealValue = Math.max(0, ...OFFER_EVALUATIONS.map((e) => e.offer.headlinePriceUsd));
+  const topRisk = risks[0];
 
   return (
     <div>
@@ -76,6 +79,15 @@ const Closing: React.FC = () => {
         title="Deal Closing Center"
         description="Signature orchestration, escrow choreography, regulatory filings, share-transfer mechanics — the closing checklist that doesn't drop."
         actions={<><Button variant="ghost">Print checklist</Button><Button>Closing call</Button></>}
+      />
+
+      <BankerTake
+        next={topRisk ? <>Clear <span className="text-white">{topRisk.title}</span> ({topRisk.owner}) — the top {topRisk.severity}-risk item gating the wire.</> : "Confirm escrow funding and hold the closing call."}
+        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(dealValue)}</span> transaction · <span style={{ color: probColor }}>{Math.round(prob * 100)}%</span> modeled close probability.</>}
+        inaction={<>{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</>}
+        buyer={<><span className="text-white">Sentinel Holdings</span> — in signing, 6 days to close.</>}
+        automate={<>ExitOS tracks every signature, escrow movement and filing, and nudges the owner before each due date.</>}
+        cta={{ label: "Generate closing docs", to: "/console/documents" }}
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

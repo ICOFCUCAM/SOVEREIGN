@@ -8,6 +8,7 @@ import {
 } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import ExitProcessModal from "../components/ExitProcessModal";
+import BankerTake from "../components/BankerTake";
 import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
 import { emitTelemetry } from "../lib/telemetry";
 
@@ -36,6 +37,10 @@ const Dashboard: React.FC = () => {
   const criticalQs = DILIGENCE.criticalQuestions;
   const redFlags = DILIGENCE.redFlags;
   const arrM = SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd / 1_000_000;
+
+  const topMove = READINESS_ANALYSIS.weaknesses[0];
+  const valGap = READINESS_ANALYSIS.projectedStrategicMid - READINESS_ANALYSIS.currentStrategicMid;
+  const topBuyer = topBuyers[0];
 
   const [run, setRun] = useState<ExitRun | null>(() => loadRun());
   const [modalOpen, setModalOpen] = useState(false);
@@ -74,6 +79,19 @@ const Dashboard: React.FC = () => {
             <Button onClick={startExit}>Start Exit Process →</Button>
           )
         }
+      />
+
+      <BankerTake
+        next={topMove ? topMove.recommendation : "Posture is strong — run the process now."}
+        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(VALUATION_STRATEGIC.headline.mid)}</span> strategic mid · band {fmtMoney(VALUATION_STRATEGIC.headline.low)}–{fmtMoney(VALUATION_STRATEGIC.headline.high)}.</>}
+        inaction={topMove
+          ? <>Leaving <span className="text-white">{topMove.dimension}</span> unaddressed forgoes <span className="font-mono text-red-300">+{fmtMoney(valGap)}</span> of value buyers would otherwise pay.</>
+          : <>Multiple windows compress over time — every quarter idle risks the bid.</>}
+        buyer={topBuyer
+          ? <><span className="text-white">{topBuyer.buyer.name}</span> — {(topBuyer.probability * 100).toFixed(0)}% fit, {topBuyer.buyer.buyerType.replace(/_/g, " ")}.</>
+          : "No qualified buyers yet — widen the search."}
+        automate={<>One click runs the exit: ExitOS drafts the CIM, issues NDAs and sequences buyer outreach for you.</>}
+        cta={{ label: run?.status === "complete" ? "Re-run exit process" : "Start Exit Process", onClick: startExit }}
       />
 
       {run?.status === "complete" && (

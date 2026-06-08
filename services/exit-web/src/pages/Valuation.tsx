@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Button, Card, Kpi, SectionHeader, Field, fmtMoney } from "../lib/ui";
 import { VALUATION_STANDARD, VALUATION_STRATEGIC } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import BankerTake from "../components/BankerTake";
 
 // Deal Valuation Engine — surfaces the live multiples-driven methodologies
 // from runValuation (@exit/engines) AND adds an in-page DCF and comparable-
@@ -45,6 +46,7 @@ const Valuation: React.FC = () => {
     () => (VALUATION_STANDARD.headline.mid + dcfValue + compMid) / 3,
     [dcfValue, compMid]
   );
+  const premiumGap = VALUATION_STRATEGIC.headline.mid - VALUATION_STANDARD.headline.mid;
 
   return (
     <div>
@@ -53,6 +55,15 @@ const Valuation: React.FC = () => {
         title="Deal Valuation Engine"
         description="Live valuation from four methodologies — DCF, comparable transactions, revenue multiples and EBITDA multiples — recomputed as assumptions change. Multiples bands come from the valuation engine; DCF is modelled from company financials."
         actions={<Button variant="ghost">Export model</Button>}
+      />
+
+      <BankerTake
+        next={<>Anchor the process at the <span className="text-white">strategic</span> band — not the standard multiple — and make buyers underwrite the synergy.</>}
+        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(blended)}</span> blended · strategic mid {fmtMoney(VALUATION_STRATEGIC.headline.mid)}.</>}
+        inaction={<>Pricing off the standard band leaves <span className="font-mono text-red-300">{fmtMoney(premiumGap)}</span> of strategic premium unclaimed.</>}
+        buyer={<><span className="text-white">Strategic acquirers</span> pay the premium — financial buyers underwrite cash flow, not synergy.</>}
+        automate={<>ExitOS recomputes the full model as assumptions move and packages it straight into the CIM.</>}
+        cta={{ label: "Build the CIM", to: "/console/documents" }}
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
