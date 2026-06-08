@@ -21,6 +21,7 @@ const NAV: Array<{ to: string; label: string; group: string; scope?: string }> =
   { to: "/console/banker",             label: "Outreach",         group: "Find Buyers" },
 
   { to: "/console/diligence-ai",       label: "Diligence",        group: "Diligence" },
+  { to: "/console/deal-room",          label: "Live Deal Room",   group: "Diligence" },
   { to: "/console/data-room",          label: "Data Room",        group: "Diligence" },
   { to: "/console/documents",          label: "Documents",        group: "Diligence" },
   { to: "/console/nda",                label: "NDA",              group: "Diligence" },
