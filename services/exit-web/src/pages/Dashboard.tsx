@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button, Card, Kpi, SectionHeader, fmtMoney, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import {
@@ -8,8 +8,8 @@ import {
 } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import ExitProcessModal from "../components/ExitProcessModal";
-import BankerTake from "../components/BankerTake";
 import JourneyMap from "../components/JourneyMap";
+import ExitCommander from "../components/ExitCommander";
 import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
 import { emitTelemetry } from "../lib/telemetry";
 
@@ -39,9 +39,14 @@ const Dashboard: React.FC = () => {
   const redFlags = DILIGENCE.redFlags;
   const arrM = SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd / 1_000_000;
 
+  const navigate = useNavigate();
   const topMove = READINESS_ANALYSIS.weaknesses[0];
-  const valGap = READINESS_ANALYSIS.projectedStrategicMid - READINESS_ANALYSIS.currentStrategicMid;
-  const topBuyer = topBuyers[0];
+  const strategicActive = BUYERS.candidates.filter((c) => c.buyer.buyerType === "strategic" && c.buyer.appetite === "active").length;
+  const recommendedAction = strategicActive > 0
+    ? `Launch soft outreach to the ${strategicActive} strategic buyer${strategicActive === 1 ? "" : "s"} already circling.`
+    : topMove
+      ? topMove.recommendation.split(".")[0] + "."
+      : "Start the process — your posture is strong.";
 
   const [run, setRun] = useState<ExitRun | null>(() => loadRun());
   const [modalOpen, setModalOpen] = useState(false);
@@ -84,18 +89,16 @@ const Dashboard: React.FC = () => {
 
       <JourneyMap current={run?.status === "complete" ? "run" : "monitor"} />
 
-      <BankerTake
-        next={topMove ? topMove.recommendation : "Posture is strong — run the process now."}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(VALUATION_STRATEGIC.headline.mid)}</span> strategic mid · band {fmtMoney(VALUATION_STRATEGIC.headline.low)}–{fmtMoney(VALUATION_STRATEGIC.headline.high)}.</>}
-        inaction={topMove
-          ? <>Leaving <span className="text-white">{topMove.dimension}</span> unaddressed forgoes <span className="font-mono text-red-300">+{fmtMoney(valGap)}</span> of value buyers would otherwise pay.</>
-          : <>Multiple windows compress over time — every quarter idle risks the bid.</>}
-        buyer={topBuyer
-          ? <><span className="text-white">{topBuyer.buyer.name}</span> — {(topBuyer.probability * 100).toFixed(0)}% fit, {topBuyer.buyer.buyerType.replace(/_/g, " ")}.</>
-          : "No qualified buyers yet — widen the search."}
-        automate={<>One click runs the exit: ExitOS drafts the CIM, issues NDAs and sequences buyer outreach for you.</>}
-        impact={topMove ? <>+{fmtMoney(valGap)}</> : undefined}
-        cta={{ label: run?.status === "complete" ? "Re-run exit process" : "Start Exit Process", onClick: startExit }}
+      <ExitCommander
+        founderName={session?.founderId ?? "founder"}
+        companyName={SAMPLE_COMPANY.name}
+        valuationToday={VALUATION_STRATEGIC.headline.mid}
+        valuationPotential={READINESS_ANALYSIS.projectedStrategicMid}
+        fixCount={READINESS_ANALYSIS.weaknesses.length}
+        horizonMonths={6}
+        strategicBuyersActive={strategicActive}
+        recommendedAction={recommendedAction}
+        onExecute={() => navigate("/console/autopilot")}
       />
 
       {run?.status === "complete" && (
@@ -123,55 +126,16 @@ const Dashboard: React.FC = () => {
 
       <ExitProcessModal open={modalOpen} onClose={() => setModalOpen(false)} />
 
-      {/* AI Chief Exit Officer — action-first morning briefing. The single
-          recommended next move + its expected valuation uplift come from the
-          readiness-analysis engine; the activity line summarises buyer/diligence
-          signals. Founders open this daily for "what should I do next?". */}
-      {(() => {
-        const move = READINESS_ANALYSIS.weaknesses[0];
-        const requested = DILIGENCE.criticalQuestions.length;
-        const viewing = Math.min(BUYERS.candidates.length, 3);
-        return (
-          <Card className="mb-8 overflow-hidden p-0">
-            <div className="border-b border-white/10 bg-deal-600/10 px-6 py-3">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-deal-600/30 text-[12px] text-deal-200 ring-1 ring-deal-400/40">★</span>
-                <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-deal-300">AI Chief Exit Officer · morning briefing</span>
-              </div>
-            </div>
-            <div className="grid gap-0 lg:grid-cols-[1.4fr_1fr]">
-              {/* recommended next move */}
-              <div className="border-b border-white/10 p-6 lg:border-b-0 lg:border-r">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Recommended next move</div>
-                {move ? (
-                  <>
-                    <p className="mt-2 text-lg font-semibold leading-snug text-white">{move.recommendation}</p>
-                    <p className="mt-1 text-[13px] text-white/55">{move.weakness}</p>
-                    <div className="mt-4 flex items-center gap-4">
-                      <div>
-                        <div className="text-[10px] uppercase tracking-wide text-white/40">Expected value increase</div>
-                        <div className="font-mono text-2xl font-bold text-deal-300">+{fmtMoney(move.valuationUpliftUsd)}</div>
-                      </div>
-                      <Link to="/console/data-room" className="rounded-md bg-deal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">Take action →</Link>
-                    </div>
-                  </>
-                ) : (
-                  <p className="mt-2 text-lg font-semibold text-white">Posture is strong — run the process. No high-impact fixes outstanding.</p>
-                )}
-              </div>
-              {/* activity feed */}
-              <div className="p-6">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Since yesterday</div>
-                <ul className="mt-3 space-y-2.5 text-[13px] text-white/75">
-                  <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-deal-400" />{viewing} buyers viewed your profile</li>
-                  <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-loi-400" />1 buyer requested diligence access</li>
-                  <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-stage-engaged" />{requested} critical diligence question{requested === 1 ? "" : "s"} to resolve</li>
-                </ul>
-              </div>
-            </div>
-          </Card>
-        );
-      })()}
+      {/* Live signals the Commander is reading — the buyer/diligence activity
+          behind the brief above. */}
+      <Card className="mb-8 p-5">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Since yesterday</div>
+        <ul className="mt-3 grid gap-2.5 text-[13px] text-white/75 sm:grid-cols-3">
+          <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-deal-400" />{Math.min(BUYERS.candidates.length, 3)} buyers viewed your profile</li>
+          <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-loi-400" />1 buyer requested diligence access</li>
+          <li className="flex items-baseline gap-2.5"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-stage-engaged" />{DILIGENCE.criticalQuestions.length} critical diligence question{DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} to resolve</li>
+        </ul>
+      </Card>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi
