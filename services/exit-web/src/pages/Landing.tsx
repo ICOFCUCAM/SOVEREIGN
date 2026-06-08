@@ -60,14 +60,22 @@ const Landing: React.FC = () => {
       </header>
 
       {/* ===== 01 · HERO ===== */}
+      {/* The board is NOT a floating UI card — it is a massive acquisition-
+          exchange display physically mounted inside the trading hall: large,
+          in perspective, with a structural mount, a big soft shadow, a polished
+          floor reflection and ambient light spilling onto the floor. */}
       <section className="relative overflow-hidden border-b border-slate-200">
-        {/* office command-center photograph as the hero background */}
+        {/* office trading-hall photograph as the hero environment */}
         <div className="pointer-events-none absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/command-center.png)" }} aria-hidden />
-        {/* light wash so the photo reads bright but the headline stays legible */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/92 via-white/70 to-white/30" aria-hidden />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#f6f8fb] via-transparent to-white/40" aria-hidden />
-        <div className="relative mx-auto grid max-w-[1380px] items-center gap-8 px-6 py-16 lg:grid-cols-[0.72fr_1.28fr] lg:px-10 lg:py-24">
-          <div>
+        {/* wash: strong on the left for the headline, light on the right so the
+            hall (desks, analysts, windows) stays visible around the board. */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/92 from-5% via-white/45 via-40% to-white/5" aria-hidden />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#eef2f7]/90 to-transparent" aria-hidden />
+        {/* ambient light the board emits onto the floor */}
+        <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-64 w-[58%] rounded-[50%] opacity-60 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.35), rgba(70,150,220,0) 70%)" }} aria-hidden />
+
+        <div className="relative mx-auto grid max-w-[1440px] items-center gap-6 px-6 py-16 lg:grid-cols-[0.62fr_1.5fr] lg:px-10 lg:py-24">
+          <div className="lg:pr-2">
             <h1 className="font-serif text-4xl font-bold leading-[1.06] tracking-tight text-ink-900 sm:text-5xl">
               THE OPERATING SYSTEM<br />FOR COMPANY SALES
             </h1>
@@ -78,9 +86,63 @@ const Landing: React.FC = () => {
               <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-ink-800">Launch ExitOS <Arrow /></button>
               <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-6 py-3 text-sm font-semibold text-ink-900 backdrop-blur transition hover:border-slate-400 hover:bg-white">Request a Demo</button>
             </div>
+            {/* trust strip — what ExitOS stands on */}
+            <div className="mt-10 grid max-w-md grid-cols-2 gap-x-6 gap-y-4">
+              {HERO_TRUST.map((t) => (
+                <div key={t.title} className="flex items-start gap-2.5">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/70 text-ink-700 ring-1 ring-slate-200 backdrop-blur"><Glyph name={t.icon} small /></span>
+                  <div>
+                    <div className="text-[13px] font-bold leading-tight text-ink-900">{t.title}</div>
+                    <div className="text-[11px] leading-snug text-slate-500">{t.sub}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          {/* live command-center board (coded) */}
-          <div className="min-w-0"><CommandBoard /></div>
+
+          {/* ---- MOUNTED ACQUISITION-EXCHANGE DISPLAY ---- */}
+          <div className="min-w-0" style={{ perspective: "2000px" }}>
+            <div className="relative">
+              {/* structural mount / bezel behind the screen */}
+              <div
+                className="relative rounded-[20px] p-2.5"
+                style={{
+                  transform: "rotateY(-7deg) rotateX(2.5deg)",
+                  transformOrigin: "center right",
+                  background: "linear-gradient(145deg,#1c2c44,#0a1626)",
+                  boxShadow: "0 60px 90px -30px rgba(8,20,40,0.55), 0 20px 40px -20px rgba(8,20,40,0.45), inset 0 1px 0 rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                }}
+              >
+                {/* top mount rail with status LEDs */}
+                <div className="mb-1.5 flex items-center justify-between px-2 py-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_1px_rgba(80,230,140,0.8)]" />
+                    <span className="text-[8px] font-semibold uppercase tracking-[0.22em] text-white/45">ExitOS Acquisition Exchange · Live</span>
+                  </div>
+                  <span className="text-[8px] font-mono uppercase tracking-[0.18em] text-white/30">Floor 01 · Deal Board</span>
+                </div>
+                <CommandBoard />
+                {/* bottom mount bracket */}
+                <div className="mx-auto mt-1.5 h-1 w-1/3 rounded-full bg-white/10" />
+              </div>
+
+              {/* polished-floor reflection of the screen */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-full h-40 overflow-hidden"
+                style={{
+                  transform: "rotateY(-7deg) rotateX(2.5deg) scaleY(-1)",
+                  transformOrigin: "center right",
+                  opacity: 0.16,
+                  filter: "blur(3px)",
+                  WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
+                  maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
+                  background: "linear-gradient(180deg,#0a1626,#08203B)",
+                }}
+              />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -339,13 +401,28 @@ const BOARD_STATS = [
   { label: "Transactions in Motion", value: "1,249" },
   { label: "Total Acquisition Value", value: "$4.2B+" },
 ];
+const HERO_TRUST = [
+  { icon: "globe", title: "Global Buyer Network", sub: "58,000+ verified acquirers" },
+  { icon: "lock", title: "Institutional Security", sub: "SOC 2 · data residency" },
+  { icon: "users", title: "Founder First", sub: "you own every decision" },
+  { icon: "check", title: "Auditable Process", sub: "every action, every artifact" },
+];
+const LEAN_STATS = [
+  { label: "Buyers", value: "58,341" },
+  { label: "Appetite", value: "$4.2T" },
+  { label: "Mandates", value: "13,240" },
+  { label: "Acquirers", value: "4,800" },
+];
 const heatGradient = (bars: number) =>
   bars >= 9 ? "linear-gradient(90deg,#FF5A5A,#FF3434)"
   : bars >= 8 ? "linear-gradient(90deg,#FF9A3D,#FF7030)"
   : bars >= 6 ? "linear-gradient(90deg,#FFD36B,#FFB84A)"
   : "linear-gradient(90deg,#78B7FF,#4A8CFF)";
 
-const CommandBoard: React.FC<{ compact?: boolean }> = ({ compact }) => (
+// `lean` = focused hero board: only Strategic Buyers + Acquisition Demand
+// (no Live Transactions column — that detail lives below the fold), trimmed to
+// the few rows that matter, plus a 4-stat market-activity bar.
+const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact, lean }) => (
   <div
     className="min-w-0 overflow-hidden rounded-3xl text-white"
     style={{
@@ -354,12 +431,12 @@ const CommandBoard: React.FC<{ compact?: boolean }> = ({ compact }) => (
       boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
     }}
   >
-    <div className="grid grid-cols-1 lg:grid-cols-[25%_45%_30%]">
+    <div className={"grid grid-cols-1 " + (lean ? "lg:grid-cols-[44%_56%]" : "lg:grid-cols-[25%_45%_30%]")}>
       {/* ---- COL 1 · STRATEGIC BUYERS ---- */}
       <div className="border-b border-white/5 p-5 lg:border-b-0 lg:border-r">
         <BoardHeader title="Strategic Buyers" right="Match Score" />
         <div className="mt-1">
-          {STRATEGIC_BUYERS.map(([name, sector, match, status]) => (
+          {(lean ? STRATEGIC_BUYERS.filter((b) => ["Microsoft", "Salesforce", "Oracle", "Thoma Bravo"].includes(b[0])) : STRATEGIC_BUYERS).map(([name, sector, match, status]) => (
             <div key={name} className="group flex items-center justify-between gap-2 border-b border-white/5 py-2.5 transition last:border-0 hover:translate-x-1" style={{ transitionDuration: ".25s" }}>
               <div className="flex items-center gap-2">
                 <Mark name={name} size={22} />
@@ -378,7 +455,8 @@ const CommandBoard: React.FC<{ compact?: boolean }> = ({ compact }) => (
         <button className="mt-2 text-[11px] font-medium text-blue-300 hover:text-blue-200">View all buyers &rarr;</button>
       </div>
 
-      {/* ---- COL 2 · LIVE TRANSACTIONS ---- */}
+      {/* ---- COL 2 · LIVE TRANSACTIONS (full board only) ---- */}
+      {!lean && (
       <div className="border-b border-white/5 p-5 lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -413,12 +491,13 @@ const CommandBoard: React.FC<{ compact?: boolean }> = ({ compact }) => (
         </div>
         <button className="mt-2 text-[11px] font-medium text-blue-300 hover:text-blue-200">View all transactions &rarr;</button>
       </div>
+      )}
 
       {/* ---- COL 3 · ACQUISITION DEMAND ---- */}
       <div className="p-5">
         <BoardHeader title="Acquisition Demand" right="Market Heat" />
         <div className="mt-3 space-y-2.5">
-          {DEMAND.map(([label, heat, bars]) => (
+          {(lean ? DEMAND.slice(0, 4) : DEMAND).map(([label, heat, bars]) => (
             <div key={label}>
               <div className="flex items-center justify-between text-[10.5px]">
                 <span className="text-white/80">{label}</span>
@@ -430,7 +509,8 @@ const CommandBoard: React.FC<{ compact?: boolean }> = ({ compact }) => (
             </div>
           ))}
         </div>
-        {/* Market intelligence box */}
+        {/* Market intelligence box (full board only — lean shows the stat bar) */}
+        {!lean && (
         <div className="mt-4 rounded-2xl p-3" style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.04)" }}>
           <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/45">Market Intelligence</div>
           <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-3">
@@ -442,12 +522,13 @@ const CommandBoard: React.FC<{ compact?: boolean }> = ({ compact }) => (
             ))}
           </div>
         </div>
+        )}
       </div>
     </div>
 
-    {/* ---- BOTTOM · summary stat bar ---- */}
-    <div className="grid grid-cols-2 gap-px border-t border-white/10 sm:grid-cols-5" style={{ background: "rgba(255,255,255,.06)" }}>
-      {BOARD_STATS.map((s) => (
+    {/* ---- BOTTOM · market-activity stat bar ---- */}
+    <div className={"grid grid-cols-2 gap-px border-t border-white/10 " + (lean ? "sm:grid-cols-4" : "sm:grid-cols-5")} style={{ background: "rgba(255,255,255,.06)" }}>
+      {(lean ? LEAN_STATS : BOARD_STATS).map((s) => (
         <div key={s.label} className="px-4 py-3.5" style={{ background: "#06182E" }}>
           <div className="font-bold leading-none text-white" style={{ fontSize: 18 }}>{s.value}</div>
           <div className="mt-1.5 text-[9px] uppercase tracking-[0.12em] text-white/45">{s.label}</div>
