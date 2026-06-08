@@ -44,12 +44,23 @@ const Wealth: React.FC = () => {
 
   const portfolioUsd = afterTax * ALLOC[0].pct;
 
+  // WealthOS tracker — the six threads ExitOS keeps after the wire.
+  const foViable = afterTax >= 50_000_000;
+  const tracker: { label: string; value: string; note: string; pill: string; tint: string }[] = [
+    { label: "Proceeds",      value: fmtMoney(afterTax),                 note: "after-tax net, scheduled across tranches",   pill: "Tracked",     tint: "#34d399" },
+    { label: "Taxes",         value: fmtMoney(taxDue),                   note: `reserved · ~${(TAX * 100).toFixed(1)}% blended`, pill: "Reserved",  tint: "#fbbf24" },
+    { label: "Trusts",        value: fmtMoney(Math.round(afterTax * 0.15)), note: "GRAT / family trust for estate efficiency", pill: "Recommended", tint: "#a78bfa" },
+    { label: "Family office", value: foViable ? "Single-family office" : "Multi-family office", note: foViable ? "liquidity supports a dedicated SFO" : "MFO / OCIO until scale", pill: "Setup", tint: "#60a5fa" },
+    { label: "Reinvestments", value: fmtMoney(afterTax * ALLOC[1].pct),  note: "next venture · angel portfolio",             pill: "Allocated",   tint: "#34d399" },
+    { label: "Philanthropy",  value: fmtMoney(afterTax * ALLOC[3].pct),  note: "donor-advised fund · tax-efficient",         pill: "Allocated",   tint: "#fbbf24" },
+  ];
+
   return (
     <div>
       <SectionHeader
-        kicker="Wealth · founder liquidity"
-        title="Wealth Transition"
-        description="The deal closed. Now the work is the money — when it lands, what the tax takes, and how to turn a single illiquid position into durable, diversified wealth."
+        kicker="WealthOS · founder liquidity"
+        title="WealthOS"
+        description="Most platforms stop at closing. ExitOS doesn't. WealthOS tracks the money after the wire — proceeds, taxes, trusts, family office, reinvestments and philanthropy — so the founder relationship continues long past the sale."
       />
 
       <BankerTake
@@ -75,6 +86,22 @@ const Wealth: React.FC = () => {
           ))}
         </div>
       </Card>
+
+      {/* ── WealthOS tracker ─────────────────────────────────────── */}
+      <h2 className="mt-8 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">WealthOS tracker</h2>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        {tracker.map((t) => (
+          <Card key={t.label} className="relative overflow-hidden p-5">
+            <div className="absolute inset-x-0 top-0 h-0.5" style={{ background: t.tint }} />
+            <div className="flex items-center justify-between">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-white/45">{t.label}</div>
+              <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide" style={{ background: `${t.tint}1f`, color: t.tint }}>{t.pill}</span>
+            </div>
+            <div className="mt-2 font-mono text-xl font-bold text-white">{t.value}</div>
+            <div className="mt-1 text-[11px] text-white/45">{t.note}</div>
+          </Card>
+        ))}
+      </div>
 
       {/* ── Liquidity timeline ───────────────────────────────────── */}
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_1fr]">

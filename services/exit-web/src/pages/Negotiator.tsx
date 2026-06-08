@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, Field, inputCls, fmtMoney } from "../lib/ui";
 import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_STRATEGIC } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -50,12 +50,46 @@ function generateCounter(offer: Offer) {
 }
 const SAMPLE_GROWTH = 0.42; // ARR growth from company profile (Helios)
 
+// Autonomous Negotiation — the founder sets their lines (minimum, ideal,
+// walk-away) and the AI generates the deal terms a junior banker + lawyer
+// would: protective clauses, earnout alternatives and seller protections.
+interface Thresholds { minUsd: number; idealUsd: number; walkUsd: number; }
+function autonomousTerms(offer: Offer | undefined, t: Thresholds): { clauses: string[]; earnouts: string[]; protections: string[] } {
+  const earnoutPct = offer?.earnoutPct ?? 0;
+  const clauses = [
+    `Reverse break-up fee of 4% (${fmtMoney(t.minUsd * 0.04)}) if the buyer fails to close on agreed terms`,
+    "Narrow the Material Adverse Change definition to exclude market- and sector-wide events",
+    "Cap general indemnity at 10% of consideration; 18-month survival on standard reps",
+    "Anti-sandbagging carve-out so disclosed items can't be clawed back post-close",
+  ];
+  const earnouts = earnoutPct > 0 ? [
+    `All-cash alternative at ${fmtMoney(t.minUsd)} — trade the ${Math.round(earnoutPct * 100)}% earnout for certainty`,
+    "Shorter 12-month earnout with an 80% cash floor and objective, audited milestones",
+    "Convert the earnout to a vendor loan note at 8% — a fixed return, not performance-contingent",
+  ] : [
+    "Hold the all-cash structure — no earnout exposure to defend in diligence",
+    `Offer a 10% management rollover to pull the buyer toward your ideal of ${fmtMoney(t.idealUsd)}`,
+  ];
+  const protections = [
+    "Escrow capped at 8% of consideration, released in 12 months",
+    "No personal guarantees or indemnities from the founders beyond escrow",
+    "Buyer-funded key-employee retention pool to de-risk the transition",
+    "Structure as a stock sale where QSBS treatment applies — protect the after-tax proceeds",
+  ];
+  return { clauses, earnouts, protections };
+}
+
 const Negotiator: React.FC = () => {
   const [activeId, setActiveId] = useState(OFFER_EVALUATIONS[0]?.offer.offerId ?? "");
   const active = OFFER_EVALUATIONS.find((e) => e.offer.offerId === activeId) ?? OFFER_EVALUATIONS[0];
   const reserveMid = VALUATION_STRATEGIC.headline.mid;
   const counter = active ? generateCounter(active.offer) : null;
   const [draftOpen, setDraftOpen] = useState(false);
+
+  const [walkUsd, setWalkUsd]   = useState(Math.round(RESERVATION_LINES.minHeadlinePriceUsd * 0.95));
+  const [minUsd, setMinUsd]     = useState(RESERVATION_LINES.minHeadlinePriceUsd);
+  const [idealUsd, setIdealUsd] = useState(Math.round(VALUATION_STRATEGIC.headline.high));
+  const terms = autonomousTerms(active?.offer, { minUsd, idealUsd, walkUsd });
 
   return (
     <div>
@@ -77,6 +111,36 @@ const Negotiator: React.FC = () => {
           cta={{ label: "Draft the response", onClick: () => setDraftOpen(true) }}
         />
       )}
+
+      {/* ── Autonomous Negotiation — set your lines, AI generates the terms ── */}
+      <Card className="mb-8 p-6">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-deal-600/30 text-[10px] font-bold text-deal-200 ring-1 ring-deal-400/40">AI</span>
+          <h2 className="font-serif text-base font-bold text-white">Autonomous Negotiation</h2>
+        </div>
+        <p className="mt-1 text-[12px] text-white/45">Set your lines — the AI anchors the counter, drafts the clauses, and engineers seller protections like a junior banker and lawyer.</p>
+
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Field label="Walk away">
+            <input type="number" value={walkUsd} step={1_000_000} min={0} onChange={(e) => setWalkUsd(Number(e.target.value))} className={inputCls} />
+          </Field>
+          <Field label="Minimum">
+            <input type="number" value={minUsd} step={1_000_000} min={0} onChange={(e) => setMinUsd(Number(e.target.value))} className={inputCls} />
+          </Field>
+          <Field label="Ideal">
+            <input type="number" value={idealUsd} step={1_000_000} min={0} onChange={(e) => setIdealUsd(Number(e.target.value))} className={inputCls} />
+          </Field>
+        </div>
+        <div className="mt-3 rounded-md border border-deal-500/20 bg-deal-600/[0.06] px-4 py-2.5 text-[12.5px] text-white/75">
+          AI strategy: open at <span className="font-mono font-semibold text-deal-300">{fmtMoney(idealUsd)}</span>, concede no lower than <span className="font-mono font-semibold text-white">{fmtMoney(minUsd)}</span>, and walk below <span className="font-mono font-semibold text-red-300">{fmtMoney(walkUsd)}</span>.
+        </div>
+
+        <div className="mt-5 grid gap-5 sm:grid-cols-3">
+          <TermsList title="Protective clauses" items={terms.clauses} dot="bg-deal-400" />
+          <TermsList title="Earnout alternatives" items={terms.earnouts} dot="bg-loi-400" />
+          <TermsList title="Seller protections" items={terms.protections} dot="bg-stage-engaged" />
+        </div>
+      </Card>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi label="Active offers"    value={String(NEGOTIATION_STATE.activeOffers)} sub={`Stage: ${NEGOTIATION_STATE.stage}`} />
@@ -291,6 +355,17 @@ James — on behalf of Helios Freight`
     </div>
   );
 };
+
+const TermsList: React.FC<{ title: string; items: string[]; dot: string }> = ({ title, items, dot }) => (
+  <div>
+    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">{title}</div>
+    <ul className="mt-2 space-y-2 text-[12.5px] text-white/75">
+      {items.map((it) => (
+        <li key={it} className="flex items-baseline gap-2"><span className={`mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />{it}</li>
+      ))}
+    </ul>
+  </div>
+);
 
 const Stat: React.FC<{ label: string; value: string; accent?: string }> = ({ label, value, accent }) => (
   <div>

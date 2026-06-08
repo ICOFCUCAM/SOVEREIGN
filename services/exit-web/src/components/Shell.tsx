@@ -12,6 +12,7 @@ const NAV: Array<{ to: string; label: string; group: string; scope?: string }> =
 
   { to: "/console/valuation",          label: "Valuation",        group: "Prepare" },
   { to: "/console/readiness",          label: "Readiness",        group: "Prepare" },
+  { to: "/console/exit-timing",        label: "Exit Timing",      group: "Prepare" },
   { to: "/console/investors",          label: "Cap Table",        group: "Prepare" },
 
   { to: "/console/intelligence",       label: "Intelligence",     group: "Find Buyers" },
@@ -34,7 +35,7 @@ const NAV: Array<{ to: string; label: string; group: string; scope?: string }> =
   { to: "/console/closing#signatures", label: "Signatures",       group: "Close" },
   { to: "/console/closing#escrow",     label: "Escrow",           group: "Close" },
 
-  { to: "/console/wealth",             label: "Wealth Transition", group: "Wealth" },
+  { to: "/console/wealth",             label: "WealthOS",         group: "Wealth" },
 
   { to: "/console/buyer-portal",       label: "Buyer Portal",     group: "Internal" },
   { to: "/console/calibration",        label: "Calibration",      group: "Internal" },
