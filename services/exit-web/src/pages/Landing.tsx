@@ -34,17 +34,6 @@ const Mark: React.FC<{ name: string; size?: number }> = ({ name, size = 26 }) =>
   );
 };
 
-// ---- shared bits -----------------------------------------------------------
-const Eyebrow: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{children}</div>
-);
-const SectionTag: React.FC<{ n: string; label: string }> = ({ n, label }) => (
-  <div className="hidden w-28 shrink-0 lg:block">
-    <div className="font-mono text-[13px] font-bold text-ink-800">{n}</div>
-    <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.22em] text-slate-400">{label}</div>
-  </div>
-);
-
 const Landing: React.FC = () => {
   const nav = useNavigate();
   return (
@@ -72,45 +61,32 @@ const Landing: React.FC = () => {
 
       {/* ===== 01 · HERO ===== */}
       <section className="relative overflow-hidden border-b border-slate-200">
-        {/* previously-uploaded command-center image as a faint backdrop */}
-        <div className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.06]" style={{ backgroundImage: "url(/command-center.png)" }} aria-hidden />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/70 to-[#f6f8fb]" aria-hidden />
-        <div className="relative mx-auto grid max-w-[1320px] items-center gap-10 px-6 py-14 lg:grid-cols-[0.82fr_1.18fr] lg:px-10 lg:py-20">
-          <div className="flex items-start gap-6">
-            <SectionTag n="01" label="Hero" />
-            <div>
-              <Eyebrow>The operating system for company sales</Eyebrow>
-              <h1 className="mt-5 font-serif text-5xl font-bold leading-[1.04] tracking-tight text-ink-900 sm:text-[3.4rem]">
-                Built for founders.
-                <br />Trusted by acquirers.
-                <br /><span className="text-blue-600">Designed to close.</span>
-              </h1>
-              <p className="mt-6 max-w-md text-base leading-relaxed text-slate-600">
-                ExitOS is the acquisition operating system that connects founders with the right buyers, runs the entire sale process, and closes more deals.
-              </p>
-              <div className="mt-8 flex flex-wrap items-center gap-3">
-                <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Launch ExitOS <Arrow /></button>
-                <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-ink-900 transition hover:border-slate-400 hover:bg-slate-50">Request a Demo</button>
-              </div>
-              <div className="mt-9">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Trusted by founders. Backed by top acquirers.</div>
-                <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
-                  {["Microsoft", "Salesforce", "Google", "SAP", "Oracle", "Thoma Bravo"].map((l) => (
-                    <span key={l} className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-400"><Mark name={l} size={16} /> {l}</span>
-                  ))}
-                </div>
-              </div>
+        {/* office command-center photograph as the hero background */}
+        <div className="pointer-events-none absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/command-center.png)" }} aria-hidden />
+        {/* light wash so the photo reads bright but the headline stays legible */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/92 via-white/70 to-white/30" aria-hidden />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#f6f8fb] via-transparent to-white/40" aria-hidden />
+        <div className="relative mx-auto grid max-w-[1380px] items-center gap-8 px-6 py-16 lg:grid-cols-[0.72fr_1.28fr] lg:px-10 lg:py-24">
+          <div>
+            <h1 className="font-serif text-4xl font-bold leading-[1.06] tracking-tight text-ink-900 sm:text-5xl">
+              THE OPERATING SYSTEM<br />FOR COMPANY SALES
+            </h1>
+            <p className="mt-5 max-w-md text-base leading-relaxed text-slate-700">
+              Built for founders. Trusted by acquirers.<br />Designed to close.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-ink-800">Launch ExitOS <Arrow /></button>
+              <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-6 py-3 text-sm font-semibold text-ink-900 backdrop-blur transition hover:border-slate-400 hover:bg-white">Request a Demo</button>
             </div>
           </div>
           {/* live command-center board (coded) */}
-          <CommandBoard />
+          <div className="min-w-0"><CommandBoard /></div>
         </div>
       </section>
 
       {/* ===== 02 · ACQUISITION MARKET ===== */}
       <section id="solutions" className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <SectionTag n="02" label="Acquisition Market" />
           <div className="flex-1">
             <h2 className="font-serif text-[2rem] font-bold tracking-tight text-ink-900">The world&rsquo;s acquisition marketplace.</h2>
             <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
@@ -131,7 +107,6 @@ const Landing: React.FC = () => {
       {/* ===== 03 · HOW EXITOS WORKS ===== */}
       <section id="platform" className="border-b border-slate-200">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <SectionTag n="03" label="How ExitOS Works" />
           <div className="flex-1">
             <h2 className="font-serif text-[2rem] font-bold tracking-tight text-ink-900">Run your entire company sale from discovery to closing.</h2>
             <div className="mt-12 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
@@ -151,7 +126,6 @@ const Landing: React.FC = () => {
       {/* ===== 04 · BUYER INTELLIGENCE ===== */}
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <SectionTag n="04" label="Buyer Intelligence" />
           <div className="flex-1">
             <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Real buyers.<br />Real appetite.<br />Real opportunities.</h2>
             <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">View all buyers &rarr;</a>
@@ -183,7 +157,6 @@ const Landing: React.FC = () => {
       {/* ===== 05 · COMMAND CENTER PREVIEW ===== */}
       <section className="border-b border-slate-200">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <SectionTag n="05" label="Command Center Preview" />
           <div className="grid flex-1 items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="min-w-0 scale-90 lg:scale-100"><CommandBoard compact /></div>
             <div>
@@ -211,7 +184,6 @@ const Landing: React.FC = () => {
       {/* ===== 06 · DATA ROOM INFRASTRUCTURE ===== */}
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <SectionTag n="06" label="Data Room Infrastructure" />
           <div className="grid flex-1 items-center gap-10 lg:grid-cols-[1.4fr_1fr]">
             <div>
               <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Institutional-grade<br />data rooms.</h2>
@@ -234,7 +206,6 @@ const Landing: React.FC = () => {
       {/* ===== 07 · NEGOTIATION ENGINE ===== */}
       <section className="border-b border-slate-200">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <SectionTag n="07" label="Negotiation Engine" />
           <div className="grid flex-1 items-start gap-10 lg:grid-cols-[1.25fr_1fr]">
             <OfferTable />
             <div>
@@ -260,7 +231,6 @@ const Landing: React.FC = () => {
       {/* ===== 08 · EXIT MARKETPLACE ===== */}
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <SectionTag n="08" label="Exit Marketplace" />
           <div className="flex-1">
             <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Live opportunities.<br />Private and confidential.</h2>
             <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">View all opportunities &rarr;</a>
@@ -285,7 +255,6 @@ const Landing: React.FC = () => {
       {/* ===== 09 · GLOBAL INFRASTRUCTURE ===== */}
       <section className="border-b border-slate-200 bg-ink-900 text-white">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <SectionTag n="09" label="Global Infrastructure" />
           <div className="grid flex-1 items-center gap-10 lg:grid-cols-2">
             <div className="flex items-center justify-center"><WorldDots /></div>
             <div>
@@ -310,8 +279,7 @@ const Landing: React.FC = () => {
           {[0, 1, 2, 3].map((i) => <div key={i} className="h-40 w-16 rounded-t bg-ink-900" />)}
         </div>
         <div className="relative mx-auto max-w-[1320px] px-6 py-24 text-center lg:px-10">
-          <span className="font-mono text-[11px] font-bold tracking-[0.22em] text-slate-300">10 — FINAL CTA</span>
-          <h2 className="mt-4 font-serif text-4xl font-bold tracking-tight text-ink-900 sm:text-5xl">Ready to run your company sale?</h2>
+          <h2 className="font-serif text-4xl font-bold tracking-tight text-ink-900 sm:text-5xl">Ready to run your company sale?</h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600">
             ExitOS brings acquisition intelligence, buyer discovery, diligence, negotiation and closing into a single institutional operating system.
           </p>
@@ -363,23 +331,13 @@ const DEMAND: [string, string, number][] = [
   ["Industrial Tech", "Medium", 5],
   ["Fintech", "Medium", 4],
 ];
-// command-center indices (top strip) + live deal-feed (bottom ticker)
-const INDICES = [
-  { label: "LOIs (30d)", value: "47", color: "#45E38A" },
-  { label: "Buyer Appetite", value: "8.6", color: "#5AD1FF" },
-  { label: "Sector Liquidity", value: "High", color: "#5AD1FF" },
-  { label: "Median Multiple", value: "6.8x", color: "#FFFFFF" },
-  { label: "Cross-Border", value: "72", color: "#FF9F43" },
-  { label: "Founder Readiness", value: "91%", color: "#7CFF9F" },
-];
-const DEAL_FEED = [
-  { company: "Helios Freight", event: "LOI received from Microsoft", value: "$261M", color: "#45E38A" },
-  { company: "DataMind AI", event: "entered negotiation with Google", value: "$315M", color: "#FF8A3D" },
-  { company: "SecureLayer", event: "diligence opened · Palo Alto Networks", value: "$198M", color: "#FFB14A" },
-  { company: "CareSphere", event: "data room access · UnitedHealth", value: "$175M", color: "#58C6FF" },
-  { company: "Atlas Fintech", event: "new mandate indexed", value: "$420M", color: "#5AD1FF" },
-  { company: "NextGen Robotics", event: "initial review · Rockwell", value: "$142M", color: "rgba(255,255,255,.6)" },
-  { company: "Verdant Bio", event: "closed · strategic acquirer", value: "$540M", color: "#45E38A" },
+// summary stat bar along the board's bottom edge (benchmark)
+const BOARD_STATS = [
+  { label: "Active Buyers", value: "58,341+" },
+  { label: "Active Acquirers", value: "18,340" },
+  { label: "Active Deals", value: "12,400" },
+  { label: "Transactions in Motion", value: "1,249" },
+  { label: "Total Acquisition Value", value: "$4.2B+" },
 ];
 const heatGradient = (bars: number) =>
   bars >= 9 ? "linear-gradient(90deg,#FF5A5A,#FF3434)"
@@ -396,22 +354,6 @@ const CommandBoard: React.FC<{ compact?: boolean }> = ({ compact }) => (
       boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
     }}
   >
-    {/* ---- TOP STATUS STRIP · live indices + LOI counter ---- */}
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-white/5 px-5 py-2.5" style={{ background: "rgba(255,255,255,.02)" }}>
-      <div className="flex items-center gap-2">
-        <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: "#45E38A" }} />
-        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">Acquisition Command Center</span>
-      </div>
-      <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1.5">
-        {INDICES.map((ix) => (
-          <div key={ix.label} className="flex items-baseline gap-1.5">
-            <span className="font-bold leading-none" style={{ color: ix.color, fontSize: 12 }}>{ix.value}</span>
-            <span className="text-[9px] uppercase tracking-wide text-white/40">{ix.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-
     <div className="grid grid-cols-1 lg:grid-cols-[25%_45%_30%]">
       {/* ---- COL 1 · STRATEGIC BUYERS ---- */}
       <div className="border-b border-white/5 p-5 lg:border-b-0 lg:border-r">
@@ -503,20 +445,15 @@ const CommandBoard: React.FC<{ compact?: boolean }> = ({ compact }) => (
       </div>
     </div>
 
-    {/* ---- BOTTOM · live deal-feed ticker ---- */}
-    <div className="overflow-hidden border-t border-white/5" style={{ background: "rgba(255,255,255,.02)" }}>
-      <div className="flex items-center gap-6 whitespace-nowrap px-5 py-2" style={{ animation: "boardTicker 38s linear infinite", width: "max-content" }}>
-        {[...DEAL_FEED, ...DEAL_FEED].map((d, i) => (
-          <span key={i} className="flex items-center gap-1.5 text-[10px]">
-            <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: d.color }} />
-            <span className="font-semibold text-white/80">{d.company}</span>
-            <span className="text-white/40">{d.event}</span>
-            <span className="font-mono text-white/60">{d.value}</span>
-          </span>
-        ))}
-      </div>
+    {/* ---- BOTTOM · summary stat bar ---- */}
+    <div className="grid grid-cols-2 gap-px border-t border-white/10 sm:grid-cols-5" style={{ background: "rgba(255,255,255,.06)" }}>
+      {BOARD_STATS.map((s) => (
+        <div key={s.label} className="px-4 py-3.5" style={{ background: "#06182E" }}>
+          <div className="font-bold leading-none text-white" style={{ fontSize: 18 }}>{s.value}</div>
+          <div className="mt-1.5 text-[9px] uppercase tracking-[0.12em] text-white/45">{s.label}</div>
+        </div>
+      ))}
     </div>
-    <style>{`@keyframes boardTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
   </div>
 );
 const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right }) => (
