@@ -57,7 +57,7 @@ export const Button: React.FC<
   return (
     <button
       {...p}
-      className={`inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed ${v} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400 focus-visible:ring-offset-1 focus-visible:ring-offset-ink-900 disabled:opacity-40 disabled:cursor-not-allowed ${v} ${className}`}
     />
   );
 };
