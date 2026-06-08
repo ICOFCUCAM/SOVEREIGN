@@ -29,6 +29,7 @@ import BuyerCopilot from "./pages/BuyerCopilot";
 import DealRoom from "./pages/DealRoom";
 import ExitTiming from "./pages/ExitTiming";
 import Commander from "./pages/Commander";
+import Network from "./pages/Network";
 
 const Console: React.FC = () => {
   const { session } = useAuth();
@@ -38,6 +39,7 @@ const Console: React.FC = () => {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="commander" element={<Commander />} />
+        <Route path="network" element={<Network />} />
         <Route path="autopilot" element={<Autopilot />} />
         <Route path="readiness" element={<Readiness />} />
         <Route path="exit-timing" element={<ExitTiming />} />

@@ -10,6 +10,7 @@ const NAV: Array<{ to: string; label: string; group: string; scope?: string }> =
   { to: "/console/commander",          label: "Exit Commander",   group: "Overview" },
   { to: "/console",                    label: "Dashboard",        group: "Overview" },
   { to: "/console/autopilot",          label: "Autonomous Exit",  group: "Overview" },
+  { to: "/console/network",            label: "Network Intelligence", group: "Overview" },
 
   { to: "/console/valuation",          label: "Valuation",        group: "Prepare" },
   { to: "/console/readiness",          label: "Readiness",        group: "Prepare" },
