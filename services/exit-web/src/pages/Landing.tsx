@@ -11,7 +11,7 @@ const NAV = ["Platform", "Solutions", "Resources", "Company", "Pricing"];
 
 // ---- shared bits -----------------------------------------------------------
 const Eyebrow: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-deal-600">{children}</div>
+  <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{children}</div>
 );
 const SectionTag: React.FC<{ n: string; label: string }> = ({ n, label }) => (
   <div className="hidden shrink-0 lg:block">
@@ -28,9 +28,9 @@ const Landing: React.FC = () => {
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur">
         <div className="mx-auto flex max-w-[1320px] items-center justify-between px-6 py-4 lg:px-10">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-gradient-to-br from-deal-400 to-deal-700 text-xs font-black text-white shadow-sm">EX</div>
+            <div className="flex h-8 w-8 items-center justify-center rounded bg-gradient-to-br from-blue-500 to-blue-700 text-xs font-black text-white shadow-sm">EX</div>
             <span className="text-lg font-bold tracking-tight text-ink-900">
-              EXIT<span className="text-deal-600">OS</span>
+              EXIT<span className="text-blue-600">OS</span>
             </span>
           </div>
           <nav className="hidden items-center gap-8 lg:flex">
@@ -58,14 +58,14 @@ const Landing: React.FC = () => {
             <h1 className="mt-5 font-serif text-5xl font-bold leading-[1.05] tracking-tight text-ink-900 sm:text-6xl">
               Built for founders.
               <br />Trusted by acquirers.
-              <br /><span className="text-deal-600">Designed to close.</span>
+              <br /><span className="text-blue-600">Designed to close.</span>
             </h1>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-slate-600">
               ExitOS is the acquisition operating system that connects founders with the right buyers, runs the entire sale process, and closes more deals.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <button onClick={() => nav("/console")}
-                className="inline-flex items-center gap-2 rounded-md bg-deal-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-deal-700">
+                className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
                 Launch ExitOS
               </button>
               <button onClick={() => nav("/pricing")}
@@ -94,7 +94,7 @@ const Landing: React.FC = () => {
             <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
               {MARKET_STATS.map((s) => (
                 <div key={s.label}>
-                  <div className="font-serif text-2xl font-bold text-deal-600">{s.value}</div>
+                  <div className="font-serif text-2xl font-bold text-blue-600">{s.value}</div>
                   <div className="mt-1 text-[12px] leading-snug text-slate-500">{s.label}</div>
                 </div>
               ))}
@@ -149,7 +149,7 @@ const Landing: React.FC = () => {
                 </div>
               ))}
             </div>
-            <a href="#" className="mt-6 inline-block text-[13px] font-semibold text-deal-600 hover:text-deal-700">View all buyers &rarr;</a>
+            <a href="#" className="mt-6 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">View all buyers &rarr;</a>
           </div>
         </div>
       </section>
@@ -168,7 +168,7 @@ const Landing: React.FC = () => {
               <ul className="mt-6 space-y-4">
                 {COMMAND_FEATURES.map((f) => (
                   <li key={f.title} className="flex gap-3">
-                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-deal-50 text-deal-600"><Glyph name={f.icon} small /></span>
+                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><Glyph name={f.icon} small /></span>
                     <div>
                       <div className="text-sm font-bold text-ink-900">{f.title}</div>
                       <div className="text-[12px] text-slate-500">{f.body}</div>
@@ -176,7 +176,7 @@ const Landing: React.FC = () => {
                   </li>
                 ))}
               </ul>
-              <a href="#" className="mt-6 inline-block text-[13px] font-semibold text-deal-600 hover:text-deal-700">Explore the Platform &rarr;</a>
+              <a href="#" className="mt-6 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">Explore the Platform &rarr;</a>
             </div>
           </div>
         </div>
@@ -200,7 +200,7 @@ const Landing: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <a href="#" className="mt-6 inline-block text-[13px] font-semibold text-deal-600 hover:text-deal-700">Learn more &rarr;</a>
+              <a href="#" className="mt-6 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">Learn more &rarr;</a>
             </div>
             <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-ink-900 to-ink-700 p-12">
               <Vault />
@@ -231,7 +231,7 @@ const Landing: React.FC = () => {
                   </div>
                 </li>
               ))}
-              <a href="#" className="inline-block text-[13px] font-semibold text-deal-600 hover:text-deal-700">See Negotiation Engine &rarr;</a>
+              <a href="#" className="inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">See Negotiation Engine &rarr;</a>
             </ul>
           </div>
         </div>
@@ -246,19 +246,19 @@ const Landing: React.FC = () => {
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {OPPORTUNITIES.map((o) => (
                 <div key={o.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-                  <div className="inline-block rounded bg-deal-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-deal-700">{o.sector}</div>
+                  <div className="inline-block rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">{o.sector}</div>
                   <div className="mt-3 text-sm font-bold text-ink-900">{o.name}</div>
                   <div className="mt-4 flex items-end justify-between">
                     <div>
                       <div className="text-[10px] uppercase tracking-wide text-slate-400">Asking Price</div>
                       <div className="font-serif text-xl font-bold text-ink-900">{o.price}</div>
                     </div>
-                    <a href="#" className="text-[12px] font-semibold text-deal-600 hover:text-deal-700">View Details &rarr;</a>
+                    <a href="#" className="text-[12px] font-semibold text-blue-600 hover:text-blue-700">View Details &rarr;</a>
                   </div>
                 </div>
               ))}
             </div>
-            <a href="#" className="mt-6 inline-block text-[13px] font-semibold text-deal-600 hover:text-deal-700">View all opportunities &rarr;</a>
+            <a href="#" className="mt-6 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">View all opportunities &rarr;</a>
           </div>
         </div>
       </section>
@@ -278,7 +278,7 @@ const Landing: React.FC = () => {
             <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
               {GLOBAL_STATS.map((s) => (
                 <div key={s.label}>
-                  <div className="font-serif text-2xl font-bold text-deal-300">{s.value}</div>
+                  <div className="font-serif text-2xl font-bold text-blue-300">{s.value}</div>
                   <div className="mt-1 text-[12px] text-white/55">{s.label}</div>
                 </div>
               ))}
@@ -296,7 +296,7 @@ const Landing: React.FC = () => {
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <button onClick={() => nav("/console")}
-              className="inline-flex items-center gap-2 rounded-md bg-deal-600 px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-deal-700">
+              className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
               Launch ExitOS
             </button>
             <button onClick={() => nav("/pricing")}
@@ -392,7 +392,7 @@ const HeroPanel: React.FC = () => (
     <div className="grid grid-cols-1 divide-y divide-white/10 lg:grid-cols-[1.1fr_1.2fr_0.9fr] lg:divide-x lg:divide-y-0">
       {/* strategic buyers */}
       <div className="p-4">
-        <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-deal-300">Strategic Buyers</div>
+        <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-blue-300">Strategic Buyers</div>
         <div className="mt-3 space-y-2">
           {HERO_BUYERS.map((b) => (
             <div key={b[0]} className="flex items-center justify-between gap-2 text-[10px]">
@@ -401,7 +401,7 @@ const HeroPanel: React.FC = () => (
                 <div className="text-white/35">{b[1]}</div>
               </div>
               <div className="text-right">
-                <div className="font-mono font-semibold text-deal-300">{b[2]}</div>
+                <div className="font-mono font-semibold text-blue-300">{b[2]}</div>
                 <div className="text-white/35">{b[3]}</div>
               </div>
             </div>
@@ -411,7 +411,7 @@ const HeroPanel: React.FC = () => (
       {/* live transactions */}
       <div className="p-4">
         <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/55">
-          <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-deal-400" /> Live Transactions
+          <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" /> Live Transactions
         </div>
         <div className="mt-3 space-y-2">
           {HERO_TX.map((t) => (
@@ -419,7 +419,7 @@ const HeroPanel: React.FC = () => (
               <div className="font-semibold text-white">{t[0]}</div>
               <div className="text-right">
                 <div className="font-mono text-white/80">{t[1]}</div>
-                <div className="text-deal-300">{t[2]}</div>
+                <div className="text-blue-300">{t[2]}</div>
               </div>
             </div>
           ))}
@@ -434,7 +434,7 @@ const HeroPanel: React.FC = () => (
               <div key={k as string}>
                 <div className="flex justify-between text-[9px] text-white/55"><span>{k}</span><span>{Math.round((v as number) * 100)}%</span></div>
                 <div className="mt-0.5 h-1 overflow-hidden rounded-full bg-white/10">
-                  <div className="h-full rounded-full bg-gradient-to-r from-loi-400 to-deal-400" style={{ width: `${(v as number) * 100}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-loi-400 to-blue-500" style={{ width: `${(v as number) * 100}%` }} />
                 </div>
               </div>
             ))}
@@ -443,7 +443,7 @@ const HeroPanel: React.FC = () => (
         <div className="mt-auto grid grid-cols-2 gap-px border-t border-white/10 bg-white/5">
           {[["$4.2T+", "Acquisition Appetite"], ["13,240", "Active Mandates"], ["4,800+", "Strategic Acquirers"], ["125+", "Sectors Monitored"]].map((s) => (
             <div key={s[1]} className="bg-ink-900 p-3">
-              <div className="font-serif text-base font-bold text-deal-300">{s[0]}</div>
+              <div className="font-serif text-base font-bold text-blue-300">{s[0]}</div>
               <div className="text-[9px] text-white/45">{s[1]}</div>
             </div>
           ))}
@@ -457,12 +457,12 @@ const DashboardMini: React.FC = () => (
   <div className="overflow-hidden rounded-2xl border border-slate-200 bg-ink-900 p-4 text-white shadow-xl">
     <div className="flex items-center justify-between text-[10px] text-white/50">
       <span className="font-semibold uppercase tracking-[0.18em]">Acquisition Command Center</span>
-      <span className="flex items-center gap-1.5"><span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-deal-400" /> Live</span>
+      <span className="flex items-center gap-1.5"><span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" /> Live</span>
     </div>
     <div className="mt-3 grid grid-cols-3 gap-2">
       {[["$2.7T", "Tracked value"], ["94.7%", "Model accuracy"], ["58,341", "Active buyers"]].map((s) => (
         <div key={s[1]} className="rounded-lg bg-white/5 p-2.5">
-          <div className="font-serif text-sm font-bold text-deal-300">{s[0]}</div>
+          <div className="font-serif text-sm font-bold text-blue-300">{s[0]}</div>
           <div className="text-[8.5px] text-white/45">{s[1]}</div>
         </div>
       ))}
@@ -470,7 +470,7 @@ const DashboardMini: React.FC = () => (
     {/* faux bar chart */}
     <div className="mt-3 flex h-24 items-end gap-1 rounded-lg bg-white/5 p-2">
       {[40, 62, 50, 78, 66, 88, 72, 95, 80, 70, 84, 60].map((h, i) => (
-        <div key={i} className="flex-1 rounded-sm bg-gradient-to-t from-deal-700 to-deal-400" style={{ height: `${h}%` }} />
+        <div key={i} className="flex-1 rounded-sm bg-gradient-to-t from-blue-700 to-blue-500" style={{ height: `${h}%` }} />
       ))}
     </div>
     <div className="mt-3 space-y-1.5">
@@ -478,7 +478,7 @@ const DashboardMini: React.FC = () => (
         <div key={r[0]} className="flex items-center gap-2 text-[10px]">
           <span className="w-20 text-white/55">{r[0]}</span>
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full rounded-full bg-deal-400" style={{ width: r[2] }} />
+            <div className="h-full rounded-full bg-blue-500" style={{ width: r[2] }} />
           </div>
           <span className="font-mono text-white/70">{r[1]}</span>
         </div>
@@ -497,7 +497,7 @@ const OfferTable: React.FC = () => (
       </thead>
       <tbody className="divide-y divide-slate-100">
         {[["Upfront Cash", "$110M", "$295M", "$271M"], ["Earnout", "$30M", "$50M", "$84M"], ["Total", "$140M", "$245M", "$355M"], ["Structure", "Cash", "Cash + Roll", "Cash"]].map((r, i) => (
-          <tr key={r[0]} className={i === 2 ? "bg-deal-50/60 font-semibold" : ""}>
+          <tr key={r[0]} className={i === 2 ? "bg-blue-50/60 font-semibold" : ""}>
             <td className="px-4 py-2.5 text-slate-500">{r[0]}</td>
             <td className="px-4 py-2.5 text-ink-800">{r[1]}</td>
             <td className="px-4 py-2.5 text-ink-800">{r[2]}</td>
