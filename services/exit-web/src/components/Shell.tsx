@@ -8,6 +8,7 @@ import { useAuth } from "../lib/auth";
 // (negotiator, closing). Active route highlights with deal accent.
 const NAV: Array<{ to: string; label: string; group: string; scope?: string }> = [
   { to: "/console",                label: "Founder Dashboard",      group: "Overview" },
+  { to: "/console/autopilot",      label: "Autonomous Exit",        group: "Overview" },
   { to: "/console/intelligence",   label: "Acquisition Intelligence", group: "Sourcing" },
   { to: "/console/banker",         label: "Banker AI",              group: "Sourcing" },
   { to: "/console/buyers",         label: "Buyer Marketplace",      group: "Sourcing" },
