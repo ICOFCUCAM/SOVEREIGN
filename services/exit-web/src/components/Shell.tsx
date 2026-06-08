@@ -2,69 +2,31 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { Toast } from "../lib/ui";
+import { navForRole, needsUpgrade, GROUP_ORDER, ROLE_LABEL, type NavItem, type Role, type Plan } from "../lib/access";
 
-// Six command centers. The console is organized the way a founder runs an
-// exit — Prepare → Discover → Engage → Negotiate → Close → Wealth — with
-// Overview and Internal as bookends. Each item maps to a real surface;
-// facets that live inside a page (Signatures, Escrow) link to an anchor.
-const NAV: Array<{ to: string; label: string; group: string; scope?: string }> = [
-  { to: "/console/commander",          label: "Chief Investment Banker", group: "Overview" },
-  { to: "/console",                    label: "Dashboard",            group: "Overview" },
-  { to: "/console/autopilot",          label: "Autonomous Exit",      group: "Overview" },
-  { to: "/console/network",            label: "Network Intelligence", group: "Overview" },
+// Role-aware console rail. The navigation is driven by the access policy:
+// founders, buyers, admins and superadmins see different command centers, and
+// pro-only surfaces show a lock for free plans (linking to the upgrade screen).
 
-  { to: "/console/valuation",          label: "Valuation",        group: "Prepare" },
-  { to: "/console/readiness",          label: "Readiness",        group: "Prepare" },
-  { to: "/console/diligence-ai",       label: "Diligence",        group: "Prepare" },
-  { to: "/console/investors",          label: "Cap Table",        group: "Prepare" },
-  { to: "/console/exit-timing",        label: "Exit Timing",      group: "Prepare" },
-
-  { to: "/console/buyer-copilot",      label: "Buyer Intelligence", group: "Discover" },
-  { to: "/console/buyers",             label: "Buyer Profiles",     group: "Discover" },
-  { to: "/console/marketplace",        label: "Marketplace",        group: "Discover" },
-  { to: "/console/intelligence",       label: "Acquisition Radar",  group: "Discover" },
-
-  { to: "/console/banker",             label: "Outreach",         group: "Engage" },
-  { to: "/console/nda",                label: "NDA",              group: "Engage" },
-  { to: "/console/pipeline",           label: "Pipeline",         group: "Engage" },
-  { to: "/console/deal-room",          label: "Live Deal Room",   group: "Engage" },
-
-  { to: "/console/negotiator",         label: "AI Banker · Offers", group: "Negotiate" },
-  { to: "/console/simulator",          label: "Scenario Simulator", group: "Negotiate" },
-
-  { to: "/console/closing",            label: "Closing Center",   group: "Close" },
-  { to: "/console/data-room",          label: "Data Room",        group: "Close" },
-  { to: "/console/documents",          label: "Documents",        group: "Close" },
-  { to: "/console/closing#signatures", label: "Signatures",       group: "Close" },
-  { to: "/console/closing#escrow",     label: "Escrow",           group: "Close" },
-
-  { to: "/console/wealth",             label: "WealthOS",         group: "Wealth" },
-
-  { to: "/console/buyer-portal",       label: "Buyer Portal",     group: "Internal" },
-  { to: "/console/calibration",        label: "Calibration",      group: "Internal" },
-];
-
-const GROUP_ORDER = ["Overview", "Prepare", "Discover", "Engage", "Negotiate", "Close", "Wealth", "Internal"];
+const basePath = (to: string): string => to.split("#")[0];
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { session, signOut, has } = useAuth();
+  const { session, signOut } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
   const [navOpen, setNavOpen] = useState(false);
-  const items = NAV.filter((n) => !n.scope || has(n.scope));
+
+  const role: Role = session?.role ?? "founder";
+  const plan: Plan = session?.plan ?? "free";
+  const items = navForRole(role);
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => { setNavOpen(false); }, [loc.pathname, loc.hash]);
 
-  // Scroll anchored sections into view when the hash changes (and reset to
-  // top on a plain page change). A short delay lets the target page mount.
+  // Scroll anchored sections into view when the hash changes.
   useEffect(() => {
     const id = loc.hash ? loc.hash.slice(1) : null;
-    const t = setTimeout(() => {
-      if (id) {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 60);
+    const t = setTimeout(() => { if (id) document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
     return () => clearTimeout(t);
   }, [loc.pathname, loc.hash]);
 
@@ -75,18 +37,19 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return loc.pathname === to && loc.hash === "";
   };
 
-  const groups = items.reduce<Record<string, typeof NAV>>((acc, item) => {
-    acc[item.group] = acc[item.group] ?? [];
-    acc[item.group]!.push(item);
+  const groups = items.reduce<Record<string, NavItem[]>>((acc, item) => {
+    (acc[item.group] = acc[item.group] ?? []).push(item);
     return acc;
   }, {});
+
+  const subtitle = role === "buyer" ? "Buyer Access" : role === "admin" || role === "superadmin" ? "Operator Console" : "Founder Acquisition Suite";
 
   const Brand = (
     <div className="flex items-center gap-2.5">
       <div className="flex h-9 w-9 items-center justify-center rounded bg-gradient-to-br from-deal-400 to-deal-700 text-sm font-black text-white shadow-lg shadow-deal-700/30">EX</div>
       <div className="leading-tight">
         <div className="text-sm font-bold tracking-tight text-white">ExitOS</div>
-        <div className="text-[10px] uppercase tracking-[0.22em] text-white/45">Founder Acquisition Suite</div>
+        <div className="text-[10px] uppercase tracking-[0.22em] text-white/45">{subtitle}</div>
       </div>
     </div>
   );
@@ -97,19 +60,14 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* Mobile top bar */}
       <div className="flex items-center gap-3 border-b border-white/10 bg-ink-900/80 px-4 py-3 lg:hidden">
-        <button
-          onClick={() => setNavOpen(true)}
-          aria-label="Open navigation menu"
-          aria-expanded={navOpen}
-          className="rounded-md p-2 text-white/80 ring-1 ring-white/15 transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400"
-        >
+        <button onClick={() => setNavOpen(true)} aria-label="Open navigation menu" aria-expanded={navOpen}
+          className="rounded-md p-2 text-white/80 ring-1 ring-white/15 transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M3 6h18M3 12h18M3 18h18" /></svg>
         </button>
         {Brand}
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Backdrop (mobile) */}
         {navOpen && <div className="fixed inset-0 z-30 bg-black/60 lg:hidden" aria-hidden onClick={() => setNavOpen(false)} />}
 
         <aside
@@ -127,17 +85,19 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <div className="space-y-1">
                   {groups[group]!.map((n) => {
                     const active = isActive(n.to);
+                    const locked = needsUpgrade(basePath(n.to), role, plan);
                     return (
                       <Link
-                        key={n.to}
-                        to={n.to}
+                        key={`${n.to}-${n.group}`}
+                        to={locked ? "/console/upgrade" : n.to}
                         aria-current={active ? "page" : undefined}
                         onClick={() => setNavOpen(false)}
-                        className={`block rounded-md px-3 py-2 text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400 ${active
+                        className={`flex items-center justify-between rounded-md px-3 py-2 text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400 ${active
                           ? "bg-deal-600/20 text-white ring-1 ring-deal-400/40"
                           : "text-white/70 hover:bg-white/5 hover:text-white"}`}
                       >
-                        {n.label}
+                        <span className={locked ? "text-white/45" : ""}>{n.label}</span>
+                        {locked && <span aria-label="Pro feature" title="Upgrade to Pro" className="text-[10px] text-white/35">🔒</span>}
                       </Link>
                     );
                   })}
@@ -147,13 +107,14 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </nav>
           <div className="border-t border-white/10 px-4 py-3">
             <div className="truncate text-xs font-medium text-white/80">{session?.email}</div>
-            <div className="mb-2 truncate text-[10px] text-white/50">workspace · {session?.workspace}</div>
-            <button
-              onClick={() => { signOut(); nav("/"); }}
-              className="rounded text-xs font-semibold text-white/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400"
-            >
-              Sign out
-            </button>
+            <div className="mb-2 flex items-center gap-1.5 text-[10px] text-white/50">
+              <span className="rounded bg-white/10 px-1.5 py-0.5 font-semibold uppercase tracking-wide text-white/70">{ROLE_LABEL[role]}</span>
+              <span className={`rounded px-1.5 py-0.5 font-semibold uppercase tracking-wide ${plan === "pro" ? "bg-deal-600/25 text-deal-300" : "bg-white/10 text-white/55"}`}>{plan}</span>
+            </div>
+            {plan === "free" && (role === "founder" || role === "buyer") && (
+              <Link to="/console/upgrade" className="mb-2 block text-xs font-semibold text-deal-300 hover:text-deal-200">Upgrade to Pro →</Link>
+            )}
+            <button onClick={() => { signOut(); nav("/"); }} className="rounded text-xs font-semibold text-white/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">Sign out</button>
             <a href="/" className="ml-3 text-xs font-semibold text-white/45 hover:text-white/70">Home</a>
           </div>
         </aside>

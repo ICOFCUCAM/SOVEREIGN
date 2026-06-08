@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 // Command Center" board in the hero. Figures are illustrative. Company marks
 // are brand-coloured monogram placeholders (swap for licensed logo assets).
 
-const NAV = ["Platform", "Solutions", "Resources", "Company", "Pricing"];
+const NAV = ["Platform", "Solutions", "Pricing"];
 
 // ---- company marks ---------------------------------------------------------
 // Brand-coloured icon tiles — abstract geometric glyphs on a white chip, in

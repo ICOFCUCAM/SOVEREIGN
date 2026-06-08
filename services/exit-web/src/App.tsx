@@ -1,13 +1,11 @@
 import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./lib/auth";
+import { canAccess, needsUpgrade, homeFor, featureLabel } from "./lib/access";
 import Shell from "./components/Shell";
 import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 
-// Public entry (Landing) and the auth gate (SignIn) load eagerly; everything
-// behind the console is lazy so the initial bundle stays small and the engines
-// only load once a founder is inside.
 const Pricing      = lazy(() => import("./pages/Pricing"));
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
 const Intelligence = lazy(() => import("./pages/Intelligence"));
@@ -34,6 +32,8 @@ const DealRoom     = lazy(() => import("./pages/DealRoom"));
 const ExitTiming   = lazy(() => import("./pages/ExitTiming"));
 const Commander    = lazy(() => import("./pages/Commander"));
 const Network      = lazy(() => import("./pages/Network"));
+const Upgrade      = lazy(() => import("./pages/Upgrade"));
+const Admin        = lazy(() => import("./pages/Admin"));
 
 const RouteFallback: React.FC = () => (
   <div className="flex items-center gap-3 py-20 text-sm text-white/45">
@@ -42,6 +42,47 @@ const RouteFallback: React.FC = () => (
   </div>
 );
 
+// Each console route is gated by the access policy: a role that can't see it is
+// redirected to its home; a free plan hitting a pro surface gets the paywall.
+const Guard: React.FC<{ policy: string; children: React.ReactNode }> = ({ policy, children }) => {
+  const { session } = useAuth();
+  const role = session?.role ?? "founder";
+  const plan = session?.plan ?? "free";
+  if (!canAccess(policy, role)) return <Navigate to={homeFor(role)} replace />;
+  if (needsUpgrade(policy, role, plan)) return <Upgrade feature={featureLabel(policy, role)} />;
+  return <>{children}</>;
+};
+
+const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
+  { path: "/",             policy: "/console",                el: <Dashboard /> },
+  { path: "commander",     policy: "/console/commander",      el: <Commander /> },
+  { path: "network",       policy: "/console/network",        el: <Network /> },
+  { path: "autopilot",     policy: "/console/autopilot",      el: <Autopilot /> },
+  { path: "readiness",     policy: "/console/readiness",      el: <Readiness /> },
+  { path: "exit-timing",   policy: "/console/exit-timing",    el: <ExitTiming /> },
+  { path: "wealth",        policy: "/console/wealth",         el: <Wealth /> },
+  { path: "buyer-copilot", policy: "/console/buyer-copilot",  el: <BuyerCopilot /> },
+  { path: "deal-room",     policy: "/console/deal-room",      el: <DealRoom /> },
+  { path: "intelligence",  policy: "/console/intelligence",   el: <Intelligence /> },
+  { path: "data-room",     policy: "/console/data-room",      el: <DataRoom /> },
+  { path: "buyers",        policy: "/console/buyers",         el: <Buyers /> },
+  { path: "investors",     policy: "/console/investors",      el: <Investors /> },
+  { path: "negotiator",    policy: "/console/negotiator",     el: <Negotiator /> },
+  { path: "documents",     policy: "/console/documents",      el: <Documents /> },
+  { path: "nda",           policy: "/console/nda",            el: <Nda /> },
+  { path: "pipeline",      policy: "/console/pipeline",       el: <Pipeline /> },
+  { path: "closing",       policy: "/console/closing",        el: <Closing /> },
+  { path: "marketplace",   policy: "/console/marketplace",    el: <Marketplace /> },
+  { path: "valuation",     policy: "/console/valuation",      el: <Valuation /> },
+  { path: "diligence-ai",  policy: "/console/diligence-ai",   el: <DiligenceAI /> },
+  { path: "banker",        policy: "/console/banker",         el: <Banker /> },
+  { path: "buyer-portal",  policy: "/console/buyer-portal",   el: <BuyerPortal /> },
+  { path: "calibration",   policy: "/console/calibration",    el: <Calibration /> },
+  { path: "simulator",     policy: "/console/simulator",      el: <Simulator /> },
+  { path: "admin",         policy: "/console/admin",          el: <Admin /> },
+  { path: "upgrade",       policy: "/console/upgrade",        el: <Upgrade /> },
+];
+
 const Console: React.FC = () => {
   const { session } = useAuth();
   if (!session) return <SignIn />;
@@ -49,31 +90,9 @@ const Console: React.FC = () => {
     <Shell>
       <Suspense fallback={<RouteFallback />}>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="commander" element={<Commander />} />
-          <Route path="network" element={<Network />} />
-          <Route path="autopilot" element={<Autopilot />} />
-          <Route path="readiness" element={<Readiness />} />
-          <Route path="exit-timing" element={<ExitTiming />} />
-          <Route path="wealth" element={<Wealth />} />
-          <Route path="buyer-copilot" element={<BuyerCopilot />} />
-          <Route path="deal-room" element={<DealRoom />} />
-          <Route path="intelligence" element={<Intelligence />} />
-          <Route path="data-room" element={<DataRoom />} />
-          <Route path="buyers" element={<Buyers />} />
-          <Route path="investors" element={<Investors />} />
-          <Route path="negotiator" element={<Negotiator />} />
-          <Route path="documents" element={<Documents />} />
-          <Route path="nda" element={<Nda />} />
-          <Route path="pipeline" element={<Pipeline />} />
-          <Route path="closing" element={<Closing />} />
-          <Route path="marketplace" element={<Marketplace />} />
-          <Route path="valuation" element={<Valuation />} />
-          <Route path="diligence-ai" element={<DiligenceAI />} />
-          <Route path="banker" element={<Banker />} />
-          <Route path="buyer-portal" element={<BuyerPortal />} />
-          <Route path="calibration" element={<Calibration />} />
-          <Route path="simulator" element={<Simulator />} />
+          {ROUTES.map((r) => (
+            <Route key={r.path} path={r.path} element={<Guard policy={r.policy}>{r.el}</Guard>} />
+          ))}
           <Route path="*" element={<Navigate to="/console" replace />} />
         </Routes>
       </Suspense>
