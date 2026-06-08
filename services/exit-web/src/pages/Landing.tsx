@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import ReactorHero from "../components/ReactorHero";
+import GlobeScene from "../components/GlobeScene";
 
 // Public marketing landing — the front door to ExitOS. Mirrors the Dispatch
 // landing rhythm (full-bleed hero, top nav, modular grid below the fold) but
@@ -40,11 +40,11 @@ const Landing: React.FC = () => {
         <div className="absolute -right-32 bottom-[8%] h-[520px] w-[520px] rounded-full opacity-20 blur-[140px]" style={{ background: "rgba(16,185,129,0.22)" }} />
       </div>
 
-      {/* hero artwork — the live acquisition-intelligence reactor (WebGL /
-          R3F): a particle globe computed above a 12-subsystem holographic
-          reactor. Full-bleed across the hero viewport; module grid stays clean. */}
+      {/* hero artwork — the live acquisition-intelligence globe command core
+          (GlobeScene), full-bleed behind the hero content. Spans only the
+          hero viewport height so the module grid below stays clean. */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-screen" aria-hidden>
-        <ReactorHero className="h-full w-full" />
+        <GlobeScene className="h-full w-full" />
       </div>
       {/* legibility: darken the left column for the headline while the command
           core stays bright on the right; gentle darkening at the bottom. */}
