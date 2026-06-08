@@ -20,6 +20,22 @@ interface Tier {
 
 const FOUNDER_TIERS: readonly Tier[] = [
   {
+    key: "free",
+    badge: "Free",
+    name: "Founder Free",
+    price: "$0",
+    priceSub: "forever",
+    headline: "Watch your position and the market. Read-only — upgrade to act.",
+    features: [
+      "Founder Dashboard & Exit Readiness Score",
+      "Valuation & Cap Table (view)",
+      "Marketplace & Acquisition Radar (browse)",
+      "Pipeline (view)",
+      "No outreach, exports or active deals",
+    ],
+    cta: "Start free",
+  },
+  {
     key: "prep",
     badge: "Preparation",
     name: "Founder Prep",
@@ -79,6 +95,20 @@ const FOUNDER_TIERS: readonly Tier[] = [
 
 const BUYER_TIERS: readonly Tier[] = [
   {
+    key: "buyer-free",
+    badge: "Free",
+    name: "Buyer Free",
+    price: "$0",
+    priceSub: "forever",
+    headline: "Browse the marketplace. Upgrade to engage.",
+    features: [
+      "Browse anonymized opportunities",
+      "Acquisition Radar (view)",
+      "No NDA requests or deal-room access",
+    ],
+    cta: "Start free",
+  },
+  {
     key: "buyer-basic",
     badge: "Buyer",
     name: "Buyer Access",
@@ -132,8 +162,8 @@ const Pricing: React.FC = () => {
             </span>
           </button>
           <nav className="hidden items-center gap-9 lg:flex">
-            <button onClick={() => nav("/")} className="text-[13px] font-medium uppercase tracking-wide text-white/70 hover:text-white">Platform</button>
-            <button onClick={() => nav("/")} className="text-[13px] font-medium uppercase tracking-wide text-white/70 hover:text-white">Modules</button>
+            <button onClick={() => nav("/platform")} className="text-[13px] font-medium uppercase tracking-wide text-white/70 hover:text-white">Platform</button>
+            <button onClick={() => nav("/modules")} className="text-[13px] font-medium uppercase tracking-wide text-white/70 hover:text-white">Modules</button>
             <span className="text-[13px] font-medium uppercase tracking-wide text-deal-400">Pricing</span>
           </nav>
           <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded bg-gradient-to-b from-deal-300 to-deal-700 px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-[#04140c] shadow-lg shadow-deal-700/30">
@@ -159,10 +189,10 @@ const Pricing: React.FC = () => {
           <div className="mb-6 flex items-end justify-between">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-deal-400">Founder side</div>
-              <h2 className="mt-2 font-serif text-3xl font-bold leading-tight">Three tiers. One trajectory.</h2>
+              <h2 className="mt-2 font-serif text-3xl font-bold leading-tight">From free to institutional.</h2>
             </div>
           </div>
-          <div className="grid gap-px overflow-hidden rounded-2xl bg-white/10 lg:grid-cols-3">
+          <div className="grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
             {FOUNDER_TIERS.map((t) => <TierCard key={t.key} tier={t} onAct={() => nav("/console")} />)}
           </div>
         </section>
@@ -174,7 +204,7 @@ const Pricing: React.FC = () => {
             <h2 className="mt-2 font-serif text-3xl font-bold leading-tight">Buyer access. Premium matching.</h2>
             <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-white/60">The other side of the marketplace. Buyers subscribe for browse + NDA-gated diligence; premium adds outbound matched introductions before public listing.</p>
           </div>
-          <div className="grid gap-px overflow-hidden rounded-2xl bg-white/10 lg:grid-cols-2">
+          <div className="grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
             {BUYER_TIERS.map((t) => <TierCard key={t.key} tier={t} onAct={() => nav("/console")} />)}
           </div>
         </section>

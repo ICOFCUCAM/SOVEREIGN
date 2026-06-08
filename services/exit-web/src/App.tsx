@@ -7,6 +7,8 @@ import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 
 const Pricing      = lazy(() => import("./pages/Pricing"));
+const Platform     = lazy(() => import("./pages/Platform"));
+const Modules      = lazy(() => import("./pages/Modules"));
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
 const Intelligence = lazy(() => import("./pages/Intelligence"));
 const DataRoom     = lazy(() => import("./pages/DataRoom"));
@@ -104,6 +106,8 @@ const App: React.FC = () => (
   <Suspense fallback={<RouteFallback />}>
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/platform" element={<Platform />} />
+      <Route path="/modules" element={<Modules />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/console/*" element={<Console />} />
       <Route path="*" element={<Navigate to="/" replace />} />

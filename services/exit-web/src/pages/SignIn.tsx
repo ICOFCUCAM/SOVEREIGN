@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../lib/auth";
 import { Button, Field, inputCls } from "../lib/ui";
-import { ROLE_LABEL, type Role, type Plan } from "../lib/access";
+import { ROLE_LABEL, type Role } from "../lib/access";
 
 // Sign-in wizard. Founders and buyers self-serve here; admins are provisioned
 // from the back office and the superadmin is bootstrapped by email. Social
@@ -25,10 +25,9 @@ const SignIn: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<Role>("founder");
-  const [plan, setPlan] = useState<Plan>("free");
   const [resetSent, setResetSent] = useState(false);
 
-  const sso = (provider: string) => signIn(`${role}@${provider}.com`, "sso", role, plan).catch(() => {});
+  const sso = (provider: string) => signIn(`${role}@${provider}.com`, "sso", role).catch(() => {});
 
   return (
     <div className="flex min-h-full items-center justify-center px-4 py-10">
@@ -79,7 +78,7 @@ const SignIn: React.FC = () => {
               <div className="h-px flex-1 bg-white/10" />
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); signIn(email.trim(), password, role, plan).catch(() => {}); }} className="space-y-4">
+            <form onSubmit={(e) => { e.preventDefault(); signIn(email.trim(), password, role).catch(() => {}); }} className="space-y-4">
               <div>
                 <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/50">I am a</span>
                 <div className="grid grid-cols-2 gap-1 rounded-md border border-white/10 bg-ink-900/60 p-1">
@@ -87,18 +86,6 @@ const SignIn: React.FC = () => {
                     <button key={r} type="button" onClick={() => setRole(r)}
                       className={`rounded px-2 py-1.5 text-[12px] font-semibold transition ${role === r ? "bg-deal-600/30 text-white" : "text-white/55 hover:text-white"}`}>
                       {ROLE_LABEL[r]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/50">Plan</span>
-                <div className="grid grid-cols-2 gap-1 rounded-md border border-white/10 bg-ink-900/60 p-1">
-                  {(["free", "pro"] as Plan[]).map((p) => (
-                    <button key={p} type="button" onClick={() => setPlan(p)}
-                      className={`rounded px-2 py-1.5 text-[12px] font-semibold uppercase transition ${plan === p ? "bg-deal-600/30 text-white" : "text-white/55 hover:text-white"}`}>
-                      {p}
                     </button>
                   ))}
                 </div>
