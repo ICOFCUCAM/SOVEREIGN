@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button, Card, SectionHeader, fmtMoney } from "../lib/ui";
 import { READINESS, READINESS_ANALYSIS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import { exitReadinessCategories } from "../lib/exit-readiness-ai";
 
 // Exit Readiness Score — the category-defining surface. Not a generic score:
 // it ties the readiness number directly to money. Current valuation, the
@@ -11,7 +12,6 @@ import { SAMPLE_COMPANY } from "../lib/profile";
 // engine (runReadiness + runReadinessAnalysis).
 
 const EFFORT_LABEL: Record<string, string> = { weeks: "~weeks", months: "~months", quarters: "~quarters" };
-const SEV_DOT: Record<string, string> = { high: "bg-red-400", medium: "bg-loi-400", low: "bg-white/40" };
 
 const Readiness: React.FC = () => {
   const score = READINESS.overallScore;
@@ -21,6 +21,7 @@ const Readiness: React.FC = () => {
   const upliftPct = current > 0 ? (left / current) * 100 : 0;
   const fixes = [...READINESS_ANALYSIS.weaknesses].sort((a, b) => b.valuationUpliftUsd - a.valuationUpliftUsd);
   const topFix = fixes[0];
+  const categories = exitReadinessCategories(left).sort((a, b) => b.impactUsd - a.impactUsd);
 
   const scoreColor = score >= 70 ? "#34d399" : score >= 50 ? "#fbbf24" : "#f87171";
   const R = 52;
@@ -144,11 +145,14 @@ const Readiness: React.FC = () => {
         </div>
       </Card>
 
-      {/* ── Ranked fixes ─────────────────────────────────────────── */}
+      {/* ── Exit Readiness AI — category scorecard with priced fixes ── */}
       <div className="mt-8 flex items-end justify-between">
         <div>
-          <h2 className="font-serif text-lg font-bold text-white">Recommended fixes</h2>
-          <p className="text-xs text-white/45">Ranked by the dollars each one adds to the headline. {READINESS_ANALYSIS.headline}</p>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-deal-600/30 text-[10px] font-bold text-deal-200 ring-1 ring-deal-400/40">AI</span>
+            <h2 className="font-serif text-lg font-bold text-white">Exit Readiness AI</h2>
+          </div>
+          <p className="mt-1 text-xs text-white/45">Scored across the six categories buyers underwrite — every gap priced. {READINESS_ANALYSIS.headline}</p>
         </div>
         <div className="text-right text-[11px]">
           <div className="uppercase tracking-[0.2em] text-white/40">Total upside</div>
@@ -157,54 +161,41 @@ const Readiness: React.FC = () => {
       </div>
 
       <div className="mt-4 space-y-3">
-        {fixes.map((f, i) => (
-          <Card key={f.dimension} className="p-5">
-            <div className="flex items-start gap-4">
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/5 font-mono text-[12px] font-bold text-white/70 ring-1 ring-white/15">{i + 1}</span>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`h-1.5 w-1.5 rounded-full ${SEV_DOT[f.severity]}`} />
-                    <span className="text-[13px] font-bold text-white">{f.dimension}</span>
-                    <span className="rounded-full bg-white/5 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/45 ring-1 ring-white/10">{EFFORT_LABEL[f.effort] ?? f.effort}</span>
-                  </div>
-                  <span className="font-mono text-base font-bold text-deal-300">+{fmtMoney(f.valuationUpliftUsd)}</span>
+        {categories.map((cat) => {
+          const c = cat.score >= 75 ? "#34d399" : cat.score >= 50 ? "#fbbf24" : "#f87171";
+          return (
+            <Card key={cat.key} className="p-5">
+              <div className="grid items-center gap-4 sm:grid-cols-[150px_1fr_140px]">
+                <div>
+                  <div className="text-[13px] font-bold text-white">{cat.label}</div>
+                  <div className="font-mono text-2xl font-bold" style={{ color: c }}>{cat.score}<span className="text-sm text-white/40">/100</span></div>
                 </div>
-                <p className="mt-1.5 text-[12.5px] text-white/55">{f.weakness}</p>
-                <p className="mt-1 text-[13px] text-white/80">→ {f.recommendation}</p>
+                <div className="min-w-0">
+                  <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+                    <div className="h-full rounded-full" style={{ width: `${Math.max(2, cat.score)}%`, background: c }} />
+                  </div>
+                  <p className="mt-2 text-[12.5px] leading-snug text-white/65">{cat.fix}</p>
+                </div>
+                <div className="text-right">
+                  {cat.impactUsd > 0 ? (
+                    <>
+                      <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">Fix impact</div>
+                      <div className="font-mono text-lg font-bold text-deal-300">+{fmtMoney(cat.impactUsd)}</div>
+                    </>
+                  ) : (
+                    <span className="text-[12px] font-semibold text-deal-300">On track ✓</span>
+                  )}
+                </div>
               </div>
-            </div>
-          </Card>
-        ))}
-        {fixes.length === 0 && (
-          <Card className="p-6 text-sm text-white/55">No material gaps — readiness is strong. Run the process.</Card>
-        )}
+            </Card>
+          );
+        })}
       </div>
 
-      {/* ── Dimension breakdown ──────────────────────────────────── */}
-      <Card className="mt-8 p-6">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Score breakdown</div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {READINESS.dimensions.map((d) => {
-            const c = d.score >= 70 ? "#34d399" : d.score >= 50 ? "#fbbf24" : "#f87171";
-            return (
-              <div key={d.name}>
-                <div className="mb-1 flex items-baseline justify-between text-[12px]">
-                  <span className="text-white/70">{d.name}</span>
-                  <span className="font-mono" style={{ color: c }}>{d.score.toFixed(0)}/100</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
-                  <div className="h-full rounded-full" style={{ width: `${Math.max(2, d.score)}%`, background: c }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link to="/console/valuation" className="rounded-md bg-deal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">See the valuation model →</Link>
-          <Link to="/console/data-room" className="rounded-md border border-white/15 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5">Close the gaps in the data room</Link>
-        </div>
-      </Card>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link to="/console/valuation" className="rounded-md bg-deal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">See the valuation model →</Link>
+        <Link to="/console/data-room" className="rounded-md border border-white/15 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5">Close the gaps in the data room</Link>
+      </div>
     </div>
   );
 };
