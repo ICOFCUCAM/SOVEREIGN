@@ -169,29 +169,6 @@ const Landing: React.FC = () => {
                 <CommandBoard />
               </div>
 
-              {/* ---- FLOOR STAND: neck column + base foot (board stands on floor) ---- */}
-              <div
-                className="relative mx-auto"
-                style={{ transform: "rotateY(-11deg) rotateX(2.5deg)", transformOrigin: "center top", width: "26%" }}
-              >
-                {/* neck column */}
-                <div
-                  className="mx-auto w-full"
-                  style={{ height: 54, background: "linear-gradient(90deg,#0a1626,#1f3052 45%,#10203a)", borderLeft: "1px solid rgba(255,255,255,0.05)", borderRight: "1px solid rgba(255,255,255,0.05)" }}
-                />
-                {/* base foot — wide elliptical plate on the floor */}
-                <div
-                  className="mx-auto"
-                  style={{ height: 14, width: "300%", marginLeft: "-100%", borderRadius: "50%", background: "linear-gradient(180deg,#26395a,#0b1830)", boxShadow: "0 14px 30px -6px rgba(8,20,40,0.6)", border: "1px solid rgba(255,255,255,0.10)" }}
-                />
-                {/* contact shadow cast on the floor */}
-                <div
-                  aria-hidden
-                  className="mx-auto mt-1 blur-lg"
-                  style={{ height: 18, width: "420%", marginLeft: "-160%", borderRadius: "50%", background: "rgba(8,20,40,0.28)" }}
-                />
-              </div>
-
               {/* polished-floor reflection of the screen */}
               <div
                 aria-hidden
