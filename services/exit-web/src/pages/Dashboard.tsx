@@ -9,6 +9,7 @@ import {
 import { SAMPLE_COMPANY } from "../lib/profile";
 import ExitProcessModal from "../components/ExitProcessModal";
 import BankerTake from "../components/BankerTake";
+import JourneyMap from "../components/JourneyMap";
 import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
 import { emitTelemetry } from "../lib/telemetry";
 
@@ -80,6 +81,8 @@ const Dashboard: React.FC = () => {
           )
         }
       />
+
+      <JourneyMap current={run?.status === "complete" ? "run" : "monitor"} />
 
       <BankerTake
         next={topMove ? topMove.recommendation : "Posture is strong — run the process now."}

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button, Card, SectionHeader, fmtMoney } from "../lib/ui";
 import { READINESS, READINESS_ANALYSIS } from "../lib/engines";
+import { SAMPLE_COMPANY } from "../lib/profile";
 
 // Exit Readiness Score — the category-defining surface. Not a generic score:
 // it ties the readiness number directly to money. Current valuation, the
@@ -24,6 +25,30 @@ const Readiness: React.FC = () => {
   const scoreColor = score >= 70 ? "#34d399" : score >= 50 ? "#fbbf24" : "#f87171";
   const R = 52;
   const circ = 2 * Math.PI * R;
+
+  // "When to sell" — the monitor signal. ExitOS helps decide *when*, not just
+  // run the process. Strong growth + open market window argue for going now;
+  // a large, fixable readiness gap argues for two quarters of prep first.
+  const growthYoy = SAMPLE_COMPANY.growth.arrGrowthYoyPct;
+  const marketGrowth = SAMPLE_COMPANY.market.marketGrowthPct ?? 0;
+  const gapRatio = current > 0 ? left / current : 0;
+  const growthStrong = growthYoy >= 0.3;
+  const marketOpen = marketGrowth >= 0.05;
+  const verdict = gapRatio > 0.25
+    ? { tone: "#fbbf24", label: "Prepare — don't list yet",
+        body: `${fmtMoney(left)} of upside is still fixable. Two to three quarters of prep lifts the headline before you ever run a process.` }
+    : growthStrong && marketOpen
+      ? { tone: "#34d399", label: "Window open — go",
+          body: "Growth and the market window are both working for you. Readiness is high enough — start the process now." }
+      : { tone: "#94a3b8", label: "Monitor — hold",
+          body: "No urgent catalyst. Keep building and let ExitOS watch the readiness clock for the right moment." };
+
+  const signals = [
+    { label: "Readiness", value: `${score.toFixed(0)}/100`, ok: score >= 60 },
+    { label: "Growth momentum", value: `${Math.round(growthYoy * 100)}% YoY`, ok: growthStrong },
+    { label: "Market window", value: marketOpen ? "Open" : "Tightening", ok: marketOpen },
+    { label: "Upside still on table", value: fmtMoney(left), ok: gapRatio <= 0.15 },
+  ];
 
   return (
     <div>
@@ -87,6 +112,33 @@ const Readiness: React.FC = () => {
             <div className="mt-2 flex justify-between text-[11px] text-white/45">
               <span>Captured today · {fmtMoney(current)}</span>
               <span className="text-loi-300">Unclaimed · {fmtMoney(left)}</span>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* ── When to sell (monitor signal) ────────────────────────── */}
+      <Card className="mt-8 p-6">
+        <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
+          <div className="border-b border-white/10 pb-5 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">When to sell</div>
+            <div className="mt-2 inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-bold" style={{ background: `${verdict.tone}1f`, color: verdict.tone }}>
+              <span className="h-2 w-2 rounded-full" style={{ background: verdict.tone }} /> {verdict.label}
+            </div>
+            <p className="mt-3 text-[13px] leading-relaxed text-white/65">{verdict.body}</p>
+          </div>
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Timing signals</div>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              {signals.map((s) => (
+                <div key={s.label} className="rounded-lg border border-white/10 bg-ink-900/40 p-3">
+                  <div className="flex items-center gap-2">
+                    <span className={`h-1.5 w-1.5 rounded-full ${s.ok ? "bg-deal-400" : "bg-loi-400"}`} />
+                    <span className="text-[10px] uppercase tracking-wide text-white/40">{s.label}</span>
+                  </div>
+                  <div className="mt-1 font-mono text-base font-semibold text-white">{s.value}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

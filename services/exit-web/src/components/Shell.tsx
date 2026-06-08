@@ -32,12 +32,14 @@ const NAV: Array<{ to: string; label: string; group: string; scope?: string }> =
   { to: "/console/closing#signatures", label: "Signatures",       group: "Close" },
   { to: "/console/closing#escrow",     label: "Escrow",           group: "Close" },
 
+  { to: "/console/wealth",             label: "Wealth Transition", group: "Wealth" },
+
   { to: "/console/buyer-portal",       label: "Buyer Portal",     group: "Internal" },
   { to: "/console/calibration",        label: "Calibration",      group: "Internal" },
 ];
 
 // Preserve the founder-stage order rather than insertion-bucketed order.
-const GROUP_ORDER = ["Overview", "Prepare", "Find Buyers", "Diligence", "Negotiate", "Close", "Internal"];
+const GROUP_ORDER = ["Overview", "Prepare", "Find Buyers", "Diligence", "Negotiate", "Close", "Wealth", "Internal"];
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session, signOut, has } = useAuth();
