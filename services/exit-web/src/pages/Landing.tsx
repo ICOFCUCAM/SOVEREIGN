@@ -40,7 +40,7 @@ const Landing: React.FC = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#eef2f7] via-[#eef2f7]/70 to-transparent" aria-hidden />
         {/* floor sheen + ambient light the board emits onto the floor */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 opacity-50" aria-hidden style={{ background: "linear-gradient(to top, rgba(255,255,255,0.5), transparent)" }} />
-        <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-56 w-[52%] rounded-[50%] opacity-40 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.30), rgba(70,150,220,0) 70%)" }} aria-hidden />
+        <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-48 w-[48%] rounded-[50%] opacity-25 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.22), rgba(70,150,220,0) 70%)" }} aria-hidden />
 
         {/* proof ribbon — institutional authority above the fold (real figures) */}
         <div className="relative border-b border-slate-200/70 bg-white/70 backdrop-blur">
@@ -52,7 +52,7 @@ const Landing: React.FC = () => {
               [MARKET_FMT.activeMandates, "Mandates actively deploying"],
             ].map(([v, l], i) => (
               <div key={l} className="flex items-baseline gap-2.5 px-4 py-2.5">
-                {i === 3 && <span className="relative inline-flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" /></span>}
+                {i === 3 && <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />}
                 <span className="font-mono text-[15px] font-bold tabular-nums text-ink-900">{v}</span>
                 <span className="text-[11px] leading-tight text-slate-500">{l}</span>
               </div>
@@ -75,7 +75,7 @@ const Landing: React.FC = () => {
               One system connecting founders, buyers, advisors and transaction data — from signal generation to closing.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-ink-800">Access the Exchange <Arrow /></button>
+              <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-ink-800">Access the Exchange <Arrow /></button>
               <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-6 py-3 text-sm font-semibold text-ink-900 backdrop-blur transition hover:border-slate-400 hover:bg-white">Deploy a Mandate</button>
             </div>
           </div>
@@ -141,7 +141,7 @@ const Landing: React.FC = () => {
           <div className="mx-auto grid max-w-[1480px] grid-cols-2 gap-px overflow-hidden px-6 lg:grid-cols-4 lg:px-10">
             {HERO_TRUST.map((t) => (
               <div key={t.title} className="group flex items-center gap-3.5 px-5 py-5 transition hover:bg-white">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-100 transition group-hover:bg-blue-100"><Glyph name={t.icon} /></span>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={t.icon} /></span>
                 <div className="min-w-0">
                   <div className="font-serif text-xl font-bold leading-none text-ink-900">{t.metric}</div>
                   <div className="mt-1 text-[12.5px] font-semibold leading-tight text-ink-800">{t.title}</div>
@@ -194,8 +194,8 @@ const Landing: React.FC = () => {
           <div className="mt-8 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center">
             {ECOSYSTEM.map((e, i) => (
               <React.Fragment key={e.label}>
-                <div className="group flex flex-1 flex-col items-center rounded-xl border border-slate-200 bg-white px-3 py-4 text-center transition hover:border-blue-300 hover:shadow-sm">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 ring-1 ring-blue-100"><Glyph name={e.icon} small /></span>
+                <div className="group flex flex-1 flex-col items-center rounded-lg border border-slate-200 bg-white px-3 py-4 text-center transition hover:border-blue-300">
+                  <span className="flex h-10 w-10 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={e.icon} small /></span>
                   <div className="mt-2.5 text-[12px] font-semibold text-ink-800">{e.label}</div>
                   <div className="mt-0.5 text-[10px] text-slate-400">{e.meta}</div>
                 </div>
@@ -215,7 +215,7 @@ const Landing: React.FC = () => {
         {/* ambient grid + glow */}
         <div className="pointer-events-none absolute inset-0 opacity-[0.18]" aria-hidden
           style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(120,170,255,0.5) 0 1px, transparent 1px 120px), repeating-linear-gradient(0deg, rgba(120,170,255,0.35) 0 1px, transparent 1px 120px)", maskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 75%)" }} />
-        <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[80%] -translate-x-1/2 rounded-[50%] opacity-50 blur-[120px]" aria-hidden style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.45), transparent 70%)" }} />
+        <div className="pointer-events-none absolute -top-20 left-1/2 h-48 w-[60%] -translate-x-1/2 rounded-[50%] opacity-30 blur-[90px]" aria-hidden style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.28), transparent 70%)" }} />
 
         <div className="relative mx-auto max-w-[1320px] px-6 py-20 lg:px-10">
           <div className="max-w-3xl">
@@ -229,7 +229,7 @@ const Landing: React.FC = () => {
             <ol className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
               {STEPS.map((st, i) => (
                 <li key={st.title} className="relative flex flex-col items-center text-center">
-                  <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-lg"
+                  <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-lg text-white shadow-lg"
                     style={{ background: "linear-gradient(145deg,#1b3a66,#0c244a)", boxShadow: "0 0 0 1px rgba(120,170,255,0.25), 0 8px 24px -10px rgba(56,130,246,0.7), inset 0 1px 0 rgba(255,255,255,0.12)" }}>
                     <Glyph name={st.icon} />
                     <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 font-mono text-[9px] font-bold text-white ring-2 ring-[#0A1F3A]">{i + 1}</span>
@@ -242,7 +242,7 @@ const Landing: React.FC = () => {
           </div>
 
           {/* Founder → Exit — compact horizontal flow */}
-          <div className="mt-16 flex flex-wrap items-center justify-center gap-x-2 gap-y-3 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4 backdrop-blur">
+          <div className="mt-16 flex flex-wrap items-center justify-center gap-x-2 gap-y-3 rounded-lg border border-white/10 bg-white/[0.04] px-5 py-4 backdrop-blur">
             {EXCHANGE_FLOW.map((s, i) => (
               <React.Fragment key={s.title}>
                 <div className="flex items-center gap-2">
@@ -265,7 +265,7 @@ const Landing: React.FC = () => {
             <Link to="/console" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">View all buyers &rarr;</Link>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {BUYERS.map((b) => (
-                <div key={b.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md">
+                <div key={b.name} className="rounded-md border border-slate-200 bg-white p-5 transition hover:border-blue-300">
                   <div className="flex items-center gap-2.5">
                     <Mark name={b.name} />
                     <div>
@@ -320,7 +320,7 @@ const Landing: React.FC = () => {
               </div>
             </div>
             {/* confidence-tier register */}
-            <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+            <div className="overflow-hidden rounded-lg border border-slate-200">
               <div className="flex items-center justify-between bg-ink-900 px-5 py-3">
                 <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white">Confidence register</span>
                 <span className="text-[10px] uppercase tracking-wide text-white/50">applied to every estimate</span>
@@ -344,9 +344,9 @@ const Landing: React.FC = () => {
           {/* dense signal grid — one full-width row of live readouts */}
           <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {COMMAND_FEATURES.map((f) => (
-              <div key={f.title} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md">
+              <div key={f.title} className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-blue-300">
                 <div className="flex items-center justify-between">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-blue-600"><Glyph name={f.icon} small /></span>
+                  <span className="flex h-7 w-7 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={f.icon} small /></span>
                   <span className="font-mono text-[14px] font-bold text-ink-900">{f.value}</span>
                 </div>
                 <div className="mt-2.5 text-[12px] font-bold leading-tight text-ink-900">{f.title}</div>
@@ -374,13 +374,13 @@ const Landing: React.FC = () => {
                 ))}
               </div>
             </div>
-            <div className="flex h-32 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0B2947] to-[#06182E]"><Vault /></div>
+            <div className="flex h-32 items-center justify-center rounded-lg bg-gradient-to-br from-[#0B2947] to-[#06182E]"><Vault /></div>
           </div>
 
           {/* 6 document categories — one full-width row */}
           <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {DATA_ROOMS.map((d) => (
-              <div key={d.title} className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md">
+              <div key={d.title} className="rounded-md border border-slate-200 bg-white p-3.5 transition hover:border-blue-300">
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 text-ink-700"><Glyph name={d.icon} small /></span>
                 <div className="mt-2.5 text-[12px] font-semibold leading-tight text-ink-800">{d.title}</div>
                 <div className="mt-2 flex items-center gap-1.5 text-[9px] font-medium uppercase tracking-wide text-slate-400">
@@ -406,7 +406,7 @@ const Landing: React.FC = () => {
               <ul className="mt-7 space-y-5">
                 {NEGOTIATION_FEATURES.map((f) => (
                   <li key={f.title} className="flex gap-3">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600"><Glyph name={f.icon} small /></span>
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={f.icon} small /></span>
                     <div>
                       <div className="text-sm font-bold text-ink-900">{f.title}</div>
                       <div className="text-[12px] text-slate-500">{f.body}</div>
@@ -429,7 +429,7 @@ const Landing: React.FC = () => {
             <a href="/marketplace" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">How the listing protocol works &rarr;</a>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {OPPORTUNITIES.map((o) => (
-                <div key={o.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md">
+                <div key={o.name} className="rounded-md border border-slate-200 bg-white p-5 transition hover:border-blue-300">
                   <div className="flex items-center justify-between">
                     <div className="inline-block rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">{o.sector}</div>
                     <span className="text-[9.5px] font-semibold uppercase tracking-wide text-slate-400">{o.stage}</span>
@@ -478,7 +478,7 @@ const Landing: React.FC = () => {
             <div className="mt-10 grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4">
               {GLOBAL_STATS.map((s) => (
                 <div key={s.label}>
-                  <div className="font-serif text-3xl font-bold text-ink-900">{s.value}</div>
+                  <div className="font-serif text-3xl font-bold tabular-nums text-ink-900">{s.value}</div>
                   <div className="mt-1 text-[12px] text-slate-500">{s.label}</div>
                 </div>
               ))}
@@ -498,7 +498,7 @@ const Landing: React.FC = () => {
             </p>
           </div>
           {/* comparison matrix: Traditional vs ExitOS */}
-          <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+          <div className="mt-10 overflow-hidden rounded-lg border border-slate-200">
             <div className="grid grid-cols-[1.1fr_1fr_1fr]">
               <div className="bg-slate-50 px-5 py-4" />
               <div className="bg-slate-100 px-5 py-4 text-center text-[12px] font-bold uppercase tracking-wide text-slate-500">Traditional Sale</div>
@@ -531,12 +531,12 @@ const Landing: React.FC = () => {
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-3">
             {TRANSACTIONS.slice(0, 3).map((c) => (
-              <div key={c.company} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <div key={c.company} className="rounded-lg border border-slate-200 bg-white px-6 py-8 text-center transition">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">{c.industry}</div>
                 <div className="mt-4 text-[11px] font-medium uppercase tracking-wide text-slate-500">{c.company} &mdash; acquired by</div>
                 <div className="mt-1 flex items-center justify-center gap-2 text-base font-bold text-ink-900"><Mark name={c.buyer} size={20} />{c.buyer}</div>
                 <div className="mx-auto my-5 h-px w-12 bg-slate-200" />
-                <div className="font-serif text-4xl font-bold text-ink-900">{c.offer}</div>
+                <div className="font-serif text-4xl font-bold tabular-nums text-ink-900">{c.offer}</div>
                 <div className="mt-1 text-[11px] uppercase tracking-[0.2em] text-slate-400">Disclosed Value</div>
                 <div className="mt-6 grid grid-cols-3 gap-2 border-t border-slate-100 pt-5 text-[11px]">
                   <div><div className="font-serif text-[15px] font-bold text-blue-600">{c.premium.replace(/ vs reference$/, "")}</div><div className="mt-0.5 text-slate-400">vs reference</div></div>
@@ -547,7 +547,7 @@ const Landing: React.FC = () => {
             ))}
           </div>
           <div className="mt-6 text-center text-[11px] text-slate-400">Source-referenced from public filings and disclosures · {HISTORY_FMT.events} events indexed · {HISTORY_FMT.disclosedValue} disclosed value · {HISTORY_FMT.closed} closed</div>
-          <div className="mt-8 flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm sm:mx-auto sm:max-w-2xl">
+          <div className="mt-8 flex items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-6 py-4 sm:mx-auto sm:max-w-2xl">
             <span className="text-[13px] text-slate-600">Your company, priced against this record — the same engines run your valuation in the workspace.</span>
             <button onClick={() => nav("/console")} className="shrink-0 rounded-md bg-ink-900 px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-ink-800">Run the valuation &rarr;</button>
           </div>
@@ -561,7 +561,7 @@ const Landing: React.FC = () => {
             <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-300">Governance &amp; controls</div>
             <div className="text-[11px] text-white/40">The conditions under which a transaction is allowed to proceed</div>
           </div>
-          <div className="mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-2xl lg:grid-cols-5" style={{ background: "rgba(255,255,255,.08)" }}>
+          <div className="mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-lg lg:grid-cols-5" style={{ background: "rgba(255,255,255,.08)" }}>
             {GOVERNANCE.map((g) => (
               <div key={g.title} className="px-5 py-5" style={{ background: "rgba(6,24,46,.92)" }}>
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/15 text-blue-300 ring-1 ring-blue-400/30"><Glyph name={g.icon} small /></span>
@@ -585,7 +585,7 @@ const Landing: React.FC = () => {
             One confidential process — sourcing, diligence, negotiation and closing — executed on institutional infrastructure, under your control at every gate.
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
-            <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Open Acquisition Workspace <Arrow /></button>
+            <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-ink-800">Open Acquisition Workspace <Arrow /></button>
             <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-7 py-3.5 text-sm font-semibold text-ink-900 transition hover:border-slate-400 hover:bg-slate-50">Request a Private Briefing</button>
           </div>
           <p className="mt-6 text-[11.5px] text-slate-400">Strictly confidential. Anonymous until NDA. Every action audited.</p>
@@ -699,7 +699,7 @@ const CommandBoard: React.FC = () => {
 
   return (
   <div
-    className="relative min-w-0 overflow-hidden rounded-3xl text-white"
+    className="relative min-w-0 overflow-hidden rounded-xl text-white"
     style={{
       background: "linear-gradient(180deg,#08203B 0%,#06182E 100%)",
       border: "1px solid rgba(255,255,255,0.06)",
@@ -816,7 +816,7 @@ const CommandBoard: React.FC = () => {
     <div className="grid grid-cols-2 gap-px border-t border-white/10 sm:grid-cols-5" style={{ background: "rgba(255,255,255,.06)" }}>
       {BOARD_STATS.map((s) => (
         <div key={s.label} className="px-4 py-3.5" style={{ background: "#06182E" }}>
-          <div className="font-bold leading-none text-white" style={{ fontSize: 18 }}>{s.value}</div>
+          <div className="font-bold leading-none tabular-nums text-white" style={{ fontSize: 18 }}>{s.value}</div>
           <div className="mt-1.5 text-[9px] uppercase tracking-[0.12em] text-white/45">{s.label}</div>
         </div>
       ))}
@@ -972,7 +972,7 @@ const GLOBAL_STATS = [
 // illustration of the desk's scoring; on a live process the same table runs
 // against the founder's actual offers and reservation lines.
 const OfferTable: React.FC = () => (
-  <div className="overflow-hidden rounded-2xl p-4 text-white" style={{ background: "linear-gradient(180deg,#08203B,#06182E)" }}>
+  <div className="overflow-hidden rounded-lg p-4 text-white" style={{ background: "linear-gradient(180deg,#08203B,#06182E)" }}>
     <div className="flex items-center justify-between">
       <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">Cross-Bid Comparison</div>
       <div className="text-[9px] uppercase tracking-wide text-white/35">scored vs reservation lines</div>
