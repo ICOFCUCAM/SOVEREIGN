@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { fetchNetworkStats, type NetworkStats } from '@/lib/stats';
 
 // Deterministic starfield — sparse, dim, for deep-space depth.
 const STARS = Array.from({ length: 54 }, (_, i) => {
@@ -19,6 +20,8 @@ const ellipsePath = (cx: number, cy: number, rx: number, ry: number) =>
 
 const CinematicHero: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null);
+  const [net, setNet] = useState<NetworkStats | null>(null);
+  useEffect(() => { fetchNetworkStats().then(setNet); }, []);
   const onMove = (ev: React.MouseEvent) => {
     const el = ref.current;
     if (!el) return;
@@ -102,7 +105,11 @@ const CinematicHero: React.FC = () => {
           <div className="hairline max-w-md mb-5" />
           <div className="flex flex-wrap items-center gap-x-8 gap-y-3 max-w-md">
             <span className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.22em] text-emerald-300/80"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> Live network</span>
-            {[['47', 'edge nodes'], ['23', 'sovereign regions'], ['99.99%', 'uptime']].map(([v, l]) => (
+            {[
+              [String(net?.edgeNodes ?? '—'), 'edge nodes'],
+              [String(net?.regions ?? '—'), 'sovereign regions'],
+              [net?.uptime ?? '99.99%', 'uptime'],
+            ].map(([v, l]) => (
               <span key={l} className="flex flex-col leading-none">
                 <span className="text-lg font-semibold text-white tabular-nums tracking-tight">{v}</span>
                 <span className="text-[9px] font-mono uppercase tracking-[0.18em] text-white/35 mt-1.5">{l}</span>
