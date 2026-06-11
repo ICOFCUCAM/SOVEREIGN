@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   docToMarkdown, docFilename, buyerIntroLetter, introFilename, buyerListCsv,
   valuationMemo, buyerShortlistMemo, riskReportDoc, structuredDoc, frameDoc,
+  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, closingChecklistDoc, wealthPlanDoc,
 } from "./deliverables.js";
-import { BUYERS, VALUATION_STRATEGIC } from "./engines.js";
+import { BUYERS, VALUATION_STRATEGIC, OFFER_COMPARISON, NEGOTIATION_STATE, DILIGENCE } from "./engines.js";
 import { TemplateMemorandumGenerator } from "@exit/engines";
+import type { MemorandumKind } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile.js";
 import { discoverFindings, buildSellerReport } from "./diligence-intel.js";
 
@@ -87,5 +89,57 @@ describe("deliverables", () => {
     const md = structuredDoc("Plan", "Sub", [{ heading: "X", bullets: ["a", "b"] }]);
     expect(md).toContain("## 1. X");
     expect(md).toContain("- a");
+  });
+});
+
+// ── Every document the platform can produce has substantive content ──
+describe("all generated documents have content", () => {
+  const fmt = (n: number): string => `$${n.toLocaleString()}`;
+  const shortlist = BUYERS.candidates.slice(0, 7);
+  const leaderName = OFFER_COMPARISON.offers[0]?.offer.buyerName;
+
+  // Filename → built document, mirroring exactly what each surface generates.
+  const builds: Record<string, () => string> = {
+    "valuation-summary.md": () => valuationMemo(VALUATION_STRATEGIC, SAMPLE_COMPANY.name),
+    "buyer-target-list.md": () => buyerShortlistMemo(shortlist, "Project Cipher"),
+    "outreach-plan.md": () => outreachPlanDoc({ projectName: "Project Cipher", shortlistCount: shortlist.length, anchor: fmt(VALUATION_STRATEGIC.headline.mid) }),
+    "data-room-gating.md": () => dataRoomGatingDoc(DILIGENCE.documents.length),
+    "seller-diligence-report.md": () => riskReportDoc(buildSellerReport(discoverFindings())),
+    "offer-comparison.md": () => offerComparisonDoc({
+      summary: OFFER_COMPARISON.summary,
+      offers: OFFER_COMPARISON.offers.map((e) => ({ buyer: e.offer.buyerName, type: e.offer.buyerType, score: `${e.score.toFixed(0)}/100`, headline: fmt(e.offer.headlinePriceUsd), net: fmt(e.impliedNetToFoundersUsd) })),
+      dynamics: OFFER_COMPARISON.delta.map((d) => [d.term, d.notes] as [string, string]),
+      posture: [`Leverage: ${NEGOTIATION_STATE.leverage}`, `Leading bid: ${leaderName ?? "—"}`],
+    }),
+    "closing-checklist.md": closingChecklistDoc,
+    "wealth-transition-plan.md": () => wealthPlanDoc(fmt(VALUATION_STRATEGIC.headline.mid)),
+    "buyer-shortlist.csv": () => buyerListCsv(shortlist),
+    "intro-letter.txt": () => buyerIntroLetter({ buyer: shortlist[0], projectName: "Project Cipher", askMid: VALUATION_STRATEGIC.headline.mid, fromName: "Anne Kovac" }),
+  };
+
+  for (const [filename, build] of Object.entries(builds)) {
+    it(`${filename} is substantive`, () => {
+      const text = build();
+      expect(text.length).toBeGreaterThan(500);
+      noPlaceholders(text);
+      if (filename.endsWith(".md")) {
+        expect(text.trim().split("\n").length).toBeGreaterThan(10);
+        expect(text).toMatch(/^# /m);          // a title
+        expect(text).toMatch(/^## /m);          // at least one section
+      }
+    });
+  }
+
+  it("all five memorandum kinds render with real sections", async () => {
+    const gen = new TemplateMemorandumGenerator();
+    const kinds: readonly MemorandumKind[] = ["cim", "executive_summary", "investor_deck", "buyer_teaser", "dd_room_index"];
+    for (const kind of kinds) {
+      // mirror useMemorandum(): the pages always supply the full engine context
+      const doc = await gen.generate(kind, { company: SAMPLE_COMPANY, valuation: VALUATION_STRATEGIC, buyers: BUYERS, diligence: DILIGENCE });
+      const md = docToMarkdown(doc);
+      expect(doc.sections.length, kind).toBeGreaterThan(0);
+      expect(md.length, kind).toBeGreaterThan(800);
+      noPlaceholders(md);
+    }
   });
 });

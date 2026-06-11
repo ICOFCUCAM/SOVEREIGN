@@ -3,7 +3,11 @@ import { Link } from "react-router-dom";
 import { Button, Card, Modal, SectionHeader, fmtMoney } from "../lib/ui";
 import { VALUATION_STRATEGIC, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON, DILIGENCE } from "../lib/engines";
 import { discoverFindings, buildSellerReport } from "../lib/diligence-intel";
-import { valuationMemo, buyerShortlistMemo, riskReportDoc, structuredDoc, sendDeliverable, downloadDeliverable } from "../lib/deliverables";
+import {
+  valuationMemo, buyerShortlistMemo, riskReportDoc,
+  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, closingChecklistDoc, wealthPlanDoc,
+  sendDeliverable, downloadDeliverable,
+} from "../lib/deliverables";
 import { emitTelemetry } from "../lib/telemetry";
 import { useAuth } from "../lib/auth";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -142,33 +146,13 @@ const Autopilot: React.FC = () => {
       id: "outreach", name: "Outreach Agent", role: "Drafts and runs the approach.",
       work: <>Wrote the anonymized teaser and a six-step outreach sequence; intros personalized per buyer.</>,
       decision: `Send the anonymized teaser to the ${shortlist.length} shortlisted buyers?`, approveLabel: "Send outreach",
-      deliverable: { filename: "outreach-plan.md", build: () => structuredDoc("Outreach Plan", "Project Cipher · sell-side process", [
-        { heading: "Approach", body: `A ${shortlist.length}-buyer competitive process run in parallel to build leverage. All outreach is anonymized pre-NDA; identity and the data room unlock only on a signed NDA.` },
-        { heading: "Sequence", table: { headers: ["Step", "Timing", "Action"], rows: [
-          ["1 · Target list", "Day 0", "Rank acquirers by fit, appetite and recent activity"],
-          ["2 · Teaser", "Day 1", "Issue the anonymized teaser to tier-1 targets"],
-          ["3 · NDA + data room", "Day 3–7", "Counter-sign NDAs; grant staged data-room access"],
-          ["4 · Management presentations", "Week 2–3", "Distribute the CIM; schedule calls with engaged buyers"],
-          ["5 · Indications", "Week 4", "Solicit non-binding IOIs; build the offer comparison"],
-          ["6 · LOI", "Week 5–6", "Drive a competitive process to a signed letter of intent"],
-        ] } },
-        { heading: "Personalization", body: "Each shortlisted buyer receives an intro letter generated from its own mandate thesis and the engine's match rationale." },
-      ]) },
+      deliverable: { filename: "outreach-plan.md", build: () => outreachPlanDoc({ projectName: "Project Cipher", shortlistCount: shortlist.length, anchor: fmtMoney(mid) }) },
     },
     {
       id: "dataroom", name: "Data Room Agent", role: "Provisions and gates diligence.",
       work: <>Provisioned seven rooms and wired access behind signed NDAs + the Buyer Trust score.</>,
       decision: "Auto-grant data-room access to verified, NDA-signed buyers?", approveLabel: "Approve gating",
-      deliverable: { filename: "data-room-gating.md", build: () => structuredDoc("Data-Room Gating Policy", "Permissioned access for a controlled process", [
-        { heading: "Access control", body: "No buyer reaches the data room until they clear a mutual NDA and a Buyer Trust score of Verified. Access is staged by diligence package, fully logged and revocable." },
-        { heading: "Buyer Trust gates", table: { headers: ["Gate", "Requirement"], rows: [
-          ["NDA signed", "Executed mutual NDA on file"],
-          ["Identity verified", "Authorized signatory on the signature record"],
-          ["Acquisition history", "Institutional counterparty with a validated track record"],
-          ["Funds verified", "Capitalised counterparty with damages provision in force"],
-        ] } },
-        { heading: "Packages", body: `${DILIGENCE.documents.length} staged diligence packages, each completeness-scored, with the dollar impact of every gap surfaced before buyers see it.` },
-      ]) },
+      deliverable: { filename: "data-room-gating.md", build: () => dataRoomGatingDoc(DILIGENCE.documents.length) },
     },
     {
       id: "diligence", name: "Diligence Agent", role: "Finds the risks before buyers do.",
@@ -190,53 +174,32 @@ const Autopilot: React.FC = () => {
       id: "negotiation", name: "Negotiation Agent", role: "Scores offers and counters.",
       work: <>Scoring <span className="font-mono text-white">{NEGOTIATION_STATE.activeOffers}</span> offers; leverage <span className="text-white">{NEGOTIATION_STATE.leverage}</span>{leaderName ? <> · <span className="text-white">{leaderName}</span> leads</> : null}.</>,
       decision: leaderName ? `Approve the counter and drive ${leaderName} to a signed LOI?` : "Approve the counter strategy and drive to LOI?", approveLabel: "Approve the counter",
-      deliverable: { filename: "offer-comparison.md", build: () => structuredDoc("Offer Comparison", "Cross-bid analysis & negotiation posture", [
-        { heading: "Summary", body: OFFER_COMPARISON.summary },
-        { heading: "Bids", table: { headers: ["Buyer", "Type", "Score", "Headline", "Net to founders"], rows: OFFER_COMPARISON.offers.map((e) => [
-          e.offer.buyerName, e.offer.buyerType, `${e.score.toFixed(0)}/100`, fmtMoney(e.offer.headlinePriceUsd), fmtMoney(e.impliedNetToFoundersUsd),
-        ]) } },
-        { heading: "Field dynamics", bullets: OFFER_COMPARISON.delta.map((d) => `**${d.term}:** ${d.notes}`) },
-        { heading: "Posture", bullets: [
+      deliverable: { filename: "offer-comparison.md", build: () => offerComparisonDoc({
+        summary: OFFER_COMPARISON.summary,
+        offers: OFFER_COMPARISON.offers.map((e) => ({
+          buyer: e.offer.buyerName, type: e.offer.buyerType, score: `${e.score.toFixed(0)}/100`,
+          headline: fmtMoney(e.offer.headlinePriceUsd), net: fmtMoney(e.impliedNetToFoundersUsd),
+        })),
+        dynamics: OFFER_COMPARISON.delta.map((d) => [d.term, d.notes] as [string, string]),
+        posture: [
           `Active offers: ${NEGOTIATION_STATE.activeOffers}`,
           `Leverage: ${NEGOTIATION_STATE.leverage}`,
           `Leading bid: ${leaderName ?? "—"}`,
           `Next move: ${NEGOTIATION_STATE.nextMove}`,
-        ] },
-      ]) },
+        ],
+      }) },
     },
     {
       id: "closing", name: "Closing Agent", role: "Orchestrates signatures and escrow.",
       work: <>Assembled the closing checklist; tracking signatures, escrow funding and regulatory filings to the wire.</>,
       decision: "Approve proceeding to signing and funding the escrow?", approveLabel: "Approve close",
-      deliverable: { filename: "closing-checklist.md", build: () => structuredDoc("Closing Checklist", "Signature, escrow & filing orchestration to the wire", [
-        { heading: "Workstreams", table: { headers: ["Item", "Owner", "Status"], rows: [
-          ["SPA + signature pages", "Counsel", "In progress"],
-          ["Disclosure schedules", "Counsel", "In progress"],
-          ["Shareholder consent (≥95%)", "Founder", "In progress"],
-          ["Escrow agent engagement", "Banker", "Done"],
-          ["Escrow funding confirmation", "Banker", "Pending"],
-          ["Regulatory filings", "Counsel", "In progress"],
-        ] } },
-        { heading: "Economics", bullets: [
-          "Escrow capped at ≤8% of consideration, released in 12 months",
-          "Reverse break-fee in force; no founder indemnity beyond escrow",
-          "30–45 day sign-to-close target",
-        ] },
-      ]) },
+      deliverable: { filename: "closing-checklist.md", build: closingChecklistDoc },
     },
     {
       id: "wealth", name: "Wealth Agent", role: "Manages the proceeds after the wire.",
       work: <>Modeled proceeds through tax, scheduled the liquidity and drafted the diversification plan in WealthOS.</>,
       decision: "Approve the wealth transition plan?", approveLabel: "Approve & finish",
-      deliverable: { filename: "wealth-transition-plan.md", build: () => structuredDoc("Wealth Transition Plan", "From a concentrated position to durable wealth", [
-        { heading: "Proceeds", body: `Headline consideration of ${fmtMoney(mid)} modeled through federal and state tax, with QSBS treatment evaluated where the holding qualifies.` },
-        { heading: "Plan", bullets: [
-          "Staged liquidity schedule across the months after close",
-          "Diversification out of the single concentrated position into a durable portfolio",
-          "Trust, family-office and reinvestment structuring evaluated against the after-tax base",
-        ] },
-        { heading: "Note", body: "Figures are planning estimates. Tax outcomes depend on structure and jurisdiction and require a qualified advisor before any election." },
-      ]) },
+      deliverable: { filename: "wealth-transition-plan.md", build: () => wealthPlanDoc(fmtMoney(mid)) },
     },
   ];
 

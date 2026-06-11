@@ -303,6 +303,83 @@ export function structuredDoc(title: string, subtitle: string, sections: readonl
   return frameDoc({ title, subtitle, sections });
 }
 
+// ── Agent work products (Autonomous Exit + The Banker) ─────────────
+// Parameterized builders so every document the agents produce is testable
+// end-to-end — no inline one-off strings in page components.
+
+export function outreachPlanDoc(opts: { projectName: string; shortlistCount: number; anchor: string }): string {
+  return structuredDoc("Outreach Plan", `${opts.projectName} · sell-side process`, [
+    { heading: "Approach", body: `A ${opts.shortlistCount}-buyer competitive process run in parallel to build leverage, anchored at ${opts.anchor}. All outreach is anonymized pre-NDA; identity and the data room unlock only on a signed NDA.` },
+    { heading: "Sequence", table: { headers: ["Step", "Timing", "Action"], rows: [
+      ["1 · Target list", "Day 0", "Rank acquirers by fit, appetite and recent activity"],
+      ["2 · Teaser", "Day 1", "Issue the anonymized teaser to tier-1 targets"],
+      ["3 · NDA + data room", "Day 3–7", "Counter-sign NDAs; grant staged data-room access"],
+      ["4 · Management presentations", "Week 2–3", "Distribute the CIM; schedule calls with engaged buyers"],
+      ["5 · Indications", "Week 4", "Solicit non-binding IOIs; build the offer comparison"],
+      ["6 · LOI", "Week 5–6", "Drive a competitive process to a signed letter of intent"],
+    ] } },
+    { heading: "Personalization", body: "Each shortlisted buyer receives an intro letter generated from its own mandate thesis and the engine's match rationale." },
+  ]);
+}
+
+export function dataRoomGatingDoc(packageCount: number): string {
+  return structuredDoc("Data-Room Gating Policy", "Permissioned access for a controlled process", [
+    { heading: "Access control", body: "No buyer reaches the data room until they clear a mutual NDA and a Buyer Trust score of Verified. Access is staged by diligence package, fully logged and revocable." },
+    { heading: "Buyer Trust gates", table: { headers: ["Gate", "Requirement"], rows: [
+      ["NDA signed", "Executed mutual NDA on file"],
+      ["Identity verified", "Authorized signatory on the signature record"],
+      ["Acquisition history", "Institutional counterparty with a validated track record"],
+      ["Funds verified", "Capitalised counterparty with damages provision in force"],
+    ] } },
+    { heading: "Packages", body: `${packageCount} staged diligence packages, each completeness-scored, with the dollar impact of every gap surfaced before buyers see it.` },
+  ]);
+}
+
+export interface OfferLine { readonly buyer: string; readonly type: string; readonly score: string; readonly headline: string; readonly net: string }
+export function offerComparisonDoc(opts: {
+  summary: string;
+  offers: readonly OfferLine[];
+  dynamics: ReadonlyArray<[string, string]>;
+  posture: readonly string[];
+}): string {
+  return structuredDoc("Offer Comparison", "Cross-bid analysis & negotiation posture", [
+    { heading: "Summary", body: opts.summary },
+    { heading: "Bids", table: { headers: ["Buyer", "Type", "Score", "Headline", "Net to founders"], rows: opts.offers.map((o) => [o.buyer, o.type, o.score, o.headline, o.net]) } },
+    { heading: "Field dynamics", bullets: opts.dynamics.map(([term, notes]) => `**${term}:** ${notes}`) },
+    { heading: "Posture", bullets: opts.posture },
+  ]);
+}
+
+export function closingChecklistDoc(): string {
+  return structuredDoc("Closing Checklist", "Signature, escrow & filing orchestration to the wire", [
+    { heading: "Workstreams", table: { headers: ["Item", "Owner", "Status"], rows: [
+      ["SPA + signature pages", "Counsel", "In progress"],
+      ["Disclosure schedules", "Counsel", "In progress"],
+      ["Shareholder consent (≥95%)", "Founder", "In progress"],
+      ["Escrow agent engagement", "Banker", "Done"],
+      ["Escrow funding confirmation", "Banker", "Pending"],
+      ["Regulatory filings", "Counsel", "In progress"],
+    ] } },
+    { heading: "Economics", bullets: [
+      "Escrow capped at ≤8% of consideration, released in 12 months",
+      "Reverse break-fee in force; no founder indemnity beyond escrow",
+      "30–45 day sign-to-close target",
+    ] },
+  ]);
+}
+
+export function wealthPlanDoc(headline: string): string {
+  return structuredDoc("Wealth Transition Plan", "From a concentrated position to durable wealth", [
+    { heading: "Proceeds", body: `Headline consideration of ${headline} modeled through federal and state tax, with QSBS treatment evaluated where the holding qualifies.` },
+    { heading: "Plan", bullets: [
+      "Staged liquidity schedule across the months after close",
+      "Diversification out of the single concentrated position into a durable portfolio",
+      "Trust, family-office and reinvestment structuring evaluated against the after-tax base",
+    ] },
+    { heading: "Note", body: "Figures are planning estimates. Tax outcomes depend on structure and jurisdiction and require a qualified advisor before any election." },
+  ]);
+}
+
 /** Backward-compatible simple brief, now framed and disclaimed. */
 export function briefMarkdown(title: string, rows: ReadonlyArray<[string, string]>, body?: string): string {
   return frameDoc({

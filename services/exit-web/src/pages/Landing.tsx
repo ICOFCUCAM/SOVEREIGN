@@ -34,7 +34,7 @@ const Landing: React.FC = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 opacity-50" aria-hidden style={{ background: "linear-gradient(to top, rgba(255,255,255,0.5), transparent)" }} />
         <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-56 w-[52%] rounded-[50%] opacity-40 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.30), rgba(70,150,220,0) 70%)" }} aria-hidden />
 
-        <div className="relative mx-auto grid max-w-[1480px] items-center gap-4 px-6 py-16 lg:grid-cols-[0.5fr_1.7fr] lg:px-10 lg:py-24">
+        <div className="relative mx-auto grid max-w-[1480px] items-center gap-8 px-6 py-16 lg:grid-cols-[0.9fr_1.3fr] lg:px-10 lg:py-20">
           <div className="lg:pr-2">
             <h1 className="font-serif text-4xl font-bold leading-[1.06] tracking-tight text-ink-900 sm:text-5xl">
               THE OPERATING SYSTEM<br />FOR COMPANY SALES
@@ -52,8 +52,8 @@ const Landing: React.FC = () => {
           </div>
 
           {/* ---- MOUNTED ACQUISITION-EXCHANGE DISPLAY ---- */}
-          {/* nudged right + up off the headline, with a lighter floor shadow */}
-          <div className="min-w-0 lg:translate-x-10 lg:-translate-y-8" style={{ perspective: "2000px" }}>
+          {/* pushed right + up, clear of the headline, with a light floor shadow */}
+          <div className="min-w-0 lg:translate-x-16 lg:-translate-y-6" style={{ perspective: "2000px" }}>
             <div className="relative">
               {/* structural mount / bezel behind the screen */}
               <div
@@ -268,7 +268,7 @@ const Landing: React.FC = () => {
       <section className="border-b border-slate-200">
         <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
           <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="min-w-0 scale-90 lg:scale-100"><CommandBoard compact /></div>
+            <div className="min-w-0 scale-90 lg:scale-100"><CommandBoard /></div>
             <div>
               <h2 className="font-serif text-[2rem] font-bold tracking-tight text-ink-900">Your Acquisition Command Center.</h2>
               <p className="mt-4 text-base leading-relaxed text-slate-600">
@@ -573,7 +573,7 @@ const heatGradient = (bars: number) =>
 // `lean` = focused hero board: only Strategic Buyers + Acquisition Demand
 // (no Live Transactions column — that detail lives below the fold), trimmed to
 // the few rows that matter, plus a 4-stat market-activity bar.
-const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact, lean }) => (
+const CommandBoard: React.FC<{ lean?: boolean }> = ({ lean }) => (
   <div
     className="min-w-0 overflow-hidden rounded-3xl text-white"
     style={{
@@ -587,7 +587,7 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
       <div className="border-b border-white/5 px-5 py-3 lg:border-b-0 lg:border-r">
         <BoardHeader title="Strategic Buyers" right="Match Score" />
         <div className="mt-1">
-          {(lean ? STRATEGIC_BUYERS.filter((b) => ["Microsoft", "Salesforce", "Oracle", "Thoma Bravo"].includes(b[0])) : STRATEGIC_BUYERS).map(([name, sector, match, status]) => (
+          {(lean ? STRATEGIC_BUYERS.filter((b) => ["Microsoft", "Salesforce", "Oracle", "Thoma Bravo"].includes(b[0])) : STRATEGIC_BUYERS.slice(0, 4)).map(([name, sector, match, status]) => (
             <div key={name} className="group flex items-center justify-between gap-2 border-b border-white/5 py-1.5 transition last:border-0 hover:translate-x-1" style={{ transitionDuration: ".25s" }}>
               <div className="flex items-center gap-2">
                 <Mark name={name} size={22} />
@@ -619,7 +619,7 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
           <span>Target Company</span><span>Best Match</span><span className="text-right">Expected / Status</span>
         </div>
         <div className="mt-1">
-          {TRANSACTIONS.map((t) => (
+          {TRANSACTIONS.slice(0, 4).map((t) => (
             <div key={t.company} className="grid grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 border-b border-white/5 py-1.5 last:border-0">
               <div>
                 <div className="text-[12.5px] font-medium text-white/90">{t.company}</div>
@@ -648,7 +648,7 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
       <div className="px-5 py-3">
         <BoardHeader title="Acquisition Demand" right="Market Heat" />
         <div className="mt-3 space-y-2">
-          {(lean ? DEMAND.slice(0, 4) : DEMAND).map(([label, heat, bars]) => (
+          {(lean ? DEMAND.slice(0, 4) : DEMAND.slice(0, 5)).map(([label, heat, bars]) => (
             <div key={label}>
               <div className="flex items-center justify-between text-[10.5px]">
                 <span className="text-white/80">{label}</span>
@@ -660,20 +660,6 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
             </div>
           ))}
         </div>
-        {/* Market intelligence box (full board only — lean shows the stat bar) */}
-        {!lean && (
-        <div className="mt-4 rounded-2xl p-3" style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.04)" }}>
-          <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/45">Market Intelligence</div>
-          <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-3">
-            {[[MARKET_FMT.appetite, "Check Capacity Indexed"], [MARKET_FMT.activeMandates, "Mandates Actively Deploying"], [MARKET_FMT.strategic, "Strategic Acquirers Indexed"], [MARKET_FMT.sectors, "Sectors Monitored"]].map((m) => (
-              <div key={m[1]}>
-                <div className="font-bold leading-none text-white" style={{ fontSize: compact ? 18 : 22 }}>{m[0]}</div>
-                <div className="mt-1 text-[9px] leading-snug text-white/45">{m[1]}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-        )}
       </div>
     </div>
 
