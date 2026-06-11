@@ -23,7 +23,7 @@ import { DomainOrdersAdmin } from '@/components/admin/DomainOrdersAdmin';
 type Tab = 'overview' | 'domains' | 'orders' | 'leads' | 'briefings' | 'channel' | 'narratives' | 'campaigns' | 'scenarios' | 'pipelines' | 'analytics' | 'ecosystem' | 'team' | 'activity';
 interface Scenario { id: string; label: string; accent: string; icon_key: string; origin: number; down: number[]; respond: number[]; phases: Array<{ label: string; resilience: number; affected: number; clock: string; desc: string }>; published: boolean; sort_order: number; created_at: string }
 interface PipelineJob { id: string; kind: string; status: string; provider: string | null; title: string | null; result_url: string | null; media_class: string | null; result: { seedUrl?: string } | null; error: string | null; created_at: string }
-interface MediaItem { id: string; media_class: string; kind: string; title: string; meta: string | null; length: string | null; youtube_id: string | null; video_url: string | null; source_job_id: string | null; sort_order: number }
+interface MediaItem { id: string; media_class: string; kind: string; title: string; meta: string | null; length: string | null; youtube_id: string | null; video_url: string | null; source_job_id: string | null; published: boolean; sort_order: number }
 interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null; published: boolean; sort_order: number; cover_image_url: string | null }
 interface Campaign { id: string; name: string; media_class: string | null; channel: string; status: string; asset_ref: string | null; scheduled_at: string | null; created_at: string }
 type LeadFilter = 'all' | 'inquiry' | 'offer' | 'buy_now';
@@ -1196,6 +1196,26 @@ const AdminPage: React.FC = () => {
                             onBlur={(e) => { if ((e.target.value.trim() || null) !== (m.youtube_id || null)) updateMediaVideo(m.id, 'youtube_id', e.target.value); }}
                             className="w-32 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
                           {(m.video_url || m.youtube_id) ? <span className="text-[10px] font-mono text-emerald-300/70 shrink-0">live</span> : <span className="text-[10px] font-mono text-white/25 shrink-0">—</span>}
+                          <button title={m.published !== false ? 'Unpublish from the public channel' : 'Publish to the public channel'}
+                            onClick={async () => {
+                              const next = !(m.published !== false);
+                              const { error } = await supabase.from('media').update({ published: next }).eq('id', m.id);
+                              if (error) { toast.error(error.message); return; }
+                              toast.success(next ? 'Published' : 'Unpublished'); load();
+                            }}
+                            className={`p-1.5 rounded hover:bg-white/10 shrink-0 ${m.published !== false ? 'text-emerald-300' : 'text-white/30 hover:text-white/60'}`}>
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                          <button title="Delete media row"
+                            onClick={async () => {
+                              if (!confirm(`Delete "${m.title}" from the channel?`)) return;
+                              const { error } = await supabase.from('media').delete().eq('id', m.id);
+                              if (error) { toast.error(error.message); return; }
+                              toast.success('Deleted'); load();
+                            }}
+                            className="p-1.5 rounded hover:bg-white/10 text-white/40 hover:text-red-400 shrink-0">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       ))}
                     </div>
