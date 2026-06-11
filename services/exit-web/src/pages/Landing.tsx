@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MarketingChrome, Glyph, Mark, Arrow } from "../components/MarketingChrome";
-import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, STRATEGIC_BOARD, SECTOR_DEMAND, HISTORY_FMT, REGISTRY_CARDS } from "../lib/market-stats";
+import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, STRATEGIC_BOARD, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS } from "../lib/market-stats";
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
 // marketing chrome (header nav → Platform / Modules / Pricing + footer). The
@@ -34,20 +34,41 @@ const Landing: React.FC = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 opacity-50" aria-hidden style={{ background: "linear-gradient(to top, rgba(255,255,255,0.5), transparent)" }} />
         <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-56 w-[52%] rounded-[50%] opacity-40 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.30), rgba(70,150,220,0) 70%)" }} aria-hidden />
 
+        {/* proof ribbon — institutional authority above the fold (real figures) */}
+        <div className="relative border-b border-slate-200/70 bg-white/70 backdrop-blur">
+          <div className="mx-auto grid max-w-[1480px] grid-cols-2 divide-x divide-slate-200/70 px-6 lg:grid-cols-4 lg:px-10">
+            {[
+              [HISTORY_FMT.events, "Disclosed acquisitions indexed"],
+              [MARKET_FMT.buyers, "Verified acquirer mandates"],
+              [HISTORY_FMT.disclosedValue, "Transaction value tracked"],
+              [MARKET_FMT.activeMandates, "Mandates actively deploying"],
+            ].map(([v, l], i) => (
+              <div key={l} className="flex items-baseline gap-2.5 px-4 py-2.5">
+                {i === 3 && <span className="relative inline-flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" /></span>}
+                <span className="font-mono text-[15px] font-bold tabular-nums text-ink-900">{v}</span>
+                <span className="text-[11px] leading-tight text-slate-500">{l}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="relative mx-auto grid max-w-[1480px] items-center gap-8 px-6 py-16 lg:grid-cols-[0.9fr_1.3fr] lg:px-10 lg:py-20">
           <div className="lg:pr-2">
-            <h1 className="font-serif text-4xl font-bold leading-[1.06] tracking-tight text-ink-900 sm:text-5xl">
-              THE OPERATING SYSTEM<br />FOR COMPANY SALES
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-300/70 bg-white/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" /> The Global Acquisition Exchange
+            </div>
+            <h1 className="font-serif text-4xl font-bold leading-[1.04] tracking-tight text-ink-900 sm:text-5xl">
+              INSTITUTIONAL<br />ACQUISITION<br />INFRASTRUCTURE
             </h1>
             <p className="mt-6 max-w-md font-serif text-xl font-semibold leading-snug text-ink-900">
-              Source buyers. Run diligence. Negotiate offers. Close transactions.
+              Source acquirers. Coordinate diligence. Manage negotiations. Execute transactions.
             </p>
             <p className="mt-3 max-w-md text-[15px] leading-relaxed text-slate-600">
-              One acquisition infrastructure. One audit trail. One source of truth.
+              One system connecting founders, buyers, advisors and transaction data — from signal generation to closing.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-ink-800">Launch ExitOS <Arrow /></button>
-              <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-6 py-3 text-sm font-semibold text-ink-900 backdrop-blur transition hover:border-slate-400 hover:bg-white">Request a Demo</button>
+              <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-ink-800">Access the Exchange <Arrow /></button>
+              <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-6 py-3 text-sm font-semibold text-ink-900 backdrop-blur transition hover:border-slate-400 hover:bg-white">Deploy a Mandate</button>
             </div>
           </div>
 
@@ -122,7 +143,38 @@ const Landing: React.FC = () => {
             ))}
           </div>
         </div>
-        <style>{`@keyframes exTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
+        <style>{`
+          @keyframes exTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+          @keyframes exScan{0%{transform:translateY(-100%);opacity:0}8%{opacity:1}50%{opacity:.5}92%{opacity:1}100%{transform:translateY(2000%);opacity:0}}
+          @keyframes exFlash{0%,100%{background:transparent}50%{background:rgba(96,165,250,.10)}}
+          @keyframes exTravel{0%{left:0;opacity:0}6%{opacity:1}94%{opacity:1}100%{left:100%;opacity:0}}
+        `}</style>
+      </section>
+
+      {/* ===== 1A · ACQUISITION LIFECYCLE RAIL ===== */}
+      <section className="border-b border-white/10" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
+        <div className="mx-auto max-w-[1480px] px-6 py-9 lg:px-10">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-300">The acquisition lifecycle · signal → closing</div>
+            <div className="hidden items-center gap-1.5 sm:flex">
+              <span className="relative inline-flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" /></span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-300">Live process</span>
+            </div>
+          </div>
+          {/* one animated rail: a traveling pulse runs the full lifecycle */}
+          <div className="relative mt-7">
+            <div className="pointer-events-none absolute left-0 right-0 top-[11px] hidden h-px lg:block" style={{ background: "linear-gradient(90deg, transparent, rgba(96,165,250,.45) 6%, rgba(96,165,250,.45) 94%, transparent)" }} />
+            <div className="pointer-events-none absolute top-[7px] hidden h-2 w-2 rounded-full lg:block" style={{ background: "#7CFF9F", boxShadow: "0 0 8px 2px rgba(124,255,159,.8)", animation: "exTravel 7s linear infinite" }} />
+            <ol className="grid grid-cols-2 gap-y-6 sm:grid-cols-4 lg:grid-cols-8">
+              {LIFECYCLE.map((s, i) => (
+                <li key={s} className="relative flex flex-col items-center text-center">
+                  <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#0A1F3A] font-mono text-[10px] font-bold text-blue-200 ring-1 ring-blue-400/40">{i + 1}</span>
+                  <span className="mt-2.5 px-1 text-[11px] font-semibold leading-tight text-white/85">{s}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
       </section>
 
       {/* ===== 1B · ACQUISITION ECOSYSTEM ===== */}
@@ -506,12 +558,14 @@ const TRANSACTIONS = DISCLOSED_TRANSACTIONS;
 // Demand column — sector heat computed from mandate coverage.
 const DEMAND = SECTOR_DEMAND;
 // summary stat bar along the board's bottom edge — registry + history facts
+// Bottom stat bar — operational depth that complements (does not repeat) the
+// proof ribbon: aggregate capacity, closing velocity and registry coverage.
 const BOARD_STATS = [
-  { label: "Acquirer Mandates", value: MARKET_FMT.buyers },
-  { label: "Actively Deploying", value: MARKET_FMT.activeMandates },
-  { label: "Disclosed Deals Indexed", value: HISTORY_FMT.events },
-  { label: "Check Capacity", value: MARKET_FMT.appetite },
-  { label: "Disclosed Deal Value", value: HISTORY_FMT.disclosedValue },
+  { label: "Aggregate Capacity", value: MARKET_FMT.appetite },
+  { label: "Median Close Period", value: DEAL_INTEL_FMT.medianClose },
+  { label: "Strategic Acquirers", value: MARKET_FMT.strategic },
+  { label: "Sectors Monitored", value: MARKET_FMT.sectors },
+  { label: "Jurisdictions", value: MARKET_FMT.geographies },
 ];
 const HERO_TRUST = [
   { icon: "globe", metric: `${MARKET_FMT.buyers} Mandates`, title: "Curated Acquirer Network", sub: `${MARKET_FMT.geographies} jurisdictions · ${MARKET_FMT.sectors} sectors` },
@@ -575,13 +629,16 @@ const heatGradient = (bars: number) =>
 // the few rows that matter, plus a 4-stat market-activity bar.
 const CommandBoard: React.FC<{ lean?: boolean }> = ({ lean }) => (
   <div
-    className="min-w-0 overflow-hidden rounded-3xl text-white"
+    className="relative min-w-0 overflow-hidden rounded-3xl text-white"
     style={{
       background: "linear-gradient(180deg,#08203B 0%,#06182E 100%)",
       border: "1px solid rgba(255,255,255,0.06)",
       boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
     }}
   >
+    {/* live operational layer — a faint signal sweep travels down the board */}
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-16" aria-hidden
+      style={{ background: "linear-gradient(180deg, rgba(96,165,250,0.18), transparent)", animation: "exScan 6s linear infinite" }} />
     <div className={"grid grid-cols-1 " + (lean ? "lg:grid-cols-[44%_56%]" : "lg:grid-cols-[25%_45%_30%]")}>
       {/* ---- COL 1 · STRATEGIC BUYERS ---- */}
       <div className="border-b border-white/5 px-5 py-3 lg:border-b-0 lg:border-r">
@@ -619,8 +676,9 @@ const CommandBoard: React.FC<{ lean?: boolean }> = ({ lean }) => (
           <span>Target Company</span><span>Best Match</span><span className="text-right">Expected / Status</span>
         </div>
         <div className="mt-1">
-          {TRANSACTIONS.slice(0, 4).map((t) => (
-            <div key={t.company} className="grid grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 border-b border-white/5 py-1.5 last:border-0">
+          {TRANSACTIONS.slice(0, 4).map((t, i) => (
+            <div key={t.company} className="grid grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 rounded border-b border-white/5 py-1.5 last:border-0"
+              style={i === 0 ? { animation: "exFlash 4s ease-in-out infinite" } : undefined}>
               <div>
                 <div className="text-[12.5px] font-medium text-white/90">{t.company}</div>
                 <div className="text-[10px] text-white/45">{t.industry}</div>
@@ -705,6 +763,7 @@ const MARKET_STATS = [
   { icon: "doc", value: MARKET_FMT.sectors, label: "Sectors Monitored", trend: "Stable", up: false },
   { icon: "globe", value: MARKET_FMT.geographies, label: "Jurisdictions with Buyer Activity", trend: "↑ Expanding", up: true },
 ];
+const LIFECYCLE = ["Signal", "Buyer Discovery", "NDA", "CIM", "Management Meetings", "LOI", "Diligence", "Closing"];
 const STEPS = [
   { icon: "chart", title: "Company Analysis", body: "AI-powered valuation, market positioning, and readiness scoring." },
   { icon: "users", title: "Buyer Discovery", body: `Engine-ranked matching across ${MARKET_FMT.buyers} curated strategic and financial mandates.` },
