@@ -182,6 +182,20 @@ const DispatchDemo: React.FC = () => {
 
 const EmergencyAILanding: React.FC = () => {
   useDocumentTitle('Emergency AI', 'Emergency AI — sovereign AI media, distribution and intelligence infrastructure, owned end-to-end.');
+  // Live production counters from the real pipeline; hidden until work exists.
+  const [live, setLive] = useState<Array<{ v: string; l: string }>>([]);
+  useEffect(() => {
+    (async () => {
+      const [done, published] = await Promise.all([
+        supabase.from('pipeline_jobs').select('id', { count: 'exact', head: true }).eq('status', 'done'),
+        supabase.from('media').select('id', { count: 'exact', head: true }).not('video_url', 'is', null),
+      ]);
+      const extra: Array<{ v: string; l: string }> = [];
+      if (done.count) extra.push({ v: done.count.toLocaleString(), l: 'productions rendered' });
+      if (published.count) extra.push({ v: published.count.toLocaleString(), l: 'films on the channel' });
+      setLive(extra);
+    })();
+  }, []);
 
   return (
     <div className="relative min-h-screen text-white">
@@ -210,7 +224,7 @@ const EmergencyAILanding: React.FC = () => {
               <Link to="/pricing" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-white/15 text-white font-semibold hover:bg-white/5 hover:border-white/25 transition">See pricing <ArrowRight className="w-4 h-4" /></Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto">
-              {METRICS.map((m) => (
+              {[...METRICS, ...live].map((m) => (
                 <div key={m.l} className="rounded-2xl border border-white/8 bg-white/[0.015] px-4 py-4">
                   <div className="font-display text-3xl font-bold text-white">{m.v}</div>
                   <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 mt-1">{m.l}</div>
