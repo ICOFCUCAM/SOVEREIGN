@@ -21,6 +21,7 @@ const EcosystemHub = lazy(() => import("./pages/EcosystemHub"));
 const SystemPage = lazy(() => import("./pages/SystemPage"));
 const DeployPage = lazy(() => import("./pages/DeployPage"));
 const ChannelPage = lazy(() => import("./pages/ChannelPage"));
+const FilmsPage = lazy(() => import("./pages/FilmsPage"));
 const DnsPage = lazy(() => import("./pages/DnsPage"));
 const RegistrantsPage = lazy(() => import("./pages/RegistrantsPage"));
 const DeploymentsConsolePage = lazy(() => import("./pages/DeploymentsConsolePage"));
@@ -86,6 +87,7 @@ const PlatformRoutes = () => (
     <Route path="/studio/:domain" element={<StudioPage />} />
     <Route path="/deploy" element={<DeployPage />} />
     <Route path="/channel" element={<ChannelPage />} />
+    <Route path="/films" element={<FilmsPage />} />
     <Route path="/dns" element={<DnsPage />} />
     <Route path="/registrants" element={<RegistrantsPage />} />
     <Route path="/deployments" element={<DeploymentsConsolePage />} />
