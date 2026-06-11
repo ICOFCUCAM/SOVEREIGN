@@ -343,8 +343,9 @@ const Landing: React.FC = () => {
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
           <div className="flex-1">
-            <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Live opportunities.<br />Private and confidential.</h2>
-            <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">View all opportunities &rarr;</a>
+            <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">The marketplace.<br />Private and confidential.</h2>
+            <p className="mt-3 max-w-md text-[13px] leading-relaxed text-slate-500">Representative listing profiles — live mandates stay anonymous until NDA. Publish yours to enter the exchange.</p>
+            <a href="/marketplace" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">How the marketplace works &rarr;</a>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {OPPORTUNITIES.map((o) => (
                 <div key={o.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md">

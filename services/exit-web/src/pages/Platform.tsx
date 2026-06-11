@@ -1,12 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MarketingChrome, Glyph, Arrow } from "../components/MarketingChrome";
+import { MARKET_FMT } from "../lib/market-stats";
 
 // Platform — the marketing page for the acquisition infrastructure itself:
 // one exchange, one audit trail, end to end.
 
 const PILLARS = [
-  { icon: "globe", title: "Acquisition exchange", body: "58,000+ verified buyers on one live marketplace — strategics, PE, family offices and corporate development." },
+  { icon: "globe", title: "Acquisition exchange", body: `${MARKET_FMT.buyers} curated acquirer mandates on one live exchange — strategics, PE, family offices and corporate development, across ${MARKET_FMT.geographies} jurisdictions.` },
   { icon: "chart", title: "Intelligence engines", body: "Valuation, readiness, buyer discovery and diligence run deterministically on your numbers — not slideware." },
   { icon: "spark", title: "Autonomous execution", body: "Agents run sourcing, outreach, data room, negotiation and closing. You approve; the desk does the work." },
   { icon: "lock", title: "Institutional security", body: "Permissioned data rooms, full audit trails and access logs. Every action and artifact is accountable." },
