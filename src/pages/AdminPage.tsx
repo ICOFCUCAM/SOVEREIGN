@@ -1351,6 +1351,10 @@ const AdminPage: React.FC = () => {
                 {pipelineJobs.map((j) => (
                   <div key={j.id} className="flex items-center gap-4 px-5 py-3">
                     <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 text-white/50 shrink-0 w-20 text-center">{j.kind}</span>
+                    {j.result?.seedUrl && (
+                      <img src={j.result.seedUrl} alt="" loading="lazy" decoding="async"
+                        className="w-14 h-8 object-cover rounded border border-white/10 shrink-0" />
+                    )}
                     <div className="min-w-0 flex-1">
                       <div className="text-sm text-white truncate">{j.title || '—'}{j.provider ? <span className="text-white/35 text-xs font-mono"> · {j.provider}</span> : null}</div>
                       {j.error && <div className="text-[10px] text-rose-300/70 truncate">{j.error}</div>}
@@ -1364,7 +1368,10 @@ const AdminPage: React.FC = () => {
                             {pipelineBusy === 'publish-' + j.id ? 'Publishing…' : 'Publish'}
                           </button>
                     )}
-                    <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${j.status === 'done' ? 'bg-emerald-500/15 text-emerald-300' : j.status === 'processing' ? 'bg-cyan-500/15 text-cyan-300' : j.status === 'failed' ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'}`}>{j.status}</span>
+                    <span className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${j.status === 'done' ? 'bg-emerald-500/15 text-emerald-300' : j.status === 'processing' ? 'bg-cyan-500/15 text-cyan-300' : j.status === 'failed' ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'}`}>
+                      {j.status === 'processing' && <span className="w-2.5 h-2.5 rounded-full border border-cyan-300/40 border-t-cyan-300 animate-spin" />}
+                      {j.status}
+                    </span>
                     <span className="text-white/35 text-xs font-mono whitespace-nowrap shrink-0">{new Date(j.created_at).toLocaleDateString()}</span>
                   </div>
                 ))}
