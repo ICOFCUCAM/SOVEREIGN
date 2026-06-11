@@ -328,11 +328,11 @@ const AdminPage: React.FC = () => {
     load();
   };
 
-  const updateMediaVideo = async (id: string, youtube_id: string) => {
-    const v = youtube_id.trim() || null;
-    setMedia((prev) => prev.map((m) => (m.id === id ? { ...m, youtube_id: v } : m)));
-    const { error } = await supabase.from('media').update({ youtube_id: v }).eq('id', id);
-    if (error) toast.error('Could not save video id'); else toast.success('Media updated');
+  const updateMediaVideo = async (id: string, field: 'youtube_id' | 'video_url', value: string) => {
+    const v = value.trim() || null;
+    setMedia((prev) => prev.map((m) => (m.id === id ? { ...m, [field]: v } : m)));
+    const { error } = await supabase.from('media').update({ [field]: v }).eq('id', id);
+    if (error) toast.error('Could not save video reference'); else toast.success('Media updated');
   };
 
   const generateContent = async (type: string, mediaClass: string | null, onText: (t: string) => void) => {
@@ -1170,10 +1170,13 @@ const AdminPage: React.FC = () => {
                             <div className="text-sm text-white truncate">{m.title}</div>
                             <div className="text-[10px] font-mono uppercase tracking-wider text-white/35">{m.kind}{m.length ? ` · ${m.length}` : ''}</div>
                           </div>
+                          <input defaultValue={m.video_url || ''} placeholder="Video URL (render)" aria-label={`Video URL for ${m.title}`}
+                            onBlur={(e) => { if ((e.target.value.trim() || null) !== (m.video_url || null)) updateMediaVideo(m.id, 'video_url', e.target.value); }}
+                            className="w-48 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
                           <input defaultValue={m.youtube_id || ''} placeholder="YouTube ID" aria-label={`YouTube ID for ${m.title}`}
-                            onBlur={(e) => { if ((e.target.value.trim() || null) !== (m.youtube_id || null)) updateMediaVideo(m.id, e.target.value); }}
-                            className="w-40 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
-                          {m.youtube_id ? <span className="text-[10px] font-mono text-emerald-300/70 shrink-0">live</span> : <span className="text-[10px] font-mono text-white/25 shrink-0">—</span>}
+                            onBlur={(e) => { if ((e.target.value.trim() || null) !== (m.youtube_id || null)) updateMediaVideo(m.id, 'youtube_id', e.target.value); }}
+                            className="w-32 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
+                          {(m.video_url || m.youtube_id) ? <span className="text-[10px] font-mono text-emerald-300/70 shrink-0">live</span> : <span className="text-[10px] font-mono text-white/25 shrink-0">—</span>}
                         </div>
                       ))}
                     </div>
