@@ -203,6 +203,9 @@ const ChannelPage: React.FC = () => {
               <a href="#cinematic" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] text-white font-semibold hover:bg-white/8 transition-all">
                 Enter the channel
               </a>
+              <Link to="/films" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] text-white font-semibold hover:bg-white/8 transition-all">
+                <Film className="w-4 h-4 text-cyan-300" /> Film library
+              </Link>
             </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-10 text-[11px] font-mono text-white/45">
               {CHANNELS.map((c) => (

@@ -22,6 +22,7 @@ const PLATFORM_COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
       { label: 'Marketplace', to: '/marketplace' },
       { label: 'Ecosystem', to: '/ecosystem' },
       { label: 'Channel', to: '/channel' },
+      { label: 'Films', to: '/films' },
       { label: 'AI Valuation', to: '/valuation' },
       { label: 'Branding Studio', to: '/studio' },
     ],
