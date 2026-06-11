@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney, copyText, preview } from "../lib/ui";
+import React, { useMemo, useState } from "react";
+import { Button, Card, Kpi, Modal, Field, inputCls, SectionHeader, fmtMoney, copyText } from "../lib/ui";
 import { BUYERS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import type { BuyerCandidate } from "@exit/engines";
@@ -49,7 +49,17 @@ function warmIntro(c: BuyerCandidate): string {
 }
 
 const Buyers: React.FC = () => {
-  const candidates = BUYERS.candidates;
+  const all = BUYERS.candidates;
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filter, setFilter] = useState<{ type: string; appetite: string; interest: string }>({ type: "all", appetite: "all", interest: "all" });
+  const candidates = useMemo(() => all.filter((c) => {
+    if (filter.type !== "all" && c.buyer.buyerType !== filter.type) return false;
+    if (filter.appetite !== "all" && c.buyer.appetite !== filter.appetite) return false;
+    if (filter.interest === "hot" && c.probability < 0.6) return false;
+    if (filter.interest === "warm" && (c.probability < 0.35 || c.probability >= 0.6)) return false;
+    return true;
+  }), [all, filter]);
+  const activeFilters = [filter.type, filter.appetite, filter.interest].filter((f) => f !== "all").length;
   const activeBucket = candidates.filter((c) => c.buyer.appetite === "active");
   const sortedByCheck = candidates.slice().sort((a, b) =>
     (a.buyer.checkSizeLowUsd + a.buyer.checkSizeHighUsd) / 2 - (b.buyer.checkSizeLowUsd + b.buyer.checkSizeHighUsd) / 2);
@@ -64,8 +74,39 @@ const Buyers: React.FC = () => {
         kicker="Module 03 · Sourcing"
         title="Buyer Marketplace"
         description="Buyer profiles ranked against your company — interest, appetite, deal size, speed and founder-friendliness at a glance. Generate a warm introduction in one click."
-        actions={<Button variant="ghost" onClick={preview}>Filter</Button>}
+        actions={<Button variant="ghost" onClick={() => setFilterOpen(true)}>Filter{activeFilters > 0 ? ` · ${activeFilters}` : ""}</Button>}
       />
+
+      {/* ── Filter ────────────────────────────────────────────────── */}
+      <Modal open={filterOpen} onClose={() => setFilterOpen(false)} title="Filter buyers" subtitle={`${candidates.length} of ${all.length} match`} size="md"
+        footer={<><Button variant="ghost" onClick={() => setFilter({ type: "all", appetite: "all", interest: "all" })}>Clear</Button><Button onClick={() => setFilterOpen(false)}>Done</Button></>}>
+        <div className="space-y-4">
+          <Field label="Buyer type">
+            <select className={inputCls} value={filter.type} onChange={(e) => setFilter((f) => ({ ...f, type: e.target.value }))}>
+              <option value="all">All types</option>
+              <option value="strategic">Strategic</option>
+              <option value="pe">Private equity</option>
+              <option value="family_office">Family office</option>
+              <option value="sponsor">Sponsor</option>
+            </select>
+          </Field>
+          <Field label="Appetite">
+            <select className={inputCls} value={filter.appetite} onChange={(e) => setFilter((f) => ({ ...f, appetite: e.target.value }))}>
+              <option value="all">Any appetite</option>
+              <option value="active">Active</option>
+              <option value="warm">Warm</option>
+              <option value="dormant">Dormant</option>
+            </select>
+          </Field>
+          <Field label="Interest level">
+            <select className={inputCls} value={filter.interest} onChange={(e) => setFilter((f) => ({ ...f, interest: e.target.value }))}>
+              <option value="all">Any interest</option>
+              <option value="hot">Hot (≥60%)</option>
+              <option value="warm">Warm (35–59%)</option>
+            </select>
+          </Field>
+        </div>
+      </Modal>
 
       {candidates[0] && (() => {
         const top = candidates[0];
@@ -90,6 +131,10 @@ const Buyers: React.FC = () => {
         <Kpi label="Median target check" value={fmtMoney(medianCheckUsd)} sub="across registry" />
         <Kpi label="Top match"           value={candidates[0] ? `${(candidates[0].probability * 100).toFixed(0)}%` : "—"} sub={candidates[0]?.buyer.name ?? ""} accent="#fbbf24" />
       </div>
+
+      {candidates.length === 0 && (
+        <Card className="mt-10 p-8 text-center text-sm text-white/50">No buyers match these filters. <button className="font-semibold text-deal-300 hover:text-deal-200" onClick={() => setFilter({ type: "all", appetite: "all", interest: "all" })}>Clear filters</button></Card>
+      )}
 
       <div className="mt-10 grid gap-4 lg:grid-cols-2">
         {candidates.map((c) => {

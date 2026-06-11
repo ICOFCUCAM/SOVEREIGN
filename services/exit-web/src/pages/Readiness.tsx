@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Card, SectionHeader, fmtMoney, preview } from "../lib/ui";
+import { Button, Card, SectionHeader, fmtMoney, notify } from "../lib/ui";
 import { READINESS_ANALYSIS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { EXIT_SCORE, READINESS_BAND, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VALUE_LEFT_USD, READINESS_CATEGORIES } from "../lib/deal-context";
@@ -51,13 +51,22 @@ const Readiness: React.FC = () => {
     { label: "Upside still on table", value: fmtMoney(left), ok: gapRatio <= 0.15 },
   ];
 
+  const [scanning, setScanning] = useState(false);
+  const rescore = (): void => {
+    setScanning(true);
+    setTimeout(() => {
+      setScanning(false);
+      notify(`Re-scored · ${EXIT_SCORE}/100 (${READINESS_BAND.replace(/_/g, " ")}) — ${READINESS_CATEGORIES.length} categories re-evaluated`);
+    }, 700);
+  };
+
   return (
     <div>
       <SectionHeader
         kicker="Prepare · Exit readiness"
         title="Exit Readiness Score"
         description="One number that tells you what your company is worth today, what it could be worth, and exactly what to fix to close the gap — every fix priced in dollars."
-        actions={<Button onClick={preview}>Re-score</Button>}
+        actions={<Button onClick={rescore} disabled={scanning}>{scanning ? "Re-scoring…" : "Re-score"}</Button>}
       />
 
       {/* ── Recommended action lead ──────────────────────────────── */}

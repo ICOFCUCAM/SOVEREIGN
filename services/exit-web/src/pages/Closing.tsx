@@ -1,5 +1,5 @@
-import React from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney, preview } from "../lib/ui";
+import React, { useState } from "react";
+import { Button, Card, Kpi, Modal, SectionHeader, fmtMoney, downloadText, notify } from "../lib/ui";
 import { DILIGENCE, OFFER_EVALUATIONS } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -72,14 +72,58 @@ const Closing: React.FC = () => {
   const dealValue = Math.max(0, ...OFFER_EVALUATIONS.map((e) => e.offer.headlinePriceUsd));
   const topRisk = risks[0];
 
+  // Closing call — agenda built from the open gating items + diligence flags,
+  // plus a downloadable calendar invite.
+  const [callOpen, setCallOpen] = useState(false);
+  const agenda: string[] = [
+    "Confirm escrow funding and wire instructions (both sides)",
+    ...risks.slice(0, 5).map((r) => `${r.severity === "high" ? "[gate] " : ""}${r.title} — owner ${r.owner}`),
+    ...(redFlags.length ? [`Resolve ${redFlags.length} open diligence flag${redFlags.length === 1 ? "" : "s"}`] : []),
+    "Walk the signature sequence and confirm timing to the wire",
+  ];
+  const downloadInvite = (): void => {
+    const dt = new Date(); dt.setDate(dt.getDate() + 2); dt.setHours(8, 0, 0, 0);
+    const end = new Date(dt.getTime() + 60 * 60 * 1000);
+    const z = (d: Date): string => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const ics = [
+      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ExitOS//Closing//EN", "BEGIN:VEVENT",
+      `UID:closing-${Date.now()}@exitos`, `DTSTAMP:${z(new Date())}`, `DTSTART:${z(dt)}`, `DTEND:${z(end)}`,
+      "SUMMARY:Closing call — Helios Freight transaction",
+      `DESCRIPTION:${agenda.map((a) => "• " + a).join("\\n")}`,
+      "END:VEVENT", "END:VCALENDAR",
+    ].join("\r\n");
+    downloadText("closing-call.ics", ics);
+    notify("Closing call invite downloaded");
+  };
+
   return (
     <div>
       <SectionHeader
         kicker="Module 10 · Operator"
         title="Deal Closing Center"
         description="Signature orchestration, escrow choreography, regulatory filings, share-transfer mechanics — the closing checklist that doesn't drop."
-        actions={<><Button variant="ghost" onClick={() => window.print()}>Print checklist</Button><Button onClick={preview}>Closing call</Button></>}
+        actions={<><Button variant="ghost" onClick={() => window.print()}>Print checklist</Button><Button onClick={() => setCallOpen(true)}>Closing call</Button></>}
       />
+
+      {/* ── Closing call ──────────────────────────────────────────── */}
+      <Modal open={callOpen} onClose={() => setCallOpen(false)} title="Closing call" subtitle={`Tuesday 08:00 · ${Math.round(prob * 100)}% modeled close probability`}
+        footer={<><Button variant="ghost" onClick={downloadInvite}>Download invite (.ics)</Button><Button onClick={() => { setCallOpen(false); notify("Closing call scheduled"); }}>Schedule</Button></>}>
+        <div className="space-y-4">
+          <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3 text-[12px] text-white/60">
+            Participants: Founder · Counsel · Banker · Buyer. Dial-in issued with the calendar invite.
+          </div>
+          <div>
+            <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">Agenda — gated on the open items</div>
+            <ol className="space-y-1.5">
+              {agenda.map((a, i) => (
+                <li key={i} className="flex items-baseline gap-2 text-[13px] text-white/75">
+                  <span className="font-mono text-[11px] text-white/40">{i + 1}.</span> {a}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </Modal>
 
       <BankerTake
         next={topRisk ? <>Clear <span className="text-white">{topRisk.title}</span> ({topRisk.owner}) — the top {topRisk.severity}-risk item gating the wire.</> : "Confirm escrow funding and hold the closing call."}

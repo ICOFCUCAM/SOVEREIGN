@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney, preview } from "../lib/ui";
+import { Button, Card, Kpi, Modal, Field, inputCls, SectionHeader, fmtMoney, notify } from "../lib/ui";
 import { LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES, useMemorandum } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -40,8 +40,17 @@ const Marketplace: React.FC = () => {
   const [phase, setPhase] = useState<Phase>("idle");
   const [done, setDone]   = useState<number>(0);
 
-  const listing  = view === "founder" ? LISTING_PRIVATE : LISTING_PUBLIC;
+  const baseListing = view === "founder" ? LISTING_PRIVATE : LISTING_PUBLIC;
   const matches  = LISTING_MATCHES.matches;
+
+  // Founder edits — local overrides applied on top of the engine listing.
+  const [editOpen, setEditOpen] = useState(false);
+  const [override, setOverride] = useState<{ askMid: number | null; note: string }>({ askMid: null, note: "" });
+  const listing = override.askMid != null
+    ? { ...baseListing, askingPriceUsd: { ...baseListing.askingPriceUsd, mid: override.askMid } }
+    : baseListing;
+  const [editAsk, setEditAsk] = useState<number>(baseListing.askingPriceUsd.mid);
+  const [editNote, setEditNote] = useState("");
 
   const teaserInputs = useMemo(() => ({ anonymize: true }), []);
   const teaser = useMemorandum("buyer_teaser", teaserInputs);
@@ -267,10 +276,29 @@ const Marketplace: React.FC = () => {
             {phase === "done"
               ? <Button variant="ghost" disabled>● Published to marketplace</Button>
               : <Button onClick={publish}>Publish Opportunity</Button>}
-            <Button variant="ghost" onClick={preview}>Edit listing</Button>
+            <Button variant="ghost" onClick={() => { setEditAsk(listing.askingPriceUsd.mid); setEditNote(override.note); setEditOpen(true); }}>Edit listing</Button>
             {view === "public" && <Button variant="ghost">Request NDA</Button>}
           </div>
+          {override.note && view === "founder" && (
+            <div className="mt-3 rounded-md border border-loi-400/20 bg-loi-500/[0.06] px-3 py-2 text-[12px] text-white/70"><span className="font-semibold text-loi-300">Founder note:</span> {override.note}</div>
+          )}
         </Card>
+
+        {/* ── Edit listing ────────────────────────────────────────── */}
+        <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit listing" subtitle="Founder-side adjustments to the published opportunity" size="md"
+          footer={<><Button variant="ghost" onClick={() => { setOverride({ askMid: null, note: "" }); setEditOpen(false); notify("Listing reset to engine values"); }}>Reset</Button><Button onClick={() => { setOverride({ askMid: editAsk, note: editNote.trim() }); setEditOpen(false); notify("Listing updated"); }}>Save</Button></>}>
+          <div className="space-y-4">
+            <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3 text-[12px] text-white/55">
+              Engine band: {fmtMoney(baseListing.askingPriceUsd.low)} – {fmtMoney(baseListing.askingPriceUsd.high)} · readiness {baseListing.readinessScore.toFixed(0)}/100 · {baseListing.sector.replace(/_/g, " ")}
+            </div>
+            <Field label="Asking price (mid)" hint="Overrides the engine mid; band low/high unchanged">
+              <input type="number" step={1_000_000} min={baseListing.askingPriceUsd.low} value={editAsk} onChange={(e) => setEditAsk(Number(e.target.value))} className={inputCls} />
+            </Field>
+            <Field label="Founder note" hint="Shown on your founder view only">
+              <textarea className={`${inputCls} min-h-[80px] resize-y`} placeholder="e.g. hold publication until the audit closes" value={editNote} onChange={(e) => setEditNote(e.target.value)} />
+            </Field>
+          </div>
+        </Modal>
 
         <aside className="space-y-4">
           <Card className="p-5">

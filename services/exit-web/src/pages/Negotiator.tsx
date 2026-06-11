@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import { Button, Card, Kpi, SectionHeader, Field, inputCls, fmtMoney, copyText, preview } from "../lib/ui";
+import { Button, Card, Kpi, Modal, SectionHeader, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
 import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_STRATEGIC } from "../lib/engines";
+import { sendDeliverable } from "../lib/deliverables";
 import BankerTake from "../components/BankerTake";
+
+interface Reserve { minHeadlinePriceUsd: number; minCashPct: number; maxEarnoutPct: number; premiumOverride: number | null }
 
 const REC_STYLE: Record<string, string> = {
   accept:  "bg-deal-600/20 text-deal-300 ring-deal-400/40",
@@ -27,18 +30,19 @@ const LEV_STYLE: Record<string, string> = {
 // justification is composed from growth, strategic premium and the leverage
 // posture. Output is a ready-to-send response.
 type Offer = typeof OFFER_EVALUATIONS[number]["offer"];
-function generateCounter(offer: Offer) {
+function generateCounter(offer: Offer, reserve: Reserve) {
   const strategicMid = VALUATION_STRATEGIC.headline.mid;
   const strategicHigh = VALUATION_STRATEGIC.headline.high;
   const lev = NEGOTIATION_STATE.leverage;
   // anchor: max of strategic-mid and the offer, plus a leverage-scaled premium
-  const premiumPct = lev === "high" ? 0.18 : lev === "medium" ? 0.12 : 0.07;
+  // (or the founder's manual override from the Adjust counter modal)
+  const premiumPct = reserve.premiumOverride ?? (lev === "high" ? 0.18 : lev === "medium" ? 0.12 : 0.07);
   const anchor = Math.max(strategicMid, offer.headlinePriceUsd) * (1 + premiumPct);
   const counterPrice = Math.min(strategicHigh * 1.05, Math.round(anchor / 1_000_000) * 1_000_000);
   const upliftPct = ((counterPrice - offer.headlinePriceUsd) / offer.headlinePriceUsd) * 100;
   // structure: pull cash up to the reservation floor, earnout down to the cap
-  const cashPct = Math.max(offer.cashPct, RESERVATION_LINES.minCashPct);
-  const earnoutPct = Math.min(offer.earnoutPct, RESERVATION_LINES.maxEarnoutPct);
+  const cashPct = Math.max(offer.cashPct, reserve.minCashPct);
+  const earnoutPct = Math.min(offer.earnoutPct, reserve.maxEarnoutPct);
   const stockPct = Math.max(0, 1 - cashPct - earnoutPct);
   const justification = [
     `${(SAMPLE_GROWTH * 100).toFixed(0)}% ARR growth supports a forward multiple above the submitted bid`,
@@ -83,8 +87,16 @@ const Negotiator: React.FC = () => {
   const [activeId, setActiveId] = useState(OFFER_EVALUATIONS[0]?.offer.offerId ?? "");
   const active = OFFER_EVALUATIONS.find((e) => e.offer.offerId === activeId) ?? OFFER_EVALUATIONS[0];
   const reserveMid = VALUATION_STRATEGIC.headline.mid;
-  const counter = active ? generateCounter(active.offer) : null;
+  const [reserve, setReserve] = useState<Reserve>({
+    minHeadlinePriceUsd: RESERVATION_LINES.minHeadlinePriceUsd,
+    minCashPct: RESERVATION_LINES.minCashPct,
+    maxEarnoutPct: RESERVATION_LINES.maxEarnoutPct,
+    premiumOverride: null,
+  });
+  const counter = active ? generateCounter(active.offer, reserve) : null;
   const [draftOpen, setDraftOpen] = useState(false);
+  const [reserveOpen, setReserveOpen] = useState(false);
+  const [counterSent, setCounterSent] = useState(false);
 
   const [walkUsd, setWalkUsd]   = useState(Math.round(RESERVATION_LINES.minHeadlinePriceUsd * 0.95));
   const [minUsd, setMinUsd]     = useState(RESERVATION_LINES.minHeadlinePriceUsd);
@@ -117,9 +129,33 @@ James — on behalf of Helios Freight`
       <SectionHeader
         kicker="Module 05 · Operator"
         title="AI Deal Negotiator"
-        description={`Evaluating ${OFFER_EVALUATIONS.length} active offers against the founder's reservation lines (floor ${fmtMoney(RESERVATION_LINES.minHeadlinePriceUsd)}; min cash ${(RESERVATION_LINES.minCashPct * 100).toFixed(0)}%; max earnout ${(RESERVATION_LINES.maxEarnoutPct * 100).toFixed(0)}%).`}
-        actions={<><Button variant="ghost" onClick={preview}>Edit reservation lines</Button><Button onClick={() => setDraftOpen(true)}>Generate counter</Button></>}
+        description={`Evaluating ${OFFER_EVALUATIONS.length} active offers against the founder's reservation lines (floor ${fmtMoney(reserve.minHeadlinePriceUsd)}; min cash ${(reserve.minCashPct * 100).toFixed(0)}%; max earnout ${(reserve.maxEarnoutPct * 100).toFixed(0)}%).`}
+        actions={<><Button variant="ghost" onClick={() => setReserveOpen(true)}>Edit reservation lines</Button><Button onClick={() => setDraftOpen(true)}>Generate counter</Button></>}
       />
+
+      {/* ── Edit reservation lines / adjust counter ───────────────── */}
+      <Modal open={reserveOpen} onClose={() => setReserveOpen(false)} title="Reservation lines & counter" subtitle="These shape the counter price and structure" size="md"
+        footer={<><Button variant="ghost" onClick={() => setReserve({ minHeadlinePriceUsd: RESERVATION_LINES.minHeadlinePriceUsd, minCashPct: RESERVATION_LINES.minCashPct, maxEarnoutPct: RESERVATION_LINES.maxEarnoutPct, premiumOverride: null })}>Reset</Button><Button onClick={() => { setReserveOpen(false); notify("Reservation lines updated"); }}>Apply</Button></>}>
+        <div className="space-y-4">
+          <Field label="Headline floor (walk-away below this)">
+            <input type="number" step={1_000_000} min={0} value={reserve.minHeadlinePriceUsd} onChange={(e) => setReserve((r) => ({ ...r, minHeadlinePriceUsd: Number(e.target.value) }))} className={inputCls} />
+          </Field>
+          <Field label={`Minimum cash — ${(reserve.minCashPct * 100).toFixed(0)}%`}>
+            <input type="range" min={50} max={100} step={5} value={reserve.minCashPct * 100} onChange={(e) => setReserve((r) => ({ ...r, minCashPct: Number(e.target.value) / 100 }))} className="w-full accent-deal-500" />
+          </Field>
+          <Field label={`Max earnout — ${(reserve.maxEarnoutPct * 100).toFixed(0)}%`}>
+            <input type="range" min={0} max={40} step={5} value={reserve.maxEarnoutPct * 100} onChange={(e) => setReserve((r) => ({ ...r, maxEarnoutPct: Number(e.target.value) / 100 }))} className="w-full accent-deal-500" />
+          </Field>
+          <Field label={`Counter premium — ${reserve.premiumOverride == null ? "auto (leverage-scaled)" : `${Math.round(reserve.premiumOverride * 100)}% over anchor`}`} hint="Override the leverage-scaled premium on the counter price">
+            <input type="range" min={0} max={30} step={1} value={reserve.premiumOverride == null ? 12 : Math.round(reserve.premiumOverride * 100)} onChange={(e) => setReserve((r) => ({ ...r, premiumOverride: Number(e.target.value) / 100 }))} className="w-full accent-deal-500" />
+          </Field>
+          {counter && active && (
+            <div className="rounded-md border border-deal-500/30 bg-deal-600/[0.07] p-3 text-[12.5px] text-white/75">
+              Counter previews at <span className="font-mono font-semibold text-deal-300">{fmtMoney(counter.counterPrice)}</span> (+{counter.upliftPct.toFixed(0)}%) · {(counter.cashPct * 100).toFixed(0)}% cash / {(counter.earnoutPct * 100).toFixed(0)}% earnout.
+            </div>
+          )}
+        </div>
+      </Modal>
 
       {active && counter && (
         <BankerTake
@@ -265,7 +301,7 @@ James — on behalf of Helios Freight`
                 </div>
                 <div className="mt-4 flex gap-2">
                   <Button onClick={() => setDraftOpen(true)}>✦ Generate response draft</Button>
-                  <Button variant="ghost" onClick={preview}>Adjust counter</Button>
+                  <Button variant="ghost" onClick={() => setReserveOpen(true)}>Adjust counter</Button>
                 </div>
               </div>
             )}
@@ -349,7 +385,7 @@ James — on behalf of Helios Freight`
             <pre className="mt-4 whitespace-pre-wrap rounded-md border border-white/10 bg-ink-900/70 p-4 text-[13px] leading-relaxed text-white/80">{draftText}</pre>
             <div className="mt-4 flex justify-end gap-2">
               <Button variant="ghost" onClick={() => copyText(draftText)}>Copy</Button>
-              <Button onClick={preview}>Send counter →</Button>
+              <Button onClick={() => { sendDeliverable(`counter-${active.offer.buyerName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.txt`, draftText); setCounterSent(true); setDraftOpen(false); }}>{counterSent ? "Sent ✓ · resend" : "Send counter →"}</Button>
             </div>
           </div>
         </div>

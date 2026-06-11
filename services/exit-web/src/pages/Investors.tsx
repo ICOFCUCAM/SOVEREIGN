@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, preview } from "../lib/ui";
+import { Button, Card, Kpi, Modal, Field, inputCls, SectionHeader, notify } from "../lib/ui";
 import {
   CAPTABLE_ANALYSIS, CAPTABLE_SIGNATORY, CAPTABLE_DRAGALONG,
   SAMPLE_CAPTABLE, OFFER_WATERFALLS, SAMPLE_OFFERS, fmt,
@@ -36,14 +36,54 @@ const Investors: React.FC = () => {
   );
   const selectedOffer = SAMPLE_OFFERS.find((o) => o.offerId === selectedOfferId)!;
 
+  const [addOpen, setAddOpen] = useState(false);
+  const [added, setAdded] = useState<{ name: string; role: string; email: string }[]>([]);
+  const [draft, setDraft] = useState({ name: "", role: "investor", email: "" });
+  const submitAdd = (): void => {
+    const name = draft.name.trim();
+    if (!name) { notify("Enter a name"); return; }
+    setAdded((prev) => [{ name, role: draft.role, email: draft.email.trim() }, ...prev]);
+    setDraft({ name: "", role: "investor", email: "" });
+    setAddOpen(false);
+    notify(`Added ${name} to the cap-table CRM`);
+  };
+
   return (
     <div>
       <SectionHeader
         kicker="Module 04 · Workspace"
         title="Investor CRM · Cap-table"
         description="Cap-table-aware relationship graph. Board, leads, observers, signatories, drag-along holdouts and per-offer founder waterfall — all in one stack."
-        actions={<Button onClick={preview}>Add stakeholder</Button>}
+        actions={<Button onClick={() => setAddOpen(true)}>Add stakeholder</Button>}
       />
+
+      {/* ── Add stakeholder ───────────────────────────────────────── */}
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add stakeholder" subtitle="Adds a contact to the cap-table CRM roster" size="md"
+        footer={<><Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button><Button onClick={submitAdd}>Add to CRM</Button></>}>
+        <div className="space-y-4">
+          <Field label="Name"><input className={inputCls} placeholder="e.g. Dana Reyes" value={draft.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} /></Field>
+          <Field label="Role">
+            <select className={inputCls} value={draft.role} onChange={(e) => setDraft((d) => ({ ...d, role: e.target.value }))}>
+              {Object.entries(ROLE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+          </Field>
+          <Field label="Email" hint="Optional"><input className={inputCls} placeholder="dana@fund.example" value={draft.email} onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))} /></Field>
+        </div>
+      </Modal>
+
+      {added.length > 0 && (
+        <Card className="mb-6 p-5">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Added to CRM · {added.length}</div>
+          <div className="mt-3 space-y-2">
+            {added.map((s, i) => (
+              <div key={i} className="flex items-center justify-between rounded-lg border border-white/10 bg-ink-900/40 px-4 py-2.5 text-[13px]">
+                <span className="font-medium text-white">{s.name}</span>
+                <span className={`text-[11px] font-semibold uppercase tracking-wide ${ROLE_STYLE[s.role] ?? "text-white/50"}`}>{ROLE_LABEL[s.role] ?? s.role}{s.email ? ` · ${s.email}` : ""}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <BankerTake
         next={signatory.meetsThreshold

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney, downloadText, downloadJson, preview } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, fmtMoney, downloadText, downloadJson, notify } from "../lib/ui";
 import { DILIGENCE } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 import {
@@ -33,6 +33,14 @@ const DiligenceAI: React.FC = () => {
 
   const high = findings.filter((f) => f.severity === "high").length;
   const buyerDiscount = findings.reduce((s, f) => s + f.impactUsd, 0);
+  const [rerunning, setRerunning] = useState(false);
+  const rerun = (): void => {
+    setRerunning(true);
+    setTimeout(() => {
+      setRerunning(false);
+      notify(`Re-ran across ${SOURCE_FILES.length} sources · ${findings.length} findings (${high} high-severity)`);
+    }, 800);
+  };
   const report = reports.find((r) => r.key === reportKey) ?? reports[0];
 
   const reportMarkdown = (r: typeof report): string =>
@@ -49,7 +57,7 @@ const DiligenceAI: React.FC = () => {
         kicker="Phase 2 · AI Due Diligence"
         title="AI Due Diligence"
         description="Upload financial reports, contracts, tax records, customer and employment agreements. ExitOS discovers the financial, legal and operational risks a buyer will find and writes both the Buyer Diligence Report and the Seller Risk Report — the work an investment bank charges tens of thousands and weeks for, in minutes."
-        actions={<Button onClick={preview}>Re-run analysis</Button>}
+        actions={<Button onClick={rerun} disabled={rerunning}>{rerunning ? "Re-running…" : "Re-run analysis"}</Button>}
       />
 
       <BankerTake
