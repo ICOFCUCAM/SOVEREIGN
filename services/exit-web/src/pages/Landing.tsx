@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MarketingChrome, Glyph, Mark, Arrow } from "../components/MarketingChrome";
 import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS, type BoardTx } from "../lib/market-stats";
@@ -627,8 +627,25 @@ const CommandBoard: React.FC = () => {
   const [sector, setSector] = useState<string | null>(null);
   const [drill, setDrill] = useState<BoardTx | null>(null);
 
+  // ── live feed ──────────────────────────────────────────────────
+  // A session clock, a slow market heartbeat (drives the match-score and
+  // demand-heat micro-motion), and a spotlight that rotates the deal tape.
+  const [clock, setClock] = useState<string>(() => new Date().toLocaleTimeString("en-US", { hour12: false }));
+  const [beat, setBeat] = useState(0);
+  const [spot, setSpot] = useState(0);
+  useEffect(() => {
+    const c = setInterval(() => setClock(new Date().toLocaleTimeString("en-US", { hour12: false })), 1000);
+    const b = setInterval(() => setBeat((x) => x + 1), 2400);
+    const s = setInterval(() => setSpot((x) => x + 1), 3800);
+    return () => { clearInterval(c); clearInterval(b); clearInterval(s); };
+  }, []);
+  // smooth ±1 oscillation around a base value — a live instrument, bounded
+  const liveScore = (base: number, phase: number): number =>
+    Math.max(1, Math.min(99, base + Math.round(Math.sin(beat * 0.7 + phase))));
+
   const buyers = sector ? BOARD_BUYERS.filter((b) => b.sectors.includes(sector)) : BOARD_BUYERS.slice(0, 4);
   const txns   = sector ? TRANSACTIONS.filter((t) => t.industry === sector) : TRANSACTIONS.slice(0, 4);
+  const liveRow = txns.length ? spot % txns.length : -1;
   const toggle = (s: string): void => setSector((cur) => (cur === s ? null : s));
 
   // Only surface demand sectors that actually drill into something, so every
@@ -663,7 +680,7 @@ const CommandBoard: React.FC = () => {
       <div className="border-b border-white/5 px-5 py-3 lg:border-b-0 lg:border-r">
         <BoardHeader title="Strategic Buyers" right="Match Score" />
         <div className="mt-1">
-          {buyers.map((b) => (
+          {buyers.map((b, i) => (
             <button key={b.name} onClick={() => toggle(b.sector)} title={`Filter to ${b.sector}`}
               className="group flex w-full items-center justify-between gap-2 border-b border-white/5 py-1.5 text-left transition last:border-0 hover:translate-x-1" style={{ transitionDuration: ".25s" }}>
               <div className="flex items-center gap-2">
@@ -674,7 +691,7 @@ const CommandBoard: React.FC = () => {
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-bold leading-none" style={{ color: "#7CFF9F", fontSize: 17 }}>{b.match}%</div>
+                <div className="font-bold leading-none tabular-nums transition-all duration-700" style={{ color: "#7CFF9F", fontSize: 17 }}>{liveScore(b.match, i * 1.3)}%</div>
                 <div className="mt-0.5 text-[9px] text-white/45">{b.status}</div>
               </div>
             </button>
@@ -691,7 +708,7 @@ const CommandBoard: React.FC = () => {
             <span className="inline-block h-2 w-2 animate-pulse rounded-full" style={{ background: "#45E38A" }} />
             <BoardHeader title="Live Transactions" />
           </div>
-          <span className="text-[9px] text-white/35">click to inspect</span>
+          <span className="font-mono text-[9px] tabular-nums text-emerald-300/80">● {clock}</span>
         </div>
         <div className="mt-2 grid grid-cols-[1.4fr_1fr_0.9fr] gap-2 text-[9px] uppercase tracking-wide text-white/40">
           <span>Target Company</span><span>Best Match</span><span className="text-right">Expected / Status</span>
@@ -699,10 +716,13 @@ const CommandBoard: React.FC = () => {
         <div className="mt-1">
           {txns.map((t, i) => (
             <button key={t.company} onClick={() => setDrill(t)}
-              className="grid w-full grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 rounded border-b border-white/5 py-1.5 text-left transition last:border-0 hover:bg-white/[0.04]"
-              style={i === 0 && !sector ? { animation: "exFlash 4s ease-in-out infinite" } : undefined}>
+              className="grid w-full grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 rounded border-b border-white/5 py-1.5 text-left transition-colors duration-500 last:border-0 hover:bg-white/[0.04]"
+              style={i === liveRow ? { background: "rgba(96,165,250,0.10)" } : undefined}>
               <div>
-                <div className="text-[12.5px] font-medium text-white/90">{t.company}</div>
+                <div className="flex items-center gap-1.5 text-[12.5px] font-medium text-white/90">
+                  {i === liveRow && <span className="inline-block h-1.5 w-1.5 shrink-0 animate-pulse rounded-full" style={{ background: "#7CFF9F", boxShadow: "0 0 6px 1px rgba(124,255,159,.8)" }} />}
+                  {t.company}
+                </div>
                 <div className="text-[10px] text-white/45">{t.industry}</div>
               </div>
               <div className="flex items-center gap-1.5">
@@ -728,8 +748,9 @@ const CommandBoard: React.FC = () => {
       <div className="px-5 py-3">
         <BoardHeader title="Acquisition Demand" right="Market Heat" />
         <div className="mt-3 space-y-2">
-          {covered.map(([label, heat, bars]) => {
+          {covered.map(([label, heat, bars], i) => {
             const active = sector === label;
+            const liveBars = Math.max(2, Math.min(10, bars + Math.sin(beat * 0.6 + i * 1.7) * 0.4));
             return (
               <button key={label} onClick={() => toggle(label)}
                 className={`block w-full rounded-md px-2 py-1 text-left transition ${active ? "bg-blue-500/15 ring-1 ring-blue-400/40" : "hover:bg-white/5"}`}>
@@ -738,7 +759,7 @@ const CommandBoard: React.FC = () => {
                   <span className="text-white/45">{heat}</span>
                 </div>
                 <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/10">
-                  <div className="h-full rounded-full" style={{ width: `${bars * 10}%`, background: heatGradient(bars) }} />
+                  <div className="h-full rounded-full transition-all duration-1000 ease-in-out" style={{ width: `${liveBars * 10}%`, background: heatGradient(bars) }} />
                 </div>
               </button>
             );
