@@ -439,6 +439,22 @@ const AdminPage: React.FC = () => {
     const pj = await supabase.from('pipeline_jobs').select('id, kind, status, provider, title, result_url, media_class, result, error, created_at').order('created_at', { ascending: false }).limit(50);
     setPipelineJobs((pj.data || []) as PipelineJob[]);
   };
+  // While renders are in flight and the pipeline tab is open, drive the
+  // finalizer: poll-video-jobs promotes finished Runway clips into storage
+  // (and auto-stitches films), then the job list refreshes.
+  const hasProcessing = pipelineJobs.some((j) => j.status === 'processing');
+  useEffect(() => {
+    if (tab !== 'pipelines' || !hasProcessing) return;
+    let cancelled = false;
+    const tick = async () => {
+      try { await supabase.functions.invoke('poll-video-jobs', { body: {} }); } catch { /* worker offline — keep refreshing */ }
+      if (!cancelled) await refreshPipelineJobs();
+    };
+    tick();
+    const t = setInterval(tick, 20000);
+    return () => { cancelled = true; clearInterval(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, hasProcessing]);
   const publishJob = async (j: PipelineJob) => {
     if (!j.result_url) return;
     setPipelineBusy('publish-' + j.id);
