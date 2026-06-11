@@ -359,7 +359,7 @@ const AdminPage: React.FC = () => {
     const payload = { kind: editNar.kind || 'dispatch', media_class: editNar.media_class || null, title: editNar.title.trim(), subtitle: editNar.subtitle?.trim() || null, body: editNar.body, read_time: editNar.read_time?.trim() || null, published: editNar.published ?? true, sort_order: editNar.sort_order ?? (narratives.length + 1), cover_image_url: editNar.cover_image_url?.trim() || null };
     const { error } = editNar.id ? await supabase.from('narratives').update(payload).eq('id', editNar.id) : await supabase.from('narratives').insert(payload);
     if (error) { toast.error(error.message); return; }
-    toast.success('Dispatch saved'); setEditNar(null); loadAll();
+    toast.success('Dispatch saved'); setEditNar(null); load();
   };
   const generateNarrativeCover = async () => {
     if (!editNar?.title?.trim()) { toast.error('Add a title first'); return; }
@@ -377,14 +377,14 @@ const AdminPage: React.FC = () => {
   const deleteNarrative = async (id: string) => {
     if (!confirm('Delete this dispatch?')) return;
     const { error } = await supabase.from('narratives').delete().eq('id', id);
-    if (error) { toast.error(error.message); return; } toast.success('Deleted'); loadAll();
+    if (error) { toast.error(error.message); return; } toast.success('Deleted'); load();
   };
   const saveCampaign = async () => {
     if (!editCamp?.name?.trim()) { toast.error('Name required'); return; }
     const payload = { name: editCamp.name.trim(), media_class: editCamp.media_class || null, channel: editCamp.channel || 'executive', status: editCamp.status || 'draft', asset_ref: editCamp.asset_ref?.trim() || null, scheduled_at: editCamp.scheduled_at || null };
     const { error } = editCamp.id ? await supabase.from('campaigns').update(payload).eq('id', editCamp.id) : await supabase.from('campaigns').insert(payload);
     if (error) { toast.error(error.message); return; }
-    toast.success('Campaign saved'); setEditCamp(null); loadAll();
+    toast.success('Campaign saved'); setEditCamp(null); load();
   };
   const setCampaignStatus = async (id: string, status: string) => {
     const { error } = await supabase.from('campaigns').update({ status }).eq('id', id);
@@ -395,7 +395,7 @@ const AdminPage: React.FC = () => {
   const deleteCampaign = async (id: string) => {
     if (!confirm('Delete this campaign?')) return;
     const { error } = await supabase.from('campaigns').delete().eq('id', id);
-    if (error) { toast.error(error.message); return; } toast.success('Deleted'); loadAll();
+    if (error) { toast.error(error.message); return; } toast.success('Deleted'); load();
   };
 
   const generateScenario = async () => {
@@ -414,7 +414,7 @@ const AdminPage: React.FC = () => {
       if (insErr) throw insErr;
       toast.success('Scenario generated & published');
       setScenarioBrief('');
-      loadAll();
+      load();
     } catch (e) {
       toast.error(`Scenario generation failed: ${(e as Error).message}`);
     }
@@ -428,7 +428,7 @@ const AdminPage: React.FC = () => {
   const deleteScenario = async (id: string) => {
     if (!confirm('Delete this scenario?')) return;
     const { error } = await supabase.from('scenarios').delete().eq('id', id);
-    if (error) { toast.error(error.message); return; } toast.success('Deleted'); loadAll();
+    if (error) { toast.error(error.message); return; } toast.success('Deleted'); load();
   };
 
   const refreshPipelineJobs = async () => {
