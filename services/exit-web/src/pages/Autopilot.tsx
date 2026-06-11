@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Card, Modal, SectionHeader, fmtMoney } from "../lib/ui";
-import { VALUATION_STRATEGIC, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON } from "../lib/engines";
+import { VALUATION_STRATEGIC, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON, DILIGENCE } from "../lib/engines";
 import { discoverFindings, buildSellerReport } from "../lib/diligence-intel";
-import { briefMarkdown, buyerListCsv, sendDeliverable, downloadDeliverable } from "../lib/deliverables";
+import { valuationMemo, buyerShortlistMemo, riskReportDoc, structuredDoc, sendDeliverable, downloadDeliverable } from "../lib/deliverables";
 import { emitTelemetry } from "../lib/telemetry";
 import { useAuth } from "../lib/auth";
+import { SAMPLE_COMPANY } from "../lib/profile";
 import type { BuyerCandidate } from "@exit/engines";
 
 // Autonomous Exit Mode — "Sell my company," not "manage the sale." Seven
@@ -43,28 +44,51 @@ const Spinner: React.FC = () => (
   <span className="block h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-loi-300/40 border-t-loi-200" />
 );
 
-// Compact buyer row used in the Buyer Discovery work product.
-const BuyerRow: React.FC<{ b: BuyerCandidate; n: number; excluded?: boolean; onToggle?: () => void }> = ({ b, n, excluded, onToggle }) => (
-  <div className={`flex items-center gap-3 rounded-lg border p-3 ${excluded ? "border-white/10 bg-ink-900/20 opacity-50" : "border-white/10 bg-ink-900/40"}`}>
-    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5 font-mono text-[11px] text-white/50">{n}</span>
-    <div className="min-w-0 flex-1">
-      <div className="flex items-center gap-2">
-        <span className="truncate text-[13px] font-semibold text-white">{b.buyer.name}</span>
-        <span className="shrink-0 rounded-full bg-white/5 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/45 ring-1 ring-white/10">{b.buyer.buyerType.replace(/_/g, " ")}</span>
-      </div>
-      <div className="mt-0.5 truncate text-[11px] text-white/45">{b.rationale}</div>
-    </div>
-    <div className="shrink-0 text-right">
-      <div className="font-mono text-[13px] font-bold text-deal-300">{Math.round(b.probability * 100)}%</div>
-      <div className="text-[10px] text-white/40">{fmtMoney(b.estimatedCheck.low)}–{fmtMoney(b.estimatedCheck.high)}</div>
-    </div>
-    {onToggle && (
-      <button onClick={onToggle} className={`shrink-0 rounded-md px-2 py-1 text-[11px] font-semibold ring-1 transition ${excluded ? "text-white/50 ring-white/15 hover:bg-white/5" : "text-deal-300 ring-deal-400/40 hover:bg-deal-600/10"}`}>
-        {excluded ? "Add" : "Remove"}
-      </button>
-    )}
+// Buyer row used in the Buyer Discovery work product — surfaces the engine's
+// real signals: probability, expected offer/close, premium, sectors/geography
+// and confidence, not just a name and a percentage.
+const Sig: React.FC<{ label: string; value: string; accent?: string }> = ({ label, value, accent }) => (
+  <div className="min-w-0">
+    <div className="font-mono text-[12px] font-bold leading-none" style={{ color: accent ?? "#cbd5e1" }}>{value}</div>
+    <div className="mt-0.5 text-[9px] uppercase tracking-wide text-white/35">{label}</div>
   </div>
 );
+
+const BuyerRow: React.FC<{ b: BuyerCandidate; n: number; excluded?: boolean; onToggle?: () => void }> = ({ b, n, excluded, onToggle }) => {
+  const eo = b.expectedOutcome;
+  return (
+    <div className={`rounded-lg border p-3.5 ${excluded ? "border-white/10 bg-ink-900/20 opacity-50" : "border-white/10 bg-ink-900/40"}`}>
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5 font-mono text-[11px] text-white/50">{n}</span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="truncate text-[13px] font-semibold text-white">{b.buyer.name}</span>
+            <span className="shrink-0 rounded-full bg-white/5 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/45 ring-1 ring-white/10">{b.buyer.buyerType.replace(/_/g, " ")}</span>
+            <span className="shrink-0 text-[9px] uppercase tracking-wide text-white/30">{eo.overallConfidence.tier} conf.</span>
+          </div>
+          <div className="mt-0.5 text-[11px] leading-snug text-white/45">{b.rationale}</div>
+          <div className="mt-1 truncate text-[10px] text-white/35">{b.buyer.sectorsActive.slice(0, 3).map((s) => s.replace(/_/g, " ")).join(" · ")} · {b.buyer.geographyPreferred.length ? b.buyer.geographyPreferred.slice(0, 4).join(" ") : "Global"}</div>
+        </div>
+        <div className="shrink-0 text-right">
+          <div className="font-mono text-[14px] font-bold text-deal-300">{Math.round(b.probability * 100)}%</div>
+          <div className="text-[10px] text-white/40">fit</div>
+        </div>
+        {onToggle && (
+          <button onClick={onToggle} className={`shrink-0 self-center rounded-md px-2 py-1 text-[11px] font-semibold ring-1 transition ${excluded ? "text-white/50 ring-white/15 hover:bg-white/5" : "text-deal-300 ring-deal-400/40 hover:bg-deal-600/10"}`}>
+            {excluded ? "Add" : "Remove"}
+          </button>
+        )}
+      </div>
+      {/* engine signals */}
+      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-white/5 pt-2.5 sm:grid-cols-4">
+        <Sig label="Expected offer" value={fmtMoney(eo.expectedHeadlineUsd)} accent="#7CFF9F" />
+        <Sig label="Expected net" value={fmtMoney(eo.expectedClosingUsd)} />
+        <Sig label="Days to close" value={`~${Math.round(eo.expectedDaysToCash)}d`} />
+        <Sig label="Check range" value={`${fmtMoney(b.estimatedCheck.low)}–${fmtMoney(b.estimatedCheck.high)}`} />
+      </div>
+    </div>
+  );
+};
 
 const Autopilot: React.FC = () => {
   const mid = VALUATION_STRATEGIC.headline.mid;
@@ -100,11 +124,7 @@ const Autopilot: React.FC = () => {
         </div>
       ),
       decision: `Set the asking range anchored at ${fmtMoney(mid)} strategic mid?`, approveLabel: "Approve the ask",
-      deliverable: { filename: "valuation-summary.md", build: () => briefMarkdown(
-        `Valuation summary — ${fmtMoney(mid)} strategic mid`,
-        VALUATION_STRATEGIC.methodologies.map((m) => [m.name, `${fmtMoney(m.band.low)}–${fmtMoney(m.band.high)} (${Math.round(m.weight * 100)}% weight)`] as [string, string]),
-        `Strategic band ${fmtMoney(VALUATION_STRATEGIC.headline.low)}–${fmtMoney(VALUATION_STRATEGIC.headline.high)}, mid ${fmtMoney(mid)}.`,
-      ) },
+      deliverable: { filename: "valuation-summary.md", build: () => valuationMemo(VALUATION_STRATEGIC, SAMPLE_COMPANY.name) },
     },
     {
       id: "discovery", name: "Buyer Discovery Agent", role: "Finds and ranks acquirers.",
@@ -116,27 +136,38 @@ const Autopilot: React.FC = () => {
         </div>
       ),
       decision: `Approve the ${shortlist.length}-buyer target list?`, approveLabel: "Approve the list",
-      deliverable: { filename: "buyer-shortlist.csv", build: () => buyerListCsv(shortlist) },
+      deliverable: { filename: "buyer-target-list.md", build: () => buyerShortlistMemo(shortlist, "Project Cipher") },
     },
     {
       id: "outreach", name: "Outreach Agent", role: "Drafts and runs the approach.",
       work: <>Wrote the anonymized teaser and a six-step outreach sequence; intros personalized per buyer.</>,
       decision: `Send the anonymized teaser to the ${shortlist.length} shortlisted buyers?`, approveLabel: "Send outreach",
-      deliverable: { filename: "outreach-plan.md", build: () => briefMarkdown("Outreach plan — Project Cipher", [
-        ["Teaser", "anonymized, issued pre-NDA"],
-        ["Sequence", "6 steps: target list → teaser → NDA → management presentations → IOIs → LOI"],
-        ["Targets", `${shortlist.length} shortlisted buyers`],
-        ["Personalization", "intro letter per buyer from its match rationale"],
+      deliverable: { filename: "outreach-plan.md", build: () => structuredDoc("Outreach Plan", "Project Cipher · sell-side process", [
+        { heading: "Approach", body: `A ${shortlist.length}-buyer competitive process run in parallel to build leverage. All outreach is anonymized pre-NDA; identity and the data room unlock only on a signed NDA.` },
+        { heading: "Sequence", table: { headers: ["Step", "Timing", "Action"], rows: [
+          ["1 · Target list", "Day 0", "Rank acquirers by fit, appetite and recent activity"],
+          ["2 · Teaser", "Day 1", "Issue the anonymized teaser to tier-1 targets"],
+          ["3 · NDA + data room", "Day 3–7", "Counter-sign NDAs; grant staged data-room access"],
+          ["4 · Management presentations", "Week 2–3", "Distribute the CIM; schedule calls with engaged buyers"],
+          ["5 · Indications", "Week 4", "Solicit non-binding IOIs; build the offer comparison"],
+          ["6 · LOI", "Week 5–6", "Drive a competitive process to a signed letter of intent"],
+        ] } },
+        { heading: "Personalization", body: "Each shortlisted buyer receives an intro letter generated from its own mandate thesis and the engine's match rationale." },
       ]) },
     },
     {
       id: "dataroom", name: "Data Room Agent", role: "Provisions and gates diligence.",
       work: <>Provisioned seven rooms and wired access behind signed NDAs + the Buyer Trust score.</>,
       decision: "Auto-grant data-room access to verified, NDA-signed buyers?", approveLabel: "Approve gating",
-      deliverable: { filename: "data-room-gating.md", build: () => briefMarkdown("Data-room gating policy", [
-        ["Access control", "NDA-gated + Buyer Trust score ≥ Verified"],
-        ["Rooms", "7 staged packages"],
-        ["Trust gates", "NDA signed · identity · acquisition history · funds verified"],
+      deliverable: { filename: "data-room-gating.md", build: () => structuredDoc("Data-Room Gating Policy", "Permissioned access for a controlled process", [
+        { heading: "Access control", body: "No buyer reaches the data room until they clear a mutual NDA and a Buyer Trust score of Verified. Access is staged by diligence package, fully logged and revocable." },
+        { heading: "Buyer Trust gates", table: { headers: ["Gate", "Requirement"], rows: [
+          ["NDA signed", "Executed mutual NDA on file"],
+          ["Identity verified", "Authorized signatory on the signature record"],
+          ["Acquisition history", "Institutional counterparty with a validated track record"],
+          ["Funds verified", "Capitalised counterparty with damages provision in force"],
+        ] } },
+        { heading: "Packages", body: `${DILIGENCE.documents.length} staged diligence packages, each completeness-scored, with the dollar impact of every gap surfaced before buyers see it.` },
       ]) },
     },
     {
@@ -153,41 +184,58 @@ const Autopilot: React.FC = () => {
         </div>
       ),
       decision: "Approve the pre-market remediation plan and disclosure schedule?", approveLabel: "Approve the plan",
-      deliverable: { filename: "seller-diligence-report.md", build: () => briefMarkdown(
-        sellerReport.title,
-        sellerReport.points.map((p) => [p.title, p.body] as [string, string]),
-        `${sellerReport.headline}\n\nRecommendation: ${sellerReport.recommendation}`,
-      ) },
+      deliverable: { filename: "seller-diligence-report.md", build: () => riskReportDoc(sellerReport) },
     },
     {
       id: "negotiation", name: "Negotiation Agent", role: "Scores offers and counters.",
       work: <>Scoring <span className="font-mono text-white">{NEGOTIATION_STATE.activeOffers}</span> offers; leverage <span className="text-white">{NEGOTIATION_STATE.leverage}</span>{leaderName ? <> · <span className="text-white">{leaderName}</span> leads</> : null}.</>,
       decision: leaderName ? `Approve the counter and drive ${leaderName} to a signed LOI?` : "Approve the counter strategy and drive to LOI?", approveLabel: "Approve the counter",
-      deliverable: { filename: "offer-comparison.md", build: () => briefMarkdown("Offer comparison", [
-        ["Active offers", String(NEGOTIATION_STATE.activeOffers)],
-        ["Leverage", String(NEGOTIATION_STATE.leverage)],
-        ["Leader", leaderName ?? "—"],
-        ...OFFER_COMPARISON.delta.map((d) => [d.term, d.notes] as [string, string]),
-      ], OFFER_COMPARISON.summary) },
+      deliverable: { filename: "offer-comparison.md", build: () => structuredDoc("Offer Comparison", "Cross-bid analysis & negotiation posture", [
+        { heading: "Summary", body: OFFER_COMPARISON.summary },
+        { heading: "Bids", table: { headers: ["Buyer", "Type", "Score", "Headline", "Net to founders"], rows: OFFER_COMPARISON.offers.map((e) => [
+          e.offer.buyerName, e.offer.buyerType, `${e.score.toFixed(0)}/100`, fmtMoney(e.offer.headlinePriceUsd), fmtMoney(e.impliedNetToFoundersUsd),
+        ]) } },
+        { heading: "Field dynamics", bullets: OFFER_COMPARISON.delta.map((d) => `**${d.term}:** ${d.notes}`) },
+        { heading: "Posture", bullets: [
+          `Active offers: ${NEGOTIATION_STATE.activeOffers}`,
+          `Leverage: ${NEGOTIATION_STATE.leverage}`,
+          `Leading bid: ${leaderName ?? "—"}`,
+          `Next move: ${NEGOTIATION_STATE.nextMove}`,
+        ] },
+      ]) },
     },
     {
       id: "closing", name: "Closing Agent", role: "Orchestrates signatures and escrow.",
       work: <>Assembled the closing checklist; tracking signatures, escrow funding and regulatory filings to the wire.</>,
       decision: "Approve proceeding to signing and funding the escrow?", approveLabel: "Approve close",
-      deliverable: { filename: "closing-checklist.md", build: () => briefMarkdown("Closing checklist", [
-        ["Signatures", "SPA + disclosure schedules — tracked per party"],
-        ["Escrow", "funding instructions issued; ≤8% / 12-month release"],
-        ["Filings", "regulatory + corporate filings to the wire"],
+      deliverable: { filename: "closing-checklist.md", build: () => structuredDoc("Closing Checklist", "Signature, escrow & filing orchestration to the wire", [
+        { heading: "Workstreams", table: { headers: ["Item", "Owner", "Status"], rows: [
+          ["SPA + signature pages", "Counsel", "In progress"],
+          ["Disclosure schedules", "Counsel", "In progress"],
+          ["Shareholder consent (≥95%)", "Founder", "In progress"],
+          ["Escrow agent engagement", "Banker", "Done"],
+          ["Escrow funding confirmation", "Banker", "Pending"],
+          ["Regulatory filings", "Counsel", "In progress"],
+        ] } },
+        { heading: "Economics", bullets: [
+          "Escrow capped at ≤8% of consideration, released in 12 months",
+          "Reverse break-fee in force; no founder indemnity beyond escrow",
+          "30–45 day sign-to-close target",
+        ] },
       ]) },
     },
     {
       id: "wealth", name: "Wealth Agent", role: "Manages the proceeds after the wire.",
       work: <>Modeled proceeds through tax, scheduled the liquidity and drafted the diversification plan in WealthOS.</>,
       decision: "Approve the wealth transition plan?", approveLabel: "Approve & finish",
-      deliverable: { filename: "wealth-transition-plan.md", build: () => briefMarkdown("Wealth transition plan", [
-        ["Proceeds", `${fmtMoney(mid)} headline → modeled through tax`],
-        ["Liquidity", "staged schedule post-close"],
-        ["Diversification", "concentrated position → durable portfolio"],
+      deliverable: { filename: "wealth-transition-plan.md", build: () => structuredDoc("Wealth Transition Plan", "From a concentrated position to durable wealth", [
+        { heading: "Proceeds", body: `Headline consideration of ${fmtMoney(mid)} modeled through federal and state tax, with QSBS treatment evaluated where the holding qualifies.` },
+        { heading: "Plan", bullets: [
+          "Staged liquidity schedule across the months after close",
+          "Diversification out of the single concentrated position into a durable portfolio",
+          "Trust, family-office and reinvestment structuring evaluated against the after-tax base",
+        ] },
+        { heading: "Note", body: "Figures are planning estimates. Tax outcomes depend on structure and jurisdiction and require a qualified advisor before any election." },
       ]) },
     },
   ];

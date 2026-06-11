@@ -3,7 +3,7 @@ import { Button, Card, Modal, Field, inputCls, SectionHeader, fmtMoney, notify }
 import { BUYERS, DILIGENCE, VALUATION_STRATEGIC, useMemorandum } from "../lib/engines";
 import {
   docToMarkdown, docFilename, buyerIntroLetter, introFilename, buyerListCsv,
-  briefMarkdown, sendDeliverable, downloadDeliverable,
+  structuredDoc, sendDeliverable, downloadDeliverable,
 } from "../lib/deliverables";
 import type { BuyerCandidate } from "@exit/engines";
 
@@ -129,11 +129,14 @@ const Banker: React.FC = () => {
   };
 
   // Deliverable file builders
-  const outreachMd = (): string => briefMarkdown(
-    `Outreach campaign — ${PROJECT}`,
-    SEQUENCE.map((s) => [`${s.timing} · ${s.step}`, s.body] as [string, string]),
-    `A ${SEQUENCE.length}-step sell-side process anchored at ${fmtMoney(target)}, run against a ${nShort}-buyer shortlist.`,
-  );
+  const outreachMd = (): string => structuredDoc(`Outreach Campaign`, `${PROJECT} · sell-side process`, [
+    { heading: "Approach", body: `A ${SEQUENCE.length}-step competitive process anchored at ${fmtMoney(target)}, run against a ${nShort}-buyer shortlist to build leverage. Anonymized pre-NDA; identity and the data room unlock only on a signed NDA.` },
+    { heading: "Sequence", table: { headers: ["Step", "Timing", "Action"], rows: SEQUENCE.map((s) => [s.step, s.timing, s.body]) } },
+    { heading: "Status", bullets: [
+      `${nId} acquirers identified, ${nShort} shortlisted, ${nContact} contacted, ${nInterest} in active conversations`,
+      `Anchoring the process at ${fmtMoney(target)}`,
+    ] },
+  ]);
   const introMd = (b: BuyerCandidate): string => buyerIntroLetter({ buyer: b, projectName: PROJECT, askMid: mid, fromName: FROM_NAME });
 
   return (
