@@ -50,10 +50,15 @@ const ChannelTeaser: React.FC = () => {
         <p className="text-lg text-white/55 leading-relaxed max-w-md mb-9">
           Four classes of civilization-scale media — cinematic, operational, strategic and crisis-response — and an interactive national-crisis simulation, all routing to a sovereign executive briefing.
         </p>
-        <Link to="/channel" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
-          style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 40px rgba(0,194,255,0.26)' }}>
-          <Play className="w-4 h-4" fill="currentColor" /> Enter the channel
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link to="/channel" className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold transition-all hover:-translate-y-px"
+            style={{ background: 'linear-gradient(135deg, #00C2FF, #7C4DFF)', boxShadow: '0 0 40px rgba(0,194,255,0.26)' }}>
+            <Play className="w-4 h-4" fill="currentColor" /> Enter the channel
+          </Link>
+          <Link to="/films" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border border-white/15 bg-white/[0.04] text-white font-semibold hover:bg-white/8 transition-all">
+            <Film className="w-4 h-4 text-cyan-300" /> Film library
+          </Link>
+        </div>
       </div>
 
       {/* media class matrix */}
