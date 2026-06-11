@@ -71,6 +71,7 @@ const AdminPage: React.FC = () => {
   const [scenarioBrief, setScenarioBrief] = useState('');
   const [genScenario, setGenScenario] = useState(false);
   const [pipelineJobs, setPipelineJobs] = useState<PipelineJob[]>([]);
+  const [meshRegions, setMeshRegions] = useState<Array<{ id: string; label: string; sub: string | null; nodes: number; status: string; accent: string }>>([]);
   const [pipelineBusy, setPipelineBusy] = useState<string | null>(null);
   const [filmTitle, setFilmTitle] = useState('');
   const [filmScript, setFilmScript] = useState('');
@@ -114,6 +115,8 @@ const AdminPage: React.FC = () => {
     const camp = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
     const scn = await supabase.from('scenarios').select('*').order('sort_order', { ascending: true });
     const pj = await supabase.from('pipeline_jobs').select('id, kind, status, provider, title, result_url, media_class, result, error, created_at').order('created_at', { ascending: false }).limit(50);
+    const mesh = await supabase.from('network_regions').select('*').order('sort_order', { ascending: true });
+    setMeshRegions((mesh.data || []) as typeof meshRegions);
     setMedia((med.data || []) as MediaItem[]);
     setNarratives((nar.data || []) as Narrative[]);
     setCampaigns((camp.data || []) as Campaign[]);
@@ -1514,6 +1517,43 @@ const AdminPage: React.FC = () => {
                   </table>
                 </div>
               </div>
+
+              {/* Network mesh — feeds the hero strip, deployment regions and status page */}
+              {meshRegions.length > 0 && (
+                <div className="glass-strong rounded-2xl overflow-hidden">
+                  <div className="px-5 py-3 border-b border-white/10 flex items-center justify-between">
+                    <span className="text-[11px] font-mono uppercase tracking-[0.24em] text-cyan-300/70">Network mesh</span>
+                    <span className="text-[10px] font-mono text-white/40">{meshRegions.reduce((s, r) => s + r.nodes, 0)} edge nodes · feeds homepage + status</span>
+                  </div>
+                  <div className="divide-y divide-white/5">
+                    {meshRegions.map((r) => (
+                      <div key={r.id} className="flex items-center gap-4 px-5 py-3">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: r.accent }} />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm text-white">{r.label}</div>
+                          {r.sub && <div className="text-[10px] font-mono uppercase tracking-wider text-white/35">{r.sub}</div>}
+                        </div>
+                        <input type="number" defaultValue={r.nodes} min={0} aria-label={`Edge nodes in ${r.label}`}
+                          onBlur={async (e) => {
+                            const nodes = Math.max(0, Number(e.target.value) || 0);
+                            if (nodes === r.nodes) return;
+                            const { error } = await supabase.from('network_regions').update({ nodes }).eq('id', r.id);
+                            if (error) toast.error(error.message); else { toast.success(`${r.label}: ${nodes} nodes`); load(); }
+                          }}
+                          className="w-20 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-white text-right focus:border-cyan-400/50 focus:outline-none" />
+                        <select defaultValue={r.status} aria-label={`Status of ${r.label}`}
+                          onChange={async (e) => {
+                            const { error } = await supabase.from('network_regions').update({ status: e.target.value }).eq('id', r.id);
+                            if (error) toast.error(error.message); else { toast.success(`${r.label} ${e.target.value}`); load(); }
+                          }}
+                          className="px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-white focus:border-cyan-400/50 focus:outline-none">
+                          {['operational', 'provisioning', 'planned'].map((s) => <option key={s} value={s} className="bg-[#0A0E27]">{s}</option>)}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
