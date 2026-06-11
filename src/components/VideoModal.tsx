@@ -6,15 +6,18 @@ import { X, Film, ArrowUpRight } from 'lucide-react';
 interface Props {
   title: string;
   kicker?: string;
-  videoId?: string | null;     // YouTube ID — when present, plays inline
+  videoId?: string | null;     // YouTube ID — plays as an embed
+  videoUrl?: string | null;    // direct asset URL (generated render) — takes precedence
+  posterUrl?: string | null;
   accent?: string;
   onClose: () => void;
   onBrief?: () => void;        // fallback CTA when the film is still in production
 }
 
-// Lightweight cinematic player. Plays a YouTube embed when an id is supplied;
-// otherwise presents a sovereign "in production" state with the briefing route.
-const VideoModal: React.FC<Props> = ({ title, kicker, videoId, accent = '#00C2FF', onClose, onBrief }) => {
+// Lightweight cinematic player. Direct video assets (pipeline renders in
+// storage) play natively; YouTube ids play as embeds; otherwise presents a
+// sovereign "in production" state with the briefing route.
+const VideoModal: React.FC<Props> = ({ title, kicker, videoId, videoUrl, posterUrl, accent = '#00C2FF', onClose, onBrief }) => {
   useEscape(onClose);
   useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = ''; }; }, []);
 
@@ -29,7 +32,10 @@ const VideoModal: React.FC<Props> = ({ title, kicker, videoId, accent = '#00C2FF
         <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#04060f]" style={{ aspectRatio: '16 / 9' }}>
           <span className="absolute inset-x-0 top-0 h-px z-10" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
           <HudCorners color={accent} className="opacity-40 z-10" />
-          {videoId ? (
+          {videoUrl ? (
+            <video className="absolute inset-0 w-full h-full object-contain bg-black" src={videoUrl}
+              poster={posterUrl || undefined} controls autoPlay playsInline aria-label={title} />
+          ) : videoId ? (
             <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`}
               title={title} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen />
           ) : (
