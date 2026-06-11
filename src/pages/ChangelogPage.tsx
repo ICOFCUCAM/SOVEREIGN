@@ -16,6 +16,17 @@ const TAG_STYLE: Record<Entry['tag'], string> = {
 
 const ENTRIES: Entry[] = [
   {
+    date: '2026-06-11',
+    tag: 'feature',
+    title: 'Channel · generated films flow to the public site',
+    body: [
+      'media table carries real video assets (video_url, poster_url, duration, source job) with public-read RLS — finished pipeline renders publish straight to the Channel.',
+      'One-click Publish on completed video/film jobs in the Admin pipeline console, with audit trail and duplicate-safe re-publishing.',
+      'VideoModal plays storage renders natively (with poster) alongside YouTube embeds; Channel tiles show Now showing vs In production from live data.',
+      'Homepage: feature-dispatch player auto-mounts when the first film is published; channel teaser shows real per-class film counts and render posters.',
+    ],
+  },
+  {
     date: '2026-05-29',
     tag: 'feature',
     title: 'Emergency AI · multi-channel publishing + every video format',
