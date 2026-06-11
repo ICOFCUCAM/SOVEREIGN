@@ -11,6 +11,7 @@ import {
   Landmark, Banknote, Vote, Building2, Truck, BadgeCheck, FileText, Lock, ChevronDown, Activity,
 } from 'lucide-react';
 import { getTldPricing, formatPrice, type TldPrice } from '@/lib/registrar';
+import { fetchNetworkStats, type NetworkStats } from '@/lib/stats';
 
 // ── Capabilities marketed on the registrar landing ──
 const CAPABILITIES = [
@@ -93,7 +94,11 @@ const RegistrarLanding: React.FC = () => {
   const nav = useNavigate();
   const [q, setQ] = useState('');
   const [tlds, setTlds] = useState<TldPrice[]>([]);
-  useEffect(() => { getTldPricing().then(setTlds).catch(() => {}); }, []);
+  const [net, setNet] = useState<NetworkStats | null>(null);
+  useEffect(() => {
+    getTldPricing().then(setTlds).catch(() => {});
+    fetchNetworkStats().then(setNet).catch(() => {});
+  }, []);
 
   const go = (path?: string) => {
     const search = q.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
@@ -147,7 +152,7 @@ const RegistrarLanding: React.FC = () => {
             <span className="inline-flex items-center gap-1.5"><BadgeCheck className="w-3 h-3 text-emerald-400/80" /> Direct registrar</span>
             <span className="inline-flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-400/80" /> DNSSEC default</span>
             <span className="inline-flex items-center gap-1.5"><FileText className="w-3 h-3 text-emerald-400/80" /> Audited</span>
-            <span className="inline-flex items-center gap-1.5"><Activity className="w-3 h-3 text-emerald-400/80" /> 23 sovereign regions</span>
+            <span className="inline-flex items-center gap-1.5"><Activity className="w-3 h-3 text-emerald-400/80" /> {net?.regions ?? 5} sovereign regions</span>
             <span className="inline-flex items-center gap-1.5"><Lock className="w-3 h-3 text-emerald-400/80" /> Owner-scoped tenancy</span>
           </div>
 
