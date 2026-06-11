@@ -32,7 +32,7 @@ const Landing: React.FC = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#eef2f7] via-[#eef2f7]/70 to-transparent" aria-hidden />
         {/* floor sheen + ambient light the board emits onto the floor */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 opacity-50" aria-hidden style={{ background: "linear-gradient(to top, rgba(255,255,255,0.5), transparent)" }} />
-        <div className="pointer-events-none absolute bottom-[6%] right-[6%] h-72 w-[60%] rounded-[50%] opacity-70 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.40), rgba(70,150,220,0) 70%)" }} aria-hidden />
+        <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-56 w-[52%] rounded-[50%] opacity-40 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.30), rgba(70,150,220,0) 70%)" }} aria-hidden />
 
         <div className="relative mx-auto grid max-w-[1480px] items-center gap-4 px-6 py-16 lg:grid-cols-[0.5fr_1.7fr] lg:px-10 lg:py-24">
           <div className="lg:pr-2">
@@ -49,21 +49,11 @@ const Landing: React.FC = () => {
               <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-ink-800">Launch ExitOS <Arrow /></button>
               <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-6 py-3 text-sm font-semibold text-ink-900 backdrop-blur transition hover:border-slate-400 hover:bg-white">Request a Demo</button>
             </div>
-            {/* trust strip — 4 institutional glass metric cards */}
-            <div className="mt-10 grid max-w-lg grid-cols-2 gap-3">
-              {HERO_TRUST.map((t) => (
-                <div key={t.title} className="rounded-xl border border-slate-200 bg-white/70 p-3.5 shadow-sm backdrop-blur transition hover:border-blue-300 hover:shadow-md">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-blue-600"><Glyph name={t.icon} small /></span>
-                  <div className="mt-2.5 font-serif text-lg font-bold leading-none text-ink-900">{t.metric}</div>
-                  <div className="mt-1 text-[12px] font-semibold leading-tight text-ink-800">{t.title}</div>
-                  <div className="text-[10.5px] leading-snug text-slate-500">{t.sub}</div>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* ---- MOUNTED ACQUISITION-EXCHANGE DISPLAY ---- */}
-          <div className="min-w-0" style={{ perspective: "2000px" }}>
+          {/* nudged right + up off the headline, with a lighter floor shadow */}
+          <div className="min-w-0 lg:translate-x-10 lg:-translate-y-8" style={{ perspective: "2000px" }}>
             <div className="relative">
               {/* structural mount / bezel behind the screen */}
               <div
@@ -72,7 +62,7 @@ const Landing: React.FC = () => {
                   transform: "rotateY(-11deg) rotateX(2.5deg)",
                   transformOrigin: "center right",
                   background: "linear-gradient(145deg,#1c2c44,#0a1626)",
-                  boxShadow: "0 60px 90px -30px rgba(8,20,40,0.55), 0 20px 40px -20px rgba(8,20,40,0.45), inset 0 1px 0 rgba(255,255,255,0.08)",
+                  boxShadow: "0 28px 48px -30px rgba(8,20,40,0.32), 0 10px 22px -18px rgba(8,20,40,0.26), inset 0 1px 0 rgba(255,255,255,0.08)",
                   border: "1px solid rgba(255,255,255,0.10)",
                 }}
               >
@@ -102,18 +92,34 @@ const Landing: React.FC = () => {
               {/* polished-floor reflection of the screen */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-full h-40 overflow-hidden"
+                className="pointer-events-none absolute inset-x-0 top-full h-28 overflow-hidden"
                 style={{
                   transform: "rotateY(-11deg) rotateX(2.5deg) scaleY(-1)",
                   transformOrigin: "center right",
-                  opacity: 0.16,
-                  filter: "blur(3px)",
+                  opacity: 0.07,
+                  filter: "blur(4px)",
                   WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
                   maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
                   background: "linear-gradient(180deg,#0a1626,#08203B)",
                 }}
               />
             </div>
+          </div>
+        </div>
+
+        {/* trust strip — 4 institutional metric cards, one full-width row */}
+        <div className="relative border-t border-slate-200/70 bg-white/55 backdrop-blur">
+          <div className="mx-auto grid max-w-[1480px] grid-cols-2 gap-px overflow-hidden px-6 lg:grid-cols-4 lg:px-10">
+            {HERO_TRUST.map((t) => (
+              <div key={t.title} className="group flex items-center gap-3.5 px-5 py-5 transition hover:bg-white">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-100 transition group-hover:bg-blue-100"><Glyph name={t.icon} /></span>
+                <div className="min-w-0">
+                  <div className="font-serif text-xl font-bold leading-none text-ink-900">{t.metric}</div>
+                  <div className="mt-1 text-[12.5px] font-semibold leading-tight text-ink-800">{t.title}</div>
+                  <div className="text-[11px] leading-snug text-slate-500">{t.sub}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
         <style>{`@keyframes exTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
@@ -171,41 +177,48 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== ROW 5 · PIPELINE / WORKFLOW (process 70% + timeline 30%) ===== */}
-      <section id="platform" className="border-b border-slate-200">
-        <div className="mx-auto grid max-w-[1320px] gap-10 px-6 py-16 lg:grid-cols-[7fr_3fr] lg:px-10">
-          {/* left · 6 process cards */}
-          <div>
-            <h2 className="font-serif text-[2rem] font-bold tracking-tight text-ink-900">Run your entire company sale from discovery to closing.</h2>
-            <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3">
-              {STEPS.map((st, i) => (
-                <div key={st.title} className="relative">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-ink-900 text-white"><Glyph name={st.icon} /></div>
-                    <span className="font-mono text-[11px] font-bold text-slate-300">{String(i + 1).padStart(2, "0")}</span>
-                  </div>
-                  <div className="mt-3 text-sm font-bold text-ink-900">{st.title}</div>
-                  <div className="mt-1.5 text-[12px] leading-snug text-slate-500">{st.body}</div>
-                </div>
-              ))}
-            </div>
+      {/* ===== ROW 5 · PIPELINE / WORKFLOW — futuristic horizontal stepper ===== */}
+      <section id="platform" className="relative overflow-hidden border-b border-white/10" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 55%,#0B2547 100%)" }}>
+        {/* ambient grid + glow */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.18]" aria-hidden
+          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(120,170,255,0.5) 0 1px, transparent 1px 120px), repeating-linear-gradient(0deg, rgba(120,170,255,0.35) 0 1px, transparent 1px 120px)", maskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 75%)" }} />
+        <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[80%] -translate-x-1/2 rounded-[50%] opacity-50 blur-[120px]" aria-hidden style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.45), transparent 70%)" }} />
+
+        <div className="relative mx-auto max-w-[1320px] px-6 py-20 lg:px-10">
+          <div className="max-w-3xl">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-300">The exchange · founder → exit</div>
+            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white sm:text-[2.4rem]">Run your entire company sale from discovery to closing.</h2>
           </div>
-          {/* right · vertical Founder → Exit timeline */}
-          <div className="rounded-2xl p-6 text-white" style={{ background: "linear-gradient(180deg,#08203B,#06182E)" }}>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-300">The exchange</div>
-            <div className="mt-1 text-sm font-bold">Founder → Exit</div>
-            <ol className="mt-5 space-y-0">
-              {EXCHANGE_FLOW.map((s, i) => (
-                <li key={s.title} className="relative flex gap-3 pb-5 last:pb-0">
-                  {i < EXCHANGE_FLOW.length - 1 && <span className="absolute left-[13px] top-7 h-full w-px bg-white/15" aria-hidden />}
-                  <span className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 ring-1 ring-blue-400/30"><Glyph name={s.icon} small /></span>
-                  <div className="pt-0.5">
-                    <div className="text-[13px] font-bold text-white">{s.title}</div>
-                    <div className="text-[10px] leading-snug text-white/50">{s.sub}</div>
-                  </div>
+
+          {/* 6 steps — one horizontal row, connected by a glowing rail */}
+          <div className="relative mt-14">
+            <div className="pointer-events-none absolute left-0 right-0 top-7 hidden h-px lg:block" aria-hidden style={{ background: "linear-gradient(90deg, transparent, rgba(96,165,250,0.55) 12%, rgba(96,165,250,0.55) 88%, transparent)" }} />
+            <ol className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
+              {STEPS.map((st, i) => (
+                <li key={st.title} className="relative flex flex-col items-center text-center">
+                  <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-lg"
+                    style={{ background: "linear-gradient(145deg,#1b3a66,#0c244a)", boxShadow: "0 0 0 1px rgba(120,170,255,0.25), 0 8px 24px -10px rgba(56,130,246,0.7), inset 0 1px 0 rgba(255,255,255,0.12)" }}>
+                    <Glyph name={st.icon} />
+                    <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 font-mono text-[9px] font-bold text-white ring-2 ring-[#0A1F3A]">{i + 1}</span>
+                  </span>
+                  <div className="mt-4 text-[13.5px] font-bold text-white">{st.title}</div>
+                  <div className="mt-1.5 text-[11.5px] leading-snug text-blue-100/55">{st.body}</div>
                 </li>
               ))}
             </ol>
+          </div>
+
+          {/* Founder → Exit — compact horizontal flow */}
+          <div className="mt-16 flex flex-wrap items-center justify-center gap-x-2 gap-y-3 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4 backdrop-blur">
+            {EXCHANGE_FLOW.map((s, i) => (
+              <React.Fragment key={s.title}>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 ring-1 ring-blue-400/30"><Glyph name={s.icon} small /></span>
+                  <span className="text-[12px] font-semibold text-white/85">{s.title}</span>
+                </div>
+                {i < EXCHANGE_FLOW.length - 1 && <span className="px-1 text-blue-300/50" aria-hidden>→</span>}
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </section>
@@ -253,8 +266,8 @@ const Landing: React.FC = () => {
 
       {/* ===== 05 · COMMAND CENTER PREVIEW ===== */}
       <section className="border-b border-slate-200">
-        <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <div className="grid flex-1 items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
+          <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="min-w-0 scale-90 lg:scale-100"><CommandBoard compact /></div>
             <div>
               <h2 className="font-serif text-[2rem] font-bold tracking-tight text-ink-900">Your Acquisition Command Center.</h2>
@@ -262,54 +275,55 @@ const Landing: React.FC = () => {
                 Real-time intelligence, buyer activity, transaction tracking, valuation insights, and market demand &mdash; on one acquisition infrastructure.
               </p>
               <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">Explore the Platform &rarr;</a>
-              {/* dense signal grid — Bloomberg-style live readouts */}
-              <div className="mt-7 grid grid-cols-2 gap-2.5">
-                {COMMAND_FEATURES.map((f) => (
-                  <div key={f.title} className="rounded-lg border border-slate-200 bg-white p-3 transition hover:border-blue-300">
-                    <div className="flex items-center justify-between">
-                      <span className="flex h-6 w-6 items-center justify-center rounded bg-blue-50 text-blue-600"><Glyph name={f.icon} small /></span>
-                      <span className="font-mono text-[13px] font-bold text-ink-900">{f.value}</span>
-                    </div>
-                    <div className="mt-2 text-[12px] font-bold leading-tight text-ink-900">{f.title}</div>
-                    <div className="text-[10.5px] leading-snug text-slate-500">{f.body}</div>
-                  </div>
-                ))}
-              </div>
             </div>
+          </div>
+          {/* dense signal grid — one full-width row of live readouts */}
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {COMMAND_FEATURES.map((f) => (
+              <div key={f.title} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md">
+                <div className="flex items-center justify-between">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-blue-600"><Glyph name={f.icon} small /></span>
+                  <span className="font-mono text-[14px] font-bold text-ink-900">{f.value}</span>
+                </div>
+                <div className="mt-2.5 text-[12px] font-bold leading-tight text-ink-900">{f.title}</div>
+                <div className="text-[10.5px] leading-snug text-slate-500">{f.body}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ===== 06 · DATA ROOM INFRASTRUCTURE ===== */}
       <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <div className="grid flex-1 items-center gap-10 lg:grid-cols-[1.4fr_1fr]">
+        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
+          {/* heading + a short, half-height vault panel on the right */}
+          <div className="grid items-center gap-10 lg:grid-cols-[1.4fr_1fr]">
             <div>
               <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Institutional-grade<br />data rooms.</h2>
               <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-600">Secure, permissioned, and built for high-stakes transactions.</p>
               <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">Learn more &rarr;</a>
-              <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {DATA_ROOMS.map((d) => (
-                  <div key={d.title} className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition hover:border-blue-300">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-ink-700"><Glyph name={d.icon} small /></span>
-                      <div className="text-[12px] font-semibold leading-tight text-ink-800">{d.title}</div>
-                    </div>
-                    <div className="mt-2.5 flex items-center gap-1.5 text-[9px] font-medium uppercase tracking-wide text-slate-400">
-                      <span className="flex items-center gap-1 text-emerald-600"><span className="h-1 w-1 rounded-full bg-emerald-500" /> Secured</span>
-                      <span className="text-slate-300">·</span><span>Audit trail</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
               {/* security posture row */}
-              <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[11px] text-slate-500">
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[11px] text-slate-500">
                 {[["lock", "Permission controls"], ["check", "Full audit trails"], ["shield", "Access logs"]].map(([ic, t]) => (
                   <span key={t} className="flex items-center gap-1.5"><span className="text-blue-600"><Glyph name={ic} small /></span>{t}</span>
                 ))}
               </div>
             </div>
-            <div className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#0B2947] to-[#06182E] p-12"><Vault /></div>
+            <div className="flex h-32 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0B2947] to-[#06182E]"><Vault /></div>
+          </div>
+
+          {/* 6 document categories — one full-width row */}
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {DATA_ROOMS.map((d) => (
+              <div key={d.title} className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 text-ink-700"><Glyph name={d.icon} small /></span>
+                <div className="mt-2.5 text-[12px] font-semibold leading-tight text-ink-800">{d.title}</div>
+                <div className="mt-2 flex items-center gap-1.5 text-[9px] font-medium uppercase tracking-wide text-slate-400">
+                  <span className="flex items-center gap-1 text-emerald-600"><span className="h-1 w-1 rounded-full bg-emerald-500" /> Secured</span>
+                  <span className="text-slate-300">·</span><span>Audit trail</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -773,7 +787,7 @@ const OfferTable: React.FC = () => (
 );
 
 const Vault: React.FC = () => (
-  <svg viewBox="0 0 140 120" className="h-40 w-44">
+  <svg viewBox="0 0 140 120" className="h-24 w-28">
     <rect x="34" y="22" width="72" height="76" rx="8" fill="#13355f" stroke="#58C6FF" strokeOpacity="0.5" />
     <rect x="42" y="30" width="56" height="60" rx="5" fill="#0c244a" />
     <circle cx="70" cy="60" r="16" fill="none" stroke="#58C6FF" strokeWidth="2.5" />
