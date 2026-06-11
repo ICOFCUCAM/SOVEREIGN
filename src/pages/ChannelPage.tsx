@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import { fetchChannelMedia, type ChannelMedia, type PlayableMedia } from '@/lib/media';
+import { fetchChannelMedia, fetchRenderingJobs, type ChannelMedia, type PlayableMedia, type RenderingJob } from '@/lib/media';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -143,6 +143,7 @@ const ChannelPage: React.FC = () => {
   const [narratives, setNarratives] = useState<Narrative[]>([]);
   const [reading, setReading] = useState<Narrative | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [rendering, setRendering] = useState<RenderingJob[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -155,6 +156,7 @@ const ChannelPage: React.FC = () => {
         .order('scheduled_at', { ascending: true, nullsFirst: false });
       setCampaigns((camp || []) as Campaign[]);
       setMedia(await fetchChannelMedia());
+      setRendering(await fetchRenderingJobs());
     })();
   }, []);
 
@@ -213,6 +215,12 @@ const ChannelPage: React.FC = () => {
               {CHANNELS.map((c) => (
                 <span key={c.id} className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: c.accent }} /> {c.cls} · {c.kicker}</span>
               ))}
+              {rendering.length > 0 && (
+                <span className="inline-flex items-center gap-1.5 text-cyan-300/80">
+                  <span className="w-2.5 h-2.5 rounded-full border border-cyan-300/40 border-t-cyan-300 animate-spin" />
+                  {rendering.length} now rendering
+                </span>
+              )}
             </div>
           </div>
         </section>
