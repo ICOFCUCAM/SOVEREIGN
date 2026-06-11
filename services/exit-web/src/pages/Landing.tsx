@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MarketingChrome, Glyph, Mark, Arrow } from "../components/MarketingChrome";
-import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, STRATEGIC_BOARD, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS } from "../lib/market-stats";
+import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS, type BoardTx } from "../lib/market-stats";
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
 // marketing chrome (header nav → Platform / Modules / Pricing + footer). The
@@ -550,8 +550,6 @@ const Landing: React.FC = () => {
 // 3 columns: Strategic Buyers (25%) · Live Transactions (45%) · Demand (30%)
 // Navy palette, glass cards, status-coloured rows.
 // ===========================================================================
-// Strategic Buyers column — the registry's most active mandates.
-const STRATEGIC_BUYERS: readonly [string, string, number, string][] = STRATEGIC_BOARD;
 // Disclosed Transactions column — source-referenced public M&A events from
 // the buyer-history snapshot (the same data that drives engine matching).
 const TRANSACTIONS = DISCLOSED_TRANSACTIONS;
@@ -612,12 +610,6 @@ const CASE_STUDIES = [
   { sector: "AI Infrastructure", name: "AI Infrastructure Co.", value: "$261M", buyers: "21", premium: "+31%", time: "9 wks", buyer: "Microsoft*" },
   { sector: "Healthcare SaaS", name: "Healthcare SaaS", value: "$175M", buyers: "12", premium: "+26%", time: "13 wks", buyer: "UnitedHealth*" },
 ];
-const LEAN_STATS = [
-  { label: "Mandates", value: MARKET_FMT.buyers },
-  { label: "Capacity", value: MARKET_FMT.appetite },
-  { label: "Deploying", value: MARKET_FMT.activeMandates },
-  { label: "Sectors", value: MARKET_FMT.sectors },
-];
 const heatGradient = (bars: number) =>
   bars >= 9 ? "linear-gradient(90deg,#FF5A5A,#FF3434)"
   : bars >= 8 ? "linear-gradient(90deg,#FF9A3D,#FF7030)"
@@ -627,7 +619,25 @@ const heatGradient = (bars: number) =>
 // `lean` = focused hero board: only Strategic Buyers + Acquisition Demand
 // (no Live Transactions column — that detail lives below the fold), trimmed to
 // the few rows that matter, plus a 4-stat market-activity bar.
-const CommandBoard: React.FC<{ lean?: boolean }> = ({ lean }) => (
+// Interactive acquisition exchange. Click a demand sector (or a buyer's
+// sector) to drill the buyers and transactions into that industry; click a
+// transaction to open the deal detail. All three columns join on the same
+// sectorLabel, so the board behaves like the product, not an illustration.
+const CommandBoard: React.FC = () => {
+  const [sector, setSector] = useState<string | null>(null);
+  const [drill, setDrill] = useState<BoardTx | null>(null);
+
+  const buyers = sector ? BOARD_BUYERS.filter((b) => b.sectors.includes(sector)) : BOARD_BUYERS.slice(0, 4);
+  const txns   = sector ? TRANSACTIONS.filter((t) => t.industry === sector) : TRANSACTIONS.slice(0, 4);
+  const toggle = (s: string): void => setSector((cur) => (cur === s ? null : s));
+
+  // Only surface demand sectors that actually drill into something, so every
+  // click yields buyers and/or deals — never a dead end.
+  const covered = DEMAND.filter(([label]) =>
+    BOARD_BUYERS.some((b) => b.sectors.includes(label)) || TRANSACTIONS.some((t) => t.industry === label),
+  ).slice(0, 5);
+
+  return (
   <div
     className="relative min-w-0 overflow-hidden rounded-3xl text-white"
     style={{
@@ -639,46 +649,58 @@ const CommandBoard: React.FC<{ lean?: boolean }> = ({ lean }) => (
     {/* live operational layer — a faint signal sweep travels down the board */}
     <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-16" aria-hidden
       style={{ background: "linear-gradient(180deg, rgba(96,165,250,0.18), transparent)", animation: "exScan 6s linear infinite" }} />
-    <div className={"grid grid-cols-1 " + (lean ? "lg:grid-cols-[44%_56%]" : "lg:grid-cols-[25%_45%_30%]")}>
+
+    {/* filter status bar — appears when the board is drilled into a sector */}
+    {sector && (
+      <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-blue-500/10 px-5 py-1.5">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-200">Filtered · {sector} — {buyers.length} buyer{buyers.length === 1 ? "" : "s"}, {txns.length} deal{txns.length === 1 ? "" : "s"}</span>
+        <button onClick={() => setSector(null)} className="rounded px-1.5 text-[10px] font-semibold uppercase tracking-wide text-white/60 hover:text-white">Clear ✕</button>
+      </div>
+    )}
+
+    <div className="grid grid-cols-1 lg:grid-cols-[25%_45%_30%]">
       {/* ---- COL 1 · STRATEGIC BUYERS ---- */}
       <div className="border-b border-white/5 px-5 py-3 lg:border-b-0 lg:border-r">
         <BoardHeader title="Strategic Buyers" right="Match Score" />
         <div className="mt-1">
-          {(lean ? STRATEGIC_BUYERS.filter((b) => ["Microsoft", "Salesforce", "Oracle", "Thoma Bravo"].includes(b[0])) : STRATEGIC_BUYERS.slice(0, 4)).map(([name, sector, match, status]) => (
-            <div key={name} className="group flex items-center justify-between gap-2 border-b border-white/5 py-1.5 transition last:border-0 hover:translate-x-1" style={{ transitionDuration: ".25s" }}>
+          {buyers.map((b) => (
+            <button key={b.name} onClick={() => toggle(b.sector)} title={`Filter to ${b.sector}`}
+              className="group flex w-full items-center justify-between gap-2 border-b border-white/5 py-1.5 text-left transition last:border-0 hover:translate-x-1" style={{ transitionDuration: ".25s" }}>
               <div className="flex items-center gap-2">
-                <Mark name={name} size={22} />
+                <Mark name={b.name} size={22} />
                 <div>
-                  <div className="text-[12.5px] font-medium text-white/90">{name}</div>
-                  <div className="text-[10px] text-white/45">{sector}</div>
+                  <div className="text-[12.5px] font-medium text-white/90">{b.name}</div>
+                  <div className="text-[10px] text-white/45 group-hover:text-blue-300">{b.sector}</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-bold leading-none" style={{ color: "#7CFF9F", fontSize: 17 }}>{match}%</div>
-                <div className="mt-0.5 text-[9px] text-white/45">{status}</div>
+                <div className="font-bold leading-none" style={{ color: "#7CFF9F", fontSize: 17 }}>{b.match}%</div>
+                <div className="mt-0.5 text-[9px] text-white/45">{b.status}</div>
               </div>
-            </div>
+            </button>
           ))}
+          {buyers.length === 0 && <div className="py-3 text-[11px] text-white/40">No indexed buyer in {sector} on this board.</div>}
         </div>
         <Link to="/console" className="mt-2 inline-block text-[11px] font-medium text-blue-300 hover:text-blue-200">View all buyers &rarr;</Link>
       </div>
 
-      {/* ---- COL 2 · LIVE TRANSACTIONS (full board only) ---- */}
-      {!lean && (
+      {/* ---- COL 2 · LIVE TRANSACTIONS ---- */}
       <div className="border-b border-white/5 px-5 py-3 lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="inline-block h-2 w-2 animate-pulse rounded-full" style={{ background: "#45E38A" }} />
             <BoardHeader title="Live Transactions" />
           </div>
+          <span className="text-[9px] text-white/35">click to inspect</span>
         </div>
         <div className="mt-2 grid grid-cols-[1.4fr_1fr_0.9fr] gap-2 text-[9px] uppercase tracking-wide text-white/40">
           <span>Target Company</span><span>Best Match</span><span className="text-right">Expected / Status</span>
         </div>
         <div className="mt-1">
-          {TRANSACTIONS.slice(0, 4).map((t, i) => (
-            <div key={t.company} className="grid grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 rounded border-b border-white/5 py-1.5 last:border-0"
-              style={i === 0 ? { animation: "exFlash 4s ease-in-out infinite" } : undefined}>
+          {txns.map((t, i) => (
+            <button key={t.company} onClick={() => setDrill(t)}
+              className="grid w-full grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 rounded border-b border-white/5 py-1.5 text-left transition last:border-0 hover:bg-white/[0.04]"
+              style={i === 0 && !sector ? { animation: "exFlash 4s ease-in-out infinite" } : undefined}>
               <div>
                 <div className="text-[12.5px] font-medium text-white/90">{t.company}</div>
                 <div className="text-[10px] text-white/45">{t.industry}</div>
@@ -695,35 +717,40 @@ const CommandBoard: React.FC<{ lean?: boolean }> = ({ lean }) => (
                 <div className="text-[10px] font-semibold" style={{ color: "#45E38A" }}>{t.premium}</div>
                 <div className="mt-0.5 text-[9px] font-medium" style={{ color: t.color }}>{t.status} · <span className="text-white/35">{t.age}</span></div>
               </div>
-            </div>
+            </button>
           ))}
+          {txns.length === 0 && <div className="py-3 text-[11px] text-white/40">No disclosed deal in {sector} on this board.</div>}
         </div>
         <Link to="/console" className="mt-2 inline-block text-[11px] font-medium text-blue-300 hover:text-blue-200">View all transactions &rarr;</Link>
       </div>
-      )}
 
-      {/* ---- COL 3 · ACQUISITION DEMAND ---- */}
+      {/* ---- COL 3 · ACQUISITION DEMAND (the industry switcher) ---- */}
       <div className="px-5 py-3">
         <BoardHeader title="Acquisition Demand" right="Market Heat" />
         <div className="mt-3 space-y-2">
-          {(lean ? DEMAND.slice(0, 4) : DEMAND.slice(0, 5)).map(([label, heat, bars]) => (
-            <div key={label}>
-              <div className="flex items-center justify-between text-[10.5px]">
-                <span className="text-white/80">{label}</span>
-                <span className="text-white/45">{heat}</span>
-              </div>
-              <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full rounded-full" style={{ width: `${bars * 10}%`, background: heatGradient(bars) }} />
-              </div>
-            </div>
-          ))}
+          {covered.map(([label, heat, bars]) => {
+            const active = sector === label;
+            return (
+              <button key={label} onClick={() => toggle(label)}
+                className={`block w-full rounded-md px-2 py-1 text-left transition ${active ? "bg-blue-500/15 ring-1 ring-blue-400/40" : "hover:bg-white/5"}`}>
+                <div className="flex items-center justify-between text-[10.5px]">
+                  <span className={active ? "font-semibold text-blue-200" : "text-white/80"}>{label}</span>
+                  <span className="text-white/45">{heat}</span>
+                </div>
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full rounded-full" style={{ width: `${bars * 10}%`, background: heatGradient(bars) }} />
+                </div>
+              </button>
+            );
+          })}
         </div>
+        <div className="mt-2 text-[9px] uppercase tracking-wide text-white/30">Click a sector to drill the board</div>
       </div>
     </div>
 
     {/* ---- BOTTOM · market-activity stat bar ---- */}
-    <div className={"grid grid-cols-2 gap-px border-t border-white/10 " + (lean ? "sm:grid-cols-4" : "sm:grid-cols-5")} style={{ background: "rgba(255,255,255,.06)" }}>
-      {(lean ? LEAN_STATS : BOARD_STATS).map((s) => (
+    <div className="grid grid-cols-2 gap-px border-t border-white/10 sm:grid-cols-5" style={{ background: "rgba(255,255,255,.06)" }}>
+      {BOARD_STATS.map((s) => (
         <div key={s.label} className="px-4 py-3.5" style={{ background: "#06182E" }}>
           <div className="font-bold leading-none text-white" style={{ fontSize: 18 }}>{s.value}</div>
           <div className="mt-1.5 text-[9px] uppercase tracking-[0.12em] text-white/45">{s.label}</div>
@@ -743,6 +770,41 @@ const CommandBoard: React.FC<{ lean?: boolean }> = ({ lean }) => (
         ))}
       </div>
     </div>
+
+    {/* ---- transaction drilldown ---- */}
+    {drill && (
+      <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setDrill(null)}>
+        <div className="w-full max-w-sm rounded-xl border border-white/10 bg-[#0A1F3A] p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-300">Disclosed transaction</div>
+              <div className="mt-1 font-serif text-lg font-bold text-white">{drill.company}</div>
+              <div className="text-[11px] text-white/50">{drill.industry}</div>
+            </div>
+            <button onClick={() => setDrill(null)} className="rounded p-1 text-white/50 hover:text-white">✕</button>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3 border-t border-white/10 pt-4 text-[12px]">
+            <Drill k="Acquirer" v={drill.buyer} />
+            <Drill k="Best-match sector" v={drill.match} />
+            <Drill k="Headline" v={drill.offer} accent="#7CFF9F" />
+            <Drill k="Premium" v={drill.premium} accent="#45E38A" />
+            <Drill k="Status" v={drill.status} />
+            <Drill k="Period" v={drill.age} />
+          </div>
+          <button onClick={() => { setDrill(null); toggle(drill.industry); }} className="mt-4 w-full rounded-md bg-blue-600 py-2 text-[12px] font-semibold text-white transition hover:bg-blue-500">
+            Filter the board to {drill.industry} →
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+  );
+};
+
+const Drill: React.FC<{ k: string; v: string; accent?: string }> = ({ k, v, accent }) => (
+  <div>
+    <div className="text-[9px] uppercase tracking-wide text-white/40">{k}</div>
+    <div className="mt-0.5 font-medium" style={{ color: accent ?? "rgba(255,255,255,0.9)" }}>{v}</div>
   </div>
 );
 const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right }) => (

@@ -141,6 +141,28 @@ export const STRATEGIC_BOARD: ReadonlyArray<[string, string, number, string]> = 
     b.appetite === "active" ? "Very High" : b.appetite === "warm" ? "High" : "Medium",
   ]);
 
+export interface BoardBuyer {
+  readonly name: string;
+  readonly sector: string;                 // primary sector label (shown)
+  readonly sectors: readonly string[];     // all active sector labels (for filtering)
+  readonly match: number;
+  readonly status: string;
+}
+
+/** Strategic-buyer rows for the interactive board — carries every active
+ *  sector so the sector drilldown matches on the full mandate, not just one. */
+export const BOARD_BUYERS: readonly BoardBuyer[] = [...REGISTRY]
+  .filter((b) => b.buyerType === "strategic" || b.buyerType === "pe")
+  .sort((a, b) => b.recentActivityScore - a.recentActivityScore)
+  .slice(0, 8)
+  .map((b) => ({
+    name: shortBuyer(b.name),
+    sector: sectorLabel(b.sectorsActive[0]),
+    sectors: b.sectorsActive.map(sectorLabel),
+    match: Math.round(b.recentActivityScore * 100),
+    status: b.appetite === "active" ? "Very High" : b.appetite === "warm" ? "High" : "Medium",
+  }));
+
 /** Sector demand heat, from mandate coverage across the registry. */
 export const SECTOR_DEMAND: ReadonlyArray<[string, string, number]> = (() => {
   const freq = new Map<string, number>();
