@@ -46,7 +46,7 @@ export const NAV: NavItem[] = [
   { to: "/console/deal-room",          label: "Live Deal Room",       group: "Engage", roles: ["founder"], pro: true },
 
   // ── Negotiate (founder) ────────────────────────────────────────
-  { to: "/console/negotiator",         label: "AI Banker · Offers",   group: "Negotiate", roles: ["founder"], pro: true },
+  { to: "/console/negotiator",         label: "The Banker · Offers",  group: "Negotiate", roles: ["founder"], pro: true },
   { to: "/console/simulator",          label: "Scenario Simulator",   group: "Negotiate", roles: ["founder"], pro: true },
 
   // ── Close (founder) ────────────────────────────────────────────

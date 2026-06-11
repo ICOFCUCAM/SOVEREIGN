@@ -1,8 +1,14 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, timeAgo, preview } from "../lib/ui";
-import { SAMPLE_NDAS, NDA_ROSTER } from "../lib/engines";
-import { evaluateNdaStatus, generateBreachNotice, type NdaInstance, type NdaState } from "@exit/engines";
+import { Button, Card, Kpi, SectionHeader, Modal, Field, inputCls, timeAgo, notify } from "../lib/ui";
+import { SAMPLE_NDAS, NDA_ROSTER, LISTING_PRIVATE } from "../lib/engines";
+import {
+  evaluateNdaStatus, generateBreachNotice, rosterFor,
+  STANDARD_TEMPLATES, templateById, issueNda,
+  type NdaInstance, type NdaState,
+} from "@exit/engines";
 import BankerTake from "../components/BankerTake";
+
+const FOUNDER_PARTY = { id: "founder-helios", name: "Helios Freight, Inc.", representativeName: "Anne Kovac", representativeEmail: "anne@helios.example" };
 
 const STATUS_STYLE: Record<NdaState, string> = {
   active:            "bg-deal-600/20 text-deal-300",
@@ -50,10 +56,33 @@ const TIER_STYLE: Record<BuyerTrust["tier"], string> = {
 };
 
 const Nda: React.FC = () => {
-  const roster = NDA_ROSTER;
-  const ndas = SAMPLE_NDAS;
+  // Session-issued NDAs sit in front of the seeded portfolio so "Issue NDA"
+  // produces a real, visible counterparty row via the engine's issueNda().
+  const [issued, setIssued] = useState<NdaInstance[]>([]);
+  const ndas = useMemo(() => [...issued, ...SAMPLE_NDAS], [issued]);
+  const roster = useMemo(() => (issued.length ? rosterFor(ndas) : NDA_ROSTER), [issued, ndas]);
   const verifiedCount = ndas.filter((n) => buyerTrust(n, evaluateNdaStatus(n)).tier === "Verified").length;
   const [openId, setOpenId] = useState<string | null>(null);
+
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [issueOpen, setIssueOpen] = useState(false);
+  const [form, setForm] = useState({ templateId: STANDARD_TEMPLATES[0].id, buyerName: "", rep: "" });
+
+  const submitIssue = (): void => {
+    const buyerName = form.buyerName.trim();
+    if (!buyerName) { notify("Enter a counterparty name"); return; }
+    const nda = issueNda({
+      templateId: form.templateId,
+      listingId: LISTING_PRIVATE.listingId,
+      disclosing: FOUNDER_PARTY,
+      receiving: { id: `buyer-${Date.now().toString(36)}`, name: buyerName, representativeName: form.rep.trim() || "Authorized signatory" },
+    });
+    setIssued((prev) => [nda, ...prev]);
+    setIssueOpen(false);
+    setForm({ templateId: STANDARD_TEMPLATES[0].id, buyerName: "", rep: "" });
+    notify(`NDA issued to ${buyerName} — pending countersignature`);
+    setOpenId(nda.id);
+  };
 
   const openNda = useMemo<NdaInstance | null>(
     () => ndas.find((n) => n.id === openId) ?? null,
@@ -80,8 +109,56 @@ const Nda: React.FC = () => {
         kicker="Module 07 · Workspace"
         title="NDA &amp; Buyer Trust"
         description="The NDA is the first gate of buyer qualification — not just a document. Every counterparty earns a Buyer Trust Score from four verification gates before data-room access is granted."
-        actions={<><Button variant="ghost" onClick={preview}>Templates</Button><Button onClick={preview}>Issue NDA</Button></>}
+        actions={<><Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button><Button onClick={() => setIssueOpen(true)}>Issue NDA</Button></>}
       />
+
+      {/* ── Templates library ─────────────────────────────────────── */}
+      <Modal open={templatesOpen} onClose={() => setTemplatesOpen(false)} title="NDA templates" subtitle={`${STANDARD_TEMPLATES.length} institutional templates · issue any against a counterparty`}
+        footer={<Button onClick={() => { setTemplatesOpen(false); setIssueOpen(true); }}>Issue an NDA →</Button>}>
+        <div className="space-y-3">
+          {STANDARD_TEMPLATES.map((t) => (
+            <div key={t.id} className="rounded-lg border border-white/10 bg-ink-900/40 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-sm font-bold text-white">{t.name}</div>
+                <span className="shrink-0 rounded-full bg-white/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-white/50 ring-1 ring-white/10">{t.shape.replace(/_/g, " ")} · v{t.version}</span>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5 text-[12px] sm:grid-cols-3">
+                <div><span className="text-white/40">Clauses</span> <span className="text-white/80">{t.clauseCount}</span></div>
+                <div><span className="text-white/40">Survival</span> <span className="text-white/80">{t.defaultTerms.survivalMonths}mo</span></div>
+                <div><span className="text-white/40">Return/destroy</span> <span className="text-white/80">{t.defaultTerms.returnOrDestroyDays}d</span></div>
+                <div><span className="text-white/40">Scope</span> <span className="text-white/80">{t.defaultTerms.scope}</span></div>
+                <div><span className="text-white/40">Law</span> <span className="text-white/80">{t.defaultTerms.governingLaw}</span></div>
+                <div><span className="text-white/40">Injunctive</span> <span className="text-white/80">{t.defaultTerms.injunctiveRelief ? "yes" : "no"}</span></div>
+                {t.defaultTerms.liquidatedDamagesUsd ? <div className="col-span-2"><span className="text-white/40">Liquidated damages</span> <span className="text-white/80">USD {t.defaultTerms.liquidatedDamagesUsd.toLocaleString()}</span></div> : null}
+              </div>
+              <div className="mt-3 text-[11px] text-white/45">Carve-outs: {t.defaultTerms.carveOuts.join(" · ")}</div>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      {/* ── Issue NDA ─────────────────────────────────────────────── */}
+      <Modal open={issueOpen} onClose={() => setIssueOpen(false)} title="Issue an NDA" subtitle="Generates a pending-signature NDA against the live listing" size="md"
+        footer={<><Button variant="ghost" onClick={() => setIssueOpen(false)}>Cancel</Button><Button onClick={submitIssue}>Issue NDA</Button></>}>
+        <div className="space-y-4">
+          <Field label="Template">
+            <select className={inputCls} value={form.templateId} onChange={(e) => setForm((f) => ({ ...f, templateId: e.target.value }))}>
+              {STANDARD_TEMPLATES.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          </Field>
+          <Field label="Counterparty (buyer)">
+            <input className={inputCls} placeholder="e.g. Redwood Capital Partners" value={form.buyerName} onChange={(e) => setForm((f) => ({ ...f, buyerName: e.target.value }))} />
+          </Field>
+          <Field label="Authorized signatory" hint="Optional — defaults to 'Authorized signatory'">
+            <input className={inputCls} placeholder="e.g. Jane Okonkwo, VP CorpDev" value={form.rep} onChange={(e) => setForm((f) => ({ ...f, rep: e.target.value }))} />
+          </Field>
+          {(() => { const t = templateById(form.templateId); return t ? (
+            <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3 text-[12px] text-white/55">
+              Issues a <span className="text-white/80">{t.shape.replace(/_/g, " ")}</span> NDA — {t.defaultTerms.survivalMonths}mo survival, {t.defaultTerms.governingLaw} law, {t.clauseCount} clauses. State starts at <span className="text-loi-300">pending signature</span>.
+            </div>
+          ) : null; })()}
+        </div>
+      </Modal>
 
       <BankerTake
         next={roster.pending > 0

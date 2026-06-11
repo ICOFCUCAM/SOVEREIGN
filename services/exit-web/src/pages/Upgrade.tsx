@@ -11,7 +11,7 @@ import { homeFor } from "../lib/access";
 const PRO_FEATURES = [
   "Chief Investment Banker — your always-on transaction desk",
   "Autonomous Exit — the seven agents run the process end to end",
-  "AI Banker, Negotiator & Scenario Simulator",
+  "The Banker, Negotiator & Scenario Simulator",
   "Due Diligence, Data Room, Documents & Closing",
   "Buyer Intelligence, Live Deal Room & WealthOS",
   "Unlimited exports, outreach and active deals",

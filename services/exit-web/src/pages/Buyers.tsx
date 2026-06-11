@@ -79,7 +79,7 @@ const Buyers: React.FC = () => {
             buyer={<><span className="text-white">{top.buyer.name}</span> — {it.label.toLowerCase()} interest at {it.pct}%, {top.buyer.buyerType.replace(/_/g, " ")}.</>}
             automate={<>ExitOS drafts a personalized warm introduction for each buyer and routes it through the banker.</>}
             impact={<>{fmtMoney(topCheck)}</>}
-            cta={{ label: "Send via AI Banker", to: "/console/banker" }}
+            cta={{ label: "Send via The Banker", to: "/console/banker" }}
           />
         );
       })()}

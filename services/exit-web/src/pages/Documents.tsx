@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney, preview } from "../lib/ui";
+import { Button, Card, Kpi, SectionHeader, Modal, fmtMoney } from "../lib/ui";
 import { useMemorandum, VALUATION_STRATEGIC } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import { docToMarkdown, docFilename, sendDeliverable, downloadDeliverable } from "../lib/deliverables";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -89,14 +90,44 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
   { key: "dd_room_index",      label: "Data Room Index",                     description: "Index of the diligence package contents organised by package.",    accent: "text-white/65" },
 ];
 
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [sent, setSent] = useState<Set<string>>(new Set());
+  const markSent = (k: MemorandumKind, text: string, filename: string): void => {
+    sendDeliverable(filename, text);
+    setSent((prev) => new Set(prev).add(k));
+  };
+
   return (
     <div>
       <SectionHeader
         kicker="Module 06 · Workspace"
         title="Document Generator"
         description="Term sheets, LOIs, SPAs, CIMs and buyer teasers — generated from the company profile and the valuation, readiness, buyer and diligence engines."
-        actions={<Button variant="ghost" onClick={preview}>Library</Button>}
+        actions={<>
+          <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>
+          {doc && <Button variant="ghost" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download .md</Button>}
+          {doc && <Button onClick={() => markSent(doc.kind, docToMarkdown(doc), docFilename(doc))}>{sent.has(doc.kind) ? "Sent ✓ · resend" : "Send to buyer"}</Button>}
+        </>}
       />
+
+      {/* ── Document library ──────────────────────────────────────── */}
+      <Modal open={libraryOpen} onClose={() => setLibraryOpen(false)} title="Document library" subtitle={`${KINDS.length} acquisition documents — generated from the engines`}>
+        <div className="space-y-2">
+          {KINDS.map((k) => (
+            <button key={k.key} onClick={() => { setKind(k.key); setLibraryOpen(false); }}
+              className={`flex w-full items-center justify-between gap-3 rounded-lg border p-3.5 text-left transition ${kind === k.key ? "border-deal-400/50 bg-deal-600/10" : "border-white/10 bg-ink-900/40 hover:border-white/20"}`}>
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-white">{k.label}</div>
+                <div className="mt-0.5 text-[11px] leading-snug text-white/50">{k.description}</div>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                {sent.has(k.key) && <span className="rounded-full bg-deal-600/20 px-2 py-0.5 text-[10px] font-semibold uppercase text-deal-300 ring-1 ring-deal-400/40">Sent</span>}
+                {kind === k.key && <span className="text-[11px] font-semibold uppercase tracking-wide text-deal-300">Open ✓</span>}
+              </div>
+            </button>
+          ))}
+        </div>
+      </Modal>
 
       <BankerTake
         next={flags.length > 0
