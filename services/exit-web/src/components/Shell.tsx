@@ -19,6 +19,8 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const role: Role = session?.role ?? "founder";
   const plan: Plan = session?.plan ?? "free";
   const items = navForRole(role);
+  const [noticeDismissed, setNoticeDismissed] = useState(false);
+  const showStarterNotice = role === "founder" && plan === "starter" && !noticeDismissed;
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => { setNavOpen(false); }, [loc.pathname, loc.hash]);
@@ -109,9 +111,9 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div className="truncate text-xs font-medium text-white/80">{session?.email}</div>
             <div className="mb-2 flex items-center gap-1.5 text-[10px] text-white/50">
               <span className="rounded bg-white/10 px-1.5 py-0.5 font-semibold uppercase tracking-wide text-white/70">{ROLE_LABEL[role]}</span>
-              <span className={`rounded px-1.5 py-0.5 font-semibold uppercase tracking-wide ${plan === "pro" ? "bg-deal-600/25 text-deal-300" : "bg-white/10 text-white/55"}`}>{plan}</span>
+              <span className={`rounded px-1.5 py-0.5 font-semibold uppercase tracking-wide ${plan === "pro" ? "bg-deal-600/25 text-deal-300" : plan === "starter" ? "bg-loi-500/20 text-loi-300" : "bg-white/10 text-white/55"}`}>{plan}</span>
             </div>
-            {plan === "free" && (role === "founder" || role === "buyer") && (
+            {plan !== "pro" && (role === "founder" || role === "buyer") && (
               <Link to="/console/upgrade" className="mb-2 block text-xs font-semibold text-deal-300 hover:text-deal-200">Upgrade to Pro →</Link>
             )}
             <button onClick={() => { signOut(); nav("/"); }} className="rounded text-xs font-semibold text-white/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">Sign out</button>
@@ -120,6 +122,15 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </aside>
 
         <main className="flex-1 overflow-y-auto">
+          {showStarterNotice && (
+            <div className="border-b border-loi-400/30 bg-loi-500/10">
+              <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
+                <span className="text-[13px] text-loi-100">🔔 <span className="font-semibold">Buyers are reviewing your listing.</span> Upgrade to Pro to open conversations, run outreach and continue with the agents.</span>
+                <Link to="/console/upgrade" className="ml-auto rounded-md bg-deal-600 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-deal-500">Upgrade to Pro →</Link>
+                <button onClick={() => setNoticeDismissed(true)} aria-label="Dismiss" className="rounded p-1 text-white/45 hover:text-white">✕</button>
+              </div>
+            </div>
+          )}
           <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</div>
         </main>
       </div>

@@ -22,7 +22,8 @@ interface AuthCtx {
   session: Session | null;
   signIn: (email: string, password: string, role?: Role, plan?: Plan) => Promise<void>;
   signOut: () => void;
-  upgrade: () => void;
+  upgrade: () => void;                 // → pro (kept for existing callers)
+  upgradeTo: (plan: Plan) => void;     // set any plan (starter / pro)
   has: (scope: string) => boolean;
   loading: boolean;
   error: string | null;
@@ -82,7 +83,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signOut = useCallback(() => setSession(null), []);
-  const upgrade = useCallback(() => setSession((s) => (s ? { ...s, plan: "pro" } : s)), []);
+  const upgradeTo = useCallback((plan: Plan) => setSession((s) => (s ? { ...s, plan } : s)), []);
+  const upgrade = useCallback(() => upgradeTo("pro"), [upgradeTo]);
 
   useEffect(() => {
     if (!session) return;
@@ -93,8 +95,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const has = useCallback((scope: string) => !!session?.scopes.includes(scope), [session]);
 
-  const value = useMemo<AuthCtx>(() => ({ session, signIn, signOut, upgrade, has, loading, error }),
-    [session, signIn, signOut, upgrade, has, loading, error]);
+  const value = useMemo<AuthCtx>(() => ({ session, signIn, signOut, upgrade, upgradeTo, has, loading, error }),
+    [session, signIn, signOut, upgrade, upgradeTo, has, loading, error]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 

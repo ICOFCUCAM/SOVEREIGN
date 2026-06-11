@@ -2,70 +2,94 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, SectionHeader, Button } from "../lib/ui";
 import { useAuth } from "../lib/auth";
-import { homeFor } from "../lib/access";
+import { homeFor, type Plan } from "../lib/access";
 
-// Paywall — shown when a free founder/buyer hits a pro-only surface. Upgrading
-// flips the session plan to pro (demo) and drops them straight into the feature
-// they wanted. The real billing wires through here later.
+// In-console paywall — shown when a plan hits a surface it can't reach. Three
+// plans: Free (watch), Starter ($99 — upload, list, get discovered, run
+// Autonomous Exit to "buyers found"), and Pro (the full transaction desk).
+// Choosing a plan flips the session and drops the founder back into the work.
 
-const PRO_FEATURES = [
-  "Chief Investment Banker — your always-on transaction desk",
-  "Autonomous Exit — the seven agents run the process end to end",
-  "The Banker, Negotiator & Scenario Simulator",
-  "Due Diligence, Data Room, Documents & Closing",
-  "Buyer Intelligence, Live Deal Room & WealthOS",
-  "Unlimited exports, outreach and active deals",
-];
+interface Tier {
+  readonly plan: Plan;
+  readonly name: string;
+  readonly price: string;
+  readonly priceSub: string;
+  readonly blurb: string;
+  readonly features: readonly string[];
+  readonly highlight?: boolean;
+}
 
 const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
-  const { session, upgrade } = useAuth();
+  const { session, upgradeTo } = useAuth();
   const navigate = useNavigate();
   const role = session?.role ?? "founder";
+  const current = session?.plan ?? "free";
+
+  const proPrice = role === "buyer" ? "$999" : "$1,499";
+  const TIERS: readonly Tier[] = [
+    { plan: "free", name: "Free", price: "$0", priceSub: "forever", blurb: "Watch your position and the market — read-only.",
+      features: ["Dashboard & Exit Readiness Score", "Valuation & Cap Table (view)", "Marketplace & Acquisition Radar (browse)", "Pipeline (view)"] },
+    { plan: "starter", name: "Founder Starter", price: "$99", priceSub: "/ month", blurb: "Upload, get valued, and get discovered by buyers.",
+      features: ["Everything in Free", "Upload documents → Diligence & Data Room", "Generate the teaser & list the company", "Buyer Intelligence — matched acquirers", "Autonomous Exit up to buyers found"], highlight: current === "free" },
+    { plan: "pro", name: "Founder Pro", price: proPrice, priceSub: "/ month", blurb: "The full transaction desk — communicate, negotiate, close.",
+      features: ["Everything in Starter", "Chief Investment Banker + The Banker outreach", "NDA, Live Deal Room & buyer communication", "Negotiator, Simulator & Closing Center", "WealthOS · unlimited exports & active deals"], highlight: current !== "free" },
+  ];
+
+  const act = (plan: Plan): void => {
+    if (plan === "free") return;
+    upgradeTo(plan);
+    navigate(homeFor(role));
+  };
 
   return (
     <div>
       <SectionHeader
         kicker="Subscription"
-        title="Upgrade to Pro"
+        title="Choose your plan"
         description={feature
-          ? `${feature} is a Pro feature. Your current plan can watch the read-only surfaces — upgrade to act.`
-          : "Your current plan can watch the read-only surfaces — upgrade to act."}
+          ? `${feature} needs a higher plan. Starter gets you listed and discovered; Pro runs the whole deal.`
+          : "Free watches the market. Starter gets you valued, listed and discovered. Pro runs the whole deal."}
       />
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-        <Card className="p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">Free</div>
-          <div className="mt-2 font-mono text-3xl font-bold text-white">$0</div>
-          <p className="mt-2 text-[13px] text-white/55">Watch your position and the market — read-only.</p>
-          <ul className="mt-4 space-y-2 text-[13px] text-white/70">
-            {["Dashboard & Exit Readiness Score", "Valuation & Cap Table (view)", "Marketplace & Acquisition Radar (browse)", "Pipeline (view)"].map((f) => (
-              <li key={f} className="flex items-baseline gap-2"><span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-white/40" />{f}</li>
-            ))}
-          </ul>
-          <div className="mt-5 text-[11px] uppercase tracking-wide text-white/40">Your current plan</div>
-        </Card>
+      <div className="grid gap-5 lg:grid-cols-3">
+        {TIERS.map((t) => {
+          const isCurrent = t.plan === current;
+          return (
+            <Card key={t.plan} className={`overflow-hidden p-0 ${t.highlight ? "ring-1 ring-deal-400/40" : ""}`}>
+              <div className={`px-6 py-5 ${t.plan === "pro" ? "bg-gradient-to-r from-deal-600/20 to-transparent" : t.plan === "starter" ? "bg-gradient-to-r from-loi-500/15 to-transparent" : ""}`}>
+                <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${t.plan === "pro" ? "text-deal-300" : t.plan === "starter" ? "text-loi-300" : "text-white/45"}`}>{t.name}</div>
+                <div className="mt-1 flex items-baseline gap-2">
+                  <span className="font-mono text-3xl font-bold text-white">{t.price}</span>
+                  <span className="text-[12px] text-white/50">{t.priceSub}</span>
+                </div>
+                <p className="mt-2 text-[12.5px] leading-relaxed text-white/55">{t.blurb}</p>
+              </div>
+              <div className="p-6">
+                <ul className="space-y-2 text-[13px] text-white/80">
+                  {t.features.map((f) => (
+                    <li key={f} className="flex items-baseline gap-2"><span className={`mt-0.5 ${t.plan === "free" ? "text-white/40" : "text-deal-300"}`}>{t.plan === "free" ? "•" : "✓"}</span>{f}</li>
+                  ))}
+                </ul>
+                <div className="mt-6">
+                  {isCurrent ? (
+                    <div className="text-[11px] font-semibold uppercase tracking-wide text-white/40">Your current plan</div>
+                  ) : t.plan === "free" ? (
+                    <div className="text-[11px] uppercase tracking-wide text-white/35">Downgrade in billing</div>
+                  ) : (
+                    <Button variant={t.plan === "pro" ? "primary" : "ghost"} onClick={() => act(t.plan)}>
+                      {t.plan === "starter" ? "Start with Starter →" : "Upgrade to Pro →"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
 
-        <Card className="overflow-hidden p-0 ring-1 ring-deal-400/40">
-          <div className="bg-gradient-to-r from-deal-600/20 to-transparent px-6 py-5">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Pro</div>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="font-mono text-3xl font-bold text-white">{role === "buyer" ? "$999" : "$1,499"}</span>
-              <span className="text-[12px] text-white/50">/ month</span>
-            </div>
-          </div>
-          <div className="p-6">
-            <ul className="space-y-2 text-[13px] text-white/80">
-              {PRO_FEATURES.map((f) => (
-                <li key={f} className="flex items-baseline gap-2"><span className="mt-0.5 text-deal-300">✓</span>{f}</li>
-              ))}
-            </ul>
-            <div className="mt-6 flex flex-wrap gap-2.5">
-              <Button onClick={() => { upgrade(); navigate(homeFor(role)); }}>Upgrade to Pro →</Button>
-              <Button variant="ghost" onClick={() => navigate("/pricing")}>See full pricing</Button>
-            </div>
-            <p className="mt-3 text-[11px] text-white/40">Demo: upgrading unlocks every pro surface instantly for this session.</p>
-          </div>
-        </Card>
+      <div className="mt-5 flex items-center gap-3">
+        <Button variant="ghost" onClick={() => navigate("/pricing")}>See full pricing</Button>
+        <p className="text-[11px] text-white/40">Demo: choosing a plan switches your session instantly.</p>
       </div>
     </div>
   );

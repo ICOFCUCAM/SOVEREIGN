@@ -6,21 +6,26 @@
 // WealthOS …) are pro-only. Admin/superadmin bypass the subscription gate.
 
 export type Role = "founder" | "buyer" | "admin" | "superadmin";
-export type Plan = "free" | "pro";
+// free  — watch the read-only surfaces
+// starter ($99) — upload, get valued, get listed and run Autonomous Exit up to
+//   the point buyers are found; communication + execution stay locked
+// pro   — the full transaction desk
+export type Plan = "free" | "starter" | "pro";
 
 export interface NavItem {
   to: string;
   label: string;
   group: string;
   roles: Role[];     // which roles see this item
-  pro?: boolean;     // requires a pro subscription (founders/buyers)
+  pro?: boolean;     // requires a paid subscription (founders/buyers)
+  starter?: boolean; // a pro surface that the $99 starter plan also unlocks
 }
 
 export const NAV: NavItem[] = [
   // ── Founder · Overview ─────────────────────────────────────────
   { to: "/console/commander",          label: "Chief Investment Banker", group: "Overview", roles: ["founder"], pro: true },
   { to: "/console",                    label: "Dashboard",            group: "Overview", roles: ["founder"] },
-  { to: "/console/autopilot",          label: "Autonomous Exit",      group: "Overview", roles: ["founder"], pro: true },
+  { to: "/console/autopilot",          label: "Autonomous Exit",      group: "Overview", roles: ["founder"], pro: true, starter: true },
   { to: "/console/network",            label: "Network Intelligence", group: "Overview", roles: ["founder"], pro: true },
 
   // ── Buyer · Overview ───────────────────────────────────────────
@@ -29,12 +34,12 @@ export const NAV: NavItem[] = [
   // ── Prepare (founder) ──────────────────────────────────────────
   { to: "/console/valuation",          label: "Valuation",            group: "Prepare", roles: ["founder"] },
   { to: "/console/readiness",          label: "Readiness",            group: "Prepare", roles: ["founder"] },
-  { to: "/console/diligence-ai",       label: "Diligence",            group: "Prepare", roles: ["founder"], pro: true },
+  { to: "/console/diligence-ai",       label: "Diligence",            group: "Prepare", roles: ["founder"], pro: true, starter: true },
   { to: "/console/investors",          label: "Cap Table",            group: "Prepare", roles: ["founder"] },
   { to: "/console/exit-timing",        label: "Exit Timing",          group: "Prepare", roles: ["founder"], pro: true },
 
   // ── Discover (founder) ─────────────────────────────────────────
-  { to: "/console/buyer-copilot",      label: "Buyer Intelligence",   group: "Discover", roles: ["founder"], pro: true },
+  { to: "/console/buyer-copilot",      label: "Buyer Intelligence",   group: "Discover", roles: ["founder"], pro: true, starter: true },
   { to: "/console/buyers",             label: "Buyer Profiles",       group: "Discover", roles: ["founder"] },
   { to: "/console/marketplace",        label: "Marketplace",          group: "Discover", roles: ["founder"] },
   { to: "/console/intelligence",       label: "Acquisition Radar",    group: "Discover", roles: ["founder"] },
@@ -51,8 +56,8 @@ export const NAV: NavItem[] = [
 
   // ── Close (founder) ────────────────────────────────────────────
   { to: "/console/closing",            label: "Closing Center",       group: "Close", roles: ["founder"], pro: true },
-  { to: "/console/data-room",          label: "Data Room",            group: "Close", roles: ["founder"], pro: true },
-  { to: "/console/documents",          label: "Documents",            group: "Close", roles: ["founder"], pro: true },
+  { to: "/console/data-room",          label: "Data Room",            group: "Close", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/documents",          label: "Documents",            group: "Close", roles: ["founder"], pro: true, starter: true },
   { to: "/console/closing#signatures", label: "Signatures",           group: "Close", roles: ["founder"], pro: true },
   { to: "/console/closing#escrow",     label: "Escrow",               group: "Close", roles: ["founder"], pro: true },
 
@@ -100,8 +105,15 @@ export function canAccess(path: string, role: Role): boolean {
 export function needsUpgrade(path: string, role: Role, plan: Plan): boolean {
   if (role === "admin" || role === "superadmin") return false;
   if (plan === "pro") return false;
-  return !!entryFor(path, role)?.pro;
+  const e = entryFor(path, role);
+  if (!e?.pro) return false;
+  // Starter unlocks the prepare/list/discover surfaces; everything else is Pro.
+  if (plan === "starter" && e.starter) return false;
+  return true;
 }
+
+export const PLAN_LABEL: Record<Plan, string> = { free: "Free", starter: "Starter", pro: "Pro" };
+export const PLAN_PRICE: Record<Plan, string> = { free: "$0", starter: "$99", pro: "$1,499" };
 
 export function featureLabel(path: string, role: Role): string | undefined {
   const p = base(path);

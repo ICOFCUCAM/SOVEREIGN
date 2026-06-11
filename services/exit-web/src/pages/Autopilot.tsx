@@ -5,6 +5,7 @@ import { VALUATION_STRATEGIC, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON } from
 import { discoverFindings, buildSellerReport } from "../lib/diligence-intel";
 import { briefMarkdown, buyerListCsv, sendDeliverable, downloadDeliverable } from "../lib/deliverables";
 import { emitTelemetry } from "../lib/telemetry";
+import { useAuth } from "../lib/auth";
 import type { BuyerCandidate } from "@exit/engines";
 
 // Autonomous Exit Mode — "Sell my company," not "manage the sale." Seven
@@ -191,6 +192,12 @@ const Autopilot: React.FC = () => {
     },
   ];
 
+  const { session, upgradeTo } = useAuth();
+  // On the $99 Starter plan the agents run only as far as "buyers found" — the
+  // Buyer Discovery gate — then the founder must upgrade to Pro to continue.
+  const isStarter = session?.plan === "starter";
+  const GATE = AGENTS.findIndex((a) => a.id === "discovery");
+
   const [started, setStarted] = useState(false);
   const [statuses, setStatuses] = useState<AgentStatus[]>(() => AGENTS.map(() => "queued"));
   const [reviewIdx, setReviewIdx] = useState<number | null>(null);
@@ -214,12 +221,26 @@ const Autopilot: React.FC = () => {
 
   const approve = (i: number): void => {
     emitTelemetry("autopilot_approved", { agent: AGENTS[i].id, step: i }, "/console/autopilot");
+    // Starter plan: approving the Buyer Discovery step finds the buyers and then
+    // pauses — the remaining agents are Pro-gated.
+    if (isStarter && i === GATE) {
+      setStatuses((prev) => prev.map((s, idx) => (idx === i ? "done" : s)));
+      return;
+    }
     setStatuses((prev) => prev.map((s, idx) => {
       if (idx === i) return "done";
       if (idx === i + 1) return "working";
       return s;
     }));
   };
+
+  // Buyers have been found and the founder is on Starter — unlock Pro and let
+  // the rest of the process run.
+  const unlockAndContinue = (): void => {
+    upgradeTo("pro");
+    setStatuses((prev) => prev.map((s, idx) => (idx === GATE + 1 && s === "queued" ? "working" : s)));
+  };
+  const starterGated = isStarter && statuses[GATE] === "done";
 
   const send = (a: AgentDef): void => {
     sendDeliverable(a.deliverable.filename, a.deliverable.build());
@@ -237,7 +258,9 @@ const Autopilot: React.FC = () => {
       <SectionHeader
         kicker="Phase 3 · Autonomous"
         title="Autonomous Exit"
-        description="You uploaded revenue, financials and a cap table. ExitOS does the rest — value, readiness, buyers, data room, documents, outreach, negotiation, closing and wealth. Your job is three words: approve, approve, approve."
+        description={isStarter
+          ? "On Starter, the agents take you from your uploads through valuation, listing and buyer discovery — and stop the moment buyers are found. Upgrade to Pro to run outreach, negotiation, closing and wealth."
+          : "You uploaded revenue, financials and a cap table. ExitOS does the rest — value, readiness, buyers, data room, documents, outreach, negotiation, closing and wealth. Your job is three words: approve, approve, approve."}
       />
 
       {/* ── Review / Adjust modal ─────────────────────────────────── */}
@@ -284,7 +307,7 @@ const Autopilot: React.FC = () => {
               {!started && <Button onClick={start}>Start Exit Process →</Button>}
               {started && !allDone && (
                 <span className="inline-flex items-center gap-2 rounded-md bg-loi-500/15 px-3 py-2 text-[12px] font-semibold text-loi-200 ring-1 ring-loi-400/40">
-                  ● Running · {awaitingIndex >= 0 ? `${AGENTS[awaitingIndex].name} needs you` : "agents working"}
+                  ● {starterGated ? "Buyers found · upgrade to continue" : `Running · ${awaitingIndex >= 0 ? `${AGENTS[awaitingIndex].name} needs you` : "agents working"}`}
                 </span>
               )}
               {allDone && (
@@ -321,12 +344,13 @@ const Autopilot: React.FC = () => {
         {AGENTS.map((a, i) => {
           const status = statuses[i];
           const revealed = status !== "queued";
+          const locked = isStarter && i > GATE;
           return (
-            <Card key={a.id} className={`p-5 transition ${status === "awaiting" ? "ring-1 ring-deal-400/40" : ""}`}>
+            <Card key={a.id} className={`p-5 transition ${status === "awaiting" ? "ring-1 ring-deal-400/40" : ""} ${locked ? "opacity-55" : ""}`}>
               <div className="flex items-start gap-4">
                 <div className="flex flex-col items-center">
                   <span className={`flex h-9 w-9 items-center justify-center rounded-xl text-[13px] font-bold ring-1 ${STATUS_STYLE[status]}`}>
-                    {status === "done" ? "✓" : status === "working" ? <Spinner /> : i + 1}
+                    {locked ? "🔒" : status === "done" ? "✓" : status === "working" ? <Spinner /> : i + 1}
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">
@@ -335,9 +359,11 @@ const Autopilot: React.FC = () => {
                       <span className="text-sm font-bold text-white">{a.name}</span>
                       <span className="ml-2 text-[12px] text-white/45">{a.role}</span>
                     </div>
-                    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${STATUS_STYLE[status]}`}>
-                      {status === "working" ? "Working…" : STATUS_LABEL[status]}
-                    </span>
+                    {locked
+                      ? <span className="rounded-full bg-loi-500/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-loi-300 ring-1 ring-loi-400/40">Pro</span>
+                      : <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${STATUS_STYLE[status]}`}>
+                          {status === "working" ? "Working…" : STATUS_LABEL[status]}
+                        </span>}
                   </div>
 
                   {revealed && (
@@ -375,6 +401,31 @@ const Autopilot: React.FC = () => {
           );
         })}
       </div>
+
+      {/* ── Starter gate — buyers found, upgrade to continue ─────── */}
+      {starterGated && (
+        <Card className="mt-8 overflow-hidden p-0 ring-1 ring-deal-400/40">
+          <div className="border-b border-white/10 bg-gradient-to-r from-deal-600/20 to-transparent px-6 py-5">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Buyers found</div>
+            <div className="mt-1 flex flex-wrap items-baseline gap-3">
+              <span className="font-mono text-2xl font-bold text-deal-300">{shortlist.length} matched acquirers</span>
+              <span className="text-[13px] text-white/60">are ready to engage your listing</span>
+            </div>
+          </div>
+          <div className="p-6">
+            <h3 className="font-serif text-xl font-bold text-white">This is where Starter ends — and the deal begins.</h3>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-white/65">
+              Your $99 Starter plan took you from uploads to a priced, listed company with {shortlist.length} matched
+              buyers. To open conversations, run outreach, negotiate offers and close — and let the remaining agents
+              finish the job — upgrade to Pro.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2.5">
+              <Button onClick={unlockAndContinue}>Upgrade to Pro & continue →</Button>
+              <Link to="/pricing" className="inline-flex items-center rounded-md px-4 py-2 text-sm font-semibold text-white/70 ring-1 ring-white/15 transition hover:bg-white/5">See pricing</Link>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* ── Deliverables produced ────────────────────────────────── */}
       {doneCount > 0 && (
