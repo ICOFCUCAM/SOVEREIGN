@@ -91,6 +91,37 @@ export async function fetchLatestFilm(mediaClass?: MediaClass): Promise<MediaRow
   return (data as MediaRow | null) ?? null;
 }
 
+/** Every published row with a playable asset, newest first — the film library. */
+export async function fetchFilmLibrary(): Promise<MediaRow[]> {
+  const { data, error } = await supabase
+    .from('media')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error || !data) return [];
+  return (data as MediaRow[]).filter((r) => r.published !== false && hasAsset(r));
+}
+
+export interface RenderingJob {
+  id: string;
+  kind: string;
+  title: string | null;
+  media_class: string | null;
+  created_at: string;
+}
+
+/** Films currently moving through the render pipeline — the production feed. */
+export async function fetchRenderingJobs(): Promise<RenderingJob[]> {
+  const { data, error } = await supabase
+    .from('pipeline_jobs')
+    .select('id, kind, title, media_class, created_at')
+    .in('kind', ['video', 'film'])
+    .eq('status', 'processing')
+    .order('created_at', { ascending: false })
+    .limit(12);
+  if (error || !data) return [];
+  return data as RenderingJob[];
+}
+
 export interface PublishInput {
   jobId: string;
   title: string;
