@@ -160,7 +160,9 @@ const ChannelPage: React.FC = () => {
 
   const contentFor = (ch: Channel) => {
     const m = media[ch.id];
-    const fallback: PlayableMedia[] = ch.episodes.map((e) => ({ title: e.title, meta: e.meta, len: e.len }));
+    // Planned programme — until real renders publish, the slate carries no
+    // fabricated runtimes; each row reads "in production".
+    const fallback: PlayableMedia[] = ch.episodes.map((e) => ({ title: e.title, meta: e.meta, len: '' }));
     return {
       feature: m?.feature?.title || ch.feature,
       featureVideo: m?.feature?.youtubeId || ch.video,
@@ -241,7 +243,9 @@ const ChannelPage: React.FC = () => {
                               <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/35">{ep.meta}</div>
                             </div>
                           </div>
-                          <span className="text-[11px] font-mono tabular-nums text-white/40 shrink-0">{ep.len}</span>
+                          <span className="text-[11px] font-mono tabular-nums text-white/40 shrink-0">
+                            {ep.len || ((ep.videoUrl || ep.youtubeId) ? '' : <span className="text-[9px] uppercase tracking-wider text-white/30">in production</span>)}
+                          </span>
                         </button>
                       ))}
                     </div>
