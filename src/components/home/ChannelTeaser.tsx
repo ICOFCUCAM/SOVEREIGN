@@ -12,21 +12,26 @@ const CLASSES = [
 
 const ChannelTeaser: React.FC = () => {
   const [covers, setCovers] = useState<Record<string, string>>({});
+  const [counts, setCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from('narratives')
-        .select('media_class, cover_image_url')
-        .eq('published', true)
-        .not('cover_image_url', 'is', null)
-        .order('sort_order', { ascending: true });
-      if (!data) return;
+      // Posters from published renders take precedence; narrative covers fill gaps.
+      const [med, nar] = await Promise.all([
+        supabase.from('media').select('media_class, poster_url, video_url, youtube_id').order('created_at', { ascending: false }),
+        supabase.from('narratives').select('media_class, cover_image_url').eq('published', true).not('cover_image_url', 'is', null).order('sort_order', { ascending: true }),
+      ]);
       const map: Record<string, string> = {};
-      for (const r of data as Array<{ media_class: string | null; cover_image_url: string | null }>) {
+      const n: Record<string, number> = {};
+      for (const r of (med.data || []) as Array<{ media_class: string; poster_url: string | null; video_url: string | null; youtube_id: string | null }>) {
+        if (r.video_url || r.youtube_id) n[r.media_class] = (n[r.media_class] || 0) + 1;
+        if (r.poster_url && !map[r.media_class]) map[r.media_class] = r.poster_url;
+      }
+      for (const r of (nar.data || []) as Array<{ media_class: string | null; cover_image_url: string | null }>) {
         if (r.media_class && r.cover_image_url && !map[r.media_class]) map[r.media_class] = r.cover_image_url;
       }
       setCovers(map);
+      setCounts(n);
     })();
   }, []);
 
@@ -69,7 +74,7 @@ const ChannelTeaser: React.FC = () => {
                 <span className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: `${c.accent}1a`, border: `1px solid ${c.accent}33` }}>
                   <Icon className="w-5 h-5" style={{ color: c.accent }} />
                 </span>
-                <div className="text-[9px] font-mono uppercase tracking-[0.22em]" style={{ color: c.accent }}>{c.cls}</div>
+                <div className="text-[9px] font-mono uppercase tracking-[0.22em]" style={{ color: c.accent }}>{c.cls}{counts[c.id] ? ` · ${counts[c.id]} ${counts[c.id] === 1 ? 'film' : 'films'}` : ''}</div>
                 <div className="font-display text-xl font-bold text-white tracking-tight mt-1">{c.label}</div>
                 <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all mt-4" />
               </div>
