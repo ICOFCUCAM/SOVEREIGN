@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { MarketingChrome, Glyph, Mark, Arrow } from "../components/MarketingChrome";
 import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, STRATEGIC_BOARD, SECTOR_DEMAND, HISTORY_FMT, REGISTRY_CARDS } from "../lib/market-stats";
 
@@ -589,7 +589,7 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
             </div>
           ))}
         </div>
-        <button className="mt-2 text-[11px] font-medium text-blue-300 hover:text-blue-200">View all buyers &rarr;</button>
+        <Link to="/console" className="mt-2 inline-block text-[11px] font-medium text-blue-300 hover:text-blue-200">View all buyers &rarr;</Link>
       </div>
 
       {/* ---- COL 2 · LIVE TRANSACTIONS (full board only) ---- */}
@@ -626,7 +626,7 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
             </div>
           ))}
         </div>
-        <button className="mt-2 text-[11px] font-medium text-blue-300 hover:text-blue-200">View all transactions &rarr;</button>
+        <Link to="/console" className="mt-2 inline-block text-[11px] font-medium text-blue-300 hover:text-blue-200">View all transactions &rarr;</Link>
       </div>
       )}
 
