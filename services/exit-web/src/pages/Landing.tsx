@@ -385,7 +385,7 @@ const Landing: React.FC = () => {
           <div className="px-6 py-14 lg:px-12 lg:py-20">
             <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Global reach.<br />Institutional network.</h2>
             <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
-              ExitOS connects founders with buyers across <span className="font-semibold text-ink-800">125+ countries</span> and every major industry.
+              ExitOS connects founders with acquirer mandates across <span className="font-semibold text-ink-800">{MARKET_FMT.geographies} jurisdictions</span> and every major industry.
             </p>
             <div className="mt-10 grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4">
               {GLOBAL_STATS.map((s) => (
