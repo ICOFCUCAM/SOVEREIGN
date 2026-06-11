@@ -166,10 +166,11 @@ const Landing: React.FC = () => {
             <div className="pointer-events-none absolute left-0 right-0 top-[11px] hidden h-px lg:block" style={{ background: "linear-gradient(90deg, transparent, rgba(96,165,250,.45) 6%, rgba(96,165,250,.45) 94%, transparent)" }} />
             <div className="pointer-events-none absolute top-[7px] hidden h-2 w-2 rounded-full lg:block" style={{ background: "#7CFF9F", boxShadow: "0 0 8px 2px rgba(124,255,159,.8)", animation: "exTravel 7s linear infinite" }} />
             <ol className="grid grid-cols-2 gap-y-6 sm:grid-cols-4 lg:grid-cols-8">
-              {LIFECYCLE.map((s, i) => (
+              {LIFECYCLE.map(([s, w], i) => (
                 <li key={s} className="relative flex flex-col items-center text-center">
                   <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#0A1F3A] font-mono text-[10px] font-bold text-blue-200 ring-1 ring-blue-400/40">{i + 1}</span>
                   <span className="mt-2.5 px-1 text-[11px] font-semibold leading-tight text-white/85">{s}</span>
+                  <span className="mt-0.5 font-mono text-[9px] uppercase tracking-wide text-blue-300/60">{w}</span>
                 </li>
               ))}
             </ol>
@@ -389,7 +390,7 @@ const Landing: React.FC = () => {
             <OfferTable />
             <div>
               <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Negotiate with clarity.<br />Close with confidence.</h2>
-              <p className="mt-3 text-base leading-relaxed text-slate-600">AI-powered negotiation support to maximise your outcome and minimise your risk.</p>
+              <p className="mt-3 text-base leading-relaxed text-slate-600">Every bid scored against your reservation lines — structure, certainty and counterparty record, not just headline price.</p>
               <a href="#" className="mt-3 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">See Negotiation Engine &rarr;</a>
               <ul className="mt-7 space-y-5">
                 {NEGOTIATION_FEATURES.map((f) => (
@@ -472,6 +473,9 @@ const Landing: React.FC = () => {
           <div className="text-center">
             <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">The cost of running blind</div>
             <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Why founders lose millions on exit.</h2>
+            <p className="mx-auto mt-3 max-w-xl text-[13.5px] leading-relaxed text-slate-500">
+              Across the disclosed transactions we index, the median premium over reference is <span className="font-semibold text-ink-800">{DEAL_INTEL_FMT.medianPremium}</span> and the median announce-to-close period is <span className="font-semibold text-ink-800">{DEAL_INTEL_FMT.medianClose}</span>. Preparation and leverage decide which side of the median you land on.
+            </p>
           </div>
           {/* comparison matrix: Traditional vs ExitOS */}
           <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
@@ -523,6 +527,25 @@ const Landing: React.FC = () => {
             ))}
           </div>
           <div className="mt-6 text-center text-[11px] text-slate-400">Source-referenced from public filings and disclosures · {HISTORY_FMT.events} events indexed · {HISTORY_FMT.disclosedValue} disclosed value · {HISTORY_FMT.closed} closed</div>
+        </div>
+      </section>
+
+      {/* ===== 9D · GOVERNANCE & CONTROLS ===== */}
+      <section className="border-b border-white/10" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
+        <div className="mx-auto max-w-[1320px] px-6 py-12 lg:px-10">
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-300">Governance &amp; controls</div>
+            <div className="text-[11px] text-white/40">The conditions under which a transaction is allowed to proceed</div>
+          </div>
+          <div className="mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-2xl lg:grid-cols-5" style={{ background: "rgba(255,255,255,.08)" }}>
+            {GOVERNANCE.map((g) => (
+              <div key={g.title} className="px-5 py-5" style={{ background: "rgba(6,24,46,.92)" }}>
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/15 text-blue-300 ring-1 ring-blue-400/30"><Glyph name={g.icon} small /></span>
+                <div className="mt-3 text-[12.5px] font-bold text-white">{g.title}</div>
+                <div className="mt-1 text-[11px] leading-snug text-white/50">{g.body}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -594,7 +617,7 @@ const EXCHANGE_FLOW = [
   { icon: "users", title: "Founder", sub: "lists the company" },
   { icon: "chart", title: "Acquisition Intelligence", sub: "valuation & positioning" },
   { icon: "globe", title: "Buyer Network", sub: "matched acquirers" },
-  { icon: "spark", title: "Negotiation", sub: "AI-assisted terms" },
+  { icon: "spark", title: "Negotiation", sub: "scored terms" },
   { icon: "lock", title: "Closing", sub: "signature & escrow" },
   { icon: "check", title: "Exit", sub: "funds transferred" },
 ];
@@ -624,16 +647,16 @@ const CommandBoard: React.FC = () => {
   const [drill, setDrill] = useState<BoardTx | null>(null);
 
   // ── live feed ──────────────────────────────────────────────────
-  // A session clock, a slow market heartbeat (drives the match-score and
-  // demand-heat micro-motion), and a spotlight that rotates the deal tape.
-  const [clock, setClock] = useState<string>(() => new Date().toLocaleTimeString("en-US", { hour12: false }));
+  // A slow market heartbeat (drives the match-score and demand-heat
+  // micro-motion) and a spotlight that rotates the deal tape. The session
+  // clock lives in its own component so its 1s tick doesn't re-render the
+  // whole board.
   const [beat, setBeat] = useState(0);
   const [spot, setSpot] = useState(0);
   useEffect(() => {
-    const c = setInterval(() => setClock(new Date().toLocaleTimeString("en-US", { hour12: false })), 1000);
     const b = setInterval(() => setBeat((x) => x + 1), 2400);
     const s = setInterval(() => setSpot((x) => x + 1), 3800);
-    return () => { clearInterval(c); clearInterval(b); clearInterval(s); };
+    return () => { clearInterval(b); clearInterval(s); };
   }, []);
   // smooth ±1 oscillation around a base value — a live instrument, bounded
   const liveScore = (base: number, phase: number): number =>
@@ -704,7 +727,7 @@ const CommandBoard: React.FC = () => {
             <span className="inline-block h-2 w-2 animate-pulse rounded-full" style={{ background: "#45E38A" }} />
             <BoardHeader title="Live Transactions" />
           </div>
-          <span className="font-mono text-[9px] tabular-nums text-emerald-300/80">● {clock}</span>
+          <SessionClock />
         </div>
         <div className="mt-2 grid grid-cols-[1.4fr_1fr_0.9fr] gap-2 text-[9px] uppercase tracking-wide text-white/40">
           <span>Target Company</span><span>Best Match</span><span className="text-right">Expected / Status</span>
@@ -818,6 +841,16 @@ const CommandBoard: React.FC = () => {
   );
 };
 
+// Isolated 1-second clock — keeps the per-second tick out of the board tree.
+const SessionClock: React.FC = () => {
+  const [clock, setClock] = useState<string>(() => new Date().toLocaleTimeString("en-US", { hour12: false }));
+  useEffect(() => {
+    const t = setInterval(() => setClock(new Date().toLocaleTimeString("en-US", { hour12: false })), 1000);
+    return () => clearInterval(t);
+  }, []);
+  return <span className="font-mono text-[9px] tabular-nums text-emerald-300/80">● {clock}</span>;
+};
+
 const Drill: React.FC<{ k: string; v: string; accent?: string }> = ({ k, v, accent }) => (
   <div>
     <div className="text-[9px] uppercase tracking-wide text-white/40">{k}</div>
@@ -834,7 +867,11 @@ const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right
 // ===========================================================================
 // SECTION DATA
 // ===========================================================================
-const LIFECYCLE = ["Signal", "Buyer Discovery", "NDA", "CIM", "Management Meetings", "LOI", "Diligence", "Closing"];
+// The lifecycle rail — stage plus the typical window in a run process.
+const LIFECYCLE: ReadonlyArray<[string, string]> = [
+  ["Signal", "day 0"], ["Buyer Discovery", "wk 1"], ["NDA", "wk 1–2"], ["CIM", "wk 2"],
+  ["Management Meetings", "wk 2–3"], ["LOI", "wk 4–6"], ["Diligence", "wk 6–9"], ["Closing", "wk 10+"],
+];
 // Data provenance — the pipeline every figure passes through, and the
 // confidence register applied to estimates (mirrors the engines' tiers).
 const PROVENANCE_PIPELINE = [
@@ -843,16 +880,25 @@ const PROVENANCE_PIPELINE = [
   { stage: "Deterministic pricing", detail: "same inputs, same answer — reproducible" },
   { stage: "The exchange", detail: "every figure on this page traces to the record" },
 ];
+// Governance band — the controls a counterparty must clear and the controls
+// that protect the founder. Stated as conditions, not features.
+const GOVERNANCE = [
+  { icon: "lock", title: "Anonymous until NDA", body: "Identity, exact financials and the ask never leave the protocol unsigned." },
+  { icon: "shield", title: "Buyer verification", body: "Identity, track record and funds clear four gates before the data room." },
+  { icon: "check", title: "Full audit trail", body: "Every view, download and signature on the record — admissible process history." },
+  { icon: "users", title: "Founder control", body: "Eight approval gates. Nothing moves to the next stage without your decision." },
+  { icon: "doc", title: "SOC 2 posture", body: "Encrypted at rest and in transit; permissioned access; data residency respected." },
+];
 const CONFIDENCE_TIERS = [
   { tier: "Verified", color: "#059669", basis: "Disclosed in a public filing", detail: "Headline value, dates and parties confirmed against the primary source." },
   { tier: "Reported", color: "#2563eb", basis: "Multiple independent reports", detail: "Cross-referenced press and database coverage; primary filing not located." },
   { tier: "Estimated", color: "#d97706", basis: "Modeled from the record", detail: "Benchmarked against the acquirer's completed-transaction history, with sample size shown." },
 ];
 const STEPS = [
-  { icon: "chart", title: "Company Analysis", body: "AI-powered valuation, market positioning, and readiness scoring." },
+  { icon: "chart", title: "Company Analysis", body: "Valuation across weighted methodologies, market positioning, and a priced readiness score." },
   { icon: "users", title: "Buyer Discovery", body: `Engine-ranked matching across ${MARKET_FMT.buyers} curated strategic and financial mandates.` },
   { icon: "doc", title: "Data Room", body: "Secure diligence infrastructure built for M&A." },
-  { icon: "spark", title: "Negotiation Engine", body: "AI-assisted negotiation with offer optimization and scenario modeling." },
+  { icon: "spark", title: "Negotiation Engine", body: "Offer scoring, counters and scenario modeling against your reservation lines." },
   { icon: "check", title: "LOI Received", body: "Manage terms, track milestones, and reduce deal risk." },
   { icon: "lock", title: "Closing & Payout", body: "Streamline closing, documents, and funds transfer." },
 ];
@@ -897,24 +943,40 @@ const GLOBAL_STATS = [
 // ===========================================================================
 // SMALL VISUAL HELPERS
 // ===========================================================================
+// Cross-bid comparison instrument. Figures are an internally-consistent
+// illustration of the desk's scoring; on a live process the same table runs
+// against the founder's actual offers and reservation lines.
 const OfferTable: React.FC = () => (
   <div className="overflow-hidden rounded-2xl p-4 text-white" style={{ background: "linear-gradient(180deg,#08203B,#06182E)" }}>
-    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">Offer Comparison</div>
+    <div className="flex items-center justify-between">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">Cross-Bid Comparison</div>
+      <div className="text-[9px] uppercase tracking-wide text-white/35">scored vs reservation lines</div>
+    </div>
     <table className="mt-3 w-full text-left text-[12px]">
       <thead className="text-white/45">
         <tr>{["", "Buyer A", "Buyer B", "Buyer C"].map((h) => <th key={h} className="pb-2 font-semibold">{h}</th>)}</tr>
       </thead>
       <tbody>
-        {[["Upfront Cash", "$110M", "$190M", "$140M"], ["Earnout", "$22M", "$25M", "$31M"], ["Total", "$312M", "$285M", "$271M"], ["Structure", "Cash", "Cash + Roll", "Cash"]].map((r) => (
-          <tr key={r[0]} className={"border-t border-white/5 " + (r[0] === "Total" ? "font-bold" : "")}>
+        {[
+          ["Upfront Cash", "$172M", "$190M", "$140M"],
+          ["Earnout", "$22M", "—", "$31M"],
+          ["Rollover", "$18M", "$25M", "—"],
+          ["Total", "$212M", "$215M", "$171M"],
+          ["Certainty-weighted", "$198M", "$209M", "$152M"],
+          ["Desk score", "84 / 100", "91 / 100", "66 / 100"],
+        ].map((r) => (
+          <tr key={r[0]} className={"border-t border-white/5 " + (r[0] === "Total" || r[0] === "Desk score" ? "font-bold" : "")}>
             <td className="py-2 text-white/50">{r[0]}</td>
             <td className="py-2" style={r[0] === "Total" ? { color: "#7CFF9F" } : undefined}>{r[1]}</td>
-            <td className="py-2" style={r[0] === "Total" ? { color: "#7CFF9F" } : undefined}>{r[2]}</td>
+            <td className="py-2" style={r[0] === "Total" || r[0] === "Desk score" ? { color: "#7CFF9F" } : undefined}>{r[2]}</td>
             <td className="py-2" style={r[0] === "Total" ? { color: "#7CFF9F" } : undefined}>{r[3]}</td>
           </tr>
         ))}
       </tbody>
     </table>
+    <div className="mt-3 border-t border-white/10 pt-2 text-[10px] text-white/40">
+      Headline ≠ outcome. Every bid is weighted by structure, certainty and counterparty record — B leads on certainty despite A&rsquo;s earnout package.
+    </div>
   </div>
 );
 
