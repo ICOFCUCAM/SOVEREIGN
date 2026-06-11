@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
+import { fetchNetworkRegions } from '@/lib/stats';
 import type { EcosystemProduct } from '@/lib/types';
 import {
   Landmark, Banknote, Truck, Cpu, Film, GraduationCap, ArrowRight, ArrowUpRight,
@@ -145,17 +146,26 @@ export const OperationalInfrastructure: React.FC = () => (
 );
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Section 5 — Deployment Regions
+// Section 5 — Deployment Regions (live from network_regions; seed values mirror
+// the original hardcoded mesh so the section never renders empty)
 // ──────────────────────────────────────────────────────────────────────────────
-const REGIONS = [
-  { label: 'North America', sub: 'United States · Canada', nodes: 12, accent: '#00C2FF' },
-  { label: 'Europe', sub: 'EU · UK · EFTA', nodes: 24, accent: '#7C4DFF' },
-  { label: 'Africa', sub: 'West · East · Southern', nodes: 7, accent: '#10B981' },
-  { label: 'Middle East', sub: 'GCC · Levant', nodes: 4, accent: '#F59E0B' },
-  { label: 'Asia-Pacific', sub: 'East · South · Oceania', nodes: 15, accent: '#EC4899' },
+const REGION_FALLBACK = [
+  { label: 'North America', sub: 'United States · Canada', nodes: 12, accent: '#00C2FF', status: 'operational' },
+  { label: 'Europe', sub: 'EU · UK · EFTA', nodes: 24, accent: '#7C4DFF', status: 'operational' },
+  { label: 'Africa', sub: 'West · East · Southern', nodes: 7, accent: '#10B981', status: 'operational' },
+  { label: 'Middle East', sub: 'GCC · Levant', nodes: 4, accent: '#F59E0B', status: 'operational' },
+  { label: 'Asia-Pacific', sub: 'East · South · Oceania', nodes: 15, accent: '#EC4899', status: 'operational' },
 ];
 
-export const DeploymentRegions: React.FC = () => (
+export const DeploymentRegions: React.FC = () => {
+  const [regions, setRegions] = useState<Array<{ label: string; sub: string | null; nodes: number; accent: string; status: string }>>(REGION_FALLBACK);
+  useEffect(() => {
+    fetchNetworkRegions().then((rows) => { if (rows.length) setRegions(rows); });
+  }, []);
+  return <DeploymentRegionsView regions={regions} />;
+};
+
+const DeploymentRegionsView: React.FC<{ regions: Array<{ label: string; sub: string | null; nodes: number; accent: string; status: string }> }> = ({ regions: REGIONS }) => (
   <section className="relative py-28 px-4 sm:px-6 lg:px-8 border-t border-white/5">
     <div className="max-w-7xl mx-auto">
       <div className="text-center max-w-2xl mx-auto mb-14">
@@ -171,7 +181,7 @@ export const DeploymentRegions: React.FC = () => (
             <span className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-[70px] opacity-[0.10] group-hover:opacity-[0.22] transition-opacity" style={{ background: r.accent }} />
             <div className="relative">
               <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.22em] mb-4" style={{ color: r.accent }}>
-                <span className="w-1.5 h-1.5 rounded-full animate-node" style={{ background: r.accent }} /> OPERATIONAL
+                <span className="w-1.5 h-1.5 rounded-full animate-node" style={{ background: r.accent }} /> {r.status}
               </div>
               <div className="font-display font-bold text-white text-lg tracking-tight">{r.label}</div>
               <div className="text-xs text-white/50 mt-1">{r.sub}</div>
