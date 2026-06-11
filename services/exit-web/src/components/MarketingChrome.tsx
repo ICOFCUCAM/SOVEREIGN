@@ -83,7 +83,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
           </nav>
           <div className="flex items-center gap-2">
             <button onClick={() => nav("/console")} className="rounded-md border border-slate-300 px-4 py-2 text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50">Log in</button>
-            <button onClick={() => nav("/console")} className="rounded-md bg-ink-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-ink-800">Launch ExitOS</button>
+            <button onClick={() => nav("/console")} className="rounded-md bg-ink-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-ink-800">Access the Exchange</button>
           </div>
         </div>
       </header>
