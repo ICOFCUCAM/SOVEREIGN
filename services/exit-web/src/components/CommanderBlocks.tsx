@@ -2,22 +2,21 @@ import React from "react";
 import { Card, fmtMoney } from "../lib/ui";
 import { CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VALUE_LEFT_USD, DEAL_BUYERS, ACTIVE_BUYERS, DEMAND_LABEL } from "../lib/deal-context";
 import { commanderMetrics } from "../lib/commander-metrics";
+import { DEAL_INTEL_FMT } from "../lib/market-stats";
 
 // Chief Investment Banker blocks — the panels that make the command surface
 // read like a digital investment bank: who's moving on the company, how hot
 // the deal is, the value gap, the buyer universe, what Execute does, the
-// probability breakdown, and a live banker feed. Company-side numbers are
-// deal-context-derived; market activity is illustrative in demo mode.
+// probability breakdown, and a live banker feed. Every figure is derived
+// from the deal context and the discovery engine's measured outcomes.
 
 // ── Block 1 · Buyer Movement ──────────────────────────────────────
 export const BuyerMovement: React.FC = () => {
-  const b = (i: number): string => DEAL_BUYERS[i]?.buyer.name ?? "A buyer";
-  const moves = [
-    { name: b(0), action: "Viewed profile", when: "17 minutes ago" },
-    { name: b(1), action: "Opened teaser", when: "31 minutes ago" },
-    { name: b(2), action: "Requested financials", when: "2 hours ago" },
-    { name: b(3), action: "Monitoring", when: "Confidence 88%" },
-  ];
+  const moves = DEAL_BUYERS.slice(0, 4).map((c) => ({
+    name: c.buyer.name,
+    action: c.buyer.appetite === "active" ? "Actively deploying" : c.buyer.appetite === "warm" ? "Monitoring the sector" : "Dormant mandate",
+    when: `${Math.round(c.probability * 100)}% probability`,
+  }));
   return (
     <Card className="p-6">
       <div className="flex items-center gap-2">
@@ -178,12 +177,12 @@ export const ExitProbabilityBreakdown: React.FC = () => {
 
 // ── Block 7 · Banker Feed ─────────────────────────────────────────
 export const BankerFeed: React.FC = () => {
-  const b0 = DEAL_BUYERS[0]?.buyer.name ?? "A strategic acquirer";
+  const top = DEAL_BUYERS[0];
   const notes = [
-    { t: "09:12", text: `${b0} acquisition activity in logistics increased 14%.` },
-    { t: "09:25", text: "Two strategic buyers entered the sector." },
-    { t: "10:08", text: "Valuation estimate revised upward." },
-    { t: "11:16", text: "Buyer interest score moved from 78 to 84." },
+    { t: "Pool", text: `${ACTIVE_BUYERS} of ${DEAL_BUYERS.length} matched mandates are actively deploying against your profile.` },
+    ...(top ? [{ t: "Lead", text: `${top.buyer.name} ranks first — ${Math.round(top.probability * 100)}% probability, est. check ${fmtMoney(top.estimatedCheck.low)}–${fmtMoney(top.estimatedCheck.high)}.` }] : []),
+    { t: "Value", text: `Readiness fixes add ${fmtMoney(VALUE_LEFT_USD)} to the strategic mid.` },
+    { t: "Market", text: `Median disclosed premium across tracked deals: ${DEAL_INTEL_FMT.medianPremium}; median announce-to-close ${DEAL_INTEL_FMT.medianClose}.` },
   ];
   return (
     <Card className="p-6">
@@ -196,7 +195,7 @@ export const BankerFeed: React.FC = () => {
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-[11px] text-white/35">Live market intelligence · illustrative in demo mode</p>
+      <p className="mt-3 text-[11px] text-white/35">Computed from the live engine state and the source-referenced deal history</p>
     </Card>
   );
 };

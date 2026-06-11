@@ -4,6 +4,7 @@ import { VALUATION_STRATEGIC } from "../lib/engines";
 import { compareOutcomes, runBuyerDiscovery, type BuyerCandidate } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { fetchBuyerStats, mergeLiveStatsIntoCandidates, type BuyerLiveStat } from "../lib/buyer-stats";
+import { DEAL_INTEL_FMT } from "../lib/market-stats";
 import BankerTake from "../components/BankerTake";
 
 // Acquisition Intelligence Engine surface — wired to runBuyerDiscovery.
@@ -104,18 +105,22 @@ const Intelligence: React.FC = () => {
     ? candidates.reduce((s, c) => s + c.probability, 0) / candidates.length
     : 0;
 
-  // Acquisition Radar — live market signals (illustrative in demo mode) that
-  // move the probability of a successful outreach. Buyer names are pulled from
-  // the discovery pool so the feed reads as real.
-  const b0 = candidates[0]?.buyer.name ?? "A strategic acquirer";
-  const b1 = candidates[1]?.buyer.name ?? "A second acquirer";
-  const b2 = candidates[2]?.buyer.name ?? "A third acquirer";
+  // Acquisition Radar — signals computed from each candidate's measured
+  // acquisition history (EDGAR 8-K / Wikidata / press) and the tracked-deal
+  // medians. Lift is a heuristic over the measured track record.
+  const trackRecord = candidates
+    .filter((c) => c.history.totalDeals > 0)
+    .sort((a, b) => b.history.dealsLast3Years - a.history.dealsLast3Years)
+    .slice(0, 3)
+    .map((c) => ({
+      tag: "Track record",
+      text: `${c.buyer.name} — ${c.history.totalDeals} tracked acquisition${c.history.totalDeals === 1 ? "" : "s"}${c.history.lastTargetName ? `, most recently ${c.history.lastTargetName}${c.history.lastAcquiredAt ? ` (${c.history.lastAcquiredAt.slice(0, 4)})` : ""}` : ""}.`,
+      lift: Math.min(6, Math.max(1, c.history.dealsLast3Years * 2 || c.history.totalDeals)),
+    }));
   const radar: { tag: string; text: string; lift: number }[] = [
-    { tag: "Recent acquisitions", text: `${b0} completed 3 acquisitions in your category this year.`, lift: 6 },
-    { tag: "Buyer activity",      text: `${b1} increased acquisition activity 42% over the last two quarters.`, lift: 5 },
-    { tag: "Strategic expansion", text: `${b2} announced a strategic infrastructure expansion adjacent to your space.`, lift: 3 },
-    { tag: "PE dry powder",       text: "Two sponsors in your sector closed new funds — fresh capital to deploy.", lift: 2 },
-    { tag: "M&A trend",           text: "Sector M&A volume is up 18% quarter-over-quarter.", lift: 2 },
+    ...trackRecord,
+    { tag: "Active mandates", text: `${activeCount} of ${candidates.length} matched mandates are actively deploying capital.`, lift: Math.min(4, activeCount) },
+    { tag: "Deal medians", text: `Across tracked deals: ${DEAL_INTEL_FMT.medianPremium} median disclosed premium, ${DEAL_INTEL_FMT.medianClose} announce-to-close.`, lift: 2 },
   ];
   const radarLift = radar.reduce((s, r) => s + r.lift, 0);
   return (
@@ -146,7 +151,7 @@ const Intelligence: React.FC = () => {
             </li>
           ))}
         </ul>
-        <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">Signals are illustrative in demo mode; production wires live EDGAR / news / fund-formation feeds.</div>
+        <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">Signals computed from the source-referenced acquisition history (EDGAR 8-K / Wikidata / press).</div>
       </Card>
 
       {candidates[0] && (

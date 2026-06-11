@@ -1,14 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Card, SectionHeader } from "../lib/ui";
-import { BUYERS, VALUATION_STRATEGIC } from "../lib/engines";
+import { BUYERS, VALUATION_STRATEGIC, DILIGENCE } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import { MARKET_FMT, HISTORY_FMT, DEAL_INTEL, DEAL_INTEL_FMT } from "../lib/market-stats";
 
 // Network Intelligence — the five moats. Individual screens can be copied;
 // the compounding dataset cannot. This surface makes the moats tangible: the
-// founder graph, the buyer graph, deal intelligence, the agent workforce and
-// the founder lifecycle. Dataset scale is illustrative; the per-buyer DNA is
-// computed from the discovery engine's measured outcomes.
+// deal graph, the buyer graph, deal intelligence, the agent workforce and
+// the founder lifecycle. Every figure is computed from the source-referenced
+// acquisition history and the live engine runs.
 
 const ARR = SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd;
 
@@ -58,15 +59,15 @@ const Network: React.FC = () => {
       />
 
       <div className="space-y-5">
-        <Moat n={1} title="The Founder Graph" why="The world's largest founder-exit dataset — no new entrant can backfill it.">
+        <Moat n={1} title="The Deal Graph" why="A source-referenced acquisition dataset — every event traceable to EDGAR, Wikidata or press.">
           <div className="grid grid-cols-3 gap-4">
-            <Stat value="52,000" label="Founders" accent="#34d399" />
-            <Stat value="800,000" label="Buyer interactions" accent="#60a5fa" />
-            <Stat value="15,000" label="Completed acquisitions" accent="#a78bfa" />
+            <Stat value={MARKET_FMT.buyers} label="Acquirer mandates profiled" accent="#34d399" />
+            <Stat value={HISTORY_FMT.events} label="Acquisition events tracked" accent="#60a5fa" />
+            <Stat value={HISTORY_FMT.disclosedValue} label="Disclosed deal value" accent="#a78bfa" />
           </div>
           <p className="mt-4 text-[13px] leading-relaxed text-white/65">
-            Every founder contributes industry, revenue, growth, cap table, team, buyers approached, offers received and
-            closing outcomes. The graph learns <span className="text-white">who buys what, for how much, and under what conditions</span> — the
+            Every event carries buyer, target, sector, price and outcome — with its source on record. The graph learns
+            <span className="text-white"> who buys what, for how much, and under what conditions</span> — the
             knowledge a first-time founder and most bankers simply don't have.
           </p>
         </Moat>
@@ -91,10 +92,10 @@ const Network: React.FC = () => {
 
         <Moat n={3} title="Deal Intelligence" why="Every acquisition teaches the system — the AI grows smarter than most advisors.">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Stat value="74 days" label="Median LOI → close" />
-            <Stat value="8%" label="Median escrow" />
-            <Stat value="41%" label="PE deals w/ earnout" />
-            <Stat value="28%" label="Reverse break-fee usage" />
+            <Stat value={DEAL_INTEL_FMT.medianClose} label="Median announce → close" />
+            <Stat value={DEAL_INTEL_FMT.medianPremium} label="Median disclosed premium" />
+            <Stat value={DEAL_INTEL_FMT.closedRate} label="Tracked deals closed" />
+            <Stat value={String(DEAL_INTEL.measuredCloses)} label="Closes measured" />
           </div>
           <p className="mt-4 text-[13px] leading-relaxed text-white/65">
             The platform learns the patterns that win: LOI structures, SPA clauses, earnout models, escrow patterns and
@@ -104,8 +105,8 @@ const Network: React.FC = () => {
 
         <Moat n={4} title="Autonomous Agents" why="Competitors offer tools. ExitOS offers workers." to="/console/autopilot" cta="Autonomous Exit">
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3.5 text-[13px] text-white/80">The <span className="text-white">Outreach Agent</span> contacted 27 buyers.</div>
-            <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3.5 text-[13px] text-white/80">The <span className="text-white">Diligence Agent</span> prepared the room and flagged 14 risks.</div>
+            <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3.5 text-[13px] text-white/80">The <span className="text-white">Outreach Agent</span> qualified {BUYERS.candidates.length} buyers from the registry.</div>
+            <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3.5 text-[13px] text-white/80">The <span className="text-white">Diligence Agent</span> prepared {DILIGENCE.documents.length} packages and flagged {DILIGENCE.redFlags.length + DILIGENCE.criticalQuestions.length} open items.</div>
           </div>
           <p className="mt-4 text-[13px] leading-relaxed text-white/65">
             Eight agents do the work — not "use the outreach tool" but "the agent contacted the buyers." The winner won't
@@ -132,7 +133,7 @@ const Network: React.FC = () => {
         </Moat>
       </div>
 
-      <p className="mt-6 text-[11px] text-white/40">Dataset scale is illustrative in demo mode; per-buyer DNA and outcomes are computed from the discovery engine.</p>
+      <p className="mt-6 text-[11px] text-white/40">All figures computed from the source-referenced acquisition history and the live engine runs.</p>
     </div>
   );
 };

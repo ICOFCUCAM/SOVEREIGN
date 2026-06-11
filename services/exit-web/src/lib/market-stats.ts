@@ -171,6 +171,38 @@ export const REGISTRY_CARDS = [...REGISTRY]
     ] as Array<[string, string]>,
   }));
 
+// ── Deal intelligence ──────────────────────────────────────────────────
+// Medians measured over the source-referenced history, via the engine's
+// own outcome helpers — the numbers the "deal intelligence" moat shows.
+
+const median = (xs: number[]): number | undefined => {
+  if (xs.length === 0) return undefined;
+  const s = [...xs].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+};
+
+const closeDays = HISTORY.map((e) => buyers.closeDurationDays(e)).filter((d): d is number => d != null);
+const premiums  = HISTORY.map((e) => buyers.premiumPct(e)).filter((p): p is number => p != null);
+
+export const DEAL_INTEL = {
+  medianCloseDays: median(closeDays),
+  medianPremiumPct: median(premiums),
+  closedRatePct: Math.round((HISTORY.filter((e) => e.status === "closed").length / HISTORY.length) * 100),
+  measuredCloses: closeDays.length,
+  measuredPremiums: premiums.length,
+} as const;
+
+export const DEAL_INTEL_FMT = {
+  medianClose: DEAL_INTEL.medianCloseDays != null ? `${Math.round(DEAL_INTEL.medianCloseDays)} days` : "—",
+  medianPremium: DEAL_INTEL.medianPremiumPct != null ? `+${Math.round(DEAL_INTEL.medianPremiumPct * 100)}%` : "—",
+  closedRate: `${DEAL_INTEL.closedRatePct}%`,
+} as const;
+
+/** Tracked acquisition events in a given sector. */
+export const sectorEventCount = (sector: string): number =>
+  HISTORY.filter((e) => e.sector === sector).length;
+
 export const HISTORY_STATS = {
   events: HISTORY.length,
   closed: HISTORY.filter((e) => e.status === "closed").length,

@@ -1,16 +1,17 @@
 import React from "react";
 import { Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
 import BankerTake from "../components/BankerTake";
-import { READINESS_ANALYSIS, BUYERS } from "../lib/engines";
+import { READINESS_ANALYSIS, BUYERS, VALUATION_STANDARD } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { EXIT_SCORE, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD } from "../lib/deal-context";
+import { DEAL_INTEL_FMT, sectorEventCount } from "../lib/market-stats";
 
 // Exit Timing Engine — most founders don't know *when* to sell. The engine
 // monitors the market signals that move valuation (multiples, deal activity,
-// competitor exits, rates, buyer demand) alongside the company's own
+// competitor exits, deal velocity, buyer demand) alongside the company's own
 // trajectory, then recommends an optimal exit window and the value of waiting.
-// Market signals are illustrative in demo mode; the company-side projection
-// comes from the readiness + valuation engines.
+// Every signal is computed from the valuation engine, the discovery pool and
+// the source-referenced acquisition history.
 
 type Impact = "tailwind" | "headwind" | "neutral";
 const IMPACT_STYLE: Record<Impact, { color: string; label: string }> = {
@@ -48,11 +49,13 @@ const ExitTiming: React.FC = () => {
   const windowIdx = yearScores.findIndex((s) => s >= 85);
   const windowRow = timeline[windowIdx === -1 ? timeline.length - 1 : windowIdx];
 
+  const revMult = VALUATION_STANDARD.methodologies.find((m) => m.multiple != null);
+  const sectorExits = sectorEventCount(SAMPLE_COMPANY.sector);
   const signals: { label: string; value: string; trend: string; impact: Impact; note: string }[] = [
-    { label: "Industry multiples", value: "3.4× revenue", trend: "+11% YoY", impact: "tailwind", note: "Sector multiples expanding as logistics-tech consolidates." },
-    { label: "Acquisition activity", value: `${dealCount} deals / 12mo`, trend: "elevated", impact: "tailwind", note: "Strategics and sponsors are both active in the sector." },
-    { label: "Competitor exits", value: "6 recent", trend: "rising", impact: "tailwind", note: "Comparable assets clearing at premium multiples." },
-    { label: "Interest rates", value: "5.0%", trend: "easing expected", impact: "neutral", note: "Cheaper debt would lift sponsor bids into next year." },
+    { label: "Industry multiples", value: revMult ? `${revMult.multiple?.toFixed(1)}× ${revMult.basis.toLowerCase().includes("ebitda") ? "EBITDA" : "revenue"}` : "—", trend: "engine mid-band", impact: "tailwind", note: `From the valuation engine's ${revMult?.name.toLowerCase() ?? "multiples"} methodology on your numbers.` },
+    { label: "Acquisition activity", value: `${dealCount} tracked deals`, trend: "measured", impact: "tailwind", note: "Strategics and sponsors are both active in the sector." },
+    { label: "Sector exits", value: `${sectorExits} on record`, trend: DEAL_INTEL_FMT.medianPremium + " median premium", impact: sectorExits > 0 ? "tailwind" : "neutral", note: "Comparable assets in your sector from the source-referenced history." },
+    { label: "Deal velocity", value: DEAL_INTEL_FMT.medianClose, trend: "announce → close", impact: "neutral", note: "Median time from announcement to close across tracked deals." },
     { label: "Buyer demand", value: `${activeBuyers} in acquisition mode`, trend: "high", impact: "tailwind", note: "Active acquirers match your profile right now." },
     { label: "Your trajectory", value: `${Math.round(growthYoy * 100)}% ARR growth`, trend: "compounding", impact: "tailwind", note: "Each quarter lifts the headline into a higher band." },
   ];
@@ -187,7 +190,7 @@ const ExitTiming: React.FC = () => {
           );
         })}
       </div>
-      <p className="mt-4 text-[11px] text-white/40">Market signals are illustrative in demo mode; the company-side projection is computed from the readiness and valuation engines.</p>
+      <p className="mt-4 text-[11px] text-white/40">All signals computed from the valuation engine, the discovery pool and the source-referenced acquisition history.</p>
     </div>
   );
 };

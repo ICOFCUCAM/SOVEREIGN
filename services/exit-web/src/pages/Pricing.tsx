@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { ENGINE_COUNTS } from "../lib/module-stats";
 
 // Public pricing page. Three tiers + the marketplace economics:
 // Founder Prep ($499/mo) → Founder Pro ($1,499/mo + success fee) →
@@ -46,8 +47,8 @@ const FOUNDER_TIERS: readonly Tier[] = [
       "Company Valuation Engine — standard, strategic and asset-replacement reports",
       "Exit Readiness Score with weakness analysis + improvement plan",
       "Acquisition Memorandum Generator — CIM, exec summary, deck, teaser, DD index",
-      "Due Diligence Engine — 7 standard packages with artifact lists",
-      "Buyer Discovery — 26-firm curated registry",
+      `Due Diligence Engine — ${ENGINE_COUNTS.diligencePackages} standard packages with artifact lists`,
+      `Buyer Discovery — ${ENGINE_COUNTS.registryFirms}-firm curated registry`,
       "Virtual Data Room (up to 50GB)",
       "Single workspace, single deal",
     ],

@@ -1,27 +1,29 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MarketingChrome, Glyph, Arrow } from "../components/MarketingChrome";
+import { MODULE_FACTS } from "../lib/module-stats";
 
 // Modules — the marketing breakdown of what's inside the console, split by the
-// side of the table the user sits on.
+// side of the table the user sits on. Each card's stat line is computed from
+// the live engines (see lib/module-stats.ts), never typed in by hand.
 
-interface Mod { icon: string; name: string; body: string }
+interface Mod { icon: string; name: string; body: string; stat?: string }
 
 const FOUNDER_MODULES: Mod[] = [
-  { icon: "chart", name: "Valuation Engine", body: "DCF, comparables and revenue/EBITDA multiples, recomputed live." },
-  { icon: "spark", name: "Exit Readiness Score", body: "A money-tied score across ten categories with each fix priced." },
-  { icon: "globe", name: "Buyer Intelligence", body: "Likelihood, range, timing, risk and synergy for every acquirer." },
-  { icon: "users", name: "Outreach", body: "Teasers, CIMs and a sequenced campaign — run by the banker agent." },
-  { icon: "lock", name: "Data Room", body: "Permissioned, completeness-scored, with the dollar impact of every gap." },
-  { icon: "doc", name: "Documents", body: "CIM, teaser, deck and LOIs, red-teamed against your real numbers." },
+  { icon: "chart", name: "Valuation Engine", body: "DCF, comparables and revenue/EBITDA multiples, recomputed live.", stat: MODULE_FACTS.valuation },
+  { icon: "spark", name: "Exit Readiness Score", body: "A money-tied score across weighted dimensions with each fix priced.", stat: MODULE_FACTS.readiness },
+  { icon: "globe", name: "Buyer Intelligence", body: "Likelihood, range, timing, risk and synergy for every acquirer.", stat: MODULE_FACTS.buyerIntel },
+  { icon: "users", name: "Outreach", body: "Teasers, CIMs and a sequenced campaign — run by the banker agent.", stat: MODULE_FACTS.outreach },
+  { icon: "lock", name: "Data Room", body: "Permissioned, completeness-scored, with the dollar impact of every gap.", stat: MODULE_FACTS.dataRoom },
+  { icon: "doc", name: "Documents", body: "CIM, teaser, deck and LOIs, red-teamed against your real numbers.", stat: MODULE_FACTS.documents },
   { icon: "chart", name: "Negotiator", body: "Offer scoring, counters, protective clauses and earnout alternatives." },
   { icon: "check", name: "Closing Center", body: "Signatures, escrow and filings tracked to the wire." },
   { icon: "shield", name: "WealthOS", body: "Proceeds, taxes, trusts, family office and reinvestment after close." },
 ];
 
 const BUYER_MODULES: Mod[] = [
-  { icon: "globe", name: "Marketplace", body: "Browse anonymized opportunities matched to your thesis." },
-  { icon: "chart", name: "Acquisition Radar", body: "Live sector signals — deals, mandates and demand." },
+  { icon: "globe", name: "Marketplace", body: "Browse anonymized opportunities matched to your thesis.", stat: MODULE_FACTS.marketplace },
+  { icon: "chart", name: "Acquisition Radar", body: "Live sector signals — deals, mandates and demand.", stat: MODULE_FACTS.radar },
   { icon: "lock", name: "Deal Room", body: "Gated diligence access once trust and NDA clear." },
   { icon: "doc", name: "Access Requests", body: "Request NDA-gated identity and packages, tracked end to end." },
 ];
@@ -33,6 +35,11 @@ const ModCard: React.FC<{ m: Mod }> = ({ m }) => (
       <div className="text-sm font-bold text-ink-900">{m.name}</div>
     </div>
     <p className="mt-3 text-[12.5px] leading-relaxed text-slate-500">{m.body}</p>
+    {m.stat && (
+      <div className="mt-3 inline-flex rounded-full bg-slate-100 px-2.5 py-1 font-mono text-[10.5px] font-medium uppercase tracking-wide text-slate-600 ring-1 ring-slate-200">
+        {m.stat}
+      </div>
+    )}
   </div>
 );
 
