@@ -8,6 +8,7 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import AuthModal from '@/components/AuthModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { logAudit, fetchRecentAuditLogs, AuditLogEntry } from '@/lib/audit';
+import { publishJobToChannel } from '@/lib/media';
 import { toast } from 'sonner';
 import { useEscape } from '@/hooks/useEscape';
 import type { LucideIcon } from 'lucide-react';
@@ -21,8 +22,8 @@ import { DomainOrdersAdmin } from '@/components/admin/DomainOrdersAdmin';
 
 type Tab = 'overview' | 'domains' | 'orders' | 'leads' | 'briefings' | 'channel' | 'narratives' | 'campaigns' | 'scenarios' | 'pipelines' | 'analytics' | 'ecosystem' | 'team' | 'activity';
 interface Scenario { id: string; label: string; accent: string; icon_key: string; origin: number; down: number[]; respond: number[]; phases: Array<{ label: string; resilience: number; affected: number; clock: string; desc: string }>; published: boolean; sort_order: number; created_at: string }
-interface PipelineJob { id: string; kind: string; status: string; provider: string | null; title: string | null; result_url: string | null; error: string | null; created_at: string }
-interface MediaItem { id: string; media_class: string; kind: string; title: string; meta: string | null; length: string | null; youtube_id: string | null; sort_order: number }
+interface PipelineJob { id: string; kind: string; status: string; provider: string | null; title: string | null; result_url: string | null; media_class: string | null; result: { seedUrl?: string } | null; error: string | null; created_at: string }
+interface MediaItem { id: string; media_class: string; kind: string; title: string; meta: string | null; length: string | null; youtube_id: string | null; video_url: string | null; source_job_id: string | null; sort_order: number }
 interface Narrative { id: string; kind: string; media_class: string | null; title: string; subtitle: string | null; body: string; read_time: string | null; published: boolean; sort_order: number; cover_image_url: string | null }
 interface Campaign { id: string; name: string; media_class: string | null; channel: string; status: string; asset_ref: string | null; scheduled_at: string | null; created_at: string }
 type LeadFilter = 'all' | 'inquiry' | 'offer' | 'buy_now';
@@ -112,7 +113,7 @@ const AdminPage: React.FC = () => {
     const nar = await supabase.from('narratives').select('*').order('sort_order', { ascending: true });
     const camp = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
     const scn = await supabase.from('scenarios').select('*').order('sort_order', { ascending: true });
-    const pj = await supabase.from('pipeline_jobs').select('id, kind, status, provider, title, result_url, error, created_at').order('created_at', { ascending: false }).limit(50);
+    const pj = await supabase.from('pipeline_jobs').select('id, kind, status, provider, title, result_url, media_class, result, error, created_at').order('created_at', { ascending: false }).limit(50);
     setMedia((med.data || []) as MediaItem[]);
     setNarratives((nar.data || []) as Narrative[]);
     setCampaigns((camp.data || []) as Campaign[]);
@@ -432,8 +433,26 @@ const AdminPage: React.FC = () => {
   };
 
   const refreshPipelineJobs = async () => {
-    const pj = await supabase.from('pipeline_jobs').select('id, kind, status, provider, title, result_url, error, created_at').order('created_at', { ascending: false }).limit(50);
+    const pj = await supabase.from('pipeline_jobs').select('id, kind, status, provider, title, result_url, media_class, result, error, created_at').order('created_at', { ascending: false }).limit(50);
     setPipelineJobs((pj.data || []) as PipelineJob[]);
+  };
+  const publishJob = async (j: PipelineJob) => {
+    if (!j.result_url) return;
+    setPipelineBusy('publish-' + j.id);
+    const { error } = await publishJobToChannel({
+      jobId: j.id,
+      title: j.title || 'Untitled production',
+      videoUrl: j.result_url,
+      mediaClass: j.media_class || 'cinematic',
+      kind: j.kind === 'film' ? 'feature' : 'episode',
+      meta: j.kind === 'film' ? 'Generated film' : 'Generated render',
+      posterUrl: j.result?.seedUrl,
+    });
+    setPipelineBusy(null);
+    if (error) { toast.error(error); return; }
+    toast.success('Published to the Channel');
+    logAudit({ action: 'media.publish', resource_type: 'media', resource_id: j.id, changes: { title: j.title, video_url: j.result_url } });
+    load();
   };
   const voiceDispatch = async (n: Narrative) => {
     setPipelineBusy('voice-' + n.id);
@@ -1315,6 +1334,14 @@ const AdminPage: React.FC = () => {
                       {j.error && <div className="text-[10px] text-rose-300/70 truncate">{j.error}</div>}
                     </div>
                     {j.result_url && <a href={j.result_url} target="_blank" rel="noreferrer" className="text-[10px] font-mono uppercase tracking-wider text-cyan-300 hover:text-cyan-200 shrink-0">Open</a>}
+                    {j.status === 'done' && j.result_url && ['video', 'film'].includes(j.kind) && (
+                      media.some((m) => m.source_job_id === j.id)
+                        ? <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-300/70 shrink-0">On channel</span>
+                        : <button onClick={() => publishJob(j)} disabled={pipelineBusy === 'publish-' + j.id}
+                            className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 transition shrink-0 disabled:opacity-50">
+                            {pipelineBusy === 'publish-' + j.id ? 'Publishing…' : 'Publish'}
+                          </button>
+                    )}
                     <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${j.status === 'done' ? 'bg-emerald-500/15 text-emerald-300' : j.status === 'processing' ? 'bg-cyan-500/15 text-cyan-300' : j.status === 'failed' ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'}`}>{j.status}</span>
                     <span className="text-white/35 text-xs font-mono whitespace-nowrap shrink-0">{new Date(j.created_at).toLocaleDateString()}</span>
                   </div>

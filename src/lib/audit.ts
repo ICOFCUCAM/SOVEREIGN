@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 
-export type AuditAction = 'domain.create' | 'domain.update' | 'domain.delete' | 'lead.update' | 'role.update' | 'system.create' | 'system.update' | 'system.delete';
+export type AuditAction = 'domain.create' | 'domain.update' | 'domain.delete' | 'lead.update' | 'role.update' | 'system.create' | 'system.update' | 'system.delete' | 'media.publish';
 
 export interface AuditLogEntry {
   id: string;
