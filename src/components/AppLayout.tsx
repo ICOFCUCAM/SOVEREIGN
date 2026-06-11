@@ -8,6 +8,7 @@ import MarketplaceTeaser from '@/components/home/MarketplaceTeaser';
 import EcosystemPanels from '@/components/home/EcosystemPanels';
 import EcosystemSectors from '@/components/home/EcosystemSectors';
 import ChannelTeaser from '@/components/home/ChannelTeaser';
+import HomeVideo from '@/components/home/HomeVideo';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import InstitutionalTrust from '@/components/home/InstitutionalTrust';
 import ClosingCTA from '@/components/home/ClosingCTA';
@@ -35,6 +36,8 @@ const AppLayout: React.FC = () => {
         <EcosystemSectors />
         {/* the sovereign channel — media ecosystem entry */}
         <Reveal><ChannelTeaser /></Reveal>
+        {/* feature dispatch — newest published render; renders nothing until one exists */}
+        <HomeVideo />
         {/* deployment story */}
         <Reveal><TransformationFlow /></Reveal>
         {/* institutional trust & governance */}

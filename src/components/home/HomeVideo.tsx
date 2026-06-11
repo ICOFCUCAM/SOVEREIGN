@@ -1,31 +1,42 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Play, Volume2, VolumeX, Maximize2 } from 'lucide-react';
 import HudCorners from '@/components/HudCorners';
+import { fetchLatestFilm, formatDuration, type MediaRow } from '@/lib/media';
 
-// Cinematic video showcase — sits in the homepage flow where the
-// Acquisition Terminal previously lived. Poster + centered play affordance
-// in the institutional gold/cyan vocabulary. Clicking the poster begins
-// inline playback. The video source defaults to /sovereign-feature.mp4
-// and falls back gracefully if the file is not yet provisioned.
+// Cinematic video showcase — plays the newest published render from the
+// media pipeline. When nothing has been published yet (and no explicit src
+// is passed) the section renders nothing: the homepage never shows a
+// placeholder player.
 
 interface Props {
-  /** Path to the MP4 file. Drop the asset into `public/` to enable. */
+  /** Explicit source override; when omitted the latest published film is used. */
   src?: string;
-  /** Poster shown before playback. Defaults to the hero globe. */
+  /** Poster shown before playback. */
   poster?: string;
   /** Optional caption shown below the poster while idle. */
   caption?: string;
 }
 
-const HomeVideo: React.FC<Props> = ({
-  src = '/sovereign-feature.mp4',
-  poster = '/hero-globe.webp',
-  caption = 'A sovereign-infrastructure dispatch — three minutes on what the substrate does at civilisation scale.',
-}) => {
+const HomeVideo: React.FC<Props> = ({ src: srcProp, poster: posterProp, caption: captionProp }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
   const [failed, setFailed] = useState(false);
+  const [film, setFilm] = useState<MediaRow | null>(null);
+  const [loaded, setLoaded] = useState(Boolean(srcProp));
+
+  useEffect(() => {
+    if (srcProp) return;
+    (async () => {
+      setFilm(await fetchLatestFilm());
+      setLoaded(true);
+    })();
+  }, [srcProp]);
+
+  const src = srcProp || film?.video_url || undefined;
+  const poster = posterProp || film?.poster_url || '/hero-globe.webp';
+  const caption = captionProp || (film ? `${film.title}${film.meta ? ` — ${film.meta}` : ''}` : 'A sovereign-infrastructure dispatch from the media pipeline.');
+  const durationLabel = film ? formatDuration(film.duration_seconds, film.length) : '';
 
   const start = async () => {
     const v = videoRef.current;
@@ -55,6 +66,9 @@ const HomeVideo: React.FC<Props> = ({
     else if (target.webkitEnterFullscreen) target.webkitEnterFullscreen();
   };
 
+  // No published film and no explicit source — the section stays off the page.
+  if (!loaded || !src) return null;
+
   return (
     <section className="relative px-4 sm:px-6 lg:px-8 py-28 sm:py-36 overflow-hidden">
       {/* subtle dark grid wash to match the rest of the homepage */}
@@ -71,7 +85,7 @@ const HomeVideo: React.FC<Props> = ({
         <div className="flex items-center gap-4 mb-12">
           <span className="kicker text-white/45" style={{ letterSpacing: '0.3em' }}>Sovereign feature dispatch</span>
           <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
-          <span className="kicker text-white/30 hidden sm:inline" style={{ fontSize: '10px', letterSpacing: '0.2em' }}>Three minutes · cinematic · audit-ready</span>
+          <span className="kicker text-white/30 hidden sm:inline" style={{ fontSize: '10px', letterSpacing: '0.2em' }}>{durationLabel ? `${durationLabel} · ` : ''}cinematic · audit-ready</span>
         </div>
 
         {/* The player */}
@@ -128,7 +142,7 @@ const HomeVideo: React.FC<Props> = ({
                       </div>
                       <p className="mt-3 text-white/75 text-sm sm:text-base leading-relaxed max-w-2xl">{caption}</p>
                     </div>
-                    <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/45 hidden sm:block">3:14 · 1080p · audit-grade</div>
+                    {durationLabel && <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/45 hidden sm:block">{durationLabel} · audit-grade</div>}
                   </div>
                 </div>
               </>
