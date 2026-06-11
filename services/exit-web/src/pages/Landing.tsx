@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MarketingChrome, Glyph, Mark, Arrow } from "../components/MarketingChrome";
+import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, STRATEGIC_BOARD, SECTOR_DEMAND, HISTORY_FMT, REGISTRY_CARDS } from "../lib/market-stats";
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
 // marketing chrome (header nav → Platform / Modules / Pricing + footer). The
@@ -83,7 +84,7 @@ const Landing: React.FC = () => {
                       <span className="h-1 w-1 animate-pulse rounded-full bg-emerald-400" />
                       <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live Market</span>
                     </span>
-                    <span className="hidden font-mono text-[9px] uppercase tracking-[0.14em] text-white/45 md:inline">13,240 active mandates</span>
+                    <span className="hidden font-mono text-[9px] uppercase tracking-[0.14em] text-white/45 md:inline">{MARKET_FMT.activeMandates} mandates deploying · {MARKET_FMT.appetite} capacity</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/40">System Status</span>
@@ -482,54 +483,30 @@ const Landing: React.FC = () => {
 // 3 columns: Strategic Buyers (25%) · Live Transactions (45%) · Demand (30%)
 // Navy palette, glass cards, status-coloured rows.
 // ===========================================================================
-const STRATEGIC_BUYERS: [string, string, number, string][] = [
-  ["Microsoft", "Enterprise Software", 94, "Very High"],
-  ["Salesforce", "CRM / AI / Data", 91, "Very High"],
-  ["SAP", "Enterprise Software", 89, "High"],
-  ["Oracle", "Cloud / Infrastructure", 88, "High"],
-  ["Thoma Bravo", "Private Equity", 86, "High"],
-  ["Vista Equity Partners", "Private Equity", 84, "High"],
-];
-type Tx = { company: string; industry: string; buyer: string; match: string; offer: string; premium: string; status: string; color: string; age: string };
-const TRANSACTIONS: Tx[] = [
-  { company: "Helios Freight", industry: "Logistics / Transportation", buyer: "Microsoft", match: "94% Match", offer: "$261,000,000", premium: "+31% Premium", status: "LOI Received", color: "#45E38A", age: "2h ago" },
-  { company: "SecureLayer", industry: "Cybersecurity", buyer: "Palo Alto Networks", match: "92% Match", offer: "$198,000,000", premium: "+28% Premium", status: "Due Diligence", color: "#FFB14A", age: "1d ago" },
-  { company: "DataMind AI", industry: "AI / Machine Learning", buyer: "Google", match: "90% Match", offer: "$315,000,000", premium: "+34% Premium", status: "Negotiation", color: "#FF8A3D", age: "2d ago" },
-  { company: "CareSphere", industry: "HealthTech", buyer: "UnitedHealth Group", match: "89% Match", offer: "$175,000,000", premium: "+26% Premium", status: "Data Room", color: "#58C6FF", age: "3d ago" },
-  { company: "NextGen Robotics", industry: "Industrial Automation", buyer: "Rockwell Automation", match: "87% Match", offer: "$142,000,000", premium: "+22% Premium", status: "Initial Review", color: "rgba(255,255,255,.55)", age: "4d ago" },
-];
-const DEMAND: [string, string, number][] = [
-  ["AI Infrastructure", "Extreme", 9],
-  ["Cybersecurity", "Very High", 8],
-  ["SaaS / Enterprise", "Very High", 8],
-  ["Data & Analytics", "High", 7],
-  ["Healthcare SaaS", "High", 6],
-  ["Industrial Tech", "Medium", 5],
-  ["Fintech", "Medium", 4],
-];
-// summary stat bar along the board's bottom edge (benchmark)
+// Strategic Buyers column — the registry's most active mandates.
+const STRATEGIC_BUYERS: readonly [string, string, number, string][] = STRATEGIC_BOARD;
+// Disclosed Transactions column — source-referenced public M&A events from
+// the buyer-history snapshot (the same data that drives engine matching).
+const TRANSACTIONS = DISCLOSED_TRANSACTIONS;
+// Demand column — sector heat computed from mandate coverage.
+const DEMAND = SECTOR_DEMAND;
+// summary stat bar along the board's bottom edge — registry + history facts
 const BOARD_STATS = [
-  { label: "Active Buyers", value: "58,341+" },
-  { label: "Active Acquirers", value: "18,340" },
-  { label: "Active Deals", value: "12,400" },
-  { label: "Transactions in Motion", value: "1,249" },
-  { label: "Total Acquisition Value", value: "$4.2B+" },
+  { label: "Acquirer Mandates", value: MARKET_FMT.buyers },
+  { label: "Actively Deploying", value: MARKET_FMT.activeMandates },
+  { label: "Disclosed Deals Indexed", value: HISTORY_FMT.events },
+  { label: "Check Capacity", value: MARKET_FMT.appetite },
+  { label: "Disclosed Deal Value", value: HISTORY_FMT.disclosedValue },
 ];
 const HERO_TRUST = [
-  { icon: "globe", metric: "58,341+", title: "Verified Buyers", sub: "global acquirer network" },
+  { icon: "globe", metric: `${MARKET_FMT.buyers} Mandates`, title: "Curated Acquirer Network", sub: `${MARKET_FMT.geographies} jurisdictions · ${MARKET_FMT.sectors} sectors` },
   { icon: "lock", metric: "SOC 2", title: "Compliant Infrastructure", sub: "security + data residency" },
   { icon: "users", metric: "100%", title: "Founder Controlled", sub: "you own every decision" },
   { icon: "check", metric: "Every Action", title: "Auditable", sub: "every action, every artifact" },
 ];
-// live activity ticker (very bottom of the board)
-const ACTIVITY = [
-  { text: "Microsoft acquired an AI-infrastructure company — LOI received", meta: "2m ago", color: "#45E38A" },
-  { text: "Vista reviewing a logistics platform", meta: "$132M indication", color: "#58C6FF" },
-  { text: "New strategic buyer added to the network", meta: "just now", color: "#A8FFFF" },
-  { text: "DataMind AI entered negotiation with Google", meta: "$315M · 12m ago", color: "#FF8A3D" },
-  { text: "SecureLayer opened its data room", meta: "Palo Alto Networks", color: "#FFB14A" },
-  { text: "Verdant Bio closed", meta: "$540M · 1h ago", color: "#45E38A" },
-];
+// live mandate ticker (very bottom of the board) — real registry entries,
+// not fabricated transactions; computed from @exit/engines BUYER_REGISTRY.
+const ACTIVITY = MANDATE_ACTIVITY;
 // acquisition ecosystem (below hero)
 const ECOSYSTEM = [
   { icon: "shield", label: "Strategic Acquirers" },
@@ -539,10 +516,10 @@ const ECOSYSTEM = [
   { icon: "doc", label: "Corporate Development" },
 ];
 const ECO_STATS = [
-  { value: "18,340", label: "Acquirers" },
-  { value: "58,341", label: "Buyers" },
-  { value: "4,800", label: "Strategic Buyers" },
-  { value: "$4.2T", label: "Acquisition Appetite" },
+  { value: MARKET_FMT.buyers, label: "Acquirer Mandates" },
+  { value: MARKET_FMT.strategic, label: "Strategic Buyers" },
+  { value: MARKET_FMT.privateEquity, label: "PE & Growth" },
+  { value: MARKET_FMT.appetite, label: "Check Capacity" },
 ];
 // founder → exit workflow chain
 const EXCHANGE_FLOW = [
@@ -555,7 +532,7 @@ const EXCHANGE_FLOW = [
 ];
 // why founders lose millions (problem → fix)
 const LOSSES = [
-  { dimension: "Buyer reach", problem: "A handful of known contacts", fix: "Full process across 58,000+ verified acquirers" },
+  { dimension: "Buyer reach", problem: "A handful of known contacts", fix: `A run across ${MARKET_FMT.buyers} curated acquirer mandates in ${MARKET_FMT.geographies} jurisdictions` },
   { dimension: "Preparation", problem: "Negotiate unprepared", fix: "AI valuation, comps and reservation lines up front" },
   { dimension: "Leverage", problem: "Leverage erodes mid-process", fix: "Live signals + parallel offers hold tension" },
   { dimension: "Final price", problem: "Accept discounted offers", fix: "Offer optimisation captures the premium" },
@@ -567,10 +544,10 @@ const CASE_STUDIES = [
   { sector: "Healthcare SaaS", name: "Healthcare SaaS", value: "$175M", buyers: "12", premium: "+26%", time: "13 wks", buyer: "UnitedHealth*" },
 ];
 const LEAN_STATS = [
-  { label: "Buyers", value: "58,341" },
-  { label: "Appetite", value: "$4.2T" },
-  { label: "Mandates", value: "13,240" },
-  { label: "Acquirers", value: "4,800" },
+  { label: "Mandates", value: MARKET_FMT.buyers },
+  { label: "Capacity", value: MARKET_FMT.appetite },
+  { label: "Deploying", value: MARKET_FMT.activeMandates },
+  { label: "Sectors", value: MARKET_FMT.sectors },
 ];
 const heatGradient = (bars: number) =>
   bars >= 9 ? "linear-gradient(90deg,#FF5A5A,#FF3434)"
@@ -673,7 +650,7 @@ const CommandBoard: React.FC<{ compact?: boolean; lean?: boolean }> = ({ compact
         <div className="mt-4 rounded-2xl p-3" style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.04)" }}>
           <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/45">Market Intelligence</div>
           <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-3">
-            {[["$4.2T+", "Acquisition Appetite Indexed"], ["13,240", "Active Mandates Tracked"], ["4,800+", "Strategic Acquirers Indexed"], ["212", "Sectors Monitored"]].map((m) => (
+            {[[MARKET_FMT.appetite, "Check Capacity Indexed"], [MARKET_FMT.activeMandates, "Mandates Actively Deploying"], [MARKET_FMT.strategic, "Strategic Acquirers Indexed"], [MARKET_FMT.sectors, "Sectors Monitored"]].map((m) => (
               <div key={m[1]}>
                 <div className="font-bold leading-none text-white" style={{ fontSize: compact ? 18 : 22 }}>{m[0]}</div>
                 <div className="mt-1 text-[9px] leading-snug text-white/45">{m[1]}</div>
@@ -720,35 +697,29 @@ const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right
 // SECTION DATA
 // ===========================================================================
 const MARKET_STATS = [
-  { icon: "users", value: "58,341+", label: "Active Buyers", trend: "↑ 12% YoY", up: true },
-  { icon: "spark", value: "$4.2T+", label: "Acquisition Appetite Indexed", trend: "↑ Rising", up: true },
-  { icon: "chart", value: "13,240", label: "Active Mandates Tracked", trend: "↑ 8% QoQ", up: true },
-  { icon: "shield", value: "4,800+", label: "Strategic Acquirers Indexed", trend: "↑ 5% YoY", up: true },
-  { icon: "doc", value: "212", label: "Sectors Monitored", trend: "Stable", up: false },
-  { icon: "globe", value: "125+", label: "Countries with Buyer Activity", trend: "↑ Expanding", up: true },
+  { icon: "users", value: MARKET_FMT.buyers, label: "Acquirer Mandates", trend: "Curated registry", up: true },
+  { icon: "spark", value: MARKET_FMT.appetite, label: "Check Capacity Indexed", trend: "↑ Rising", up: true },
+  { icon: "chart", value: MARKET_FMT.activeMandates, label: "Mandates Actively Deploying", trend: "Live appetite", up: true },
+  { icon: "shield", value: MARKET_FMT.strategic, label: "Strategic Acquirers Indexed", trend: "Engine-matched", up: true },
+  { icon: "doc", value: MARKET_FMT.sectors, label: "Sectors Monitored", trend: "Stable", up: false },
+  { icon: "globe", value: MARKET_FMT.geographies, label: "Jurisdictions with Buyer Activity", trend: "↑ Expanding", up: true },
 ];
 const STEPS = [
   { icon: "chart", title: "Company Analysis", body: "AI-powered valuation, market positioning, and readiness scoring." },
-  { icon: "users", title: "Buyer Discovery", body: "Access 58,000+ qualified strategic and financial buyers." },
+  { icon: "users", title: "Buyer Discovery", body: `Engine-ranked matching across ${MARKET_FMT.buyers} curated strategic and financial mandates.` },
   { icon: "doc", title: "Data Room", body: "Secure diligence infrastructure built for M&A." },
   { icon: "spark", title: "Negotiation Engine", body: "AI-assisted negotiation with offer optimization and scenario modeling." },
   { icon: "check", title: "LOI Received", body: "Manage terms, track milestones, and reduce deal risk." },
   { icon: "lock", title: "Closing & Payout", body: "Streamline closing, documents, and funds transfer." },
 ];
-const BUYERS = [
-  { name: "Microsoft", kind: "Enterprise Software", appetite: 95, rows: [["Check Size", "$100M – $2B+"], ["Activity Score", "95/100"], ["Focus Areas", "AI, Cloud, DevTools"]] },
-  { name: "Salesforce", kind: "CRM / AI / Data", appetite: 92, rows: [["Check Size", "$50M – $1.5B+"], ["Activity Score", "92/100"], ["Focus Areas", "AI, Data, Automation"]] },
-  { name: "SAP", kind: "Enterprise Software", appetite: 84, rows: [["Check Size", "$80M – $1.5B+"], ["Activity Score", "90/100"], ["Focus Areas", "Enterprise, Cloud, Data"]] },
-  { name: "Oracle", kind: "Cloud / Infrastructure", appetite: 82, rows: [["Check Size", "$100M – $2B+"], ["Activity Score", "88/100"], ["Focus Areas", "Cloud, Infrastructure, AI"]] },
-  { name: "Thoma Bravo", kind: "Private Equity", appetite: 90, rows: [["Check Size", "$250M – $5B+"], ["Activity Score", "88/100"], ["Focus Areas", "Software, Tech, Services"]] },
-];
+const BUYERS = REGISTRY_CARDS;
 const COMMAND_FEATURES = [
-  { icon: "chart", value: "1,249", title: "Live Deal Tracking", body: "LOI to closing" },
-  { icon: "users", value: "58,341", title: "Buyer Signals", body: "intent monitoring" },
-  { icon: "spark", value: "94.7%", title: "Valuation Intelligence", body: "AI forecasting" },
+  { icon: "chart", value: HISTORY_FMT.events, title: "Disclosed Deals Indexed", body: "EDGAR + Wikidata sourced" },
+  { icon: "users", value: MARKET_FMT.buyers, title: "Buyer Mandates", body: "intent monitoring" },
+  { icon: "spark", value: MARKET_FMT.activeMandates, title: "Actively Deploying", body: "live appetite" },
   { icon: "fire", value: "High", title: "Market Heat", body: "liquidity scores" },
-  { icon: "globe", value: "$4.2T", title: "Acquisition Demand", body: "appetite indexed" },
-  { icon: "doc", value: "3,410", title: "Data Room Activity", body: "documents in review" },
+  { icon: "globe", value: MARKET_FMT.appetite, title: "Acquisition Demand", body: "check capacity indexed" },
+  { icon: "doc", value: MARKET_FMT.sectors, title: "Sectors Covered", body: "across the registry" },
 ];
 const DATA_ROOMS = [
   { icon: "chart", title: "Financial Statements" },
@@ -770,9 +741,9 @@ const OPPORTUNITIES = [
   { sector: "AI / SaaS", name: "AI Automation Platform", rev: "$87M", ebitda: "$27M", price: "$195M", interest: "26 buyers", status: "LOI Stage", region: "Asia-Pacific" },
 ];
 const GLOBAL_STATS = [
-  { value: "125+", label: "Countries" },
-  { value: "58K+", label: "Active Buyers" },
-  { value: "$4.2T+", label: "Buyer Appetite" },
+  { value: MARKET_FMT.geographies, label: "Jurisdictions" },
+  { value: MARKET_FMT.buyers, label: "Acquirer Mandates" },
+  { value: MARKET_FMT.appetite, label: "Check Capacity" },
   { value: "24/7", label: "Market Activity" },
 ];
 
