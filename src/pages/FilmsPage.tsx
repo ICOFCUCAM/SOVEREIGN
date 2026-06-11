@@ -69,6 +69,29 @@ const FilmsPage: React.FC = () => {
     })();
   }, []);
 
+  // Structured data — a VideoObject per published film, rebuilt as the library loads.
+  useEffect(() => {
+    if (films.length === 0) return;
+    const el = document.createElement('script');
+    el.type = 'application/ld+json';
+    el.text = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      itemListElement: films.slice(0, 24).map((f, i) => ({
+        '@type': 'VideoObject',
+        position: i + 1,
+        name: f.title,
+        description: f.meta || metaFor(f.media_class).label,
+        uploadDate: f.created_at,
+        ...(f.poster_url ? { thumbnailUrl: f.poster_url } : {}),
+        ...(f.video_url ? { contentUrl: f.video_url } : {}),
+        ...(f.youtube_id ? { embedUrl: `https://www.youtube.com/embed/${f.youtube_id}` } : {}),
+      })),
+    });
+    document.head.appendChild(el);
+    return () => { document.head.removeChild(el); };
+  }, [films]);
+
   const classes = useMemo(() => {
     const present = new Set(films.map((f) => f.media_class));
     return Object.keys(CLASS_META).filter((c) => present.has(c));
