@@ -30,8 +30,8 @@ export interface TrustStats {
   assetsUnderGovernanceUsd: number;
 }
 
-const NETWORK_FALLBACK: NetworkStats = { edgeNodes: 62, regions: 5, uptime: '99.99%' };
-const TRUST_FALLBACK: TrustStats = { institutions: 11, deployments: 2847, continents: 6, assetsUnderGovernanceUsd: 4_200_000_000 };
+export const NETWORK_FALLBACK: NetworkStats = { edgeNodes: 62, regions: 5, uptime: '99.99%' };
+export const TRUST_FALLBACK: TrustStats = { institutions: 11, deployments: 2847, continents: 6, assetsUnderGovernanceUsd: 4_200_000_000 };
 
 export async function fetchNetworkRegions(): Promise<NetworkRegion[]> {
   const { data, error } = await supabase

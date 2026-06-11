@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShieldCheck, Landmark, Globe2, Activity, Lock, FileCheck, Database, ServerCog, Fingerprint } from 'lucide-react';
 import { useCountUp } from '@/hooks/useCountUp';
 import HudCorners from '@/components/HudCorners';
+import { fetchTrustStats, TRUST_FALLBACK, type TrustStats } from '@/lib/stats';
 
 interface MetricDef { icon: React.ComponentType<{ className?: string }>; value: number; decimals?: number; prefix?: string; suffix?: string; label: string }
 // Deliberately distinct from the deployment-network telemetry bar — these speak
 // to governance, scale and institutional trust, not live network counts.
-const METRICS: MetricDef[] = [
-  { icon: Landmark, value: 11, label: 'Deployable institutions' },
-  { icon: Activity, value: 2847, label: 'Verified deployments' },
-  { icon: Globe2, value: 6, label: 'Continents operational' },
-  { icon: ShieldCheck, value: 4.2, decimals: 1, prefix: '$', suffix: 'B', label: 'Assets under governance' },
+// Values hydrate from the registry (ecosystem_products, deployments, domains).
+const metricsFrom = (t: TrustStats): MetricDef[] => [
+  { icon: Landmark, value: t.institutions, label: 'Deployable institutions' },
+  { icon: Activity, value: t.deployments, label: 'Verified deployments' },
+  { icon: Globe2, value: t.continents, label: 'Continents operational' },
+  { icon: ShieldCheck, value: t.assetsUnderGovernanceUsd / 1e9, decimals: 1, prefix: '$', suffix: 'B', label: 'Assets under governance' },
 ];
 
 const GOVERNANCE = [
@@ -36,7 +38,13 @@ const Metric: React.FC<{ m: MetricDef; i: number }> = ({ m, i }) => {
   );
 };
 
-const InstitutionalTrust: React.FC = () => (
+const InstitutionalTrust: React.FC = () => {
+  const [metrics, setMetrics] = useState<MetricDef[]>(() => metricsFrom(TRUST_FALLBACK));
+  useEffect(() => { fetchTrustStats().then((t) => setMetrics(metricsFrom(t))); }, []);
+  return <InstitutionalTrustView metrics={metrics} />;
+};
+
+const InstitutionalTrustView: React.FC<{ metrics: MetricDef[] }> = ({ metrics: METRICS }) => (
   <section className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
     <div className="max-w-6xl mx-auto">
       <div className="grid lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-20 items-center">
