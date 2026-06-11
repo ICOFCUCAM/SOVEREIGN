@@ -26,6 +26,14 @@ const Landing: React.FC = () => {
           style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(255,255,255,0.5) 0 2px, transparent 2px 96px)", maskImage: "linear-gradient(to bottom, #000, transparent)", WebkitMaskImage: "linear-gradient(to bottom, #000, transparent)" }} />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-2/3 opacity-[0.12]" aria-hidden
           style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(40,70,110,0.6) 0 1px, transparent 1px 140px), repeating-linear-gradient(0deg, rgba(40,70,110,0.4) 0 1px, transparent 1px 180px)" }} />
+        {/* sovereign data layer — a near-invisible transaction heat field rising
+            from the floor of the hall; reads as depth, not decoration */}
+        <div className="pointer-events-none absolute bottom-0 right-0 h-2/3 w-3/5 opacity-[0.07]" aria-hidden
+          style={{
+            backgroundImage: "repeating-linear-gradient(90deg, rgba(56,130,246,0.9) 0 10px, transparent 10px 34px)",
+            maskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 80%)",
+            WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 80%)",
+          }} />
         {/* wash: strong on the left for the headline, light on the right so the
             hall (desks, analysts, windows) stays visible around the board. */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/92 from-5% via-white/45 via-40% to-white/5" aria-hidden />
@@ -95,7 +103,7 @@ const Landing: React.FC = () => {
                       <span className="h-1 w-1 animate-pulse rounded-full bg-emerald-400" />
                       <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live Market</span>
                     </span>
-                    <span className="hidden font-mono text-[9px] uppercase tracking-[0.14em] text-white/45 md:inline">{MARKET_FMT.activeMandates} mandates deploying · {MARKET_FMT.appetite} capacity</span>
+                    <span className="hidden font-mono text-[9px] uppercase tracking-[0.14em] text-white/45 md:inline">{MARKET_FMT.activeMandates} mandates deploying · {MARKET_FMT.appetite} capacity · data as of {DATA_AS_OF}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/40">System Status</span>
@@ -539,6 +547,10 @@ const Landing: React.FC = () => {
             ))}
           </div>
           <div className="mt-6 text-center text-[11px] text-slate-400">Source-referenced from public filings and disclosures · {HISTORY_FMT.events} events indexed · {HISTORY_FMT.disclosedValue} disclosed value · {HISTORY_FMT.closed} closed</div>
+          <div className="mt-8 flex items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm sm:mx-auto sm:max-w-2xl">
+            <span className="text-[13px] text-slate-600">Your company, priced against this record — the same engines run your valuation in the workspace.</span>
+            <button onClick={() => nav("/console")} className="shrink-0 rounded-md bg-ink-900 px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-ink-800">Run the valuation &rarr;</button>
+          </div>
         </div>
       </section>
 
@@ -880,6 +892,7 @@ const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right
 // SECTION DATA
 // ===========================================================================
 // The lifecycle rail — stage plus the typical window in a run process.
+const DATA_AS_OF = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 const LIFECYCLE: ReadonlyArray<[string, string]> = [
   ["Signal", "day 0"], ["Buyer Discovery", "wk 1"], ["NDA", "wk 1–2"], ["CIM", "wk 2"],
   ["Management Meetings", "wk 2–3"], ["LOI", "wk 4–6"], ["Diligence", "wk 6–9"], ["Closing", "wk 10+"],
