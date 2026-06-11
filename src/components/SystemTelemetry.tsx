@@ -34,7 +34,7 @@ export const READOUT: Record<Motif, string> = {
   payments: 'circulation $4.2M/24h · 6 corridors',
   oversight: '4 anomalies flagged · 12 under trace',
   governance: '7 ministries linked · sync nominal',
-  deployment: '23 regions · 47 edge nodes online',
+  deployment: '5 regions · 62 edge nodes online',
 };
 
 // Coarse continent dot field shared by map-based environments.
