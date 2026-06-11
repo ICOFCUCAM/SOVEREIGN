@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useEscape } from '@/hooks/useEscape';
 import HudCorners from '@/components/HudCorners';
+import { trackEvent } from '@/lib/analytics';
 import { X, Film, ArrowUpRight } from 'lucide-react';
 
 interface Props {
@@ -20,6 +21,9 @@ interface Props {
 const VideoModal: React.FC<Props> = ({ title, kicker, videoId, videoUrl, posterUrl, accent = '#00C2FF', onClose, onBrief }) => {
   useEscape(onClose);
   useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = ''; }; }, []);
+  useEffect(() => {
+    if (videoUrl || videoId) trackEvent({ eventType: 'film_play', metadata: { title, source: videoUrl ? 'render' : 'youtube' } });
+  }, [videoUrl, videoId, title]);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={title}>

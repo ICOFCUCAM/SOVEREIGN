@@ -80,7 +80,8 @@ export type DomainEventType =
   | 'inquiry'
   | 'offer'
   | 'buy_now'
-  | 'modal_open';
+  | 'modal_open'
+  | 'film_play';
 
 export interface TrackOptions {
   domainId?: string | null;
