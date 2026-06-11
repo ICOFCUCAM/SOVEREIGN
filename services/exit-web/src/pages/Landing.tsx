@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MarketingChrome, Glyph, Mark, Arrow } from "../components/MarketingChrome";
-import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS, type BoardTx } from "../lib/market-stats";
+import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS, TOP_JURISDICTIONS, type BoardTx } from "../lib/market-stats";
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
 // marketing chrome (header nav → Platform / Modules / Pricing + footer). The
@@ -252,8 +252,9 @@ const Landing: React.FC = () => {
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
           <div className="flex-1">
-            <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Real buyers.<br />Real appetite.<br />Real opportunities.</h2>
-            <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">View all buyers &rarr;</a>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">Buyer intelligence</div>
+            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Real buyers.<br />Real appetite.<br />Real opportunities.</h2>
+            <Link to="/console" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">View all buyers &rarr;</Link>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {BUYERS.map((b) => (
                 <div key={b.name} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md">
@@ -354,9 +355,10 @@ const Landing: React.FC = () => {
           {/* heading + a short, half-height vault panel on the right */}
           <div className="grid items-center gap-10 lg:grid-cols-[1.4fr_1fr]">
             <div>
-              <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Institutional-grade<br />data rooms.</h2>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">Diligence infrastructure</div>
+              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Institutional-grade<br />data rooms.</h2>
               <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-600">Secure, permissioned, and built for high-stakes transactions.</p>
-              <a href="#" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">Learn more &rarr;</a>
+              <Link to="/platform" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">Inside the data room &rarr;</Link>
               {/* security posture row */}
               <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[11px] text-slate-500">
                 {[["lock", "Permission controls"], ["check", "Full audit trails"], ["shield", "Access logs"]].map(([ic, t]) => (
@@ -389,9 +391,10 @@ const Landing: React.FC = () => {
           <div className="grid flex-1 items-start gap-10 lg:grid-cols-[1.25fr_1fr]">
             <OfferTable />
             <div>
-              <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Negotiate with clarity.<br />Close with confidence.</h2>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">The negotiation desk</div>
+              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Negotiate with clarity.<br />Close with confidence.</h2>
               <p className="mt-3 text-base leading-relaxed text-slate-600">Every bid scored against your reservation lines — structure, certainty and counterparty record, not just headline price.</p>
-              <a href="#" className="mt-3 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">See Negotiation Engine &rarr;</a>
+              <Link to="/modules" className="mt-3 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">See the negotiation desk &rarr;</Link>
               <ul className="mt-7 space-y-5">
                 {NEGOTIATION_FEATURES.map((f) => (
                   <li key={f.title} className="flex gap-3">
@@ -412,7 +415,8 @@ const Landing: React.FC = () => {
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
           <div className="flex-1">
-            <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">The marketplace.<br />Anonymous until NDA.</h2>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">The listing protocol</div>
+            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">The marketplace.<br />Anonymous until NDA.</h2>
             <p className="mt-3 max-w-md text-[13px] leading-relaxed text-slate-500">Every listing trades under a codename with banded figures. Identity, exact financials and the asking range unlock only on an executed NDA — the protocol that lets serious companies come to market without market rumor.</p>
             <a href="/marketplace" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">How the listing protocol works &rarr;</a>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -451,10 +455,18 @@ const Landing: React.FC = () => {
           </div>
           {/* headline + inline stats */}
           <div className="px-6 py-14 lg:px-12 lg:py-20">
-            <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Global reach.<br />Institutional network.</h2>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">Coverage</div>
+            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Global reach.<br />Institutional network.</h2>
             <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
               ExitOS connects founders with acquirer mandates across <span className="font-semibold text-ink-800">{MARKET_FMT.geographies} jurisdictions</span> and every major industry.
             </p>
+            <div className="mt-5 flex flex-wrap gap-1.5">
+              {TOP_JURISDICTIONS.map(([code, n]) => (
+                <span key={code} className="inline-flex items-baseline gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-[11px] font-bold text-ink-800">
+                  {code} <span className="text-[9.5px] font-medium text-slate-400">{n} mandates</span>
+                </span>
+              ))}
+            </div>
             <div className="mt-10 grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4">
               {GLOBAL_STATS.map((s) => (
                 <div key={s.label}>
@@ -701,7 +713,7 @@ const CommandBoard: React.FC = () => {
         <div className="mt-1">
           {buyers.map((b, i) => (
             <button key={b.name} onClick={() => toggle(b.sector)} title={`Filter to ${b.sector}`}
-              className="group flex w-full items-center justify-between gap-2 border-b border-white/5 py-1.5 text-left transition last:border-0 hover:translate-x-1" style={{ transitionDuration: ".25s" }}>
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 group flex w-full items-center justify-between gap-2 rounded border-b border-white/5 py-1.5 text-left transition last:border-0 hover:translate-x-1" style={{ transitionDuration: ".25s" }}>
               <div className="flex items-center gap-2">
                 <Mark name={b.name} size={22} />
                 <div>
@@ -735,7 +747,7 @@ const CommandBoard: React.FC = () => {
         <div className="mt-1">
           {txns.map((t, i) => (
             <button key={t.company} onClick={() => setDrill(t)}
-              className="grid w-full grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 rounded border-b border-white/5 py-1.5 text-left transition-colors duration-500 last:border-0 hover:bg-white/[0.04]"
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 grid w-full grid-cols-[1.4fr_1fr_0.9fr] items-center gap-2 rounded border-b border-white/5 py-1.5 text-left transition-colors duration-500 last:border-0 hover:bg-white/[0.04]"
               style={i === liveRow ? { background: "rgba(96,165,250,0.10)" } : undefined}>
               <div>
                 <div className="flex items-center gap-1.5 text-[12.5px] font-medium text-white/90">
@@ -772,7 +784,7 @@ const CommandBoard: React.FC = () => {
             const liveBars = Math.max(2, Math.min(10, bars + Math.sin(beat * 0.6 + i * 1.7) * 0.4));
             return (
               <button key={label} onClick={() => toggle(label)}
-                className={`block w-full rounded-md px-2 py-1 text-left transition ${active ? "bg-blue-500/15 ring-1 ring-blue-400/40" : "hover:bg-white/5"}`}>
+                className={`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 block w-full rounded-md px-2 py-1 text-left transition ${active ? "bg-blue-500/15 ring-1 ring-blue-400/40" : "hover:bg-white/5"}`}>
                 <div className="flex items-center justify-between text-[10.5px]">
                   <span className={active ? "font-semibold text-blue-200" : "text-white/80"}>{label}</span>
                   <span className="text-white/45">{heat}</span>

@@ -221,6 +221,13 @@ export const DEAL_INTEL_FMT = {
   closedRate: `${DEAL_INTEL.closedRatePct}%`,
 } as const;
 
+/** Top jurisdictions by mandate coverage — ISO codes with mandate counts. */
+export const TOP_JURISDICTIONS: ReadonlyArray<[string, number]> = (() => {
+  const tally = new Map<string, number>();
+  for (const b of REGISTRY) for (const g of b.geographyPreferred) tally.set(g, (tally.get(g) || 0) + 1);
+  return [...tally.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+})();
+
 /** Tracked acquisition events in a given sector. */
 export const sectorEventCount = (sector: string): number =>
   HISTORY.filter((e) => e.sector === sector).length;

@@ -98,12 +98,17 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
                 <div className="flex h-8 w-8 items-center justify-center rounded-md bg-ink-900 text-xs font-black text-white">EX</div>
                 <span className="text-lg font-bold tracking-tight">ExitOS</span>
               </div>
-              <p className="mt-3 max-w-xs text-[12.5px] leading-relaxed text-slate-500">The operating system for company sales — sourcing, diligence, negotiation and closing on one acquisition exchange.</p>
+              <p className="mt-3 max-w-xs text-[12.5px] leading-relaxed text-slate-500">Institutional acquisition infrastructure — sourcing, diligence, negotiation and closing on one exchange.</p>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[10.5px] text-slate-400">
+                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> SOC 2 posture</span>
+                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> Full audit trail</span>
+                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> NDA-gated identity</span>
+              </div>
             </div>
             {[
-              ["Product", [["Platform", "/platform"], ["Modules", "/modules"], ["Pricing", "/pricing"], ["Launch", "/console"]]],
-              ["Company", [["Home", "/"], ["Pricing", "/pricing"]]],
-              ["Get started", [["Log in", "/console"], ["Request a demo", "/pricing"]]],
+              ["The exchange", [["Platform", "/platform"], ["Modules", "/modules"], ["Pricing", "/pricing"], ["Access the Exchange", "/console"]]],
+              ["For founders", [["List confidentially", "/console"], ["Valuation & readiness", "/modules"], ["Founder plans", "/pricing"]]],
+              ["For acquirers", [["Browse the marketplace", "/console"], ["Buyer access", "/pricing"], ["Request an NDA", "/console"]]],
             ].map(([title, links]) => (
               <div key={title as string}>
                 <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{title as string}</div>
@@ -115,9 +120,14 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
               </div>
             ))}
           </div>
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6 text-[12px] text-slate-400">
-            <div>© {new Date().getFullYear()} ExitOS — A Sovereign Infrastructure</div>
-            <div className="font-mono uppercase tracking-[0.22em]">exit.sovereigndo.com</div>
+          <div className="mt-8 border-t border-slate-200 pt-6">
+            <p className="max-w-3xl text-[10.5px] leading-relaxed text-slate-400">
+              Market data on this site is indexed from public filings and disclosures (SEC EDGAR, Wikidata, press) and from a curated registry of acquirer mandates. Figures are presented for information only and do not constitute investment, legal or tax advice. Listings trade anonymously; identity and detailed financials are disclosed only under executed NDA.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-4 text-[12px] text-slate-400">
+              <div>© {new Date().getFullYear()} ExitOS — A Sovereign Infrastructure</div>
+              <div className="font-mono uppercase tracking-[0.22em]">exit.sovereigndo.com</div>
+            </div>
           </div>
         </div>
       </footer>
