@@ -22,6 +22,14 @@ describe("plan gating", () => {
     expect(needsUpgrade("/console/wealth", "founder", "starter")).toBe(true);
   });
 
+  it("prep unlocks prepare/list/discover, keeps engage/close Pro-gated", () => {
+    expect(needsUpgrade("/console/diligence-ai", "founder", "prep")).toBe(false);
+    expect(needsUpgrade("/console/documents", "founder", "prep")).toBe(false);
+    expect(needsUpgrade("/console/data-room", "founder", "prep")).toBe(false);
+    expect(needsUpgrade("/console/banker", "founder", "prep")).toBe(true);
+    expect(needsUpgrade("/console/closing", "founder", "prep")).toBe(true);
+  });
+
   it("pro unlocks everything; admins bypass", () => {
     expect(needsUpgrade("/console/banker", "founder", "pro")).toBe(false);
     expect(needsUpgrade("/console/closing", "founder", "pro")).toBe(false);

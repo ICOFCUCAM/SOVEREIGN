@@ -9,8 +9,10 @@ export type Role = "founder" | "buyer" | "admin" | "superadmin";
 // free  — watch the read-only surfaces
 // starter ($99) — upload, get valued, get listed and run Autonomous Exit up to
 //   the point buyers are found; communication + execution stay locked
+// prep ($499) — full acquisition-readiness suite (documents, diligence,
+//   data room, discovery) ahead of a live process; engage/close stay Pro
 // pro   — the full transaction desk
-export type Plan = "free" | "starter" | "pro";
+export type Plan = "free" | "starter" | "prep" | "pro";
 
 export interface NavItem {
   to: string;
@@ -107,13 +109,14 @@ export function needsUpgrade(path: string, role: Role, plan: Plan): boolean {
   if (plan === "pro") return false;
   const e = entryFor(path, role);
   if (!e?.pro) return false;
-  // Starter unlocks the prepare/list/discover surfaces; everything else is Pro.
-  if (plan === "starter" && e.starter) return false;
+  // Starter and Prep unlock the prepare/list/discover surfaces; the
+  // engage/negotiate/close surfaces stay Pro-only.
+  if ((plan === "starter" || plan === "prep") && e.starter) return false;
   return true;
 }
 
-export const PLAN_LABEL: Record<Plan, string> = { free: "Free", starter: "Starter", pro: "Pro" };
-export const PLAN_PRICE: Record<Plan, string> = { free: "$0", starter: "$99", pro: "$1,499" };
+export const PLAN_LABEL: Record<Plan, string> = { free: "Free", starter: "Starter", prep: "Prep", pro: "Pro" };
+export const PLAN_PRICE: Record<Plan, string> = { free: "$0", starter: "$99", prep: "$499", pro: "$1,499" };
 
 export function featureLabel(path: string, role: Role): string | undefined {
   const p = base(path);

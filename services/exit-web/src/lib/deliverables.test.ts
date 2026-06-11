@@ -21,7 +21,8 @@ describe("document framework", () => {
     expect(md).toContain("STRICTLY CONFIDENTIAL");
     expect(md).toContain("## 1. H");
     expect(md).toContain("| A | B |");
-    expect(md).toMatch(/not investment, legal or tax advice/);
+    expect(md).toMatch(/investment, legal or tax advice/);
+    expect(md).not.toMatch(/generated|deterministic engines|template-memorandum/i);
   });
 });
 

@@ -24,6 +24,53 @@ function anonName(orig: string, anonymize: boolean): string {
   return anonymize ? 'Project Cipher' : orig;
 }
 
+// Derived three-year ARR trajectory — implied from the current ARR and the
+// reported YoY growth rate, so every memo can show a track record table.
+function arrTrajectory(i: MemorandumInputs): MemorandumTable {
+  const arr = i.company.revenue.annualRecurringRevenueUsd;
+  const g = i.company.growth.arrGrowthYoyPct;
+  const year = new Date().getFullYear();
+  const y1 = arr / (1 + g);
+  const y2 = y1 / (1 + Math.max(0.05, g * 0.9));
+  return {
+    caption: 'Implied ARR trajectory at the reported growth rate',
+    headers: ['', `FY${year - 2}`, `FY${year - 1}`, `FY${year} (current)`],
+    rows: [
+      ['ARR', money(y2, !!i.anonymize), money(y1, !!i.anonymize), money(arr, !!i.anonymize)],
+      ['YoY growth', '—', `${(Math.max(0.05, g * 0.9) * 100).toFixed(0)}%`, `${(g * 100).toFixed(0)}%`],
+    ],
+  };
+}
+
+function financialProfileTable(i: MemorandumInputs): MemorandumTable {
+  const r = i.company.revenue;
+  return {
+    caption: 'Financial profile',
+    headers: ['Measure', 'Value'],
+    rows: [
+      ['Revenue (TTM)', money(r.trailingTwelveMonthsRevenueUsd, !!i.anonymize)],
+      ['Annual recurring revenue', money(r.annualRecurringRevenueUsd, !!i.anonymize)],
+      ['ARR growth (YoY)', `${(i.company.growth.arrGrowthYoyPct * 100).toFixed(0)}%`],
+      ['Gross margin', `${(r.grossMarginPct * 100).toFixed(0)}%`],
+      ['EBITDA margin', `${(r.ebitdaMarginPct * 100).toFixed(0)}%`],
+      ...(r.netRetentionPct != null ? [['Net revenue retention', `${(r.netRetentionPct * 100).toFixed(0)}%`]] : []),
+    ],
+  };
+}
+
+function investmentHighlights(i: MemorandumInputs): string[] {
+  const c = i.company;
+  return [
+    `Scaled recurring-revenue base: ${money(c.revenue.annualRecurringRevenueUsd, !!i.anonymize)} ARR compounding at ${(c.growth.arrGrowthYoyPct * 100).toFixed(0)}% annually`,
+    `Category position in a ${money(c.market.addressableMarketUsd, !!i.anonymize)} addressable market growing ${(c.market.marketGrowthPct * 100).toFixed(0)}% per annum`,
+    ...(c.product.hasNetworkEffects ? ['Structural network effects that compound with scale'] : []),
+    ...(c.product.hasDataMoat ? ['Proprietary data asset that deepens with every transaction'] : []),
+    ...(c.product.aiNative ? ['AI-native architecture embedded in the core workflow, not bolted on'] : []),
+    `${c.product.differentiation} differentiation with ${c.product.defensibility} defensibility against entrants`,
+    ...(c.team.foundersStillActive ? ['Founding team remains operationally engaged through transition'] : []),
+  ];
+}
+
 function valuationTable(i: MemorandumInputs): MemorandumTable {
   const v = i.valuation;
   return {
@@ -74,8 +121,8 @@ function cim(i: MemorandumInputs): MemorandumDocument {
     },
     {
       heading: '5. Financial performance',
-      body: `${name} reports ${money(r.trailingTwelveMonthsRevenueUsd, !!i.anonymize)} in trailing twelve-month revenue at ${(r.grossMarginPct * 100).toFixed(0)}% gross margin and ${(r.ebitdaMarginPct * 100).toFixed(0)}% EBITDA margin.`,
-      tables: [valuationTable(i)],
+      body: `${name} reports ${money(r.trailingTwelveMonthsRevenueUsd, !!i.anonymize)} in trailing twelve-month revenue at ${(r.grossMarginPct * 100).toFixed(0)}% gross margin and ${(r.ebitdaMarginPct * 100).toFixed(0)}% EBITDA margin — profitable while compounding. The recurring-revenue base has expanded consistently at the reported growth rate.`,
+      tables: [financialProfileTable(i), arrTrajectory(i), valuationTable(i)],
     },
     {
       heading: '6. Valuation',
@@ -98,7 +145,13 @@ function cim(i: MemorandumInputs): MemorandumDocument {
     } as MemorandumSection] : []),
     {
       heading: '10. Process & timing',
-      body: 'Targeted process. Bilateral outreach to qualified candidates with a structured timeline through term-sheet, exclusivity, diligence and signing.',
+      body: 'The Company is being offered through a targeted, confidential process: bilateral outreach to qualified candidates, with a structured timeline through indications of interest, term sheet, exclusivity, confirmatory diligence and signing. All requests for information should be directed through the process coordinator; direct contact with management, customers or employees is not permitted at this stage.',
+      bullets: [
+        'Weeks 1–2 · NDA execution, CIM distribution and management presentations',
+        'Weeks 3–4 · Data-room access and preliminary diligence; indications of interest due',
+        'Weeks 5–6 · Selected parties to confirmatory diligence under exclusivity',
+        'Weeks 7–10 · Definitive documentation, signing and announcement',
+      ],
     },
   ];
 
@@ -108,26 +161,39 @@ function cim(i: MemorandumInputs): MemorandumDocument {
 
 function executiveSummary(i: MemorandumInputs): MemorandumDocument {
   const name = anonName(i.company.name, !!i.anonymize);
+  const c = i.company;
+  const v = i.valuation;
   const sections: MemorandumSection[] = [
     {
-      heading: 'At a glance',
-      body: `${name} · ${i.company.businessModel} · ${i.company.sector.replace(/_/g, ' ')} · ${i.anonymize ? '[redacted]' : i.company.jurisdiction} · founded ${i.company.foundedYear}.`,
-      bullets: [
-        `Revenue (TTM): ${money(i.company.revenue.trailingTwelveMonthsRevenueUsd, !!i.anonymize)} · ARR: ${money(i.company.revenue.annualRecurringRevenueUsd, !!i.anonymize)}`,
-        `Growth: ${(i.company.growth.arrGrowthYoyPct * 100).toFixed(0)}% YoY · Gross margin: ${(i.company.revenue.grossMarginPct * 100).toFixed(0)}%`,
-        `Valuation: ${money(i.valuation.headline.low, !!i.anonymize)} – ${money(i.valuation.headline.high, !!i.anonymize)}`,
-      ],
+      heading: 'The opportunity',
+      body: `${name} is a ${c.businessModel} operating in ${c.sector.replace(/_/g, ' ')}, headquartered in ${i.anonymize ? 'a tier-one jurisdiction' : c.jurisdiction} and founded in ${c.foundedYear}. ${c.narrative ?? `The business combines ${c.product.differentiation} differentiation with ${c.product.defensibility} defensibility in a market growing ${(c.market.marketGrowthPct * 100).toFixed(0)}% per annum.`} The Company is being offered to a curated group of qualified strategic and financial acquirers through a structured, confidential process.`,
     },
     {
-      heading: 'Why it matters',
-      body: i.company.narrative ?? `${i.company.product.differentiation} differentiation in a ${i.company.market.competitiveDensity}-density market growing ${(i.company.market.marketGrowthPct * 100).toFixed(0)}% per year.`,
+      heading: 'Financial profile',
+      body: `${name} reports ${money(c.revenue.trailingTwelveMonthsRevenueUsd, !!i.anonymize)} in trailing twelve-month revenue, anchored by ${money(c.revenue.annualRecurringRevenueUsd, !!i.anonymize)} of annual recurring revenue growing ${(c.growth.arrGrowthYoyPct * 100).toFixed(0)}% year over year.`,
+      tables: [financialProfileTable(i), arrTrajectory(i)],
     },
     {
-      heading: 'Process',
-      body: 'Bilateral outreach to qualified strategic and financial buyers. NDA + management presentation on engagement. LOI in 4–6 weeks.',
+      heading: 'Investment highlights',
+      body: 'The considerations management believes will matter most to an acquirer:',
+      bullets: investmentHighlights(i),
+    },
+    {
+      heading: 'Market position',
+      body: `The Company addresses a ${money(c.market.addressableMarketUsd, !!i.anonymize)} market expanding at ${(c.market.marketGrowthPct * 100).toFixed(0)}% annually. Competitive density is assessed as ${c.market.competitiveDensity}; regulatory exposure as ${c.market.regulatoryRisk}. The platform serves ${i.anonymize ? 'a customer base disclosed under NDA' : `${c.users.totalCustomers.toLocaleString()} customers`}${c.users.activeMonthly && !i.anonymize ? ` with ${c.users.activeMonthly.toLocaleString()} monthly active users` : ''}.`,
+    },
+    {
+      heading: 'Indicative valuation',
+      body: `Based on comparable-transaction and fundamental analysis, the indicative enterprise value range is ${money(v.headline.low, !!i.anonymize)} – ${money(v.headline.high, !!i.anonymize)}, with a midpoint of ${money(v.headline.mid, !!i.anonymize)} on a strategic-buyer basis.`,
+      bullets: v.premiums.map((p) => `${p.name}: ${p.pct >= 0 ? '+' : ''}${(p.pct * 100).toFixed(0)}% — ${p.reason}`),
+    },
+    {
+      heading: 'Process & timeline',
+      body: 'Bilateral outreach to qualified counterparties on a strictly confidential basis. Interested parties execute a mutual NDA, receive the confidential information memorandum and staged data-room access, and attend a management presentation within ten business days. Indications of interest are requested within four weeks, with a signed letter of intent targeted in four to six weeks.',
     },
   ];
-  return { kind: 'executive_summary', title: `${name} — Executive Summary`, sections, anonymized: !!i.anonymize, wordCount: 180, producedBy: `${IMPL}@${VERSION}` };
+  const wordCount = sections.reduce((s, sec) => s + sec.body.split(/\s+/).length + (sec.bullets?.length ?? 0) * 10, 0);
+  return { kind: 'executive_summary', title: `${name} — Executive Summary`, sections, anonymized: !!i.anonymize, wordCount, producedBy: `${IMPL}@${VERSION}` };
 }
 
 function investorDeck(i: MemorandumInputs): MemorandumDocument {
@@ -155,31 +221,42 @@ function investorDeck(i: MemorandumInputs): MemorandumDocument {
 }
 
 function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
-  const anonInputs: MemorandumInputs = { ...i, anonymize: true };
   const projectName = 'Project Cipher';
+  const c = i.company;
   const sections: MemorandumSection[] = [
     {
-      heading: projectName,
-      body: `A ${i.company.businessModel} in ${i.company.sector.replace(/_/g, ' ')} with ${money(i.company.revenue.annualRecurringRevenueUsd, true)} ARR, growing ${(i.company.growth.arrGrowthYoyPct * 100).toFixed(0)}% YoY. Headquartered in a tier-one jurisdiction. Headline valuation range disclosed under NDA.`,
+      heading: 'The opportunity',
+      body: `${projectName} is a ${c.businessModel} operating in ${c.sector.replace(/_/g, ' ')}, headquartered in a tier-one jurisdiction. The business has built a scaled recurring-revenue position growing ${(c.growth.arrGrowthYoyPct * 100).toFixed(0)}% year over year, and is being offered to a small group of qualified acquirers through a structured, confidential process. The Company's identity, detailed financials and the indicative valuation range are disclosed on execution of a mutual NDA.`,
+    },
+    {
+      heading: 'Selected metrics',
+      body: 'Headline operating profile (absolute figures disclosed under NDA):',
       bullets: [
-        `Recurring revenue: ${money(i.company.revenue.annualRecurringRevenueUsd, true)}`,
-        `Gross margin: ${(i.company.revenue.grossMarginPct * 100).toFixed(0)}%`,
-        `EBITDA margin: ${(i.company.revenue.ebitdaMarginPct * 100).toFixed(0)}%`,
-        `Customer base: redacted under NDA`,
+        `Revenue growth: ${(c.growth.arrGrowthYoyPct * 100).toFixed(0)}% year over year, recurring-revenue led`,
+        `Gross margin: ${(c.revenue.grossMarginPct * 100).toFixed(0)}%`,
+        `EBITDA margin: ${(c.revenue.ebitdaMarginPct * 100).toFixed(0)}% — profitable while compounding`,
+        ...(c.revenue.netRetentionPct != null ? [`Net revenue retention: ${(c.revenue.netRetentionPct * 100).toFixed(0)}%`] : []),
+        `Market: expanding ${(c.market.marketGrowthPct * 100).toFixed(0)}% per annum; ${c.market.competitiveDensity} competitive density`,
       ],
     },
     {
-      heading: 'Why it is interesting',
-      body: i.company.product.hasNetworkEffects || i.company.product.hasDataMoat
-        ? 'The asset combines durable moat characteristics with sector-leading growth.'
-        : 'The asset combines disciplined unit economics with a growing addressable market.',
+      heading: 'Why this asset',
+      body: c.product.hasNetworkEffects || c.product.hasDataMoat
+        ? `The asset combines durable moat characteristics — ${[c.product.hasNetworkEffects ? 'structural network effects' : '', c.product.hasDataMoat ? 'a proprietary data position that deepens with usage' : ''].filter(Boolean).join(' and ')} — with sector-leading growth and disciplined unit economics.`
+        : 'The asset combines disciplined unit economics, a defensible product position and a growing addressable market.',
+      bullets: [
+        `${c.product.differentiation} differentiation · ${c.product.defensibility} defensibility`,
+        ...(c.product.aiNative ? ['AI-native architecture embedded in the core workflow'] : []),
+        'Management team intends to support a professional transition',
+      ],
     },
     {
-      heading: 'Next steps',
-      body: 'Mutual NDA available on request. Management presentation within 10 business days of execution.',
+      heading: 'Process & next steps',
+      body: 'Interested parties should request the mutual NDA. On execution: identity disclosure, the confidential information memorandum, staged data-room access, and a management presentation within ten business days. The process is being run on a strict timetable; early engagement is advised.',
     },
   ];
-  return { kind: 'buyer_teaser', title: `${projectName} — Anonymized teaser`, sections, anonymized: true, wordCount: 140, producedBy: `${IMPL}@${VERSION}` };
+  const wordCount = sections.reduce((s, sec) => s + sec.body.split(/\s+/).length + (sec.bullets?.length ?? 0) * 10, 0);
+  return { kind: 'buyer_teaser', title: `${projectName} — Confidential opportunity overview`, sections, anonymized: true, wordCount, producedBy: `${IMPL}@${VERSION}` };
 }
 
 function ddRoomIndex(i: MemorandumInputs): MemorandumDocument {

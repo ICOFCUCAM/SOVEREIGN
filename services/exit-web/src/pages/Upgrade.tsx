@@ -31,8 +31,10 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
       features: ["Dashboard & Exit Readiness Score", "Valuation & Cap Table (view)", "Marketplace & Acquisition Radar (browse)", "Pipeline (view)"] },
     { plan: "starter", name: "Founder Starter", price: "$99", priceSub: "/ month", blurb: "Upload, get valued, and get discovered by buyers.",
       features: ["Everything in Free", "Upload documents → Diligence & Data Room", "Generate the teaser & list the company", "Buyer Intelligence — matched acquirers", "Autonomous Exit up to buyers found"], highlight: current === "free" },
+    { plan: "prep", name: "Founder Prep", price: "$499", priceSub: "/ month", blurb: "Get fully acquisition-ready before a live process.",
+      features: ["Everything in Starter", "Acquisition Memorandum suite — CIM, deck, teaser, DD index", "Due Diligence Engine — full packages & artifact lists", "Buyer Discovery — full curated registry", "Virtual Data Room (up to 50GB)"] },
     { plan: "pro", name: "Founder Pro", price: proPrice, priceSub: "/ month", blurb: "The full transaction desk — communicate, negotiate, close.",
-      features: ["Everything in Starter", "Chief Investment Banker + The Banker outreach", "NDA, Live Deal Room & buyer communication", "Negotiator, Simulator & Closing Center", "WealthOS · unlimited exports & active deals"], highlight: current !== "free" },
+      features: ["Everything in Prep", "Chief Investment Banker + The Banker outreach", "NDA, Live Deal Room & buyer communication", "Negotiator, Simulator & Closing Center", "WealthOS · unlimited exports & active deals"], highlight: current !== "free" },
   ];
 
   const act = (plan: Plan): void => {
@@ -51,13 +53,13 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
           : "Free watches the market. Starter gets you valued, listed and discovered. Pro runs the whole deal."}
       />
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {TIERS.map((t) => {
           const isCurrent = t.plan === current;
           return (
             <Card key={t.plan} className={`overflow-hidden p-0 ${t.highlight ? "ring-1 ring-deal-400/40" : ""}`}>
-              <div className={`px-6 py-5 ${t.plan === "pro" ? "bg-gradient-to-r from-deal-600/20 to-transparent" : t.plan === "starter" ? "bg-gradient-to-r from-loi-500/15 to-transparent" : ""}`}>
-                <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${t.plan === "pro" ? "text-deal-300" : t.plan === "starter" ? "text-loi-300" : "text-white/45"}`}>{t.name}</div>
+              <div className={`px-6 py-5 ${t.plan === "pro" ? "bg-gradient-to-r from-deal-600/20 to-transparent" : t.plan === "starter" ? "bg-gradient-to-r from-loi-500/15 to-transparent" : t.plan === "prep" ? "bg-gradient-to-r from-blue-500/10 to-transparent" : ""}`}>
+                <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${t.plan === "pro" ? "text-deal-300" : t.plan === "starter" ? "text-loi-300" : t.plan === "prep" ? "text-blue-300" : "text-white/45"}`}>{t.name}</div>
                 <div className="mt-1 flex items-baseline gap-2">
                   <span className="font-mono text-3xl font-bold text-white">{t.price}</span>
                   <span className="text-[12px] text-white/50">{t.priceSub}</span>
@@ -77,7 +79,7 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
                     <div className="text-[11px] uppercase tracking-wide text-white/35">Downgrade in billing</div>
                   ) : (
                     <Button variant={t.plan === "pro" ? "primary" : "ghost"} onClick={() => act(t.plan)}>
-                      {t.plan === "starter" ? "Start with Starter →" : "Upgrade to Pro →"}
+                      {t.plan === "starter" ? "Start with Starter →" : t.plan === "prep" ? "Start with Prep →" : "Upgrade to Pro →"}
                     </Button>
                   )}
                 </div>
