@@ -33,8 +33,8 @@ export const StageBadge: React.FC<{ stage: DealStage }> = ({ stage }) => (
   </span>
 );
 
-export const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
-  <div className={`rounded-lg border border-white/10 bg-ink-800/60 ${className}`}>{children}</div>
+export const Card: React.FC<{ children: React.ReactNode; className?: string; id?: string }> = ({ children, className = "", id }) => (
+  <div id={id} className={`rounded-lg border border-white/10 bg-ink-800/60 ${className}`}>{children}</div>
 );
 
 export const Kpi: React.FC<{ label: string; value: string; sub?: string; accent?: string }> = ({ label, value, sub, accent }) => (
@@ -57,8 +57,58 @@ export const Button: React.FC<
   return (
     <button
       {...p}
-      className={`inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed ${v} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400 focus-visible:ring-offset-1 focus-visible:ring-offset-ink-900 disabled:opacity-40 disabled:cursor-not-allowed ${v} ${className}`}
     />
+  );
+};
+
+// ── Toast + actions ───────────────────────────────────────────────
+// A transient bottom-right toast, driven by a window event so any module can
+// fire one without prop-drilling. notify() shows a message; preview() marks a
+// control that isn't wired in the demo; copyText/download* perform the real,
+// cheap browser actions so Export and Copy buttons actually do something.
+export function notify(message: string): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("exitos:toast", { detail: message }));
+}
+export const preview = (): void => notify("Preview — not wired in this demo");
+
+export function copyText(text: string): void {
+  try { void navigator.clipboard?.writeText(text); } catch { /* clipboard unavailable */ }
+  notify("Copied to clipboard");
+}
+
+function triggerDownload(filename: string, blob: Blob): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  notify(`Downloaded ${filename}`);
+}
+export function downloadText(filename: string, text: string): void {
+  triggerDownload(filename, new Blob([text], { type: "text/plain;charset=utf-8" }));
+}
+export function downloadJson(filename: string, data: unknown): void {
+  triggerDownload(filename, new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+}
+
+export const Toast: React.FC = () => {
+  const [msg, setMsg] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const handler = (e: Event): void => {
+      setMsg((e as CustomEvent<string>).detail);
+      clearTimeout(timer);
+      timer = setTimeout(() => setMsg(null), 2600);
+    };
+    window.addEventListener("exitos:toast", handler);
+    return () => { window.removeEventListener("exitos:toast", handler); clearTimeout(timer); };
+  }, []);
+  if (!msg) return null;
+  return (
+    <div role="status" aria-live="polite"
+      className="pointer-events-none fixed bottom-6 right-6 z-[100] rounded-lg border border-deal-400/30 bg-ink-800/95 px-4 py-2.5 text-[13px] font-medium text-white shadow-xl shadow-black/40">
+      {msg}
+    </div>
   );
 };
 
@@ -97,3 +147,28 @@ export function fmtMoney(n?: number | null, currency = "USD"): string {
   if (n == null) return "—";
   return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
 }
+
+// Confidence chip — surfaces the sample size and tier behind every
+// statistic. "75% close rate (n=24)" reads very differently from
+// "100% close rate (n=1)"; this primitive enforces the distinction
+// everywhere stats are quoted.
+type ConfidenceTier = "experimental" | "low" | "medium" | "high";
+const CONF_STYLE: Record<ConfidenceTier, string> = {
+  experimental: "bg-white/5 text-white/40 ring-white/10",
+  low:          "bg-loi-500/15 text-loi-300 ring-loi-400/30",
+  medium:       "bg-stage-engaged/15 text-stage-engaged ring-stage-engaged/30",
+  high:         "bg-deal-600/25 text-deal-200 ring-deal-500/40",
+};
+const CONF_LABEL: Record<ConfidenceTier, string> = {
+  experimental: "Exp.", low: "Low", medium: "Med.", high: "High",
+};
+
+export const ConfidenceChip: React.FC<{ tier: ConfidenceTier; sample?: number; compact?: boolean; title?: string }> = ({ tier, sample, compact = false, title }) => (
+  <span
+    title={title ?? `${CONF_LABEL[tier]} confidence${sample != null ? ` · n=${sample}` : ""}`}
+    className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono font-bold uppercase tracking-wider ring-1 ${CONF_STYLE[tier]} ${compact ? "text-[8.5px]" : "text-[9.5px]"}`}
+  >
+    {sample != null && <span className="opacity-80">n={sample}</span>}
+    <span>{CONF_LABEL[tier]}</span>
+  </span>
+);

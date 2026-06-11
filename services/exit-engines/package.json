@@ -15,13 +15,16 @@
     "./readiness":    { "types": "./dist/readiness/index.d.ts",    "import": "./dist/readiness/index.js" },
     "./marketplace":  { "types": "./dist/marketplace/index.d.ts",  "import": "./dist/marketplace/index.js" },
     "./negotiation":  { "types": "./dist/negotiation/index.d.ts",  "import": "./dist/negotiation/index.js" },
-    "./listing":      { "types": "./dist/listing/index.d.ts",      "import": "./dist/listing/index.js" }
+    "./listing":      { "types": "./dist/listing/index.d.ts",      "import": "./dist/listing/index.js" },
+    "./captable":     { "types": "./dist/captable/index.d.ts",     "import": "./dist/captable/index.js" },
+    "./nda":          { "types": "./dist/nda/index.d.ts",          "import": "./dist/nda/index.js" }
   },
   "files": ["dist", "src"],
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b",
-    "test": "npm run build && node --test test/*.test.js"
+    "test": "npm run build && node --test test/*.test.js",
+    "refresh-buyer-history": "npm run build && node dist/scripts/refresh-buyer-history.js"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",

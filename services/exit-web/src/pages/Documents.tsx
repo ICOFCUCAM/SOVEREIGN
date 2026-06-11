@@ -1,7 +1,79 @@
-import React, { useState } from "react";
-import { Button, Card, Kpi, SectionHeader } from "../lib/ui";
-import { useMemorandum } from "../lib/engines";
-import type { MemorandumKind } from "@exit/engines";
+import React, { useMemo, useState } from "react";
+import { Button, Card, Kpi, SectionHeader, fmtMoney, preview } from "../lib/ui";
+import { useMemorandum, VALUATION_STRATEGIC } from "../lib/engines";
+import { SAMPLE_COMPANY } from "../lib/profile";
+import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
+import BankerTake from "../components/BankerTake";
+
+// AI Red Team — reads the generated document like a hostile buyer's analyst.
+// It scans every section for numeric claims (growth, margin, retention, ARR,
+// customers) and cross-checks each against the TRUE company profile. Any claim
+// that diverges materially from source-of-truth becomes a flagged challenge —
+// the gap a buyer will find in diligence.
+interface RedFlag {
+  readonly metric: string;
+  readonly claimed: string;
+  readonly actual: string;
+  readonly severity: "high" | "medium" | "low";
+  readonly note: string;
+}
+function redTeam(doc: MemorandumDocument | null): RedFlag[] {
+  if (!doc) return [];
+  const text = doc.sections.map((s) => `${s.heading} ${s.body} ${(s.bullets ?? []).join(" ")}`).join(" ");
+  const C = SAMPLE_COMPANY;
+  const flags: RedFlag[] = [];
+  // truth values
+  const truth = {
+    growth: Math.round(C.growth.arrGrowthYoyPct * 100),
+    gross: Math.round(C.revenue.grossMarginPct * 100),
+    ebitda: Math.round(C.revenue.ebitdaMarginPct * 100),
+    nrr: C.revenue.netRetentionPct != null ? Math.round(C.revenue.netRetentionPct * 100) : null,
+    arrM: Math.round(C.revenue.annualRecurringRevenueUsd / 1_000_000),
+    customers: C.users.totalCustomers,
+  };
+  const sev = (claimed: number, actual: number): RedFlag["severity"] => {
+    const d = Math.abs(claimed - actual) / Math.max(1, actual);
+    return d >= 0.2 ? "high" : d >= 0.08 ? "medium" : "low";
+  };
+  // helper: find a "<n>% <keyword>" or "<keyword> ... <n>%" claim
+  const findPct = (re: RegExp) => { const m = text.match(re); return m ? parseInt(m[1] ?? m[2], 10) : null; };
+
+  const growthClaim = findPct(/(\d{1,3})%\s*(?:yoy|growth|year[- ]over[- ]year)/i) ?? findPct(/grow\w*[^.]{0,40}?(\d{1,3})%/i);
+  if (growthClaim != null && growthClaim !== truth.growth && Math.abs(growthClaim - truth.growth) >= 3)
+    flags.push({ metric: "ARR growth", claimed: `${growthClaim}%`, actual: `${truth.growth}%`, severity: sev(growthClaim, truth.growth), note: "Growth narrative diverges from booked ARR growth — a buyer will reconcile against the financials." });
+
+  const grossClaim = findPct(/(\d{1,3})%\s*gross\s*margin/i) ?? findPct(/gross\s*margin[^.]{0,30}?(\d{1,3})%/i);
+  if (grossClaim != null && Math.abs(grossClaim - truth.gross) >= 3)
+    flags.push({ metric: "Gross margin", claimed: `${grossClaim}%`, actual: `${truth.gross}%`, severity: sev(grossClaim, truth.gross), note: "Margin claim doesn't match the P&L — expect a quality-of-earnings challenge." });
+
+  if (truth.nrr != null) {
+    const nrrClaim = findPct(/(\d{2,3})%\s*(?:net\s*retention|nrr|ndr)/i) ?? findPct(/(?:net\s*retention|nrr)[^.]{0,30}?(\d{2,3})%/i);
+    if (nrrClaim != null && Math.abs(nrrClaim - truth.nrr) >= 3)
+      flags.push({ metric: "Net retention", claimed: `${nrrClaim}%`, actual: `${truth.nrr}%`, severity: sev(nrrClaim, truth.nrr), note: "Retention claim above reported NRR — cohort data will be requested." });
+  }
+
+  // concentration: doc silent on a known high concentration is itself a flag
+  if ((C.revenue.customerConcentrationTop10Pct ?? 0) >= 0.35 && !/concentrat/i.test(text))
+    flags.push({ metric: "Customer concentration", claimed: "not disclosed", actual: `top-10 = ${Math.round((C.revenue.customerConcentrationTop10Pct ?? 0) * 100)}%`, severity: "high", note: "Document omits a material concentration risk a buyer will surface in diligence." });
+
+  return flags;
+}
+
+const Documents: React.FC = () => {
+  const [kind, setKind] = useState<MemorandumKind>("cim");
+  const doc = useMemorandum(kind);
+  const flags = useMemo(() => redTeam(doc), [doc]);
+  return (
+    <DocumentsView kind={kind} setKind={setKind} doc={doc} flags={flags} />
+  );
+};
+
+const DocumentsView: React.FC<{
+  kind: MemorandumKind;
+  setKind: (k: MemorandumKind) => void;
+  doc: MemorandumDocument | null;
+  flags: RedFlag[];
+}> = ({ kind, setKind, doc, flags }) => {
 
 // Document Generator surface — wired to TemplateMemorandumGenerator
 // from @exit/engines. Selecting a kind triggers useMemorandum() which
@@ -17,25 +89,66 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
   { key: "dd_room_index",      label: "Data Room Index",                     description: "Index of the diligence package contents organised by package.",    accent: "text-white/65" },
 ];
 
-const Documents: React.FC = () => {
-  const [kind, setKind] = useState<MemorandumKind>("cim");
-  const doc = useMemorandum(kind);
-
   return (
     <div>
       <SectionHeader
         kicker="Module 06 · Workspace"
         title="Document Generator"
         description="Term sheets, LOIs, SPAs, CIMs and buyer teasers — generated from the company profile and the valuation, readiness, buyer and diligence engines."
-        actions={<Button variant="ghost">Library</Button>}
+        actions={<Button variant="ghost" onClick={preview}>Library</Button>}
+      />
+
+      <BankerTake
+        next={flags.length > 0
+          ? <>Reconcile the <span className="text-white">{flags.length} Red Team flag{flags.length === 1 ? "" : "s"}</span> before this document reaches a buyer.</>
+          : <>This draft is defensible — issue it to the process.</>}
+        stake={<>A <span className="font-mono font-bold text-deal-300">{fmtMoney(VALUATION_STRATEGIC.headline.mid)}</span> outcome hinges on a narrative buyers can't pick apart.</>}
+        inaction={<>Every unreconciled claim is a retrade lever a buyer's analyst finds in diligence.</>}
+        buyer={<>The buyer's analyst reads this adversarially — close the gaps before they do.</>}
+        automate={<>ExitOS generates each document from the engines and red-teams it against your real financials.</>}
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi label="Templates"          value={String(KINDS.length)} sub="acquisition document kinds" />
-        <Kpi label="Generated"          value={doc ? "1" : "0"}      sub={doc ? doc.kind.replace(/_/g, " ") : "select a template"} accent="#34d399" />
         <Kpi label="Word count"         value={doc ? String(doc.wordCount) : "—"} sub="current document" />
         <Kpi label="Anonymized"         value={doc?.anonymized ? "Yes" : "No"} sub={doc?.kind === "buyer_teaser" ? "teaser default" : "founder-named"} />
+        <Kpi label="Red Team flags"     value={String(flags.length)} sub={flags.length === 0 ? "no buyer challenges" : "buyer challenges detected"} accent={flags.length === 0 ? "#34d399" : "#f87171"} />
       </div>
+
+      {/* AI Red Team — claims vs source-of-truth, the way a buyer's analyst reads it */}
+      {doc && (
+        <Card className="mt-8 overflow-hidden p-0">
+          <div className="flex items-center justify-between border-b border-white/10 bg-red-500/10 px-5 py-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500/25 text-[12px] text-red-200 ring-1 ring-red-400/40">⚔</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-red-200">AI Red Team · {doc.kind.replace(/_/g, " ")}</span>
+            </div>
+            <span className="text-[11px] text-white/45">{flags.length} claim{flags.length === 1 ? "" : "s"} to reconcile before buyer review</span>
+          </div>
+          {flags.length === 0 ? (
+            <div className="p-5 text-sm text-white/55">No contradictions between document claims and source financials. This draft is defensible in diligence.</div>
+          ) : (
+            <div className="divide-y divide-white/5">
+              {flags.map((f) => (
+                <div key={f.metric} className="flex items-start gap-3 p-4">
+                  <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ring-1 ${
+                    f.severity === "high" ? "bg-red-500/15 text-red-300 ring-red-400/40" :
+                    f.severity === "medium" ? "bg-loi-500/15 text-loi-300 ring-loi-400/40" :
+                    "bg-white/5 text-white/50 ring-white/15"}`}>{f.severity}</span>
+                  <div className="flex-1">
+                    <div className="text-[13px] font-semibold text-white">{f.metric}</div>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px]">
+                      <span className="text-white/55">Document claims <span className="font-mono font-semibold text-red-300">{f.claimed}</span></span>
+                      <span className="text-white/55">Financials show <span className="font-mono font-semibold text-deal-300">{f.actual}</span></span>
+                    </div>
+                    <p className="mt-1 text-[12px] leading-snug text-white/55">{f.note}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
 
       <div className="mt-10 grid gap-6 lg:grid-cols-[280px_1fr]">
         <div className="space-y-2">

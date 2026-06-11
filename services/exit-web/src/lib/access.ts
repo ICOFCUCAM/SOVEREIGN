@@ -1,0 +1,122 @@
+// Access policy — the single source of truth for who can see what. Roles
+// (founder / buyer / admin / superadmin) and subscription plans (free / pro)
+// gate both the navigation and the routes. Free founders and buyers can watch
+// the read-only surfaces but must upgrade to act — the high-value "do" surfaces
+// (Chief Investment Banker, Autonomous Exit, negotiation, diligence, closing,
+// WealthOS …) are pro-only. Admin/superadmin bypass the subscription gate.
+
+export type Role = "founder" | "buyer" | "admin" | "superadmin";
+export type Plan = "free" | "pro";
+
+export interface NavItem {
+  to: string;
+  label: string;
+  group: string;
+  roles: Role[];     // which roles see this item
+  pro?: boolean;     // requires a pro subscription (founders/buyers)
+}
+
+export const NAV: NavItem[] = [
+  // ── Founder · Overview ─────────────────────────────────────────
+  { to: "/console/commander",          label: "Chief Investment Banker", group: "Overview", roles: ["founder"], pro: true },
+  { to: "/console",                    label: "Dashboard",            group: "Overview", roles: ["founder"] },
+  { to: "/console/autopilot",          label: "Autonomous Exit",      group: "Overview", roles: ["founder"], pro: true },
+  { to: "/console/network",            label: "Network Intelligence", group: "Overview", roles: ["founder"], pro: true },
+
+  // ── Buyer · Overview ───────────────────────────────────────────
+  { to: "/console/buyer-portal",       label: "Buyer Home",           group: "Overview", roles: ["buyer"] },
+
+  // ── Prepare (founder) ──────────────────────────────────────────
+  { to: "/console/valuation",          label: "Valuation",            group: "Prepare", roles: ["founder"] },
+  { to: "/console/readiness",          label: "Readiness",            group: "Prepare", roles: ["founder"] },
+  { to: "/console/diligence-ai",       label: "Diligence",            group: "Prepare", roles: ["founder"], pro: true },
+  { to: "/console/investors",          label: "Cap Table",            group: "Prepare", roles: ["founder"] },
+  { to: "/console/exit-timing",        label: "Exit Timing",          group: "Prepare", roles: ["founder"], pro: true },
+
+  // ── Discover (founder) ─────────────────────────────────────────
+  { to: "/console/buyer-copilot",      label: "Buyer Intelligence",   group: "Discover", roles: ["founder"], pro: true },
+  { to: "/console/buyers",             label: "Buyer Profiles",       group: "Discover", roles: ["founder"] },
+  { to: "/console/marketplace",        label: "Marketplace",          group: "Discover", roles: ["founder"] },
+  { to: "/console/intelligence",       label: "Acquisition Radar",    group: "Discover", roles: ["founder"] },
+
+  // ── Engage (founder) ───────────────────────────────────────────
+  { to: "/console/banker",             label: "Outreach",             group: "Engage", roles: ["founder"], pro: true },
+  { to: "/console/nda",                label: "NDA",                  group: "Engage", roles: ["founder"], pro: true },
+  { to: "/console/pipeline",           label: "Pipeline",             group: "Engage", roles: ["founder"] },
+  { to: "/console/deal-room",          label: "Live Deal Room",       group: "Engage", roles: ["founder"], pro: true },
+
+  // ── Negotiate (founder) ────────────────────────────────────────
+  { to: "/console/negotiator",         label: "AI Banker · Offers",   group: "Negotiate", roles: ["founder"], pro: true },
+  { to: "/console/simulator",          label: "Scenario Simulator",   group: "Negotiate", roles: ["founder"], pro: true },
+
+  // ── Close (founder) ────────────────────────────────────────────
+  { to: "/console/closing",            label: "Closing Center",       group: "Close", roles: ["founder"], pro: true },
+  { to: "/console/data-room",          label: "Data Room",            group: "Close", roles: ["founder"], pro: true },
+  { to: "/console/documents",          label: "Documents",            group: "Close", roles: ["founder"], pro: true },
+  { to: "/console/closing#signatures", label: "Signatures",           group: "Close", roles: ["founder"], pro: true },
+  { to: "/console/closing#escrow",     label: "Escrow",               group: "Close", roles: ["founder"], pro: true },
+
+  // ── Wealth (founder) ───────────────────────────────────────────
+  { to: "/console/wealth",             label: "WealthOS",             group: "Wealth", roles: ["founder"], pro: true },
+
+  // ── Buyer · Marketplace ────────────────────────────────────────
+  { to: "/console/marketplace",        label: "Browse Opportunities", group: "Marketplace", roles: ["buyer"] },
+  { to: "/console/intelligence",       label: "Acquisition Radar",    group: "Marketplace", roles: ["buyer"] },
+  // ── Buyer · Deals ──────────────────────────────────────────────
+  { to: "/console/deal-room",          label: "Deal Room",            group: "Deals", roles: ["buyer"], pro: true },
+  { to: "/console/nda",                label: "Access Requests",      group: "Deals", roles: ["buyer"], pro: true },
+
+  // ── Admin ──────────────────────────────────────────────────────
+  { to: "/console/admin",              label: "Admin Console",        group: "Admin", roles: ["admin"] },
+  { to: "/console/calibration",        label: "Calibration",          group: "Admin", roles: ["admin"] },
+];
+
+export const GROUP_ORDER = ["Overview", "Prepare", "Discover", "Engage", "Negotiate", "Close", "Wealth", "Marketplace", "Deals", "Admin"];
+
+const base = (to: string): string => to.split("#")[0];
+
+// Items shown in the sidebar for a role. Superadmin sees the founder console
+// plus the admin tools (not the buyer duplicates) — a clean superset.
+export function navForRole(role: Role): NavItem[] {
+  if (role === "superadmin") return NAV.filter((n) => n.roles.includes("founder") || n.roles.includes("admin"));
+  return NAV.filter((n) => n.roles.includes(role));
+}
+
+function entryFor(path: string, role: Role): NavItem | undefined {
+  const p = base(path);
+  if (role === "superadmin") return NAV.find((n) => base(n.to) === p);
+  return NAV.find((n) => base(n.to) === p && n.roles.includes(role));
+}
+
+// Routes always reachable regardless of policy.
+const OPEN_PATHS = new Set(["/console/upgrade"]);
+
+export function canAccess(path: string, role: Role): boolean {
+  if (role === "superadmin") return true;
+  if (OPEN_PATHS.has(base(path))) return true;
+  return !!entryFor(path, role);
+}
+
+export function needsUpgrade(path: string, role: Role, plan: Plan): boolean {
+  if (role === "admin" || role === "superadmin") return false;
+  if (plan === "pro") return false;
+  return !!entryFor(path, role)?.pro;
+}
+
+export function featureLabel(path: string, role: Role): string | undefined {
+  const p = base(path);
+  const e = NAV.find((n) => base(n.to) === p && (role === "superadmin" || n.roles.includes(role)));
+  return e?.label;
+}
+
+export function homeFor(role: Role): string {
+  switch (role) {
+    case "buyer": return "/console/buyer-portal";
+    case "admin": return "/console/admin";
+    default: return "/console";
+  }
+}
+
+export const ROLE_LABEL: Record<Role, string> = {
+  founder: "Founder", buyer: "Buyer", admin: "Admin", superadmin: "Superadmin",
+};

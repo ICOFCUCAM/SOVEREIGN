@@ -1,7 +1,26 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Card, Kpi, SectionHeader } from "../lib/ui";
-import { DILIGENCE } from "../lib/engines";
+import { Link } from "react-router-dom";
+import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { DILIGENCE, VALUATION_STRATEGIC } from "../lib/engines";
 import { listDocuments, uploadDocument, fmtBytes, type DataRoomDocument, type RoomKind } from "../lib/data-room";
+import BankerTake from "../components/BankerTake";
+
+// Completeness model — buyers care about how complete each package is, not how
+// many files were uploaded. Completeness = uploaded ÷ required specs (capped),
+// and each missing REQUIRED artifact carries an estimated valuation impact
+// (a fraction of the strategic headline, weighted by how foundational the
+// package is to a buyer's diligence).
+const PKG_IMPACT_WEIGHT: Record<string, number> = {
+  financial: 0.06, legal: 0.05, security: 0.04, technical: 0.03,
+  commercial: 0.03, market: 0.02, user_growth: 0.02,
+};
+function completeness(uploaded: number, required: number) {
+  return required === 0 ? 100 : Math.min(100, Math.round((uploaded / required) * 100));
+}
+function missingImpactUsd(kind: string, missingRequired: number): number {
+  const w = PKG_IMPACT_WEIGHT[kind] ?? 0.02;
+  return VALUATION_STRATEGIC.headline.mid * w * missingRequired;
+}
 
 // Virtual Data Room — wired to Supabase storage via the exit-doc-upload
 // + exit-doc-list edge functions. Diligence-engine specs surface the
@@ -49,10 +68,25 @@ const DataRoom: React.FC = () => {
   };
 
   const docsForActive = uploaded.filter((d) => d.room_kind === activeKind);
-  const totalArtifacts = DILIGENCE.documents.reduce((s, d) => s + d.artifacts.length, 0);
   const requiredArtifacts = DILIGENCE.documents.reduce((s, d) => s + d.artifacts.filter((a) => a.required).length, 0);
   const confidentialCount = DILIGENCE.documents.filter((d) => d.classification === "confidential").length;
   const uploadedTotalBytes = uploaded.reduce((s, d) => s + d.bytes, 0);
+
+  // overall completeness + total at-risk value across all packages
+  const perPkg = DILIGENCE.documents.map((d) => {
+    const req = d.artifacts.filter((a) => a.required).length;
+    const up = uploaded.filter((u) => u.room_kind === d.kind).length;
+    const pct = completeness(up, req);
+    const missing = Math.max(0, req - up);
+    return { kind: d.kind, title: d.title, pct, missing, impact: missingImpactUsd(d.kind, missing), req, up };
+  });
+  const overallPct = perPkg.length ? Math.round(perPkg.reduce((s, p) => s + p.pct, 0) / perPkg.length) : 0;
+  const atRiskUsd = perPkg.reduce((s, p) => s + p.impact, 0);
+  const worstPkg = perPkg.filter((p) => p.missing > 0).sort((a, b) => b.impact - a.impact)[0];
+  const activePkg = perPkg.find((p) => p.kind === activeKind);
+  // missing required artifacts for the active package
+  const uploadedNames = new Set(docsForActive.map((d) => d.filename.toLowerCase()));
+  const missingArtifacts = (active?.artifacts ?? []).filter((a) => a.required && !uploadedNames.has(a.filename.toLowerCase()));
 
   return (
     <div>
@@ -81,17 +115,58 @@ const DataRoom: React.FC = () => {
         </div>
       )}
 
+      <BankerTake
+        next={worstPkg
+          ? <>Upload the <span className="text-white">{worstPkg.missing} missing artifact{worstPkg.missing === 1 ? "" : "s"}</span> in {worstPkg.title} — the biggest gap in the room.</>
+          : <>Room is complete — keep it current as new diligence requests land.</>}
+        stake={<><span className="font-mono font-bold text-red-300">-{fmtMoney(atRiskUsd)}</span> at risk while gaps stay open · {overallPct}% complete.</>}
+        inaction={<>Every empty package lets a buyer discount the bid or stall in diligence until it's filled.</>}
+        buyer={<>A buyer in diligence probes the weakest package first{worstPkg ? <> — <span className="text-white">{worstPkg.title}</span></> : null}.</>}
+        automate={<>ExitOS maps every engine-required artifact, scores completeness and prices the dollar impact of each gap.</>}
+        impact={<>-{fmtMoney(atRiskUsd)}</>}
+        cta={{ label: "Run the risk scan", to: "/console/diligence-ai" }}
+      />
+
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Diligence packages"  value={String(DILIGENCE.documents.length)} sub="financial · market · ux · tech · sec · legal · comm" />
-        <Kpi label="Required (specs)"     value={`${requiredArtifacts} / ${totalArtifacts}`} sub="from diligence engine"        accent="#fbbf24" />
-        <Kpi label="Uploaded"             value={String(uploaded.length)} sub={fmtBytes(uploadedTotalBytes)}     accent="#34d399" />
-        <Kpi label="Confidential pkgs"    value={String(confidentialCount)} sub="ring-1 access policy"            accent="#f87171" />
+        <Kpi label="Data room completeness" value={`${overallPct}%`} sub={`${requiredArtifacts} required specs across ${DILIGENCE.documents.length} packages`} accent={overallPct >= 80 ? "#34d399" : overallPct >= 50 ? "#fbbf24" : "#f87171"} />
+        <Kpi label="Value at risk"          value={`-${fmtMoney(atRiskUsd)}`} sub="if missing artifacts stay open" accent="#f87171" />
+        <Kpi label="Uploaded"               value={String(uploaded.length)} sub={fmtBytes(uploadedTotalBytes)} accent="#34d399" />
+        <Kpi label="Confidential pkgs"      value={String(confidentialCount)} sub="ring-1 access policy" />
       </div>
+
+      {/* Due Diligence AI — instant risk readout on the package contents */}
+      <Card className="mt-8 overflow-hidden p-0">
+        <div className="flex items-center justify-between border-b border-white/10 bg-loi-500/10 px-5 py-3">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-loi-500/25 text-[12px] text-loi-200 ring-1 ring-loi-400/40">!</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-loi-200">Due Diligence AI · risk scan</span>
+          </div>
+          <Link to="/console/diligence-ai" className="text-[12px] font-semibold text-loi-200 hover:text-loi-100">Full report →</Link>
+        </div>
+        <div className="grid gap-px bg-white/10 sm:grid-cols-2">
+          {DILIGENCE.redFlags.length === 0 ? (
+            <div className="bg-ink-800/95 p-5 text-sm text-white/55 sm:col-span-2">No material risks detected in the current package — defensible buyer-facing posture.</div>
+          ) : (
+            DILIGENCE.redFlags.slice(0, 4).map((f) => {
+              const fl = f.toLowerCase();
+              const cat = fl.includes("concentration") ? "Customer concentration" : fl.includes("regulat") || fl.includes("compliance") ? "Compliance" : fl.includes("margin") || fl.includes("revenue") || fl.includes("retention") ? "Revenue" : "Legal";
+              return (
+                <div key={f} className="bg-ink-800/95 p-4">
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-loi-300">{cat} risk</div>
+                  <div className="mt-1 text-[13px] leading-snug text-white/80">{f}</div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </Card>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-[280px_1fr]">
         <div className="space-y-2">
           {DILIGENCE.documents.map((doc) => {
-            const count = uploaded.filter((u) => u.room_kind === doc.kind).length;
+            const pkg = perPkg.find((p) => p.kind === doc.kind);
+            const pct = pkg?.pct ?? 0;
+            const pc = pct >= 80 ? "#34d399" : pct >= 50 ? "#fbbf24" : "#f87171";
             return (
               <button
                 key={doc.kind}
@@ -104,13 +179,14 @@ const DataRoom: React.FC = () => {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="text-sm font-medium leading-tight text-white">{doc.title}</div>
-                  <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ring-1 ${CLASS_STYLE[doc.classification]}`}>
-                    {doc.classification}
-                  </span>
+                  <span className="shrink-0 font-mono text-[11px] font-bold" style={{ color: pc }}>{pct}%</span>
                 </div>
-                <div className="mt-1 flex items-baseline justify-between text-[11px]">
-                  <span className="text-white/45">{doc.sections.length} sections · {doc.artifacts.length} specs</span>
-                  <span className="font-mono text-deal-300">{count} uploaded</span>
+                <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pc }} />
+                </div>
+                <div className="mt-1.5 flex items-baseline justify-between text-[10px] text-white/45">
+                  <span>{pkg?.up ?? 0}/{pkg?.req ?? 0} required</span>
+                  {pkg && pkg.missing > 0 && <span className="text-red-300/80">-{fmtMoney(pkg.impact)}</span>}
                 </div>
               </button>
             );
@@ -130,6 +206,36 @@ const DataRoom: React.FC = () => {
                   <span className="text-white/45">{active.artifacts.length} required specs · {docsForActive.length} uploaded</span>
                 </div>
               </div>
+
+              {/* completeness + missing artifacts with estimated impact */}
+              {activePkg && (
+                <div className="mb-6 rounded-lg border border-white/10 bg-ink-900/40 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Package completeness</span>
+                    <span className="font-mono text-lg font-bold" style={{ color: activePkg.pct >= 80 ? "#34d399" : activePkg.pct >= 50 ? "#fbbf24" : "#f87171" }}>{activePkg.pct}%</span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+                    <div className="h-full rounded-full" style={{ width: `${activePkg.pct}%`, background: activePkg.pct >= 80 ? "#34d399" : activePkg.pct >= 50 ? "#fbbf24" : "#f87171" }} />
+                  </div>
+                  {missingArtifacts.length > 0 ? (
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between text-[12px]">
+                        <span className="text-white/55">Missing required artifacts</span>
+                        <span className="font-mono font-semibold text-red-300">est. impact -{fmtMoney(activePkg.impact)}</span>
+                      </div>
+                      <ul className="mt-2 space-y-1 text-[12px] text-white/70">
+                        {missingArtifacts.map((a) => (
+                          <li key={a.filename} className="flex items-baseline gap-2">
+                            <span className="mt-1 inline-block h-1 w-1 rounded-full bg-red-400" /><span className="font-mono">{a.filename}</span> <span className="text-white/40">— {a.description}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <div className="mt-3 text-[12px] text-deal-300">All required artifacts present for this package.</div>
+                  )}
+                </div>
+              )}
 
               <h3 className="mb-3 font-serif text-base font-bold text-white">Uploaded artifacts</h3>
               {docsForActive.length === 0 ? (

@@ -7,6 +7,8 @@ export * as memorandum   from './memorandum/index.js';
 export * as marketplace  from './marketplace/index.js';
 export * as negotiation  from './negotiation/index.js';
 export * as listing      from './listing/index.js';
+export * as captable     from './captable/index.js';
+export * as nda          from './nda/index.js';
 
 // Top-level convenience re-exports — the most common entrypoints.
 export { runValuation, strategicBuyerReport, assetReplacementReport, tenMillionReport, twentyFiveMillionReport } from './valuation/index.js';
@@ -27,8 +29,17 @@ export type {
 } from './valuation/engine.js';
 export type { ReadinessReport, ReadinessBand, ReadinessDimension } from './readiness/engine.js';
 export type { ReadinessAnalysis, ImprovementPlan, ImprovementEffort } from './readiness/improvements.js';
-export type { BuyerDiscoveryReport, BuyerCandidate } from './buyers/engine.js';
+export type { BuyerDiscoveryReport, BuyerCandidate, BuyerSignal } from './buyers/engine.js';
 export type { BuyerEntry, BuyerType } from './buyers/registry.js';
+
+// Buyer M&A history + deal outcomes + expected outcome + strategy simulator
+export { rollupBuyerHistory, rollupBuyerOutcomes, compareOutcomes, closeDurationDays, premiumPct, computeExpectedOutcome, confidenceFromSample, runStrategySimulator, ACQUISITION_HISTORY } from './buyers/index.js';
+export type {
+  AcquisitionEvent, AcquisitionSource, BuyerHistoryRollup, ConfidenceTier,
+  BuyerDealOutcomeRollup, OutcomeStandouts,
+  ExpectedOutcome, ConfidenceLabel, StatConfidence,
+  StrategyConstraints, StrategyOutput, ProcessStructure,
+} from './buyers/index.js';
 export type {
   DueDiligenceReport, DiligenceDocumentSpec, DiligenceDocumentKind, DiligenceSection, DiligenceArtifact,
 } from './diligence/engine.js';
@@ -36,3 +47,22 @@ export type {
   Offer, OfferEvaluation, OfferComparison, NegotiationState, ReservationLines, Term, TermCategory, OfferConflict,
 } from './negotiation/types.js';
 export type { MarketplaceListing, BuyerMatch, ListingMatches, ListingVisibility, CreateListingOptions } from './listing/engine.js';
+
+// Cap-table CRM
+export {
+  runCapTableAnalysis, computeWaterfall, signatoryRoster, dragAlongCheck, foundersNetFromOffer, vestedShares,
+} from './captable/index.js';
+export type {
+  ShareClass, ShareClassKind, StakeholderRole, Holding, VestingSchedule, Stakeholder, CapTable,
+  CapTableAnalysis, SignatoryRoster, DragAlongCheck, Waterfall, WaterfallInputs, StakeholderDistribution,
+} from './captable/index.js';
+
+// NDA lifecycle
+export {
+  STANDARD_TEMPLATES, templateById, issueNda, recordSignature, evaluateNdaStatus, revokeNda, markBreached,
+  generateBreachNotice, ndaCoverageFor, rosterFor,
+} from './nda/index.js';
+export type {
+  NdaShape, NdaState, NdaTemplate, NdaTerms, NdaParty, NdaInstance, NdaSignatureEvent,
+  BreachNotice, AccessCheck, NdaRoster,
+} from './nda/index.js';

@@ -1,12 +1,20 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button, Card, Kpi, SectionHeader, fmtMoney, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import {
   VALUATION_STANDARD, VALUATION_STRATEGIC, VALUATION_REPLACEMENT,
   READINESS, READINESS_ANALYSIS, BUYERS, DILIGENCE,
 } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import ExitProcessModal from "../components/ExitProcessModal";
+import JourneyMap from "../components/JourneyMap";
+import ExitCommander from "../components/ExitCommander";
+import { LiquidityScore, AcquisitionHeatMap, LiveBuyerActivity, ValuationScenarios, ProbabilityFunnel } from "../components/DashboardModules";
+import CommandTiles from "../components/CommandTiles";
+import { commanderMetrics } from "../lib/commander-metrics";
+import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
+import { emitTelemetry } from "../lib/telemetry";
 
 // Founder dashboard — wired to @exit/engines. The deterministic
 // engines (valuation, readiness, buyer discovery, diligence) all run
@@ -34,13 +42,106 @@ const Dashboard: React.FC = () => {
   const redFlags = DILIGENCE.redFlags;
   const arrM = SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd / 1_000_000;
 
+  const navigate = useNavigate();
+  const m = commanderMetrics();
+
+  const [run, setRun] = useState<ExitRun | null>(() => loadRun());
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!modalOpen) setRun(loadRun());
+  }, [modalOpen]);
+
+  useEffect(() => {
+    emitTelemetry("dashboard_viewed", undefined, "/console");
+  }, []);
+
+  const startExit = (): void => {
+    emitTelemetry("exit_process_clicked", undefined, "/console");
+    setModalOpen(true);
+  };
+  const resetExit = (): void => {
+    emitTelemetry("exit_process_reset", undefined, "/console");
+    clearRun();
+    setRun(null);
+  };
+
   return (
     <div>
       <SectionHeader
         kicker="Founder Dashboard"
         title={`Good morning, ${session?.founderId ?? "founder"}.`}
         description={`${SAMPLE_COMPANY.name} · ${SAMPLE_COMPANY.sector.replace(/_/g, " ")} · ${arrM.toFixed(1)}M ARR · ${SAMPLE_COMPANY.jurisdiction}`}
+        actions={
+          run?.status === "complete" ? (
+            <>
+              <Button variant="ghost" onClick={resetExit}>Reset</Button>
+              <Button onClick={startExit}>Re-run exit process</Button>
+            </>
+          ) : (
+            <Button onClick={startExit}>Start Exit Process →</Button>
+          )
+        }
       />
+
+      <JourneyMap current={run?.status === "complete" ? "run" : "monitor"} />
+
+      <CommandTiles
+        companyValue={m.companyValue}
+        potential={m.potential}
+        exitProbability={m.exitProbability}
+        demandLabel={m.demandLabel}
+        buyersMatching={m.activeBuyers}
+        timeToExitMonths={m.timeToExitMonths}
+      />
+
+      <ExitCommander
+        founderName={session?.founderId ?? "founder"}
+        companyName={SAMPLE_COMPANY.name}
+        valuationToday={m.companyValue}
+        valuationPotential={m.potential}
+        fixCount={m.fixCount}
+        horizonMonths={6}
+        strategicBuyersActive={m.strategicActive}
+        recommendedAction={m.recommendedAction}
+        expectedIncreaseUsd={m.expectedIncreaseUsd}
+        confidencePct={m.confidencePct}
+        onExecute={() => navigate("/console/autopilot")}
+      />
+
+      {run?.status === "complete" && (
+        <Card className="mb-8 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-deal-600/20 text-deal-300 ring-1 ring-deal-400/40">✓</span>
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-400">Exit process active</div>
+                <div className="text-sm font-medium text-white">
+                  Initialized {timeAgo(run.startedAt)} · {run.steps.filter((s) => s.status === "done").length}/{run.steps.length} engines complete
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 text-[11px]">
+              {run.artifacts.cim && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">CIM · {run.artifacts.cim.wordCount.toLocaleString()} words</span>}
+              {run.artifacts.teaser && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">Teaser ready</span>}
+              {run.artifacts.ndasIssued && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">{run.artifacts.ndasIssued.length} NDAs pre-issued</span>}
+              {run.artifacts.listing && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">Listing {run.artifacts.listing.private.listingId.slice(0, 18)}…</span>}
+              {run.artifacts.offerLeaderName && <span className="rounded-full bg-deal-600/20 px-2.5 py-0.5 text-deal-300 ring-1 ring-deal-400/40">Leader: {run.artifacts.offerLeaderName}</span>}
+            </div>
+          </div>
+        </Card>
+      )}
+
+      <ExitProcessModal open={modalOpen} onClose={() => setModalOpen(false)} />
+
+      {/* Market position — liquidity, demand geography and who's looking now. */}
+      <div className="mb-6 grid gap-4 lg:grid-cols-3">
+        <LiquidityScore />
+        <LiveBuyerActivity />
+        <AcquisitionHeatMap />
+      </div>
+      <div className="mb-6"><ValuationScenarios /></div>
+      <div className="mb-8"><ProbabilityFunnel /></div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi
@@ -68,7 +169,7 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
-      <div className="mt-10 grid gap-5 lg:grid-cols-3">
+      <div id="readiness" className="mt-10 grid gap-5 lg:grid-cols-3">
         <Card className="p-6 lg:col-span-2">
           <div className="mb-4 flex items-end justify-between">
             <div>

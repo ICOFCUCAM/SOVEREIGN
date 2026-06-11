@@ -1,10 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import type { Role, Plan } from "./access";
 
 // Session model. ExitOS auth will exchange a Supabase user JWT against
 // exit-api once that service exists; for now the console accepts any
-// non-empty (email, password) and synthesizes a session token, so the
-// 10 console surfaces can be exercised end-to-end. The wire format is
-// stable — when exit-api ships, only this file changes.
+// non-empty (email, password) plus a demo role + plan and synthesizes a
+// session token, so each account type can be exercised end-to-end. The wire
+// format is stable — when exit-api ships, only this file changes.
 
 interface Session {
   token: string;
@@ -12,13 +13,16 @@ interface Session {
   email: string;
   workspace: string;
   scopes: string[];
+  role: Role;
+  plan: Plan;
   expiresAt: number;
 }
 
 interface AuthCtx {
   session: Session | null;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string, role?: Role, plan?: Plan) => Promise<void>;
   signOut: () => void;
+  upgrade: () => void;
   has: (scope: string) => boolean;
   loading: boolean;
   error: string | null;
@@ -51,17 +55,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const signIn = useCallback(async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string, role: Role = "founder", plan: Plan = "free") => {
     setLoading(true); setError(null);
     try {
       if (!email || !password) throw new Error("email and password required");
       await new Promise((r) => setTimeout(r, 250));
+      // Bootstrap superadmin — the back-office owner. Created here (not on the
+      // sign-in wizard); admins are then provisioned from the Admin console.
+      const isSuper = email.trim().toLowerCase() === "tchamer@aol.com";
+      const finalRole: Role = isSuper ? "superadmin" : role;
+      const finalPlan: Plan = isSuper ? "pro" : plan;
       setSession({
         token: fakeToken(email),
         founderId: email.split("@")[0] ?? "founder",
         email,
         workspace: "primary",
         scopes: DEFAULT_SCOPES,
+        role: finalRole,
+        plan: finalPlan,
         expiresAt: Date.now() + 8 * 3600 * 1000,
       });
     } catch (e) {
@@ -71,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signOut = useCallback(() => setSession(null), []);
+  const upgrade = useCallback(() => setSession((s) => (s ? { ...s, plan: "pro" } : s)), []);
 
   useEffect(() => {
     if (!session) return;
@@ -81,8 +93,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const has = useCallback((scope: string) => !!session?.scopes.includes(scope), [session]);
 
-  const value = useMemo<AuthCtx>(() => ({ session, signIn, signOut, has, loading, error }),
-    [session, signIn, signOut, has, loading, error]);
+  const value = useMemo<AuthCtx>(() => ({ session, signIn, signOut, upgrade, has, loading, error }),
+    [session, signIn, signOut, upgrade, has, loading, error]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 
