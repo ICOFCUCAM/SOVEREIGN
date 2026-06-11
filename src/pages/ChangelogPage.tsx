@@ -18,6 +18,17 @@ const ENTRIES: Entry[] = [
   {
     date: '2026-06-11',
     tag: 'feature',
+    title: 'Sovereign Films · public cinema + live data across the platform',
+    body: [
+      '/films — a DB-driven cinema for every published render, with class filters, poster frames, real runtimes and a public live render queue.',
+      'Homepage hero, deployment regions, trust ledger and status page now hydrate from the database (network_regions, ecosystem registry, deployments, pipeline probes) instead of hardcoded numbers.',
+      'Admin gains a network-mesh editor; node counts and region status drive the hero strip, regions section and status page from one table.',
+      'film_play telemetry distinguishes generated renders from YouTube embeds.',
+    ],
+  },
+  {
+    date: '2026-06-11',
+    tag: 'feature',
     title: 'Channel · generated films flow to the public site',
     body: [
       'media table carries real video assets (video_url, poster_url, duration, source job) with public-read RLS — finished pipeline renders publish straight to the Channel.',
