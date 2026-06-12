@@ -72,10 +72,12 @@ export async function preflight(): Promise<void> {
 // ── value / date parsing ────────────────────────────────────────────
 
 /** "US$26.2 billion" | "$1,200 million" | "€4.85 billion" → USD number (EUR/GBP left unconverted → undefined). */
-export function parseMoneyUsd(raw: string | undefined): number | undefined {
+export function parseMoneyUsd(raw: string | undefined, assumeUsd = false): number | undefined {
   if (!raw) return undefined;
   const text = raw.replace(/ /g, ' ').trim();
-  if (!/(US\$|\$|USD)/.test(text)) return undefined;           // non-USD: skip rather than guess FX
+  // unmarked numerics are accepted only when the COLUMN declares USD
+  // (e.g. Wikipedia's "Value (USD)" columns list bare figures)
+  if (!/(US\$|\$|USD)/.test(text) && !(assumeUsd && /^[\d,]+(\.\d+)?( ?(billion|million))?$/i.test(text))) return undefined;
   const m = text.match(/([\d,]+(?:\.\d+)?)\s*(billion|million|thousand|bn|m\b)?/i);
   if (!m) return undefined;
   const n = parseFloat(m[1]!.replace(/,/g, ''));

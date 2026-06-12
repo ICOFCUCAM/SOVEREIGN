@@ -33,7 +33,7 @@ export async function discoverListPages(): Promise<string[]> {
   return [...titles].sort();
 }
 
-interface ColumnMap { date?: number; target?: number; industry?: number; country?: number; value?: number }
+interface ColumnMap { date?: number; target?: number; industry?: number; country?: number; value?: number; valueIsUsd?: boolean }
 
 function mapColumns(headerCells: string[]): ColumnMap | null {
   const map: ColumnMap = {};
@@ -43,7 +43,7 @@ function mapColumns(headerCells: string[]): ColumnMap | null {
     if (map.target === undefined && /company|target|acquisition\b|acquired company/.test(t)) map.target = i;
     if (map.industry === undefined && /business|industry|category|used as|products|description/.test(t)) map.industry = i;
     if (map.country === undefined && /country|nation|headquarters|location/.test(t)) map.country = i;
-    if (map.value === undefined && /value|price|cost|amount/.test(t)) map.value = i;
+    if (map.value === undefined && /value|price|cost|amount/.test(t)) { map.value = i; map.valueIsUsd = /usd|us\$|\$/.test(t); }
   });
   return map.target !== undefined ? map : null;       // a list without a target column is not an acquisition table
 }
@@ -78,7 +78,7 @@ export function parseAcquisitionTables(html: string, title: string): IngestedAcq
         buyer_name: buyerName,
         target_name: target,
         ...(date ? { announced_date: date } : {}),
-        ...(cols.value !== undefined && parseMoneyUsd(cells[cols.value]) ? { value_usd: parseMoneyUsd(cells[cols.value])! } : {}),
+        ...(cols.value !== undefined && parseMoneyUsd(cells[cols.value], cols.valueIsUsd) ? { value_usd: parseMoneyUsd(cells[cols.value], cols.valueIsUsd)! } : {}),
         ...(cols.industry !== undefined && cells[cols.industry] ? { industry: cells[cols.industry]!.slice(0, 120) } : {}),
         ...(cols.country !== undefined && cells[cols.country] ? { country: cells[cols.country]!.slice(0, 60) } : {}),
       });

@@ -28,7 +28,8 @@ export const NAV: NavItem[] = [
   { to: "/console/commander",          label: "Chief Investment Banker", group: "Mandate", roles: ["founder"], pro: true },
   { to: "/console",                    label: "Liquidity Command",    group: "Mandate", roles: ["founder"] },
   { to: "/console/autopilot",          label: "Autonomous Exit",      group: "Mandate", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/network",            label: "Network Intelligence", group: "Market", roles: ["founder"], pro: true },
+  { to: "/console/buyer-graph",        label: "Buyer Graph",          group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/network",            label: "Network Intelligence", group: "Market Intelligence", roles: ["founder"], pro: true },
 
   // ── Buyer · Overview ───────────────────────────────────────────
   { to: "/console/buyer-portal",       label: "Buyer Home",           group: "Overview", roles: ["buyer"] },
@@ -41,27 +42,27 @@ export const NAV: NavItem[] = [
   { to: "/console/exit-timing",        label: "Exit Timing",          group: "Mandate", roles: ["founder"], pro: true },
 
   // ── Discover (founder) ─────────────────────────────────────────
-  { to: "/console/buyer-copilot",      label: "Buyer Intelligence",   group: "Market", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/buyers",             label: "Buyer Profiles",       group: "Market", roles: ["founder"] },
-  { to: "/console/marketplace",        label: "The Exchange",         group: "Market", roles: ["founder"] },
-  { to: "/console/intelligence",       label: "Acquisition Radar",    group: "Market", roles: ["founder"] },
+  { to: "/console/buyer-copilot",      label: "Buyer Intelligence",   group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/buyers",             label: "Buyer Profiles",       group: "Market Intelligence", roles: ["founder"] },
+  { to: "/console/marketplace",        label: "Anonymous Listings",   group: "Exchange", roles: ["founder"] },
+  { to: "/console/intelligence",       label: "Acquisition Radar",    group: "Market Intelligence", roles: ["founder"] },
 
   // ── Engage (founder) ───────────────────────────────────────────
-  { to: "/console/banker",             label: "Outreach",             group: "Execution", roles: ["founder"], pro: true },
-  { to: "/console/nda",                label: "NDA",                  group: "Execution", roles: ["founder"], pro: true },
-  { to: "/console/pipeline",           label: "Pipeline",             group: "Execution", roles: ["founder"] },
-  { to: "/console/deal-room",          label: "Live Deal Room",       group: "Execution", roles: ["founder"], pro: true },
+  { to: "/console/banker",             label: "Outreach",             group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/nda",                label: "NDA Vault",            group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/pipeline",           label: "Active Processes",     group: "Exchange", roles: ["founder"] },
+  { to: "/console/deal-room",          label: "Live Deal Room",       group: "Exchange", roles: ["founder"], pro: true },
 
   // ── Negotiate (founder) ────────────────────────────────────────
-  { to: "/console/negotiator",         label: "Negotiation",          group: "Execution", roles: ["founder"], pro: true },
-  { to: "/console/simulator",          label: "Scenario Simulator",   group: "Execution", roles: ["founder"], pro: true },
+  { to: "/console/negotiator",         label: "Bid Room",             group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/simulator",          label: "Scenario Simulator",   group: "Exchange", roles: ["founder"], pro: true },
 
   // ── Close (founder) ────────────────────────────────────────────
-  { to: "/console/closing",            label: "Closing",              group: "Execution", roles: ["founder"], pro: true },
+  { to: "/console/closing",            label: "Closing Center",       group: "Exchange", roles: ["founder"], pro: true },
   { to: "/console/data-room",          label: "Data Room",            group: "Mandate", roles: ["founder"], pro: true, starter: true },
   { to: "/console/documents",          label: "Documents",            group: "Mandate", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/closing#signatures", label: "Signatures",           group: "Execution", roles: ["founder"], pro: true },
-  { to: "/console/closing#escrow",     label: "Escrow",               group: "Execution", roles: ["founder"], pro: true },
+  { to: "/console/closing#signatures", label: "Signatures",           group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/closing#escrow",     label: "Escrow",               group: "Exchange", roles: ["founder"], pro: true },
 
   // ── Wealth (founder) ───────────────────────────────────────────
   { to: "/console/wealth",             label: "Liquidity & Transition", group: "Wealth", roles: ["founder"], pro: true },
@@ -78,7 +79,7 @@ export const NAV: NavItem[] = [
   { to: "/console/calibration",        label: "Calibration",          group: "Admin", roles: ["admin"] },
 ];
 
-export const GROUP_ORDER = ["Mandate", "Market", "Execution", "Wealth", "Overview", "Marketplace", "Deals", "Admin"];
+export const GROUP_ORDER = ["Mandate", "Market Intelligence", "Exchange", "Wealth", "Overview", "Marketplace", "Deals", "Admin"];
 
 const base = (to: string): string => to.split("#")[0];
 

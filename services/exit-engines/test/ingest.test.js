@@ -50,6 +50,11 @@ test('value/date parsers handle the formats the lists actually use', () => {
   assert.equal(parseMoneyUsd('$1,200,000,000'), 1_200_000_000);
   assert.equal(parseMoneyUsd('€4.85 billion'), undefined, 'non-USD must not be guessed via FX');
   assert.equal(parseMoneyUsd('Undisclosed'), undefined);
+  // bare numerics are accepted ONLY when the column declares USD
+  assert.equal(parseMoneyUsd('7,500,000,000'), undefined);
+  assert.equal(parseMoneyUsd('7,500,000,000', true), 7_500_000_000);
+  assert.equal(parseMoneyUsd('26.2 billion', true), 26_200_000_000);
+  assert.equal(parseMoneyUsd('Undisclosed', true), undefined);
 
   assert.equal(parseDateIso('September 21, 1993'), '1993-09-21');
   assert.equal(parseDateIso('4 June 2018'), '2018-06-04');

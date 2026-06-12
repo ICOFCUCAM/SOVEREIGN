@@ -44,7 +44,8 @@ SELECT ?target ?targetLabel ?start WHERE {
     const targetUri = b['target']?.value;
     const label = b['targetLabel']?.value;
     if (!targetUri || !label || /^Q\d+$/.test(label)) continue;    // unlabeled entity — skip, don't guess
-    const date = b['start']?.value?.slice(0, 10);
+    const raw = b['start']?.value?.slice(0, 10);
+    const date = raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : undefined;
     out.push({
       ...meta('wikidata', targetUri, 'reported', 'unverified'),
       acquisition_id: acquisitionId(buyerName, label, date),

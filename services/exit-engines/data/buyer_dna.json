@@ -1,0 +1,3296 @@
+{
+ "as_of": "2026-06-12T10:29:56.833Z",
+ "profiles": [
+  {
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
+   "buyer_type": "corporate",
+   "events_indexed": 418,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2026-01-05",
+    "target": "Osmos"
+   },
+   "deals_12m": 2,
+   "deals_3y": 3,
+   "appetite": "high",
+   "sector_tokens": [
+    {
+     "token": "software",
+     "count": 45
+    },
+    {
+     "token": "video games",
+     "count": 26
+    },
+    {
+     "token": "internet service provider",
+     "count": 11
+    },
+    {
+     "token": "internet software",
+     "count": 10
+    },
+    {
+     "token": "wholesale computer software",
+     "count": 7
+    },
+    {
+     "token": "cable television",
+     "count": 7
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q2283",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "sony",
+   "name": "Sony",
+   "buyer_type": "corporate",
+   "events_indexed": 307,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2026-05-18",
+    "target": "32 Flavors"
+   },
+   "deals_12m": 15,
+   "deals_3y": 40,
+   "appetite": "high",
+   "sector_tokens": [
+    {
+     "token": "television",
+     "count": 53
+    },
+    {
+     "token": "music",
+     "count": 38
+    },
+    {
+     "token": "video game",
+     "count": 32
+    },
+    {
+     "token": "film",
+     "count": 19
+    },
+    {
+     "token": "music publishing",
+     "count": 12
+    },
+    {
+     "token": "semiconductor",
+     "count": 10
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q41187",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "alphabet",
+   "name": "Alphabet",
+   "buyer_type": "corporate",
+   "events_indexed": 270,
+   "disclosed_events": 62,
+   "last_acquisition": {
+    "date": "2025-12-22",
+    "target": "December 22, 2025"
+   },
+   "max_deal": {
+    "usd": 32000000000,
+    "target": "March 2025"
+   },
+   "avg_deal_usd": 1394406452,
+   "deals_12m": 2,
+   "deals_3y": 10,
+   "appetite": "high",
+   "sector_tokens": [
+    {
+     "token": "artificial intelligence",
+     "count": 8
+    },
+    {
+     "token": "online advertising",
+     "count": 5
+    },
+    {
+     "token": "social networking service",
+     "count": 4
+    },
+    {
+     "token": "mobile software",
+     "count": 4
+    },
+    {
+     "token": "big data",
+     "count": 4
+    },
+    {
+     "token": "web search engine",
+     "count": 3
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q20800404",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "cisco",
+   "name": "Cisco",
+   "buyer_type": "corporate",
+   "events_indexed": 235,
+   "disclosed_events": 146,
+   "last_acquisition": {
+    "date": "2025-11-14",
+    "target": "EzDubs, Inc."
+   },
+   "max_deal": {
+    "usd": 29587000000,
+    "target": "Splunk"
+   },
+   "avg_deal_usd": 971360575,
+   "deals_12m": 3,
+   "deals_3y": 11,
+   "appetite": "high",
+   "sector_tokens": [
+    {
+     "token": "computer networking",
+     "count": 14
+    },
+    {
+     "token": "lan switching",
+     "count": 9
+    },
+    {
+     "token": "voice over internet protocol",
+     "count": 8
+    },
+    {
+     "token": "computer security",
+     "count": 5
+    },
+    {
+     "token": "mobile software",
+     "count": 5
+    },
+    {
+     "token": "synchronous optical networking",
+     "count": 4
+    }
+   ],
+   "verified_events": 1,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q173395",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "ibm",
+   "name": "IBM",
+   "buyer_type": "corporate",
+   "events_indexed": 206,
+   "disclosed_events": 43,
+   "last_acquisition": {
+    "date": "2025-12-08",
+    "target": "Confluent"
+   },
+   "max_deal": {
+    "usd": 34000000000,
+    "target": "Red Hat"
+   },
+   "avg_deal_usd": 2182046512,
+   "deals_12m": 2,
+   "deals_3y": 8,
+   "appetite": "high",
+   "sector_tokens": [
+    {
+     "token": "software",
+     "count": 6
+    },
+    {
+     "token": "it services",
+     "count": 5
+    },
+    {
+     "token": "enterprise information integration",
+     "count": 4
+    },
+    {
+     "token": "business intelligence",
+     "count": 4
+    },
+    {
+     "token": "analytics",
+     "count": 4
+    },
+    {
+     "token": "identity management",
+     "count": 3
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q37156",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "disney",
+   "name": "Disney",
+   "buyer_type": "corporate",
+   "events_indexed": 191,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2026-01-31",
+    "target": "NFL's Media assets"
+   },
+   "deals_12m": 3,
+   "deals_3y": 4,
+   "appetite": "high",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q7414",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "amazon",
+   "name": "Amazon",
+   "buyer_type": "corporate",
+   "events_indexed": 173,
+   "disclosed_events": 10,
+   "last_acquisition": {
+    "date": "2026-03-19",
+    "target": "Rivr"
+   },
+   "max_deal": {
+    "usd": 1250000000,
+    "target": "Anthropic"
+   },
+   "avg_deal_usd": 175075000,
+   "deals_12m": 5,
+   "deals_3y": 10,
+   "appetite": "high",
+   "sector_tokens": [
+    {
+     "token": "amazon web services",
+     "count": 16
+    },
+    {
+     "token": "twitch interactive",
+     "count": 5
+    },
+    {
+     "token": "amazon echo",
+     "count": 4
+    },
+    {
+     "token": "retail",
+     "count": 4
+    },
+    {
+     "token": "amazon kindle",
+     "count": 3
+    },
+    {
+     "token": "amazon robotics",
+     "count": 3
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q3884",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "oracle",
+   "name": "Oracle",
+   "buyer_type": "corporate",
+   "events_indexed": 166,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2022-05-06",
+    "target": "May 6, 2022"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [
+    {
+     "token": "software",
+     "count": 6
+    },
+    {
+     "token": "management",
+     "count": 3
+    },
+    {
+     "token": "cloud",
+     "count": 2
+    },
+    {
+     "token": "business intelligence",
+     "count": 2
+    },
+    {
+     "token": "product lifecycle management",
+     "count": 2
+    },
+    {
+     "token": "enterprise content management",
+     "count": 2
+    }
+   ],
+   "verified_events": 1,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q19900",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "apple",
+   "name": "Apple",
+   "buyer_type": "corporate",
+   "events_indexed": 158,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2026-03-16",
+    "target": "MotionVFX"
+   },
+   "deals_12m": 4,
+   "deals_3y": 13,
+   "appetite": "high",
+   "sector_tokens": [
+    {
+     "token": "software",
+     "count": 10
+    },
+    {
+     "token": "artificial intelligence",
+     "count": 6
+    },
+    {
+     "token": "maps",
+     "count": 5
+    },
+    {
+     "token": "computer software",
+     "count": 4
+    },
+    {
+     "token": "machine learning",
+     "count": 4
+    },
+    {
+     "token": "semiconductors",
+     "count": 3
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q312",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "nortonlifelock",
+   "name": "NortonLifeLock",
+   "buyer_type": "corporate",
+   "events_indexed": 128,
+   "disclosed_events": 80,
+   "last_acquisition": {
+    "date": "2022-01-01",
+    "target": "Avast Software"
+   },
+   "max_deal": {
+    "usd": 13520000000,
+    "target": "Veritas Software"
+   },
+   "avg_deal_usd": 477997881,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [
+    {
+     "token": "software",
+     "count": 15
+    },
+    {
+     "token": "computer software",
+     "count": 3
+    },
+    {
+     "token": "management software",
+     "count": 3
+    },
+    {
+     "token": "internet software",
+     "count": 3
+    },
+    {
+     "token": "anti-spam software",
+     "count": 3
+    },
+    {
+     "token": "wholesale software",
+     "count": 2
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q677085",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "symantec",
+   "name": "Symantec",
+   "buyer_type": "corporate",
+   "events_indexed": 128,
+   "disclosed_events": 80,
+   "last_acquisition": {
+    "date": "2022-01-01",
+    "target": "Avast Software"
+   },
+   "max_deal": {
+    "usd": 13520000000,
+    "target": "Veritas Software"
+   },
+   "avg_deal_usd": 477997881,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [
+    {
+     "token": "software",
+     "count": 15
+    },
+    {
+     "token": "computer software",
+     "count": 3
+    },
+    {
+     "token": "management software",
+     "count": 3
+    },
+    {
+     "token": "internet software",
+     "count": 3
+    },
+    {
+     "token": "anti-spam software",
+     "count": 3
+    },
+    {
+     "token": "wholesale software",
+     "count": 2
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q677085",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "yahoo",
+   "name": "Yahoo!",
+   "buyer_type": "corporate",
+   "events_indexed": 119,
+   "disclosed_events": 49,
+   "last_acquisition": {
+    "date": "2024-04-03",
+    "target": "Artifact"
+   },
+   "max_deal": {
+    "usd": 850000000,
+    "target": "Right Media"
+   },
+   "avg_deal_usd": 126430613,
+   "deals_12m": 0,
+   "deals_3y": 3,
+   "appetite": "medium",
+   "sector_tokens": [
+    {
+     "token": "web-based email",
+     "count": 3
+    },
+    {
+     "token": "internet service provider",
+     "count": 3
+    },
+    {
+     "token": "social recommendation",
+     "count": 3
+    },
+    {
+     "token": "advertising",
+     "count": 3
+    },
+    {
+     "token": "web search engine",
+     "count": 2
+    },
+    {
+     "token": "online game",
+     "count": 2
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q29231846",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "aol",
+   "name": "AOL",
+   "buyer_type": "corporate",
+   "events_indexed": 118,
+   "disclosed_events": 28,
+   "last_acquisition": {
+    "date": "2020-04-30",
+    "target": "Xandr"
+   },
+   "max_deal": {
+    "usd": 183000000000,
+    "target": "11 January 2001"
+   },
+   "avg_deal_usd": 6932502893,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [
+    {
+     "token": "web browser",
+     "count": 3
+    },
+    {
+     "token": "mobile applications",
+     "count": 3
+    },
+    {
+     "token": "internet service provider",
+     "count": 2
+    },
+    {
+     "token": "search engine",
+     "count": 2
+    },
+    {
+     "token": "telecommunications",
+     "count": 2
+    },
+    {
+     "token": "video search engine",
+     "count": 2
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q191715",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "meta-platforms",
+   "name": "Meta Platforms",
+   "buyer_type": "corporate",
+   "events_indexed": 116,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2026-05-01",
+    "target": "Assured Robot Intelligence"
+   },
+   "deals_12m": 7,
+   "deals_3y": 7,
+   "appetite": "high",
+   "sector_tokens": [
+    {
+     "token": "oculus studio",
+     "count": 10
+    },
+    {
+     "token": "reality labs",
+     "count": 5
+    },
+    {
+     "token": "facebook messenger",
+     "count": 3
+    },
+    {
+     "token": "meta superintelligence labs",
+     "count": 3
+    },
+    {
+     "token": "mobile engineering team",
+     "count": 2
+    },
+    {
+     "token": "name change from thefacebook.com",
+     "count": 1
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q380",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "hewlett-packard",
+   "name": "Hewlett-Packard",
+   "buyer_type": "corporate",
+   "events_indexed": 99,
+   "disclosed_events": 32,
+   "last_acquisition": {
+    "date": "2024-01-10",
+    "target": "July 2, 2025"
+   },
+   "max_deal": {
+    "usd": 25000000000,
+    "target": "May 3, 2002"
+   },
+   "avg_deal_usd": 2895714031,
+   "deals_12m": 0,
+   "deals_3y": 1,
+   "appetite": "medium",
+   "sector_tokens": [
+    {
+     "token": "computer software",
+     "count": 16
+    },
+    {
+     "token": "information technology",
+     "count": 10
+    },
+    {
+     "token": "automatic test equipment",
+     "count": 4
+    },
+    {
+     "token": "information technology consulting",
+     "count": 4
+    },
+    {
+     "token": "computer security",
+     "count": 3
+    },
+    {
+     "token": "printing",
+     "count": 3
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q80978",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "nokia",
+   "name": "Nokia",
+   "buyer_type": "corporate",
+   "events_indexed": 96,
+   "disclosed_events": 20,
+   "last_acquisition": {
+    "date": "2024-06-01",
+    "target": "Infinera Corporation"
+   },
+   "max_deal": {
+    "usd": 16600,
+    "target": "Alcatel - Lucent"
+   },
+   "avg_deal_usd": 1570,
+   "deals_12m": 0,
+   "deals_3y": 1,
+   "appetite": "medium",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q1418",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "electronic-arts",
+   "name": "Electronic Arts",
+   "buyer_type": "corporate",
+   "events_indexed": 80,
+   "disclosed_events": 11,
+   "last_acquisition": {
+    "date": "2025-02-04",
+    "target": "TRACAB Technologies"
+   },
+   "max_deal": {
+    "usd": 2400000000,
+    "target": "Glu Mobile"
+   },
+   "avg_deal_usd": 735227273,
+   "deals_12m": 0,
+   "deals_3y": 1,
+   "appetite": "medium",
+   "sector_tokens": [
+    {
+     "token": "video game developer",
+     "count": 18
+    },
+    {
+     "token": "publisher",
+     "count": 9
+    },
+    {
+     "token": "mobile video game developer",
+     "count": 5
+    },
+    {
+     "token": "software distributor",
+     "count": 3
+    },
+    {
+     "token": "social network service",
+     "count": 3
+    },
+    {
+     "token": "racing video game developer",
+     "count": 2
+    }
+   ],
+   "verified_events": 4,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q173941",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "adobe",
+   "name": "Adobe",
+   "buyer_type": "corporate",
+   "events_indexed": 74,
+   "disclosed_events": 4,
+   "last_acquisition": {
+    "date": "2025-11-19",
+    "target": "Semrush"
+   },
+   "max_deal": {
+    "usd": 4360000,
+    "target": "Why Interactive"
+   },
+   "avg_deal_usd": 2590000,
+   "deals_12m": 2,
+   "deals_3y": 2,
+   "appetite": "high",
+   "sector_tokens": [
+    {
+     "token": "graphics software",
+     "count": 2
+    },
+    {
+     "token": "computer consulting",
+     "count": 1
+    },
+    {
+     "token": "applications software",
+     "count": 1
+    },
+    {
+     "token": "application services provider",
+     "count": 1
+    },
+    {
+     "token": "online digital music services",
+     "count": 1
+    },
+    {
+     "token": "software",
+     "count": 1
+    }
+   ],
+   "verified_events": 2,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q11463",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "sap",
+   "name": "SAP",
+   "buyer_type": "corporate",
+   "events_indexed": 74,
+   "disclosed_events": 15,
+   "last_acquisition": {
+    "date": "2026-05-01",
+    "target": "78"
+   },
+   "max_deal": {
+    "usd": 350000000,
+    "target": "65"
+   },
+   "avg_deal_usd": 51066670,
+   "deals_12m": 3,
+   "deals_3y": 5,
+   "appetite": "high",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q552581",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "ebay",
+   "name": "eBay",
+   "buyer_type": "corporate",
+   "events_indexed": 72,
+   "disclosed_events": 34,
+   "last_acquisition": {
+    "date": "2026-02-18",
+    "target": "Depop"
+   },
+   "max_deal": {
+    "usd": 1200000000,
+    "target": "Depop"
+   },
+   "avg_deal_usd": 255808824,
+   "deals_12m": 1,
+   "deals_3y": 2,
+   "appetite": "medium",
+   "sector_tokens": [
+    {
+     "token": "online auction",
+     "count": 5
+    },
+    {
+     "token": "electronic commerce",
+     "count": 5
+    },
+    {
+     "token": "online commerce",
+     "count": 5
+    },
+    {
+     "token": "classified advertising",
+     "count": 4
+    },
+    {
+     "token": "e-commerce payment systems",
+     "count": 3
+    },
+    {
+     "token": "auction house",
+     "count": 2
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q58024",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "embracer-group",
+   "name": "Embracer Group",
+   "buyer_type": "corporate",
+   "events_indexed": 71,
+   "disclosed_events": 10,
+   "last_acquisition": {
+    "date": "2025-12-01",
+    "target": "Anime Limited"
+   },
+   "max_deal": {
+    "usd": 1300000000,
+    "target": "Gearbox Software Gearbox Studio Québec"
+   },
+   "avg_deal_usd": 429090000,
+   "deals_12m": 2,
+   "deals_3y": 9,
+   "appetite": "high",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q65083539",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "twitter",
+   "name": "Twitter",
+   "buyer_type": "corporate",
+   "events_indexed": 71,
+   "disclosed_events": 14,
+   "last_acquisition": {
+    "date": "2023-05-15",
+    "target": "Laskie"
+   },
+   "max_deal": {
+    "usd": 479000000,
+    "target": "TellApart"
+   },
+   "avg_deal_usd": 116655004,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [
+    {
+     "token": "advertising",
+     "count": 3
+    },
+    {
+     "token": "analytics",
+     "count": 2
+    },
+    {
+     "token": "advertising solutions",
+     "count": 2
+    },
+    {
+     "token": "social tv",
+     "count": 2
+    },
+    {
+     "token": "social search",
+     "count": 1
+    },
+    {
+     "token": "social software development",
+     "count": 1
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q1390577",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "take-two-interactive",
+   "name": "Take-Two Interactive",
+   "buyer_type": "corporate",
+   "events_indexed": 67,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2025-03-01",
+    "target": "Video Games Deluxe"
+   },
+   "deals_12m": 0,
+   "deals_3y": 2,
+   "appetite": "medium",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q94933",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "citrix",
+   "name": "Citrix",
+   "buyer_type": "corporate",
+   "events_indexed": 53,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [
+    {
+     "token": "server-based computing",
+     "count": 2
+    },
+    {
+     "token": "management",
+     "count": 2
+    },
+    {
+     "token": "ipad document editing",
+     "count": 2
+    },
+    {
+     "token": "consumer electronics",
+     "count": 1
+    },
+    {
+     "token": "java developer",
+     "count": 1
+    },
+    {
+     "token": "internet film broadcasting",
+     "count": 1
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q916196",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "accenture",
+   "name": "Accenture",
+   "buyer_type": "corporate",
+   "events_indexed": 50,
+   "disclosed_events": 2,
+   "last_acquisition": {
+    "date": "2026-01-01",
+    "target": "Faculty"
+   },
+   "max_deal": {
+    "usd": 375000000,
+    "target": "Procurian"
+   },
+   "avg_deal_usd": 345500000,
+   "deals_12m": 3,
+   "deals_3y": 14,
+   "appetite": "high",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q338825",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "dell",
+   "name": "Dell",
+   "buyer_type": "corporate",
+   "events_indexed": 45,
+   "disclosed_events": 15,
+   "last_acquisition": {
+    "date": "2023-08-11",
+    "target": "Moogsoft"
+   },
+   "max_deal": {
+    "usd": 67000000000,
+    "target": "EMC²"
+   },
+   "avg_deal_usd": 4683892534,
+   "deals_12m": 0,
+   "deals_3y": 1,
+   "appetite": "medium",
+   "sector_tokens": [
+    {
+     "token": "software",
+     "count": 2
+    },
+    {
+     "token": "it services provider",
+     "count": 2
+    },
+    {
+     "token": "information technology",
+     "count": 2
+    },
+    {
+     "token": "services modernization",
+     "count": 2
+    },
+    {
+     "token": "software security",
+     "count": 2
+    },
+    {
+     "token": "services",
+     "count": 2
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q30873",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "advania",
+   "name": "Advania",
+   "buyer_type": "corporate",
+   "events_indexed": 34,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2012-01-20",
+    "target": "Aston Baltic"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [
+    {
+     "token": "iceland",
+     "count": 2
+    },
+    {
+     "token": "software retail",
+     "count": 2
+    },
+    {
+     "token": "software development",
+     "count": 1
+    },
+    {
+     "token": "computer",
+     "count": 1
+    },
+    {
+     "token": "data centre",
+     "count": 1
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q4686399",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "blackberry",
+   "name": "BlackBerry",
+   "buyer_type": "corporate",
+   "events_indexed": 32,
+   "disclosed_events": 8,
+   "last_acquisition": {
+    "date": "2018-11-16",
+    "target": "Cylance Inc."
+   },
+   "max_deal": {
+    "usd": 1400000000,
+    "target": "Cylance Inc."
+   },
+   "avg_deal_usd": 302390625,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [
+    {
+     "token": "software",
+     "count": 2
+    },
+    {
+     "token": "software provider",
+     "count": 1
+    },
+    {
+     "token": "mobile app design studio",
+     "count": 1
+    },
+    {
+     "token": "apps",
+     "count": 1
+    },
+    {
+     "token": "enterprise voice mobility solutions",
+     "count": 1
+    },
+    {
+     "token": "data compression",
+     "count": 1
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q502121",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "kkr",
+   "name": "KKR",
+   "buyer_type": "private_equity",
+   "events_indexed": 29,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2024-01-01",
+    "target": "FiberCop"
+   },
+   "deals_12m": 0,
+   "deals_3y": 1,
+   "appetite": "medium",
+   "sector_tokens": [],
+   "verified_events": 3,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q1570773",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "juniper-networks",
+   "name": "Juniper Networks",
+   "buyer_type": "corporate",
+   "events_indexed": 28,
+   "disclosed_events": 18,
+   "last_acquisition": {
+    "date": "2020-12-07",
+    "target": "Apstra"
+   },
+   "max_deal": {
+    "usd": 585000000,
+    "target": "Unisphere Networks, Westford, MA, a subsidiary of Siemens. Founded : 1999"
+   },
+   "avg_deal_usd": 168283333,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [
+    {
+     "token": "optimization technology",
+     "count": 2
+    },
+    {
+     "token": "intellectual property development",
+     "count": 1
+    },
+    {
+     "token": "licensing",
+     "count": 1
+    },
+    {
+     "token": "sales",
+     "count": 1
+    },
+    {
+     "token": "marketing organization",
+     "count": 1
+    },
+    {
+     "token": "asic design firm",
+     "count": 1
+    }
+   ],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q1049080",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "google",
+   "name": "Google",
+   "buyer_type": "corporate",
+   "events_indexed": 25,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2014-08-01",
+    "target": "Terra Bella"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q95",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "blackstone-inc",
+   "name": "Blackstone Inc.",
+   "buyer_type": "private_equity",
+   "events_indexed": 23,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2024-02-01",
+    "target": "rover.com"
+   },
+   "deals_12m": 0,
+   "deals_3y": 1,
+   "appetite": "medium",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q880942",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "tpg-inc",
+   "name": "TPG Inc.",
+   "buyer_type": "private_equity",
+   "events_indexed": 17,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2018-08-01",
+    "target": "Wind River Systems"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q2164606",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "carlyle-group",
+   "name": "Carlyle Group",
+   "buyer_type": "private_equity",
+   "events_indexed": 12,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2020-01-01",
+    "target": "Memsource"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q926806",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "bain-capital",
+   "name": "Bain Capital",
+   "buyer_type": "private_equity",
+   "events_indexed": 9,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2015-01-01",
+    "target": "Blue Coat Systems"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q803873",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "advent-international",
+   "name": "Advent International",
+   "buyer_type": "private_equity",
+   "events_indexed": 9,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2025-10-01",
+    "target": "Lanteris Space Systems"
+   },
+   "deals_12m": 2,
+   "deals_3y": 2,
+   "appetite": "high",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q379801",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "vista-equity-partners",
+   "name": "Vista Equity Partners",
+   "buyer_type": "private_equity",
+   "events_indexed": 8,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2016-08-01",
+    "target": "Ping Identity"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q7936440",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "apax-partners",
+   "name": "Apax Partners",
+   "buyer_type": "private_equity",
+   "events_indexed": 8,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2022-03-31",
+    "target": "Odido"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q618098",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "silver-lake",
+   "name": "Silver Lake",
+   "buyer_type": "private_equity",
+   "events_indexed": 7,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2016-01-01",
+    "target": "Ancestry.com Inc."
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q1676442",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "warburg-pincus",
+   "name": "Warburg Pincus",
+   "buyer_type": "private_equity",
+   "events_indexed": 6,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2022-03-31",
+    "target": "Odido"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q1300943",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "francisco-partners",
+   "name": "Francisco Partners",
+   "buyer_type": "private_equity",
+   "events_indexed": 5,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2018-01-01",
+    "target": "VeriFone"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q3045904",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "eqt-ab",
+   "name": "EQT AB",
+   "buyer_type": "private_equity",
+   "events_indexed": 5,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2021-01-01",
+    "target": "Torghatten"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q1275733",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "intuit",
+   "name": "Intuit",
+   "buyer_type": "corporate",
+   "events_indexed": 4,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2009-10-21",
+    "target": "Mint Software, Inc."
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q1318848",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "thoma-bravo",
+   "name": "Thoma Bravo",
+   "buyer_type": "private_equity",
+   "events_indexed": 4,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2022-10-01",
+    "target": "Ping Identity"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q7786759",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "permira",
+   "name": "Permira",
+   "buyer_type": "private_equity",
+   "events_indexed": 4,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2014-01-01",
+    "target": "Dr. Martens"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q662030",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "thq-nordic",
+   "name": "THQ Nordic",
+   "buyer_type": "corporate",
+   "events_indexed": 3,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2022-08-26",
+    "target": "Square Enix Montréal"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q65083539",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "ca-technologies",
+   "name": "CA Technologies",
+   "buyer_type": "corporate",
+   "events_indexed": 2,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2016-01-01",
+    "target": "BlazeMeter"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q600624",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "block-inc",
+   "name": "Block, Inc.",
+   "buyer_type": "corporate",
+   "events_indexed": 1,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q110778747",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "salesforce",
+   "name": "Salesforce",
+   "buyer_type": "corporate",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q941127",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "servicenow",
+   "name": "ServiceNow",
+   "buyer_type": "corporate",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q7455653",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "hubspot",
+   "name": "HubSpot",
+   "buyer_type": "corporate",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q5926631",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "atlassian",
+   "name": "Atlassian",
+   "buyer_type": "corporate",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q757307",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "twilio",
+   "name": "Twilio",
+   "buyer_type": "corporate",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q7858039",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "snowflake",
+   "name": "Snowflake",
+   "buyer_type": "corporate",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q56118381",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "datadog",
+   "name": "Datadog",
+   "buyer_type": "corporate",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q16248637",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "paypal",
+   "name": "PayPal",
+   "buyer_type": "corporate",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q135683185",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "shopify",
+   "name": "Shopify",
+   "buyer_type": "corporate",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q7501150",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "workday",
+   "name": "Workday",
+   "buyer_type": "corporate",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q8034666",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "insight-partners",
+   "name": "Insight Partners",
+   "buyer_type": "private_equity",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q6038111",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "hg-capital",
+   "name": "Hg Capital",
+   "buyer_type": "private_equity",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q60748773",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "government-pension-fund-global",
+   "name": "Government Pension Fund Global",
+   "buyer_type": "sovereign_fund",
+   "country": "Norway",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "safe-investment-company",
+   "name": "SAFE Investment Company",
+   "buyer_type": "sovereign_fund",
+   "country": "China",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "china-investment-corporation",
+   "name": "China Investment Corporation",
+   "buyer_type": "sovereign_fund",
+   "country": "China",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "abu-dhabi-investment-authority",
+   "name": "Abu Dhabi Investment Authority",
+   "buyer_type": "sovereign_fund",
+   "country": "United Arab Emirates",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "kuwait-investment-authority",
+   "name": "Kuwait Investment Authority",
+   "buyer_type": "sovereign_fund",
+   "country": "Kuwait",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "gic-private-limited",
+   "name": "GIC Private Limited",
+   "buyer_type": "sovereign_fund",
+   "country": "Singapore",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "public-investment-fund",
+   "name": "Public Investment Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Saudi Arabia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "daya-anagata-nusantara-investment-management-agency",
+   "name": "Daya Anagata Nusantara Investment Management Agency",
+   "buyer_type": "sovereign_fund",
+   "country": "Indonesia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "qatar-investment-authority",
+   "name": "Qatar Investment Authority",
+   "buyer_type": "sovereign_fund",
+   "country": "Qatar",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "exchange-fund",
+   "name": "Exchange Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Hong Kong",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "central-provident-fund",
+   "name": "Central Provident Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Singapore",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "national-council-for-social-security-fund",
+   "name": "National Council for Social Security Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "China",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "investment-corporation-of-dubai",
+   "name": "Investment Corporation of Dubai",
+   "buyer_type": "sovereign_fund",
+   "country": "United Arab Emirates",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "turkey-wealth-fund",
+   "name": "Turkey Wealth Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Turkey",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "mubadala-investment-company",
+   "name": "Mubadala Investment Company",
+   "buyer_type": "sovereign_fund",
+   "country": "United Arab Emirates",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "temasek-holdings",
+   "name": "Temasek Holdings",
+   "buyer_type": "sovereign_fund",
+   "country": "Singapore",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "future-fund",
+   "name": "Future Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Australia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "abu-dhabi-developmental-holding-company",
+   "name": "Abu Dhabi Developmental Holding Company",
+   "buyer_type": "sovereign_fund",
+   "country": "United Arab Emirates",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "korea-investment-corporation",
+   "name": "Korea Investment Corporation",
+   "buyer_type": "sovereign_fund",
+   "country": "South Korea",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "national-development-fund",
+   "name": "National Development Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Iran",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "russian-national-wealth-fund",
+   "name": "Russian National Wealth Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Russia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "emirates-investment-authority",
+   "name": "Emirates Investment Authority",
+   "buyer_type": "sovereign_fund",
+   "country": "United Arab Emirates",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "samruk-kazyna",
+   "name": "Samruk-Kazyna",
+   "buyer_type": "sovereign_fund",
+   "country": "Kazakhstan",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "dubai-world",
+   "name": "Dubai World",
+   "buyer_type": "sovereign_fund",
+   "country": "United Arab Emirates",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "alaska-permanent-fund",
+   "name": "Alaska Permanent Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "brunei-investment-agency",
+   "name": "Brunei Investment Agency",
+   "buyer_type": "sovereign_fund",
+   "country": "Brunei",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "libyan-investment-authority",
+   "name": "Libyan Investment Authority",
+   "buyer_type": "sovereign_fund",
+   "country": "Libya",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "oman-investment-fund",
+   "name": "Oman Investment Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Oman",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "texas-permanent-school-fund",
+   "name": "Texas Permanent School Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "kazakhstan-national-fund",
+   "name": "Kazakhstan National Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Kazakhstan",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "state-oil-fund-of-the-republic-of-azerbaijan",
+   "name": "State Oil Fund of the Republic of Azerbaijan",
+   "buyer_type": "sovereign_fund",
+   "country": "Azerbaijan",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "ethiopian-investment-holdings",
+   "name": "Ethiopian Investment Holdings",
+   "buyer_type": "sovereign_fund",
+   "country": "Ethiopia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "osterreichische-beteiligungs-ag",
+   "name": "Österreichische Beteiligungs AG",
+   "buyer_type": "sovereign_fund",
+   "country": "Austria",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "texas-permanent-university-fund",
+   "name": "Texas Permanent University Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "khazanah-nasional",
+   "name": "Khazanah Nasional",
+   "buyer_type": "sovereign_fund",
+   "country": "Malaysia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "new-zealand-superannuation-fund",
+   "name": "New Zealand Superannuation Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "New Zealand",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "bpifrance",
+   "name": "Bpifrance",
+   "buyer_type": "sovereign_fund",
+   "country": "France",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "new-mexico-land-grant-permanent-fund",
+   "name": "New Mexico Land Grant Permanent Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "russian-direct-investment-fund",
+   "name": "Russian Direct Investment Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Russia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "nuclear-waste-disposal-fund",
+   "name": "Nuclear Waste Disposal Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Germany",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "government-pension-fund-norway",
+   "name": "Government Pension Fund – Norway",
+   "buyer_type": "sovereign_fund",
+   "country": "Norway",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "papua-new-guinea-sovereign-wealth-fund",
+   "name": "Papua New Guinea Sovereign Wealth Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Papua New Guinea",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "alberta-heritage-savings-trust-fund",
+   "name": "Alberta Heritage Savings Trust Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Canada",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "mumtalakat-holding-company",
+   "name": "Mumtalakat Holding Company",
+   "buyer_type": "sovereign_fund",
+   "country": "Bahrain",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "timor-leste-petroleum-fund",
+   "name": "Timor-Leste Petroleum Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Timor Leste",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "ireland-strategic-investment-fund",
+   "name": "Ireland Strategic Investment Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Ireland",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "japan-investment-corporation",
+   "name": "Japan Investment Corporation",
+   "buyer_type": "sovereign_fund",
+   "country": "Japan",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "fondo-de-ahorro-y-estabilizacion-petrolera",
+   "name": "Fondo de Ahorro y Estabilización Petrolera",
+   "buyer_type": "sovereign_fund",
+   "country": "Colombia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "growthfund",
+   "name": "Growthfund",
+   "buyer_type": "sovereign_fund",
+   "country": "Greece",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "economic-and-social-stabilization-fund",
+   "name": "Economic and Social Stabilization Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Chile",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "pension-reserve-fund",
+   "name": "Pension Reserve Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Chile",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "permanent-wyoming-mineral-trust-fund",
+   "name": "Permanent Wyoming Mineral Trust Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "maharlika-investment-fund",
+   "name": "Maharlika Investment Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Philippines",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "future-ireland-fund",
+   "name": "Future Ireland Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Ireland",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "north-dakota-legacy-fund",
+   "name": "North Dakota Legacy Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "new-mexico-severance-tax-permanent-fund",
+   "name": "New Mexico Severance Tax Permanent Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "national-wealth-fund",
+   "name": "National Wealth Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United Kingdom",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "indonesia-investment-authority",
+   "name": "Indonesia Investment Authority",
+   "buyer_type": "sovereign_fund",
+   "country": "Indonesia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "pakistan-sovereign-wealth-fund",
+   "name": "Pakistan Sovereign Wealth Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Pakistan",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "fondo-mexicano-del-petroleo-para-la-estabilizacion-y-el-desarrol",
+   "name": "Fondo Mexicano del Petroleo para la Estabilizacion y el Desarrollo",
+   "buyer_type": "sovereign_fund",
+   "country": "Mexico",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "heritage-and-stabilization-fund",
+   "name": "Heritage and Stabilization Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Trinidad & Tobago",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "national-investment-and-infrastructure-fund",
+   "name": "National Investment and Infrastructure Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "India",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "china-africa-development-fund",
+   "name": "China-Africa Development Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "China",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "fiscal-stabilization-fund",
+   "name": "Fiscal Stabilization Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Peru",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "cassa-depositi-e-prestiti-equity",
+   "name": "Cassa Depositi e Prestiti Equity",
+   "buyer_type": "sovereign_fund",
+   "country": "Italy",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "pula-fund",
+   "name": "Pula Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Botswana",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "alabama-trust-fund",
+   "name": "Alabama Trust Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "idaho-endowment-fund-investment-board",
+   "name": "Idaho Endowment Fund Investment Board",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "utah-school-and-institutional-trust-funds-office",
+   "name": "Utah School and Institutional Trust Funds Office",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "state-capital-investment-corporation",
+   "name": "State Capital Investment Corporation",
+   "buyer_type": "sovereign_fund",
+   "country": "Vietnam",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "nigeria-sovereign-investment-authority",
+   "name": "Nigeria Sovereign Investment Authority",
+   "buyer_type": "sovereign_fund",
+   "country": "Nigeria",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "fundo-soberano-de-angola",
+   "name": "Fundo Soberano de Angola",
+   "buyer_type": "sovereign_fund",
+   "country": "Angola",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "israeli-citizens-fund",
+   "name": "Israeli Citizens' Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Israel",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "federale-participatie--en-investeringsmaatschappij-fr",
+   "name": "Federale Participatie- en Investeringsmaatschappij [fr]",
+   "buyer_type": "sovereign_fund",
+   "country": "Belgium",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "ras-al-khaimah-investment-authority",
+   "name": "Ras Al Khaimah Investment Authority",
+   "buyer_type": "sovereign_fund",
+   "country": "United Arab Emirates",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "sharjah-asset-management-holding",
+   "name": "Sharjah Asset Management Holding",
+   "buyer_type": "sovereign_fund",
+   "country": "United Arab Emirates",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "oregon-common-school-fund",
+   "name": "Oregon Common School Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "awqaf-and-islamic-affairs-fund",
+   "name": "Awqaf and Islamic Affairs Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Kuwait",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "fondo-de-ahorro-de-panama",
+   "name": "Fondo de Ahorro de Panama",
+   "buyer_type": "sovereign_fund",
+   "country": "Panama",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "louisiana-education-quality-trust-fund",
+   "name": "Louisiana Education Quality Trust Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "wisconsin-board-of-commissioners-of-public-lands",
+   "name": "Wisconsin Board of Commissioners of Public Lands",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "colorado-public-school-fund-endowment-board",
+   "name": "Colorado Public School Fund Endowment Board",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "fonds-gabonais-dinvestissements-strategiques",
+   "name": "Fonds Gabonais d'Investissements Strategiques",
+   "buyer_type": "sovereign_fund",
+   "country": "Gabon",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "palestine-investment-fund",
+   "name": "Palestine Investment Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Palestine",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "ghana-petroleum-funds",
+   "name": "Ghana Petroleum Funds",
+   "buyer_type": "sovereign_fund",
+   "country": "Ghana",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "western-australian-future-fund",
+   "name": "Western Australian Future Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Australia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "turkmenistan-stabilization-fund",
+   "name": "Turkmenistan Stabilization Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Turkmenistan",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "fondo-para-la-revolucion-industrial-productiva",
+   "name": "Fondo para la Revolución Industrial Productiva",
+   "buyer_type": "sovereign_fund",
+   "country": "Bolivia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "revenue-equalization-reserve-fund",
+   "name": "Revenue Equalization Reserve Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Kiribati",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "fonds-de-reserves-pour-generations-futures",
+   "name": "Fonds de Réserves pour Générations Futures",
+   "buyer_type": "sovereign_fund",
+   "country": "Equatorial Guinea",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "agaciro-development-fund",
+   "name": "Agaciro Development Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Rwanda",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "west-virginia-future-fund",
+   "name": "West Virginia Future Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "United States",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "national-fund-for-hydrocarbon-reserves",
+   "name": "National Fund for Hydrocarbon Reserves",
+   "buyer_type": "sovereign_fund",
+   "country": "Mauritania",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "chinggis-fund-future-heritage-fund",
+   "name": "Chinggis Fund, Future Heritage Fund",
+   "buyer_type": "sovereign_fund",
+   "country": "Mongolia",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "bayelsa-development-and-investment-corporation",
+   "name": "Bayelsa Development and Investment Corporation",
+   "buyer_type": "sovereign_fund",
+   "country": "Nigeria",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  },
+  {
+   "buyer_id": "fonds-souverain-dinvestissement-strategiques",
+   "name": "Fonds Souverain d'Investissement Strategiques",
+   "buyer_type": "sovereign_fund",
+   "country": "Senegal",
+   "events_indexed": 0,
+   "disclosed_events": 0,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "no_events",
+   "sector_tokens": [],
+   "verified_events": 0,
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
+   "generated_at": "2026-06-12T10:45:53.905Z"
+  }
+ ]
+}
