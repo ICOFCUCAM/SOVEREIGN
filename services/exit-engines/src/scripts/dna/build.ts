@@ -20,6 +20,7 @@ interface Ev {
 interface Buyer {
   buyer_id: string; name: string; buyer_type: string; country?: string;
   qid?: string; cik?: string; aum_usd?: number; source_url: string;
+  industry_official?: string; sector_exitos?: string[];
 }
 
 export interface BuyerDna {
@@ -31,7 +32,10 @@ export interface BuyerDna {
   disclosed_events: number;                    // events with a USD value
   last_acquisition?: { date: string; target: string };
   max_deal?: { usd: number; target: string };
+  min_deal?: { usd: number; target: string };
   avg_deal_usd?: number;                       // mean of disclosed values
+  median_deal_usd?: number;                    // median of disclosed values
+  check_size_band?: { low_usd: number; high_usd: number }; // typical band (p10–p90, rounded)
   deals_12m: number;
   deals_3y: number;
   appetite: 'high' | 'medium' | 'low' | 'no_events';
@@ -45,6 +49,9 @@ export interface BuyerDna {
   median_close_days?: number;
   // Phase 4 — strategic intent inference (what they're buying NOW)
   currently_seeking: string[];                 // sector tokens from last-3y events
+  // taxonomy — official classification verbatim + the ExitOS lens
+  industry_official?: string;
+  sector_exitos?: string[];
   // provenance
   derived_from: 'acquisition_events.json';
   source_url: string;                          // the buyer's registry source
@@ -52,6 +59,31 @@ export interface BuyerDna {
 }
 
 const DATA = join(process.cwd(), 'data');
+
+// nice-number ladder (1–2–5 × 10^k); low rounds down, high rounds up,
+// so the band reads like a desk would quote it ("$100M–$5B")
+const ladder = (x: number, up: boolean): number => {
+  if (x <= 0) return 0;
+  const exp = Math.floor(Math.log10(x));
+  const steps = [1, 2, 5, 10].map((s) => s * 10 ** exp);
+  return up ? steps.find((s) => s >= x)! : [...steps].reverse().find((s) => s <= x) ?? 10 ** exp;
+};
+
+/** Typical check-size band from disclosed deal values: p10–p90, nice-rounded. */
+export function checkSizeBand(values: number[]): { low_usd: number; high_usd: number } | undefined {
+  if (values.length < 3) return undefined;              // a band needs a sample, not a point
+  const s = [...values].sort((a, b) => a - b);
+  const at = (p: number): number => s[Math.min(s.length - 1, Math.floor(p * s.length))]!;
+  return { low_usd: ladder(at(0.1), false), high_usd: ladder(at(0.9), true) };
+}
+
+const medianOf = (xs: number[]): number | undefined => {
+  if (!xs.length) return undefined;
+  const s = [...xs].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : Math.round((s[m - 1]! + s[m]!) / 2);
+};
+
 const tokenize = (s: string): string[] =>
   s.toLowerCase().split(/[,;/·&()]| and /).map((x) => x.trim()).filter((x) => x.length > 3 && !/^\d+$/.test(x));
 
@@ -110,6 +142,9 @@ export function buildDna(): { dna: BuyerDna[]; asOf: string } {
     const valued = evs.filter((e) => typeof e.value_usd === 'number' && e.value_usd! > 0);
     const last = dated.at(-1);
     const max = valued.length ? valued.reduce((m, e) => (e.value_usd! > m.value_usd! ? e : m)) : undefined;
+    const min = valued.length ? valued.reduce((m, e) => (e.value_usd! < m.value_usd! ? e : m)) : undefined;
+    const medianVal = medianOf(valued.map((e) => e.value_usd!));
+    const band = checkSizeBand(valued.map((e) => e.value_usd!));
     const deals12 = dated.filter((e) => asOfMs - new Date(e.announced_date!).getTime() <= YEAR).length;
     const deals36 = dated.filter((e) => asOfMs - new Date(e.announced_date!).getTime() <= 3 * YEAR).length;
 
@@ -148,7 +183,10 @@ export function buildDna(): { dna: BuyerDna[]; asOf: string } {
       disclosed_events: valued.length,
       ...(last ? { last_acquisition: { date: last.announced_date!, target: last.target_name } } : {}),
       ...(max ? { max_deal: { usd: max.value_usd!, target: max.target_name } } : {}),
+      ...(min ? { min_deal: { usd: min.value_usd!, target: min.target_name } } : {}),
       ...(valued.length ? { avg_deal_usd: Math.round(valued.reduce((s, e) => s + e.value_usd!, 0) / valued.length) } : {}),
+      ...(medianVal !== undefined ? { median_deal_usd: medianVal } : {}),
+      ...(band ? { check_size_band: band } : {}),
       deals_12m: deals12,
       deals_3y: deals36,
       appetite: evs.length === 0 ? 'no_events' : deals12 >= 2 ? 'high' : deals36 >= 1 ? 'medium' : 'low',
@@ -160,6 +198,8 @@ export function buildDna(): { dna: BuyerDna[]; asOf: string } {
       ...(outcomes?.closeRatePct != null ? { close_rate: outcomes.closeRatePct } : {}),
       ...(outcomes?.medianCloseDays != null ? { median_close_days: outcomes.medianCloseDays } : {}),
       currently_seeking: [...recentTokens.entries()].sort((a, z) => z[1] - a[1]).slice(0, 4).map(([t]) => t),
+      ...(b.industry_official ? { industry_official: b.industry_official } : {}),
+      ...(b.sector_exitos?.length ? { sector_exitos: b.sector_exitos } : {}),
       derived_from: 'acquisition_events.json',
       source_url: b.source_url,
       generated_at,

@@ -18,6 +18,7 @@ import { preflight, REQUIRED_HOSTS } from './util.js';
 import { meta, slug, type IngestedAcquisition, type IngestedBuyer, type GraphEdgeRecord } from './types.js';
 import { PRIMARY_LIST_PAGES, CORPORATE_ACQUIRERS, PRIVATE_EQUITY_ACQUIRERS, SWF_LIST_PAGE } from './sources.js';
 import { discoverListPages, ingestListPage, buyerFromTitle } from './wikipedia.js';
+import { ingestUniverse } from './universe.js';
 import { resolveQid, acquisitionsOf } from './wikidata.js';
 import { resolveCik, itemTwoOhOneFilings, filingsToEvents, corroborate, type SecFiling } from './sec.js';
 import { parse as parseHtml } from 'node-html-parser';
@@ -149,6 +150,18 @@ async function main(): Promise<void> {
     const swfs = await ingestSwf();
     console.log(`  sovereign funds: ${swfs.length}`);
     buyers.push(...swfs);
+  }
+  // ── L3b: buyer universe — S&P 500 (GICS taxonomy), largest US, family offices
+  if (!flag('no-universe')) {
+    try {
+      const uni = await ingestUniverse();
+      const known = new Set(buyers.map((b) => b.buyer_id));
+      const fresh = uni.buyers.filter((b) => !known.has(b.buyer_id));
+      buyers.push(...fresh);
+      console.log(`  buyer universe: +${fresh.length} (S&P ${uni.counts.sp500} · largest US ${uni.counts.largest_us} · family offices ${uni.counts.family_offices})`);
+    } catch (err) {
+      console.warn(`  ! buyer universe: ${(err as Error).message.slice(0, 100)}`);
+    }
   }
 
   // ── L4: Wikidata acquisitions for buyers with QIDs ──────────────

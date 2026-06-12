@@ -5,10 +5,11 @@
 // through these types' factory (see meta()).
 
 export type IngestSource =
-  | 'wikipedia'        // List_of_acquisitions_by_* pages
-  | 'wikidata'         // SPARQL over wdt:P127 ownership statements
-  | 'sec_edgar'        // 8-K item 2.01 filings via data.sec.gov
-  | 'wikipedia_swf';   // List of sovereign wealth funds
+  | 'wikipedia'           // List_of_acquisitions_by_* pages
+  | 'wikidata'            // SPARQL over wdt:P127 ownership statements
+  | 'sec_edgar'           // 8-K item 2.01 filings via data.sec.gov
+  | 'wikipedia_swf'       // List of sovereign wealth funds
+  | 'wikipedia_universe'; // S&P 500 constituents · largest US by revenue · family offices
 
 export type Confidence = 'verified' | 'reported' | 'estimated';
 export type VerificationStatus = 'verified' | 'corroborated' | 'unverified';
@@ -26,12 +27,14 @@ export interface RecordMeta {
 export interface IngestedBuyer extends RecordMeta {
   readonly buyer_id: string;               // slug, stable across runs
   readonly name: string;
-  readonly buyer_type: 'corporate' | 'private_equity' | 'sovereign_fund';
+  readonly buyer_type: 'corporate' | 'private_equity' | 'sovereign_fund' | 'family_office';
   readonly qid?: string;                   // Wikidata entity
   readonly cik?: string;                   // SEC CIK (zero-padded 10)
   readonly country?: string;
   readonly aum_usd?: number;               // sovereign funds
   readonly list_page?: string;             // the Wikipedia list page ingested
+  readonly industry_official?: string;     // GICS sector · sub-industry (or listed industry), verbatim
+  readonly sector_exitos?: readonly string[]; // simplified ExitOS taxonomy (derived)
 }
 
 export interface IngestedAcquisition extends RecordMeta {

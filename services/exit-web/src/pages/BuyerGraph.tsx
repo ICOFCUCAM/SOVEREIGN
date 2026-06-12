@@ -13,7 +13,7 @@ import { SAMPLE_COMPANY } from "../lib/profile";
 // derived from the ingested registries (Wikipedia · Wikidata · SEC EDGAR)
 // with sample sizes and source links on the record.
 
-type TypeFilter = "all" | "corporate" | "private_equity" | "sovereign_fund";
+type TypeFilter = "all" | "corporate" | "private_equity" | "sovereign_fund" | "family_office";
 
 const APPETITE_STYLE: Record<DnaProfile["appetite"], { label: string; cls: string }> = {
   high:      { label: "High",      cls: "bg-deal-600/20 text-deal-300 ring-deal-400/40" },
@@ -33,6 +33,13 @@ const DnaCard: React.FC<{ p: DnaProfile }> = ({ p }) => {
           <div className="mt-0.5 text-[10px] uppercase tracking-wide text-white/40">
             {p.buyer_type.replace(/_/g, " ")}{p.country ? ` · ${p.country}` : ""}
           </div>
+          {p.sector_exitos && p.sector_exitos.length > 0 && (
+            <div className="mt-1.5 flex flex-wrap gap-1" title={p.industry_official ? `Official: ${p.industry_official}` : undefined}>
+              {p.sector_exitos.map((s) => (
+                <span key={s} className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/55 ring-1 ring-white/10">{s}</span>
+              ))}
+            </div>
+          )}
         </div>
         <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1 ${ap.cls}`}>
           Appetite: {ap.label}
@@ -44,6 +51,9 @@ const DnaCard: React.FC<{ p: DnaProfile }> = ({ p }) => {
         <Row k="Last acquisition" v={p.last_acquisition ? `${p.last_acquisition.target} · ${p.last_acquisition.date.slice(0, 7)}` : "—"} />
         <Row k="Sector preference" v={p.sector_tokens.length ? p.sector_tokens.slice(0, 4).map((t) => t.token).join(" · ") : "—"} />
         <Row k="Average deal size" v={p.avg_deal_usd ? `${fmtUsdShort(p.avg_deal_usd)} (n=${p.disclosed_events} disclosed)` : "undisclosed"} />
+        {p.check_size_band && (
+          <Row k="Typical band" v={<span className="font-mono">{fmtUsdShort(p.check_size_band.low_usd)}–{fmtUsdShort(p.check_size_band.high_usd)}{p.median_deal_usd ? ` · median ${fmtUsdShort(p.median_deal_usd)}` : ""}</span>} />
+        )}
         <Row k="Maximum historical" v={p.max_deal ? `${fmtUsdShort(p.max_deal.usd)} — ${p.max_deal.target}` : "—"} />
         <Row k="Cadence" v={`${p.deals_12m} last 12m · ${p.deals_3y} last 3y · ${p.events_indexed} indexed`} />
         {p.frequency_per_year != null && <Row k="Frequency" v={`${p.frequency_per_year} deals / year`} />}
@@ -111,7 +121,7 @@ const BuyerGraph: React.FC = () => {
 
       {/* filters */}
       <div className="mt-8 flex flex-wrap items-center gap-2">
-        {([["all", "All"], ["corporate", "Strategic"], ["private_equity", "Private Equity"], ["sovereign_fund", "Sovereign Funds"]] as [TypeFilter, string][]).map(([k, l]) => (
+        {([["all", "All"], ["corporate", "Strategic"], ["private_equity", "Private Equity"], ["sovereign_fund", "Sovereign Funds"], ["family_office", "Family Offices"]] as [TypeFilter, string][]).map(([k, l]) => (
           <button key={k} onClick={() => setType(k)}
             className={`rounded-md px-3.5 py-2 text-[13px] font-semibold transition ${type === k ? "bg-deal-600/20 text-white ring-1 ring-deal-400/40" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>
             {l}

@@ -23,6 +23,11 @@ export interface DnaProfile {
   sector_tokens: Array<{ token: string; count: number }>;
   verified_events: number;
   // DNA v2 — Phase 3/4 derivations (present when the sample supports them)
+  min_deal?: { usd: number; target: string };
+  median_deal_usd?: number;
+  check_size_band?: { low_usd: number; high_usd: number };
+  industry_official?: string;
+  sector_exitos?: string[];
   frequency_per_year?: number;
   preferred_geography?: Array<{ country: string; count: number }>;
   premium_pct?: number;
