@@ -40,13 +40,22 @@ function mapColumns(headerCells: string[]): ColumnMap | null {
   headerCells.forEach((h, i) => {
     const t = h.toLowerCase();
     if (map.date === undefined && /date|announced|acquired on/.test(t)) map.date = i;
-    if (map.target === undefined && /company|target|acquisition\b|acquired company/.test(t)) map.target = i;
+    // never let a date-flavored header ("date completed", "targeted completion")
+    // win the target column — some lists carry two date columns
+    if (map.target === undefined && /company|target|acquisition\b|acquired company/.test(t) && !/date|complet/.test(t)) map.target = i;
     if (map.industry === undefined && /business|industry|category|used as|products|description/.test(t)) map.industry = i;
     if (map.country === undefined && /country|nation|headquarters|location/.test(t)) map.country = i;
     if (map.value === undefined && /value|price|cost|amount/.test(t)) { map.value = i; map.valueIsUsd = /usd|us\$|\$/.test(t); }
   });
   return map.target !== undefined ? map : null;       // a list without a target column is not an acquisition table
 }
+
+// whole-cell date shapes only ("July 2, 2025", "2 July 2025", "Q1 2024",
+// "2022") — a company name that merely contains a year ("Poly 2010")
+// must not match, so the alpha token has to be a real month name
+const MONTH_RE = '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*';
+const looksLikeDate = (s: string): boolean =>
+  new RegExp(`^\\s*(?:\\d{4}(?:-\\d{2}(?:-\\d{2})?)?|${MONTH_RE}\\.? \\d{1,2}, \\d{4}|\\d{1,2} ${MONTH_RE}\\.? \\d{4}|${MONTH_RE}\\.? \\d{4}|Q[1-4] \\d{4})\\s*$`).test(s);
 
 const buyerFromTitle = (title: string): string =>
   title.replace(/^List_of_(mergers_and_)?acquisitions_by_/, '').replace(/_/g, ' ');
@@ -69,6 +78,9 @@ export function parseAcquisitionTables(html: string, title: string): IngestedAcq
       const cells = row.querySelectorAll('td,th').map((c) => cleanCell(c.text));
       const target = cols.target !== undefined ? cells[cols.target] : undefined;
       if (!target || target.length < 2) continue;
+      // a cell that IS a date is a misaligned column, not a company —
+      // drop the row rather than index a date as an acquisition target
+      if (looksLikeDate(target)) continue;
       const dateRaw = cols.date !== undefined ? cells[cols.date] : undefined;
       const date = parseDateIso(dateRaw);
       out.push({

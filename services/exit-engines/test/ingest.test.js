@@ -20,6 +20,29 @@ const FIXTURE = `
 </tbody>
 </table>`;
 
+// Regression: the Hewlett-Packard list carries two date columns; the 2026-06-12
+// ingest indexed "July 2, 2025" (Juniper's completion date) as a target name.
+// A date-flavored header must never win the target column, and a company
+// name that merely contains a year must survive.
+const TWO_DATE_FIXTURE = `
+<table class="wikitable sortable">
+<tbody>
+<tr><th>Date announced</th><th>Targeted completion date</th><th>Company</th><th>Value (USD)</th></tr>
+<tr><td>January 10, 2024</td><td>July 2, 2025</td><td>Juniper Networks</td><td>$14,000,000,000</td></tr>
+<tr><td>March 28, 2022</td><td>August 29, 2022</td><td>Poly 2010</td><td>$3,300,000,000</td></tr>
+</tbody>
+</table>`;
+
+test('wikipedia parser: date columns never become acquisition targets', () => {
+  const recs = parseAcquisitionTables(TWO_DATE_FIXTURE, 'List_of_acquisitions_by_Hewlett-Packard');
+  assert.equal(recs.length, 2);
+  assert.equal(recs[0].target_name, 'Juniper Networks');
+  assert.equal(recs[0].announced_date, '2024-01-10');
+  assert.equal(recs[0].value_usd, 14_000_000_000);
+  assert.equal(recs[1].target_name, 'Poly 2010', 'a year inside a name is not a date cell');
+  for (const r of recs) assert.ok(!/^\w+ \d{1,2}, \d{4}$/.test(r.target_name));
+});
+
 test('wikipedia parser: real-format table → fully-provenanced records', () => {
   const recs = parseAcquisitionTables(FIXTURE, 'List_of_mergers_and_acquisitions_by_Microsoft');
   assert.equal(recs.length, 2);
