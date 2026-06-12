@@ -11,6 +11,8 @@ on:
   schedule:
     - cron: "20 5 * * *"      # daily 05:20 UTC — off the SEC's peak hours
   workflow_dispatch: {}        # manual trigger
+  push:
+    branches: [radar/kick]     # on-demand: push main here to force a refresh
 
 permissions:
   contents: write
@@ -61,5 +63,5 @@ jobs:
             echo "radar: no changes today"
           else
             git commit -m "radar: daily registry refresh ($(date -u +%F))"
-            git push
+            git push origin HEAD:main
           fi
