@@ -8,7 +8,10 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "ingest": "npm --prefix services/exit-engines run ingest",
+    "ingest:smoke": "npm --prefix services/exit-engines run ingest:smoke",
+    "ingest:validate": "npm --prefix services/exit-engines run ingest:validate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
