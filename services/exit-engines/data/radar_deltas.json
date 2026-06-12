@@ -1,33 +1,4677 @@
 {
- "detected_at": "2026-06-12T15:30:03.424Z",
- "count": 3,
+ "detected_at": "2026-06-12T15:50:04.251Z",
+ "count": 519,
  "deltas": [
   {
-   "buyer_id": "alphabet",
-   "name": "Alphabet",
-   "kind": "new_acquisition",
-   "before": "270",
-   "after": "285",
-   "detail": "+15 indexed event(s) · latest: Intersect",
-   "detected_at": "2026-06-12T15:30:03.423Z"
+   "buyer_id": "3m",
+   "name": "3M",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
   },
   {
-   "buyer_id": "hewlett-packard",
-   "name": "Hewlett-Packard",
-   "kind": "new_acquisition",
-   "before": "109",
-   "after": "141",
-   "detail": "+32 indexed event(s) · latest: Juniper Networks (by HPE)",
-   "detected_at": "2026-06-12T15:30:03.423Z"
+   "buyer_id": "a-o-smith",
+   "name": "A. O. Smith",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
   },
   {
-   "buyer_id": "aol",
-   "name": "AOL",
-   "kind": "new_acquisition",
-   "before": "118",
-   "after": "124",
-   "detail": "+6 indexed event(s) · latest: Xandr",
-   "detected_at": "2026-06-12T15:30:03.423Z"
+   "buyer_id": "abbott-laboratories",
+   "name": "Abbott Laboratories",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "abbvie",
+   "name": "AbbVie",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "advanced-micro-devices",
+   "name": "Advanced Micro Devices",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "aes-corporation",
+   "name": "AES Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "aflac",
+   "name": "Aflac",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "agilent-technologies",
+   "name": "Agilent Technologies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "air-products",
+   "name": "Air Products",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "airbnb",
+   "name": "Airbnb",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "akamai-technologies",
+   "name": "Akamai Technologies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "albemarle-corporation",
+   "name": "Albemarle Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "alexandria-real-estate-equities",
+   "name": "Alexandria Real Estate Equities",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "align-technology",
+   "name": "Align Technology",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "allegion",
+   "name": "Allegion",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "alliant-energy",
+   "name": "Alliant Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "allstate",
+   "name": "Allstate",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "altria",
+   "name": "Altria",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "amcor",
+   "name": "Amcor",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ameren",
+   "name": "Ameren",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "american-electric-power",
+   "name": "American Electric Power",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "american-express",
+   "name": "American Express",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "american-international-group",
+   "name": "American International Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "american-tower",
+   "name": "American Tower",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "american-water-works",
+   "name": "American Water Works",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ameriprise-financial",
+   "name": "Ameriprise Financial",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ametek",
+   "name": "Ametek",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "amgen",
+   "name": "Amgen",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "amphenol",
+   "name": "Amphenol",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "analog-devices",
+   "name": "Analog Devices",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "aon-plc",
+   "name": "Aon plc",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "apa-corporation",
+   "name": "APA Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "apollo-global-management",
+   "name": "Apollo Global Management",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "applied-materials",
+   "name": "Applied Materials",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "applovin",
+   "name": "AppLovin",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "aptiv",
+   "name": "Aptiv",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "arch-capital-group",
+   "name": "Arch Capital Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "archer-daniels-midland",
+   "name": "Archer Daniels Midland",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ares-management",
+   "name": "Ares Management",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "arista-networks",
+   "name": "Arista Networks",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "arthur-j-gallagher-co",
+   "name": "Arthur J. Gallagher & Co.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "assurant",
+   "name": "Assurant",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "att",
+   "name": "AT&T",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "atmos-energy",
+   "name": "Atmos Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "autodesk",
+   "name": "Autodesk",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "automatic-data-processing",
+   "name": "Automatic Data Processing",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "autozone",
+   "name": "AutoZone",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "avalonbay-communities",
+   "name": "AvalonBay Communities",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "avery-dennison",
+   "name": "Avery Dennison",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "axon-enterprise",
+   "name": "Axon Enterprise",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "baker-hughes",
+   "name": "Baker Hughes",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ball-corporation",
+   "name": "Ball Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "bank-of-america",
+   "name": "Bank of America",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "baxter-international",
+   "name": "Baxter International",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "becton-dickinson",
+   "name": "Becton Dickinson",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "berkshire-hathaway",
+   "name": "Berkshire Hathaway",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "best-buy",
+   "name": "Best Buy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "bio-techne",
+   "name": "Bio-Techne",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "biogen",
+   "name": "Biogen",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "blackrock",
+   "name": "BlackRock",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "bny-mellon",
+   "name": "BNY Mellon",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "boeing",
+   "name": "Boeing",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "booking-holdings",
+   "name": "Booking Holdings",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "boston-scientific",
+   "name": "Boston Scientific",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "bristol-myers-squibb",
+   "name": "Bristol Myers Squibb",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "broadcom",
+   "name": "Broadcom",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "broadridge-financial-solutions",
+   "name": "Broadridge Financial Solutions",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "brown-brown",
+   "name": "Brown & Brown",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "brownforman",
+   "name": "Brown–Forman",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "builders-firstsource",
+   "name": "Builders FirstSource",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "bunge-global",
+   "name": "Bunge Global",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "bxp-inc",
+   "name": "BXP, Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ch-robinson",
+   "name": "C.H. Robinson",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cadence-design-systems",
+   "name": "Cadence Design Systems",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "camden-property-trust",
+   "name": "Camden Property Trust",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "campbells-company-the",
+   "name": "Campbell's Company (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "capital-one",
+   "name": "Capital One",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cardinal-health",
+   "name": "Cardinal Health",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "carnival-corporation",
+   "name": "Carnival Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "carrier-global",
+   "name": "Carrier Global",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "carvana",
+   "name": "Carvana",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "caseys",
+   "name": "Casey's",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "caterpillar-inc",
+   "name": "Caterpillar Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cboe-global-markets",
+   "name": "Cboe Global Markets",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cbre-group",
+   "name": "CBRE Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cdw-corporation",
+   "name": "CDW Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cencora",
+   "name": "Cencora",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "centene-corporation",
+   "name": "Centene Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "centerpoint-energy",
+   "name": "CenterPoint Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cf-industries",
+   "name": "CF Industries",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "charles-river-laboratories",
+   "name": "Charles River Laboratories",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "charles-schwab-corporation",
+   "name": "Charles Schwab Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "charter-communications",
+   "name": "Charter Communications",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "chevron-corporation",
+   "name": "Chevron Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "chipotle-mexican-grill",
+   "name": "Chipotle Mexican Grill",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "chubb-limited",
+   "name": "Chubb Limited",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "church-dwight",
+   "name": "Church & Dwight",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ciena",
+   "name": "Ciena",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cigna",
+   "name": "Cigna",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cincinnati-financial",
+   "name": "Cincinnati Financial",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cintas",
+   "name": "Cintas",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "citigroup",
+   "name": "Citigroup",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "citizens-financial-group",
+   "name": "Citizens Financial Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "clorox",
+   "name": "Clorox",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cme-group",
+   "name": "CME Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cms-energy",
+   "name": "CMS Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "coca-cola-company-the",
+   "name": "Coca-Cola Company (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cognizant",
+   "name": "Cognizant",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "coherent-corp",
+   "name": "Coherent Corp.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "coinbase",
+   "name": "Coinbase",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "colgate-palmolive",
+   "name": "Colgate-Palmolive",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "comcast",
+   "name": "Comcast",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "comfort-systems-usa",
+   "name": "Comfort Systems USA",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "conagra-brands",
+   "name": "Conagra Brands",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "conocophillips",
+   "name": "ConocoPhillips",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "consolidated-edison",
+   "name": "Consolidated Edison",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "constellation-brands",
+   "name": "Constellation Brands",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "constellation-energy",
+   "name": "Constellation Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cooper-companies-the",
+   "name": "Cooper Companies (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "copart",
+   "name": "Copart",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "corning-inc",
+   "name": "Corning Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "corpay",
+   "name": "Corpay",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "corteva",
+   "name": "Corteva",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "costar-group",
+   "name": "CoStar Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "costco",
+   "name": "Costco",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "crh-plc",
+   "name": "CRH plc",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "crowdstrike",
+   "name": "CrowdStrike",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "crown-castle",
+   "name": "Crown Castle",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "csx-corporation",
+   "name": "CSX Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cummins",
+   "name": "Cummins",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "cvs-health",
+   "name": "CVS Health",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "danaher-corporation",
+   "name": "Danaher Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "darden-restaurants",
+   "name": "Darden Restaurants",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "davita",
+   "name": "DaVita",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "deckers-brands",
+   "name": "Deckers Brands",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "deere-company",
+   "name": "Deere & Company",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "delta-air-lines",
+   "name": "Delta Air Lines",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "devon-energy",
+   "name": "Devon Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "dexcom",
+   "name": "Dexcom",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "diamondback-energy",
+   "name": "Diamondback Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "digital-realty",
+   "name": "Digital Realty",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "dollar-general",
+   "name": "Dollar General",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "dollar-tree",
+   "name": "Dollar Tree",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "dominion-energy",
+   "name": "Dominion Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "dominos",
+   "name": "Domino's",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "doordash",
+   "name": "DoorDash",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "dover-corporation",
+   "name": "Dover Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "dow-inc",
+   "name": "Dow Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "d-r-horton",
+   "name": "D. R. Horton",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "dte-energy",
+   "name": "DTE Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "duke-energy",
+   "name": "Duke Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "dupont",
+   "name": "DuPont",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "eaton-corporation",
+   "name": "Eaton Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "echostar",
+   "name": "EchoStar",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ecolab",
+   "name": "Ecolab",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "edison-international",
+   "name": "Edison International",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "edwards-lifesciences",
+   "name": "Edwards Lifesciences",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "elevance-health",
+   "name": "Elevance Health",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "emcor",
+   "name": "Emcor",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "emerson-electric",
+   "name": "Emerson Electric",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "entergy",
+   "name": "Entergy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "eog-resources",
+   "name": "EOG Resources",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "eqt-corporation",
+   "name": "EQT Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "equifax",
+   "name": "Equifax",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "equinix",
+   "name": "Equinix",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "equity-residential",
+   "name": "Equity Residential",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "erie-indemnity",
+   "name": "Erie Indemnity",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "essex-property-trust",
+   "name": "Essex Property Trust",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "estee-lauder-companies-the",
+   "name": "Estée Lauder Companies (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "everest-group",
+   "name": "Everest Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "evergy",
+   "name": "Evergy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "eversource-energy",
+   "name": "Eversource Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "exelon",
+   "name": "Exelon",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "expand-energy",
+   "name": "Expand Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "expedia-group",
+   "name": "Expedia Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "expeditors-international",
+   "name": "Expeditors International",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "extra-space-storage",
+   "name": "Extra Space Storage",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "exxonmobil",
+   "name": "ExxonMobil",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "f5-inc",
+   "name": "F5, Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "factset",
+   "name": "FactSet",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "fair-isaac",
+   "name": "Fair Isaac",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "fastenal",
+   "name": "Fastenal",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "federal-realty-investment-trust",
+   "name": "Federal Realty Investment Trust",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "fedex",
+   "name": "FedEx",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "fedex-freight",
+   "name": "FedEx Freight",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "fidelity-national-information-services",
+   "name": "Fidelity National Information Services",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "fifth-third-bancorp",
+   "name": "Fifth Third Bancorp",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "first-solar",
+   "name": "First Solar",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "firstenergy",
+   "name": "FirstEnergy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "fiserv",
+   "name": "Fiserv",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ford-motor-company",
+   "name": "Ford Motor Company",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "fortinet",
+   "name": "Fortinet",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "fortive",
+   "name": "Fortive",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "fox-corporation",
+   "name": "Fox Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "franklin-resources",
+   "name": "Franklin Resources",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "freeport-mcmoran",
+   "name": "Freeport-McMoRan",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "garmin",
+   "name": "Garmin",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "gartner",
+   "name": "Gartner",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ge-aerospace",
+   "name": "GE Aerospace",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ge-healthcare",
+   "name": "GE HealthCare",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ge-vernova",
+   "name": "GE Vernova",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "gen-digital",
+   "name": "Gen Digital",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "generac",
+   "name": "Generac",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "general-dynamics",
+   "name": "General Dynamics",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "general-mills",
+   "name": "General Mills",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "general-motors",
+   "name": "General Motors",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "genuine-parts-company",
+   "name": "Genuine Parts Company",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "gilead-sciences",
+   "name": "Gilead Sciences",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "global-payments",
+   "name": "Global Payments",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "globe-life",
+   "name": "Globe Life",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "godaddy",
+   "name": "GoDaddy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "goldman-sachs",
+   "name": "Goldman Sachs",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "halliburton",
+   "name": "Halliburton",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "hartford-the",
+   "name": "Hartford (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "hasbro",
+   "name": "Hasbro",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "hca-healthcare",
+   "name": "HCA Healthcare",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "healthpeak-properties",
+   "name": "Healthpeak Properties",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "henry-schein",
+   "name": "Henry Schein",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "hershey-company-the",
+   "name": "Hershey Company (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "hewlett-packard-enterprise",
+   "name": "Hewlett Packard Enterprise",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "hilton-worldwide",
+   "name": "Hilton Worldwide",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "home-depot-the",
+   "name": "Home Depot (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "honeywell",
+   "name": "Honeywell",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "hormel-foods",
+   "name": "Hormel Foods",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "host-hotels-resorts",
+   "name": "Host Hotels & Resorts",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "howmet-aerospace",
+   "name": "Howmet Aerospace",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "hp-inc",
+   "name": "HP Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "hubbell-incorporated",
+   "name": "Hubbell Incorporated",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "humana",
+   "name": "Humana",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "huntington-bancshares",
+   "name": "Huntington Bancshares",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "huntington-ingalls-industries",
+   "name": "Huntington Ingalls Industries",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "idex-corporation",
+   "name": "IDEX Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "idexx-laboratories",
+   "name": "Idexx Laboratories",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "illinois-tool-works",
+   "name": "Illinois Tool Works",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "incyte",
+   "name": "Incyte",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ingersoll-rand",
+   "name": "Ingersoll Rand",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "insulet-corporation",
+   "name": "Insulet Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "intel",
+   "name": "Intel",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "interactive-brokers",
+   "name": "Interactive Brokers",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "intercontinental-exchange",
+   "name": "Intercontinental Exchange",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "international-flavors-fragrances",
+   "name": "International Flavors & Fragrances",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "international-paper",
+   "name": "International Paper",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "intuitive-surgical",
+   "name": "Intuitive Surgical",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "invesco",
+   "name": "Invesco",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "invitation-homes",
+   "name": "Invitation Homes",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "iqvia",
+   "name": "IQVIA",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "iron-mountain",
+   "name": "Iron Mountain",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "jb-hunt",
+   "name": "J.B. Hunt",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "jabil",
+   "name": "Jabil",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "jack-henry-associates",
+   "name": "Jack Henry & Associates",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "jacobs-solutions",
+   "name": "Jacobs Solutions",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "johnson-johnson",
+   "name": "Johnson & Johnson",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "johnson-controls",
+   "name": "Johnson Controls",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "jpmorgan-chase",
+   "name": "JPMorgan Chase",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "kenvue",
+   "name": "Kenvue",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "keurig-dr-pepper",
+   "name": "Keurig Dr Pepper",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "keycorp",
+   "name": "KeyCorp",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "keysight-technologies",
+   "name": "Keysight Technologies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "kimberly-clark",
+   "name": "Kimberly-Clark",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "kimco-realty",
+   "name": "Kimco Realty",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "kinder-morgan",
+   "name": "Kinder Morgan",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "kkr-co",
+   "name": "KKR & Co.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "kla-corporation",
+   "name": "KLA Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "kraft-heinz",
+   "name": "Kraft Heinz",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "kroger",
+   "name": "Kroger",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "l3harris",
+   "name": "L3Harris",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "labcorp",
+   "name": "Labcorp",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "lam-research",
+   "name": "Lam Research",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "las-vegas-sands",
+   "name": "Las Vegas Sands",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "leidos",
+   "name": "Leidos",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "lennar",
+   "name": "Lennar",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "lennox-international",
+   "name": "Lennox International",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "lilly-eli",
+   "name": "Lilly (Eli)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "linde-plc",
+   "name": "Linde plc",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "live-nation-entertainment",
+   "name": "Live Nation Entertainment",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "lockheed-martin",
+   "name": "Lockheed Martin",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "loews-corporation",
+   "name": "Loews Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "lowes",
+   "name": "Lowe's",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "lululemon-athletica",
+   "name": "Lululemon Athletica",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "lumentum",
+   "name": "Lumentum",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "lyondellbasell",
+   "name": "LyondellBasell",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "mt-bank",
+   "name": "M&T Bank",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "marathon-petroleum",
+   "name": "Marathon Petroleum",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "marriott-international",
+   "name": "Marriott International",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "marsh-mclennan",
+   "name": "Marsh McLennan",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "martin-marietta-materials",
+   "name": "Martin Marietta Materials",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "masco",
+   "name": "Masco",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "mastercard",
+   "name": "Mastercard",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "mccormick-company",
+   "name": "McCormick & Company",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "mcdonalds",
+   "name": "McDonald's",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "mckesson-corporation",
+   "name": "McKesson Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "medtronic",
+   "name": "Medtronic",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "merck-co",
+   "name": "Merck & Co.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "metlife",
+   "name": "MetLife",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "mettler-toledo",
+   "name": "Mettler Toledo",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "mgm-resorts",
+   "name": "MGM Resorts",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "microchip-technology",
+   "name": "Microchip Technology",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "micron-technology",
+   "name": "Micron Technology",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "mid-america-apartment-communities",
+   "name": "Mid-America Apartment Communities",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "moderna",
+   "name": "Moderna",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "molson-coors-beverage-company",
+   "name": "Molson Coors Beverage Company",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "mondelez-international",
+   "name": "Mondelez International",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "monolithic-power-systems",
+   "name": "Monolithic Power Systems",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "monster-beverage",
+   "name": "Monster Beverage",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "moodys-corporation",
+   "name": "Moody's Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "morgan-stanley",
+   "name": "Morgan Stanley",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "mosaic-company-the",
+   "name": "Mosaic Company (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "motorola-solutions",
+   "name": "Motorola Solutions",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "msci-inc",
+   "name": "MSCI Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "nasdaq-inc",
+   "name": "Nasdaq, Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "netapp",
+   "name": "NetApp",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "netflix",
+   "name": "Netflix",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "newmont",
+   "name": "Newmont",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "news-corp",
+   "name": "News Corp",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "nextera-energy",
+   "name": "NextEra Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "nike-inc",
+   "name": "Nike, Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "nisource",
+   "name": "NiSource",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "nordson-corporation",
+   "name": "Nordson Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "norfolk-southern",
+   "name": "Norfolk Southern",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "northern-trust",
+   "name": "Northern Trust",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "northrop-grumman",
+   "name": "Northrop Grumman",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "norwegian-cruise-line-holdings",
+   "name": "Norwegian Cruise Line Holdings",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "nrg-energy",
+   "name": "NRG Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "nucor",
+   "name": "Nucor",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "nvidia",
+   "name": "Nvidia",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "nvr-inc",
+   "name": "NVR, Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "nxp-semiconductors",
+   "name": "NXP Semiconductors",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "oreilly-automotive",
+   "name": "O’Reilly Automotive",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "occidental-petroleum",
+   "name": "Occidental Petroleum",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "old-dominion",
+   "name": "Old Dominion",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "omnicom-group",
+   "name": "Omnicom Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "on-semiconductor",
+   "name": "ON Semiconductor",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "oneok",
+   "name": "Oneok",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "otis-worldwide",
+   "name": "Otis Worldwide",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "paccar",
+   "name": "Paccar",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "packaging-corporation-of-america",
+   "name": "Packaging Corporation of America",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "palantir-technologies",
+   "name": "Palantir Technologies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "palo-alto-networks",
+   "name": "Palo Alto Networks",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "paramount-skydance-corporation",
+   "name": "Paramount Skydance Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "parker-hannifin",
+   "name": "Parker Hannifin",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "paychex",
+   "name": "Paychex",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "pentair",
+   "name": "Pentair",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "pepsico",
+   "name": "PepsiCo",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "pfizer",
+   "name": "Pfizer",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "pge-corporation",
+   "name": "PG&E Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "philip-morris-international",
+   "name": "Philip Morris International",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "phillips-66",
+   "name": "Phillips 66",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "pinnacle-west-capital",
+   "name": "Pinnacle West Capital",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "pnc-financial-services",
+   "name": "PNC Financial Services",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "pool-corporation",
+   "name": "Pool Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ppg-industries",
+   "name": "PPG Industries",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ppl-corporation",
+   "name": "PPL Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "principal-financial-group",
+   "name": "Principal Financial Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "procter-gamble",
+   "name": "Procter & Gamble",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "progressive-corporation",
+   "name": "Progressive Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "prologis",
+   "name": "Prologis",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "prudential-financial",
+   "name": "Prudential Financial",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "public-service-enterprise-group",
+   "name": "Public Service Enterprise Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ptc-inc",
+   "name": "PTC Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "public-storage",
+   "name": "Public Storage",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "pultegroup",
+   "name": "PulteGroup",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "quanta-services",
+   "name": "Quanta Services",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "qualcomm",
+   "name": "Qualcomm",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "quest-diagnostics",
+   "name": "Quest Diagnostics",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "qnity-electronics",
+   "name": "Qnity Electronics",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ralph-lauren-corporation",
+   "name": "Ralph Lauren Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "raymond-james-financial",
+   "name": "Raymond James Financial",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "rtx-corporation",
+   "name": "RTX Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "realty-income",
+   "name": "Realty Income",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "regency-centers",
+   "name": "Regency Centers",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "regeneron-pharmaceuticals",
+   "name": "Regeneron Pharmaceuticals",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "regions-financial-corporation",
+   "name": "Regions Financial Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "republic-services",
+   "name": "Republic Services",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "resmed",
+   "name": "ResMed",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "revvity",
+   "name": "Revvity",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "robinhood-markets",
+   "name": "Robinhood Markets",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "rockwell-automation",
+   "name": "Rockwell Automation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "rollins-inc",
+   "name": "Rollins, Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "roper-technologies",
+   "name": "Roper Technologies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ross-stores",
+   "name": "Ross Stores",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "royal-caribbean-group",
+   "name": "Royal Caribbean Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "sp-global",
+   "name": "S&P Global",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "sandisk",
+   "name": "Sandisk",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "sba-communications",
+   "name": "SBA Communications",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "schlumberger",
+   "name": "Schlumberger",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "seagate-technology",
+   "name": "Seagate Technology",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "sempra",
+   "name": "Sempra",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "sherwin-williams",
+   "name": "Sherwin-Williams",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "simon-property-group",
+   "name": "Simon Property Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "skyworks-solutions",
+   "name": "Skyworks Solutions",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "jm-smucker-company-the",
+   "name": "J.M. Smucker Company (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "smurfit-westrock",
+   "name": "Smurfit Westrock",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "snap-on",
+   "name": "Snap-on",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "solventum",
+   "name": "Solventum",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "southern-company",
+   "name": "Southern Company",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "southwest-airlines",
+   "name": "Southwest Airlines",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "stanley-black-decker",
+   "name": "Stanley Black & Decker",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "starbucks",
+   "name": "Starbucks",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "state-street-corporation",
+   "name": "State Street Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "steel-dynamics",
+   "name": "Steel Dynamics",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "steris",
+   "name": "Steris",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "stryker-corporation",
+   "name": "Stryker Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "supermicro",
+   "name": "Supermicro",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "synchrony-financial",
+   "name": "Synchrony Financial",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "synopsys",
+   "name": "Synopsys",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "sysco",
+   "name": "Sysco",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "t-mobile-us",
+   "name": "T-Mobile US",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "t-rowe-price",
+   "name": "T. Rowe Price",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "tapestry-inc",
+   "name": "Tapestry, Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "targa-resources",
+   "name": "Targa Resources",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "target-corporation",
+   "name": "Target Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "te-connectivity",
+   "name": "TE Connectivity",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "teledyne-technologies",
+   "name": "Teledyne Technologies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "teradyne",
+   "name": "Teradyne",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "tesla-inc",
+   "name": "Tesla, Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "texas-instruments",
+   "name": "Texas Instruments",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "texas-pacific-land-corporation",
+   "name": "Texas Pacific Land Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "textron",
+   "name": "Textron",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "thermo-fisher-scientific",
+   "name": "Thermo Fisher Scientific",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "tjx-companies",
+   "name": "TJX Companies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "tko-group-holdings",
+   "name": "TKO Group Holdings",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "trade-desk-the",
+   "name": "Trade Desk (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "tractor-supply",
+   "name": "Tractor Supply",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "trane-technologies",
+   "name": "Trane Technologies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "transdigm-group",
+   "name": "TransDigm Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "travelers-companies-the",
+   "name": "Travelers Companies (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "trimble-inc",
+   "name": "Trimble Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "truist-financial",
+   "name": "Truist Financial",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "tyler-technologies",
+   "name": "Tyler Technologies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "tyson-foods",
+   "name": "Tyson Foods",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "us-bancorp",
+   "name": "U.S. Bancorp",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "uber",
+   "name": "Uber",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "udr-inc",
+   "name": "UDR, Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ulta-beauty",
+   "name": "Ulta Beauty",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "union-pacific-corporation",
+   "name": "Union Pacific Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "united-airlines-holdings",
+   "name": "United Airlines Holdings",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "united-parcel-service",
+   "name": "United Parcel Service",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "united-rentals",
+   "name": "United Rentals",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "unitedhealth-group",
+   "name": "UnitedHealth Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "universal-health-services",
+   "name": "Universal Health Services",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "valero-energy",
+   "name": "Valero Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "veeva-systems",
+   "name": "Veeva Systems",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ventas",
+   "name": "Ventas",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "veralto",
+   "name": "Veralto",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "verisign",
+   "name": "Verisign",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "verisk-analytics",
+   "name": "Verisk Analytics",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "verizon",
+   "name": "Verizon",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "vertex-pharmaceuticals",
+   "name": "Vertex Pharmaceuticals",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "vertiv",
+   "name": "Vertiv",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "viatris",
+   "name": "Viatris",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "vici-properties",
+   "name": "Vici Properties",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "visa-inc",
+   "name": "Visa Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "vistra-corp",
+   "name": "Vistra Corp.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "vulcan-materials-company",
+   "name": "Vulcan Materials Company",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "w-r-berkley-corporation",
+   "name": "W. R. Berkley Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "w-w-grainger",
+   "name": "W. W. Grainger",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "wabtec",
+   "name": "Wabtec",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "walmart",
+   "name": "Walmart",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "walt-disney-company-the",
+   "name": "Walt Disney Company (The)",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "warner-bros-discovery",
+   "name": "Warner Bros. Discovery",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "waste-management",
+   "name": "Waste Management",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "waters-corporation",
+   "name": "Waters Corporation",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "wec-energy-group",
+   "name": "WEC Energy Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "wells-fargo",
+   "name": "Wells Fargo",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "welltower",
+   "name": "Welltower",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "west-pharmaceutical-services",
+   "name": "West Pharmaceutical Services",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "western-digital",
+   "name": "Western Digital",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "weyerhaeuser",
+   "name": "Weyerhaeuser",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "williams-sonoma-inc",
+   "name": "Williams-Sonoma, Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "williams-companies",
+   "name": "Williams Companies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "willis-towers-watson",
+   "name": "Willis Towers Watson",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "wynn-resorts",
+   "name": "Wynn Resorts",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "xcel-energy",
+   "name": "Xcel Energy",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "xylem-inc",
+   "name": "Xylem Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "yum-brands",
+   "name": "Yum! Brands",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "zebra-technologies",
+   "name": "Zebra Technologies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "zimmer-biomet",
+   "name": "Zimmer Biomet",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "zoetis",
+   "name": "Zoetis",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "exxon-mobil",
+   "name": "Exxon Mobil",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "costco-wholesale",
+   "name": "Costco Wholesale",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "the-home-depot",
+   "name": "The Home Depot",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "fannie-mae",
+   "name": "Fannie Mae",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "walgreens-boots-alliance",
+   "name": "Walgreens Boots Alliance",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "verizon-communications",
+   "name": "Verizon Communications",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "goldman-sachs-group",
+   "name": "Goldman Sachs Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "state-farm-insurance",
+   "name": "State Farm Insurance",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "freddie-mac",
+   "name": "Freddie Mac",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "stonex-group",
+   "name": "StoneX Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "walt-disney",
+   "name": "Walt Disney",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "energy-transfer-partners",
+   "name": "Energy Transfer Partners",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "albertsons",
+   "name": "Albertsons",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "merck",
+   "name": "Merck",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "new-york-life-insurance-company",
+   "name": "New York Life Insurance Company",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "publix-super-markets",
+   "name": "Publix Super Markets",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "nationwide-mutual-insurance-company",
+   "name": "Nationwide Mutual Insurance Company",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "td-synnex",
+   "name": "TD Synnex",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "tjx",
+   "name": "TJX",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "enterprise-products-partners",
+   "name": "Enterprise Products Partners",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "performance-food-group",
+   "name": "Performance Food Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "american-airlines-group",
+   "name": "American Airlines Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "capital-one-financial",
+   "name": "Capital One Financial",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "deere",
+   "name": "Deere",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "liberty-mutual-insurance-group",
+   "name": "Liberty Mutual Insurance Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "plains-gp-holdings",
+   "name": "Plains GP Holdings",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "usaa",
+   "name": "USAA",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ingram-micro-holding",
+   "name": "Ingram Micro Holding",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "coca-cola",
+   "name": "Coca-Cola",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "tiaa",
+   "name": "TIAA",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "travelers",
+   "name": "Travelers",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "eli-lilly",
+   "name": "Eli Lilly",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "ballmer-group",
+   "name": "Ballmer Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "bezos-expeditions",
+   "name": "Bezos Expeditions",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "dfo-management",
+   "name": "DFO Management",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "financiere-agache",
+   "name": "Financière Agache",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "hms-management",
+   "name": "HMS Management",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "kirkbi",
+   "name": "Kirkbi",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "mousse-partners",
+   "name": "Mousse Partners",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "royal-group",
+   "name": "Royal Group",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
+  },
+  {
+   "buyer_id": "walton-enterprises",
+   "name": "Walton Enterprises",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-06-12T15:50:04.251Z"
   }
  ]
 }
