@@ -101,4 +101,30 @@ export const ACQUISITION_HISTORY: readonly AcquisitionEvent[] = [
 
   // ── Walton Enterprises ─────────────────────────────────────────────
   { buyerName: 'Walton Enterprises', targetName: 'Denver Broncos', announcedDate: '2022-08-09', closedDate: '2022-08-09', headlinePriceUsd: 4_650_000_000, sector: 'media_content', targetGeography: 'US', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'denverbroncos.com 2022-08-09' }], confidence: 'unverified' },
+
+  // ── Uber (freight) ─────────────────────────────────────────────────
+  { buyerName: 'Uber Acquisitions', targetName: 'Transplace', announcedDate: '2021-07-22', closedDate: '2021-11-12', headlinePriceUsd: 2_250_000_000, sector: 'logistics_freight', targetGeography: 'US', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'investor.uber.com 2021-07-22' }, { kind: 'wikidata', ref: 'Q7835154' }], confidence: 'unverified' },
+
+  // ── DP World ───────────────────────────────────────────────────────
+  { buyerName: 'DP World Logistics M&A', targetName: 'syncreon', announcedDate: '2021-07-01', closedDate: '2021-10-01', headlinePriceUsd: 1_200_000_000, sector: 'logistics_freight', targetGeography: 'US', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'dpworld.com 2021-07-01' }], confidence: 'unverified' },
+  { buyerName: 'DP World Logistics M&A', targetName: 'Imperial Logistics', announcedDate: '2021-07-08', closedDate: '2022-03-22', headlinePriceUsd: 890_000_000, sector: 'logistics_freight', targetGeography: 'ZA', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'dpworld.com 2021-07-08' }, { kind: 'wikidata', ref: 'Q3149256' }], confidence: 'unverified' },
+
+  // ── A.P. Moller–Maersk ─────────────────────────────────────────────
+  { buyerName: 'A.P. Moller–Maersk Integrator M&A', targetName: 'LF Logistics', announcedDate: '2021-12-22', closedDate: '2022-08-31', headlinePriceUsd: 3_600_000_000, sector: 'logistics_freight', targetGeography: 'CN', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'maersk.com 2021-12-22' }], confidence: 'unverified' },
+  { buyerName: 'A.P. Moller–Maersk Integrator M&A', targetName: 'Pilot Freight Services', announcedDate: '2022-02-09', closedDate: '2022-05-02', headlinePriceUsd: 1_680_000_000, sector: 'logistics_freight', targetGeography: 'US', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'maersk.com 2022-02-09' }], confidence: 'unverified' },
+
+  // ── DSV ────────────────────────────────────────────────────────────
+  { buyerName: 'DSV Corporate Development', targetName: 'DB Schenker', announcedDate: '2024-09-13', closedDate: '2025-04-30', headlinePriceUsd: 15_850_000_000, sector: 'logistics_freight', targetGeography: 'DE', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'investor.dsv.com 2024-09-13' }, { kind: 'wikidata', ref: 'Q459536' }], confidence: 'unverified' },
+  { buyerName: 'DSV Corporate Development', targetName: 'Agility Global Integrated Logistics', announcedDate: '2021-04-27', closedDate: '2021-08-16', headlinePriceUsd: 4_100_000_000, sector: 'logistics_freight', targetGeography: 'KW', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'investor.dsv.com 2021-04-27' }], confidence: 'unverified' },
+
+  // ── CMA CGM / CEVA ─────────────────────────────────────────────────
+  { buyerName: 'CMA CGM / CEVA Acquisitions', targetName: 'Bolloré Logistics', announcedDate: '2023-05-08', closedDate: '2024-02-29', headlinePriceUsd: 5_200_000_000, sector: 'logistics_freight', targetGeography: 'FR', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'cmacgm-group.com 2023-05-08' }], confidence: 'unverified' },
+  { buyerName: 'CMA CGM / CEVA Acquisitions', targetName: 'Ingram Micro CLS', announcedDate: '2021-12-15', closedDate: '2022-04-04', headlinePriceUsd: 3_000_000_000, sector: 'logistics_freight', targetGeography: 'US', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'cmacgm-group.com 2021-12-15' }], confidence: 'unverified' },
+
+  // ── Kuehne+Nagel ───────────────────────────────────────────────────
+  { buyerName: 'Kuehne+Nagel Corporate Development', targetName: 'Apex International', announcedDate: '2021-02-23', closedDate: '2021-05-20', sector: 'logistics_freight', targetGeography: 'CN', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'kuehne-nagel.com 2021-02-23' }], confidence: 'unverified' },
+
+  // ── Flexport ───────────────────────────────────────────────────────
+  { buyerName: 'Flexport Strategic', targetName: 'Shopify Logistics (Deliverr)', announcedDate: '2023-05-03', closedDate: '2023-06-09', sector: 'logistics_freight', targetGeography: 'US', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'flexport.com 2023-05-03' }], confidence: 'unverified' },
+  { buyerName: 'Flexport Strategic', targetName: 'Convoy (technology assets)', announcedDate: '2023-11-01', closedDate: '2023-11-01', sector: 'logistics_freight', targetGeography: 'US', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'flexport.com 2023-11-01' }], confidence: 'unverified' },
 ];

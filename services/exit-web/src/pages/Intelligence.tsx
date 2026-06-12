@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, Kpi, SectionHeader, Field, inputCls, fmtMoney, ConfidenceChip } from "../lib/ui";
 import { VALUATION_STRATEGIC } from "../lib/engines";
-import { compareOutcomes, runBuyerDiscovery, type BuyerCandidate } from "@exit/engines";
+import { compareOutcomes, runBuyerDiscovery, runAcquisitionIntelligence, type BuyerCandidate } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { fetchBuyerStats, mergeLiveStatsIntoCandidates, type BuyerLiveStat } from "../lib/buyer-stats";
 import { DEAL_INTEL_FMT } from "../lib/market-stats";
+import { computePlatformSignals } from "../lib/platform-signals";
 import BankerTake from "../components/BankerTake";
 
 // Acquisition Intelligence Engine surface — wired to runBuyerDiscovery.
@@ -77,6 +78,14 @@ const Intelligence: React.FC = () => {
     () => runBuyerDiscovery(SAMPLE_COMPANY, { impliedPriceUsd: VALUATION_STRATEGIC.headline.mid, limit: 20, sortBy }),
     [sortBy],
   );
+
+  // The full acquisition-intelligence pipeline: registry → fit → pattern →
+  // intent → outcome → expected result, plus graph-discovered hidden buyers.
+  const intel = useMemo(
+    () => runAcquisitionIntelligence(SAMPLE_COMPANY, { impliedPriceUsd: VALUATION_STRATEGIC.headline.mid, limit: 5 }),
+    [],
+  );
+  const platformSignals = useMemo(() => computePlatformSignals(), []);
   const candidates = useMemo<readonly BuyerCandidate[]>(() => {
     const merged = mergeLiveStatsIntoCandidates(report.candidates, liveStats, report.companyHeadlineUsd);
     if (sortBy === "expected_outcome") {
@@ -128,8 +137,131 @@ const Intelligence: React.FC = () => {
       <SectionHeader
         kicker="Module 01 · Sourcing"
         title="Acquisition Intelligence Engine"
-        description={`Ranked against an implied price of ${fmtMoney(VALUATION_STRATEGIC.headline.mid)}. Probability = sector × model × check × geography × activity × M&A track record (EDGAR 8-K + Wikidata).`}
+        description={`Not a buyer directory. A layered engine that answers one question: which buyer is most likely to produce the best outcome — ranked by expected realized value against an implied price of ${fmtMoney(VALUATION_STRATEGIC.headline.mid)}.`}
       />
+
+      {/* ── The pipeline — six layers, registry → expected result ── */}
+      <Card className="mb-6 overflow-hidden p-0">
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-3">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/60">Buyer discovery pipeline</span>
+          <span className="hidden text-[10px] uppercase tracking-wide text-white/35 sm:inline">each layer narrows the pool</span>
+        </div>
+        <div className="grid grid-cols-2 gap-px sm:grid-cols-3 lg:grid-cols-6" style={{ background: "rgba(255,255,255,.07)" }}>
+          {intel.layers.map((l, i) => (
+            <div key={l.id} className="bg-ink-800/95 px-4 py-3.5">
+              <div className="flex items-baseline justify-between">
+                <span className="font-mono text-[9px] font-bold text-white/35">L{i + 1}</span>
+                <span className={`font-mono text-xl font-bold tabular-nums ${i === intel.layers.length - 1 ? "text-deal-300" : "text-white/85"}`}>{l.pool}</span>
+              </div>
+              <div className="mt-1 text-[11px] font-semibold leading-tight text-white">{l.name}</div>
+              <div className="text-[9.5px] leading-snug text-white/40">{l.note}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* ── Most likely successful outcomes — the ranking ────────── */}
+      <Card className="mb-6 overflow-hidden p-0">
+        <div className="border-b border-white/10 bg-deal-600/10 px-5 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-deal-300">Most likely successful outcomes</span>
+            <span className="text-[10px] uppercase tracking-wide text-white/40">ranked by expected realized value — not headline price</span>
+          </div>
+        </div>
+        <div className="divide-y divide-white/5">
+          {intel.ranked.map((r) => {
+            const eo = r.candidate.expectedOutcome;
+            return (
+              <div key={r.candidate.buyer.name} className="px-5 py-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/5 font-mono text-[12px] font-bold text-white/60 ring-1 ring-white/10">{r.rank}</span>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[14.5px] font-bold text-white">{r.candidate.buyer.name}</span>
+                        <span className="rounded-full bg-white/5 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/45 ring-1 ring-white/10">{r.candidate.buyer.buyerType.replace(/_/g, " ")}</span>
+                        <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ring-1 ${
+                          r.intent.tier === "high" ? "bg-deal-600/20 text-deal-300 ring-deal-400/40"
+                          : r.intent.tier === "medium" ? "bg-loi-500/15 text-loi-300 ring-loi-400/40"
+                          : "bg-white/5 text-white/45 ring-white/15"}`}>intent {r.intent.score}</span>
+                      </div>
+                      {/* why ranked */}
+                      <ul className="mt-2 grid gap-x-6 gap-y-1 sm:grid-cols-2">
+                        {r.whyRanked.map((w) => (
+                          <li key={w} className="flex items-baseline gap-1.5 text-[11.5px] leading-snug text-white/60">
+                            <span className="text-deal-400">✓</span> {w}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="grid shrink-0 grid-cols-2 gap-x-6 gap-y-2 text-right sm:grid-cols-4">
+                    <div>
+                      <div className="font-mono text-[16px] font-bold tabular-nums text-deal-300">{fmtMoney(eo.expectedClosingUsd)}</div>
+                      <div className="text-[9px] uppercase tracking-wide text-white/40">Expected realized</div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[16px] font-bold tabular-nums text-white/90">{Math.round(eo.closeRatePct * 100)}%</div>
+                      <div className="text-[9px] uppercase tracking-wide text-white/40">Close probability</div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[16px] font-bold tabular-nums text-white/90">{Math.round(eo.expectedDaysToCash)}d</div>
+                      <div className="text-[9px] uppercase tracking-wide text-white/40">Time to cash</div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[16px] font-bold tabular-nums text-white/60">{fmtMoney(eo.expectedHeadlineUsd)}</div>
+                      <div className="text-[9px] uppercase tracking-wide text-white/40">Offer potential</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="border-t border-white/10 px-5 py-2.5 text-[11.5px] text-white/55">{intel.summary}</div>
+      </Card>
+
+      {/* ── L7 network discovery + L8 proprietary signals ─────────── */}
+      <div className="mb-8 grid gap-4 lg:grid-cols-2">
+        <Card className="overflow-hidden p-0">
+          <div className="border-b border-white/10 px-5 py-3">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/60">Network discovery · hidden buyers</span>
+            <div className="mt-0.5 text-[10px] text-white/35">off-mandate acquirers reached through the co-acquisition graph</div>
+          </div>
+          <div className="divide-y divide-white/5">
+            {intel.hidden.map((h) => (
+              <div key={h.buyer.name} className="px-5 py-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[13px] font-semibold text-white">{h.buyer.name}</span>
+                  <span className="font-mono text-[10px] text-white/40">via {h.via}</span>
+                </div>
+                <div className="mt-1 text-[11px] leading-snug text-white/50">{h.reason}</div>
+              </div>
+            ))}
+            {intel.hidden.length === 0 && <div className="px-5 py-4 text-[12px] text-white/45">No off-mandate adjacency found for this sector yet — the graph grows with every indexed deal.</div>}
+          </div>
+        </Card>
+        <Card className="overflow-hidden p-0">
+          <div className="border-b border-white/10 px-5 py-3">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/60">Proprietary platform signals</span>
+            <div className="mt-0.5 text-[10px] text-white/35">behavioural evidence from this workspace's own process records — no external database has this</div>
+          </div>
+          <div className="divide-y divide-white/5">
+            {platformSignals.map((s) => (
+              <div key={s.label} className="flex items-center justify-between gap-3 px-5 py-3">
+                <div className="min-w-0">
+                  <div className="text-[12.5px] font-semibold text-white">{s.label}</div>
+                  <div className="truncate text-[11px] text-white/45">{s.detail}</div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="font-mono text-[15px] font-bold tabular-nums text-deal-300">{s.value}</div>
+                  <div className="font-mono text-[9px] uppercase tracking-wide text-white/35">{s.sample}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
 
       {/* ── Acquisition Radar — live market signals ─────────────── */}
       <Card className="mb-8 overflow-hidden p-0">

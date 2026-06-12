@@ -10,3 +10,9 @@ export type { AcquisitionEvent, AcquisitionSource, BuyerHistoryRollup, Confidenc
 export type { BuyerDealOutcomeRollup, OutcomeStandouts } from './outcomes.js';
 export type { ExpectedOutcome, ConfidenceLabel, StatConfidence } from './expected-outcome.js';
 export type { StrategyConstraints, StrategyOutput, ProcessStructure } from './strategy.js';
+export { assessIntent } from './intent.js';
+export type { BuyerIntent, IntentSignal, IntentSignalKind } from './intent.js';
+export { buildAcquisitionGraph, discoverAdjacentBuyers } from './graph.js';
+export type { GraphEdge, AdjacentBuyer } from './graph.js';
+export { runAcquisitionIntelligence } from './intelligence.js';
+export type { AcquisitionIntelligenceReport, RankedOutcome, PipelineLayer, IntelligenceOptions } from './intelligence.js';

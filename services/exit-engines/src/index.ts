@@ -34,6 +34,8 @@ export type { BuyerEntry, BuyerType } from './buyers/registry.js';
 
 // Buyer M&A history + deal outcomes + expected outcome + strategy simulator
 export { rollupBuyerHistory, rollupBuyerOutcomes, compareOutcomes, closeDurationDays, premiumPct, computeExpectedOutcome, confidenceFromSample, runStrategySimulator, ACQUISITION_HISTORY } from './buyers/index.js';
+export { runAcquisitionIntelligence, assessIntent, buildAcquisitionGraph, discoverAdjacentBuyers } from './buyers/index.js';
+export type { AcquisitionIntelligenceReport, RankedOutcome, PipelineLayer, IntelligenceOptions, BuyerIntent, IntentSignal, GraphEdge, AdjacentBuyer } from './buyers/index.js';
 export type {
   AcquisitionEvent, AcquisitionSource, BuyerHistoryRollup, ConfidenceTier,
   BuyerDealOutcomeRollup, OutcomeStandouts,
