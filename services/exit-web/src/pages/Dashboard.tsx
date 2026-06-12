@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Card, Kpi, SectionHeader, fmtMoney, timeAgo } from "../lib/ui";
+import { Button, Card, Kpi, fmtMoney, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import {
   VALUATION_STANDARD, VALUATION_STRATEGIC, VALUATION_REPLACEMENT,
   READINESS, READINESS_ANALYSIS, BUYERS, DILIGENCE,
 } from "../lib/engines";
+import { assessIntent } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import ExitProcessModal from "../components/ExitProcessModal";
 import JourneyMap from "../components/JourneyMap";
@@ -45,6 +46,20 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const m = commanderMetrics();
 
+  // Highest-intent buyer + most-likely premium payer for the briefing memo —
+  // computed from the same candidates the intelligence pipeline ranks.
+  const briefing = useMemo(() => {
+    const withIntent = BUYERS.candidates.map((c) => ({ c, intent: assessIntent(c.buyer, c.history) }));
+    const byIntent = [...withIntent].sort((a, b) => b.intent.score - a.intent.score)[0];
+    const byPremium = [...BUYERS.candidates]
+      .filter((c) => c.outcomes.avgPremiumPct != null)
+      .sort((a, b) => (b.outcomes.avgPremiumPct ?? 0) - (a.outcomes.avgPremiumPct ?? 0))[0];
+    return {
+      highestIntent: byIntent ? `${byIntent.c.buyer.name} · intent ${byIntent.intent.score}/100` : undefined,
+      premiumPayer: byPremium ? `${byPremium.buyer.name} · +${Math.round((byPremium.outcomes.avgPremiumPct ?? 0) * 100)}% avg` : undefined,
+    };
+  }, []);
+
   const [run, setRun] = useState<ExitRun | null>(() => loadRun());
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -66,23 +81,45 @@ const Dashboard: React.FC = () => {
     setRun(null);
   };
 
+  const statusChips: Array<[string, string, string]> = [
+    ["Mandate", run?.status === "complete" ? "Executing" : "Active", "#34d399"],
+    ["Market", "Open", "#34d399"],
+    ["Buyer activity", m.demandLabel === "High" ? "Elevated" : m.demandLabel, m.demandLabel === "High" ? "#34d399" : m.demandLabel === "Medium" ? "#fbbf24" : "#f87171"],
+    ["Expected outcome", fmtMoney(m.potential), "#34d399"],
+    ["Confidence", `${m.confidencePct}%`, "#e2e8f0"],
+  ];
+
   return (
     <div>
-      <SectionHeader
-        kicker="Founder Dashboard"
-        title={`Good morning, ${session?.founderId ?? "founder"}.`}
-        description={`${SAMPLE_COMPANY.name} · ${SAMPLE_COMPANY.sector.replace(/_/g, " ")} · ${arrM.toFixed(1)}M ARR · ${SAMPLE_COMPANY.jurisdiction}`}
-        actions={
-          run?.status === "complete" ? (
+      {/* ── Founder Liquidity Command — a live market header, not a greeting ── */}
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-deal-400">Founder Liquidity Command</div>
+          <h1 className="mt-2 font-serif text-3xl font-bold leading-tight text-white sm:text-4xl">{SAMPLE_COMPANY.name}</h1>
+          <div className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/45">
+            {SAMPLE_COMPANY.sector.replace(/_/g, " ")} · {arrM.toFixed(1)}M ARR · {SAMPLE_COMPANY.jurisdiction} · operator {session?.founderId ?? "founder"}
+          </div>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+            {statusChips.map(([k, v, c]) => (
+              <span key={k} className="flex items-baseline gap-1.5">
+                <span className="inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full" style={{ background: c }} />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">{k}</span>
+                <span className="font-mono text-[12px] font-bold tabular-nums text-white/90">{v}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          {run?.status === "complete" ? (
             <>
               <Button variant="ghost" onClick={resetExit}>Reset</Button>
               <Button onClick={startExit}>Re-run exit process</Button>
             </>
           ) : (
             <Button onClick={startExit}>Start Exit Process →</Button>
-          )
-        }
-      />
+          )}
+        </div>
+      </div>
 
       <JourneyMap current={run?.status === "complete" ? "run" : "monitor"} />
 
@@ -106,6 +143,8 @@ const Dashboard: React.FC = () => {
         recommendedAction={m.recommendedAction}
         expectedIncreaseUsd={m.expectedIncreaseUsd}
         confidencePct={m.confidencePct}
+        {...(briefing.highestIntent ? { highestIntentName: briefing.highestIntent } : {})}
+        {...(briefing.premiumPayer ? { premiumPayerName: briefing.premiumPayer } : {})}
         onExecute={() => navigate("/console/autopilot")}
       />
 
