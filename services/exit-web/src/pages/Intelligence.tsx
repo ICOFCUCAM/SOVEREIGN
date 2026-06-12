@@ -6,6 +6,7 @@ import { SAMPLE_COMPANY } from "../lib/profile";
 import { fetchBuyerStats, mergeLiveStatsIntoCandidates, type BuyerLiveStat } from "../lib/buyer-stats";
 import { DEAL_INTEL_FMT } from "../lib/market-stats";
 import { computePlatformSignals } from "../lib/platform-signals";
+import { MARKET_INDEX_FMT } from "../lib/market-index";
 import BankerTake from "../components/BankerTake";
 
 // Acquisition Intelligence Engine surface — wired to runBuyerDiscovery.
@@ -144,7 +145,7 @@ const Intelligence: React.FC = () => {
       <Card className="mb-6 overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-3">
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/60">Buyer discovery pipeline</span>
-          <span className="hidden text-[10px] uppercase tracking-wide text-white/35 sm:inline">each layer narrows the pool</span>
+          <span className="hidden font-mono text-[10px] uppercase tracking-wide text-white/35 sm:inline">market index: {MARKET_INDEX_FMT.events} events · {MARKET_INDEX_FMT.buyers} buyers · as of {MARKET_INDEX_FMT.asOf}</span>
         </div>
         <div className="grid grid-cols-2 gap-px sm:grid-cols-3 lg:grid-cols-6" style={{ background: "rgba(255,255,255,.07)" }}>
           {intel.layers.map((l, i) => (

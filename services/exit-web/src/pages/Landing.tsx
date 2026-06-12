@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { MarketingChrome, Glyph, Mark, Arrow } from "../components/MarketingChrome";
 import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS, TOP_JURISDICTIONS, type BoardTx } from "../lib/market-stats";
 import { useI18n, tLines } from "../lib/i18n";
+import { MARKET_INDEX_FMT } from "../lib/market-index";
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
 // marketing chrome (header nav → Platform / Modules / Pricing + footer). The
@@ -54,7 +55,7 @@ const Landing: React.FC = () => {
         <div className="relative border-b border-slate-200/70 bg-white/70 backdrop-blur">
           <div className="mx-auto grid max-w-[1480px] grid-cols-2 divide-x divide-slate-200/70 px-6 lg:grid-cols-4 lg:px-10">
             {[
-              [HISTORY_FMT.events, t("ribbon.deals")],
+              [MARKET_INDEX_FMT.events, t("ribbon.deals")],
               [MARKET_FMT.buyers, t("ribbon.mandates")],
               [HISTORY_FMT.disclosedValue, t("ribbon.value")],
               [MARKET_FMT.activeMandates, t("ribbon.deploying")],
@@ -554,7 +555,7 @@ const Landing: React.FC = () => {
               </div>
             ))}
           </div>
-          <div className="mt-6 text-center text-[11px] text-slate-400">Source-referenced from public filings and disclosures · {HISTORY_FMT.events} events indexed · {HISTORY_FMT.disclosedValue} disclosed value · {HISTORY_FMT.closed} closed</div>
+          <div className="mt-6 text-center text-[11px] text-slate-400">Market index: {MARKET_INDEX_FMT.events} acquisition events from {MARKET_INDEX_FMT.buyers} buyers (Wikipedia · Wikidata · SEC EDGAR, as of {MARKET_INDEX_FMT.asOf}) · benchmark set: {HISTORY_FMT.events} priced events · {HISTORY_FMT.disclosedValue} disclosed value</div>
           <div className="mt-8 flex items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-6 py-4 sm:mx-auto sm:max-w-2xl">
             <span className="text-[13px] text-slate-600">{t("rec.bridge")}</span>
             <button onClick={() => nav("/console")} className="shrink-0 rounded-md bg-ink-900 px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-ink-800">{t("rec.run")} &rarr;</button>
