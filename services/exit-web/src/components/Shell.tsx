@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { Toast } from "../lib/ui";
 import { navForRole, needsUpgrade, GROUP_ORDER, ROLE_LABEL, type NavItem, type Role, type Plan } from "../lib/access";
+import { ExchangeMark } from "./ExchangeMark";
 
 // Role-aware console rail. The navigation is driven by the access policy:
 // founders, buyers, admins and superadmins see different command centers, and
@@ -48,7 +49,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const Brand = (
     <div className="flex items-center gap-2.5">
-      <div className="flex h-9 w-9 items-center justify-center rounded bg-gradient-to-br from-deal-400 to-deal-700 text-sm font-black text-white shadow-lg shadow-deal-700/30">EX</div>
+      <ExchangeMark size={32} />
       <div className="leading-tight">
         <div className="text-sm font-bold tracking-tight text-white">ExitOS</div>
         <div className="text-[10px] uppercase tracking-[0.22em] text-white/45">{subtitle}</div>

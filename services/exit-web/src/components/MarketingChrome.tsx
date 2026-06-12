@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ExchangeLockup } from "./ExchangeMark";
 
 // Shared chrome + iconography for the public marketing site, so the homepage,
 // Platform, Modules and Pricing all read as one professional, multi-page
@@ -72,10 +73,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
     <div className="min-h-screen bg-[#f6f8fb] text-ink-900">
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur">
         <div className="mx-auto flex max-w-[1320px] items-center justify-between px-6 py-4 lg:px-10">
-          <button onClick={() => nav("/")} className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-ink-900 text-xs font-black text-white">EX</div>
-            <span className="text-lg font-bold tracking-tight text-ink-900">ExitOS</span>
-          </button>
+          <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={30} /></button>
           <nav className="hidden items-center gap-8 lg:flex">
             {NAV.map(([label, to]) => (
               <Link key={to} to={to} className={`text-[13px] font-medium transition ${active === label.toLowerCase() ? "font-semibold text-ink-900" : "text-slate-600 hover:text-ink-900"}`}>{label}</Link>
@@ -94,10 +92,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
         <div className="mx-auto max-w-[1320px] px-6 py-10 lg:px-10">
           <div className="grid gap-8 sm:grid-cols-[1.4fr_1fr_1fr_1fr]">
             <div>
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-ink-900 text-xs font-black text-white">EX</div>
-                <span className="text-lg font-bold tracking-tight">ExitOS</span>
-              </div>
+              <ExchangeLockup size={30} />
               <p className="mt-3 max-w-xs text-[12.5px] leading-relaxed text-slate-500">Institutional acquisition infrastructure — sourcing, diligence, negotiation and closing on one exchange.</p>
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[10.5px] text-slate-400">
                 <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> SOC 2 posture</span>

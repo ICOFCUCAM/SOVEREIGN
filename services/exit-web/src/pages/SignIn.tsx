@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../lib/auth";
 import { Button, Field, inputCls } from "../lib/ui";
 import { ROLE_LABEL, type Role } from "../lib/access";
+import { ExchangeMark } from "../components/ExchangeMark";
 
 // Sign-in wizard. Founders and buyers self-serve here; admins are provisioned
 // from the back office and the superadmin is bootstrapped by email. Social
@@ -33,9 +34,9 @@ const SignIn: React.FC = () => {
     <div className="flex min-h-full items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-7 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-deal-400 to-deal-700 text-lg font-black text-white shadow-lg shadow-deal-700/30">EX</div>
-          <h1 className="text-xl font-bold text-white">{mode === "reset" ? "Reset your password" : "Sign in to ExitOS"}</h1>
-          <p className="mt-1 text-sm text-white/50">The operating system for company exits</p>
+          <ExchangeMark size={52} detail className="mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-white">{mode === "reset" ? "Reset your password" : "Access the Exchange"}</h1>
+          <p className="mt-1 text-sm text-white/50">Institutional acquisition infrastructure</p>
         </div>
 
         {mode === "reset" ? (

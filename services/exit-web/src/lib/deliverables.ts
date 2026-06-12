@@ -23,6 +23,19 @@ const DISCLAIMER =
   "and all figures remain subject to due diligence and definitive documentation. Distribution or reproduction, in whole or in part, " +
   "without prior written consent is prohibited.";
 
+// Report identity — a recognizable masthead so any exported document is
+// identifiable as ExitOS without the name. ◎ is the Exchange Mark geometry
+// (transaction ring + live core) rendered in plain text.
+const RULE = "═══════════════════════════════════════════";
+const MASTHEAD: readonly string[] = ["◎ **EXITOS** · ACQUISITION EXCHANGE", RULE, ""];
+const COLOPHON: readonly string[] = [
+  "",
+  "───────────────────────────────────────────",
+  "◎ EXITOS · ACQUISITION EXCHANGE · Strictly confidential — for the addressed counterparty only",
+  "",
+  `_${DISCLAIMER}_`,
+];
+
 // ── Document framework ──────────────────────────────────────────────
 
 export interface DocSection {
@@ -47,10 +60,10 @@ export function frameDoc(opts: {
   confidential?: boolean;
 }): string {
   const { title, subtitle, meta = [], sections, confidential = true } = opts;
-  const lines: string[] = [`# ${title}`];
+  const lines: string[] = [...MASTHEAD, `# ${title}`];
   if (subtitle) lines.push(`### ${subtitle}`);
   lines.push("");
-  lines.push(`${confidential ? "**STRICTLY CONFIDENTIAL** · " : ""}Prepared by **ExitOS** · ${today()}`);
+  lines.push(`${confidential ? "**STRICTLY CONFIDENTIAL** · " : ""}Prepared by **ExitOS Advisory** · ${today()}`);
   const metaAll: Array<[string, string]> = [["Basis", "Company records and management information"], ...meta];
   lines.push("", ...metaAll.map(([k, v]) => `- **${k}:** ${v}`), "", "---", "");
   sections.forEach((s, i) => {
@@ -59,7 +72,7 @@ export function frameDoc(opts: {
     if (s.bullets?.length) { for (const b of s.bullets) lines.push(`- ${b}`); lines.push(""); }
     if (s.table) { lines.push(...mdTable(s.table.headers, s.table.rows), ""); }
   });
-  lines.push("---", "", `_${DISCLAIMER}_`, "");
+  lines.push(...COLOPHON);
   return lines.join("\n");
 }
 
@@ -68,8 +81,9 @@ export function frameDoc(opts: {
 /** A generated memorandum → Markdown, with the same confidential framing. */
 export function docToMarkdown(doc: MemorandumDocument): string {
   const lines: string[] = [
+    ...MASTHEAD,
     `# ${doc.title}`, "",
-    `**STRICTLY CONFIDENTIAL** · Prepared by **ExitOS** for qualified counterparties${doc.anonymized ? " · identity withheld pending NDA" : ""}`,
+    `**STRICTLY CONFIDENTIAL** · Prepared by **ExitOS Advisory** for qualified counterparties${doc.anonymized ? " · identity withheld pending NDA" : ""}`,
     `_${today()}_`, "", "---", "",
   ];
   for (const s of doc.sections) {
@@ -82,7 +96,7 @@ export function docToMarkdown(doc: MemorandumDocument): string {
       lines.push("");
     }
   }
-  lines.push("---", "", `_${DISCLAIMER}_`, "");
+  lines.push(...COLOPHON);
   return lines.join("\n");
 }
 
@@ -238,6 +252,7 @@ export function buyerIntroLetter(opts: {
   const { buyer, projectName, askMid, fromName, anonymized = true } = opts;
   const eo = buyer.expectedOutcome;
   return [
+    `◎ EXITOS · ACQUISITION EXCHANGE`,
     `STRICTLY CONFIDENTIAL`,
     `${today()}`,
     "",

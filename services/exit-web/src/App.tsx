@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./lib/auth";
 import { canAccess, needsUpgrade, homeFor, featureLabel } from "./lib/access";
 import Shell from "./components/Shell";
+import { ExchangeMark } from "./components/ExchangeMark";
 import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 
@@ -38,9 +39,9 @@ const Upgrade      = lazy(() => import("./pages/Upgrade"));
 const Admin        = lazy(() => import("./pages/Admin"));
 
 const RouteFallback: React.FC = () => (
-  <div className="flex items-center gap-3 py-20 text-sm text-white/45">
-    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-deal-400" />
-    Loading…
+  <div className="flex flex-col items-center justify-center gap-3 py-24">
+    <ExchangeMark size={44} loading title="Loading ExitOS" />
+    <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/35">Routing the exchange…</span>
   </div>
 );
 
