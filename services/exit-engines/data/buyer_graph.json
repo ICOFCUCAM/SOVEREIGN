@@ -1,0 +1,1988 @@
+[
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "cisco-systems",
+  "shared_industries": [
+   "lan switching",
+   "router",
+   "atm switching",
+   "remote office routers",
+   "gateway",
+   "firewalls",
+   "internet software company",
+   "modems"
+  ],
+  "weight": 265
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "nortonlifelock",
+  "b": "symantec",
+  "shared_industries": [
+   "software",
+   "computer software",
+   "compiler software",
+   "computer programming",
+   "wholesale software",
+   "debugging software",
+   "programming tools",
+   "anti-virus software"
+  ],
+  "weight": 124
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "nortonlifelock",
+  "shared_industries": [
+   "computer software",
+   "software",
+   "internet software",
+   "community software",
+   "computer programming",
+   "computer consulting",
+   "security software",
+   "information technology"
+  ],
+  "weight": 32
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "symantec",
+  "shared_industries": [
+   "computer software",
+   "software",
+   "internet software",
+   "community software",
+   "computer programming",
+   "computer consulting",
+   "security software",
+   "information technology"
+  ],
+  "weight": 32
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "alphabet",
+  "b": "apple",
+  "shared_industries": [
+   "computer vision",
+   "mobile advertising",
+   "video",
+   "music streaming",
+   "facial recognition",
+   "artificial intelligence",
+   "augmented reality",
+   "mobile device management"
+  ],
+  "weight": 26
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "apple",
+  "shared_industries": [
+   "computer software",
+   "software",
+   "internet software",
+   "search engine",
+   "machine learning",
+   "artificial intelligence",
+   "speech recognition"
+  ],
+  "weight": 20
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "alphabet",
+  "shared_industries": [
+   "internet service provider",
+   "advertising",
+   "mapping",
+   "semantic search",
+   "social networking",
+   "home automation",
+   "api management",
+   "cloud computing"
+  ],
+  "weight": 19
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "alphabet",
+  "b": "yahoo",
+  "shared_industries": [
+   "web search engine",
+   "weblog software",
+   "online advertising",
+   "widget engine",
+   "mobile software",
+   "advertising",
+   "video sharing",
+   "web application"
+  ],
+  "weight": 18
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "ibm",
+  "shared_industries": [
+   "network management",
+   "digital marketing",
+   "network",
+   "business intelligence",
+   "software",
+   "it services",
+   "product lifecycle management",
+   "risk management"
+  ],
+  "weight": 17
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "alphabet",
+  "shared_industries": [
+   "computer security",
+   "digital video",
+   "mobile software",
+   "united states",
+   "social networking service",
+   "videoconferencing",
+   "video",
+   "design"
+  ],
+  "weight": 16
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "alphabet",
+  "shared_industries": [
+   "computer security",
+   "digital video",
+   "mobile software",
+   "united states",
+   "social networking service",
+   "videoconferencing",
+   "video",
+   "design"
+  ],
+  "weight": 16
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "apple",
+  "b": "nortonlifelock",
+  "shared_industries": [
+   "software",
+   "computer software",
+   "internet software",
+   "mobile device management"
+  ],
+  "weight": 15
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "apple",
+  "b": "symantec",
+  "shared_industries": [
+   "software",
+   "computer software",
+   "internet software",
+   "mobile device management"
+  ],
+  "weight": 15
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "ibm",
+  "shared_industries": [
+   "software",
+   "web conferencing",
+   "networking",
+   "digital marketing",
+   "cloud computing",
+   "application management",
+   "cloud security",
+   "software development"
+  ],
+  "weight": 14
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "hewlett-packard",
+  "shared_industries": [
+   "computer networking",
+   "computer security",
+   "information technology consulting",
+   "information management",
+   "communication software",
+   "data storage",
+   "web conferencing",
+   "information technology"
+  ],
+  "weight": 14
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "hewlett-packard",
+  "shared_industries": [
+   "computer networking",
+   "computer security",
+   "information technology consulting",
+   "information management",
+   "communication software",
+   "data storage",
+   "web conferencing",
+   "information technology"
+  ],
+  "weight": 14
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "alphabet",
+  "b": "ibm",
+  "shared_industries": [
+   "web search engine",
+   "web analytics",
+   "security",
+   "cloud computing",
+   "natural language processing",
+   "mobile device management",
+   "identity management",
+   "big data"
+  ],
+  "weight": 13
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "ibm",
+  "b": "nortonlifelock",
+  "shared_industries": [
+   "database software",
+   "software",
+   "identity management",
+   "information security",
+   "security",
+   "risk management",
+   "cyber security",
+   "mobile device management"
+  ],
+  "weight": 13
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "ibm",
+  "b": "symantec",
+  "shared_industries": [
+   "database software",
+   "software",
+   "identity management",
+   "information security",
+   "security",
+   "risk management",
+   "cyber security",
+   "mobile device management"
+  ],
+  "weight": 13
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "aol",
+  "shared_industries": [
+   "internet service provider",
+   "search engine",
+   "mobile applications",
+   "telecommunications",
+   "social networking",
+   "predictive analytics",
+   "financial services",
+   "online advertising"
+  ],
+  "weight": 10
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "sony",
+  "shared_industries": [
+   "internet service provider",
+   "digital marketing",
+   "machine learning",
+   "artificial intelligence",
+   "software development",
+   "esports",
+   "blockchain",
+   "financial services"
+  ],
+  "weight": 10
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "yahoo",
+  "shared_industries": [
+   "internet service provider",
+   "advertising",
+   "social analytics",
+   "web portal",
+   "productivity",
+   "social network",
+   "online advertising"
+  ],
+  "weight": 10
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "aol",
+  "b": "alphabet",
+  "shared_industries": [
+   "internet service provider",
+   "html editor",
+   "audio",
+   "online advertising",
+   "mobile software",
+   "mobile advertising",
+   "social search",
+   "web search engine"
+  ],
+  "weight": 10
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "aol",
+  "b": "yahoo",
+  "shared_industries": [
+   "internet service provider",
+   "online game",
+   "web mapping",
+   "online advertising",
+   "mobile software",
+   "online music store",
+   "social network service",
+   "advertising network"
+  ],
+  "weight": 10
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "sony",
+  "b": "alphabet",
+  "shared_industries": [
+   "computer vision",
+   "internet service provider",
+   "e-commerce",
+   "machine learning",
+   "artificial intelligence",
+   "voice over ip"
+  ],
+  "weight": 10
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "dell",
+  "shared_industries": [
+   "software",
+   "internet service provider",
+   "security software",
+   "information technology",
+   "virtualization",
+   "storage",
+   "consulting"
+  ],
+  "weight": 9
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "hewlett-packard",
+  "shared_industries": [
+   "computer software",
+   "computer programming",
+   "web conferencing",
+   "information technology"
+  ],
+  "weight": 9
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "sony",
+  "b": "apple",
+  "shared_industries": [
+   "music",
+   "computer vision",
+   "motion capture",
+   "machine learning",
+   "artificial intelligence"
+  ],
+  "weight": 9
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "alphabet",
+  "b": "twitter",
+  "shared_industries": [
+   "advertising",
+   "security",
+   "social search",
+   "internet security",
+   "discovery",
+   "machine learning",
+   "analytics"
+  ],
+  "weight": 9
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "apple",
+  "b": "ibm",
+  "shared_industries": [
+   "software",
+   "analytics",
+   "mobile device management",
+   "data compression"
+  ],
+  "weight": 9
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.813Z",
+  "a": "microsoft",
+  "b": "oracle",
+  "shared_industries": [
+   "software",
+   "digital marketing",
+   "management software",
+   "network",
+   "storage"
+  ],
+  "weight": 8
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "ibm",
+  "shared_industries": [
+   "network management",
+   "web conferencing",
+   "cloud services",
+   "cloud computing",
+   "identity management",
+   "cloud security",
+   "security"
+  ],
+  "weight": 8
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "ibm",
+  "shared_industries": [
+   "network management",
+   "web conferencing",
+   "cloud services",
+   "cloud computing",
+   "identity management",
+   "cloud security",
+   "security"
+  ],
+  "weight": 8
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.813Z",
+  "a": "microsoft",
+  "b": "cisco",
+  "shared_industries": [
+   "computer software",
+   "web conferencing",
+   "information technology",
+   "cloud computing",
+   "machine learning",
+   "cloud security",
+   "internet access"
+  ],
+  "weight": 7
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "cisco-systems",
+  "shared_industries": [
+   "computer software",
+   "web conferencing",
+   "information technology",
+   "cloud computing",
+   "machine learning",
+   "cloud security",
+   "internet access"
+  ],
+  "weight": 7
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "nortonlifelock",
+  "shared_industries": [
+   "management software",
+   "software",
+   "risk management",
+   "identity management"
+  ],
+  "weight": 7
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "symantec",
+  "shared_industries": [
+   "management software",
+   "software",
+   "risk management",
+   "identity management"
+  ],
+  "weight": 7
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "nortonlifelock",
+  "shared_industries": [
+   "information management",
+   "internet access",
+   "information technology",
+   "computer software",
+   "network management software",
+   "identity management",
+   "security"
+  ],
+  "weight": 7
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "symantec",
+  "shared_industries": [
+   "information management",
+   "internet access",
+   "information technology",
+   "computer software",
+   "network management software",
+   "identity management",
+   "security"
+  ],
+  "weight": 7
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "nortonlifelock",
+  "shared_industries": [
+   "information management",
+   "internet access",
+   "information technology",
+   "computer software",
+   "network management software",
+   "identity management",
+   "security"
+  ],
+  "weight": 7
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "symantec",
+  "shared_industries": [
+   "information management",
+   "internet access",
+   "information technology",
+   "computer software",
+   "network management software",
+   "identity management",
+   "security"
+  ],
+  "weight": 7
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "hewlett-packard",
+  "b": "nortonlifelock",
+  "shared_industries": [
+   "information technology",
+   "computer software",
+   "computer programming",
+   "information management"
+  ],
+  "weight": 6
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "hewlett-packard",
+  "b": "symantec",
+  "shared_industries": [
+   "information technology",
+   "computer software",
+   "computer programming",
+   "information management"
+  ],
+  "weight": 6
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "twitter",
+  "b": "yahoo",
+  "shared_industries": [
+   "mobile messaging",
+   "advertising",
+   "social analytics",
+   "mobile marketing"
+  ],
+  "weight": 6
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "oracle",
+  "b": "cisco",
+  "shared_industries": [
+   "management",
+   "network management",
+   "cloud",
+   "integrated software",
+   "identity management"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "cisco-systems",
+  "shared_industries": [
+   "management",
+   "network management",
+   "cloud",
+   "integrated software",
+   "identity management"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "dell",
+  "shared_industries": [
+   "cloud",
+   "software",
+   "storage",
+   "services"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "dell",
+  "shared_industries": [
+   "data storage",
+   "information technology",
+   "software security",
+   "cloud",
+   "security"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "apple",
+  "shared_industries": [
+   "semiconductors",
+   "computer software",
+   "video",
+   "machine learning"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "dell",
+  "shared_industries": [
+   "data storage",
+   "information technology",
+   "software security",
+   "cloud",
+   "security"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "apple",
+  "shared_industries": [
+   "semiconductors",
+   "computer software",
+   "video",
+   "machine learning"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "dell",
+  "b": "alphabet",
+  "shared_industries": [
+   "statistical software",
+   "storage",
+   "data center",
+   "security",
+   "internet service provider"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "dell",
+  "b": "nortonlifelock",
+  "shared_industries": [
+   "software",
+   "information technology",
+   "security software",
+   "security"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "dell",
+  "b": "symantec",
+  "shared_industries": [
+   "software",
+   "information technology",
+   "security software",
+   "security"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "hewlett-packard",
+  "b": "apple",
+  "shared_industries": [
+   "computer software",
+   "computers"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "sony",
+  "b": "yahoo",
+  "shared_industries": [
+   "video on demand",
+   "content delivery network",
+   "internet service provider",
+   "e-commerce"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "ebay",
+  "b": "alphabet",
+  "shared_industries": [
+   "united states",
+   "price comparison service",
+   "machine learning",
+   "image recognition"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "alphabet",
+  "b": "nortonlifelock",
+  "shared_industries": [
+   "security",
+   "internet security",
+   "mobile device management",
+   "identity management"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "alphabet",
+  "b": "symantec",
+  "shared_industries": [
+   "security",
+   "internet security",
+   "mobile device management",
+   "identity management"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "citrix",
+  "b": "ibm",
+  "shared_industries": [
+   "it services",
+   "cloud computing",
+   "mobile device management",
+   "application management",
+   "networking"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "ibm",
+  "b": "twitter",
+  "shared_industries": [
+   "software",
+   "analytics",
+   "security",
+   "creative agency"
+  ],
+  "weight": 5
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "adobe",
+  "shared_industries": [
+   "software",
+   "internet software",
+   "internet service provider",
+   "computer consulting"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "twitter",
+  "shared_industries": [
+   "software",
+   "advertising",
+   "social analytics",
+   "machine learning"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "alphabet",
+  "shared_industries": [
+   "e-commerce",
+   "storage",
+   "java",
+   "identity management"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "apple",
+  "shared_industries": [
+   "software"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "citrix",
+  "shared_industries": [
+   "management",
+   "e-commerce",
+   "it services"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "aol",
+  "b": "sony",
+  "shared_industries": [
+   "internet service provider",
+   "instant messaging",
+   "financial services"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "aol",
+  "b": "apple",
+  "shared_industries": [
+   "search engine",
+   "data compression",
+   "audio",
+   "mobile advertising"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "dell",
+  "b": "ibm",
+  "shared_industries": [
+   "software",
+   "security",
+   "cloud management"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "ebay",
+  "b": "yahoo",
+  "shared_industries": [
+   "e-commerce payment systems",
+   "price comparison service",
+   "social network service",
+   "image recognition"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "alphabet",
+  "b": "amazon",
+  "shared_industries": [
+   "music streaming",
+   "robotics",
+   "artificial intelligence",
+   "e-commerce"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "apple",
+  "b": "blackberry",
+  "shared_industries": [
+   "software",
+   "mobile device management",
+   "data compression"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "apple",
+  "b": "twitter",
+  "shared_industries": [
+   "software",
+   "analytics",
+   "machine learning"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "blackberry",
+  "b": "ibm",
+  "shared_industries": [
+   "software",
+   "data compression",
+   "mobile device management"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "blackberry",
+  "b": "nortonlifelock",
+  "shared_industries": [
+   "software",
+   "mobile device management",
+   "data encryption"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "blackberry",
+  "b": "symantec",
+  "shared_industries": [
+   "software",
+   "mobile device management",
+   "data encryption"
+  ],
+  "weight": 4
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "ebay",
+  "shared_industries": [
+   "marketing",
+   "mobile applications",
+   "machine learning"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "amazon",
+  "shared_industries": [
+   "software",
+   "artificial intelligence",
+   "financial services"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "citrix",
+  "shared_industries": [
+   "networking",
+   "cloud computing",
+   "application management"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "sony",
+  "shared_industries": [
+   "video on demand",
+   "digital rights management",
+   "machine learning"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "citrix",
+  "shared_industries": [
+   "network security",
+   "cloud computing",
+   "management"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "yahoo",
+  "shared_industries": [
+   "voice over internet protocol",
+   "mobile software",
+   "video on demand"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "adobe",
+  "b": "apple",
+  "shared_industries": [
+   "graphics software",
+   "software",
+   "internet software"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "adobe",
+  "b": "nortonlifelock",
+  "shared_industries": [
+   "computer consulting",
+   "software",
+   "internet software"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "adobe",
+  "b": "symantec",
+  "shared_industries": [
+   "computer consulting",
+   "software",
+   "internet software"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "sony",
+  "shared_industries": [
+   "video on demand",
+   "digital rights management",
+   "machine learning"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "citrix",
+  "shared_industries": [
+   "network security",
+   "cloud computing",
+   "management"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "yahoo",
+  "shared_industries": [
+   "voice over internet protocol",
+   "mobile software",
+   "video on demand"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "dell",
+  "b": "hewlett-packard",
+  "shared_industries": [
+   "data storage",
+   "information technology"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "sony",
+  "b": "amazon",
+  "shared_industries": [
+   "financial services",
+   "e-commerce",
+   "artificial intelligence"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "ebay",
+  "b": "apple",
+  "shared_industries": [
+   "machine learning",
+   "image recognition"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "alphabet",
+  "b": "blackberry",
+  "shared_industries": [
+   "social gaming",
+   "mobile device management",
+   "video editing"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "alphabet",
+  "b": "citrix",
+  "shared_industries": [
+   "cloud computing",
+   "e-commerce",
+   "mobile device management"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "amazon",
+  "b": "apple",
+  "shared_industries": [
+   "music streaming",
+   "software",
+   "artificial intelligence"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "ibm",
+  "b": "yahoo",
+  "shared_industries": [
+   "data analysis",
+   "natural language processing",
+   "web search engine"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "nortonlifelock",
+  "b": "twitter",
+  "shared_industries": [
+   "software",
+   "internet security",
+   "security"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "symantec",
+  "b": "twitter",
+  "shared_industries": [
+   "software",
+   "internet security",
+   "security"
+  ],
+  "weight": 3
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.814Z",
+  "a": "microsoft",
+  "b": "blackberry",
+  "shared_industries": [
+   "software"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "juniper-networks",
+  "shared_industries": [
+   "operations",
+   "management software"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "sony",
+  "shared_industries": [
+   "digital marketing",
+   "e-commerce"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "amazon",
+  "shared_industries": [
+   "e-commerce",
+   "software"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "oracle",
+  "b": "blackberry",
+  "shared_industries": [
+   "software"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.815Z",
+  "a": "cisco",
+  "b": "aol",
+  "shared_industries": [
+   "mobile software",
+   "email"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "ebay",
+  "shared_industries": [
+   "united states",
+   "machine learning"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "cisco",
+  "b": "twitter",
+  "shared_industries": [
+   "machine learning",
+   "security"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "adobe",
+  "b": "dell",
+  "shared_industries": [
+   "software",
+   "internet service provider"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "aol",
+  "b": "cisco-systems",
+  "shared_industries": [
+   "mobile software",
+   "email"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "aol",
+  "b": "electronic-arts",
+  "shared_industries": [
+   "social network service"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "aol",
+  "b": "ebay",
+  "shared_industries": [
+   "social network service",
+   "mobile applications"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.816Z",
+  "a": "aol",
+  "b": "blackberry",
+  "shared_industries": [
+   "data compression",
+   "news"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "aol",
+  "b": "ibm",
+  "shared_industries": [
+   "data compression",
+   "web search engine"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "ebay",
+  "shared_industries": [
+   "united states",
+   "machine learning"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "cisco-systems",
+  "b": "twitter",
+  "shared_industries": [
+   "machine learning",
+   "security"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "dell",
+  "b": "apple",
+  "shared_industries": [
+   "software"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "dell",
+  "b": "blackberry",
+  "shared_industries": [
+   "software"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "dell",
+  "b": "twitter",
+  "shared_industries": [
+   "software",
+   "security"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "electronic-arts",
+  "b": "yahoo",
+  "shared_industries": [
+   "sports",
+   "social network service"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "hewlett-packard",
+  "b": "alphabet",
+  "shared_industries": [
+   "computer security",
+   "photo sharing"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.817Z",
+  "a": "hewlett-packard",
+  "b": "ibm",
+  "shared_industries": [
+   "business process management",
+   "web conferencing"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "sony",
+  "b": "citrix",
+  "shared_industries": [
+   "consumer electronics",
+   "e-commerce"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.818Z",
+  "a": "sony",
+  "b": "ibm",
+  "shared_industries": [
+   "digital marketing",
+   "software development"
+  ],
+  "weight": 2
+ },
+ {
+  "source": "wikipedia",
+  "source_url": "https://en.wikipedia.org/wiki/Lists_of_corporate_mergers_and_acquisitions",
+  "confidence": "estimated",
+  "verification_status": "unverified",
+  "last_updated": "2026-06-12T10:29:56.819Z",
+  "a": "apple",
+  "b": "yahoo",
+  "shared_industries": [
+   "image recognition"
+  ],
+  "weight": 2
+ }
+]
