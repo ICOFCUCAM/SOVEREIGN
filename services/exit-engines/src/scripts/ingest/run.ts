@@ -19,7 +19,7 @@ import { meta, slug, type IngestedAcquisition, type IngestedBuyer, type GraphEdg
 import { PRIMARY_LIST_PAGES, CORPORATE_ACQUIRERS, PRIVATE_EQUITY_ACQUIRERS, SWF_LIST_PAGE } from './sources.js';
 import { discoverListPages, ingestListPage, buyerFromTitle } from './wikipedia.js';
 import { ingestUniverse } from './universe.js';
-import { resolveQid, acquisitionsOf } from './wikidata.js';
+import { resolveQid, acquisitionsOf, acquisitionsOfMany } from './wikidata.js';
 import { resolveCik, itemTwoOhOneFilings, filingsToEvents, corroborate, type SecFiling } from './sec.js';
 import { parse as parseHtml } from 'node-html-parser';
 import { politeFetch, cleanCell, parseMoneyUsd } from './util.js';
@@ -164,18 +164,51 @@ async function main(): Promise<void> {
     }
   }
 
-  // ── L4: Wikidata acquisitions for buyers with QIDs ──────────────
-  if (!flag('no-wikidata')) {
-    for (const b of buyers.filter((x) => x.qid && x.buyer_type !== 'sovereign_fund')) {
+  // ── L3c: enrich universe buyers with QIDs + CIKs ────────────────
+  // (the seed loop already resolved its own; the universe arrives bare)
+  if (!flag('no-enrich')) {
+    let qids = 0, ciks = 0;
+    for (let i = 0; i < buyers.length; i++) {
+      const b = buyers[i]!;
+      if (b.qid || (b.buyer_type !== 'corporate' && b.buyer_type !== 'private_equity')) continue;
       try {
-        const recs = await acquisitionsOf(b.name, b.qid!);
-        const known = new Set(events.map((e) => e.acquisition_id));
+        const qid = await resolveQid(b.name);
+        const cik = b.buyer_type === 'corporate' && !b.cik && !flag('no-sec') ? await resolveCik(b.name) : undefined;
+        if (qid || cik) buyers[i] = { ...b, ...(qid ? { qid } : {}), ...(cik ? { cik } : {}) };
+        if (qid) qids++;
+        if (cik) ciks++;
+      } catch {
+        // unresolved stays unresolved — never invented
+      }
+    }
+    console.log(`  enrichment: +${qids} QIDs, +${ciks} CIKs across the universe`);
+  }
+
+  // ── L4: Wikidata acquisitions — one batched query per QID chunk ──
+  if (!flag('no-wikidata')) {
+    const withQid = buyers.filter((x): x is typeof x & { qid: string } => !!x.qid);
+    // the curated seeds keep the per-buyer path (statement-level provenance
+    // already proven); the wide universe goes through the batched query
+    const seedNames = new Set([...CORPORATE_ACQUIRERS, ...PRIVATE_EQUITY_ACQUIRERS].map((n) => n.toLowerCase()));
+    const known = new Set(events.map((e) => e.acquisition_id));
+    for (const b of withQid.filter((x) => seedNames.has(x.name.toLowerCase()))) {
+      try {
+        const recs = await acquisitionsOf(b.name, b.qid);
         const fresh = recs.filter((r) => !known.has(r.acquisition_id));
+        fresh.forEach((r) => known.add(r.acquisition_id));
         if (fresh.length) console.log(`  wikidata ${b.name}: +${fresh.length}`);
         events.push(...fresh);
       } catch (err) {
         console.warn(`  ! wikidata ${b.name}: ${(err as Error).message.slice(0, 100)}`);
       }
+    }
+    const universeQid = withQid.filter((x) => !seedNames.has(x.name.toLowerCase()));
+    if (universeQid.length) {
+      const batched = await acquisitionsOfMany(universeQid.map((b) => ({ name: b.name, qid: b.qid })));
+      const fresh = batched.filter((r) => !known.has(r.acquisition_id));
+      fresh.forEach((r) => known.add(r.acquisition_id));
+      console.log(`  wikidata universe (batched, ${universeQid.length} buyers): +${fresh.length}`);
+      events.push(...fresh);
     }
   }
 
@@ -228,12 +261,16 @@ async function main(): Promise<void> {
     generated_at: new Date().toISOString(),
     hosts_used: REQUIRED_HOSTS,
     counts: { buyers: buyers.length, acquisition_events: finalEvents.length, rollups: rollup.length, graph_edges: graph.length },
-    targets: { buyers: 1000, acquisition_events: 5000 },
+    targets: {
+      phase1: { buyers: 1_000, acquisition_events: 2_000 },
+      phase2: { buyers: 5_000, acquisition_events: 10_000 },
+      phase3: { buyers: 10_000, acquisition_events: 25_000 },
+    },
   });
 
   console.log('──────────────────────────────────────');
-  console.log(`buyers: ${buyers.length} (target 1000)`);
-  console.log(`acquisition events: ${finalEvents.length} (target 5000)`);
+  console.log(`buyers: ${buyers.length} (phase-1 target 1000)`);
+  console.log(`acquisition events: ${finalEvents.length} (phase-1 target 2000, phase-3 25000+)`);
   console.log(`graph edges: ${graph.length}`);
 }
 

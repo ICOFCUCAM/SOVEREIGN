@@ -15,7 +15,10 @@ import { mapToExitOs } from './taxonomy.js';
 
 export const SP500_PAGE = 'List_of_S%26P_500_companies';
 export const LARGEST_US_PAGE = 'List_of_largest_companies_in_the_United_States_by_revenue';
+export const PE_LIST_PAGE = 'List_of_private_equity_firms';
 export const FAMILY_OFFICE_CATEGORY = 'Category:Family_offices';
+export const PE_CATEGORY = 'Category:Private_equity_firms';
+export const SWF_CATEGORY = 'Category:Sovereign_wealth_funds';
 
 const WIKI_API = 'https://en.wikipedia.org/w/api.php';
 const pageUrl = (title: string): string => `https://en.wikipedia.org/wiki/${title}`;
@@ -95,18 +98,67 @@ interface CategoryMembersJson {
   continue?: { cmcontinue: string };
 }
 
-/** Pure mapper — category-member titles → family-office buyers. */
-export function familyOfficesFromMembers(members: Array<{ ns: number; title: string }>): IngestedBuyer[] {
-  return members
-    .filter((m) => m.ns === 0)                          // articles only, not sub-categories
-    .filter((m) => !/^(family office|list of)/i.test(m.title))
-    .map((m) => ({
+export interface CategoryMember { ns: number; title: string }
+
+/** Pure mapper — category-member article titles → buyers of the given type.
+ *  Concept pages, lists and disambiguations never become buyers. */
+export function buyersFromCategoryMembers(
+  members: CategoryMember[],
+  buyer_type: IngestedBuyer['buyer_type'],
+  category: string,
+): IngestedBuyer[] {
+  const out = new Map<string, IngestedBuyer>();
+  for (const m of members) {
+    if (m.ns !== 0) continue;                           // articles only, not sub-categories
+    if (/^(family office|private equity|sovereign wealth fund|list of|history of|category:)/i.test(m.title)) continue;
+    if (/\(disambiguation\)/i.test(m.title)) continue;
+    const name = m.title.replace(/\s*\([^)]*\)\s*$/, '').trim();  // "Carlyle Group (company)" → "Carlyle Group"
+    if (name.length < 3) continue;
+    const id = slug(name);
+    if (out.has(id)) continue;
+    out.set(id, {
       ...meta('wikipedia_universe', pageUrl(encodeURIComponent(m.title.replace(/ /g, '_'))), 'reported', 'unverified'),
-      buyer_id: slug(m.title),
-      name: m.title,
-      buyer_type: 'family_office' as const,
-      list_page: FAMILY_OFFICE_CATEGORY,
-    }));
+      buyer_id: id,
+      name,
+      buyer_type,
+      list_page: category,
+    });
+  }
+  return [...out.values()];
+}
+
+/** Pure mapper — kept for the family-office entry point. */
+export function familyOfficesFromMembers(members: CategoryMember[]): IngestedBuyer[] {
+  return buyersFromCategoryMembers(members, 'family_office', FAMILY_OFFICE_CATEGORY);
+}
+
+/** Pure parser — the ranked private-equity firms list (PEI ranking mirror). */
+export function parsePeListTable(html: string): IngestedBuyer[] {
+  const root = parseHtml(html);
+  const out: IngestedBuyer[] = [];
+  const url = pageUrl(PE_LIST_PAGE);
+  for (const table of root.querySelectorAll('table.wikitable')) {
+    const rows = table.querySelectorAll('tr');
+    const headers = rows[0]?.querySelectorAll('th').map((th) => cleanCell(th.text).toLowerCase()) ?? [];
+    const iName = headers.findIndex((h) => /firm|name|company/.test(h));
+    const iHq = headers.findIndex((h) => /headquarters|location|city/.test(h));
+    if (iName < 0) continue;
+    for (const row of rows.slice(1)) {
+      const cells = row.querySelectorAll('td,th').map((c) => cleanCell(c.text));
+      const name = companyName(cells[iName] ?? '');
+      if (!name || name.length < 3 || /^\d+$/.test(name)) continue;
+      out.push({
+        ...meta('wikipedia_universe', url, 'reported', 'unverified'),
+        buyer_id: slug(name),
+        name,
+        buyer_type: 'private_equity',
+        ...(iHq >= 0 && cells[iHq] ? { country: cells[iHq]!.split(',').at(-1)!.trim().slice(0, 60) } : {}),
+        list_page: PE_LIST_PAGE,
+      });
+    }
+    if (out.length) break;
+  }
+  return out;
 }
 
 async function fetchParsedHtml(title: string): Promise<string> {
@@ -116,35 +168,57 @@ async function fetchParsedHtml(title: string): Promise<string> {
   return json.parse?.text ?? '';
 }
 
-async function fetchFamilyOffices(): Promise<IngestedBuyer[]> {
-  const members: Array<{ ns: number; title: string }> = [];
+async function fetchCategoryMembers(category: string): Promise<CategoryMember[]> {
+  const members: CategoryMember[] = [];
   let cont = '';
   do {
-    const url = `${WIKI_API}?action=query&list=categorymembers&cmtitle=${FAMILY_OFFICE_CATEGORY}&cmlimit=500&format=json&formatversion=2${cont ? `&cmcontinue=${cont}` : ''}`;
+    const url = `${WIKI_API}?action=query&list=categorymembers&cmtitle=${encodeURIComponent(category)}&cmlimit=500&format=json&formatversion=2${cont ? `&cmcontinue=${encodeURIComponent(cont)}` : ''}`;
     const res = await politeFetch(url);
     const json = (await res.json()) as CategoryMembersJson;
     members.push(...(json.query?.categorymembers ?? []));
     cont = json.continue?.cmcontinue ?? '';
   } while (cont);
-  return familyOfficesFromMembers(members);
+  return members;
+}
+
+/** Category + its sub-categories (one level: the by-country splits). */
+async function fetchCategoryTree(category: string, maxSubcats = 60): Promise<CategoryMember[]> {
+  const top = await fetchCategoryMembers(category);
+  const subcats = top.filter((m) => m.ns === 14).slice(0, maxSubcats);
+  const all = [...top];
+  for (const sub of subcats) {
+    try {
+      all.push(...await fetchCategoryMembers(sub.title));
+    } catch {
+      // a missing sub-category page never aborts the roster
+    }
+  }
+  return all;
 }
 
 export interface UniverseResult {
   readonly buyers: IngestedBuyer[];
-  readonly counts: { sp500: number; largest_us: number; family_offices: number };
+  readonly counts: { sp500: number; largest_us: number; private_equity: number; sovereign_funds: number; family_offices: number };
 }
 
 /** Fetch all universe rosters; duplicate names collapse to the richer record. */
 export async function ingestUniverse(): Promise<UniverseResult> {
   const sp500 = parseSp500Table(await fetchParsedHtml(SP500_PAGE));
   const largest = parseLargestUsTable(await fetchParsedHtml(LARGEST_US_PAGE));
-  const family = await fetchFamilyOffices();
+  // PE: the ranked list page + the category tree (by-country sub-categories)
+  const peList = parsePeListTable(await fetchParsedHtml(PE_LIST_PAGE));
+  const peCat = buyersFromCategoryMembers(await fetchCategoryTree(PE_CATEGORY), 'private_equity', PE_CATEGORY);
+  const swfCat = buyersFromCategoryMembers(await fetchCategoryTree(SWF_CATEGORY), 'sovereign_fund', SWF_CATEGORY);
+  const family = familyOfficesFromMembers(await fetchCategoryMembers(FAMILY_OFFICE_CATEGORY));
+
   const byId = new Map<string, IngestedBuyer>();
-  for (const b of [...sp500, ...largest, ...family]) {
-    if (!byId.has(b.buyer_id)) byId.set(b.buyer_id, b);  // S&P record (with GICS) wins
+  // order matters: S&P (carries GICS) > largest-US > PE list (ranked) > categories
+  for (const b of [...sp500, ...largest, ...peList, ...peCat, ...swfCat, ...family]) {
+    if (!byId.has(b.buyer_id)) byId.set(b.buyer_id, b);
   }
+  const pe = [...byId.values()].filter((b) => b.buyer_type === 'private_equity').length;
   return {
     buyers: [...byId.values()],
-    counts: { sp500: sp500.length, largest_us: largest.length, family_offices: family.length },
+    counts: { sp500: sp500.length, largest_us: largest.length, private_equity: pe, sovereign_funds: swfCat.length, family_offices: family.length },
   };
 }

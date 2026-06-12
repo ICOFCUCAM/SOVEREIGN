@@ -46,6 +46,7 @@ export interface IngestedAcquisition extends RecordMeta {
   readonly value_usd?: number;             // disclosed value when known
   readonly industry?: string;              // the list page's business column
   readonly country?: string;
+  readonly status?: 'closed' | 'announced'; // only when the source states it (8-K 2.01 = closed)
   readonly derived_from?: string;          // e.g. EDGAR accession corroborating
 }
 

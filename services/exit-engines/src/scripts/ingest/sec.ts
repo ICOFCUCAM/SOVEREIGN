@@ -67,6 +67,7 @@ export function filingsToEvents(buyerName: string, filings: SecFiling[]): Ingest
     buyer_name: buyerName,
     target_name: `[8-K Item 2.01 — completion of acquisition/disposition] ${f.accession}`,
     announced_date: f.filed,
+    status: 'closed',                       // item 2.01 IS a completion filing
     derived_from: f.accession,
   }));
 }

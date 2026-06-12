@@ -1,0 +1,185 @@
+{
+ "as_of": "2026-06-12T15:50:03.166Z",
+ "tokens": [
+  "logistic",
+  "freight",
+  "transport",
+  "supply chain",
+  "fleet",
+  "shipping",
+  "delivery",
+  "trucking"
+ ],
+ "transactions": [
+  {
+   "buyer": "Alphabet",
+   "target": "Cameyo",
+   "date": "2024-06-05",
+   "value_usd": null,
+   "industry": "Virtual app delivery",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_mergers_and_acquisitions_by_Alphabet",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Oracle",
+   "target": "Corente",
+   "date": "2014-01-01",
+   "value_usd": null,
+   "industry": "Software for a cloud service delivery in heterogeneous network environments with software-defined networking technologie",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_acquisitions_by_Oracle",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Yahoo!",
+   "target": "PeerCDN",
+   "date": "2013-12-17",
+   "value_usd": null,
+   "industry": "Content delivery network",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_mergers_and_acquisitions_by_Yahoo!",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "IBM",
+   "target": "UrbanCode",
+   "date": "2013-04-22",
+   "value_usd": null,
+   "industry": "Software delivery automation",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_mergers_and_acquisitions_by_IBM",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Alphabet",
+   "target": "BufferBox",
+   "date": "2012-11-30",
+   "value_usd": 17000000,
+   "industry": "Package delivery",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_mergers_and_acquisitions_by_Alphabet",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "IBM",
+   "target": "Emptoris",
+   "date": "2011-12-15",
+   "value_usd": null,
+   "industry": "Supply Chain Analytics",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_mergers_and_acquisitions_by_IBM",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Juniper Networks",
+   "target": "Blackwave Networks, Acton, MA. Founded : 2008",
+   "date": "2010-11-08",
+   "value_usd": null,
+   "industry": "Video Storage and delivery",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_acquisitions_by_Juniper_Networks",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Sony",
+   "target": "Convergent Media Systems",
+   "date": "2010-01-28",
+   "value_usd": null,
+   "industry": "Content delivery network",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_acquisitions_by_Sony",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "IBM",
+   "target": "Viacore, Inc.",
+   "date": "2006-01-01",
+   "value_usd": null,
+   "industry": "Supply chain optimization",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_mergers_and_acquisitions_by_IBM",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Oracle",
+   "target": "G-Log",
+   "date": "2005-09-01",
+   "value_usd": null,
+   "industry": "Transportation Management Solutions",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_acquisitions_by_Oracle",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Cisco",
+   "target": "P-Cube",
+   "date": "2004-08-23",
+   "value_usd": 200000000,
+   "industry": "Service Delivery Platform",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_acquisitions_by_Cisco",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Cisco",
+   "target": "SightPath",
+   "date": "2000-03-29",
+   "value_usd": 1496000000,
+   "industry": "Content delivery",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_acquisitions_by_Cisco",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Yahoo!",
+   "target": "Online Anywhere",
+   "date": "1999-06-02",
+   "value_usd": 80000000,
+   "industry": "Content delivery network",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_mergers_and_acquisitions_by_Yahoo!",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Amazon",
+   "target": "Homegrocer.com",
+   "date": "1999-05-19",
+   "value_usd": 42500000,
+   "industry": "Grocery delivery",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_mergers_and_acquisitions_by_Amazon",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Amazon",
+   "target": "Kozmo.com",
+   "date": "1999-01-01",
+   "value_usd": null,
+   "industry": "Delivery",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_mergers_and_acquisitions_by_Amazon",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Citrix",
+   "target": "FrameHawk",
+   "date": null,
+   "value_usd": null,
+   "industry": "Mobile delivery of virtual desktop",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_mergers_and_acquisitions_by_Citrix",
+   "verification_status": "unverified"
+  },
+  {
+   "buyer": "Citrix",
+   "target": "Solid Instance",
+   "date": null,
+   "value_usd": null,
+   "industry": "Microsoft Windows virtual application delivery",
+   "source": "wikipedia",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_mergers_and_acquisitions_by_Citrix",
+   "verification_status": "unverified"
+  }
+ ]
+}

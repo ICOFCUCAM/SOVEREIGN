@@ -252,9 +252,42 @@ const isMain = process.argv[1]?.endsWith('build.js');
 if (isMain) {
   const { dna, asOf } = buildDna();
   writeFileSync(join(DATA, 'buyer_dna.json'), JSON.stringify({ as_of: asOf, profiles: dna }, null, 1));
+  // acquisition_dna is the canonical name of this artifact; buyer_dna.json
+  // stays as the path the web bundle imports
+  writeFileSync(join(DATA, 'acquisition_dna.json'), JSON.stringify({ as_of: asOf, profiles: dna }, null, 1));
+
+  // buyer_outcomes — the pricing ledger per buyer (median/avg/extremes,
+  // premium, close rate, time to close), only fields the data supports
+  const outcomes = dna.filter((d) => d.disclosed_events > 0 || d.premium_pct != null).map((d) => ({
+    buyer_id: d.buyer_id, name: d.name,
+    ...(d.median_deal_usd != null ? { median_deal_usd: d.median_deal_usd } : {}),
+    ...(d.avg_deal_usd != null ? { avg_deal_usd: d.avg_deal_usd } : {}),
+    ...(d.max_deal ? { largest: d.max_deal } : {}),
+    ...(d.min_deal ? { smallest: d.min_deal } : {}),
+    ...(d.check_size_band ? { check_size_band: d.check_size_band } : {}),
+    ...(d.premium_pct != null ? { premium_pct: d.premium_pct } : {}),
+    ...(d.close_rate != null ? { close_rate: d.close_rate } : {}),
+    ...(d.median_close_days != null ? { median_close_days: d.median_close_days } : {}),
+    events_indexed: d.events_indexed, disclosed_events: d.disclosed_events,
+    source_url: d.source_url, generated_at: d.generated_at,
+  }));
+  writeFileSync(join(DATA, 'buyer_outcomes.json'), JSON.stringify({ as_of: asOf, buyers: outcomes }, null, 1));
+
+  // strategic_intent — what each active buyer is buying NOW
+  const intent = dna.filter((d) => d.currently_seeking.length > 0).map((d) => ({
+    buyer_id: d.buyer_id, name: d.name, appetite: d.appetite, deals_12m: d.deals_12m,
+    currently_seeking: d.currently_seeking,
+    ...(d.last_acquisition ? { last_acquisition: d.last_acquisition } : {}),
+    source_url: d.source_url, generated_at: d.generated_at,
+  }));
+  writeFileSync(join(DATA, 'strategic_intent.json'), JSON.stringify({ as_of: asOf, buyers: intent }, null, 1));
+
   const extract = buildSectorExtract(SECTOR_TOKENS);
   writeFileSync(join(DATA, 'sector_transactions.json'), JSON.stringify({ as_of: asOf, tokens: SECTOR_TOKENS, transactions: extract }, null, 1));
+  // similar_transactions is the canonical name of the same artifact
+  writeFileSync(join(DATA, 'similar_transactions.json'), JSON.stringify({ as_of: asOf, tokens: SECTOR_TOKENS, transactions: extract }, null, 1));
   console.log(`sector_transactions.json: ${extract.length} logistics-relevant events`);
+  console.log(`buyer_outcomes.json: ${outcomes.length} · strategic_intent.json: ${intent.length}`);
   const withEvents = dna.filter((d) => d.events_indexed > 0);
   console.log(`buyer_dna.json: ${dna.length} profiles (${withEvents.length} with indexed events)`);
   console.log(`top: ${withEvents.slice(0, 5).map((d) => `${d.name}=${d.events_indexed}`).join(', ')}`);

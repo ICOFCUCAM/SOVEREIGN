@@ -4,7 +4,9 @@
 // these parsers are pure and tested offline.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSp500Table, parseLargestUsTable, familyOfficesFromMembers } from '../dist/scripts/ingest/universe.js';
+import { parseSp500Table, parseLargestUsTable, familyOfficesFromMembers, buyersFromCategoryMembers, parsePeListTable, PE_CATEGORY } from '../dist/scripts/ingest/universe.js';
+import { sparqlBindingsToEvents } from '../dist/scripts/ingest/wikidata.js';
+import { filingsToEvents } from '../dist/scripts/ingest/sec.js';
 import { mapToExitOs, EXITOS_SECTORS, EXITOS_TAXONOMY } from '../dist/scripts/ingest/taxonomy.js';
 import { checkSizeBand } from '../dist/scripts/dna/build.js';
 
@@ -90,6 +92,66 @@ test('family-office category members: articles only, meta pages excluded', () =>
   assert.equal(buyers.length, 2);
   assert.ok(buyers.every((b) => b.buyer_type === 'family_office'));
   assert.ok(buyers.every((b) => /^https:\/\/en\.wikipedia\.org\/wiki\//.test(b.source_url)));
+});
+
+// ── private equity from category tree + ranked list ─────────────────
+
+test('PE category members become private_equity buyers; meta pages excluded', () => {
+  const buyers = buyersFromCategoryMembers([
+    { ns: 0, title: 'Private equity firm' },              // concept — excluded
+    { ns: 0, title: 'Thoma Bravo' },
+    { ns: 0, title: 'Vista Equity Partners' },
+    { ns: 0, title: 'Carlyle Group (company)' },          // parenthetical stripped
+    { ns: 0, title: 'List of private equity firms' },     // list — excluded
+    { ns: 14, title: 'Category:Private equity firms of the United States' },
+  ], 'private_equity', PE_CATEGORY);
+  assert.equal(buyers.length, 3);
+  assert.ok(buyers.every((b) => b.buyer_type === 'private_equity'));
+  assert.ok(buyers.some((b) => b.name === 'Carlyle Group'));
+});
+
+const PE_LIST_FIXTURE = `
+<table class="wikitable sortable">
+<tbody>
+<tr><th>Rank</th><th>Firm</th><th>Headquarters</th><th>Capital raised ($bn)</th></tr>
+<tr><td>1</td><td>Blackstone Inc.</td><td>New York City, United States</td><td>125.6</td></tr>
+<tr><td>2</td><td>KKR</td><td>New York City, United States</td><td>103.7</td></tr>
+</tbody>
+</table>`;
+
+test('ranked PE list parser: firms with headquarters country', () => {
+  const buyers = parsePeListTable(PE_LIST_FIXTURE);
+  assert.equal(buyers.length, 2);
+  assert.equal(buyers[0].name, 'Blackstone Inc.');
+  assert.equal(buyers[0].buyer_type, 'private_equity');
+  assert.equal(buyers[0].country, 'United States');
+});
+
+// ── batched Wikidata mapper ─────────────────────────────────────────
+
+test('sparql bindings map to events; unlabeled entities and bad dates dropped', () => {
+  const nameByQid = new Map([['Q2283', 'Microsoft']]);
+  const events = sparqlBindingsToEvents([
+    { buyer: { value: 'http://www.wikidata.org/entity/Q2283' }, target: { value: 'http://www.wikidata.org/entity/Q10134' }, targetLabel: { value: 'GitHub' }, start: { value: '2018-10-26T00:00:00Z' } },
+    { buyer: { value: 'http://www.wikidata.org/entity/Q2283' }, target: { value: 'http://www.wikidata.org/entity/Q99999' }, targetLabel: { value: 'Q99999' } },          // unlabeled — dropped
+    { buyer: { value: 'http://www.wikidata.org/entity/Q404' },  target: { value: 'http://www.wikidata.org/entity/Q1' }, targetLabel: { value: 'Mystery Co' } },           // unknown buyer — dropped
+    { buyer: { value: 'http://www.wikidata.org/entity/Q2283' }, target: { value: 'http://www.wikidata.org/entity/Q777' }, targetLabel: { value: 'Undated Co' }, start: { value: 'http://www' } }, // somevalue date — kept, undated
+  ], nameByQid);
+  assert.equal(events.length, 2);
+  assert.equal(events[0].target_name, 'GitHub');
+  assert.equal(events[0].announced_date, '2018-10-26');
+  assert.equal(events[1].target_name, 'Undated Co');
+  assert.equal(events[1].announced_date, undefined, 'a somevalue date is omitted, never mangled');
+  assert.ok(events.every((e) => /^http:\/\/www\.wikidata\.org\/entity\//.test(e.source_url)));
+});
+
+// ── SEC events carry status (SOURCE 6 contract) ─────────────────────
+
+test('8-K item 2.01 events are status closed — the filing IS the completion', () => {
+  const [ev] = filingsToEvents('Microsoft', [{ accession: '0001564590-18-026876', filed: '2018-10-26', form: '8-K', items: '2.01,9.01', url: 'https://www.sec.gov/x' }]);
+  assert.equal(ev.status, 'closed');
+  assert.equal(ev.confidence, 'verified');
+  assert.equal(ev.verification_status, 'verified');
 });
 
 // ── check-size bands ────────────────────────────────────────────────

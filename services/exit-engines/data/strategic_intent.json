@@ -1,0 +1,224 @@
+{
+ "as_of": "2026-06-12T15:50:03.166Z",
+ "buyers": [
+  {
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
+   "appetite": "high",
+   "deals_12m": 2,
+   "currently_seeking": [
+    "natural language web",
+    "ai development tools",
+    "software"
+   ],
+   "last_acquisition": {
+    "date": "2026-01-05",
+    "target": "Osmos"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q2283",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "sony",
+   "name": "Sony",
+   "appetite": "high",
+   "deals_12m": 15,
+   "currently_seeking": [
+    "music",
+    "music publishing",
+    "animation",
+    "video game"
+   ],
+   "last_acquisition": {
+    "date": "2026-05-18",
+    "target": "32 Flavors"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q41187",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "alphabet",
+   "name": "Alphabet",
+   "appetite": "high",
+   "deals_12m": 2,
+   "currently_seeking": [
+    "virtual app delivery",
+    "llm test",
+    "comparison tool",
+    "coding documentation tool"
+   ],
+   "last_acquisition": {
+    "date": "2025-12-22",
+    "target": "Intersect"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q20800404",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "cisco",
+   "name": "Cisco",
+   "appetite": "high",
+   "deals_12m": 3,
+   "currently_seeking": [
+    "high performance service assurance",
+    "identity security",
+    "management",
+    "data analysis platform for real-time cybersecurity"
+   ],
+   "last_acquisition": {
+    "date": "2025-11-14",
+    "target": "EzDubs, Inc."
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q173395",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "ibm",
+   "name": "IBM",
+   "appetite": "high",
+   "deals_12m": 2,
+   "currently_seeking": [
+    "ai applications",
+    "software-as-a-service",
+    "data integration",
+    "network"
+   ],
+   "last_acquisition": {
+    "date": "2025-12-08",
+    "target": "Confluent"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q37156",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "amazon",
+   "name": "Amazon",
+   "appetite": "high",
+   "deals_12m": 5,
+   "currently_seeking": [
+    "artificial intelligence",
+    "amazon prime video",
+    "digital creator economy"
+   ],
+   "last_acquisition": {
+    "date": "2026-03-19",
+    "target": "Rivr"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q3884",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "apple",
+   "name": "Apple",
+   "appetite": "high",
+   "deals_12m": 4,
+   "currently_seeking": [
+    "artificial intelligence",
+    "photography software",
+    "record label",
+    "data compression"
+   ],
+   "last_acquisition": {
+    "date": "2026-03-16",
+    "target": "MotionVFX"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q312",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "hewlett-packard",
+   "name": "Hewlett-Packard",
+   "appetite": "medium",
+   "deals_12m": 0,
+   "currently_seeking": [
+    "computer networking"
+   ],
+   "last_acquisition": {
+    "date": "2024-01-10",
+    "target": "Juniper Networks (by HPE)"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q80978",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "yahoo",
+   "name": "Yahoo!",
+   "appetite": "medium",
+   "deals_12m": 0,
+   "currently_seeking": [
+    "financial social platform",
+    "tech publication",
+    "ai news app"
+   ],
+   "last_acquisition": {
+    "date": "2024-04-03",
+    "target": "Artifact"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q29231846",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "meta-platforms",
+   "name": "Meta Platforms",
+   "appetite": "high",
+   "deals_12m": 7,
+   "currently_seeking": [
+    "meta superintelligence labs",
+    "meta training",
+    "inference accelerator"
+   ],
+   "last_acquisition": {
+    "date": "2026-05-01",
+    "target": "Assured Robot Intelligence"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q380",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "electronic-arts",
+   "name": "Electronic Arts",
+   "appetite": "medium",
+   "deals_12m": 0,
+   "currently_seeking": [
+    "sports tracking platform"
+   ],
+   "last_acquisition": {
+    "date": "2025-02-04",
+    "target": "TRACAB Technologies"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q173941",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "ebay",
+   "name": "eBay",
+   "appetite": "medium",
+   "deals_12m": 1,
+   "currently_seeking": [
+    "online commerce"
+   ],
+   "last_acquisition": {
+    "date": "2026-02-18",
+    "target": "Depop"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q58024",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  },
+  {
+   "buyer_id": "dell",
+   "name": "Dell",
+   "appetite": "medium",
+   "deals_12m": 0,
+   "currently_seeking": [
+    "ai powered devops",
+    "itops"
+   ],
+   "last_acquisition": {
+    "date": "2023-08-11",
+    "target": "Moogsoft"
+   },
+   "source_url": "https://www.wikidata.org/wiki/Q30873",
+   "generated_at": "2026-06-12T15:57:31.572Z"
+  }
+ ]
+}
