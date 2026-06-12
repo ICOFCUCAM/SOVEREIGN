@@ -24,3 +24,10 @@ body {
 
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }
+
+/* Exchange board mount — the 3D rotation only renders at desktop width;
+   phones and tablets get the flat board, full-width and unclipped. */
+@media (min-width: 1024px) {
+  .ex-bezel { transform: rotateY(-11deg) rotateX(2.5deg); transform-origin: center right; }
+  .ex-reflection { transform: rotateY(-11deg) rotateX(2.5deg) scaleY(-1); transform-origin: center right; }
+}

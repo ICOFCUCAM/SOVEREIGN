@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ExchangeLockup } from "./ExchangeMark";
+import { useI18n, LOCALES } from "../lib/i18n";
 
 // Shared chrome + iconography for the public marketing site, so the homepage,
 // Platform, Modules and Pricing all read as one professional, multi-page
@@ -65,63 +66,109 @@ export const Mark: React.FC<{ name: string; size?: number }> = ({ name, size = 2
   return <span className="inline-flex shrink-0 items-center justify-center rounded bg-white shadow-sm ring-1 ring-black/5" style={{ width: size, height: size }} aria-hidden><MarkGlyph g={m.glyph} c={m.tint} s={size * 0.66} /></span>;
 };
 
-const NAV: [string, string][] = [["Platform", "/platform"], ["Modules", "/modules"], ["Pricing", "/pricing"]];
+const NAV: [string, string, string][] = [["nav.platform", "Platform", "/platform"], ["nav.modules", "Modules", "/modules"], ["nav.pricing", "Pricing", "/pricing"]];
+
+// Compact segmented language switcher — EN · FR · ES.
+export const LocaleSwitch: React.FC<{ dark?: boolean }> = ({ dark }) => {
+  const { locale, setLocale } = useI18n();
+  return (
+    <div className={`flex items-center overflow-hidden rounded-md border ${dark ? "border-white/15" : "border-slate-300"}`} role="group" aria-label="Language">
+      {LOCALES.map(([code]) => (
+        <button key={code} onClick={() => setLocale(code)} aria-pressed={locale === code}
+          className={`px-2 py-1 font-mono text-[10.5px] font-bold uppercase tracking-wide transition ${
+            locale === code
+              ? (dark ? "bg-white/15 text-white" : "bg-ink-900 text-white")
+              : (dark ? "text-white/55 hover:text-white" : "text-slate-500 hover:text-ink-900")
+          }`}>
+          {code}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 export const MarketingChrome: React.FC<{ active?: string; children: React.ReactNode }> = ({ active, children }) => {
   const nav = useNavigate();
+  const { t } = useI18n();
+  const [menuOpen, setMenuOpen] = React.useState(false);
   return (
     <div className="min-h-screen bg-[#f6f8fb] text-ink-900">
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between px-6 py-4 lg:px-10">
+        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-10">
           <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={30} /></button>
           <nav className="hidden items-center gap-8 lg:flex">
-            {NAV.map(([label, to]) => (
-              <Link key={to} to={to} className={`text-[13px] font-medium transition ${active === label.toLowerCase() ? "font-semibold text-ink-900" : "text-slate-600 hover:text-ink-900"}`}>{label}</Link>
+            {NAV.map(([key, fallback, to]) => (
+              <Link key={to} to={to} className={`text-[13px] font-medium transition ${active === fallback.toLowerCase() ? "font-semibold text-ink-900" : "text-slate-600 hover:text-ink-900"}`}>{t(key)}</Link>
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <button onClick={() => nav("/console")} className="rounded-md border border-slate-300 px-4 py-2 text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50">Log in</button>
-            <button onClick={() => nav("/console")} className="rounded-md bg-ink-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-ink-800">Access the Exchange</button>
+            <div className="hidden sm:block"><LocaleSwitch /></div>
+            <button onClick={() => nav("/console")} className="hidden rounded-md border border-slate-300 px-4 py-2 text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50 sm:inline-flex">{t("nav.login")}</button>
+            <button onClick={() => nav("/console")} className="rounded-md bg-ink-900 px-3 py-2 text-[12.5px] font-semibold text-white transition hover:bg-ink-800 sm:px-4 sm:text-[13px]">{t("nav.access")}</button>
+            {/* mobile menu toggle */}
+            <button onClick={() => setMenuOpen((o) => !o)} aria-label="Menu" aria-expanded={menuOpen}
+              className="rounded-md border border-slate-300 p-2 text-slate-700 lg:hidden">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                {menuOpen ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M3 6h18M3 12h18M3 18h18" />}
+              </svg>
+            </button>
           </div>
         </div>
+        {/* mobile nav panel */}
+        {menuOpen && (
+          <div className="border-t border-slate-200 bg-white px-4 py-4 lg:hidden">
+            <nav className="flex flex-col gap-1">
+              {NAV.map(([key, fallback, to]) => (
+                <Link key={to} to={to} onClick={() => setMenuOpen(false)}
+                  className={`rounded-md px-3 py-2.5 text-[14px] font-medium ${active === fallback.toLowerCase() ? "bg-slate-100 font-semibold text-ink-900" : "text-slate-600"}`}>{t(key)}</Link>
+              ))}
+              <Link to="/console" onClick={() => setMenuOpen(false)} className="rounded-md px-3 py-2.5 text-[14px] font-medium text-slate-600">{t("nav.login")}</Link>
+            </nav>
+            <div className="mt-3 flex items-center gap-3 border-t border-slate-100 px-3 pt-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{t("nav.language")}</span>
+              <LocaleSwitch />
+            </div>
+          </div>
+        )}
       </header>
 
       {children}
 
       <footer className="border-t border-slate-200 bg-[#f6f8fb]">
         <div className="mx-auto max-w-[1320px] px-6 py-10 lg:px-10">
-          <div className="grid gap-8 sm:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
             <div>
               <ExchangeLockup size={30} />
-              <p className="mt-3 max-w-xs text-[12.5px] leading-relaxed text-slate-500">Institutional acquisition infrastructure — sourcing, diligence, negotiation and closing on one exchange.</p>
+              <p className="mt-3 max-w-xs text-[12.5px] leading-relaxed text-slate-500">{t("ft.tagline")}</p>
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[10.5px] text-slate-400">
-                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> SOC 2 posture</span>
-                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> Full audit trail</span>
-                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> NDA-gated identity</span>
+                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.soc")}</span>
+                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.audit")}</span>
+                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.ndagated")}</span>
               </div>
             </div>
-            {[
-              ["The exchange", [["Platform", "/platform"], ["Modules", "/modules"], ["Pricing", "/pricing"], ["Access the Exchange", "/console"]]],
-              ["For founders", [["List confidentially", "/console"], ["Valuation & readiness", "/modules"], ["Founder plans", "/pricing"]]],
-              ["For acquirers", [["Browse the marketplace", "/console"], ["Buyer access", "/pricing"], ["Request an NDA", "/console"]]],
-            ].map(([title, links]) => (
-              <div key={title as string}>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{title as string}</div>
+            {([
+              ["ft.exchange", [["nav.platform", "/platform"], ["nav.modules", "/modules"], ["nav.pricing", "/pricing"], ["nav.access", "/console"]]],
+              ["ft.founders", [["ft.list", "/console"], ["ft.valuation", "/modules"], ["ft.plans", "/pricing"]]],
+              ["ft.acquirers", [["ft.browse", "/console"], ["ft.buyeraccess", "/pricing"], ["ft.requestnda", "/console"]]],
+            ] as Array<[string, Array<[string, string]>]>).map(([titleKey, links]) => (
+              <div key={titleKey}>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{t(titleKey)}</div>
                 <ul className="mt-3 space-y-2 text-[13px]">
-                  {(links as [string, string][]).map(([l, to]) => (
-                    <li key={l + to}><Link to={to} className="text-slate-600 hover:text-ink-900">{l}</Link></li>
+                  {links.map(([k, to]) => (
+                    <li key={k + to}><Link to={to} className="text-slate-600 hover:text-ink-900">{t(k)}</Link></li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
           <div className="mt-8 border-t border-slate-200 pt-6">
-            <p className="max-w-3xl text-[10.5px] leading-relaxed text-slate-400">
-              Market data on this site is indexed from public filings and disclosures (SEC EDGAR, Wikidata, press) and from a curated registry of acquirer mandates. Figures are presented for information only and do not constitute investment, legal or tax advice. Listings trade anonymously; identity and detailed financials are disclosed only under executed NDA.
-            </p>
+            <p className="max-w-3xl text-[10.5px] leading-relaxed text-slate-400">{t("ft.legal")}</p>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-4 text-[12px] text-slate-400">
               <div>© {new Date().getFullYear()} ExitOS — A Sovereign Infrastructure</div>
-              <div className="font-mono uppercase tracking-[0.22em]">exit.sovereigndo.com</div>
+              <div className="flex items-center gap-4">
+                <LocaleSwitch />
+                <div className="font-mono uppercase tracking-[0.22em]">exit.sovereigndo.com</div>
+              </div>
             </div>
           </div>
         </div>

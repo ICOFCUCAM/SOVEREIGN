@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MarketingChrome, Glyph, Mark, Arrow } from "../components/MarketingChrome";
 import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS, TOP_JURISDICTIONS, type BoardTx } from "../lib/market-stats";
+import { useI18n, tLines } from "../lib/i18n";
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
 // marketing chrome (header nav → Platform / Modules / Pricing + footer). The
@@ -10,6 +11,13 @@ import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SEC
 
 const Landing: React.FC = () => {
   const nav = useNavigate();
+  const { t } = useI18n();
+  const heroTrust = [
+    { icon: "globe", metric: t("trust.network.m", { n: MARKET_FMT.buyers }), title: t("trust.network.t"), sub: t("trust.network.s", { g: MARKET_FMT.geographies, s: MARKET_FMT.sectors }) },
+    { icon: "lock", metric: "SOC 2", title: t("trust.soc.t"), sub: t("trust.soc.s") },
+    { icon: "users", metric: "100%", title: t("trust.control.t"), sub: t("trust.control.s") },
+    { icon: "check", metric: t("trust.audit.m"), title: t("trust.audit.t"), sub: t("trust.audit.s") },
+  ];
   return (
     <MarketingChrome active="home">
       {/* ===== 01 · HERO ===== */}
@@ -46,10 +54,10 @@ const Landing: React.FC = () => {
         <div className="relative border-b border-slate-200/70 bg-white/70 backdrop-blur">
           <div className="mx-auto grid max-w-[1480px] grid-cols-2 divide-x divide-slate-200/70 px-6 lg:grid-cols-4 lg:px-10">
             {[
-              [HISTORY_FMT.events, "Disclosed acquisitions indexed"],
-              [MARKET_FMT.buyers, "Verified acquirer mandates"],
-              [HISTORY_FMT.disclosedValue, "Transaction value tracked"],
-              [MARKET_FMT.activeMandates, "Mandates actively deploying"],
+              [HISTORY_FMT.events, t("ribbon.deals")],
+              [MARKET_FMT.buyers, t("ribbon.mandates")],
+              [HISTORY_FMT.disclosedValue, t("ribbon.value")],
+              [MARKET_FMT.activeMandates, t("ribbon.deploying")],
             ].map(([v, l], i) => (
               <div key={l} className="flex items-baseline gap-2.5 px-4 py-2.5">
                 {i === 3 && <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />}
@@ -63,20 +71,20 @@ const Landing: React.FC = () => {
         <div className="relative mx-auto grid max-w-[1480px] items-center gap-8 px-6 py-16 lg:grid-cols-[0.9fr_1.3fr] lg:px-10 lg:py-20">
           <div className="lg:pr-2">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-300/70 bg-white/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" /> The Global Acquisition Exchange
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" /> {t("hero.eyebrow")}
             </div>
-            <h1 className="font-serif text-4xl font-bold leading-[1.04] tracking-tight text-ink-900 sm:text-5xl">
-              INSTITUTIONAL<br />ACQUISITION<br />INFRASTRUCTURE
+            <h1 className="font-serif text-3xl font-bold leading-[1.04] tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+              {tLines(t("hero.h1"))}
             </h1>
             <p className="mt-6 max-w-md font-serif text-xl font-semibold leading-snug text-ink-900">
-              Source acquirers. Coordinate diligence. Manage negotiations. Execute transactions.
+              {t("hero.sub")}
             </p>
             <p className="mt-3 max-w-md text-[15px] leading-relaxed text-slate-600">
-              One system connecting founders, buyers, advisors and transaction data — from signal generation to closing.
+              {t("hero.body")}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-ink-800">Access the Exchange <Arrow /></button>
-              <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-6 py-3 text-sm font-semibold text-ink-900 backdrop-blur transition hover:border-slate-400 hover:bg-white">Deploy a Mandate</button>
+              <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-ink-800">{t("nav.access")} <Arrow /></button>
+              <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-6 py-3 text-sm font-semibold text-ink-900 backdrop-blur transition hover:border-slate-400 hover:bg-white">{t("hero.deploy")}</button>
             </div>
           </div>
 
@@ -84,12 +92,11 @@ const Landing: React.FC = () => {
           {/* pushed right + up, clear of the headline, with a light floor shadow */}
           <div className="min-w-0 lg:translate-x-16 lg:-translate-y-6" style={{ perspective: "2000px" }}>
             <div className="relative">
-              {/* structural mount / bezel behind the screen */}
+              {/* structural mount / bezel behind the screen — the 3D mount
+                  rotation applies only at lg+; phones get the flat board */}
               <div
-                className="relative rounded-[20px] p-2.5"
+                className="ex-bezel relative rounded-[20px] p-2.5"
                 style={{
-                  transform: "rotateY(-11deg) rotateX(2.5deg)",
-                  transformOrigin: "center right",
                   background: "linear-gradient(145deg,#1c2c44,#0a1626)",
                   boxShadow: "0 28px 48px -30px rgba(8,20,40,0.32), 0 10px 22px -18px rgba(8,20,40,0.26), inset 0 1px 0 rgba(255,255,255,0.08)",
                   border: "1px solid rgba(255,255,255,0.10)",
@@ -118,13 +125,11 @@ const Landing: React.FC = () => {
                 <CommandBoard />
               </div>
 
-              {/* polished-floor reflection of the screen */}
+              {/* polished-floor reflection of the screen (lg+ only) */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-full h-28 overflow-hidden"
+                className="ex-reflection pointer-events-none absolute inset-x-0 top-full hidden h-28 overflow-hidden lg:block"
                 style={{
-                  transform: "rotateY(-11deg) rotateX(2.5deg) scaleY(-1)",
-                  transformOrigin: "center right",
                   opacity: 0.07,
                   filter: "blur(4px)",
                   WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
@@ -139,13 +144,13 @@ const Landing: React.FC = () => {
         {/* trust strip — 4 institutional metric cards, one full-width row */}
         <div className="relative border-t border-slate-200/70 bg-white/55 backdrop-blur">
           <div className="mx-auto grid max-w-[1480px] grid-cols-2 gap-px overflow-hidden px-6 lg:grid-cols-4 lg:px-10">
-            {HERO_TRUST.map((t) => (
-              <div key={t.title} className="group flex items-center gap-3.5 px-5 py-5 transition hover:bg-white">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={t.icon} /></span>
+            {heroTrust.map((c) => (
+              <div key={c.title} className="group flex items-center gap-3.5 px-5 py-5 transition hover:bg-white">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={c.icon} /></span>
                 <div className="min-w-0">
-                  <div className="font-serif text-xl font-bold leading-none text-ink-900">{t.metric}</div>
-                  <div className="mt-1 text-[12.5px] font-semibold leading-tight text-ink-800">{t.title}</div>
-                  <div className="text-[11px] leading-snug text-slate-500">{t.sub}</div>
+                  <div className="font-serif text-xl font-bold leading-none text-ink-900">{c.metric}</div>
+                  <div className="mt-1 text-[12.5px] font-semibold leading-tight text-ink-800">{c.title}</div>
+                  <div className="text-[11px] leading-snug text-slate-500">{c.sub}</div>
                 </div>
               </div>
             ))}
@@ -163,10 +168,10 @@ const Landing: React.FC = () => {
       <section className="border-b border-white/10" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
         <div className="mx-auto max-w-[1480px] px-6 py-9 lg:px-10">
           <div className="flex items-center justify-between">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-300">The acquisition lifecycle · signal → closing</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-300">{t("lifecycle.title")}</div>
             <div className="hidden items-center gap-1.5 sm:flex">
               <span className="relative inline-flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" /></span>
-              <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-300">Live process</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-300">{t("lifecycle.live")}</span>
             </div>
           </div>
           {/* one animated rail: a traveling pulse runs the full lifecycle */}
@@ -177,7 +182,7 @@ const Landing: React.FC = () => {
               {LIFECYCLE.map(([s, w], i) => (
                 <li key={s} className="relative flex flex-col items-center text-center">
                   <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#0A1F3A] font-mono text-[10px] font-bold text-blue-200 ring-1 ring-blue-400/40">{i + 1}</span>
-                  <span className="mt-2.5 px-1 text-[11px] font-semibold leading-tight text-white/85">{s}</span>
+                  <span className="mt-2.5 px-1 text-[11px] font-semibold leading-tight text-white/85">{t(s)}</span>
                   <span className="mt-0.5 font-mono text-[9px] uppercase tracking-wide text-blue-300/60">{w}</span>
                 </li>
               ))}
@@ -189,15 +194,15 @@ const Landing: React.FC = () => {
       {/* ===== 1B · MARKET STRUCTURE — the counterparties on the exchange ===== */}
       <section id="solutions" className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-[1320px] px-6 py-12 lg:px-10">
-          <div className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Market structure · who trades on the exchange</div>
+          <div className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">{t("ms.eyebrow")}</div>
           {/* horizontal institutional network — nodes joined by connecting lines */}
           <div className="mt-8 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center">
             {ECOSYSTEM.map((e, i) => (
               <React.Fragment key={e.label}>
                 <div className="group flex flex-1 flex-col items-center rounded-lg border border-slate-200 bg-white px-3 py-4 text-center transition hover:border-blue-300">
                   <span className="flex h-10 w-10 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={e.icon} small /></span>
-                  <div className="mt-2.5 text-[12px] font-semibold text-ink-800">{e.label}</div>
-                  <div className="mt-0.5 text-[10px] text-slate-400">{e.meta}</div>
+                  <div className="mt-2.5 text-[12px] font-semibold text-ink-800">{t(e.label)}</div>
+                  <div className="mt-0.5 text-[10px] text-slate-400">{t(e.meta, { n: e.n })}</div>
                 </div>
                 {i < ECOSYSTEM.length - 1 && (
                   <div className="flex shrink-0 items-center justify-center text-blue-300">
@@ -219,8 +224,8 @@ const Landing: React.FC = () => {
 
         <div className="relative mx-auto max-w-[1320px] px-6 py-20 lg:px-10">
           <div className="max-w-3xl">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-300">The exchange · founder → exit</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white sm:text-[2.4rem]">Run your entire company sale from discovery to closing.</h2>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-300">{t("wf.eyebrow")}</div>
+            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white sm:text-[2.4rem]">{t("wf.h2")}</h2>
           </div>
 
           {/* 6 steps — one horizontal row, connected by a glowing rail */}
@@ -260,9 +265,9 @@ const Landing: React.FC = () => {
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
           <div className="flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">Buyer intelligence</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Real buyers.<br />Real appetite.<br />Real opportunities.</h2>
-            <Link to="/console" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">View all buyers &rarr;</Link>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("bi.eyebrow")}</div>
+            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("bi.h2"))}</h2>
+            <Link to="/console" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("bi.link")} &rarr;</Link>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {BUYERS.map((b) => (
                 <div key={b.name} className="rounded-md border border-slate-200 bg-white p-5 transition hover:border-blue-300">
@@ -303,10 +308,10 @@ const Landing: React.FC = () => {
         <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
           <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">Data provenance</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Sourced. Referenced.<br />Auditable.</h2>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("prov.eyebrow")}</div>
+              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("prov.h2"))}</h2>
               <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
-                Every figure on the exchange traces to a source on record. Transactions are indexed from public filings; mandates are curated and verified; estimates carry an explicit confidence tier backed by observation counts.
+                {t("prov.body")}
               </p>
               <div className="mt-6 space-y-2.5">
                 {PROVENANCE_PIPELINE.map((p, i) => (
@@ -363,10 +368,10 @@ const Landing: React.FC = () => {
           {/* heading + a short, half-height vault panel on the right */}
           <div className="grid items-center gap-10 lg:grid-cols-[1.4fr_1fr]">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">Diligence infrastructure</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Institutional-grade<br />data rooms.</h2>
-              <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-600">Secure, permissioned, and built for high-stakes transactions.</p>
-              <Link to="/platform" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">Inside the data room &rarr;</Link>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("dr.eyebrow")}</div>
+              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("dr.h2"))}</h2>
+              <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-600">{t("dr.body")}</p>
+              <Link to="/platform" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("dr.link")} &rarr;</Link>
               {/* security posture row */}
               <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[11px] text-slate-500">
                 {[["lock", "Permission controls"], ["check", "Full audit trails"], ["shield", "Access logs"]].map(([ic, t]) => (
@@ -399,10 +404,10 @@ const Landing: React.FC = () => {
           <div className="grid flex-1 items-start gap-10 lg:grid-cols-[1.25fr_1fr]">
             <OfferTable />
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">The negotiation desk</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Negotiate with clarity.<br />Close with confidence.</h2>
-              <p className="mt-3 text-base leading-relaxed text-slate-600">Every bid scored against your reservation lines — structure, certainty and counterparty record, not just headline price.</p>
-              <Link to="/modules" className="mt-3 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">See the negotiation desk &rarr;</Link>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("neg.eyebrow")}</div>
+              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("neg.h2"))}</h2>
+              <p className="mt-3 text-base leading-relaxed text-slate-600">{t("neg.body")}</p>
+              <Link to="/modules" className="mt-3 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("neg.link")} &rarr;</Link>
               <ul className="mt-7 space-y-5">
                 {NEGOTIATION_FEATURES.map((f) => (
                   <li key={f.title} className="flex gap-3">
@@ -423,10 +428,10 @@ const Landing: React.FC = () => {
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
           <div className="flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">The listing protocol</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">The marketplace.<br />Anonymous until NDA.</h2>
-            <p className="mt-3 max-w-md text-[13px] leading-relaxed text-slate-500">Every listing trades under a codename with banded figures. Identity, exact financials and the asking range unlock only on an executed NDA — the protocol that lets serious companies come to market without market rumor.</p>
-            <a href="/marketplace" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">How the listing protocol works &rarr;</a>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("mp.eyebrow")}</div>
+            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("mp.h2"))}</h2>
+            <p className="mt-3 max-w-md text-[13px] leading-relaxed text-slate-500">{t("mp.body")}</p>
+            <a href="/marketplace" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("mp.link")} &rarr;</a>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {OPPORTUNITIES.map((o) => (
                 <div key={o.name} className="rounded-md border border-slate-200 bg-white p-5 transition hover:border-blue-300">
@@ -463,10 +468,10 @@ const Landing: React.FC = () => {
           </div>
           {/* headline + inline stats */}
           <div className="px-6 py-14 lg:px-12 lg:py-20">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">Coverage</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Global reach.<br />Institutional network.</h2>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("cov.eyebrow")}</div>
+            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("cov.h2"))}</h2>
             <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
-              ExitOS connects founders with acquirer mandates across <span className="font-semibold text-ink-800">{MARKET_FMT.geographies} jurisdictions</span> and every major industry.
+              {t("cov.body", { g: MARKET_FMT.geographies })}
             </p>
             <div className="mt-5 flex flex-wrap gap-1.5">
               {TOP_JURISDICTIONS.map(([code, n]) => (
@@ -491,14 +496,16 @@ const Landing: React.FC = () => {
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-[1100px] px-6 py-16 lg:px-10">
           <div className="text-center">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">The cost of running blind</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">Why founders lose millions on exit.</h2>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("loss.eyebrow")}</div>
+            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{t("loss.h2")}</h2>
             <p className="mx-auto mt-3 max-w-xl text-[13.5px] leading-relaxed text-slate-500">
-              Across the disclosed transactions we index, the median premium over reference is <span className="font-semibold text-ink-800">{DEAL_INTEL_FMT.medianPremium}</span> and the median announce-to-close period is <span className="font-semibold text-ink-800">{DEAL_INTEL_FMT.medianClose}</span>. Preparation and leverage decide which side of the median you land on.
+              {t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}
             </p>
           </div>
-          {/* comparison matrix: Traditional vs ExitOS */}
-          <div className="mt-10 overflow-hidden rounded-lg border border-slate-200">
+          {/* comparison matrix: Traditional vs ExitOS — horizontally scrollable
+              on phones so the three columns stay readable */}
+          <div className="mt-10 overflow-x-auto rounded-lg border border-slate-200">
+            <div className="min-w-[620px]">
             <div className="grid grid-cols-[1.1fr_1fr_1fr]">
               <div className="bg-slate-50 px-5 py-4" />
               <div className="bg-slate-100 px-5 py-4 text-center text-[12px] font-bold uppercase tracking-wide text-slate-500">Traditional Sale</div>
@@ -515,6 +522,7 @@ const Landing: React.FC = () => {
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
       </section>
@@ -524,10 +532,10 @@ const Landing: React.FC = () => {
         <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">The transaction record</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold tracking-tight text-ink-900">Disclosed acquisitions on the market we index.</h2>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("rec.eyebrow")}</div>
+              <h2 className="mt-3 font-serif text-[2rem] font-bold tracking-tight text-ink-900">{t("rec.h2")}</h2>
             </div>
-            <p className="max-w-sm text-[13px] leading-relaxed text-slate-500">Public, source-referenced M&amp;A events — the same record that prices matches and benchmarks every process on the exchange.</p>
+            <p className="max-w-sm text-[13px] leading-relaxed text-slate-500">{t("rec.body")}</p>
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-3">
             {TRANSACTIONS.slice(0, 3).map((c) => (
@@ -548,8 +556,8 @@ const Landing: React.FC = () => {
           </div>
           <div className="mt-6 text-center text-[11px] text-slate-400">Source-referenced from public filings and disclosures · {HISTORY_FMT.events} events indexed · {HISTORY_FMT.disclosedValue} disclosed value · {HISTORY_FMT.closed} closed</div>
           <div className="mt-8 flex items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-6 py-4 sm:mx-auto sm:max-w-2xl">
-            <span className="text-[13px] text-slate-600">Your company, priced against this record — the same engines run your valuation in the workspace.</span>
-            <button onClick={() => nav("/console")} className="shrink-0 rounded-md bg-ink-900 px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-ink-800">Run the valuation &rarr;</button>
+            <span className="text-[13px] text-slate-600">{t("rec.bridge")}</span>
+            <button onClick={() => nav("/console")} className="shrink-0 rounded-md bg-ink-900 px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-ink-800">{t("rec.run")} &rarr;</button>
           </div>
         </div>
       </section>
@@ -558,15 +566,15 @@ const Landing: React.FC = () => {
       <section className="border-b border-white/10" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
         <div className="mx-auto max-w-[1320px] px-6 py-12 lg:px-10">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-300">Governance &amp; controls</div>
-            <div className="text-[11px] text-white/40">The conditions under which a transaction is allowed to proceed</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-300">{t("gov.eyebrow")}</div>
+            <div className="text-[11px] text-white/40">{t("gov.note")}</div>
           </div>
           <div className="mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-lg lg:grid-cols-5" style={{ background: "rgba(255,255,255,.08)" }}>
             {GOVERNANCE.map((g) => (
               <div key={g.title} className="px-5 py-5" style={{ background: "rgba(6,24,46,.92)" }}>
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/15 text-blue-300 ring-1 ring-blue-400/30"><Glyph name={g.icon} small /></span>
-                <div className="mt-3 text-[12.5px] font-bold text-white">{g.title}</div>
-                <div className="mt-1 text-[11px] leading-snug text-white/50">{g.body}</div>
+                <div className="mt-3 text-[12.5px] font-bold text-white">{t(g.title)}</div>
+                <div className="mt-1 text-[11px] leading-snug text-white/50">{t(g.body)}</div>
               </div>
             ))}
           </div>
@@ -579,16 +587,16 @@ const Landing: React.FC = () => {
           {[0, 1, 2, 3].map((i) => <div key={i} className="h-40 w-16 rounded-t bg-ink-900" />)}
         </div>
         <div className="relative mx-auto max-w-[1320px] px-6 py-24 text-center lg:px-10">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">When the decision is made</div>
-          <h2 className="mt-4 font-serif text-4xl font-bold tracking-tight text-ink-900 sm:text-5xl">Bring your company to market.</h2>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("cta.eyebrow")}</div>
+          <h2 className="mt-4 font-serif text-4xl font-bold tracking-tight text-ink-900 sm:text-5xl">{t("cta.h2")}</h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600">
-            One confidential process — sourcing, diligence, negotiation and closing — executed on institutional infrastructure, under your control at every gate.
+            {t("cta.body")}
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
-            <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-ink-800">Open Acquisition Workspace <Arrow /></button>
-            <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-7 py-3.5 text-sm font-semibold text-ink-900 transition hover:border-slate-400 hover:bg-slate-50">Request a Private Briefing</button>
+            <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-ink-800">{t("cta.open")} <Arrow /></button>
+            <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-7 py-3.5 text-sm font-semibold text-ink-900 transition hover:border-slate-400 hover:bg-slate-50">{t("cta.brief")}</button>
           </div>
-          <p className="mt-6 text-[11.5px] text-slate-400">Strictly confidential. Anonymous until NDA. Every action audited.</p>
+          <p className="mt-6 text-[11.5px] text-slate-400">{t("cta.foot")}</p>
         </div>
       </section>
 
@@ -616,12 +624,6 @@ const BOARD_STATS = [
   { label: "Sectors Monitored", value: MARKET_FMT.sectors },
   { label: "Jurisdictions", value: MARKET_FMT.geographies },
 ];
-const HERO_TRUST = [
-  { icon: "globe", metric: `${MARKET_FMT.buyers} Mandates`, title: "Curated Acquirer Network", sub: `${MARKET_FMT.geographies} jurisdictions · ${MARKET_FMT.sectors} sectors` },
-  { icon: "lock", metric: "SOC 2", title: "Compliant Infrastructure", sub: "security + data residency" },
-  { icon: "users", metric: "100%", title: "Founder Controlled", sub: "you own every decision" },
-  { icon: "check", metric: "Every Action", title: "Auditable", sub: "every action, every artifact" },
-];
 // live mandate ticker (very bottom of the board) — real registry entries,
 // not fabricated transactions; computed from @exit/engines BUYER_REGISTRY.
 const ACTIVITY = MANDATE_ACTIVITY;
@@ -630,11 +632,11 @@ const ACTIVITY = MANDATE_ACTIVITY;
 // registry count where one exists (strategic / PE are measured; the rest
 // describe the role they play in a process).
 const ECOSYSTEM = [
-  { icon: "shield", label: "Strategic Acquirers", meta: `${MARKET_FMT.strategic} mandates indexed` },
-  { icon: "spark", label: "Private Equity & Growth", meta: `${MARKET_FMT.privateEquity} mandates indexed` },
-  { icon: "users", label: "Family Offices", meta: "long-hold capital" },
-  { icon: "chart", label: "Advisors & Counsel", meta: "process & documentation" },
-  { icon: "doc", label: "Corporate Development", meta: "buy-side desks" },
+  { icon: "shield", label: "ms.strategic", meta: "ms.strategic.meta", n: MARKET_FMT.strategic },
+  { icon: "spark", label: "ms.pe", meta: "ms.pe.meta", n: MARKET_FMT.privateEquity },
+  { icon: "users", label: "ms.fo", meta: "ms.fo.meta", n: "" },
+  { icon: "chart", label: "ms.advisors", meta: "ms.advisors.meta", n: "" },
+  { icon: "doc", label: "ms.corpdev", meta: "ms.corpdev.meta", n: "" },
 ];
 // founder → exit workflow chain
 const EXCHANGE_FLOW = [
@@ -894,8 +896,8 @@ const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right
 // The lifecycle rail — stage plus the typical window in a run process.
 const DATA_AS_OF = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 const LIFECYCLE: ReadonlyArray<[string, string]> = [
-  ["Signal", "day 0"], ["Buyer Discovery", "wk 1"], ["NDA", "wk 1–2"], ["CIM", "wk 2"],
-  ["Management Meetings", "wk 2–3"], ["LOI", "wk 4–6"], ["Diligence", "wk 6–9"], ["Closing", "wk 10+"],
+  ["lc.signal", "day 0"], ["lc.discovery", "wk 1"], ["lc.nda", "wk 1–2"], ["lc.cim", "wk 2"],
+  ["lc.meetings", "wk 2–3"], ["lc.loi", "wk 4–6"], ["lc.diligence", "wk 6–9"], ["lc.closing", "wk 10+"],
 ];
 // Data provenance — the pipeline every figure passes through, and the
 // confidence register applied to estimates (mirrors the engines' tiers).
@@ -908,11 +910,11 @@ const PROVENANCE_PIPELINE = [
 // Governance band — the controls a counterparty must clear and the controls
 // that protect the founder. Stated as conditions, not features.
 const GOVERNANCE = [
-  { icon: "lock", title: "Anonymous until NDA", body: "Identity, exact financials and the ask never leave the protocol unsigned." },
-  { icon: "shield", title: "Buyer verification", body: "Identity, track record and funds clear four gates before the data room." },
-  { icon: "check", title: "Full audit trail", body: "Every view, download and signature on the record — admissible process history." },
-  { icon: "users", title: "Founder control", body: "Eight approval gates. Nothing moves to the next stage without your decision." },
-  { icon: "doc", title: "SOC 2 posture", body: "Encrypted at rest and in transit; permissioned access; data residency respected." },
+  { icon: "lock", title: "gov.nda.t", body: "gov.nda.b" },
+  { icon: "shield", title: "gov.verify.t", body: "gov.verify.b" },
+  { icon: "check", title: "gov.audit.t", body: "gov.audit.b" },
+  { icon: "users", title: "gov.control.t", body: "gov.control.b" },
+  { icon: "doc", title: "gov.soc.t", body: "gov.soc.b" },
 ];
 const CONFIDENCE_TIERS = [
   { tier: "Verified", color: "#059669", basis: "Disclosed in a public filing", detail: "Headline value, dates and parties confirmed against the primary source." },
