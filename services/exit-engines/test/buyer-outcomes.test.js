@@ -38,12 +38,13 @@ test('premiumPct returns undefined when prior price missing', () => {
   assert.equal(premiumPct(ev), undefined);
 });
 
-test('rollupBuyerOutcomes — Salesforce won every disclosed deal in snapshot', () => {
+test('rollupBuyerOutcomes — Salesforce closed every deal except the LinkedIn lost bid', () => {
   const r = rollupBuyerOutcomes('Salesforce Acquisition Office');
   assert.ok(r.closedCount >= 4);
-  assert.equal(r.lostCount, 0);
+  // 2016: lost LinkedIn to Microsoft — on record as a lost bid
+  assert.equal(r.lostCount, 1);
   assert.equal(r.withdrawnCount, 0);
-  assert.equal(r.closeRatePct, 1.0);
+  assert.ok(r.closeRatePct < 1.0 && r.closeRatePct > 0.7);
 });
 
 test('rollupBuyerOutcomes — Adobe Figma termination counts as withdrawn', () => {

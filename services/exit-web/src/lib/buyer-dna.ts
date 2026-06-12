@@ -22,6 +22,13 @@ export interface DnaProfile {
   appetite: "high" | "medium" | "low" | "no_events";
   sector_tokens: Array<{ token: string; count: number }>;
   verified_events: number;
+  // DNA v2 — Phase 3/4 derivations (present when the sample supports them)
+  frequency_per_year?: number;
+  preferred_geography?: Array<{ country: string; count: number }>;
+  premium_pct?: number;
+  close_rate?: number;
+  median_close_days?: number;
+  currently_seeking?: string[];
   source_url: string;
 }
 

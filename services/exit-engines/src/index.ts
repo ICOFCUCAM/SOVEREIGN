@@ -9,6 +9,7 @@ export * as negotiation  from './negotiation/index.js';
 export * as listing      from './listing/index.js';
 export * as captable     from './captable/index.js';
 export * as nda          from './nda/index.js';
+export * as exchange     from './exchange/index.js';
 
 // Top-level convenience re-exports — the most common entrypoints.
 export { runValuation, strategicBuyerReport, assetReplacementReport, tenMillionReport, twentyFiveMillionReport } from './valuation/index.js';
@@ -36,6 +37,12 @@ export type { BuyerEntry, BuyerType } from './buyers/registry.js';
 export { rollupBuyerHistory, rollupBuyerOutcomes, compareOutcomes, closeDurationDays, premiumPct, computeExpectedOutcome, confidenceFromSample, runStrategySimulator, ACQUISITION_HISTORY } from './buyers/index.js';
 export { runAcquisitionIntelligence, assessIntent, buildAcquisitionGraph, discoverAdjacentBuyers } from './buyers/index.js';
 export type { AcquisitionIntelligenceReport, RankedOutcome, PipelineLayer, IntelligenceOptions, BuyerIntent, IntentSignal, GraphEdge, AdjacentBuyer } from './buyers/index.js';
+export { buildBuyerGraph, runSimilarTransactions } from './buyers/index.js';
+export type { BuyerGraph, GraphEntity, GraphEntityProps, GraphRelation, RelKind, SimilarTransactionsReport, SimilarExit } from './buyers/index.js';
+
+// Sovereign Exchange — the mandate state machine
+export { MANDATE_STATES, deriveMandateState } from './exchange/index.js';
+export type { MandateState, MandateStateReport, MandateInputs, StateEvidence } from './exchange/index.js';
 export type {
   AcquisitionEvent, AcquisitionSource, BuyerHistoryRollup, ConfidenceTier,
   BuyerDealOutcomeRollup, OutcomeStandouts,

@@ -18,7 +18,9 @@ export interface RecordMeta {
   readonly source_url: string;
   readonly confidence: Confidence;
   readonly verification_status: VerificationStatus;
-  readonly last_updated: string;           // ISO timestamp of ingestion
+  readonly last_updated: string;           // ISO timestamp (compat alias of last_refreshed)
+  readonly date_collected: string;         // first time this record entered the registry
+  readonly last_refreshed: string;         // most recent re-verification against the source
 }
 
 export interface IngestedBuyer extends RecordMeta {
@@ -67,7 +69,8 @@ export function meta(
   if (!/^https?:\/\//.test(source_url)) {
     throw new Error(`refusing to create record without a real source_url (got: ${source_url})`);
   }
-  return { source, source_url, confidence, verification_status, last_updated: new Date().toISOString() };
+  const now = new Date().toISOString();
+  return { source, source_url, confidence, verification_status, last_updated: now, date_collected: now, last_refreshed: now };
 }
 
 export const slug = (s: string): string =>

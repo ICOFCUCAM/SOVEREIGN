@@ -102,6 +102,11 @@ export const ACQUISITION_HISTORY: readonly AcquisitionEvent[] = [
   // ── Walton Enterprises ─────────────────────────────────────────────
   { buyerName: 'Walton Enterprises', targetName: 'Denver Broncos', announcedDate: '2022-08-09', closedDate: '2022-08-09', headlinePriceUsd: 4_650_000_000, sector: 'media_content', targetGeography: 'US', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'denverbroncos.com 2022-08-09' }], confidence: 'unverified' },
 
+  // ── Lost bids (publicly confirmed) ─────────────────────────────────
+  // Salesforce confirmed bidding for LinkedIn and losing to Microsoft
+  // (Benioff, multiple 2016 interviews; Microsoft closed at $26.2B).
+  { buyerName: 'Salesforce Acquisition Office', targetName: 'LinkedIn', announcedDate: '2016-06-13', headlinePriceUsd: 26_200_000_000, sector: 'enterprise_saas', targetGeography: 'US', status: 'lost_bid', winningBuyerName: 'Microsoft Industry Solutions', sourceRefs: [{ kind: 'press_release', ref: 'news.microsoft.com 2016-06-13' }, { kind: 'wikidata', ref: 'Q213660' }], confidence: 'unverified' },
+
   // ── Uber (freight) ─────────────────────────────────────────────────
   { buyerName: 'Uber Acquisitions', targetName: 'Transplace', announcedDate: '2021-07-22', closedDate: '2021-11-12', headlinePriceUsd: 2_250_000_000, sector: 'logistics_freight', targetGeography: 'US', status: 'closed', sourceRefs: [{ kind: 'press_release', ref: 'investor.uber.com 2021-07-22' }, { kind: 'wikidata', ref: 'Q7835154' }], confidence: 'unverified' },
 

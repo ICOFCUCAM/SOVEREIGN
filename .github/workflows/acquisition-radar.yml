@@ -1,0 +1,65 @@
+# ── PHASE 6 · ACQUISITION RADAR — the daily heartbeat ────────────────
+# Re-ingests the acquisition registries from primary sources (Wikipedia,
+# Wikidata, SEC EDGAR), rebuilds Acquisition DNA, detects deltas
+# (appetite changes, new acquisitions, cadence shifts) and commits the
+# refreshed datasets. GitHub runners have open egress, so this runs the
+# same pipelines the sandbox can't. Buyer scores update daily.
+
+name: acquisition-radar
+
+on:
+  schedule:
+    - cron: "20 5 * * *"      # daily 05:20 UTC — off the SEC's peak hours
+  workflow_dispatch: {}        # manual trigger
+
+permissions:
+  contents: write
+
+concurrency:
+  group: acquisition-radar
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install engine dependencies
+        working-directory: services/exit-engines
+        run: npm ci || npm install
+
+      - name: Ingest registries (primary sources, full provenance)
+        working-directory: services/exit-engines
+        run: npm run ingest
+
+      - name: Validate provenance contract
+        working-directory: services/exit-engines
+        run: npm run ingest:validate
+
+      - name: Rebuild Acquisition DNA + detect radar deltas
+        working-directory: services/exit-engines
+        run: |
+          npm run dna
+          node dist/scripts/radar/refresh.js
+
+      - name: Run engine test suite against the fresh data
+        working-directory: services/exit-engines
+        run: npm test
+
+      - name: Commit refreshed registries
+        run: |
+          git config user.name "exitos-radar[bot]"
+          git config user.email "radar@sovereigndo.com"
+          git add services/exit-engines/data/
+          if git diff --cached --quiet; then
+            echo "radar: no changes today"
+          else
+            git commit -m "radar: daily registry refresh ($(date -u +%F))"
+            git push
+          fi

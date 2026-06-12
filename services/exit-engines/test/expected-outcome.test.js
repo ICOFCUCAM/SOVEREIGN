@@ -113,8 +113,11 @@ test('expected_outcome ranking can promote a high-close-rate buyer above a high-
 test('rollup → expectedOutcome composition matches end-to-end', () => {
   const outcomes = rollupBuyerOutcomes('Salesforce Acquisition Office');
   const eo = computeExpectedOutcome(FAKE_BUYER, outcomes, 100_000_000);
-  // SF closed all and averaged ~42% premium, so expectedClosing should be
-  // close to 100M × 1.42 × 1.0 = 142M.
-  assert.ok(eo.expectedClosingUsd > 130_000_000 && eo.expectedClosingUsd < 150_000_000,
-    `expected ~140M, got ${eo.expectedClosingUsd}`);
+  // SF averaged ~42% premium but the LinkedIn lost bid drags close rate
+  // below 1.0, so expectedClosing lands under the headline 142M and the
+  // composition must reflect that haircut honestly.
+  assert.ok(eo.expectedClosingUsd > 100_000_000 && eo.expectedClosingUsd < 142_000_000,
+    `expected 100–142M, got ${eo.expectedClosingUsd}`);
+  assert.ok(eo.expectedClosingUsd < 142_000_000 * outcomes.closeRatePct + 1,
+    'lost bid haircut is applied, not ignored');
 });

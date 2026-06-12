@@ -16,3 +16,7 @@ export { buildAcquisitionGraph, discoverAdjacentBuyers } from './graph.js';
 export type { GraphEdge, AdjacentBuyer } from './graph.js';
 export { runAcquisitionIntelligence } from './intelligence.js';
 export type { AcquisitionIntelligenceReport, RankedOutcome, PipelineLayer, IntelligenceOptions } from './intelligence.js';
+export { buildBuyerGraph } from './property-graph.js';
+export type { BuyerGraph, GraphEntity, GraphEntityProps, GraphRelation, RelKind } from './property-graph.js';
+export { runSimilarTransactions } from './similar.js';
+export type { SimilarTransactionsReport, SimilarExit } from './similar.js';

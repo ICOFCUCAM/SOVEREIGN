@@ -46,6 +46,17 @@ const DnaCard: React.FC<{ p: DnaProfile }> = ({ p }) => {
         <Row k="Average deal size" v={p.avg_deal_usd ? `${fmtUsdShort(p.avg_deal_usd)} (n=${p.disclosed_events} disclosed)` : "undisclosed"} />
         <Row k="Maximum historical" v={p.max_deal ? `${fmtUsdShort(p.max_deal.usd)} — ${p.max_deal.target}` : "—"} />
         <Row k="Cadence" v={`${p.deals_12m} last 12m · ${p.deals_3y} last 3y · ${p.events_indexed} indexed`} />
+        {p.frequency_per_year != null && <Row k="Frequency" v={`${p.frequency_per_year} deals / year`} />}
+        {p.preferred_geography && p.preferred_geography.length > 0 && (
+          <Row k="Geography" v={p.preferred_geography.slice(0, 3).map((g) => g.country).join(" · ")} />
+        )}
+        {(p.premium_pct != null || p.median_close_days != null) && (
+          <Row k="Premium · speed" v={`${p.premium_pct != null ? `+${Math.round(p.premium_pct * 100)}% over reference` : "premium undisclosed"}${p.median_close_days != null ? ` · ${p.median_close_days}d to close` : ""}`} />
+        )}
+        {p.close_rate != null && <Row k="Close rate" v={`${Math.round(p.close_rate * 100)}% of announced deals completed`} />}
+        {p.currently_seeking && p.currently_seeking.length > 0 && (
+          <Row k="Currently seeking" v={<span className="text-loi-300">{p.currently_seeking.slice(0, 3).join(" · ")}</span>} />
+        )}
         {overlap.pct > 0 && (
           <Row k="Your overlap" v={<span className="font-mono font-bold text-deal-300">{overlap.pct}%{overlap.matched.length ? ` · ${overlap.matched.join(", ")}` : ""}</span>} />
         )}

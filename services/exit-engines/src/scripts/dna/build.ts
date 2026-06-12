@@ -9,6 +9,8 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { rollupBuyerOutcomes } from '../../buyers/outcomes.js';
+import { BUYER_REGISTRY } from '../../buyers/registry.js';
 
 interface Ev {
   buyer_id: string; buyer_name: string; target_name: string;
@@ -35,6 +37,14 @@ export interface BuyerDna {
   appetite: 'high' | 'medium' | 'low' | 'no_events';
   sector_tokens: Array<{ token: string; count: number }>;
   verified_events: number;                     // sec_edgar-verified or corroborated
+  // Phase 3 — full DNA
+  frequency_per_year?: number;                 // events / active-year span
+  preferred_geography: Array<{ country: string; count: number }>;
+  premium_pct?: number;                        // from the curated outcome record
+  close_rate?: number;
+  median_close_days?: number;
+  // Phase 4 — strategic intent inference (what they're buying NOW)
+  currently_seeking: string[];                 // sector tokens from last-3y events
   // provenance
   derived_from: 'acquisition_events.json';
   source_url: string;                          // the buyer's registry source
@@ -106,6 +116,29 @@ export function buildDna(): { dna: BuyerDna[]; asOf: string } {
     const tokens = new Map<string, number>();
     for (const e of evs) if (e.industry) for (const t of tokenize(e.industry)) tokens.set(t, (tokens.get(t) ?? 0) + 1);
 
+    // Phase 3: frequency + geography preference
+    const spanYears = dated.length >= 2
+      ? (new Date(dated.at(-1)!.announced_date!).getTime() - new Date(dated[0]!.announced_date!).getTime()) / (365 * 86_400_000)
+      : 0;
+    const freq = spanYears > 0.5 ? +(dated.length / spanYears).toFixed(1) : undefined;
+    const geo = new Map<string, number>();
+    for (const e of evs) if (e.country) geo.set(e.country, (geo.get(e.country) ?? 0) + 1);
+
+    // Phase 3: premium / close-rate / speed from the curated outcome record,
+    // matched by normalized-name containment (curated desks carry suffixes)
+    const normName = b.name.toLowerCase();
+    const curated = BUYER_REGISTRY.find((r) => {
+      const rn = r.name.toLowerCase();
+      return rn.includes(normName) || normName.includes(rn.split(' ')[0]!.toLowerCase()) && rn.startsWith(normName.split(' ')[0]!);
+    });
+    const outcomes = curated ? rollupBuyerOutcomes(curated.name) : undefined;
+
+    // Phase 4: strategic intent — what they are buying NOW (last 3 years)
+    const recentTokens = new Map<string, number>();
+    for (const e of dated.filter((x) => asOfMs - new Date(x.announced_date!).getTime() <= 3 * 365 * 86_400_000)) {
+      if (e.industry) for (const t of tokenize(e.industry)) recentTokens.set(t, (recentTokens.get(t) ?? 0) + 1);
+    }
+
     return {
       buyer_id: b.buyer_id,
       name: b.name,
@@ -121,6 +154,12 @@ export function buildDna(): { dna: BuyerDna[]; asOf: string } {
       appetite: evs.length === 0 ? 'no_events' : deals12 >= 2 ? 'high' : deals36 >= 1 ? 'medium' : 'low',
       sector_tokens: [...tokens.entries()].sort((a, z) => z[1] - a[1]).slice(0, 6).map(([token, count]) => ({ token, count })),
       verified_events: evs.filter((e) => e.verification_status !== 'unverified').length,
+      ...(freq !== undefined ? { frequency_per_year: freq } : {}),
+      preferred_geography: [...geo.entries()].sort((a, z) => z[1] - a[1]).slice(0, 4).map(([country, count]) => ({ country, count })),
+      ...(outcomes?.avgPremiumPct != null ? { premium_pct: outcomes.avgPremiumPct } : {}),
+      ...(outcomes?.closeRatePct != null ? { close_rate: outcomes.closeRatePct } : {}),
+      ...(outcomes?.medianCloseDays != null ? { median_close_days: outcomes.medianCloseDays } : {}),
+      currently_seeking: [...recentTokens.entries()].sort((a, z) => z[1] - a[1]).slice(0, 4).map(([t]) => t),
       derived_from: 'acquisition_events.json',
       source_url: b.source_url,
       generated_at,

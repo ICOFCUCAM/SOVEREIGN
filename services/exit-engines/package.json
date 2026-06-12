@@ -50,6 +50,10 @@
     "./nda": {
       "types": "./dist/nda/index.d.ts",
       "import": "./dist/nda/index.js"
+    },
+    "./exchange": {
+      "types": "./dist/exchange/index.d.ts",
+      "import": "./dist/exchange/index.js"
     }
   },
   "files": [
@@ -64,7 +68,8 @@
     "ingest": "npm run build && node dist/scripts/ingest/run.js",
     "ingest:smoke": "npm run build && node dist/scripts/ingest/run.js --pages 8 --no-wikidata",
     "ingest:validate": "npm run build && node dist/scripts/ingest/validate.js",
-    "dna": "npm run build && node dist/scripts/dna/build.js"
+    "dna": "npm run build && node dist/scripts/dna/build.js",
+    "radar": "npm run build && node dist/scripts/radar/refresh.js"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",
