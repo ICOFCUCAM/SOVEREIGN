@@ -1,5 +1,5 @@
 {
- "as_of": "2026-06-12T15:19:02.117Z",
+ "as_of": "2026-06-12T15:30:02.289Z",
  "profiles": [
   {
    "buyer_id": "microsoft",
@@ -75,7 +75,7 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q2283",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "sony",
@@ -149,25 +149,25 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q41187",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "alphabet",
    "name": "Alphabet",
    "buyer_type": "corporate",
-   "events_indexed": 270,
-   "disclosed_events": 62,
+   "events_indexed": 285,
+   "disclosed_events": 66,
    "last_acquisition": {
     "date": "2025-12-22",
-    "target": "December 22, 2025"
+    "target": "Intersect"
    },
    "max_deal": {
     "usd": 32000000000,
-    "target": "March 2025"
+    "target": "Wiz"
    },
-   "avg_deal_usd": 1394406452,
+   "avg_deal_usd": 1323578788,
    "deals_12m": 2,
-   "deals_3y": 10,
+   "deals_3y": 11,
    "appetite": "high",
    "sector_tokens": [
     {
@@ -176,7 +176,7 @@
     },
     {
      "token": "online advertising",
-     "count": 5
+     "count": 6
     },
     {
      "token": "social networking service",
@@ -196,19 +196,19 @@
     }
    ],
    "verified_events": 0,
-   "frequency_per_year": 10.3,
+   "frequency_per_year": 10.9,
    "preferred_geography": [
     {
      "country": "—",
-     "count": 110
+     "count": 115
     },
     {
      "country": "United States",
-     "count": 51
+     "count": 55
     },
     {
      "country": "Canada",
-     "count": 12
+     "count": 14
     },
     {
      "country": "Israel",
@@ -223,7 +223,7 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q20800404",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "cisco",
@@ -297,7 +297,7 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q173395",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "ibm",
@@ -371,7 +371,7 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q37156",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "disney",
@@ -415,7 +415,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q7414",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "amazon",
@@ -491,54 +491,7 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q3884",
-   "generated_at": "2026-06-12T15:19:03.139Z"
-  },
-  {
-   "buyer_id": "oracle",
-   "name": "Oracle",
-   "buyer_type": "corporate",
-   "events_indexed": 166,
-   "disclosed_events": 0,
-   "last_acquisition": {
-    "date": "2022-05-06",
-    "target": "May 6, 2022"
-   },
-   "deals_12m": 0,
-   "deals_3y": 0,
-   "appetite": "low",
-   "sector_tokens": [
-    {
-     "token": "software",
-     "count": 6
-    },
-    {
-     "token": "management",
-     "count": 3
-    },
-    {
-     "token": "cloud",
-     "count": 2
-    },
-    {
-     "token": "business intelligence",
-     "count": 2
-    },
-    {
-     "token": "product lifecycle management",
-     "count": 2
-    },
-    {
-     "token": "enterprise content management",
-     "count": 2
-    }
-   ],
-   "verified_events": 1,
-   "frequency_per_year": 5.4,
-   "preferred_geography": [],
-   "currently_seeking": [],
-   "derived_from": "acquisition_events.json",
-   "source_url": "https://www.wikidata.org/wiki/Q19900",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "apple",
@@ -612,7 +565,125 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q312",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
+  },
+  {
+   "buyer_id": "oracle",
+   "name": "Oracle",
+   "buyer_type": "corporate",
+   "events_indexed": 155,
+   "disclosed_events": 0,
+   "last_acquisition": {
+    "date": "2022-05-06",
+    "target": "AdiInsights"
+   },
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [
+    {
+     "token": "software",
+     "count": 6
+    },
+    {
+     "token": "management",
+     "count": 3
+    },
+    {
+     "token": "enterprise content management",
+     "count": 3
+    },
+    {
+     "token": "retail industry solutions",
+     "count": 3
+    },
+    {
+     "token": "cloud",
+     "count": 2
+    },
+    {
+     "token": "applications",
+     "count": 2
+    }
+   ],
+   "verified_events": 1,
+   "frequency_per_year": 5.2,
+   "preferred_geography": [],
+   "currently_seeking": [],
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q19900",
+   "generated_at": "2026-06-12T15:30:03.334Z"
+  },
+  {
+   "buyer_id": "hewlett-packard",
+   "name": "Hewlett-Packard",
+   "buyer_type": "corporate",
+   "events_indexed": 141,
+   "disclosed_events": 36,
+   "last_acquisition": {
+    "date": "2024-01-10",
+    "target": "Juniper Networks (by HPE)"
+   },
+   "max_deal": {
+    "usd": 25000000000,
+    "target": "Compaq"
+   },
+   "avg_deal_usd": 2592899389,
+   "deals_12m": 0,
+   "deals_3y": 1,
+   "appetite": "medium",
+   "sector_tokens": [
+    {
+     "token": "computer software",
+     "count": 31
+    },
+    {
+     "token": "information technology",
+     "count": 12
+    },
+    {
+     "token": "information technology consulting",
+     "count": 7
+    },
+    {
+     "token": "automatic test equipment",
+     "count": 4
+    },
+    {
+     "token": "computer networking",
+     "count": 4
+    },
+    {
+     "token": "data storage",
+     "count": 4
+    }
+   ],
+   "verified_events": 0,
+   "frequency_per_year": 2,
+   "preferred_geography": [
+    {
+     "country": "United States",
+     "count": 101
+    },
+    {
+     "country": "Germany",
+     "count": 5
+    },
+    {
+     "country": "Israel",
+     "count": 5
+    },
+    {
+     "country": "United Kingdom",
+     "count": 5
+    }
+   ],
+   "currently_seeking": [
+    "computer networking"
+   ],
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q80978",
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "nortonlifelock",
@@ -681,7 +752,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q677085",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "symantec",
@@ -750,7 +821,76 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q677085",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
+  },
+  {
+   "buyer_id": "aol",
+   "name": "AOL",
+   "buyer_type": "corporate",
+   "events_indexed": 124,
+   "disclosed_events": 30,
+   "last_acquisition": {
+    "date": "2020-04-30",
+    "target": "Xandr"
+   },
+   "max_deal": {
+    "usd": 183000000000,
+    "target": "Time Warner"
+   },
+   "avg_deal_usd": 6481502700,
+   "deals_12m": 0,
+   "deals_3y": 0,
+   "appetite": "low",
+   "sector_tokens": [
+    {
+     "token": "mobile applications",
+     "count": 4
+    },
+    {
+     "token": "web browser",
+     "count": 3
+    },
+    {
+     "token": "internet service provider",
+     "count": 2
+    },
+    {
+     "token": "search engine",
+     "count": 2
+    },
+    {
+     "token": "media player",
+     "count": 2
+    },
+    {
+     "token": "telecommunications",
+     "count": 2
+    }
+   ],
+   "verified_events": 0,
+   "frequency_per_year": 2.9,
+   "preferred_geography": [
+    {
+     "country": "USA",
+     "count": 68
+    },
+    {
+     "country": "ISR",
+     "count": 5
+    },
+    {
+     "country": "CAN",
+     "count": 1
+    },
+    {
+     "country": "DEU",
+     "count": 1
+    }
+   ],
+   "currently_seeking": [],
+   "derived_from": "acquisition_events.json",
+   "source_url": "https://www.wikidata.org/wiki/Q191715",
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "yahoo",
@@ -823,76 +963,7 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q29231846",
-   "generated_at": "2026-06-12T15:19:03.139Z"
-  },
-  {
-   "buyer_id": "aol",
-   "name": "AOL",
-   "buyer_type": "corporate",
-   "events_indexed": 118,
-   "disclosed_events": 28,
-   "last_acquisition": {
-    "date": "2020-04-30",
-    "target": "Xandr"
-   },
-   "max_deal": {
-    "usd": 183000000000,
-    "target": "11 January 2001"
-   },
-   "avg_deal_usd": 6932502893,
-   "deals_12m": 0,
-   "deals_3y": 0,
-   "appetite": "low",
-   "sector_tokens": [
-    {
-     "token": "web browser",
-     "count": 3
-    },
-    {
-     "token": "mobile applications",
-     "count": 3
-    },
-    {
-     "token": "internet service provider",
-     "count": 2
-    },
-    {
-     "token": "search engine",
-     "count": 2
-    },
-    {
-     "token": "telecommunications",
-     "count": 2
-    },
-    {
-     "token": "video search engine",
-     "count": 2
-    }
-   ],
-   "verified_events": 0,
-   "frequency_per_year": 2.7,
-   "preferred_geography": [
-    {
-     "country": "USA",
-     "count": 62
-    },
-    {
-     "country": "ISR",
-     "count": 5
-    },
-    {
-     "country": "CAN",
-     "count": 1
-    },
-    {
-     "country": "DEU",
-     "count": 1
-    }
-   ],
-   "currently_seeking": [],
-   "derived_from": "acquisition_events.json",
-   "source_url": "https://www.wikidata.org/wiki/Q191715",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "meta-platforms",
@@ -960,78 +1031,7 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q380",
-   "generated_at": "2026-06-12T15:19:03.139Z"
-  },
-  {
-   "buyer_id": "hewlett-packard",
-   "name": "Hewlett-Packard",
-   "buyer_type": "corporate",
-   "events_indexed": 109,
-   "disclosed_events": 32,
-   "last_acquisition": {
-    "date": "2024-01-10",
-    "target": "July 2, 2025"
-   },
-   "max_deal": {
-    "usd": 25000000000,
-    "target": "May 3, 2002"
-   },
-   "avg_deal_usd": 2895714031,
-   "deals_12m": 0,
-   "deals_3y": 1,
-   "appetite": "medium",
-   "sector_tokens": [
-    {
-     "token": "computer software",
-     "count": 16
-    },
-    {
-     "token": "information technology",
-     "count": 10
-    },
-    {
-     "token": "automatic test equipment",
-     "count": 4
-    },
-    {
-     "token": "information technology consulting",
-     "count": 4
-    },
-    {
-     "token": "computer security",
-     "count": 3
-    },
-    {
-     "token": "printing",
-     "count": 3
-    }
-   ],
-   "verified_events": 0,
-   "frequency_per_year": 1.3,
-   "preferred_geography": [
-    {
-     "country": "United States",
-     "count": 76
-    },
-    {
-     "country": "Israel",
-     "count": 5
-    },
-    {
-     "country": "United Kingdom",
-     "count": 4
-    },
-    {
-     "country": "Germany",
-     "count": 3
-    }
-   ],
-   "currently_seeking": [
-    "computer networking"
-   ],
-   "derived_from": "acquisition_events.json",
-   "source_url": "https://www.wikidata.org/wiki/Q80978",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "nokia",
@@ -1075,7 +1075,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q1418",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "electronic-arts",
@@ -1146,7 +1146,7 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q173941",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "adobe",
@@ -1217,7 +1217,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q11463",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "sap",
@@ -1261,7 +1261,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q552581",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "ebay",
@@ -1332,7 +1332,7 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q58024",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "embracer-group",
@@ -1376,7 +1376,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q65083539",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "twitter",
@@ -1445,7 +1445,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q1390577",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "take-two-interactive",
@@ -1489,7 +1489,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q94933",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "citrix",
@@ -1548,7 +1548,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q916196",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "accenture",
@@ -1592,7 +1592,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q338825",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "dell",
@@ -1664,7 +1664,7 @@
    ],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q30873",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "advania",
@@ -1724,7 +1724,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q4686399",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "blackberry",
@@ -1793,7 +1793,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q502121",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "kkr",
@@ -1817,7 +1817,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q1570773",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "juniper-networks",
@@ -1886,7 +1886,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q1049080",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "google",
@@ -1908,7 +1908,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q95",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "blackstone-inc",
@@ -1930,7 +1930,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q880942",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "tpg-inc",
@@ -1954,7 +1954,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q2164606",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "carlyle-group",
@@ -1976,7 +1976,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q926806",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "bain-capital",
@@ -1998,7 +1998,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q803873",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "advent-international",
@@ -2020,7 +2020,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q379801",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "vista-equity-partners",
@@ -2044,7 +2044,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q7936440",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "apax-partners",
@@ -2066,7 +2066,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q618098",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "silver-lake",
@@ -2087,7 +2087,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q1676442",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "warburg-pincus",
@@ -2108,7 +2108,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q1300943",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "francisco-partners",
@@ -2130,7 +2130,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q3045904",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "eqt-ab",
@@ -2152,7 +2152,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q1275733",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "salesforce",
@@ -2172,7 +2172,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q941127",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "intuit",
@@ -2193,7 +2193,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q1318848",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "thoma-bravo",
@@ -2218,7 +2218,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q7786759",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "permira",
@@ -2240,7 +2240,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q662030",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "thq-nordic",
@@ -2262,7 +2262,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q65083539",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "ca-technologies",
@@ -2283,7 +2283,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q600624",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "block-inc",
@@ -2300,7 +2300,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q110778747",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "servicenow",
@@ -2319,7 +2319,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q7455653",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "hubspot",
@@ -2336,7 +2336,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q5926631",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "atlassian",
@@ -2353,7 +2353,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q757307",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "twilio",
@@ -2370,7 +2370,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q7858039",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "snowflake",
@@ -2387,7 +2387,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q56118381",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "datadog",
@@ -2404,7 +2404,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q16248637",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "paypal",
@@ -2421,7 +2421,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q135683185",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "shopify",
@@ -2440,7 +2440,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q7501150",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "workday",
@@ -2457,7 +2457,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q8034666",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "insight-partners",
@@ -2476,7 +2476,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q6038111",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "hg-capital",
@@ -2493,7 +2493,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://www.wikidata.org/wiki/Q60748773",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "government-pension-fund-global",
@@ -2511,7 +2511,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "safe-investment-company",
@@ -2529,7 +2529,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "china-investment-corporation",
@@ -2547,7 +2547,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "abu-dhabi-investment-authority",
@@ -2565,7 +2565,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "kuwait-investment-authority",
@@ -2583,7 +2583,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "gic-private-limited",
@@ -2601,7 +2601,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "public-investment-fund",
@@ -2619,7 +2619,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "daya-anagata-nusantara-investment-management-agency",
@@ -2637,7 +2637,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "qatar-investment-authority",
@@ -2655,7 +2655,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "exchange-fund",
@@ -2673,7 +2673,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "central-provident-fund",
@@ -2691,7 +2691,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "national-council-for-social-security-fund",
@@ -2709,7 +2709,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "investment-corporation-of-dubai",
@@ -2727,7 +2727,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "turkey-wealth-fund",
@@ -2745,7 +2745,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "mubadala-investment-company",
@@ -2763,7 +2763,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "temasek-holdings",
@@ -2781,7 +2781,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "future-fund",
@@ -2799,7 +2799,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "abu-dhabi-developmental-holding-company",
@@ -2817,7 +2817,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "korea-investment-corporation",
@@ -2835,7 +2835,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "national-development-fund",
@@ -2853,7 +2853,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "russian-national-wealth-fund",
@@ -2871,7 +2871,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "emirates-investment-authority",
@@ -2889,7 +2889,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "samruk-kazyna",
@@ -2907,7 +2907,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "dubai-world",
@@ -2925,7 +2925,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "alaska-permanent-fund",
@@ -2943,7 +2943,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "brunei-investment-agency",
@@ -2961,7 +2961,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "libyan-investment-authority",
@@ -2979,7 +2979,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "oman-investment-fund",
@@ -2997,7 +2997,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "texas-permanent-school-fund",
@@ -3015,7 +3015,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "kazakhstan-national-fund",
@@ -3033,7 +3033,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "state-oil-fund-of-the-republic-of-azerbaijan",
@@ -3051,7 +3051,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "ethiopian-investment-holdings",
@@ -3069,7 +3069,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "osterreichische-beteiligungs-ag",
@@ -3087,7 +3087,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "texas-permanent-university-fund",
@@ -3105,7 +3105,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "khazanah-nasional",
@@ -3123,7 +3123,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "new-zealand-superannuation-fund",
@@ -3141,7 +3141,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "bpifrance",
@@ -3159,7 +3159,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "new-mexico-land-grant-permanent-fund",
@@ -3177,7 +3177,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "russian-direct-investment-fund",
@@ -3195,7 +3195,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "nuclear-waste-disposal-fund",
@@ -3213,7 +3213,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "government-pension-fund-norway",
@@ -3231,7 +3231,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "papua-new-guinea-sovereign-wealth-fund",
@@ -3249,7 +3249,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "alberta-heritage-savings-trust-fund",
@@ -3267,7 +3267,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "mumtalakat-holding-company",
@@ -3285,7 +3285,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "timor-leste-petroleum-fund",
@@ -3303,7 +3303,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "ireland-strategic-investment-fund",
@@ -3321,7 +3321,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "japan-investment-corporation",
@@ -3339,7 +3339,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "fondo-de-ahorro-y-estabilizacion-petrolera",
@@ -3357,7 +3357,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "growthfund",
@@ -3375,7 +3375,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "economic-and-social-stabilization-fund",
@@ -3393,7 +3393,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "pension-reserve-fund",
@@ -3411,7 +3411,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "permanent-wyoming-mineral-trust-fund",
@@ -3429,7 +3429,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "maharlika-investment-fund",
@@ -3447,7 +3447,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "future-ireland-fund",
@@ -3465,7 +3465,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "north-dakota-legacy-fund",
@@ -3483,7 +3483,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "new-mexico-severance-tax-permanent-fund",
@@ -3501,7 +3501,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "national-wealth-fund",
@@ -3519,7 +3519,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "indonesia-investment-authority",
@@ -3537,7 +3537,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "pakistan-sovereign-wealth-fund",
@@ -3555,7 +3555,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "fondo-mexicano-del-petroleo-para-la-estabilizacion-y-el-desarrol",
@@ -3573,7 +3573,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "heritage-and-stabilization-fund",
@@ -3591,7 +3591,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "national-investment-and-infrastructure-fund",
@@ -3609,7 +3609,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "china-africa-development-fund",
@@ -3627,7 +3627,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "fiscal-stabilization-fund",
@@ -3645,7 +3645,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "cassa-depositi-e-prestiti-equity",
@@ -3663,7 +3663,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "pula-fund",
@@ -3681,7 +3681,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "alabama-trust-fund",
@@ -3699,7 +3699,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "idaho-endowment-fund-investment-board",
@@ -3717,7 +3717,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "utah-school-and-institutional-trust-funds-office",
@@ -3735,7 +3735,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "state-capital-investment-corporation",
@@ -3753,7 +3753,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "nigeria-sovereign-investment-authority",
@@ -3771,7 +3771,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "fundo-soberano-de-angola",
@@ -3789,7 +3789,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "israeli-citizens-fund",
@@ -3807,7 +3807,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "federale-participatie--en-investeringsmaatschappij-fr",
@@ -3825,7 +3825,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "ras-al-khaimah-investment-authority",
@@ -3843,7 +3843,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "sharjah-asset-management-holding",
@@ -3861,7 +3861,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "oregon-common-school-fund",
@@ -3879,7 +3879,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "awqaf-and-islamic-affairs-fund",
@@ -3897,7 +3897,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "fondo-de-ahorro-de-panama",
@@ -3915,7 +3915,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "louisiana-education-quality-trust-fund",
@@ -3933,7 +3933,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "wisconsin-board-of-commissioners-of-public-lands",
@@ -3951,7 +3951,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "colorado-public-school-fund-endowment-board",
@@ -3969,7 +3969,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "fonds-gabonais-dinvestissements-strategiques",
@@ -3987,7 +3987,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "palestine-investment-fund",
@@ -4005,7 +4005,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "ghana-petroleum-funds",
@@ -4023,7 +4023,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "western-australian-future-fund",
@@ -4041,7 +4041,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "turkmenistan-stabilization-fund",
@@ -4059,7 +4059,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "fondo-para-la-revolucion-industrial-productiva",
@@ -4077,7 +4077,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "revenue-equalization-reserve-fund",
@@ -4095,7 +4095,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "fonds-de-reserves-pour-generations-futures",
@@ -4113,7 +4113,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "agaciro-development-fund",
@@ -4131,7 +4131,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "west-virginia-future-fund",
@@ -4149,7 +4149,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "national-fund-for-hydrocarbon-reserves",
@@ -4167,7 +4167,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "chinggis-fund-future-heritage-fund",
@@ -4185,7 +4185,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "bayelsa-development-and-investment-corporation",
@@ -4203,7 +4203,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   },
   {
    "buyer_id": "fonds-souverain-dinvestissement-strategiques",
@@ -4221,7 +4221,7 @@
    "currently_seeking": [],
    "derived_from": "acquisition_events.json",
    "source_url": "https://en.wikipedia.org/wiki/List_of_sovereign_wealth_funds",
-   "generated_at": "2026-06-12T15:19:03.139Z"
+   "generated_at": "2026-06-12T15:30:03.334Z"
   }
  ]
 }

@@ -1,5 +1,5 @@
 {
- "as_of": "2026-06-12T15:19:02.117Z",
+ "as_of": "2026-06-12T15:30:02.289Z",
  "tokens": [
   "logistic",
   "freight",
@@ -13,7 +13,7 @@
  "transactions": [
   {
    "buyer": "Alphabet",
-   "target": "June 5, 2024",
+   "target": "Cameyo",
    "date": "2024-06-05",
    "value_usd": null,
    "industry": "Virtual app delivery",
@@ -23,7 +23,7 @@
   },
   {
    "buyer": "Oracle",
-   "target": "Jan 8, 2014",
+   "target": "Corente",
    "date": "2014-01-01",
    "value_usd": null,
    "industry": "Software for a cloud service delivery in heterogeneous network environments with software-defined networking technologie",
@@ -53,7 +53,7 @@
   },
   {
    "buyer": "Alphabet",
-   "target": "November 30, 2012",
+   "target": "BufferBox",
    "date": "2012-11-30",
    "value_usd": 17000000,
    "industry": "Package delivery",
@@ -103,7 +103,7 @@
   },
   {
    "buyer": "Oracle",
-   "target": "September 2005",
+   "target": "G-Log",
    "date": "2005-09-01",
    "value_usd": null,
    "industry": "Transportation Management Solutions",

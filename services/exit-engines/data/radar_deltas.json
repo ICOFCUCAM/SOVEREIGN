@@ -1,33 +1,33 @@
 {
- "detected_at": "2026-06-12T15:19:03.227Z",
+ "detected_at": "2026-06-12T15:30:03.424Z",
  "count": 3,
  "deltas": [
+  {
+   "buyer_id": "alphabet",
+   "name": "Alphabet",
+   "kind": "new_acquisition",
+   "before": "270",
+   "after": "285",
+   "detail": "+15 indexed event(s) · latest: Intersect",
+   "detected_at": "2026-06-12T15:30:03.423Z"
+  },
   {
    "buyer_id": "hewlett-packard",
    "name": "Hewlett-Packard",
    "kind": "new_acquisition",
-   "before": "99",
-   "after": "109",
-   "detail": "+10 indexed event(s) · latest: July 2, 2025",
-   "detected_at": "2026-06-12T15:19:03.226Z"
+   "before": "109",
+   "after": "141",
+   "detail": "+32 indexed event(s) · latest: Juniper Networks (by HPE)",
+   "detected_at": "2026-06-12T15:30:03.423Z"
   },
   {
-   "buyer_id": "salesforce",
-   "name": "Salesforce",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-06-12T15:19:03.226Z"
-  },
-  {
-   "buyer_id": "salesforce",
-   "name": "Salesforce",
+   "buyer_id": "aol",
+   "name": "AOL",
    "kind": "new_acquisition",
-   "before": "0",
-   "after": "4",
-   "detail": "+4 indexed event(s)",
-   "detected_at": "2026-06-12T15:19:03.226Z"
+   "before": "118",
+   "after": "124",
+   "detail": "+6 indexed event(s) · latest: Xandr",
+   "detected_at": "2026-06-12T15:30:03.423Z"
   }
  ]
 }
