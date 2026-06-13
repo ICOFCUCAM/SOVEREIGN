@@ -25,9 +25,29 @@ const Reveal: React.FC<Props> = ({ children, delay = 0, className = '', y = 28 }
     }
     const el = ref.current;
     if (!el) return;
+
+    // Safety net 1 — if the element is already in the viewport on mount,
+    // show immediately. Covers the case where Reveal wraps async content
+    // (EcosystemAtlas, ranked-buyer lists, etc.) that starts at near-zero
+    // height: a freshly-attached IntersectionObserver samples once, sees
+    // an empty box, and never fires again because IO doesn't re-sample on
+    // child-driven height growth in most browsers.
+    const rect = el.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    if (rect.top < vh && rect.bottom > 0) {
+      setShown(true);
+      return;
+    }
+
+    // Safety net 2 — hard timeout. If the observer hasn't fired within
+    // 1.5s, show the content anyway. Prevents the "invisible until click"
+    // failure mode permanently, regardless of the underlying cause.
+    const fallback = window.setTimeout(() => setShown(true), 1500);
+
     const io = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
+          window.clearTimeout(fallback);
           setShown(true);
           io.disconnect();
         }
@@ -35,7 +55,10 @@ const Reveal: React.FC<Props> = ({ children, delay = 0, className = '', y = 28 }
       { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
     );
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      window.clearTimeout(fallback);
+      io.disconnect();
+    };
   }, []);
 
   return (
