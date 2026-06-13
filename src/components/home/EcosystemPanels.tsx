@@ -46,10 +46,35 @@ const PILLARS: Pillar[] = [
   { label: 'Infrastructure', desc: 'Sovereign cloud & edge', icon: Server, accent: '#00E599', anchor: 'operations' },
 ];
 
+// Hardcoded fallback so the LEFT flagship panel always renders, even
+// when the ecosystem_products query returns nothing (fresh environment,
+// transient DB outage, RLS misconfiguration). National Shell is the
+// canonical flagship; this object mirrors the shape the query would
+// have returned for slug='civicos-national-shell'.
+const FALLBACK_FLAGSHIP: EcosystemProduct = {
+  id: 'fallback-civicos-national-shell',
+  slug: 'civicos-national-shell',
+  name: 'CivicOS · National Shell',
+  category: 'Sovereign government',
+  tagline: 'A whole-of-government operating runtime — civic, electoral, fiscal and identity systems on one deployable spine.',
+  description: null,
+  capabilities: [],
+  status: 'Operational',
+  accent: '#00C2FF',
+  source_project_ref: null,
+  is_featured: true,
+  sort_order: 0,
+  metrics: [
+    { label: 'Deployment value', value: 'Sovereign-scale' },
+    { label: 'Scope',            value: 'Whole-of-government' },
+    { label: 'Class',            value: 'Flagship infrastructure' },
+  ],
+};
+
 // ── LEFT · sovereign acquisition terminal (driven by featured infrastructure) ──
 const AcquisitionTerminal: React.FC<{ assets: EcosystemProduct[] }> = ({ assets }) => {
-  if (assets.length === 0) return null;
-  const [flag, ...rest] = assets;
+  const effective = assets.length > 0 ? assets : [FALLBACK_FLAGSHIP];
+  const [flag, ...rest] = effective;
   const accent = flag.accent || '#00C2FF';
   const metrics = flagshipMetrics(flag);
   return (
