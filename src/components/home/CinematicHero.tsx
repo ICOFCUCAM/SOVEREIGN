@@ -78,7 +78,7 @@ const CinematicHero: React.FC = () => {
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(95deg, #050816 14%, rgba(5,8,22,0.82) 34%, rgba(5,8,22,0.35) 52%, transparent 70%)' }} />
 
       {/* ── editorial column, left ── */}
-      <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center pt-28 sm:pt-32 lg:pt-28">
+      <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
         <div className="max-w-xl lg:max-w-[46%]">
           <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-300/80 kicker mb-8 backdrop-blur-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node" /> The operating layer for digital civilization

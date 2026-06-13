@@ -5,18 +5,18 @@ import type { EcosystemProduct } from '@/lib/types';
 import { ArrowRight, ArrowUpRight, FileText, Scale, Banknote, Truck, Cpu, GraduationCap, ShoppingCart, Server } from 'lucide-react';
 import HudCorners from '@/components/HudCorners';
 
-// Featured sovereign infrastructures — independent flagships available
-// for deployment. National Shell leads the rotation as the cinematic
-// centerpiece; ordering here is editorial, not a hierarchy claim.
+// Featured sovereign infrastructure — National Shell leads the flagship
+// rotation as the dominant centerpiece (Civicos sub-module operating at
+// whole-of-government scope). The canonical seven flagships follow.
 const FEATURED_SLUGS = [
-  'civicos-national-shell',
-  'civicos',
-  'emergency-ai-platform',
-  'veritas-banking',
-  'elecpro',
-  'veritas-os',
-  'veritas-operations',
-  'sovereign-dispatch',
+  'civicos-national-shell',    // Flagship · Sovereign Government Runtime
+  'civicos',                   // Operating · Sovereign
+  'emergency-ai-platform',     // Producer · Intelligence
+  'veritas-banking',           // Producer · Financial
+  'elecpro',                   // Producer · Electoral
+  'veritas-os',                // Foundational
+  'veritas-operations',        // Operating · Enterprise
+  'sovereign-dispatch',        // Terminal · Publication
 ];
 
 const deployValueOf = (p: EcosystemProduct): string | null => {
@@ -110,24 +110,15 @@ const AcquisitionTerminal: React.FC<{ assets: EcosystemProduct[] }> = ({ assets 
         <div className="mt-auto pt-12">
           <div className="text-[10px] font-mono uppercase tracking-[0.32em] text-white/30 mb-1">Secondary acquisitions</div>
           {rest.slice(0, 4).map((p) => {
-            const ac = p.accent || '#00C2FF';
             const val = deployValueOf(p);
             return (
-              <Link key={p.id} to={`/systems/${p.slug}`} className="group/row relative flex items-center justify-between gap-4 py-4 border-t border-white/8 hover:border-white/20 transition-colors">
-                <div className="min-w-0">
-                  <div className="font-display text-xl font-bold text-white tracking-tight truncate group-hover/row:translate-x-0.5 transition-transform">{p.name}</div>
-                  <div className="flex items-center gap-2.5 mt-1.5 text-[9px] font-mono uppercase tracking-[0.16em]">
-                    <span style={{ color: ac }} className="truncate max-w-[14rem]">{p.category}</span>
-                    <span className="text-white/25">·</span>
-                    <span className="inline-flex items-center gap-1 text-emerald-300/60"><span className="w-1 h-1 rounded-full bg-emerald-400" /> Acquisition ready</span>
-                  </div>
+              <Link key={p.id} to={`/systems/${p.slug}`} className="group/row flex items-baseline justify-between gap-6 py-4 border-t border-white/8 hover:border-white/16 transition-colors">
+                <div className="min-w-0 flex-1">
+                  <span className="font-display text-[18px] font-semibold text-white tracking-tight truncate group-hover/row:translate-x-0.5 inline-block transition-transform">{p.name}</span>
                 </div>
-                <div className="flex items-center gap-4 shrink-0 text-right">
-                  <div>
-                    <div className="text-lg font-bold text-white tabular-nums leading-none">{val || '—'}</div>
-                    <div className="text-[8px] font-mono uppercase tracking-[0.16em] text-white/35 mt-1">Deployment value</div>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-white/25 group-hover/row:text-white group-hover/row:translate-x-0.5 transition-all" />
+                <div className="shrink-0 flex items-baseline gap-4">
+                  <span className="text-[15px] text-white/70 tabular-nums">{val || '—'}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-white/25 group-hover/row:text-white/70 group-hover/row:translate-x-0.5 transition-all" />
                 </div>
               </Link>
             );

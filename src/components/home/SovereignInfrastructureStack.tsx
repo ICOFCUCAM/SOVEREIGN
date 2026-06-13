@@ -2,11 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 
-// Featured infrastructures — a typographic editorial register of flagship
-// systems currently available for sovereign deployment. Each entry stands
-// on its own as an independent infrastructure; no public hierarchy is
-// asserted. Architecture and integration patterns are reserved for the
-// gated /infrastructure/architecture surface.
+// Sovereign Infrastructure Stack — the canonical seven flagships in
+// dependency-tier order: Foundational → Producers → Operating → Terminal.
+// Typographic only — no card chrome. Matches the institutional editorial
+// pattern. Each row carries the official positioning verbatim.
 
 interface Row {
   n: string;
@@ -16,6 +15,7 @@ interface Row {
   scale: 'INSTITUTIONAL' | 'ENTERPRISE' | 'NATIONAL' | 'CIVILIZATION';
   body: string;
   beneficiaries: string;
+  composes: string;
 }
 
 const STACK: Row[] = [
@@ -25,8 +25,9 @@ const STACK: Row[] = [
     name: 'Veritas OS',
     position: 'Knowledge & Organizational Intelligence Infrastructure',
     scale: 'INSTITUTIONAL',
-    body: 'Knowledge and organizational intelligence infrastructure — organisational memory, institutional knowledge, search, reference systems and knowledge governance for institutions at any scale.',
+    body: 'The knowledge substrate of the Sovereign ecosystem — organisational memory, institutional knowledge, search, reference systems and knowledge governance. Feeds every other infrastructure with retrieval-ready signal.',
     beneficiaries: 'Institutions with knowledge capital · Researchers · Editorial staff · Decision-support functions',
+    composes: 'Consumed by every other infrastructure in the stack',
   },
   {
     n: '02',
@@ -34,8 +35,9 @@ const STACK: Row[] = [
     name: 'Emergency AI',
     position: 'Strategic Intelligence Infrastructure',
     scale: 'INSTITUTIONAL',
-    body: 'Strategic intelligence infrastructure — intelligence acquisition, strategic analysis, media acquisition and communications orchestration. Produces institutional intelligence: briefings, situation reports and strategic assessments.',
+    body: 'Intelligence acquisition, strategic analysis, media acquisition, communications and distribution orchestration. Produces institutional intelligence — briefings, situation reports, strategic assessments and intelligence packages.',
     beneficiaries: 'Governments · Financial institutions · Media networks · Enterprise organisations',
+    composes: 'Consumes Veritas OS · Publishes through Sovereign Dispatch',
   },
   {
     n: '03',
@@ -45,6 +47,7 @@ const STACK: Row[] = [
     scale: 'NATIONAL',
     body: 'The electoral substrate — registration, ballot, tabulation, observation and electoral-cycle dispatch operated under sovereign jurisdiction and continuous audit posture.',
     beneficiaries: 'Electoral commissions · Election authorities · Civic-integrity organs',
+    composes: 'Composes with Civicos at full national integration · Pairs with Emergency AI for electoral intelligence',
   },
   {
     n: '04',
@@ -52,8 +55,9 @@ const STACK: Row[] = [
     name: 'Veritas Financial Sovereign Stack',
     position: 'Financial Infrastructure for Civilizations',
     scale: 'CIVILIZATION',
-    body: 'Sovereign financial infrastructure — treasury, monetary, settlement, banking and reserve operations carrying sovereign financial integrity at civilisation scale.',
+    body: 'The sovereign financial layer — treasury, monetary, settlement, banking and reserve infrastructure operated at civilisation scale. Carries sovereign financial integrity across the substrate.',
     beneficiaries: 'Nations · Central banks · Treasuries · Sovereign wealth funds · Finance ministries',
+    composes: 'Pairs with Civicos at nation scale · Embeds with Veritas Operations for enterprise treasury',
   },
   {
     n: '05',
@@ -61,8 +65,9 @@ const STACK: Row[] = [
     name: 'Civicos',
     position: 'Sovereign Operating Infrastructure',
     scale: 'NATIONAL',
-    body: 'Sovereign operating infrastructure — a deployable national runtime for ministries, agencies, councils and public administration.',
+    body: 'The operating layer for sovereign institutions — councils, municipalities, ministries, agencies and public administration. Composes the other six infrastructures into a unified national runtime.',
     beneficiaries: 'Nations · Ministries · Agencies · Councils · Municipalities',
+    composes: 'Orchestrates every other infrastructure in the stack at sovereign scale',
   },
   {
     n: '06',
@@ -72,6 +77,7 @@ const STACK: Row[] = [
     scale: 'ENTERPRISE',
     body: 'Operational management, workflow orchestration, accounting intelligence, compliance and business administration — a digital operations layer for enterprises running autonomously at scale.',
     beneficiaries: 'Enterprises · Corporate offices · Operational divisions',
+    composes: 'Consumes Veritas OS · Pairs with Veritas Financial for enterprise treasury · Publishes through Sovereign Dispatch',
   },
   {
     n: '07',
@@ -79,8 +85,9 @@ const STACK: Row[] = [
     name: 'Sovereign Dispatch',
     position: 'Institutional Publication Infrastructure',
     scale: 'INSTITUTIONAL',
-    body: 'Institutional publication infrastructure — PDF, DOCX, PPTX, briefing packages, board reports and regulatory submissions rendered with chain-of-custody preserved.',
-    beneficiaries: 'Institutional secretariats · Boards · Regulators · Policy offices',
+    body: 'Receives structured payloads from every producer in the stack and renders the institutional artifact — PDF, DOCX, PPTX, briefing packages, board reports, policy documents and regulatory submissions.',
+    beneficiaries: 'Every producer in the stack · Institutional secretariats',
+    composes: 'Terminal publication endpoint for every upstream infrastructure',
   },
 ];
 
@@ -98,17 +105,17 @@ const SovereignInfrastructureStack: React.FC = () => {
         {/* Section header */}
         <div className="mb-16 grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
           <div>
-            <div className="kicker text-cyan-300/70" style={{ letterSpacing: '0.32em' }}>FEATURED INFRASTRUCTURES</div>
+            <div className="kicker text-cyan-300/70" style={{ letterSpacing: '0.32em' }}>SOVEREIGN INFRASTRUCTURE STACK</div>
             <h2 className="mt-5 font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-cinematic leading-[0.96]">
-              Deploy individually. <span className="text-gradient-cyan">Operate together.</span>
+              Seven infrastructures. <span className="text-gradient-cyan">One sovereign substrate.</span>
             </h2>
           </div>
           <p className="text-white/55 text-base sm:text-lg leading-relaxed lg:pt-3 max-w-xl">
-            Each entry below is a standalone institutional infrastructure. Procure one, several or the full portfolio — every deployment carries sovereign jurisdiction, continuous audit posture and the same operating discipline.
+            The Sovereign substrate is composed of seven institutional-grade infrastructures, each operating independently and composing into larger sovereign deployments.
           </p>
         </div>
 
-        {/* Featured infrastructures — typographic dl */}
+        {/* The seven — typographic dl */}
         <dl className="divide-y divide-white/8 border-y border-white/8">
           {STACK.map((r) => (
             <div key={r.slug} className="grid grid-cols-1 gap-y-6 py-10 sm:gap-y-7 lg:grid-cols-[60px_280px_1fr] lg:gap-x-10">
@@ -126,6 +133,8 @@ const SovereignInfrastructureStack: React.FC = () => {
                 <dl className="mt-6 grid grid-cols-1 gap-3 text-[12px] text-white/45 sm:grid-cols-[120px_1fr] sm:gap-x-6 sm:gap-y-2">
                   <dt className="font-mono uppercase tracking-[0.22em]">Beneficiaries</dt>
                   <dd className="text-white/70 leading-[1.6]">{r.beneficiaries}</dd>
+                  <dt className="font-mono uppercase tracking-[0.22em]">Composes with</dt>
+                  <dd className="text-white/70 leading-[1.6]">{r.composes}</dd>
                 </dl>
               </dd>
             </div>
@@ -133,7 +142,7 @@ const SovereignInfrastructureStack: React.FC = () => {
         </dl>
 
         <p className="mt-14 text-center text-[10px] font-mono uppercase tracking-[0.32em] text-white/35">
-          Featured portfolio · expanding · sovereign jurisdiction · continuous audit posture
+          One ecosystem · one audit posture · one sovereign jurisdiction
         </p>
       </div>
     </section>

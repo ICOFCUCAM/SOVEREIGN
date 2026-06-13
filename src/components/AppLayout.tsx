@@ -6,19 +6,17 @@ import Reveal from '@/components/Reveal';
 import CinematicHero from '@/components/home/CinematicHero';
 import MarketplaceTeaser from '@/components/home/MarketplaceTeaser';
 import EcosystemPanels from '@/components/home/EcosystemPanels';
-import EcosystemSectors from '@/components/home/EcosystemSectors';
+import HomeVideo from '@/components/home/HomeVideo';
 import ChannelTeaser from '@/components/home/ChannelTeaser';
 import HomeVideo from '@/components/home/HomeVideo';
 import TransformationFlow from '@/components/home/TransformationFlow';
 import InstitutionalTrust from '@/components/home/InstitutionalTrust';
 import ClosingCTA from '@/components/home/ClosingCTA';
-import { DeploymentRegions } from '@/components/home/HomeSections';
 
-// Canonical homepage composition. EcosystemSectors restored to its original
-// design (cinematic emblem + framed system image on the right). The
-// DeploymentRegions section sits after the ClosingCTA per the operator
-// instruction — "Deploy regions" appears after "Deploy the operating layer
-// for sovereign civilization".
+// Homepage composition. EcosystemPanels (Acquisition Terminal +
+// Architecture Matrix) is restored to its canonical slot; the
+// system-by-system sector panels (EcosystemSectors) are replaced with
+// a cinematic feature-dispatch video player.
 const AppLayout: React.FC = () => {
   return (
     <div className="relative min-h-screen text-white">
@@ -32,8 +30,8 @@ const AppLayout: React.FC = () => {
         <MarketplaceTeaser />
         {/* ACT II — the sovereign infrastructure universe */}
         <Reveal><EcosystemPanels /></Reveal>
-        {/* featured institutions — cinematic emblem panels with system imagery */}
-        <EcosystemSectors />
+        {/* feature dispatch — cinematic video showcase (was EcosystemSectors) */}
+        <Reveal><HomeVideo /></Reveal>
         {/* the sovereign channel — media ecosystem entry */}
         <Reveal><ChannelTeaser /></Reveal>
         {/* feature dispatch — newest published render; renders nothing until one exists */}
@@ -42,9 +40,7 @@ const AppLayout: React.FC = () => {
         <Reveal><TransformationFlow /></Reveal>
         {/* institutional trust & governance */}
         <Reveal><InstitutionalTrust /></Reveal>
-        {/* deployment reach — sovereign edge mesh regions */}
-        <Reveal><DeploymentRegions /></Reveal>
-        {/* closing statement — "Deploy the operating layer for sovereign civilization" */}
+        {/* closing statement */}
         <ClosingCTA />
       </main>
       <PlatformFooter />
