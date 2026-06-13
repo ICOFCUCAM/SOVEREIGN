@@ -1,9 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import type { EcosystemProduct } from '@/lib/types';
 import Reveal from '@/components/Reveal';
-import { ArrowRight, Landmark, Vote, ShieldAlert, Banknote, Truck, Cpu, GraduationCap, Boxes } from 'lucide-react';
+import { ArrowRight, Landmark, Vote, ShieldAlert, Banknote, Truck, Cpu, GraduationCap, Boxes, Play, Volume2, VolumeX } from 'lucide-react';
+
+// Slugs whose right-column visual upgrades from a static image to an
+// inline click-to-play video. Source defaults to /systems/<slug>.mp4
+// (drop the file into public/systems/ to enable); falls back to the
+// existing poster image when no video is published yet.
+const VIDEO_SLUGS = new Set(['civicos']);
+
+// Per-slug poster overrides. When present, the cinematic emblem image
+// and click-to-play poster both pull from this map instead of the
+// default /systems/<slug>.jpg convention.
+const POSTER_OVERRIDES: Record<string, string> = {
+  civicos: '/Sovereign logo2.png',
+};
+
+// Where the play affordance sits inside the frame. Used to land the
+// triangle precisely over the focal point of the poster image (e.g. the
+// S of the Sovereign logo). Values are percentages from the top of the
+// inset frame; default is 50 (geometric centre).
+const PLAY_FOCAL_PCT: Record<string, number> = {
+  civicos: 36,
+};
 
 function emblemFor(category: string): React.ComponentType<{ className?: string; style?: React.CSSProperties; strokeWidth?: number | string }> {
   const c = (category || '').toLowerCase();
@@ -16,6 +37,81 @@ function emblemFor(category: string): React.ComponentType<{ className?: string; 
   if (/knowledge|intellig|\bai\b|learn/.test(c)) return Cpu;
   return Boxes;
 }
+
+// Click-to-play video player layered over the existing poster image.
+// Used for slugs in VIDEO_SLUGS.
+const SystemPlayer: React.FC<{ p: EcosystemProduct; posterSrc: string }> = ({ p, posterSrc }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const focalPct = PLAY_FOCAL_PCT[p.slug] ?? 50;
+
+  const start = async () => {
+    const v = videoRef.current; if (!v) return;
+    try { v.muted = muted; await v.play(); setPlaying(true); }
+    catch { setPlaying(true); }
+  };
+  const toggleMute = () => {
+    const v = videoRef.current; if (!v) return;
+    v.muted = !v.muted; setMuted(v.muted);
+  };
+
+  return (
+    <>
+      {/* the video */}
+      <video
+        ref={videoRef}
+        src={`/systems/${p.slug}.mp4`}
+        poster={posterSrc}
+        preload="metadata"
+        playsInline
+        controls={playing}
+        onEnded={() => setPlaying(false)}
+        className={`absolute inset-[4%] w-[92%] h-[92%] object-cover rounded-2xl border border-white/10 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] transition-opacity duration-500 ${playing ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      />
+      {/* idle play overlay */}
+      {!playing && (
+        <button
+          type="button"
+          onClick={start}
+          aria-label={`Play ${p.name} dispatch`}
+          className="absolute inset-[4%] w-[92%] h-[92%] group/play rounded-2xl"
+        >
+          <span aria-hidden className="absolute inset-0 rounded-2xl pointer-events-none" style={{
+            background: 'linear-gradient(180deg, transparent 50%, rgba(5,7,15,0.55) 100%)',
+          }} />
+          <span
+            className="absolute left-1/2 inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full backdrop-blur-md transition-all duration-500 group-hover/play:scale-105"
+            style={{
+              top: `${focalPct}%`,
+              transform: 'translate(-50%, -50%)',
+              background: `linear-gradient(135deg, ${p.accent}33, rgba(255,255,255,0.08))`,
+              border: `1px solid ${p.accent}66`,
+              boxShadow: `0 24px 60px -28px ${p.accent}aa`,
+            }}
+          >
+            <span aria-hidden className="absolute inset-0 rounded-full animate-pulse-slow" style={{ background: `radial-gradient(circle, ${p.accent}33, transparent 70%)` }} />
+            <Play className="relative w-7 h-7 sm:w-8 sm:h-8 text-white ml-1" strokeWidth={1.5} fill="white" style={{ filter: `drop-shadow(0 0 14px ${p.accent})` }} />
+          </span>
+          <span
+            className="absolute left-1/2 -translate-x-1/2 bottom-[7%] text-[10px] font-mono uppercase tracking-[0.28em] text-white/80 whitespace-nowrap"
+          >Play dispatch</span>
+        </button>
+      )}
+      {/* mute toggle while playing */}
+      {playing && (
+        <button
+          type="button"
+          onClick={toggleMute}
+          aria-label={muted ? 'Unmute' : 'Mute'}
+          className="absolute top-[8%] right-[8%] w-9 h-9 rounded-lg flex items-center justify-center bg-black/40 backdrop-blur border border-white/15 text-white/80 hover:text-white hover:border-white/30 transition"
+        >
+          {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        </button>
+      )}
+    </>
+  );
+};
 
 const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean; index: number; total: number }> = ({ p, flip, index, total }) => {
   const Emblem = emblemFor(p.category);
@@ -31,14 +127,17 @@ const SectorPanel: React.FC<{ p: EcosystemProduct; flip: boolean; index: number;
           <div className="absolute inset-[6%] rounded-full border border-white/[0.06]" />
           <div className="absolute inset-[22%] rounded-full border border-white/[0.04]" />
           <Emblem className="relative w-28 h-28 sm:w-36 sm:h-36" strokeWidth={0.9} style={{ color: p.accent }} />
-          {/* cinematic system visual — framed product capture; tries <slug>.jpg then <slug>-1.jpg, hides if absent */}
-          <img src={`/systems/${p.slug}.jpg`} alt="" aria-hidden loading="lazy" decoding="async"
+          {/* cinematic system visual — framed product capture; tries override, then <slug>.jpg, then <slug>-1.jpg, hides if absent */}
+          <img src={POSTER_OVERRIDES[p.slug] || `/systems/${p.slug}.jpg`} alt="" aria-hidden loading="lazy" decoding="async"
             className="absolute inset-[4%] w-[92%] h-[92%] object-cover rounded-2xl border border-white/10 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]"
             onError={(e) => {
               const img = e.currentTarget as HTMLImageElement;
               if (!img.dataset.alt) { img.dataset.alt = '1'; img.src = `/systems/${p.slug}-1.jpg`; }
               else { img.style.display = 'none'; }
             }} />
+          {VIDEO_SLUGS.has(p.slug) && (
+            <SystemPlayer p={p} posterSrc={POSTER_OVERRIDES[p.slug] || `/systems/${p.slug}.jpg`} />
+          )}
         </div>
       </div>
 
