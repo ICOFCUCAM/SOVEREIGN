@@ -1,5 +1,24 @@
 {
- "detected_at": "2026-06-13T08:50:47.324Z",
- "count": 0,
- "deltas": []
+ "detected_at": "2026-06-14T09:11:15.869Z",
+ "count": 2,
+ "deltas": [
+  {
+   "buyer_id": "accenture",
+   "name": "Accenture",
+   "kind": "new_acquisition",
+   "before": "50",
+   "after": "51",
+   "detail": "+1 indexed event(s) · latest: Faculty",
+   "detected_at": "2026-06-14T09:11:15.868Z"
+  },
+  {
+   "buyer_id": "gen-digital",
+   "name": "Gen Digital",
+   "kind": "new_acquisition",
+   "before": "7",
+   "after": "8",
+   "detail": "+1 indexed event(s) · latest: Avast Software",
+   "detected_at": "2026-06-14T09:11:15.868Z"
+  }
+ ]
 }
