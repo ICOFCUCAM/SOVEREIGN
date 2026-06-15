@@ -1,24 +1,24 @@
 {
- "detected_at": "2026-06-14T09:11:15.869Z",
+ "detected_at": "2026-06-15T12:00:02.187Z",
  "count": 2,
  "deltas": [
   {
-   "buyer_id": "accenture",
-   "name": "Accenture",
+   "buyer_id": "cvc-capital-partners",
+   "name": "CVC Capital Partners",
    "kind": "new_acquisition",
-   "before": "50",
-   "after": "51",
-   "detail": "+1 indexed event(s) · latest: Faculty",
-   "detected_at": "2026-06-14T09:11:15.868Z"
+   "before": "16",
+   "after": "17",
+   "detail": "+1 indexed event(s) · latest: Packeta",
+   "detected_at": "2026-06-15T12:00:02.186Z"
   },
   {
-   "buyer_id": "gen-digital",
-   "name": "Gen Digital",
-   "kind": "new_acquisition",
-   "before": "7",
-   "after": "8",
-   "detail": "+1 indexed event(s) · latest: Avast Software",
-   "detected_at": "2026-06-14T09:11:15.868Z"
+   "buyer_id": "google",
+   "name": "Google",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-06-15T12:00:02.186Z"
   }
  ]
 }
