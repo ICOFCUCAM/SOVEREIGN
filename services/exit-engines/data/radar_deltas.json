@@ -1,33 +1,51 @@
 {
- "detected_at": "2026-06-16T10:43:09.763Z",
- "count": 3,
+ "detected_at": "2026-06-17T10:38:10.849Z",
+ "count": 5,
  "deltas": [
   {
-   "buyer_id": "meta-platforms",
-   "name": "Meta Platforms",
+   "buyer_id": "hilton-worldwide",
+   "name": "Hilton Worldwide",
    "kind": "new_acquisition",
-   "before": "109",
-   "after": "116",
-   "detail": "+7 indexed event(s) · latest: Assured Robot Intelligence",
-   "detected_at": "2026-06-16T10:43:09.762Z"
+   "before": "582",
+   "after": "584",
+   "detail": "+2 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-06-17T10:38:10.848Z"
   },
   {
-   "buyer_id": "google",
-   "name": "Google",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-06-16T10:43:09.762Z"
+   "buyer_id": "amazon",
+   "name": "Amazon",
+   "kind": "new_acquisition",
+   "before": "173",
+   "after": "175",
+   "detail": "+2 indexed event(s) · latest: Rivr",
+   "detected_at": "2026-06-17T10:38:10.848Z"
   },
   {
-   "buyer_id": "google",
-   "name": "Google",
+   "buyer_id": "amazon",
+   "name": "Amazon",
+   "kind": "cadence_shift",
+   "before": "5/12m",
+   "after": "6/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-06-17T10:38:10.848Z"
+  },
+  {
+   "buyer_id": "general-motors",
+   "name": "General Motors",
    "kind": "new_acquisition",
-   "before": "0",
-   "after": "25",
-   "detail": "+25 indexed event(s) · latest: Terra Bella",
-   "detected_at": "2026-06-16T10:43:09.762Z"
+   "before": "33",
+   "after": "34",
+   "detail": "+1 indexed event(s) · latest: Eastern Air Lines",
+   "detected_at": "2026-06-17T10:38:10.848Z"
+  },
+  {
+   "buyer_id": "jpmorgan-chase",
+   "name": "JPMorgan Chase",
+   "kind": "new_acquisition",
+   "before": "15",
+   "after": "16",
+   "detail": "+1 indexed event(s) · latest: Zagat",
+   "detected_at": "2026-06-17T10:38:10.848Z"
   }
  ]
 }
