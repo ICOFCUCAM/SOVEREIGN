@@ -79,7 +79,10 @@ describe("deliverables", () => {
       const doc = DOCUMENT_SUITE[kind];
       expect(doc.traceability.ok, `${kind} fully traceable`).toBe(true);
       const md = tracedDocMarkdown(doc);
-      expect(md).toContain("Valuation fact sheet");
+      // every report carries the nine canonical institutional sections
+      for (const heading of ["Executive Summary", "Valuation", "Buyer Universe", "Comparable Transactions", "Strategic Rationale", "Expected Outcome", "Confidence Analysis", "Data Provenance", "Disclaimers"]) {
+        expect(md, `${kind} has ${heading}`).toContain(heading);
+      }
       expect(md).toContain("Traceability");
       expect(md).toContain(`Framework v${doc.frameworkVersion}`);
       // the governed midpoint appears verbatim — no per-document recompute

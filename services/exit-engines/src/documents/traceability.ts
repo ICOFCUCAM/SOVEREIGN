@@ -12,6 +12,12 @@ export interface TracedSectionLike {
   readonly body?: string;
   readonly bullets?: readonly string[];
   readonly rows?: ReadonlyArray<readonly string[]>;
+  // Source-data tables carry their own per-row provenance (comparable
+  // transactions cite sourceRef; the fact sheet cites methodology), so their
+  // rows are not prose-claims and are not numeric-scanned.
+  readonly sourceData?: boolean;
+  // Provenance and disclaimer sections are meta — exempt from the scan.
+  readonly exempt?: boolean;
 }
 
 export interface Untraced {
@@ -57,9 +63,12 @@ export function validateTraceability(
   };
 
   for (const s of sections) {
+    if (s.exempt) continue;                       // meta sections (provenance, disclaimers)
     if (s.body) scan(s.body, s.heading);
     for (const b of s.bullets ?? []) scan(b, s.heading);
-    for (const row of s.rows ?? []) for (const cell of row) scan(cell, s.heading);
+    if (!s.sourceData) {                           // source-data tables carry their own provenance
+      for (const row of s.rows ?? []) for (const cell of row) scan(cell, s.heading);
+    }
   }
 
   return { ok: untraced.length === 0, checked, traced, untraced };

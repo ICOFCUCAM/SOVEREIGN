@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   figure, numericTokens, valuationFacts, validateTraceability,
-  renderDocument, renderDocumentSuite,
+  renderDocument, renderDocumentSuite, REPORT_SECTIONS,
 } from '../dist/documents/index.js';
 import { runValuationConstitution } from '../dist/valuation/index.js';
 import { SAMPLE_SAAS } from './sample.js';
@@ -32,7 +32,7 @@ test('the fact sheet is the target tear block — every headline metric, fully s
   }
 });
 
-test('every document type renders from the one intelligence object and fully traces', () => {
+test('every report carries the same nine canonical sections, fully traced', () => {
   const suite = renderDocumentSuite({ constitution: c });
   const kinds = ['valuation_summary', 'board_report', 'market_update', 'buyer_brief', 'acquisition_recommendation', 'exit_readiness'];
   for (const k of kinds) {
@@ -41,13 +41,28 @@ test('every document type renders from the one intelligence object and fully tra
     assert.equal(doc.traceability.ok, true, `${k} has zero untraced numbers (got ${JSON.stringify(doc.traceability.untraced)})`);
     assert.ok(doc.traceability.checked > 0, `${k} actually contains figures to check`);
     assert.ok(doc.facts.length >= 9, `${k} carries the fact sheet`);
-    assert.ok(doc.sections.length > 0);
-    // the fact sheet section is present and first
-    assert.equal(doc.sections[0].heading, 'Valuation fact sheet');
+    // the nine canonical sections, in order, every report
+    assert.deepEqual(doc.sections.map((s) => s.heading), [...REPORT_SECTIONS], `${k} has the nine canonical sections`);
   }
 });
 
-test('the board report surfaces the governed midpoint and confidence verbatim', () => {
+test('the nine canonical sections are exactly the institutional contract', () => {
+  assert.deepEqual([...REPORT_SECTIONS], [
+    'Executive Summary', 'Valuation', 'Buyer Universe', 'Comparable Transactions',
+    'Strategic Rationale', 'Expected Outcome', 'Confidence Analysis',
+    'Data Provenance', 'Disclaimers',
+  ]);
+});
+
+test('no report invents a buyer — every named buyer is a real registry candidate', () => {
+  const doc = renderDocument('acquisition_recommendation', { constitution: c });
+  const buyerSection = doc.sections.find((s) => s.heading === 'Buyer Universe');
+  const namesInReport = (buyerSection.rows ?? []).map((r) => r[1]);
+  const registryNames = new Set(c.mostLikelyBuyers.map((b) => b.name));
+  for (const n of namesInReport) assert.ok(registryNames.has(n), `${n} is a real ranked buyer`);
+});
+
+test('the board report surfaces the governed midpoint verbatim', () => {
   const doc = renderDocument('board_report', { constitution: c });
   const ev = facts.find((f) => f.key === 'enterprise_value').value;
   const text = doc.sections.map((s) => `${s.body ?? ''} ${(s.bullets ?? []).join(' ')}`).join(' ');
