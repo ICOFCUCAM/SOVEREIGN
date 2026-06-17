@@ -70,6 +70,7 @@
     "ingest:validate": "npm run build && node dist/scripts/ingest/validate.js",
     "dna": "npm run build && node dist/scripts/dna/build.js",
     "market-feeds": "npm run build && node dist/scripts/ingest/market-feeds.js",
+    "market": "npm run build && node dist/scripts/market/build.js",
     "radar": "npm run build && node dist/scripts/radar/refresh.js"
   },
   "devDependencies": {

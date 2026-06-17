@@ -29,6 +29,8 @@ export const NAV: NavItem[] = [
   { to: "/console",                    label: "Liquidity Command",    group: "Mandate", roles: ["founder"] },
   { to: "/console/autopilot",          label: "Autonomous Exit",      group: "Mandate", roles: ["founder"], pro: true, starter: true },
   { to: "/console/buyer-graph",        label: "Buyer Graph",          group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/market-map",         label: "Market Map",           group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/knowledge-graph",    label: "Knowledge Graph",      group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/network",            label: "Network Intelligence", group: "Market Intelligence", roles: ["founder"], pro: true },
 
   // ── Buyer · Overview ───────────────────────────────────────────

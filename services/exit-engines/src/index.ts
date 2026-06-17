@@ -12,6 +12,7 @@ export * as nda          from './nda/index.js';
 export * as exchange     from './exchange/index.js';
 export * as documents    from './documents/index.js';
 export * as marketdata   from './marketdata/index.js';
+export * as market       from './market/index.js';
 
 // Top-level convenience re-exports — the most common entrypoints.
 export { runValuation, strategicBuyerReport, assetReplacementReport, tenMillionReport, twentyFiveMillionReport, runInstitutionalValuation, runValuationConstitution, VALUATION_FRAMEWORK, VALUATION_FRAMEWORK_VERSION } from './valuation/index.js';
@@ -54,6 +55,10 @@ export type { DocumentKind, TracedDocument, TracedSection, DocumentInputs, Figur
 // Market Data engine — the fourth data source feeding the framework.
 export { assessMarketConditions, marketCycle } from './marketdata/index.js';
 export type { MarketConditions, MarketVariable, MarketFeedInput } from './marketdata/index.js';
+
+// Knowledge Graph + Market Map — queryable acquisition intelligence.
+export { queryAcquisitions, regionOf, ALL_REGIONS } from './market/index.js';
+export type { Region, GraphQuery, GraphResult, BuyerRollup, AcquisitionIndex, IndexEvent, MarketIntelligence, SectorHeat, GeoDensity, Corridor, ActiveAcquirer } from './market/index.js';
 export type {
   AcquisitionEvent, AcquisitionSource, BuyerHistoryRollup, ConfidenceTier,
   BuyerDealOutcomeRollup, OutcomeStandouts,

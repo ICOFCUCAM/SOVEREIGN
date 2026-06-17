@@ -1,0 +1,544 @@
+{
+ "as_of": "2026-06-17T10:38:09.607Z",
+ "totalEvents": 3832,
+ "disclosedEvents": 1142,
+ "totalDisclosedUsd": 1413812842501,
+ "sectorHeat": [
+  {
+   "token": "software",
+   "deals": 98,
+   "disclosedUsd": 1939925000
+  },
+  {
+   "token": "television",
+   "deals": 53,
+   "disclosedUsd": 9355000000
+  },
+  {
+   "token": "computer software",
+   "deals": 47,
+   "disclosedUsd": 8086679000
+  },
+  {
+   "token": "music",
+   "deals": 39,
+   "disclosedUsd": 5083250000
+  },
+  {
+   "token": "computer networking",
+   "deals": 32,
+   "disclosedUsd": 31176000000
+  },
+  {
+   "token": "video game",
+   "deals": 32,
+   "disclosedUsd": 6594000000
+  },
+  {
+   "token": "video games",
+   "deals": 26,
+   "disclosedUsd": 86592000000
+  },
+  {
+   "token": "internet service provider",
+   "deals": 22,
+   "disclosedUsd": 2800070000
+  },
+  {
+   "token": "information technology",
+   "deals": 21,
+   "disclosedUsd": 4281000000
+  },
+  {
+   "token": "artificial intelligence",
+   "deals": 21,
+   "disclosedUsd": 4530000000
+  },
+  {
+   "token": "film",
+   "deals": 19,
+   "disclosedUsd": 6752000000
+  },
+  {
+   "token": "internet software",
+   "deals": 18,
+   "disclosedUsd": 586000002
+  },
+  {
+   "token": "lan switching",
+   "deals": 18,
+   "disclosedUsd": 16281000000
+  },
+  {
+   "token": "video game developer",
+   "deals": 18,
+   "disclosedUsd": 2564000000
+  },
+  {
+   "token": "voice over internet protocol",
+   "deals": 17,
+   "disclosedUsd": 4236000000
+  },
+  {
+   "token": "mobile software",
+   "deals": 16,
+   "disclosedUsd": 3285000000
+  },
+  {
+   "token": "amazon web services",
+   "deals": 16,
+   "disclosedUsd": 0
+  },
+  {
+   "token": "computer security",
+   "deals": 14,
+   "disclosedUsd": 10690000000
+  },
+  {
+   "token": "machine learning",
+   "deals": 12,
+   "disclosedUsd": 200000000
+  },
+  {
+   "token": "music publishing",
+   "deals": 12,
+   "disclosedUsd": 4409500000
+  },
+  {
+   "token": "online advertising",
+   "deals": 11,
+   "disclosedUsd": 4964000000
+  },
+  {
+   "token": "data storage",
+   "deals": 11,
+   "disclosedUsd": 12630688000
+  },
+  {
+   "token": "video on demand",
+   "deals": 11,
+   "disclosedUsd": 2262000000
+  },
+  {
+   "token": "security",
+   "deals": 11,
+   "disclosedUsd": 52000000
+  },
+  {
+   "token": "semiconductor",
+   "deals": 10,
+   "disclosedUsd": 962000000
+  },
+  {
+   "token": "sony pictures entertainment",
+   "deals": 10,
+   "disclosedUsd": 1275000000
+  },
+  {
+   "token": "oculus studio",
+   "deals": 10,
+   "disclosedUsd": 0
+  },
+  {
+   "token": "advertising",
+   "deals": 9,
+   "disclosedUsd": 701000000
+  },
+  {
+   "token": "information technology consulting",
+   "deals": 9,
+   "disclosedUsd": 13998000000
+  },
+  {
+   "token": "analytics",
+   "deals": 9,
+   "disclosedUsd": 4500000000
+  },
+  {
+   "token": "management software",
+   "deals": 8,
+   "disclosedUsd": 350142000
+  },
+  {
+   "token": "synchronous optical networking",
+   "deals": 8,
+   "disclosedUsd": 4290200000
+  },
+  {
+   "token": "social networking service",
+   "deals": 8,
+   "disclosedUsd": 0
+  },
+  {
+   "token": "wholesale computer software",
+   "deals": 7,
+   "disclosedUsd": 56657950000
+  },
+  {
+   "token": "cable television",
+   "deals": 7,
+   "disclosedUsd": 4388400000
+  },
+  {
+   "token": "web conferencing",
+   "deals": 7,
+   "disclosedUsd": 13718000000
+  },
+  {
+   "token": "telecommunications",
+   "deals": 7,
+   "disclosedUsd": 14028200000
+  },
+  {
+   "token": "cloud computing",
+   "deals": 7,
+   "disclosedUsd": 0
+  },
+  {
+   "token": "network management",
+   "deals": 7,
+   "disclosedUsd": 1279000000
+  },
+  {
+   "token": "identity management",
+   "deals": 7,
+   "disclosedUsd": 0
+  }
+ ],
+ "geoDensity": [
+  {
+   "region": "North America",
+   "deals": 1681,
+   "disclosedUsd": 898100939708
+  },
+  {
+   "region": "Other",
+   "deals": 1538,
+   "disclosedUsd": 383676561050
+  },
+  {
+   "region": "Europe",
+   "deals": 436,
+   "disclosedUsd": 76487906327
+  },
+  {
+   "region": "Middle East",
+   "deals": 72,
+   "disclosedUsd": 47054076000
+  },
+  {
+   "region": "Asia",
+   "deals": 66,
+   "disclosedUsd": 7057931001
+  },
+  {
+   "region": "Oceania",
+   "deals": 31,
+   "disclosedUsd": 1309428000
+  },
+  {
+   "region": "Latin America",
+   "deals": 7,
+   "disclosedUsd": 126000415
+  },
+  {
+   "region": "Africa",
+   "deals": 1,
+   "disclosedUsd": 0
+  }
+ ],
+ "corridors": [
+  {
+   "from": "North America",
+   "to": "Other",
+   "deals": 147
+  },
+  {
+   "from": "Other",
+   "to": "Other",
+   "deals": 14
+  }
+ ],
+ "topAcquirers": [
+  {
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
+   "deals": 392,
+   "recentDeals": 5,
+   "lastDate": "2026-01-05"
+  },
+  {
+   "buyer_id": "sony",
+   "name": "Sony",
+   "deals": 274,
+   "recentDeals": 47,
+   "lastDate": "2026-05-18"
+  },
+  {
+   "buyer_id": "alphabet",
+   "name": "Alphabet",
+   "deals": 270,
+   "recentDeals": 12,
+   "lastDate": "2025-12-22"
+  },
+  {
+   "buyer_id": "cisco",
+   "name": "Cisco",
+   "deals": 233,
+   "recentDeals": 15,
+   "lastDate": "2025-11-14"
+  },
+  {
+   "buyer_id": "cisco-systems",
+   "name": "Cisco Systems",
+   "deals": 233,
+   "recentDeals": 15,
+   "lastDate": "2025-11-14"
+  },
+  {
+   "buyer_id": "ibm",
+   "name": "IBM",
+   "deals": 198,
+   "recentDeals": 11,
+   "lastDate": "2025-12-08"
+  },
+  {
+   "buyer_id": "amazon",
+   "name": "Amazon",
+   "deals": 157,
+   "recentDeals": 13,
+   "lastDate": "2026-03-19"
+  },
+  {
+   "buyer_id": "apple",
+   "name": "Apple",
+   "deals": 149,
+   "recentDeals": 14,
+   "lastDate": "2026-03-16"
+  },
+  {
+   "buyer_id": "oracle",
+   "name": "Oracle",
+   "deals": 143,
+   "recentDeals": 0,
+   "lastDate": "2022-05-06"
+  },
+  {
+   "buyer_id": "hewlett-packard",
+   "name": "Hewlett-Packard",
+   "deals": 131,
+   "recentDeals": 1,
+   "lastDate": "2024-01-10"
+  },
+  {
+   "buyer_id": "nortonlifelock",
+   "name": "NortonLifeLock",
+   "deals": 121,
+   "recentDeals": 0,
+   "lastDate": "2021-08-11"
+  },
+  {
+   "buyer_id": "symantec",
+   "name": "Symantec",
+   "deals": 121,
+   "recentDeals": 0,
+   "lastDate": "2021-08-11"
+  },
+  {
+   "buyer_id": "yahoo",
+   "name": "Yahoo!",
+   "deals": 119,
+   "recentDeals": 4,
+   "lastDate": "2024-04-03"
+  },
+  {
+   "buyer_id": "meta-platforms",
+   "name": "Meta Platforms",
+   "deals": 109,
+   "recentDeals": 7,
+   "lastDate": "2026-05-01"
+  },
+  {
+   "buyer_id": "nokia",
+   "name": "Nokia",
+   "deals": 89,
+   "recentDeals": 1,
+   "lastDate": "2024-06-01"
+  },
+  {
+   "buyer_id": "aol",
+   "name": "AOL",
+   "deals": 88,
+   "recentDeals": 0,
+   "lastDate": "2020-04-30"
+  },
+  {
+   "buyer_id": "disney",
+   "name": "Disney",
+   "deals": 75,
+   "recentDeals": 5,
+   "lastDate": "2026-01-31"
+  },
+  {
+   "buyer_id": "adobe",
+   "name": "Adobe",
+   "deals": 72,
+   "recentDeals": 3,
+   "lastDate": "2025-11-19"
+  },
+  {
+   "buyer_id": "sap",
+   "name": "SAP",
+   "deals": 71,
+   "recentDeals": 6,
+   "lastDate": "2026-05-01"
+  },
+  {
+   "buyer_id": "twitter",
+   "name": "Twitter",
+   "deals": 71,
+   "recentDeals": 1,
+   "lastDate": "2023-05-15"
+  },
+  {
+   "buyer_id": "ebay",
+   "name": "eBay",
+   "deals": 67,
+   "recentDeals": 1,
+   "lastDate": "2026-02-18"
+  },
+  {
+   "buyer_id": "embracer-group",
+   "name": "Embracer Group",
+   "deals": 59,
+   "recentDeals": 10,
+   "lastDate": "2025-12-01"
+  },
+  {
+   "buyer_id": "electronic-arts",
+   "name": "Electronic Arts",
+   "deals": 56,
+   "recentDeals": 1,
+   "lastDate": "2025-02-04"
+  },
+  {
+   "buyer_id": "citrix",
+   "name": "Citrix",
+   "deals": 53,
+   "recentDeals": 0
+  },
+  {
+   "buyer_id": "accenture",
+   "name": "Accenture",
+   "deals": 48,
+   "recentDeals": 18,
+   "lastDate": "2026-01-01"
+  },
+  {
+   "buyer_id": "take-two-interactive",
+   "name": "Take-Two Interactive",
+   "deals": 48,
+   "recentDeals": 3,
+   "lastDate": "2025-03-01"
+  },
+  {
+   "buyer_id": "dell",
+   "name": "Dell",
+   "deals": 40,
+   "recentDeals": 2,
+   "lastDate": "2023-08-11"
+  },
+  {
+   "buyer_id": "advania",
+   "name": "Advania",
+   "deals": 34,
+   "recentDeals": 0,
+   "lastDate": "2012-01-20"
+  },
+  {
+   "buyer_id": "blackberry",
+   "name": "BlackBerry",
+   "deals": 32,
+   "recentDeals": 0,
+   "lastDate": "2018-11-16"
+  },
+  {
+   "buyer_id": "juniper-networks",
+   "name": "Juniper Networks",
+   "deals": 28,
+   "recentDeals": 0,
+   "lastDate": "2020-12-07"
+  },
+  {
+   "buyer_id": "kkr",
+   "name": "KKR",
+   "deals": 11,
+   "recentDeals": 2,
+   "lastDate": "2024-01-01"
+  },
+  {
+   "buyer_id": "kkr-co",
+   "name": "KKR & Co.",
+   "deals": 11,
+   "recentDeals": 2,
+   "lastDate": "2024-01-01"
+  },
+  {
+   "buyer_id": "gen-digital",
+   "name": "Gen Digital",
+   "deals": 7,
+   "recentDeals": 0,
+   "lastDate": "2022-01-01"
+  },
+  {
+   "buyer_id": "blackrock",
+   "name": "BlackRock",
+   "deals": 7,
+   "recentDeals": 1,
+   "lastDate": "2024-01-01"
+  },
+  {
+   "buyer_id": "axel-springer-se",
+   "name": "Axel Springer SE",
+   "deals": 7,
+   "recentDeals": 1,
+   "lastDate": "2025-01-01"
+  },
+  {
+   "buyer_id": "google",
+   "name": "Google",
+   "deals": 6,
+   "recentDeals": 0,
+   "lastDate": "2014-08-01"
+  },
+  {
+   "buyer_id": "advent-international",
+   "name": "Advent International",
+   "deals": 6,
+   "recentDeals": 3,
+   "lastDate": "2025-10-01"
+  },
+  {
+   "buyer_id": "apollo-global-management",
+   "name": "Apollo Global Management",
+   "deals": 5,
+   "recentDeals": 0,
+   "lastDate": "2021-09-01"
+  },
+  {
+   "buyer_id": "apax-partners",
+   "name": "Apax Partners",
+   "deals": 4,
+   "recentDeals": 0,
+   "lastDate": "2022-03-31"
+  },
+  {
+   "buyer_id": "ebay-inc",
+   "name": "eBay Inc.",
+   "deals": 4,
+   "recentDeals": 1,
+   "lastDate": "2025-01-01"
+  }
+ ],
+ "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)"
+}

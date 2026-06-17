@@ -5,6 +5,8 @@ import {
   buyerById, acquisitionProbability, acquisitionSignals, similarAcquisitionsBy,
   sectorOverlap, recommendedAction, fmtUsdShort, DNA_AS_OF,
 } from "../lib/buyer-dna";
+import { VALUATION_INSTITUTIONAL } from "../lib/engines";
+import { SAMPLE_COMPANY } from "../lib/profile";
 
 // BUYER INTELLIGENCE PROFILE — every indexed buyer's own page. "Microsoft
 // Acquisition DNA": the full derived dossier a founder can explore — volume,
@@ -29,6 +31,17 @@ const BuyerProfile: React.FC = () => {
   const { signals, activeCount } = acquisitionSignals(p);
   const overlap = sectorOverlap(p);
   const similar = similarAcquisitionsBy(p.name);
+
+  // Phase 2 — expected outcome for the founder's company under THIS buyer:
+  // baseline × (1 + premium) × close-rate. Disclosed figures are used when
+  // present; otherwise a labelled market-neutral prior, never hidden.
+  const baseline = VALUATION_INSTITUTIONAL.financialBaseline.mid;
+  const premiumKnown = p.premium_pct != null;
+  const closeKnown = p.close_rate != null;
+  const premium = p.premium_pct ?? 0.2;       // neutral prior
+  const close = p.close_rate ?? 0.55;         // neutral prior
+  const expectedOffer = baseline * (1 + premium);
+  const expectedClose = expectedOffer * close;
 
   return (
     <div>
@@ -57,6 +70,26 @@ const BuyerProfile: React.FC = () => {
         <Kpi label="Avg premium" value={p.premium_pct != null ? `${Math.round(p.premium_pct * 100)}%` : "—"} sub="over reference" />
         <Kpi label="Close rate" value={p.close_rate != null ? `${Math.round(p.close_rate * 100)}%` : "—"} sub={p.median_close_days != null ? `${p.median_close_days}d median` : "—"} accent="#34d399" />
       </div>
+
+      {/* expected outcome for the founder's company */}
+      <Card className="mt-6 p-5">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Expected outcome · {SAMPLE_COMPANY.name} under {p.name}</div>
+          <span className="text-[10px] uppercase tracking-wide text-white/35">baseline {fmtUsdShort(baseline)} × (1 + premium) × close rate</span>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <Kpi label="Premium expectation" value={`${Math.round(premium * 100)}%`} sub={premiumKnown ? `${p.disclosed_events} disclosed deals` : "market-neutral prior"} accent={premiumKnown ? "#34d399" : undefined} />
+          <Kpi label="Close-rate expectation" value={`${Math.round(close * 100)}%`} sub={closeKnown ? "from track record" : "market-neutral prior"} accent={closeKnown ? "#34d399" : undefined} />
+          <Kpi label="Expected offer" value={fmtUsdShort(expectedOffer)} sub="at LOI" />
+          <Kpi label="Expected to close" value={fmtUsdShort(expectedClose)} sub="probability-weighted" accent="#fbbf24" />
+        </div>
+        {(!premiumKnown || !closeKnown) && (
+          <p className="mt-3 text-[10.5px] text-white/35">
+            {(!premiumKnown && !closeKnown) ? "Premium and close rate" : !premiumKnown ? "Premium" : "Close rate"} not disclosed in this buyer's
+            indexed record — a labelled market-neutral prior is applied (never hidden). The figure sharpens as the buyer's outcomes accrue.
+          </p>
+        )}
+      </Card>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
         {/* left — themes, sectors, regions, similar acquisitions */}
