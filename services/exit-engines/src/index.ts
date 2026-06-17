@@ -11,6 +11,7 @@ export * as captable     from './captable/index.js';
 export * as nda          from './nda/index.js';
 export * as exchange     from './exchange/index.js';
 export * as documents    from './documents/index.js';
+export * as marketdata   from './marketdata/index.js';
 
 // Top-level convenience re-exports — the most common entrypoints.
 export { runValuation, strategicBuyerReport, assetReplacementReport, tenMillionReport, twentyFiveMillionReport, runInstitutionalValuation, runValuationConstitution, VALUATION_FRAMEWORK, VALUATION_FRAMEWORK_VERSION } from './valuation/index.js';
@@ -47,8 +48,12 @@ export { MANDATE_STATES, deriveMandateState } from './exchange/index.js';
 export type { MandateState, MandateStateReport, MandateInputs, StateEvidence } from './exchange/index.js';
 
 // Document factory — Level 3. Every institutional document from one intelligence object.
-export { renderDocument, renderDocumentSuite, valuationFacts, validateTraceability, figure } from './documents/index.js';
-export type { DocumentKind, TracedDocument, TracedSection, DocumentInputs, Figure, TraceabilityReport } from './documents/index.js';
+export { renderDocument, renderDocumentSuite, valuationFacts, validateTraceability, figure, fiveQuestions, answersAllFive } from './documents/index.js';
+export type { DocumentKind, TracedDocument, TracedSection, DocumentInputs, Figure, TraceabilityReport, FiveQuestions } from './documents/index.js';
+
+// Market Data engine — the fourth data source feeding the framework.
+export { assessMarketConditions, marketCycle } from './marketdata/index.js';
+export type { MarketConditions, MarketVariable, MarketFeedInput } from './marketdata/index.js';
 export type {
   AcquisitionEvent, AcquisitionSource, BuyerHistoryRollup, ConfidenceTier,
   BuyerDealOutcomeRollup, OutcomeStandouts,

@@ -19,7 +19,13 @@ import { SAMPLE_CAPTABLE } from "./captable-sample.js";
 export const VALUATION_STANDARD     = runValuation(SAMPLE_COMPANY, { reportType: "standard" });
 export const VALUATION_STRATEGIC    = strategicBuyerReport(SAMPLE_COMPANY);
 export const VALUATION_REPLACEMENT  = assetReplacementReport(SAMPLE_COMPANY);
-export const VALUATION_INSTITUTIONAL = runInstitutionalValuation(SAMPLE_COMPANY);
+// Market feed (public comparables, rate environment, retrade) — produced by
+// the egress-enabled ingestion job; empty here means those variables render
+// honestly absent. The M&A market cycle is derived live regardless.
+import marketConditions from "../../../exit-engines/data/market_conditions.json";
+export const VALUATION_INSTITUTIONAL = runInstitutionalValuation(SAMPLE_COMPANY, {
+  marketFeed: (marketConditions as { feed?: Record<string, unknown> }).feed ?? {},
+});
 // Canonical name — the institutional report IS the Valuation Constitution.
 export const VALUATION_CONSTITUTION = VALUATION_INSTITUTIONAL;
 // Level 3 — the fact sheet (tear block) and the full traced-document suite,

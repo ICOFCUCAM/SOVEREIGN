@@ -9,6 +9,8 @@ import { runSimilarTransactions, type SimilarExit } from '../buyers/similar.js';
 import { runAcquisitionIntelligence } from '../buyers/intelligence.js';
 import { runBuyerDiscovery } from '../buyers/engine.js';
 import { BUYER_REGISTRY } from '../buyers/registry.js';
+import { assessMarketConditions } from '../marketdata/engine.js';
+import type { MarketFeedInput, MarketVariable } from '../marketdata/types.js';
 
 // ── THE VALUATION CONSTITUTION — canonical engine ───────────────────
 // runValuationConstitution() is the single source of valuation truth.
@@ -287,6 +289,15 @@ const companyVar = (name: string, present: boolean, value: string, runAt: string
   methodology: present ? methodology : 'not provided',
 });
 
+// Market Data engine output → the constitution's provenanced variable shape.
+const marketVar = (m: MarketVariable): VariableRecord => ({
+  name: m.name, present: m.present, value: m.value,
+  source: m.source, source_url: m.source_url,
+  confidence: m.confidence,
+  verification_status: m.present ? 'curated' : 'absent',
+  last_updated: m.last_updated, methodology: m.methodology,
+});
+
 const derivedVar = (name: string, present: boolean, value: string, source: string, lastUpdated: string, methodology: string, sourceUrl: string | null = null): VariableRecord => ({
   name, present, value, source, source_url: sourceUrl,
   confidence: present ? 'reported' : 'none',
@@ -295,8 +306,18 @@ const derivedVar = (name: string, present: boolean, value: string, source: strin
   methodology: present ? methodology : 'not available',
 });
 
-export function runValuationConstitution(company: CompanyProfile): ValuationConstitution {
+export interface ConstitutionOptions {
+  /** Injected external market feeds (public comparables, rate environment,
+   *  retrade). Supplied as data by the egress-enabled ingestion job; never
+   *  fetched in-engine. Absent feeds render honestly absent. */
+  readonly marketFeed?: MarketFeedInput;
+}
+
+export function runValuationConstitution(company: CompanyProfile, opts: ConstitutionOptions = {}): ValuationConstitution {
   const runAt = new Date().toISOString();
+  // Market Data engine — market_cycle is derived live from the registry;
+  // the rest populate from injected feeds or are honestly absent.
+  const market = assessMarketConditions(opts.marketFeed ?? {});
 
   // 1) financial baseline + methodology (pre-strategic-premium)
   const standard = runValuation(company, { reportType: 'standard' });
@@ -372,10 +393,10 @@ export function runValuationConstitution(company: CompanyProfile): ValuationCons
     ],
     market: [
       derivedVar('comparable_transactions', comparablesUsed > 0, String(comparablesUsed), 'exitos_registry', runAt, 'same-sector precedent transactions from the acquisition registry'),
-      derivedVar('comparable_public_companies', false, '—', 'not_provided', runAt, 'public-comparable feed not connected'),
+      marketVar(market.comparable_public_companies),
       derivedVar('sector_multiples', true, `${sectorMult.revenue?.low ?? sectorMult.arr?.low ?? '—'}×–${sectorMult.revenue?.high ?? sectorMult.arr?.high ?? '—'}×`, 'exitos_framework', `v${FW.version}`, 'institutional multiple priors, framework-governed'),
-      derivedVar('market_cycle', false, '—', 'not_provided', runAt, 'macro-cycle feed not connected'),
-      derivedVar('interest_rate_environment', false, '—', 'not_provided', runAt, 'rate feed not connected'),
+      marketVar(market.market_cycle),
+      marketVar(market.interest_rate_environment),
     ],
     buyer: [
       derivedVar('buyer_universe_size', true, String(buyerUniverse.registry), 'exitos_registry', runAt, 'curated mandate registry count'),
@@ -390,7 +411,7 @@ export function runValuationConstitution(company: CompanyProfile): ValuationCons
       derivedVar('expected_close_rate', closeRates.length > 0, closeRates.length ? pct(mean(closeRates)) : '—', 'exitos_registry', runAt, 'mean close rate of ranked acquirers'),
       derivedVar('expected_time_to_close', days.length > 0, `${timeToClose.lowDays}–${timeToClose.highDays} days`, 'exitos_registry', runAt, 'announced→closed span across ranked acquirers'),
       derivedVar('diligence_risk', true, conc(company) >= 0.4 ? 'Elevated (concentration)' : 'Standard', 'exitos_derived', runAt, 'derived from customer concentration'),
-      derivedVar('retrade_risk', false, 'Not observed in snapshot', 'not_provided', runAt, 'LOI→close pairs not in static snapshot'),
+      marketVar(market.retrade_risk),
     ],
   };
 

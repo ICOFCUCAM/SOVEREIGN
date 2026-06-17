@@ -7,4 +7,5 @@ export { runInstitutionalValuation, runValuationConstitution } from './instituti
 export type {
   ValuationConstitution, InstitutionalValuationReport, PremiumEvidence, ConfidenceScore,
   MethodologyView, LikelyBuyer, VariableRecord, ComparableAnalysis, ProvenanceSummary, MandatoryOutputs,
+  ConstitutionOptions,
 } from './institutional.js';
