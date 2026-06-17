@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS, sectorOverlap, recommendedAction,
   acquisitionProbability, rankedBuyers, acquisitionSignals, buyerById,
-  expectedOutcomeFor, strategicThemes,
+  expectedOutcomeFor, strategicThemes, buyerRationale, premiumLeague, speedLeague,
 } from "./buyer-dna.js";
 
 describe("acquisition DNA (derived from ingested registries)", () => {
@@ -116,6 +116,35 @@ describe("acquisition DNA (derived from ingested registries)", () => {
       expect(t.buyers).toBeGreaterThan(0);
     }
     for (let i = 1; i < themes.length; i++) expect(themes[i].buyers).toBeLessThanOrEqual(themes[i - 1].buyers);
+  });
+
+  it("strategic rationale is evidence-backed — points only when data supports them", () => {
+    const active = DNA_PROFILES.find((p) => p.events_indexed > 5)!;
+    const r = buyerRationale(active, 100_000_000);
+    expect(r.thesis.length).toBeGreaterThan(0);
+    expect(r.thesis).toContain(active.name);
+    expect(r.points.length).toBeGreaterThanOrEqual(1);
+    expect(r.points.length).toBeLessThanOrEqual(5);
+    for (const pt of r.points) {
+      expect(pt.label.length).toBeGreaterThan(0);
+      expect(pt.detail.length).toBeGreaterThan(0);
+    }
+    // a premium-payer point only appears when the buyer actually has one
+    const hasPremiumPoint = r.points.some((p) => p.label === "Premium payer");
+    if (hasPremiumPoint) expect(active.premium_pct).not.toBeUndefined();
+  });
+
+  it("outcome league tables rank only DISCLOSED figures, never fabricated", () => {
+    const prem = premiumLeague(12);
+    for (const p of prem) expect(p.premium_pct).not.toBeUndefined();
+    for (let i = 1; i < prem.length; i++) expect(prem[i].premium_pct!).toBeLessThanOrEqual(prem[i - 1].premium_pct!);
+
+    const fast = speedLeague(12);
+    for (const p of fast) {
+      expect(p.median_close_days).not.toBeUndefined();
+      expect(p.median_close_days!).toBeGreaterThan(0); // the 0-day data artifact is excluded
+    }
+    for (let i = 1; i < fast.length; i++) expect(fast[i].median_close_days!).toBeGreaterThanOrEqual(fast[i - 1].median_close_days!);
   });
 
   it("similar-transactions extract is sector-relevant and sourced", () => {

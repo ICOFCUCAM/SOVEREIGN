@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Card, Kpi, SectionHeader } from "../lib/ui";
 import {
   buyerById, acquisitionProbability, acquisitionSignals, similarAcquisitionsBy,
-  sectorOverlap, recommendedAction, fmtUsdShort, expectedOutcomeFor, DNA_AS_OF,
+  sectorOverlap, recommendedAction, fmtUsdShort, expectedOutcomeFor, buyerRationale, DNA_AS_OF,
 } from "../lib/buyer-dna";
 import { VALUATION_INSTITUTIONAL } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -37,6 +37,7 @@ const BuyerProfile: React.FC = () => {
   // present; otherwise a labelled market-neutral prior, never hidden.
   const baseline = VALUATION_INSTITUTIONAL.financialBaseline.mid;
   const { premium, close, premiumKnown, closeKnown, expectedOffer, expectedClose } = expectedOutcomeFor(p, baseline);
+  const rationale = buyerRationale(p, baseline);
 
   return (
     <div>
@@ -65,6 +66,23 @@ const BuyerProfile: React.FC = () => {
         <Kpi label="Avg premium" value={p.premium_pct != null ? `${Math.round(p.premium_pct * 100)}%` : "—"} sub="over reference" />
         <Kpi label="Close rate" value={p.close_rate != null ? `${Math.round(p.close_rate * 100)}%` : "—"} sub={p.median_close_days != null ? `${p.median_close_days}d median` : "—"} accent="#34d399" />
       </div>
+
+      {/* why this buyer would acquire you — strategic rationale */}
+      <Card className="mt-6 p-5">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Why {p.name} would acquire {SAMPLE_COMPANY.name}</div>
+        <p className="mt-2 text-[14px] font-medium leading-relaxed text-white/85">{rationale.thesis}</p>
+        {rationale.points.length > 0 && (
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            {rationale.points.map((pt) => (
+              <li key={pt.label} className="flex gap-2 text-[12.5px]">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-deal-400" />
+                <span><span className="font-semibold text-white/85">{pt.label}.</span> <span className="text-white/55">{pt.detail}</span></span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-3 text-[10px] text-white/35">Every point is evidence from the buyer's indexed acquisition record — points appear only when the data supports them.</div>
+      </Card>
 
       {/* expected outcome for the founder's company */}
       <Card className="mt-6 p-5">

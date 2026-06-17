@@ -4,7 +4,7 @@ import { Card, SectionHeader } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { VALUATION_INSTITUTIONAL, READINESS_ANALYSIS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
-import { rankedBuyers, expectedOutcomeFor, strategicThemes, fmtUsdShort } from "../lib/buyer-dna";
+import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, fmtUsdShort } from "../lib/buyer-dna";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 
 // ── ACQUISITION INTELLIGENCE TERMINAL ───────────────────────────────
@@ -58,6 +58,7 @@ const Terminal: React.FC = () => {
               <Stat k="Median close" v={`${leadCloseDays} days`} />
               <Stat k="Confidence" v={`${INST.confidence.score}% · ${INST.confidence.tier}`} />
             </div>
+            <p className="mt-3 max-w-3xl text-[12.5px] leading-relaxed text-white/55">{buyerRationale(lead.profile, BASELINE).thesis}</p>
           </div>
         </Card>
       )}

@@ -32,6 +32,7 @@ export const NAV: NavItem[] = [
   { to: "/console/buyer-graph",        label: "Buyer Graph",          group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/market-map",         label: "Market Map",           group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/knowledge-graph",    label: "Knowledge Graph",      group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/outcomes",           label: "Outcome Intelligence", group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/network",            label: "Network Intelligence", group: "Market Intelligence", roles: ["founder"], pro: true },
 
   // ── Buyer · Overview ───────────────────────────────────────────

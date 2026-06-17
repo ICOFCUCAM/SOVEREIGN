@@ -214,6 +214,66 @@ export function strategicThemes(limit = 6): StrategicTheme[] {
     .slice(0, limit);
 }
 
+// ── Strategic rationale — "why would THIS buyer acquire YOU?" ───────
+// A synthesized, evidence-backed thesis for the buyer↔founder pairing.
+// Every point cites a real DNA figure; points only appear when the
+// evidence supports them — no generic filler.
+export interface RationalePoint { readonly label: string; readonly detail: string }
+export interface BuyerRationale { readonly thesis: string; readonly points: readonly RationalePoint[] }
+
+export function buyerRationale(p: DnaProfile, baselineUsd?: number): BuyerRationale {
+  const overlap = sectorOverlap(p);
+  const similar = similarAcquisitionsBy(p.name);
+  const points: RationalePoint[] = [];
+
+  if (overlap.pct > 0) {
+    points.push({ label: "Acquires in your space", detail: `${overlap.pct}% of indexed activity overlaps your sector vocabulary${overlap.matched.length ? ` (${overlap.matched.join(", ")})` : ""}.` });
+  } else if (p.sector_exitos?.length) {
+    points.push({ label: "Sector adjacency", detail: `Active across ${p.sector_exitos.slice(0, 3).join(", ")} — adjacent to your category.` });
+  }
+  const seekingHit = (p.currently_seeking ?? []).filter((t) => COMPANY_TOKENS.some((c) => t.includes(c) || c.includes(t)));
+  if (seekingHit.length) {
+    points.push({ label: "Active thesis match", detail: `Currently seeking ${seekingHit.slice(0, 2).join(", ")} — directly on your category.` });
+  } else if (p.currently_seeking?.length) {
+    points.push({ label: "Current themes", detail: `Buying around ${p.currently_seeking.slice(0, 3).join(", ")}.` });
+  }
+  if (similar.length) {
+    points.push({ label: "Demonstrated pattern", detail: `Has acquired ${similar.length} similar compan${similar.length === 1 ? "y" : "ies"} — e.g. ${similar.slice(0, 2).map((s) => s.target).join(", ")}.` });
+  }
+  if (baselineUsd != null && p.check_size_band && baselineUsd >= p.check_size_band.low_usd && baselineUsd <= p.check_size_band.high_usd) {
+    points.push({ label: "Check-size fit", detail: `Your expected value sits inside their demonstrated ${fmtUsdShort(p.check_size_band.low_usd)}–${fmtUsdShort(p.check_size_band.high_usd)} check range.` });
+  }
+  if (p.appetite === "high" || (p.frequency_per_year ?? 0) >= 2) {
+    points.push({ label: "Active acquirer", detail: `${p.deals_12m} deal${p.deals_12m === 1 ? "" : "s"} in the last 12 months${p.frequency_per_year ? ` · ${p.frequency_per_year}/yr cadence` : ""}${p.last_acquisition ? ` · last: ${p.last_acquisition.target}` : ""}.` });
+  }
+  if (p.premium_pct != null && p.premium_pct >= 0.15) {
+    points.push({ label: "Premium payer", detail: `Pays ${Math.round(p.premium_pct * 100)}% over reference on disclosed deals.` });
+  }
+
+  const sectorLabel = SAMPLE_COMPANY.sector.replace(/_/g, " ");
+  const thesis = overlap.pct > 0
+    ? `${p.name} is an active acquirer in ${sectorLabel} whose recent pattern and stated themes map onto your company.`
+    : p.appetite === "high"
+      ? `${p.name} is a high-appetite acquirer; the fit is adjacency and velocity rather than a direct sector match today.`
+      : `${p.name} has indexed activity near your category — a watch-and-warm candidate.`;
+
+  return { thesis, points: points.slice(0, 5) };
+}
+
+// ── Outcome Intelligence — who pays best, who closes fastest ────────
+// League tables over buyers that have a DISCLOSED outcome figure. Sparse
+// by design — only buyers whose premium/close is on the record appear,
+// never a fabricated number. Coverage grows as the registry accretes.
+export function premiumLeague(limit = 12): readonly DnaProfile[] {
+  return DNA_PROFILES.filter((p) => p.premium_pct != null)
+    .slice().sort((a, b) => (b.premium_pct ?? 0) - (a.premium_pct ?? 0)).slice(0, limit);
+}
+
+export function speedLeague(limit = 12): readonly DnaProfile[] {
+  return DNA_PROFILES.filter((p) => p.median_close_days != null && p.median_close_days > 0)
+    .slice().sort((a, b) => (a.median_close_days ?? 1e9) - (b.median_close_days ?? 1e9)).slice(0, limit);
+}
+
 export const buyerById = (id: string): DnaProfile | undefined => DNA_PROFILES.find((p) => p.buyer_id === id);
 
 // Same-sector / similar acquisitions a buyer has made (from the bundled

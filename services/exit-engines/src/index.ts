@@ -17,6 +17,8 @@ export * as market       from './market/index.js';
 // Top-level convenience re-exports — the most common entrypoints.
 export { runValuation, strategicBuyerReport, assetReplacementReport, tenMillionReport, twentyFiveMillionReport, runInstitutionalValuation, runValuationConstitution, VALUATION_FRAMEWORK, VALUATION_FRAMEWORK_VERSION } from './valuation/index.js';
 export type { ValuationConstitution, InstitutionalValuationReport, PremiumEvidence, ConfidenceScore, MethodologyView, LikelyBuyer, VariableRecord, ComparableAnalysis, ProvenanceSummary, MandatoryOutputs, ValuationFrameworkConfig } from './valuation/index.js';
+export { MULTIPLES } from './valuation/index.js';
+export type { SectorMultiples, MultiplesBand } from './valuation/index.js';
 export { runReadiness, runReadinessAnalysis } from './readiness/index.js';
 export { runBuyerDiscovery } from './buyers/index.js';
 export { runDueDiligence }   from './diligence/index.js';
