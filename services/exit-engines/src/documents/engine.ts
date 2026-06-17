@@ -21,10 +21,13 @@ import { validateTraceability, type TraceabilityReport } from './traceability.js
 export type DocumentKind =
   | 'valuation_summary'
   | 'board_report'
-  | 'market_update'
+  | 'cim'
+  | 'executive_briefing'
   | 'buyer_brief'
   | 'acquisition_recommendation'
-  | 'exit_readiness';
+  | 'exit_readiness'
+  | 'market_update'
+  | 'mandate_report';
 
 export interface TracedSection {
   readonly heading: string;
@@ -54,10 +57,13 @@ export interface DocumentInputs {
 const DOC_TITLES: Record<DocumentKind, string> = {
   valuation_summary: 'Valuation Summary',
   board_report: 'Board Report',
-  market_update: 'Market Update',
+  cim: 'Confidential Information Memorandum',
+  executive_briefing: 'Executive Briefing',
   buyer_brief: 'Buyer Brief',
   acquisition_recommendation: 'Acquisition Recommendation',
   exit_readiness: 'Exit Readiness Report',
+  market_update: 'Market Update',
+  mandate_report: 'Mandate Report',
 };
 
 // The canonical nine section headings — every report has all of them.
@@ -78,10 +84,13 @@ function executiveLead(kind: DocumentKind, company: string, v: (k: string) => st
   const head = `${company} — enterprise value ${v('enterprise_value')} (range ${v('enterprise_value_range')}) at ${v('confidence')} confidence, on a strategic-buyer basis.`;
   switch (kind) {
     case 'board_report':               return `Prepared for the Board. ${head} Supported by ${v('comparable_transactions')} comparable transactions and a qualified buyer universe of ${v('qualified_buyers')}.`;
+    case 'cim':                        return `Confidential Information Memorandum. ${head} The memorandum sets out the valuation, the qualified buyer universe of ${v('qualified_buyers')}, and ${v('comparable_transactions')} comparable transactions for distribution to NDA-cleared counterparties.`;
+    case 'executive_briefing':         return `Executive briefing. ${head} ${v('methods_used')} weighted methods; ${v('comparable_transactions')} comparables; expected close ${v('expected_close_time')}.`;
     case 'market_update':              return `Market position update. ${head} The observed premium range is ${v('observed_premium_range')}; applied premium ${v('applied_premium')}.`;
     case 'buyer_brief':                return `Confidential buyer brief. ${head} Expected time to close ${v('expected_close_time')}.`;
     case 'acquisition_recommendation': return `Acquisition recommendation. ${head} ${v('qualified_buyers')} qualified buyers; applied premium ${v('applied_premium')}.`;
     case 'exit_readiness':             return `Exit readiness, in valuation terms. ${head} Expected time to close ${v('expected_close_time')}; data freshness ${v('data_freshness')}.`;
+    case 'mandate_report':             return `Sell-side mandate report. ${head} Anchored at the strategic midpoint with ${v('qualified_buyers')} qualified buyers and an applied premium of ${v('applied_premium')}.`;
     default:                           return head;
   }
 }
@@ -195,6 +204,6 @@ export function renderDocument(kind: DocumentKind, inputs: DocumentInputs): Trac
 
 /** Render every institutional report from one intelligence object. */
 export function renderDocumentSuite(inputs: DocumentInputs): Record<DocumentKind, TracedDocument> {
-  const kinds: DocumentKind[] = ['valuation_summary', 'board_report', 'market_update', 'buyer_brief', 'acquisition_recommendation', 'exit_readiness'];
+  const kinds: DocumentKind[] = ['valuation_summary', 'board_report', 'cim', 'executive_briefing', 'buyer_brief', 'acquisition_recommendation', 'exit_readiness', 'market_update', 'mandate_report'];
   return Object.fromEntries(kinds.map((k) => [k, renderDocument(k, inputs)])) as Record<DocumentKind, TracedDocument>;
 }

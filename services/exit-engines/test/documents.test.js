@@ -6,9 +6,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   figure, numericTokens, valuationFacts, validateTraceability,
-  renderDocument, renderDocumentSuite, REPORT_SECTIONS,
+  renderDocument, renderDocumentSuite, REPORT_SECTIONS, answersAllFive, fiveQuestions,
 } from '../dist/documents/index.js';
 import { runValuationConstitution } from '../dist/valuation/index.js';
+import { runBuyerIntelligenceEngine } from '../dist/buyers/index.js';
 import { SAMPLE_SAAS } from './sample.js';
 
 const c = runValuationConstitution(SAMPLE_SAAS);
@@ -32,9 +33,35 @@ test('the fact sheet is the target tear block — every headline metric, fully s
   }
 });
 
-test('every report carries the same nine canonical sections, fully traced', () => {
+test('every number answers the five non-negotiable questions', () => {
+  for (const f of facts) {
+    assert.ok(answersAllFive(f), `${f.key} answers all five`);
+    const q = fiveQuestions(f);
+    assert.ok(q.whereFrom && q.whenUpdated && q.howConfident && q.whatMethodology && q.traceable);
+  }
+});
+
+test('Engine 1 (Buyer Intelligence) emits its seven outputs per buyer, all sourced', () => {
+  const bi = runBuyerIntelligenceEngine(SAMPLE_SAAS, { limit: 6 });
+  assert.ok(bi.profiles.length > 0);
+  assert.ok(bi.qualifiedCount <= bi.scoredCount);
+  for (const p of bi.profiles) {
+    assert.ok(p.name && p.source);                            // qualified buyers + provenance
+    assert.equal(typeof p.qualified, 'boolean');
+    assert.ok(p.dna && p.dna.appetite);                       // buyer DNA
+    assert.ok(p.acquisitionHistory);                          // acquisition history
+    assert.ok(p.acquisitionAppetite);                         // acquisition appetite
+    assert.ok(p.expectedInterest && typeof p.expectedInterest.score === 'number'); // expected interest
+    assert.ok(p.closeProbabilityPct >= 0 && p.closeProbabilityPct <= 100);         // close probability
+    // historical premium present OR honestly absent (never invented)
+    assert.ok(p.historicalPremiumPct === undefined || p.historicalPremiumPct >= 0);
+  }
+});
+
+test('all nine report types render the nine canonical sections, fully traced', () => {
   const suite = renderDocumentSuite({ constitution: c });
-  const kinds = ['valuation_summary', 'board_report', 'market_update', 'buyer_brief', 'acquisition_recommendation', 'exit_readiness'];
+  const kinds = ['valuation_summary', 'board_report', 'cim', 'executive_briefing', 'buyer_brief', 'acquisition_recommendation', 'exit_readiness', 'market_update', 'mandate_report'];
+  assert.equal(Object.keys(suite).length, kinds.length, 'the suite covers all nine institutional report types');
   for (const k of kinds) {
     const doc = suite[k];
     assert.ok(doc, `${k} produced`);

@@ -15,12 +15,38 @@ export interface Figure {
   readonly methodology: string;  // how it was derived — never blank
 }
 
-/** Construct a Figure — throws if any provenance field is missing, so an
- *  untraceable figure cannot exist. */
+/** The non-negotiable rule: every number displayed in ExitOS must answer
+ *  five questions. A Figure that cannot answer all five may not be shown. */
+export interface FiveQuestions {
+  readonly whereFrom: string;       // 1. Where did it come from?   (source)
+  readonly whenUpdated: string;     // 2. When was it updated?      (last_updated)
+  readonly howConfident: string;    // 3. How confident are we?     (confidence)
+  readonly whatMethodology: string; // 4. What methodology?         (methodology)
+  readonly traceable: boolean;      // 5. Can we trace it to source data?
+}
+
+export function fiveQuestions(f: Figure): FiveQuestions {
+  return {
+    whereFrom: f.source,
+    whenUpdated: f.last_updated,
+    howConfident: f.confidence,
+    whatMethodology: f.methodology,
+    traceable: true,                // a constructed Figure is, by definition, traced
+  };
+}
+
+/** True only if the figure answers all five questions. */
+export function answersAllFive(f: Figure): boolean {
+  const q = fiveQuestions(f);
+  return [q.whereFrom, q.whenUpdated, q.howConfident, q.whatMethodology].every((a) => !!a && a.trim() !== '') && q.traceable;
+}
+
+/** Construct a Figure — throws unless it answers all five questions, so a
+ *  number that can't be traced to source data cannot enter a document. */
 export function figure(f: Figure): Figure {
   for (const k of ['source', 'confidence', 'last_updated', 'methodology'] as const) {
     if (!f[k] || String(f[k]).trim() === '') {
-      throw new Error(`Figure "${f.key}" is missing required provenance: ${k}. A number without a traceable ${k} may not enter a document.`);
+      throw new Error(`Figure "${f.key}" cannot answer question for "${k}". Per the non-negotiable rule, a number that cannot answer where it came from, when it was updated, how confident we are, what methodology produced it, and whether it traces to source data may not be displayed.`);
     }
   }
   return f;

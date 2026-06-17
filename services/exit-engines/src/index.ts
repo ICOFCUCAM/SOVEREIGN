@@ -39,8 +39,8 @@ export type { BuyerEntry, BuyerType } from './buyers/registry.js';
 export { rollupBuyerHistory, rollupBuyerOutcomes, compareOutcomes, closeDurationDays, premiumPct, computeExpectedOutcome, confidenceFromSample, runStrategySimulator, ACQUISITION_HISTORY } from './buyers/index.js';
 export { runAcquisitionIntelligence, assessIntent, buildAcquisitionGraph, discoverAdjacentBuyers } from './buyers/index.js';
 export type { AcquisitionIntelligenceReport, RankedOutcome, PipelineLayer, IntelligenceOptions, BuyerIntent, IntentSignal, GraphEdge, AdjacentBuyer } from './buyers/index.js';
-export { buildBuyerGraph, runSimilarTransactions } from './buyers/index.js';
-export type { BuyerGraph, GraphEntity, GraphEntityProps, GraphRelation, RelKind, SimilarTransactionsReport, SimilarExit } from './buyers/index.js';
+export { buildBuyerGraph, runSimilarTransactions, runBuyerIntelligenceEngine } from './buyers/index.js';
+export type { BuyerGraph, GraphEntity, GraphEntityProps, GraphRelation, RelKind, SimilarTransactionsReport, SimilarExit, BuyerIntelligenceReport, BuyerIntelligenceProfile } from './buyers/index.js';
 
 // Sovereign Exchange — the mandate state machine
 export { MANDATE_STATES, deriveMandateState } from './exchange/index.js';

@@ -75,7 +75,7 @@ describe("deliverables", () => {
     for (const k of ["enterprise_value", "confidence", "comparable_transactions", "qualified_buyers", "applied_premium", "data_freshness"]) {
       expect(keys, k).toContain(k);
     }
-    for (const kind of ["board_report", "market_update", "buyer_brief", "acquisition_recommendation", "exit_readiness", "valuation_summary"] as const) {
+    for (const kind of ["valuation_summary", "board_report", "cim", "executive_briefing", "buyer_brief", "acquisition_recommendation", "exit_readiness", "market_update", "mandate_report"] as const) {
       const doc = DOCUMENT_SUITE[kind];
       expect(doc.traceability.ok, `${kind} fully traceable`).toBe(true);
       const md = tracedDocMarkdown(doc);
