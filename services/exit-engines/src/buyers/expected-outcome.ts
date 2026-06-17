@@ -1,5 +1,6 @@
 import type { BuyerEntry } from './registry.js';
 import type { BuyerDealOutcomeRollup } from './outcomes.js';
+import { VALUATION_FRAMEWORK } from '../valuation/framework.js';
 
 // Expected Outcome Engine. Ranks buyers by the value the founder
 // actually receives — not the headline price, not the probability of
@@ -35,13 +36,13 @@ export function confidenceFromSample(n: number, label = 'observations'): Confide
   return        { tier: 'high',                sample: n, note: `n=${n} ${label}` };
 }
 
-// Neutral defaults used when a buyer has no track record. These are
-// sector-blind priors; once exit_close_events accrues real data, the
-// orchestration layer can swap these for tenant-aggregated values.
-const NEUTRAL_PREMIUM       = 0.20;  // public-market M&A premiums historically cluster around 20-30%
-const NEUTRAL_CLOSE_RATE    = 0.55;  // mid-range close rate for non-PE acquirers
-const NEUTRAL_DAYS_TO_CASH  = 150;   // 5-month median for mid-market software M&A
-const NEUTRAL_RETRADE       = 0;     // assume no retrade until data says otherwise
+// Neutral defaults used when a buyer has no track record. Sourced from the
+// Valuation Constitution's execution neutrals — the single home for every
+// fallback prior the platform uses.
+const NEUTRAL_PREMIUM       = VALUATION_FRAMEWORK.executionNeutrals.premiumPct;
+const NEUTRAL_CLOSE_RATE    = VALUATION_FRAMEWORK.executionNeutrals.closeRatePct;
+const NEUTRAL_DAYS_TO_CASH  = VALUATION_FRAMEWORK.executionNeutrals.daysToCash;
+const NEUTRAL_RETRADE       = VALUATION_FRAMEWORK.executionNeutrals.retradePct;
 
 export interface ExpectedOutcome {
   readonly impliedPriceUsd:    number;

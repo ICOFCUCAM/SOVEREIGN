@@ -19,6 +19,8 @@ export const VALUATION_STANDARD     = runValuation(SAMPLE_COMPANY, { reportType:
 export const VALUATION_STRATEGIC    = strategicBuyerReport(SAMPLE_COMPANY);
 export const VALUATION_REPLACEMENT  = assetReplacementReport(SAMPLE_COMPANY);
 export const VALUATION_INSTITUTIONAL = runInstitutionalValuation(SAMPLE_COMPANY);
+// Canonical name — the institutional report IS the Valuation Constitution.
+export const VALUATION_CONSTITUTION = VALUATION_INSTITUTIONAL;
 export const READINESS              = runReadiness(SAMPLE_COMPANY);
 export const READINESS_ANALYSIS     = runReadinessAnalysis(SAMPLE_COMPANY, READINESS);
 export const BUYERS                 = runBuyerDiscovery(SAMPLE_COMPANY, { limit: 12 });
@@ -176,11 +178,12 @@ export function useMemorandum(kind: MemorandumKind, inputs?: Partial<MemorandumI
     let alive = true;
     memoGen
       .generate(kind, {
-        company:   SAMPLE_COMPANY,
-        valuation: VALUATION_STRATEGIC,
-        readiness: READINESS,
-        buyers:    BUYERS,
-        diligence: DILIGENCE,
+        company:      SAMPLE_COMPANY,
+        valuation:    VALUATION_STRATEGIC,
+        constitution: VALUATION_INSTITUTIONAL,   // every memo inherits the framework
+        readiness:    READINESS,
+        buyers:       BUYERS,
+        diligence:    DILIGENCE,
         ...inputs,
       })
       .then((d) => { if (alive) setDoc(d); });

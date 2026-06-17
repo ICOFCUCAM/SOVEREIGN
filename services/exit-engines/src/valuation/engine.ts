@@ -1,5 +1,11 @@
 import type { CompanyProfile, EngineMeta } from '../types.js';
 import { MULTIPLES, countryAdjustment } from './multiples.js';
+import { METHODOLOGY_WEIGHTS, VALUATION_FRAMEWORK } from './framework.js';
+
+// Methodology weights and every prior are owned by the Valuation
+// Constitution, never defined inline — so every report computes identically.
+const W = METHODOLOGY_WEIGHTS;
+const FW = VALUATION_FRAMEWORK;
 
 export type ValuationReportType = 'standard' | 'strategic' | 'asset_replacement';
 
@@ -75,7 +81,7 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
       basis: `${(company.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(2)}M ARR`,
       multiple: sectorMult.arr.mid,
       band: bandFromMultiple(company.revenue.annualRecurringRevenueUsd, sectorMult.arr),
-      weight: 0.50,
+      weight: W['ARR multiple'],
     });
   }
 
@@ -86,7 +92,7 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
       basis: `${(company.revenue.trailingTwelveMonthsRevenueUsd / 1_000_000).toFixed(2)}M TTM revenue`,
       multiple: sectorMult.revenue.mid,
       band: bandFromMultiple(company.revenue.trailingTwelveMonthsRevenueUsd, sectorMult.revenue),
-      weight: 0.30,
+      weight: W['Revenue multiple (TTM)'],
     });
   }
 
@@ -98,7 +104,7 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
       basis: `${(ebitda / 1_000_000).toFixed(2)}M EBITDA (${(company.revenue.ebitdaMarginPct * 100).toFixed(1)}% margin)`,
       multiple: sectorMult.ebitda.mid,
       band: bandFromMultiple(ebitda, sectorMult.ebitda),
-      weight: 0.20,
+      weight: W['EBITDA multiple'],
     });
   }
 
@@ -110,7 +116,7 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
       basis: `${(gmv / 1_000_000).toFixed(2)}M GMV`,
       multiple: sectorMult.gmv.mid,
       band: bandFromMultiple(gmv, sectorMult.gmv),
-      weight: 0.25,
+      weight: W['GMV multiple'],
     });
   }
 
@@ -128,8 +134,8 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
 
   // Customer concentration discount
   const conc = company.revenue.customerConcentrationTop10Pct ?? 0;
-  if (conc >= 0.5) {
-    premiums.push({ name: 'Concentration discount', pct: -0.20, reason: `Top-10 customers concentrate ${(conc * 100).toFixed(0)}% of revenue` });
+  if (conc >= FW.concentrationDiscount.thresholdPct) {
+    premiums.push({ name: 'Concentration discount', pct: FW.concentrationDiscount.discountPct, reason: `Top-10 customers concentrate ${(conc * 100).toFixed(0)}% of revenue` });
   }
 
   // Liquidation preference floor — applies as a hard low-band guard
@@ -142,7 +148,9 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
 
   // Strategic uplift — buyers pay for synergies + control + competitive blocking.
   if (reportType === 'strategic') {
-    const heuristicUplift = 0.30 + (company.product.hasNetworkEffects ? 0.10 : 0) + (company.product.hasDataMoat ? 0.10 : 0);
+    const heuristicUplift = FW.strategicHeuristic.basePct
+      + (company.product.hasNetworkEffects ? FW.strategicHeuristic.networkEffectsUpliftPct : 0)
+      + (company.product.hasDataMoat ? FW.strategicHeuristic.dataMoatUpliftPct : 0);
     const strategicUplift = opts.strategicPremiumPct ?? heuristicUplift;
     premiums.push({
       name: 'Strategic premium',
@@ -157,23 +165,23 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
 
   // Asset replacement — bottom-up cost to rebuild
   if (reportType === 'asset_replacement') {
-    const engineeringHc = company.team.engineeringHeadcount ?? Math.max(2, Math.floor(company.team.headcount * 0.35));
-    const yearsToBuild = Math.max(2, Math.ceil((company.foundedYear < 2026 ? 2026 - company.foundedYear : 2) * 0.6));
-    const fullyLoadedCostPerEng = 280_000;
+    const ar = FW.assetReplacement;
+    const engineeringHc = company.team.engineeringHeadcount ?? Math.max(2, Math.floor(company.team.headcount * ar.engRatioOfHeadcount));
+    const yearsToBuild = Math.max(ar.minYearsToBuild, Math.ceil((company.foundedYear < 2026 ? 2026 - company.foundedYear : ar.minYearsToBuild) * ar.yearsToBuildFactor));
     const ipPremium = company.product.intellectualProperty?.patentsGranted ?? 0;
-    const replacementCost = engineeringHc * fullyLoadedCostPerEng * yearsToBuild + ipPremium * 500_000;
-    const opportunityCost = company.revenue.annualRecurringRevenueUsd * 1.5;
+    const replacementCost = engineeringHc * ar.fullyLoadedEngCostUsd * yearsToBuild + ipPremium * ar.patentValueUsd;
+    const opportunityCost = company.revenue.annualRecurringRevenueUsd * ar.arrOpportunityMultiple;
     methodologies.push({
       name: 'Replacement cost',
-      basis: `${engineeringHc} eng × ${yearsToBuild}yr × $280k + ${ipPremium} patent(s)`,
-      band: { low: replacementCost * 0.7, mid: replacementCost, high: replacementCost * 1.4, currency: 'USD' },
-      weight: 0.6,
+      basis: `${engineeringHc} eng × ${yearsToBuild}yr × $${(ar.fullyLoadedEngCostUsd / 1000).toFixed(0)}k + ${ipPremium} patent(s)`,
+      band: { low: replacementCost * ar.replacementLowBand, mid: replacementCost, high: replacementCost * ar.replacementHighBand, currency: 'USD' },
+      weight: W['Replacement cost'],
     });
     methodologies.push({
       name: 'Opportunity cost (foregone revenue)',
-      basis: `1.5× ARR (${(company.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(2)}M)`,
-      band: { low: opportunityCost * 0.8, mid: opportunityCost, high: opportunityCost * 1.3, currency: 'USD' },
-      weight: 0.4,
+      basis: `${ar.arrOpportunityMultiple}× ARR (${(company.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(2)}M)`,
+      band: { low: opportunityCost * ar.opportunityLowBand, mid: opportunityCost, high: opportunityCost * ar.opportunityHighBand, currency: 'USD' },
+      weight: W['Opportunity cost (foregone revenue)'],
     });
     headline = combineWeighted(methodologies);
     notes.push('Asset-replacement valuation reflects the cost a buyer would incur to rebuild the asset in-house, plus opportunity cost of years lost.');

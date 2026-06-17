@@ -58,8 +58,9 @@ export function frameDoc(opts: {
   meta?: ReadonlyArray<[string, string]>;
   sections: readonly DocSection[];
   confidential?: boolean;
+  disclaimerOverride?: string;
 }): string {
-  const { title, subtitle, meta = [], sections, confidential = true } = opts;
+  const { title, subtitle, meta = [], sections, confidential = true, disclaimerOverride } = opts;
   const lines: string[] = [...MASTHEAD, `# ${title}`];
   if (subtitle) lines.push(`### ${subtitle}`);
   lines.push("");
@@ -72,7 +73,13 @@ export function frameDoc(opts: {
     if (s.bullets?.length) { for (const b of s.bullets) lines.push(`- ${b}`); lines.push(""); }
     if (s.table) { lines.push(...mdTable(s.table.headers, s.table.rows), ""); }
   });
-  lines.push(...COLOPHON);
+  if (disclaimerOverride) {
+    lines.push("", "───────────────────────────────────────────",
+      "◎ EXITOS · ACQUISITION EXCHANGE · Strictly confidential — for the addressed counterparty only", "",
+      `_${disclaimerOverride}_`);
+  } else {
+    lines.push(...COLOPHON);
+  }
   return lines.join("\n");
 }
 
@@ -281,18 +288,72 @@ export function institutionalValuationMemo(report: InstitutionalValuationReport)
         ["Comparable depth", pct(report.confidence.drivers.comparableDepth)],
         ["Sector maturity", pct(report.confidence.drivers.sectorMaturity)],
         ["Financial quality", pct(report.confidence.drivers.financialQuality)],
+        ["Data freshness", pct(report.confidence.drivers.dataFreshness)],
+      ],
+    },
+  };
+
+  // Required-variable coverage with per-figure provenance — the framework's
+  // contract that no figure is shown without a traceable source.
+  const allVars = [
+    ...report.variables.company, ...report.variables.market,
+    ...report.variables.buyer, ...report.variables.execution,
+  ];
+  const variableCoverage: DocSection = {
+    heading: "Valuation variables & provenance",
+    body: `Every variable the framework requires, with its value and provenance. Variables marked absent lower the confidence score rather than being silently omitted. Required provenance fields: ${report.provenanceSummary.requiredFields.join(", ")}.`,
+    table: {
+      headers: ["Variable", "Value", "Source", "Verification", "Last updated"],
+      rows: allVars.map((v) => [
+        v.name,
+        v.present ? v.value : "— absent",
+        v.source,
+        v.verification_status,
+        v.last_updated.length > 10 ? v.last_updated.slice(0, 10) : v.last_updated,
+      ]),
+    },
+  };
+
+  const provenance: DocSection = {
+    heading: "Data provenance summary",
+    body: `${report.provenanceSummary.note} ${report.provenanceSummary.totalFigures} sourced figures in total${report.provenanceSummary.mostRecentDataDate ? `; most recent evidence dated ${report.provenanceSummary.mostRecentDataDate}` : ""}.`,
+    table: {
+      headers: ["Source", "Figures"],
+      rows: Object.entries(report.provenanceSummary.bySource).map(([s, n]) => [s, String(n)]),
+    },
+  };
+
+  // Explicit mandatory-output checklist so the document proves compliance.
+  const mandatory: DocSection = {
+    heading: "Framework compliance — mandatory outputs",
+    body: `Prepared under ExitOS Valuation Framework v${report.frameworkVersion}. All ten mandatory outputs are present:`,
+    table: {
+      headers: ["#", "Mandatory output", "Value"],
+      rows: [
+        ["1", "Enterprise value range", report.mandatoryOutputs.enterprise_value_range],
+        ["2", "Midpoint valuation", report.mandatoryOutputs.midpoint_valuation],
+        ["3", "Confidence score", report.mandatoryOutputs.confidence_score],
+        ["4", "Valuation methodologies", report.mandatoryOutputs.valuation_methodologies],
+        ["5", "Methodology weighting", report.mandatoryOutputs.methodology_weighting],
+        ["6", "Comparable transaction count", report.mandatoryOutputs.comparable_transaction_count],
+        ["7", "Strategic premium basis", report.mandatoryOutputs.strategic_premium_basis],
+        ["8", "Buyer universe size", report.mandatoryOutputs.buyer_universe_size],
+        ["9", "Expected time to close", report.mandatoryOutputs.expected_time_to_close],
+        ["10", "Data provenance summary", report.mandatoryOutputs.data_provenance_summary],
       ],
     },
   };
 
   return frameDoc({
     title: "Institutional Valuation — Summary",
-    subtitle: `${report.companyName} · strategic-buyer basis · ${report.confidence.tier} confidence`,
+    subtitle: `${report.companyName} · strategic-buyer basis · ${report.confidence.tier} confidence · Framework v${report.frameworkVersion}`,
     meta: [
       ["Prepared for", "The Board and shareholders of the Company"],
       ["Approach", "Multiples baseline · precedent-transaction premium · comparable analysis · buyer-universe intelligence"],
+      ["Framework", `ExitOS Valuation Framework v${report.frameworkVersion}`],
     ],
-    sections: [summary, methodology, premium, comps, buyers, rationale, confidence, { heading: "Assumptions & notes", bullets: report.notes }],
+    sections: [summary, methodology, premium, comps, buyers, rationale, confidence, variableCoverage, provenance, mandatory, { heading: "Assumptions & notes", bullets: report.notes }],
+    disclaimerOverride: report.disclaimer,
   });
 }
 

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Button, Card, Kpi, SectionHeader, Field, fmtMoney, downloadJson } from "../lib/ui";
 import { VALUATION_INSTITUTIONAL } from "../lib/engines";
+import { VALUATION_FRAMEWORK } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import BankerTake from "../components/BankerTake";
 
@@ -16,7 +17,8 @@ const EBITDA = TTM * C.revenue.ebitdaMarginPct;
 const INST = VALUATION_INSTITUTIONAL;
 const pctStr = (x: number, d = 0): string => `${(x * 100).toFixed(d)}%`;
 
-function dcf(growth: number, discount: number, years = 5, terminal = 0.03) {
+// DCF parameters are governed by the Valuation Constitution, not the page.
+function dcf(growth: number, discount: number, years = VALUATION_FRAMEWORK.dcf.years, terminal = VALUATION_FRAMEWORK.dcf.terminalGrowthPct) {
   // FCF proxy = EBITDA, grown each year, discounted; + Gordon terminal value
   let pv = 0;
   let fcf = EBITDA;
@@ -38,7 +40,7 @@ const compMid = compPrices.length
 
 const Valuation: React.FC = () => {
   const [growth, setGrowth] = useState(Math.round(C.growth.arrGrowthYoyPct * 100)); // %
-  const [discount, setDiscount] = useState(18); // %
+  const [discount, setDiscount] = useState(Math.round(VALUATION_FRAMEWORK.dcf.defaultDiscountPct * 100)); // %
 
   const dcfValue = useMemo(() => dcf(growth / 100, discount / 100), [growth, discount]);
 

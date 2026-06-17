@@ -1,5 +1,6 @@
 import type { CompanyProfile } from '../types.js';
 import type { ValuationReport } from '../valuation/engine.js';
+import type { ValuationConstitution } from '../valuation/institutional.js';
 import type { BuyerDiscoveryReport } from '../buyers/engine.js';
 import type { ReadinessReport } from '../readiness/engine.js';
 import type { DueDiligenceReport } from '../diligence/engine.js';
@@ -14,6 +15,11 @@ export type MemorandumKind =
 export interface MemorandumInputs {
   readonly company: CompanyProfile;
   readonly valuation: ValuationReport;
+  // The canonical Valuation Constitution. When supplied, every valuation
+  // figure in the document is rendered from it — the document inherits the
+  // framework rather than describing the base report. Optional only for
+  // backward compatibility; production callers always pass it.
+  readonly constitution?: ValuationConstitution;
   readonly buyers?: BuyerDiscoveryReport;
   readonly readiness?: ReadinessReport;
   readonly diligence?: DueDiligenceReport;

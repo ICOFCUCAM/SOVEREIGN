@@ -47,7 +47,21 @@ function compactInputs(i: MemorandumInputs): string {
     market: c.market,
     product: c.product,
     team: c.team,
-    valuationHeadline: i.valuation.headline,
+    // Valuation MUST be taken from the constitution when present — the LLM
+    // is given the framework's mandatory outputs and is instructed (below)
+    // not to invent or alter any valuation figure.
+    valuationFramework: i.constitution
+      ? {
+          version: i.constitution.frameworkVersion,
+          mandatoryOutputs: i.constitution.mandatoryOutputs,
+          headline: i.constitution.headline,
+          methodologies: i.constitution.methodologies,
+          premium: { applied: i.constitution.premium.appliedPct, basis: i.constitution.premium.basis, observed: i.constitution.premium.observedPremiums.length },
+          confidence: { score: i.constitution.confidence.score, tier: i.constitution.confidence.tier },
+          comparablesUsed: i.constitution.comparablesUsed,
+        }
+      : null,
+    valuationHeadline: i.constitution ? i.constitution.headline : i.valuation.headline,
     valuationMethodologies: i.valuation.methodologies,
     premiums: i.valuation.premiums,
     readiness: i.readiness ? { score: i.readiness.overallScore, band: i.readiness.band, strengths: i.readiness.strengths, recommendations: i.readiness.recommendations } : null,
@@ -105,7 +119,10 @@ export class ClaudeMemorandumGenerator implements MemorandumGenerator {
   }
 
   async generate(kind: MemorandumKind, inputs: MemorandumInputs): Promise<MemorandumDocument> {
-    const system = `You are a managing director at a top-tier investment bank, producing institutional acquisition documents. Output strict JSON only.\n\nFormat: { "sections": [{ "heading": "1. ...", "body": "...", "bullets": ["..."] }, ...] }\n\nNo prose outside the JSON. Adhere to the section structure of the document kind. Banker register; declarative; verified facts only.\n\n${KIND_DIRECTIVES[kind]}`;
+    const valuationRule = inputs.constitution
+      ? `\n\nVALUATION GOVERNANCE: All valuation figures (enterprise value range, midpoint, confidence, methodology weights, comparable count, strategic premium, buyer universe, time to close) MUST be taken verbatim from valuationFramework.mandatoryOutputs. Do NOT invent, round differently, or alter any valuation number. The figures are governed by ExitOS Valuation Framework v${inputs.constitution.frameworkVersion}.`
+      : '';
+    const system = `You are a managing director at a top-tier investment bank, producing institutional acquisition documents. Output strict JSON only.\n\nFormat: { "sections": [{ "heading": "1. ...", "body": "...", "bullets": ["..."] }, ...] }\n\nNo prose outside the JSON. Adhere to the section structure of the document kind. Banker register; declarative; verified facts only.\n\n${KIND_DIRECTIVES[kind]}${valuationRule}`;
     const user = `Document kind: ${kind}\nAnonymize: ${inputs.anonymize ? 'yes (use Project Cipher and redact identifying details)' : 'no'}\n\nInputs:\n${compactInputs(inputs)}`;
 
     try {

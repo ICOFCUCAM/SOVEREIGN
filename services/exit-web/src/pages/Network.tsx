@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Card, SectionHeader } from "../lib/ui";
 import { BUYERS, VALUATION_STRATEGIC, DILIGENCE } from "../lib/engines";
+import { VALUATION_FRAMEWORK } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { MARKET_FMT, HISTORY_FMT, DEAL_INTEL, DEAL_INTEL_FMT } from "../lib/market-stats";
 
@@ -13,9 +14,11 @@ import { MARKET_FMT, HISTORY_FMT, DEAL_INTEL, DEAL_INTEL_FMT } from "../lib/mark
 
 const ARR = SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd;
 
-function buyerDna(name: string, premiumDefault: number, retentionBase: number, earnout: string) {
+function buyerDna(name: string, retentionBase: number, earnout: string) {
   const c = BUYERS.candidates.find((x) => x.buyer.name === name) ?? BUYERS.candidates[0];
   const days = c.expectedOutcome.expectedDaysToCash;
+  // premium prior is owned by the Valuation Constitution, never inlined here
+  const premiumDefault = VALUATION_FRAMEWORK.buyerTypePremiumPriors[c.buyer.buyerType] ?? VALUATION_FRAMEWORK.executionNeutrals.premiumPct;
   const prem = c.outcomes.avgPremiumPct != null ? Math.min(0.4, c.outcomes.avgPremiumPct) : premiumDefault;
   const multiple = ((VALUATION_STRATEGIC.headline.mid * (1 + prem)) / ARR).toFixed(1);
   const retention = Math.min(95, Math.max(45, Math.round(retentionBase + ((c.outcomes.avgRetradePct ?? 0) >= 0 ? 6 : -8))));
@@ -46,8 +49,8 @@ const Moat: React.FC<{ n: number; title: string; why: string; children: React.Re
 );
 
 const Network: React.FC = () => {
-  const buyerA = buyerDna("Amazon Strategic", 0.28, 80, "Rare");
-  const buyerB = buyerDna("Pritzker Private Capital", 0.12, 60, "Aggressive");
+  const buyerA = buyerDna("Amazon Strategic", 80, "Rare");
+  const buyerB = buyerDna("Pritzker Private Capital", 60, "Aggressive");
   const buyerDnaCount = BUYERS.candidates.length;
 
   return (

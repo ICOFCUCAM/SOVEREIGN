@@ -49,11 +49,11 @@ test('comparable transactions are real and source-referenced', () => {
   }
 });
 
-test('confidence score is a 0–100 composite with named drivers', () => {
+test('confidence score is a 0–100 composite with the five framework drivers', () => {
   assert.ok(r.confidence.score >= 0 && r.confidence.score <= 100);
-  assert.ok(['Developing', 'Medium', 'Medium-High', 'High'].includes(r.confidence.tier));
+  assert.ok(['Low', 'Moderate', 'High'].includes(r.confidence.tier));
   const d = r.confidence.drivers;
-  for (const k of ['dataCompleteness', 'comparableDepth', 'sectorMaturity', 'financialQuality']) {
+  for (const k of ['dataCompleteness', 'comparableDepth', 'sectorMaturity', 'financialQuality', 'dataFreshness']) {
     assert.ok(d[k] >= 0 && d[k] <= 1, `${k} normalized 0–1`);
   }
 });

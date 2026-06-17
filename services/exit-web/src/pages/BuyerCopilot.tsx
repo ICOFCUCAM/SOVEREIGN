@@ -3,7 +3,7 @@ import { Card, SectionHeader, fmtMoney } from "../lib/ui";
 import { VALUATION_STRATEGIC } from "../lib/engines";
 import { DEAL_BUYERS } from "../lib/deal-context";
 import BankerTake from "../components/BankerTake";
-import { type BuyerCandidate } from "@exit/engines";
+import { type BuyerCandidate, VALUATION_FRAMEWORK } from "@exit/engines";
 
 // Buyer Copilot — buyer intelligence, not a directory. For every acquirer it
 // computes the things a founder could never see: acquisition likelihood, the
@@ -75,8 +75,9 @@ function buyerDNA(c: BuyerCandidate): BuyerDNA {
   const baseFriendly: Record<string, number> = { strategic: 78, pe: 64, vc: 80, family_office: 90, sponsor: 60 };
   const retrade = c.outcomes.avgRetradePct ?? 0;
   const founderFriendly = Math.max(35, Math.min(96, Math.round((baseFriendly[t] ?? 70) + (retrade >= 0 ? 8 : retrade < -0.05 ? -16 : -6))));
-  const premiumDefault: Record<string, number> = { strategic: 28, pe: 12, vc: 18, family_office: 15, sponsor: 10 };
-  const typicalPremiumPct = c.outcomes.avgPremiumPct != null ? Math.round(Math.min(0.4, c.outcomes.avgPremiumPct) * 100) : (premiumDefault[t] ?? 15);
+  // buyer-type premium priors are owned by the Valuation Constitution
+  const priorPct = Math.round((VALUATION_FRAMEWORK.buyerTypePremiumPriors[t] ?? VALUATION_FRAMEWORK.executionNeutrals.premiumPct) * 100);
+  const typicalPremiumPct = c.outcomes.avgPremiumPct != null ? Math.round(Math.min(0.4, c.outcomes.avgPremiumPct) * 100) : priorPct;
   const rest = DNA_BY_TYPE[t] ?? DNA_BY_TYPE.strategic;
   return { founderFriendly, typicalPremiumPct, ...rest };
 }

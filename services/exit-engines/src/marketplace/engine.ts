@@ -5,6 +5,7 @@ import type { ReadinessReport } from '../readiness/engine.js';
 import type { DueDiligenceReport } from '../diligence/engine.js';
 import type { MemorandumDocument, MemorandumGenerator } from '../memorandum/types.js';
 import { runValuation } from '../valuation/engine.js';
+import { runValuationConstitution } from '../valuation/institutional.js';
 import { runBuyerDiscovery } from '../buyers/engine.js';
 import { runReadiness } from '../readiness/engine.js';
 import { runDueDiligence } from '../diligence/engine.js';
@@ -108,8 +109,10 @@ export async function runMarketplace(
   // Stage 4 — diligence
   const diligence = runDueDiligence(company);
 
-  // Stage 5 — memoranda
-  const memInputs = { company, valuation: strategic, buyers, readiness, diligence };
+  // Stage 5 — memoranda. Every document inherits the Valuation Constitution
+  // so no memo defines its own valuation logic.
+  const constitution = runValuationConstitution(company);
+  const memInputs = { company, valuation: strategic, constitution, buyers, readiness, diligence };
   const [cim, executiveSummary, investorDeck, buyerTeaser, ddRoomIndex] = await Promise.all([
     generator.generate('cim',                memInputs),
     generator.generate('executive_summary',  memInputs),

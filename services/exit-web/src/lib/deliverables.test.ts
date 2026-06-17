@@ -59,6 +59,12 @@ describe("deliverables", () => {
     expect(md).toContain("Buyer universe");
     for (const b of r.mostLikelyBuyers.slice(0, 3)) expect(md).toContain(b.name);
     expect(md).toContain("Strategic buyer rationale");
+    // framework governance — provenance, variable coverage, mandatory-output checklist
+    expect(md).toContain(`Framework v${r.frameworkVersion}`);
+    expect(md).toContain("Valuation variables & provenance");
+    expect(md).toContain("Data provenance summary");
+    expect(md).toContain("Framework compliance — mandatory outputs");
+    for (const field of r.provenanceSummary.requiredFields) expect(md).toContain(field);
     expect(md.length).toBeGreaterThan(1500);
     noPlaceholders(md);
   });
@@ -167,5 +173,28 @@ describe("all generated documents have content", () => {
       expect(md.length, kind).toBeGreaterThan(800);
       noPlaceholders(md);
     }
+  });
+
+  it("memoranda INHERIT the Valuation Constitution when supplied", async () => {
+    const gen = new TemplateMemorandumGenerator();
+    const fwVersion = VALUATION_INSTITUTIONAL.frameworkVersion;
+    // CIM, exec summary and deck must render the framework's governed figures
+    for (const kind of ["cim", "executive_summary", "investor_deck"] as const) {
+      const doc = await gen.generate(kind, {
+        company: SAMPLE_COMPANY, valuation: VALUATION_STRATEGIC,
+        constitution: VALUATION_INSTITUTIONAL, buyers: BUYERS, diligence: DILIGENCE,
+      });
+      const md = docToMarkdown(doc);
+      expect(md, kind).toContain(`Framework v${fwVersion}`);
+      // the governed midpoint figure appears verbatim (no per-doc recomputation)
+      expect(md, kind).toContain(VALUATION_INSTITUTIONAL.mandatoryOutputs.midpoint_valuation);
+    }
+    // the anonymized teaser inherits the basis without leaking absolute figures
+    const teaser = await gen.generate("buyer_teaser", {
+      company: SAMPLE_COMPANY, valuation: VALUATION_STRATEGIC, constitution: VALUATION_INSTITUTIONAL,
+    });
+    const tmd = docToMarkdown(teaser);
+    expect(tmd).toContain(`Framework v${fwVersion}`);
+    expect(tmd).not.toContain(VALUATION_INSTITUTIONAL.mandatoryOutputs.midpoint_valuation);
   });
 });

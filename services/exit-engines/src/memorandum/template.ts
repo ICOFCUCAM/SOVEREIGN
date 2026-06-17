@@ -72,6 +72,20 @@ function investmentHighlights(i: MemorandumInputs): string[] {
 }
 
 function valuationTable(i: MemorandumInputs): MemorandumTable {
+  // When the constitution is present, the methodology table inherits its
+  // normalized weights and per-method market evidence — the single source
+  // of valuation truth, not a per-document recomputation.
+  if (i.constitution) {
+    return {
+      caption: `Valuation methodology — ExitOS Framework v${i.constitution.frameworkVersion}`,
+      headers: ['Methodology', 'Basis', 'Low', 'Mid', 'High', 'Weight', 'Market evidence'],
+      rows: i.constitution.methodologies.map((m) => [
+        m.name, m.basis,
+        money(m.band.low, i.anonymize), money(m.band.mid, i.anonymize), money(m.band.high, i.anonymize),
+        `${m.weightPct}%`, m.evidence,
+      ]),
+    };
+  }
   const v = i.valuation;
   return {
     caption: 'Valuation band',
@@ -83,6 +97,40 @@ function valuationTable(i: MemorandumInputs): MemorandumTable {
       money(m.band.high, i.anonymize),
       `${Math.round(m.weight * 100)}%`,
     ]),
+  };
+}
+
+// The framework-governed valuation section every memorandum inherits.
+// Renders the ten mandatory outputs from the constitution — no document
+// states a valuation figure the framework didn't produce.
+function constitutionValuationSection(i: MemorandumInputs, heading: string): MemorandumSection | null {
+  const c = i.constitution;
+  if (!c) return null;
+  const m = c.mandatoryOutputs;
+  const anon = !!i.anonymize;
+  const body = anon
+    ? `Valuation prepared under ExitOS Valuation Framework v${c.frameworkVersion}. Absolute figures are disclosed on execution of a mutual NDA; the methodology, confidence (${m.confidence_score}) and the buyer universe (${m.buyer_universe_size}) are shared pre-NDA.`
+    : `On a strategic-buyer basis the enterprise value is ${m.midpoint_valuation} (range ${m.enterprise_value_range}), prepared under ExitOS Valuation Framework v${c.frameworkVersion}. The midpoint is the financial baseline uplifted by a strategic premium of ${m.strategic_premium_basis} — drawn from observed precedent transactions, not assumed.`;
+  return {
+    heading,
+    body,
+    tables: [
+      {
+        caption: 'Mandatory valuation outputs',
+        headers: ['Output', 'Value'],
+        rows: [
+          ['Enterprise value range', anon ? '— (under NDA)' : m.enterprise_value_range],
+          ['Midpoint valuation', anon ? '— (under NDA)' : m.midpoint_valuation],
+          ['Valuation confidence', m.confidence_score],
+          ['Methodology weighting', m.methodology_weighting],
+          ['Comparable transactions', m.comparable_transaction_count],
+          ['Strategic premium basis', m.strategic_premium_basis],
+          ['Buyer universe', m.buyer_universe_size],
+          ['Expected time to close', m.expected_time_to_close],
+          ['Data provenance', m.data_provenance_summary],
+        ],
+      },
+    ],
   };
 }
 
@@ -124,7 +172,7 @@ function cim(i: MemorandumInputs): MemorandumDocument {
       body: `${name} reports ${money(r.trailingTwelveMonthsRevenueUsd, !!i.anonymize)} in trailing twelve-month revenue at ${(r.grossMarginPct * 100).toFixed(0)}% gross margin and ${(r.ebitdaMarginPct * 100).toFixed(0)}% EBITDA margin — profitable while compounding. The recurring-revenue base has expanded consistently at the reported growth rate.`,
       tables: [financialProfileTable(i), arrTrajectory(i), valuationTable(i)],
     },
-    {
+    constitutionValuationSection(i, '6. Valuation') ?? {
       heading: '6. Valuation',
       body: `Headline valuation range: ${money(i.valuation.headline.low, !!i.anonymize)} – ${money(i.valuation.headline.mid, !!i.anonymize)} – ${money(i.valuation.headline.high, !!i.anonymize)}. Country adjustment for ${i.anonymize ? '[redacted]' : i.company.jurisdiction}: ${(i.valuation.countryAdjustment * 100).toFixed(0)}%.`,
       bullets: i.valuation.premiums.map((p) => `${p.name}: ${p.pct >= 0 ? '+' : ''}${(p.pct * 100).toFixed(0)}% — ${p.reason}`),
@@ -182,7 +230,7 @@ function executiveSummary(i: MemorandumInputs): MemorandumDocument {
       heading: 'Market position',
       body: `The Company addresses a ${money(c.market.addressableMarketUsd, !!i.anonymize)} market expanding at ${(c.market.marketGrowthPct * 100).toFixed(0)}% annually. Competitive density is assessed as ${c.market.competitiveDensity}; regulatory exposure as ${c.market.regulatoryRisk}. The platform serves ${i.anonymize ? 'a customer base disclosed under NDA' : `${c.users.totalCustomers.toLocaleString()} customers`}${c.users.activeMonthly && !i.anonymize ? ` with ${c.users.activeMonthly.toLocaleString()} monthly active users` : ''}.`,
     },
-    {
+    constitutionValuationSection(i, 'Indicative valuation') ?? {
       heading: 'Indicative valuation',
       body: `Based on comparable-transaction and fundamental analysis, the indicative enterprise value range is ${money(v.headline.low, !!i.anonymize)} – ${money(v.headline.high, !!i.anonymize)}, with a midpoint of ${money(v.headline.mid, !!i.anonymize)} on a strategic-buyer basis.`,
       bullets: v.premiums.map((p) => `${p.name}: ${p.pct >= 0 ? '+' : ''}${(p.pct * 100).toFixed(0)}% — ${p.reason}`),
@@ -213,7 +261,13 @@ function investorDeck(i: MemorandumInputs): MemorandumDocument {
     slide('Slide 5 · Market',          `Competitive density: ${i.company.market.competitiveDensity}. Regulatory risk: ${i.company.market.regulatoryRisk}.`),
     slide('Slide 6 · Financials',      `${money(i.company.revenue.trailingTwelveMonthsRevenueUsd, !!i.anonymize)} TTM revenue. ${(i.company.revenue.ebitdaMarginPct * 100).toFixed(0)}% EBITDA margin.`),
     slide('Slide 7 · Team',            `${i.anonymize ? '—' : i.company.team.headcount} headcount. Leadership: ${i.company.team.leadershipBenchStrength}.`),
-    slide('Slide 8 · Valuation',       `${money(i.valuation.headline.low, !!i.anonymize)} – ${money(i.valuation.headline.high, !!i.anonymize)} headline range.`, i.valuation.premiums.map((p) => `${p.name}: ${(p.pct * 100).toFixed(0)}%`)),
+    slide('Slide 8 · Valuation',
+      i.constitution
+        ? `${money(i.constitution.headline.low, !!i.anonymize)} – ${money(i.constitution.headline.high, !!i.anonymize)} · midpoint ${money(i.constitution.headline.mid, !!i.anonymize)} · confidence ${i.constitution.confidence.score}% (Framework v${i.constitution.frameworkVersion})`
+        : `${money(i.valuation.headline.low, !!i.anonymize)} – ${money(i.valuation.headline.high, !!i.anonymize)} headline range.`,
+      i.constitution
+        ? [`Strategic premium ${i.constitution.mandatoryOutputs.strategic_premium_basis}`, `${i.constitution.comparablesUsed} comparable transactions`, `Buyer universe: ${i.constitution.mandatoryOutputs.buyer_universe_size}`]
+        : i.valuation.premiums.map((p) => `${p.name}: ${(p.pct * 100).toFixed(0)}%`)),
     slide('Slide 9 · Process',         'Bilateral outreach. Targeted process. LOI in 4–6 weeks.'),
     slide('Slide 10 · Contact',        'Bilateral inquiries through the ExitOS dispatch desk.'),
   ];
@@ -250,6 +304,10 @@ function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
         'Management team intends to support a professional transition',
       ],
     },
+    ...(i.constitution ? [{
+      heading: 'Valuation basis',
+      body: `Valuation is prepared under ExitOS Valuation Framework v${i.constitution.frameworkVersion}. The enterprise value range and midpoint are disclosed on NDA; pre-NDA we share the basis: confidence ${i.constitution.mandatoryOutputs.confidence_score}, ${i.constitution.comparablesUsed} comparable transactions, a strategic premium of ${i.constitution.mandatoryOutputs.strategic_premium_basis}, and a qualified buyer universe of ${i.constitution.mandatoryOutputs.buyer_universe_size}.`,
+    } as MemorandumSection] : []),
     {
       heading: 'Process & next steps',
       body: 'Interested parties should request the mutual NDA. On execution: identity disclosure, the confidential information memorandum, staged data-room access, and a management presentation within ten business days. The process is being run on a strict timetable; early engagement is advised.',

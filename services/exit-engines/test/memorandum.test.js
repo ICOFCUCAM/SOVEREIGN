@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { TemplateMemorandumGenerator } from '../dist/memorandum/index.js';
 import { ClaudeMemorandumGenerator } from '../dist/memorandum/claude.js';
-import { runValuation } from '../dist/valuation/index.js';
+import { runValuation, runValuationConstitution } from '../dist/valuation/index.js';
 import { runReadiness } from '../dist/readiness/index.js';
 import { runBuyerDiscovery } from '../dist/buyers/index.js';
 import { runDueDiligence } from '../dist/diligence/index.js';
@@ -30,6 +30,18 @@ test('template generator produces all five document kinds', async () => {
     assert.ok(doc.title.length > 0);
     assert.ok(doc.wordCount > 0);
   }
+});
+
+test('CIM inherits the Valuation Constitution — no per-document valuation logic', async () => {
+  const gen = new TemplateMemorandumGenerator();
+  const constitution = runValuationConstitution(SAMPLE_SAAS);
+  const doc = await gen.generate('cim', { ...inputs(), constitution });
+  const text = doc.sections.map((s) => `${s.heading}\n${s.body}\n${(s.tables ?? []).flatMap((t) => t.rows.flat()).join(' ')}`).join('\n');
+  // the governed midpoint and framework stamp appear verbatim
+  assert.ok(text.includes(constitution.mandatoryOutputs.midpoint_valuation), 'CIM shows the constitution midpoint');
+  assert.ok(text.includes(`Framework v${constitution.frameworkVersion}`), 'CIM stamps the framework version');
+  // the mandatory strategic-premium basis is inherited, not invented
+  assert.ok(text.includes(constitution.mandatoryOutputs.strategic_premium_basis));
 });
 
 test('buyer teaser anonymizes when requested', async () => {
