@@ -32,6 +32,7 @@ const BuyerProfile = lazy(() => import("./pages/BuyerProfile"));
 const MarketMap    = lazy(() => import("./pages/MarketMap"));
 const KnowledgeGraph = lazy(() => import("./pages/KnowledgeGraph"));
 const OutcomeIntelligence = lazy(() => import("./pages/OutcomeIntelligence"));
+const Indexes      = lazy(() => import("./pages/Indexes"));
 const BuyerPortal  = lazy(() => import("./pages/BuyerPortal"));
 const Autopilot    = lazy(() => import("./pages/Autopilot"));
 const Readiness    = lazy(() => import("./pages/Readiness"));
@@ -81,6 +82,7 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
   { path: "market-map",    policy: "/console/market-map",     el: <MarketMap /> },
   { path: "knowledge-graph", policy: "/console/knowledge-graph", el: <KnowledgeGraph /> },
   { path: "outcomes",      policy: "/console/outcomes",        el: <OutcomeIntelligence /> },
+  { path: "indexes",       policy: "/console/indexes",         el: <Indexes /> },
   { path: "investors",     policy: "/console/investors",      el: <Investors /> },
   { path: "negotiator",    policy: "/console/negotiator",     el: <Negotiator /> },
   { path: "documents",     policy: "/console/documents",      el: <Documents /> },

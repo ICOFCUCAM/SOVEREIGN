@@ -44,10 +44,11 @@ jobs:
         working-directory: services/exit-engines
         run: npm run ingest:validate
 
-      - name: Rebuild Acquisition DNA + detect radar deltas
+      - name: Rebuild Acquisition DNA + market intelligence + detect radar deltas
         working-directory: services/exit-engines
         run: |
           npm run dna
+          node dist/scripts/market/build.js
           node dist/scripts/radar/refresh.js
 
       - name: Run engine test suite against the fresh data

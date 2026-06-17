@@ -10,6 +10,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { regionOf } from '../../market/regions.js';
+import { sectorIndexes } from '../../market/indexes.js';
 import type {
   IndexEvent, AcquisitionIndex, MarketIntelligence,
   SectorHeat, GeoDensity, Corridor, ActiveAcquirer,
@@ -113,8 +114,13 @@ if (isMain) {
   const { index, intel } = build();
   writeFileSync(join(DATA, 'acquisition_index.json'), JSON.stringify(index));
   writeFileSync(join(DATA, 'market_intelligence.json'), JSON.stringify(intel, null, 1));
+  // ExitOS Acquisition Indexes (Stage 8) — per-sector market intelligence
+  const events = JSON.parse(readFileSync(join(DATA, 'acquisition_events.json'), 'utf8')) as RawEvent[];
+  const indexes = sectorIndexes(events.filter((e) => !e.target_name.startsWith('[8-K')));
+  writeFileSync(join(DATA, 'acquisition_indexes.json'), JSON.stringify({ as_of: intel.as_of, source: intel.source, indexes }, null, 1));
   console.log(`acquisition_index.json: ${index.count} queryable events`);
   console.log(`market_intelligence.json: ${intel.sectorHeat.length} sectors, ${intel.geoDensity.length} regions, ${intel.corridors.length} corridors, ${intel.topAcquirers.length} acquirers`);
+  console.log(`acquisition_indexes.json: ${indexes.length} sector indexes`);
   console.log(`disclosed: ${intel.disclosedEvents} events, $${(intel.totalDisclosedUsd / 1e9).toFixed(1)}B`);
 }
 

@@ -6,6 +6,8 @@ export { regionOf, ALL_REGIONS } from './regions.js';
 export type { Region } from './regions.js';
 export { queryAcquisitions } from './query.js';
 export type { GraphQuery, GraphResult, BuyerRollup } from './query.js';
+export { sectorIndexes } from './indexes.js';
+export type { SectorIndex, IndexEventInput } from './indexes.js';
 export type {
   AcquisitionIndex, IndexEvent, MarketIntelligence,
   SectorHeat, GeoDensity, Corridor, ActiveAcquirer,

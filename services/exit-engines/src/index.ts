@@ -59,8 +59,8 @@ export { assessMarketConditions, marketCycle } from './marketdata/index.js';
 export type { MarketConditions, MarketVariable, MarketFeedInput } from './marketdata/index.js';
 
 // Knowledge Graph + Market Map — queryable acquisition intelligence.
-export { queryAcquisitions, regionOf, ALL_REGIONS } from './market/index.js';
-export type { Region, GraphQuery, GraphResult, BuyerRollup, AcquisitionIndex, IndexEvent, MarketIntelligence, SectorHeat, GeoDensity, Corridor, ActiveAcquirer } from './market/index.js';
+export { queryAcquisitions, regionOf, ALL_REGIONS, sectorIndexes } from './market/index.js';
+export type { Region, GraphQuery, GraphResult, BuyerRollup, AcquisitionIndex, IndexEvent, MarketIntelligence, SectorHeat, GeoDensity, Corridor, ActiveAcquirer, SectorIndex } from './market/index.js';
 export type {
   AcquisitionEvent, AcquisitionSource, BuyerHistoryRollup, ConfidenceTier,
   BuyerDealOutcomeRollup, OutcomeStandouts,

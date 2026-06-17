@@ -1,0 +1,281 @@
+{
+ "as_of": "2026-06-17T10:38:09.607Z",
+ "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)",
+ "indexes": [
+  {
+   "sector": "Software",
+   "volume": 631,
+   "volume12m": 4,
+   "volumePrior12m": 3,
+   "trendPct": 0.3333333333333333,
+   "activeBuyers": 23,
+   "disclosedDeals": 239,
+   "medianDealUsd": 95849000,
+   "totalDisclosedUsd": 224225344016
+  },
+  {
+   "sector": "Media",
+   "volume": 236,
+   "volume12m": 11,
+   "volumePrior12m": 7,
+   "trendPct": 0.5714285714285714,
+   "activeBuyers": 20,
+   "disclosedDeals": 99,
+   "medianDealUsd": 198000000,
+   "totalDisclosedUsd": 235272710050
+  },
+  {
+   "sector": "Cloud Infrastructure",
+   "volume": 144,
+   "volume12m": 2,
+   "volumePrior12m": 2,
+   "trendPct": 0,
+   "activeBuyers": 13,
+   "disclosedDeals": 42,
+   "medianDealUsd": 410000000,
+   "totalDisclosedUsd": 103475788004
+  },
+  {
+   "sector": "Gaming",
+   "volume": 110,
+   "volume12m": 2,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 10,
+   "disclosedDeals": 27,
+   "medianDealUsd": 375000000,
+   "totalDisclosedUsd": 101693500000
+  },
+  {
+   "sector": "Cybersecurity",
+   "volume": 73,
+   "volume12m": 2,
+   "volumePrior12m": 1,
+   "trendPct": 1,
+   "activeBuyers": 13,
+   "disclosedDeals": 37,
+   "medianDealUsd": 350000000,
+   "totalDisclosedUsd": 134441760002
+  },
+  {
+   "sector": "AI",
+   "volume": 68,
+   "volume12m": 8,
+   "volumePrior12m": 6,
+   "trendPct": 0.3333333333333333,
+   "activeBuyers": 14,
+   "disclosedDeals": 18,
+   "medianDealUsd": 300000000,
+   "totalDisclosedUsd": 66987000000
+  },
+  {
+   "sector": "Developer Tools",
+   "volume": 55,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 9,
+   "disclosedDeals": 15,
+   "medianDealUsd": 1121000000,
+   "totalDisclosedUsd": 20501500000
+  },
+  {
+   "sector": "Consumer",
+   "volume": 35,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 9,
+   "disclosedDeals": 14,
+   "medianDealUsd": 181500000,
+   "totalDisclosedUsd": 4049250000
+  },
+  {
+   "sector": "Industrial Tech",
+   "volume": 31,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 7,
+   "disclosedDeals": 11,
+   "medianDealUsd": 187500000,
+   "totalDisclosedUsd": 2099000000
+  },
+  {
+   "sector": "Healthcare",
+   "volume": 20,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 7,
+   "disclosedDeals": 4,
+   "medianDealUsd": 625000000,
+   "totalDisclosedUsd": 3855000000
+  },
+  {
+   "sector": "Ecommerce",
+   "volume": 16,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 8,
+   "disclosedDeals": 6,
+   "medianDealUsd": 80000000,
+   "totalDisclosedUsd": 814900002
+  },
+  {
+   "sector": "Payments",
+   "volume": 16,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 9,
+   "disclosedDeals": 6,
+   "medianDealUsd": 171500000,
+   "totalDisclosedUsd": 2729000002
+  },
+  {
+   "sector": "Manufacturing",
+   "volume": 14,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 8,
+   "disclosedDeals": 5,
+   "medianDealUsd": 960000000,
+   "totalDisclosedUsd": 20785000000
+  },
+  {
+   "sector": "Fintech",
+   "volume": 13,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 6,
+   "disclosedDeals": 3,
+   "medianDealUsd": 248000000,
+   "totalDisclosedUsd": 1138000000
+  },
+  {
+   "sector": "Energy",
+   "volume": 9,
+   "volume12m": 1,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 6,
+   "disclosedDeals": 7,
+   "medianDealUsd": 78411000,
+   "totalDisclosedUsd": 5207322000
+  },
+  {
+   "sector": "Marketplace",
+   "volume": 8,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 6,
+   "disclosedDeals": 4,
+   "medianDealUsd": 397500000,
+   "totalDisclosedUsd": 1995000000
+  },
+  {
+   "sector": "Supply Chain",
+   "volume": 6,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 3,
+   "disclosedDeals": 1,
+   "medianDealUsd": 2,
+   "totalDisclosedUsd": 2
+  },
+  {
+   "sector": "Insurtech",
+   "volume": 4,
+   "volume12m": 0,
+   "volumePrior12m": 1,
+   "trendPct": -1,
+   "activeBuyers": 2,
+   "disclosedDeals": 0,
+   "medianDealUsd": null,
+   "totalDisclosedUsd": 0
+  },
+  {
+   "sector": "Transportation",
+   "volume": 4,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 4,
+   "disclosedDeals": 1,
+   "medianDealUsd": 131000000,
+   "totalDisclosedUsd": 131000000
+  },
+  {
+   "sector": "Defense",
+   "volume": 3,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 3,
+   "disclosedDeals": 2,
+   "medianDealUsd": 205000000,
+   "totalDisclosedUsd": 410000000
+  },
+  {
+   "sector": "Health IT",
+   "volume": 2,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 2,
+   "disclosedDeals": 1,
+   "medianDealUsd": 250000000,
+   "totalDisclosedUsd": 250000000
+  },
+  {
+   "sector": "Biotech",
+   "volume": 2,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 1,
+   "disclosedDeals": 0,
+   "medianDealUsd": null,
+   "totalDisclosedUsd": 0
+  },
+  {
+   "sector": "Logistics",
+   "volume": 2,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 2,
+   "disclosedDeals": 1,
+   "medianDealUsd": 131000000,
+   "totalDisclosedUsd": 131000000
+  },
+  {
+   "sector": "GovTech",
+   "volume": 2,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 1,
+   "disclosedDeals": 0,
+   "medianDealUsd": null,
+   "totalDisclosedUsd": 0
+  },
+  {
+   "sector": "Climate",
+   "volume": 1,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 1,
+   "disclosedDeals": 0,
+   "medianDealUsd": null,
+   "totalDisclosedUsd": 0
+  }
+ ]
+}
