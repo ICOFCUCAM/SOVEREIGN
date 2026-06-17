@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, Field, fmtMoney, downloadJson } from "../lib/ui";
-import { VALUATION_INSTITUTIONAL } from "../lib/engines";
+import { Button, Card, Kpi, SectionHeader, Field, fmtMoney, downloadJson, downloadText } from "../lib/ui";
+import { VALUATION_INSTITUTIONAL, VALUATION_FACTS, DOCUMENT_SUITE } from "../lib/engines";
 import { VALUATION_FRAMEWORK } from "@exit/engines";
+import { tracedDocMarkdown } from "../lib/deliverables";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import BankerTake from "../components/BankerTake";
 
@@ -57,12 +58,19 @@ const Valuation: React.FC = () => {
         kicker="Module · Operator"
         title="Deal Valuation Engine"
         description="Institutional-grade valuation: a multiples baseline uplifted by an evidence-based strategic premium, with comparable transactions, a confidence score and the qualified buyer universe — plus an interactive DCF. Every figure traces to source data, not assumption."
-        actions={<Button variant="ghost" onClick={() => downloadJson("exitos-valuation-model.json", {
-          company: C.name,
-          institutional: INST,
-          blended, dcf: dcfValue, comparables: compMid,
-          assumptions: { growthPct: growth, discountPct: discount },
-        })}>Export model</Button>}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Button variant="ghost" onClick={() => downloadText("board-report.md", tracedDocMarkdown(DOCUMENT_SUITE.board_report))}>Board report</Button>
+            <Button variant="ghost" onClick={() => downloadText("market-update.md", tracedDocMarkdown(DOCUMENT_SUITE.market_update))}>Market update</Button>
+            <Button variant="ghost" onClick={() => downloadJson("exitos-valuation-model.json", {
+              company: C.name,
+              institutional: INST,
+              factSheet: VALUATION_FACTS,
+              blended, dcf: dcfValue, comparables: compMid,
+              assumptions: { growthPct: growth, discountPct: discount },
+            })}>Export model</Button>
+          </div>
+        }
       />
 
       <BankerTake
@@ -74,6 +82,28 @@ const Valuation: React.FC = () => {
         impact={<>+{fmtMoney(premiumGap)}</>}
         cta={{ label: "Build the CIM", to: "/console/documents" }}
       />
+
+      {/* ── The fact sheet — the institutional tear block. Every figure
+            carries source, confidence, methodology and date. ── */}
+      <Card className="mt-2 p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Valuation fact sheet · every figure traced to a source</div>
+          <span className="font-mono text-[10px] uppercase tracking-wide text-white/35">Framework v{INST.frameworkVersion}</span>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {VALUATION_FACTS.map((f) => (
+            <div key={f.key} className="group relative rounded-lg border border-white/10 bg-white/[0.02] p-3" title={`${f.methodology} · source: ${f.source} · updated ${f.last_updated}`}>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white/35">{f.label}</div>
+              <div className="mt-1 font-mono text-lg font-bold text-white">{f.value}</div>
+              <div className="mt-1 flex items-center gap-1 text-[9px] text-white/40">
+                <span className="rounded bg-white/5 px-1 py-0.5 ring-1 ring-white/10">{f.confidence}</span>
+                <span className="truncate">{f.source.replace(/^ExitOS /, "")}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 text-[10px] text-white/35">Hover any figure for its methodology, source and last-updated date. No number on this page exists without one.</p>
+      </Card>
 
       {/* ── Institutional summary — the block a banker reads first ── */}
       <Card className="mt-2 p-6">

@@ -10,6 +10,7 @@ export * as listing      from './listing/index.js';
 export * as captable     from './captable/index.js';
 export * as nda          from './nda/index.js';
 export * as exchange     from './exchange/index.js';
+export * as documents    from './documents/index.js';
 
 // Top-level convenience re-exports — the most common entrypoints.
 export { runValuation, strategicBuyerReport, assetReplacementReport, tenMillionReport, twentyFiveMillionReport, runInstitutionalValuation, runValuationConstitution, VALUATION_FRAMEWORK, VALUATION_FRAMEWORK_VERSION } from './valuation/index.js';
@@ -44,6 +45,10 @@ export type { BuyerGraph, GraphEntity, GraphEntityProps, GraphRelation, RelKind,
 // Sovereign Exchange — the mandate state machine
 export { MANDATE_STATES, deriveMandateState } from './exchange/index.js';
 export type { MandateState, MandateStateReport, MandateInputs, StateEvidence } from './exchange/index.js';
+
+// Document factory — Level 3. Every institutional document from one intelligence object.
+export { renderDocument, renderDocumentSuite, valuationFacts, validateTraceability, figure } from './documents/index.js';
+export type { DocumentKind, TracedDocument, TracedSection, DocumentInputs, Figure, TraceabilityReport } from './documents/index.js';
 export type {
   AcquisitionEvent, AcquisitionSource, BuyerHistoryRollup, ConfidenceTier,
   BuyerDealOutcomeRollup, OutcomeStandouts,

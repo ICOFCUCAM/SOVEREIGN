@@ -5,7 +5,7 @@
 // numbered sections, real tables, and a standing disclaimer — banker-desk
 // quality, generated from the company's own data and the platform's engines.
 
-import type { MemorandumDocument, BuyerCandidate, ValuationReport, InstitutionalValuationReport } from "@exit/engines";
+import type { MemorandumDocument, BuyerCandidate, ValuationReport, InstitutionalValuationReport, TracedDocument } from "@exit/engines";
 import type { RiskReport } from "./diligence-intel.js";
 import { downloadText, notify } from "./ui";
 
@@ -169,6 +169,31 @@ export function valuationMemo(report: ValuationReport, companyName: string): str
     subtitle: `${companyName} · strategic-buyer basis`,
     meta: [["Prepared for", "The Board and shareholders of the Company"], ["Approach", `${titleCase(report.reportType)} basis · comparable transactions and fundamentals`]],
     sections,
+  });
+}
+
+// ── Traced documents (Level 3 — the document factory) ───────────────
+
+/** Render a traced document → Markdown. The fact sheet leads; every number
+ *  in the prose traces to it. A compliance line states the traceability. */
+export function tracedDocMarkdown(doc: TracedDocument): string {
+  const t = doc.traceability;
+  const sections: DocSection[] = doc.sections.map((s) => ({
+    heading: s.heading,
+    ...(s.body ? { body: s.body } : {}),
+    ...(s.bullets ? { bullets: s.bullets } : {}),
+    ...(s.rows ? { table: { headers: s.tableHeaders ?? [], rows: s.rows } } : {}),
+  }));
+  sections.push({
+    heading: "Traceability",
+    body: `${t.traced} of ${t.checked} numeric figures in this document trace to a stored source (${t.ok ? "100% — fully traceable" : `${t.untraced.length} untraced`}). No figure is shown without a source, confidence, methodology and date. Prepared under ExitOS Valuation Framework v${doc.frameworkVersion}.`,
+  });
+  return frameDoc({
+    title: doc.title,
+    subtitle: doc.subtitle,
+    meta: [["Framework", `ExitOS Valuation Framework v${doc.frameworkVersion}`], ["Traceability", t.ok ? "100% — every figure sourced" : `${t.untraced.length} untraced`]],
+    sections,
+    disclaimerOverride: doc.disclaimer,
   });
 }
 

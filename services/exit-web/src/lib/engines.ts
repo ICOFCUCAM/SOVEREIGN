@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   runValuation, strategicBuyerReport, assetReplacementReport, runInstitutionalValuation,
+  valuationFacts, renderDocumentSuite,
   runReadiness, runReadinessAnalysis, runBuyerDiscovery, runDueDiligence,
   evaluateOffer, compareOffers, deriveNegotiationState,
   createListing, matchBuyersToListing,
@@ -21,6 +22,10 @@ export const VALUATION_REPLACEMENT  = assetReplacementReport(SAMPLE_COMPANY);
 export const VALUATION_INSTITUTIONAL = runInstitutionalValuation(SAMPLE_COMPANY);
 // Canonical name — the institutional report IS the Valuation Constitution.
 export const VALUATION_CONSTITUTION = VALUATION_INSTITUTIONAL;
+// Level 3 — the fact sheet (tear block) and the full traced-document suite,
+// all rendered from the single intelligence object above.
+export const VALUATION_FACTS = valuationFacts(VALUATION_CONSTITUTION);
+export const DOCUMENT_SUITE = renderDocumentSuite({ constitution: VALUATION_CONSTITUTION });
 export const READINESS              = runReadiness(SAMPLE_COMPANY);
 export const READINESS_ANALYSIS     = runReadinessAnalysis(SAMPLE_COMPANY, READINESS);
 export const BUYERS                 = runBuyerDiscovery(SAMPLE_COMPANY, { limit: 12 });

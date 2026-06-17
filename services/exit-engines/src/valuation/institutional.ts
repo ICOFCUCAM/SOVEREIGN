@@ -33,7 +33,8 @@ const median = (xs: readonly number[]): number | undefined => {
 const pct = (x: number): string => `${Math.round(x * 100)}%`;
 const usd = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`);
 
-// Every figure carries provenance — the five framework-required fields.
+// Every figure carries provenance — the framework-required fields, now
+// including the methodology that produced it.
 export interface VariableRecord {
   readonly name: string;
   readonly present: boolean;
@@ -43,6 +44,7 @@ export interface VariableRecord {
   readonly confidence: string;
   readonly verification_status: string;
   readonly last_updated: string;
+  readonly methodology: string;
 }
 
 export interface PremiumEvidence {
@@ -275,20 +277,22 @@ function strategicRationale(company: CompanyProfile): string[] {
 }
 
 // ── variable assembly with provenance ───────────────────────────────
-const companyVar = (name: string, present: boolean, value: string, runAt: string): VariableRecord => ({
+const companyVar = (name: string, present: boolean, value: string, runAt: string, methodology = 'reported by company'): VariableRecord => ({
   name, present, value,
   source: present ? 'company_provided' : 'not_provided',
   source_url: null,
   confidence: present ? 'reported' : 'none',
   verification_status: present ? 'unverified' : 'absent',
   last_updated: runAt,
+  methodology: present ? methodology : 'not provided',
 });
 
-const derivedVar = (name: string, present: boolean, value: string, source: string, lastUpdated: string, sourceUrl: string | null = null): VariableRecord => ({
+const derivedVar = (name: string, present: boolean, value: string, source: string, lastUpdated: string, methodology: string, sourceUrl: string | null = null): VariableRecord => ({
   name, present, value, source, source_url: sourceUrl,
   confidence: present ? 'reported' : 'none',
   verification_status: present ? 'curated' : 'absent',
   last_updated: lastUpdated,
+  methodology: present ? methodology : 'not available',
 });
 
 export function runValuationConstitution(company: CompanyProfile): ValuationConstitution {
@@ -367,26 +371,26 @@ export function runValuationConstitution(company: CompanyProfile): ValuationCons
       companyVar('funding_history', company.cap?.priorRoundsValuationUsd != null, company.cap?.priorRoundsValuationUsd != null ? usd(company.cap.priorRoundsValuationUsd) : '—', runAt),
     ],
     market: [
-      derivedVar('comparable_transactions', comparablesUsed > 0, String(comparablesUsed), 'exitos_registry', runAt),
-      derivedVar('comparable_public_companies', false, '—', 'not_provided', runAt),
-      derivedVar('sector_multiples', true, `${sectorMult.revenue?.low ?? sectorMult.arr?.low ?? '—'}×–${sectorMult.revenue?.high ?? sectorMult.arr?.high ?? '—'}×`, 'exitos_framework', `v${FW.version}`),
-      derivedVar('market_cycle', false, '—', 'not_provided', runAt),
-      derivedVar('interest_rate_environment', false, '—', 'not_provided', runAt),
+      derivedVar('comparable_transactions', comparablesUsed > 0, String(comparablesUsed), 'exitos_registry', runAt, 'same-sector precedent transactions from the acquisition registry'),
+      derivedVar('comparable_public_companies', false, '—', 'not_provided', runAt, 'public-comparable feed not connected'),
+      derivedVar('sector_multiples', true, `${sectorMult.revenue?.low ?? sectorMult.arr?.low ?? '—'}×–${sectorMult.revenue?.high ?? sectorMult.arr?.high ?? '—'}×`, 'exitos_framework', `v${FW.version}`, 'institutional multiple priors, framework-governed'),
+      derivedVar('market_cycle', false, '—', 'not_provided', runAt, 'macro-cycle feed not connected'),
+      derivedVar('interest_rate_environment', false, '—', 'not_provided', runAt, 'rate feed not connected'),
     ],
     buyer: [
-      derivedVar('buyer_universe_size', true, String(buyerUniverse.registry), 'exitos_registry', runAt),
-      derivedVar('strategic_buyers', true, String(buyerUniverse.strategic), 'exitos_registry', runAt),
-      derivedVar('financial_buyers', true, String(buyerUniverse.financial), 'exitos_registry', runAt),
-      derivedVar('sovereign_buyers', true, String(buyerUniverse.sovereign), 'exitos_registry', runAt),
-      derivedVar('acquisition_history', true, `${ACQUISITION_HISTORY.length} events`, 'exitos_registry', runAt),
-      derivedVar('acquisition_frequency', mostLikelyBuyers.length > 0, `${mostLikelyBuyers.length} active acquirers ranked`, 'exitos_registry', runAt),
-      derivedVar('historical_premiums', premium.observedPremiums.length > 0, premium.observedPremiums.length ? `n=${premium.observedPremiums.length}, ${pct(premium.rangeLowPct)}–${pct(premium.rangeHighPct)}` : '—', 'exitos_registry', runAt),
+      derivedVar('buyer_universe_size', true, String(buyerUniverse.registry), 'exitos_registry', runAt, 'curated mandate registry count'),
+      derivedVar('strategic_buyers', true, String(buyerUniverse.strategic), 'exitos_registry', runAt, 'registry filtered by strategic/corporate type'),
+      derivedVar('financial_buyers', true, String(buyerUniverse.financial), 'exitos_registry', runAt, 'registry filtered by PE/sponsor/VC type'),
+      derivedVar('sovereign_buyers', true, String(buyerUniverse.sovereign), 'exitos_registry', runAt, 'registry filtered by sovereign-fund type'),
+      derivedVar('acquisition_history', true, `${ACQUISITION_HISTORY.length} events`, 'exitos_registry', runAt, 'source-referenced acquisition events'),
+      derivedVar('acquisition_frequency', mostLikelyBuyers.length > 0, `${mostLikelyBuyers.length} active acquirers ranked`, 'exitos_registry', runAt, 'intent-screened active acquirers'),
+      derivedVar('historical_premiums', premium.observedPremiums.length > 0, premium.observedPremiums.length ? `n=${premium.observedPremiums.length}, ${pct(premium.rangeLowPct)}–${pct(premium.rangeHighPct)}` : '—', 'exitos_registry', runAt, 'observed premiums over disclosed reference price'),
     ],
     execution: [
-      derivedVar('expected_close_rate', closeRates.length > 0, closeRates.length ? pct(mean(closeRates)) : '—', 'exitos_registry', runAt),
-      derivedVar('expected_time_to_close', days.length > 0, `${timeToClose.lowDays}–${timeToClose.highDays} days`, 'exitos_registry', runAt),
-      derivedVar('diligence_risk', true, conc(company) >= 0.4 ? 'Elevated (concentration)' : 'Standard', 'exitos_derived', runAt),
-      derivedVar('retrade_risk', false, 'Not observed in snapshot', 'not_provided', runAt),
+      derivedVar('expected_close_rate', closeRates.length > 0, closeRates.length ? pct(mean(closeRates)) : '—', 'exitos_registry', runAt, 'mean close rate of ranked acquirers'),
+      derivedVar('expected_time_to_close', days.length > 0, `${timeToClose.lowDays}–${timeToClose.highDays} days`, 'exitos_registry', runAt, 'announced→closed span across ranked acquirers'),
+      derivedVar('diligence_risk', true, conc(company) >= 0.4 ? 'Elevated (concentration)' : 'Standard', 'exitos_derived', runAt, 'derived from customer concentration'),
+      derivedVar('retrade_risk', false, 'Not observed in snapshot', 'not_provided', runAt, 'LOI→close pairs not in static snapshot'),
     ],
   };
 

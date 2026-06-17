@@ -253,7 +253,7 @@ export const VALUATION_FRAMEWORK: ValuationFrameworkConfig = deepFreeze({
   },
 
   provenance: {
-    requiredFields: ['source', 'source_url', 'confidence', 'verification_status', 'last_updated'],
+    requiredFields: ['source', 'source_url', 'confidence', 'verification_status', 'last_updated', 'methodology'],
   },
 
   requiredVariables: {

@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   docToMarkdown, docFilename, buyerIntroLetter, introFilename, buyerListCsv,
   valuationMemo, institutionalValuationMemo, buyerShortlistMemo, riskReportDoc, structuredDoc, frameDoc,
-  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, closingChecklistDoc, wealthPlanDoc,
+  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, closingChecklistDoc, wealthPlanDoc, tracedDocMarkdown,
 } from "./deliverables.js";
-import { BUYERS, VALUATION_STRATEGIC, VALUATION_INSTITUTIONAL, OFFER_COMPARISON, NEGOTIATION_STATE, DILIGENCE } from "./engines.js";
+import { BUYERS, VALUATION_STRATEGIC, VALUATION_INSTITUTIONAL, VALUATION_FACTS, DOCUMENT_SUITE, OFFER_COMPARISON, NEGOTIATION_STATE, DILIGENCE } from "./engines.js";
 import { TemplateMemorandumGenerator } from "@exit/engines";
 import type { MemorandumKind } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile.js";
@@ -67,6 +67,28 @@ describe("deliverables", () => {
     for (const field of r.provenanceSummary.requiredFields) expect(md).toContain(field);
     expect(md.length).toBeGreaterThan(1500);
     noPlaceholders(md);
+  });
+
+  it("the document factory renders every kind, fully traceable, from one fact sheet", () => {
+    // the tear block exists with the headline metrics
+    const keys = VALUATION_FACTS.map((f) => f.key);
+    for (const k of ["enterprise_value", "confidence", "comparable_transactions", "qualified_buyers", "applied_premium", "data_freshness"]) {
+      expect(keys, k).toContain(k);
+    }
+    for (const kind of ["board_report", "market_update", "buyer_brief", "acquisition_recommendation", "exit_readiness", "valuation_summary"] as const) {
+      const doc = DOCUMENT_SUITE[kind];
+      expect(doc.traceability.ok, `${kind} fully traceable`).toBe(true);
+      const md = tracedDocMarkdown(doc);
+      expect(md).toContain("Valuation fact sheet");
+      expect(md).toContain("Traceability");
+      expect(md).toContain(`Framework v${doc.frameworkVersion}`);
+      // the governed midpoint appears verbatim — no per-document recompute
+      expect(md).toContain(VALUATION_INSTITUTIONAL.headline.mid >= 1e9
+        ? `$${(VALUATION_INSTITUTIONAL.headline.mid / 1e9).toFixed(2)}B`
+        : `$${(VALUATION_INSTITUTIONAL.headline.mid / 1e6).toFixed(1)}M`);
+      expect(md.length).toBeGreaterThan(500);
+      noPlaceholders(md);
+    }
   });
 
   it("buyer target list has a ranked table and a profile per buyer", () => {
