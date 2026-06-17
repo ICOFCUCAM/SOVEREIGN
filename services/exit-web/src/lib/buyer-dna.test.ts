@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS, sectorOverlap, recommendedAction } from "./buyer-dna.js";
+import {
+  DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS, sectorOverlap, recommendedAction,
+  acquisitionProbability, rankedBuyers, acquisitionSignals, buyerById,
+} from "./buyer-dna.js";
 
 describe("acquisition DNA (derived from ingested registries)", () => {
   it("profiles exist, are alias-deduped, and sort by indexed events", () => {
@@ -49,6 +52,39 @@ describe("acquisition DNA (derived from ingested registries)", () => {
     expect(recommendedAction(synthetic)).toBe("Initiate NDA outreach");
     // dataset: overlap is computable everywhere without error
     for (const p of DNA_PROFILES.slice(0, 30)) expect(sectorOverlap(p).pct).toBeGreaterThanOrEqual(0);
+  });
+
+  it("acquisition probability is a transparent 0–100 composite of measured inputs", () => {
+    const p = DNA_PROFILES.find((x) => x.events_indexed > 0)!;
+    const b = acquisitionProbability(p);
+    expect(b.pct).toBeGreaterThanOrEqual(0);
+    expect(b.pct).toBeLessThanOrEqual(100);
+    // the score is the sum of its named, bounded parts (within rounding)
+    expect(Math.abs(b.pct - (b.appetite + b.overlap + b.velocity + b.recency))).toBeLessThanOrEqual(2);
+    expect(b.rationale.length).toBeGreaterThan(0);
+  });
+
+  it("rankedBuyers returns the crown-jewel ranking — active acquirers, sorted by probability", () => {
+    const ranked = rankedBuyers(15);
+    expect(ranked.length).toBeGreaterThan(0);
+    for (const r of ranked) expect(r.profile.events_indexed).toBeGreaterThan(0);
+    for (let i = 1; i < ranked.length; i++) {
+      expect(ranked[i].probability.pct).toBeLessThanOrEqual(ranked[i - 1].probability.pct);
+    }
+  });
+
+  it("acquisition signals: derived signals are real; external feeds are honestly inactive", () => {
+    const ms = buyerById("microsoft")!;
+    expect(ms).toBeDefined();
+    const { signals, activeCount } = acquisitionSignals(ms);
+    // a serial acquirer shows real derived signals
+    expect(activeCount).toBeGreaterThan(0);
+    // external-feed signals are never invented — always inactive until connected
+    const feeds = signals.filter((s) => s.source === "feed");
+    expect(feeds.length).toBeGreaterThan(0);
+    for (const f of feeds) expect(f.active).toBe(false);
+    // activeCount counts only derived signals
+    expect(activeCount).toBe(signals.filter((s) => s.source === "derived" && s.active).length);
   });
 
   it("similar-transactions extract is sector-relevant and sourced", () => {

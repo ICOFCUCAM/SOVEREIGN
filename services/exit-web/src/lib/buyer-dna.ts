@@ -86,3 +86,95 @@ export const fmtUsdShort = (n?: number | null): string => {
   if (n >= 1e6) return `$${(n / 1e6).toFixed(0)}M`;
   return `$${n.toLocaleString()}`;
 };
+
+// ── Acquisition Probability — the crown-jewel ranking ───────────────
+// For the founder's company, how likely is each indexed buyer to acquire
+// one like it? A transparent composite of measured signals: appetite,
+// sector overlap with the founder, acquisition velocity and recency. Every
+// input is a real DNA figure — no opaque model.
+const monthsSince = (iso?: string): number | null => {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  return (Date.now() - t) / (30.4 * 86_400_000);
+};
+
+export interface ProbabilityBreakdown {
+  readonly pct: number;                 // 0–100
+  readonly appetite: number;
+  readonly overlap: number;
+  readonly velocity: number;
+  readonly recency: number;
+  readonly rationale: string;
+}
+
+export function acquisitionProbability(p: DnaProfile): ProbabilityBreakdown {
+  const appetiteBase = p.appetite === "high" ? 50 : p.appetite === "medium" ? 32 : p.appetite === "low" ? 14 : 2;
+  const { pct: overlapPct, matched } = sectorOverlap(p);
+  const overlap = Math.min(34, overlapPct * 0.34);
+  const velocity = Math.min(14, (p.frequency_per_year ?? 0) * 2.5);
+  const ageM = monthsSince(p.last_acquisition?.date);
+  const recency = ageM == null ? 0 : ageM <= 18 ? 10 : ageM <= 36 ? 5 : ageM <= 60 ? 2 : 0;
+  const pct = Math.max(0, Math.min(100, Math.round(appetiteBase + overlap + velocity + recency)));
+
+  const bits: string[] = [];
+  bits.push(`${p.appetite.replace("_", " ")} appetite`);
+  if (overlapPct > 0) bits.push(`${overlapPct}% sector overlap${matched.length ? ` (${matched.join(", ")})` : ""}`);
+  if (p.frequency_per_year) bits.push(`${p.frequency_per_year}/yr cadence`);
+  if (ageM != null && ageM <= 36) bits.push(`active in the last ${Math.round(ageM)}mo`);
+  return { pct, appetite: Math.round(appetiteBase), overlap: Math.round(overlap), velocity: Math.round(velocity), recency, rationale: bits.join(" · ") };
+}
+
+export interface RankedBuyer { readonly profile: DnaProfile; readonly probability: ProbabilityBreakdown }
+
+/** Buyers with indexed activity, ranked by acquisition probability for the
+ *  founder's company — the "who is most likely to buy me" list. */
+export function rankedBuyers(limit = 25): RankedBuyer[] {
+  return DNA_PROFILES
+    .filter((p) => p.events_indexed > 0)
+    .map((p) => ({ profile: p, probability: acquisitionProbability(p) }))
+    .sort((a, b) => b.probability.pct - a.probability.pct)
+    .slice(0, limit);
+}
+
+// ── Acquisition-Readiness Signals (Priority 5) ──────────────────────
+// Derived signals are computed from the registry and are real. External
+// signals (hiring, cash, executive changes, new divisions) require feeds
+// not yet connected — they are listed honestly as such, never invented.
+export interface BuyerSignal {
+  readonly label: string;
+  readonly active: boolean;
+  readonly detail: string;
+  readonly source: "derived" | "feed";
+}
+
+export function acquisitionSignals(p: DnaProfile): { signals: readonly BuyerSignal[]; activeCount: number } {
+  const ageM = monthsSince(p.last_acquisition?.date);
+  const accelerating = p.deals_12m >= 2 || (p.deals_3y > 0 && p.deals_12m > p.deals_3y / 3);
+  const derived: BuyerSignal[] = [
+    { label: "Acquisition acceleration", active: accelerating, detail: `${p.deals_12m} in 12mo vs ${p.deals_3y} in 3yr`, source: "derived" },
+    { label: "Recent activity", active: ageM != null && ageM <= 18, detail: p.last_acquisition ? `last: ${p.last_acquisition.target}` : "no dated activity", source: "derived" },
+    { label: "High velocity", active: (p.frequency_per_year ?? 0) >= 3, detail: `${p.frequency_per_year ?? 0} deals/year`, source: "derived" },
+    { label: "Premium payer", active: p.premium_pct != null && p.premium_pct >= 0.2, detail: p.premium_pct != null ? `${Math.round(p.premium_pct * 100)}% avg premium` : "premium undisclosed", source: "derived" },
+    { label: "Reliable closer", active: p.close_rate != null && p.close_rate >= 0.8, detail: p.close_rate != null ? `${Math.round(p.close_rate * 100)}% close rate` : "close rate undisclosed", source: "derived" },
+    { label: "Active strategic themes", active: (p.currently_seeking?.length ?? 0) > 0, detail: p.currently_seeking?.slice(0, 3).join(", ") || "none indexed", source: "derived" },
+    { label: "Multi-region buyer", active: (p.preferred_geography?.length ?? 0) >= 3, detail: `${p.preferred_geography?.length ?? 0} regions`, source: "derived" },
+  ];
+  const feeds: BuyerSignal[] = [
+    { label: "Hiring spike", active: false, detail: "job-postings feed not connected", source: "feed" },
+    { label: "Cash accumulation", active: false, detail: "filings feed not connected", source: "feed" },
+    { label: "Executive changes", active: false, detail: "leadership feed not connected", source: "feed" },
+    { label: "New division launch", active: false, detail: "press feed not connected", source: "feed" },
+  ];
+  const signals = [...derived, ...feeds];
+  return { signals, activeCount: derived.filter((s) => s.active).length };
+}
+
+export const buyerById = (id: string): DnaProfile | undefined => DNA_PROFILES.find((p) => p.buyer_id === id);
+
+// Same-sector / similar acquisitions a buyer has made (from the bundled
+// sector-transaction extract) — "similar companies acquired".
+export function similarAcquisitionsBy(name: string): readonly SectorTransaction[] {
+  const norm = name.toLowerCase().split(" ")[0];
+  return SECTOR_TRANSACTIONS.filter((t) => t.buyer.toLowerCase().includes(norm)).slice(0, 8);
+}

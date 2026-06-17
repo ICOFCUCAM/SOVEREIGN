@@ -27,6 +27,7 @@ const Valuation    = lazy(() => import("./pages/Valuation"));
 const DiligenceAI  = lazy(() => import("./pages/DiligenceAI"));
 const Banker       = lazy(() => import("./pages/Banker"));
 const BuyerGraph   = lazy(() => import("./pages/BuyerGraph"));
+const BuyerProfile = lazy(() => import("./pages/BuyerProfile"));
 const BuyerPortal  = lazy(() => import("./pages/BuyerPortal"));
 const Autopilot    = lazy(() => import("./pages/Autopilot"));
 const Readiness    = lazy(() => import("./pages/Readiness"));
@@ -71,6 +72,7 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
   { path: "data-room",     policy: "/console/data-room",      el: <DataRoom /> },
   { path: "buyers",        policy: "/console/buyers",         el: <Buyers /> },
   { path: "buyer-graph",   policy: "/console/buyer-graph",    el: <BuyerGraph /> },
+  { path: "buyer/:id",     policy: "/console/buyer-graph",    el: <BuyerProfile /> },
   { path: "investors",     policy: "/console/investors",      el: <Investors /> },
   { path: "negotiator",    policy: "/console/negotiator",     el: <Negotiator /> },
   { path: "documents",     policy: "/console/documents",      el: <Documents /> },

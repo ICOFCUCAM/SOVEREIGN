@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, Kpi, SectionHeader, inputCls } from "../lib/ui";
 import {
   DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS,
-  sectorOverlap, recommendedAction, fmtUsdShort, type DnaProfile,
+  sectorOverlap, recommendedAction, fmtUsdShort, rankedBuyers, type DnaProfile,
 } from "../lib/buyer-dna";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -29,7 +30,7 @@ const DnaCard: React.FC<{ p: DnaProfile }> = ({ p }) => {
     <Card className="p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-[15px] font-bold text-white">{p.name}</div>
+          <Link to={`/console/buyer/${p.buyer_id}`} className="text-[15px] font-bold text-white hover:text-deal-300">{p.name}</Link>
           <div className="mt-0.5 text-[10px] uppercase tracking-wide text-white/40">
             {p.buyer_type.replace(/_/g, " ")}{p.country ? ` · ${p.country}` : ""}
           </div>
@@ -103,6 +104,7 @@ const BuyerGraph: React.FC = () => {
 
   const withEvents = DNA_PROFILES.filter((p) => p.events_indexed > 0).length;
   const highAppetite = DNA_PROFILES.filter((p) => p.appetite === "high").length;
+  const RANKED = useMemo(() => rankedBuyers(12), []);
 
   return (
     <div>
@@ -118,6 +120,42 @@ const BuyerGraph: React.FC = () => {
         <Kpi label="High appetite" value={String(highAppetite)} sub="≥2 deals in the last 12 months" accent="#fbbf24" />
         <Kpi label="Events indexed" value={MARKET_INDEX_FMT.events} sub={`as of ${MARKET_INDEX_FMT.asOf}`} />
       </div>
+
+      {/* ── Acquisition Probability — the crown-jewel ranking ── */}
+      <Card className="mt-8 overflow-hidden p-0">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-5 py-3">
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-deal-300">Who is most likely to buy you</div>
+            <div className="mt-0.5 text-[11px] text-white/45">Indexed buyers ranked by acquisition probability for {SAMPLE_COMPANY.name} — appetite × sector overlap × velocity × recency.</div>
+          </div>
+          <span className="text-[10px] uppercase tracking-wide text-white/35">Top {RANKED.length} of {DNA_PROFILES.filter((p) => p.events_indexed > 0).length} active acquirers</span>
+        </div>
+        <table className="w-full text-[12.5px]">
+          <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
+            <tr className="border-b border-white/10">
+              <th className="px-5 py-2.5">#</th><th className="px-5 py-2.5">Buyer</th>
+              <th className="px-5 py-2.5 text-right">Probability</th>
+              <th className="px-5 py-2.5 text-right">Cadence</th>
+              <th className="px-5 py-2.5 text-right">Median deal</th>
+              <th className="px-5 py-2.5 text-right">Avg premium</th>
+              <th className="px-5 py-2.5">Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            {RANKED.map((r, i) => (
+              <tr key={r.profile.buyer_id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                <td className="px-5 py-2.5 font-mono text-white/40">{i + 1}</td>
+                <td className="px-5 py-2.5"><Link to={`/console/buyer/${r.profile.buyer_id}`} className="font-semibold text-white hover:text-deal-300">{r.profile.name}</Link></td>
+                <td className="px-5 py-2.5 text-right"><span className="font-mono font-bold tabular-nums text-deal-300">{r.probability.pct}%</span></td>
+                <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/70">{r.profile.frequency_per_year != null ? `${r.profile.frequency_per_year}/yr` : "—"}</td>
+                <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/70">{fmtUsdShort(r.profile.median_deal_usd)}</td>
+                <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/70">{r.profile.premium_pct != null ? `${Math.round(r.profile.premium_pct * 100)}%` : "—"}</td>
+                <td className="px-5 py-2.5 text-white/45">{r.probability.rationale}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
 
       {/* filters */}
       <div className="mt-8 flex flex-wrap items-center gap-2">
