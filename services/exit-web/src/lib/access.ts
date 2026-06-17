@@ -116,8 +116,12 @@ export function needsUpgrade(path: string, role: Role, plan: Plan): boolean {
   return true;
 }
 
-export const PLAN_LABEL: Record<Plan, string> = { free: "Free", starter: "Starter", prep: "Prep", pro: "Pro" };
-export const PLAN_PRICE: Record<Plan, string> = { free: "$0", starter: "$99", prep: "$499", pro: "$1,499" };
+// Institutional engagement ladder. The gating keys (free/starter/prep/pro)
+// are unchanged; these are the founder-facing labels — prep backs
+// "Preparation", pro backs "Active Mandate". starter is a retired key folded
+// into the free "Listed Founder" entry point.
+export const PLAN_LABEL: Record<Plan, string> = { free: "Listed Founder", starter: "Listed Founder", prep: "Preparation", pro: "Active Mandate" };
+export const PLAN_PRICE: Record<Plan, string> = { free: "$0", starter: "$0", prep: "$995 one-time", pro: "$995/mo + 2.5%" };
 
 export function featureLabel(path: string, role: Role): string | undefined {
   const p = base(path);

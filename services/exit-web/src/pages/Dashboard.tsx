@@ -13,6 +13,7 @@ import JourneyMap from "../components/JourneyMap";
 import ExitCommander from "../components/ExitCommander";
 import { LiquidityScore, AcquisitionHeatMap, LiveBuyerActivity, ValuationScenarios, ProbabilityFunnel } from "../components/DashboardModules";
 import CommandTiles from "../components/CommandTiles";
+import BuyerInterestGate from "../components/BuyerInterestGate";
 import { commanderMetrics } from "../lib/commander-metrics";
 import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
 import { emitTelemetry } from "../lib/telemetry";
@@ -91,6 +92,9 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
+      {/* Listed Founder (free) — surface buyer interest behind the upgrade gate */}
+      {(session?.plan ?? "free") === "free" && <BuyerInterestGate />}
+
       {/* ── Founder Liquidity Command — a live market header, not a greeting ── */}
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
         <div>

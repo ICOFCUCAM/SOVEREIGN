@@ -203,8 +203,8 @@ const Autopilot: React.FC = () => {
   ];
 
   const { session, upgradeTo } = useAuth();
-  // On the $99 Starter plan the agents run only as far as "buyers found" — the
-  // Buyer Discovery gate — then the founder must upgrade to Pro to continue.
+  // Before an Active Mandate, the agents run only as far as "buyers found" —
+  // the Buyer Discovery gate — then the founder upgrades to engage.
   const isStarter = session?.plan === "starter";
   const GATE = AGENTS.findIndex((a) => a.id === "discovery");
 
@@ -423,14 +423,14 @@ const Autopilot: React.FC = () => {
             </div>
           </div>
           <div className="p-6">
-            <h3 className="font-serif text-xl font-bold text-white">This is where Starter ends — and the deal begins.</h3>
+            <h3 className="font-serif text-xl font-bold text-white">This is where listing ends — and the deal begins.</h3>
             <p className="mt-2 text-[13.5px] leading-relaxed text-white/65">
-              Your $99 Starter plan took you from uploads to a priced, listed company with {shortlist.length} matched
-              buyers. To open conversations, run outreach, negotiate offers and close — and let the remaining agents
-              finish the job — upgrade to Pro.
+              ExitOS took you from uploads to a priced, listed company with {shortlist.length} matched buyers. To open
+              conversations, run outreach, negotiate offers and close — and let the remaining agents finish the job —
+              launch an Active Mandate.
             </p>
             <div className="mt-4 flex flex-wrap gap-2.5">
-              <Button onClick={unlockAndContinue}>Upgrade to Pro & continue →</Button>
+              <Button onClick={unlockAndContinue}>Launch a mandate & continue →</Button>
               <Link to="/pricing" className="inline-flex items-center rounded-md px-4 py-2 text-sm font-semibold text-white/70 ring-1 ring-white/15 transition hover:bg-white/5">See pricing</Link>
             </div>
           </div>
