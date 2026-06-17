@@ -6,6 +6,7 @@ import { VALUATION_INSTITUTIONAL, READINESS_ANALYSIS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, fmtUsdShort } from "../lib/buyer-dna";
 import BuyerInterestGate from "../components/BuyerInterestGate";
+import MorningBriefing from "../components/MorningBriefing";
 
 // ── ACQUISITION INTELLIGENCE TERMINAL ───────────────────────────────
 // The product, on one screen. A founder opens ExitOS and immediately sees
@@ -42,6 +43,9 @@ const Terminal: React.FC = () => {
         title={`${SAMPLE_COMPANY.name} · exit intelligence`}
         description={`Who is most likely to buy you, at what price, why, and on what evidence — synthesized from the buyer graph, ${INST.comparablesUsed} comparable transactions and the valuation framework. As of ${INST.meta.runAt.slice(0, 10)}.`}
       />
+
+      {/* Chief Investment Banker — proactive morning briefing */}
+      <div className="mb-6"><MorningBriefing /></div>
 
       {/* the product statement */}
       {lead && (
