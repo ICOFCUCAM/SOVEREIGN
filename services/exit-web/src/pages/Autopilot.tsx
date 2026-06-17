@@ -1,16 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Card, Modal, SectionHeader, fmtMoney } from "../lib/ui";
-import { VALUATION_STRATEGIC, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON, DILIGENCE } from "../lib/engines";
+import { VALUATION_STRATEGIC, VALUATION_INSTITUTIONAL, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON, DILIGENCE } from "../lib/engines";
 import { discoverFindings, buildSellerReport } from "../lib/diligence-intel";
 import {
-  valuationMemo, buyerShortlistMemo, riskReportDoc,
+  institutionalValuationMemo, buyerShortlistMemo, riskReportDoc,
   outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, closingChecklistDoc, wealthPlanDoc,
   sendDeliverable, downloadDeliverable,
 } from "../lib/deliverables";
 import { emitTelemetry } from "../lib/telemetry";
 import { useAuth } from "../lib/auth";
-import { SAMPLE_COMPANY } from "../lib/profile";
 import type { BuyerCandidate } from "@exit/engines";
 
 // Autonomous Exit Mode — "Sell my company," not "manage the sale." Seven
@@ -128,7 +127,7 @@ const Autopilot: React.FC = () => {
         </div>
       ),
       decision: `Set the asking range anchored at ${fmtMoney(mid)} strategic mid?`, approveLabel: "Approve the ask",
-      deliverable: { filename: "valuation-summary.md", build: () => valuationMemo(VALUATION_STRATEGIC, SAMPLE_COMPANY.name) },
+      deliverable: { filename: "institutional-valuation.md", build: () => institutionalValuationMemo(VALUATION_INSTITUTIONAL) },
     },
     {
       id: "discovery", name: "Buyer Discovery Agent", role: "Finds and ranks acquirers.",

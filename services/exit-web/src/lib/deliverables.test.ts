@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   docToMarkdown, docFilename, buyerIntroLetter, introFilename, buyerListCsv,
-  valuationMemo, buyerShortlistMemo, riskReportDoc, structuredDoc, frameDoc,
+  valuationMemo, institutionalValuationMemo, buyerShortlistMemo, riskReportDoc, structuredDoc, frameDoc,
   outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, closingChecklistDoc, wealthPlanDoc,
 } from "./deliverables.js";
-import { BUYERS, VALUATION_STRATEGIC, OFFER_COMPARISON, NEGOTIATION_STATE, DILIGENCE } from "./engines.js";
+import { BUYERS, VALUATION_STRATEGIC, VALUATION_INSTITUTIONAL, OFFER_COMPARISON, NEGOTIATION_STATE, DILIGENCE } from "./engines.js";
 import { TemplateMemorandumGenerator } from "@exit/engines";
 import type { MemorandumKind } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile.js";
@@ -35,6 +35,31 @@ describe("deliverables", () => {
     // every methodology row is present
     for (const m of VALUATION_STRATEGIC.methodologies) expect(md).toContain(m.name);
     expect(md.length).toBeGreaterThan(600);
+    noPlaceholders(md);
+  });
+
+  it("institutional valuation memo is evidence-driven across all six dimensions", () => {
+    const md = institutionalValuationMemo(VALUATION_INSTITUTIONAL);
+    const r = VALUATION_INSTITUTIONAL;
+    expect(md).toContain("Institutional Valuation");
+    // 1 — explained conclusion
+    expect(md).toMatch(/= financial baseline .* × \(1 \+/);
+    // 2 — normalized weights
+    expect(md).toContain("normalized and sum to 100%");
+    // 3 — evidence-based premium with observed precedents
+    expect(md).toContain("Strategic premium — evidence");
+    expect(md).toContain("Observed precedent premiums");
+    // 4 — comparable transactions, each sourced
+    expect(md).toContain("Comparable transactions");
+    for (const c of r.comparableTransactions.slice(0, 3)) expect(md).toContain(c.target);
+    // 5 — confidence score
+    expect(md).toContain("Confidence score");
+    expect(md).toContain(`${r.confidence.score}%`);
+    // 6 — buyer universe + most likely buyers
+    expect(md).toContain("Buyer universe");
+    for (const b of r.mostLikelyBuyers.slice(0, 3)) expect(md).toContain(b.name);
+    expect(md).toContain("Strategic buyer rationale");
+    expect(md.length).toBeGreaterThan(1500);
     noPlaceholders(md);
   });
 

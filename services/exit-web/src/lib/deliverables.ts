@@ -5,7 +5,7 @@
 // numbered sections, real tables, and a standing disclaimer — banker-desk
 // quality, generated from the company's own data and the platform's engines.
 
-import type { MemorandumDocument, BuyerCandidate, ValuationReport } from "@exit/engines";
+import type { MemorandumDocument, BuyerCandidate, ValuationReport, InstitutionalValuationReport } from "@exit/engines";
 import type { RiskReport } from "./diligence-intel.js";
 import { downloadText, notify } from "./ui";
 
@@ -162,6 +162,137 @@ export function valuationMemo(report: ValuationReport, companyName: string): str
     subtitle: `${companyName} · strategic-buyer basis`,
     meta: [["Prepared for", "The Board and shareholders of the Company"], ["Approach", `${titleCase(report.reportType)} basis · comparable transactions and fundamentals`]],
     sections,
+  });
+}
+
+// ── Institutional valuation summary ─────────────────────────────────
+
+const days = (n: number): string => `${Math.round(n)}`;
+
+/** The institutional-grade valuation: every figure traced to evidence —
+ *  an explained conclusion, a precedent-based premium, comparable
+ *  transactions, a confidence score and the buyer universe behind it. */
+export function institutionalValuationMemo(report: InstitutionalValuationReport): string {
+  const h = report.headline;
+  const fb = report.financialBaseline;
+  const p = report.premium;
+
+  // The headline summary block the desk reads first.
+  const summary: DocSection = {
+    heading: "Valuation summary",
+    body:
+      `We assess a strategic-buyer enterprise value of **${money(h.mid)}** ` +
+      `(range ${money(h.low)} – ${money(h.high)}). The midpoint is the financial baseline of ` +
+      `${money(fb.mid)} uplifted by an evidence-based strategic premium of **+${pct(p.appliedPct)}** — ` +
+      `the mean of ${p.observedPremiums.length} observed precedent transaction${p.observedPremiums.length === 1 ? "" : "s"}, ` +
+      `not a flat assumption.`,
+    table: {
+      headers: ["Measure", "Value"],
+      rows: [
+        ["Enterprise value — low", money(h.low)],
+        ["Enterprise value — midpoint", money(h.mid)],
+        ["Enterprise value — high", money(h.high)],
+        ["Valuation confidence", `${report.confidence.score}% · ${report.confidence.tier}`],
+        ["Strategic buyer premium", `+${pct(p.appliedPct)} (range ${pct(p.rangeLowPct)}–${pct(p.rangeHighPct)})`],
+        ["Comparable transactions used", String(report.comparablesUsed)],
+        ["Qualified buyer universe", `${report.buyerUniverse.qualified} (of ${report.buyerUniverse.scored} scored)`],
+        ["Most likely buyers", report.mostLikelyBuyers.slice(0, 5).map((b) => b.name).join(", ") || "—"],
+        ["Expected time to close", `${days(report.timeToClose.lowDays)}–${days(report.timeToClose.highDays)} days`],
+      ],
+    },
+  };
+
+  const methodology: DocSection = {
+    heading: "Methodology & weighting",
+    body: "Each method is applied to the company's own figures and weighted by reliability for this profile; the weights are normalized and sum to 100%. The range on each line is the sector's observed trough-to-peak multiple band — which is why the same company can support both the low and high figures under different market conditions.",
+    table: {
+      headers: ["Methodology", "Basis", "Multiple", "Range (low – high)", "Weight", "Market evidence"],
+      rows: report.methodologies.map((m) => [
+        m.name,
+        m.basis,
+        m.multiple != null ? `${m.multiple.toFixed(1)}×` : "—",
+        `${money(m.band.low)} – ${money(m.band.high)}`,
+        `${m.weightPct}%`,
+        m.evidence,
+      ]),
+    },
+  };
+
+  const premium: DocSection = {
+    heading: "Strategic premium — evidence",
+    body:
+      `${p.note} Confidence: ${p.confidence.tier} (${p.confidence.note}). ` +
+      `In-sector precedents: ${p.inSectorSample}; market-wide precedents: ${p.marketSample}.`,
+    table: {
+      headers: ["Observed precedent premiums (sorted)"],
+      rows: p.observedPremiums.length
+        ? [[p.observedPremiums.map((x) => pct(x)).join(" · ")]]
+        : [["No precedent with a disclosed reference price — neutral prior applied"]],
+    },
+  };
+
+  const comps: DocSection = {
+    heading: "Comparable transactions",
+    body: `${report.comparablesUsed} source-referenced transactions in the company's sector, most recent first.`,
+    table: {
+      headers: ["Target", "Acquirer", "Date", "Value", "Premium", "Days to close", "Source"],
+      rows: report.comparableTransactions.map((c) => [
+        c.target,
+        c.buyer,
+        c.date ?? "—",
+        c.priceUsd != null ? money(c.priceUsd) : "undisclosed",
+        c.premiumPct != null ? pct(c.premiumPct) : "—",
+        c.closeDays != null ? days(c.closeDays) : "—",
+        c.sourceRef,
+      ]),
+    },
+  };
+
+  const buyers: DocSection = {
+    heading: "Buyer universe & most likely acquirers",
+    body:
+      `Ranked against ${report.buyerUniverse.scored} scored mandates from a ${report.buyerUniverse.registry}-buyer curated registry; ` +
+      `${report.buyerUniverse.qualified} clear a 50% acquisition-probability bar. The list below is ranked by fit-adjusted ` +
+      `expected value — the buyers most likely to actually transact with this company, not merely the largest.`,
+    table: {
+      headers: ["#", "Buyer", "Acquisition probability", "Expected days to close"],
+      rows: report.mostLikelyBuyers.map((b, i) => [
+        String(i + 1),
+        b.name,
+        `${b.probabilityPct}%`,
+        `${b.expectedDaysToCash}d`,
+      ]),
+    },
+  };
+
+  const rationale: DocSection = {
+    heading: "Strategic buyer rationale",
+    body: "Why a strategic acquirer would pay the premium above the financial-buyer baseline:",
+    bullets: report.strategicRationale,
+  };
+
+  const confidence: DocSection = {
+    heading: "Confidence score",
+    body: `**${report.confidence.score}% — ${report.confidence.tier}.** ${report.confidence.note}`,
+    table: {
+      headers: ["Driver", "Score"],
+      rows: [
+        ["Data completeness", pct(report.confidence.drivers.dataCompleteness)],
+        ["Comparable depth", pct(report.confidence.drivers.comparableDepth)],
+        ["Sector maturity", pct(report.confidence.drivers.sectorMaturity)],
+        ["Financial quality", pct(report.confidence.drivers.financialQuality)],
+      ],
+    },
+  };
+
+  return frameDoc({
+    title: "Institutional Valuation — Summary",
+    subtitle: `${report.companyName} · strategic-buyer basis · ${report.confidence.tier} confidence`,
+    meta: [
+      ["Prepared for", "The Board and shareholders of the Company"],
+      ["Approach", "Multiples baseline · precedent-transaction premium · comparable analysis · buyer-universe intelligence"],
+    ],
+    sections: [summary, methodology, premium, comps, buyers, rationale, confidence, { heading: "Assumptions & notes", bullets: report.notes }],
   });
 }
 

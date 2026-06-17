@@ -51,6 +51,10 @@ function combineWeighted(entries: readonly MethodologyEntry[]): ValuationBand {
 
 export interface RunOptions {
   readonly reportType?: ValuationReportType;
+  /** Evidence-based strategic premium injected by the institutional layer.
+   *  When set, it overrides the heuristic synergy formula — the premium is
+   *  then driven by observed precedent transactions, not a flat assumption. */
+  readonly strategicPremiumPct?: number;
 }
 
 // Standard valuation — multiples-driven, weighted blend of ARR /
@@ -138,8 +142,15 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
 
   // Strategic uplift — buyers pay for synergies + control + competitive blocking.
   if (reportType === 'strategic') {
-    const strategicUplift = 0.30 + (company.product.hasNetworkEffects ? 0.10 : 0) + (company.product.hasDataMoat ? 0.10 : 0);
-    premiums.push({ name: 'Strategic premium', pct: strategicUplift, reason: 'Synergies, control, competitive blocking' });
+    const heuristicUplift = 0.30 + (company.product.hasNetworkEffects ? 0.10 : 0) + (company.product.hasDataMoat ? 0.10 : 0);
+    const strategicUplift = opts.strategicPremiumPct ?? heuristicUplift;
+    premiums.push({
+      name: 'Strategic premium',
+      pct: strategicUplift,
+      reason: opts.strategicPremiumPct != null
+        ? 'Applied from observed precedent-transaction premiums (evidence-based)'
+        : 'Synergies, control, competitive blocking',
+    });
     headline = applyAdjustments(headline, 1, strategicUplift);
     notes.push('Strategic buyer valuation includes synergy premium and reflects control transaction pricing.');
   }
