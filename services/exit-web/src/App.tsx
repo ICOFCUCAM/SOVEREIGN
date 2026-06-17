@@ -11,6 +11,7 @@ const Pricing      = lazy(() => import("./pages/Pricing"));
 const Platform     = lazy(() => import("./pages/Platform"));
 const Modules      = lazy(() => import("./pages/Modules"));
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
+const Terminal     = lazy(() => import("./pages/Terminal"));
 const Intelligence = lazy(() => import("./pages/Intelligence"));
 const DataRoom     = lazy(() => import("./pages/DataRoom"));
 const Buyers       = lazy(() => import("./pages/Buyers"));
@@ -61,7 +62,8 @@ const Guard: React.FC<{ policy: string; children: React.ReactNode }> = ({ policy
 };
 
 const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
-  { path: "/",             policy: "/console",                el: <Dashboard /> },
+  { path: "/",             policy: "/console",                el: <Terminal /> },
+  { path: "command",       policy: "/console",                el: <Dashboard /> },
   { path: "commander",     policy: "/console/commander",      el: <Commander /> },
   { path: "network",       policy: "/console/network",        el: <Network /> },
   { path: "autopilot",     policy: "/console/autopilot",      el: <Autopilot /> },

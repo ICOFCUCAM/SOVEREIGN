@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Card, Kpi, SectionHeader } from "../lib/ui";
 import {
   buyerById, acquisitionProbability, acquisitionSignals, similarAcquisitionsBy,
-  sectorOverlap, recommendedAction, fmtUsdShort, DNA_AS_OF,
+  sectorOverlap, recommendedAction, fmtUsdShort, expectedOutcomeFor, DNA_AS_OF,
 } from "../lib/buyer-dna";
 import { VALUATION_INSTITUTIONAL } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -36,12 +36,7 @@ const BuyerProfile: React.FC = () => {
   // baseline × (1 + premium) × close-rate. Disclosed figures are used when
   // present; otherwise a labelled market-neutral prior, never hidden.
   const baseline = VALUATION_INSTITUTIONAL.financialBaseline.mid;
-  const premiumKnown = p.premium_pct != null;
-  const closeKnown = p.close_rate != null;
-  const premium = p.premium_pct ?? 0.2;       // neutral prior
-  const close = p.close_rate ?? 0.55;         // neutral prior
-  const expectedOffer = baseline * (1 + premium);
-  const expectedClose = expectedOffer * close;
+  const { premium, close, premiumKnown, closeKnown, expectedOffer, expectedClose } = expectedOutcomeFor(p, baseline);
 
   return (
     <div>

@@ -170,6 +170,50 @@ export function acquisitionSignals(p: DnaProfile): { signals: readonly BuyerSign
   return { signals, activeCount: derived.filter((s) => s.active).length };
 }
 
+// ── Expected outcome for the founder's company under a given buyer ──
+// baseline × (1 + premium) × close-rate. Disclosed buyer figures are used
+// when present; otherwise a LABELLED market-neutral prior — never hidden.
+const NEUTRAL_PREMIUM = 0.2;
+const NEUTRAL_CLOSE = 0.55;
+
+export interface ExpectedOutcome {
+  readonly premium: number;
+  readonly close: number;
+  readonly premiumKnown: boolean;
+  readonly closeKnown: boolean;
+  readonly expectedOffer: number;
+  readonly expectedClose: number;
+}
+
+export function expectedOutcomeFor(p: DnaProfile, baselineUsd: number): ExpectedOutcome {
+  const premiumKnown = p.premium_pct != null;
+  const closeKnown = p.close_rate != null;
+  const premium = p.premium_pct ?? NEUTRAL_PREMIUM;
+  const close = p.close_rate ?? NEUTRAL_CLOSE;
+  const expectedOffer = baselineUsd * (1 + premium);
+  return { premium, close, premiumKnown, closeKnown, expectedOffer, expectedClose: expectedOffer * close };
+}
+
+// ── Strategic themes — what the active acquirers are buying NOW ──────
+// Aggregates currently_seeking across indexed buyers; a theme's weight is
+// the number of distinct buyers pursuing it. Real, registry-derived.
+export interface StrategicTheme { readonly theme: string; readonly buyers: number }
+
+export function strategicThemes(limit = 6): StrategicTheme[] {
+  const byTheme = new Map<string, Set<string>>();
+  for (const p of DNA_PROFILES) {
+    for (const t of p.currently_seeking ?? []) {
+      const set = byTheme.get(t) ?? new Set<string>();
+      set.add(p.buyer_id);
+      byTheme.set(t, set);
+    }
+  }
+  return [...byTheme.entries()]
+    .map(([theme, ids]) => ({ theme, buyers: ids.size }))
+    .sort((a, b) => b.buyers - a.buyers)
+    .slice(0, limit);
+}
+
 export const buyerById = (id: string): DnaProfile | undefined => DNA_PROFILES.find((p) => p.buyer_id === id);
 
 // Same-sector / similar acquisitions a buyer has made (from the bundled

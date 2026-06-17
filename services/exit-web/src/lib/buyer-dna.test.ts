@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS, sectorOverlap, recommendedAction,
   acquisitionProbability, rankedBuyers, acquisitionSignals, buyerById,
+  expectedOutcomeFor, strategicThemes,
 } from "./buyer-dna.js";
 
 describe("acquisition DNA (derived from ingested registries)", () => {
@@ -85,6 +86,36 @@ describe("acquisition DNA (derived from ingested registries)", () => {
     for (const f of feeds) expect(f.active).toBe(false);
     // activeCount counts only derived signals
     expect(activeCount).toBe(signals.filter((s) => s.source === "derived" && s.active).length);
+  });
+
+  it("expected outcome = baseline × (1+premium) × close, with priors labelled not hidden", () => {
+    const baseline = 100_000_000;
+    const known = DNA_PROFILES.find((p) => p.premium_pct != null && p.close_rate != null);
+    if (known) {
+      const e = expectedOutcomeFor(known, baseline);
+      expect(e.premiumKnown).toBe(true);
+      expect(e.closeKnown).toBe(true);
+      expect(e.expectedOffer).toBeCloseTo(baseline * (1 + known.premium_pct!), -2);
+      expect(e.expectedClose).toBeCloseTo(e.expectedOffer * known.close_rate!, -2);
+    }
+    // a buyer with no disclosed premium/close falls back to a flagged prior
+    const unknown = DNA_PROFILES.find((p) => p.premium_pct == null && p.close_rate == null && p.events_indexed > 0)!;
+    const u = expectedOutcomeFor(unknown, baseline);
+    expect(u.premiumKnown).toBe(false);
+    expect(u.closeKnown).toBe(false);
+    expect(u.premium).toBe(0.2);   // neutral prior, surfaced
+    expect(u.close).toBe(0.55);
+    expect(u.expectedOffer).toBeCloseTo(baseline * 1.2, -2);
+  });
+
+  it("strategic themes aggregate what active buyers are seeking, weighted by buyer count", () => {
+    const themes = strategicThemes(6);
+    expect(themes.length).toBeGreaterThan(0);
+    for (const t of themes) {
+      expect(t.theme.length).toBeGreaterThan(0);
+      expect(t.buyers).toBeGreaterThan(0);
+    }
+    for (let i = 1; i < themes.length; i++) expect(themes[i].buyers).toBeLessThanOrEqual(themes[i - 1].buyers);
   });
 
   it("similar-transactions extract is sector-relevant and sourced", () => {
