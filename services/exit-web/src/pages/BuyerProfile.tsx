@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { Card, Kpi, SectionHeader } from "../lib/ui";
 import {
   buyerById, acquisitionProbability, acquisitionSignals, similarAcquisitionsBy,
-  sectorOverlap, recommendedAction, fmtUsdShort, expectedOutcomeFor, buyerRationale, DNA_AS_OF,
+  sectorOverlap, recommendedAction, fmtUsdShort, expectedOutcomeFor, buyerRationale,
+  acquisitionAppetiteScore, buyerConfidence, DNA_AS_OF,
 } from "../lib/buyer-dna";
 import { VALUATION_INSTITUTIONAL } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -38,6 +39,9 @@ const BuyerProfile: React.FC = () => {
   const baseline = VALUATION_INSTITUTIONAL.financialBaseline.mid;
   const { premium, close, premiumKnown, closeKnown, expectedOffer, expectedClose } = expectedOutcomeFor(p, baseline);
   const rationale = buyerRationale(p, baseline);
+  const appetite = acquisitionAppetiteScore(p);
+  const confidence = buyerConfidence(p);
+  const medianClose = p.median_close_days ?? VALUATION_INSTITUTIONAL.timeToClose.lowDays;
 
   return (
     <div>
@@ -50,12 +54,51 @@ const BuyerProfile: React.FC = () => {
             {p.buyer_type.replace(/_/g, " ")}{p.country ? ` · ${p.country}` : ""}{p.industry_official ? ` · ${p.industry_official}` : ""}
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Acquisition probability · your company</div>
-          <div className="font-mono text-4xl font-bold tabular-nums text-deal-300">{prob.pct}%</div>
-          <div className="text-[11px] text-white/45">{recommendedAction(p)}</div>
+        <div className="flex gap-6">
+          <div className="text-right">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Probability · your company</div>
+            <div className="font-mono text-4xl font-bold tabular-nums text-deal-300">{prob.pct}%</div>
+            <div className="text-[11px] text-white/45">{recommendedAction(p)}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40" title="Intrinsic acquisitiveness right now — independent of your company">Appetite score</div>
+            <div className="font-mono text-4xl font-bold tabular-nums text-white">{appetite.score}<span className="text-lg text-white/35">/100</span></div>
+            <div className="text-[11px] text-white/45">{appetite.tier} · confidence {confidence}</div>
+          </div>
         </div>
       </div>
+
+      {/* ── Acquisition Forecast — the evidence-based North-Star output ── */}
+      <Card className="mt-6 overflow-hidden border-deal-400/30 p-0">
+        <div className="grid gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["Probability", `${prob.pct}%`, "for a company like yours"],
+            ["Expected value", fmtUsdShort(expectedOutcomeFor(p, baseline).expectedClose), "probability-weighted"],
+            ["Expected premium", `+${Math.round((p.premium_pct ?? 0.2) * 100)}%${p.premium_pct == null ? "*" : ""}`, p.premium_pct != null ? "from track record" : "neutral prior"],
+            ["Median close", `${medianClose} days`, "time-to-cash"],
+          ].map(([k, v, sub]) => (
+            <div key={k} className="bg-ink-950 px-4 py-3">
+              <div className="text-[9.5px] font-semibold uppercase tracking-[0.16em] text-white/40">{k}</div>
+              <div className="mt-0.5 font-mono text-xl font-bold tabular-nums text-white">{v}</div>
+              <div className="text-[10px] text-white/35">{sub}</div>
+            </div>
+          ))}
+        </div>
+        <div className="grid gap-px bg-white/10 lg:grid-cols-[1fr_1fr_auto]">
+          <div className="bg-ink-950 px-4 py-3">
+            <div className="text-[9.5px] font-semibold uppercase tracking-[0.16em] text-white/40">Similar acquisitions</div>
+            <div className="mt-1 text-[12.5px] text-white/80">{similar.length ? similar.slice(0, 3).map((s) => s.target).join(" · ") : "indexed node-side"}</div>
+          </div>
+          <div className="bg-ink-950 px-4 py-3">
+            <div className="text-[9.5px] font-semibold uppercase tracking-[0.16em] text-white/40">Strategic rationale</div>
+            <div className="mt-1 text-[12.5px] text-white/80">{rationale.points.slice(0, 3).map((pt) => pt.label).join(" · ") || rationale.thesis.slice(0, 60)}</div>
+          </div>
+          <div className="bg-ink-950 px-4 py-3 text-right">
+            <div className="text-[9.5px] font-semibold uppercase tracking-[0.16em] text-white/40">Confidence</div>
+            <div className={`mt-0.5 font-mono text-xl font-bold ${confidence === "High" ? "text-deal-300" : confidence === "Moderate" ? "text-loi-300" : "text-white/50"}`}>{confidence}</div>
+          </div>
+        </div>
+      </Card>
 
       {/* headline DNA */}
       <div className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
@@ -149,7 +192,26 @@ const BuyerProfile: React.FC = () => {
             <span className="font-mono text-[12px] font-bold text-deal-300">{activeCount} active</span>
           </div>
           <p className="mt-1 text-[11px] text-white/45">{p.name} currently exhibits {activeCount} acquisition signal{activeCount === 1 ? "" : "s"}.</p>
-          <ul className="mt-3 space-y-1.5">
+
+          {/* appetite score driver breakdown — the predictive composite */}
+          <div className="mt-3 rounded-lg border border-white/10 bg-white/[0.02] p-3">
+            <div className="flex items-baseline justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">Appetite score</span>
+              <span className="font-mono text-[13px] font-bold text-white">{appetite.score}<span className="text-white/35">/100 · {appetite.tier}</span></span>
+            </div>
+            <div className="mt-2 space-y-1">
+              {([["Cadence", appetite.drivers.cadence, 30], ["Acceleration", appetite.drivers.acceleration, 20], ["Recency", appetite.drivers.recency, 20], ["Breadth", appetite.drivers.breadth, 15], ["Themes", appetite.drivers.themes, 10], ["Geography", appetite.drivers.geography, 5]] as [string, number, number][]).map(([k, v, max]) => (
+                <div key={k} className="flex items-center gap-2 text-[10.5px]">
+                  <span className="w-20 shrink-0 text-white/45">{k}</span>
+                  <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10"><span className="block h-full rounded-full bg-deal-500" style={{ width: `${(v / max) * 100}%` }} /></span>
+                  <span className="w-7 shrink-0 text-right font-mono tabular-nums text-white/55">{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">Behavioral signals</div>
+          <ul className="mt-2 space-y-1.5">
             {signals.map((s) => (
               <li key={s.label} className="flex items-start gap-2 text-[12px]">
                 <span className={`mt-1 inline-block h-2 w-2 shrink-0 rounded-full ${s.active ? "bg-deal-400" : s.source === "feed" ? "bg-white/15" : "bg-white/10"}`} />

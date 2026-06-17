@@ -274,6 +274,56 @@ export function speedLeague(limit = 12): readonly DnaProfile[] {
     .slice().sort((a, b) => (a.median_close_days ?? 1e9) - (b.median_close_days ?? 1e9)).slice(0, limit);
 }
 
+// ── Acquisition Appetite Score (Sprint D — the predictive layer) ────
+// Distinct from acquisitionProbability (which is founder-relative). This is
+// the buyer's INTRINSIC acquisitiveness right now — a 0–100 composite of
+// behavioral indicators: cadence, acceleration, recency, breadth, active
+// themes and geographic reach. Every driver is a measured DNA figure; the
+// external feed signals (hiring, new funds, leadership) add to it once
+// connected, and are flagged honestly until then.
+export interface AppetiteScore {
+  readonly score: number;            // 0–100
+  readonly tier: "High" | "Moderate" | "Low";
+  readonly drivers: {
+    readonly cadence: number;
+    readonly acceleration: number;
+    readonly recency: number;
+    readonly breadth: number;
+    readonly themes: number;
+    readonly geography: number;
+  };
+  readonly summary: string;
+}
+
+export function acquisitionAppetiteScore(p: DnaProfile): AppetiteScore {
+  const ageM = monthsSince(p.last_acquisition?.date);
+  const accelerating = p.deals_3y > 0 ? p.deals_12m / (p.deals_3y / 3) : (p.deals_12m > 0 ? 1.5 : 0);
+
+  const cadence = Math.min(30, (p.frequency_per_year ?? 0) * 4);
+  const acceleration = Math.min(20, p.deals_12m * 6 + (accelerating >= 1.2 ? 6 : 0));
+  const recency = ageM == null ? 0 : ageM <= 6 ? 20 : ageM <= 12 ? 15 : ageM <= 24 ? 10 : ageM <= 36 ? 5 : 0;
+  const breadth = Math.min(15, p.sector_tokens.length * 2.5);
+  const themes = (p.currently_seeking?.length ?? 0) > 0 ? 10 : 0;
+  const geography = (p.preferred_geography?.length ?? 0) >= 3 ? 5 : (p.preferred_geography?.length ?? 0) >= 1 ? 2 : 0;
+
+  const score = Math.max(0, Math.min(100, Math.round(cadence + acceleration + recency + breadth + themes + geography)));
+  const tier = score >= 70 ? "High" : score >= 40 ? "Moderate" : "Low";
+  const bits: string[] = [];
+  if (p.frequency_per_year) bits.push(`${p.frequency_per_year}/yr cadence`);
+  if (p.deals_12m > 0) bits.push(`${p.deals_12m} in the last 12mo`);
+  if (ageM != null && ageM <= 24) bits.push(`active ${Math.round(ageM)}mo ago`);
+  const summary = `${tier} acquisition appetite${bits.length ? ` — ${bits.join(", ")}` : ""}.`;
+  return { score, tier, drivers: { cadence: Math.round(cadence), acceleration: Math.round(acceleration), recency, breadth: Math.round(breadth), themes, geography }, summary };
+}
+
+// Per-buyer confidence in the forecast — a function of how much real data
+// backs it (events indexed + disclosed values). Honest, never asserted.
+export function buyerConfidence(p: DnaProfile): "High" | "Moderate" | "Developing" {
+  if (p.events_indexed >= 40 && p.disclosed_events >= 4) return "High";
+  if (p.events_indexed >= 10) return "Moderate";
+  return "Developing";
+}
+
 export const buyerById = (id: string): DnaProfile | undefined => DNA_PROFILES.find((p) => p.buyer_id === id);
 
 // Same-sector / similar acquisitions a buyer has made (from the bundled

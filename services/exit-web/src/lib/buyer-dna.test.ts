@@ -3,6 +3,7 @@ import {
   DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS, sectorOverlap, recommendedAction,
   acquisitionProbability, rankedBuyers, acquisitionSignals, buyerById,
   expectedOutcomeFor, strategicThemes, buyerRationale, premiumLeague, speedLeague,
+  acquisitionAppetiteScore, buyerConfidence,
 } from "./buyer-dna.js";
 
 describe("acquisition DNA (derived from ingested registries)", () => {
@@ -145,6 +146,27 @@ describe("acquisition DNA (derived from ingested registries)", () => {
       expect(p.median_close_days!).toBeGreaterThan(0); // the 0-day data artifact is excluded
     }
     for (let i = 1; i < fast.length; i++) expect(fast[i].median_close_days!).toBeGreaterThanOrEqual(fast[i - 1].median_close_days!);
+  });
+
+  it("acquisition appetite score is an intrinsic 0–100 composite of behavioral drivers", () => {
+    const p = DNA_PROFILES.find((x) => x.events_indexed > 50)!;
+    const a = acquisitionAppetiteScore(p);
+    expect(a.score).toBeGreaterThanOrEqual(0);
+    expect(a.score).toBeLessThanOrEqual(100);
+    expect(["High", "Moderate", "Low"]).toContain(a.tier);
+    // the score is the sum of its named, bounded drivers
+    const d = a.drivers;
+    expect(Math.abs(a.score - (d.cadence + d.acceleration + d.recency + d.breadth + d.themes + d.geography))).toBeLessThanOrEqual(2);
+    // a buyer with NO events has minimal appetite (it is intrinsic, not asserted)
+    const cold = DNA_PROFILES.find((x) => x.events_indexed === 0);
+    if (cold) expect(acquisitionAppetiteScore(cold).score).toBeLessThan(20);
+  });
+
+  it("buyer confidence reflects data depth, never asserted", () => {
+    const deep = DNA_PROFILES.find((x) => x.events_indexed >= 40 && x.disclosed_events >= 4);
+    if (deep) expect(buyerConfidence(deep)).toBe("High");
+    const thin = DNA_PROFILES.find((x) => x.events_indexed > 0 && x.events_indexed < 10);
+    if (thin) expect(buyerConfidence(thin)).toBe("Developing");
   });
 
   it("similar-transactions extract is sector-relevant and sourced", () => {
