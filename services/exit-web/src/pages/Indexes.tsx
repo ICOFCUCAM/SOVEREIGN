@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor } from "../components/Reactor";
+import { TransactionHeatfield } from "../components/Heatfield";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 
 // EXITOS ACQUISITION INDEXES (Stage 8) — Bloomberg has indexes; so does
@@ -48,6 +49,13 @@ const Indexes: React.FC = () => {
       />
 
       <MarketTape items={tape} />
+
+      <Frame>
+        <Panel title="Transaction heatfield · volume × disclosed value" className="lg:col-span-12"
+          foot="Column height = acquisition volume · heat = disclosed value · cap colour = 12-month trend. Hover a sector for figures.">
+          <TransactionHeatfield height={200} />
+        </Panel>
+      </Frame>
 
       <Frame>
         <Panel title="Acquisition reactor" className="lg:col-span-4"

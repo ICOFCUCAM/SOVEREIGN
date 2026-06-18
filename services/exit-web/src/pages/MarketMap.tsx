@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { LiquidityReactor } from "../components/Reactor";
+import { TransactionHeatfield } from "../components/Heatfield";
 import { MARKET_INTEL, fmtUsd } from "../lib/market-intel";
 
 // GLOBAL ACQUISITION MARKET INTELLIGENCE (Phase 4) — the visual signature.
@@ -40,6 +41,13 @@ const MarketMap: React.FC = () => {
       />
 
       <MarketTape items={tape} />
+
+      <Frame>
+        <Panel title="Transaction heatfield · where capital is moving" className="lg:col-span-12"
+          foot="Column height = acquisition volume · heat = disclosed value · cap = trend. Aggregated from the verified registry.">
+          <TransactionHeatfield height={190} />
+        </Panel>
+      </Frame>
 
       <Frame>
         <Panel title="Liquidity reactor · disclosed capital" className="lg:col-span-4"
