@@ -3,7 +3,6 @@ import { Button, Card, Modal, Field, inputCls, fmtMoney, copyText, notify } from
 import { CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_STRATEGIC } from "../lib/engines";
-import { sendDeliverable } from "../lib/deliverables";
 import BankerTake from "../components/BankerTake";
 
 interface Reserve { minHeadlinePriceUsd: number; minCashPct: number; maxEarnoutPct: number; premiumOverride: number | null }
@@ -392,7 +391,7 @@ James — on behalf of Helios Freight`
             <pre className="mt-4 whitespace-pre-wrap rounded-md border border-white/10 bg-ink-900/70 p-4 text-[13px] leading-relaxed text-white/80">{draftText}</pre>
             <div className="mt-4 flex justify-end gap-2">
               <Button variant="ghost" onClick={() => copyText(draftText)}>Copy</Button>
-              <Button onClick={() => { sendDeliverable(`counter-${active.offer.buyerName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.txt`, draftText); setCounterSent(true); setDraftOpen(false); }}>{counterSent ? "Sent ✓ · resend" : "Send counter →"}</Button>
+              <Button onClick={() => { setCounterSent(true); setDraftOpen(false); notify(`Counter sent to ${active.offer.buyerName}`); }}>{counterSent ? "Sent ✓ · resend" : "Send counter →"}</Button>
             </div>
           </div>
         </div>

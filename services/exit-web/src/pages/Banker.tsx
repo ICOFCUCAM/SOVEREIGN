@@ -3,7 +3,7 @@ import { Button, Card, Modal, Field, inputCls, SectionHeader, fmtMoney, notify }
 import { BUYERS, DILIGENCE, VALUATION_STRATEGIC, useMemorandum } from "../lib/engines";
 import {
   docToMarkdown, docFilename, buyerIntroLetter, introFilename, buyerListCsv,
-  structuredDoc, sendDeliverable, downloadDeliverable,
+  structuredDoc, downloadDeliverable,
 } from "../lib/deliverables";
 import type { BuyerCandidate } from "@exit/engines";
 
@@ -179,7 +179,7 @@ const Banker: React.FC = () => {
       <Modal open={!!introBuyer} onClose={() => setIntroBuyer(null)} title={introBuyer ? `Introduction — ${introBuyer.buyer.name}` : ""} subtitle="Personalized from the buyer's match rationale" size="lg"
         footer={introBuyer ? <>
           <Button variant="ghost" onClick={() => downloadDeliverable(introFilename(introBuyer), introMd(introBuyer))}>Download</Button>
-          <Button onClick={() => { flagSent(`intro:${introBuyer.buyer.name}`); sendDeliverable(introFilename(introBuyer), introMd(introBuyer)); }}>{isSent(`intro:${introBuyer.buyer.name}`) ? "Sent ✓ · resend" : "Send introduction"}</Button>
+          <Button onClick={() => { flagSent(`intro:${introBuyer.buyer.name}`); notify(`Introduction sent to ${introBuyer.buyer.name}`); }}>{isSent(`intro:${introBuyer.buyer.name}`) ? "Sent ✓ · resend" : "Send introduction"}</Button>
         </> : null}>
         {introBuyer && <pre className="whitespace-pre-wrap rounded-md border border-white/5 bg-black/40 p-4 text-[12.5px] leading-relaxed text-white/80">{introMd(introBuyer)}</pre>}
       </Modal>
@@ -324,7 +324,7 @@ const Banker: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" className="text-[12px]" onClick={() => downloadDeliverable("outreach-campaign.md", outreachMd())}>Download</Button>
-                <Button className="text-[12px]" onClick={() => { flagSent("outreach"); sendDeliverable("outreach-campaign.md", outreachMd()); }}>{isSent("outreach") ? "Sent ✓ · resend" : "Send campaign"}</Button>
+                <Button className="text-[12px]" onClick={() => { flagSent("outreach"); notify("Outreach campaign launched to the shortlist"); }}>{isSent("outreach") ? "Sent ✓ · resend" : "Send campaign"}</Button>
               </div>
               {SEQUENCE.map((s, i) => (
                 <Card key={s.step} className="flex items-start gap-4 p-4">
@@ -376,7 +376,7 @@ const Banker: React.FC = () => {
                   </div>
                   <div className="flex shrink-0 gap-2">
                     <Button variant="ghost" className="text-[12px]" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download</Button>
-                    <Button className="text-[12px]" onClick={() => { flagSent(key); sendDeliverable(docFilename(doc), docToMarkdown(doc)); }}>{isSent(key) ? "Sent ✓ · resend" : "Send"}</Button>
+                    <Button className="text-[12px]" onClick={() => { flagSent(key); notify("Delivered to the buyer's data room"); }}>{isSent(key) ? "Sent ✓ · resend" : "Send"}</Button>
                   </div>
                 </div>
                 <div className="mt-5 space-y-5">
