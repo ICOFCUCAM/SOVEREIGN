@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Card, Kpi, SectionHeader, inputCls } from "../lib/ui";
+import { Card, inputCls } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { fmtUsd } from "../lib/market-intel";
 import { queryAcquisitions, type AcquisitionIndex, type GraphQuery, type Region } from "@exit/engines";
 // The full queryable event index (~83 KB gzip) loads only on this route.
@@ -49,12 +51,20 @@ const KnowledgeGraph: React.FC = () => {
   }, [sector, region, minUsd, maxUsd, sinceYear]);
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Market Intelligence · The moat"
-        title="ExitOS Knowledge Graph"
-        description={`Query the relationships in ${INDEX.count.toLocaleString()} verified acquisitions — buyer × sector × geography × value × time. Every result traces to a source-tagged registry event.`}
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Market Intelligence"
+        title="Knowledge Graph"
+        tag="Query the registry"
+        metrics={[
+          { k: "Matching deals", v: result.totalMatched.toLocaleString(), accent: true, sub: "for this query" },
+          { k: "Distinct buyers", v: String(result.buyers.length), sub: "in the result" },
+          { k: "Disclosed value", v: fmtUsd(result.disclosedUsd), sub: "of matched deals" },
+          { k: "Showing", v: String(result.events.length), sub: "top matches" },
+        ]}
       />
+
+      <MarketTape items={buildMarketTape()} />
 
       {/* query bar */}
       <Card className="p-5">
@@ -87,12 +97,6 @@ const KnowledgeGraph: React.FC = () => {
         </div>
       </Card>
 
-      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Matching deals" value={result.totalMatched.toLocaleString()} accent="#34d399" />
-        <Kpi label="Distinct buyers" value={String(result.buyers.length)} />
-        <Kpi label="Disclosed value" value={fmtUsd(result.disclosedUsd)} sub="of matched deals" />
-        <Kpi label="Showing" value={String(result.events.length)} sub="top matches" />
-      </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[320px_1fr]">
         {/* buyers that match */}

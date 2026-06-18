@@ -1,5 +1,7 @@
 import React from "react";
-import { Card, SectionHeader, fmtMoney } from "../lib/ui";
+import { Card, fmtMoney } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import BankerTake from "../components/BankerTake";
 import { OFFER_WATERFALLS, SAMPLE_OFFERS, OFFER_COMPARISON, CAPTABLE_ANALYSIS } from "../lib/engines";
 
@@ -60,12 +62,19 @@ const Wealth: React.FC = () => {
   ];
 
   return (
-    <div>
-      <SectionHeader
-        kicker="WealthOS · founder liquidity"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Wealth · Liquidity"
         title="WealthOS"
-        description="Most platforms stop at closing. ExitOS doesn't. WealthOS tracks the money after the wire — proceeds, taxes, trusts, family office, reinvestments and philanthropy — so the founder relationship continues long past the sale."
+        tag="After the wire"
+        metrics={[
+          { k: "After-tax net", v: fmtMoney(afterTax), accent: true, sub: leadingOffer.buyerName },
+          { k: "Tax reserve", v: fmtMoney(taxDue), sub: "set aside first" },
+          { k: "To portfolio", v: fmtMoney(portfolioUsd), accent: true, sub: "diversified" },
+        ]}
       />
+
+      <MarketTape items={buildMarketTape()} />
 
       <BankerTake
         next={<>At lock-up, move <span className="text-white">{Math.round(ALLOC[0].pct * 100)}%</span> of your after-tax proceeds out of concentrated stock and into a diversified portfolio.</>}

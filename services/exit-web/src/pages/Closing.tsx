@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Button, Card, Kpi, Modal, SectionHeader, fmtMoney, downloadText, notify } from "../lib/ui";
+import { Button, Card, Modal, fmtMoney, downloadText, notify } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { DILIGENCE, OFFER_EVALUATIONS } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -97,13 +99,26 @@ const Closing: React.FC = () => {
   };
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Module 10 · Operator"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Operator · Closing"
         title="Deal Closing Center"
-        description="Signature orchestration, escrow choreography, regulatory filings, share-transfer mechanics — the closing checklist that doesn't drop."
-        actions={<><Button variant="ghost" onClick={() => window.print()}>Print checklist</Button><Button onClick={() => setCallOpen(true)}>Closing call</Button></>}
+        tag="Sign · escrow · file"
+        status={`${Math.round(prob * 100)}% close prob`}
+        metrics={[
+          { k: "Closing in", v: "6 days", accent: true, sub: "Sentinel Holdings" },
+          { k: "Done", v: `${done} / ${CLOSING.length}`, accent: true, sub: "signed off" },
+          { k: "In progress", v: String(inProgress), sub: "active workstreams" },
+          { k: "Blockers", v: String(blocked + redFlags.length), sub: "checklist + red flags" },
+        ]}
       />
+
+      <MarketTape items={buildMarketTape()} />
+
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button variant="ghost" onClick={() => window.print()}>Print checklist</Button>
+        <Button onClick={() => setCallOpen(true)}>Closing call</Button>
+      </div>
 
       {/* ── Closing call ──────────────────────────────────────────── */}
       <Modal open={callOpen} onClose={() => setCallOpen(false)} title="Closing call" subtitle={`Tuesday 08:00 · ${Math.round(prob * 100)}% modeled close probability`}
@@ -135,12 +150,6 @@ const Closing: React.FC = () => {
         cta={{ label: "Generate closing docs", to: "/console/documents" }}
       />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Closing in"   value="6 days"         sub="Sentinel Holdings"     accent="#34d399" />
-        <Kpi label="Done"         value={`${done} / ${CLOSING.length}`} sub="signed off" accent="#34d399" />
-        <Kpi label="In progress"  value={String(inProgress)} sub="active workstreams" accent="#fbbf24" />
-        <Kpi label="Blockers"     value={String(blocked + redFlags.length)} sub="checklist + diligence red flags" />
-      </div>
 
       {/* Closing Risk Meter — close probability + the risks gating the wire */}
       <Card className="mt-8 p-6" id="escrow">
