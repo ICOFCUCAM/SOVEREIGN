@@ -32,6 +32,12 @@ body {
 .ex-ticker:hover { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) { .ex-ticker { animation: none; } }
 
+/* Ambient signal layer — a slow institutional sweep across the operating
+   surface, like a desk scope refreshing. Decorative depth, not data. */
+@keyframes exSweep { 0% { transform: translateY(-35%); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translateY(135%); opacity: 0; } }
+.ex-sweep { animation: exSweep 16s cubic-bezier(.4,0,.2,1) infinite; }
+@media (prefers-reduced-motion: reduce) { .ex-sweep { animation: none; opacity: 0; } }
+
 /* Exchange board mount — the 3D rotation only renders at desktop width;
    phones and tablets get the flat board, full-width and unclipped. */
 @media (min-width: 1024px) {

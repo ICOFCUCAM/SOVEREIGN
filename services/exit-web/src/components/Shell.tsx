@@ -144,6 +144,8 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(120,170,255,0.7) 0 1px, transparent 1px 110px), repeating-linear-gradient(0deg, rgba(120,170,255,0.5) 0 1px, transparent 1px 110px)", maskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 70%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 70%)" }} />
             <div className="absolute -top-24 left-1/2 h-56 w-[70%] -translate-x-1/2 rounded-[50%] opacity-25 blur-[100px]"
               style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.35), transparent 70%)" }} />
+            {/* ambient signal sweep — the desk scope refreshing */}
+            <div className="ex-sweep absolute inset-x-0 top-0 h-44" style={{ background: "linear-gradient(to bottom, transparent, rgba(56,130,246,0.05), transparent)" }} />
             <svg className="absolute -right-32 top-24 h-[480px] w-[480px] opacity-[0.04]" viewBox="0 0 100 100" fill="none">
               <circle cx="50" cy="50" r="33" stroke="#9CC2FF" strokeWidth="2" />
               <circle cx="50" cy="50" r="22" stroke="#9CC2FF" strokeWidth="1" />
