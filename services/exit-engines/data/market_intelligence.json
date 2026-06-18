@@ -1,6 +1,6 @@
 {
- "as_of": "2026-06-17T10:38:09.607Z",
- "totalEvents": 3832,
+ "as_of": "2026-06-18T10:15:24.308Z",
+ "totalEvents": 3836,
  "disclosedEvents": 1142,
  "totalDisclosedUsd": 1413812842501,
  "sectorHeat": [
@@ -208,12 +208,12 @@
  "geoDensity": [
   {
    "region": "North America",
-   "deals": 1681,
+   "deals": 1684,
    "disclosedUsd": 898100939708
   },
   {
    "region": "Other",
-   "deals": 1538,
+   "deals": 1537,
    "disclosedUsd": 383676561050
   },
   {
@@ -233,7 +233,7 @@
   },
   {
    "region": "Oceania",
-   "deals": 31,
+   "deals": 33,
    "disclosedUsd": 1309428000
   },
   {
@@ -298,7 +298,7 @@
   {
    "buyer_id": "ibm",
    "name": "IBM",
-   "deals": 198,
+   "deals": 199,
    "recentDeals": 11,
    "lastDate": "2025-12-08"
   },
@@ -354,7 +354,7 @@
   {
    "buyer_id": "meta-platforms",
    "name": "Meta Platforms",
-   "deals": 109,
+   "deals": 112,
    "recentDeals": 7,
    "lastDate": "2026-05-01"
   },
