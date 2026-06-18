@@ -177,6 +177,8 @@ export const PALETTE = { INK, MUTE, FAINT, LINE, HAIR, GREEN, NAVY, GOLD };
 
 export const REPORT_CSS = `
 .rpt { position: relative; font-feature-settings: "tnum" 1, "lnum" 1; }
+.rpt h1, .rpt h2, .rpt .font-serif { font-family: "Source Serif 4", Georgia, "Times New Roman", serif; font-feature-settings: "lnum" 1; }
+.rpt h1 { letter-spacing: -0.012em; }
 .tnum { font-variant-numeric: tabular-nums lining-nums; }
 .no-screen { display: none; }
 .rpt-watermark { display: none; }
