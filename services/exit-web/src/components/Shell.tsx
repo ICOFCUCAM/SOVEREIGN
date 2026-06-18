@@ -4,7 +4,6 @@ import { useAuth } from "../lib/auth";
 import { Toast } from "../lib/ui";
 import { navForRole, needsUpgrade, GROUP_ORDER, ROLE_LABEL, type NavItem, type Role, type Plan } from "../lib/access";
 import { ExchangeMark } from "./ExchangeMark";
-import InstitutionalRibbon from "./InstitutionalRibbon";
 import LayerBar from "./LayerBar";
 import LayerSubNav from "./LayerSubNav";
 
@@ -140,29 +139,8 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
         <main className="relative flex-1 overflow-y-auto">
           <div className="sticky top-0 z-30">
-            <InstitutionalRibbon />
             <LayerBar />
             <LayerSubNav />
-          </div>
-          {/* ambient reactor layer — the homepage exchange DNA, inside the
-              console: faint market grid, a top liquidity glow, and the
-              transaction-ring watermark. Ambient intelligence, not decoration. */}
-          <div className="pointer-events-none absolute inset-0" aria-hidden>
-            <div className="absolute inset-0 opacity-[0.05]"
-              style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(120,170,255,0.7) 0 1px, transparent 1px 110px), repeating-linear-gradient(0deg, rgba(120,170,255,0.5) 0 1px, transparent 1px 110px)", maskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 70%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 70%)" }} />
-            <div className="absolute -top-24 left-1/2 h-56 w-[70%] -translate-x-1/2 rounded-[50%] opacity-25 blur-[100px]"
-              style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.35), transparent 70%)" }} />
-            {/* ambient signal sweep — the desk scope refreshing */}
-            <div className="ex-sweep absolute inset-x-0 top-0 h-44" style={{ background: "linear-gradient(to bottom, transparent, rgba(56,130,246,0.05), transparent)" }} />
-            <svg className="absolute -right-32 top-24 h-[480px] w-[480px] opacity-[0.04]" viewBox="0 0 100 100" fill="none">
-              <circle cx="50" cy="50" r="33" stroke="#9CC2FF" strokeWidth="2" />
-              <circle cx="50" cy="50" r="22" stroke="#9CC2FF" strokeWidth="1" />
-              <g stroke="#9CC2FF" strokeWidth="2" strokeLinecap="round">
-                <line x1="50" y1="11" x2="50" y2="21" /><line x1="50" y1="79" x2="50" y2="89" />
-                <line x1="11" y1="50" x2="21" y2="50" /><line x1="79" y1="50" x2="89" y2="50" />
-              </g>
-              <circle cx="50" cy="50" r="6" fill="#9CC2FF" />
-            </svg>
           </div>
           {showStarterNotice && (
             <div className="border-b border-loi-400/30 bg-loi-500/10">
