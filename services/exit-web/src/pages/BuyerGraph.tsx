@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { inputCls } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape, Evidence } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, CommandHeader, Evidence } from "../lib/workstation";
 import { BuyerNetworkReactor } from "../components/Reactor";
 import {
   DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS,
@@ -108,7 +107,6 @@ const BuyerGraph: React.FC = () => {
   const withEvents = DNA_PROFILES.filter((p) => p.events_indexed > 0).length;
   const highAppetite = DNA_PROFILES.filter((p) => p.appetite === "high").length;
   const RANKED = useMemo(() => rankedBuyers(12), []);
-  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
@@ -129,7 +127,6 @@ const BuyerGraph: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={tape} />
 
       {/* ── Acquisition Probability — the crown-jewel ranking ── */}
       <Frame>

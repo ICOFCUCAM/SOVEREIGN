@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, inputCls } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { CommandHeader } from "../lib/workstation";
 import { fmtUsd } from "../lib/market-intel";
 import { queryAcquisitions, type AcquisitionIndex, type GraphQuery, type Region } from "@exit/engines";
 // The full queryable event index (~83 KB gzip) loads only on this route.
@@ -64,7 +63,6 @@ const KnowledgeGraph: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={buildMarketTape()} />
 
       {/* query bar */}
       <Card className="p-5">

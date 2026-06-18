@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { Panel, Frame, CommandHeader, MarketTape, Evidence } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, CommandHeader, Evidence } from "../lib/workstation";
 import { BuyerNetworkReactor } from "../components/Reactor";
 import { MULTIPLES } from "@exit/engines";
 import { premiumLeague, speedLeague, DNA_AS_OF } from "../lib/buyer-dna";
@@ -27,7 +26,6 @@ const label = (s: string): string => s.replace(/_/g, " ");
 const OutcomeIntelligence: React.FC = () => {
   const premium = premiumLeague(12);
   const speed = speedLeague(12);
-  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
@@ -44,7 +42,6 @@ const OutcomeIntelligence: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={tape} />
 
       <Frame>
         <Panel title="Buyer network reactor" className="lg:col-span-3"

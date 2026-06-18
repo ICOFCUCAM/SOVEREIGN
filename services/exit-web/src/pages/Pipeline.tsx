@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { StageBadge, STAGE_ORDER, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape, CommandState, Evidence } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, CommandHeader, CommandState, Evidence } from "../lib/workstation";
 import { OFFER_EVALUATIONS, NEGOTIATION_STATE } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -108,7 +107,6 @@ const Pipeline: React.FC = () => {
   const totalWeighted = weighted(live);
   const lead = live.slice().sort((a, b) => b.probability - a.probability)[0];
   const leadF = lead ? forecast(lead) : null;
-  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
@@ -126,7 +124,6 @@ const Pipeline: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={tape} />
 
       <CommandState
         current={<><span className="font-mono text-white">{live.length}</span> live deals · prob-weighted {fmtMoney(totalWeighted)} · leverage {NEGOTIATION_STATE.leverage}</>}

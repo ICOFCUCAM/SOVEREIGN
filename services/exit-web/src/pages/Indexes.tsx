@@ -1,6 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import React, { useState } from "react";
+import { Panel, Frame, CommandHeader } from "../lib/workstation";
 import { AcquisitionReactor } from "../components/Reactor";
 import { TransactionHeatfield } from "../components/Heatfield";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
@@ -30,7 +29,6 @@ const Indexes: React.FC = () => {
     : b.volume - a.volume);
   const maxVol = Math.max(...indexes.map((i) => i.volume), 1);
   const hottest = [...indexes].sort((a, b) => (b.trendPct ?? -1) - (a.trendPct ?? -1))[0];
-  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
@@ -48,7 +46,6 @@ const Indexes: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={tape} />
 
       <Frame>
         <Panel title="Transaction heatfield · volume × disclosed value" className="lg:col-span-12"

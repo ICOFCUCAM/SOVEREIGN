@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, CommandHeader } from "../lib/workstation";
 import { LiquidityReactor } from "../components/Reactor";
 import { TransactionHeatfield } from "../components/Heatfield";
 import { MARKET_INTEL, fmtUsd } from "../lib/market-intel";
@@ -22,7 +21,6 @@ const MarketMap: React.FC = () => {
     return `rgba(56, 132, 255, ${a.toFixed(2)})`;
   };
 
-  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
@@ -40,7 +38,6 @@ const MarketMap: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={tape} />
 
       <Frame>
         <Panel title="Transaction heatfield · where capital is moving" className="lg:col-span-12"

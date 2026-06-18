@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, Field, fmtMoney, ConfidenceChip, inputCls } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { CommandHeader } from "../lib/workstation";
 import { runStrategySimulator, runValuation, type BuyerType, type CompanyProfile, type StrategyOutput } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { VALUATION_STRATEGIC } from "../lib/engines";
@@ -250,7 +249,6 @@ const Simulator: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={buildMarketTape()} />
 
       <BankerTake
         next={<>Stress-test the plan before you commit — model waiting, scaling to $25M ARR, or a marquee entrant.</>}

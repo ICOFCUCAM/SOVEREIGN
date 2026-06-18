@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Button, Card, Modal, fmtMoney } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { CommandHeader } from "../lib/workstation";
 import { useMemorandum, VALUATION_STRATEGIC } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { docToMarkdown, docFilename, sendDeliverable, downloadDeliverable } from "../lib/deliverables";
@@ -114,7 +113,6 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
         ]}
       />
 
-      <MarketTape items={buildMarketTape()} />
 
       <div className="flex flex-wrap justify-end gap-2">
         <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>

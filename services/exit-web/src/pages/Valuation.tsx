@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Field, fmtMoney, downloadJson, downloadText } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape, CommandState, Evidence } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, CommandHeader, CommandState, Evidence } from "../lib/workstation";
 import { VALUATION_INSTITUTIONAL, VALUATION_FACTS, DOCUMENT_SUITE } from "../lib/engines";
 import { VALUATION_FRAMEWORK } from "@exit/engines";
 import { tracedDocMarkdown } from "../lib/deliverables";
@@ -37,7 +36,6 @@ const Valuation: React.FC = () => {
   const dcfValue = useMemo(() => dcf(growth / 100, discount / 100), [growth, discount]);
   const blended = useMemo(() => (INST.financialBaseline.mid + dcfValue + compMid) / 3, [dcfValue]);
   const premiumGap = INST.headline.mid - INST.financialBaseline.mid;
-  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
@@ -62,7 +60,6 @@ const Valuation: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={tape} />
 
       <CommandState
         current={<>Midpoint <span className="font-mono text-white">{fmtMoney(INST.headline.mid)}</span> · confidence {INST.confidence.score}% · baseline {fmtMoney(INST.financialBaseline.mid)}</>}

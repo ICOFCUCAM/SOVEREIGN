@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, Field, inputCls, notify } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, CommandHeader } from "../lib/workstation";
 import {
   CAPTABLE_ANALYSIS, CAPTABLE_SIGNATORY, CAPTABLE_DRAGALONG,
   SAMPLE_CAPTABLE, OFFER_WATERFALLS, SAMPLE_OFFERS, fmt,
@@ -50,7 +49,6 @@ const Investors: React.FC = () => {
     notify(`Added ${name} to the cap-table CRM`);
   };
 
-  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
@@ -68,7 +66,6 @@ const Investors: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={tape} />
 
       {/* ── Add stakeholder ───────────────────────────────────────── */}
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add stakeholder" subtitle="Adds a contact to the cap-table CRM roster" size="md"

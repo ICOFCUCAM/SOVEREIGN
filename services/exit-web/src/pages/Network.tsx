@@ -1,8 +1,7 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { Card } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, CommandHeader } from "../lib/workstation";
 import { AcquisitionReactor, LiquidityReactor, BuyerNetworkReactor } from "../components/Reactor";
 import { BUYERS, VALUATION_STRATEGIC, DILIGENCE } from "../lib/engines";
 import { VALUATION_FRAMEWORK } from "@exit/engines";
@@ -70,7 +69,6 @@ const Network: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={useMemo(() => buildMarketTape(), [])} />
 
       {/* the three reactors — the moat made visible */}
       <Frame>

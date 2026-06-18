@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, CommandHeader } from "../lib/workstation";
 import { AcquisitionReactor, BuyerNetworkReactor, ReactorTelemetry } from "../components/Reactor";
 import { MARKET_INTEL } from "../lib/market-intel";
 import { fmtMoney } from "../lib/ui";
@@ -26,7 +25,6 @@ const Commander: React.FC = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
   const m = commanderMetrics();
-  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
@@ -45,7 +43,6 @@ const Commander: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={tape} />
 
       {/* executive command — jump to any desk, each with its live headline */}
       <Frame>

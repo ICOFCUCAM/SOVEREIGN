@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Card, fmtMoney } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { CommandHeader } from "../lib/workstation";
 import { DILIGENCE, VALUATION_STRATEGIC } from "../lib/engines";
 import { listDocuments, uploadDocument, fmtBytes, type DataRoomDocument, type RoomKind } from "../lib/data-room";
 import BankerTake from "../components/BankerTake";
@@ -105,7 +104,6 @@ const DataRoom: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={buildMarketTape()} />
 
       <div className="flex flex-wrap justify-end gap-2">
         <Button variant="ghost" onClick={refresh} disabled={loading}>{loading ? "Refreshing…" : "Refresh"}</Button>

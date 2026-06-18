@@ -4,8 +4,7 @@ import { useAuth } from "../lib/auth";
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
 import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, fmtUsdShort } from "../lib/buyer-dna";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
-import { Panel, CommandHeader, MarketTape, CommandState, Evidence } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, CommandHeader, CommandState, Evidence } from "../lib/workstation";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 
@@ -50,7 +49,6 @@ const Terminal: React.FC = () => {
   const leadPremium = lead?.profile.premium_pct ?? INST.premium.appliedPct;
   const leadCloseDays = lead?.profile.median_close_days ?? INST.timeToClose.lowDays;
   const asOf = new Date().toISOString().slice(0, 10);
-  const tape = useMemo(() => buildMarketTape(), []);
 
   // action queue — recommended next moves, derived from the engines (not invented)
   const actions: { label: string; meta: string; to: string }[] = [
@@ -102,7 +100,6 @@ const Terminal: React.FC = () => {
         )}
       />
 
-      <MarketTape items={tape} />
 
       <CommandState
         current={<>EV <span className="font-mono text-white">{fmtUsdShort(INST.headline.mid)}</span> · readiness <span className="font-mono text-white">{Math.round(ra.currentScore)}</span> · {INST.buyerUniverse.qualified} qualified buyers</>}

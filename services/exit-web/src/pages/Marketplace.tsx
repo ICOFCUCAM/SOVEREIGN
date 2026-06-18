@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Button, Card, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { CommandHeader } from "../lib/workstation";
 import { LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES, useMemorandum } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -102,7 +101,6 @@ const Marketplace: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={useMemo(() => buildMarketTape(), [])} />
 
       <BankerTake
         next={phase === "done"

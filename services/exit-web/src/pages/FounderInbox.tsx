@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, CommandHeader } from "../lib/workstation";
 import { loadActiveCompany } from "../lib/active-company";
 import { listingFromCompany, allListings } from "../lib/listings";
 import {
@@ -116,7 +115,6 @@ const FounderInbox: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={useMemo(() => buildMarketTape(), [])} />
 
       {!isLive && (
         <div className="rounded-lg border border-amber-400/30 bg-amber-500/[0.04] px-4 py-2.5 text-[12px] text-white/70">

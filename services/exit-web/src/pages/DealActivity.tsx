@@ -1,7 +1,6 @@
-import React, { useMemo, useSyncExternalStore } from "react";
+import React, { useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, CommandHeader } from "../lib/workstation";
 import { subscribe, allDealEvents, dealFlowFunnel, subjectsAtStage, clearDealEvents, type DealEvent } from "../lib/deal-events";
 import { networkStats } from "../lib/network-stats";
 
@@ -29,7 +28,6 @@ const DealActivity: React.FC = () => {
   const funnel = dealFlowFunnel(events);
   const recent = [...events].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 60);
   const max = Math.max(...funnel.map((f) => f.count), 1);
-  const tape = useMemo(() => buildMarketTape(), [events.length]);
   const net = networkStats(events);
   const rate = (v: number | null): string => (v == null ? "—" : `${v}%`);
 
@@ -48,7 +46,6 @@ const DealActivity: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={tape} />
 
       {/* network effects — what the platform has learned from real transactions */}
       <Frame>

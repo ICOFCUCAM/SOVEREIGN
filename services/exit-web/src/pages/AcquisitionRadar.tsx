@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { Field, inputCls, Button, notify } from "../lib/ui";
-import { Panel, Frame, Rail, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, Rail, CommandHeader, CommandState } from "../lib/workstation";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
@@ -73,7 +72,6 @@ const AcquisitionRadar: React.FC = () => {
 
   const toggle = <T,>(arr: T[], v: T, set: (x: T[]) => void): void => set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
   const maxActiveBuyers = watch.reduce((m, i) => Math.max(m, i.activeBuyers), 0);
-  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
@@ -95,7 +93,6 @@ const AcquisitionRadar: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={tape} />
 
       <CommandState
         current={<><span className="font-mono text-white">{sectors.length}</span> target sectors · {listings.length} live listings · {regions.length} regions</>}

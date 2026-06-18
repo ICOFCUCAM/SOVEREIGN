@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { inputCls } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { Panel, Frame, CommandHeader } from "../lib/workstation";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { engagementRegistry } from "../lib/engagement-registry";
 
@@ -22,7 +21,6 @@ const EngagementRegistry: React.FC = () => {
 
   const high = rows.filter((r) => r.engagementLikelihood.tier === "High").length;
   const withHistory = rows.filter((r) => r.processesRun > 0).length;
-  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
@@ -38,7 +36,6 @@ const EngagementRegistry: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={tape} />
 
       <Frame>
         <Panel title="Buyer engagement registry" className="lg:col-span-12"

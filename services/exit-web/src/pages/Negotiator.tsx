@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Button, Card, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { CommandHeader } from "../lib/workstation";
 import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_STRATEGIC } from "../lib/engines";
 import { sendDeliverable } from "../lib/deliverables";
 import BankerTake from "../components/BankerTake";
@@ -141,7 +140,6 @@ James — on behalf of Helios Freight`
         ]}
       />
 
-      <MarketTape items={buildMarketTape()} />
 
       <div className="flex flex-wrap justify-end gap-2">
         <Button variant="ghost" onClick={() => setReserveOpen(true)}>Edit reservation lines</Button>

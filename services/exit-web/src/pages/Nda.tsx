@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Button, Card, Modal, Field, inputCls, timeAgo, notify } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
-import { buildMarketTape } from "../lib/market-tape";
+import { CommandHeader } from "../lib/workstation";
 import { SAMPLE_NDAS, NDA_ROSTER, LISTING_PRIVATE } from "../lib/engines";
 import {
   evaluateNdaStatus, generateBreachNotice, rosterFor,
@@ -122,7 +121,6 @@ const Nda: React.FC = () => {
         ]}
       />
 
-      <MarketTape items={useMemo(() => buildMarketTape(), [])} />
 
       <div className="flex flex-wrap justify-end gap-2">
         <Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button>
