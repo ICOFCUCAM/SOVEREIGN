@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { StageBadge, STAGE_ORDER, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, CommandState, Evidence } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, NEGOTIATION_STATE } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
@@ -186,7 +186,9 @@ const Pipeline: React.FC = () => {
                     <td className="px-2 py-1.5">
                       <div className="flex items-center gap-1.5">
                         <div className="h-1 w-14 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full" style={{ width: `${f.closeProbability * 100}%`, background: pc }} /></div>
-                        <span className="font-mono text-[12px] font-bold" style={{ color: pc }}>{(f.closeProbability * 100).toFixed(0)}%</span>
+                        <Evidence meta={{ methodology: f.risk, source: "stage progression · offer score · negotiation posture", confidence: `${d.stage} stage` }}>
+                          <span className="font-mono text-[12px] font-bold" style={{ color: pc }}>{(f.closeProbability * 100).toFixed(0)}%</span>
+                        </Evidence>
                       </div>
                     </td>
                     <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/80">{f.expectedDays}d</td>

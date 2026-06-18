@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, Evidence } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { BuyerNetworkReactor } from "../components/Reactor";
 import { MULTIPLES } from "@exit/engines";
@@ -59,7 +59,11 @@ const OutcomeIntelligence: React.FC = () => {
                 <tr key={p.buyer_id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
                   <td className="px-3 py-1.5 font-mono text-white/35">{i + 1}</td>
                   <td className="px-2 py-1.5"><Link to={`/console/buyer/${p.buyer_id}`} className="font-semibold text-white hover:text-deal-300">{p.name}</Link></td>
-                  <td className="px-2 py-1.5 text-right font-mono font-bold tabular-nums text-deal-300">+{Math.round((p.premium_pct ?? 0) * 100)}%</td>
+                  <td className="px-2 py-1.5 text-right font-mono font-bold tabular-nums text-deal-300">
+                    <Evidence meta={{ methodology: "premium over the disclosed reference price", source: "acquisition registry (disclosed deals only)", sample: p.disclosed_events, asOf: DNA_AS_OF.slice(0, 10) }}>
+                      +{Math.round((p.premium_pct ?? 0) * 100)}%
+                    </Evidence>
+                  </td>
                   <td className="px-3 py-1.5 text-right font-mono tabular-nums text-white/45">{p.disclosed_events} disc.</td>
                 </tr>
               ))}

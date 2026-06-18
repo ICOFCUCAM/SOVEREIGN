@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fmtMoney, notify } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, CommandState, Evidence } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { READINESS_ANALYSIS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -174,7 +174,7 @@ const Readiness: React.FC = () => {
                   </div>
                   <div className="text-right">
                     {cat.impactUsd > 0
-                      ? <div className="font-mono text-[14px] font-bold text-deal-300">+{fmtMoney(cat.impactUsd)}</div>
+                      ? <Evidence meta={{ methodology: cat.fix, source: "readiness engine · value-impact simulator", confidence: `${cat.score}/100 category score` }}><span className="font-mono text-[14px] font-bold text-deal-300">+{fmtMoney(cat.impactUsd)}</span></Evidence>
                       : <span className="text-[11px] font-semibold text-deal-300">On track ✓</span>}
                   </div>
                 </div>
