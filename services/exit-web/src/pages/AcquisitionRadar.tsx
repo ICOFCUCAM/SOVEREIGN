@@ -1,6 +1,6 @@
-import React, { useMemo, useState, useSyncExternalStore } from "react";
+import React, { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { Field, inputCls } from "../lib/ui";
+import { Field, inputCls, Button, notify } from "../lib/ui";
 import { Panel, Frame, Rail, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
@@ -8,7 +8,7 @@ import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
 import { allListings, subscribeListings } from "../lib/listings";
 import { captureDealEvent } from "../lib/deal-events";
-import { requestNda, submitOffer } from "../lib/exit-api";
+import { requestNda, submitOffer, startDeal, saveMandate, myMandate } from "../lib/exit-api";
 import type { Region } from "@exit/engines";
 
 // BUYER ACQUISITION COMMAND CENTER — the other side of the exchange. A buyer
@@ -26,9 +26,32 @@ const AcquisitionRadar: React.FC = () => {
   const [maxRevM, setMaxRevM] = useState(500);
   const [regions, setRegions] = useState<Region[]>(["North America", "Europe"]);
   const [minGrowth, setMinGrowth] = useState(20);
+  const [themes, setThemes] = useState("");                 // strategic themes, comma-separated
   const [requested, setRequested] = useState<Record<string, boolean>>({});
   const [offerInput, setOfferInput] = useState<Record<string, string>>({});
   const [offered, setOffered] = useState<Record<string, boolean>>({});
+  const [savedMandate, setSavedMandate] = useState(false);
+
+  // hydrate the form from the buyer's persisted mandate, if one exists
+  useEffect(() => {
+    void myMandate().then((m) => {
+      if (!m) return;
+      setSectors([...m.sectors]); setRegions([...m.regions] as Region[]);
+      setMinRevM(Math.round(m.minCheckUsd / 1e6)); setMaxRevM(Math.round(m.maxCheckUsd / 1e6));
+      setMinGrowth(Math.round(m.minGrowthPct * 100)); setThemes(m.strategicThemes.join(", "));
+      setSavedMandate(true);
+    });
+  }, []);
+
+  const persistMandate = (): void => {
+    void saveMandate({
+      name: "Acquisition mandate",
+      sectors, regions,
+      minCheckUsd: minRevM * 1e6, maxCheckUsd: maxRevM * 1e6,
+      minGrowthPct: minGrowth / 100,
+      strategicThemes: themes.split(",").map((t) => t.trim()).filter(Boolean),
+    }).then((m) => { if (m) { setSavedMandate(true); notify("Mandate published — founders can now match it"); } });
+  };
 
   const criteria: AcquisitionCriteria = useMemo(() => ({
     sectors, minRevUsd: minRevM * 1e6, maxRevUsd: maxRevM * 1e6, regions, minGrowthPct: minGrowth / 100,
@@ -86,29 +109,34 @@ const AcquisitionRadar: React.FC = () => {
         <Panel title="Acquisition mandate">
           <div className="space-y-3.5 p-3">
             <div>
-              <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">Sectors</span>
+              <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">Sector preferences</span>
               <div className="flex flex-wrap gap-1.5">
                 {SECTOR_OPTIONS.map((s) => (
-                  <button key={s} onClick={() => toggle(sectors, s, setSectors)}
+                  <button key={s} onClick={() => { toggle(sectors, s, setSectors); setSavedMandate(false); }}
                     className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${sectors.includes(s) ? "bg-deal-600/25 text-white ring-1 ring-deal-400/40" : "bg-white/[0.03] text-white/50 hover:text-white"}`}>{s}</button>
                 ))}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Min revenue ($M)"><input className={inputCls} inputMode="numeric" value={minRevM} onChange={(e) => setMinRevM(+e.target.value || 0)} /></Field>
-              <Field label="Max revenue ($M)"><input className={inputCls} inputMode="numeric" value={maxRevM} onChange={(e) => setMaxRevM(+e.target.value || 0)} /></Field>
+              <Field label="Min check ($M)"><input className={inputCls} inputMode="numeric" value={minRevM} onChange={(e) => { setMinRevM(+e.target.value || 0); setSavedMandate(false); }} /></Field>
+              <Field label="Max check ($M)"><input className={inputCls} inputMode="numeric" value={maxRevM} onChange={(e) => { setMaxRevM(+e.target.value || 0); setSavedMandate(false); }} /></Field>
             </div>
             <Field label={`Min growth · ${minGrowth}%`}>
-              <input type="range" min={0} max={100} value={minGrowth} onChange={(e) => setMinGrowth(+e.target.value)} className="w-full accent-deal-500" />
+              <input type="range" min={0} max={100} value={minGrowth} onChange={(e) => { setMinGrowth(+e.target.value); setSavedMandate(false); }} className="w-full accent-deal-500" />
             </Field>
             <div>
-              <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">Regions</span>
+              <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">Geography</span>
               <div className="flex flex-wrap gap-1.5">
                 {REGIONS.map((r) => (
-                  <button key={r} onClick={() => toggle(regions, r, setRegions)}
+                  <button key={r} onClick={() => { toggle(regions, r, setRegions); setSavedMandate(false); }}
                     className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${regions.includes(r) ? "bg-deal-600/25 text-white ring-1 ring-deal-400/40" : "bg-white/[0.03] text-white/50 hover:text-white"}`}>{r}</button>
                 ))}
               </div>
+            </div>
+            <Field label="Strategic themes"><input className={inputCls} placeholder="ai infra, payments, vertical saas…" value={themes} onChange={(e) => { setThemes(e.target.value); setSavedMandate(false); }} /></Field>
+            <div className="flex items-center gap-2 border-t border-white/10 pt-3">
+              <Button onClick={persistMandate} className="!px-3 !py-1.5 !text-[12px]">{savedMandate ? "✓ Mandate published" : "Publish mandate"}</Button>
+              {savedMandate && <span className="text-[10px] text-white/40">matchable by founders</span>}
             </div>
           </div>
         </Panel>
