@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, Kpi, SectionHeader } from "../lib/ui";
+import { captureDealEvent } from "../lib/deal-events";
 import {
   buyerById, acquisitionProbability, acquisitionSignals, similarAcquisitionsBy,
   sectorOverlap, recommendedAction, fmtUsdShort, expectedOutcomeFor, buyerRationale,
@@ -20,6 +21,12 @@ import { SAMPLE_COMPANY } from "../lib/profile";
 const BuyerProfile: React.FC = () => {
   const { id = "" } = useParams();
   const p = buyerById(id);
+  const [interested, setInterested] = useState(false);
+
+  // capture the view forever — the behavioral data that becomes the moat
+  useEffect(() => {
+    if (p) captureDealEvent({ actorRole: "founder", kind: "viewed_buyer", subjectType: "buyer", subjectId: p.buyer_id, subjectName: p.name });
+  }, [p]);
 
   if (!p) {
     return (
@@ -69,6 +76,16 @@ const BuyerProfile: React.FC = () => {
             <div className="text-[11px] text-white/45">{appetite.tier} · confidence {confidence}</div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <button
+          onClick={() => { if (!interested) { captureDealEvent({ actorRole: "founder", kind: "expressed_interest", subjectType: "buyer", subjectId: p.buyer_id, subjectName: p.name }); setInterested(true); } }}
+          disabled={interested}
+          className={`rounded-md px-4 py-2 text-[12.5px] font-semibold transition ${interested ? "bg-deal-600/15 text-deal-300 ring-1 ring-deal-400/30" : "bg-deal-500 text-ink-950 hover:bg-deal-400"}`}>
+          {interested ? "✓ Interest captured" : "Express interest"}
+        </button>
+        <span className="text-[11px] text-white/35">Captured to your <Link to="/console/activity" className="text-deal-300 hover:text-deal-200">deal activity</Link> — the behavioral signal that sharpens engagement intelligence.</span>
       </div>
 
       {/* ── Acquisition Forecast — the evidence-based North-Star output ── */}

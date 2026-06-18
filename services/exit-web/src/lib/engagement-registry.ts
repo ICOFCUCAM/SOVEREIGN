@@ -5,6 +5,7 @@ import {
   buyerContactRegistry, type ContactChannel,
 } from "./buyer-contact";
 import { BUYER_RESPONSES } from "./process-intel";
+import { buyerActivity } from "./deal-events";
 
 // ── BUYER ENGAGEMENT REGISTRY ───────────────────────────────────────
 // NOT a cold-email database. One consolidated record per buyer that unifies
@@ -68,8 +69,16 @@ function engagementLikelihood(p: DnaProfile, confidence: "High" | "Medium" | "Lo
 
 export function buyerEngagementRecord(p: DnaProfile, founderTokens: readonly string[]): BuyerEngagementRecord {
   const reg = buyerContactRegistry(p, founderTokens);
+  // observed behavior — captured ExitOS events for this buyer take priority
+  // over the demo telemetry seed; this is the moat learning from real usage
+  const observed = buyerActivity(p.buyer_id);
   const resp = RESPONSE_BY_BUYER.get(norm(p.name));
-  const responseRate = resp ? (resp.ndaSigned || resp.loiIssued ? 100 : 0) : null;
+  const responseRate = observed.hasActivity
+    ? (observed.ndaSigned > 0 || observed.loiIssued > 0 ? 100 : observed.engagements > 0 ? 50 : 0)
+    : resp ? (resp.ndaSigned || resp.loiIssued ? 100 : 0) : null;
+  const processesRun = (observed.hasActivity ? 1 : 0) + (resp ? 1 : 0);
+  const ndaConversionPct = observed.ndaConversionPct ?? (resp ? (resp.ndaSigned ? 100 : 0) : null);
+  const loiConversionPct = observed.loiConversionPct ?? (resp ? (resp.loiIssued ? 100 : 0) : null);
 
   return {
     buyerId: p.buyer_id,
@@ -86,9 +95,9 @@ export function buyerEngagementRecord(p: DnaProfile, founderTokens: readonly str
     outreachPath: reg.outreachPaths[0]?.channel ?? reg.bestContactRole,
     contactChannels: reg.channels,
     contactConfidence: reg.confidence.tier,
-    processesRun: resp ? 1 : 0,
-    ndaConversionPct: resp ? (resp.ndaSigned ? 100 : 0) : null,
-    loiConversionPct: resp ? (resp.loiIssued ? 100 : 0) : null,
+    processesRun,
+    ndaConversionPct,
+    loiConversionPct,
     closeRatePct: reg.engagement.closeRatePct,
     engagementLikelihood: engagementLikelihood(p, reg.confidence.tier, responseRate),
     sourceUrl: reg.sourceUrl,
