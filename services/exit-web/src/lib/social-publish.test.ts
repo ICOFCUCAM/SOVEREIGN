@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { allListings } from "./listings";
-import { buildListingPost, intentUrl, isAutoConnected } from "./social-publish";
+import { buildListingPost, intentUrl } from "./social-publish";
 
 describe("social publishing", () => {
   it("never leaks the company identity in a founder-listing post", () => {
@@ -25,10 +25,5 @@ describe("social publishing", () => {
     expect(intentUrl("linkedin", post)).toContain("linkedin.com/sharing");
     expect(intentUrl("whatsapp", post)).toContain("wa.me");
     expect(intentUrl("instagram", post)).toBeNull();
-  });
-
-  it("reports auto-broadcast as connected only with a real webhook URL", () => {
-    expect(isAutoConnected({ webhookUrl: "", channels: [] })).toBe(false);
-    expect(isAutoConnected({ webhookUrl: "https://hook.make.com/abc", channels: [] })).toBe(true);
   });
 });

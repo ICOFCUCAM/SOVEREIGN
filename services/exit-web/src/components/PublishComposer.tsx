@@ -1,37 +1,34 @@
 import React, { useMemo, useState } from "react";
 import { Button, copyText, notify } from "../lib/ui";
 import type { Listing } from "../lib/listings";
-import {
-  CHANNELS, buildListingPost, intentUrl, publishViaWebhook, useSocialConfig, isAutoConnected,
-  type SocialChannel, type SocialPost,
-} from "../lib/social-publish";
+import { CHANNELS, buildListingPost, intentUrl, type SocialChannel, type SocialPost } from "../lib/social-publish";
+import { dispatch, useEngineStatus, type DispatchResult } from "../lib/distribution-engine";
 
-// A reusable one-button publish surface. Honest: posts for real via the
-// connected aggregator, or opens each network's official composer. Never
-// claims a post that did not happen.
+// One-button publish surface, powered by the ExitOS distribution engine. Honest:
+// the engine posts to the real platform APIs and returns a per-channel result;
+// the per-network composer buttons are a manual fallback. No post is faked.
 
 export const PublishComposer: React.FC<{ listing?: Listing; post?: SocialPost; open: boolean; onClose: () => void }> = ({ listing, post: postProp, open, onClose }) => {
-  const [cfg] = useSocialConfig();
+  const { connected, anyConnected, loading } = useEngineStatus();
   const basePost = useMemo<SocialPost | null>(() => postProp ?? (listing ? buildListingPost(listing) : null), [postProp, listing]);
   const [text, setText] = useState<string>("");
-  const [sel, setSel] = useState<Set<SocialChannel>>(() => new Set(cfg.channels));
+  const [sel, setSel] = useState<Set<SocialChannel>>(() => new Set(["linkedin", "x", "facebook", "telegram"]));
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+  const [results, setResults] = useState<DispatchResult[] | null>(null);
 
-  React.useEffect(() => { if (open && basePost) { setText(basePost.text); setSel(new Set(cfg.channels)); setResult(null); } }, [open, basePost, cfg.channels]);
+  React.useEffect(() => { if (open && basePost) { setText(basePost.text); setResults(null); } }, [open, basePost]);
   if (!open || !basePost) return null;
 
-  const post: SocialPost = { ...basePost, text };
-  const connected = isAutoConnected(cfg);
+  const post: SocialPost = { ...basePost, text, body: text };
   const toggle = (c: SocialChannel): void => setSel((s) => { const n = new Set(s); n.has(c) ? n.delete(c) : n.add(c); return n; });
   const chosen = CHANNELS.filter((c) => sel.has(c.id));
 
-  const broadcast = async (): Promise<void> => {
-    setBusy(true); setResult(null);
-    const r = await publishViaWebhook(post, [...sel]);
-    setBusy(false);
-    if (r.ok) { setResult(`Published to ${r.posted.length} channel${r.posted.length === 1 ? "" : "s"}.`); notify("Published to ExitOS social channels"); }
-    else { setResult(`Could not auto-publish — ${r.error}. Use the per-network buttons below.`); }
+  const publish = async (): Promise<void> => {
+    setBusy(true); setResults(null);
+    const r = await dispatch(post, [...sel]);
+    setBusy(false); setResults(r);
+    const ok = r.filter((x) => x.status === "done").length;
+    notify(ok > 0 ? `Published to ${ok} channel${ok === 1 ? "" : "s"}` : "Engine could not publish — see per-channel status");
   };
 
   const shareIntent = (c: SocialChannel): void => {
@@ -40,12 +37,14 @@ export const PublishComposer: React.FC<{ listing?: Listing; post?: SocialPost; o
     window.open(url, "_blank", "noopener,noreferrer,width=640,height=720");
   };
 
+  const resultFor = (c: SocialChannel): DispatchResult | undefined => results?.find((r) => r.channel === c);
+
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div className="max-h-[88vh] w-full max-w-xl overflow-auto rounded-xl border border-white/10 bg-ink-800/95 p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Publish to ExitOS social</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Publish · ExitOS Distribution Engine</div>
             <div className="mt-0.5 text-lg font-bold text-white">{post.title}</div>
           </div>
           <button onClick={onClose} className="text-white/40 hover:text-white">✕</button>
@@ -57,24 +56,29 @@ export const PublishComposer: React.FC<{ listing?: Listing; post?: SocialPost; o
         <div className="mt-3">
           <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Channels</div>
           <div className="mt-2 flex flex-wrap gap-2">
-            {CHANNELS.map((c) => (
-              <button key={c.id} onClick={() => toggle(c.id)}
-                className={`rounded-md px-2.5 py-1 text-[12px] font-semibold ring-1 transition ${sel.has(c.id) ? "bg-deal-600/20 text-deal-200 ring-deal-400/40" : "text-white/55 ring-white/15 hover:text-white"}`}>
-                {c.label}{!c.hasWebIntent && <span className="ml-1 text-[9px] text-white/35">·aggregator</span>}
-              </button>
-            ))}
+            {CHANNELS.map((c) => {
+              const isConn = connected[c.id];
+              const res = resultFor(c.id);
+              return (
+                <button key={c.id} onClick={() => toggle(c.id)}
+                  className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] font-semibold ring-1 transition ${sel.has(c.id) ? "bg-deal-600/20 text-deal-200 ring-deal-400/40" : "text-white/55 ring-white/15 hover:text-white"}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${isConn ? "bg-deal-400" : "bg-white/25"}`} title={isConn ? "Connected" : "Not connected"} />
+                  {c.label}
+                  {res && <span className={res.status === "done" ? "text-deal-300" : "text-red-300"}>{res.status === "done" ? "✓" : "✗"}</span>}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* status — honest about whether auto-broadcast is wired */}
-        <div className={`mt-4 rounded-lg border p-3 text-[12px] ${connected ? "border-deal-400/30 bg-deal-600/[0.07] text-white/75" : "border-loi-400/30 bg-loi-500/[0.07] text-loi-100/90"}`}>
-          {connected
-            ? "Auto-broadcast is connected — one click posts to every selected ExitOS account via your aggregator."
-            : "Auto-broadcast is not connected. Connect an aggregator webhook in Admin → Social distribution for true one-click posting. Until then, use the per-network buttons (real share composers)."}
+        <div className={`mt-4 rounded-lg border p-3 text-[12px] ${anyConnected ? "border-deal-400/30 bg-deal-600/[0.07] text-white/75" : "border-loi-400/30 bg-loi-500/[0.07] text-loi-100/90"}`}>
+          {loading ? "Checking engine connection…"
+            : anyConnected ? `ExitOS Distribution Engine is live — ${Object.values(connected).filter(Boolean).length} channel(s) connected. One click posts to the connected accounts.`
+            : "No channels are connected yet. Add platform tokens in Admin → ExitOS Distribution Engine. Until then, use the per-network composer buttons below (real share dialogs)."}
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Button onClick={broadcast} disabled={!connected || busy || sel.size === 0}>{busy ? "Publishing…" : `Publish to ${sel.size} channel${sel.size === 1 ? "" : "s"} →`}</Button>
+          <Button onClick={publish} disabled={busy || sel.size === 0}>{busy ? "Publishing…" : `Publish to ${sel.size} channel${sel.size === 1 ? "" : "s"} →`}</Button>
           <Button variant="ghost" onClick={() => copyText(post.text)}>Copy text</Button>
           <div className="ml-auto flex flex-wrap gap-1.5">
             {chosen.map((c) => (
@@ -84,7 +88,19 @@ export const PublishComposer: React.FC<{ listing?: Listing; post?: SocialPost; o
           </div>
         </div>
 
-        {result && <div className="mt-3 text-[12px] text-white/70">{result}</div>}
+        {results && (
+          <div className="mt-4 space-y-1.5">
+            {results.map((r) => (
+              <div key={r.channel} className="flex items-start gap-2 text-[12px]">
+                <span className={r.status === "done" ? "text-deal-300" : "text-red-300"}>{r.status === "done" ? "✓" : "✗"}</span>
+                <span className="font-semibold text-white/80 capitalize">{r.channel}</span>
+                {r.status === "done"
+                  ? (r.url ? <a href={r.url} target="_blank" rel="noopener noreferrer" className="text-deal-300 hover:underline">view post ↗</a> : <span className="text-white/50">posted</span>)
+                  : <span className="text-white/50">{r.error}</span>}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

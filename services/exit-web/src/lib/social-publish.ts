@@ -1,18 +1,11 @@
-import React from "react";
 import type { Listing } from "./listings";
 
-// ── SOCIAL PUBLISHING LAYER ─────────────────────────────────────────
-// One-button distribution for ExitOS's own social presence. It is honest by
-// construction:
-//   • It composes an ANONYMISED, compliance-safe post from a listing (never the
-//     company identity for founder listings; the product name is used only for
-//     the admin-owned Sovereign catalog, which is intentionally public).
-//   • If an aggregator webhook is connected (Make/Zapier/Ayrshare/own backend
-//     that holds the real credentials and fans out to every ExitOS account), the
-//     same button posts to all channels for real and reports the actual result.
-//   • If not connected, it opens each network's official share composer
-//     (prefilled) — a real action — and says plainly that auto-broadcast is off.
-// No post is ever claimed that did not happen.
+// ── SOCIAL POST COMPOSER + SHARE INTENTS ────────────────────────────
+// Composes an anonymised, compliance-safe post from a listing (never the
+// company identity for founder listings; product name only for the admin-owned
+// Sovereign catalog, which is intentionally public), and builds official
+// per-network share-composer URLs. Actual fan-out posting is handled by the
+// ExitOS distribution engine (lib/distribution-engine.ts).
 
 export type SocialChannel = "linkedin" | "x" | "facebook" | "instagram" | "telegram" | "whatsapp";
 
@@ -95,55 +88,6 @@ export function intentUrl(channel: SocialChannel, post: SocialPost): string | nu
     case "linkedin": return `https://www.linkedin.com/sharing/share-offsite/?url=${u}`;
     case "telegram": return `https://t.me/share/url?url=${u}&text=${tNoUrl}`;
     case "whatsapp": return `https://wa.me/?text=${t}`;
-    case "instagram": return null; // no web prefill — use aggregator or copy the caption
+    case "instagram": return null; // no web prefill — use the engine or copy the caption
   }
-}
-
-// ── Aggregator configuration (the one-click fan-out hook) ───────────
-// ExitOS connects a webhook (Make/Zapier/Ayrshare proxy/own backend) that holds
-// the real social credentials and posts to every connected account. The browser
-// only POSTs the composed post — no secret ever lives client-side.
-export interface SocialConfig { webhookUrl: string; channels: SocialChannel[] }
-const KEY = "exitos.social.config.v1";
-const EVT = "exitos:social-config";
-
-export function loadSocialConfig(): SocialConfig {
-  try { const r = localStorage.getItem(KEY); if (r) return JSON.parse(r) as SocialConfig; } catch { /* ignore */ }
-  return { webhookUrl: "", channels: ["linkedin", "x", "facebook", "telegram", "whatsapp"] };
-}
-export function saveSocialConfig(c: SocialConfig): void {
-  try { localStorage.setItem(KEY, JSON.stringify(c)); } catch { /* ignore */ }
-  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(EVT));
-}
-export function isAutoConnected(c: SocialConfig = loadSocialConfig()): boolean {
-  return /^https?:\/\/.+/i.test(c.webhookUrl.trim());
-}
-
-export interface PublishResult { ok: boolean; posted: SocialChannel[]; error?: string }
-
-/** Fan-out post to the connected aggregator. Returns the real result. */
-export async function publishViaWebhook(post: SocialPost, channels: SocialChannel[], c: SocialConfig = loadSocialConfig()): Promise<PublishResult> {
-  if (!isAutoConnected(c)) return { ok: false, posted: [], error: "No aggregator connected" };
-  try {
-    const res = await fetch(c.webhookUrl.trim(), {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ source: "exitos", title: post.title, text: post.text, body: post.body, url: post.url, hashtags: post.hashtags, channels }),
-    });
-    if (!res.ok) return { ok: false, posted: [], error: `Aggregator returned ${res.status}` };
-    return { ok: true, posted: channels };
-  } catch (e) {
-    return { ok: false, posted: [], error: e instanceof Error ? e.message : "Network error" };
-  }
-}
-
-/** React hook: live social config, synced across surfaces. */
-export function useSocialConfig(): [SocialConfig, (c: SocialConfig) => void] {
-  const [cfg, setCfg] = React.useState<SocialConfig>(() => loadSocialConfig());
-  React.useEffect(() => {
-    const sync = (): void => setCfg(loadSocialConfig());
-    window.addEventListener(EVT, sync); window.addEventListener("storage", sync);
-    return () => { window.removeEventListener(EVT, sync); window.removeEventListener("storage", sync); };
-  }, []);
-  return [cfg, (c) => saveSocialConfig(c)];
 }
