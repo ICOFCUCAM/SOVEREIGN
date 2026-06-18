@@ -34,10 +34,21 @@ export const ReportFrame: React.FC<{ docType: string; company: string; framework
   );
 };
 
+/** A deterministic document control reference, e.g. EXOS·VAL·HLS·2026·A3F1. */
+const docReference = (docType: string, company: string, date: string): string => {
+  const docCode = docType.replace(/[^A-Za-z ]/g, "").split(/\s+/).filter(Boolean).slice(0, 1).map((w) => w.slice(0, 3).toUpperCase())[0] ?? "DOC";
+  const co = company.replace(/[^A-Za-z ]/g, "").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "CO";
+  const year = (date.match(/\b(20\d{2})\b/) ?? [])[1] ?? String(new Date().getFullYear());
+  let h = 0; const seed = `${docType}|${company}|${date}`;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  const tag = h.toString(16).toUpperCase().padStart(4, "0").slice(0, 4);
+  return `EXOS·${docCode}·${co}·${year}·${tag}`;
+};
+
 /** Premium cover — institutional hairline geometry, no stock photography. */
 export const Cover: React.FC<{
-  docType: string; company: string; preparedFor: string; preparedBy: string; date: string; frameworkVersion: string; classification?: string;
-}> = ({ docType, company, preparedFor, preparedBy, date, frameworkVersion, classification = "Strictly Private & Confidential" }) => (
+  docType: string; company: string; preparedFor: string; preparedBy: string; date: string; frameworkVersion: string; classification?: string; reference?: string;
+}> = ({ docType, company, preparedFor, preparedBy, date, frameworkVersion, classification = "Strictly Private & Confidential", reference }) => (
   <section className="rpt-cover relative flex min-h-[1040px] flex-col overflow-hidden px-16 py-20">
     {/* subtle hairline geometry */}
     <svg className="pointer-events-none absolute -right-40 -top-24 h-[640px] w-[640px]" viewBox="0 0 200 200" fill="none" aria-hidden>
@@ -60,8 +71,11 @@ export const Cover: React.FC<{
       </div>
     </div>
     <div className="relative mt-auto flex items-end justify-between border-t border-[#d8dee8] pt-5">
-      <span className="rounded-sm border border-[#c9b08a] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[#8a6d3b]">{classification}</span>
-      <span className="text-[10px] text-[#9aa3b0]">This document is the property of ExitOS Advisory and may not be reproduced or distributed.</span>
+      <div className="flex flex-col gap-2">
+        <span className="w-fit rounded-sm border border-[#c9b08a] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[#8a6d3b]">{classification}</span>
+        <span className="tnum font-mono text-[10px] tracking-[0.08em] text-[#9aa3b0]">Ref · {reference ?? docReference(docType, company, date)}</span>
+      </div>
+      <span className="max-w-[280px] text-right text-[10px] text-[#9aa3b0]">This document is the property of ExitOS Advisory and may not be reproduced or distributed.</span>
     </div>
   </section>
 );
