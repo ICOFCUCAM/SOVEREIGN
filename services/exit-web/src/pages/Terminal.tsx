@@ -4,7 +4,7 @@ import { useAuth } from "../lib/auth";
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
 import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, fmtUsdShort } from "../lib/buyer-dna";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
-import { Panel, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
+import { Panel, CommandHeader, MarketTape, CommandState, Evidence } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor } from "../components/Reactor";
 import BuyerInterestGate from "../components/BuyerInterestGate";
@@ -144,7 +144,9 @@ const Terminal: React.FC = () => {
                       <td className="px-2 py-1.5 text-right">
                         <span className="inline-flex items-center gap-1.5">
                           <span className="hidden h-1 w-10 overflow-hidden rounded-full bg-white/10 sm:inline-block align-middle"><span className="block h-full bg-deal-500" style={{ width: `${r.probability.pct}%` }} /></span>
-                          <span className="font-mono font-bold tabular-nums text-deal-300">{r.probability.pct}%</span>
+                          <Evidence meta={{ methodology: why.thesis, source: "DNA engine · valuation framework", confidence: `${INST.confidence.score}% · ${INST.confidence.tier}` }}>
+                            <span className="font-mono font-bold tabular-nums text-deal-300">{r.probability.pct}%</span>
+                          </Evidence>
                         </span>
                       </td>
                       <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/85">{fmtUsdShort(r.exp.expectedClose)}–{fmtUsdShort(r.exp.expectedOffer)}</td>

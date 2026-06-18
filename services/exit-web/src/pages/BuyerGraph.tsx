@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { inputCls } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, Evidence } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { BuyerNetworkReactor } from "../components/Reactor";
 import {
@@ -159,7 +159,9 @@ const BuyerGraph: React.FC = () => {
                   <td className="px-2 py-1.5 text-right">
                     <span className="inline-flex items-center gap-1.5">
                       <span className="hidden h-1 w-10 overflow-hidden rounded-full bg-white/10 sm:inline-block align-middle"><span className="block h-full bg-deal-500" style={{ width: `${r.probability.pct}%` }} /></span>
-                      <span className="font-mono font-bold tabular-nums text-deal-300">{r.probability.pct}%</span>
+                      <Evidence meta={{ methodology: r.probability.rationale, source: "DNA engine · acquisition registry", confidence: "appetite × sector overlap × velocity × recency", asOf: MARKET_INDEX_FMT.asOf }}>
+                        <span className="font-mono font-bold tabular-nums text-deal-300">{r.probability.pct}%</span>
+                      </Evidence>
                     </span>
                   </td>
                   <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/65">{r.profile.frequency_per_year != null ? `${r.profile.frequency_per_year}/yr` : "—"}</td>
