@@ -85,6 +85,10 @@ const BuyerProfile: React.FC = () => {
           className={`rounded-md px-4 py-2 text-[12.5px] font-semibold transition ${interested ? "bg-deal-600/15 text-deal-300 ring-1 ring-deal-400/30" : "bg-deal-500 text-ink-950 hover:bg-deal-400"}`}>
           {interested ? "✓ Interest captured" : "Express interest"}
         </button>
+        <a href={`/report/buyer/${p.buyer_id}`} target="_blank" rel="noopener noreferrer"
+          className="rounded-md border border-deal-400/30 px-4 py-2 text-[12.5px] font-semibold text-deal-300 transition hover:bg-deal-600/10">
+          Briefing Book (PDF) →
+        </a>
         <span className="text-[11px] text-white/35">Captured to your <Link to="/console/activity" className="text-deal-300 hover:text-deal-200">deal activity</Link> — the behavioral signal that sharpens engagement intelligence.</span>
       </div>
 

@@ -42,6 +42,10 @@ const MarketMap: React.FC = () => {
 
       <MarketTape items={tape} />
 
+      <div className="flex justify-end">
+        <a href="/report/market" target="_blank" rel="noopener noreferrer" className="rounded-md border border-deal-400/30 px-3.5 py-1.5 text-[11.5px] font-semibold text-deal-300 transition hover:bg-deal-600/10">Market Intelligence Report (PDF) →</a>
+      </div>
+
       <Frame>
         <Panel title="Transaction heatfield · where capital is moving" className="lg:col-span-12"
           foot="Column height = acquisition volume · heat = disclosed value · cap = trend. Aggregated from the verified registry.">

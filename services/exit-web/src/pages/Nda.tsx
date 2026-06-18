@@ -124,7 +124,8 @@ const Nda: React.FC = () => {
 
       <MarketTape items={useMemo(() => buildMarketTape(), [])} />
 
-      <div className="flex flex-wrap justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <a href="/report/nda" target="_blank" rel="noopener noreferrer" className="rounded-md border border-deal-400/30 px-3.5 py-1.5 text-[12px] font-semibold text-deal-300 transition hover:bg-deal-600/10">NDA Package (PDF) →</a>
         <Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button>
         <Button onClick={() => setIssueOpen(true)}>Issue NDA</Button>
       </div>

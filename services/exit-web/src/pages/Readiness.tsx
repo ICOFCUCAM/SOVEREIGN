@@ -86,6 +86,10 @@ const Readiness: React.FC = () => {
 
       <MarketTape items={tape} />
 
+      <div className="flex justify-end">
+        <a href="/report/readiness" target="_blank" rel="noopener noreferrer" className="rounded-md border border-deal-400/30 px-3.5 py-1.5 text-[11.5px] font-semibold text-deal-300 transition hover:bg-deal-600/10">Acquisition Readiness Report (PDF) →</a>
+      </div>
+
       <CommandState
         current={<>Readiness <span className="font-mono text-white">{score.toFixed(0)}/100</span> ({READINESS_BAND.replace(/_/g, " ")}) · value {fmtMoney(current)}</>}
         changes={<>{categories.length} categories scored · {topFix ? `top lever: ${topFix.dimension}` : "all on track"}</>}
