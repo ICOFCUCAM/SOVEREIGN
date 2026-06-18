@@ -27,6 +27,7 @@ export const NAV: NavItem[] = [
   // ── Founder · Overview ─────────────────────────────────────────
   { to: "/console/commander",          label: "Chief Investment Banker", group: "Mandate", roles: ["founder"], pro: true },
   { to: "/console",                    label: "Intelligence Terminal", group: "Mandate", roles: ["founder"] },
+  { to: "/console/intake",             label: "Value My Company",     group: "Mandate", roles: ["founder"] },
   { to: "/console/command",            label: "Liquidity Command",    group: "Mandate", roles: ["founder"] },
   { to: "/console/autopilot",          label: "Autonomous Exit",      group: "Mandate", roles: ["founder"], pro: true, starter: true },
   { to: "/console/buyer-graph",        label: "Buyer Graph",          group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },

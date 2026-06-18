@@ -33,6 +33,7 @@ const MarketMap    = lazy(() => import("./pages/MarketMap"));
 const KnowledgeGraph = lazy(() => import("./pages/KnowledgeGraph"));
 const OutcomeIntelligence = lazy(() => import("./pages/OutcomeIntelligence"));
 const Indexes      = lazy(() => import("./pages/Indexes"));
+const Intake       = lazy(() => import("./pages/Intake"));
 const BuyerPortal  = lazy(() => import("./pages/BuyerPortal"));
 const Autopilot    = lazy(() => import("./pages/Autopilot"));
 const Readiness    = lazy(() => import("./pages/Readiness"));
@@ -66,6 +67,7 @@ const Guard: React.FC<{ policy: string; children: React.ReactNode }> = ({ policy
 const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
   { path: "/",             policy: "/console",                el: <Terminal /> },
   { path: "command",       policy: "/console",                el: <Dashboard /> },
+  { path: "intake",        policy: "/console/intake",         el: <Intake /> },
   { path: "commander",     policy: "/console/commander",      el: <Commander /> },
   { path: "network",       policy: "/console/network",        el: <Network /> },
   { path: "autopilot",     policy: "/console/autopilot",      el: <Autopilot /> },
