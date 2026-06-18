@@ -7,7 +7,8 @@ import { loadActiveCompany } from "../lib/active-company";
 import { listingFromCompany, allListings } from "../lib/listings";
 import {
   eventsForSubject, ndaRequestsForListing, signNda, offersForListing, resolveOffer,
-  type NdaRequest, type Offer,
+  dealsForListing, advanceDeal, DEAL_STAGES, dealStageIndex,
+  type NdaRequest, type Offer, type Deal, type DealStage,
 } from "../lib/exit-api";
 import { captureDealEvent, subscribe, type DealEvent } from "../lib/deal-events";
 
@@ -49,12 +50,18 @@ const FounderInbox: React.FC = () => {
   const [events, setEvents] = useState<DealEvent[]>([]);
   const [ndas, setNdas] = useState<NdaRequest[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
 
   const refresh = useCallback(() => {
     void eventsForSubject(listing.id).then((e) => setEvents([...e].sort((a, b) => b.at.localeCompare(a.at))));
     void ndaRequestsForListing(listing.id).then((r) => setNdas([...r].sort((a, b) => b.requestedAt.localeCompare(a.requestedAt))));
     void offersForListing(listing.id).then((o) => setOffers([...o].sort((a, b) => b.createdAt.localeCompare(a.createdAt))));
+    void dealsForListing(listing.id).then((d) => setDeals([...d].sort((a, b) => dealStageIndex(b.stage) - dealStageIndex(a.stage))));
   }, [listing.id]);
+
+  const advance = (deal: Deal, stage: DealStage): void => {
+    void advanceDeal(deal, stage, "founder", listing.code).then(refresh);
+  };
 
   // re-query on mount and whenever any deal event is captured (buyer interest,
   // founder executing an NDA) — keeps the inbox live.
@@ -87,7 +94,8 @@ const FounderInbox: React.FC = () => {
           { k: "REV", v: usd(listing.publicView.revenueUsd) },
         ]}
         metrics={[
-          { k: "Interest expressed", v: String(interested), accent: true, sub: "from buyers" },
+          { k: "Live deals", v: String(deals.length), accent: true, sub: `${deals.filter((d) => d.stage === "closed").length} closed` },
+          { k: "Interest expressed", v: String(interested), sub: "from buyers" },
           { k: "NDA requests", v: String(ndas.length), sub: `${pendingNdas.length} awaiting · ${executedNdas.length} done` },
           { k: "NDAs executed", v: String(executedNdas.length), accent: true, sub: "identity released" },
           { k: "Offers", v: String(offers.length), sub: `${openOffers.length} open` },
@@ -102,6 +110,45 @@ const FounderInbox: React.FC = () => {
           <Link to="/console/intake" className="text-deal-300 hover:text-deal-200">List on the exchange</Link> to start receiving interest — the panels below populate as soon as buyers act on <span className="font-mono text-white/80">{listing.code}</span>.
         </div>
       )}
+
+      {/* deal pipeline — advance each transaction through the lifecycle */}
+      <Frame>
+        <Panel title="Deal pipeline · advance each transaction" className="lg:col-span-12"
+          foot="One deal per buyer. Advancing a stage captures telemetry that feeds buyer DNA, response and close-rate models. Buyers stay anonymous until they sign.">
+          {deals.length ? (
+            <ul className="divide-y divide-white/5">
+              {deals.map((d) => {
+                const idx = dealStageIndex(d.stage);
+                const next = DEAL_STAGES[idx + 1];
+                const isClosed = d.stage === "closed";
+                const isWithdrawn = d.stage === "withdrawn";
+                return (
+                  <li key={d.id} className="px-3 py-2.5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[11px] text-white/40">{idx >= 0 ? `${idx + 1}/${DEAL_STAGES.length}` : "—"}</span>
+                        <span className="text-[12px] font-semibold text-white">A buyer</span>
+                        <span className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${isClosed ? "bg-emerald-500/15 text-emerald-300" : isWithdrawn ? "bg-white/5 text-white/40" : "bg-deal-500/15 text-deal-300"} ring-1 ring-white/10`}>{DEAL_STAGES[idx]?.label ?? d.stage}</span>
+                        <span className="font-mono text-[10px] text-white/30">{timeAgo(d.updatedAt)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {next && !isWithdrawn && <Button onClick={() => advance(d, next.stage)} className="!px-3 !py-1 !text-[11px]">Advance → {next.label}</Button>}
+                        {!isClosed && !isWithdrawn && <button onClick={() => advance(d, "withdrawn")} className="rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/40 ring-1 ring-white/10 transition hover:text-red-300">Withdraw</button>}
+                      </div>
+                    </div>
+                    {/* stage track */}
+                    <div className="mt-2 flex gap-0.5">
+                      {DEAL_STAGES.map((s, i) => (
+                        <span key={s.stage} title={s.label} className={`h-1 flex-1 rounded-sm ${i <= idx && !isWithdrawn ? "bg-deal-500" : "bg-white/10"}`} />
+                      ))}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : <div className="px-3 py-6 text-center text-[12px] text-white/40">No open deals yet. A deal opens the moment a buyer expresses interest in {listing.code}.</div>}
+        </Panel>
+      </Frame>
 
       <Frame>
         {/* pending NDA requests — first-class records to resolve */}

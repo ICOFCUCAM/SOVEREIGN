@@ -8,7 +8,7 @@ import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
 import { allListings, subscribeListings } from "../lib/listings";
 import { captureDealEvent } from "../lib/deal-events";
-import { requestNda, submitOffer, startDeal, saveMandate, myMandate } from "../lib/exit-api";
+import { requestNda, submitOffer, startDeal, advanceDeal, saveMandate, myMandate } from "../lib/exit-api";
 import type { Region } from "@exit/engines";
 
 // BUYER ACQUISITION COMMAND CENTER — the other side of the exchange. A buyer
@@ -175,6 +175,7 @@ const AcquisitionRadar: React.FC = () => {
                       captureDealEvent({ actorRole: "buyer", kind: "expressed_interest", subjectType: "listing", subjectId: l.id, subjectName: l.code });
                       captureDealEvent({ actorRole: "buyer", kind: "nda_requested", subjectType: "listing", subjectId: l.id, subjectName: l.code });
                       void requestNda(l.id);
+                      void startDeal(l.id, "nda_requested");   // open the transaction
                       setRequested((s) => ({ ...s, [l.id]: true }));
                     }}
                     className="ml-auto rounded-md bg-deal-500/90 px-3 py-1 text-[11px] font-semibold text-ink-950 transition hover:bg-deal-400 disabled:opacity-60"
@@ -192,7 +193,8 @@ const AcquisitionRadar: React.FC = () => {
                     onClick={() => {
                       const m = parseFloat(offerInput[l.id] ?? ""); if (!m) return;
                       void submitOffer(l.id, m * 1e6);
-                      captureDealEvent({ actorRole: "buyer", kind: "loi_issued", subjectType: "listing", subjectId: l.id, subjectName: l.code });
+                      // open (or fetch) the deal and advance it to IOI — emits the loi telemetry
+                      void startDeal(l.id).then((d) => { if (d) void advanceDeal(d, "ioi", "buyer", l.code); });
                       setOffered((s) => ({ ...s, [l.id]: true }));
                     }}
                     className="rounded-md bg-white/[0.06] px-3 py-1 text-[11px] font-semibold text-white ring-1 ring-white/10 transition hover:bg-white/10 disabled:opacity-60"
