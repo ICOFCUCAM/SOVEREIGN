@@ -37,6 +37,7 @@ const Intake       = lazy(() => import("./pages/Intake"));
 const AcquisitionRadar = lazy(() => import("./pages/AcquisitionRadar"));
 const ProcessIntelligence = lazy(() => import("./pages/ProcessIntelligence"));
 const OutreachPlan = lazy(() => import("./pages/OutreachPlan"));
+const EngagementRegistry = lazy(() => import("./pages/EngagementRegistry"));
 const BuyerPortal  = lazy(() => import("./pages/BuyerPortal"));
 const Autopilot    = lazy(() => import("./pages/Autopilot"));
 const Readiness    = lazy(() => import("./pages/Readiness"));
@@ -96,6 +97,7 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
   { path: "pipeline",      policy: "/console/pipeline",       el: <Pipeline /> },
   { path: "process-intel", policy: "/console/process-intel",  el: <ProcessIntelligence /> },
   { path: "outreach-plan", policy: "/console/outreach-plan",  el: <OutreachPlan /> },
+  { path: "engagement-registry", policy: "/console/engagement-registry", el: <EngagementRegistry /> },
   { path: "closing",       policy: "/console/closing",        el: <Closing /> },
   { path: "marketplace",   policy: "/console/marketplace",    el: <Marketplace /> },
   { path: "valuation",     policy: "/console/valuation",      el: <Valuation /> },

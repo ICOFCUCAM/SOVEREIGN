@@ -36,6 +36,7 @@ export const NAV: NavItem[] = [
   { to: "/console/outcomes",           label: "Outcome Intelligence", group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/indexes",            label: "Acquisition Indexes",  group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/acquisition-radar",  label: "Acquisition Radar",    group: "Market Intelligence", roles: ["founder", "buyer"] },
+  { to: "/console/engagement-registry", label: "Engagement Registry",  group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/network",            label: "Network Intelligence", group: "Market Intelligence", roles: ["founder"], pro: true },
 
   // ── Buyer · Overview ───────────────────────────────────────────
