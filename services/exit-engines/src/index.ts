@@ -47,8 +47,8 @@ export { buildBuyerGraph, runSimilarTransactions, runBuyerIntelligenceEngine } f
 export type { BuyerGraph, GraphEntity, GraphEntityProps, GraphRelation, RelKind, SimilarTransactionsReport, SimilarExit, BuyerIntelligenceReport, BuyerIntelligenceProfile } from './buyers/index.js';
 
 // Sovereign Exchange — the mandate state machine
-export { MANDATE_STATES, deriveMandateState } from './exchange/index.js';
-export type { MandateState, MandateStateReport, MandateInputs, StateEvidence } from './exchange/index.js';
+export { MANDATE_STATES, deriveMandateState, mandateEventsFrom, aggregateBuyerResponse, processFunnel } from './exchange/index.js';
+export type { MandateState, MandateStateReport, MandateInputs, StateEvidence, MandateEvent, MandateEventKind, BuyerResponseStats, ProcessFunnel } from './exchange/index.js';
 
 // Document factory — Level 3. Every institutional document from one intelligence object.
 export { renderDocument, renderDocumentSuite, valuationFacts, validateTraceability, figure, fiveQuestions, answersAllFive } from './documents/index.js';
