@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { subscribe, allDealEvents, dealFlowFunnel, subjectsAtStage, clearDealEvents, type DealEvent } from "../lib/deal-events";
+import { networkStats } from "../lib/network-stats";
 
 // DEAL ACTIVITY — the live capture feed. Every deal-flow action on the
 // platform is recorded here, forever: the behavioral + transaction data
@@ -29,6 +30,8 @@ const DealActivity: React.FC = () => {
   const recent = [...events].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 60);
   const max = Math.max(...funnel.map((f) => f.count), 1);
   const tape = useMemo(() => buildMarketTape(), [events.length]);
+  const net = networkStats(events);
+  const rate = (v: number | null): string => (v == null ? "—" : `${v}%`);
 
   return (
     <div className="space-y-2">
@@ -46,6 +49,29 @@ const DealActivity: React.FC = () => {
       />
 
       <MarketTape items={tape} />
+
+      {/* network effects — what the platform has learned from real transactions */}
+      <Frame>
+        <Panel title="Network effects · learned from captured transactions" className="lg:col-span-12"
+          foot="Every completed action improves these rates — the response/close-rate moat no banker or database has. A rate stays null until the network produces the events to measure it; nothing is modelled.">
+          <div className="grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-3 lg:grid-cols-6">
+            {[
+              { k: "Captured actions", v: String(net.actions), sub: "all-time" },
+              { k: "Response rate", v: rate(net.responseRatePct), sub: "NDA signed / requested" },
+              { k: "Meeting rate", v: rate(net.meetingRatePct), sub: "meetings / NDAs" },
+              { k: "Close rate", v: rate(net.closeRatePct), sub: "closed / offers" },
+              { k: "Offers seen", v: String(net.offers), sub: "IOI / LOI" },
+              { k: "Closed", v: String(net.closed), sub: "definitive" },
+            ].map((c) => (
+              <div key={c.k} className="bg-ink-900 px-3 py-2">
+                <div className="text-[8.5px] font-semibold uppercase tracking-[0.16em] text-white/40">{c.k}</div>
+                <div className="mt-0.5 font-mono text-[16px] font-bold tabular-nums text-deal-300">{c.v}</div>
+                <div className="text-[9px] text-white/35">{c.sub}</div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </Frame>
 
       <Frame>
         <Panel title="Deal-flow funnel · captured" className="lg:col-span-5"

@@ -30,6 +30,7 @@ const AcquisitionRadar: React.FC = () => {
   const [requested, setRequested] = useState<Record<string, boolean>>({});
   const [offerInput, setOfferInput] = useState<Record<string, string>>({});
   const [offered, setOffered] = useState<Record<string, boolean>>({});
+  const [watched, setWatched] = useState<Record<string, boolean>>({});
   const [savedMandate, setSavedMandate] = useState(false);
 
   // hydrate the form from the buyer's persisted mandate, if one exists
@@ -167,6 +168,12 @@ const AcquisitionRadar: React.FC = () => {
                 <div className="mt-2.5 flex flex-wrap items-center gap-3 text-[11.5px] text-white/55">
                   <span>Revenue {fmtUsd(l.publicView.revenueUsd)}</span>
                   <span>· Growth {Math.round(l.publicView.growthPct * 100)}%</span>
+                  <button
+                    onClick={() => {
+                      captureDealEvent({ actorRole: "buyer", kind: "added_to_outreach", subjectType: "listing", subjectId: l.id, subjectName: l.code });
+                      setWatched((s) => ({ ...s, [l.id]: !s[l.id] }));
+                    }}
+                    className="rounded-md px-2 py-1 text-[11px] font-semibold text-white/60 ring-1 ring-white/10 transition hover:text-white">{watched[l.id] ? "★ Following" : "☆ Follow"}</button>
                   <button
                     onClick={() => {
                       // a single buyer action: captured telemetry the founder
