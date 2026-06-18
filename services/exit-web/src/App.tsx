@@ -19,6 +19,7 @@ const ReportCIM = lazy(() => import("./pages/ReportCIM"));
 const ReportBuyerBrief = lazy(() => import("./pages/ReportBuyerBrief"));
 const ReportNda = lazy(() => import("./pages/ReportNda"));
 const ReportManagement = lazy(() => import("./pages/ReportManagement"));
+const ReportHub = lazy(() => import("./pages/ReportHub"));
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
 const Terminal     = lazy(() => import("./pages/Terminal"));
 const Intelligence = lazy(() => import("./pages/Intelligence"));
@@ -147,6 +148,7 @@ const App: React.FC = () => (
       <Route path="/platform" element={<Platform />} />
       <Route path="/modules" element={<Modules />} />
       <Route path="/pricing" element={<Pricing />} />
+      <Route path="/report" element={<ReportHub />} />
       <Route path="/report/valuation" element={<Report />} />
       <Route path="/report/buyers" element={<ReportBuyers />} />
       <Route path="/report/readiness" element={<ReportReadiness />} />
