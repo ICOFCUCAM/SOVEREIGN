@@ -1,9 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, SectionHeader } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
-import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, fmtUsdShort } from "../lib/buyer-dna";
+import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, fmtUsdShort } from "../lib/buyer-dna";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 import MorningBriefing from "../components/MorningBriefing";
@@ -19,6 +19,7 @@ const pctOf = (x?: number): string => (x == null ? "—" : `${Math.round(x * 100
 const Terminal: React.FC = () => {
   const { session } = useAuth();
   const plan = session?.plan ?? "free";
+  const [openWhy, setOpenWhy] = useState<string | null>(null);
 
   const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
   const INST = useMemo(() => runInstitutionalValuation(company), [company]);
@@ -28,6 +29,12 @@ const Terminal: React.FC = () => {
 
   const TOP = rankedBuyers(8, tokens).map((r) => ({ ...r, exp: expectedOutcomeFor(r.profile, BASELINE) }));
   const lead = TOP[0];
+  // Section 5 — active buyers, by intrinsic acquisition appetite
+  const ACTIVE = useMemo(() => DNA_PROFILES
+    .filter((p) => p.events_indexed > 0)
+    .map((p) => ({ p, a: acquisitionAppetiteScore(p) }))
+    .sort((x, y) => y.a.score - x.a.score).slice(0, 6), []);
+  const cd = INST.confidence.drivers;
   const themes = strategicThemes(6);
   const comps = INST.comparableTransactions.slice(0, 6);
   const uplift = Math.max(0, ra.projectedStrategicMid - ra.currentStrategicMid);
@@ -80,25 +87,49 @@ const Terminal: React.FC = () => {
             <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
               <tr className="border-b border-white/10">
                 <th className="px-5 py-2.5">Buyer</th>
-                <th className="px-3 py-2.5 text-right">Probability</th>
+                <th className="px-3 py-2.5 text-right">Prob.</th>
                 <th className="px-3 py-2.5 text-right">Expected value</th>
                 <th className="px-3 py-2.5 text-right">Premium</th>
-                <th className="px-5 py-2.5 text-right">Close rate</th>
+                <th className="px-3 py-2.5 text-right">Close</th>
+                <th className="px-5 py-2.5 text-right">Time</th>
               </tr>
             </thead>
             <tbody>
-              {TOP.map((r) => (
-                <tr key={r.profile.buyer_id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                  <td className="px-5 py-2.5"><Link to={`/console/buyer/${r.profile.buyer_id}`} className="font-semibold text-white hover:text-deal-300">{r.profile.name}</Link></td>
-                  <td className="px-3 py-2.5 text-right font-mono font-bold tabular-nums text-deal-300">{r.probability.pct}%</td>
-                  <td className="px-3 py-2.5 text-right font-mono tabular-nums text-white/85">{fmtUsdShort(r.exp.expectedOffer)}</td>
-                  <td className="px-3 py-2.5 text-right font-mono tabular-nums text-white/70">+{Math.round(r.exp.premium * 100)}%{!r.exp.premiumKnown ? "*" : ""}</td>
-                  <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/70">{Math.round(r.exp.close * 100)}%{!r.exp.closeKnown ? "*" : ""}</td>
-                </tr>
-              ))}
+              {TOP.map((r) => {
+                const why = buyerRationale(r.profile, BASELINE, tokens, company.sector);
+                const days = r.profile.median_close_days ?? INST.timeToClose.lowDays;
+                const open = openWhy === r.profile.buyer_id;
+                return (
+                  <React.Fragment key={r.profile.buyer_id}>
+                    <tr className="border-b border-white/5 hover:bg-white/[0.02]">
+                      <td className="px-5 py-2.5">
+                        <Link to={`/console/buyer/${r.profile.buyer_id}`} className="font-semibold text-white hover:text-deal-300">{r.profile.name}</Link>
+                        <button onClick={() => setOpenWhy(open ? null : r.profile.buyer_id)} className="ml-2 text-[10px] text-white/35 hover:text-deal-300">{open ? "hide why" : "why ▾"}</button>
+                      </td>
+                      <td className="px-3 py-2.5 text-right font-mono font-bold tabular-nums text-deal-300">{r.probability.pct}%</td>
+                      <td className="px-3 py-2.5 text-right font-mono tabular-nums text-white/85">{fmtUsdShort(r.exp.expectedClose)}–{fmtUsdShort(r.exp.expectedOffer)}</td>
+                      <td className="px-3 py-2.5 text-right font-mono tabular-nums text-white/70">+{Math.round(r.exp.premium * 100)}%{!r.exp.premiumKnown ? "*" : ""}</td>
+                      <td className="px-3 py-2.5 text-right font-mono tabular-nums text-white/70">{Math.round(r.exp.close * 100)}%{!r.exp.closeKnown ? "*" : ""}</td>
+                      <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/70">{days}d</td>
+                    </tr>
+                    {open && (
+                      <tr className="border-b border-white/5 bg-white/[0.015]">
+                        <td colSpan={6} className="px-5 py-3">
+                          <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-deal-300/80">Why they match</div>
+                          <ul className="mt-1.5 grid gap-1 sm:grid-cols-2">
+                            {why.points.map((pt) => (
+                              <li key={pt.label} className="flex gap-1.5 text-[11.5px]"><span className="text-deal-400">·</span><span><span className="font-semibold text-white/80">{pt.label}.</span> <span className="text-white/50">{pt.detail}</span></span></li>
+                            ))}
+                          </ul>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </tbody>
           </table>
-          <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">* premium/close not disclosed for this buyer — labelled market-neutral prior. Probability = appetite × sector overlap × velocity × recency.</div>
+          <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">Expected value = close-weighted to LOI offer. * premium/close not disclosed — labelled neutral prior. Probability = appetite × sector overlap × velocity × recency. Click "why" for the evidence per buyer.</div>
         </Card>
 
         {/* ACQUISITION READINESS */}
@@ -167,6 +198,55 @@ const Terminal: React.FC = () => {
             ))}
           </div>
           <div className="mt-4 text-[10px] text-white/35">Themes = number of indexed buyers actively pursuing each. Explore the full map in the <Link to="/console/market-map" className="text-deal-300 hover:text-deal-200">Market Map</Link>.</div>
+        </Card>
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        {/* SECTION 5 — ACTIVE BUYERS (acquisition appetite) */}
+        <Card className="overflow-hidden p-0">
+          <div className="border-b border-white/10 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-deal-300">Active buyers · acquisition appetite now</div>
+          <table className="w-full text-[12.5px]">
+            <tbody>
+              {ACTIVE.map(({ p, a }) => (
+                <tr key={p.buyer_id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                  <td className="px-5 py-2.5"><Link to={`/console/buyer/${p.buyer_id}`} className="font-semibold text-white hover:text-deal-300">{p.name}</Link></td>
+                  <td className="px-3 py-2.5 text-white/45">{p.deals_12m} in 12m · {p.frequency_per_year ?? 0}/yr</td>
+                  <td className="px-3 py-2.5 text-right">
+                    <span className="inline-block h-1.5 w-20 overflow-hidden rounded-full bg-white/10 align-middle"><span className="block h-full rounded-full bg-deal-500" style={{ width: `${a.score}%` }} /></span>
+                  </td>
+                  <td className="px-5 py-2.5 text-right font-mono font-bold tabular-nums text-deal-300">{a.score}<span className="text-white/35"> · {a.tier}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">Appetite = intrinsic acquisitiveness (cadence × acceleration × recency × breadth × themes × reach), independent of your company.</div>
+        </Card>
+
+        {/* SECTION 7 — CONFIDENCE */}
+        <Card className="p-5">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-deal-300">Confidence</span>
+            <span className="font-mono text-2xl font-bold tabular-nums text-white">{INST.confidence.score}%<span className="text-[12px] font-normal text-white/45"> · {INST.confidence.tier}</span></span>
+          </div>
+          <p className="mt-1 text-[11px] text-white/45">Every prediction above carries this confidence — a composite of five measured drivers.</p>
+          <div className="mt-4 space-y-2.5">
+            {([
+              ["Data quality / completeness", cd.dataCompleteness],
+              ["Comparable count & similarity", cd.comparableDepth],
+              ["Buyer coverage (sector maturity)", cd.sectorMaturity],
+              ["Financial quality", cd.financialQuality],
+              ["Data freshness", cd.dataFreshness],
+            ] as [string, number][]).map(([label, v]) => (
+              <div key={label}>
+                <div className="flex items-baseline justify-between text-[12px]">
+                  <span className="text-white/70">{label}</span>
+                  <span className="font-mono tabular-nums text-white/55">{Math.round(v * 100)}%</span>
+                </div>
+                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10"><span className="block h-full rounded-full bg-deal-500" style={{ width: `${Math.round(v * 100)}%` }} /></div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 text-[10px] text-white/35">{INST.comparablesUsed} comparables · {INST.buyerUniverse.qualified} qualified buyers · framework v{INST.frameworkVersion}.</div>
         </Card>
       </div>
     </div>
