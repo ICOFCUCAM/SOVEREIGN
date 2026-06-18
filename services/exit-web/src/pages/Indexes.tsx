@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
+import { AcquisitionReactor } from "../components/Reactor";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 
 // EXITOS ACQUISITION INDEXES (Stage 8) — Bloomberg has indexes; so does
@@ -49,7 +50,11 @@ const Indexes: React.FC = () => {
       <MarketTape items={tape} />
 
       <Frame>
-        <Panel title="ExitOS Acquisition Indexes" className="lg:col-span-12"
+        <Panel title="Acquisition reactor" className="lg:col-span-4"
+          foot="Orbital field of sector acquisition volume — node size ∝ √volume, colour = 12-month trend.">
+          <AcquisitionReactor height={240} />
+        </Panel>
+        <Panel title="ExitOS Acquisition Indexes" className="lg:col-span-8"
           right={
             <div className="flex flex-wrap gap-1">
               {([["volume", "Vol"], ["trend", "Trend"], ["size", "Size"], ["buyers", "Buyers"]] as [typeof sort, string][]).map(([k, l]) => (

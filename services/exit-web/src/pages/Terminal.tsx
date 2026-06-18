@@ -6,6 +6,7 @@ import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acqu
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { Panel, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
+import { AcquisitionReactor } from "../components/Reactor";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 
 // ── ACQUISITION INTELLIGENCE TERMINAL ───────────────────────────────
@@ -233,6 +234,13 @@ const Terminal: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </Panel>
+
+        {/* ACQUISITION REACTOR — live sector-volume telemetry */}
+        <Panel title="Acquisition reactor · sector volume" className="lg:col-span-4"
+          right={<span className="font-mono text-[9px] text-white/35">{ACTIVE.length} active</span>}
+          foot="Node size ∝ √volume · colour = 12-month trend · from the live sector indexes.">
+          <AcquisitionReactor height={188} />
         </Panel>
 
         {/* CONFIDENCE */}

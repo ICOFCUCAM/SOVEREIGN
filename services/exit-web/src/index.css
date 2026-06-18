@@ -38,6 +38,17 @@ body {
 .ex-sweep { animation: exSweep 16s cubic-bezier(.4,0,.2,1) infinite; }
 @media (prefers-reduced-motion: reduce) { .ex-sweep { animation: none; opacity: 0; } }
 
+/* Reactor system — telemetry-driven instruments. Slow rotation of the orbital
+   field + node pulse. The DATA (node size, colour, position) is real; only
+   the motion is decorative. Reduced-motion stills it. */
+@keyframes exReactorSpin { to { transform: rotate(360deg); } }
+@keyframes exReactorSpinR { to { transform: rotate(-360deg); } }
+@keyframes exNodePulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+.ex-rspin { animation: exReactorSpin 48s linear infinite; transform-origin: center; }
+.ex-rspin-r { animation: exReactorSpinR 64s linear infinite; transform-origin: center; }
+.ex-node { animation: exNodePulse 3.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .ex-rspin, .ex-rspin-r, .ex-node { animation: none; } }
+
 /* Exchange board mount — the 3D rotation only renders at desktop width;
    phones and tablets get the flat board, full-width and unclipped. */
 @media (min-width: 1024px) {
