@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { inputCls } from "../lib/ui";
 import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
+import { BuyerNetworkReactor } from "../components/Reactor";
 import {
   DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS,
   sectorOverlap, recommendedAction, fmtUsdShort, rankedBuyers, type DnaProfile,
@@ -132,7 +133,11 @@ const BuyerGraph: React.FC = () => {
 
       {/* ── Acquisition Probability — the crown-jewel ranking ── */}
       <Frame>
-        <Panel title="Acquisition probability · who is most likely to buy you" className="lg:col-span-12"
+        <Panel title="Buyer network reactor" className="lg:col-span-3"
+          foot="Active acquirers, node size ∝ 12-month cadence, green = ≥2 deals.">
+          <BuyerNetworkReactor height={260} />
+        </Panel>
+        <Panel title="Acquisition probability · who is most likely to buy you" className="lg:col-span-9"
           right={<span className="text-[9px] uppercase tracking-wide text-white/35">top {RANKED.length} of {withEvents} active</span>}
           foot={`Ranked for ${SAMPLE_COMPANY.name} — appetite × sector overlap × velocity × recency. Every buyer traces to a source on record.`}>
           <table className="w-full text-[12px]">

@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
+import { LiquidityReactor } from "../components/Reactor";
 import { MARKET_INTEL, fmtUsd } from "../lib/market-intel";
 
 // GLOBAL ACQUISITION MARKET INTELLIGENCE (Phase 4) — the visual signature.
@@ -41,7 +42,11 @@ const MarketMap: React.FC = () => {
       <MarketTape items={tape} />
 
       <Frame>
-        <Panel title="Sector heat · deal volume" className="lg:col-span-6" foot="Colour intensity = deal volume. Hover for disclosed value.">
+        <Panel title="Liquidity reactor · disclosed capital" className="lg:col-span-4"
+          foot="Concentric wells of disclosed deal value per sector — arc length ∝ disclosed value.">
+          <LiquidityReactor height={210} />
+        </Panel>
+        <Panel title="Sector heat · deal volume" className="lg:col-span-4" foot="Colour intensity = deal volume. Hover for disclosed value.">
           <div className="grid grid-cols-4 gap-px bg-white/10 sm:grid-cols-5">
             {m.sectorHeat.slice(0, 25).map((s) => (
               <div key={s.token} className="p-2" style={{ background: heat(s.deals / sectorMax) }} title={`${s.deals} deals · ${fmtUsd(s.disclosedUsd)} disclosed`}>
@@ -52,7 +57,7 @@ const MarketMap: React.FC = () => {
           </div>
         </Panel>
 
-        <Panel title="Regional deal density" className="lg:col-span-6">
+        <Panel title="Regional deal density" className="lg:col-span-4">
           <div className="space-y-2 p-3">
             {m.geoDensity.map((g) => (
               <div key={g.region}>
