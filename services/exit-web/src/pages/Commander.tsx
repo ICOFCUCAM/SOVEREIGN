@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, BuyerNetworkReactor, ReactorTelemetry } from "../components/Reactor";
+import { MARKET_INTEL, fmtUsd } from "../lib/market-intel";
 import { fmtMoney } from "../lib/ui";
 import CommandTiles from "../components/CommandTiles";
 import ExitCommander from "../components/ExitCommander";
@@ -45,6 +46,26 @@ const Commander: React.FC = () => {
       />
 
       <MarketTape items={tape} />
+
+      {/* executive command — jump to any desk, each with its live headline */}
+      <Frame>
+        {[
+          { roman: "II", label: "Investment Banker", to: "/console", v: fmtMoney(m.companyValue), sub: "enterprise value" },
+          { roman: "III", label: "Market", to: "/console/market-map", v: MARKET_INTEL.totalEvents.toLocaleString(), sub: "indexed acquisitions" },
+          { roman: "IV", label: "Transaction", to: "/console/pipeline", v: `${m.timeToExitMonths}mo`, sub: "to exit" },
+          { roman: "V", label: "Buyer", to: "/console/buyer-graph", v: String(m.activeBuyers), sub: "active acquirers" },
+        ].map((d) => (
+          <Link key={d.roman} to={d.to} className="group bg-ink-900 px-4 py-3 transition hover:bg-white/[0.03] lg:col-span-3">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] font-bold text-deal-300">{d.roman}</span>
+              <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">{d.label} layer</span>
+              <span className="ml-auto text-deal-300/60 transition group-hover:translate-x-0.5">→</span>
+            </div>
+            <div className="mt-1 font-mono text-[17px] font-bold tabular-nums text-white">{d.v}</div>
+            <div className="text-[10px] text-white/40">{d.sub}</div>
+          </Link>
+        ))}
+      </Frame>
 
       {/* market reactors — the desk's awareness of the live market */}
       <Frame>
