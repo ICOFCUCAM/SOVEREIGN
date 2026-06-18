@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
+import { AcquisitionReactor, LiquidityReactor, BuyerNetworkReactor } from "../components/Reactor";
 import { BUYERS, VALUATION_STRATEGIC, DILIGENCE } from "../lib/engines";
 import { VALUATION_FRAMEWORK } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -70,6 +71,19 @@ const Network: React.FC = () => {
       />
 
       <MarketTape items={useMemo(() => buildMarketTape(), [])} />
+
+      {/* the three reactors — the moat made visible */}
+      <Frame>
+        <Panel title="Acquisition reactor" className="lg:col-span-4" foot="Sector acquisition volume — the deal graph.">
+          <AcquisitionReactor height={200} />
+        </Panel>
+        <Panel title="Liquidity reactor" className="lg:col-span-4" foot="Disclosed capital depth per sector.">
+          <LiquidityReactor height={200} />
+        </Panel>
+        <Panel title="Buyer network reactor" className="lg:col-span-4" foot="Active acquirers by cadence — the buyer graph.">
+          <BuyerNetworkReactor height={200} />
+        </Panel>
+      </Frame>
 
       <div className="space-y-2">
         <Moat n={1} title="The Deal Graph" why="A source-referenced acquisition dataset — every event traceable to EDGAR, Wikidata or press.">
