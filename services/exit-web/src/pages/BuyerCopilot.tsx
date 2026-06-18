@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { fmtMoney } from "../lib/ui";
-import { Panel, Frame, CommandHeader } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { VALUATION_STRATEGIC } from "../lib/engines";
 import { DEAL_BUYERS } from "../lib/deal-context";
 import BankerTake from "../components/BankerTake";
@@ -96,11 +97,12 @@ const BuyerCopilot: React.FC = () => {
   const candidates = DEAL_BUYERS.slice(0, 8);
   const top = candidates[0];
   const topD = top ? dossier(top) : null;
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Find Buyers"
+        kicker="◉ Find Buyers"
         title="Buyer Copilot"
         tag="Buyer intelligence"
         metrics={[
@@ -111,6 +113,7 @@ const BuyerCopilot: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={tape} />
 
       {top && topD && (
         <BankerTake

@@ -1,5 +1,6 @@
-import React from "react";
-import { Panel, Frame, CommandHeader } from "../lib/workstation";
+import React, { useMemo } from "react";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { BUYER_RESPONSES, PROCESS_FUNNEL } from "../lib/process-intel";
 
 // PROCESS INTELLIGENCE — buyer-response telemetry for the live mandate.
@@ -16,10 +17,11 @@ const stages: ReadonlyArray<{ label: string; n: number; note: string }> = [
 
 const ProcessIntelligence: React.FC = () => {
   const max = Math.max(F.matched, 1);
+  const tape = useMemo(() => buildMarketTape(), []);
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Exchange · Execution"
+        kicker="◉ Exchange · Execution"
         title="Process Intelligence"
         tag="Buyer-response moat"
         metrics={[
@@ -30,6 +32,7 @@ const ProcessIntelligence: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={tape} />
 
       <Frame>
         <Panel title="Process funnel" className="lg:col-span-4">

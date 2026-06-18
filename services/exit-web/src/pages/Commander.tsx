@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Frame, CommandHeader } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
+import { AcquisitionReactor, BuyerNetworkReactor, ReactorTelemetry } from "../components/Reactor";
 import { MARKET_INTEL } from "../lib/market-intel";
 import { fmtMoney } from "../lib/ui";
 import CommandTiles from "../components/CommandTiles";
@@ -24,11 +26,12 @@ const Commander: React.FC = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
   const m = commanderMetrics();
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Chief Investment Banker"
+        kicker="◉ Chief Investment Banker"
         title={SAMPLE_COMPANY.name}
         tag="Transaction desk"
         status={m.demandLabel}
@@ -42,6 +45,7 @@ const Commander: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={tape} />
 
       {/* executive command — jump to any desk, each with its live headline */}
       <Frame>
@@ -61,6 +65,19 @@ const Commander: React.FC = () => {
             <div className="text-[10px] text-white/40">{d.sub}</div>
           </Link>
         ))}
+      </Frame>
+
+      {/* market reactors — the desk's awareness of the live market */}
+      <Frame>
+        <Panel title="Acquisition reactor" className="lg:col-span-4" foot="Sector acquisition volume across the network.">
+          <AcquisitionReactor height={196} />
+        </Panel>
+        <Panel title="Buyer network reactor" className="lg:col-span-4" foot="Active acquirers by 12-month cadence.">
+          <BuyerNetworkReactor height={196} />
+        </Panel>
+        <Panel title="Live telemetry" className="lg:col-span-4" foot="Real extrema from the registry + sector indexes.">
+          <ReactorTelemetry />
+        </Panel>
       </Frame>
 
       {/* Value cards */}

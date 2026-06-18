@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Card, Modal, fmtMoney, downloadText, notify } from "../lib/ui";
-import { CommandHeader } from "../lib/workstation";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { DILIGENCE, OFFER_EVALUATIONS } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -100,7 +101,7 @@ const Closing: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Operator · Closing"
+        kicker="◉ Operator · Closing"
         title="Deal Closing Center"
         tag="Sign · escrow · file"
         status={`${Math.round(prob * 100)}% close prob`}
@@ -112,6 +113,7 @@ const Closing: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={buildMarketTape()} />
 
       <div className="flex flex-wrap justify-end gap-2">
         <Button variant="ghost" onClick={() => window.print()}>Print checklist</Button>

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Button, Card, Modal, Field, inputCls, timeAgo, notify } from "../lib/ui";
-import { CommandHeader } from "../lib/workstation";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { SAMPLE_NDAS, NDA_ROSTER, LISTING_PRIVATE } from "../lib/engines";
 import {
   evaluateNdaStatus, generateBreachNotice, rosterFor,
@@ -109,7 +110,7 @@ const Nda: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Workspace · NDA"
+        kicker="◉ Workspace · NDA"
         title="NDA & Buyer Trust"
         tag="Qualification gate"
         status={`${roster.active} active`}
@@ -121,6 +122,7 @@ const Nda: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={useMemo(() => buildMarketTape(), [])} />
 
       <div className="flex flex-wrap justify-end gap-2">
         <Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button>

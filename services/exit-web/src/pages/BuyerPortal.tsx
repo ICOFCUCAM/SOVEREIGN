@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Button, StageBadge, fmtMoney } from "../lib/ui";
-import { Panel, Frame, CommandHeader } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import {
   SEAT, SEAT_MANDATE, PORTAL_OPPORTUNITIES, PORTAL_NEGOTIATIONS, PORTAL_STATS,
 } from "../lib/buyer-portal";
@@ -17,12 +18,13 @@ const BuyerPortal: React.FC = () => {
   const [tab, setTab] = useState<Tab>("dashboard");
   const [watch, setWatch] = useState<string[]>(PORTAL_OPPORTUNITIES.map((o) => o.code));
   const toggle = (c: string) => setWatch((w) => (w.includes(c) ? w.filter((x) => x !== c) : [...w, c]));
+  const tape = useMemo(() => buildMarketTape(), []);
   const TABS: [Tab, string][] = [["dashboard", "Dashboard"], ["watchlist", "Watchlist"], ["opportunities", "Opportunities"], ["diligence", "Diligence"], ["negotiations", "Negotiations"]];
 
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Buyer Console"
+        kicker="◉ Buyer Console"
         title={SEAT.entry?.name ?? "Buyer Portal"}
         tag="Acquirer seat"
         status={`Rank #${SEAT.rank}`}
@@ -34,6 +36,7 @@ const BuyerPortal: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={tape} />
 
       <Frame>
         <Panel title="Buyer workstation" className="lg:col-span-12"

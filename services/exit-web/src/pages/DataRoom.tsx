@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Card, fmtMoney } from "../lib/ui";
-import { CommandHeader } from "../lib/workstation";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { DILIGENCE, VALUATION_STRATEGIC } from "../lib/engines";
 import { listDocuments, uploadDocument, fmtBytes, type DataRoomDocument, type RoomKind } from "../lib/data-room";
 import BankerTake from "../components/BankerTake";
@@ -92,7 +93,7 @@ const DataRoom: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Workspace · Data Room"
+        kicker="◉ Workspace · Data Room"
         title="Virtual Data Room"
         tag="Diligence artifacts"
         status={`${overallPct}% complete`}
@@ -104,6 +105,7 @@ const DataRoom: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={buildMarketTape()} />
 
       <div className="flex flex-wrap justify-end gap-2">
         <Button variant="ghost" onClick={refresh} disabled={loading}>{loading ? "Refreshing…" : "Refresh"}</Button>

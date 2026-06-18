@@ -17,10 +17,11 @@ const pct = (x: number | null | undefined, d = 0): string => (x == null ? "—" 
 const money = (n: number): string => fmtMoney(n);
 const moneyShort = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`);
 
+const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 const SECTIONS = [
-  "Executive Summary", "Company Overview", "Valuation Methodology", "Comparable Transactions",
-  "Strategic Buyer Universe", "Acquisition Probability", "Premium Analysis", "Sensitivity Analysis",
-  "Risk Factors", "Data Provenance & Appendix",
+  "Executive Summary", "Company Overview", "Valuation Methodology", "Comparable Transaction Analysis",
+  "Strategic Acquirer Universe", "Acquisition Probability", "Premium Analysis", "Sensitivity Analysis",
+  "Indicative Timeline", "Risk Factors", "Valuation Variables & Provenance",
 ];
 
 const Report: React.FC = () => {
@@ -73,7 +74,7 @@ const Report: React.FC = () => {
           <ol className="mt-2 divide-y divide-[#eef1f5]">
             {SECTIONS.map((s, i) => (
               <li key={s} className="flex items-baseline gap-3 py-2 text-[13.5px]">
-                <span className="w-6 font-mono text-[#0e7a4f]">{String(i + 1).padStart(2, "0")}</span>
+                <span className="w-8 font-mono font-semibold text-[#0e7a4f]">{ROMAN[i + 1]}</span>
                 <span className="font-medium text-[#0b1220]">{s}</span>
                 <span className="mx-2 flex-1 border-b border-dotted border-[#c8cfda]" />
               </li>
@@ -131,6 +132,7 @@ const Report: React.FC = () => {
             Enterprise value is triangulated across the methodologies below, weighted to a single institutional view.
             Each band derives from the company's reported figures and source-referenced market data.
           </p>
+          <Exhibit label="Exhibit 3A — Valuation football field" />
           {r.methodologies.map((m) => {
             const max = Math.max(...r.methodologies.map((x) => x.band.high), r.exec.evHigh);
             return (
@@ -151,8 +153,8 @@ const Report: React.FC = () => {
         </Section>
 
         {/* ── 4 · COMPARABLE TRANSACTIONS ── */}
-        <Section n={4} title="Comparable Transactions" rpt>
-          <Exhibit label={`Exhibit 4.1 — Precedent transactions (${r.comparablesAnalysis.count} indexed${r.comparablesAnalysis.medianPremiumPct != null ? `, ${pct(r.comparablesAnalysis.medianPremiumPct)} median premium` : ""})`} />
+        <Section n={4} title="Comparable Transaction Analysis" rpt>
+          <Exhibit label={`Exhibit 4A — Precedent transactions (${r.comparablesAnalysis.count} indexed${r.comparablesAnalysis.medianPremiumPct != null ? `, ${pct(r.comparablesAnalysis.medianPremiumPct)} median premium` : ""})`} />
           <table className="w-full border-collapse text-[12.5px]">
             <thead>
               <tr className="border-b-2 border-[#0b1220] text-left text-[10px] uppercase tracking-wide text-[#5b6675]">
@@ -177,7 +179,7 @@ const Report: React.FC = () => {
         </Section>
 
         {/* ── 5 · STRATEGIC BUYER UNIVERSE ── */}
-        <Section n={5} title="Strategic Buyer Universe" rpt>
+        <Section n={5} title="Strategic Acquirer Universe" rpt>
           <div className="grid grid-cols-4 gap-px overflow-hidden rounded border border-[#e3e8ef] bg-[#e3e8ef]">
             <Stat label="Qualified" value={String(r.buyerUniverse.qualified)} />
             <Stat label="Strategic" value={String(r.buyerUniverse.strategic)} />
@@ -192,25 +194,24 @@ const Report: React.FC = () => {
 
         {/* ── 6 · ACQUISITION PROBABILITY ── */}
         <Section n={6} title="Acquisition Probability" rpt>
-          <Exhibit label="Exhibit 6.1 — Most likely acquirers, by fit-adjusted probability" />
-          <table className="w-full border-collapse text-[12.5px]">
-            <thead>
-              <tr className="border-b-2 border-[#0b1220] text-left text-[10px] uppercase tracking-wide text-[#5b6675]">
-                <th className="py-1.5 pr-2">#</th><th className="py-1.5 px-2">Acquirer</th>
-                <th className="py-1.5 px-2 text-right">Probability</th><th className="py-1.5 pl-2 text-right">Expected days to cash</th>
-              </tr>
-            </thead>
-            <tbody>
-              {r.mostLikelyBuyers.map((b, i) => (
-                <tr key={b.name} className="border-b border-[#eef1f5]">
-                  <td className="py-1.5 pr-2 font-mono text-[#9aa3b0]">{i + 1}</td>
-                  <td className="py-1.5 px-2 font-medium text-[#0b1220]">{b.name}</td>
-                  <td className="py-1.5 px-2 text-right font-mono font-semibold text-[#0e7a4f]">{b.probabilityPct}%</td>
-                  <td className="py-1.5 pl-2 text-right font-mono text-[#2b3543]">{b.expectedDaysToCash}d</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <Exhibit label="Exhibit 6A — Strategic acquirer ranking, by fit-adjusted probability" />
+          <div className="space-y-2">
+            {r.mostLikelyBuyers.slice(0, 8).map((b, i) => {
+              const max = Math.max(...r.mostLikelyBuyers.map((x) => x.probabilityPct), 1);
+              return (
+                <div key={b.name} className="avoid-break flex items-center gap-3 text-[12.5px]">
+                  <span className="w-4 font-mono text-[#9aa3b0]">{i + 1}</span>
+                  <span className="w-44 shrink-0 font-medium text-[#0b1220]">{b.name}</span>
+                  <span className="relative h-4 flex-1 rounded-sm bg-[#eef1f5]">
+                    <span className="absolute left-0 top-0 h-full rounded-sm bg-[#0e7a4f]/75" style={{ width: `${(b.probabilityPct / max) * 100}%` }} />
+                  </span>
+                  <span className="w-10 text-right font-mono font-semibold text-[#0e7a4f]">{b.probabilityPct}%</span>
+                  <span className="w-16 text-right font-mono text-[#9aa3b0]">{b.expectedDaysToCash}d</span>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-[11px] text-[#9aa3b0]">Probability = acquisition appetite × sector overlap × deal velocity × recency. Expected days-to-cash from each acquirer's measured close history.</p>
         </Section>
 
         {/* ── 7 · PREMIUM ANALYSIS ── */}
@@ -220,7 +221,7 @@ const Report: React.FC = () => {
             underwritten by {r.premium.observedPremiums.length} observed precedent premiums
             ({pct(r.premium.rangeLowPct)}–{pct(r.premium.rangeHighPct)} range, basis: {r.premium.basis.replace(/_/g, " ")}).
           </p>
-          <Exhibit label="Exhibit 7.1 — Observed precedent premiums" />
+          <Exhibit label="Exhibit 7A — Observed precedent premiums" />
           <div className="flex items-end gap-1.5" style={{ height: 120 }}>
             {[...r.premium.observedPremiums].sort((a, b) => a - b).map((p, i) => {
               const max = Math.max(...r.premium.observedPremiums, r.premium.appliedPct, 0.5);
@@ -233,7 +234,7 @@ const Report: React.FC = () => {
 
         {/* ── 8 · SENSITIVITY ── */}
         <Section n={8} title="Sensitivity Analysis" rpt>
-          <Exhibit label="Exhibit 8.1 — Enterprise value across the evidence-based premium band" />
+          <Exhibit label="Exhibit 8A — Enterprise value across the evidence-based premium band" />
           <table className="w-full border-collapse text-[12.5px]">
             <thead>
               <tr className="border-b-2 border-[#0b1220] text-left text-[10px] uppercase tracking-wide text-[#5b6675]">
@@ -252,8 +253,39 @@ const Report: React.FC = () => {
           </table>
         </Section>
 
-        {/* ── 9 · RISK FACTORS ── */}
-        <Section n={9} title="Risk Factors" rpt>
+        {/* ── 9 · INDICATIVE TIMELINE ── */}
+        <Section n={9} title="Indicative Timeline" rpt>
+          <p className="mb-4 text-[13px] leading-relaxed text-[#5b6675]">
+            An indicative path to close of <strong className="text-[#0b1220]">{r.exec.closeLowDays}–{r.exec.closeHighDays} days</strong>,
+            consistent with observed timelines for the qualified acquirer set.
+          </p>
+          <Exhibit label="Exhibit 9A — Path to close" />
+          {(() => {
+            const phases = [
+              { label: "Preparation", w: 18 }, { label: "Buyer Outreach", w: 18 }, { label: "NDA", w: 10 },
+              { label: "LOI", w: 14 }, { label: "Due Diligence", w: 28 }, { label: "Close", w: 12 },
+            ];
+            let acc = 0;
+            return (
+              <>
+                <div className="flex h-9 w-full overflow-hidden rounded-sm">
+                  {phases.map((p, i) => (
+                    <div key={p.label} className="flex items-center justify-center border-r border-white/40 text-[10px] font-semibold text-white last:border-0"
+                      style={{ width: `${p.w}%`, background: `rgba(14,122,79,${0.4 + i * 0.1})` }}>{p.w >= 12 ? p.label : ""}</div>
+                  ))}
+                </div>
+                <div className="mt-1.5 flex justify-between font-mono text-[11px] text-[#5b6675]">
+                  <span>Day 0</span>
+                  {phases.slice(0, -1).map((p) => { acc += p.w; return <span key={p.label}>{Math.round((acc / 100) * r.exec.closeHighDays)}d</span>; })}
+                  <span className="font-semibold text-[#0e7a4f]">Close · {r.exec.closeHighDays}d</span>
+                </div>
+              </>
+            );
+          })()}
+        </Section>
+
+        {/* ── 10 · RISK FACTORS ── */}
+        <Section n={10} title="Risk Factors" rpt>
           <p className="mb-3 text-[13px] leading-relaxed text-[#5b6675]">The factors most likely to be probed in diligence, with the value at stake in each.</p>
           <ol className="space-y-3">
             {r.risks.map((rk, i) => (
@@ -269,13 +301,13 @@ const Report: React.FC = () => {
           </ol>
         </Section>
 
-        {/* ── 10 · DATA PROVENANCE & APPENDIX ── */}
-        <Section n={10} title="Data Provenance & Appendix" rpt>
+        {/* ── 11 · VALUATION VARIABLES & PROVENANCE ── */}
+        <Section n={11} title="Valuation Variables & Provenance" rpt>
           <p className="mb-3 text-[13px] leading-relaxed text-[#5b6675]">
             Every figure in this report traces to a source. {r.provenance.totalFigures} variables underpin the analysis
             {r.provenance.mostRecentDataDate ? `, most recent data as of ${r.provenance.mostRecentDataDate}` : ""}.
           </p>
-          <Exhibit label="Exhibit 10.1 — Key variables and sources" />
+          <Exhibit label="Exhibit 11A — Key variables and sources" />
           <table className="w-full border-collapse text-[11.5px]">
             <thead>
               <tr className="border-b-2 border-[#0b1220] text-left text-[10px] uppercase tracking-wide text-[#5b6675]">
@@ -321,9 +353,9 @@ const Exhibit: React.FC<{ label: string }> = ({ label }) => (
 
 const Section: React.FC<{ n: number | null; title: string; rpt?: boolean; children: React.ReactNode }> = ({ n, title, children }) => (
   <section className="rpt-section px-16 py-12">
-    <div className="mb-5 flex items-baseline gap-3 border-b-2 border-[#0b1220] pb-2">
-      {n != null && <span className="font-mono text-[15px] font-bold text-[#0e7a4f]">{String(n).padStart(2, "0")}</span>}
-      <h2 className="font-serif text-[22px] font-bold text-[#0b1220]">{title}</h2>
+    <div className="mb-5 border-b-2 border-[#0b1220] pb-2.5">
+      {n != null && <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#0e7a4f]">Section {ROMAN[n]}</div>}
+      <h2 className="mt-1 font-serif text-[23px] font-bold uppercase tracking-[0.02em] text-[#0b1220]">{title}</h2>
     </div>
     {children}
   </section>
@@ -333,7 +365,7 @@ const ValuationBar: React.FC<{ low: number; mid: number; high: number; baseline:
   const max = high * 1.08, scale = (n: number): number => (n / max) * 100;
   return (
     <div className="avoid-break mt-6">
-      <Exhibit label="Exhibit 1.1 — Enterprise value range" />
+      <Exhibit label="Exhibit 1A — Enterprise value range" />
       <div className="relative h-12 rounded-sm bg-[#eef1f5]">
         <div className="absolute top-0 h-full rounded-sm bg-[#0e7a4f]/25" style={{ left: `${scale(low)}%`, width: `${scale(high) - scale(low)}%` }} />
         <div className="absolute top-0 h-full w-[2px] bg-[#0b1220]" style={{ left: `${scale(baseline)}%` }} title="Financial baseline" />

@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Panel, Frame, CommandHeader } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { runInstitutionalValuation } from "@exit/engines";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { buildOutreachPlan } from "../lib/outreach-plan";
@@ -20,11 +21,12 @@ const OutreachPlan: React.FC = () => {
   const baseline = useMemo(() => runInstitutionalValuation(company).financialBaseline.mid, [company]);
   const tokens = useMemo(() => activeTokens(company), [company]);
   const plan = useMemo(() => buildOutreachPlan(baseline, tokens, 20), [baseline, tokens]);
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Exchange · Execution"
+        kicker="◉ Exchange · Execution"
         title="Buyer Outreach Plan"
         tag={fromIntake ? "Your mandate" : company.name}
         status="Sequenced"
@@ -37,6 +39,7 @@ const OutreachPlan: React.FC = () => {
         note={<span className="text-white/70">{plan.summary}</span>}
       />
 
+      <MarketTape items={tape} />
 
       <Frame>
         {plan.waves.map((w) => (

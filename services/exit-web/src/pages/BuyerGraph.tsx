@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { inputCls } from "../lib/ui";
-import { Panel, Frame, CommandHeader, Evidence } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, Evidence } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
+import { BuyerNetworkReactor } from "../components/Reactor";
 import {
   DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS,
   sectorOverlap, recommendedAction, fmtUsdShort, rankedBuyers, type DnaProfile,
@@ -106,11 +108,12 @@ const BuyerGraph: React.FC = () => {
   const withEvents = DNA_PROFILES.filter((p) => p.events_indexed > 0).length;
   const highAppetite = DNA_PROFILES.filter((p) => p.appetite === "high").length;
   const RANKED = useMemo(() => rankedBuyers(12), []);
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Market Intelligence"
+        kicker="◉ Market Intelligence"
         title="Buyer Graph"
         tag="The moat"
         meta={[
@@ -126,10 +129,15 @@ const BuyerGraph: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={tape} />
 
       {/* ── Acquisition Probability — the crown-jewel ranking ── */}
       <Frame>
-        <Panel title="Acquisition probability · who is most likely to buy you" className="lg:col-span-12"
+        <Panel title="Buyer network reactor" className="lg:col-span-3"
+          foot="Active acquirers, node size ∝ 12-month cadence, green = ≥2 deals.">
+          <BuyerNetworkReactor height={260} />
+        </Panel>
+        <Panel title="Acquisition probability · who is most likely to buy you" className="lg:col-span-9"
           right={<span className="text-[9px] uppercase tracking-wide text-white/35">top {RANKED.length} of {withEvents} active</span>}
           foot={`Ranked for ${SAMPLE_COMPANY.name} — appetite × sector overlap × velocity × recency. Every buyer traces to a source on record.`}>
           <table className="w-full text-[12px]">

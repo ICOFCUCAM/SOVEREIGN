@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, fmtMoney } from "../lib/ui";
-import { CommandHeader } from "../lib/workstation";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import BankerTake from "../components/BankerTake";
 import { OFFER_WATERFALLS, SAMPLE_OFFERS, OFFER_COMPARISON, CAPTABLE_ANALYSIS } from "../lib/engines";
 
@@ -63,7 +64,7 @@ const Wealth: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Wealth · Liquidity"
+        kicker="◉ Wealth · Liquidity"
         title="WealthOS"
         tag="After the wire"
         metrics={[
@@ -73,6 +74,7 @@ const Wealth: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={buildMarketTape()} />
 
       <BankerTake
         next={<>At lock-up, move <span className="text-white">{Math.round(ALLOC[0].pct * 100)}%</span> of your after-tax proceeds out of concentrated stock and into a diversified portfolio.</>}

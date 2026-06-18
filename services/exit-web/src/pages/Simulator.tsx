@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, Field, fmtMoney, ConfidenceChip, inputCls } from "../lib/ui";
-import { CommandHeader } from "../lib/workstation";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { runStrategySimulator, runValuation, type BuyerType, type CompanyProfile, type StrategyOutput } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { VALUATION_STRATEGIC } from "../lib/engines";
@@ -239,7 +240,7 @@ const Simulator: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Decision Engine"
+        kicker="◉ Decision Engine"
         title="Scenario Engine"
         tag="Simulate futures"
         metrics={[
@@ -249,6 +250,7 @@ const Simulator: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={buildMarketTape()} />
 
       <BankerTake
         next={<>Stress-test the plan before you commit — model waiting, scaling to $25M ARR, or a marquee entrant.</>}

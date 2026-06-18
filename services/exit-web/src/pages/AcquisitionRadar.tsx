@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { Field, inputCls, Button, notify } from "../lib/ui";
-import { Panel, Frame, Rail, CommandHeader, CommandState } from "../lib/workstation";
+import { Panel, Frame, Rail, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
+import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
 import { allListings, subscribeListings } from "../lib/listings";
@@ -71,11 +73,12 @@ const AcquisitionRadar: React.FC = () => {
 
   const toggle = <T,>(arr: T[], v: T, set: (x: T[]) => void): void => set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
   const maxActiveBuyers = watch.reduce((m, i) => Math.max(m, i.activeBuyers), 0);
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Buyer Console"
+        kicker="◉ Buyer Console"
         title="Acquisition Command Center"
         tag="Mandate"
         meta={[
@@ -92,6 +95,7 @@ const AcquisitionRadar: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={tape} />
 
       <CommandState
         current={<><span className="font-mono text-white">{sectors.length}</span> target sectors · {listings.length} live listings · {regions.length} regions</>}
@@ -137,6 +141,7 @@ const AcquisitionRadar: React.FC = () => {
             </div>
           </div>
         </Panel>
+        <Panel title="Intelligence rail · live telemetry"><ReactorTelemetry /></Panel>
         </Rail>
 
         {/* matched opportunities — the scored pool, anonymized */}
@@ -209,7 +214,11 @@ const AcquisitionRadar: React.FC = () => {
 
       {/* sector watch — buyer-lens intelligence */}
       <Frame>
-        <Panel title="Sector watch · your space" className="lg:col-span-12"
+        <Panel title="Acquisition reactor · your sectors" className="lg:col-span-4"
+          foot="Sector acquisition volume across the network — node size ∝ √volume, colour = trend.">
+          <AcquisitionReactor height={208} />
+        </Panel>
+        <Panel title="Sector watch · your space" className="lg:col-span-8"
           foot={<>Live ExitOS Acquisition Indexes for your mandate. Full set in <Link to="/console/indexes" className="text-deal-300 hover:text-deal-200">Acquisition Indexes</Link>.</>}>
           {watch.length ? (
             <table className="w-full text-[12px]">

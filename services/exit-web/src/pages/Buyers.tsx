@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, Field, inputCls, fmtMoney, copyText } from "../lib/ui";
-import { Panel, Frame, CommandHeader } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { BUYERS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import type { BuyerCandidate } from "@exit/engines";
@@ -68,11 +69,12 @@ const Buyers: React.FC = () => {
   const medianCheckUsd = medianCheck ? (medianCheck.buyer.checkSizeLowUsd + medianCheck.buyer.checkSizeHighUsd) / 2 : 0;
 
   const [intro, setIntro] = useState<{ name: string; text: string } | null>(null);
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Sourcing"
+        kicker="◉ Sourcing"
         title="Buyer Marketplace"
         tag="Profiles ranked"
         metrics={[
@@ -83,6 +85,7 @@ const Buyers: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={tape} />
 
       {/* ── Filter ────────────────────────────────────────────────── */}
       <Modal open={filterOpen} onClose={() => setFilterOpen(false)} title="Filter buyers" subtitle={`${candidates.length} of ${all.length} match`} size="md"

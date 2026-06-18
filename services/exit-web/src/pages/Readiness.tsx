@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fmtMoney, notify } from "../lib/ui";
-import { Panel, Frame, CommandHeader, CommandState, Evidence } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, CommandState, Evidence } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { READINESS_ANALYSIS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { EXIT_SCORE, READINESS_BAND, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VALUE_LEFT_USD, READINESS_CATEGORIES } from "../lib/deal-context";
@@ -60,11 +61,12 @@ const Readiness: React.FC = () => {
       notify(`Re-scored · ${EXIT_SCORE}/100 (${READINESS_BAND.replace(/_/g, " ")}) — ${READINESS_CATEGORIES.length} categories re-evaluated`);
     }, 700);
   };
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Readiness Desk"
+        kicker="◉ Readiness Desk"
         title="Exit Readiness"
         tag={READINESS_BAND.replace(/_/g, " ")}
         status={verdict.label}
@@ -82,6 +84,7 @@ const Readiness: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={tape} />
 
       <CommandState
         current={<>Readiness <span className="font-mono text-white">{score.toFixed(0)}/100</span> ({READINESS_BAND.replace(/_/g, " ")}) · value {fmtMoney(current)}</>}

@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { fmtMoney } from "../lib/ui";
-import { Panel, Frame, CommandHeader, CommandState } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import BankerTake from "../components/BankerTake";
 import { READINESS_ANALYSIS, BUYERS, VALUATION_STANDARD } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -61,11 +62,12 @@ const ExitTiming: React.FC = () => {
     { label: "Your trajectory", value: `${Math.round(growthYoy * 100)}% ARR growth`, trend: "compounding", impact: "tailwind", note: "Each quarter lifts the headline into a higher band." },
   ];
   const tailwinds = signals.filter((s) => s.impact === "tailwind").length;
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Timing Desk"
+        kicker="◉ Timing Desk"
         title="Exit Timing"
         tag="Monitor"
         status={`${tailwinds}/${signals.length} tailwinds`}
@@ -83,6 +85,7 @@ const ExitTiming: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={tape} />
 
       <CommandState
         current={<>Sell-today <span className="font-mono text-white">{fmtMoney(current)}</span> · growth {Math.round(growthYoy * 100)}% · {tailwinds >= signals.length / 2 ? "conditions favourable" : "mixed conditions"}</>}

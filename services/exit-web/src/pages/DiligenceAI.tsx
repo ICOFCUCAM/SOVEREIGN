@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Button, Card, fmtMoney, downloadText, downloadJson, notify } from "../lib/ui";
-import { CommandHeader } from "../lib/workstation";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { DILIGENCE } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 import {
@@ -55,7 +56,7 @@ const DiligenceAI: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="Due Diligence"
+        kicker="◉ Due Diligence"
         title="AI Due Diligence"
         tag="Buyer + Seller reports"
         status={high > 0 ? `${high} high severity` : "Clean"}
@@ -67,6 +68,7 @@ const DiligenceAI: React.FC = () => {
         ]}
       />
 
+      <MarketTape items={buildMarketTape()} />
 
       <div className="flex justify-end">
         <Button variant="ghost" onClick={rerun} disabled={rerunning}>{rerunning ? "Re-running…" : "Re-run analysis"}</Button>
