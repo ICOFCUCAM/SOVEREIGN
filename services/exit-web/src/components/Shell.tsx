@@ -6,6 +6,7 @@ import { navForRole, needsUpgrade, GROUP_ORDER, ROLE_LABEL, type NavItem, type R
 import { ExchangeMark } from "./ExchangeMark";
 import InstitutionalRibbon from "./InstitutionalRibbon";
 import LayerBar from "./LayerBar";
+import LayerSubNav from "./LayerSubNav";
 
 // Role-aware console rail. The navigation is driven by the access policy:
 // founders, buyers, admins and superadmins see different command centers, and
@@ -140,6 +141,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <div className="sticky top-0 z-30">
             <InstitutionalRibbon />
             <LayerBar />
+            <LayerSubNav />
           </div>
           {/* ambient reactor layer — the homepage exchange DNA, inside the
               console: faint market grid, a top liquidity glow, and the
