@@ -6,9 +6,10 @@ import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
-import { allListings, subscribeListings } from "../lib/listings";
+import { allListings, subscribeListings, type Listing } from "../lib/listings";
 import { captureDealEvent } from "../lib/deal-events";
 import { requestNda, submitOffer, startDeal, advanceDeal, saveMandate, myMandate } from "../lib/exit-api";
+import PublishComposer from "../components/PublishComposer";
 import type { Region } from "@exit/engines";
 
 // BUYER ACQUISITION COMMAND CENTER — the other side of the exchange. A buyer
@@ -32,6 +33,7 @@ const AcquisitionRadar: React.FC = () => {
   const [offered, setOffered] = useState<Record<string, boolean>>({});
   const [watched, setWatched] = useState<Record<string, boolean>>({});
   const [savedMandate, setSavedMandate] = useState(false);
+  const [publish, setPublish] = useState<Listing | null>(null);
 
   // hydrate the form from the buyer's persisted mandate, if one exists
   useEffect(() => {
@@ -197,6 +199,9 @@ const AcquisitionRadar: React.FC = () => {
                     }}
                     className="rounded-md px-2 py-1 text-[11px] font-semibold text-white/60 ring-1 ring-white/10 transition hover:text-white">{watched[l.id] ? "★ Following" : "☆ Follow"}</button>
                   <button
+                    onClick={() => setPublish(l)}
+                    className="rounded-md px-2 py-1 text-[11px] font-semibold text-deal-300 ring-1 ring-deal-400/30 transition hover:bg-deal-600/10">↗ Publish</button>
+                  <button
                     onClick={() => {
                       // a single buyer action: captured telemetry the founder
                       // sees on their listing, AND a first-class NDA request
@@ -262,6 +267,8 @@ const AcquisitionRadar: React.FC = () => {
           ) : <div className="px-3 py-3 text-[12px] text-white/45">Select target sectors to see their acquisition indexes.</div>}
         </Panel>
       </Frame>
+
+      <PublishComposer listing={publish ?? undefined} open={!!publish} onClose={() => setPublish(null)} />
     </div>
   );
 };

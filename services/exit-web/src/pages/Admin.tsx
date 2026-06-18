@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Card, Kpi, SectionHeader, Button, Field, inputCls, notify } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { ROLE_LABEL, type Role, type Plan } from "../lib/access";
+import { CHANNELS, useSocialConfig, isAutoConnected, type SocialChannel } from "../lib/social-publish";
 
 // Admin console — the back office. Account roster, plan mix and system status,
 // plus the superadmin's ability to provision admin accounts. Illustrative data
@@ -108,7 +109,47 @@ const Admin: React.FC = () => {
           ))}
         </div>
       </Card>
+
+      <SocialDistribution />
     </div>
+  );
+};
+
+// ── Social distribution — connect the aggregator that fans ExitOS posts out ──
+const ALL_CHANNELS = CHANNELS;
+const SocialDistribution: React.FC = () => {
+  const [cfg, setCfg] = useSocialConfig();
+  const [url, setUrl] = useState(cfg.webhookUrl);
+  const [channels, setChannels] = useState<SocialChannel[]>(cfg.channels);
+  const connected = isAutoConnected({ webhookUrl: url, channels });
+  const toggle = (c: SocialChannel): void => setChannels((s) => (s.includes(c) ? s.filter((x) => x !== c) : [...s, c]));
+  const save = (): void => { setCfg({ webhookUrl: url.trim(), channels }); notify(connected ? "Social distribution connected" : "Saved — add a webhook URL to enable one-click broadcast"); };
+
+  return (
+    <Card className="mt-6 p-6">
+      <div className="flex items-center justify-between">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">Social distribution</div>
+        <span className={`flex items-center gap-1.5 text-[11px] ${connected ? "text-deal-300" : "text-loi-300"}`}><span className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-deal-400" : "bg-loi-400"}`} />{connected ? "Connected" : "Not connected"}</span>
+      </div>
+      <p className="mt-2 text-[12.5px] leading-relaxed text-white/55">
+        Connect an aggregator webhook (Make / Zapier / Ayrshare proxy / your own backend) that holds ExitOS's social
+        credentials and posts to every connected account. The browser only sends the composed post — no secret lives
+        client-side. Until a URL is set, the Publish button opens each network's official composer instead.
+      </p>
+      <Field label="Aggregator webhook URL" hint="POST { title, text, body, url, hashtags, channels } — your endpoint fans out to the accounts">
+        <input className={inputCls} placeholder="https://hook.make.com/…" value={url} onChange={(e) => setUrl(e.target.value)} />
+      </Field>
+      <div className="mt-3">
+        <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Channels</div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {ALL_CHANNELS.map((c) => (
+            <button key={c.id} onClick={() => toggle(c.id)}
+              className={`rounded-md px-2.5 py-1 text-[12px] font-semibold ring-1 transition ${channels.includes(c.id) ? "bg-deal-600/20 text-deal-200 ring-deal-400/40" : "text-white/55 ring-white/15 hover:text-white"}`}>{c.label}</button>
+          ))}
+        </div>
+      </div>
+      <div className="mt-4"><Button onClick={save}>Save distribution settings</Button></div>
+    </Card>
   );
 };
 
