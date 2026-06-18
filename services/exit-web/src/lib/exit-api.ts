@@ -3,6 +3,7 @@ import { setPersistenceAdapter } from "./deal-events";
 import type { Listing } from "./listings";
 import { setListingsAdapter } from "./listings";
 import { SupabaseExitApi, supabaseConfigFromEnv } from "./supabase-exit-api";
+import { ensureSupabaseSession } from "./supabase-auth";
 
 // ── THE EXIT-API CONTRACT ───────────────────────────────────────────
 // The boundary between this client and the multi-tenant backend. The whole
@@ -296,19 +297,37 @@ export function createExitApi(): ExitApiClient {
 // One durable client the running app talks to, chosen by createExitApi().
 // Every consumer only ever touches the stores, never this client directly —
 // so the dependency injection above is the entire backend-swap surface.
-export const backend: ExitApiClient = createExitApi();
+let active: ExitApiClient = createExitApi();
+
+/** The live client, for query accessors. */
+export function backendClient(): ExitApiClient { return active; }
 
 /** Activate the live backend for a signed-in account: point every store at
- *  it so this session is durable and account-scoped. Called on sign-in. */
+ *  it so this session is durable and account-scoped. Called on sign-in.
+ *
+ *  With Supabase selected we first obtain a real authenticated session so
+ *  the backend runs as that user (RLS scopes to auth.uid()), and bind the
+ *  account id to the auth user id. If auth is unreachable or disabled, we
+ *  fall back to the durable local backend so the app never breaks. */
 export async function activateBackend(account: Account): Promise<void> {
-  await connectExitApi(backend, account);
+  if (active instanceof SupabaseExitApi) {
+    try {
+      const session = await ensureSupabaseSession(active.config);
+      active.setAccessToken(session.accessToken);
+      account = { ...account, id: session.userId };   // account id == auth.uid()
+    } catch (err) {
+      console.warn("[exitos] Supabase auth unavailable — using durable local backend.", err);
+      active = new LocalStorageExitApi();
+    }
+  }
+  await connectExitApi(active, account);
 }
 
 /** Query accessor — events targeting a subject (a listing the founder owns,
  *  a buyer) across ALL actors. This is how a founder sees the buyer interest
  *  and NDA requests landing on their listing. */
 export async function eventsForSubject(subjectId: string): Promise<DealEvent[]> {
-  return backend.listEventsForSubject(subjectId);
+  return active.listEventsForSubject(subjectId);
 }
 
 /** Point the app's stores at a backend. After this, captured events and
