@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Card, Modal, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, Modal, SectionHeader, fmtMoney, notify } from "../lib/ui";
 import { VALUATION_STRATEGIC, VALUATION_INSTITUTIONAL, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON, DILIGENCE } from "../lib/engines";
 import { discoverFindings, buildSellerReport } from "../lib/diligence-intel";
 import {
   institutionalValuationMemo, buyerShortlistMemo, riskReportDoc,
   outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, closingChecklistDoc, wealthPlanDoc,
-  sendDeliverable, downloadDeliverable,
+  downloadDeliverable,
 } from "../lib/deliverables";
 import { emitTelemetry } from "../lib/telemetry";
 import { useAuth } from "../lib/auth";
@@ -31,6 +31,7 @@ interface AgentDef {
   decision: string;            // the single decision the founder approves
   approveLabel: string;
   deliverable: { filename: string; build: () => string };
+  reportPath?: string;          // institutional A4 PDF document, where one exists
 }
 
 const STATUS_STYLE: Record<AgentStatus, string> = {
@@ -128,6 +129,7 @@ const Autopilot: React.FC = () => {
       ),
       decision: `Set the asking range anchored at ${fmtMoney(mid)} strategic mid?`, approveLabel: "Approve the ask",
       deliverable: { filename: "institutional-valuation.md", build: () => institutionalValuationMemo(VALUATION_INSTITUTIONAL) },
+      reportPath: "/report/valuation",
     },
     {
       id: "discovery", name: "Buyer Discovery Agent", role: "Finds and ranks acquirers.",
@@ -140,6 +142,7 @@ const Autopilot: React.FC = () => {
       ),
       decision: `Approve the ${shortlist.length}-buyer target list?`, approveLabel: "Approve the list",
       deliverable: { filename: "buyer-target-list.md", build: () => buyerShortlistMemo(shortlist, "Project Cipher") },
+      reportPath: "/report/buyers",
     },
     {
       id: "outreach", name: "Outreach Agent", role: "Drafts and runs the approach.",
@@ -168,6 +171,7 @@ const Autopilot: React.FC = () => {
       ),
       decision: "Approve the pre-market remediation plan and disclosure schedule?", approveLabel: "Approve the plan",
       deliverable: { filename: "seller-diligence-report.md", build: () => riskReportDoc(sellerReport) },
+      reportPath: "/report/readiness",
     },
     {
       id: "negotiation", name: "Negotiation Agent", role: "Scores offers and counters.",
@@ -252,9 +256,11 @@ const Autopilot: React.FC = () => {
   };
   const starterGated = isStarter && statuses[GATE] === "done";
 
+  // "Send" delivers the agent's work product into the deal process — it records
+  // the send and notifies, rather than downloading a raw .md to the founder.
   const send = (a: AgentDef): void => {
-    sendDeliverable(a.deliverable.filename, a.deliverable.build());
     setSent((prev) => new Set(prev).add(a.id));
+    notify(`${a.name} deliverable sent to the deal room`);
   };
 
   const doneCount = statuses.filter((s) => s === "done").length;
@@ -276,7 +282,9 @@ const Autopilot: React.FC = () => {
       {/* ── Review / Adjust modal ─────────────────────────────────── */}
       <Modal open={!!reviewAgent} onClose={() => setReviewIdx(null)} title={reviewAgent ? reviewAgent.name : ""} subtitle={reviewAgent?.role} size="lg"
         footer={reviewAgent ? <>
-          <Button variant="ghost" onClick={() => downloadDeliverable(reviewAgent.deliverable.filename, reviewAgent.deliverable.build())}>Download deliverable</Button>
+          {reviewAgent.reportPath
+            ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-deal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">Open board-ready PDF →</a>
+            : <Button variant="ghost" onClick={() => downloadDeliverable(reviewAgent.deliverable.filename, reviewAgent.deliverable.build())}>Download draft (.md)</Button>}
           <Button onClick={() => { send(reviewAgent); }}>{sent.has(reviewAgent.id) ? "Sent ✓ · resend" : "Send deliverable"}</Button>
         </> : null}>
         {reviewAgent && (
@@ -401,7 +409,9 @@ const Autopilot: React.FC = () => {
                       <span className="text-[11px] font-semibold uppercase tracking-wide text-deal-300">✓ Approved</span>
                       <span className="text-white/20">·</span>
                       <button className="text-[11px] font-semibold uppercase tracking-wide text-white/55 hover:text-white" onClick={() => setReviewIdx(i)}>Review</button>
-                      <button className="text-[11px] font-semibold uppercase tracking-wide text-white/55 hover:text-white" onClick={() => downloadDeliverable(a.deliverable.filename, a.deliverable.build())}>Download</button>
+                      {a.reportPath
+                        ? <a className="text-[11px] font-semibold uppercase tracking-wide text-white/55 hover:text-white" href={a.reportPath} target="_blank" rel="noopener noreferrer">PDF →</a>
+                        : <button className="text-[11px] font-semibold uppercase tracking-wide text-white/55 hover:text-white" onClick={() => downloadDeliverable(a.deliverable.filename, a.deliverable.build())}>Download .md</button>}
                       <button className="text-[11px] font-semibold uppercase tracking-wide text-deal-300 hover:text-deal-200" onClick={() => send(a)}>{sent.has(a.id) ? "Sent ✓" : "Send"}</button>
                     </div>
                   )}

@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Modal, fmtMoney } from "../lib/ui";
+import { Button, Card, Modal, fmtMoney, notify } from "../lib/ui";
 import { CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { useMemorandum, VALUATION_STRATEGIC } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
-import { docToMarkdown, docFilename, sendDeliverable, downloadDeliverable } from "../lib/deliverables";
+import { docToMarkdown, docFilename, downloadDeliverable } from "../lib/deliverables";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -94,9 +94,13 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
 
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [sent, setSent] = useState<Set<string>>(new Set());
-  const markSent = (k: MemorandumKind, text: string, filename: string): void => {
-    sendDeliverable(filename, text);
+  // "Send" delivers the document to the buyer's data room — it records the send
+  // and notifies, rather than dumping a raw .md to the founder's disk. The
+  // explicit "Download draft (.md)" / "Board-ready report (PDF)" actions remain
+  // for when the founder actually wants the file.
+  const markSent = (k: MemorandumKind): void => {
     setSent((prev) => new Set(prev).add(k));
+    notify("Delivered to the buyer's data room");
   };
 
   return (
@@ -121,7 +125,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
         <a href="/report" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-md border border-white/15 px-3.5 py-2 text-sm font-semibold text-white/75 transition hover:bg-white/5">Publishing Center →</a>
         <a href="/report/valuation" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-md bg-deal-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">Board-ready report (PDF) →</a>
         {doc && <Button variant="ghost" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download draft (.md)</Button>}
-        {doc && <Button onClick={() => markSent(doc.kind, docToMarkdown(doc), docFilename(doc))}>{sent.has(doc.kind) ? "Sent ✓ · resend" : "Send to buyer"}</Button>}
+        {doc && <Button onClick={() => markSent(doc.kind)}>{sent.has(doc.kind) ? "Sent ✓ · resend" : "Send to buyer"}</Button>}
       </div>
 
       {/* ── Document library ──────────────────────────────────────── */}

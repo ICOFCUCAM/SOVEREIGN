@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { ExchangeMark } from "../components/ExchangeMark";
 
 // ── INSTITUTIONAL PUBLISHING LAYER ──────────────────────────────────
 // The shared vocabulary every ExitOS document is set in — cover, numbered
@@ -18,15 +19,15 @@ export const ReportFrame: React.FC<{ docType: string; company: string; framework
   const nav = useNavigate();
   const ref = reference ?? docReference(docType, company, new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
   return (
-    <div className="min-h-screen bg-[#0a1018] py-8">
+    <div className="rpt-shell min-h-screen bg-[#0a1018] py-8">
       <style>{REPORT_CSS}</style>
       <div className="no-print mx-auto mb-5 flex max-w-[840px] items-center justify-between px-4">
         <button onClick={() => nav(-1)} className="rounded-md border border-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/70 hover:bg-white/5">← Back</button>
         <div className="text-[12px] text-white/45">{docType} · {company}</div>
         <button onClick={() => window.print()} className="rounded-md bg-deal-600 px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-500">Download PDF →</button>
       </div>
-      <div className="rpt mx-auto max-w-[840px] bg-white text-[#0b1220] shadow-2xl shadow-black/50">
-        <div className="rpt-fixed-header no-screen"><span>{company}</span><span>{docType}</span></div>
+      <div className="rpt mx-auto text-[#0b1220]">
+        <div className="rpt-fixed-header no-screen"><span className="flex items-center gap-1.5"><ExchangeMark size={11} tile={false} className="text-[#0e7a4f]" /> {company}</span><span>{docType}</span></div>
         <div className="rpt-fixed-footer no-screen"><span>ExitOS Advisory · Strictly Private &amp; Confidential</span><span>{ref} · Framework v{frameworkVersion}</span></div>
         <div className="rpt-watermark no-screen">CONFIDENTIAL</div>
         {children}
@@ -57,7 +58,7 @@ export const Cover: React.FC<{
       <g stroke={NAVY} strokeOpacity="0.05" strokeWidth="0.5">{Array.from({ length: 14 }, (_, i) => <line key={i} x1={i * 16} y1="200" x2={i * 16 + 60} y2="0" />)}</g>
     </svg>
     <div className="relative flex items-center gap-3">
-      <span className="inline-flex h-8 w-8 items-center justify-center rounded-sm bg-[#0e7a4f] font-mono text-[14px] font-bold text-white">E</span>
+      <ExchangeMark size={34} detail title="ExitOS" />
       <span className="text-[12px] font-semibold uppercase tracking-[0.34em] text-[#0e7a4f]">ExitOS Acquisition Exchange</span>
     </div>
     <div className="relative mt-auto">
@@ -197,13 +198,43 @@ export const REPORT_CSS = `
 .tnum { font-variant-numeric: tabular-nums lining-nums; }
 .no-screen { display: none; }
 .rpt-watermark { display: none; }
+
+/* ── On-screen pagination — each section reads as a discrete A4 sheet ── */
+@media screen {
+  .rpt { counter-reset: rptpage; }
+  .rpt > section {
+    position: relative;
+    width: 210mm;
+    max-width: 100%;
+    min-height: 297mm;
+    margin: 0 auto 26px;
+    background: #ffffff;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+    counter-increment: rptpage;
+  }
+  .rpt > section::after {
+    content: "ExitOS · Strictly Private & Confidential";
+    position: absolute; left: 18mm; bottom: 11mm;
+    font: 500 8.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.06em; color: #9aa3b0;
+  }
+  .rpt > section::before {
+    content: "Page " counter(rptpage);
+    position: absolute; right: 18mm; bottom: 11mm;
+    font: 600 8.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.06em; color: #9aa3b0; z-index: 1;
+  }
+  .rpt > section.rpt-cover::after, .rpt > section.rpt-cover::before { content: none; }
+}
 @media print {
   @page { size: A4; margin: 18mm 15mm 20mm; }
   @page { @bottom-center { content: "ExitOS Advisory  ·  Strictly Private & Confidential"; font-size: 8px; color: #9aa3b0; } @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8px; color: #9aa3b0; } }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   html, body { background: #ffffff !important; }
   .no-print { display: none !important; }
-  .rpt { box-shadow: none !important; max-width: none !important; width: 100% !important; margin: 0 !important; }
+  .rpt-shell { background: #ffffff !important; padding: 0 !important; min-height: 0 !important; }
+  .rpt { box-shadow: none !important; max-width: none !important; width: 100% !important; margin: 0 !important; background: #ffffff !important; }
+  .rpt > section { background: #ffffff !important; width: auto !important; min-height: 0 !important; box-shadow: none !important; }
   .rpt-section, .rpt-cover { break-before: page; }
   .rpt-cover { break-before: avoid; break-after: page; min-height: 0 !important; }
   .avoid-break { break-inside: avoid; }
