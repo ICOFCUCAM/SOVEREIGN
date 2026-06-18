@@ -20,6 +20,17 @@ const REGION_OF: Record<string, Region> = {
   australia: 'Oceania', 'new zealand': 'Oceania',
   brazil: 'Latin America', mexico: 'Latin America', argentina: 'Latin America', chile: 'Latin America', colombia: 'Latin America',
   'south africa': 'Africa', nigeria: 'Africa', kenya: 'Africa', egypt: 'Africa',
+  // ISO 3166 alpha-2 codes (company jurisdictions are stored as codes)
+  ca: 'North America', mx: 'Latin America',
+  gb: 'Europe', de: 'Europe', fr: 'Europe', nl: 'Europe', ie: 'Europe', se: 'Europe',
+  ch: 'Europe', es: 'Europe', it: 'Europe', dk: 'Europe', no: 'Europe', fi: 'Europe',
+  be: 'Europe', at: 'Europe', pl: 'Europe', pt: 'Europe',
+  cn: 'Asia', jp: 'Asia', in: 'Asia', sg: 'Asia', kr: 'Asia', hk: 'Asia', tw: 'Asia',
+  id: 'Asia', vn: 'Asia', th: 'Asia', my: 'Asia',
+  il: 'Middle East', ae: 'Middle East', sa: 'Middle East', qa: 'Middle East',
+  au: 'Oceania', nz: 'Oceania',
+  br: 'Latin America', ar: 'Latin America', cl: 'Latin America', co: 'Latin America',
+  za: 'Africa', ng: 'Africa', ke: 'Africa', eg: 'Africa',
 };
 
 export function regionOf(country: string | null | undefined): Region {
