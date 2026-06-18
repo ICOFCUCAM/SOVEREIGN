@@ -4,7 +4,7 @@ import { useAuth } from "../lib/auth";
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
 import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, fmtUsdShort } from "../lib/buyer-dna";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
-import { Panel, CommandHeader, MarketTape } from "../lib/workstation";
+import { Panel, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 
@@ -102,6 +102,13 @@ const Terminal: React.FC = () => {
       />
 
       <MarketTape items={tape} />
+
+      <CommandState
+        current={<>EV <span className="font-mono text-white">{fmtUsdShort(INST.headline.mid)}</span> · readiness <span className="font-mono text-white">{Math.round(ra.currentScore)}</span> · {INST.buyerUniverse.qualified} qualified buyers</>}
+        changes={<>{ACTIVE.length} acquirers active in your space · {INST.comparablesUsed} comparable transactions indexed</>}
+        action={lead ? <>Open outreach to <span className="font-semibold text-white">{lead.profile.name}</span> — {lead.probability.pct}% likely, exp. {fmtUsdShort(lead.exp.expectedClose)}</> : <>List on the exchange to surface the buyer set</>}
+        outcome={<>Strategic range <span className="font-mono text-white">{fmtUsdShort(INST.headline.low)}–{fmtUsdShort(INST.headline.high)}</span> · close ~{leadCloseDays}d · +{fmtUsdShort(uplift)} readiness uplift</>}
+      />
 
       {/* ── WORKSTATION GRID ── hairline-separated panels in one frame ── */}
       <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 lg:grid-cols-12">

@@ -80,6 +80,34 @@ export const MarketTape: React.FC<{ items: TapeItem[] }> = ({ items }) => {
   );
 };
 
+// ── COMMAND STATE ───────────────────────────────────────────────────
+// The four questions every workstation must answer, as one bordered strip:
+// what IS happening, what CHANGED, what to DO, what to EXPECT. Color-coded
+// quadrants so the eye reads state → change → action → outcome left to right.
+export const CommandState: React.FC<{
+  current: React.ReactNode;
+  changes: React.ReactNode;
+  action: React.ReactNode;
+  outcome: React.ReactNode;
+}> = ({ current, changes, action, outcome }) => {
+  const cells: { k: string; tone: string; body: React.ReactNode }[] = [
+    { k: "Current state", tone: "text-white/45", body: current },
+    { k: "Recent changes", tone: "text-amber-300/80", body: changes },
+    { k: "Recommended action", tone: "text-deal-300", body: action },
+    { k: "Expected outcome", tone: "text-sky-300/80", body: outcome },
+  ];
+  return (
+    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+      {cells.map((c) => (
+        <div key={c.k} className="bg-ink-900 px-3 py-2">
+          <div className={`text-[8.5px] font-semibold uppercase tracking-[0.18em] ${c.tone}`}>{c.k}</div>
+          <div className="mt-1 text-[12px] leading-snug text-white/80">{c.body}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export interface MetricCell { k: string; v: React.ReactNode; accent?: boolean; sub?: React.ReactNode }
 
 const STRIP_COLS: Record<number, string> = {
