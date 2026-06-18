@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { InMemoryExitApi, LocalStorageExitApi, connectExitApi, activateBackend, eventsForSubject, type Account } from "./exit-api.js";
+import { InMemoryExitApi, LocalStorageExitApi, connectExitApi, activateBackend, eventsForSubject, type Account, type ExitApiClient } from "./exit-api.js";
+import { SupabaseExitApi } from "./supabase-exit-api.js";
 import { captureDealEvent, allDealEvents, clearDealEvents } from "./deal-events.js";
 import { listCompany, allListings } from "./listings.js";
 import { buildProfile, SAMPLE_INTAKE } from "./company-intake.js";
@@ -102,3 +103,121 @@ describe("durable backend — the live, account-scoped exit-api singleton", () =
     expect((await eventsForSubject("lst-target")).some((e) => e.kind === "nda_signed")).toBe(true);
   });
 });
+
+// the contract is now COMPLETE — exercise every entity the network needs
+describe("the complete contract — organizations, NDA, offers, documents, notifications", () => {
+  it("organizations: an account sees the orgs it owns or belongs to", async () => {
+    const api = new InMemoryExitApi();
+    await api.upsertOrganization({ id: "org-1", name: "Vista", ownerAccountId: founder.id, memberIds: [], createdAt: new Date().toISOString() });
+    await api.upsertOrganization({ id: "org-2", name: "KKR", ownerAccountId: "someone", memberIds: [buyer.id], createdAt: new Date().toISOString() });
+    expect((await api.listOrganizationsForAccount(founder.id)).map((o) => o.id)).toEqual(["org-1"]);
+    expect((await api.listOrganizationsForAccount(buyer.id)).map((o) => o.id)).toEqual(["org-2"]);
+  });
+
+  it("NDA requests carry a lifecycle the founder resolves", async () => {
+    const api = new InMemoryExitApi();
+    const r = await api.createNdaRequest({ listingId: "lst-1", buyerAccountId: buyer.id });
+    expect(r.status).toBe("requested");
+    expect((await api.listNdaRequests({ listingId: "lst-1" })).length).toBe(1);
+    const signed = await api.updateNdaRequest(r.id, { status: "signed" });
+    expect(signed.status).toBe("signed");
+    expect(signed.resolvedAt).not.toBeNull();
+  });
+
+  it("offers, documents and notifications round-trip", async () => {
+    const api = new InMemoryExitApi();
+    const offer = await api.createOffer({ listingId: "lst-1", buyerAccountId: buyer.id, amountUsd: 42e6 });
+    expect((await api.listOffers({ buyerAccountId: buyer.id }))[0].amountUsd).toBe(42e6);
+    expect((await api.updateOffer(offer.id, { status: "accepted" })).status).toBe("accepted");
+
+    await api.putDocument({ listingId: "lst-1", name: "CIM.pdf", kind: "cim", uri: "s3://x", visibility: "post_nda", uploadedByAccountId: founder.id });
+    expect((await api.listDocuments("lst-1")).length).toBe(1);
+
+    const n = await api.pushNotification({ accountId: founder.id, kind: "nda_event", subjectId: "lst-1", message: "Buyer requested NDA" });
+    expect((await api.listNotifications(founder.id))[0].read).toBe(false);
+    await api.markNotificationRead(n.id);
+    expect((await api.listNotifications(founder.id))[0].read).toBe(true);
+  });
+
+  it("LocalStorage durably persists the new entities across instances", async () => {
+    installLocalStorage();
+    const a = new LocalStorageExitApi();
+    await a.createOffer({ listingId: "lst-9", buyerAccountId: buyer.id, amountUsd: 10e6 });
+    await a.createNdaRequest({ listingId: "lst-9", buyerAccountId: buyer.id });
+    const b = new LocalStorageExitApi();   // fresh session, same store
+    expect((await b.listOffers({ listingId: "lst-9" })).length).toBe(1);
+    expect((await b.listNdaRequests({ listingId: "lst-9" })).length).toBe(1);
+  });
+});
+
+// ── THE SWAP TEST — InMemory ⇄ Supabase, no consumer changes ─────────
+// A fake PostgREST (Map-backed) lets us drive the production client through
+// the exact same assertions. If these pass, swapping backends is dependency
+// injection only — no UI, store or engine change.
+function fakeSupabaseFetch(): typeof fetch {
+  const tables: Record<string, Map<string, Record<string, unknown>>> = {};
+  const tbl = (n: string): Map<string, Record<string, unknown>> => (tables[n] ??= new Map());
+  return (async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+    const url = new URL(String(input));
+    const table = url.pathname.replace(/^\/rest\/v1\//, "");
+    const method = init?.method ?? "GET";
+    const t = tbl(table);
+    const matches = (row: Record<string, unknown>): boolean => {
+      for (const [k, v] of url.searchParams) {
+        if (k === "select") continue;
+        const m = /^eq\.(.*)$/.exec(v);
+        if (m && String(row[k]) !== m[1]) return false;
+      }
+      return true;
+    };
+    if (method === "GET") {
+      const rows = [...t.values()].filter(matches).map((r) => ({ data: r.data }));
+      return new Response(JSON.stringify(rows), { status: 200 });
+    }
+    if (method === "POST") {
+      for (const row of JSON.parse(String(init?.body ?? "[]")) as Record<string, unknown>[]) t.set(String(row.id), row);
+      return new Response("", { status: 200 });
+    }
+    if (method === "DELETE") {
+      for (const [id, row] of [...t]) if (matches(row)) t.delete(id);
+      return new Response("", { status: 200 });
+    }
+    return new Response("", { status: 400 });
+  }) as typeof fetch;
+}
+
+// the SAME suite, run against any ExitApiClient — proving interchangeability
+function contractSuite(name: string, make: () => ExitApiClient): void {
+  describe(`contract conformance · ${name}`, () => {
+    beforeEach(() => installLocalStorage());   // harmless for InMemory/Supabase, required for LocalStorage
+    it("accounts upsert + fetch", async () => {
+      const api = make();
+      await api.upsertAccount(founder);
+      expect((await api.getAccount(founder.id))?.name).toBe(founder.name);
+      expect(await api.getAccount("missing")).toBeNull();
+    });
+    it("events: per-account stream + cross-actor subject scan", async () => {
+      const api = make();
+      await api.saveEvents(buyer.id, [{ id: "e1", at: "t", actorRole: "buyer", kind: "nda_requested", subjectType: "listing", subjectId: "lst-s", subjectName: "P" }]);
+      expect((await api.listEvents(buyer.id)).length).toBe(1);
+      expect((await api.listEventsForSubject("lst-s")).map((e) => e.id)).toEqual(["e1"]);
+    });
+    it("listings: a saved listing is in the shared pool", async () => {
+      const api = make();
+      await api.saveListings([{ id: "lst-z", code: "Project Z", listedAt: "t", profile: { name: "Z" } as never, publicView: { sector: "AI", region: "North America", revenueUsd: 1, growthPct: 0, ebitdaMarginPct: 0 } }]);
+      expect((await api.listListings()).some((l) => l.id === "lst-z")).toBe(true);
+    });
+    it("NDA + offer lifecycle", async () => {
+      const api = make();
+      const r = await api.createNdaRequest({ listingId: "lst-1", buyerAccountId: buyer.id });
+      expect((await api.updateNdaRequest(r.id, { status: "signed" })).status).toBe("signed");
+      const o = await api.createOffer({ listingId: "lst-1", buyerAccountId: buyer.id, amountUsd: 5e6 });
+      expect((await api.updateOffer(o.id, { status: "accepted" })).status).toBe("accepted");
+      expect((await api.listOffers({ listingId: "lst-1" })).length).toBe(1);
+    });
+  });
+}
+
+contractSuite("InMemoryExitApi", () => new InMemoryExitApi());
+contractSuite("LocalStorageExitApi", () => new LocalStorageExitApi());
+contractSuite("SupabaseExitApi (mock PostgREST)", () => new SupabaseExitApi({ url: "https://x.supabase.co", anonKey: "anon", fetchImpl: fakeSupabaseFetch() }));
