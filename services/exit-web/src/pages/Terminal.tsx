@@ -5,7 +5,6 @@ import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@
 import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, fmtUsdShort } from "../lib/buyer-dna";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { Panel, CommandHeader, CommandState, Evidence } from "../lib/workstation";
-import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 
 // ── ACQUISITION INTELLIGENCE TERMINAL ───────────────────────────────
@@ -169,12 +168,9 @@ const Terminal: React.FC = () => {
           </table>
         </Panel>
 
-        {/* right column — intelligence rail: telemetry · signals · actions */}
+        {/* right column — what changed · what to do next */}
         <div className="flex flex-col gap-px bg-white/10 lg:col-span-4">
-          <Panel title="Intelligence rail · live telemetry" className="shrink-0">
-            <ReactorTelemetry />
-          </Panel>
-          <Panel title="Market signals · indexed" className="flex-1"
+          <Panel title="What changed · recent acquisitions" className="flex-1"
             right={<span className="font-mono text-[9px] text-white/35">{activeAcquirers} active acquirers</span>}>
             {comps.length ? (
               <ul className="divide-y divide-white/5">
@@ -238,15 +234,8 @@ const Terminal: React.FC = () => {
           </table>
         </Panel>
 
-        {/* ACQUISITION REACTOR — live sector-volume telemetry */}
-        <Panel title="Acquisition reactor · sector volume" className="lg:col-span-4"
-          right={<span className="font-mono text-[9px] text-white/35">{ACTIVE.length} active</span>}
-          foot="Node size ∝ √volume · colour = 12-month trend · from the live sector indexes.">
-          <AcquisitionReactor height={188} />
-        </Panel>
-
         {/* CONFIDENCE */}
-        <Panel title="Confidence" className="lg:col-span-3"
+        <Panel title="Confidence" className="lg:col-span-4"
           right={<span className="font-mono text-[11px] font-bold text-white">{INST.confidence.score}%</span>}
           foot={`${INST.comparablesUsed} comps · ${INST.buyerUniverse.qualified} qualified · v${INST.frameworkVersion}`}>
           <div className="space-y-2 px-3 py-2.5">
