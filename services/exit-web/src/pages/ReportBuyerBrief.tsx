@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { loadActiveCompany } from "../lib/active-company";
 import { buildBuyerBriefing, type BuyerBriefing } from "../lib/report-docs";
-import { ReportFrame, Cover, Contents, Section, Exhibit, BankTable, StatGrid, Stat, Lead, Note } from "../lib/report-ui";
+import { ReportFrame, Cover, Contents, Section, Exhibit, BankTable, StatGrid, Stat, Lead, Note, docReference } from "../lib/report-ui";
 import { ConfidenceDrivers } from "../lib/report-charts";
 
 const SECTIONS = [
@@ -14,10 +14,11 @@ const ReportBuyerBrief: React.FC = () => {
   const { id = "" } = useParams<{ id: string }>();
   const { company } = useMemo(() => loadActiveCompany(), []);
   const r: BuyerBriefing = useMemo(() => buildBuyerBriefing(company, id), [company, id]);
+  const ref = useMemo(() => docReference("Buyer Briefing Book", r.header.name, r.meta.date), [r.header.name, r.meta.date]);
 
   return (
-    <ReportFrame docType="Buyer Briefing Book" company={r.header.name} frameworkVersion={r.meta.frameworkVersion}>
-      <Cover docType={`Buyer Briefing Book · ${company.name}`} company={r.header.name} preparedFor={r.meta.preparedFor} preparedBy={r.meta.preparedBy} date={r.meta.date} frameworkVersion={r.meta.frameworkVersion} />
+    <ReportFrame docType="Buyer Briefing Book" company={r.header.name} frameworkVersion={r.meta.frameworkVersion} reference={ref}>
+      <Cover docType={`Buyer Briefing Book · ${company.name}`} company={r.header.name} preparedFor={r.meta.preparedFor} preparedBy={r.meta.preparedBy} date={r.meta.date} frameworkVersion={r.meta.frameworkVersion} reference={ref} />
       <Contents items={SECTIONS} />
 
       <Section n={1} title="Executive Summary">

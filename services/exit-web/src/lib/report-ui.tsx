@@ -14,8 +14,9 @@ export const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"
 const INK = "#0b1220", MUTE = "#5b6675", FAINT = "#9aa3b0", LINE = "#d8dee8", HAIR = "#eef1f5";
 const GREEN = "#0e7a4f", NAVY = "#16314f", GOLD = "#8a6d3b";
 
-export const ReportFrame: React.FC<{ docType: string; company: string; frameworkVersion: string; children: React.ReactNode }> = ({ docType, company, frameworkVersion, children }) => {
+export const ReportFrame: React.FC<{ docType: string; company: string; frameworkVersion: string; reference?: string; children: React.ReactNode }> = ({ docType, company, frameworkVersion, reference, children }) => {
   const nav = useNavigate();
+  const ref = reference ?? docReference(docType, company, new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
   return (
     <div className="min-h-screen bg-[#0a1018] py-8">
       <style>{REPORT_CSS}</style>
@@ -26,7 +27,7 @@ export const ReportFrame: React.FC<{ docType: string; company: string; framework
       </div>
       <div className="rpt mx-auto max-w-[840px] bg-white text-[#0b1220] shadow-2xl shadow-black/50">
         <div className="rpt-fixed-header no-screen"><span>{company}</span><span>{docType}</span></div>
-        <div className="rpt-fixed-footer no-screen"><span>ExitOS Advisory · Strictly Private &amp; Confidential</span><span>Framework v{frameworkVersion}</span></div>
+        <div className="rpt-fixed-footer no-screen"><span>ExitOS Advisory · Strictly Private &amp; Confidential</span><span>{ref} · Framework v{frameworkVersion}</span></div>
         <div className="rpt-watermark no-screen">CONFIDENTIAL</div>
         {children}
       </div>
@@ -35,7 +36,7 @@ export const ReportFrame: React.FC<{ docType: string; company: string; framework
 };
 
 /** A deterministic document control reference, e.g. EXOS·VAL·HLS·2026·A3F1. */
-const docReference = (docType: string, company: string, date: string): string => {
+export const docReference = (docType: string, company: string, date: string): string => {
   const docCode = docType.replace(/[^A-Za-z ]/g, "").split(/\s+/).filter(Boolean).slice(0, 1).map((w) => w.slice(0, 3).toUpperCase())[0] ?? "DOC";
   const co = company.replace(/[^A-Za-z ]/g, "").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "CO";
   const year = (date.match(/\b(20\d{2})\b/) ?? [])[1] ?? String(new Date().getFullYear());
