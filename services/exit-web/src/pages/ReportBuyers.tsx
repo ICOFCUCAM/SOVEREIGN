@@ -44,6 +44,7 @@ const ReportBuyers: React.FC = () => {
                   <span className="ml-1 text-[10px] uppercase tracking-wide text-[#9aa3b0]">probability</span>
                 </div>
               </div>
+              <p className="border-b border-[#f0f2f6] px-4 py-2.5 text-[12px] leading-relaxed text-[#2b3543]">{b.thesis}</p>
               <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 px-4 py-3 sm:grid-cols-4">
                 {([
                   ["Expected value", b.expectedValue], ["Typical check", b.typicalCheck],

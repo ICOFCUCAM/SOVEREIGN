@@ -26,6 +26,7 @@ export interface BuyerScorecard {
   buyerId: string; name: string; type: string; probabilityPct: number;
   expectedValue: string; typicalCheck: string; medianCloseDays: string;
   activity: string; strategicFitPct: number; recentAcquisition: string; confidence: string;
+  thesis: string;
 }
 export interface BuyerIntelReport {
   meta: ReportMeta;
@@ -49,6 +50,7 @@ export function buildBuyerIntelReport(company: CompanyProfile): BuyerIntelReport
       strategicFitPct: ov.pct,
       recentAcquisition: p.last_acquisition ? `${p.last_acquisition.target} · ${p.last_acquisition.date.slice(0, 7)}` : "—",
       confidence: buyerConfidence(p),
+      thesis: buyerRationale(p, baseline, tokens, company.sector).thesis,
     };
   });
   return {
