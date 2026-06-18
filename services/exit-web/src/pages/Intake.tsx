@@ -5,6 +5,7 @@ import { runInstitutionalValuation } from "@exit/engines";
 import {
   buildProfile, SECTORS, SAMPLE_INTAKE, type IntakeInputs, type Sector,
 } from "../lib/company-intake";
+import { listCompany } from "../lib/listings";
 
 // COMPANY INTAKE → INSTANT REPORT — the success metric: a founder enters
 // their company and within seconds receives the institutional answer (who
@@ -24,7 +25,8 @@ const Intake: React.FC = () => {
   useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify(inp)); } catch { /* ignore */ } }, [inp]);
 
   const report = useMemo(() => runInstitutionalValuation(buildProfile(inp)), [inp]);
-  const set = <K extends keyof IntakeInputs>(k: K, v: IntakeInputs[K]): void => setInp((p) => ({ ...p, [k]: v }));
+  const [listed, setListed] = useState(false);
+  const set = <K extends keyof IntakeInputs>(k: K, v: IntakeInputs[K]): void => { setInp((p) => ({ ...p, [k]: v })); setListed(false); };
   const num = (k: keyof IntakeInputs, v: string, scale = 1): void => set(k, (parseFloat(v) || 0) * scale as never);
 
   const m = report.mandatoryOutputs;
@@ -35,7 +37,12 @@ const Intake: React.FC = () => {
         kicker="Acquisition Intelligence · Intake"
         title="Value my company"
         description="Enter your company and receive the institutional answer in seconds — enterprise value, the buyers most likely to acquire you, comparable transactions and the evidence behind every figure."
-        actions={<Button variant="ghost" onClick={() => setInp(SAMPLE_INTAKE)}>Reset to example</Button>}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => { listCompany(buildProfile(inp)); setListed(true); }}>{listed ? "✓ Listed (anonymized)" : "List on the exchange"}</Button>
+            <Button variant="ghost" onClick={() => { setInp(SAMPLE_INTAKE); setListed(false); }}>Reset to example</Button>
+          </div>
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
