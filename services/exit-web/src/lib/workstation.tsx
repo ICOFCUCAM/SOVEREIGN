@@ -108,6 +108,34 @@ export const CommandState: React.FC<{
   );
 };
 
+// ── EVIDENCE OVERLAY ────────────────────────────────────────────────
+// A floating evidence panel attached to any figure. Hover or focus reveals
+// its source, methodology and confidence — the spatial-intelligence rule:
+// no important metric without traceable evidence. Opens downward so it reads
+// inside tall panel bodies.
+export interface EvidenceMeta {
+  source?: string;
+  methodology?: string;
+  confidence?: string;
+  sample?: number;
+  asOf?: string;
+}
+export const Evidence: React.FC<{ meta: EvidenceMeta; children: React.ReactNode; className?: string }> = ({ meta, children, className = "" }) => (
+  <span tabIndex={0} className={`group/ev relative inline-flex cursor-help items-center gap-0.5 outline-none ${className}`}>
+    {children}
+    <span className="text-[8px] leading-none text-white/25 transition group-hover/ev:text-deal-300 group-focus/ev:text-deal-300">ⓘ</span>
+    <span className="invisible absolute left-0 top-full z-[60] mt-1 w-60 rounded-md border border-white/15 bg-ink-950/95 p-2.5 text-left opacity-0 shadow-xl shadow-black/60 backdrop-blur transition duration-100 group-hover/ev:visible group-hover/ev:opacity-100 group-focus/ev:visible group-focus/ev:opacity-100">
+      <span className="block text-[8px] font-semibold uppercase tracking-[0.18em] text-deal-300">Evidence</span>
+      {meta.methodology && <span className="mt-1 block text-[10.5px] leading-snug text-white/75">{meta.methodology}</span>}
+      <span className="mt-1.5 block space-y-0.5 text-[9px] text-white/45">
+        {meta.source && <span className="block">source · {meta.source}</span>}
+        {meta.confidence && <span className="block">confidence · {meta.confidence}{meta.sample != null ? ` (n=${meta.sample})` : ""}</span>}
+        {meta.asOf && <span className="block">as of {meta.asOf}</span>}
+      </span>
+    </span>
+  </span>
+);
+
 export interface MetricCell { k: string; v: React.ReactNode; accent?: boolean; sub?: React.ReactNode }
 
 const STRIP_COLS: Record<number, string> = {

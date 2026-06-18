@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Field, fmtMoney, downloadJson, downloadText } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, CommandState, Evidence } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { VALUATION_INSTITUTIONAL, VALUATION_FACTS, DOCUMENT_SUITE } from "../lib/engines";
 import { VALUATION_FRAMEWORK } from "@exit/engines";
@@ -94,9 +94,11 @@ const Valuation: React.FC = () => {
           foot="Hover any figure for its methodology, source and last-updated date. No number on this page exists without one.">
           <div className="grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-3 lg:grid-cols-5">
             {VALUATION_FACTS.map((f) => (
-              <div key={f.key} className="bg-ink-900 p-3" title={`${f.methodology} · source: ${f.source} · updated ${f.last_updated}`}>
+              <div key={f.key} className="bg-ink-900 p-3">
                 <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white/35">{f.label}</div>
-                <div className="mt-1 font-mono text-[15px] font-bold text-white">{f.value}</div>
+                <div className="mt-1 font-mono text-[15px] font-bold text-white">
+                  <Evidence meta={{ methodology: f.methodology, source: f.source, confidence: f.confidence, asOf: f.last_updated }}>{f.value}</Evidence>
+                </div>
                 <div className="mt-1 flex items-center gap-1 text-[9px] text-white/40">
                   <span className="rounded bg-white/5 px-1 py-0.5 ring-1 ring-white/10">{f.confidence}</span>
                   <span className="truncate">{f.source.replace(/^ExitOS /, "")}</span>
