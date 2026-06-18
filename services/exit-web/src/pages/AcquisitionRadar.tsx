@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { Field, inputCls } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
+import { Panel, Frame, Rail, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
-import { AcquisitionReactor } from "../components/Reactor";
+import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
 import { allListings, subscribeListings } from "../lib/listings";
@@ -81,8 +81,9 @@ const AcquisitionRadar: React.FC = () => {
       />
 
       <Frame>
-        {/* mandate config */}
-        <Panel title="Acquisition mandate" className="lg:col-span-4">
+        {/* mandate config + nested intelligence rail */}
+        <Rail className="lg:col-span-4">
+        <Panel title="Acquisition mandate">
           <div className="space-y-3.5 p-3">
             <div>
               <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">Sectors</span>
@@ -111,6 +112,8 @@ const AcquisitionRadar: React.FC = () => {
             </div>
           </div>
         </Panel>
+        <Panel title="Intelligence rail · live telemetry"><ReactorTelemetry /></Panel>
+        </Rail>
 
         {/* matched opportunities — the scored pool, anonymized */}
         <Panel title="Opportunities · scored against your mandate" className="lg:col-span-8"

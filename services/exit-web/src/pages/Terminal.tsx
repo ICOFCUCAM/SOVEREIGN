@@ -6,7 +6,7 @@ import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acqu
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { Panel, CommandHeader, MarketTape, CommandState, Evidence } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
-import { AcquisitionReactor } from "../components/Reactor";
+import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 
 // ── ACQUISITION INTELLIGENCE TERMINAL ───────────────────────────────
@@ -172,8 +172,11 @@ const Terminal: React.FC = () => {
           </table>
         </Panel>
 
-        {/* right column — signals over action queue */}
+        {/* right column — intelligence rail: telemetry · signals · actions */}
         <div className="flex flex-col gap-px bg-white/10 lg:col-span-4">
+          <Panel title="Intelligence rail · live telemetry" className="shrink-0">
+            <ReactorTelemetry />
+          </Panel>
           <Panel title="Market signals · indexed" className="flex-1"
             right={<span className="font-mono text-[9px] text-white/35">{activeAcquirers} active acquirers</span>}>
             {comps.length ? (
