@@ -1,33 +1,35 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Card, SectionHeader } from "../lib/ui";
 import { useAuth } from "../lib/auth";
-import { VALUATION_INSTITUTIONAL, READINESS_ANALYSIS } from "../lib/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
+import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
 import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, fmtUsdShort } from "../lib/buyer-dna";
+import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 import MorningBriefing from "../components/MorningBriefing";
 
 // ── ACQUISITION INTELLIGENCE TERMINAL ───────────────────────────────
-// The product, on one screen. A founder opens ExitOS and immediately sees
-// the answer: who is most likely to buy them, at what price, why, and on
-// what evidence. Every figure composes the engines already built —
-// probability ranking, per-buyer expected outcome, comparable transactions,
-// strategic themes and the readiness uplift — nothing new is invented.
+// The product, on one screen, personalized to the active company (the
+// founder's intake, or the demo). A founder opens ExitOS and immediately
+// sees the answer: who is most likely to buy them, at what price, why, and
+// on what evidence — every figure composed from the engines, nothing new.
 
-const INST = VALUATION_INSTITUTIONAL;
-const BASELINE = INST.financialBaseline.mid;
 const pctOf = (x?: number): string => (x == null ? "—" : `${Math.round(x * 100)}%`);
 
 const Terminal: React.FC = () => {
   const { session } = useAuth();
   const plan = session?.plan ?? "free";
 
-  const TOP = rankedBuyers(8).map((r) => ({ ...r, exp: expectedOutcomeFor(r.profile, BASELINE) }));
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const INST = useMemo(() => runInstitutionalValuation(company), [company]);
+  const ra = useMemo(() => runReadinessAnalysis(company, runReadiness(company)), [company]);
+  const tokens = useMemo(() => activeTokens(company), [company]);
+  const BASELINE = INST.financialBaseline.mid;
+
+  const TOP = rankedBuyers(8, tokens).map((r) => ({ ...r, exp: expectedOutcomeFor(r.profile, BASELINE) }));
   const lead = TOP[0];
   const themes = strategicThemes(6);
   const comps = INST.comparableTransactions.slice(0, 6);
-  const ra = READINESS_ANALYSIS;
   const uplift = Math.max(0, ra.projectedStrategicMid - ra.currentStrategicMid);
 
   // the product statement — built from the #1 ranked buyer + the framework
@@ -40,12 +42,12 @@ const Terminal: React.FC = () => {
 
       <SectionHeader
         kicker="Acquisition Intelligence Terminal"
-        title={`${SAMPLE_COMPANY.name} · exit intelligence`}
-        description={`Who is most likely to buy you, at what price, why, and on what evidence — synthesized from the buyer graph, ${INST.comparablesUsed} comparable transactions and the valuation framework. As of ${INST.meta.runAt.slice(0, 10)}.`}
+        title={`${company.name} · exit intelligence`}
+        description={`${fromIntake ? "Your company" : "Demo company"} · who is most likely to buy you, at what price, why, and on what evidence — synthesized from the buyer graph, ${INST.comparablesUsed} comparable transactions and the valuation framework.`}
       />
 
       {/* Chief Investment Banker — proactive morning briefing */}
-      <div className="mb-6"><MorningBriefing /></div>
+      <div className="mb-6"><MorningBriefing baselineUsd={BASELINE} headlineMidUsd={INST.headline.mid} tokens={tokens} /></div>
 
       {/* the product statement */}
       {lead && (
@@ -53,7 +55,7 @@ const Terminal: React.FC = () => {
           <div className="bg-gradient-to-r from-deal-600/15 to-transparent px-6 py-5">
             <div className="font-serif text-xl font-bold leading-snug text-white sm:text-2xl">
               <Link to={`/console/buyer/${lead.profile.buyer_id}`} className="text-deal-200 hover:underline">{lead.profile.name}</Link>{" "}
-              is <span className="tabular-nums text-deal-200">{lead.probability.pct}%</span> likely to acquire a company like {SAMPLE_COMPANY.name}.
+              is <span className="tabular-nums text-deal-200">{lead.probability.pct}%</span> likely to acquire a company like {company.name}.
             </div>
             <div className="mt-3 flex flex-wrap gap-x-8 gap-y-2 text-[13px]">
               <Stat k="Expected valuation" v={`${fmtUsdShort(INST.headline.low)} – ${fmtUsdShort(INST.headline.high)}`} />
@@ -62,7 +64,7 @@ const Terminal: React.FC = () => {
               <Stat k="Median close" v={`${leadCloseDays} days`} />
               <Stat k="Confidence" v={`${INST.confidence.score}% · ${INST.confidence.tier}`} />
             </div>
-            <p className="mt-3 max-w-3xl text-[12.5px] leading-relaxed text-white/55">{buyerRationale(lead.profile, BASELINE).thesis}</p>
+            <p className="mt-3 max-w-3xl text-[12.5px] leading-relaxed text-white/55">{buyerRationale(lead.profile, BASELINE, tokens, company.sector).thesis}</p>
           </div>
         </Card>
       )}

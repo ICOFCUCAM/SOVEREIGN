@@ -35,9 +35,19 @@ const KIND_LABEL: Record<string, string> = {
   new_buyer: "entered the index",
 };
 
-export function morningBriefing(): MorningBriefingReport {
-  const baseline = VALUATION_INSTITUTIONAL.financialBaseline.mid;
-  const valueAtStakeUsd = Math.max(0, VALUATION_INSTITUTIONAL.headline.mid - baseline);
+// Accepts the active company's valuation + sector tokens so the briefing
+// personalizes; defaults to the demo company for back-compat.
+interface BriefingContext {
+  baselineUsd: number;
+  headlineMidUsd: number;
+  tokens?: readonly string[];
+}
+
+export function morningBriefing(ctx?: BriefingContext): MorningBriefingReport {
+  const baseline = ctx?.baselineUsd ?? VALUATION_INSTITUTIONAL.financialBaseline.mid;
+  const headlineMid = ctx?.headlineMidUsd ?? VALUATION_INSTITUTIONAL.headline.mid;
+  const tokens = ctx?.tokens;
+  const valueAtStakeUsd = Math.max(0, headlineMid - baseline);
 
   // movements — real registry changes, deduped by buyer, most recent first
   const seen = new Set<string>();
@@ -55,11 +65,11 @@ export function morningBriefing(): MorningBriefingReport {
   const newAcquirers = RADAR.deltas.filter((d) => d.kind === "new_acquisition").length;
 
   // recommended actions — the buyers most likely to acquire this founder
-  const actions: BriefingAction[] = rankedBuyers(3).map((r) => ({
+  const actions: BriefingAction[] = rankedBuyers(3, tokens).map((r) => ({
     name: r.profile.name,
     buyerId: r.profile.buyer_id,
     probabilityPct: r.probability.pct,
-    why: buyerRationale(r.profile, baseline).points[0]?.detail ?? buyerRationale(r.profile, baseline).thesis,
+    why: buyerRationale(r.profile, baseline, tokens).points[0]?.detail ?? buyerRationale(r.profile, baseline, tokens).thesis,
     expectedValueUsd: expectedOutcomeFor(r.profile, baseline).expectedClose,
   }));
 

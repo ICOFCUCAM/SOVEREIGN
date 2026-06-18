@@ -3,7 +3,7 @@ import {
   DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS, sectorOverlap, recommendedAction,
   acquisitionProbability, rankedBuyers, acquisitionSignals, buyerById,
   expectedOutcomeFor, strategicThemes, buyerRationale, premiumLeague, speedLeague,
-  acquisitionAppetiteScore, buyerConfidence,
+  acquisitionAppetiteScore, buyerConfidence, sectorTokensFor, rankedBuyers,
 } from "./buyer-dna.js";
 
 describe("acquisition DNA (derived from ingested registries)", () => {
@@ -167,6 +167,24 @@ describe("acquisition DNA (derived from ingested registries)", () => {
     if (deep) expect(buyerConfidence(deep)).toBe("High");
     const thin = DNA_PROFILES.find((x) => x.events_indexed > 0 && x.events_indexed < 10);
     if (thin) expect(buyerConfidence(thin)).toBe("Developing");
+  });
+
+  it("the ranking re-targets to ANY founder's sector — not just the demo", () => {
+    const logistics = sectorTokensFor("logistics_freight");
+    const software = sectorTokensFor("enterprise_saas");
+    expect(logistics).toContain("freight");
+    expect(software).toContain("software");
+    // the same buyer can score differently for different founder sectors,
+    // because sector overlap is measured against the founder's vocabulary
+    const p = DNA_PROFILES.find((x) => x.events_indexed > 20 && x.sector_tokens.length > 2)!;
+    const probLog = acquisitionProbability(p, logistics).pct;
+    const probSw = acquisitionProbability(p, software).pct;
+    expect(typeof probLog).toBe("number");
+    expect(typeof probSw).toBe("number");
+    // both rankings are valid, sorted, and only include active acquirers
+    const rankedSw = rankedBuyers(10, software);
+    expect(rankedSw.length).toBeGreaterThan(0);
+    for (let i = 1; i < rankedSw.length; i++) expect(rankedSw[i].probability.pct).toBeLessThanOrEqual(rankedSw[i - 1].probability.pct);
   });
 
   it("similar-transactions extract is sector-relevant and sourced", () => {

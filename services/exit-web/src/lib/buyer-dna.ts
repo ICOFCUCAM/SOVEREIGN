@@ -62,10 +62,33 @@ const COMPANY_TOKENS = [
   "delivery", "trucking", "marketplace", SAMPLE_COMPANY.sector.replace(/_/g, " "),
 ];
 
-export function sectorOverlap(p: DnaProfile): { pct: number; matched: string[] } {
+// Sector vocabulary per sector — lets the overlap/ranking re-target to ANY
+// founder's company, not just the demo. Keys are SectorTag strings.
+const SECTOR_VOCAB: Record<string, string[]> = {
+  logistics_freight: ["logistic", "freight", "transport", "supply chain", "fleet", "shipping", "delivery", "trucking"],
+  enterprise_saas: ["software", "saas", "enterprise", "platform", "cloud", "information"],
+  vertical_saas: ["software", "saas", "vertical", "platform", "application"],
+  developer_tools: ["developer", "devops", "software development", "tooling", "platform"],
+  ai_infra: ["artificial intelligence", "machine learning", "infrastructure", "data", "compute"],
+  fintech_payments: ["fintech", "payment", "banking", "financial", "transaction", "lending"],
+  b2b_marketplace: ["marketplace", "platform", "commerce", "procurement", "b2b"],
+  consumer_marketplace: ["marketplace", "commerce", "retail", "consumer", "e-commerce"],
+  mobility: ["mobility", "transport", "automotive", "ride", "vehicle"],
+  media_content: ["media", "content", "entertainment", "gaming", "streaming", "publishing"],
+  other: [],
+};
+
+/** Sector vocabulary for a company's sector, used to measure buyer overlap. */
+export function sectorTokensFor(sector: string): string[] {
+  const base = SECTOR_VOCAB[sector] ?? [];
+  const word = sector.replace(/_/g, " ");
+  return base.length ? [...base, word] : [word];
+}
+
+export function sectorOverlap(p: DnaProfile, tokens: readonly string[] = COMPANY_TOKENS): { pct: number; matched: string[] } {
   const total = p.sector_tokens.reduce((s, t) => s + t.count, 0);
   if (total === 0) return { pct: 0, matched: [] };
-  const matchedTokens = p.sector_tokens.filter((t) => COMPANY_TOKENS.some((c) => t.token.includes(c)));
+  const matchedTokens = p.sector_tokens.filter((t) => tokens.some((c) => c.length > 0 && t.token.includes(c)));
   const matched = matchedTokens.reduce((s, t) => s + t.count, 0);
   return { pct: Math.round((matched / total) * 100), matched: matchedTokens.map((t) => t.token).slice(0, 3) };
 }
@@ -108,9 +131,9 @@ export interface ProbabilityBreakdown {
   readonly rationale: string;
 }
 
-export function acquisitionProbability(p: DnaProfile): ProbabilityBreakdown {
+export function acquisitionProbability(p: DnaProfile, tokens?: readonly string[]): ProbabilityBreakdown {
   const appetiteBase = p.appetite === "high" ? 50 : p.appetite === "medium" ? 32 : p.appetite === "low" ? 14 : 2;
-  const { pct: overlapPct, matched } = sectorOverlap(p);
+  const { pct: overlapPct, matched } = sectorOverlap(p, tokens);
   const overlap = Math.min(34, overlapPct * 0.34);
   const velocity = Math.min(14, (p.frequency_per_year ?? 0) * 2.5);
   const ageM = monthsSince(p.last_acquisition?.date);
@@ -129,10 +152,10 @@ export interface RankedBuyer { readonly profile: DnaProfile; readonly probabilit
 
 /** Buyers with indexed activity, ranked by acquisition probability for the
  *  founder's company — the "who is most likely to buy me" list. */
-export function rankedBuyers(limit = 25): RankedBuyer[] {
+export function rankedBuyers(limit = 25, tokens?: readonly string[]): RankedBuyer[] {
   return DNA_PROFILES
     .filter((p) => p.events_indexed > 0)
-    .map((p) => ({ profile: p, probability: acquisitionProbability(p) }))
+    .map((p) => ({ profile: p, probability: acquisitionProbability(p, tokens) }))
     .sort((a, b) => b.probability.pct - a.probability.pct)
     .slice(0, limit);
 }
@@ -221,8 +244,8 @@ export function strategicThemes(limit = 6): StrategicTheme[] {
 export interface RationalePoint { readonly label: string; readonly detail: string }
 export interface BuyerRationale { readonly thesis: string; readonly points: readonly RationalePoint[] }
 
-export function buyerRationale(p: DnaProfile, baselineUsd?: number): BuyerRationale {
-  const overlap = sectorOverlap(p);
+export function buyerRationale(p: DnaProfile, baselineUsd?: number, tokens: readonly string[] = COMPANY_TOKENS, sector: string = SAMPLE_COMPANY.sector): BuyerRationale {
+  const overlap = sectorOverlap(p, tokens);
   const similar = similarAcquisitionsBy(p.name);
   const points: RationalePoint[] = [];
 
@@ -231,7 +254,7 @@ export function buyerRationale(p: DnaProfile, baselineUsd?: number): BuyerRation
   } else if (p.sector_exitos?.length) {
     points.push({ label: "Sector adjacency", detail: `Active across ${p.sector_exitos.slice(0, 3).join(", ")} — adjacent to your category.` });
   }
-  const seekingHit = (p.currently_seeking ?? []).filter((t) => COMPANY_TOKENS.some((c) => t.includes(c) || c.includes(t)));
+  const seekingHit = (p.currently_seeking ?? []).filter((t) => tokens.some((c) => c.length > 0 && (t.includes(c) || c.includes(t))));
   if (seekingHit.length) {
     points.push({ label: "Active thesis match", detail: `Currently seeking ${seekingHit.slice(0, 2).join(", ")} — directly on your category.` });
   } else if (p.currently_seeking?.length) {
@@ -250,7 +273,7 @@ export function buyerRationale(p: DnaProfile, baselineUsd?: number): BuyerRation
     points.push({ label: "Premium payer", detail: `Pays ${Math.round(p.premium_pct * 100)}% over reference on disclosed deals.` });
   }
 
-  const sectorLabel = SAMPLE_COMPANY.sector.replace(/_/g, " ");
+  const sectorLabel = sector.replace(/_/g, " ");
   const thesis = overlap.pct > 0
     ? `${p.name} is an active acquirer in ${sectorLabel} whose recent pattern and stated themes map onto your company.`
     : p.appetite === "high"
