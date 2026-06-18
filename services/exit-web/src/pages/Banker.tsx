@@ -6,6 +6,10 @@ import {
   structuredDoc, downloadDeliverable,
 } from "../lib/deliverables";
 import type { BuyerCandidate } from "@exit/engines";
+import {
+  useDirectives, applyToBuyers, outreachPosture, valuationGuardrail, recommendedActions,
+  type AdjustedBuyer,
+} from "../lib/banker-directives";
 
 // The Banker — a permanent, always-on investment banker working the deal for
 // the founder. It doesn't just list buyers; it runs the process: finds and
@@ -48,8 +52,21 @@ const Banker: React.FC = () => {
   const teaser  = useMemorandum("buyer_teaser");
   const summary = useMemorandum("executive_summary");
   const cim     = useMemorandum("cim");
-  const ranked  = useMemo(() => BUYERS.candidates, []);
+  // ── Banker directives — real mandate intelligence, not a placebo ──
+  // Stored against the mandate, parsed into structured preferences, and applied
+  // here to re-weight the engine's buyer discovery, outreach and valuation.
+  const { directives, preferences, add: addDirective, remove: removeDirective } = useDirectives();
+  const { included, excluded } = useMemo(() => applyToBuyers(BUYERS.candidates, preferences), [preferences]);
+  const adjustedById = useMemo(() => {
+    const m = new Map<string, AdjustedBuyer>();
+    for (const r of included) m.set(r.candidate.buyer.name, r);
+    return m;
+  }, [included]);
+  const ranked = useMemo(() => included.map((r) => r.candidate), [included]);
   const topBuyers = useMemo(() => ranked.slice(0, 6), [ranked]);
+  const posture = useMemo(() => outreachPosture(preferences), [preferences]);
+  const guardrail = useMemo(() => valuationGuardrail(preferences), [preferences]);
+  const directiveActions = useMemo(() => recommendedActions(preferences), [preferences]);
   const mid = VALUATION_STRATEGIC.headline.mid;
 
   // ── Interactive state ────────────────────────────────────────────
@@ -108,10 +125,19 @@ const Banker: React.FC = () => {
   const submitBrief = (): void => {
     const t = briefText.trim();
     if (!t) { notify("Type an instruction for the banker"); return; }
-    setExtraActivity((p) => [{ when: "just now", tone: "info", text: `You briefed me: "${t}" — adjusting the process accordingly.` }, ...p]);
+    const d = addDirective(t);
     setBriefText("");
     setBriefOpen(false);
-    notify("Briefed the banker");
+    if (d && d.understood) {
+      // Report the ACTUAL parsed effects — exactly what the engine now applies.
+      const summary = d.effects.map((e) => e.detail).join("; ");
+      setExtraActivity((p) => [{ when: "just now", tone: "good", text: `Directive applied — ${summary}.` }, ...p]);
+      notify("Directive applied to the mandate");
+    } else {
+      // Honest: the deterministic parser found no actionable instruction.
+      setExtraActivity((p) => [{ when: "just now", tone: "warn", text: `Logged your note "${t}" — no actionable directive was parsed, so rankings are unchanged.` }, ...p]);
+      notify("Saved as a note — no rule matched");
+    }
   };
 
   const approveNext = (): void => {
@@ -149,11 +175,15 @@ const Banker: React.FC = () => {
       />
 
       {/* ── Brief the banker ──────────────────────────────────────── */}
-      <Modal open={briefOpen} onClose={() => setBriefOpen(false)} title="Brief the banker" subtitle="Give an instruction; it adjusts the live process" size="md"
-        footer={<><Button variant="ghost" onClick={() => setBriefOpen(false)}>Cancel</Button><Button onClick={submitBrief}>Send brief</Button></>}>
-        <Field label="Your instruction" hint="e.g. prioritize strategics over PE, or hold outreach until the audit closes">
+      <Modal open={briefOpen} onClose={() => setBriefOpen(false)} title="Brief the banker" subtitle="Your directive is parsed into mandate rules that re-weight rankings, outreach and valuation" size="md"
+        footer={<><Button variant="ghost" onClick={() => setBriefOpen(false)}>Cancel</Button><Button onClick={submitBrief}>Apply directive</Button></>}>
+        <Field label="Your instruction" hint="e.g. prioritize strategic buyers · avoid private equity · target logistics consolidators · minimum valuation $100M · hold outreach until Q4">
           <textarea className={`${inputCls} min-h-[120px] resize-y`} value={briefText} onChange={(e) => setBriefText(e.target.value)} placeholder="Tell the banker what to do…" />
         </Field>
+        <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+          Parsed by the deterministic directive engine — no language model is involved. The exact rules it extracts are shown
+          as active directives and applied to the buyer pool, outreach posture and valuation guardrail.
+        </p>
       </Modal>
 
       {/* ── Adjust strategy ───────────────────────────────────────── */}
@@ -232,6 +262,68 @@ const Banker: React.FC = () => {
             </ul>
           </div>
         </div>
+      </Card>
+
+      {/* ── Active banker directives ─────────────────────────────── */}
+      <Card className="mt-6 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Active mandate directives</div>
+            <p className="mt-0.5 text-[11.5px] text-white/45">Stored against the mandate · deterministic parser · re-applied to every recommendation below</p>
+          </div>
+          <Button variant="ghost" className="text-[12px]" onClick={() => setBriefOpen(true)}>+ Brief the banker</Button>
+        </div>
+
+        {directives.length === 0 ? (
+          <div className="mt-4 rounded-lg border border-dashed border-white/12 bg-ink-900/40 p-4 text-[12.5px] text-white/55">
+            No directives yet. Brief the banker (e.g. <span className="text-white/75">"prioritize strategic buyers, avoid PE, minimum valuation $100M"</span>) and the rules will appear here and re-rank the pool.
+          </div>
+        ) : (
+          <div className="mt-4 space-y-2.5">
+            {directives.map((d) => (
+              <div key={d.id} className="rounded-lg border border-white/10 bg-ink-900/40 p-3.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-[13px] font-semibold text-white">“{d.raw}”</div>
+                    <div className="mt-1 flex flex-wrap gap-1.5">
+                      {d.understood ? d.effects.map((e, i) => (
+                        <span key={i} className="rounded-full bg-deal-600/15 px-2 py-0.5 text-[10px] font-medium text-deal-200 ring-1 ring-deal-400/30" title={e.field}>{e.detail}</span>
+                      )) : <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-white/45 ring-1 ring-white/10">Stored as a note — no rule matched</span>}
+                    </div>
+                  </div>
+                  <button onClick={() => removeDirective(d.id)} className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-red-300">Remove</button>
+                </div>
+              </div>
+            ))}
+
+            {/* effective posture from the merged directives */}
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              <div className={`rounded-lg border p-3 ${posture.held ? "border-loi-400/40 bg-loi-500/10" : "border-white/10 bg-ink-900/40"}`}>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Outreach posture</div>
+                <div className={`mt-0.5 text-[12.5px] ${posture.held ? "text-loi-200" : "text-white/70"}`}>{posture.note}</div>
+              </div>
+              <div className={`rounded-lg border p-3 ${guardrail.note ? "border-deal-400/30 bg-deal-600/[0.07]" : "border-white/10 bg-ink-900/40"}`}>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Valuation guardrail</div>
+                <div className="mt-0.5 text-[12.5px] text-white/70">{guardrail.note ?? "No valuation floor or ceiling set."}</div>
+              </div>
+            </div>
+
+            {directiveActions.length > 0 && (
+              <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3.5">
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Recommended actions from your directives</div>
+                <ul className="mt-2 space-y-1.5">
+                  {directiveActions.map((a, i) => (
+                    <li key={i} className="flex items-start gap-2 text-[12.5px] text-white/75"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-deal-400" />{a}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {excluded.length > 0 && (
+              <div className="text-[11.5px] text-white/45">{excluded.length} buyer{excluded.length === 1 ? "" : "s"} removed from the active set by directive: {excluded.map((r) => r.candidate.buyer.name).join(", ")}.</div>
+            )}
+          </div>
+        )}
       </Card>
 
       {/* ── Deal funnel ──────────────────────────────────────────── */}
@@ -322,9 +414,14 @@ const Banker: React.FC = () => {
         <div className="mt-6">
           {tab === "outreach" && (
             <div className="space-y-2">
+              {posture.held && (
+                <div className="rounded-lg border border-loi-400/40 bg-loi-500/10 px-3.5 py-2.5 text-[12.5px] text-loi-200">
+                  ⏸ Outreach is held {posture.label} per banker directive — the sequence below is staged but not sent.
+                </div>
+              )}
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" className="text-[12px]" onClick={() => downloadDeliverable("outreach-campaign.md", outreachMd())}>Download</Button>
-                <Button className="text-[12px]" onClick={() => { flagSent("outreach"); notify("Outreach campaign launched to the shortlist"); }}>{isSent("outreach") ? "Sent ✓ · resend" : "Send campaign"}</Button>
+                <Button className="text-[12px]" disabled={posture.held} onClick={() => { flagSent("outreach"); notify("Outreach campaign launched to the shortlist"); }}>{posture.held ? "Held by directive" : isSent("outreach") ? "Sent ✓ · resend" : "Send campaign"}</Button>
               </div>
               {SEQUENCE.map((s, i) => (
                 <Card key={s.step} className="flex items-start gap-4 p-4">
@@ -343,13 +440,24 @@ const Banker: React.FC = () => {
 
           {tab === "intros" && (
             <div className="grid gap-3 sm:grid-cols-2">
-              {topBuyers.map((b) => (
+              {topBuyers.map((b) => {
+                const adj = adjustedById.get(b.buyer.name);
+                const moved = adj && Math.abs(adj.adjustedProbability - adj.baseProbability) >= 0.005;
+                return (
                 <Card key={b.buyer.name} className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-bold text-white">{b.buyer.name}</div>
-                    <span className="font-mono text-[13px] font-bold text-deal-300">{Math.round(b.probability * 100)}%</span>
+                    <span className="text-right">
+                      <span className="font-mono text-[13px] font-bold text-deal-300">{Math.round((adj?.adjustedProbability ?? b.probability) * 100)}%</span>
+                      {moved && <span className="ml-1 font-mono text-[10px] text-white/40 line-through">{Math.round(adj!.baseProbability * 100)}%</span>}
+                    </span>
                   </div>
                   <div className="text-[11px] text-white/45">{b.buyer.buyerType.replace(/_/g, " ")}</div>
+                  {adj && adj.reasons.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      {adj.reasons.map((r, i) => <span key={i} className="rounded bg-deal-600/15 px-1.5 py-0.5 text-[9.5px] font-medium text-deal-200 ring-1 ring-deal-400/25">{r}</span>)}
+                    </div>
+                  )}
                   <p className="mt-2 text-[12px] leading-relaxed text-white/70">
                     Suggested intro: position {PROJECT} to {b.buyer.name} — {b.rationale}
                   </p>
@@ -358,7 +466,8 @@ const Banker: React.FC = () => {
                     {isSent(`intro:${b.buyer.name}`) && <span className="text-[11px] font-semibold uppercase tracking-wide text-deal-300">Sent ✓</span>}
                   </div>
                 </Card>
-              ))}
+                );
+              })}
             </div>
           )}
 
