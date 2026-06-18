@@ -330,12 +330,50 @@ export async function eventsForSubject(subjectId: string): Promise<DealEvent[]> 
   return active.listEventsForSubject(subjectId);
 }
 
+// ── the live account this session acts as ───────────────────────────
+// Set on connect (== auth.uid() under Supabase). The NDA/offer accessors
+// stamp it as the actor so RLS attributes records to the right buyer.
+let connectedAccountId: string | undefined;
+export function currentAccountId(): string | undefined { return connectedAccountId; }
+
+// ── NDA requests (first-class records, owner-scoped resolution) ──────
+/** Buyer action: request an NDA on a listing. Attributed to this account. */
+export async function requestNda(listingId: string): Promise<NdaRequest | null> {
+  if (!connectedAccountId) return null;
+  return active.createNdaRequest({ listingId, buyerAccountId: connectedAccountId });
+}
+/** Founder view: the NDA requests on a listing they own. */
+export async function ndaRequestsForListing(listingId: string): Promise<NdaRequest[]> {
+  return active.listNdaRequests({ listingId });
+}
+/** Founder action: execute (sign) an NDA — only the listing owner may, by RLS. */
+export async function signNda(id: string): Promise<NdaRequest> {
+  return active.updateNdaRequest(id, { status: "signed" });
+}
+
+// ── offers (first-class records) ────────────────────────────────────
+/** Buyer action: submit an offer on a listing. Attributed to this account. */
+export async function submitOffer(listingId: string, amountUsd: number, note?: string): Promise<Offer | null> {
+  if (!connectedAccountId) return null;
+  return active.createOffer({ listingId, buyerAccountId: connectedAccountId, amountUsd, note });
+}
+/** Founder view: the offers on a listing they own. */
+export async function offersForListing(listingId: string): Promise<Offer[]> {
+  return active.listOffers({ listingId });
+}
+/** Founder action: accept/reject an offer — the listing owner may, by RLS. */
+export async function resolveOffer(id: string, status: OfferStatus): Promise<Offer> {
+  return active.updateOffer(id, { status });
+}
+
 /** Point the app's stores at a backend. After this, captured events and
  *  listings persist through the API (network-wide, per account) instead of
  *  localStorage — the multi-tenant spine, with no consumer changes. */
 export async function connectExitApi(client: ExitApiClient, account: Account): Promise<void> {
   await client.upsertAccount(account);
-  // stamp this account as the owner of any listing it creates this session
+  // remember who we act as (== auth.uid() under Supabase) and stamp this
+  // account as the owner of any listing it creates this session
+  connectedAccountId = account.id;
   setListingOwner(account.id);
 
   // listings — the shared pool (mutated in place so read() stays stable)

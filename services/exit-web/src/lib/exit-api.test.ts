@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { InMemoryExitApi, LocalStorageExitApi, connectExitApi, activateBackend, eventsForSubject, type Account, type ExitApiClient } from "./exit-api.js";
+import { InMemoryExitApi, LocalStorageExitApi, connectExitApi, activateBackend, eventsForSubject, requestNda, ndaRequestsForListing, signNda, submitOffer, offersForListing, resolveOffer, type Account, type ExitApiClient } from "./exit-api.js";
 import { SupabaseExitApi } from "./supabase-exit-api.js";
 import { captureDealEvent, allDealEvents, clearDealEvents } from "./deal-events.js";
 import { listCompany, allListings } from "./listings.js";
@@ -101,6 +101,25 @@ describe("durable backend — the live, account-scoped exit-api singleton", () =
     // executing the NDA is captured against the same subject
     captureDealEvent({ actorRole: "founder", kind: "nda_signed", subjectType: "listing", subjectId: "lst-target", subjectName: "Project T" });
     expect((await eventsForSubject("lst-target")).some((e) => e.kind === "nda_signed")).toBe(true);
+  });
+
+  it("first-class NDA + offer records flow buyer → founder and resolve", async () => {
+    // buyer requests an NDA and submits an offer on a listing
+    await activateBackend(buyer);
+    const nda = await requestNda("lst-deal");
+    await submitOffer("lst-deal", 25e6, "all cash");
+    expect(nda?.buyerAccountId).toBe(buyer.id);
+
+    // the founder sees both as records on their listing and resolves them
+    await activateBackend(founder);
+    const incomingNdas = await ndaRequestsForListing("lst-deal");
+    expect(incomingNdas.some((r) => r.status === "requested")).toBe(true);
+    const signed = await signNda(incomingNdas[0].id);
+    expect(signed.status).toBe("signed");
+
+    const incomingOffers = await offersForListing("lst-deal");
+    expect(incomingOffers[0].amountUsd).toBe(25e6);
+    expect((await resolveOffer(incomingOffers[0].id, "accepted")).status).toBe("accepted");
   });
 });
 

@@ -5,6 +5,7 @@ import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
 import { allListings, subscribeListings } from "../lib/listings";
 import { captureDealEvent } from "../lib/deal-events";
+import { requestNda, submitOffer } from "../lib/exit-api";
 import type { Region } from "@exit/engines";
 
 // BUYER ACQUISITION COMMAND CENTER — the other side of the exchange. A buyer
@@ -23,6 +24,8 @@ const AcquisitionRadar: React.FC = () => {
   const [regions, setRegions] = useState<Region[]>(["North America", "Europe"]);
   const [minGrowth, setMinGrowth] = useState(20);
   const [requested, setRequested] = useState<Record<string, boolean>>({});
+  const [offerInput, setOfferInput] = useState<Record<string, string>>({});
+  const [offered, setOffered] = useState<Record<string, boolean>>({});
 
   const criteria: AcquisitionCriteria = useMemo(() => ({
     sectors, minRevUsd: minRevM * 1e6, maxRevUsd: maxRevM * 1e6, regions, minGrowthPct: minGrowth / 100,
@@ -118,14 +121,34 @@ const AcquisitionRadar: React.FC = () => {
                   <span>· Growth {Math.round(l.publicView.growthPct * 100)}%</span>
                   <button
                     onClick={() => {
-                      // a single buyer action emits two events the founder sees
-                      // on their listing: the interest signal, then the NDA ask.
+                      // a single buyer action: captured telemetry the founder
+                      // sees on their listing, AND a first-class NDA request
+                      // record the founder resolves in their inbox.
                       captureDealEvent({ actorRole: "buyer", kind: "expressed_interest", subjectType: "listing", subjectId: l.id, subjectName: l.code });
                       captureDealEvent({ actorRole: "buyer", kind: "nda_requested", subjectType: "listing", subjectId: l.id, subjectName: l.code });
+                      void requestNda(l.id);
                       setRequested((s) => ({ ...s, [l.id]: true }));
                     }}
                     className="ml-auto rounded-md bg-deal-500/90 px-3 py-1 text-[11px] font-semibold text-ink-950 transition hover:bg-deal-400 disabled:opacity-60"
                     disabled={!!requested[l.id]}>{requested[l.id] ? "✓ NDA requested" : "Express interest (request NDA)"}</button>
+                </div>
+                {/* indicative offer — a first-class record the founder resolves */}
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-[11.5px]">
+                  <span className="text-white/40">Indicative offer</span>
+                  <span className="text-white/30">$</span>
+                  <input
+                    className={`${inputCls} h-7 w-24 py-0`} inputMode="decimal" placeholder="M"
+                    value={offerInput[l.id] ?? ""} onChange={(e) => setOfferInput((s) => ({ ...s, [l.id]: e.target.value }))} />
+                  <span className="text-white/40">M</span>
+                  <button
+                    onClick={() => {
+                      const m = parseFloat(offerInput[l.id] ?? ""); if (!m) return;
+                      void submitOffer(l.id, m * 1e6);
+                      captureDealEvent({ actorRole: "buyer", kind: "loi_issued", subjectType: "listing", subjectId: l.id, subjectName: l.code });
+                      setOffered((s) => ({ ...s, [l.id]: true }));
+                    }}
+                    className="rounded-md bg-white/[0.06] px-3 py-1 text-[11px] font-semibold text-white ring-1 ring-white/10 transition hover:bg-white/10 disabled:opacity-60"
+                    disabled={!!offered[l.id]}>{offered[l.id] ? "✓ Offer submitted" : "Submit offer"}</button>
                 </div>
               </div>
             ))}
