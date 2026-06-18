@@ -4,7 +4,7 @@ import { buildValuationReport } from "../lib/report-model";
 import { buildBuyerIntelReport, buildMarketReport, buildReadinessReport } from "../lib/report-docs";
 import { fmtMoney } from "../lib/ui";
 import { fmtUsd } from "../lib/market-intel";
-import { ReportFrame, Cover, Contents, Section, Exhibit, BankTable, StatGrid, Stat, Lead, Note } from "../lib/report-ui";
+import { ReportFrame, Cover, Contents, ListOfExhibits, Section, Exhibit, BankTable, StatGrid, Stat, Lead, Note } from "../lib/report-ui";
 import { FootballField, BuyerRankingChart, BuyerUniverse, ValuationBridge, TransactionTimeline } from "../lib/report-charts";
 
 const pct = (x: number | null | undefined): string => (x == null ? "—" : `${Math.round(x * 100)}%`);
@@ -27,6 +27,15 @@ const ReportManagement: React.FC = () => {
     <ReportFrame docType="Management Presentation" company={company.name} frameworkVersion={v.meta.frameworkVersion}>
       <Cover docType="Management Presentation" company={company.name} preparedFor="Prospective Acquirers & Investment Committee" preparedBy={v.meta.preparedBy} date={v.meta.date} frameworkVersion={v.meta.frameworkVersion} />
       <Contents items={SECTIONS} />
+      <ListOfExhibits items={[
+        { n: "III-A", title: "Headline financials" },
+        { n: "IV-A", title: "Sector acquisition indexes" },
+        { n: "VI-A", title: "Valuation football field" },
+        { n: "VII-A", title: "Acquirer ranking" },
+        { n: "VII-B", title: "Universe distribution" },
+        { n: "VIII-A", title: "Value creation bridge" },
+        { n: "IX-A", title: "Transaction timeline" },
+      ]} />
 
       <Section n={1} title="The Opportunity">
         <StatGrid cols={4}>
