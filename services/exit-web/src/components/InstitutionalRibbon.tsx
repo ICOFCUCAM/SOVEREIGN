@@ -35,7 +35,7 @@ const Clock: React.FC = () => {
 };
 
 const InstitutionalRibbon: React.FC = () => (
-  <div className="sticky top-0 z-30 flex items-stretch overflow-x-auto border-b border-white/10 bg-ink-950/92 backdrop-blur-sm">
+  <div className="flex items-stretch overflow-x-auto border-b border-white/10 bg-ink-950/92 backdrop-blur-sm">
     <div className="flex shrink-0 items-center gap-1.5 border-r border-white/10 px-3">
       <span className="relative flex h-1.5 w-1.5">
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-deal-400 opacity-75" />

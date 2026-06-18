@@ -5,6 +5,7 @@ import { Toast } from "../lib/ui";
 import { navForRole, needsUpgrade, GROUP_ORDER, ROLE_LABEL, type NavItem, type Role, type Plan } from "../lib/access";
 import { ExchangeMark } from "./ExchangeMark";
 import InstitutionalRibbon from "./InstitutionalRibbon";
+import LayerBar from "./LayerBar";
 
 // Role-aware console rail. The navigation is driven by the access policy:
 // founders, buyers, admins and superadmins see different command centers, and
@@ -136,7 +137,10 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </aside>
 
         <main className="relative flex-1 overflow-y-auto">
-          <InstitutionalRibbon />
+          <div className="sticky top-0 z-30">
+            <InstitutionalRibbon />
+            <LayerBar />
+          </div>
           {/* ambient reactor layer — the homepage exchange DNA, inside the
               console: faint market grid, a top liquidity glow, and the
               transaction-ring watermark. Ambient intelligence, not decoration. */}
