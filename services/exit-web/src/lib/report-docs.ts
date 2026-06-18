@@ -1,4 +1,4 @@
-import { runInstitutionalValuation, runReadiness, runReadinessAnalysis, type CompanyProfile } from "@exit/engines";
+import { runInstitutionalValuation, runReadiness, runReadinessAnalysis, STANDARD_TEMPLATES, type CompanyProfile, type NdaTemplate } from "@exit/engines";
 import {
   rankedBuyers, expectedOutcomeFor, sectorOverlap, buyerConfidence, fmtUsdShort,
   buyerById, acquisitionProbability, buyerRationale, acquisitionSignals,
@@ -172,6 +172,55 @@ export function buildMarketReport(company: CompanyProfile): MarketReport {
     summary: { events: MARKET_INTEL.totalEvents.toLocaleString(), disclosed: fmtUsd(MARKET_INTEL.totalDisclosedUsd), buyers: MARKET.buyers.toLocaleString(), sectors: ACQ_INDEXES.indexes.length },
     indexes: [...ACQ_INDEXES.indexes].sort((a, b) => b.volume - a.volume).slice(0, 12).map((i) => ({ sector: i.sector, volume: i.volume, trendPct: i.trendPct, activeBuyers: i.activeBuyers, medianDealUsd: i.medianDealUsd })),
     acquirers: [...MARKET_INTEL.topAcquirers].slice(0, 12).map((a) => ({ name: a.name, deals: a.deals, recentDeals: a.recentDeals })),
+  };
+}
+
+// ── NON-DISCLOSURE AGREEMENT PACKAGE ────────────────────────────────
+// Presents the institutional NDA suite and a board-ready execution copy.
+// Every term is read straight from the NDA engine's standard templates —
+// nothing here invents a clause or alters a term.
+export interface NdaTermRow { k: string; v: string }
+export interface NdaTemplateRow { name: string; shape: string; version: string; clauseCount: number; survival: string; returnDestroy: string; scope: string; law: string; injunctive: string; damages: string }
+export interface NdaPackage {
+  meta: ReportMeta;
+  parties: { disclosing: string; receiving: string };
+  primary: { name: string; version: string; clauseCount: number; terms: NdaTermRow[]; carveOuts: string[]; survivalMonths: number; returnOrDestroyDays: number; scope: string; governingLaw: string; jurisdiction: string; injunctiveRelief: boolean; liquidatedDamagesUsd: number | null };
+  templates: NdaTemplateRow[];
+}
+function ndaTemplateRow(t: NdaTemplate): NdaTemplateRow {
+  return {
+    name: t.name, shape: t.shape.replace(/_/g, " "), version: t.version, clauseCount: t.clauseCount,
+    survival: `${t.defaultTerms.survivalMonths} mo`, returnDestroy: `${t.defaultTerms.returnOrDestroyDays} d`,
+    scope: t.defaultTerms.scope, law: t.defaultTerms.governingLaw,
+    injunctive: t.defaultTerms.injunctiveRelief ? "Yes" : "No",
+    damages: t.defaultTerms.liquidatedDamagesUsd != null ? fmtUsd(t.defaultTerms.liquidatedDamagesUsd) : "—",
+  };
+}
+export function buildNdaPackage(company: CompanyProfile): NdaPackage {
+  const INST = runInstitutionalValuation(company);
+  const primary = STANDARD_TEMPLATES.find((t) => t.shape === "bilateral") ?? STANDARD_TEMPLATES[0];
+  const dt = primary.defaultTerms;
+  return {
+    meta: meta("Non-Disclosure Agreement Package", company.name, INST.frameworkVersion),
+    parties: { disclosing: company.name, receiving: "Prospective Acquirer (the “Recipient”)" },
+    primary: {
+      name: primary.name, version: primary.version, clauseCount: primary.clauseCount,
+      survivalMonths: dt.survivalMonths, returnOrDestroyDays: dt.returnOrDestroyDays, scope: dt.scope,
+      governingLaw: dt.governingLaw, jurisdiction: dt.jurisdiction, injunctiveRelief: dt.injunctiveRelief,
+      liquidatedDamagesUsd: dt.liquidatedDamagesUsd ?? null,
+      carveOuts: [...dt.carveOuts],
+      terms: [
+        { k: "Agreement form", v: primary.shape.replace(/_/g, " ") },
+        { k: "Confidentiality survival", v: `${dt.survivalMonths} months from termination` },
+        { k: "Return or destruction", v: `${dt.returnOrDestroyDays} days of termination` },
+        { k: "Territorial scope", v: dt.scope },
+        { k: "Governing law", v: `${dt.governingLaw} (${dt.jurisdiction})` },
+        { k: "Injunctive relief", v: dt.injunctiveRelief ? "Available to the disclosing party" : "Not provided" },
+        { k: "Liquidated damages", v: dt.liquidatedDamagesUsd != null ? fmtUsd(dt.liquidatedDamagesUsd) : "Not specified" },
+        { k: "Standard clauses", v: `${primary.clauseCount}` },
+      ],
+    },
+    templates: STANDARD_TEMPLATES.map(ndaTemplateRow),
   };
 }
 
