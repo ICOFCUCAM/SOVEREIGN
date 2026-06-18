@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
+import { AcquisitionReactor, BuyerNetworkReactor, ReactorTelemetry } from "../components/Reactor";
 import { fmtMoney } from "../lib/ui";
 import CommandTiles from "../components/CommandTiles";
 import ExitCommander from "../components/ExitCommander";
@@ -44,6 +45,19 @@ const Commander: React.FC = () => {
       />
 
       <MarketTape items={tape} />
+
+      {/* market reactors — the desk's awareness of the live market */}
+      <Frame>
+        <Panel title="Acquisition reactor" className="lg:col-span-4" foot="Sector acquisition volume across the network.">
+          <AcquisitionReactor height={196} />
+        </Panel>
+        <Panel title="Buyer network reactor" className="lg:col-span-4" foot="Active acquirers by 12-month cadence.">
+          <BuyerNetworkReactor height={196} />
+        </Panel>
+        <Panel title="Live telemetry" className="lg:col-span-4" foot="Real extrema from the registry + sector indexes.">
+          <ReactorTelemetry />
+        </Panel>
+      </Frame>
 
       {/* Value cards */}
       <CommandTiles

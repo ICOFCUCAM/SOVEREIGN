@@ -12,6 +12,32 @@ import { DNA_PROFILES } from "../lib/buyer-dna";
 const TAU = Math.PI * 2;
 const polar = (cx: number, cy: number, r: number, a: number): [number, number] => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
 
+/** REACTOR TELEMETRY — the live numeric readout beside the instruments. Every
+ *  line is a real extremum from the registry/indexes, so the reactors are
+ *  legible as data, not ornament. */
+export const ReactorTelemetry: React.FC = () => {
+  const hotSector = [...ACQ_INDEXES.indexes].filter((i) => i.trendPct != null).sort((a, b) => (b.trendPct ?? 0) - (a.trendPct ?? 0))[0];
+  const busiest = [...DNA_PROFILES].filter((p) => p.events_indexed > 0).sort((a, b) => b.deals_12m - a.deals_12m)[0];
+  const deepest = [...MARKET_INTEL.sectorHeat].sort((a, b) => b.disclosedUsd - a.disclosedUsd)[0];
+  const rows: { k: string; v: string; tone?: string }[] = [
+    { k: "Hottest sector", v: hotSector ? `${hotSector.sector} ${hotSector.trendPct! >= 0 ? "+" : ""}${Math.round((hotSector.trendPct ?? 0) * 100)}%` : "—", tone: "text-deal-300" },
+    { k: "Busiest acquirer", v: busiest ? `${busiest.name} · ${busiest.deals_12m}/12m` : "—" },
+    { k: "Deepest liquidity", v: deepest ? `${deepest.token} · ${fmtUsd(deepest.disclosedUsd)}` : "—", tone: "text-sky-300" },
+    { k: "Total volume", v: ACQ_INDEXES.indexes.reduce((s, i) => s + i.volume, 0).toLocaleString() },
+    { k: "Disclosed value", v: fmtUsd(MARKET_INTEL.totalDisclosedUsd) },
+  ];
+  return (
+    <div className="divide-y divide-white/5">
+      {rows.map((r) => (
+        <div key={r.k} className="flex items-baseline justify-between gap-2 px-3 py-[7px] text-[11.5px]">
+          <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">{r.k}</span>
+          <span className={`font-mono tabular-nums ${r.tone ?? "text-white/80"}`}>{r.v}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 /** ACQUISITION REACTOR — sector acquisition volume as an orbital field.
  *  Node radius ∝ √volume; colour = 12-month trend; centre = total volume. */
 export const AcquisitionReactor: React.FC<{ height?: number }> = ({ height = 200 }) => {
