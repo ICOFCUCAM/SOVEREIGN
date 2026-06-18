@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Panel, Frame, CommandHeader, Evidence } from "../lib/workstation";
-import { BuyerNetworkReactor } from "../components/Reactor";
 import { MULTIPLES } from "@exit/engines";
 import { premiumLeague, speedLeague, DNA_AS_OF } from "../lib/buyer-dna";
 
@@ -44,11 +43,7 @@ const OutcomeIntelligence: React.FC = () => {
 
 
       <Frame>
-        <Panel title="Buyer network reactor" className="lg:col-span-3"
-          foot="Active acquirers · node size ∝ 12-month cadence.">
-          <BuyerNetworkReactor height={220} />
-        </Panel>
-        <Panel title="Highest premium payers" className="lg:col-span-5"
+        <Panel title="Highest premium payers" className="lg:col-span-6"
           foot="Premium over disclosed reference price. Only buyers with a priced, referenced deal appear.">
           <table className="w-full text-[12px]">
             <tbody>
@@ -68,7 +63,7 @@ const OutcomeIntelligence: React.FC = () => {
           </table>
         </Panel>
 
-        <Panel title="Fastest closers" className="lg:col-span-4"
+        <Panel title="Fastest closers" className="lg:col-span-6"
           foot="Median announced→closed duration on completed deals.">
           <table className="w-full text-[12px]">
             <tbody>

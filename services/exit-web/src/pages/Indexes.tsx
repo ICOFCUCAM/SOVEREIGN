@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Panel, Frame, CommandHeader } from "../lib/workstation";
-import { AcquisitionReactor } from "../components/Reactor";
-import { TransactionHeatfield } from "../components/Heatfield";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 
 // EXITOS ACQUISITION INDEXES (Stage 8) — Bloomberg has indexes; so does
@@ -48,18 +46,7 @@ const Indexes: React.FC = () => {
 
 
       <Frame>
-        <Panel title="Transaction heatfield · volume × disclosed value" className="lg:col-span-12"
-          foot="Column height = acquisition volume · heat = disclosed value · cap colour = 12-month trend. Hover a sector for figures.">
-          <TransactionHeatfield height={200} />
-        </Panel>
-      </Frame>
-
-      <Frame>
-        <Panel title="Acquisition reactor" className="lg:col-span-4"
-          foot="Orbital field of sector acquisition volume — node size ∝ √volume, colour = 12-month trend.">
-          <AcquisitionReactor height={240} />
-        </Panel>
-        <Panel title="ExitOS Acquisition Indexes" className="lg:col-span-8"
+        <Panel title="ExitOS Acquisition Indexes" className="lg:col-span-12"
           right={
             <div className="flex flex-wrap gap-1">
               {([["volume", "Vol"], ["trend", "Trend"], ["size", "Size"], ["buyers", "Buyers"]] as [typeof sort, string][]).map(([k, l]) => (
