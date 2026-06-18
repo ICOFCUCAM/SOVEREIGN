@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { StageBadge, STAGE_ORDER, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, NEGOTIATION_STATE } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
@@ -127,6 +127,13 @@ const Pipeline: React.FC = () => {
       />
 
       <MarketTape items={tape} />
+
+      <CommandState
+        current={<><span className="font-mono text-white">{live.length}</span> live deals · prob-weighted {fmtMoney(totalWeighted)} · leverage {NEGOTIATION_STATE.leverage}</>}
+        changes={lead ? <>Lead {lead.buyer} at {(lead.probability * 100).toFixed(0)}%{leadF ? ` · ~${leadF.expectedDays}d to close` : ""}</> : <>No live offers in the funnel</>}
+        action={<>{NEGOTIATION_STATE.nextMove}</>}
+        outcome={lead && leadF ? <>Lead closes ~{leadF.expectedDays}d · adj. value <span className="font-mono text-white">{fmtMoney(leadF.adjustedValue)}</span></> : <>Rebuild the funnel to regain leverage</>}
+      />
 
       <BankerTake
         next={NEGOTIATION_STATE.nextMove}

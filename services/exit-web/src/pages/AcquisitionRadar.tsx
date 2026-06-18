@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { Field, inputCls } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
@@ -71,6 +71,13 @@ const AcquisitionRadar: React.FC = () => {
       />
 
       <MarketTape items={tape} />
+
+      <CommandState
+        current={<><span className="font-mono text-white">{sectors.length}</span> target sectors · {listings.length} live listings · {regions.length} regions</>}
+        changes={<>{watchVolume.toLocaleString()} indexed acquisitions in your space · {maxActiveBuyers} competing acquirers</>}
+        action={qualified[0] ? <>Express interest in <span className="font-semibold text-white">{qualified[0].listing.code}</span> — {qualified[0].match.score}% match</> : <>Widen the mandate — no qualified listings yet</>}
+        outcome={<><span className="font-mono text-white">{qualified.length}</span> qualified opportunities · identities reveal on NDA</>}
+      />
 
       <Frame>
         {/* mandate config */}

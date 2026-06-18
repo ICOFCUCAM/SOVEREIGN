@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fmtMoney, notify } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { READINESS_ANALYSIS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -85,6 +85,13 @@ const Readiness: React.FC = () => {
       />
 
       <MarketTape items={tape} />
+
+      <CommandState
+        current={<>Readiness <span className="font-mono text-white">{score.toFixed(0)}/100</span> ({READINESS_BAND.replace(/_/g, " ")}) · value {fmtMoney(current)}</>}
+        changes={<>{categories.length} categories scored · {topFix ? `top lever: ${topFix.dimension}` : "all on track"}</>}
+        action={topFix ? <>{topFix.recommendation.split(".")[0]} — <span className="font-mono text-white">+{fmtMoney(topFix.valuationUpliftUsd)}</span></> : <>Run the process — readiness is high enough</>}
+        outcome={<>Potential <span className="font-mono text-white">{fmtMoney(potential)}</span> · +{fmtMoney(left)} unclaimed ({upliftPct.toFixed(0)}%) · verdict: {verdict.label}</>}
+      />
 
       {/* recommended action + gauge + cascade */}
       <Frame>

@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { fmtMoney } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import BankerTake from "../components/BankerTake";
 import { READINESS_ANALYSIS, BUYERS, VALUATION_STANDARD } from "../lib/engines";
@@ -86,6 +86,13 @@ const ExitTiming: React.FC = () => {
       />
 
       <MarketTape items={tape} />
+
+      <CommandState
+        current={<>Sell-today <span className="font-mono text-white">{fmtMoney(current)}</span> · growth {Math.round(growthYoy * 100)}% · {tailwinds >= signals.length / 2 ? "conditions favourable" : "mixed conditions"}</>}
+        changes={<><span className="font-mono text-white">{tailwinds}/{signals.length}</span> market signals are tailwinds</>}
+        action={<>Prepare now and target a sale in months <span className="font-mono text-white">{windowLo}–{windowHi}</span></>}
+        outcome={<>At the window <span className="font-mono text-white">{fmtMoney(potential)}</span> · +{upliftPct}% value of waiting · Q2 {windowRow.year}</>}
+      />
 
       <BankerTake
         next={<>Prepare now and target a sale in <span className="text-white">months {windowLo}–{windowHi}</span> — as the readiness gap closes and multiples hold.</>}

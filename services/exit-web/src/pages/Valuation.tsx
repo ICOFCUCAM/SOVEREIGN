@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Field, fmtMoney, downloadJson, downloadText } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { VALUATION_INSTITUTIONAL, VALUATION_FACTS, DOCUMENT_SUITE } from "../lib/engines";
 import { VALUATION_FRAMEWORK } from "@exit/engines";
@@ -63,6 +63,13 @@ const Valuation: React.FC = () => {
       />
 
       <MarketTape items={tape} />
+
+      <CommandState
+        current={<>Midpoint <span className="font-mono text-white">{fmtMoney(INST.headline.mid)}</span> · confidence {INST.confidence.score}% · baseline {fmtMoney(INST.financialBaseline.mid)}</>}
+        changes={<>{INST.comparablesUsed} comparables · premium evidence n={INST.premium.observedPremiums.length} ({INST.premium.confidence.tier})</>}
+        action={<>Anchor at the strategic band — make buyers defend +{pctStr(INST.premium.appliedPct)}, not debate it</>}
+        outcome={<>Range <span className="font-mono text-white">{fmtMoney(INST.headline.low)}–{fmtMoney(INST.headline.high)}</span> · +{fmtMoney(premiumGap)} premium vs baseline · close {INST.timeToClose.lowDays}–{INST.timeToClose.highDays}d</>}
+      />
 
       <BankerTake
         next={<>Anchor the process at the <span className="text-white">strategic</span> band — the {pctStr(INST.premium.appliedPct)} premium is underwritten by {INST.premium.observedPremiums.length} observed precedents, so make buyers defend it, not debate it.</>}
