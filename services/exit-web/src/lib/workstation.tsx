@@ -1,7 +1,5 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
 import type { TapeItem, TapeKind } from "./market-tape";
-import { LAYERS, activeLayer } from "../components/LayerBar";
 
 // ── WORKSTATION PRIMITIVES ──────────────────────────────────────────
 // The shared vocabulary that makes a screen read as one instrument — a deal
@@ -157,13 +155,10 @@ export const CommandHeader: React.FC<{
   note?: React.ReactNode;
   right?: React.ReactNode;
 }> = ({ kicker = "◉ Mandate", title, tag, status, meta = [], metrics = [], note, right }) => {
-  const { pathname } = useLocation();
-  const layer = LAYERS.find((l) => l.key === activeLayer(pathname));
   return (
   <div className="overflow-hidden rounded-lg border border-white/10">
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-gradient-to-r from-deal-600/15 via-ink-900 to-ink-900 px-4 py-2.5">
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-ink-900 px-4 py-2.5">
       <div className="flex flex-wrap items-baseline gap-3">
-        {layer && <span className="rounded bg-white/[0.05] px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-wide text-deal-300/80 ring-1 ring-white/10" title={`${layer.label} layer`}>L{layer.roman}</span>}
         <span className="text-[9.5px] font-semibold uppercase tracking-[0.22em] text-deal-300/80">{kicker}</span>
         <span className="font-mono text-[18px] font-bold tracking-tight text-white">{title}</span>
         {tag && <span className="rounded bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/65 ring-1 ring-white/10">{tag}</span>}
