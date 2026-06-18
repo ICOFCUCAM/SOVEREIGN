@@ -4,7 +4,8 @@ import { useAuth } from "../lib/auth";
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
 import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, fmtUsdShort } from "../lib/buyer-dna";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
-import { Panel, CommandHeader } from "../lib/workstation";
+import { Panel, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 
 // ── ACQUISITION INTELLIGENCE TERMINAL ───────────────────────────────
@@ -48,6 +49,7 @@ const Terminal: React.FC = () => {
   const leadPremium = lead?.profile.premium_pct ?? INST.premium.appliedPct;
   const leadCloseDays = lead?.profile.median_close_days ?? INST.timeToClose.lowDays;
   const asOf = new Date().toISOString().slice(0, 10);
+  const tape = useMemo(() => buildMarketTape(), []);
 
   // action queue — recommended next moves, derived from the engines (not invented)
   const actions: { label: string; meta: string; to: string }[] = [
@@ -98,6 +100,8 @@ const Terminal: React.FC = () => {
           </>
         )}
       />
+
+      <MarketTape items={tape} />
 
       {/* ── WORKSTATION GRID ── hairline-separated panels in one frame ── */}
       <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 lg:grid-cols-12">

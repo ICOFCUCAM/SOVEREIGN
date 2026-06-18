@@ -13,7 +13,10 @@ const basePath = (to: string): string => to.split("#")[0];
 
 // Routes that render as full-bleed workstations (one instrument, no centered
 // column) rather than the standard document-width page.
-const WORKSTATION_ROUTES = new Set(["/console", "/console/buyer-graph", "/console/acquisition-radar", "/console/inbox"]);
+const WORKSTATION_ROUTES = new Set([
+  "/console", "/console/buyer-graph", "/console/acquisition-radar", "/console/inbox",
+  "/console/valuation", "/console/readiness",
+]);
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session, signOut } = useAuth();

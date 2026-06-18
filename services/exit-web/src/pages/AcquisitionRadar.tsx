@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { Field, inputCls } from "../lib/ui";
-import { Panel, Frame, CommandHeader } from "../lib/workstation";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
 import { allListings, subscribeListings } from "../lib/listings";
@@ -47,6 +48,7 @@ const AcquisitionRadar: React.FC = () => {
 
   const toggle = <T,>(arr: T[], v: T, set: (x: T[]) => void): void => set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
   const maxActiveBuyers = watch.reduce((m, i) => Math.max(m, i.activeBuyers), 0);
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div className="space-y-2">
@@ -67,6 +69,8 @@ const AcquisitionRadar: React.FC = () => {
           { k: "Qualified opportunities", v: String(qualified.length), accent: true, sub: `of ${listings.length} live listings` },
         ]}
       />
+
+      <MarketTape items={tape} />
 
       <Frame>
         {/* mandate config */}

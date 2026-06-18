@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Card, SectionHeader, fmtMoney, notify } from "../lib/ui";
+import { fmtMoney, notify } from "../lib/ui";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { READINESS_ANALYSIS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { EXIT_SCORE, READINESS_BAND, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VALUE_LEFT_USD, READINESS_CATEGORIES } from "../lib/deal-context";
@@ -59,151 +61,125 @@ const Readiness: React.FC = () => {
       notify(`Re-scored · ${EXIT_SCORE}/100 (${READINESS_BAND.replace(/_/g, " ")}) — ${READINESS_CATEGORIES.length} categories re-evaluated`);
     }, 700);
   };
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Prepare · Exit readiness"
-        title="Exit Readiness Score"
-        description="One number that tells you what your company is worth today, what it could be worth, and exactly what to fix to close the gap — every fix priced in dollars."
-        actions={<Button onClick={rescore} disabled={scanning}>{scanning ? "Re-scoring…" : "Re-score"}</Button>}
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Readiness Desk"
+        title="Exit Readiness"
+        tag={READINESS_BAND.replace(/_/g, " ")}
+        status={verdict.label}
+        meta={[
+          { k: "GROWTH", v: `${Math.round(growthYoy * 100)}%` },
+          { k: "WINDOW", v: marketOpen ? "Open" : "Tightening" },
+          { k: "CATEGORIES", v: categories.length },
+        ]}
+        metrics={[
+          { k: "Readiness", v: `${score.toFixed(0)}/100`, accent: true, sub: READINESS_BAND.replace(/_/g, " ") },
+          { k: "Current value", v: fmtMoney(current), sub: "strategic mid, today" },
+          { k: "Potential", v: fmtMoney(potential), accent: true, sub: "after fixes" },
+          { k: "Value left", v: fmtMoney(left), sub: `+${upliftPct.toFixed(0)}% unclaimed` },
+          { k: "Top fix impact", v: topFix ? `+${fmtMoney(topFix.valuationUpliftUsd)}` : "—", sub: topFix?.dimension },
+        ]}
       />
 
-      {/* ── Recommended action lead ──────────────────────────────── */}
-      {topFix && (
-        <div className="mb-8 overflow-hidden rounded-2xl border border-deal-500/40 bg-gradient-to-r from-deal-600/15 to-transparent">
-          <div className="flex flex-wrap items-center justify-between gap-4 p-5">
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-deal-300">Recommended action</div>
-              <div className="mt-1 text-lg font-semibold text-white">{topFix.recommendation.split(".")[0]}.</div>
-              <div className="mt-0.5 text-[12px] text-white/55">Biggest single lever: {topFix.dimension} · {EFFORT_LABEL[topFix.effort] ?? topFix.effort}</div>
-            </div>
-            <div className="text-right">
-              <div className="text-[10px] uppercase tracking-wide text-white/40">Estimated impact</div>
-              <div className="font-mono text-2xl font-bold text-deal-300">+{fmtMoney(topFix.valuationUpliftUsd)}</div>
-            </div>
-          </div>
-        </div>
-      )}
+      <MarketTape items={tape} />
 
-      {/* ── Score + money cascade ────────────────────────────────── */}
-      <Card className="p-6">
-        <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
-          {/* gauge */}
-          <div className="flex flex-col items-center justify-center border-b border-white/10 pb-6 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-8">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Exit readiness</div>
-            <div className="relative mt-3 flex h-40 w-40 items-center justify-center">
+      {/* recommended action + gauge + cascade */}
+      <Frame>
+        <Panel title="Exit readiness" className="lg:col-span-3"
+          right={<button onClick={rescore} disabled={scanning} className="rounded bg-white/[0.04] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/55 ring-1 ring-white/10 hover:text-white disabled:opacity-50">{scanning ? "Re-scoring…" : "Re-score"}</button>}>
+          <div className="flex flex-col items-center justify-center py-4">
+            <div className="relative flex h-36 w-36 items-center justify-center">
               <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
                 <circle cx="60" cy="60" r={R} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
-                <circle cx="60" cy="60" r={R} fill="none" stroke={scoreColor} strokeWidth="10" strokeLinecap="round"
-                  strokeDasharray={`${circ}`} strokeDashoffset={`${circ * (1 - score / 100)}`} />
+                <circle cx="60" cy="60" r={R} fill="none" stroke={scoreColor} strokeWidth="10" strokeLinecap="round" strokeDasharray={`${circ}`} strokeDashoffset={`${circ * (1 - score / 100)}`} />
               </svg>
               <div className="absolute text-center">
                 <div className="font-mono text-4xl font-bold" style={{ color: scoreColor }}>{score.toFixed(0)}</div>
                 <div className="text-[10px] uppercase tracking-wide text-white/40">/ 100</div>
               </div>
             </div>
-            <div className="mt-3 text-[12px] font-semibold uppercase tracking-wide text-white/60">{READINESS_BAND.replace(/_/g, " ")}</div>
+            <div className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-white/60">{READINESS_BAND.replace(/_/g, " ")}</div>
           </div>
+        </Panel>
 
-          {/* money cascade */}
-          <div className="flex flex-col justify-center">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Panel title="Value cascade · readiness → money" className="lg:col-span-5"
+          foot={topFix ? `Biggest single lever: ${topFix.dimension} · ${EFFORT_LABEL[topFix.effort] ?? topFix.effort} · ${topFix.recommendation.split(".")[0]}.` : undefined}>
+          <div className="p-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <CascadeStat label="Current valuation" value={fmtMoney(current)} sub="strategic mid, today" color="text-white" />
               <CascadeStat label="Potential after fixes" value={fmtMoney(potential)} sub="if the gaps close" color="text-deal-300" arrow />
-              <CascadeStat label="Value left on the table" value={fmtMoney(left)} sub={`+${upliftPct.toFixed(0)}% upside unclaimed`} color="text-loi-300" arrow />
+              <CascadeStat label="Value left" value={fmtMoney(left)} sub={`+${upliftPct.toFixed(0)}% unclaimed`} color="text-loi-300" arrow />
             </div>
-            <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/5">
+            <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-white/5">
               <div className="flex h-full">
                 <div className="h-full bg-gradient-to-r from-deal-700 to-deal-400" style={{ width: `${(current / potential) * 100}%` }} />
                 <div className="h-full bg-loi-500/50" style={{ width: `${(left / potential) * 100}%` }} />
               </div>
             </div>
             <div className="mt-2 flex justify-between text-[11px] text-white/45">
-              <span>Captured today · {fmtMoney(current)}</span>
+              <span>Captured · {fmtMoney(current)}</span>
               <span className="text-loi-300">Unclaimed · {fmtMoney(left)}</span>
             </div>
           </div>
-        </div>
-      </Card>
+        </Panel>
 
-      {/* ── When to sell (monitor signal) ────────────────────────── */}
-      <Card className="mt-8 p-6">
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
-          <div className="border-b border-white/10 pb-5 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">When to sell</div>
-            <div className="mt-2 inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-bold" style={{ background: `${verdict.tone}1f`, color: verdict.tone }}>
+        <Panel title="When to sell · monitor signal" className="lg:col-span-4">
+          <div className="p-4">
+            <div className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-[13px] font-bold" style={{ background: `${verdict.tone}1f`, color: verdict.tone }}>
               <span className="h-2 w-2 rounded-full" style={{ background: verdict.tone }} /> {verdict.label}
             </div>
-            <p className="mt-3 text-[13px] leading-relaxed text-white/65">{verdict.body}</p>
-          </div>
-          <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Timing signals</div>
-            <div className="mt-3 grid grid-cols-2 gap-3">
+            <p className="mt-2 text-[12px] leading-relaxed text-white/65">{verdict.body}</p>
+            <div className="mt-3 grid grid-cols-2 gap-px overflow-hidden rounded-md bg-white/10">
               {signals.map((s) => (
-                <div key={s.label} className="rounded-lg border border-white/10 bg-ink-900/40 p-3">
-                  <div className="flex items-center gap-2">
+                <div key={s.label} className="bg-ink-900 p-2.5">
+                  <div className="flex items-center gap-1.5">
                     <span className={`h-1.5 w-1.5 rounded-full ${s.ok ? "bg-deal-400" : "bg-loi-400"}`} />
-                    <span className="text-[10px] uppercase tracking-wide text-white/40">{s.label}</span>
+                    <span className="text-[9px] uppercase tracking-wide text-white/40">{s.label}</span>
                   </div>
-                  <div className="mt-1 font-mono text-base font-semibold text-white">{s.value}</div>
+                  <div className="mt-0.5 font-mono text-[13px] font-semibold text-white">{s.value}</div>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-      </Card>
+        </Panel>
+      </Frame>
 
-      {/* ── Exit Readiness AI — category scorecard with priced fixes ── */}
-      <div className="mt-8 flex items-end justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-deal-600/30 text-[10px] font-bold text-deal-200 ring-1 ring-deal-400/40">AI</span>
-            <h2 className="font-serif text-lg font-bold text-white">Exit Readiness AI · Value Impact Simulator</h2>
-          </div>
-          <p className="mt-1 text-xs text-white/45">Scored across the ten categories buyers underwrite — every fix priced. {READINESS_ANALYSIS.headline}</p>
-        </div>
-        <div className="text-right text-[11px]">
-          <div className="uppercase tracking-[0.2em] text-white/40">Total upside</div>
-          <div className="font-mono text-lg font-bold text-deal-300">+{fmtMoney(left)}</div>
-        </div>
-      </div>
-
-      <div className="mt-4 space-y-3">
-        {categories.map((cat) => {
-          const c = cat.score >= 75 ? "#34d399" : cat.score >= 50 ? "#fbbf24" : "#f87171";
-          return (
-            <Card key={cat.key} className="p-5">
-              <div className="grid items-center gap-4 sm:grid-cols-[150px_1fr_140px]">
-                <div>
-                  <div className="text-[13px] font-bold text-white">{cat.label}</div>
-                  <div className="font-mono text-2xl font-bold" style={{ color: c }}>{cat.score}<span className="text-sm text-white/40">/100</span></div>
-                </div>
-                <div className="min-w-0">
-                  <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
-                    <div className="h-full rounded-full" style={{ width: `${Math.max(2, cat.score)}%`, background: c }} />
+      {/* category scorecard with priced fixes */}
+      <Frame>
+        <Panel title="Exit Readiness AI · Value Impact Simulator" className="lg:col-span-12"
+          right={<span className="font-mono text-[10px] text-deal-300">total upside +{fmtMoney(left)}</span>}
+          foot={`Scored across the ten categories buyers underwrite — every fix priced. ${READINESS_ANALYSIS.headline}`}>
+          <div className="divide-y divide-white/5">
+            {categories.map((cat) => {
+              const c = cat.score >= 75 ? "#34d399" : cat.score >= 50 ? "#fbbf24" : "#f87171";
+              return (
+                <div key={cat.key} className="grid items-center gap-4 px-3 py-2 sm:grid-cols-[160px_1fr_130px]">
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-mono text-[18px] font-bold" style={{ color: c }}>{cat.score}</span>
+                    <span className="text-[12px] font-semibold text-white">{cat.label}</span>
                   </div>
-                  <p className="mt-2 text-[12.5px] leading-snug text-white/65">{cat.fix}</p>
+                  <div className="min-w-0">
+                    <div className="h-1 overflow-hidden rounded-full bg-white/5"><div className="h-full rounded-full" style={{ width: `${Math.max(2, cat.score)}%`, background: c }} /></div>
+                    <p className="mt-1 text-[11.5px] leading-snug text-white/55">{cat.fix}</p>
+                  </div>
+                  <div className="text-right">
+                    {cat.impactUsd > 0
+                      ? <div className="font-mono text-[14px] font-bold text-deal-300">+{fmtMoney(cat.impactUsd)}</div>
+                      : <span className="text-[11px] font-semibold text-deal-300">On track ✓</span>}
+                  </div>
                 </div>
-                <div className="text-right">
-                  {cat.impactUsd > 0 ? (
-                    <>
-                      <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">Fix impact</div>
-                      <div className="font-mono text-lg font-bold text-deal-300">+{fmtMoney(cat.impactUsd)}</div>
-                    </>
-                  ) : (
-                    <span className="text-[12px] font-semibold text-deal-300">On track ✓</span>
-                  )}
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </Panel>
+      </Frame>
 
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Link to="/console/valuation" className="rounded-md bg-deal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">See the valuation model →</Link>
-        <Link to="/console/data-room" className="rounded-md border border-white/15 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5">Close the gaps in the data room</Link>
+      <div className="flex flex-wrap gap-2 px-1">
+        <Link to="/console/valuation" className="rounded-md bg-deal-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-500">See the valuation model →</Link>
+        <Link to="/console/data-room" className="rounded-md border border-white/15 px-4 py-2 text-[13px] font-semibold text-white/80 transition hover:bg-white/5">Close the gaps in the data room</Link>
       </div>
     </div>
   );

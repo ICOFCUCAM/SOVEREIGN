@@ -25,6 +25,13 @@ body {
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }
 
+/* Market tape — a continuous ticker of real market activity. The track is
+   rendered twice so the loop is seamless; honors reduced-motion. */
+@keyframes exTicker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ex-ticker { animation: exTicker 60s linear infinite; }
+.ex-ticker:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .ex-ticker { animation: none; } }
+
 /* Exchange board mount — the 3D rotation only renders at desktop width;
    phones and tablets get the flat board, full-width and unclipped. */
 @media (min-width: 1024px) {
