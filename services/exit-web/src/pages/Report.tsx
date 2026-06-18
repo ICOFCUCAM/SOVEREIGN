@@ -3,7 +3,7 @@ import { loadActiveCompany } from "../lib/active-company";
 import { buildValuationReport, type ValuationReportModel } from "../lib/report-model";
 import { fmtMoney } from "../lib/ui";
 import {
-  ReportFrame, Cover, Contents, Section, Exhibit, BankTable, StatGrid, Stat, Lead, Note,
+  ReportFrame, Cover, Contents, ListOfExhibits, ExhibitRef, Section, Exhibit, BankTable, StatGrid, Stat, Lead, Note,
 } from "../lib/report-ui";
 import {
   FootballField, ValuationBridge, BuyerRankingChart, BuyerUniverse, ConfidenceDrivers, TransactionTimeline,
@@ -23,6 +23,19 @@ const SECTIONS = [
   "Data Provenance", "Framework Compliance", "Legal Notices", "Appendices",
 ];
 
+const EXHIBITS = [
+  { n: "IV-A", title: "Valuation football field" },
+  { n: "IV-B", title: "Valuation bridge — baseline to concluded value" },
+  { n: "IV-C", title: "Methodology weighting" },
+  { n: "V-A", title: "Precedent transaction matrix" },
+  { n: "VI-A", title: "Strategic acquirer ranking — fit-adjusted probability" },
+  { n: "VI-B", title: "Buyer universe distribution" },
+  { n: "VII-A", title: "Indicative path to close" },
+  { n: "VIII-A", title: "Confidence drivers" },
+  { n: "IX-A", title: "Figures by source" },
+  { n: "XII-A", title: "Valuation variables and sources" },
+];
+
 const Report: React.FC = () => {
   const { company } = useMemo(() => loadActiveCompany(), []);
   const r: ValuationReportModel = useMemo(() => buildValuationReport(company), [company]);
@@ -31,6 +44,7 @@ const Report: React.FC = () => {
     <ReportFrame docType={r.meta.title} company={r.meta.company} frameworkVersion={r.meta.frameworkVersion}>
       <Cover docType={r.meta.title} company={r.meta.company} preparedFor={r.meta.preparedFor} preparedBy={r.meta.preparedBy} date={r.meta.date} frameworkVersion={r.meta.frameworkVersion} />
       <Contents items={SECTIONS} />
+      <ListOfExhibits items={EXHIBITS} />
 
       {/* I · EXECUTIVE SUMMARY */}
       <Section n={1} title="Executive Summary">
@@ -91,7 +105,7 @@ const Report: React.FC = () => {
 
       {/* IV · VALUATION ANALYSIS */}
       <Section n={4} title="Valuation Analysis">
-        <Lead>Enterprise value is triangulated across the methodologies below, each derived from reported figures and source-referenced market data, then weighted to a single institutional view.</Lead>
+        <Lead>Enterprise value is triangulated across the methodologies below (<ExhibitRef n="IV-C" />), each derived from reported figures and source-referenced market data, then weighted to a single institutional view. The concluded range and the premium that drives it are set out in <ExhibitRef n="IV-A" /> and <ExhibitRef n="IV-B" />.</Lead>
         <Exhibit n="IV-A" title="Valuation football field" source="ExitOS Valuation Framework">
           <FootballField
             methods={r.methodologies.map((mt) => ({ label: mt.name, low: mt.band.low, mid: mt.band.mid, high: mt.band.high }))}
@@ -111,7 +125,7 @@ const Report: React.FC = () => {
 
       {/* V · COMPARABLE TRANSACTIONS */}
       <Section n={5} title="Comparable Transactions">
-        <Lead>Precedent transactions in the sector, with disclosed premiums where available. The applied premium is anchored to this set.</Lead>
+        <Lead>Precedent transactions in the sector, with disclosed premiums where available (<ExhibitRef n="V-A" />). The applied premium is anchored to this set.</Lead>
         <Exhibit n="V-A" title="Precedent transaction matrix" source={r.comparablesAnalysis.note}>
           <BankTable
             columns={[{ key: "t", label: "Target" }, { key: "a", label: "Acquirer" }, { key: "d", label: "Date", align: "right" }, { key: "p", label: "Premium", align: "right" }, { key: "v", label: "Value", align: "right" }]}

@@ -87,6 +87,26 @@ export const Contents: React.FC<{ items: string[] }> = ({ items }) => (
   </Section>
 );
 
+/** A formal "List of Exhibits" register — exhibit number + caption. */
+export const ListOfExhibits: React.FC<{ items: { n: string; title: string }[] }> = ({ items }) => (
+  <Section n={null} title="List of Exhibits">
+    <ol className="mt-2 divide-y divide-[#eef1f5]">
+      {items.map((e) => (
+        <li key={e.n} className="flex items-baseline gap-3 py-2 text-[12.5px]">
+          <span className="w-20 shrink-0 font-mono font-semibold text-[#0e7a4f]">Exhibit {e.n}</span>
+          <span className="font-medium text-[#0b1220]">{e.title}</span>
+          <span className="mx-2 flex-1 border-b border-dotted border-[#c8cfda]" />
+        </li>
+      ))}
+    </ol>
+  </Section>
+);
+
+/** A cross-reference to a numbered exhibit, e.g. (see Exhibit IV-A). */
+export const ExhibitRef: React.FC<{ n: string }> = ({ n }) => (
+  <span className="whitespace-nowrap font-medium text-[#0e7a4f]">Exhibit {n}</span>
+);
+
 export const Section: React.FC<{ n: number | null; title: string; children: React.ReactNode }> = ({ n, title, children }) => (
   <section className="rpt-section px-16 py-12">
     <div className="mb-6 border-b-2 border-[#0b1220] pb-2.5">
