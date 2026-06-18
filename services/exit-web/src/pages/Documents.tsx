@@ -116,7 +116,8 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
 
       <div className="flex flex-wrap justify-end gap-2">
         <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>
-        {doc && <Button variant="ghost" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download .md</Button>}
+        <a href="/report/valuation" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-md bg-deal-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">Board-ready report (PDF) →</a>
+        {doc && <Button variant="ghost" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download draft (.md)</Button>}
         {doc && <Button onClick={() => markSent(doc.kind, docToMarkdown(doc), docFilename(doc))}>{sent.has(doc.kind) ? "Sent ✓ · resend" : "Send to buyer"}</Button>}
       </div>
 

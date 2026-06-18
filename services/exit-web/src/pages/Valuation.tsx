@@ -1,9 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { Field, fmtMoney, downloadJson, downloadText } from "../lib/ui";
+import { Field, fmtMoney, downloadJson } from "../lib/ui";
 import { Panel, Frame, CommandHeader, CommandState, Evidence } from "../lib/workstation";
-import { VALUATION_INSTITUTIONAL, VALUATION_FACTS, DOCUMENT_SUITE } from "../lib/engines";
+import { VALUATION_INSTITUTIONAL, VALUATION_FACTS } from "../lib/engines";
 import { VALUATION_FRAMEWORK } from "@exit/engines";
-import { tracedDocMarkdown } from "../lib/deliverables";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import BankerTake from "../components/BankerTake";
 
@@ -83,9 +82,8 @@ const Valuation: React.FC = () => {
         <Panel title="Valuation fact sheet · every figure traced to a source" className="lg:col-span-12"
           right={
             <div className="flex flex-wrap gap-1.5">
-              <button onClick={() => downloadText("board-report.md", tracedDocMarkdown(DOCUMENT_SUITE.board_report))} className="rounded bg-white/[0.04] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/55 ring-1 ring-white/10 hover:text-white">Board report</button>
-              <button onClick={() => downloadText("market-update.md", tracedDocMarkdown(DOCUMENT_SUITE.market_update))} className="rounded bg-white/[0.04] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/55 ring-1 ring-white/10 hover:text-white">Market update</button>
-              <button onClick={() => downloadJson("exitos-valuation-model.json", { company: C.name, institutional: INST, factSheet: VALUATION_FACTS, blended, dcf: dcfValue, comparables: compMid, assumptions: { growthPct: growth, discountPct: discount } })} className="rounded bg-deal-600/80 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white ring-1 ring-deal-400/40 hover:bg-deal-500">Export model</button>
+              <button onClick={() => downloadJson("exitos-valuation-model.json", { company: C.name, institutional: INST, factSheet: VALUATION_FACTS, blended, dcf: dcfValue, comparables: compMid, assumptions: { growthPct: growth, discountPct: discount } })} className="rounded bg-white/[0.04] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/55 ring-1 ring-white/10 hover:text-white">Export data (.json)</button>
+              <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded bg-deal-600/80 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white ring-1 ring-deal-400/40 hover:bg-deal-500">Board-ready report (PDF) →</a>
             </div>
           }
           foot="Hover any figure for its methodology, source and last-updated date. No number on this page exists without one.">
