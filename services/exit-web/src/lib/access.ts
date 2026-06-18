@@ -58,6 +58,7 @@ export const NAV: NavItem[] = [
   // ── Engage (founder) ───────────────────────────────────────────
   { to: "/console/banker",             label: "Outreach",             group: "Exchange", roles: ["founder"], pro: true },
   { to: "/console/nda",                label: "NDA Vault",            group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/inbox",              label: "Inbox",                group: "Exchange", roles: ["founder"] },
   { to: "/console/pipeline",           label: "Active Processes",     group: "Exchange", roles: ["founder"] },
   { to: "/console/activity",           label: "Deal Activity",        group: "Exchange", roles: ["founder", "buyer"] },
   { to: "/console/outreach-plan",      label: "Outreach Plan",        group: "Exchange", roles: ["founder"], pro: true, starter: true },

@@ -1,5 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Role, Plan } from "./access";
+import { activateBackend, type AccountRole } from "./exit-api";
+
+// Session role → backend AccountRole. The backend models three actor kinds;
+// admins/superadmins act as advisors over the network.
+const accountRoleOf = (role: Role): AccountRole =>
+  role === "founder" ? "founder" : role === "buyer" ? "buyer" : "advisor";
 
 // Session model. ExitOS auth will exchange a Supabase user JWT against
 // exit-api once that service exists; for now the console accepts any
@@ -91,6 +97,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const ms = session.expiresAt - Date.now() - 5000;
     const t = setTimeout(() => setSession(null), Math.max(ms, 0));
     return () => clearTimeout(t);
+  }, [session]);
+
+  // Activate the durable, account-scoped backend on sign-in: from here every
+  // captured event and listing persists through the exit-api contract, keyed
+  // to this account — the multi-tenant spine, live for the session.
+  useEffect(() => {
+    if (!session) return;
+    void activateBackend({
+      id: session.founderId,
+      role: accountRoleOf(session.role),
+      name: session.email,
+      createdAt: new Date().toISOString(),
+    });
   }, [session]);
 
   const has = useCallback((scope: string) => !!session?.scopes.includes(scope), [session]);

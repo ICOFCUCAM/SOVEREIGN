@@ -39,6 +39,7 @@ const ProcessIntelligence = lazy(() => import("./pages/ProcessIntelligence"));
 const OutreachPlan = lazy(() => import("./pages/OutreachPlan"));
 const EngagementRegistry = lazy(() => import("./pages/EngagementRegistry"));
 const DealActivity = lazy(() => import("./pages/DealActivity"));
+const FounderInbox = lazy(() => import("./pages/FounderInbox"));
 const BuyerPortal  = lazy(() => import("./pages/BuyerPortal"));
 const Autopilot    = lazy(() => import("./pages/Autopilot"));
 const Readiness    = lazy(() => import("./pages/Readiness"));
@@ -98,6 +99,7 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
   { path: "pipeline",      policy: "/console/pipeline",       el: <Pipeline /> },
   { path: "process-intel", policy: "/console/process-intel",  el: <ProcessIntelligence /> },
   { path: "activity",      policy: "/console/activity",       el: <DealActivity /> },
+  { path: "inbox",         policy: "/console/inbox",          el: <FounderInbox /> },
   { path: "outreach-plan", policy: "/console/outreach-plan",  el: <OutreachPlan /> },
   { path: "engagement-registry", policy: "/console/engagement-registry", el: <EngagementRegistry /> },
   { path: "closing",       policy: "/console/closing",        el: <Closing /> },

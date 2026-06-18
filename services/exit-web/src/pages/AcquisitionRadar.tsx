@@ -22,6 +22,7 @@ const AcquisitionRadar: React.FC = () => {
   const [maxRevM, setMaxRevM] = useState(500);
   const [regions, setRegions] = useState<Region[]>(["North America", "Europe"]);
   const [minGrowth, setMinGrowth] = useState(20);
+  const [requested, setRequested] = useState<Record<string, boolean>>({});
 
   const criteria: AcquisitionCriteria = useMemo(() => ({
     sectors, minRevUsd: minRevM * 1e6, maxRevUsd: maxRevM * 1e6, regions, minGrowthPct: minGrowth / 100,
@@ -116,8 +117,15 @@ const AcquisitionRadar: React.FC = () => {
                   <span>Revenue {fmtUsd(l.publicView.revenueUsd)}</span>
                   <span>· Growth {Math.round(l.publicView.growthPct * 100)}%</span>
                   <button
-                    onClick={() => captureDealEvent({ actorRole: "buyer", kind: "expressed_interest", subjectType: "listing", subjectId: l.id, subjectName: l.code })}
-                    className="ml-auto rounded-md bg-deal-500/90 px-3 py-1 text-[11px] font-semibold text-ink-950 transition hover:bg-deal-400">Express interest (request NDA)</button>
+                    onClick={() => {
+                      // a single buyer action emits two events the founder sees
+                      // on their listing: the interest signal, then the NDA ask.
+                      captureDealEvent({ actorRole: "buyer", kind: "expressed_interest", subjectType: "listing", subjectId: l.id, subjectName: l.code });
+                      captureDealEvent({ actorRole: "buyer", kind: "nda_requested", subjectType: "listing", subjectId: l.id, subjectName: l.code });
+                      setRequested((s) => ({ ...s, [l.id]: true }));
+                    }}
+                    className="ml-auto rounded-md bg-deal-500/90 px-3 py-1 text-[11px] font-semibold text-ink-950 transition hover:bg-deal-400 disabled:opacity-60"
+                    disabled={!!requested[l.id]}>{requested[l.id] ? "✓ NDA requested" : "Express interest (request NDA)"}</button>
                 </div>
               </div>
             ))}
