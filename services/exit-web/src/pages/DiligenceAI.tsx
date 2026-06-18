@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, fmtMoney, downloadText, downloadJson, notify } from "../lib/ui";
+import { Button, Card, fmtMoney, downloadText, downloadJson, notify } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { DILIGENCE } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 import {
@@ -52,13 +54,25 @@ const DiligenceAI: React.FC = () => {
   const bySource = SOURCE_FILES.map((s) => ({ ...s, count: findings.filter((f) => f.source === s.label).length }));
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Phase 2 · AI Due Diligence"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Due Diligence"
         title="AI Due Diligence"
-        description="Upload financial reports, contracts, tax records, customer and employment agreements. ExitOS discovers the financial, legal and operational risks a buyer will find and writes both the Buyer Diligence Report and the Seller Risk Report — the work an investment bank charges tens of thousands and weeks for, in minutes."
-        actions={<Button onClick={rerun} disabled={rerunning}>{rerunning ? "Re-running…" : "Re-run analysis"}</Button>}
+        tag="Buyer + Seller reports"
+        status={high > 0 ? `${high} high severity` : "Clean"}
+        metrics={[
+          { k: "Risks discovered", v: String(findings.length), accent: true, sub: "across 3 categories" },
+          { k: "High severity", v: String(high), sub: "resolve before access" },
+          { k: "Est. buyer discount", v: `-${fmtMoney(buyerDiscount)}`, sub: "buyers would deduct" },
+          { k: "Critical questions", v: String(DILIGENCE.criticalQuestions.length), sub: "acquirers will ask" },
+        ]}
       />
+
+      <MarketTape items={buildMarketTape()} />
+
+      <div className="flex justify-end">
+        <Button variant="ghost" onClick={rerun} disabled={rerunning}>{rerunning ? "Re-running…" : "Re-run analysis"}</Button>
+      </div>
 
       <BankerTake
         next={high > 0
@@ -101,13 +115,6 @@ const DiligenceAI: React.FC = () => {
           </div>
         </div>
         <button onClick={() => downloadJson("exitos-diligence-reports.json", reports)} className="inline-flex items-center rounded-md bg-deal-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-500">Export both reports →</button>
-      </div>
-
-      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Risks discovered" value={String(findings.length)} sub="across 3 categories" accent={high ? "#f87171" : "#34d399"} />
-        <Kpi label="High severity" value={String(high)} sub="resolve before buyer access" accent="#f87171" />
-        <Kpi label="Est. buyer discount" value={`-${fmtMoney(buyerDiscount)}`} sub="value buyers would deduct" accent="#f87171" />
-        <Kpi label="Critical questions" value={String(DILIGENCE.criticalQuestions.length)} sub="acquirers will ask" />
       </div>
 
       {/* ── Discovered risks by category ─────────────────────────── */}

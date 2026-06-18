@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import { Button, Card, fmtMoney } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { DILIGENCE, VALUATION_STRATEGIC } from "../lib/engines";
 import { listDocuments, uploadDocument, fmtBytes, type DataRoomDocument, type RoomKind } from "../lib/data-room";
 import BankerTake from "../components/BankerTake";
@@ -89,25 +91,27 @@ const DataRoom: React.FC = () => {
   const missingArtifacts = (active?.artifacts ?? []).filter((a) => a.required && !uploadedNames.has(a.filename.toLowerCase()));
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Module 02 · Workspace"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Workspace · Data Room"
         title="Virtual Data Room"
-        description="Diligence-engine specs surface the required artifacts per package. Uploaded files persist to the private 'exit-data-room' Supabase bucket and serve via short-lived signed URLs."
-        actions={
-          <>
-            <Button variant="ghost" onClick={refresh} disabled={loading}>{loading ? "Refreshing…" : "Refresh"}</Button>
-            <Button onClick={() => fileInput.current?.click()} disabled={uploading}>{uploading ? "Uploading…" : `Upload to ${activeKind.replace(/_/g, " ")}`}</Button>
-            <input
-              ref={fileInput}
-              type="file"
-              className="hidden"
-              onChange={onFile}
-              disabled={uploading}
-            />
-          </>
-        }
+        tag="Diligence artifacts"
+        status={`${overallPct}% complete`}
+        metrics={[
+          { k: "Completeness", v: `${overallPct}%`, accent: overallPct >= 80, sub: `${requiredArtifacts} specs · ${DILIGENCE.documents.length} packages` },
+          { k: "Value at risk", v: `-${fmtMoney(atRiskUsd)}`, sub: "while gaps stay open" },
+          { k: "Uploaded", v: String(uploaded.length), accent: true, sub: fmtBytes(uploadedTotalBytes) },
+          { k: "Confidential pkgs", v: String(confidentialCount), sub: "ring-1 access" },
+        ]}
       />
+
+      <MarketTape items={buildMarketTape()} />
+
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button variant="ghost" onClick={refresh} disabled={loading}>{loading ? "Refreshing…" : "Refresh"}</Button>
+        <Button onClick={() => fileInput.current?.click()} disabled={uploading}>{uploading ? "Uploading…" : `Upload to ${activeKind.replace(/_/g, " ")}`}</Button>
+        <input ref={fileInput} type="file" className="hidden" onChange={onFile} disabled={uploading} />
+      </div>
 
       {error && (
         <div className="mb-6 rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
@@ -127,12 +131,6 @@ const DataRoom: React.FC = () => {
         cta={{ label: "Run the risk scan", to: "/console/diligence-ai" }}
       />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Data room completeness" value={`${overallPct}%`} sub={`${requiredArtifacts} required specs across ${DILIGENCE.documents.length} packages`} accent={overallPct >= 80 ? "#34d399" : overallPct >= 50 ? "#fbbf24" : "#f87171"} />
-        <Kpi label="Value at risk"          value={`-${fmtMoney(atRiskUsd)}`} sub="if missing artifacts stay open" accent="#f87171" />
-        <Kpi label="Uploaded"               value={String(uploaded.length)} sub={fmtBytes(uploadedTotalBytes)} accent="#34d399" />
-        <Kpi label="Confidential pkgs"      value={String(confidentialCount)} sub="ring-1 access policy" />
-      </div>
 
       {/* Due Diligence AI — instant risk readout on the package contents */}
       <Card className="mt-8 overflow-hidden p-0">

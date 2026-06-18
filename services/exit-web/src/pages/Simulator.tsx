@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Card, Field, SectionHeader, fmtMoney, ConfidenceChip, inputCls } from "../lib/ui";
+import { Card, Field, fmtMoney, ConfidenceChip, inputCls } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { runStrategySimulator, runValuation, type BuyerType, type CompanyProfile, type StrategyOutput } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { VALUATION_STRATEGIC } from "../lib/engines";
@@ -236,12 +238,19 @@ const Simulator: React.FC = () => {
   };
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Module 10 · Decision Engine"
-        title="ExitOS Scenario Engine"
-        description="Define today's trajectory, then simulate futures. Wait six months, hit $25M ARR, strip the earnout, bring in a marquee strategic — each scenario re-runs the valuation and strategy engines and diffs the outcome against your baseline."
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Decision Engine"
+        title="Scenario Engine"
+        tag="Simulate futures"
+        metrics={[
+          { k: "Baseline realized", v: fmtMoney(baseline.sim.expectedRealizedValueUsd), accent: true, sub: "today's trajectory" },
+          { k: "Lead buyer close", v: baseline.sim.recommendedBuyers[0] ? `${(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}%` : "—", sub: baseline.sim.recommendedBuyers[0]?.buyer.name },
+          { k: "Buyers in set", v: String(baseline.sim.recommendedBuyers.length), sub: "clearing constraints" },
+        ]}
       />
+
+      <MarketTape items={buildMarketTape()} />
 
       <BankerTake
         next={<>Stress-test the plan before you commit — model waiting, scaling to $25M ARR, or a marquee entrant.</>}

@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, Modal, fmtMoney } from "../lib/ui";
+import { Button, Card, Modal, fmtMoney } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { useMemorandum, VALUATION_STRATEGIC } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { docToMarkdown, docFilename, sendDeliverable, downloadDeliverable } from "../lib/deliverables";
@@ -98,17 +100,27 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
   };
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Module 06 · Workspace"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Workspace · Documents"
         title="Document Generator"
-        description="Term sheets, LOIs, SPAs, CIMs and buyer teasers — generated from the company profile and the valuation, readiness, buyer and diligence engines."
-        actions={<>
-          <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>
-          {doc && <Button variant="ghost" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download .md</Button>}
-          {doc && <Button onClick={() => markSent(doc.kind, docToMarkdown(doc), docFilename(doc))}>{sent.has(doc.kind) ? "Sent ✓ · resend" : "Send to buyer"}</Button>}
-        </>}
+        tag="Engine-composed"
+        status={flags.length > 0 ? `${flags.length} flags` : "Defensible"}
+        metrics={[
+          { k: "Templates", v: String(KINDS.length), sub: "document kinds" },
+          { k: "Word count", v: doc ? String(doc.wordCount) : "—", sub: "current document" },
+          { k: "Anonymized", v: doc?.anonymized ? "Yes" : "No", sub: doc?.kind === "buyer_teaser" ? "teaser default" : "founder-named" },
+          { k: "Red Team flags", v: String(flags.length), accent: flags.length === 0, sub: flags.length === 0 ? "no challenges" : "challenges detected" },
+        ]}
       />
+
+      <MarketTape items={buildMarketTape()} />
+
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>
+        {doc && <Button variant="ghost" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download .md</Button>}
+        {doc && <Button onClick={() => markSent(doc.kind, docToMarkdown(doc), docFilename(doc))}>{sent.has(doc.kind) ? "Sent ✓ · resend" : "Send to buyer"}</Button>}
+      </div>
 
       {/* ── Document library ──────────────────────────────────────── */}
       <Modal open={libraryOpen} onClose={() => setLibraryOpen(false)} title="Document library" subtitle={`${KINDS.length} acquisition documents — generated from the engines`}>
@@ -139,12 +151,6 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
         automate={<>ExitOS generates each document from the engines and red-teams it against your real financials.</>}
       />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Templates"          value={String(KINDS.length)} sub="acquisition document kinds" />
-        <Kpi label="Word count"         value={doc ? String(doc.wordCount) : "—"} sub="current document" />
-        <Kpi label="Anonymized"         value={doc?.anonymized ? "Yes" : "No"} sub={doc?.kind === "buyer_teaser" ? "teaser default" : "founder-named"} />
-        <Kpi label="Red Team flags"     value={String(flags.length)} sub={flags.length === 0 ? "no buyer challenges" : "buyer challenges detected"} accent={flags.length === 0 ? "#34d399" : "#f87171"} />
-      </div>
 
       {/* AI Red Team — claims vs source-of-truth, the way a buyer's analyst reads it */}
       {doc && (

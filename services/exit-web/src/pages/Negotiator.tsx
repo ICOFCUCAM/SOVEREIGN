@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Button, Card, Kpi, Modal, SectionHeader, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
+import { Button, Card, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_STRATEGIC } from "../lib/engines";
 import { sendDeliverable } from "../lib/deliverables";
 import BankerTake from "../components/BankerTake";
@@ -125,13 +127,26 @@ James — on behalf of Helios Freight`
     : "";
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Module 05 · Operator"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Operator · Negotiation"
         title="AI Deal Negotiator"
-        description={`Evaluating ${OFFER_EVALUATIONS.length} active offers against the founder's reservation lines (floor ${fmtMoney(reserve.minHeadlinePriceUsd)}; min cash ${(reserve.minCashPct * 100).toFixed(0)}%; max earnout ${(reserve.maxEarnoutPct * 100).toFixed(0)}%).`}
-        actions={<><Button variant="ghost" onClick={() => setReserveOpen(true)}>Edit reservation lines</Button><Button onClick={() => setDraftOpen(true)}>Generate counter</Button></>}
+        tag={`Stage: ${NEGOTIATION_STATE.stage}`}
+        status={`Leverage ${NEGOTIATION_STATE.leverage}`}
+        metrics={[
+          { k: "Active offers", v: String(NEGOTIATION_STATE.activeOffers), sub: NEGOTIATION_STATE.stage },
+          { k: "Leverage", v: NEGOTIATION_STATE.leverage, accent: NEGOTIATION_STATE.leverage === "high", sub: "market posture" },
+          { k: "Leading bid", v: active ? `${active.score.toFixed(0)}/100` : "—", accent: true, sub: active?.offer.buyerName },
+          { k: "Strategic mid", v: fmtMoney(reserveMid), sub: "valuation reference" },
+        ]}
       />
+
+      <MarketTape items={buildMarketTape()} />
+
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button variant="ghost" onClick={() => setReserveOpen(true)}>Edit reservation lines</Button>
+        <Button onClick={() => setDraftOpen(true)}>Generate counter</Button>
+      </div>
 
       {/* ── Edit reservation lines / adjust counter ───────────────── */}
       <Modal open={reserveOpen} onClose={() => setReserveOpen(false)} title="Reservation lines & counter" subtitle="These shape the counter price and structure" size="md"
@@ -199,15 +214,7 @@ James — on behalf of Helios Freight`
         </div>
       </Card>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Active offers"    value={String(NEGOTIATION_STATE.activeOffers)} sub={`Stage: ${NEGOTIATION_STATE.stage}`} />
-        <Kpi label="Leverage"         value={NEGOTIATION_STATE.leverage} sub="market posture"
-             accent={NEGOTIATION_STATE.leverage === "high" ? "#34d399" : NEGOTIATION_STATE.leverage === "low" ? "#f87171" : "#fbbf24"} />
-        <Kpi label="Leading bid"      value={active ? `${active.score.toFixed(0)}/100` : "—"} sub={active?.offer.buyerName} accent="#34d399" />
-        <Kpi label="Strategic mid"    value={fmtMoney(reserveMid)} sub="valuation reference" />
-      </div>
-
-      <Card className="mt-8 p-5">
+      <Card className="mt-2 p-5">
         <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Negotiation posture</div>
         <p className="mt-2 text-sm text-white/85"><span className="font-semibold">Next move:</span> {NEGOTIATION_STATE.nextMove}</p>
         {NEGOTIATION_STATE.recommendations.length > 0 && (

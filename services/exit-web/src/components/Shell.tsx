@@ -21,6 +21,7 @@ const WORKSTATION_ROUTES = new Set([
   "/console/activity", "/console/engagement-registry", "/console/process-intel", "/console/outreach-plan", "/console/pipeline",
   "/console/buyer-portal", "/console/investors", "/console/buyers", "/console/buyer-copilot",
   "/console/commander", "/console/marketplace", "/console/nda", "/console/network",
+  "/console/diligence-ai", "/console/data-room", "/console/documents", "/console/negotiator", "/console/simulator",
 ]);
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
