@@ -3,7 +3,7 @@ import { regionOf, type Region } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile";
 import { exitosSectorOf } from "./acquirer";
 import { buildProfile } from "./company-intake";
-import { SOVEREIGN_INTEL_PRODUCTS, SOVEREIGN_OWNER_ACCOUNT } from "./sovereign-intel";
+import { SOVEREIGN_INTEL_PRODUCTS, SOVEREIGN_OWNER_ACCOUNT, SOVEREIGN_PRICING_NOTE } from "./sovereign-intel";
 
 // ── LISTINGS REPOSITORY ─────────────────────────────────────────────
 // Real listings — the supply side of the exchange. A founder lists their
@@ -19,6 +19,7 @@ export interface ListingProductMeta {
   readonly posture?: string;      // operating posture, where defined
   readonly capability: string;    // what it does
   readonly answers?: string;      // the question it answers
+  readonly pricingNote?: string;  // published list/subscription pricing context, where real
 }
 
 export interface Listing {
@@ -86,7 +87,7 @@ function buildSovereignListings(): Listing[] {
       listedAt: "2026-01-01T00:00:00.000Z",
       ownerAccountId: SOVEREIGN_OWNER_ACCOUNT,
       profile,
-      productMeta: { productLine: p.name, category: p.layer, posture: p.posture, capability: p.capability, answers: p.answers },
+      productMeta: { productLine: p.name, category: p.layer, posture: p.posture, capability: p.capability, answers: p.answers, pricingNote: SOVEREIGN_PRICING_NOTE },
       publicView: {
         sector: exitosSectorOf(profile), region: regionOf(profile.jurisdiction),
         revenueUsd: 0, growthPct: 0, ebitdaMarginPct: 0, disclosed: false,

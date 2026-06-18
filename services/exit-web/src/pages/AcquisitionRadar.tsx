@@ -174,7 +174,7 @@ const AcquisitionRadar: React.FC = () => {
                 </div>
                 <div className="mt-2.5 flex flex-wrap items-center gap-3 text-[11.5px] text-white/55">
                   {l.publicView.disclosed === false
-                    ? <span className="text-white/45">Financials under NDA</span>
+                    ? <><span className="text-white/45">Financials under NDA</span>{l.productMeta?.pricingNote && <span className="text-white/35">· {l.productMeta.pricingNote}</span>}</>
                     : <><span>Revenue {fmtUsd(l.publicView.revenueUsd)}</span><span>· Growth {Math.round(l.publicView.growthPct * 100)}%</span></>}
                   <button
                     onClick={() => {

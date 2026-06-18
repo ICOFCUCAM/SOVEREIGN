@@ -15,6 +15,8 @@ describe("sovereign intelligence listings", () => {
       expect(l.ownerAccountId).toBe(SOVEREIGN_OWNER_ACCOUNT);
       expect(l.publicView.disclosed).toBe(false);   // no invented revenue/EBITDA
       expect(l.productMeta?.capability).toBeTruthy(); // real capability surfaced
+      // real published platform pricing attached as context (not a per-engine price)
+      expect(l.productMeta?.pricingNote).toMatch(/\$490\/mo.*\$4,900\/mo/);
     }
   });
 

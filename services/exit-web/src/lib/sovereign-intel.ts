@@ -44,3 +44,13 @@ export const SOVEREIGN_INTEL_PRODUCTS: readonly IntelProduct[] = [
 
 /** The platform/admin account that owns the seeded Sovereign Intelligence listings. */
 export const SOVEREIGN_OWNER_ACCOUNT = "acct-admin-sovereign";
+
+// Real published pricing for the Sovereign platform, from the source
+// (sovereign-os/apps/web/lib/plans.ts — the same data sovereigndo.com renders).
+// This is PLATFORM-WIDE subscription pricing across all engines — NOT a
+// per-engine acquisition price. Surfaced as context only; per-product
+// acquisition value remains undisclosed (under NDA) because it is not published.
+export const SOVEREIGN_PLATFORM_PRICING = { evaluatorUsdMo: 0, operatorUsdMo: 490, institutionalUsdMo: 4_900 } as const;
+export const SOVEREIGN_PRICING_NOTE =
+  `Sovereign platform pricing (all engines) · Operator $${SOVEREIGN_PLATFORM_PRICING.operatorUsdMo.toLocaleString()}/mo · Institutional $${SOVEREIGN_PLATFORM_PRICING.institutionalUsdMo.toLocaleString()}/mo`;
+
