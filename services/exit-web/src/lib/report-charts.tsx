@@ -5,7 +5,7 @@ import React from "react";
 // valuation bridge, buyer ranking, buyer universe, confidence drivers and
 // the transaction timeline. Light, print-safe, selectable. No data created.
 
-const GREEN = "#0e7a4f", NAVY = "#16314f", LINE = "#eef1f5", INK = "#0b1220", MUTE = "#5b6675";
+const GREEN = "#0e7a4f", NAVY = "#16314f", LINE = "#eef1f5", INK = "#0b1220";
 const usd = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`);
 
 /** Football field — a horizontal band per method, plus the concluded range. */
