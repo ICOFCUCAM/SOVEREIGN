@@ -6,7 +6,7 @@ import {
   sectorOverlap, recommendedAction, fmtUsdShort, expectedOutcomeFor, buyerRationale,
   acquisitionAppetiteScore, buyerConfidence, DNA_AS_OF,
 } from "../lib/buyer-dna";
-import { buyerEngagement, ENGAGEMENT_DISCLAIMER } from "../lib/buyer-contact";
+import { buyerContactRegistry, ENGAGEMENT_DISCLAIMER, ENRICHMENT_PROVIDERS } from "../lib/buyer-contact";
 import { sectorTokensFor } from "../lib/buyer-dna";
 import { VALUATION_INSTITUTIONAL } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -44,7 +44,7 @@ const BuyerProfile: React.FC = () => {
   const appetite = acquisitionAppetiteScore(p);
   const confidence = buyerConfidence(p);
   const medianClose = p.median_close_days ?? VALUATION_INSTITUTIONAL.timeToClose.lowDays;
-  const eng = buyerEngagement(p, sectorTokensFor(SAMPLE_COMPANY.sector));
+  const reg = buyerContactRegistry(p, sectorTokensFor(SAMPLE_COMPANY.sector));
 
   return (
     <div>
@@ -130,28 +130,66 @@ const BuyerProfile: React.FC = () => {
         <div className="mt-3 text-[10px] text-white/35">Every point is evidence from the buyer's indexed acquisition record — points appear only when the data supports them.</div>
       </Card>
 
-      {/* buyer engagement intelligence — how to approach, not who to spam */}
+      {/* buyer contact intelligence — public paths + confidence, never scraped PII */}
       <Card className="mt-6 p-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Engagement intelligence</div>
-          <span className="text-[10px] uppercase tracking-wide text-white/35">targeted approach · {eng.telemetryConnected ? "telemetry live" : "process telemetry not yet observed"}</span>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Contact intelligence</div>
+          <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1 ${reg.confidence.tier === "High" ? "bg-deal-600/20 text-deal-300 ring-deal-400/40" : reg.confidence.tier === "Medium" ? "bg-loi-500/15 text-loi-300 ring-loi-400/40" : "bg-white/5 text-white/50 ring-white/15"}`}>
+            Contact confidence: {reg.confidence.tier}
+          </span>
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          <EngStat label="Best contact" value={eng.bestContactRole} sub="typical decision-maker" wide />
-          <EngStat label="Prior similar acq." value={eng.priorSimilarAcquisitions > 0 ? String(eng.priorSimilarAcquisitions) : "—"} sub="indexed in your space" accent={eng.priorSimilarAcquisitions > 0 ? "#34d399" : undefined} />
-          <EngStat label="Response rate" value={eng.responseRatePct != null ? `${eng.responseRatePct}%` : "—"} sub="needs platform deals" />
-          <EngStat label="Time to NDA" value={eng.medianTimeToNdaDays != null ? `${eng.medianTimeToNdaDays}d` : "—"} sub="needs platform deals" />
-          <EngStat label="Time to LOI" value={eng.medianTimeToLoiDays != null ? `${eng.medianTimeToLoiDays}d` : "—"} sub="needs platform deals" />
-          <EngStat label="Time to close" value={eng.medianTimeToCloseDays != null ? `${eng.medianTimeToCloseDays}d` : "—"} sub={eng.medianTimeToCloseDays != null ? "median, disclosed" : "not disclosed"} accent={eng.medianTimeToCloseDays != null ? "#fbbf24" : undefined} />
+        <p className="mt-2 text-[11.5px] text-white/50">{reg.confidence.reason}</p>
+
+        <div className="mt-4 grid gap-5 lg:grid-cols-2">
+          {/* outreach paths */}
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">Outreach paths · how deals originate</div>
+            <ol className="mt-2 space-y-1.5">
+              {reg.outreachPaths.map((path) => (
+                <li key={path.rank} className="flex items-baseline gap-2 text-[12px]">
+                  <span className="font-mono text-white/35">{path.rank}</span>
+                  <span className="min-w-0">
+                    {path.discoveryUrl
+                      ? <a href={path.discoveryUrl} target="_blank" rel="noreferrer" className="font-semibold text-white hover:text-deal-300">{path.channel} ↗</a>
+                      : <span className="font-semibold text-white/85">{path.channel}</span>}
+                    <span className="text-white/40"> — {path.rationale}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          {/* engagement score */}
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">Engagement score</div>
+            <div className="mt-2 grid grid-cols-2 gap-3">
+              <EngStat label="Prior similar acq." value={reg.priorSimilarAcquisitions > 0 ? String(reg.priorSimilarAcquisitions) : "—"} sub="indexed in your space" accent={reg.priorSimilarAcquisitions > 0 ? "#34d399" : undefined} />
+              <EngStat label="Close rate" value={reg.engagement.closeRatePct != null ? `${reg.engagement.closeRatePct}%` : "—"} sub={reg.engagement.closeRatePct != null ? "disclosed deals" : "not disclosed"} accent={reg.engagement.closeRatePct != null ? "#34d399" : undefined} />
+              <EngStat label="Median close" value={reg.engagement.medianTimeToCloseDays != null ? `${reg.engagement.medianTimeToCloseDays}d` : "—"} sub="announced→closed" />
+              <EngStat label="Responsiveness" value={reg.engagement.responsivenessPct != null ? `${reg.engagement.responsivenessPct}%` : "—"} sub="needs outreach history" />
+              <EngStat label="NDA rate" value={reg.engagement.ndaRatePct != null ? `${reg.engagement.ndaRatePct}%` : "—"} sub="needs outreach history" />
+              <EngStat label="LOI rate" value={reg.engagement.loiRatePct != null ? `${reg.engagement.loiRatePct}%` : "—"} sub="needs outreach history" />
+            </div>
+          </div>
         </div>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {eng.research.map((r) => (
-            <a key={r.label} href={r.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[12px] font-medium text-white/75 transition hover:bg-white/5 hover:text-deal-300">
-              {r.label} ↗
-            </a>
+
+        {/* public discovery channels */}
+        <div className="mt-4 border-t border-white/10 pt-3">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">Public channels · research</div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {reg.channels.map((c) => (
+              <a key={c.label} href={c.discoveryUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11.5px] font-medium text-white/70 transition hover:bg-white/5 hover:text-deal-300">{c.label} ↗</a>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/10 pt-3">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Verified contacts via</span>
+          {ENRICHMENT_PROVIDERS.map((e) => (
+            <span key={e.name} className="rounded bg-white/5 px-2 py-0.5 text-[10px] text-white/45">{e.name} {e.connected ? "· connected" : "· not connected"}</span>
           ))}
         </div>
-        <div className="mt-3 border-t border-white/10 pt-3 text-[10px] leading-relaxed text-white/35">{ENGAGEMENT_DISCLAIMER}</div>
+        <div className="mt-3 text-[10px] leading-relaxed text-white/35">{ENGAGEMENT_DISCLAIMER}</div>
       </Card>
 
       {/* expected outcome for the founder's company */}

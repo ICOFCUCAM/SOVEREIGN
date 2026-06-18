@@ -1,43 +1,50 @@
 import { describe, expect, it } from "vitest";
-import { buyerEngagement, ENGAGEMENT_DISCLAIMER } from "./buyer-contact.js";
+import {
+  buyerContactRegistry, contactConfidence, outreachPaths, buyerEngagementScore,
+  ENGAGEMENT_DISCLAIMER, ENRICHMENT_PROVIDERS,
+} from "./buyer-contact.js";
 import { DNA_PROFILES, sectorTokensFor } from "./buyer-dna.js";
 
 const tokens = sectorTokensFor("enterprise_saas");
 
-describe("buyer engagement intelligence", () => {
-  const p = DNA_PROFILES.find((x) => x.events_indexed > 20)!;
-  const e = buyerEngagement(p, tokens);
+describe("buyer contact intelligence (registry, not a contact-data clone)", () => {
+  const serial = DNA_PROFILES.find((x) => x.events_indexed >= 40)!;
+  const reg = buyerContactRegistry(serial, tokens);
 
-  it("infers a decision-maker ROLE, never a named person or invented email", () => {
-    expect(e.bestContactRole.length).toBeGreaterThan(0);
-    // it is a role title, not contact PII
-    expect(e.bestContactRole).not.toMatch(/@/);
-    expect(JSON.stringify(e)).not.toMatch(/@[\w.]+\.(com|io|ai|net)/); // no email anywhere
+  it("never emits an email or asserted contact — only public discovery links", () => {
+    const blob = JSON.stringify(reg);
+    expect(blob).not.toMatch(/@[\w.]+\.(com|io|ai|net|org)/);     // no emails
+    for (const c of reg.channels) expect(c.discoveryUrl).toMatch(/^https:\/\/(www\.google\.com|www\.linkedin\.com)\//);
+    for (const path of reg.outreachPaths) if (path.discoveryUrl) expect(path.discoveryUrl).toMatch(/^https:\/\//);
   });
 
-  it("process telemetry is honestly absent until real platform deals exist", () => {
-    expect(e.responseRatePct).toBeNull();
-    expect(e.medianTimeToNdaDays).toBeNull();
-    expect(e.medianTimeToLoiDays).toBeNull();
-    expect(e.telemetryConnected).toBe(false);
+  it("contact confidence is earned from acquisition depth", () => {
+    expect(contactConfidence(serial).tier).toBe("High");
+    const thin = DNA_PROFILES.find((x) => x.events_indexed > 0 && x.events_indexed < 8);
+    if (thin) expect(contactConfidence(thin).tier).toBe("Low");
   });
 
-  it("prior similar acquisitions is a real count from the DNA token index", () => {
-    expect(e.priorSimilarAcquisitions).toBeGreaterThanOrEqual(0);
-    expect(Number.isInteger(e.priorSimilarAcquisitions)).toBe(true);
+  it("provides the five ordered outreach paths bankers use", () => {
+    const paths = outreachPaths(serial);
+    expect(paths.map((p) => p.rank)).toEqual([1, 2, 3, 4, 5]);
+    expect(paths[0].channel).toMatch(/Corporate Development|Investment Team|Acquisitions/);
+    // the partner-network path has no external link (it routes through ExitOS)
+    expect(paths[4].discoveryUrl).toBeUndefined();
   });
 
-  it("research links are deterministic public searches — not stored contacts", () => {
-    expect(e.research.length).toBeGreaterThan(0);
-    for (const r of e.research) {
-      expect(r.url).toMatch(/^https:\/\/(www\.linkedin\.com|www\.google\.com)\//);
-      expect(decodeURIComponent(r.url)).toContain(p.name);
-    }
+  it("engagement score uses disclosed close data; outreach metrics await real history", () => {
+    const e = buyerEngagementScore(serial);
+    // close rate / median close are real-where-disclosed
+    if (serial.close_rate != null) expect(e.closeRatePct).toBe(Math.round(serial.close_rate * 100));
+    // responsiveness / NDA / LOI rates require the platform's own outreach history
+    expect(e.responsivenessPct).toBeNull();
+    expect(e.ndaRatePct).toBeNull();
+    expect(e.loiRatePct).toBeNull();
   });
 
-  it("median time-to-close uses the disclosed figure when present, else null", () => {
-    const withClose = DNA_PROFILES.find((x) => x.median_close_days != null);
-    if (withClose) expect(buyerEngagement(withClose, tokens).medianTimeToCloseDays).toBe(withClose.median_close_days);
-    expect(ENGAGEMENT_DISCLAIMER).toMatch(/does not store, scrape/);
+  it("enrichment providers are an explicit integration point, not connected by default", () => {
+    expect(ENRICHMENT_PROVIDERS.map((p) => p.name)).toContain("Apollo.io");
+    expect(ENRICHMENT_PROVIDERS.every((p) => p.connected === false)).toBe(true);
+    expect(ENGAGEMENT_DISCLAIMER).toMatch(/does not store, scrape, guess/);
   });
 });
