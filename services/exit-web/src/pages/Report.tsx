@@ -1,405 +1,203 @@
 import React, { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { loadActiveCompany } from "../lib/active-company";
 import { buildValuationReport, type ValuationReportModel } from "../lib/report-model";
 import { fmtMoney } from "../lib/ui";
+import {
+  ReportFrame, Cover, Contents, Section, Exhibit, BankTable, StatGrid, Stat, Lead, Note,
+} from "../lib/report-ui";
+import {
+  FootballField, ValuationBridge, BuyerRankingChart, BuyerUniverse, ConfidenceDrivers, TransactionTimeline,
+} from "../lib/report-charts";
 
-// ── THE PUBLISHING ENGINE ───────────────────────────────────────────
-// Structured report model → board-ready document. White, ink-on-paper,
-// institutional typography; cover, table of contents, an executive-summary
-// dashboard, numbered sections, transaction/buyer/valuation exhibits, vector
-// charts, a data-provenance appendix, a confidentiality watermark and running
-// header/footer. "Download PDF" prints through the browser's vector engine —
-// no markdown, selectable text, real pages. This is the artifact that leaves
-// the building.
+// THE INSTITUTIONAL VALUATION REPORT — composed from the report model with the
+// shared publishing layer. Board-level acquisition memorandum: cover, twelve
+// numbered sections, lettered exhibits, banking tables, vector charts.
 
 const pct = (x: number | null | undefined, d = 0): string => (x == null ? "—" : `${(x * 100).toFixed(d)}%`);
-const money = (n: number): string => fmtMoney(n);
-const moneyShort = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`);
+const m$ = (n: number): string => fmtMoney(n);
+const short = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`);
 
-const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 const SECTIONS = [
-  "Executive Summary", "Company Overview", "Valuation Methodology", "Comparable Transaction Analysis",
-  "Strategic Acquirer Universe", "Acquisition Probability", "Premium Analysis", "Sensitivity Analysis",
-  "Indicative Timeline", "Risk Factors", "Valuation Variables & Provenance",
+  "Executive Summary", "Investment Highlights", "Transaction Overview", "Valuation Analysis",
+  "Comparable Transactions", "Buyer Intelligence", "Strategic Rationale", "Confidence Assessment",
+  "Data Provenance", "Framework Compliance", "Legal Notices", "Appendices",
 ];
 
 const Report: React.FC = () => {
-  const nav = useNavigate();
   const { company } = useMemo(() => loadActiveCompany(), []);
   const r: ValuationReportModel = useMemo(() => buildValuationReport(company), [company]);
 
   return (
-    <div className="min-h-screen bg-[#0a1018] py-8">
-      <style>{PRINT_CSS}</style>
+    <ReportFrame docType={r.meta.title} company={r.meta.company} frameworkVersion={r.meta.frameworkVersion}>
+      <Cover docType={r.meta.title} company={r.meta.company} preparedFor={r.meta.preparedFor} preparedBy={r.meta.preparedBy} date={r.meta.date} frameworkVersion={r.meta.frameworkVersion} />
+      <Contents items={SECTIONS} />
 
-      {/* screen toolbar — never printed */}
-      <div className="no-print mx-auto mb-5 flex max-w-[820px] items-center justify-between px-4">
-        <button onClick={() => nav(-1)} className="rounded-md border border-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/70 hover:bg-white/5">← Back</button>
-        <div className="text-[12px] text-white/45">Institutional Valuation Report · {r.meta.company}</div>
-        <button onClick={() => window.print()} className="rounded-md bg-deal-600 px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-500">Download PDF →</button>
-      </div>
+      {/* I · EXECUTIVE SUMMARY */}
+      <Section n={1} title="Executive Summary">
+        <StatGrid cols={5}>
+          <Stat label="Enterprise Value" value={m$(r.exec.evMid)} hero />
+          <Stat label="Valuation Range" value={`${short(r.exec.evLow)}–${short(r.exec.evHigh)}`} />
+          <Stat label="Confidence" value={`${r.exec.confidencePct}%`} sub={r.exec.confidenceTier} />
+          <Stat label="Qualified Buyers" value={String(r.exec.qualifiedBuyers)} sub={`of ${r.exec.scoredBuyers} scored`} />
+          <Stat label="Expected Close" value={`${r.exec.closeLowDays}–${r.exec.closeHighDays}d`} />
+          <Stat label="Strategic Premium" value={`+${pct(r.exec.appliedPremiumPct)}`} sub={r.exec.medianPremiumPct != null ? `${pct(r.exec.medianPremiumPct)} median comp` : "evidence-based"} />
+          <Stat label="Comparables" value={String(r.exec.comparablesUsed)} sub="source-referenced" />
+          <Stat label="Acquisition Readiness" value={`${r.exec.readinessScore}/100`} />
+          <Stat label="Most Likely Buyer" value={r.exec.leadBuyer ?? "—"} sub={r.exec.leadProbabilityPct != null ? `${r.exec.leadProbabilityPct}% probability` : undefined} />
+          <Stat label="Valuation Uplift" value={`+${short(r.exec.upliftUsd)}`} sub="if readiness gaps close" />
+        </StatGrid>
+        <p className="mt-6 text-[13.5px] leading-relaxed text-[#2b3543]">
+          On a strategic-buyer basis, {r.meta.company} carries an enterprise value of{" "}
+          <strong className="text-[#0b1220]">{m$(r.exec.evMid)}</strong> (range {m$(r.exec.evLow)}–{m$(r.exec.evHigh)}). The
+          midpoint is the financial baseline of <strong>{m$(r.exec.baselineMid)}</strong> uplifted by an evidence-based
+          strategic premium of <strong>+{pct(r.exec.appliedPremiumPct)}</strong> — the mean of {r.premium.observedPremiums.length} observed
+          precedent transactions, not a flat assumption. {r.exec.leadBuyer ? <>The most probable acquirer is <strong>{r.exec.leadBuyer}</strong> ({r.exec.leadProbabilityPct}%).</> : null}
+        </p>
+        <Note>{r.exec.thesis}</Note>
+      </Section>
 
-      <div className="rpt mx-auto max-w-[820px] bg-white text-[#0b1220] shadow-2xl shadow-black/50">
-        {/* running header / footer / watermark — repeat on every printed page */}
-        <div className="rpt-fixed-header no-screen"><span>{r.meta.company}</span><span>{r.meta.title}</span></div>
-        <div className="rpt-fixed-footer no-screen"><span>ExitOS Advisory · Strictly Private &amp; Confidential</span><span>Framework v{r.meta.frameworkVersion}</span></div>
-        <div className="rpt-watermark no-screen">CONFIDENTIAL</div>
+      {/* II · INVESTMENT HIGHLIGHTS */}
+      <Section n={2} title="Investment Highlights">
+        <ol className="space-y-3">
+          {r.highlights.map((h, i) => (
+            <li key={i} className="flex gap-3 text-[13.5px] leading-relaxed text-[#2b3543]">
+              <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-[#0e7a4f]/10 font-mono text-[11px] font-bold text-[#0e7a4f]">{i + 1}</span>
+              <span>{h}</span>
+            </li>
+          ))}
+        </ol>
+      </Section>
 
-        {/* ── COVER ── */}
-        <section className="rpt-cover flex min-h-[1000px] flex-col px-16 py-20">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded bg-[#0e7a4f] font-mono text-[13px] font-bold text-white">E</span>
-            <span className="text-[12px] font-semibold uppercase tracking-[0.32em] text-[#0e7a4f]">ExitOS Acquisition Exchange</span>
-          </div>
-          <div className="mt-auto">
-            <div className="text-[13px] font-semibold uppercase tracking-[0.26em] text-[#5b6675]">{r.meta.title}</div>
-            <h1 className="mt-3 font-serif text-[52px] font-bold leading-[1.05] text-[#0b1220]">{r.meta.company}</h1>
-            <div className="mt-6 h-px w-24 bg-[#0e7a4f]" />
-            <div className="mt-10 grid grid-cols-2 gap-y-5 text-[13px]">
-              <Field k="Prepared for" v={r.meta.preparedFor} />
-              <Field k="Prepared by" v={r.meta.preparedBy} />
-              <Field k="Date" v={r.meta.date} />
-              <Field k="Basis" v="Strategic-buyer enterprise value" />
-            </div>
-          </div>
-          <div className="mt-auto flex items-end justify-between border-t border-[#d8dee8] pt-5">
-            <span className="rounded-sm border border-[#c9b08a] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[#8a6d3b]">Strictly Private &amp; Confidential</span>
-            <span className="text-[10px] text-[#9aa3b0]">Prepared under the ExitOS Valuation Framework v{r.meta.frameworkVersion}</span>
-          </div>
-        </section>
+      {/* III · TRANSACTION OVERVIEW */}
+      <Section n={3} title="Transaction Overview">
+        <Lead>This report presents an institutional view of the enterprise value of {r.meta.company} on a strategic-buyer basis, the qualified acquirer universe, and an indicative path to a transaction.</Lead>
+        <BankTable
+          columns={[{ key: "k", label: "Parameter" }, { key: "v", label: "Detail", align: "right" }]}
+          emphasizeFirst
+          rows={[
+            { k: "Company", v: r.meta.company },
+            { k: "Sector", v: r.overview.sector },
+            { k: "Annual recurring revenue", v: m$(r.overview.arrUsd) },
+            { k: "Trailing twelve-month revenue", v: m$(r.overview.ttmUsd) },
+            { k: "Revenue growth (YoY)", v: pct(r.overview.growthPct) },
+            { k: "Gross margin", v: pct(r.overview.grossMarginPct) },
+            { k: "EBITDA margin", v: pct(r.overview.ebitdaPct) },
+            { k: "Net revenue retention", v: r.overview.netRetentionPct != null ? pct(r.overview.netRetentionPct) : "—" },
+            { k: "Basis of value", v: "Strategic-buyer enterprise value" },
+            { k: "Expected time to close", v: `${r.exec.closeLowDays}–${r.exec.closeHighDays} days` },
+          ]}
+        />
+      </Section>
 
-        {/* ── TABLE OF CONTENTS ── */}
-        <Section n={null} title="Contents" rpt>
-          <ol className="mt-2 divide-y divide-[#eef1f5]">
-            {SECTIONS.map((s, i) => (
-              <li key={s} className="flex items-baseline gap-3 py-2 text-[13.5px]">
-                <span className="w-8 font-mono font-semibold text-[#0e7a4f]">{ROMAN[i + 1]}</span>
-                <span className="font-medium text-[#0b1220]">{s}</span>
-                <span className="mx-2 flex-1 border-b border-dotted border-[#c8cfda]" />
-              </li>
-            ))}
-          </ol>
-        </Section>
+      {/* IV · VALUATION ANALYSIS */}
+      <Section n={4} title="Valuation Analysis">
+        <Lead>Enterprise value is triangulated across the methodologies below, each derived from reported figures and source-referenced market data, then weighted to a single institutional view.</Lead>
+        <Exhibit n="IV-A" title="Valuation football field" source="ExitOS Valuation Framework">
+          <FootballField
+            methods={r.methodologies.map((mt) => ({ label: mt.name, low: mt.band.low, mid: mt.band.mid, high: mt.band.high }))}
+            finalLow={r.exec.evLow} finalMid={r.exec.evMid} finalHigh={r.exec.evHigh}
+          />
+        </Exhibit>
+        <Exhibit n="IV-B" title="Valuation bridge — baseline to concluded value">
+          <ValuationBridge baseline={r.exec.baselineMid} premiumUsd={r.premiumUsd} final={r.exec.evMid} />
+        </Exhibit>
+        <Exhibit n="IV-C" title="Methodology weighting">
+          <BankTable
+            columns={[{ key: "m", label: "Methodology" }, { key: "b", label: "Basis" }, { key: "w", label: "Weight", align: "right" }, { key: "v", label: "Midpoint", align: "right" }]}
+            rows={r.methodologies.map((mt) => ({ m: mt.name, b: mt.basis, w: `${mt.weightPct}%`, v: m$(mt.band.mid) }))}
+          />
+        </Exhibit>
+      </Section>
 
-        {/* ── 1 · EXECUTIVE SUMMARY ── */}
-        <Section n={1} title="Executive Summary" rpt>
-          <div className="grid grid-cols-3 gap-px overflow-hidden rounded border border-[#e3e8ef] bg-[#e3e8ef]">
-            <Stat label="Enterprise Value" value={money(r.exec.evMid)} hero />
-            <Stat label="Valuation Range" value={`${moneyShort(r.exec.evLow)} – ${moneyShort(r.exec.evHigh)}`} />
-            <Stat label="Confidence" value={`${r.exec.confidencePct}%`} sub={r.exec.confidenceTier} />
-            <Stat label="Qualified Buyers" value={String(r.exec.qualifiedBuyers)} sub={`of ${r.exec.scoredBuyers} scored`} />
-            <Stat label="Applied Premium" value={`+${pct(r.exec.appliedPremiumPct)}`} sub={r.exec.medianPremiumPct != null ? `${pct(r.exec.medianPremiumPct)} median comp` : "evidence-based"} />
-            <Stat label="Expected Close" value={`${r.exec.closeLowDays}–${r.exec.closeHighDays} days`} />
-          </div>
-          <p className="mt-6 text-[13.5px] leading-relaxed text-[#2b3543]">
-            On a strategic-buyer basis, {r.meta.company} carries an enterprise value of{" "}
-            <strong className="text-[#0b1220]">{money(r.exec.evMid)}</strong> (range {money(r.exec.evLow)}–{money(r.exec.evHigh)}),
-            being the financial baseline of <strong>{money(r.exec.baselineMid)}</strong> uplifted by an evidence-based
-            strategic premium of <strong>+{pct(r.exec.appliedPremiumPct)}</strong>, drawn from {r.exec.comparablesUsed} comparable
-            transactions. {r.exec.leadBuyer ? <>The most probable acquirer is <strong>{r.exec.leadBuyer}</strong> ({r.exec.leadProbabilityPct}% modelled probability).</> : null}
-          </p>
-          <p className="mt-3 text-[13px] leading-relaxed text-[#5b6675]">{r.exec.thesis}</p>
-          <ValuationBar low={r.exec.evLow} mid={r.exec.evMid} high={r.exec.evHigh} baseline={r.exec.baselineMid} />
-        </Section>
+      {/* V · COMPARABLE TRANSACTIONS */}
+      <Section n={5} title="Comparable Transactions">
+        <Lead>Precedent transactions in the sector, with disclosed premiums where available. The applied premium is anchored to this set.</Lead>
+        <Exhibit n="V-A" title="Precedent transaction matrix" source={r.comparablesAnalysis.note}>
+          <BankTable
+            columns={[{ key: "t", label: "Target" }, { key: "a", label: "Acquirer" }, { key: "d", label: "Date", align: "right" }, { key: "p", label: "Premium", align: "right" }, { key: "v", label: "Value", align: "right" }]}
+            rows={r.comparables.map((c) => ({ t: c.target, a: c.buyer, d: c.date ?? "—", p: c.premiumPct != null ? `+${pct(c.premiumPct)}` : "—", v: c.priceUsd != null ? short(c.priceUsd) : "undisc." }))}
+            footnote={`${r.comparablesAnalysis.count} transactions indexed${r.comparablesAnalysis.medianPremiumPct != null ? ` · ${pct(r.comparablesAnalysis.medianPremiumPct)} median premium` : ""}.`}
+          />
+        </Exhibit>
+      </Section>
 
-        {/* ── 2 · COMPANY OVERVIEW ── */}
-        <Section n={2} title="Company Overview" rpt>
-          <table className="w-full border-collapse text-[13px]">
-            <tbody>
-              {([
-                ["Sector", r.overview.sector],
-                ["Annual recurring revenue", money(r.overview.arrUsd)],
-                ["Trailing twelve-month revenue", money(r.overview.ttmUsd)],
-                ["Revenue growth (YoY)", pct(r.overview.growthPct)],
-                ["Gross margin", pct(r.overview.grossMarginPct)],
-                ["EBITDA margin", pct(r.overview.ebitdaPct)],
-                ["Net revenue retention", r.overview.netRetentionPct != null ? pct(r.overview.netRetentionPct) : "—"],
-                ["Customers", r.overview.customers != null ? r.overview.customers.toLocaleString() : "—"],
-              ] as [string, string][]).map(([k, v]) => (
-                <tr key={k} className="border-b border-[#eef1f5]">
-                  <td className="py-2 pr-4 text-[#5b6675]">{k}</td>
-                  <td className="py-2 text-right font-mono font-semibold text-[#0b1220]">{v}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Section>
+      {/* VI · BUYER INTELLIGENCE */}
+      <Section n={6} title="Buyer Intelligence">
+        <Lead>{r.buyerUniverse.qualified} of {r.buyerUniverse.scored} scored acquirers (registry of {r.buyerUniverse.registry}) qualify against the company's sector, scale and growth.</Lead>
+        <Exhibit n="VI-A" title="Strategic acquirer ranking — fit-adjusted probability">
+          <BuyerRankingChart buyers={r.mostLikelyBuyers.map((b) => ({ name: b.name, probabilityPct: b.probabilityPct, expectedDaysToCash: b.expectedDaysToCash }))} />
+          <Note>Probability = acquisition appetite × sector overlap × deal velocity × recency. Expected days-to-cash from each acquirer's measured close history.</Note>
+        </Exhibit>
+        <Exhibit n="VI-B" title="Buyer universe distribution">
+          <BuyerUniverse strategic={r.buyerUniverse.strategic} financial={r.buyerUniverse.financial} sovereign={r.buyerUniverse.sovereign} familyOffice={r.buyerUniverse.family_office} />
+        </Exhibit>
+      </Section>
 
-        {/* ── 3 · VALUATION METHODOLOGY ── */}
-        <Section n={3} title="Valuation Methodology" rpt>
-          <p className="mb-4 text-[13px] leading-relaxed text-[#5b6675]">
-            Enterprise value is triangulated across the methodologies below, weighted to a single institutional view.
-            Each band derives from the company's reported figures and source-referenced market data.
-          </p>
-          <Exhibit label="Exhibit 3A — Valuation football field" />
-          {r.methodologies.map((m) => {
-            const max = Math.max(...r.methodologies.map((x) => x.band.high), r.exec.evHigh);
-            return (
-              <div key={m.name} className="avoid-break mb-3.5">
-                <div className="flex items-baseline justify-between text-[12.5px]">
-                  <span className="font-semibold text-[#0b1220]">{m.name} <span className="font-normal text-[#9aa3b0]">· {m.weightPct}% weight</span></span>
-                  <span className="font-mono font-semibold text-[#0b1220]">{money(m.band.mid)}</span>
-                </div>
-                <div className="mt-1 h-2.5 w-full rounded-sm bg-[#eef1f5]">
-                  <div className="h-full rounded-sm bg-[#0e7a4f]/30" style={{ marginLeft: `${(m.band.low / max) * 100}%`, width: `${((m.band.high - m.band.low) / max) * 100}%` }}>
-                    <div className="h-full w-[2px] bg-[#0e7a4f]" style={{ marginLeft: `${m.band.high > m.band.low ? ((m.band.mid - m.band.low) / (m.band.high - m.band.low)) * 100 : 0}%` }} />
-                  </div>
-                </div>
-                <div className="mt-0.5 text-[11px] text-[#9aa3b0]">{m.basis} · {m.evidence}</div>
-              </div>
-            );
-          })}
-        </Section>
+      {/* VII · STRATEGIC RATIONALE */}
+      <Section n={7} title="Strategic Rationale">
+        <Lead>Why a strategic acquirer pays the premium.</Lead>
+        <ul className="space-y-2.5">
+          {r.strategicRationale.map((s) => (
+            <li key={s} className="flex gap-2 text-[13px] leading-relaxed text-[#2b3543]"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#0e7a4f]" />{s}</li>
+          ))}
+        </ul>
+        <Exhibit n="VII-A" title="Indicative path to close" source="Observed timelines, qualified acquirer set">
+          <TransactionTimeline closeHighDays={r.exec.closeHighDays} />
+        </Exhibit>
+      </Section>
 
-        {/* ── 4 · COMPARABLE TRANSACTIONS ── */}
-        <Section n={4} title="Comparable Transaction Analysis" rpt>
-          <Exhibit label={`Exhibit 4A — Precedent transactions (${r.comparablesAnalysis.count} indexed${r.comparablesAnalysis.medianPremiumPct != null ? `, ${pct(r.comparablesAnalysis.medianPremiumPct)} median premium` : ""})`} />
-          <table className="w-full border-collapse text-[12.5px]">
-            <thead>
-              <tr className="border-b-2 border-[#0b1220] text-left text-[10px] uppercase tracking-wide text-[#5b6675]">
-                <th className="py-1.5 pr-2">Target</th><th className="py-1.5 px-2">Acquirer</th>
-                <th className="py-1.5 px-2 text-right">Date</th><th className="py-1.5 px-2 text-right">Premium</th><th className="py-1.5 pl-2 text-right">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {r.comparables.map((c, i) => (
-                <tr key={`${c.target}-${i}`} className="border-b border-[#eef1f5]">
-                  <td className="py-1.5 pr-2 font-medium text-[#0b1220]">{c.target}</td>
-                  <td className="py-1.5 px-2 text-[#2b3543]">{c.buyer}</td>
-                  <td className="py-1.5 px-2 text-right font-mono text-[#5b6675]">{c.date ?? "—"}</td>
-                  <td className="py-1.5 px-2 text-right font-mono text-[#0e7a4f]">{c.premiumPct != null ? `+${pct(c.premiumPct)}` : "—"}</td>
-                  <td className="py-1.5 pl-2 text-right font-mono text-[#0b1220]">{c.priceUsd != null ? moneyShort(c.priceUsd) : "undisclosed"}</td>
-                </tr>
-              ))}
-              {r.comparables.length === 0 && <tr><td colSpan={5} className="py-3 text-[#9aa3b0]">No same-sector comparables indexed.</td></tr>}
-            </tbody>
-          </table>
-          <p className="mt-2 text-[11px] text-[#9aa3b0]">{r.comparablesAnalysis.note}</p>
-        </Section>
+      {/* VIII · CONFIDENCE ASSESSMENT */}
+      <Section n={8} title="Confidence Assessment">
+        <Lead>Every figure in this report carries a composite confidence of <strong className="text-[#0b1220]">{r.exec.confidencePct}%</strong> ({r.exec.confidenceTier}), built from five measured drivers.</Lead>
+        <Exhibit n="VIII-A" title="Confidence drivers">
+          <ConfidenceDrivers drivers={r.confidenceDrivers} />
+        </Exhibit>
+      </Section>
 
-        {/* ── 5 · STRATEGIC BUYER UNIVERSE ── */}
-        <Section n={5} title="Strategic Acquirer Universe" rpt>
-          <div className="grid grid-cols-4 gap-px overflow-hidden rounded border border-[#e3e8ef] bg-[#e3e8ef]">
-            <Stat label="Qualified" value={String(r.buyerUniverse.qualified)} />
-            <Stat label="Strategic" value={String(r.buyerUniverse.strategic)} />
-            <Stat label="Financial / PE" value={String(r.buyerUniverse.financial)} />
-            <Stat label="Sovereign / FO" value={String(r.buyerUniverse.sovereign + r.buyerUniverse.family_office)} />
-          </div>
-          <p className="mt-4 text-[13px] leading-relaxed text-[#5b6675]">
-            {r.buyerUniverse.qualified} of {r.buyerUniverse.scored} scored acquirers (from a registry of {r.buyerUniverse.registry})
-            qualify against {r.meta.company}'s sector, scale and growth profile.
-          </p>
-        </Section>
+      {/* IX · DATA PROVENANCE */}
+      <Section n={9} title="Data Provenance">
+        <Lead>Every figure traces to a source. {r.provenance.totalFigures} variables underpin the analysis{r.provenance.mostRecentDataDate ? `, most recent data as of ${r.provenance.mostRecentDataDate}` : ""}.</Lead>
+        <Exhibit n="IX-A" title="Figures by source">
+          <BankTable
+            columns={[{ key: "s", label: "Source" }, { key: "n", label: "Figures", align: "right" }]}
+            rows={Object.entries(r.provenance.bySource).map(([s, n]) => ({ s, n: String(n) }))}
+            footnote={r.provenance.note}
+          />
+        </Exhibit>
+      </Section>
 
-        {/* ── 6 · ACQUISITION PROBABILITY ── */}
-        <Section n={6} title="Acquisition Probability" rpt>
-          <Exhibit label="Exhibit 6A — Strategic acquirer ranking, by fit-adjusted probability" />
-          <div className="space-y-2">
-            {r.mostLikelyBuyers.slice(0, 8).map((b, i) => {
-              const max = Math.max(...r.mostLikelyBuyers.map((x) => x.probabilityPct), 1);
-              return (
-                <div key={b.name} className="avoid-break flex items-center gap-3 text-[12.5px]">
-                  <span className="w-4 font-mono text-[#9aa3b0]">{i + 1}</span>
-                  <span className="w-44 shrink-0 font-medium text-[#0b1220]">{b.name}</span>
-                  <span className="relative h-4 flex-1 rounded-sm bg-[#eef1f5]">
-                    <span className="absolute left-0 top-0 h-full rounded-sm bg-[#0e7a4f]/75" style={{ width: `${(b.probabilityPct / max) * 100}%` }} />
-                  </span>
-                  <span className="w-10 text-right font-mono font-semibold text-[#0e7a4f]">{b.probabilityPct}%</span>
-                  <span className="w-16 text-right font-mono text-[#9aa3b0]">{b.expectedDaysToCash}d</span>
-                </div>
-              );
-            })}
-          </div>
-          <p className="mt-3 text-[11px] text-[#9aa3b0]">Probability = acquisition appetite × sector overlap × deal velocity × recency. Expected days-to-cash from each acquirer's measured close history.</p>
-        </Section>
+      {/* X · FRAMEWORK COMPLIANCE */}
+      <Section n={10} title="Framework Compliance">
+        <Lead>The ten mandatory outputs of the ExitOS Valuation Framework, each present and sourced.</Lead>
+        <BankTable
+          columns={[{ key: "k", label: "Mandatory output" }, { key: "v", label: "Value", align: "right" }]}
+          rows={r.compliance.map((c) => ({ k: c.label, v: c.value }))}
+        />
+      </Section>
 
-        {/* ── 7 · PREMIUM ANALYSIS ── */}
-        <Section n={7} title="Premium Analysis" rpt>
-          <p className="mb-4 text-[13px] leading-relaxed text-[#5b6675]">
-            The applied strategic premium of <strong className="text-[#0b1220]">+{pct(r.premium.appliedPct)}</strong> is
-            underwritten by {r.premium.observedPremiums.length} observed precedent premiums
-            ({pct(r.premium.rangeLowPct)}–{pct(r.premium.rangeHighPct)} range, basis: {r.premium.basis.replace(/_/g, " ")}).
-          </p>
-          <Exhibit label="Exhibit 7A — Observed precedent premiums" />
-          <div className="flex items-end gap-1.5" style={{ height: 120 }}>
-            {[...r.premium.observedPremiums].sort((a, b) => a - b).map((p, i) => {
-              const max = Math.max(...r.premium.observedPremiums, r.premium.appliedPct, 0.5);
-              return <div key={i} className="flex-1 rounded-t-sm bg-[#0e7a4f]/35" style={{ height: `${(p / max) * 100}%` }} title={pct(p)} />;
-            })}
-            {r.premium.observedPremiums.length === 0 && <div className="text-[12px] text-[#9aa3b0]">No disclosed precedent premiums in-sample.</div>}
-          </div>
-          <div className="mt-1 text-[11px] text-[#9aa3b0]">Applied premium +{pct(r.premium.appliedPct)} · {r.premium.note}</div>
-        </Section>
+      {/* XI · LEGAL NOTICES */}
+      <Section n={11} title="Legal Notices">
+        <p className="text-[11.5px] leading-relaxed text-[#5b6675]">{r.disclaimer}</p>
+        <p className="mt-3 text-[11.5px] leading-relaxed text-[#5b6675]">
+          This document is strictly private and confidential, prepared by ExitOS Advisory for the named recipient. It does not
+          constitute an offer, a solicitation, investment advice, or a fairness opinion. Figures are estimates derived from the
+          ExitOS Valuation Framework and source-referenced market data; actual transaction outcomes may differ materially.
+          Recipients should conduct their own due diligence and seek independent professional advice.
+        </p>
+      </Section>
 
-        {/* ── 8 · SENSITIVITY ── */}
-        <Section n={8} title="Sensitivity Analysis" rpt>
-          <Exhibit label="Exhibit 8A — Enterprise value across the evidence-based premium band" />
-          <table className="w-full border-collapse text-[12.5px]">
-            <thead>
-              <tr className="border-b-2 border-[#0b1220] text-left text-[10px] uppercase tracking-wide text-[#5b6675]">
-                <th className="py-1.5 pr-2">Strategic premium</th><th className="py-1.5 px-2 text-right">Enterprise value</th><th className="py-1.5 pl-2 text-right">Δ vs midpoint</th>
-              </tr>
-            </thead>
-            <tbody>
-              {r.sensitivity.map((s) => (
-                <tr key={s.premiumPct} className={`border-b border-[#eef1f5] ${Math.abs(s.delta) < 1e6 ? "bg-[#0e7a4f]/[0.06]" : ""}`}>
-                  <td className="py-1.5 pr-2 font-mono text-[#0b1220]">+{pct(s.premiumPct)}</td>
-                  <td className="py-1.5 px-2 text-right font-mono font-semibold text-[#0b1220]">{money(s.evUsd)}</td>
-                  <td className={`py-1.5 pl-2 text-right font-mono ${s.delta >= 0 ? "text-[#0e7a4f]" : "text-[#b4453a]"}`}>{s.delta >= 0 ? "+" : ""}{moneyShort(s.delta)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Section>
-
-        {/* ── 9 · INDICATIVE TIMELINE ── */}
-        <Section n={9} title="Indicative Timeline" rpt>
-          <p className="mb-4 text-[13px] leading-relaxed text-[#5b6675]">
-            An indicative path to close of <strong className="text-[#0b1220]">{r.exec.closeLowDays}–{r.exec.closeHighDays} days</strong>,
-            consistent with observed timelines for the qualified acquirer set.
-          </p>
-          <Exhibit label="Exhibit 9A — Path to close" />
-          {(() => {
-            const phases = [
-              { label: "Preparation", w: 18 }, { label: "Buyer Outreach", w: 18 }, { label: "NDA", w: 10 },
-              { label: "LOI", w: 14 }, { label: "Due Diligence", w: 28 }, { label: "Close", w: 12 },
-            ];
-            let acc = 0;
-            return (
-              <>
-                <div className="flex h-9 w-full overflow-hidden rounded-sm">
-                  {phases.map((p, i) => (
-                    <div key={p.label} className="flex items-center justify-center border-r border-white/40 text-[10px] font-semibold text-white last:border-0"
-                      style={{ width: `${p.w}%`, background: `rgba(14,122,79,${0.4 + i * 0.1})` }}>{p.w >= 12 ? p.label : ""}</div>
-                  ))}
-                </div>
-                <div className="mt-1.5 flex justify-between font-mono text-[11px] text-[#5b6675]">
-                  <span>Day 0</span>
-                  {phases.slice(0, -1).map((p) => { acc += p.w; return <span key={p.label}>{Math.round((acc / 100) * r.exec.closeHighDays)}d</span>; })}
-                  <span className="font-semibold text-[#0e7a4f]">Close · {r.exec.closeHighDays}d</span>
-                </div>
-              </>
-            );
-          })()}
-        </Section>
-
-        {/* ── 10 · RISK FACTORS ── */}
-        <Section n={10} title="Risk Factors" rpt>
-          <p className="mb-3 text-[13px] leading-relaxed text-[#5b6675]">The factors most likely to be probed in diligence, with the value at stake in each.</p>
-          <ol className="space-y-3">
-            {r.risks.map((rk, i) => (
-              <li key={rk.dimension} className="avoid-break border-l-2 border-[#0e7a4f] pl-3">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-[13px] font-semibold text-[#0b1220]">{i + 1}. {rk.dimension}</span>
-                  <span className="font-mono text-[12.5px] font-semibold text-[#0e7a4f]">{moneyShort(rk.impactUsd)} at stake</span>
-                </div>
-                <p className="mt-0.5 text-[12.5px] leading-snug text-[#5b6675]">{rk.recommendation} <span className="text-[#9aa3b0]">· {rk.effort}</span></p>
-              </li>
-            ))}
-            {r.risks.length === 0 && <li className="text-[12.5px] text-[#9aa3b0]">No material readiness gaps identified.</li>}
-          </ol>
-        </Section>
-
-        {/* ── 11 · VALUATION VARIABLES & PROVENANCE ── */}
-        <Section n={11} title="Valuation Variables & Provenance" rpt>
-          <p className="mb-3 text-[13px] leading-relaxed text-[#5b6675]">
-            Every figure in this report traces to a source. {r.provenance.totalFigures} variables underpin the analysis
-            {r.provenance.mostRecentDataDate ? `, most recent data as of ${r.provenance.mostRecentDataDate}` : ""}.
-          </p>
-          <Exhibit label="Exhibit 11A — Key variables and sources" />
-          <table className="w-full border-collapse text-[11.5px]">
-            <thead>
-              <tr className="border-b-2 border-[#0b1220] text-left text-[10px] uppercase tracking-wide text-[#5b6675]">
-                <th className="py-1.5 pr-2">Variable</th><th className="py-1.5 px-2">Value</th><th className="py-1.5 px-2">Source</th><th className="py-1.5 pl-2">Confidence</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...r.variables.company, ...r.variables.market, ...r.variables.buyer].filter((v) => v.present).slice(0, 18).map((v) => (
-                <tr key={v.name} className="border-b border-[#eef1f5]">
-                  <td className="py-1.5 pr-2 text-[#0b1220]">{v.name}</td>
-                  <td className="py-1.5 px-2 font-mono text-[#2b3543]">{v.value}</td>
-                  <td className="py-1.5 px-2 text-[#5b6675]">{v.source}{v.last_updated ? ` · ${v.last_updated}` : ""}</td>
-                  <td className="py-1.5 pl-2 text-[#5b6675]">{v.confidence}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="mt-4 border-t border-[#d8dee8] pt-3 text-[10.5px] leading-relaxed text-[#9aa3b0]">{r.disclaimer}</p>
-        </Section>
-      </div>
-    </div>
+      {/* XII · APPENDICES */}
+      <Section n={12} title="Appendices">
+        <Exhibit n="XII-A" title="Valuation variables and sources">
+          <BankTable
+            columns={[{ key: "n", label: "Variable" }, { key: "v", label: "Value" }, { key: "s", label: "Source" }, { key: "c", label: "Confidence" }]}
+            rows={[...r.variables.company, ...r.variables.market, ...r.variables.buyer].filter((v) => v.present).slice(0, 20)
+              .map((v) => ({ n: v.name, v: v.value, s: `${v.source}${v.last_updated ? ` · ${v.last_updated}` : ""}`, c: v.confidence }))}
+          />
+        </Exhibit>
+      </Section>
+    </ReportFrame>
   );
 };
-
-const Field: React.FC<{ k: string; v: string }> = ({ k, v }) => (
-  <div>
-    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9aa3b0]">{k}</div>
-    <div className="mt-1 text-[15px] font-medium text-[#0b1220]">{v}</div>
-  </div>
-);
-
-const Stat: React.FC<{ label: string; value: string; sub?: string; hero?: boolean }> = ({ label, value, sub, hero }) => (
-  <div className="bg-white px-4 py-3.5">
-    <div className="text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[#5b6675]">{label}</div>
-    <div className={`mt-1 font-mono font-bold text-[#0b1220] ${hero ? "text-[24px] text-[#0e7a4f]" : "text-[17px]"}`}>{value}</div>
-    {sub && <div className="text-[10.5px] text-[#9aa3b0]">{sub}</div>}
-  </div>
-);
-
-const Exhibit: React.FC<{ label: string }> = ({ label }) => (
-  <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#0e7a4f]">{label}</div>
-);
-
-const Section: React.FC<{ n: number | null; title: string; rpt?: boolean; children: React.ReactNode }> = ({ n, title, children }) => (
-  <section className="rpt-section px-16 py-12">
-    <div className="mb-5 border-b-2 border-[#0b1220] pb-2.5">
-      {n != null && <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#0e7a4f]">Section {ROMAN[n]}</div>}
-      <h2 className="mt-1 font-serif text-[23px] font-bold uppercase tracking-[0.02em] text-[#0b1220]">{title}</h2>
-    </div>
-    {children}
-  </section>
-);
-
-const ValuationBar: React.FC<{ low: number; mid: number; high: number; baseline: number }> = ({ low, mid, high, baseline }) => {
-  const max = high * 1.08, scale = (n: number): number => (n / max) * 100;
-  return (
-    <div className="avoid-break mt-6">
-      <Exhibit label="Exhibit 1A — Enterprise value range" />
-      <div className="relative h-12 rounded-sm bg-[#eef1f5]">
-        <div className="absolute top-0 h-full rounded-sm bg-[#0e7a4f]/25" style={{ left: `${scale(low)}%`, width: `${scale(high) - scale(low)}%` }} />
-        <div className="absolute top-0 h-full w-[2px] bg-[#0b1220]" style={{ left: `${scale(baseline)}%` }} title="Financial baseline" />
-        <div className="absolute top-0 h-full w-[3px] bg-[#0e7a4f]" style={{ left: `${scale(mid)}%` }} title="Midpoint" />
-      </div>
-      <div className="mt-1 flex justify-between text-[11px] font-mono text-[#5b6675]">
-        <span>{moneyShort(low)}</span>
-        <span className="text-[#0b1220]">baseline {moneyShort(baseline)}</span>
-        <span className="font-semibold text-[#0e7a4f]">midpoint {moneyShort(mid)}</span>
-        <span>{moneyShort(high)}</span>
-      </div>
-    </div>
-  );
-};
-
-const PRINT_CSS = `
-.rpt { position: relative; }
-.no-screen { display: none; }
-.rpt-watermark { display:none; }
-@media print {
-  @page { size: A4; margin: 16mm 14mm 18mm; }
-  html, body { background: #ffffff !important; }
-  .no-print { display: none !important; }
-  .rpt { box-shadow: none !important; max-width: none !important; width: 100% !important; margin: 0 !important; }
-  .rpt-section, .rpt-cover { break-before: page; }
-  .rpt-cover { break-before: avoid; break-after: page; min-height: 0 !important; }
-  .avoid-break { break-inside: avoid; }
-  tr { break-inside: avoid; }
-  .no-screen { display: flex; }
-  .rpt-fixed-header { position: fixed; top: 0; left: 0; right: 0; justify-content: space-between; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #9aa3b0; padding: 4mm 14mm 0; }
-  .rpt-fixed-footer { position: fixed; bottom: 0; left: 0; right: 0; justify-content: space-between; font-size: 9px; color: #9aa3b0; padding: 0 14mm 4mm; border-top: 1px solid #e3e8ef; }
-  .rpt-watermark { display: block; position: fixed; top: 45%; left: 0; right: 0; text-align: center; font-size: 96px; font-weight: 800; letter-spacing: .3em; color: rgba(14,122,79,0.05); transform: rotate(-24deg); }
-  @page { @bottom-right { content: "Page " counter(page); font-size: 9px; color: #9aa3b0; } }
-}
-`;
 
 export default Report;

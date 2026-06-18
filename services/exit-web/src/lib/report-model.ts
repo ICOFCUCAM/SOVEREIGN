@@ -23,9 +23,15 @@ export interface ValuationReportModel {
     closeLowDays: number; closeHighDays: number;
     baselineMid: number; comparablesUsed: number;
     leadBuyer: string | null; leadProbabilityPct: number | null;
+    readinessScore: number; upliftUsd: number;
     thesis: string;
   };
   overview: { sector: string; arrUsd: number; ttmUsd: number; growthPct: number; ebitdaPct: number; grossMarginPct: number; netRetentionPct: number | null; customers: number | null };
+  highlights: string[];
+  strategicRationale: readonly string[];
+  confidenceDrivers: { label: string; pct: number }[];
+  compliance: { label: string; value: string }[];
+  premiumUsd: number;
   methodologies: readonly MethodologyView[];
   comparables: ReportComparable[];
   comparablesAnalysis: ComparableAnalysis;
@@ -65,6 +71,40 @@ export function buildValuationReport(company: CompanyProfile, preparedFor = "Boa
     .map((w) => ({ dimension: w.dimension, recommendation: w.recommendation, impactUsd: w.valuationUpliftUsd, effort: w.effort }));
 
   const lead = INST.mostLikelyBuyers[0];
+  const pctS = (x: number): string => `${Math.round(x * 100)}%`;
+
+  // investment highlights — drawn only from computed facts, never asserted.
+  const highlights: string[] = [
+    `Enterprise value of ${(INST.headline.mid / 1e6).toFixed(1)}M on a strategic-buyer basis, a +${Math.round(INST.premium.appliedPct * 100)}% premium to the financial baseline.`,
+    `${INST.buyerUniverse.qualified} qualified acquirers identified from a registry of ${INST.buyerUniverse.registry}, ${INST.buyerUniverse.strategic} of them strategic.`,
+    `Premium underwritten by ${INST.premium.observedPremiums.length} observed precedent transactions, not a flat assumption.`,
+    `${pctS(company.growth.arrGrowthYoyPct)} revenue growth and ${pctS(company.revenue.grossMarginPct)} gross margin.`,
+    lead ? `${lead.name} is the most probable acquirer at ${lead.probabilityPct}% modelled probability.` : `A competitive process across ${INST.buyerUniverse.qualified} buyers supports the range.`,
+    `Indicative path to close of ${INST.timeToClose.lowDays}–${INST.timeToClose.highDays} days.`,
+  ];
+
+  const d = INST.confidence.drivers;
+  const confidenceDrivers = [
+    { label: "Data completeness", pct: Math.round(d.dataCompleteness * 100) },
+    { label: "Financial quality", pct: Math.round(d.financialQuality * 100) },
+    { label: "Comparable depth", pct: Math.round(d.comparableDepth * 100) },
+    { label: "Market maturity", pct: Math.round(d.sectorMaturity * 100) },
+    { label: "Data freshness", pct: Math.round(d.dataFreshness * 100) },
+  ];
+
+  const m = INST.mandatoryOutputs;
+  const compliance: { label: string; value: string }[] = [
+    { label: "Enterprise value range", value: m.enterprise_value_range },
+    { label: "Midpoint valuation", value: m.midpoint_valuation },
+    { label: "Confidence score", value: m.confidence_score },
+    { label: "Methodologies", value: m.valuation_methodologies },
+    { label: "Methodology weighting", value: m.methodology_weighting },
+    { label: "Comparable transaction count", value: m.comparable_transaction_count },
+    { label: "Strategic premium basis", value: m.strategic_premium_basis },
+    { label: "Buyer universe size", value: m.buyer_universe_size },
+    { label: "Expected time to close", value: m.expected_time_to_close },
+    { label: "Data provenance", value: m.data_provenance_summary },
+  ];
 
   return {
     meta: {
@@ -83,6 +123,7 @@ export function buildValuationReport(company: CompanyProfile, preparedFor = "Boa
       closeLowDays: INST.timeToClose.lowDays, closeHighDays: INST.timeToClose.highDays,
       baselineMid: INST.financialBaseline.mid, comparablesUsed: INST.comparablesUsed,
       leadBuyer: lead?.name ?? null, leadProbabilityPct: lead?.probabilityPct ?? null,
+      readinessScore: Math.round(ra.currentScore), upliftUsd: Math.max(0, ra.projectedStrategicMid - ra.currentStrategicMid),
       thesis: INST.strategicRationale[0] ?? INST.premium.note,
     },
     overview: {
@@ -95,6 +136,11 @@ export function buildValuationReport(company: CompanyProfile, preparedFor = "Boa
       netRetentionPct: company.revenue.netRetentionPct ?? null,
       customers: company.users?.totalCustomers ?? null,
     },
+    highlights,
+    strategicRationale: INST.strategicRationale,
+    confidenceDrivers,
+    compliance,
+    premiumUsd: INST.headline.mid - INST.financialBaseline.mid,
     methodologies: INST.methodologies,
     comparables: INST.comparableTransactions.slice(0, 12).map((c) => ({ target: c.target, buyer: c.buyer, date: c.date ?? null, premiumPct: c.premiumPct ?? null, priceUsd: c.priceUsd ?? null })),
     comparablesAnalysis: INST.comparablesAnalysis,
