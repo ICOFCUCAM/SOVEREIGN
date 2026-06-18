@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
-import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, fmtUsdShort } from "../lib/buyer-dna";
+import { rankedBuyers, expectedOutcomeFor, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, fmtUsdShort } from "../lib/buyer-dna";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { Panel, CommandHeader, CommandState, Evidence } from "../lib/workstation";
 import BuyerInterestGate from "../components/BuyerInterestGate";
@@ -40,7 +40,6 @@ const Terminal: React.FC = () => {
     .map((p) => ({ p, a: acquisitionAppetiteScore(p) }))
     .sort((x, y) => y.a.score - x.a.score).slice(0, 7), []);
   const cd = INST.confidence.drivers;
-  const themes = strategicThemes(8);
   const comps = INST.comparableTransactions.slice(0, 7);
   const uplift = Math.max(0, ra.projectedStrategicMid - ra.currentStrategicMid);
   const activeAcquirers = DNA_PROFILES.filter((p) => p.events_indexed > 0).length;
@@ -251,18 +250,6 @@ const Terminal: React.FC = () => {
           </div>
         </Panel>
 
-        {/* STRATEGIC THEMES — full-width tape */}
-        <Panel title="Strategic themes · detected" className="lg:col-span-12"
-          right={<Link to="/console/market-map" className="text-[9px] uppercase tracking-wide text-white/35 hover:text-deal-300">market map →</Link>}>
-          <div className="flex flex-wrap gap-1.5 px-3 py-2.5">
-            {themes.map((t) => (
-              <span key={t.theme} className="inline-flex items-center gap-1.5 rounded border border-white/10 bg-white/[0.03] px-2 py-1 text-[11px] capitalize text-white/80">
-                {t.theme} <span className="font-mono text-[9px] text-deal-300">{t.buyers}</span>
-              </span>
-            ))}
-            {themes.length === 0 && <span className="text-[11px] text-white/45">No strategic themes indexed for the active buyer set yet.</span>}
-          </div>
-        </Panel>
       </div>
 
       <p className="px-1 text-[10px] text-white/30">
