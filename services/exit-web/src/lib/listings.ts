@@ -3,7 +3,7 @@ import { regionOf, type Region } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile";
 import { exitosSectorOf } from "./acquirer";
 import { buildProfile } from "./company-intake";
-import { SOVEREIGN_INTEL_PRODUCTS, SOVEREIGN_OWNER_ACCOUNT, SOVEREIGN_PRICING_NOTE } from "./sovereign-intel";
+import { SOVEREIGN_PRODUCTS, SOVEREIGN_OWNER_ACCOUNT } from "./sovereign-intel";
 
 // ── LISTINGS REPOSITORY ─────────────────────────────────────────────
 // Real listings — the supply side of the exchange. A founder lists their
@@ -12,14 +12,17 @@ import { SOVEREIGN_INTEL_PRODUCTS, SOVEREIGN_OWNER_ACCOUNT, SOVEREIGN_PRICING_NO
 // when it ships — the API and consumers never change). The public view is
 // always anonymized: sector, region, revenue band, growth — never the name.
 
-/** Real product descriptor for catalog-style listings (e.g. Sovereign Intelligence). */
+/** Real product descriptor for catalog-style listings (e.g. Sovereign estate). */
 export interface ListingProductMeta {
-  readonly productLine: string;   // the real product / engine name
-  readonly category: string;      // the product family / layer
-  readonly posture?: string;      // operating posture, where defined
-  readonly capability: string;    // what it does
-  readonly answers?: string;      // the question it answers
-  readonly pricingNote?: string;  // published list/subscription pricing context, where real
+  readonly productLine: string;   // the real product name
+  readonly category: string;      // the catalog section / family
+  readonly descriptor?: string;   // the source's uppercase descriptor
+  readonly capability: string;    // what it does (description)
+  readonly valueLabel?: string;   // "Deployment value" | "Est. infrastructure value"
+  readonly valueText?: string;    // verbatim published value, e.g. "From $8M", "$300M–$500M"
+  readonly coverage?: readonly string[];
+  readonly tags?: readonly string[];
+  readonly acquisitionReadyText?: string; // featured acquisition-ready ask
 }
 
 export interface Listing {
@@ -79,17 +82,23 @@ const sovereignProfile = (name: string, sector: string): CompanyProfile =>
   });
 
 function buildSovereignListings(): Listing[] {
-  return SOVEREIGN_INTEL_PRODUCTS.map((p) => {
+  return SOVEREIGN_PRODUCTS.map((p) => {
     const profile = sovereignProfile(p.name, p.sector);
     return {
       id: `lst-sov-${p.id}`,
-      code: p.name,                         // catalog listing — the product line is the handle
+      code: p.name,                         // catalog listing — the product name is the handle
       listedAt: "2026-01-01T00:00:00.000Z",
       ownerAccountId: SOVEREIGN_OWNER_ACCOUNT,
       profile,
-      productMeta: { productLine: p.name, category: p.layer, posture: p.posture, capability: p.capability, answers: p.answers, pricingNote: SOVEREIGN_PRICING_NOTE },
+      productMeta: {
+        productLine: p.name, category: p.category, descriptor: p.label, capability: p.description,
+        valueLabel: p.valueLabel, valueText: p.valueText, coverage: p.coverage, tags: p.tags,
+        acquisitionReadyText: p.acquisitionReadyText,
+      },
       publicView: {
         sector: exitosSectorOf(profile), region: regionOf(profile.jurisdiction),
+        // revenue/EBITDA not published; the real published figure is the
+        // deployment/infrastructure VALUE, surfaced via productMeta.valueText.
         revenueUsd: 0, growthPct: 0, ebitdaMarginPct: 0, disclosed: false,
       },
     };

@@ -1,56 +1,108 @@
 import type { Sector } from "./company-intake";
 
-// ── SOVEREIGN INTELLIGENCE — PRODUCT CATALOG ────────────────────────
-// The Strategic Intelligence Stack, imported verbatim from the Sovereign /
-// Emergency AI product surface (sovereign-os/apps/web/components/
-// IntelligenceStack.tsx). These are REAL product lines: name, capability and
-// the question each answers are the source's own words. They are seeded into
-// the ExitOS exchange as acquisition listings owned by the admin account.
-//
-// Note on honesty: these products have no published financials. The listings
-// built from them therefore disclose NO revenue/EBITDA — they are marked
-// "financials under NDA", which is standard for an anonymized teaser. No
-// figure here is invented.
+// ── SOVEREIGN — PRODUCT CATALOG ─────────────────────────────────────
+// The Sovereign product estate (sovereigndo.com), transcribed verbatim from
+// the published catalog: name, category, descriptor, description and the real
+// deployment / infrastructure value each carries. These are seeded into the
+// ExitOS exchange as acquisition listings owned by the admin account so buyers
+// see the real estate immediately. Every figure here is published by the
+// source — none is invented.
 
-export interface IntelProduct {
+export interface SovereignProduct {
   readonly id: string;
-  readonly tier: string;       // tier number, e.g. "01"
-  readonly posture: string;    // OBSERVE | UNDERSTAND | PREDICT | ADVISE | COORDINATE
-  readonly layer: string;      // tier title, used as the listing category
-  readonly name: string;       // the engine / product-line name
-  readonly capability: string; // what it does (source body)
-  readonly answers?: string;   // the question it answers (source)
-  readonly sector: Sector;     // mapped ExitOS sector for matching
+  readonly name: string;
+  readonly category: string;        // catalog section, e.g. "Governance"
+  readonly label: string;           // the uppercase descriptor under the icon
+  readonly description: string;
+  readonly sector: Sector;          // mapped ExitOS sector
+  readonly valueLabel?: string;     // "Deployment value" | "Est. infrastructure value"
+  readonly valueText?: string;      // verbatim published value, e.g. "From $8M", "$300M–$500M", "$18M"
+  readonly coverage?: readonly string[];
+  readonly tags?: readonly string[];
+  readonly acquisitionReadyText?: string; // featured acquisition-ready asking figure, e.g. "$5.9M"
 }
 
-export const SOVEREIGN_INTEL_PRODUCTS: readonly IntelProduct[] = [
-  { id: "osint", tier: "01", posture: "OBSERVE", layer: "Intelligence Acquisition Layer", name: "OSINT Engine", capability: "Continuous open-source acquisition across news, government, social, blogs, public databases, financial filings and competitor surfaces.", answers: "What just changed in the world?", sector: "ai_infra" },
-  { id: "media-monitoring", tier: "01", posture: "OBSERVE", layer: "Intelligence Acquisition Layer", name: "Media Monitoring Engine", capability: "Tracks mentions, narratives, sentiment, propagation velocity and influence campaigns across every relevant channel.", answers: "Who is talking? What are they saying? How fast is it spreading?", sector: "media_content" },
-  { id: "stakeholder-monitoring", tier: "01", posture: "OBSERVE", layer: "Intelligence Acquisition Layer", name: "Stakeholder Monitoring Engine", capability: "Tracks investors, regulators, partners, customers, journalists and ministers under one institutional view.", answers: "Who matters? Who shifted position? Who became hostile?", sector: "ai_infra" },
-  { id: "narrative-intel", tier: "02", posture: "UNDERSTAND", layer: "Intelligence Processing Layer", name: "Narrative Intelligence Engine", capability: "Builds narrative maps, influence maps and conversation clusters across the public record.", answers: "Which narratives are growing? Which are dying? Who is driving them?", sector: "ai_infra" },
-  { id: "competitive-intel", tier: "02", posture: "UNDERSTAND", layer: "Intelligence Processing Layer", name: "Competitive Intelligence Engine", capability: "Watches competitor products, acquisitions, hiring, patents and partnerships under one continuous feed.", answers: "What are competitors doing? What is changing?", sector: "ai_infra" },
-  { id: "strategic-signal", tier: "02", posture: "UNDERSTAND", layer: "Intelligence Processing Layer", name: "Strategic Signal Engine", capability: "Surfaces weak signals, emerging threats and emerging opportunities before they reach the institutional eye.", answers: "What is forming that we have not yet noticed?", sector: "ai_infra" },
-  { id: "executive-briefing", tier: "03", posture: "ADVISE", layer: "Executive Intelligence Layer", name: "Executive Briefing Engine", capability: "Every morning: what happened, why it matters, what leadership should know. Produces CEO, minister and executive briefings on schedule.", answers: "What does the principal need to know before the day begins?", sector: "enterprise_saas" },
-  { id: "risk-intel", tier: "03", posture: "ADVISE", layer: "Executive Intelligence Layer", name: "Risk Intelligence Engine", capability: "Continuous monitoring of operational, financial, political and reputational risk — with score, impact forecast and response options.", answers: "Where is exposure changing? What is the impact? What are the response options?", sector: "enterprise_saas" },
-  { id: "decision-support", tier: "03", posture: "ADVISE", layer: "Executive Intelligence Layer", name: "Decision Support Engine", capability: "Leadership asks: should we do X? The system returns Option A · Option B · Option C — each carrying benefits, risks, probability and cost.", answers: "Of the available options, which carries the institutional advantage?", sector: "enterprise_saas" },
-  { id: "scenario-planning", tier: "04", posture: "PREDICT", layer: "Forecasting Layer", name: "Scenario Planning Engine", capability: "What if oil rises 40%? What if a critical supplier fails? What if a cyber-attack lands tomorrow? Returns projected outcomes and mitigation plans.", answers: "How does the institution behave under stress?", sector: "ai_infra" },
-  { id: "strategic-forecasting", tier: "04", posture: "PREDICT", layer: "Forecasting Layer", name: "Strategic Forecasting Engine", capability: "Forecasts markets, public sentiment, regulatory direction and operational impact across the institutional horizon.", answers: "Where is the world heading and how does the institution position?", sector: "ai_infra" },
-  { id: "knowledge-graph", tier: "05", posture: "UNDERSTAND", layer: "Institutional Memory Layer", name: "Institutional Knowledge Graph", capability: "Stores campaigns, crises, decisions and outcomes — every artefact addressable, every relationship preserved.", answers: "What happened last time? What worked? What failed?", sector: "enterprise_saas" },
-  { id: "lessons-learned", tier: "05", posture: "UNDERSTAND", layer: "Institutional Memory Layer", name: "Lessons Learned Engine", capability: "Automatically composes postmortems and recommendations; carries institutional memory forward into the next campaign.", answers: "What lessons did the last cycle leave us with?", sector: "enterprise_saas" },
-  { id: "crisis-detection", tier: "06", posture: "COORDINATE", layer: "Crisis Command Layer", name: "Crisis Detection Engine", capability: "Continuous detection of cyber attack, media attack, disinformation, operational incidents and reputational threats — each surfaced with provenance.", answers: "What is happening to us right now, and how do we know?", sector: "enterprise_saas" },
-  { id: "crisis-response", tier: "06", posture: "COORDINATE", layer: "Crisis Command Layer", name: "Crisis Response Engine", capability: "Automatically prepares the executive briefing, the press response, the stakeholder update and the action plan — every artefact under audit.", answers: "What is the institutional response, and is it defensible?", sector: "enterprise_saas" },
-  { id: "mission-control", tier: "07", posture: "COORDINATE", layer: "Strategic Coordination Layer", name: "Mission Control Dashboard", capability: "Leadership sees threats, opportunities, stakeholders, markets, operations and narratives in one defensible institutional view.", answers: "What is the institutional posture, right now, across every relevant axis?", sector: "enterprise_saas" },
-];
-
-/** The platform/admin account that owns the seeded Sovereign Intelligence listings. */
 export const SOVEREIGN_OWNER_ACCOUNT = "acct-admin-sovereign";
 
-// Real published pricing for the Sovereign platform, from the source
-// (sovereign-os/apps/web/lib/plans.ts — the same data sovereigndo.com renders).
-// This is PLATFORM-WIDE subscription pricing across all engines — NOT a
-// per-engine acquisition price. Surfaced as context only; per-product
-// acquisition value remains undisclosed (under NDA) because it is not published.
-export const SOVEREIGN_PLATFORM_PRICING = { evaluatorUsdMo: 0, operatorUsdMo: 490, institutionalUsdMo: 4_900 } as const;
-export const SOVEREIGN_PRICING_NOTE =
-  `Sovereign platform pricing (all engines) · Operator $${SOVEREIGN_PLATFORM_PRICING.operatorUsdMo.toLocaleString()}/mo · Institutional $${SOVEREIGN_PLATFORM_PRICING.institutionalUsdMo.toLocaleString()}/mo`;
+const slug = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
+// Relocation & logistics marketplaces — one per market, with published
+// estimated infrastructure value and (where featured) an acquisition-ready ask.
+const RELO: { country: string; cities: string[]; value: string; ack?: string }[] = [
+  { country: "USA", cities: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix"], value: "$18M" },
+  { country: "Canada", cities: ["Toronto", "Montréal", "Vancouver", "Calgary", "Ottawa"], value: "$12M" },
+  { country: "UK", cities: ["London", "Manchester", "Birmingham", "Edinburgh", "Glasgow"], value: "$16M" },
+  { country: "France", cities: ["Paris", "Lyon", "Marseille", "Toulouse", "Nice"], value: "$14M" },
+  { country: "Germany", cities: ["Berlin", "München", "Hamburg", "Frankfurt", "Köln"], value: "$18M" },
+  { country: "Norway", cities: ["Oslo", "Bergen", "Trondheim", "Stavanger", "Drammen"], value: "$8M", ack: "$5.9M" },
+  { country: "Sweden", cities: ["Stockholm", "Göteborg", "Malmö", "Uppsala", "Linköping"], value: "$9M" },
+  { country: "Netherlands", cities: ["Amsterdam", "Rotterdam", "Den Haag", "Utrecht", "Eindhoven"], value: "$13M" },
+  { country: "Denmark", cities: ["København", "Aarhus", "Odense", "Aalborg", "Esbjerg"], value: "$7M", ack: "$5M" },
+  { country: "Belgium", cities: ["Brussels", "Antwerp", "Ghent", "Charleroi", "Liège"], value: "$7M", ack: "$5.5M" },
+  { country: "Austria", cities: ["Wien", "Graz", "Linz", "Salzburg", "Innsbruck"], value: "$6M" },
+  { country: "Switzerland", cities: ["Zürich", "Genève", "Basel", "Lausanne", "Bern"], value: "$15M" },
+  { country: "Spain", cities: ["Madrid", "Barcelona", "Valencia", "Sevilla", "Málaga"], value: "$13M" },
+  { country: "Italy", cities: ["Milano", "Roma", "Torino", "Napoli", "Firenze"], value: "$14M" },
+  { country: "Poland", cities: ["Warszawa", "Kraków", "Wrocław", "Łódź", "Poznań"], value: "$10M" },
+  { country: "Czech Republic", cities: ["Praha", "Brno", "Ostrava", "Plzeň", "Liberec"], value: "$5M", ack: "$3.9M" },
+];
+
+const reloProducts: SovereignProduct[] = RELO.map((r) => ({
+  id: slug(`${r.country}-relocation`),
+  name: `${r.country} Relocation & Logistics Marketplace`,
+  category: "Mobility, Transport & Logistics",
+  label: "Transport & Logistics Infrastructure",
+  description: `National relocation and logistics marketplace connecting ${r.country}'s residential, commercial and enterprise mobility sectors.`,
+  sector: "logistics_freight",
+  valueLabel: "Est. infrastructure value",
+  valueText: r.value,
+  coverage: r.cities,
+  tags: ["Live market", "Enterprise ready", "Acquisition ready"],
+  acquisitionReadyText: r.ack,
+}));
+
+const CORE: SovereignProduct[] = [
+  // ── Governance ──
+  { id: "civicos", name: "CivicOS", category: "Governance", label: "Sovereign Operating Infrastructure", description: "Sovereign operating infrastructure — a deployable national runtime for ministries, agencies and public services.", sector: "enterprise_saas", valueLabel: "Deployment value", valueText: "From $8M" },
+  { id: "national-shell", name: "National Shell", category: "Governance", label: "Sovereign Government Runtime", description: "The sovereign orchestration layer binding government into one runtime.", sector: "enterprise_saas", valueLabel: "Deployment value", valueText: "$300M–$500M" },
+  { id: "national-coordination-engine", name: "National Coordination Engine", category: "Governance", label: "Government Coordination Infrastructure", description: "Cross-government dependency and institutional coordination.", sector: "enterprise_saas", valueLabel: "Deployment value", valueText: "From $30M" },
+  { id: "treasuryos", name: "TreasuryOS", category: "Governance", label: "Sovereign Government Treasury", description: "Sovereign financial orchestration infrastructure.", sector: "fintech_payments", valueLabel: "Deployment value", valueText: "From $8M" },
+  { id: "healthos", name: "HealthOS", category: "Governance", label: "Government Health Infrastructure", description: "National healthcare operational runtime.", sector: "vertical_saas", valueLabel: "Deployment value", valueText: "From $5M" },
+  { id: "justiceos", name: "JusticeOS", category: "Governance", label: "Government Justice Infrastructure", description: "Judicial and constitutional operational infrastructure.", sector: "enterprise_saas", valueLabel: "Deployment value", valueText: "From $5M" },
+  { id: "educationos", name: "EducationOS", category: "Governance", label: "Government Education Infrastructure", description: "National education coordination infrastructure.", sector: "vertical_saas", valueLabel: "Deployment value", valueText: "From $5M" },
+  { id: "transportos", name: "TransportOS", category: "Governance", label: "Government Transport Infrastructure", description: "National transport and mobility orchestration.", sector: "logistics_freight", valueLabel: "Deployment value", valueText: "From $8M" },
+  { id: "emergencyos", name: "EmergencyOS", category: "Governance", label: "Government Emergency Infrastructure", description: "National emergency response and crisis coordination runtime.", sector: "enterprise_saas", valueLabel: "Deployment value", valueText: "From $10M" },
+  { id: "policeos", name: "PoliceOS", category: "Governance", label: "Government Public Safety Infrastructure", description: "National law enforcement operational infrastructure.", sector: "enterprise_saas", valueLabel: "Deployment value", valueText: "From $8M" },
+  { id: "anti-corruption-intelligence-os", name: "Anti-Corruption Intelligence OS", category: "Governance", label: "Government Anti-Corruption Intelligence", description: "AI-native anti-corruption operational intelligence.", sector: "ai_infra", valueLabel: "Deployment value", valueText: "From $10M" },
+  { id: "act-anti-corruption-tower", name: "ACT — Anti-Corruption Tower", category: "Governance", label: "Governance Integrity", description: "Institutional integrity, instrumented.", sector: "ai_infra" },
+
+  // ── Finance ──
+  { id: "veritas-financial-sovereign-stack", name: "Veritas Financial Sovereign Stack", category: "Finance", label: "Financial Infrastructure for Civilisations", description: "Treasury, monetary, settlement, banking and reserve infrastructure operated at civilisation scale.", sector: "fintech_payments", valueLabel: "Deployment value", valueText: "$50M–$200M" },
+  { id: "mobile-pay", name: "Mobile Pay", category: "Finance", label: "Sovereign Payments & Banking", description: "A national mobile-money network in a box.", sector: "fintech_payments" },
+
+  // ── Mobility, Transport & Logistics (marquees) ──
+  { id: "flytgo", name: "FlytGo", category: "Mobility, Transport & Logistics", label: "Global Logistics & Transport Marketplace", description: "The global logistics & transport marketplace.", sector: "logistics_freight" },
+  { id: "flytgo-norway", name: "FlytGo Norway", category: "Mobility, Transport & Logistics", label: "Transport & Logistics Infrastructure", description: "Norway's moving & transport marketplace.", sector: "logistics_freight" },
+
+  // ── Intelligence ──
+  { id: "veritas-os", name: "Veritas OS", category: "Intelligence", label: "Knowledge & Organizational Intelligence Infrastructure", description: "Knowledge and organizational intelligence infrastructure — organisational memory, knowledge graph and institutional reasoning.", sector: "ai_infra", valueLabel: "Deployment value", valueText: "$5M–$12M" },
+  { id: "emergency-ai", name: "Emergency AI", category: "Intelligence", label: "Strategic Intelligence Infrastructure", description: "Intelligence acquisition, strategic analysis and institutional intelligence generation. Briefings, narrative and decision support.", sector: "ai_infra", valueLabel: "Deployment value", valueText: "$8M–$15M" },
+
+  // ── Elections ──
+  { id: "elecpro", name: "ELECPRO", category: "Elections", label: "Sovereign Electoral Infrastructure", description: "Registration, ballot, tabulation, observation and electoral-cycle dispatch — operated under one runtime.", sector: "enterprise_saas", valueLabel: "Deployment value", valueText: "$20M–$50M" },
+
+  // ── Education ──
+  { id: "edupro", name: "EduPro", category: "Education", label: "Education & Credentialing", description: "A nation's learning backbone.", sector: "vertical_saas" },
+  { id: "futech", name: "FUTech", category: "Education", label: "Academic & Education Platform", description: "Transforming university administration.", sector: "vertical_saas", valueLabel: "Deployment value", valueText: "From $80K" },
+
+  // ── Commerce ──
+  { id: "marketplace-infrastructure", name: "Marketplace Infrastructure", category: "Commerce", label: "Commerce & Marketplace", description: "Multi-vendor commerce, ready to run.", sector: "b2b_marketplace" },
+
+  // ── Operations ──
+  { id: "exitos", name: "ExitOS", category: "Operations", label: "Founder Acquisition Infrastructure", description: "The operating system founders interact with to run an exit — from sourcing to closed deal, on one runtime.", sector: "enterprise_saas", valueLabel: "Deployment value", valueText: "$4M–$8M" },
+  { id: "veritas-operations", name: "Veritas Operations", category: "Operations", label: "Autonomous Company Operations Infrastructure", description: "Operational management, workflow orchestration, accounting intelligence and autonomous company operations.", sector: "enterprise_saas", valueLabel: "Deployment value", valueText: "$25M–$80M" },
+  { id: "sovereign-dispatch", name: "Sovereign Dispatch", category: "Operations", label: "Institutional Publication Infrastructure", description: "Institutional publication infrastructure — PDF, DOCX, PPTX, briefing packages and board reports.", sector: "media_content", valueLabel: "Deployment value", valueText: "$6M–$15M" },
+  { id: "deployment-engine", name: "Deployment Engine", category: "Operations", label: "Sovereign Deployment Infrastructure", description: "From acquisition to live, automatically.", sector: "developer_tools" },
+];
+
+export const SOVEREIGN_PRODUCTS: readonly SovereignProduct[] = [...CORE, ...reloProducts];

@@ -159,10 +159,17 @@ const AcquisitionRadar: React.FC = () => {
                   <div className="font-mono text-2xl font-bold tabular-nums text-deal-300">{match.score}%</div>
                 </div>
                 {l.productMeta && (
-                  <p className="mt-2 text-[12px] leading-snug text-white/65">
-                    {l.productMeta.capability}
-                    {l.productMeta.answers && <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.16em] text-deal-300/70">Answers · {l.productMeta.answers}</span>}
-                  </p>
+                  <>
+                    <p className="mt-2 text-[12px] leading-snug text-white/65">{l.productMeta.capability}</p>
+                    {l.productMeta.coverage && l.productMeta.coverage.length > 0 && (
+                      <div className="mt-1.5 text-[11px] text-white/40"><span className="uppercase tracking-wide text-white/30">Coverage</span> · {l.productMeta.coverage.join(" · ")}</div>
+                    )}
+                    {l.productMeta.tags && l.productMeta.tags.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {l.productMeta.tags.map((t) => <span key={t} className="rounded bg-deal-600/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-deal-200 ring-1 ring-deal-400/25">{t}</span>)}
+                      </div>
+                    )}
+                  </>
                 )}
                 <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
                   {match.reasons.map((r) => (
@@ -173,9 +180,16 @@ const AcquisitionRadar: React.FC = () => {
                   ))}
                 </div>
                 <div className="mt-2.5 flex flex-wrap items-center gap-3 text-[11.5px] text-white/55">
-                  {l.publicView.disclosed === false
-                    ? <><span className="text-white/45">Financials under NDA</span>{l.productMeta?.pricingNote && <span className="text-white/35">· {l.productMeta.pricingNote}</span>}</>
-                    : <><span>Revenue {fmtUsd(l.publicView.revenueUsd)}</span><span>· Growth {Math.round(l.publicView.growthPct * 100)}%</span></>}
+                  {l.productMeta
+                    ? <>
+                        {l.productMeta.valueText
+                          ? <span><span className="uppercase tracking-wide text-white/35">{l.productMeta.valueLabel ?? "Value"}</span> <span className="font-mono font-semibold text-deal-200">{l.productMeta.valueText}</span></span>
+                          : <span className="text-white/45">Value on request</span>}
+                        {l.productMeta.acquisitionReadyText && <span className="rounded bg-loi-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-loi-200 ring-1 ring-loi-400/40">★ Acquisition-ready · {l.productMeta.acquisitionReadyText}</span>}
+                      </>
+                    : l.publicView.disclosed === false
+                      ? <span className="text-white/45">Financials under NDA</span>
+                      : <><span>Revenue {fmtUsd(l.publicView.revenueUsd)}</span><span>· Growth {Math.round(l.publicView.growthPct * 100)}%</span></>}
                   <button
                     onClick={() => {
                       captureDealEvent({ actorRole: "buyer", kind: "added_to_outreach", subjectType: "listing", subjectId: l.id, subjectName: l.code });

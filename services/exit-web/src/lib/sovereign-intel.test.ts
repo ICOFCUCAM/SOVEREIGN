@@ -1,28 +1,33 @@
 import { describe, it, expect } from "vitest";
 import { allListings } from "./listings";
-import { SOVEREIGN_INTEL_PRODUCTS, SOVEREIGN_OWNER_ACCOUNT } from "./sovereign-intel";
+import { SOVEREIGN_PRODUCTS, SOVEREIGN_OWNER_ACCOUNT } from "./sovereign-intel";
 
-describe("sovereign intelligence listings", () => {
-  it("seeds every Strategic Intelligence Stack product into the exchange", () => {
+describe("sovereign product listings", () => {
+  it("seeds every published Sovereign product into the exchange", () => {
     const ids = new Set(allListings().map((l) => l.id));
-    for (const p of SOVEREIGN_INTEL_PRODUCTS) expect(ids.has(`lst-sov-${p.id}`)).toBe(true);
+    for (const p of SOVEREIGN_PRODUCTS) expect(ids.has(`lst-sov-${p.id}`)).toBe(true);
+    expect(SOVEREIGN_PRODUCTS.length).toBeGreaterThanOrEqual(40);
   });
 
-  it("lists them under the admin account with financials withheld (never fabricated)", () => {
+  it("lists them under the admin account with the real published value (no invented revenue)", () => {
     const sov = allListings().filter((l) => l.id.startsWith("lst-sov-"));
-    expect(sov.length).toBe(SOVEREIGN_INTEL_PRODUCTS.length);
     for (const l of sov) {
       expect(l.ownerAccountId).toBe(SOVEREIGN_OWNER_ACCOUNT);
-      expect(l.publicView.disclosed).toBe(false);   // no invented revenue/EBITDA
-      expect(l.productMeta?.capability).toBeTruthy(); // real capability surfaced
-      // real published platform pricing attached as context (not a per-engine price)
-      expect(l.productMeta?.pricingNote).toMatch(/\$490\/mo.*\$4,900\/mo/);
+      expect(l.publicView.disclosed).toBe(false);     // no fabricated revenue/EBITDA
+      expect(l.productMeta?.capability).toBeTruthy();
     }
   });
 
-  it("carries the real product name and the question it answers", () => {
-    const osint = allListings().find((l) => l.id === "lst-sov-osint");
-    expect(osint?.code).toBe("OSINT Engine");
-    expect(osint?.productMeta?.answers).toMatch(/changed in the world/i);
+  it("carries the real deployment values verbatim", () => {
+    const find = (id: string) => allListings().find((l) => l.id === `lst-sov-${id}`);
+    expect(find("national-shell")?.productMeta?.valueText).toBe("$300M–$500M");
+    expect(find("exitos")?.productMeta?.valueText).toBe("$4M–$8M");
+    expect(find("usa-relocation")?.productMeta?.valueText).toBe("$18M");
+  });
+
+  it("surfaces featured acquisition-ready asks where published", () => {
+    const norway = allListings().find((l) => l.id === "lst-sov-norway-relocation");
+    expect(norway?.productMeta?.acquisitionReadyText).toBe("$5.9M");
+    expect(norway?.productMeta?.coverage).toContain("Oslo");
   });
 });
