@@ -7,10 +7,14 @@ import { loadActiveCompany } from "../lib/active-company";
 import { listingFromCompany, allListings } from "../lib/listings";
 import {
   eventsForSubject, ndaRequestsForListing, signNda, offersForListing, resolveOffer,
-  dealsForListing, advanceDeal, DEAL_STAGES, dealStageIndex,
-  type NdaRequest, type Offer, type Deal, type DealStage,
+  dealsForListing, advanceDeal, DEAL_STAGES, dealStageIndex, allMandates,
+  type NdaRequest, type Offer, type Deal, type DealStage, type Mandate,
 } from "../lib/exit-api";
+import { matchCompanyToCriteria } from "../lib/acquirer";
 import { captureDealEvent, subscribe, type DealEvent } from "../lib/deal-events";
+import type { Region } from "@exit/engines";
+
+const usdShort = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(1)}B` : `$${Math.round(n / 1e6)}M`);
 
 // FOUNDER INBOX — the demand side as the founder sees it. Buyers on the
 // network express interest, request NDAs and submit offers against the
@@ -51,12 +55,21 @@ const FounderInbox: React.FC = () => {
   const [ndas, setNdas] = useState<NdaRequest[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
+  const [matched, setMatched] = useState<{ m: Mandate; score: number; qualified: boolean }[]>([]);
 
   const refresh = useCallback(() => {
     void eventsForSubject(listing.id).then((e) => setEvents([...e].sort((a, b) => b.at.localeCompare(a.at))));
     void ndaRequestsForListing(listing.id).then((r) => setNdas([...r].sort((a, b) => b.requestedAt.localeCompare(a.requestedAt))));
     void offersForListing(listing.id).then((o) => setOffers([...o].sort((a, b) => b.createdAt.localeCompare(a.createdAt))));
     void dealsForListing(listing.id).then((d) => setDeals([...d].sort((a, b) => dealStageIndex(b.stage) - dealStageIndex(a.stage))));
+    // liquidity: which published buyer mandates match THIS listing
+    void allMandates().then((ms) => setMatched(ms
+      .map((m) => {
+        const r = matchCompanyToCriteria(listing.profile, { sectors: [...m.sectors], minRevUsd: m.minCheckUsd, maxRevUsd: m.maxCheckUsd, regions: [...m.regions] as Region[], minGrowthPct: m.minGrowthPct });
+        return { m, score: r.score, qualified: r.qualified };
+      })
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score)));
   }, [listing.id]);
 
   const advance = (deal: Deal, stage: DealStage): void => {
@@ -94,7 +107,8 @@ const FounderInbox: React.FC = () => {
           { k: "REV", v: usd(listing.publicView.revenueUsd) },
         ]}
         metrics={[
-          { k: "Live deals", v: String(deals.length), accent: true, sub: `${deals.filter((d) => d.stage === "closed").length} closed` },
+          { k: "Qualified buyers", v: String(matched.filter((x) => x.qualified).length), accent: true, sub: `of ${matched.length} matching mandates` },
+          { k: "Live deals", v: String(deals.length), sub: `${deals.filter((d) => d.stage === "closed").length} closed` },
           { k: "Interest expressed", v: String(interested), sub: "from buyers" },
           { k: "NDA requests", v: String(ndas.length), sub: `${pendingNdas.length} awaiting · ${executedNdas.length} done` },
           { k: "NDAs executed", v: String(executedNdas.length), accent: true, sub: "identity released" },
@@ -110,6 +124,27 @@ const FounderInbox: React.FC = () => {
           <Link to="/console/intake" className="text-deal-300 hover:text-deal-200">List on the exchange</Link> to start receiving interest — the panels below populate as soon as buyers act on <span className="font-mono text-white/80">{listing.code}</span>.
         </div>
       )}
+
+      {/* marketplace liquidity — qualified buyer mandates matching this listing */}
+      <Frame>
+        <Panel title="Qualified buyers · mandates matching your listing" className="lg:col-span-12"
+          foot="Buyers who published an acquisition mandate that matches your sector, geography, check size and growth. Identities stay withheld until they sign — this is your demand, before you run a process.">
+          {matched.length ? (
+            <ul className="divide-y divide-white/5">
+              {matched.map(({ m, score, qualified }) => (
+                <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 text-[12px]">
+                  <div className="min-w-0">
+                    <span className="font-semibold text-white">Buyer mandate</span>
+                    {qualified && <span className="ml-2 rounded bg-deal-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-deal-300 ring-1 ring-deal-400/30">Qualified</span>}
+                    <div className="text-[10px] text-white/45">{m.sectors.slice(0, 4).join(" · ") || "any sector"} · {usdShort(m.minCheckUsd)}–{usdShort(m.maxCheckUsd)} check · {m.regions.slice(0, 3).join(", ") || "any region"}{m.strategicThemes.length ? ` · themes: ${m.strategicThemes.slice(0, 2).join(", ")}` : ""}</div>
+                  </div>
+                  <span className="shrink-0 font-mono text-[15px] font-bold tabular-nums text-deal-300">{score}%</span>
+                </li>
+              ))}
+            </ul>
+          ) : <div className="px-3 py-6 text-center text-[12px] text-white/40">No published mandates match yet. As buyers publish acquisition mandates on the radar, qualified demand appears here before you ever run a process.</div>}
+        </Panel>
+      </Frame>
 
       {/* deal pipeline — advance each transaction through the lifecycle */}
       <Frame>
