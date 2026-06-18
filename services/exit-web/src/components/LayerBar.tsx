@@ -18,7 +18,7 @@ export const LAYERS: readonly Layer[] = [
     match: ["/console/market-map", "/console/indexes", "/console/outcomes", "/console/knowledge-graph", "/console/network", "/console/buyer-graph"] },
   { key: "TXN", roman: "IV", label: "Transaction", to: "/console/pipeline",
     match: ["/console/pipeline", "/console/negotiator", "/console/nda", "/console/data-room", "/console/documents", "/console/closing", "/console/activity", "/console/process-intel", "/console/inbox", "/console/marketplace", "/console/deal-room", "/console/simulator", "/console/diligence-ai"] },
-  { key: "BUY", roman: "V", label: "Buyer", to: "/console/buyer-graph",
+  { key: "BUY", roman: "V", label: "Buyer", to: "/console/buyers",
     match: ["/console/buyers", "/console/buyer-copilot", "/console/acquisition-radar", "/console/engagement-registry", "/console/outreach-plan", "/console/buyer-portal"] },
 ];
 

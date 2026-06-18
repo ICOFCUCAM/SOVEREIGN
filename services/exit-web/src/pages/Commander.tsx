@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, BuyerNetworkReactor, ReactorTelemetry } from "../components/Reactor";
-import { MARKET_INTEL, fmtUsd } from "../lib/market-intel";
+import { MARKET_INTEL } from "../lib/market-intel";
 import { fmtMoney } from "../lib/ui";
 import CommandTiles from "../components/CommandTiles";
 import ExitCommander from "../components/ExitCommander";
@@ -53,7 +53,7 @@ const Commander: React.FC = () => {
           { roman: "II", label: "Investment Banker", to: "/console", v: fmtMoney(m.companyValue), sub: "enterprise value" },
           { roman: "III", label: "Market", to: "/console/market-map", v: MARKET_INTEL.totalEvents.toLocaleString(), sub: "indexed acquisitions" },
           { roman: "IV", label: "Transaction", to: "/console/pipeline", v: `${m.timeToExitMonths}mo`, sub: "to exit" },
-          { roman: "V", label: "Buyer", to: "/console/buyer-graph", v: String(m.activeBuyers), sub: "active acquirers" },
+          { roman: "V", label: "Buyer", to: "/console/buyers", v: String(m.activeBuyers), sub: "active acquirers" },
         ].map((d) => (
           <Link key={d.roman} to={d.to} className="group bg-ink-900 px-4 py-3 transition hover:bg-white/[0.03] lg:col-span-3">
             <div className="flex items-center gap-2">
