@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Kpi, SectionHeader, Modal, Field, inputCls, timeAgo, notify } from "../lib/ui";
+import { Button, Card, Modal, Field, inputCls, timeAgo, notify } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { SAMPLE_NDAS, NDA_ROSTER, LISTING_PRIVATE } from "../lib/engines";
 import {
   evaluateNdaStatus, generateBreachNotice, rosterFor,
@@ -103,14 +105,29 @@ const Nda: React.FC = () => {
     });
   }, [openNda]);
 
+  const verifiedTier = ndas.filter((n) => buyerTrust(n, evaluateNdaStatus(n)).tier === "Verified").length;
+
   return (
-    <div>
-      <SectionHeader
-        kicker="Module 07 · Workspace"
-        title="NDA &amp; Buyer Trust"
-        description="The NDA is the first gate of buyer qualification — not just a document. Every counterparty earns a Buyer Trust Score from four verification gates before data-room access is granted."
-        actions={<><Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button><Button onClick={() => setIssueOpen(true)}>Issue NDA</Button></>}
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Workspace · NDA"
+        title="NDA & Buyer Trust"
+        tag="Qualification gate"
+        status={`${roster.active} active`}
+        metrics={[
+          { k: "Verified buyers", v: String(verifiedTier), accent: true, sub: "all four gates" },
+          { k: "Active NDAs", v: String(roster.active), accent: true, sub: "bound counterparties" },
+          { k: "Pending", v: String(roster.pending), sub: "awaiting countersign" },
+          { k: "Breaches", v: String(roster.breached), sub: "open enforcement" },
+        ]}
       />
+
+      <MarketTape items={useMemo(() => buildMarketTape(), [])} />
+
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button>
+        <Button onClick={() => setIssueOpen(true)}>Issue NDA</Button>
+      </div>
 
       {/* ── Templates library ─────────────────────────────────────── */}
       <Modal open={templatesOpen} onClose={() => setTemplatesOpen(false)} title="NDA templates" subtitle={`${STANDARD_TEMPLATES.length} institutional templates · issue any against a counterparty`}
@@ -170,19 +187,7 @@ const Nda: React.FC = () => {
         automate={<>ExitOS scores every counterparty on four verification gates and gates data-room access automatically.</>}
       />
 
-      {(() => {
-        const verified = ndas.filter((n) => buyerTrust(n, evaluateNdaStatus(n)).tier === "Verified").length;
-        return (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Kpi label="Verified buyers"  value={String(verified)} sub="all four gates cleared" accent="#34d399" />
-            <Kpi label="Active NDAs"      value={String(roster.active)} sub="bound counterparties" accent="#34d399" />
-            <Kpi label="Pending"          value={String(roster.pending)} sub="awaiting countersignature" accent="#fbbf24" />
-            <Kpi label="Breaches"         value={String(roster.breached)} sub="open enforcement" accent={roster.breached > 0 ? "#f87171" : undefined} />
-          </div>
-        );
-      })()}
-
-      <div className="mt-10">
+      <div className="mt-2">
         <Card>
           <table className="w-full text-sm">
             <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">

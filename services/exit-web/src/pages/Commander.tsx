@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { SectionHeader } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
+import { fmtMoney } from "../lib/ui";
 import CommandTiles from "../components/CommandTiles";
 import ExitCommander from "../components/ExitCommander";
 import {
@@ -22,14 +24,26 @@ const Commander: React.FC = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
   const m = commanderMetrics();
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Powered by ExitOS Intelligence"
-        title="Chief Investment Banker"
-        description="One screen. One brief. One decision. Your transaction desk reads the company and the market, tells you the single best next move, and runs the process on a click."
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Chief Investment Banker"
+        title={SAMPLE_COMPANY.name}
+        tag="Transaction desk"
+        status={m.demandLabel}
+        meta={[{ k: "HORIZON", v: `${m.timeToExitMonths}mo` }, { k: "CONF", v: `${m.confidencePct}%` }]}
+        metrics={[
+          { k: "Company value", v: fmtMoney(m.companyValue), accent: true, sub: "strategic mid" },
+          { k: "Potential", v: fmtMoney(m.potential), accent: true, sub: "after fixes" },
+          { k: "Exit probability", v: `${m.exitProbability}%`, sub: m.demandLabel },
+          { k: "Active buyers", v: String(m.activeBuyers), sub: "matching mandate" },
+          { k: "Time to exit", v: `${m.timeToExitMonths}mo`, sub: "expected" },
+        ]}
       />
+
+      <MarketTape items={tape} />
 
       {/* Value cards */}
       <CommandTiles

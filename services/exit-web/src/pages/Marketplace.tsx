@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Button, Card, Kpi, Modal, Field, inputCls, SectionHeader, fmtMoney, notify } from "../lib/ui";
+import { Button, Card, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES, useMemorandum } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -86,12 +88,21 @@ const Marketplace: React.FC = () => {
   const progressPct = Math.round((done / steps.length) * 100);
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Module 11 · Marketplace"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Exchange · Marketplace"
         title="Exit Marketplace"
-        description="Most founders never hire a banker — because bankers are expensive. ExitOS is the banker. Publish once and the operating system runs the entire sell-side process for you."
+        tag="Become the banker"
+        status={phase === "done" ? "Live" : view === "founder" ? "Founder view" : "Public view"}
+        metrics={[
+          { k: "Asking price (mid)", v: fmtMoney(listing.askingPriceUsd.mid), accent: true, sub: `band ${fmtMoney(listing.askingPriceUsd.low)}–${fmtMoney(listing.askingPriceUsd.high)}` },
+          { k: "Readiness", v: `${listing.readinessScore.toFixed(0)}/100`, sub: listing.readinessBand.replace(/_/g, " ") },
+          { k: "Matched buyers", v: String(matches.length), accent: true, sub: LISTING_MATCHES.summary.split(".")[0] },
+          { k: "Visibility", v: listing.visibility.replace(/_/g, " "), sub: view === "founder" ? "you" : "buyers see" },
+        ]}
       />
+
+      <MarketTape items={useMemo(() => buildMarketTape(), [])} />
 
       <BankerTake
         next={phase === "done"
@@ -217,14 +228,7 @@ const Marketplace: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Asking price (mid)"   value={fmtMoney(listing.askingPriceUsd.mid)} sub={`band ${fmtMoney(listing.askingPriceUsd.low)} – ${fmtMoney(listing.askingPriceUsd.high)}`} accent="#34d399" />
-        <Kpi label="Readiness"             value={`${listing.readinessScore.toFixed(0)}/100`} sub={listing.readinessBand.replace(/_/g, " ")} />
-        <Kpi label="Matched buyers"        value={String(matches.length)} sub={LISTING_MATCHES.summary.split(".")[0]} />
-        <Kpi label="Visibility"            value={listing.visibility.replace(/_/g, " ")} sub={view === "founder" ? "you" : "buyers see"} />
-      </div>
-
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="mt-2 grid gap-6 lg:grid-cols-[1fr_360px]">
         <Card className="p-6">
           <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-400">Listing</div>
           <h2 className="mt-2 font-serif text-3xl font-bold leading-tight text-white">{listing.title}</h2>

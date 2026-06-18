@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Card, SectionHeader } from "../lib/ui";
+import { Card } from "../lib/ui";
+import { CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { BUYERS, VALUATION_STRATEGIC, DILIGENCE } from "../lib/engines";
 import { VALUATION_FRAMEWORK } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -54,14 +56,22 @@ const Network: React.FC = () => {
   const buyerDnaCount = BUYERS.candidates.length;
 
   return (
-    <div>
-      <SectionHeader
-        kicker="The moat · network intelligence"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ The moat"
         title="Network Intelligence"
-        description="Stop designing screens; design the moat. A market leader isn't the prettiest UI — it's the product that gets harder to replace every year. Five compounding data assets make ExitOS nearly impossible to copy."
+        tag="Five compounding assets"
+        metrics={[
+          { k: "Acquirer mandates", v: MARKET_FMT.buyers, accent: true, sub: "profiled" },
+          { k: "Acquisition events", v: HISTORY_FMT.events, sub: "tracked" },
+          { k: "Disclosed value", v: HISTORY_FMT.disclosedValue, accent: true, sub: "on record" },
+          { k: "Buyer dossiers", v: String(buyerDnaCount), sub: "live engine runs" },
+        ]}
       />
 
-      <div className="space-y-5">
+      <MarketTape items={useMemo(() => buildMarketTape(), [])} />
+
+      <div className="space-y-2">
         <Moat n={1} title="The Deal Graph" why="A source-referenced acquisition dataset — every event traceable to EDGAR, Wikidata or press.">
           <div className="grid grid-cols-3 gap-4">
             <Stat value={MARKET_FMT.buyers} label="Acquirer mandates profiled" accent="#34d399" />
