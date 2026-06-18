@@ -38,6 +38,7 @@ const ReportBuyers: React.FC = () => {
                   <span className="font-mono text-[12px] text-[#9aa3b0]">{String(i + 1).padStart(2, "0")}</span>
                   <span className="text-[15px] font-bold text-[#0b1220]">{b.name}</span>
                   <span className="text-[10px] uppercase tracking-wide text-[#5b6675]">{b.type}</span>
+                  <a href={`/report/buyer/${b.buyerId}`} target="_blank" rel="noopener noreferrer" className="no-print text-[10px] font-semibold uppercase tracking-wide text-[#0e7a4f] hover:underline">Briefing →</a>
                 </div>
                 <div className="text-right">
                   <span className="tnum font-mono text-[20px] font-bold text-[#0e7a4f]">{b.probabilityPct}%</span>
