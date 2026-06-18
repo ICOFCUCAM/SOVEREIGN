@@ -1,5 +1,7 @@
-import React from "react";
-import { Card, SectionHeader, fmtMoney } from "../lib/ui";
+import React, { useMemo } from "react";
+import { fmtMoney } from "../lib/ui";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { VALUATION_STRATEGIC } from "../lib/engines";
 import { DEAL_BUYERS } from "../lib/deal-context";
 import BankerTake from "../components/BankerTake";
@@ -95,14 +97,23 @@ const BuyerCopilot: React.FC = () => {
   const candidates = DEAL_BUYERS.slice(0, 8);
   const top = candidates[0];
   const topD = top ? dossier(top) : null;
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Find Buyers · Buyer intelligence"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Find Buyers"
         title="Buyer Copilot"
-        description="Every acquirer, scored on the intelligence no banker can give you: likelihood to acquire, expected price range, time to close, deal risk, strategic synergy, prior similar acquisitions, and the offer to open with."
+        tag="Buyer intelligence"
+        metrics={[
+          { k: "Acquirers scored", v: String(candidates.length), sub: "ranked by likelihood" },
+          { k: "Top likelihood", v: topD ? `${topD.likelihood}%` : "—", accent: true, sub: top?.buyer.name },
+          { k: "Expected range", v: topD ? `${fmtMoney(topD.rangeLow)}–${fmtMoney(topD.rangeHigh)}` : "—", sub: "lead buyer" },
+          { k: "Recommended open", v: topD ? fmtMoney(topD.recommendedOpen) : "—", accent: true, sub: "anchor above headline" },
+        ]}
       />
+
+      <MarketTape items={tape} />
 
       {top && topD && (
         <BankerTake
@@ -116,71 +127,52 @@ const BuyerCopilot: React.FC = () => {
         />
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        {candidates.map((c) => {
-          const d = dossier(c);
-          return (
-            <Card key={c.buyer.name} className="p-6">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-serif text-lg font-bold text-white">{c.buyer.name}</h3>
-                  <span className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${TYPE_STYLE[c.buyer.buyerType] ?? "bg-white/5 text-white/60 ring-white/15"}`}>
-                    {c.buyer.buyerType.replace(/_/g, " ")}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">Likelihood</div>
-                  <div className="font-mono text-3xl font-bold text-deal-300">{d.likelihood}%</div>
-                </div>
-              </div>
-
-              <p className="mt-3 text-[12px] leading-snug text-white/55">{c.buyer.thesis}</p>
-
-              <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-white/10 pt-4 text-[12px] sm:grid-cols-3">
-                <Metric label="Expected range" value={`${fmtMoney(d.rangeLow)}–${fmtMoney(d.rangeHigh)}`} />
-                <Metric label="Time to close" value={`${d.days} days`} />
-                <Metric label="Prior similar deals" value={String(d.priorDeals)} />
-                <Metric label="Risk" value={d.risk} color={RISK_COLOR[d.risk]} />
-                <Metric label="Synergy" value={d.synergy} color={SYN_COLOR[d.synergy]} />
-                <Metric label="Close rate" value={`${Math.round(c.expectedOutcome.closeRatePct * 100)}%`} />
-              </div>
-
-              <div className="mt-4 flex items-center justify-between rounded-lg border border-deal-500/30 bg-deal-600/[0.07] px-4 py-3">
-                <div>
-                  <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-deal-300">Recommended opening offer</div>
-                  <div className="text-[11px] text-white/45">anchors above expected headline</div>
-                </div>
-                <div className="font-mono text-xl font-bold text-deal-300">{fmtMoney(d.recommendedOpen)}</div>
-              </div>
-
-              {/* Buyer DNA */}
-              {(() => {
-                const dna = buyerDNA(c);
-                return (
-                  <div className="mt-4 border-t border-white/10 pt-4">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Buyer DNA</div>
-                    <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2.5 text-[12px] sm:grid-cols-3">
-                      <div>
-                        <div className="text-[10px] uppercase tracking-wide text-white/40">Founder-friendly</div>
-                        <div className="mt-0.5 flex items-center gap-1.5">
-                          <div className="h-1 w-10 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-deal-400" style={{ width: `${dna.founderFriendly}%` }} /></div>
-                          <span className="font-mono font-semibold text-white">{dna.founderFriendly}%</span>
-                        </div>
-                      </div>
-                      <Metric label="Typical premium" value={`+${dna.typicalPremiumPct}%`} color="#34d399" />
-                      <Metric label="Earnout usage" value={dna.earnoutUsage} />
-                      <Metric label="Negotiation" value={dna.negotiationStyle} />
-                      <Metric label="Integration" value={dna.integration} />
-                      <Metric label="Legal posture" value={dna.legalAggression} />
+      <Frame>
+        <Panel title="Acquirer dossiers · scored" className="lg:col-span-12">
+          <div className="grid grid-cols-1 gap-px bg-white/10 lg:grid-cols-2">
+            {candidates.map((c) => {
+              const d = dossier(c);
+              const dna = buyerDNA(c);
+              return (
+                <div key={c.buyer.name} className="bg-ink-900 p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-mono text-[15px] font-bold text-white">{c.buyer.name}</h3>
+                      <span className={`mt-0.5 inline-block rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ring-1 ${TYPE_STYLE[c.buyer.buyerType] ?? "bg-white/5 text-white/60 ring-white/15"}`}>{c.buyer.buyerType.replace(/_/g, " ")}</span>
                     </div>
-                    <div className="mt-2.5 text-[11px] text-white/45">Decision makers: <span className="text-white/70">{dna.decisionMakers}</span></div>
+                    <div className="text-right">
+                      <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/40">Likelihood</div>
+                      <div className="font-mono text-2xl font-bold text-deal-300">{d.likelihood}%</div>
+                    </div>
                   </div>
-                );
-              })()}
-            </Card>
-          );
-        })}
-      </div>
+                  <p className="mt-1.5 text-[11px] leading-snug text-white/55">{c.buyer.thesis}</p>
+                  <div className="mt-2 grid grid-cols-3 gap-x-3 gap-y-2 border-t border-white/10 pt-2 text-[10.5px]">
+                    <Metric label="Exp. range" value={`${fmtMoney(d.rangeLow)}–${fmtMoney(d.rangeHigh)}`} />
+                    <Metric label="To close" value={`${d.days}d`} />
+                    <Metric label="Prior deals" value={String(d.priorDeals)} />
+                    <Metric label="Risk" value={d.risk} color={RISK_COLOR[d.risk]} />
+                    <Metric label="Synergy" value={d.synergy} color={SYN_COLOR[d.synergy]} />
+                    <Metric label="Close rate" value={`${Math.round(c.expectedOutcome.closeRatePct * 100)}%`} />
+                  </div>
+                  <div className="mt-2 flex items-center justify-between rounded border border-deal-500/30 bg-deal-600/[0.07] px-3 py-1.5">
+                    <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-deal-300">Recommended open</div>
+                    <div className="font-mono text-[15px] font-bold text-deal-300">{fmtMoney(d.recommendedOpen)}</div>
+                  </div>
+                  <div className="mt-2 grid grid-cols-3 gap-x-3 gap-y-2 border-t border-white/10 pt-2 text-[10.5px]">
+                    <Metric label="Founder-friendly" value={`${dna.founderFriendly}%`} color="#34d399" />
+                    <Metric label="Typ. premium" value={`+${dna.typicalPremiumPct}%`} color="#34d399" />
+                    <Metric label="Earnout" value={dna.earnoutUsage} />
+                    <Metric label="Negotiation" value={dna.negotiationStyle} />
+                    <Metric label="Integration" value={dna.integration} />
+                    <Metric label="Legal" value={dna.legalAggression} />
+                  </div>
+                  <div className="mt-1.5 text-[10px] text-white/45">Decision makers: <span className="text-white/70">{dna.decisionMakers}</span></div>
+                </div>
+              );
+            })}
+          </div>
+        </Panel>
+      </Frame>
     </div>
   );
 };
