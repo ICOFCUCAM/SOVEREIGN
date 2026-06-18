@@ -150,7 +150,9 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </div>
             </div>
           )}
-          <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</div>
+          {loc.pathname === "/console"
+            ? <div className="px-3 py-3 sm:px-4 lg:px-5 lg:py-4">{children}</div>   /* terminal: full-bleed workstation */
+            : <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</div>}
         </main>
       </div>
       <Toast />
