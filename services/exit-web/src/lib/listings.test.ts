@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { allListings, listCompany, listingFromCompany, setListingsAdapter, type Listing } from "./listings.js";
+import { allListings, listCompany, listingFromCompany, setListingsAdapter, setListingOwner, type Listing } from "./listings.js";
 import { matchCompanyToCriteria } from "./acquirer.js";
 import { buildProfile, SAMPLE_INTAKE } from "./company-intake.js";
 
@@ -25,6 +25,13 @@ describe("listings repository — the supply side of the exchange", () => {
     listCompany(buildProfile({ ...SAMPLE_INTAKE, name: "NewCo", sector: "fintech_payments" }));
     expect(allListings().length).toBe(before + 1);
     expect(allListings().some((l) => l.profile.name === "NewCo")).toBe(true);
+  });
+
+  it("a listed company is stamped with the connected owner — drives write RLS", () => {
+    setListingOwner("acct-founder-7");
+    const l = listCompany(buildProfile({ ...SAMPLE_INTAKE, name: "OwnedCo", sector: "ai_infra" }));
+    expect(l.ownerAccountId).toBe("acct-founder-7");
+    setListingOwner(undefined);   // reset for other tests
   });
 
   it("a buyer mandate scores against the whole pool via the same matcher", () => {

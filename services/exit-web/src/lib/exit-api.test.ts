@@ -221,3 +221,17 @@ function contractSuite(name: string, make: () => ExitApiClient): void {
 contractSuite("InMemoryExitApi", () => new InMemoryExitApi());
 contractSuite("LocalStorageExitApi", () => new LocalStorageExitApi());
 contractSuite("SupabaseExitApi (mock PostgREST)", () => new SupabaseExitApi({ url: "https://x.supabase.co", anonKey: "anon", fetchImpl: fakeSupabaseFetch() }));
+
+describe("ownership hardening — owner-scoped listing writes", () => {
+  it("Supabase saveListings only persists the signed-in user's own listings", async () => {
+    const api = new SupabaseExitApi({ url: "https://x.supabase.co", anonKey: "anon", fetchImpl: fakeSupabaseFetch() });
+    api.setAccessToken("jwt", "userU");
+    const mk = (id: string, owner?: string): Parameters<typeof api.saveListings>[0][number] =>
+      ({ id, ownerAccountId: owner, code: "Project X", listedAt: "t", profile: { name: id } as never, publicView: { sector: "AI", region: "North America", revenueUsd: 1, growthPct: 0, ebitdaMarginPct: 0 } });
+    // a session that holds the whole pool tries to write all of it…
+    await api.saveListings([mk("mine", "userU"), mk("theirs", "userOther"), mk("seed", undefined)]);
+    const pool = await api.listListings();
+    // …but only the user's own listing is sent (RLS would reject the rest)
+    expect(pool.map((l) => l.id)).toEqual(["mine"]);
+  });
+});

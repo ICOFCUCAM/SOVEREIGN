@@ -14,6 +14,7 @@ export interface Listing {
   readonly id: string;
   readonly code: string;                 // anonymized handle, e.g. "Project Atlas"
   readonly listedAt: string;
+  readonly ownerAccountId?: string;      // the founder who listed it — drives owner-scoped write RLS (never shown publicly)
   readonly profile: CompanyProfile;      // internal — used for matching, never shown raw
   readonly publicView: {
     readonly sector: string;             // ExitOS sector
@@ -28,12 +29,18 @@ const KEY = "exitos.listings.v1";
 const CODES = ["Atlas", "Cipher", "Meridian", "Halcyon", "Orion", "Vantage", "Beacon", "Summit"];
 const codeFor = (id: string): string => `Project ${CODES[Math.abs([...id].reduce((a, c) => a + c.charCodeAt(0), 0)) % CODES.length]}`;
 
+// the signed-in founder's account id, stamped onto listings they create so the
+// backend can enforce "only the owner writes this listing". Set on connect.
+let currentOwner: string | undefined;
+export function setListingOwner(id?: string): void { currentOwner = id; }
+
 export function listingFromCompany(profile: CompanyProfile, id?: string): Listing {
   const lid = id ?? `lst-${profile.name.toLowerCase().replace(/[^\w]+/g, "-").slice(0, 24)}`;
   return {
     id: lid,
     code: codeFor(lid),
     listedAt: new Date().toISOString(),
+    ownerAccountId: currentOwner,
     profile,
     publicView: {
       sector: exitosSectorOf(profile),

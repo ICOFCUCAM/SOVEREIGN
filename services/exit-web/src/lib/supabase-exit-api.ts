@@ -45,11 +45,12 @@ const enc = (v: string): string => encodeURIComponent(v);
 
 export class SupabaseExitApi implements ExitApiClient {
   private accessToken?: string;
+  private userId?: string;
   constructor(private readonly cfg: SupabaseConfig) { this.accessToken = cfg.accessToken; }
 
-  /** The signed-in user's JWT — set after auth so requests run as that user
-   *  and RLS scopes to auth.uid(). Without it, requests run as anon. */
-  setAccessToken(token?: string): void { this.accessToken = token; }
+  /** The signed-in user's JWT + id — set after auth so requests run as that
+   *  user and RLS scopes to auth.uid(). Without it, requests run as anon. */
+  setAccessToken(token?: string, userId?: string): void { this.accessToken = token; this.userId = userId; }
   get config(): SupabaseConfig { return this.cfg; }
 
   private get f(): typeof fetch {
@@ -107,9 +108,14 @@ export class SupabaseExitApi implements ExitApiClient {
   }
   async listEventsForSubject(subjectId: string): Promise<DealEvent[]> { return this.rows<DealEvent>("exitos_deal_events", `subject_id=eq.${enc(subjectId)}`); }
 
-  // ── listings (shared pool) ──
+  // ── listings (shared pool, owner-scoped writes) ──
   async listListings(): Promise<Listing[]> { return this.rows<Listing>("exitos_listings"); }
-  async saveListings(listings: readonly Listing[]): Promise<void> { await this.upsert("exitos_listings", listings.map((l) => ({ id: l.id, data: l }))); }
+  async saveListings(listings: readonly Listing[]): Promise<void> {
+    // owner-scoped RLS only permits writing one's own listings; send just
+    // those (others already live in the pool, written by their owners).
+    const mine = this.userId ? listings.filter((l) => l.ownerAccountId === this.userId) : listings;
+    await this.upsert("exitos_listings", mine.map((l) => ({ id: l.id, owner_account_id: l.ownerAccountId ?? null, data: l })));
+  }
 
   // ── NDA requests ──
   async createNdaRequest(input: { listingId: string; buyerAccountId: string }): Promise<NdaRequest> {

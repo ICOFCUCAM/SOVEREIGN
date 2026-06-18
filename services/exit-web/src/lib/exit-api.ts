@@ -1,7 +1,7 @@
 import type { DealEvent } from "./deal-events";
 import { setPersistenceAdapter } from "./deal-events";
 import type { Listing } from "./listings";
-import { setListingsAdapter } from "./listings";
+import { setListingsAdapter, setListingOwner } from "./listings";
 import { SupabaseExitApi, supabaseConfigFromEnv } from "./supabase-exit-api";
 import { ensureSupabaseSession } from "./supabase-auth";
 
@@ -313,7 +313,7 @@ export async function activateBackend(account: Account): Promise<void> {
   if (active instanceof SupabaseExitApi) {
     try {
       const session = await ensureSupabaseSession(active.config);
-      active.setAccessToken(session.accessToken);
+      active.setAccessToken(session.accessToken, session.userId);
       account = { ...account, id: session.userId };   // account id == auth.uid()
     } catch (err) {
       console.warn("[exitos] Supabase auth unavailable — using durable local backend.", err);
@@ -335,6 +335,8 @@ export async function eventsForSubject(subjectId: string): Promise<DealEvent[]> 
  *  localStorage — the multi-tenant spine, with no consumer changes. */
 export async function connectExitApi(client: ExitApiClient, account: Account): Promise<void> {
   await client.upsertAccount(account);
+  // stamp this account as the owner of any listing it creates this session
+  setListingOwner(account.id);
 
   // listings — the shared pool (mutated in place so read() stays stable)
   const listings = await client.listListings();
