@@ -1,5 +1,7 @@
-import React from "react";
-import { Card, Kpi, SectionHeader, StageBadge, STAGE_ORDER, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
+import React, { useMemo } from "react";
+import { StageBadge, STAGE_ORDER, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, NEGOTIATION_STATE } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -99,25 +101,32 @@ function weighted(deals: readonly PipelineDeal[]): number {
   return deals.reduce((s, d) => s + (d.amount ?? 0) * d.probability, 0);
 }
 
-const LEV_STYLE: Record<string, string> = {
-  high:   "bg-deal-600/20 text-deal-300 ring-deal-400/40",
-  medium: "bg-loi-500/15 text-loi-300 ring-loi-400/40",
-  low:    "bg-red-500/15 text-red-300 ring-red-400/40",
-};
+const LEV_TONE: Record<string, string> = { high: "text-deal-300", medium: "text-loi-300", low: "text-red-300" };
 
 const Pipeline: React.FC = () => {
   const live = DEALS.filter((d) => d.stage !== 'dead');
   const totalWeighted = weighted(live);
   const lead = live.slice().sort((a, b) => b.probability - a.probability)[0];
   const leadF = lead ? forecast(lead) : null;
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Module 08 · Sourcing"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Exchange · Sourcing"
         title="Acquisition Pipeline"
-        description={`${live.length} live deals across the six negotiation stages. Probability-weighted forecast ${fmtMoney(totalWeighted)}. Leverage: ${NEGOTIATION_STATE.leverage}.`}
+        tag="Six-stage process"
+        status={`Leverage ${NEGOTIATION_STATE.leverage}`}
+        metrics={[
+          { k: "Live deals", v: String(live.length), sub: "excluding dead" },
+          { k: "Pipeline value", v: fmtMoney(live.reduce((s, d) => s + (d.amount ?? 0), 0)), sub: "indicated" },
+          { k: "Prob-weighted", v: fmtMoney(totalWeighted), accent: true, sub: "forecast" },
+          { k: "Lead close", v: lead ? `${(lead.probability * 100).toFixed(0)}%` : "—", accent: true, sub: lead?.buyer },
+          { k: "Leverage", v: NEGOTIATION_STATE.leverage, sub: "negotiation posture" },
+        ]}
       />
+
+      <MarketTape items={tape} />
 
       <BankerTake
         next={NEGOTIATION_STATE.nextMove}
@@ -133,42 +142,30 @@ const Pipeline: React.FC = () => {
         cta={{ label: "Open the negotiator", to: "/console/negotiator" }}
       />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Live deals"           value={String(live.length)} sub="excluding dead" />
-        <Kpi label="Pipeline value"        value={fmtMoney(live.reduce((s, d) => s + (d.amount ?? 0), 0))} sub="indicated" />
-        <Kpi label="Probability-weighted" value={fmtMoney(totalWeighted)} sub="forecast" accent="#34d399" />
-        <Kpi label="Leverage"             value={NEGOTIATION_STATE.leverage} sub={`Next: ${NEGOTIATION_STATE.nextMove.slice(0, 40)}${NEGOTIATION_STATE.nextMove.length > 40 ? '…' : ''}`} />
-      </div>
-
-      <Card className={`mt-8 p-5 ring-1 ${LEV_STYLE[NEGOTIATION_STATE.leverage]}`}>
-        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] opacity-80">Negotiation engine · posture</div>
-        <p className="mt-2 text-sm text-white/85">{NEGOTIATION_STATE.nextMove}</p>
-        {NEGOTIATION_STATE.recommendations.length > 0 && (
-          <ul className="mt-3 space-y-1 text-[12px] text-white/65">
-            {NEGOTIATION_STATE.recommendations.map((r) => <li key={r}>· {r}</li>)}
-          </ul>
-        )}
-      </Card>
-
-      {/* Deal Probability Engine — AI-predicted close probability, expected
-          close date and probability-adjusted value per live deal. */}
-      <div className="mt-8">
-        <div className="mb-3 flex items-end justify-between">
-          <div>
-            <h3 className="font-serif text-lg font-bold text-white">Deal Probability Engine</h3>
-            <p className="text-xs text-white/45">Predicted close probability, expected close date and probability-adjusted value — derived from stage, offer score and posture.</p>
+      <Frame>
+        <Panel title="Negotiation engine · posture" className="lg:col-span-4">
+          <div className="p-3">
+            <span className={`font-mono text-[13px] font-bold uppercase ${LEV_TONE[NEGOTIATION_STATE.leverage]}`}>{NEGOTIATION_STATE.leverage} leverage</span>
+            <p className="mt-1.5 text-[12.5px] text-white/85">{NEGOTIATION_STATE.nextMove}</p>
+            {NEGOTIATION_STATE.recommendations.length > 0 && (
+              <ul className="mt-2 space-y-1 text-[11.5px] text-white/60">
+                {NEGOTIATION_STATE.recommendations.map((r) => <li key={r} className="flex gap-1.5"><span className="text-deal-400">·</span>{r}</li>)}
+              </ul>
+            )}
           </div>
-        </div>
-        <Card>
-          <table className="w-full text-sm">
-            <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
+        </Panel>
+
+        <Panel title="Deal Probability Engine" className="lg:col-span-8"
+          foot="Predicted close probability, expected close date and probability-adjusted value — derived from stage, offer score and posture.">
+          <table className="w-full text-[12px]">
+            <thead className="sticky top-0 bg-ink-900 text-left text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">
               <tr className="border-b border-white/10">
-                <th className="px-5 py-3">Deal</th>
-                <th className="px-5 py-3">Stage</th>
-                <th className="px-5 py-3">Close probability</th>
-                <th className="px-5 py-3 text-right">Expected close</th>
-                <th className="px-5 py-3 text-right">Prob-adjusted value</th>
-                <th className="px-5 py-3">Top risk</th>
+                <th className="px-3 py-1.5">Deal</th>
+                <th className="px-2 py-1.5">Stage</th>
+                <th className="px-2 py-1.5">Close prob</th>
+                <th className="px-2 py-1.5 text-right">Exp. close</th>
+                <th className="px-2 py-1.5 text-right">Adj. value</th>
+                <th className="px-3 py-1.5">Top risk</th>
               </tr>
             </thead>
             <tbody>
@@ -177,58 +174,52 @@ const Pipeline: React.FC = () => {
                 const pc = f.closeProbability >= 0.7 ? "#34d399" : f.closeProbability >= 0.4 ? "#fbbf24" : "#f87171";
                 return (
                   <tr key={d.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                    <td className="px-5 py-3.5 font-medium text-white">{d.buyer}</td>
-                    <td className="px-5 py-3.5"><StageBadge stage={d.stage} /></td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-20 overflow-hidden rounded-full bg-white/10">
-                          <div className="h-full rounded-full" style={{ width: `${f.closeProbability * 100}%`, background: pc }} />
-                        </div>
-                        <span className="font-mono text-[13px] font-bold" style={{ color: pc }}>{(f.closeProbability * 100).toFixed(0)}%</span>
+                    <td className="px-3 py-1.5 font-medium text-white">{d.buyer}</td>
+                    <td className="px-2 py-1.5"><StageBadge stage={d.stage} /></td>
+                    <td className="px-2 py-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-1 w-14 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full" style={{ width: `${f.closeProbability * 100}%`, background: pc }} /></div>
+                        <span className="font-mono text-[12px] font-bold" style={{ color: pc }}>{(f.closeProbability * 100).toFixed(0)}%</span>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-right font-mono tabular-nums text-white/80">{f.expectedDays} days</td>
-                    <td className="px-5 py-3.5 text-right font-mono tabular-nums text-deal-300">{fmtMoney(f.adjustedValue)}</td>
-                    <td className="px-5 py-3.5 text-[12px] text-white/60">{f.risk}</td>
+                    <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/80">{f.expectedDays}d</td>
+                    <td className="px-2 py-1.5 text-right font-mono tabular-nums text-deal-300">{fmtMoney(f.adjustedValue)}</td>
+                    <td className="px-3 py-1.5 text-[11px] text-white/60">{f.risk}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-        </Card>
-      </div>
+        </Panel>
+      </Frame>
 
-      <div className="mt-10 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-3 lg:grid-cols-6">
+      {/* kanban — six negotiation stages */}
+      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 sm:grid-cols-3 lg:grid-cols-6">
         {STAGE_ORDER.map((stage) => {
           const list = dealsByStage(stage);
           const stageValue = list.reduce((s, d) => s + (d.amount ?? 0), 0);
           return (
-            <div key={stage} className="bg-ink-800/95 p-4">
-              <div className="mb-3 flex items-center justify-between">
+            <div key={stage} className="bg-ink-900 p-3">
+              <div className="mb-2 flex items-center justify-between">
                 <StageBadge stage={stage} />
                 <span className="font-mono text-[10px] text-white/40">{list.length}</span>
               </div>
-              <div className="mb-3 text-[11px] text-white/45">{stageValue > 0 ? fmtMoney(stageValue) : '—'}</div>
-              <div className="space-y-2">
+              <div className="mb-2 font-mono text-[10px] text-white/45">{stageValue > 0 ? fmtMoney(stageValue) : '—'}</div>
+              <div className="space-y-1.5">
                 {list.map((d) => {
                   const f = forecast(d);
                   const pc = f.closeProbability >= 0.7 ? "#34d399" : f.closeProbability >= 0.4 ? "#fbbf24" : "#f87171";
                   return (
-                  <div key={d.id} className="rounded border border-white/10 bg-ink-900/80 p-2.5">
-                    <div className="text-[13px] font-medium leading-tight text-white">{d.buyer}</div>
-                    <div className="mt-1 flex items-center justify-between text-[10px] text-white/45">
+                  <div key={d.id} className="rounded border border-white/10 bg-ink-800/80 p-2">
+                    <div className="text-[12px] font-medium leading-tight text-white">{d.buyer}</div>
+                    <div className="mt-0.5 flex items-center justify-between text-[9px] text-white/45">
                       <span className="font-mono">{d.amount ? fmtMoney(d.amount) : '—'}</span>
                       <span>{timeAgo(d.updatedAt)}</span>
                     </div>
                     {d.stage !== "dead" && (
-                      <div className="mt-1.5">
-                        <div className="flex items-center justify-between text-[10px]">
-                          <span className="font-mono font-bold" style={{ color: pc }}>{(f.closeProbability * 100).toFixed(0)}% close</span>
-                          <span className="text-white/45">~{f.expectedDays}d</span>
-                        </div>
-                        <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
-                          <div className="h-full rounded-full" style={{ width: `${f.closeProbability * 100}%`, background: pc }} />
-                        </div>
+                      <div className="mt-1 flex items-center justify-between text-[9px]">
+                        <span className="font-mono font-bold" style={{ color: pc }}>{(f.closeProbability * 100).toFixed(0)}%</span>
+                        <span className="text-white/45">~{f.expectedDays}d</span>
                       </div>
                     )}
                   </div>
@@ -240,23 +231,21 @@ const Pipeline: React.FC = () => {
         })}
       </div>
 
-      <Card className="mt-8 p-6">
-        <h3 className="font-serif text-lg font-bold">Stage conversion · benchmarks</h3>
-        <div className="mt-4 grid grid-cols-2 gap-6 sm:grid-cols-5">
-          {[
-            ['Sourcing → Engaged',   '38%'],
-            ['Engaged → Diligence',  '42%'],
-            ['Diligence → LOI',      '55%'],
-            ['LOI → Signed',         '61%'],
-            ['Signed → Closed',      '92%'],
-          ].map(([k, v]) => (
-            <div key={k}>
-              <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">{k}</div>
-              <div className="mt-1 text-2xl font-bold tabular-nums text-deal-300">{v}</div>
-            </div>
-          ))}
-        </div>
-      </Card>
+      <Frame>
+        <Panel title="Stage conversion · benchmarks" className="lg:col-span-12">
+          <div className="grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-5">
+            {[
+              ['Sourcing → Engaged', '38%'], ['Engaged → Diligence', '42%'], ['Diligence → LOI', '55%'],
+              ['LOI → Signed', '61%'], ['Signed → Closed', '92%'],
+            ].map(([k, v]) => (
+              <div key={k} className="bg-ink-900 p-3">
+                <div className="text-[9px] uppercase tracking-[0.16em] text-white/40">{k}</div>
+                <div className="mt-0.5 font-mono text-[18px] font-bold tabular-nums text-deal-300">{v}</div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </Frame>
     </div>
   );
 };
