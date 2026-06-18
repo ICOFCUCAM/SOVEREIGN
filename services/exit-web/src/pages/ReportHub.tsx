@@ -16,6 +16,7 @@ const DOCUMENTS: DocCard[] = [
   { kind: "Readiness", title: "Acquisition Readiness Report", blurb: "The readiness scorecard and the priced value bridge from closing each gap.", href: "/report/readiness", audience: "Board of Directors" },
   { kind: "Board", title: "Board Transaction Memorandum", blurb: "The decision document — recommendation, transaction parameters, highlights, risks and an approval block.", href: "/report/board", audience: "Board of Directors" },
   { kind: "Market", title: "Market Intelligence Report", blurb: "Sector acquisition indexes and the most active acquirers, from the verified registry.", href: "/report/market", audience: "Investment Committee" },
+  { kind: "Diligence", title: "Due-Diligence Report", blurb: "The pre-market diligence scan — findings register, buyer's view, seller remediation, red flags, valuation impact and legal exposure.", href: "/report/diligence", audience: "Board of Directors" },
   { kind: "NDA", title: "Non-Disclosure Agreement Package", blurb: "The institutional NDA suite and a board-ready execution copy with principal articles.", href: "/report/nda", audience: "Counterparties" },
   { kind: "Briefing", title: "Buyer Briefing Book", blurb: "A per-acquirer deep dive — thesis, probability drivers, profile, demonstrated pattern and signals. Opens from any acquirer in Buyer Graph.", audience: "Deal Team" },
 ];

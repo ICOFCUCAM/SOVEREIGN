@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Modal, Field, inputCls, fmtMoney, copyText } from "../lib/ui";
+import { Button, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
 import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { BUYERS } from "../lib/engines";
@@ -184,13 +184,13 @@ const Buyers: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setIntro(null)}>
           <div className="max-w-xl rounded-lg border border-white/10 bg-ink-800/95 p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">AI warm introduction · {intro.name}</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Warm introduction · {intro.name}</div>
               <button onClick={() => setIntro(null)} className="text-white/40 hover:text-white">✕</button>
             </div>
             <pre className="mt-4 whitespace-pre-wrap rounded-md border border-white/10 bg-ink-900/70 p-4 text-[13px] leading-relaxed text-white/80">{intro.text}</pre>
             <div className="mt-4 flex justify-end gap-2">
               <Button variant="ghost" onClick={() => copyText(intro.text)}>Copy</Button>
-              <Button>Send via Banker AI →</Button>
+              <Button onClick={() => { const n = intro.name; setIntro(null); notify(`Introduction to ${n} queued with the banker`); }}>Send introduction →</Button>
             </div>
           </div>
         </div>

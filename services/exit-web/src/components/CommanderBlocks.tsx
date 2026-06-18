@@ -3,6 +3,7 @@ import { Card, fmtMoney } from "../lib/ui";
 import { CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VALUE_LEFT_USD, DEAL_BUYERS, ACTIVE_BUYERS, DEMAND_LABEL } from "../lib/deal-context";
 import { commanderMetrics } from "../lib/commander-metrics";
 import { DEAL_INTEL_FMT } from "../lib/market-stats";
+import { BUYERS } from "../lib/engines";
 
 // Chief Investment Banker blocks — the panels that make the command surface
 // read like a digital investment bank: who's moving on the company, how hot
@@ -81,13 +82,16 @@ export const ValueGap: React.FC = () => (
 );
 
 // ── Block 4 · Acquisition Radar ───────────────────────────────────
-const RADAR = [
-  { label: "Strategic", n: 12 },
-  { label: "Private Equity", n: 7 },
-  { label: "Family Offices", n: 4 },
-  { label: "Corporate", n: 9 },
-  { label: "Investment Banks", n: 3 },
+// Real composition of the discovered buyer universe, by acquirer type, from
+// the buyer-discovery engine — not a hardcoded shape.
+const TYPE_AXES: { key: keyof typeof BUYERS.byType; label: string }[] = [
+  { key: "strategic", label: "Strategic" },
+  { key: "pe", label: "Private Equity" },
+  { key: "vc", label: "Venture" },
+  { key: "family_office", label: "Family Office" },
+  { key: "sponsor", label: "Sponsor" },
 ];
+const RADAR = TYPE_AXES.map((a) => ({ label: a.label, n: BUYERS.byType[a.key] ?? 0 }));
 export const AcquisitionRadar: React.FC = () => {
   // Canvas with generous padding so the vertex labels never clip.
   const cx = 150, cy = 132, R = 84;

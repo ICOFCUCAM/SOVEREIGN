@@ -5,6 +5,7 @@ import {
   acquisitionAppetiteScore, similarAcquisitionsBy,
 } from "./buyer-dna";
 import { activeTokens } from "./active-company";
+import { discoverFindings, allReports, SOURCE_FILES, type DiligenceFinding, type Severity } from "./diligence-intel";
 import { ACQ_INDEXES, MARKET_INTEL, fmtUsd } from "./market-intel";
 import { MARKET } from "./market-stats";
 
@@ -223,6 +224,38 @@ export function buildNdaPackage(company: CompanyProfile): NdaPackage {
       ],
     },
     templates: STANDARD_TEMPLATES.map(ndaTemplateRow),
+  };
+}
+
+// ── DUE-DILIGENCE REPORT ────────────────────────────────────────────
+// Presents the diligence engine's findings as a board-grade document: a
+// findings register, the buyer's adversarial view, the seller remediation
+// plan, red flags, valuation impact and legal exposure. Every figure is the
+// engine's — selection and formatting only.
+export interface DiligenceReportModel {
+  meta: ReportMeta;
+  summary: { findings: number; high: number; medium: number; low: number; totalImpact: string; readinessPct: number };
+  findings: { category: string; subcategory: string; title: string; severity: Severity; source: string; detail: string; buyerView: string; sellerAction: string; impact: string; impactUsd: number }[];
+  reports: { key: string; title: string; metric: string; headline: string; points: { title: string; body: string }[]; recommendation: string; accent: string }[];
+  sources: { label: string; note: string; count: number }[];
+}
+export function buildDiligenceReport(company: CompanyProfile): DiligenceReportModel {
+  const INST = runInstitutionalValuation(company);
+  const findings: DiligenceFinding[] = discoverFindings();
+  const reports = allReports(findings);
+  const bySev = (s: Severity): number => findings.filter((f) => f.severity === s).length;
+  const totalImpactUsd = findings.reduce((acc, f) => acc + f.impactUsd, 0);
+  const readiness = reports.find((r) => r.key === "readiness");
+  const readinessPct = readiness ? parseInt((readiness.metric.match(/(\d+)/) ?? ["0", "0"])[1], 10) : 0;
+  return {
+    meta: meta("Due-Diligence Report", company.name, INST.frameworkVersion),
+    summary: { findings: findings.length, high: bySev("high"), medium: bySev("medium"), low: bySev("low"), totalImpact: fmtUsd(totalImpactUsd), readinessPct },
+    findings: [...findings].sort((a, b) => b.impactUsd - a.impactUsd).map((f) => ({
+      category: f.category, subcategory: f.subcategory, title: f.title, severity: f.severity, source: f.source,
+      detail: f.detail, buyerView: f.buyerView, sellerAction: f.sellerAction, impact: fmtUsd(f.impactUsd), impactUsd: f.impactUsd,
+    })),
+    reports: reports.map((r) => ({ key: r.key, title: r.title, metric: r.metric, headline: r.headline, points: [...r.points], recommendation: r.recommendation, accent: r.accent })),
+    sources: SOURCE_FILES.map((s) => ({ label: s.label, note: s.note, count: findings.filter((f) => f.source === s.label).length })),
   };
 }
 

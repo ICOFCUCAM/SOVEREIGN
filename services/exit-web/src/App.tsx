@@ -20,6 +20,7 @@ const ReportBuyerBrief = lazy(() => import("./pages/ReportBuyerBrief"));
 const ReportNda = lazy(() => import("./pages/ReportNda"));
 const ReportManagement = lazy(() => import("./pages/ReportManagement"));
 const ReportHub = lazy(() => import("./pages/ReportHub"));
+const ReportDiligence = lazy(() => import("./pages/ReportDiligence"));
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
 const Terminal     = lazy(() => import("./pages/Terminal"));
 const Intelligence = lazy(() => import("./pages/Intelligence"));
@@ -158,6 +159,7 @@ const App: React.FC = () => (
       <Route path="/report/buyer/:id" element={<ReportBuyerBrief />} />
       <Route path="/report/nda" element={<ReportNda />} />
       <Route path="/report/management" element={<ReportManagement />} />
+      <Route path="/report/diligence" element={<ReportDiligence />} />
       <Route path="/console/*" element={<Console />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
