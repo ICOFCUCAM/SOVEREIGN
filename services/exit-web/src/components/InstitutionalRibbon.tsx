@@ -1,5 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { RIBBON } from "../lib/market-ribbon";
+import { ACQ_INDEXES } from "../lib/market-intel";
+
+// A live micro-reactor: one sparkbar per sector, height/colour by its real
+// 12-month trend. The market's shape, in the corner of the eye.
+const SPARK = [...ACQ_INDEXES.indexes]
+  .filter((i) => i.trendPct != null)
+  .sort((a, b) => b.volume - a.volume)
+  .slice(0, 16)
+  .map((i) => ({ t: i.trendPct ?? 0, sector: i.sector }));
+const SPARK_MAX = Math.max(...SPARK.map((s) => Math.abs(s.t)), 0.01);
+
+const RibbonSpark: React.FC = () => (
+  <span className="hidden items-end gap-[1.5px] md:flex" title="Sector 12-month trend">
+    {SPARK.map((s) => {
+      const h = 3 + (Math.abs(s.t) / SPARK_MAX) * 11;
+      return <span key={s.sector} className={`w-[2px] rounded-sm ${s.t >= 0 ? "bg-deal-400/80" : "bg-red-400/70"}`} style={{ height: h }} />;
+    })}
+  </span>
+);
 
 // The persistent institutional ribbon — a Bloomberg-style status bar pinned
 // above every workstation. Market vitals on the left of the eye, a live UTC
@@ -36,7 +55,8 @@ const InstitutionalRibbon: React.FC = () => (
       </div>
     ))}
 
-    <div className="ml-auto flex shrink-0 items-center gap-2 border-l border-white/10 px-3 text-[10px]">
+    <div className="ml-auto flex shrink-0 items-center gap-3 border-l border-white/10 px-3 text-[10px]">
+      <RibbonSpark />
       <Clock />
     </div>
   </div>
