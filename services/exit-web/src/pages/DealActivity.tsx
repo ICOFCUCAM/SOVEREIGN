@@ -34,7 +34,7 @@ const DealActivity: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Exchange · Telemetry"
+        kicker="Exchange · Telemetry"
         title="Deal Activity"
         tag="Capture spine"
         status={`${events.length} events`}

@@ -25,7 +25,7 @@ const EngagementRegistry: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Buyer Console"
+        kicker="Buyer Console"
         title="Engagement Registry"
         tag="Who to contact · how likely"
         metrics={[

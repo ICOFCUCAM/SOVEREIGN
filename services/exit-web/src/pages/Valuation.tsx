@@ -40,7 +40,7 @@ const Valuation: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Valuation Desk"
+        kicker="Valuation Desk"
         title="Enterprise Value"
         tag="Strategic-buyer basis"
         status={`Conf ${INST.confidence.score}% · ${INST.confidence.tier}`}

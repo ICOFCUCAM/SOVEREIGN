@@ -28,7 +28,7 @@ const Commander: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Chief Investment Banker"
+        kicker="Chief Investment Banker"
         title={SAMPLE_COMPANY.name}
         tag="Transaction desk"
         status={m.demandLabel}

@@ -128,7 +128,7 @@ James — on behalf of Helios Freight`
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Operator · Negotiation"
+        kicker="Operator · Negotiation"
         title="AI Deal Negotiator"
         tag={`Stage: ${NEGOTIATION_STATE.stage}`}
         status={`Leverage ${NEGOTIATION_STATE.leverage}`}

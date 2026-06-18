@@ -29,7 +29,7 @@ const OutcomeIntelligence: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Market Intelligence"
+        kicker="Market Intelligence"
         title="Outcome Intelligence"
         tag="Who pays · who closes"
         status={`As of ${DNA_AS_OF.slice(0, 10)}`}

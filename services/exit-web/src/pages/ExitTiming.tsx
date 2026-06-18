@@ -65,7 +65,7 @@ const ExitTiming: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Timing Desk"
+        kicker="Timing Desk"
         title="Exit Timing"
         tag="Monitor"
         status={`${tailwinds}/${signals.length} tailwinds`}

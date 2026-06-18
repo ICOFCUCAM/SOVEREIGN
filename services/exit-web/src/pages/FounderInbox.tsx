@@ -96,7 +96,7 @@ const FounderInbox: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Founder · Demand"
+        kicker="Founder · Demand"
         title={company.name}
         tag={listing.publicView.sector}
         status={isLive ? "Listed" : "Draft"}

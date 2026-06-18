@@ -100,7 +100,7 @@ const BuyerCopilot: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Find Buyers"
+        kicker="Find Buyers"
         title="Buyer Copilot"
         tag="Buyer intelligence"
         metrics={[

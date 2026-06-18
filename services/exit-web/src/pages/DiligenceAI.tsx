@@ -55,7 +55,7 @@ const DiligenceAI: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Due Diligence"
+        kicker="Due Diligence"
         title="AI Due Diligence"
         tag="Buyer + Seller reports"
         status={high > 0 ? `${high} high severity` : "Clean"}

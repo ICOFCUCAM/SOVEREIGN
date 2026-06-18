@@ -53,7 +53,7 @@ const Investors: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Workspace · Cap-table"
+        kicker="Workspace · Cap-table"
         title="Investor CRM"
         tag="Ownership · waterfall"
         status={signatory.meetsThreshold ? "Coverage met" : "Coverage short"}

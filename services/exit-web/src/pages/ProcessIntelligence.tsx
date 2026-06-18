@@ -19,7 +19,7 @@ const ProcessIntelligence: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Exchange · Execution"
+        kicker="Exchange · Execution"
         title="Process Intelligence"
         tag="Buyer-response moat"
         metrics={[

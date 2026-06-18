@@ -63,7 +63,7 @@ const Wealth: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Wealth · Liquidity"
+        kicker="Wealth · Liquidity"
         title="WealthOS"
         tag="After the wire"
         metrics={[

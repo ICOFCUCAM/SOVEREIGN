@@ -89,7 +89,7 @@ const Marketplace: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Exchange · Marketplace"
+        kicker="Exchange · Marketplace"
         title="Exit Marketplace"
         tag="Become the banker"
         status={phase === "done" ? "Live" : view === "founder" ? "Founder view" : "Public view"}

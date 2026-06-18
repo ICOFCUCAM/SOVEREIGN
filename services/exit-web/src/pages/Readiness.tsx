@@ -64,7 +64,7 @@ const Readiness: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Readiness Desk"
+        kicker="Readiness Desk"
         title="Exit Readiness"
         tag={READINESS_BAND.replace(/_/g, " ")}
         status={verdict.label}

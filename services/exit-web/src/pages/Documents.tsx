@@ -101,7 +101,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Workspace · Documents"
+        kicker="Workspace · Documents"
         title="Document Generator"
         tag="Engine-composed"
         status={flags.length > 0 ? `${flags.length} flags` : "Defensible"}

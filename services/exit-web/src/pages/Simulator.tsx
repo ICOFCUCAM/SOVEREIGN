@@ -239,7 +239,7 @@ const Simulator: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Decision Engine"
+        kicker="Decision Engine"
         title="Scenario Engine"
         tag="Simulate futures"
         metrics={[

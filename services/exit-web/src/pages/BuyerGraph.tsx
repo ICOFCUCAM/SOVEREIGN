@@ -110,7 +110,7 @@ const BuyerGraph: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Market Intelligence"
+        kicker="Market Intelligence"
         title="Buyer Graph"
         tag="The moat"
         meta={[

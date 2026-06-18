@@ -24,7 +24,7 @@ const OutreachPlan: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Exchange · Execution"
+        kicker="Exchange · Execution"
         title="Buyer Outreach Plan"
         tag={fromIntake ? "Your mandate" : company.name}
         status="Sequenced"

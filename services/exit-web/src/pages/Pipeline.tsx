@@ -111,7 +111,7 @@ const Pipeline: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Exchange · Sourcing"
+        kicker="Exchange · Sourcing"
         title="Acquisition Pipeline"
         tag="Six-stage process"
         status={`Leverage ${NEGOTIATION_STATE.leverage}`}

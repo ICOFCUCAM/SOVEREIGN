@@ -31,7 +31,7 @@ const Indexes: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Market Intelligence"
+        kicker="Market Intelligence"
         title="Acquisition Indexes"
         tag="Sector tape"
         status={`As of ${as_of.slice(0, 10)}`}

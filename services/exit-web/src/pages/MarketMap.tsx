@@ -23,7 +23,7 @@ const MarketMap: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Market Intelligence"
+        kicker="Market Intelligence"
         title="Global Acquisition Activity"
         tag="The map"
         status={`As of ${m.as_of.slice(0, 10)}`}

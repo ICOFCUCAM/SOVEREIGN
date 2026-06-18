@@ -100,7 +100,7 @@ const Closing: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Operator · Closing"
+        kicker="Operator · Closing"
         title="Deal Closing Center"
         tag="Sign · escrow · file"
         status={`${Math.round(prob * 100)}% close prob`}

@@ -22,7 +22,7 @@ const BuyerPortal: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Buyer Console"
+        kicker="Buyer Console"
         title={SEAT.entry?.name ?? "Buyer Portal"}
         tag="Acquirer seat"
         status={`Rank #${SEAT.rank}`}

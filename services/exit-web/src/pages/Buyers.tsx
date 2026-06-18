@@ -72,7 +72,7 @@ const Buyers: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Sourcing"
+        kicker="Sourcing"
         title="Buyer Marketplace"
         tag="Profiles ranked"
         metrics={[

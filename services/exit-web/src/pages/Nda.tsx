@@ -109,7 +109,7 @@ const Nda: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Workspace · NDA"
+        kicker="Workspace · NDA"
         title="NDA & Buyer Trust"
         tag="Qualification gate"
         status={`${roster.active} active`}

@@ -75,7 +75,7 @@ const AcquisitionRadar: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Buyer Console"
+        kicker="Buyer Console"
         title="Acquisition Command Center"
         tag="Mandate"
         meta={[

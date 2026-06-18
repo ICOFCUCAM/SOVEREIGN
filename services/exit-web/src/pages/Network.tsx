@@ -57,7 +57,7 @@ const Network: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ The moat"
+        kicker="The moat"
         title="Network Intelligence"
         tag="Five compounding assets"
         metrics={[

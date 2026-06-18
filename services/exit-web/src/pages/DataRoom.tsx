@@ -92,7 +92,7 @@ const DataRoom: React.FC = () => {
   return (
     <div className="space-y-2">
       <CommandHeader
-        kicker="◉ Workspace · Data Room"
+        kicker="Workspace · Data Room"
         title="Virtual Data Room"
         tag="Diligence artifacts"
         status={`${overallPct}% complete`}
