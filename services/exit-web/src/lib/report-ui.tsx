@@ -176,7 +176,7 @@ export const Note: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 export const PALETTE = { INK, MUTE, FAINT, LINE, HAIR, GREEN, NAVY, GOLD };
 
 export const REPORT_CSS = `
-.rpt { position: relative; font-feature-settings: "tnum" 1, "lnum" 1; }
+.rpt { position: relative; font-feature-settings: "tnum" 1, "lnum" 1; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .rpt h1, .rpt h2, .rpt .font-serif { font-family: "Source Serif 4", Georgia, "Times New Roman", serif; font-feature-settings: "lnum" 1; }
 .rpt h1 { letter-spacing: -0.012em; }
 .tnum { font-variant-numeric: tabular-nums lining-nums; }
@@ -185,14 +185,19 @@ export const REPORT_CSS = `
 @media print {
   @page { size: A4; margin: 18mm 15mm 20mm; }
   @page { @bottom-center { content: "ExitOS Advisory  ·  Strictly Private & Confidential"; font-size: 8px; color: #9aa3b0; } @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8px; color: #9aa3b0; } }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   html, body { background: #ffffff !important; }
   .no-print { display: none !important; }
   .rpt { box-shadow: none !important; max-width: none !important; width: 100% !important; margin: 0 !important; }
   .rpt-section, .rpt-cover { break-before: page; }
   .rpt-cover { break-before: avoid; break-after: page; min-height: 0 !important; }
   .avoid-break { break-inside: avoid; }
-  tr, figure { break-inside: avoid; }
-  h2, h3 { break-after: avoid; }
+  tr, figure, li { break-inside: avoid; }
+  thead { display: table-header-group; }
+  h2, h3, figcaption { break-after: avoid; }
+  ol, ul { break-inside: auto; }
+  a { color: inherit !important; text-decoration: none !important; }
+  a[href]:after { content: ""; }
   .no-screen { display: flex; }
   .rpt-fixed-header { position: fixed; top: 0; left: 0; right: 0; justify-content: space-between; font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; color: #9aa3b0; padding: 5mm 15mm 0; }
   .rpt-fixed-footer { position: fixed; bottom: 0; left: 0; right: 0; justify-content: space-between; font-size: 8.5px; color: #9aa3b0; padding: 0 15mm 5mm; border-top: 1px solid #e3e8ef; }
