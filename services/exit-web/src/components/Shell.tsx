@@ -137,7 +137,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </aside>
 
-        <main className="relative flex-1 overflow-y-auto">
+        <main className="relative flex-1 overflow-y-auto bg-[#0a1018]">
           <div className="sticky top-0 z-30">
             <LayerBar />
             <LayerSubNav />
