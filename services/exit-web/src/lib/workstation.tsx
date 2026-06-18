@@ -1,5 +1,4 @@
 import React from "react";
-import type { TapeItem, TapeKind } from "./market-tape";
 
 // ── WORKSTATION PRIMITIVES ──────────────────────────────────────────
 // The shared vocabulary that makes a screen read as one instrument — a deal
@@ -43,42 +42,6 @@ export const Frame: React.FC<{ children: React.ReactNode; className?: string }> 
 export const Rail: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
   <div className={`flex flex-col gap-px bg-white/10 ${className}`}>{children}</div>
 );
-
-// ── LIVE MARKET TAPE ────────────────────────────────────────────────
-const TAPE_KIND: Record<TapeKind, { c: string; l: string }> = {
-  ACQ:     { c: "text-deal-300",    l: "ACQ" },
-  BUYER:   { c: "text-sky-300",     l: "BUY" },
-  SECTOR:  { c: "text-amber-300",   l: "SEC" },
-  MANDATE: { c: "text-emerald-300", l: "LIVE" },
-};
-
-/** A continuous ticker of real market activity — the pulse of the desk. */
-export const MarketTape: React.FC<{ items: TapeItem[] }> = ({ items }) => {
-  if (!items.length) return null;
-  const Track: React.FC<{ k: string }> = ({ k }) => (
-    <>
-      {items.map((it, i) => (
-        <span key={`${k}-${i}`} className="inline-flex items-center gap-1.5 px-3 text-[11px]">
-          <span className={`font-bold ${TAPE_KIND[it.kind].c}`}>{TAPE_KIND[it.kind].l}</span>
-          <span className="text-white/75">{it.label}</span>
-          {it.value && <span className={it.dir === "up" ? "font-mono text-deal-300" : it.dir === "down" ? "font-mono text-red-300" : "font-mono text-white/45"}>{it.dir === "up" ? "▲" : it.dir === "down" ? "▼" : ""}{it.value}</span>}
-          <span className="px-1 text-white/15">│</span>
-        </span>
-      ))}
-    </>
-  );
-  return (
-    <div className="relative overflow-hidden rounded-lg border border-white/10 bg-ink-900">
-      <div className="absolute inset-y-0 left-0 z-10 flex items-center gap-1.5 bg-ink-900 px-3 ring-1 ring-white/10">
-        <span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-deal-400 opacity-75" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-deal-400" /></span>
-        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-deal-300">Tape</span>
-      </div>
-      <div className="overflow-hidden py-1.5 pl-16">
-        <div className="ex-ticker flex w-max whitespace-nowrap"><Track k="a" /><Track k="b" /></div>
-      </div>
-    </div>
-  );
-};
 
 // ── COMMAND STATE ───────────────────────────────────────────────────
 // The four questions every workstation must answer, as one bordered strip:

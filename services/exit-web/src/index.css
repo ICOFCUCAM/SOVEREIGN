@@ -25,30 +25,6 @@ body {
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }
 
-/* Market tape — a continuous ticker of real market activity. The track is
-   rendered twice so the loop is seamless; honors reduced-motion. */
-@keyframes exTicker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.ex-ticker { animation: exTicker 60s linear infinite; }
-.ex-ticker:hover { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) { .ex-ticker { animation: none; } }
-
-/* Ambient signal layer — a slow institutional sweep across the operating
-   surface, like a desk scope refreshing. Decorative depth, not data. */
-@keyframes exSweep { 0% { transform: translateY(-35%); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translateY(135%); opacity: 0; } }
-.ex-sweep { animation: exSweep 16s cubic-bezier(.4,0,.2,1) infinite; }
-@media (prefers-reduced-motion: reduce) { .ex-sweep { animation: none; opacity: 0; } }
-
-/* Reactor system — telemetry-driven instruments. Slow rotation of the orbital
-   field + node pulse. The DATA (node size, colour, position) is real; only
-   the motion is decorative. Reduced-motion stills it. */
-@keyframes exReactorSpin { to { transform: rotate(360deg); } }
-@keyframes exReactorSpinR { to { transform: rotate(-360deg); } }
-@keyframes exNodePulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
-.ex-rspin { animation: exReactorSpin 48s linear infinite; transform-origin: center; }
-.ex-rspin-r { animation: exReactorSpinR 64s linear infinite; transform-origin: center; }
-.ex-node { animation: exNodePulse 3.2s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .ex-rspin, .ex-rspin-r, .ex-node { animation: none; } }
-
 /* Exchange board mount — the 3D rotation only renders at desktop width;
    phones and tablets get the flat board, full-width and unclipped. */
 @media (min-width: 1024px) {
