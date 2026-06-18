@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth";
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
 import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, fmtUsdShort } from "../lib/buyer-dna";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
+import { Panel, CommandHeader } from "../lib/workstation";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 
 // ── ACQUISITION INTELLIGENCE TERMINAL ───────────────────────────────
@@ -20,28 +21,6 @@ const SECTOR_LABEL: Record<string, string> = {
   consumer_marketplace: "Consumer Marketplace", fintech_payments: "Fintech · Payments", logistics_freight: "Logistics · Freight",
   mobility: "Mobility", ai_infra: "AI Infrastructure", developer_tools: "Developer Tools", media_content: "Media · Content", other: "Diversified",
 };
-
-// hairline-framed panel — the building block of the workstation
-const Panel: React.FC<{ title: string; right?: React.ReactNode; children: React.ReactNode; className?: string; foot?: React.ReactNode }> =
-  ({ title, right, children, className = "", foot }) => (
-    <section className={`flex min-h-0 flex-col bg-ink-900 ${className}`}>
-      <header className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-1.5">
-        <span className="text-[9.5px] font-semibold uppercase tracking-[0.2em] text-deal-300/90">{title}</span>
-        {right}
-      </header>
-      <div className="min-h-0 flex-1 overflow-auto">{children}</div>
-      {foot && <div className="border-t border-white/10 px-3 py-1.5 text-[9px] leading-tight text-white/35">{foot}</div>}
-    </section>
-  );
-
-// a status cell in the command strip — label over a mono value
-const Cell: React.FC<{ k: string; v: React.ReactNode; accent?: boolean; sub?: string }> = ({ k, v, accent, sub }) => (
-  <div className="px-3 py-2">
-    <div className="text-[8.5px] font-semibold uppercase tracking-[0.16em] text-white/40">{k}</div>
-    <div className={`mt-0.5 font-mono text-[15px] font-bold leading-none tabular-nums ${accent ? "text-deal-300" : "text-white"}`}>{v}</div>
-    {sub && <div className="mt-1 text-[9px] uppercase tracking-wide text-white/35">{sub}</div>}
-  </div>
-);
 
 const Terminal: React.FC = () => {
   const { session } = useAuth();
@@ -91,47 +70,34 @@ const Terminal: React.FC = () => {
       {plan === "free" && <BuyerInterestGate />}
 
       {/* ── COMMAND BAR ── identity + live status strip, one framed instrument ── */}
-      <div className="overflow-hidden rounded-lg border border-white/10">
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-gradient-to-r from-deal-600/15 via-ink-900 to-ink-900 px-4 py-2.5">
-          <div className="flex items-baseline gap-3">
-            <span className="text-[9.5px] font-semibold uppercase tracking-[0.22em] text-deal-300/80">◉ Mandate</span>
-            <span className="font-mono text-[18px] font-bold tracking-tight text-white">{company.name}</span>
-            <span className="rounded bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/65 ring-1 ring-white/10">{SECTOR_LABEL[company.sector] ?? company.sector}</span>
-            <span className="rounded bg-deal-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-deal-300 ring-1 ring-deal-400/30">Active</span>
-          </div>
-          <div className="flex items-center gap-4 font-mono text-[11px] text-white/55">
-            <span>ARR <span className="font-bold text-white/85">{fmtUsdShort(company.revenue.annualRecurringRevenueUsd)}</span></span>
-            <span className="text-white/15">│</span>
-            <span>TTM <span className="font-bold text-white/85">{fmtUsdShort(company.revenue.trailingTwelveMonthsRevenueUsd)}</span></span>
-            <span className="text-white/15">│</span>
-            <span>GROWTH <span className="font-bold text-white/85">{pct(company.growth.arrGrowthYoyPct)}</span></span>
-            <span className="text-white/15">│</span>
-            <span>EBITDA <span className="font-bold text-white/85">{pct(company.revenue.ebitdaMarginPct)}</span></span>
-            <span className="text-white/15">│</span>
-            <span className="text-white/35">AS OF {asOf}</span>
-          </div>
-        </div>
-
-        {/* metrics strip — the headline numbers, mono, divided by hairlines */}
-        <div className="grid grid-cols-2 gap-px border-t border-white/10 bg-white/10 sm:grid-cols-4 lg:grid-cols-7">
-          <div className="bg-ink-900"><Cell k="Enterprise value" v={fmtUsdShort(INST.headline.mid)} accent sub={`${fmtUsdShort(INST.headline.low)}–${fmtUsdShort(INST.headline.high)}`} /></div>
-          <div className="bg-ink-900"><Cell k="Qualified buyers" v={String(INST.buyerUniverse.qualified)} sub={`of ${INST.buyerUniverse.scored} scored`} /></div>
-          <div className="bg-ink-900"><Cell k="Top match" v={lead ? `${lead.probability.pct}%` : "—"} accent sub={lead?.profile.name} /></div>
-          <div className="bg-ink-900"><Cell k="Typical premium" v={`+${pct(leadPremium)}`} sub={`range ${pct(INST.premium.rangeLowPct)}–${pct(INST.premium.rangeHighPct)}`} /></div>
-          <div className="bg-ink-900"><Cell k="Median close" v={`${leadCloseDays}d`} sub={`${INST.comparablesUsed} comps`} /></div>
-          <div className="bg-ink-900"><Cell k="Readiness" v={`${Math.round(ra.currentScore)}`} sub={`→ ${Math.round(ra.projectedScore)} · +${fmtUsdShort(uplift)}`} /></div>
-          <div className="bg-ink-900"><Cell k="Confidence" v={`${INST.confidence.score}%`} accent sub={INST.confidence.tier} /></div>
-        </div>
-
-        {/* thesis line — the one-sentence answer, operational not marketing */}
-        {lead && (
-          <div className="border-t border-white/10 bg-ink-900 px-4 py-2 text-[12.5px] text-white/70">
+      <CommandHeader
+        title={company.name}
+        tag={SECTOR_LABEL[company.sector] ?? company.sector}
+        status="Active"
+        meta={[
+          { k: "ARR", v: fmtUsdShort(company.revenue.annualRecurringRevenueUsd) },
+          { k: "TTM", v: fmtUsdShort(company.revenue.trailingTwelveMonthsRevenueUsd) },
+          { k: "GROWTH", v: pct(company.growth.arrGrowthYoyPct) },
+          { k: "EBITDA", v: pct(company.revenue.ebitdaMarginPct) },
+          { k: "AS OF", v: asOf },
+        ]}
+        metrics={[
+          { k: "Enterprise value", v: fmtUsdShort(INST.headline.mid), accent: true, sub: `${fmtUsdShort(INST.headline.low)}–${fmtUsdShort(INST.headline.high)}` },
+          { k: "Qualified buyers", v: String(INST.buyerUniverse.qualified), sub: `of ${INST.buyerUniverse.scored} scored` },
+          { k: "Top match", v: lead ? `${lead.probability.pct}%` : "—", accent: true, sub: lead?.profile.name },
+          { k: "Typical premium", v: `+${pct(leadPremium)}`, sub: `range ${pct(INST.premium.rangeLowPct)}–${pct(INST.premium.rangeHighPct)}` },
+          { k: "Median close", v: `${leadCloseDays}d`, sub: `${INST.comparablesUsed} comps` },
+          { k: "Readiness", v: `${Math.round(ra.currentScore)}`, sub: `→ ${Math.round(ra.projectedScore)} · +${fmtUsdShort(uplift)}` },
+          { k: "Confidence", v: `${INST.confidence.score}%`, accent: true, sub: INST.confidence.tier },
+        ]}
+        note={lead && (
+          <>
             <Link to={`/console/buyer/${lead.profile.buyer_id}`} className="font-semibold text-deal-200 hover:underline">{lead.profile.name}</Link>{" "}
             is <span className="font-mono font-bold text-deal-200">{lead.probability.pct}%</span> likely to acquire a company like {company.name}.{" "}
             <span className="text-white/45">{buyerRationale(lead.profile, BASELINE, tokens, company.sector).thesis}</span>
-          </div>
+          </>
         )}
-      </div>
+      />
 
       {/* ── WORKSTATION GRID ── hairline-separated panels in one frame ── */}
       <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 lg:grid-cols-12">

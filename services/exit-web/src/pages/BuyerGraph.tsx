@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Card, Kpi, SectionHeader, inputCls } from "../lib/ui";
+import { inputCls } from "../lib/ui";
+import { Panel, Frame, CommandHeader } from "../lib/workstation";
 import {
   DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS,
   sectorOverlap, recommendedAction, fmtUsdShort, rankedBuyers, type DnaProfile,
@@ -27,7 +28,7 @@ const DnaCard: React.FC<{ p: DnaProfile }> = ({ p }) => {
   const overlap = sectorOverlap(p);
   const ap = APPETITE_STYLE[p.appetite];
   return (
-    <Card className="p-5">
+    <div className="bg-ink-900 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <Link to={`/console/buyer/${p.buyer_id}`} className="text-[15px] font-bold text-white hover:text-deal-300">{p.name}</Link>
@@ -79,7 +80,7 @@ const DnaCard: React.FC<{ p: DnaProfile }> = ({ p }) => {
           source ↗
         </a>
       </div>
-    </Card>
+    </div>
   );
 };
 
@@ -107,58 +108,64 @@ const BuyerGraph: React.FC = () => {
   const RANKED = useMemo(() => rankedBuyers(12), []);
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Market Intelligence · The moat"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Market Intelligence"
         title="Buyer Graph"
-        description={`Acquisition DNA for every indexed buyer — appetite, cadence, sector preference and deal-size band, derived from ${MARKET_INDEX_FMT.events} real acquisition events (Wikipedia · Wikidata · SEC EDGAR, as of ${MARKET_INDEX_FMT.asOf}). Founders never read raw lists; the graph reads them.`}
+        tag="The moat"
+        meta={[
+          { k: "AS OF", v: MARKET_INDEX_FMT.asOf },
+          { k: "SOURCES", v: "Wikipedia · Wikidata · EDGAR" },
+        ]}
+        metrics={[
+          { k: "Buyers indexed", v: MARKET_INDEX_FMT.buyers, sub: "corporates · PE · sovereign" },
+          { k: "With acquisition DNA", v: String(withEvents), accent: true, sub: "≥1 indexed event" },
+          { k: "High appetite", v: String(highAppetite), sub: "≥2 deals / 12m" },
+          { k: "Events indexed", v: MARKET_INDEX_FMT.events, sub: `as of ${MARKET_INDEX_FMT.asOf}` },
+          { k: "Active acquirers", v: String(withEvents), accent: true, sub: "with live cadence" },
+        ]}
       />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Buyers indexed" value={MARKET_INDEX_FMT.buyers} sub="corporates · PE · sovereign funds" />
-        <Kpi label="With acquisition DNA" value={String(withEvents)} sub="≥1 indexed event" accent="#34d399" />
-        <Kpi label="High appetite" value={String(highAppetite)} sub="≥2 deals in the last 12 months" accent="#fbbf24" />
-        <Kpi label="Events indexed" value={MARKET_INDEX_FMT.events} sub={`as of ${MARKET_INDEX_FMT.asOf}`} />
-      </div>
-
       {/* ── Acquisition Probability — the crown-jewel ranking ── */}
-      <Card className="mt-8 overflow-hidden p-0">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-5 py-3">
-          <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-deal-300">Who is most likely to buy you</div>
-            <div className="mt-0.5 text-[11px] text-white/45">Indexed buyers ranked by acquisition probability for {SAMPLE_COMPANY.name} — appetite × sector overlap × velocity × recency.</div>
-          </div>
-          <span className="text-[10px] uppercase tracking-wide text-white/35">Top {RANKED.length} of {DNA_PROFILES.filter((p) => p.events_indexed > 0).length} active acquirers</span>
-        </div>
-        <table className="w-full text-[12.5px]">
-          <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
-            <tr className="border-b border-white/10">
-              <th className="px-5 py-2.5">#</th><th className="px-5 py-2.5">Buyer</th>
-              <th className="px-5 py-2.5 text-right">Probability</th>
-              <th className="px-5 py-2.5 text-right">Cadence</th>
-              <th className="px-5 py-2.5 text-right">Median deal</th>
-              <th className="px-5 py-2.5 text-right">Avg premium</th>
-              <th className="px-5 py-2.5">Rationale</th>
-            </tr>
-          </thead>
-          <tbody>
-            {RANKED.map((r, i) => (
-              <tr key={r.profile.buyer_id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                <td className="px-5 py-2.5 font-mono text-white/40">{i + 1}</td>
-                <td className="px-5 py-2.5"><Link to={`/console/buyer/${r.profile.buyer_id}`} className="font-semibold text-white hover:text-deal-300">{r.profile.name}</Link></td>
-                <td className="px-5 py-2.5 text-right"><span className="font-mono font-bold tabular-nums text-deal-300">{r.probability.pct}%</span></td>
-                <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/70">{r.profile.frequency_per_year != null ? `${r.profile.frequency_per_year}/yr` : "—"}</td>
-                <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/70">{fmtUsdShort(r.profile.median_deal_usd)}</td>
-                <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/70">{r.profile.premium_pct != null ? `${Math.round(r.profile.premium_pct * 100)}%` : "—"}</td>
-                <td className="px-5 py-2.5 text-white/45">{r.probability.rationale}</td>
+      <Frame>
+        <Panel title="Acquisition probability · who is most likely to buy you" className="lg:col-span-12"
+          right={<span className="text-[9px] uppercase tracking-wide text-white/35">top {RANKED.length} of {withEvents} active</span>}
+          foot={`Ranked for ${SAMPLE_COMPANY.name} — appetite × sector overlap × velocity × recency. Every buyer traces to a source on record.`}>
+          <table className="w-full text-[12px]">
+            <thead className="sticky top-0 bg-ink-900 text-left text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">
+              <tr className="border-b border-white/10">
+                <th className="px-3 py-1.5">#</th><th className="px-3 py-1.5">Buyer</th>
+                <th className="px-2 py-1.5 text-right">Prob</th>
+                <th className="px-2 py-1.5 text-right">Cadence</th>
+                <th className="px-2 py-1.5 text-right">Median deal</th>
+                <th className="px-2 py-1.5 text-right">Avg prem</th>
+                <th className="px-3 py-1.5">Rationale</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+            </thead>
+            <tbody>
+              {RANKED.map((r, i) => (
+                <tr key={r.profile.buyer_id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                  <td className="px-3 py-1.5 font-mono text-white/40">{i + 1}</td>
+                  <td className="px-3 py-1.5"><Link to={`/console/buyer/${r.profile.buyer_id}`} className="font-semibold text-white hover:text-deal-300">{r.profile.name}</Link></td>
+                  <td className="px-2 py-1.5 text-right">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="hidden h-1 w-10 overflow-hidden rounded-full bg-white/10 sm:inline-block align-middle"><span className="block h-full bg-deal-500" style={{ width: `${r.probability.pct}%` }} /></span>
+                      <span className="font-mono font-bold tabular-nums text-deal-300">{r.probability.pct}%</span>
+                    </span>
+                  </td>
+                  <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/65">{r.profile.frequency_per_year != null ? `${r.profile.frequency_per_year}/yr` : "—"}</td>
+                  <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/65">{fmtUsdShort(r.profile.median_deal_usd)}</td>
+                  <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/65">{r.profile.premium_pct != null ? `${Math.round(r.profile.premium_pct * 100)}%` : "—"}</td>
+                  <td className="px-3 py-1.5 text-[11px] text-white/45">{r.probability.rationale}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Panel>
+      </Frame>
 
       {/* filters */}
-      <div className="mt-8 flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 px-1 pt-1">
         {([["all", "All"], ["corporate", "Strategic"], ["private_equity", "Private Equity"], ["sovereign_fund", "Sovereign Funds"], ["family_office", "Family Offices"]] as [TypeFilter, string][]).map(([k, l]) => (
           <button key={k} onClick={() => setType(k)}
             className={`rounded-md px-3.5 py-2 text-[13px] font-semibold transition ${type === k ? "bg-deal-600/20 text-white ring-1 ring-deal-400/40" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>
@@ -169,47 +176,42 @@ const BuyerGraph: React.FC = () => {
           className={`${inputCls} ml-auto max-w-xs`} />
       </div>
 
-      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 sm:grid-cols-2 xl:grid-cols-3">
         {filtered.map((p) => <DnaCard key={p.buyer_id} p={p} />)}
         {filtered.length === 0 && (
-          <Card className="p-6 text-sm text-white/50">No indexed buyer matches that filter.</Card>
+          <div className="bg-ink-900 p-6 text-sm text-white/50">No indexed buyer matches that filter.</div>
         )}
       </div>
 
       {/* ── Similar transactions — real comparables for this company ── */}
-      <Card className="mt-10 overflow-hidden p-0">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-5 py-3">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/60">
-            Similar transactions · {SAMPLE_COMPANY.sector.replace(/_/g, " ")}
-          </span>
-          <span className="text-[10px] uppercase tracking-wide text-white/35">{SECTOR_TRANSACTIONS.length} indexed events matching your sector vocabulary</span>
-        </div>
-        <table className="w-full text-[12.5px]">
-          <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
-            <tr className="border-b border-white/10">
-              <th className="px-5 py-2.5">Target</th>
-              <th className="px-5 py-2.5">Acquirer</th>
-              <th className="px-5 py-2.5">Industry</th>
-              <th className="px-5 py-2.5 text-right">Date</th>
-              <th className="px-5 py-2.5 text-right">Disclosed</th>
-            </tr>
-          </thead>
-          <tbody>
-            {SECTOR_TRANSACTIONS.slice(0, 12).map((t) => (
-              <tr key={`${t.buyer}-${t.target}`} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                <td className="px-5 py-2.5 font-medium text-white">{t.target}</td>
-                <td className="px-5 py-2.5 text-white/70">{t.buyer}</td>
-                <td className="px-5 py-2.5 text-white/45">{t.industry.slice(0, 56)}</td>
-                <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/60">{t.date?.slice(0, 7) ?? "—"}</td>
-                <td className="px-5 py-2.5 text-right font-mono tabular-nums text-deal-300">{fmtUsdShort(t.value_usd)}</td>
+      <Frame>
+        <Panel title={`Similar transactions · ${SAMPLE_COMPANY.sector.replace(/_/g, " ")}`} className="lg:col-span-12"
+          right={<span className="text-[9px] uppercase tracking-wide text-white/35">{SECTOR_TRANSACTIONS.length} matching your sector</span>}
+          foot={`Every row traces to a source on record (Wikipedia acquisition lists; SEC-corroborated where an 8-K item 2.01 matches). As of ${DNA_AS_OF.slice(0, 10)}.`}>
+          <table className="w-full text-[12px]">
+            <thead className="sticky top-0 bg-ink-900 text-left text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">
+              <tr className="border-b border-white/10">
+                <th className="px-3 py-1.5">Target</th>
+                <th className="px-3 py-1.5">Acquirer</th>
+                <th className="px-3 py-1.5">Industry</th>
+                <th className="px-2 py-1.5 text-right">Date</th>
+                <th className="px-3 py-1.5 text-right">Disclosed</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">
-          Every row traces to a source on record (Wikipedia acquisition lists; SEC-corroborated where an 8-K item 2.01 matches). As of {DNA_AS_OF.slice(0, 10)}.
-        </div>
-      </Card>
+            </thead>
+            <tbody>
+              {SECTOR_TRANSACTIONS.slice(0, 14).map((t) => (
+                <tr key={`${t.buyer}-${t.target}`} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                  <td className="px-3 py-1.5 font-medium text-white">{t.target}</td>
+                  <td className="px-3 py-1.5 text-white/70">{t.buyer}</td>
+                  <td className="px-3 py-1.5 text-white/45">{t.industry.slice(0, 56)}</td>
+                  <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/60">{t.date?.slice(0, 7) ?? "—"}</td>
+                  <td className="px-3 py-1.5 text-right font-mono tabular-nums text-deal-300">{fmtUsdShort(t.value_usd)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Panel>
+      </Frame>
     </div>
   );
 };

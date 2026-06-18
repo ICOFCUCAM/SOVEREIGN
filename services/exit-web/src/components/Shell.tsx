@@ -11,6 +11,10 @@ import { ExchangeMark } from "./ExchangeMark";
 
 const basePath = (to: string): string => to.split("#")[0];
 
+// Routes that render as full-bleed workstations (one instrument, no centered
+// column) rather than the standard document-width page.
+const WORKSTATION_ROUTES = new Set(["/console", "/console/buyer-graph", "/console/acquisition-radar", "/console/inbox"]);
+
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session, signOut } = useAuth();
   const nav = useNavigate();
@@ -150,8 +154,8 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </div>
             </div>
           )}
-          {loc.pathname === "/console"
-            ? <div className="px-3 py-3 sm:px-4 lg:px-5 lg:py-4">{children}</div>   /* terminal: full-bleed workstation */
+          {WORKSTATION_ROUTES.has(loc.pathname)
+            ? <div className="px-3 py-3 sm:px-4 lg:px-5 lg:py-4">{children}</div>   /* full-bleed command centers */
             : <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</div>}
         </main>
       </div>
