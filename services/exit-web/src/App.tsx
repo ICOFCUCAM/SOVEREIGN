@@ -12,6 +12,7 @@ const Platform     = lazy(() => import("./pages/Platform"));
 const Modules      = lazy(() => import("./pages/Modules"));
 const Report       = lazy(() => import("./pages/Report"));
 const ReportBuyers = lazy(() => import("./pages/ReportBuyers"));
+const ReportReadiness = lazy(() => import("./pages/ReportReadiness"));
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
 const Terminal     = lazy(() => import("./pages/Terminal"));
 const Intelligence = lazy(() => import("./pages/Intelligence"));
@@ -142,6 +143,7 @@ const App: React.FC = () => (
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/report/valuation" element={<Report />} />
       <Route path="/report/buyers" element={<ReportBuyers />} />
+      <Route path="/report/readiness" element={<ReportReadiness />} />
       <Route path="/console/*" element={<Console />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

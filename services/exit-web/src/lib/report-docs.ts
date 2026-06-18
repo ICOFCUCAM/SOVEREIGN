@@ -58,7 +58,7 @@ export function buildBuyerIntelReport(company: CompanyProfile): BuyerIntelReport
 // ── ACQUISITION READINESS REPORT ────────────────────────────────────
 export interface ReadinessReport {
   meta: ReportMeta;
-  summary: { score: number; band: string; currentValue: string; potentialValue: string; uplift: string; upliftPct: number };
+  summary: { score: number; band: string; currentValue: string; potentialValue: string; uplift: string; upliftPct: number; currentUsd: number; potentialUsd: number; upliftUsd: number };
   categories: { dimension: string; severity: string; weakness: string; recommendation: string; impact: string; effort: string }[];
 }
 export function buildReadinessReport(company: CompanyProfile): ReadinessReport {
@@ -67,7 +67,7 @@ export function buildReadinessReport(company: CompanyProfile): ReadinessReport {
   const cur = ra.currentStrategicMid, pot = ra.projectedStrategicMid, up = Math.max(0, pot - cur);
   return {
     meta: meta("Acquisition Readiness Report", company.name, INST.frameworkVersion),
-    summary: { score: Math.round(ra.currentScore), band: ra.currentBand.replace(/_/g, " "), currentValue: fmtUsd(cur), potentialValue: fmtUsd(pot), uplift: fmtUsd(up), upliftPct: cur > 0 ? Math.round((up / cur) * 100) : 0 },
+    summary: { score: Math.round(ra.currentScore), band: ra.currentBand.replace(/_/g, " "), currentValue: fmtUsd(cur), potentialValue: fmtUsd(pot), uplift: fmtUsd(up), upliftPct: cur > 0 ? Math.round((up / cur) * 100) : 0, currentUsd: cur, potentialUsd: pot, upliftUsd: up },
     categories: [...ra.weaknesses].sort((a, b) => b.valuationUpliftUsd - a.valuationUpliftUsd).map((w) => ({ dimension: w.dimension, severity: w.severity, weakness: w.weakness, recommendation: w.recommendation, impact: fmtUsd(w.valuationUpliftUsd), effort: w.effort })),
   };
 }
