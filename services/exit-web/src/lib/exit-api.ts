@@ -1,5 +1,5 @@
-import type { DealEvent } from "./deal-events";
-import { setPersistenceAdapter } from "./deal-events";
+import type { DealEvent, DealEventKind } from "./deal-events";
+import { setPersistenceAdapter, captureDealEvent } from "./deal-events";
 import type { Listing } from "./listings";
 import { setListingsAdapter, setListingOwner } from "./listings";
 import { SupabaseExitApi, supabaseConfigFromEnv } from "./supabase-exit-api";
@@ -84,8 +84,59 @@ export interface Notification {
   readonly createdAt: string;
 }
 
+// ── THE DEAL — the transaction object ───────────────────────────────
+// One record per (listing × buyer), tracking the full acquisition lifecycle.
+// This is the spine of the network: every transaction is a Deal advancing
+// through the canonical stages. NDA requests, offers and documents attach to
+// it; its stage is the single source of truth for where a transaction stands.
+export type DealStage =
+  | "draft" | "listed" | "qualified" | "nda_requested" | "nda_executed"
+  | "management_meeting" | "ioi" | "loi" | "due_diligence" | "closed" | "withdrawn";
+
+/** The ordered, advanceable pipeline (excludes the terminal "withdrawn"). */
+export const DEAL_STAGES: ReadonlyArray<{ stage: DealStage; label: string }> = [
+  { stage: "listed", label: "Listed" },
+  { stage: "qualified", label: "Qualified" },
+  { stage: "nda_requested", label: "NDA Requested" },
+  { stage: "nda_executed", label: "NDA Executed" },
+  { stage: "management_meeting", label: "Management Meeting" },
+  { stage: "ioi", label: "IOI" },
+  { stage: "loi", label: "LOI" },
+  { stage: "due_diligence", label: "Due Diligence" },
+  { stage: "closed", label: "Closed" },
+];
+export const dealStageIndex = (s: DealStage): number => DEAL_STAGES.findIndex((d) => d.stage === s);
+
+export interface Deal {
+  readonly id: string;
+  readonly listingId: string;
+  readonly buyerAccountId: string;
+  readonly stage: DealStage;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly history: ReadonlyArray<{ readonly stage: DealStage; readonly at: string }>;
+}
+
+// ── THE MANDATE — the persisted acquisition criteria ────────────────
+// A buyer's standing acquisition mandate. Persisting it is what makes the
+// other side of the market liquid: a mandate becomes matchable against every
+// listing, and a listing becomes discoverable by every matching mandate.
+export interface Mandate {
+  readonly id: string;                          // == buyerAccountId (one live mandate per buyer)
+  readonly buyerAccountId: string;
+  readonly name: string;
+  readonly sectors: readonly string[];
+  readonly regions: readonly string[];
+  readonly minCheckUsd: number;
+  readonly maxCheckUsd: number;
+  readonly minGrowthPct: number;
+  readonly strategicThemes: readonly string[];
+  readonly updatedAt: string;
+}
+
 export interface NdaFilter { listingId?: string; buyerAccountId?: string }
 export interface OfferFilter { listingId?: string; buyerAccountId?: string }
+export interface DealFilter { listingId?: string; buyerAccountId?: string }
 
 /** Implemented in-memory + localStorage below; in production SupabaseExitApi
  *  (or any network client) implements exactly this interface. */
@@ -128,6 +179,16 @@ export interface ExitApiClient {
   pushNotification(input: { accountId: string; kind: NotificationKind; subjectId: string; message: string }): Promise<Notification>;
   listNotifications(accountId: string): Promise<Notification[]>;
   markNotificationRead(id: string): Promise<void>;
+
+  // ── deals (the transaction lifecycle) ──
+  createDeal(input: { listingId: string; buyerAccountId: string; stage?: DealStage }): Promise<Deal>;
+  listDeals(filter: DealFilter): Promise<Deal[]>;
+  updateDeal(id: string, patch: { stage: DealStage }): Promise<Deal>;
+
+  // ── mandates (the buyer side of liquidity) ──
+  upsertMandate(m: Mandate): Promise<Mandate>;
+  getMandate(buyerAccountId: string): Promise<Mandate | null>;
+  listMandates(): Promise<Mandate[]>;
 }
 
 const rid = (p: string): string => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -144,6 +205,8 @@ export class InMemoryExitApi implements ExitApiClient {
   private offers: Offer[] = [];
   private documents: DealDocument[] = [];
   private notifications: Notification[] = [];
+  private deals: Deal[] = [];
+  private mandates = new Map<string, Mandate>();
 
   async upsertAccount(a: Account): Promise<Account> { this.accounts.set(a.id, a); return a; }
   async getAccount(id: string): Promise<Account | null> { return this.accounts.get(id) ?? null; }
@@ -201,6 +264,27 @@ export class InMemoryExitApi implements ExitApiClient {
   async markNotificationRead(id: string): Promise<void> {
     const i = this.notifications.findIndex((n) => n.id === id); if (i >= 0) this.notifications[i] = { ...this.notifications[i], read: true };
   }
+
+  async createDeal(input: { listingId: string; buyerAccountId: string; stage?: DealStage }): Promise<Deal> {
+    const existing = this.deals.find((d) => d.listingId === input.listingId && d.buyerAccountId === input.buyerAccountId);
+    if (existing) return existing;                           // one deal per (listing, buyer)
+    const stage = input.stage ?? "qualified", at = nowIso();
+    const d: Deal = { id: rid("deal"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, stage, createdAt: at, updatedAt: at, history: [{ stage, at }] };
+    this.deals.push(d); return d;
+  }
+  async listDeals(filter: DealFilter): Promise<Deal[]> {
+    return this.deals.filter((d) => (!filter.listingId || d.listingId === filter.listingId) && (!filter.buyerAccountId || d.buyerAccountId === filter.buyerAccountId));
+  }
+  async updateDeal(id: string, patch: { stage: DealStage }): Promise<Deal> {
+    const i = this.deals.findIndex((d) => d.id === id); if (i < 0) throw new Error(`deal ${id} not found`);
+    const at = nowIso();
+    this.deals[i] = { ...this.deals[i], stage: patch.stage, updatedAt: at, history: [...this.deals[i].history, { stage: patch.stage, at }] };
+    return this.deals[i];
+  }
+
+  async upsertMandate(m: Mandate): Promise<Mandate> { this.mandates.set(m.buyerAccountId, m); return m; }
+  async getMandate(buyerAccountId: string): Promise<Mandate | null> { return this.mandates.get(buyerAccountId) ?? null; }
+  async listMandates(): Promise<Mandate[]> { return [...this.mandates.values()]; }
 }
 
 // ── durable, browser-side implementation ────────────────────────────
@@ -216,9 +300,11 @@ interface Store {
   offers: Offer[];
   documents: DealDocument[];
   notifications: Notification[];
+  deals: Deal[];
+  mandates: Record<string, Mandate>;
 }
 const SKEY = "exitos.backend.v1";
-const emptyStore = (): Store => ({ accounts: {}, organizations: {}, events: {}, listings: [], ndaRequests: [], offers: [], documents: [], notifications: [] });
+const emptyStore = (): Store => ({ accounts: {}, organizations: {}, events: {}, listings: [], ndaRequests: [], offers: [], documents: [], notifications: [], deals: [], mandates: {} });
 
 export class LocalStorageExitApi implements ExitApiClient {
   private read(): Store {
@@ -281,6 +367,28 @@ export class LocalStorageExitApi implements ExitApiClient {
   async markNotificationRead(id: string): Promise<void> {
     const s = this.read(); const i = s.notifications.findIndex((n) => n.id === id); if (i >= 0) { s.notifications[i] = { ...s.notifications[i], read: true }; this.write(s); }
   }
+
+  async createDeal(input: { listingId: string; buyerAccountId: string; stage?: DealStage }): Promise<Deal> {
+    const s = this.read();
+    const existing = s.deals.find((d) => d.listingId === input.listingId && d.buyerAccountId === input.buyerAccountId);
+    if (existing) return existing;
+    const stage = input.stage ?? "qualified", at = nowIso();
+    const d: Deal = { id: rid("deal"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, stage, createdAt: at, updatedAt: at, history: [{ stage, at }] };
+    s.deals.push(d); this.write(s); return d;
+  }
+  async listDeals(filter: DealFilter): Promise<Deal[]> {
+    return this.read().deals.filter((d) => (!filter.listingId || d.listingId === filter.listingId) && (!filter.buyerAccountId || d.buyerAccountId === filter.buyerAccountId));
+  }
+  async updateDeal(id: string, patch: { stage: DealStage }): Promise<Deal> {
+    const s = this.read(); const i = s.deals.findIndex((d) => d.id === id); if (i < 0) throw new Error(`deal ${id} not found`);
+    const at = nowIso();
+    s.deals[i] = { ...s.deals[i], stage: patch.stage, updatedAt: at, history: [...s.deals[i].history, { stage: patch.stage, at }] };
+    this.write(s); return s.deals[i];
+  }
+
+  async upsertMandate(m: Mandate): Promise<Mandate> { const s = this.read(); s.mandates[m.buyerAccountId] = m; this.write(s); return m; }
+  async getMandate(buyerAccountId: string): Promise<Mandate | null> { return this.read().mandates[buyerAccountId] ?? null; }
+  async listMandates(): Promise<Mandate[]> { return Object.values(this.read().mandates); }
 }
 
 // ── DEPENDENCY INJECTION — the one place the backend is chosen ───────
@@ -365,6 +473,39 @@ export async function offersForListing(listingId: string): Promise<Offer[]> {
 export async function resolveOffer(id: string, status: OfferStatus): Promise<Offer> {
   return active.updateOffer(id, { status });
 }
+
+// ── deals (the transaction lifecycle) ───────────────────────────────
+// Advancing a deal also emits the matching telemetry event, so the captured
+// stream — and every model that learns from it (buyer DNA, response/close
+// rates, premium/probability) — improves with each real transaction step.
+const STAGE_EVENT: Partial<Record<DealStage, DealEventKind>> = {
+  qualified: "expressed_interest", nda_requested: "nda_requested", nda_executed: "nda_signed",
+  management_meeting: "meeting_scheduled", ioi: "loi_issued", loi: "loi_issued",
+  due_diligence: "diligence_started", closed: "closed", withdrawn: "walked_away",
+};
+
+/** Buyer action: open (or fetch) the deal on a listing at a starting stage. */
+export async function startDeal(listingId: string, stage?: DealStage): Promise<Deal | null> {
+  if (!connectedAccountId) return null;
+  return active.createDeal({ listingId, buyerAccountId: connectedAccountId, stage });
+}
+export async function dealsForListing(listingId: string): Promise<Deal[]> { return active.listDeals({ listingId }); }
+export async function dealsForBuyer(): Promise<Deal[]> { return connectedAccountId ? active.listDeals({ buyerAccountId: connectedAccountId }) : []; }
+/** Advance a deal to a stage and capture the matching telemetry event. */
+export async function advanceDeal(deal: Deal, stage: DealStage, actorRole: "founder" | "buyer" = "founder", subjectName?: string): Promise<Deal> {
+  const updated = await active.updateDeal(deal.id, { stage });
+  const kind = STAGE_EVENT[stage];
+  if (kind) captureDealEvent({ actorRole, kind, subjectType: "listing", subjectId: deal.listingId, subjectName: subjectName ?? deal.listingId });
+  return updated;
+}
+
+// ── mandates (persisted buyer criteria → matchable liquidity) ───────
+export async function saveMandate(input: Omit<Mandate, "id" | "buyerAccountId" | "updatedAt">): Promise<Mandate | null> {
+  if (!connectedAccountId) return null;
+  return active.upsertMandate({ id: connectedAccountId, buyerAccountId: connectedAccountId, updatedAt: nowIso(), ...input });
+}
+export async function myMandate(): Promise<Mandate | null> { return connectedAccountId ? active.getMandate(connectedAccountId) : null; }
+export async function allMandates(): Promise<Mandate[]> { return active.listMandates(); }
 
 /** Point the app's stores at a backend. After this, captured events and
  *  listings persist through the API (network-wide, per account) instead of

@@ -234,6 +234,25 @@ function contractSuite(name: string, make: () => ExitApiClient): void {
       expect((await api.updateOffer(o.id, { status: "accepted" })).status).toBe("accepted");
       expect((await api.listOffers({ listingId: "lst-1" })).length).toBe(1);
     });
+    it("deal lifecycle: open once, advance through stages, history accrues", async () => {
+      const api = make();
+      const d = await api.createDeal({ listingId: "lst-1", buyerAccountId: buyer.id });
+      expect(d.stage).toBe("qualified");
+      const again = await api.createDeal({ listingId: "lst-1", buyerAccountId: buyer.id });
+      expect(again.id).toBe(d.id);                          // one deal per (listing, buyer)
+      const signed = await api.updateDeal(d.id, { stage: "nda_executed" });
+      expect(signed.stage).toBe("nda_executed");
+      const closed = await api.updateDeal(d.id, { stage: "closed" });
+      expect(closed.stage).toBe("closed");
+      expect(closed.history.map((h) => h.stage)).toEqual(["qualified", "nda_executed", "closed"]);
+      expect((await api.listDeals({ buyerAccountId: buyer.id })).length).toBe(1);
+    });
+    it("mandate persists and is listable for matching", async () => {
+      const api = make();
+      await api.upsertMandate({ id: buyer.id, buyerAccountId: buyer.id, name: "Vista mandate", sectors: ["AI"], regions: ["North America"], minCheckUsd: 5e6, maxCheckUsd: 5e8, minGrowthPct: 0.2, strategicThemes: ["ai infra"], updatedAt: "t" });
+      expect((await api.getMandate(buyer.id))?.name).toBe("Vista mandate");
+      expect((await api.listMandates()).some((m) => m.buyerAccountId === buyer.id)).toBe(true);
+    });
   });
 }
 

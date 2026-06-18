@@ -1,7 +1,7 @@
 import type {
   ExitApiClient, Account, Organization, NdaRequest, NdaStatus, NdaFilter,
   Offer, OfferStatus, OfferFilter, DealDocument, DocVisibility,
-  Notification, NotificationKind,
+  Notification, NotificationKind, Deal, DealStage, DealFilter, Mandate,
 } from "./exit-api";
 import type { DealEvent } from "./deal-events";
 import type { Listing } from "./listings";
@@ -174,4 +174,31 @@ export class SupabaseExitApi implements ExitApiClient {
     const next: Notification = { ...cur, read: true };
     await this.upsert("exitos_notifications", [{ id: next.id, account_id: next.accountId, data: next }]);
   }
+
+  // ── deals ──
+  async createDeal(input: { listingId: string; buyerAccountId: string; stage?: DealStage }): Promise<Deal> {
+    const existing = (await this.rows<Deal>("exitos_deals", `listing_id=eq.${enc(input.listingId)}&buyer_account_id=eq.${enc(input.buyerAccountId)}`))[0];
+    if (existing) return existing;
+    const stage = input.stage ?? "qualified", at = nowIso();
+    const d: Deal = { id: rid("deal"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, stage, createdAt: at, updatedAt: at, history: [{ stage, at }] };
+    await this.upsert("exitos_deals", [{ id: d.id, listing_id: d.listingId, buyer_account_id: d.buyerAccountId, data: d }]);
+    return d;
+  }
+  async listDeals(filter: DealFilter): Promise<Deal[]> {
+    const q = [filter.listingId && `listing_id=eq.${enc(filter.listingId)}`, filter.buyerAccountId && `buyer_account_id=eq.${enc(filter.buyerAccountId)}`].filter(Boolean).join("&");
+    return this.rows<Deal>("exitos_deals", q);
+  }
+  async updateDeal(id: string, patch: { stage: DealStage }): Promise<Deal> {
+    const cur = (await this.rows<Deal>("exitos_deals", `id=eq.${enc(id)}`))[0];
+    if (!cur) throw new Error(`deal ${id} not found`);
+    const at = nowIso();
+    const next: Deal = { ...cur, stage: patch.stage, updatedAt: at, history: [...cur.history, { stage: patch.stage, at }] };
+    await this.upsert("exitos_deals", [{ id: next.id, listing_id: next.listingId, buyer_account_id: next.buyerAccountId, data: next }]);
+    return next;
+  }
+
+  // ── mandates ──
+  async upsertMandate(m: Mandate): Promise<Mandate> { await this.upsert("exitos_mandates", [{ id: m.buyerAccountId, buyer_account_id: m.buyerAccountId, data: m }]); return m; }
+  async getMandate(buyerAccountId: string): Promise<Mandate | null> { return (await this.rows<Mandate>("exitos_mandates", `id=eq.${enc(buyerAccountId)}`))[0] ?? null; }
+  async listMandates(): Promise<Mandate[]> { return this.rows<Mandate>("exitos_mandates"); }
 }
