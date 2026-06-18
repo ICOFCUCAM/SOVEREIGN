@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState, useSyncExternalStore } from "react
 import { Link } from "react-router-dom";
 import { Field, inputCls, Button, notify } from "../lib/ui";
 import { Panel, Frame, Rail, CommandHeader, CommandState } from "../lib/workstation";
-import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
 import { allListings, subscribeListings } from "../lib/listings";
@@ -138,7 +137,6 @@ const AcquisitionRadar: React.FC = () => {
             </div>
           </div>
         </Panel>
-        <Panel title="Intelligence rail · live telemetry"><ReactorTelemetry /></Panel>
         </Rail>
 
         {/* matched opportunities — the scored pool, anonymized */}
@@ -211,11 +209,7 @@ const AcquisitionRadar: React.FC = () => {
 
       {/* sector watch — buyer-lens intelligence */}
       <Frame>
-        <Panel title="Acquisition reactor · your sectors" className="lg:col-span-4"
-          foot="Sector acquisition volume across the network — node size ∝ √volume, colour = trend.">
-          <AcquisitionReactor height={208} />
-        </Panel>
-        <Panel title="Sector watch · your space" className="lg:col-span-8"
+        <Panel title="Sector watch · your space" className="lg:col-span-12"
           foot={<>Live ExitOS Acquisition Indexes for your mandate. Full set in <Link to="/console/indexes" className="text-deal-300 hover:text-deal-200">Acquisition Indexes</Link>.</>}>
           {watch.length ? (
             <table className="w-full text-[12px]">
