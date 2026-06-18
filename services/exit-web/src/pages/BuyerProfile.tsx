@@ -6,6 +6,8 @@ import {
   sectorOverlap, recommendedAction, fmtUsdShort, expectedOutcomeFor, buyerRationale,
   acquisitionAppetiteScore, buyerConfidence, DNA_AS_OF,
 } from "../lib/buyer-dna";
+import { buyerEngagement, ENGAGEMENT_DISCLAIMER } from "../lib/buyer-contact";
+import { sectorTokensFor } from "../lib/buyer-dna";
 import { VALUATION_INSTITUTIONAL } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 
@@ -42,6 +44,7 @@ const BuyerProfile: React.FC = () => {
   const appetite = acquisitionAppetiteScore(p);
   const confidence = buyerConfidence(p);
   const medianClose = p.median_close_days ?? VALUATION_INSTITUTIONAL.timeToClose.lowDays;
+  const eng = buyerEngagement(p, sectorTokensFor(SAMPLE_COMPANY.sector));
 
   return (
     <div>
@@ -125,6 +128,30 @@ const BuyerProfile: React.FC = () => {
           </ul>
         )}
         <div className="mt-3 text-[10px] text-white/35">Every point is evidence from the buyer's indexed acquisition record — points appear only when the data supports them.</div>
+      </Card>
+
+      {/* buyer engagement intelligence — how to approach, not who to spam */}
+      <Card className="mt-6 p-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Engagement intelligence</div>
+          <span className="text-[10px] uppercase tracking-wide text-white/35">targeted approach · {eng.telemetryConnected ? "telemetry live" : "process telemetry not yet observed"}</span>
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          <EngStat label="Best contact" value={eng.bestContactRole} sub="typical decision-maker" wide />
+          <EngStat label="Prior similar acq." value={eng.priorSimilarAcquisitions > 0 ? String(eng.priorSimilarAcquisitions) : "—"} sub="indexed in your space" accent={eng.priorSimilarAcquisitions > 0 ? "#34d399" : undefined} />
+          <EngStat label="Response rate" value={eng.responseRatePct != null ? `${eng.responseRatePct}%` : "—"} sub="needs platform deals" />
+          <EngStat label="Time to NDA" value={eng.medianTimeToNdaDays != null ? `${eng.medianTimeToNdaDays}d` : "—"} sub="needs platform deals" />
+          <EngStat label="Time to LOI" value={eng.medianTimeToLoiDays != null ? `${eng.medianTimeToLoiDays}d` : "—"} sub="needs platform deals" />
+          <EngStat label="Time to close" value={eng.medianTimeToCloseDays != null ? `${eng.medianTimeToCloseDays}d` : "—"} sub={eng.medianTimeToCloseDays != null ? "median, disclosed" : "not disclosed"} accent={eng.medianTimeToCloseDays != null ? "#fbbf24" : undefined} />
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {eng.research.map((r) => (
+            <a key={r.label} href={r.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[12px] font-medium text-white/75 transition hover:bg-white/5 hover:text-deal-300">
+              {r.label} ↗
+            </a>
+          ))}
+        </div>
+        <div className="mt-3 border-t border-white/10 pt-3 text-[10px] leading-relaxed text-white/35">{ENGAGEMENT_DISCLAIMER}</div>
       </Card>
 
       {/* expected outcome for the founder's company */}
@@ -235,6 +262,14 @@ const BuyerProfile: React.FC = () => {
     </div>
   );
 };
+
+const EngStat: React.FC<{ label: string; value: string; sub: string; accent?: string; wide?: boolean }> = ({ label, value, sub, accent, wide }) => (
+  <div className={wide ? "sm:col-span-1" : ""}>
+    <div className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-white/40">{label}</div>
+    <div className="mt-0.5 text-[13px] font-bold leading-tight" style={{ color: accent ?? "rgba(255,255,255,0.9)" }}>{value}</div>
+    <div className="text-[10px] text-white/35">{sub}</div>
+  </div>
+);
 
 const Row: React.FC<{ k: string; v: React.ReactNode }> = ({ k, v }) => (
   <div className="flex items-baseline justify-between gap-3 text-[12.5px]">
