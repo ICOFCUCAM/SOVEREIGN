@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Card, Kpi, SectionHeader } from "../lib/ui";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import { MULTIPLES } from "@exit/engines";
 import { premiumLeague, speedLeague, DNA_AS_OF } from "../lib/buyer-dna";
 
@@ -25,86 +26,85 @@ const label = (s: string): string => s.replace(/_/g, " ");
 const OutcomeIntelligence: React.FC = () => {
   const premium = premiumLeague(12);
   const speed = speedLeague(12);
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Market Intelligence · Outcomes"
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Market Intelligence"
         title="Outcome Intelligence"
-        description={`Who pays the most, who closes the fastest, and which sectors command the strongest multiples — from disclosed registry outcomes and the valuation framework. As of ${DNA_AS_OF.slice(0, 10)}.`}
+        tag="Who pays · who closes"
+        status={`As of ${DNA_AS_OF.slice(0, 10)}`}
+        metrics={[
+          { k: "Disclosed premium", v: String(premium.length), accent: true, sub: "buyers on record" },
+          { k: "Close-time data", v: String(speed.length), sub: "median announced→closed" },
+          { k: "Sectors benchmarked", v: String(SECTOR_MULT.length), sub: "multiple bands" },
+          { k: "Top premium", v: premium[0] ? `${Math.round((premium[0].premium_pct ?? 0) * 100)}%` : "—", accent: true, sub: premium[0]?.name },
+        ]}
       />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Buyers with disclosed premium" value={String(premium.length)} sub="on the record" accent="#34d399" />
-        <Kpi label="Buyers with close-time data" value={String(speed.length)} sub="median announced→closed" />
-        <Kpi label="Sectors benchmarked" value={String(SECTOR_MULT.length)} sub="multiple bands" accent="#fbbf24" />
-        <Kpi label="Top premium" value={premium[0] ? `${Math.round((premium[0].premium_pct ?? 0) * 100)}%` : "—"} sub={premium[0]?.name ?? ""} />
-      </div>
+      <MarketTape items={tape} />
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        {/* highest premium payers */}
-        <Card className="overflow-hidden p-0">
-          <div className="border-b border-white/10 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-deal-300">Highest premium payers</div>
-          <table className="w-full text-[12.5px]">
+      <Frame>
+        <Panel title="Highest premium payers" className="lg:col-span-6"
+          foot="Premium over disclosed reference price. Only buyers with a priced, referenced deal appear.">
+          <table className="w-full text-[12px]">
             <tbody>
               {premium.map((p, i) => (
                 <tr key={p.buyer_id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                  <td className="px-5 py-2.5 font-mono text-white/40">{i + 1}</td>
-                  <td className="px-3 py-2.5"><Link to={`/console/buyer/${p.buyer_id}`} className="font-semibold text-white hover:text-deal-300">{p.name}</Link></td>
-                  <td className="px-3 py-2.5 text-right font-mono font-bold tabular-nums text-deal-300">+{Math.round((p.premium_pct ?? 0) * 100)}%</td>
-                  <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/45">{p.disclosed_events} disclosed</td>
+                  <td className="px-3 py-1.5 font-mono text-white/35">{i + 1}</td>
+                  <td className="px-2 py-1.5"><Link to={`/console/buyer/${p.buyer_id}`} className="font-semibold text-white hover:text-deal-300">{p.name}</Link></td>
+                  <td className="px-2 py-1.5 text-right font-mono font-bold tabular-nums text-deal-300">+{Math.round((p.premium_pct ?? 0) * 100)}%</td>
+                  <td className="px-3 py-1.5 text-right font-mono tabular-nums text-white/45">{p.disclosed_events} disc.</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">Premium over disclosed reference price. Only buyers with a priced, referenced deal appear.</div>
-        </Card>
+        </Panel>
 
-        {/* fastest closers */}
-        <Card className="overflow-hidden p-0">
-          <div className="border-b border-white/10 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-deal-300">Fastest closers</div>
-          <table className="w-full text-[12.5px]">
+        <Panel title="Fastest closers" className="lg:col-span-6"
+          foot="Median announced→closed duration on completed deals.">
+          <table className="w-full text-[12px]">
             <tbody>
               {speed.map((p, i) => (
                 <tr key={p.buyer_id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                  <td className="px-5 py-2.5 font-mono text-white/40">{i + 1}</td>
-                  <td className="px-3 py-2.5"><Link to={`/console/buyer/${p.buyer_id}`} className="font-semibold text-white hover:text-deal-300">{p.name}</Link></td>
-                  <td className="px-3 py-2.5 text-right font-mono font-bold tabular-nums text-white/85">{p.median_close_days}d</td>
-                  <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/45">{p.close_rate != null ? `${Math.round(p.close_rate * 100)}% close` : "—"}</td>
+                  <td className="px-3 py-1.5 font-mono text-white/35">{i + 1}</td>
+                  <td className="px-2 py-1.5"><Link to={`/console/buyer/${p.buyer_id}`} className="font-semibold text-white hover:text-deal-300">{p.name}</Link></td>
+                  <td className="px-2 py-1.5 text-right font-mono font-bold tabular-nums text-white/85">{p.median_close_days}d</td>
+                  <td className="px-3 py-1.5 text-right font-mono tabular-nums text-white/45">{p.close_rate != null ? `${Math.round(p.close_rate * 100)}%` : "—"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">Median announced→closed duration on completed deals.</div>
-        </Card>
-      </div>
+        </Panel>
+      </Frame>
 
-      {/* strongest-multiple sectors */}
-      <Card className="mt-6 overflow-hidden p-0">
-        <div className="border-b border-white/10 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-deal-300">Sectors by multiple — what commands the strongest valuation</div>
-        <table className="w-full text-[12.5px]">
-          <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
-            <tr className="border-b border-white/10">
-              <th className="px-5 py-2.5">Sector</th><th className="px-3 py-2.5">Basis</th>
-              <th className="px-3 py-2.5 text-right">Low</th><th className="px-3 py-2.5 text-right">Mid</th>
-              <th className="px-3 py-2.5 text-right">High</th><th className="px-5 py-2.5 text-right">EBITDA mid</th>
-            </tr>
-          </thead>
-          <tbody>
-            {SECTOR_MULT.map((s) => (
-              <tr key={s.sector} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                <td className="px-5 py-2.5 font-medium capitalize text-white">{label(s.sector)}</td>
-                <td className="px-3 py-2.5 text-white/45">{s.kind}</td>
-                <td className="px-3 py-2.5 text-right font-mono tabular-nums text-white/60">{s.low}×</td>
-                <td className="px-3 py-2.5 text-right font-mono font-bold tabular-nums text-deal-300">{s.mid}×</td>
-                <td className="px-3 py-2.5 text-right font-mono tabular-nums text-white/60">{s.high}×</td>
-                <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/55">{s.ebitda != null ? `${s.ebitda}×` : "—"}</td>
+      <Frame>
+        <Panel title="Sectors by multiple · what commands the strongest valuation" className="lg:col-span-12"
+          foot="Institutional multiple priors, framework-governed (the same bands the valuation engine applies). Tables widen as the registry accretes disclosed outcomes.">
+          <table className="w-full text-[12px]">
+            <thead className="sticky top-0 bg-ink-900 text-left text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">
+              <tr className="border-b border-white/10">
+                <th className="px-3 py-1.5">Sector</th><th className="px-2 py-1.5">Basis</th>
+                <th className="px-2 py-1.5 text-right">Low</th><th className="px-2 py-1.5 text-right">Mid</th>
+                <th className="px-2 py-1.5 text-right">High</th><th className="px-3 py-1.5 text-right">EBITDA mid</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">Institutional multiple priors, framework-governed (the same bands the valuation engine applies). Premium & close-time tables widen as the registry accretes disclosed outcomes.</div>
-      </Card>
+            </thead>
+            <tbody>
+              {SECTOR_MULT.map((s) => (
+                <tr key={s.sector} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                  <td className="px-3 py-1.5 font-medium capitalize text-white">{label(s.sector)}</td>
+                  <td className="px-2 py-1.5 text-white/45">{s.kind}</td>
+                  <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/60">{s.low}×</td>
+                  <td className="px-2 py-1.5 text-right font-mono font-bold tabular-nums text-deal-300">{s.mid}×</td>
+                  <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/60">{s.high}×</td>
+                  <td className="px-3 py-1.5 text-right font-mono tabular-nums text-white/55">{s.ebitda != null ? `${s.ebitda}×` : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Panel>
+      </Frame>
     </div>
   );
 };

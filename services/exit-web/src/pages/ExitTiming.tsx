@@ -1,5 +1,7 @@
-import React from "react";
-import { Card, Kpi, SectionHeader, fmtMoney } from "../lib/ui";
+import React, { useMemo } from "react";
+import { fmtMoney } from "../lib/ui";
+import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { buildMarketTape } from "../lib/market-tape";
 import BankerTake from "../components/BankerTake";
 import { READINESS_ANALYSIS, BUYERS, VALUATION_STANDARD } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -60,14 +62,30 @@ const ExitTiming: React.FC = () => {
     { label: "Your trajectory", value: `${Math.round(growthYoy * 100)}% ARR growth`, trend: "compounding", impact: "tailwind", note: "Each quarter lifts the headline into a higher band." },
   ];
   const tailwinds = signals.filter((s) => s.impact === "tailwind").length;
+  const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Prepare · Monitor"
-        title="Exit Timing Engine"
-        description="Most founders don't know when to sell. The engine reads industry multiples, acquisition activity, competitor exits, rates and buyer behavior — alongside your own trajectory — and tells you the optimal window and the cost of mistiming it."
+    <div className="space-y-2">
+      <CommandHeader
+        kicker="◉ Timing Desk"
+        title="Exit Timing"
+        tag="Monitor"
+        status={`${tailwinds}/${signals.length} tailwinds`}
+        meta={[
+          { k: "GROWTH", v: `${Math.round(growthYoy * 100)}%` },
+          { k: "BUYERS CIRCLING", v: activeBuyers },
+        ]}
+        metrics={[
+          { k: "Optimal window", v: `${windowLo}–${windowHi}mo`, accent: true, sub: "to start" },
+          { k: "Projected uplift", v: `+${upliftPct}%`, accent: true, sub: "value of waiting" },
+          { k: "Sell today", v: fmtMoney(current), sub: "strategic mid" },
+          { k: "Sell at window", v: fmtMoney(potential), sub: `Q2 ${windowRow.year}` },
+          { k: "Market signals", v: `${tailwinds}/${signals.length}`, sub: "tailwinds" },
+          { k: "Buyers circling", v: String(activeBuyers), sub: "acquisition mode" },
+        ]}
       />
+
+      <MarketTape items={tape} />
 
       <BankerTake
         next={<>Prepare now and target a sale in <span className="text-white">months {windowLo}–{windowHi}</span> — as the readiness gap closes and multiples hold.</>}
@@ -79,118 +97,75 @@ const ExitTiming: React.FC = () => {
         cta={{ label: "See readiness fixes", to: "/console/readiness" }}
       />
 
-      {/* ── Verdict ──────────────────────────────────────────────── */}
-      <Card className="p-6">
-        <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
-          <div className="border-b border-white/10 pb-6 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-8">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-400">Recommended window</div>
-            <div className="mt-2 font-serif text-3xl font-bold text-white">Months {windowLo}–{windowHi}</div>
-            <p className="mt-2 text-[13px] leading-relaxed text-white/60">
+      <Frame>
+        <Panel title="Recommended window" className="lg:col-span-5"
+          foot="Sell too early and you leave the readiness gap on the table; too late and you risk the multiple cycle turning. The window balances both.">
+          <div className="p-4">
+            <div className="font-mono text-3xl font-bold text-white">Months {windowLo}–{windowHi}</div>
+            <p className="mt-2 text-[12.5px] leading-relaxed text-white/60">
               Delaying <span className="text-white">~{sweet} months</span> to close the readiness gap projects a{" "}
-              <span className="font-mono font-semibold text-deal-300">+{upliftPct}%</span> valuation lift —{" "}
-              {fmtMoney(current)} today to {fmtMoney(potential)} at the window.
+              <span className="font-mono font-semibold text-deal-300">+{upliftPct}%</span> lift — {fmtMoney(current)} → {fmtMoney(potential)}.
             </p>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3">
-                <div className="text-[10px] uppercase tracking-wide text-white/40">Sell today</div>
-                <div className="font-mono text-xl font-bold text-white/80">{fmtMoney(current)}</div>
-              </div>
-              <div className="rounded-lg border border-deal-500/30 bg-deal-600/[0.07] p-3">
-                <div className="text-[10px] uppercase tracking-wide text-deal-300">Sell at window</div>
-                <div className="font-mono text-xl font-bold text-deal-300">{fmtMoney(potential)}</div>
-              </div>
+            <div className="mt-3 grid grid-cols-2 gap-px overflow-hidden rounded-md bg-white/10">
+              <div className="bg-ink-900 p-3"><div className="text-[10px] uppercase tracking-wide text-white/40">Sell today</div><div className="font-mono text-lg font-bold text-white/80">{fmtMoney(current)}</div></div>
+              <div className="bg-ink-900 p-3"><div className="text-[10px] uppercase tracking-wide text-deal-300">Sell at window</div><div className="font-mono text-lg font-bold text-deal-300">{fmtMoney(potential)}</div></div>
             </div>
           </div>
+        </Panel>
 
-          {/* timeline */}
-          <div className="flex flex-col justify-center">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Timing curve</div>
-            <div className="mt-6 relative h-2 rounded-full bg-white/10">
-              {/* optimal window band */}
-              <div className="absolute h-full rounded-full bg-deal-500/40"
-                style={{ left: `${(windowLo / (windowHi + 6)) * 100}%`, width: `${((windowHi - windowLo) / (windowHi + 6)) * 100}%` }} />
-              {/* sweet spot marker */}
-              <div className="absolute -top-1 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-ink-800 bg-deal-400"
-                style={{ left: `${(sweet / (windowHi + 6)) * 100}%` }} />
-              {/* now marker */}
-              <div className="absolute -top-1 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-ink-800 bg-white/50" style={{ left: "0%" }} />
+        <Panel title="Timing curve" className="lg:col-span-7">
+          <div className="p-4 pt-8">
+            <div className="relative h-2 rounded-full bg-white/10">
+              <div className="absolute h-full rounded-full bg-deal-500/40" style={{ left: `${(windowLo / (windowHi + 6)) * 100}%`, width: `${((windowHi - windowLo) / (windowHi + 6)) * 100}%` }} />
+              <div className="absolute -top-1 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-ink-900 bg-deal-400" style={{ left: `${(sweet / (windowHi + 6)) * 100}%` }} />
+              <div className="absolute -top-1 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-ink-900 bg-white/50" style={{ left: "0%" }} />
             </div>
             <div className="mt-3 flex justify-between text-[11px] text-white/45">
-              <span>Now · {fmtMoney(current)}</span>
-              <span className="text-deal-300">Optimal window</span>
-              <span>+{windowHi + 6}mo</span>
+              <span>Now · {fmtMoney(current)}</span><span className="text-deal-300">Optimal window</span><span>+{windowHi + 6}mo</span>
             </div>
-            <p className="mt-5 text-[12.5px] leading-relaxed text-white/55">
-              Sell too early and you leave the readiness gap on the table. Sell too late and you risk the multiple
-              cycle turning. The window balances both.
-            </p>
+            <div className="mt-5 grid grid-cols-3 gap-px overflow-hidden rounded-md bg-white/10">
+              {timeline.map((t) => {
+                const isWindow = t.year === windowRow.year;
+                const c = t.score >= 85 ? "#34d399" : t.score >= 60 ? "#fbbf24" : "#f87171";
+                return (
+                  <div key={t.year} className={`bg-ink-900 p-3 ${isWindow ? "ring-1 ring-inset ring-deal-400/50" : ""}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[15px] font-bold text-white">{t.year}</span>
+                      {isWindow && <span className="rounded bg-deal-600/25 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-deal-200">Window</span>}
+                    </div>
+                    <div className="mt-1.5 font-mono text-xl font-bold" style={{ color: c }}>{t.score}<span className="text-[10px] text-white/35">/100</span></div>
+                    <div className="font-mono text-[12px] font-semibold text-white/80">{fmtMoney(t.value)}</div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </Card>
+        </Panel>
+      </Frame>
 
-      {/* ── Exit Readiness Timeline ──────────────────────────────── */}
-      <Card className="mt-8 p-6">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Exit readiness timeline</div>
-            <p className="mt-1 text-[12px] text-white/45">Where readiness and value head as the gaps close and the business compounds.</p>
-          </div>
-          <div className="rounded-lg border border-deal-500/30 bg-deal-600/[0.07] px-4 py-2 text-right">
-            <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-deal-300">Recommended exit window</div>
-            <div className="font-mono text-base font-bold text-white">Q2 {windowRow.year} · {fmtMoney(windowRow.value)}</div>
-          </div>
-        </div>
-        <div className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-xl bg-white/10">
-          {timeline.map((t) => {
-            const isWindow = t.year === windowRow.year;
-            const c = t.score >= 85 ? "#34d399" : t.score >= 60 ? "#fbbf24" : "#f87171";
-            return (
-              <div key={t.year} className={`bg-ink-800/95 p-4 ${isWindow ? "ring-1 ring-inset ring-deal-400/50" : ""}`}>
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-lg font-bold text-white">{t.year}</span>
-                  {isWindow && <span className="rounded-full bg-deal-600/25 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-deal-200">Window</span>}
+      <Frame>
+        <Panel title="Market signals monitored" className="lg:col-span-12"
+          foot="All signals computed from the valuation engine, the discovery pool and the source-referenced acquisition history.">
+          <div className="grid grid-cols-1 gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
+            {signals.map((s) => {
+              const st = IMPACT_STYLE[s.impact];
+              return (
+                <div key={s.label} className="bg-ink-900 p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="text-[10px] font-semibold uppercase tracking-wide text-white/45">{s.label}</div>
+                    <span className="rounded px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide" style={{ background: `${st.color}1f`, color: st.color }}>{st.label}</span>
+                  </div>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="font-mono text-[16px] font-bold text-white">{s.value}</span>
+                    <span className="text-[11px]" style={{ color: st.color }}>{s.trend}</span>
+                  </div>
+                  <p className="mt-1 text-[11px] leading-snug text-white/55">{s.note}</p>
                 </div>
-                <div className="mt-3 text-[10px] uppercase tracking-wide text-white/40">Ready score</div>
-                <div className="font-mono text-2xl font-bold" style={{ color: c }}>{t.score}</div>
-                <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
-                  <div className="h-full rounded-full" style={{ width: `${t.score}%`, background: c }} />
-                </div>
-                <div className="mt-3 text-[10px] uppercase tracking-wide text-white/40">Expected value</div>
-                <div className="font-mono text-base font-semibold text-white">{fmtMoney(t.value)}</div>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
-
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi label="Optimal window" value={`${windowLo}–${windowHi}mo`} sub="to start the process" accent="#34d399" />
-        <Kpi label="Projected uplift" value={`+${upliftPct}%`} sub="value of waiting" accent="#34d399" />
-        <Kpi label="Market signals" value={`${tailwinds}/${signals.length}`} sub="tailwinds" />
-        <Kpi label="Buyers circling" value={String(activeBuyers)} sub="in acquisition mode" />
-      </div>
-
-      {/* ── Market signals ───────────────────────────────────────── */}
-      <h2 className="mt-10 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Market signals monitored</h2>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {signals.map((s) => {
-          const st = IMPACT_STYLE[s.impact];
-          return (
-            <Card key={s.label} className="p-5">
-              <div className="flex items-start justify-between gap-2">
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-white/45">{s.label}</div>
-                <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide" style={{ background: `${st.color}1f`, color: st.color }}>{st.label}</span>
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-mono text-xl font-bold text-white">{s.value}</span>
-                <span className="text-[12px]" style={{ color: st.color }}>{s.trend}</span>
-              </div>
-              <p className="mt-2 text-[12px] leading-snug text-white/55">{s.note}</p>
-            </Card>
-          );
-        })}
-      </div>
-      <p className="mt-4 text-[11px] text-white/40">All signals computed from the valuation engine, the discovery pool and the source-referenced acquisition history.</p>
+              );
+            })}
+          </div>
+        </Panel>
+      </Frame>
     </div>
   );
 };

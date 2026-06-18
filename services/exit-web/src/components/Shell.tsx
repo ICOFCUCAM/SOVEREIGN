@@ -16,6 +16,7 @@ const basePath = (to: string): string => to.split("#")[0];
 const WORKSTATION_ROUTES = new Set([
   "/console", "/console/buyer-graph", "/console/acquisition-radar", "/console/inbox",
   "/console/valuation", "/console/readiness",
+  "/console/indexes", "/console/outcomes", "/console/exit-timing", "/console/market-map",
 ]);
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
