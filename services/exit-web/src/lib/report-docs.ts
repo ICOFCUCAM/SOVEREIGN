@@ -1,5 +1,9 @@
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis, type CompanyProfile } from "@exit/engines";
-import { rankedBuyers, expectedOutcomeFor, sectorOverlap, buyerConfidence, fmtUsdShort } from "./buyer-dna";
+import {
+  rankedBuyers, expectedOutcomeFor, sectorOverlap, buyerConfidence, fmtUsdShort,
+  buyerById, acquisitionProbability, buyerRationale, acquisitionSignals,
+  acquisitionAppetiteScore, similarAcquisitionsBy,
+} from "./buyer-dna";
 import { activeTokens } from "./active-company";
 import { ACQ_INDEXES, MARKET_INTEL, fmtUsd } from "./market-intel";
 import { MARKET } from "./market-stats";
@@ -52,6 +56,88 @@ export function buildBuyerIntelReport(company: CompanyProfile): BuyerIntelReport
     summary: { qualified: INST.buyerUniverse.qualified, scored: INST.buyerUniverse.scored, topProbability: ranked[0]?.probability.pct ?? 0, medianPremium: INST.comparablesAnalysis.medianPremiumPct != null ? pctS(INST.comparablesAnalysis.medianPremiumPct) : "—" },
     scorecards,
     universe: { strategic: INST.buyerUniverse.strategic, financial: INST.buyerUniverse.financial, sovereign: INST.buyerUniverse.sovereign, family_office: INST.buyerUniverse.family_office, qualified: INST.buyerUniverse.qualified, scored: INST.buyerUniverse.scored, registry: INST.buyerUniverse.registry },
+  };
+}
+
+// ── BUYER BRIEFING BOOK (per acquirer) ──────────────────────────────
+// A deep-dive on a single acquirer↔company pairing. Every figure is a
+// measured DNA quantity or an engine output — nothing here is asserted.
+export interface BuyerBriefing {
+  meta: ReportMeta;
+  buyerId: string;
+  found: boolean;
+  header: { name: string; type: string; country: string; confidence: string };
+  summary: { probabilityPct: number; expectedValue: string; appetiteScore: number; appetiteTier: string; strategicFitPct: number };
+  thesis: string;
+  rationale: { label: string; detail: string }[];
+  probabilityDrivers: { label: string; pct: number }[];
+  profile: { k: string; v: string }[];
+  similar: { target: string; date: string; value: string; industry: string }[];
+  signals: { label: string; status: string; detail: string; kind: string }[];
+}
+export function buildBuyerBriefing(company: CompanyProfile, buyerId: string): BuyerBriefing {
+  const INST = runInstitutionalValuation(company);
+  const fv = INST.frameworkVersion;
+  const m = meta("Buyer Briefing Book", company.name, fv);
+  const p = buyerById(buyerId);
+  if (!p) {
+    return {
+      meta: m, buyerId, found: false,
+      header: { name: "Acquirer not found", type: "—", country: "—", confidence: "—" },
+      summary: { probabilityPct: 0, expectedValue: "—", appetiteScore: 0, appetiteTier: "—", strategicFitPct: 0 },
+      thesis: "No indexed acquirer matches this identifier.", rationale: [], probabilityDrivers: [], profile: [], similar: [], signals: [],
+    };
+  }
+  const tokens = activeTokens(company);
+  const baseline = INST.financialBaseline.mid;
+  const prob = acquisitionProbability(p, tokens);
+  const exp = expectedOutcomeFor(p, baseline);
+  const ov = sectorOverlap(p, tokens);
+  const appetite = acquisitionAppetiteScore(p);
+  const rat = buyerRationale(p, baseline, tokens, company.sector);
+  const sig = acquisitionSignals(p);
+  const similar = similarAcquisitionsBy(p.name);
+  return {
+    meta: m, buyerId, found: true,
+    header: { name: p.name, type: p.buyer_type.replace(/_/g, " "), country: p.country ?? "—", confidence: buyerConfidence(p) },
+    summary: {
+      probabilityPct: prob.pct,
+      expectedValue: `${fmtUsdShort(exp.expectedClose)}–${fmtUsdShort(exp.expectedOffer)}`,
+      appetiteScore: appetite.score, appetiteTier: appetite.tier, strategicFitPct: ov.pct,
+    },
+    thesis: rat.thesis,
+    rationale: rat.points.map((pt) => ({ label: pt.label, detail: pt.detail })),
+    probabilityDrivers: [
+      { label: "Acquisition appetite", pct: Math.round((prob.appetite / 50) * 100) },
+      { label: "Sector overlap", pct: Math.round((prob.overlap / 34) * 100) },
+      { label: "Deal velocity", pct: Math.round((prob.velocity / 14) * 100) },
+      { label: "Recency of activity", pct: Math.round((prob.recency / 10) * 100) },
+    ],
+    profile: [
+      { k: "Acquirer type", v: p.buyer_type.replace(/_/g, " ") },
+      { k: "Events indexed", v: `${p.events_indexed} (${p.disclosed_events} disclosed)` },
+      { k: "Deals — last 12 months", v: String(p.deals_12m) },
+      { k: "Deals — last 3 years", v: String(p.deals_3y) },
+      { k: "Acquisition cadence", v: p.frequency_per_year != null ? `${p.frequency_per_year}/year` : "—" },
+      { k: "Average deal size", v: p.avg_deal_usd != null ? fmtUsdShort(p.avg_deal_usd) : "undisclosed" },
+      { k: "Check-size band", v: p.check_size_band ? `${fmtUsdShort(p.check_size_band.low_usd)}–${fmtUsdShort(p.check_size_band.high_usd)}` : "undisclosed" },
+      { k: "Average premium paid", v: p.premium_pct != null ? `${Math.round(p.premium_pct * 100)}%` : "undisclosed" },
+      { k: "Close rate", v: p.close_rate != null ? `${Math.round(p.close_rate * 100)}%` : "undisclosed" },
+      { k: "Median close time", v: p.median_close_days != null ? `${p.median_close_days} days` : "undisclosed" },
+      { k: "Last acquisition", v: p.last_acquisition ? `${p.last_acquisition.target} · ${p.last_acquisition.date.slice(0, 7)}` : "—" },
+    ],
+    similar: similar.map((s) => ({
+      target: s.target,
+      date: s.date ?? "—",
+      value: s.value_usd != null ? fmtUsdShort(s.value_usd) : "undisclosed",
+      industry: s.industry,
+    })),
+    signals: sig.signals.map((s) => ({
+      label: s.label,
+      status: s.source === "feed" ? "Feed pending" : s.active ? "Active" : "Inactive",
+      detail: s.detail,
+      kind: s.source,
+    })),
   };
 }
 
