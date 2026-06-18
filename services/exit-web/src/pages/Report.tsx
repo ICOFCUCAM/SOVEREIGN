@@ -27,11 +27,13 @@ const EXHIBITS = [
   { n: "IV-A", title: "Valuation football field" },
   { n: "IV-B", title: "Valuation bridge — baseline to concluded value" },
   { n: "IV-C", title: "Methodology weighting" },
+  { n: "IV-D", title: "Premium sensitivity" },
   { n: "V-A", title: "Precedent transaction matrix" },
   { n: "VI-A", title: "Strategic acquirer ranking — fit-adjusted probability" },
   { n: "VI-B", title: "Buyer universe distribution" },
   { n: "VII-A", title: "Indicative path to close" },
   { n: "VIII-A", title: "Confidence drivers" },
+  { n: "VIII-B", title: "Risk factors and value at stake" },
   { n: "IX-A", title: "Figures by source" },
   { n: "XII-A", title: "Valuation variables and sources" },
 ];
@@ -121,6 +123,17 @@ const Report: React.FC = () => {
             rows={r.methodologies.map((mt) => ({ m: mt.name, b: mt.basis, w: `${mt.weightPct}%`, v: m$(mt.band.mid) }))}
           />
         </Exhibit>
+        <Exhibit n="IV-D" title="Premium sensitivity" source="ExitOS Valuation Framework — observed-premium band">
+          <BankTable
+            columns={[{ key: "p", label: "Applied premium" }, { key: "v", label: "Enterprise value", align: "right" }, { key: "d", label: "Δ vs. concluded", align: "right" }]}
+            rows={r.sensitivity.map((s) => ({
+              p: `+${pct(s.premiumPct)}`,
+              v: m$(s.evUsd),
+              d: <span className={s.delta === 0 ? "text-[#5b6675]" : s.delta > 0 ? "text-[#0e7a4f]" : "text-[#b4453a]"}>{s.delta === 0 ? "— concluded" : `${s.delta > 0 ? "+" : ""}${short(s.delta)}`}</span>,
+            }))}
+            footnote="Enterprise value across the observed-premium range — the financial baseline uplifted by the precedent-transaction band, not a hypothetical sweep."
+          />
+        </Exhibit>
       </Section>
 
       {/* V · COMPARABLE TRANSACTIONS */}
@@ -165,6 +178,13 @@ const Report: React.FC = () => {
         <Lead>Every figure in this report carries a composite confidence of <strong className="text-[#0b1220]">{r.exec.confidencePct}%</strong> ({r.exec.confidenceTier}), built from five measured drivers.</Lead>
         <Exhibit n="VIII-A" title="Confidence drivers">
           <ConfidenceDrivers drivers={r.confidenceDrivers} />
+        </Exhibit>
+        <Exhibit n="VIII-B" title="Risk factors and value at stake" source="ExitOS readiness analysis">
+          <BankTable
+            columns={[{ key: "d", label: "Risk factor" }, { key: "r", label: "Mitigant" }, { key: "e", label: "Effort", align: "center" }, { key: "i", label: "Value at stake", align: "right" }]}
+            rows={r.risks.map((rk) => ({ d: rk.dimension, r: rk.recommendation, e: rk.effort, i: <span className="text-[#0e7a4f]">+{short(rk.impactUsd)}</span> }))}
+            footnote="The factors a buyer is most likely to probe in diligence, each with the value a mitigant would protect or unlock."
+          />
         </Exhibit>
       </Section>
 
