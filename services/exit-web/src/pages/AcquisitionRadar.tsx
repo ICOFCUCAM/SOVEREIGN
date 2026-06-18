@@ -153,10 +153,17 @@ const AcquisitionRadar: React.FC = () => {
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <div className="font-serif text-[17px] font-bold text-white">
                     {l.code} <span className="text-[12px] font-normal text-white/40">· {l.publicView.sector} · {l.publicView.region}</span>
+                    {l.productMeta && <span className="ml-2 rounded-full bg-white/[0.06] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/60 ring-1 ring-white/10">{l.productMeta.category}</span>}
                     {match.qualified && <span className="ml-2 rounded-full bg-deal-500/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-deal-300 ring-1 ring-deal-400/40">Qualified</span>}
                   </div>
                   <div className="font-mono text-2xl font-bold tabular-nums text-deal-300">{match.score}%</div>
                 </div>
+                {l.productMeta && (
+                  <p className="mt-2 text-[12px] leading-snug text-white/65">
+                    {l.productMeta.capability}
+                    {l.productMeta.answers && <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.16em] text-deal-300/70">Answers · {l.productMeta.answers}</span>}
+                  </p>
+                )}
                 <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
                   {match.reasons.map((r) => (
                     <div key={r.label} className="flex items-baseline gap-2 text-[11.5px]">
@@ -166,8 +173,9 @@ const AcquisitionRadar: React.FC = () => {
                   ))}
                 </div>
                 <div className="mt-2.5 flex flex-wrap items-center gap-3 text-[11.5px] text-white/55">
-                  <span>Revenue {fmtUsd(l.publicView.revenueUsd)}</span>
-                  <span>· Growth {Math.round(l.publicView.growthPct * 100)}%</span>
+                  {l.publicView.disclosed === false
+                    ? <span className="text-white/45">Financials under NDA</span>
+                    : <><span>Revenue {fmtUsd(l.publicView.revenueUsd)}</span><span>· Growth {Math.round(l.publicView.growthPct * 100)}%</span></>}
                   <button
                     onClick={() => {
                       captureDealEvent({ actorRole: "buyer", kind: "added_to_outreach", subjectType: "listing", subjectId: l.id, subjectName: l.code });
