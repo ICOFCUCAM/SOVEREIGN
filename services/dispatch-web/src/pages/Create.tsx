@@ -131,6 +131,67 @@ const DOC_TYPES: DocTypeSpec[] = [
       { role: "commercials", heading: "Commercials", kind: "callout", calloutStyle: "info", placeholder: "Pricing and commercial terms." },
     ],
   },
+  {
+    docType: "press_release", label: "Press Release",
+    blurb: "Headline, lead, body, boilerplate.",
+    fields: [
+      { role: "headline", heading: "Headline", kind: "paragraph", placeholder: "The announcement in one strong line." },
+      { role: "lead", heading: "Lead Paragraph", kind: "paragraph", lead: true, placeholder: "CITY, Date — the who/what/when/where/why in one paragraph." },
+      { role: "body", heading: "Body", kind: "paragraph", placeholder: "Supporting detail, context, and a quote if available." },
+      { role: "boilerplate", heading: "Boilerplate", kind: "paragraph", placeholder: "Standard “About [organisation]” paragraph." },
+    ],
+  },
+  {
+    docType: "meeting_minutes", label: "Meeting Minutes",
+    blurb: "Attendees, discussion, decisions, actions.",
+    fields: [
+      { role: "attendees", heading: "Attendees", kind: "bullets", placeholder: "One attendee per line (name, role)." },
+      { role: "discussion", heading: "Discussion", kind: "paragraph", placeholder: "Summary of what was discussed." },
+      { role: "decisions", heading: "Decisions", kind: "bullets", placeholder: "One decision taken per line." },
+      { role: "actions", heading: "Action Items", kind: "bullets", placeholder: "One action per line (owner — task — due date)." },
+    ],
+  },
+  {
+    docType: "risk_report", label: "Risk Report",
+    blurb: "Summary, risk register, mitigations, recommendation.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "The overall risk position in one paragraph." },
+      { role: "risk_register", heading: "Risk Register", kind: "bullets", placeholder: "One risk per line (risk — likelihood — impact)." },
+      { role: "mitigations", heading: "Mitigations", kind: "paragraph", placeholder: "How the material risks are being mitigated." },
+      { role: "recommendation", heading: "Recommendation", kind: "callout", calloutStyle: "risk", placeholder: "What you are asking to be agreed on risk." },
+    ],
+  },
+  {
+    docType: "audit_report", label: "Audit Report",
+    blurb: "Summary, scope, findings, recommendations.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "Overall audit opinion in one paragraph." },
+      { role: "scope", heading: "Scope", kind: "paragraph", placeholder: "What was audited, the period, and the basis." },
+      { role: "findings", heading: "Findings", kind: "bullets", placeholder: "One finding per line (with rating where used)." },
+      { role: "recommendations", heading: "Recommendations", kind: "bullets", placeholder: "One recommendation per line." },
+    ],
+  },
+  {
+    docType: "due_diligence_report", label: "Due Diligence Report",
+    blurb: "Summary, scope, findings, red flags, recommendation.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "The diligence conclusion in one paragraph." },
+      { role: "scope", heading: "Scope", kind: "paragraph", placeholder: "What was examined and over what period." },
+      { role: "findings", heading: "Findings", kind: "bullets", placeholder: "One finding per line." },
+      { role: "red_flags", heading: "Red Flags", kind: "bullets", placeholder: "One material concern per line." },
+      { role: "recommendation", heading: "Recommendation", kind: "callout", calloutStyle: "warning", placeholder: "Proceed / proceed-with-conditions / do-not-proceed, and why." },
+    ],
+  },
+  {
+    docType: "white_paper", label: "White Paper",
+    blurb: "Abstract, problem, approach, conclusion.",
+    fields: [
+      { role: "abstract", heading: "Abstract", kind: "paragraph", lead: true, placeholder: "A short abstract of the paper's argument." },
+      { role: "problem", heading: "Problem", kind: "paragraph", placeholder: "The problem the paper addresses." },
+      { role: "approach", heading: "Approach", kind: "paragraph", placeholder: "The proposed approach or solution." },
+      { role: "conclusion", heading: "Conclusion", kind: "paragraph", placeholder: "What follows from the argument." },
+    ],
+  },
 ];
 
 const LEVELS = ["UNCLASSIFIED", "OFFICIAL", "OFFICIAL-SENSITIVE", "CONFIDENTIAL"];

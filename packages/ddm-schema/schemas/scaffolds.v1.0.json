@@ -144,6 +144,84 @@
       "citationStyle": "endnote",
       "tocDepth": 2,
       "numbered": true
+    },
+    "press_release": {
+      "docType": "press_release",
+      "template": "press-release",
+      "version": 1,
+      "requiredRoles": ["headline", "lead", "body", "boilerplate"],
+      "optionalRoles": ["subhead", "quote", "contact", "appendices"],
+      "roleOrder": ["title_block", "headline", "subhead", "lead", "body",
+                    "quote", "boilerplate", "contact", "appendices"],
+      "blockPolicy": {},
+      "citationStyle": "none",
+      "tocDepth": 1,
+      "numbered": false
+    },
+    "meeting_minutes": {
+      "docType": "meeting_minutes",
+      "template": "minutes",
+      "version": 1,
+      "requiredRoles": ["attendees", "discussion", "decisions", "actions"],
+      "optionalRoles": ["agenda", "apologies", "next_meeting", "appendices"],
+      "roleOrder": ["title_block", "attendees", "apologies", "agenda", "discussion",
+                    "decisions", "actions", "next_meeting", "appendices"],
+      "blockPolicy": { "actions": { "require": ["bullets"] } },
+      "citationStyle": "none",
+      "tocDepth": 1,
+      "numbered": true
+    },
+    "risk_report": {
+      "docType": "risk_report",
+      "template": "risk-report",
+      "version": 1,
+      "requiredRoles": ["summary", "risk_register", "mitigations", "recommendation"],
+      "optionalRoles": ["methodology", "appetite", "outlook", "appendices", "citations"],
+      "roleOrder": ["title_block", "summary", "methodology", "appetite", "risk_register",
+                    "mitigations", "outlook", "recommendation", "appendices", "citations"],
+      "blockPolicy": { "risk_register": { "require": ["bullets"] }, "recommendation": { "require": ["callout"] } },
+      "citationStyle": "endnote",
+      "tocDepth": 2,
+      "numbered": true
+    },
+    "audit_report": {
+      "docType": "audit_report",
+      "template": "audit-report",
+      "version": 1,
+      "requiredRoles": ["summary", "scope", "findings", "recommendations"],
+      "optionalRoles": ["methodology", "background", "management_response", "appendices", "citations"],
+      "roleOrder": ["title_block", "summary", "scope", "methodology", "background",
+                    "findings", "recommendations", "management_response", "appendices", "citations"],
+      "blockPolicy": { "findings": { "require": ["bullets"] } },
+      "citationStyle": "endnote",
+      "tocDepth": 2,
+      "numbered": true
+    },
+    "due_diligence_report": {
+      "docType": "due_diligence_report",
+      "template": "due-diligence",
+      "version": 1,
+      "requiredRoles": ["summary", "scope", "findings", "red_flags", "recommendation"],
+      "optionalRoles": ["background", "financials", "legal", "appendices", "citations"],
+      "roleOrder": ["title_block", "summary", "scope", "background", "financials",
+                    "legal", "findings", "red_flags", "recommendation", "appendices", "citations"],
+      "blockPolicy": { "red_flags": { "require": ["bullets"] }, "recommendation": { "require": ["callout"] } },
+      "citationStyle": "endnote",
+      "tocDepth": 2,
+      "numbered": true
+    },
+    "white_paper": {
+      "docType": "white_paper",
+      "template": "white-paper",
+      "version": 1,
+      "requiredRoles": ["abstract", "problem", "approach", "conclusion"],
+      "optionalRoles": ["background", "evidence", "implications", "appendices", "references"],
+      "roleOrder": ["title_block", "abstract", "problem", "background", "evidence",
+                    "approach", "implications", "conclusion", "appendices", "references"],
+      "blockPolicy": {},
+      "citationStyle": "footnote",
+      "tocDepth": 3,
+      "numbered": true
     }
   }
 }
