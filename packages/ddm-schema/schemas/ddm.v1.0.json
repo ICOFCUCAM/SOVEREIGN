@@ -12,7 +12,9 @@
       "type": "string",
       "enum": ["executive_briefing","situation_report","intelligence_briefing","policy_paper",
                "ministerial_report","strategic_memorandum","board_report","regulatory_response",
-               "research_dossier","investor_update","proposal_package"]
+               "research_dossier","investor_update","proposal_package",
+               "press_release","meeting_minutes","risk_report","audit_report",
+               "due_diligence_report","white_paper"]
     },
     "locale": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$", "default": "en-GB" },
     "metadata": { "$ref": "#/$defs/Metadata" },
