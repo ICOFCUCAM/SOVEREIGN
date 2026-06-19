@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { ExchangeMark } from "../components/ExchangeMark";
 
 // ── INSTITUTIONAL PUBLISHING LAYER ──────────────────────────────────
 // The shared vocabulary every ExitOS document is set in — cover, numbered
@@ -14,19 +15,20 @@ export const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"
 const INK = "#0b1220", MUTE = "#5b6675", FAINT = "#9aa3b0", LINE = "#d8dee8", HAIR = "#eef1f5";
 const GREEN = "#0e7a4f", NAVY = "#16314f", GOLD = "#8a6d3b";
 
-export const ReportFrame: React.FC<{ docType: string; company: string; frameworkVersion: string; children: React.ReactNode }> = ({ docType, company, frameworkVersion, children }) => {
+export const ReportFrame: React.FC<{ docType: string; company: string; frameworkVersion: string; reference?: string; children: React.ReactNode }> = ({ docType, company, frameworkVersion, reference, children }) => {
   const nav = useNavigate();
+  const ref = reference ?? docReference(docType, company, new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
   return (
-    <div className="min-h-screen bg-[#0a1018] py-8">
+    <div className="rpt-shell min-h-screen bg-[#0a1018] py-8">
       <style>{REPORT_CSS}</style>
       <div className="no-print mx-auto mb-5 flex max-w-[840px] items-center justify-between px-4">
         <button onClick={() => nav(-1)} className="rounded-md border border-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/70 hover:bg-white/5">← Back</button>
         <div className="text-[12px] text-white/45">{docType} · {company}</div>
         <button onClick={() => window.print()} className="rounded-md bg-deal-600 px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-500">Download PDF →</button>
       </div>
-      <div className="rpt mx-auto max-w-[840px] bg-white text-[#0b1220] shadow-2xl shadow-black/50">
-        <div className="rpt-fixed-header no-screen"><span>{company}</span><span>{docType}</span></div>
-        <div className="rpt-fixed-footer no-screen"><span>ExitOS Advisory · Strictly Private &amp; Confidential</span><span>Framework v{frameworkVersion}</span></div>
+      <div className="rpt mx-auto text-[#0b1220]">
+        <div className="rpt-fixed-header no-screen"><span className="flex items-center gap-1.5"><ExchangeMark size={11} tile={false} className="text-[#0e7a4f]" /> {company}</span><span>{docType}</span></div>
+        <div className="rpt-fixed-footer no-screen"><span>ExitOS Advisory · Strictly Private &amp; Confidential</span><span>{ref} · Framework v{frameworkVersion}</span></div>
         <div className="rpt-watermark no-screen">CONFIDENTIAL</div>
         {children}
       </div>
@@ -34,10 +36,21 @@ export const ReportFrame: React.FC<{ docType: string; company: string; framework
   );
 };
 
+/** A deterministic document control reference, e.g. EXOS·VAL·HLS·2026·A3F1. */
+export const docReference = (docType: string, company: string, date: string): string => {
+  const docCode = docType.replace(/[^A-Za-z ]/g, "").split(/\s+/).filter(Boolean).slice(0, 1).map((w) => w.slice(0, 3).toUpperCase())[0] ?? "DOC";
+  const co = company.replace(/[^A-Za-z ]/g, "").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "CO";
+  const year = (date.match(/\b(20\d{2})\b/) ?? [])[1] ?? String(new Date().getFullYear());
+  let h = 0; const seed = `${docType}|${company}|${date}`;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  const tag = h.toString(16).toUpperCase().padStart(4, "0").slice(0, 4);
+  return `EXOS·${docCode}·${co}·${year}·${tag}`;
+};
+
 /** Premium cover — institutional hairline geometry, no stock photography. */
 export const Cover: React.FC<{
-  docType: string; company: string; preparedFor: string; preparedBy: string; date: string; frameworkVersion: string; classification?: string;
-}> = ({ docType, company, preparedFor, preparedBy, date, frameworkVersion, classification = "Strictly Private & Confidential" }) => (
+  docType: string; company: string; preparedFor: string; preparedBy: string; date: string; frameworkVersion: string; classification?: string; reference?: string;
+}> = ({ docType, company, preparedFor, preparedBy, date, frameworkVersion, classification = "Strictly Private & Confidential", reference }) => (
   <section className="rpt-cover relative flex min-h-[1040px] flex-col overflow-hidden px-16 py-20">
     {/* subtle hairline geometry */}
     <svg className="pointer-events-none absolute -right-40 -top-24 h-[640px] w-[640px]" viewBox="0 0 200 200" fill="none" aria-hidden>
@@ -45,7 +58,7 @@ export const Cover: React.FC<{
       <g stroke={NAVY} strokeOpacity="0.05" strokeWidth="0.5">{Array.from({ length: 14 }, (_, i) => <line key={i} x1={i * 16} y1="200" x2={i * 16 + 60} y2="0" />)}</g>
     </svg>
     <div className="relative flex items-center gap-3">
-      <span className="inline-flex h-8 w-8 items-center justify-center rounded-sm bg-[#0e7a4f] font-mono text-[14px] font-bold text-white">E</span>
+      <ExchangeMark size={34} detail title="ExitOS" />
       <span className="text-[12px] font-semibold uppercase tracking-[0.34em] text-[#0e7a4f]">ExitOS Acquisition Exchange</span>
     </div>
     <div className="relative mt-auto">
@@ -60,8 +73,11 @@ export const Cover: React.FC<{
       </div>
     </div>
     <div className="relative mt-auto flex items-end justify-between border-t border-[#d8dee8] pt-5">
-      <span className="rounded-sm border border-[#c9b08a] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[#8a6d3b]">{classification}</span>
-      <span className="text-[10px] text-[#9aa3b0]">This document is the property of ExitOS Advisory and may not be reproduced or distributed.</span>
+      <div className="flex flex-col gap-2">
+        <span className="w-fit rounded-sm border border-[#c9b08a] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[#8a6d3b]">{classification}</span>
+        <span className="tnum font-mono text-[10px] tracking-[0.08em] text-[#9aa3b0]">Ref · {reference ?? docReference(docType, company, date)}</span>
+      </div>
+      <span className="max-w-[280px] text-right text-[10px] text-[#9aa3b0]">This document is the property of ExitOS Advisory and may not be reproduced or distributed.</span>
     </div>
   </section>
 );
@@ -85,6 +101,26 @@ export const Contents: React.FC<{ items: string[] }> = ({ items }) => (
       ))}
     </ol>
   </Section>
+);
+
+/** A formal "List of Exhibits" register — exhibit number + caption. */
+export const ListOfExhibits: React.FC<{ items: { n: string; title: string }[] }> = ({ items }) => (
+  <Section n={null} title="List of Exhibits">
+    <ol className="mt-2 divide-y divide-[#eef1f5]">
+      {items.map((e) => (
+        <li key={e.n} className="flex items-baseline gap-3 py-2 text-[12.5px]">
+          <span className="w-20 shrink-0 font-mono font-semibold text-[#0e7a4f]">Exhibit {e.n}</span>
+          <span className="font-medium text-[#0b1220]">{e.title}</span>
+          <span className="mx-2 flex-1 border-b border-dotted border-[#c8cfda]" />
+        </li>
+      ))}
+    </ol>
+  </Section>
+);
+
+/** A cross-reference to a numbered exhibit, e.g. (see Exhibit IV-A). */
+export const ExhibitRef: React.FC<{ n: string }> = ({ n }) => (
+  <span className="whitespace-nowrap font-medium text-[#0e7a4f]">Exhibit {n}</span>
 );
 
 export const Section: React.FC<{ n: number | null; title: string; children: React.ReactNode }> = ({ n, title, children }) => (
@@ -156,21 +192,58 @@ export const Note: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 export const PALETTE = { INK, MUTE, FAINT, LINE, HAIR, GREEN, NAVY, GOLD };
 
 export const REPORT_CSS = `
-.rpt { position: relative; font-feature-settings: "tnum" 1, "lnum" 1; }
+.rpt { position: relative; font-feature-settings: "tnum" 1, "lnum" 1; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.rpt h1, .rpt h2, .rpt .font-serif { font-family: "Source Serif 4", Georgia, "Times New Roman", serif; font-feature-settings: "lnum" 1; }
+.rpt h1 { letter-spacing: -0.012em; }
 .tnum { font-variant-numeric: tabular-nums lining-nums; }
 .no-screen { display: none; }
 .rpt-watermark { display: none; }
+
+/* ── On-screen pagination — each section reads as a discrete A4 sheet ── */
+@media screen {
+  .rpt { counter-reset: rptpage; }
+  .rpt > section {
+    position: relative;
+    width: 210mm;
+    max-width: 100%;
+    min-height: 297mm;
+    margin: 0 auto 26px;
+    background: #ffffff;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+    counter-increment: rptpage;
+  }
+  .rpt > section::after {
+    content: "ExitOS · Strictly Private & Confidential";
+    position: absolute; left: 18mm; bottom: 11mm;
+    font: 500 8.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.06em; color: #9aa3b0;
+  }
+  .rpt > section::before {
+    content: "Page " counter(rptpage);
+    position: absolute; right: 18mm; bottom: 11mm;
+    font: 600 8.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.06em; color: #9aa3b0; z-index: 1;
+  }
+  .rpt > section.rpt-cover::after, .rpt > section.rpt-cover::before { content: none; }
+}
 @media print {
   @page { size: A4; margin: 18mm 15mm 20mm; }
   @page { @bottom-center { content: "ExitOS Advisory  ·  Strictly Private & Confidential"; font-size: 8px; color: #9aa3b0; } @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8px; color: #9aa3b0; } }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   html, body { background: #ffffff !important; }
   .no-print { display: none !important; }
-  .rpt { box-shadow: none !important; max-width: none !important; width: 100% !important; margin: 0 !important; }
+  .rpt-shell { background: #ffffff !important; padding: 0 !important; min-height: 0 !important; }
+  .rpt { box-shadow: none !important; max-width: none !important; width: 100% !important; margin: 0 !important; background: #ffffff !important; }
+  .rpt > section { background: #ffffff !important; width: auto !important; min-height: 0 !important; box-shadow: none !important; }
   .rpt-section, .rpt-cover { break-before: page; }
   .rpt-cover { break-before: avoid; break-after: page; min-height: 0 !important; }
   .avoid-break { break-inside: avoid; }
-  tr, figure { break-inside: avoid; }
-  h2, h3 { break-after: avoid; }
+  tr, figure, li { break-inside: avoid; }
+  thead { display: table-header-group; }
+  h2, h3, figcaption { break-after: avoid; }
+  ol, ul { break-inside: auto; }
+  a { color: inherit !important; text-decoration: none !important; }
+  a[href]:after { content: ""; }
   .no-screen { display: flex; }
   .rpt-fixed-header { position: fixed; top: 0; left: 0; right: 0; justify-content: space-between; font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; color: #9aa3b0; padding: 5mm 15mm 0; }
   .rpt-fixed-footer { position: fixed; bottom: 0; left: 0; right: 0; justify-content: space-between; font-size: 8.5px; color: #9aa3b0; padding: 0 15mm 5mm; border-top: 1px solid #e3e8ef; }

@@ -6,9 +6,10 @@ import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
-import { allListings, subscribeListings } from "../lib/listings";
+import { allListings, subscribeListings, type Listing } from "../lib/listings";
 import { captureDealEvent } from "../lib/deal-events";
 import { requestNda, submitOffer, startDeal, advanceDeal, saveMandate, myMandate } from "../lib/exit-api";
+import PublishComposer from "../components/PublishComposer";
 import type { Region } from "@exit/engines";
 
 // BUYER ACQUISITION COMMAND CENTER — the other side of the exchange. A buyer
@@ -32,6 +33,7 @@ const AcquisitionRadar: React.FC = () => {
   const [offered, setOffered] = useState<Record<string, boolean>>({});
   const [watched, setWatched] = useState<Record<string, boolean>>({});
   const [savedMandate, setSavedMandate] = useState(false);
+  const [publish, setPublish] = useState<Listing | null>(null);
 
   // hydrate the form from the buyer's persisted mandate, if one exists
   useEffect(() => {
@@ -153,10 +155,24 @@ const AcquisitionRadar: React.FC = () => {
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <div className="font-serif text-[17px] font-bold text-white">
                     {l.code} <span className="text-[12px] font-normal text-white/40">· {l.publicView.sector} · {l.publicView.region}</span>
+                    {l.productMeta && <span className="ml-2 rounded-full bg-white/[0.06] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/60 ring-1 ring-white/10">{l.productMeta.category}</span>}
                     {match.qualified && <span className="ml-2 rounded-full bg-deal-500/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-deal-300 ring-1 ring-deal-400/40">Qualified</span>}
                   </div>
                   <div className="font-mono text-2xl font-bold tabular-nums text-deal-300">{match.score}%</div>
                 </div>
+                {l.productMeta && (
+                  <>
+                    <p className="mt-2 text-[12px] leading-snug text-white/65">{l.productMeta.capability}</p>
+                    {l.productMeta.coverage && l.productMeta.coverage.length > 0 && (
+                      <div className="mt-1.5 text-[11px] text-white/40"><span className="uppercase tracking-wide text-white/30">Coverage</span> · {l.productMeta.coverage.join(" · ")}</div>
+                    )}
+                    {l.productMeta.tags && l.productMeta.tags.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {l.productMeta.tags.map((t) => <span key={t} className="rounded bg-deal-600/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-deal-200 ring-1 ring-deal-400/25">{t}</span>)}
+                      </div>
+                    )}
+                  </>
+                )}
                 <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
                   {match.reasons.map((r) => (
                     <div key={r.label} className="flex items-baseline gap-2 text-[11.5px]">
@@ -166,14 +182,25 @@ const AcquisitionRadar: React.FC = () => {
                   ))}
                 </div>
                 <div className="mt-2.5 flex flex-wrap items-center gap-3 text-[11.5px] text-white/55">
-                  <span>Revenue {fmtUsd(l.publicView.revenueUsd)}</span>
-                  <span>· Growth {Math.round(l.publicView.growthPct * 100)}%</span>
+                  {l.productMeta
+                    ? <>
+                        {l.productMeta.valueText
+                          ? <span><span className="uppercase tracking-wide text-white/35">{l.productMeta.valueLabel ?? "Value"}</span> <span className="font-mono font-semibold text-deal-200">{l.productMeta.valueText}</span></span>
+                          : <span className="text-white/45">Value on request</span>}
+                        {l.productMeta.acquisitionReadyText && <span className="rounded bg-loi-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-loi-200 ring-1 ring-loi-400/40">★ Acquisition-ready · {l.productMeta.acquisitionReadyText}</span>}
+                      </>
+                    : l.publicView.disclosed === false
+                      ? <span className="text-white/45">Financials under NDA</span>
+                      : <><span>Revenue {fmtUsd(l.publicView.revenueUsd)}</span><span>· Growth {Math.round(l.publicView.growthPct * 100)}%</span></>}
                   <button
                     onClick={() => {
                       captureDealEvent({ actorRole: "buyer", kind: "added_to_outreach", subjectType: "listing", subjectId: l.id, subjectName: l.code });
                       setWatched((s) => ({ ...s, [l.id]: !s[l.id] }));
                     }}
                     className="rounded-md px-2 py-1 text-[11px] font-semibold text-white/60 ring-1 ring-white/10 transition hover:text-white">{watched[l.id] ? "★ Following" : "☆ Follow"}</button>
+                  <button
+                    onClick={() => setPublish(l)}
+                    className="rounded-md px-2 py-1 text-[11px] font-semibold text-deal-300 ring-1 ring-deal-400/30 transition hover:bg-deal-600/10">↗ Publish</button>
                   <button
                     onClick={() => {
                       // a single buyer action: captured telemetry the founder
@@ -240,6 +267,8 @@ const AcquisitionRadar: React.FC = () => {
           ) : <div className="px-3 py-3 text-[12px] text-white/45">Select target sectors to see their acquisition indexes.</div>}
         </Panel>
       </Frame>
+
+      <PublishComposer listing={publish ?? undefined} open={!!publish} onClose={() => setPublish(null)} />
     </div>
   );
 };

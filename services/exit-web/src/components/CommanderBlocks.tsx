@@ -3,6 +3,7 @@ import { Card, fmtMoney } from "../lib/ui";
 import { CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VALUE_LEFT_USD, DEAL_BUYERS, ACTIVE_BUYERS, DEMAND_LABEL } from "../lib/deal-context";
 import { commanderMetrics } from "../lib/commander-metrics";
 import { DEAL_INTEL_FMT } from "../lib/market-stats";
+import { BUYERS } from "../lib/engines";
 
 // Chief Investment Banker blocks — the panels that make the command surface
 // read like a digital investment bank: who's moving on the company, how hot
@@ -81,40 +82,65 @@ export const ValueGap: React.FC = () => (
 );
 
 // ── Block 4 · Acquisition Radar ───────────────────────────────────
-const RADAR = [
-  { label: "Strategic", n: 12 },
-  { label: "Private Equity", n: 7 },
-  { label: "Family Offices", n: 4 },
-  { label: "Corporate", n: 9 },
-  { label: "Investment Banks", n: 3 },
+// Real composition of the discovered buyer universe, by acquirer type, from
+// the buyer-discovery engine — not a hardcoded shape.
+const TYPE_AXES: { key: keyof typeof BUYERS.byType; label: string }[] = [
+  { key: "strategic", label: "Strategic" },
+  { key: "pe", label: "Private Equity" },
+  { key: "vc", label: "Venture" },
+  { key: "family_office", label: "Family Office" },
+  { key: "sponsor", label: "Sponsor" },
 ];
+const RADAR = TYPE_AXES.map((a) => ({ label: a.label, n: BUYERS.byType[a.key] ?? 0 }));
 export const AcquisitionRadar: React.FC = () => {
-  const cx = 110, cy = 108, R = 76, max = 12;
-  const pt = (i: number, r: number): [number, number] => {
-    const a = (-90 + i * (360 / RADAR.length)) * (Math.PI / 180);
-    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
-  };
+  // Canvas with generous padding so the vertex labels never clip.
+  const cx = 150, cy = 132, R = 84;
+  const total = RADAR.reduce((s, d) => s + d.n, 0);
+  // Scale to a rounded headroom above the largest segment so the shape fills
+  // the field rather than collapsing into a sliver.
+  const peak = Math.max(...RADAR.map((d) => d.n));
+  const max = Math.max(4, Math.ceil(peak / 4) * 4);
+  const ang = (i: number): number => (-90 + i * (360 / RADAR.length)) * (Math.PI / 180);
+  const pt = (i: number, r: number): [number, number] => [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))];
   const poly = RADAR.map((d, i) => pt(i, (d.n / max) * R).join(",")).join(" ");
   const ring = (f: number): string => RADAR.map((_, i) => pt(i, R * f).join(",")).join(" ");
   return (
     <Card className="p-6">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">Acquisition radar</div>
-      <div className="mt-2 grid items-center gap-4 sm:grid-cols-[220px_1fr]">
-        <svg viewBox="0 0 220 210" className="w-full">
-          {[0.33, 0.66, 1].map((f) => <polygon key={f} points={ring(f)} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />)}
-          {RADAR.map((_, i) => { const [x, y] = pt(i, R); return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />; })}
-          <polygon points={poly} fill="rgba(52,211,153,0.18)" stroke="#34d399" strokeWidth="1.5" />
-          {RADAR.map((d, i) => { const [x, y] = pt(i, (d.n / max) * R); return <circle key={i} cx={x} cy={y} r="2.5" fill="#34d399" />; })}
-        </svg>
-        <ul className="space-y-1.5">
-          {RADAR.map((d) => (
-            <li key={d.label} className="flex items-center justify-between text-[12.5px]">
-              <span className="text-white/70">{d.label}</span>
-              <span className="font-mono font-bold text-white">{d.n}</span>
-            </li>
-          ))}
-        </ul>
+      <div className="flex items-baseline justify-between">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">Acquisition radar</div>
+        <div className="text-[10px] uppercase tracking-wide text-white/35">{total} qualified buyers</div>
       </div>
+      <svg viewBox="0 0 300 256" className="mt-1 w-full" role="img" aria-label="Acquirer mix by type">
+        <defs>
+          <radialGradient id="radarFill" cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stopColor="#34d399" stopOpacity="0.42" />
+            <stop offset="100%" stopColor="#34d399" stopOpacity="0.12" />
+          </radialGradient>
+        </defs>
+        {/* concentric rings + scale ticks */}
+        {[0.25, 0.5, 0.75, 1].map((f) => (
+          <polygon key={f} points={ring(f)} fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
+        ))}
+        <text x={cx} y={cy - R - 4} textAnchor="middle" className="fill-white/30" style={{ fontSize: 8, fontFamily: "ui-monospace, monospace" }}>{max}</text>
+        {/* radial spokes */}
+        {RADAR.map((_, i) => { const [x, y] = pt(i, R); return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />; })}
+        {/* the shape */}
+        <polygon points={poly} fill="url(#radarFill)" stroke="#34d399" strokeWidth="1.75" strokeLinejoin="round" />
+        {/* vertex value dots */}
+        {RADAR.map((d, i) => { const [x, y] = pt(i, (d.n / max) * R); return <circle key={i} cx={x} cy={y} r="3" fill="#34d399" stroke="#0a1018" strokeWidth="1.5" />; })}
+        {/* vertex labels — category + count, anchored by hemisphere */}
+        {RADAR.map((d, i) => {
+          const [lx, ly] = pt(i, R + 16);
+          const c = Math.cos(ang(i));
+          const anchor = Math.abs(c) < 0.3 ? "middle" : c > 0 ? "start" : "end";
+          return (
+            <text key={d.label} x={lx} y={ly} textAnchor={anchor} dominantBaseline="middle">
+              <tspan className="fill-white/65" style={{ fontSize: 9.5, fontWeight: 600 }}>{d.label}</tspan>
+              <tspan className="fill-white" dx="5" style={{ fontSize: 10, fontWeight: 700, fontFamily: "ui-monospace, monospace" }}>{d.n}</tspan>
+            </text>
+          );
+        })}
+      </svg>
     </Card>
   );
 };

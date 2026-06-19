@@ -131,6 +131,10 @@ const BuyerGraph: React.FC = () => {
 
       <MarketTape items={tape} />
 
+      <div className="flex justify-end">
+        <a href="/report/buyers" target="_blank" rel="noopener noreferrer" className="rounded-md border border-deal-400/30 px-3.5 py-1.5 text-[11.5px] font-semibold text-deal-300 transition hover:bg-deal-600/10">Buyer Intelligence Report (PDF) →</a>
+      </div>
+
       {/* ── Acquisition Probability — the crown-jewel ranking ── */}
       <Frame>
         <Panel title="Buyer network reactor" className="lg:col-span-3"

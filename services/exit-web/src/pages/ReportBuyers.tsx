@@ -38,12 +38,14 @@ const ReportBuyers: React.FC = () => {
                   <span className="font-mono text-[12px] text-[#9aa3b0]">{String(i + 1).padStart(2, "0")}</span>
                   <span className="text-[15px] font-bold text-[#0b1220]">{b.name}</span>
                   <span className="text-[10px] uppercase tracking-wide text-[#5b6675]">{b.type}</span>
+                  <a href={`/report/buyer/${b.buyerId}`} target="_blank" rel="noopener noreferrer" className="no-print text-[10px] font-semibold uppercase tracking-wide text-[#0e7a4f] hover:underline">Briefing →</a>
                 </div>
                 <div className="text-right">
                   <span className="tnum font-mono text-[20px] font-bold text-[#0e7a4f]">{b.probabilityPct}%</span>
                   <span className="ml-1 text-[10px] uppercase tracking-wide text-[#9aa3b0]">probability</span>
                 </div>
               </div>
+              <p className="border-b border-[#f0f2f6] px-4 py-2.5 text-[12px] leading-relaxed text-[#2b3543]">{b.thesis}</p>
               <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 px-4 py-3 sm:grid-cols-4">
                 {([
                   ["Expected value", b.expectedValue], ["Typical check", b.typicalCheck],

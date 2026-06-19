@@ -3,7 +3,7 @@ import { loadActiveCompany } from "../lib/active-company";
 import { buildValuationReport, type ValuationReportModel } from "../lib/report-model";
 import { fmtMoney } from "../lib/ui";
 import {
-  ReportFrame, Cover, Contents, Section, Exhibit, BankTable, StatGrid, Stat, Lead, Note,
+  ReportFrame, Cover, Contents, ListOfExhibits, ExhibitRef, Section, Exhibit, BankTable, StatGrid, Stat, Lead, Note,
 } from "../lib/report-ui";
 import {
   FootballField, ValuationBridge, BuyerRankingChart, BuyerUniverse, ConfidenceDrivers, TransactionTimeline,
@@ -23,6 +23,21 @@ const SECTIONS = [
   "Data Provenance", "Framework Compliance", "Legal Notices", "Appendices",
 ];
 
+const EXHIBITS = [
+  { n: "IV-A", title: "Valuation football field" },
+  { n: "IV-B", title: "Valuation bridge — baseline to concluded value" },
+  { n: "IV-C", title: "Methodology weighting" },
+  { n: "IV-D", title: "Premium sensitivity" },
+  { n: "V-A", title: "Precedent transaction matrix" },
+  { n: "VI-A", title: "Strategic acquirer ranking — fit-adjusted probability" },
+  { n: "VI-B", title: "Buyer universe distribution" },
+  { n: "VII-A", title: "Indicative path to close" },
+  { n: "VIII-A", title: "Confidence drivers" },
+  { n: "VIII-B", title: "Risk factors and value at stake" },
+  { n: "IX-A", title: "Figures by source" },
+  { n: "XII-A", title: "Valuation variables and sources" },
+];
+
 const Report: React.FC = () => {
   const { company } = useMemo(() => loadActiveCompany(), []);
   const r: ValuationReportModel = useMemo(() => buildValuationReport(company), [company]);
@@ -31,6 +46,7 @@ const Report: React.FC = () => {
     <ReportFrame docType={r.meta.title} company={r.meta.company} frameworkVersion={r.meta.frameworkVersion}>
       <Cover docType={r.meta.title} company={r.meta.company} preparedFor={r.meta.preparedFor} preparedBy={r.meta.preparedBy} date={r.meta.date} frameworkVersion={r.meta.frameworkVersion} />
       <Contents items={SECTIONS} />
+      <ListOfExhibits items={EXHIBITS} />
 
       {/* I · EXECUTIVE SUMMARY */}
       <Section n={1} title="Executive Summary">
@@ -91,7 +107,7 @@ const Report: React.FC = () => {
 
       {/* IV · VALUATION ANALYSIS */}
       <Section n={4} title="Valuation Analysis">
-        <Lead>Enterprise value is triangulated across the methodologies below, each derived from reported figures and source-referenced market data, then weighted to a single institutional view.</Lead>
+        <Lead>Enterprise value is triangulated across the methodologies below (<ExhibitRef n="IV-C" />), each derived from reported figures and source-referenced market data, then weighted to a single institutional view. The concluded range and the premium that drives it are set out in <ExhibitRef n="IV-A" /> and <ExhibitRef n="IV-B" />.</Lead>
         <Exhibit n="IV-A" title="Valuation football field" source="ExitOS Valuation Framework">
           <FootballField
             methods={r.methodologies.map((mt) => ({ label: mt.name, low: mt.band.low, mid: mt.band.mid, high: mt.band.high }))}
@@ -107,11 +123,22 @@ const Report: React.FC = () => {
             rows={r.methodologies.map((mt) => ({ m: mt.name, b: mt.basis, w: `${mt.weightPct}%`, v: m$(mt.band.mid) }))}
           />
         </Exhibit>
+        <Exhibit n="IV-D" title="Premium sensitivity" source="ExitOS Valuation Framework — observed-premium band">
+          <BankTable
+            columns={[{ key: "p", label: "Applied premium" }, { key: "v", label: "Enterprise value", align: "right" }, { key: "d", label: "Δ vs. concluded", align: "right" }]}
+            rows={r.sensitivity.map((s) => ({
+              p: `+${pct(s.premiumPct)}`,
+              v: m$(s.evUsd),
+              d: <span className={s.delta === 0 ? "text-[#5b6675]" : s.delta > 0 ? "text-[#0e7a4f]" : "text-[#b4453a]"}>{s.delta === 0 ? "— concluded" : `${s.delta > 0 ? "+" : ""}${short(s.delta)}`}</span>,
+            }))}
+            footnote="Enterprise value across the observed-premium range — the financial baseline uplifted by the precedent-transaction band, not a hypothetical sweep."
+          />
+        </Exhibit>
       </Section>
 
       {/* V · COMPARABLE TRANSACTIONS */}
       <Section n={5} title="Comparable Transactions">
-        <Lead>Precedent transactions in the sector, with disclosed premiums where available. The applied premium is anchored to this set.</Lead>
+        <Lead>Precedent transactions in the sector, with disclosed premiums where available (<ExhibitRef n="V-A" />). The applied premium is anchored to this set.</Lead>
         <Exhibit n="V-A" title="Precedent transaction matrix" source={r.comparablesAnalysis.note}>
           <BankTable
             columns={[{ key: "t", label: "Target" }, { key: "a", label: "Acquirer" }, { key: "d", label: "Date", align: "right" }, { key: "p", label: "Premium", align: "right" }, { key: "v", label: "Value", align: "right" }]}
@@ -151,6 +178,13 @@ const Report: React.FC = () => {
         <Lead>Every figure in this report carries a composite confidence of <strong className="text-[#0b1220]">{r.exec.confidencePct}%</strong> ({r.exec.confidenceTier}), built from five measured drivers.</Lead>
         <Exhibit n="VIII-A" title="Confidence drivers">
           <ConfidenceDrivers drivers={r.confidenceDrivers} />
+        </Exhibit>
+        <Exhibit n="VIII-B" title="Risk factors and value at stake" source="ExitOS readiness analysis">
+          <BankTable
+            columns={[{ key: "d", label: "Risk factor" }, { key: "r", label: "Mitigant" }, { key: "e", label: "Effort", align: "center" }, { key: "i", label: "Value at stake", align: "right" }]}
+            rows={r.risks.map((rk) => ({ d: rk.dimension, r: rk.recommendation, e: rk.effort, i: <span className="text-[#0e7a4f]">+{short(rk.impactUsd)}</span> }))}
+            footnote="The factors a buyer is most likely to probe in diligence, each with the value a mitigant would protect or unlock."
+          />
         </Exhibit>
       </Section>
 

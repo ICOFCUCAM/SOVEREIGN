@@ -50,6 +50,24 @@ function errEnvelope(requestId, status, code, message, field) {
   return { error: { code, message, field: field ?? null, requestId: requestId ?? null } };
 }
 
+// CORS — the standalone console SPA (dispatch-web) is a different origin than the
+// API, so cross-origin requests must be allowed. DISPATCH_CORS_ORIGIN is a
+// comma-separated allowlist, or "*" (default). With an allowlist we echo the
+// matching request Origin (credentials-safe) and Vary on Origin.
+const CORS_ALLOW = (process.env.DISPATCH_CORS_ORIGIN || "*").split(",").map((s) => s.trim()).filter(Boolean);
+function applyCors(req, res) {
+  let origin = "*";
+  if (!(CORS_ALLOW.length === 1 && CORS_ALLOW[0] === "*")) {
+    const reqOrigin = req.headers["origin"];
+    origin = reqOrigin && CORS_ALLOW.includes(reqOrigin) ? reqOrigin : CORS_ALLOW[0];
+    res.setHeader("Vary", "Origin");
+  }
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "authorization, content-type, x-request-id");
+  res.setHeader("Access-Control-Max-Age", "86400");
+}
+
 async function readBody(req) {
   const chunks = [];
   let size = 0;
@@ -497,6 +515,8 @@ const server = http.createServer(async (req, res) => {
     log.info({ service: "api", requestId: reqId, method: req.method, path: routePath, status: res.statusCode, durationMs: Date.now() - t0 });
   });
   try {
+    applyCors(req, res);
+    if (req.method === "OPTIONS") { res.writeHead(204); return res.end(); }
     const url = new URL(req.url, "http://localhost");
     const path = url.pathname;
     routePath = path.replace(/\/v1\/(jobs|artifacts|documents)\/[^/]+/, "/v1/$1/:id"); // low-cardinality label

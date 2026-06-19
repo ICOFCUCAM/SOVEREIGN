@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Card, Kpi, SectionHeader, Button, Field, inputCls, notify } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { ROLE_LABEL, type Role, type Plan } from "../lib/access";
+import { CHANNELS } from "../lib/social-publish";
+import { useEngineStatus, usePublishHistory, ENGINE_ENDPOINT } from "../lib/distribution-engine";
 
 // Admin console — the back office. Account roster, plan mix and system status,
 // plus the superadmin's ability to provision admin accounts. Illustrative data
@@ -108,7 +110,79 @@ const Admin: React.FC = () => {
           ))}
         </div>
       </Card>
+
+      <SocialDistribution />
     </div>
+  );
+};
+
+// ── ExitOS Distribution Engine — our own social posting backend ──────
+// Channel credentials live as Supabase function secrets on exit-social-dispatch
+// (LINKEDIN_ACCESS_TOKEN, X_ACCESS_TOKEN, FB_PAGE_ACCESS_TOKEN, TELEGRAM_BOT_TOKEN,
+// WHATSAPP_TOKEN, INSTAGRAM_ACCESS_TOKEN, …). This panel reads the live
+// connection status from the engine and shows what has been published.
+const SECRET_HINT: Record<string, string> = {
+  linkedin: "LINKEDIN_ACCESS_TOKEN + LINKEDIN_AUTHOR_URN",
+  x: "X_ACCESS_TOKEN",
+  facebook: "FB_PAGE_ACCESS_TOKEN + FB_PAGE_ID",
+  instagram: "INSTAGRAM_ACCESS_TOKEN + INSTAGRAM_USER_ID",
+  telegram: "TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID",
+  whatsapp: "WHATSAPP_TOKEN + WHATSAPP_PHONE_ID + WHATSAPP_RECIPIENTS",
+};
+
+const SocialDistribution: React.FC = () => {
+  const { connected, anyConnected, loading } = useEngineStatus();
+  const history = usePublishHistory();
+
+  return (
+    <Card className="mt-6 p-6">
+      <div className="flex items-center justify-between">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">ExitOS Distribution Engine</div>
+        <span className={`flex items-center gap-1.5 text-[11px] ${anyConnected ? "text-deal-300" : "text-loi-300"}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${anyConnected ? "bg-deal-400" : "bg-loi-400"}`} />
+          {loading ? "Checking…" : anyConnected ? `${Object.values(connected).filter(Boolean).length} channel(s) live` : "No channels connected"}
+        </span>
+      </div>
+      <p className="mt-2 text-[12.5px] leading-relaxed text-white/55">
+        ExitOS's own posting engine (<span className="font-mono text-white/70">exit-social-dispatch</span>) holds each
+        platform's tokens as Supabase function secrets and posts to the real APIs. The browser never sees a credential.
+        Connect a channel by setting its secrets, then redeploy the function.
+      </p>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {CHANNELS.map((c) => {
+          const on = connected[c.id];
+          return (
+            <div key={c.id} className={`flex items-start justify-between gap-3 rounded-lg border p-3 ${on ? "border-deal-500/30 bg-deal-600/[0.06]" : "border-white/10 bg-ink-900/40"}`}>
+              <div>
+                <div className="text-[13px] font-semibold text-white">{c.label}</div>
+                <div className="font-mono text-[10.5px] text-white/40">{SECRET_HINT[c.id]}</div>
+              </div>
+              <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${on ? "bg-deal-600/20 text-deal-300 ring-1 ring-deal-400/40" : "bg-white/5 text-white/45 ring-1 ring-white/15"}`}>{loading ? "…" : on ? "Connected" : "Activating"}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 font-mono text-[10.5px] text-white/35 break-all">Endpoint · {ENGINE_ENDPOINT}</div>
+
+      <div className="mt-5">
+        <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Recent publishes</div>
+        {history.length === 0 ? (
+          <div className="mt-2 text-[12px] text-white/45">Nothing published yet. Use “↗ Publish” on any opportunity in Acquisition Radar.</div>
+        ) : (
+          <ul className="mt-2 space-y-1.5">
+            {history.slice(0, 8).map((h, i) => (
+              <li key={i} className="flex items-center gap-2 text-[12px]">
+                <span className={h.status === "done" ? "text-deal-300" : "text-red-300"}>{h.status === "done" ? "✓" : "✗"}</span>
+                <span className="capitalize text-white/70">{h.channel}</span>
+                <span className="truncate text-white/45">· {h.title}</span>
+                {h.url && <a href={h.url} target="_blank" rel="noopener noreferrer" className="ml-auto shrink-0 text-deal-300 hover:underline">view ↗</a>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </Card>
   );
 };
 

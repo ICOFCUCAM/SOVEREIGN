@@ -6,13 +6,26 @@ import pg from "pg";
 
 const { Pool } = pg;
 
+// TLS for managed Postgres (e.g. Supabase requires SSL). Driven by PGSSLMODE:
+//   disable (or unset)          -> no TLS (local socket / trusted network)
+//   require | prefer | no-verify -> TLS, certificate not verified
+//   verify-ca | verify-full      -> TLS, certificate verified
+function sslFromEnv() {
+  const mode = (process.env.PGSSLMODE || "").toLowerCase();
+  if (!mode || mode === "disable") return undefined;
+  const verify = mode === "verify-ca" || mode === "verify-full";
+  return { rejectUnauthorized: verify };
+}
+
 export function makePool() {
+  const ssl = sslFromEnv();
   return new Pool({
     host: process.env.PGHOST || "/tmp",
     port: Number(process.env.PGPORT || 55432),
     user: process.env.DISPATCH_DB_USER || "dispatch_app",
     database: process.env.PGDATABASE || "dispatch",
     max: Number(process.env.PG_POOL_MAX || 8),
+    ...(ssl ? { ssl } : {}),
   });
 }
 

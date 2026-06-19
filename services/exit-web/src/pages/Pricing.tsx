@@ -43,7 +43,7 @@ const FOUNDER_TIERS: readonly Tier[] = [
       "Cannot open an NDA process or see buyer identities",
       "Cannot launch a transaction — upgrade to engage",
     ],
-    lockedTeaser: "You have 4 qualified buyers interested in your company.",
+    lockedTeaser: "4 buyers are a strong acquisition match for your company.",
     cta: "List my company free",
   },
   {

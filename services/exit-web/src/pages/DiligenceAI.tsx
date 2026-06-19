@@ -114,7 +114,10 @@ const DiligenceAI: React.FC = () => {
             <div className="font-mono text-sm font-bold text-deal-300">{findings.length} findings · 2 reports · seconds</div>
           </div>
         </div>
-        <button onClick={() => downloadJson("exitos-diligence-reports.json", reports)} className="inline-flex items-center rounded-md bg-deal-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-500">Export both reports →</button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={() => downloadJson("exitos-diligence-reports.json", reports)} className="inline-flex items-center rounded-md border border-white/15 px-3.5 py-2 text-[13px] font-semibold text-white/75 transition hover:bg-white/5">Export data (.json)</button>
+          <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-md bg-deal-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-500">Board-ready report (PDF) →</a>
+        </div>
       </div>
 
       {/* ── Discovered risks by category ─────────────────────────── */}
@@ -175,7 +178,10 @@ const DiligenceAI: React.FC = () => {
           <div className="p-6">
             <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Recommendation</div>
             <p className="mt-3 text-[13px] leading-relaxed text-white/75">{report.recommendation}</p>
-            <Button variant="ghost" className="mt-4 text-[12px]" onClick={() => downloadText(`exitos-${report.key}-report.md`, reportMarkdown(report))}>Export this report</Button>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <Button variant="ghost" className="text-[12px]" onClick={() => downloadText(`exitos-${report.key}-report.md`, reportMarkdown(report))}>Export draft (.md)</Button>
+              <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-md bg-deal-600/90 px-3.5 py-2 text-[12px] font-semibold text-white transition hover:bg-deal-500">Board-ready report (PDF) →</a>
+            </div>
           </div>
         </div>
       </Card>

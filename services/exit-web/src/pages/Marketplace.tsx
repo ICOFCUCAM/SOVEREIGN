@@ -104,6 +104,11 @@ const Marketplace: React.FC = () => {
 
       <MarketTape items={useMemo(() => buildMarketTape(), [])} />
 
+      <div className="flex flex-wrap justify-end gap-2">
+        <a href="/report/cim" target="_blank" rel="noopener noreferrer" className="rounded-md border border-deal-400/30 px-3.5 py-1.5 text-[11.5px] font-semibold text-deal-300 transition hover:bg-deal-600/10">Confidential Information Memorandum (PDF) →</a>
+        <a href="/report/management" target="_blank" rel="noopener noreferrer" className="rounded-md border border-white/15 px-3.5 py-1.5 text-[11.5px] font-semibold text-white/70 transition hover:bg-white/5">Management Presentation (PDF) →</a>
+      </div>
+
       <BankerTake
         next={phase === "done"
           ? <>You're live — review the {matches.length} buyers entering outreach and approve the first conversations.</>

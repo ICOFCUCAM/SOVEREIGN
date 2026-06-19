@@ -1,6 +1,11 @@
-import { runInstitutionalValuation, runReadiness, runReadinessAnalysis, type CompanyProfile } from "@exit/engines";
-import { rankedBuyers, expectedOutcomeFor, sectorOverlap, buyerConfidence, fmtUsdShort } from "./buyer-dna";
+import { runInstitutionalValuation, runReadiness, runReadinessAnalysis, STANDARD_TEMPLATES, type CompanyProfile, type NdaTemplate } from "@exit/engines";
+import {
+  rankedBuyers, expectedOutcomeFor, sectorOverlap, buyerConfidence, fmtUsdShort,
+  buyerById, acquisitionProbability, buyerRationale, acquisitionSignals,
+  acquisitionAppetiteScore, similarAcquisitionsBy,
+} from "./buyer-dna";
 import { activeTokens } from "./active-company";
+import { discoverFindings, allReports, SOURCE_FILES, type DiligenceFinding, type Severity } from "./diligence-intel";
 import { ACQ_INDEXES, MARKET_INTEL, fmtUsd } from "./market-intel";
 import { MARKET } from "./market-stats";
 
@@ -22,6 +27,7 @@ export interface BuyerScorecard {
   buyerId: string; name: string; type: string; probabilityPct: number;
   expectedValue: string; typicalCheck: string; medianCloseDays: string;
   activity: string; strategicFitPct: number; recentAcquisition: string; confidence: string;
+  thesis: string;
 }
 export interface BuyerIntelReport {
   meta: ReportMeta;
@@ -45,6 +51,7 @@ export function buildBuyerIntelReport(company: CompanyProfile): BuyerIntelReport
       strategicFitPct: ov.pct,
       recentAcquisition: p.last_acquisition ? `${p.last_acquisition.target} · ${p.last_acquisition.date.slice(0, 7)}` : "—",
       confidence: buyerConfidence(p),
+      thesis: buyerRationale(p, baseline, tokens, company.sector).thesis,
     };
   });
   return {
@@ -52,6 +59,88 @@ export function buildBuyerIntelReport(company: CompanyProfile): BuyerIntelReport
     summary: { qualified: INST.buyerUniverse.qualified, scored: INST.buyerUniverse.scored, topProbability: ranked[0]?.probability.pct ?? 0, medianPremium: INST.comparablesAnalysis.medianPremiumPct != null ? pctS(INST.comparablesAnalysis.medianPremiumPct) : "—" },
     scorecards,
     universe: { strategic: INST.buyerUniverse.strategic, financial: INST.buyerUniverse.financial, sovereign: INST.buyerUniverse.sovereign, family_office: INST.buyerUniverse.family_office, qualified: INST.buyerUniverse.qualified, scored: INST.buyerUniverse.scored, registry: INST.buyerUniverse.registry },
+  };
+}
+
+// ── BUYER BRIEFING BOOK (per acquirer) ──────────────────────────────
+// A deep-dive on a single acquirer↔company pairing. Every figure is a
+// measured DNA quantity or an engine output — nothing here is asserted.
+export interface BuyerBriefing {
+  meta: ReportMeta;
+  buyerId: string;
+  found: boolean;
+  header: { name: string; type: string; country: string; confidence: string };
+  summary: { probabilityPct: number; expectedValue: string; appetiteScore: number; appetiteTier: string; strategicFitPct: number };
+  thesis: string;
+  rationale: { label: string; detail: string }[];
+  probabilityDrivers: { label: string; pct: number }[];
+  profile: { k: string; v: string }[];
+  similar: { target: string; date: string; value: string; industry: string }[];
+  signals: { label: string; status: string; detail: string; kind: string }[];
+}
+export function buildBuyerBriefing(company: CompanyProfile, buyerId: string): BuyerBriefing {
+  const INST = runInstitutionalValuation(company);
+  const fv = INST.frameworkVersion;
+  const m = meta("Buyer Briefing Book", company.name, fv);
+  const p = buyerById(buyerId);
+  if (!p) {
+    return {
+      meta: m, buyerId, found: false,
+      header: { name: "Acquirer not found", type: "—", country: "—", confidence: "—" },
+      summary: { probabilityPct: 0, expectedValue: "—", appetiteScore: 0, appetiteTier: "—", strategicFitPct: 0 },
+      thesis: "No indexed acquirer matches this identifier.", rationale: [], probabilityDrivers: [], profile: [], similar: [], signals: [],
+    };
+  }
+  const tokens = activeTokens(company);
+  const baseline = INST.financialBaseline.mid;
+  const prob = acquisitionProbability(p, tokens);
+  const exp = expectedOutcomeFor(p, baseline);
+  const ov = sectorOverlap(p, tokens);
+  const appetite = acquisitionAppetiteScore(p);
+  const rat = buyerRationale(p, baseline, tokens, company.sector);
+  const sig = acquisitionSignals(p);
+  const similar = similarAcquisitionsBy(p.name);
+  return {
+    meta: m, buyerId, found: true,
+    header: { name: p.name, type: p.buyer_type.replace(/_/g, " "), country: p.country ?? "—", confidence: buyerConfidence(p) },
+    summary: {
+      probabilityPct: prob.pct,
+      expectedValue: `${fmtUsdShort(exp.expectedClose)}–${fmtUsdShort(exp.expectedOffer)}`,
+      appetiteScore: appetite.score, appetiteTier: appetite.tier, strategicFitPct: ov.pct,
+    },
+    thesis: rat.thesis,
+    rationale: rat.points.map((pt) => ({ label: pt.label, detail: pt.detail })),
+    probabilityDrivers: [
+      { label: "Acquisition appetite", pct: Math.round((prob.appetite / 50) * 100) },
+      { label: "Sector overlap", pct: Math.round((prob.overlap / 34) * 100) },
+      { label: "Deal velocity", pct: Math.round((prob.velocity / 14) * 100) },
+      { label: "Recency of activity", pct: Math.round((prob.recency / 10) * 100) },
+    ],
+    profile: [
+      { k: "Acquirer type", v: p.buyer_type.replace(/_/g, " ") },
+      { k: "Events indexed", v: `${p.events_indexed} (${p.disclosed_events} disclosed)` },
+      { k: "Deals — last 12 months", v: String(p.deals_12m) },
+      { k: "Deals — last 3 years", v: String(p.deals_3y) },
+      { k: "Acquisition cadence", v: p.frequency_per_year != null ? `${p.frequency_per_year}/year` : "—" },
+      { k: "Average deal size", v: p.avg_deal_usd != null ? fmtUsdShort(p.avg_deal_usd) : "undisclosed" },
+      { k: "Check-size band", v: p.check_size_band ? `${fmtUsdShort(p.check_size_band.low_usd)}–${fmtUsdShort(p.check_size_band.high_usd)}` : "undisclosed" },
+      { k: "Average premium paid", v: p.premium_pct != null ? `${Math.round(p.premium_pct * 100)}%` : "undisclosed" },
+      { k: "Close rate", v: p.close_rate != null ? `${Math.round(p.close_rate * 100)}%` : "undisclosed" },
+      { k: "Median close time", v: p.median_close_days != null ? `${p.median_close_days} days` : "undisclosed" },
+      { k: "Last acquisition", v: p.last_acquisition ? `${p.last_acquisition.target} · ${p.last_acquisition.date.slice(0, 7)}` : "—" },
+    ],
+    similar: similar.map((s) => ({
+      target: s.target,
+      date: s.date ?? "—",
+      value: s.value_usd != null ? fmtUsdShort(s.value_usd) : "undisclosed",
+      industry: s.industry,
+    })),
+    signals: sig.signals.map((s) => ({
+      label: s.label,
+      status: s.source === "feed" ? "Feed pending" : s.active ? "Active" : "Inactive",
+      detail: s.detail,
+      kind: s.source,
+    })),
   };
 }
 
@@ -86,6 +175,87 @@ export function buildMarketReport(company: CompanyProfile): MarketReport {
     summary: { events: MARKET_INTEL.totalEvents.toLocaleString(), disclosed: fmtUsd(MARKET_INTEL.totalDisclosedUsd), buyers: MARKET.buyers.toLocaleString(), sectors: ACQ_INDEXES.indexes.length },
     indexes: [...ACQ_INDEXES.indexes].sort((a, b) => b.volume - a.volume).slice(0, 12).map((i) => ({ sector: i.sector, volume: i.volume, trendPct: i.trendPct, activeBuyers: i.activeBuyers, medianDealUsd: i.medianDealUsd })),
     acquirers: [...MARKET_INTEL.topAcquirers].slice(0, 12).map((a) => ({ name: a.name, deals: a.deals, recentDeals: a.recentDeals })),
+  };
+}
+
+// ── NON-DISCLOSURE AGREEMENT PACKAGE ────────────────────────────────
+// Presents the institutional NDA suite and a board-ready execution copy.
+// Every term is read straight from the NDA engine's standard templates —
+// nothing here invents a clause or alters a term.
+export interface NdaTermRow { k: string; v: string }
+export interface NdaTemplateRow { name: string; shape: string; version: string; clauseCount: number; survival: string; returnDestroy: string; scope: string; law: string; injunctive: string; damages: string }
+export interface NdaPackage {
+  meta: ReportMeta;
+  parties: { disclosing: string; receiving: string };
+  primary: { name: string; version: string; clauseCount: number; terms: NdaTermRow[]; carveOuts: string[]; survivalMonths: number; returnOrDestroyDays: number; scope: string; governingLaw: string; jurisdiction: string; injunctiveRelief: boolean; liquidatedDamagesUsd: number | null };
+  templates: NdaTemplateRow[];
+}
+function ndaTemplateRow(t: NdaTemplate): NdaTemplateRow {
+  return {
+    name: t.name, shape: t.shape.replace(/_/g, " "), version: t.version, clauseCount: t.clauseCount,
+    survival: `${t.defaultTerms.survivalMonths} mo`, returnDestroy: `${t.defaultTerms.returnOrDestroyDays} d`,
+    scope: t.defaultTerms.scope, law: t.defaultTerms.governingLaw,
+    injunctive: t.defaultTerms.injunctiveRelief ? "Yes" : "No",
+    damages: t.defaultTerms.liquidatedDamagesUsd != null ? fmtUsd(t.defaultTerms.liquidatedDamagesUsd) : "—",
+  };
+}
+export function buildNdaPackage(company: CompanyProfile): NdaPackage {
+  const INST = runInstitutionalValuation(company);
+  const primary = STANDARD_TEMPLATES.find((t) => t.shape === "bilateral") ?? STANDARD_TEMPLATES[0];
+  const dt = primary.defaultTerms;
+  return {
+    meta: meta("Non-Disclosure Agreement Package", company.name, INST.frameworkVersion),
+    parties: { disclosing: company.name, receiving: "Prospective Acquirer (the “Recipient”)" },
+    primary: {
+      name: primary.name, version: primary.version, clauseCount: primary.clauseCount,
+      survivalMonths: dt.survivalMonths, returnOrDestroyDays: dt.returnOrDestroyDays, scope: dt.scope,
+      governingLaw: dt.governingLaw, jurisdiction: dt.jurisdiction, injunctiveRelief: dt.injunctiveRelief,
+      liquidatedDamagesUsd: dt.liquidatedDamagesUsd ?? null,
+      carveOuts: [...dt.carveOuts],
+      terms: [
+        { k: "Agreement form", v: primary.shape.replace(/_/g, " ") },
+        { k: "Confidentiality survival", v: `${dt.survivalMonths} months from termination` },
+        { k: "Return or destruction", v: `${dt.returnOrDestroyDays} days of termination` },
+        { k: "Territorial scope", v: dt.scope },
+        { k: "Governing law", v: `${dt.governingLaw} (${dt.jurisdiction})` },
+        { k: "Injunctive relief", v: dt.injunctiveRelief ? "Available to the disclosing party" : "Not provided" },
+        { k: "Liquidated damages", v: dt.liquidatedDamagesUsd != null ? fmtUsd(dt.liquidatedDamagesUsd) : "Not specified" },
+        { k: "Standard clauses", v: `${primary.clauseCount}` },
+      ],
+    },
+    templates: STANDARD_TEMPLATES.map(ndaTemplateRow),
+  };
+}
+
+// ── DUE-DILIGENCE REPORT ────────────────────────────────────────────
+// Presents the diligence engine's findings as a board-grade document: a
+// findings register, the buyer's adversarial view, the seller remediation
+// plan, red flags, valuation impact and legal exposure. Every figure is the
+// engine's — selection and formatting only.
+export interface DiligenceReportModel {
+  meta: ReportMeta;
+  summary: { findings: number; high: number; medium: number; low: number; totalImpact: string; readinessPct: number };
+  findings: { category: string; subcategory: string; title: string; severity: Severity; source: string; detail: string; buyerView: string; sellerAction: string; impact: string; impactUsd: number }[];
+  reports: { key: string; title: string; metric: string; headline: string; points: { title: string; body: string }[]; recommendation: string; accent: string }[];
+  sources: { label: string; note: string; count: number }[];
+}
+export function buildDiligenceReport(company: CompanyProfile): DiligenceReportModel {
+  const INST = runInstitutionalValuation(company);
+  const findings: DiligenceFinding[] = discoverFindings();
+  const reports = allReports(findings);
+  const bySev = (s: Severity): number => findings.filter((f) => f.severity === s).length;
+  const totalImpactUsd = findings.reduce((acc, f) => acc + f.impactUsd, 0);
+  const readiness = reports.find((r) => r.key === "readiness");
+  const readinessPct = readiness ? parseInt((readiness.metric.match(/(\d+)/) ?? ["0", "0"])[1], 10) : 0;
+  return {
+    meta: meta("Due-Diligence Report", company.name, INST.frameworkVersion),
+    summary: { findings: findings.length, high: bySev("high"), medium: bySev("medium"), low: bySev("low"), totalImpact: fmtUsd(totalImpactUsd), readinessPct },
+    findings: [...findings].sort((a, b) => b.impactUsd - a.impactUsd).map((f) => ({
+      category: f.category, subcategory: f.subcategory, title: f.title, severity: f.severity, source: f.source,
+      detail: f.detail, buyerView: f.buyerView, sellerAction: f.sellerAction, impact: fmtUsd(f.impactUsd), impactUsd: f.impactUsd,
+    })),
+    reports: reports.map((r) => ({ key: r.key, title: r.title, metric: r.metric, headline: r.headline, points: [...r.points], recommendation: r.recommendation, accent: r.accent })),
+    sources: SOURCE_FILES.map((s) => ({ label: s.label, note: s.note, count: findings.filter((f) => f.source === s.label).length })),
   };
 }
 

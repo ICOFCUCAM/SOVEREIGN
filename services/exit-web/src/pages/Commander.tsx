@@ -47,6 +47,11 @@ const Commander: React.FC = () => {
 
       <MarketTape items={tape} />
 
+      <div className="flex flex-wrap justify-end gap-2">
+        <a href="/report/board" target="_blank" rel="noopener noreferrer" className="rounded-md border border-deal-400/30 px-3.5 py-1.5 text-[11.5px] font-semibold text-deal-300 transition hover:bg-deal-600/10">Board Memorandum (PDF) →</a>
+        <a href="/report" target="_blank" rel="noopener noreferrer" className="rounded-md border border-white/15 px-3.5 py-1.5 text-[11.5px] font-semibold text-white/70 transition hover:bg-white/5">Publishing Center →</a>
+      </div>
+
       {/* executive command — jump to any desk, each with its live headline */}
       <Frame>
         {[
