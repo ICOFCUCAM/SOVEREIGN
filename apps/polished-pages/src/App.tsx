@@ -18,16 +18,17 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthGate>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/cv" element={<CVGenerator />} />
-            <Route path="/cover-letter" element={<CoverLetterGenerator />} />
-            <Route path="/book" element={<BookCreator />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthGate>
+        <Routes>
+          {/* Public marketing landing — the hero stays open to everyone. */}
+          <Route path="/" element={<Index />} />
+          {/* Generators require sign-in (metered per user); the gate prompts
+              for sign-in only when someone actually goes to create. */}
+          <Route path="/cv" element={<AuthGate><CVGenerator /></AuthGate>} />
+          <Route path="/cover-letter" element={<AuthGate><CoverLetterGenerator /></AuthGate>} />
+          <Route path="/book" element={<AuthGate><BookCreator /></AuthGate>} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
