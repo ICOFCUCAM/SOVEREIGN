@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Sparkles, ArrowLeft, Loader2, Download, PenTool } from "lucide-react";
+import { Sparkles, Loader2, PenTool } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import CoverLetterPreview from "@/components/CoverLetterPreview";
 
 const tones = [
   { value: "professional", label: "Professional", desc: "Formal & corporate" },
@@ -61,25 +62,17 @@ const CoverLetterGenerator = () => {
     }
   };
 
-  const handleDownload = () => {
-    if (!result) return;
-    const blob = new Blob([result], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "cover-letter.md";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const renderMarkdown = (md: string) =>
-    md
-      .replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold font-serif mt-6 mb-2 text-gold-light">$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold font-serif mt-8 mb-3 text-gradient-gold pb-1 border-b border-border">$1</h2>')
-      .replace(/^# (.+)$/gm, '<h1 class="text-3xl font-bold font-serif mb-2">$1</h1>')
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\n\n/g, '<div class="mb-4"></div>')
-      .replace(/\n/g, "<br/>");
+  if (result) {
+    return (
+      <CoverLetterPreview
+        markdown={result}
+        fullName={fullName}
+        email={email}
+        phone={phone}
+        onBack={() => setResult(null)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,17 +83,12 @@ const CoverLetterGenerator = () => {
             <Sparkles className="w-5 h-5 text-gold" />
             <span className="text-lg font-bold font-serif tracking-tight">DocuForge</span>
           </Link>
-          {result && (
-            <Button variant="hero" size="sm" onClick={handleDownload}>
-              <Download className="w-4 h-4 mr-2" /> Download
-            </Button>
-          )}
         </div>
       </nav>
 
       <div className="container max-w-4xl mx-auto px-6 pt-28 pb-16">
         <AnimatePresence mode="wait">
-          {!result ? (
+          {(
             <motion.div
               key="form"
               initial={{ opacity: 0, y: 20 }}
@@ -240,28 +228,6 @@ const CoverLetterGenerator = () => {
                     )}
                   </Button>
                 </div>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="result"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Button
-                variant="ghost"
-                onClick={() => setResult(null)}
-                className="text-muted-foreground mb-6"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" /> Back to Editor
-              </Button>
-
-              <div className="rounded-xl border border-border bg-card/50 backdrop-blur-sm p-8 md:p-12 shadow-premium">
-                <div
-                  className="prose prose-invert max-w-none font-sans text-foreground leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(result) }}
-                />
               </div>
             </motion.div>
           )}

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { CV_TEMPLATES } from "@/types/cv";
 import { getCvTheme, type CvTheme } from "@/lib/cv-themes";
+import { elementToPdf } from "@/lib/export-pdf";
 
 interface CVPreviewProps {
   markdown: string;
@@ -90,24 +91,7 @@ const CVPreview = ({ markdown, onBack, template, photo }: CVPreviewProps) => {
     if (!cvRef.current) return;
     setIsPdf(true);
     try {
-      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([import("html2canvas"), import("jspdf")]);
-      const canvas = await html2canvas(cvRef.current, { scale: 2, backgroundColor: theme.pageBg, useCORS: true, logging: false });
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const imgH = (canvas.height * pageW) / canvas.width;
-      let heightLeft = imgH;
-      let position = 0;
-      pdf.addImage(imgData, "PNG", 0, position, pageW, imgH);
-      heightLeft -= pageH;
-      while (heightLeft > 0) {
-        position = heightLeft - imgH;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, pageW, imgH);
-        heightLeft -= pageH;
-      }
-      pdf.save("cv.pdf");
+      await elementToPdf(cvRef.current, "cv.pdf", theme.pageBg);
     } catch (e) {
       toast({ title: "PDF export failed", description: e instanceof Error ? e.message : "Something went wrong", variant: "destructive" });
     } finally {
