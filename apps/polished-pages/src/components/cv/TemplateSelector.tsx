@@ -1,157 +1,91 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Check, Search } from "lucide-react";
-import { CVTemplate, CV_TEMPLATES, CV_TEMPLATE_CATEGORIES, CVTemplateCategory } from "@/types/cv";
-
-import classicImg from "@/assets/cv-templates/classic.jpg";
-import modernImg from "@/assets/cv-templates/modern.jpg";
-import creativeImg from "@/assets/cv-templates/creative.jpg";
-import industryImg from "@/assets/cv-templates/industry.jpg";
-import academicImg from "@/assets/cv-templates/academic.jpg";
-import executiveImg from "@/assets/cv-templates/executive.jpg";
-import minimalistImg from "@/assets/cv-templates/minimalist.jpg";
-import regionalImg from "@/assets/cv-templates/regional.jpg";
-import specialtyImg from "@/assets/cv-templates/specialty.jpg";
-
-const categoryPreviewMap: Record<CVTemplateCategory, string> = {
-  premium: executiveImg,
-  classic: classicImg,
-  modern: modernImg,
-  creative: creativeImg,
-  industry: industryImg,
-  academic: academicImg,
-  executive: executiveImg,
-  minimalist: minimalistImg,
-  regional: regionalImg,
-  specialty: specialtyImg,
-};
+import { Check } from "lucide-react";
+import { CVTemplate, CV_TEMPLATES, CV_TEMPLATE_CATEGORIES } from "@/types/cv";
+import { PREMIUM_TEMPLATES, PREMIUM_COLLECTIONS } from "@/lib/premium-templates";
+import { MOCK_CV } from "@/lib/cv-mock";
+import PremiumCv from "@/components/PremiumCv";
 
 interface Props {
   selected: CVTemplate;
   onChange: (template: CVTemplate) => void;
 }
 
-const TemplateSelector = ({ selected, onChange }: Props) => {
-  const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState<CVTemplateCategory | "all">("all");
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+const SCALE = 0.224;
+const W = Math.round(794 * SCALE); // ~178
 
-  const filtered = CV_TEMPLATES.filter((t) => {
-    const matchesSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) || t.description.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = activeCategory === "all" || t.category === activeCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  return (
-    <div className="space-y-4">
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Search templates..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
+const PreviewCard = ({ id, name, blurb, selected, onChange }: { id: string; name: string; blurb: string; selected: boolean; onChange: (t: string) => void }) => (
+  <button type="button" onClick={() => onChange(id)} className="text-left">
+    <div
+      className={`relative overflow-hidden rounded-lg border bg-white transition ${selected ? "ring-2 ring-primary border-primary" : "border-border hover:border-primary/50"}`}
+      style={{ width: W, height: 252 }}
+    >
+      <div style={{ width: 794, transform: `scale(${SCALE})`, transformOrigin: "top left", pointerEvents: "none" }}>
+        <PremiumCv data={MOCK_CV} template={id} />
       </div>
-
-      {/* Category pills */}
-      <div className="flex flex-wrap gap-1.5">
-        <button
-          onClick={() => setActiveCategory("all")}
-          className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-            activeCategory === "all"
-              ? "bg-primary text-primary-foreground"
-              : "bg-secondary text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          All ({CV_TEMPLATES.length})
-        </button>
-        {CV_TEMPLATE_CATEGORIES.map((cat) => {
-          const count = CV_TEMPLATES.filter((t) => t.category === cat.id).length;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                activeCategory === cat.id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {cat.label} ({count})
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Preview modal */}
-      {previewImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-          onClick={() => setPreviewImage(null)}
-        >
-          <img
-            src={previewImage}
-            alt="Template preview"
-            className="max-h-[85vh] max-w-[90vw] rounded-xl shadow-2xl border border-border"
-          />
+      {selected && (
+        <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <Check className="h-3 w-3" />
         </div>
       )}
+    </div>
+    <div className="mt-1.5 text-sm font-medium font-sans">{name}</div>
+    <div className="text-xs text-muted-foreground font-sans">{blurb}</div>
+  </button>
+);
 
-      {/* Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 max-h-[520px] overflow-y-auto pr-1">
-        {filtered.map((t) => (
-          <Card
-            key={t.id}
-            className={`relative cursor-pointer overflow-hidden transition-all hover:shadow-lg group ${
-              selected === t.id
-                ? "border-primary ring-2 ring-primary/20"
-                : "border-border hover:border-primary/30"
-            }`}
-            onClick={() => onChange(t.id)}
-          >
-            {selected === t.id && (
-              <div className="absolute top-1.5 right-1.5 z-10 w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow-sm">
-                <Check className="w-3 h-3 text-primary-foreground" />
-              </div>
-            )}
+const TemplateSelector = ({ selected, onChange }: Props) => {
+  const [showClassic, setShowClassic] = useState(false);
 
-            {/* Preview thumbnail */}
-            <div className="relative h-28 bg-muted/30 overflow-hidden">
-              <img
-                src={categoryPreviewMap[t.category]}
-                alt={`${t.name} template`}
-                loading="lazy"
-                className="w-full h-full object-cover object-top opacity-90 group-hover:opacity-100 transition-opacity"
-              />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPreviewImage(categoryPreviewMap[t.category]);
-                }}
-                className="absolute bottom-1 right-1 bg-background/80 backdrop-blur-sm text-[10px] px-1.5 py-0.5 rounded text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
-              >
-                Preview
-              </button>
+  return (
+    <div className="space-y-8">
+      {PREMIUM_COLLECTIONS.map((c) => {
+        const items = PREMIUM_TEMPLATES.filter((t) => t.collection === c.id);
+        if (!items.length) return null;
+        return (
+          <div key={c.id}>
+            <div className="mb-3">
+              <h3 className="font-serif text-lg font-semibold">{c.label}</h3>
+              <p className="text-xs text-muted-foreground font-sans">{c.blurb}</p>
             </div>
-
-            {/* Info */}
-            <div className="p-2.5">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <span className="text-sm">{t.icon}</span>
-                <h4 className="font-serif font-semibold text-xs">{t.name}</h4>
-              </div>
-              <p className="text-[10px] text-muted-foreground font-sans leading-snug line-clamp-2">{t.description}</p>
+            <div className="flex flex-wrap gap-4">
+              {items.map((t) => (
+                <PreviewCard key={t.id} id={t.id} name={t.name} blurb={t.blurb} selected={selected === t.id} onChange={onChange} />
+              ))}
             </div>
-          </Card>
-        ))}
+          </div>
+        );
+      })}
+
+      <div className="border-t border-border pt-4">
+        <button type="button" onClick={() => setShowClassic((s) => !s)} className="text-sm text-muted-foreground underline underline-offset-2 font-sans">
+          {showClassic ? "Hide" : "Show"} classic templates (legacy)
+        </button>
+        {showClassic && (
+          <div className="mt-4 space-y-4">
+            {CV_TEMPLATE_CATEGORIES.filter((cat) => cat.id !== "premium").map((cat) => {
+              const items = CV_TEMPLATES.filter((t) => t.category === cat.id);
+              if (!items.length) return null;
+              return (
+                <div key={cat.id}>
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{cat.label}</div>
+                  <div className="flex flex-wrap gap-2">
+                    {items.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => onChange(t.id)}
+                        className={`rounded-md border px-2.5 py-1.5 text-xs font-sans ${selected === t.id ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/40"}`}
+                      >
+                        {t.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
-
-      {filtered.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center py-6">No templates match your search.</p>
-      )}
     </div>
   );
 };

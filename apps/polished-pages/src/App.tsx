@@ -8,6 +8,7 @@ import CVGenerator from "./pages/CVGenerator.tsx";
 import CoverLetterGenerator from "./pages/CoverLetterGenerator.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Gallery from "./pages/Gallery.tsx";
 import AuthGate from "./components/AuthGate.tsx";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,8 @@ const App = () => (
           <Route path="/cv" element={<AuthGate><CVGenerator /></AuthGate>} />
           <Route path="/cover-letter" element={<AuthGate><CoverLetterGenerator /></AuthGate>} />
           <Route path="/book" element={<AuthGate><BookCreator /></AuthGate>} />
+          {/* internal visual-QA gallery (not linked) */}
+          <Route path="/__gallery" element={<Gallery />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

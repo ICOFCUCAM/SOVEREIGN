@@ -16,9 +16,10 @@ import ReferencesStep from "@/components/cv/ReferencesStep";
 import CVUploadStep from "@/components/cv/CVUploadStep";
 import TemplateSelector from "@/components/cv/TemplateSelector";
 import CvDocument from "@/components/CvDocument";
-import PremiumCvDocument from "@/components/PremiumCvDocument";
+import PremiumCv from "@/components/PremiumCv";
 import { buildCvMarkdown } from "@/lib/cv-markdown";
 import { formToCvData, type CvData } from "@/lib/cv-data";
+import { isPremiumId } from "@/lib/premium-templates";
 import {
   PersonalInfo, Experience, Education, Reference, CVTemplate,
   defaultExperience, defaultEducation, defaultReference,
@@ -41,7 +42,7 @@ const CVGenerator = () => {
   const [certifications, setCertifications] = useState("");
   const [languages, setLanguages] = useState("");
   const [targetJob, setTargetJob] = useState("");
-  const [template, setTemplate] = useState<CVTemplate>("professional");
+  const [template, setTemplate] = useState<CVTemplate>("executive-onyx");
   const [photo, setPhoto] = useState<string | null>(null);
 
   const onPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,7 +113,7 @@ const CVGenerator = () => {
   const handleGenerate = async () => {
     // Premium templates are designed and render structured data directly — no AI
     // markdown round-trip, so the export looks exactly like the live preview.
-    if (template.startsWith("premium-")) {
+    if (isPremiumId(template)) {
       setGeneratedData(formToCvData(formState()));
       return;
     }
@@ -267,8 +268,8 @@ const CVGenerator = () => {
                   <div className="space-y-2">
                     <Label className="font-sans font-semibold">Live preview</Label>
                     <div className="rounded-lg border border-border bg-muted/20 p-4 max-h-[540px] overflow-auto">
-                      {template.startsWith("premium-") ? (
-                        <PremiumCvDocument data={formToCvData(formState())} template={template} />
+                      {isPremiumId(template) ? (
+                        <PremiumCv data={formToCvData(formState())} template={template} />
                       ) : (
                         <CvDocument
                           markdown={buildCvMarkdown({ personalInfo, experiences, education, skills, certifications, languages, references })}
@@ -319,7 +320,7 @@ const CVGenerator = () => {
                     <Sparkles className="w-8 h-8 text-primary mx-auto mb-3" />
                     <h3 className="font-serif text-lg font-semibold mb-1">Ready to Generate</h3>
                     <p className="text-sm text-muted-foreground font-sans mb-5">
-                      {template.startsWith("premium-")
+                      {isPremiumId(template)
                         ? "Your details, laid out in the selected premium design — open it full-screen and export to PDF."
                         : "Our AI will craft a polished, ATS-optimized CV using your selected template."}
                     </p>

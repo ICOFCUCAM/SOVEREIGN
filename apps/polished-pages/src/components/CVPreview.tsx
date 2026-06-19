@@ -8,7 +8,8 @@ import { CV_TEMPLATES } from "@/types/cv";
 import { getCvTheme } from "@/lib/cv-themes";
 import { elementToPdf } from "@/lib/export-pdf";
 import CvDocument from "@/components/CvDocument";
-import PremiumCvDocument from "@/components/PremiumCvDocument";
+import PremiumCv from "@/components/PremiumCv";
+import { getPremiumTemplate } from "@/lib/premium-templates";
 import { cvDataToMarkdown, type CvData } from "@/lib/cv-data";
 
 interface CVPreviewProps {
@@ -25,7 +26,8 @@ const CVPreview = ({ markdown, data, onBack, template, photo }: CVPreviewProps) 
   const [isPdf, setIsPdf] = useState(false);
   const cvRef = useRef<HTMLDivElement>(null);
   const theme = getCvTheme(template);
-  const templateInfo = CV_TEMPLATES.find((t) => t.id === template);
+  const premium = getPremiumTemplate(template);
+  const templateName = premium?.name ?? CV_TEMPLATES.find((t) => t.id === template)?.name;
   const exportMd = data ? cvDataToMarkdown(data) : (markdown ?? "");
 
   const handleDownloadMd = () => {
@@ -64,7 +66,8 @@ const CVPreview = ({ markdown, data, onBack, template, photo }: CVPreviewProps) 
     if (!cvRef.current) return;
     setIsPdf(true);
     try {
-      await elementToPdf(cvRef.current, "cv.pdf", theme.pageBg);
+      const bg = data ? (premium?.dark ? "#0f172a" : "#ffffff") : theme.pageBg;
+      await elementToPdf(cvRef.current, "cv.pdf", bg);
     } catch (e) {
       toast({ title: "PDF export failed", description: e instanceof Error ? e.message : "Something went wrong", variant: "destructive" });
     } finally {
@@ -81,9 +84,9 @@ const CVPreview = ({ markdown, data, onBack, template, photo }: CVPreviewProps) 
             <span className="text-lg font-bold font-serif tracking-tight">DocuForge</span>
           </Link>
           <div className="flex items-center gap-3">
-            {templateInfo && (
+            {templateName && (
               <span className="hidden md:inline text-xs text-muted-foreground font-sans">
-                Template: <strong className="text-foreground">{templateInfo.name}</strong>
+                Template: <strong className="text-foreground">{templateName}</strong>
               </span>
             )}
             <Button variant="ghost" onClick={onBack} className="text-muted-foreground">
@@ -106,7 +109,7 @@ const CVPreview = ({ markdown, data, onBack, template, photo }: CVPreviewProps) 
 
       <div className={`container ${theme.container} mx-auto px-6 pt-28 pb-16`}>
         {data ? (
-          <PremiumCvDocument data={data} template={template} innerRef={cvRef} />
+          <PremiumCv data={data} template={template} innerRef={cvRef} />
         ) : (
           <CvDocument markdown={markdown ?? ""} template={template} photo={photo} innerRef={cvRef} />
         )}
