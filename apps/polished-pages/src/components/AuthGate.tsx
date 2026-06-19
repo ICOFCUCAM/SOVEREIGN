@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { fetchPlanStatus, type PlanStatus } from "@/lib/session";
+import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
 
 // Polished Pages generation is metered per user, so the studio sits behind a
 // sign-in gate. This wraps the whole app: no session → sign-in screen; session →
@@ -86,15 +86,25 @@ const SignIn = () => {
 
 const AccountBar = ({ email }: { email: string }) => {
   const [status, setStatus] = useState<PlanStatus | null>(null);
+  const [upgrading, setUpgrading] = useState(false);
   useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
 
+  const isFree = status ? status.plan !== "pro" : false;
   const label = status
     ? (status.plan === "pro" ? "Pro · unlimited" : `Free · ${status.used}/${status.lim} generations this month`)
     : "";
 
+  const onUpgrade = async (): Promise<void> => {
+    setUpgrading(true);
+    try { await startUpgrade(); } catch (e) { alert(e instanceof Error ? e.message : "Upgrade failed"); setUpgrading(false); }
+  };
+
   return (
     <div className="flex items-center justify-end gap-3 border-b px-4 py-2 text-sm">
       {label && <span className="text-muted-foreground">{label}</span>}
+      {isFree && (
+        <Button size="sm" onClick={onUpgrade} disabled={upgrading}>{upgrading ? "…" : "Upgrade to Pro"}</Button>
+      )}
       <span className="text-muted-foreground">{email}</span>
       <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>Sign out</Button>
     </div>

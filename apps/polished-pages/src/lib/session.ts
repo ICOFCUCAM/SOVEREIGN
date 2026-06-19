@@ -11,6 +11,19 @@ export async function authHeader(): Promise<string> {
   return `Bearer ${data.session?.access_token ?? ANON}`;
 }
 
+// Start a Stripe Checkout to upgrade to Pro and redirect the browser to it.
+export async function startUpgrade(): Promise<void> {
+  const { data } = await supabase.auth.getSession();
+  const r = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/polished-create-checkout`, {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${data.session?.access_token ?? ANON}` },
+    body: "{}",
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.url) throw new Error(j.error || "Could not start checkout.");
+  window.location.href = j.url as string;
+}
+
 export interface PlanStatus { plan: string; used: number; lim: number }
 
 // The signed-in user's plan and monthly usage, for the account badge.

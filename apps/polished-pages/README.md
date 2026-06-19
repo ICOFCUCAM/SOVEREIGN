@@ -74,10 +74,39 @@ Turn-on checklist:
 3. Ensure Email auth is enabled in the Supabase project (Authentication →
    Providers). For frictionless testing, disable "Confirm email".
 
-**Not yet built — paid upgrade:** the gate enforces the free limit and exposes a
-`plan` flag, but there is no checkout. Wiring Stripe (a `pro` entitlement on
-successful payment) is the next step; until then "Pro" is set manually in the
-database.
+### Paid upgrade (Stripe)
+
+Upgrade flow: the account bar's **Upgrade to Pro** button calls
+`polished-create-checkout`, which creates a Stripe Checkout Session and redirects
+the browser to it. On payment, Stripe calls `polished-stripe-webhook`, which
+verifies the signature and flips the user to `pro` via
+`polished_apply_subscription` (and back to `free` on cancellation). The user id
+rides on the session/subscription metadata, so no customer→user lookup is needed.
+
+Turn-on:
+1. In Stripe, create a **Product** with a recurring **Price** (the Pro plan).
+2. Set function secrets:
+   ```bash
+   supabase secrets set STRIPE_SECRET_KEY=sk_live_or_test_... \
+     STRIPE_PRICE_ID=price_... \
+     STRIPE_WEBHOOK_SECRET=whsec_... \
+     PUBLIC_SITE_URL=https://your-polished-pages-url \
+     --project-ref qvjdivcdefuprnenedje
+   ```
+3. Deploy the two functions:
+   ```bash
+   supabase functions deploy polished-create-checkout
+   supabase functions deploy polished-stripe-webhook   # config.toml sets verify_jwt=false
+   ```
+4. In Stripe → Developers → Webhooks, add an endpoint pointing at
+   `https://qvjdivcdefuprnenedje.supabase.co/functions/v1/polished-stripe-webhook`,
+   subscribing to `checkout.session.completed`,
+   `customer.subscription.created|updated|deleted`. Use its signing secret as
+   `STRIPE_WEBHOOK_SECRET` above.
+
+Until Stripe secrets are set, the Upgrade button returns a clear "billing not
+configured" error; the free-tier gate still works. Pro can also be granted
+manually: `update polished.entitlements set plan='pro' where user_id='…';`.
 
 ## Frontend environment
 

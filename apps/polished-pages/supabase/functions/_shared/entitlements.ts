@@ -17,15 +17,15 @@ export class EntitlementError extends Error {
   }
 }
 
-// Read the user id from the request's bearer token. With verify_jwt enabled the
-// gateway has already validated the signature; we only read the verified claims.
+// Read the verified claims from the request's bearer token. With verify_jwt
+// enabled the gateway has already validated the signature; we only read claims.
 // Anonymous (anon-key) calls have no user subject and are rejected.
-export function getUserId(req: Request): string {
+function readClaims(req: Request): { sub: string; email?: string } {
   const header = req.headers.get("authorization") || "";
   const token = header.replace(/^Bearer\s+/i, "").trim();
   const parts = token.split(".");
   if (parts.length !== 3) throw new EntitlementError("Sign in to generate documents.", 401);
-  let claims: { sub?: string; role?: string };
+  let claims: { sub?: string; role?: string; email?: string };
   try {
     const seg = parts[1].replace(/-/g, "+").replace(/_/g, "/");
     const padded = seg.padEnd(Math.ceil(seg.length / 4) * 4, "=");
@@ -34,7 +34,16 @@ export function getUserId(req: Request): string {
     throw new EntitlementError("Invalid session.", 401);
   }
   if (claims.role !== "authenticated" || !claims.sub) throw new EntitlementError("Sign in to generate documents.", 401);
-  return claims.sub;
+  return { sub: claims.sub, email: claims.email };
+}
+
+export function getUserId(req: Request): string {
+  return readClaims(req).sub;
+}
+
+export function getUserContext(req: Request): { id: string; email?: string } {
+  const c = readClaims(req);
+  return { id: c.sub, email: c.email };
 }
 
 // Atomically check and increment the user's monthly quota via the service role.

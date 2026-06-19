@@ -1,1 +1,6 @@
 project_id = "qvjdivcdefuprnenedje"
+
+# Stripe calls this endpoint without a Supabase token; it authenticates via the
+# Stripe signature instead, so JWT verification must be off.
+[functions.polished-stripe-webhook]
+verify_jwt = false
