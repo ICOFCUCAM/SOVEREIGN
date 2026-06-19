@@ -109,7 +109,9 @@ const CVGenerator = () => {
             languages: langsArray,
             references: references.filter((r) => r.name.trim()),
             targetJob: targetJob.trim() || undefined,
-            template,
+            // Premium designs render their own structured layout; generate their
+            // content with the sidebar-producing prompt so the columns fill well.
+            template: template.startsWith("premium-") ? "modern" : template,
           }),
         }
       );

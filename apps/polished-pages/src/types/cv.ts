@@ -45,9 +45,10 @@ export interface CVTemplateInfo {
   icon: string;
 }
 
-export type CVTemplateCategory = "classic" | "modern" | "creative" | "industry" | "academic" | "executive" | "minimalist" | "regional" | "specialty";
+export type CVTemplateCategory = "premium" | "classic" | "modern" | "creative" | "industry" | "academic" | "executive" | "minimalist" | "regional" | "specialty";
 
 export const CV_TEMPLATE_CATEGORIES: { id: CVTemplateCategory; label: string }[] = [
+  { id: "premium", label: "Premium ✦" },
   { id: "classic", label: "Classic" },
   { id: "modern", label: "Modern" },
   { id: "creative", label: "Creative" },
@@ -60,6 +61,12 @@ export const CV_TEMPLATE_CATEGORIES: { id: CVTemplateCategory; label: string }[]
 ];
 
 export const CV_TEMPLATES: CVTemplateInfo[] = [
+  // Premium — designed two-column layouts with header band + photo + sidebar cards
+  { id: "premium-executive", name: "Executive Pro", description: "Designed two-column layout with header band, photo, and a categorized sidebar — blue accent", category: "premium", icon: "✦" },
+  { id: "premium-emerald", name: "Emerald Pro", description: "Premium two-column design with photo and sidebar cards — emerald accent", category: "premium", icon: "✦" },
+  { id: "premium-slate", name: "Slate Pro", description: "Dark premium design with photo, sidebar, and sky accent — striking and modern", category: "premium", icon: "✦" },
+  { id: "premium-burgundy", name: "Burgundy Pro", description: "Refined serif premium design with header band, photo, and burgundy accent", category: "premium", icon: "✦" },
+
   // Classic (6)
   { id: "professional", name: "Professional", description: "Traditional ATS-optimized format with clear section headings and structured layout", category: "classic", icon: "📄" },
   { id: "traditional", name: "Traditional", description: "Time-tested chronological format with conservative styling", category: "classic", icon: "📋" },

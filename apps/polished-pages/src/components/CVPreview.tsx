@@ -84,6 +84,14 @@ const CVPreview = ({ markdown, onBack, template }: CVPreviewProps) => {
   const theme = getCvTheme(template);
   const { header, sections } = parseSections(markdown);
 
+  // Designed templates: pull the name out for the header band + photo medallion,
+  // and keep the remaining header lines (contact) for the top of the sidebar.
+  const headerLines = header.split("\n");
+  const nameIdx = headerLines.findIndex((l) => /^#\s+/.test(l));
+  const cvName = nameIdx >= 0 ? headerLines[nameIdx].replace(/^#\s+/, "").trim() : "";
+  const initials = cvName.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
+  const headerRest = headerLines.filter((_, i) => i !== nameIdx).join("\n").trim();
+
   const handleDownloadMd = () => {
     const blob = new Blob([markdown], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
@@ -153,9 +161,42 @@ const CVPreview = ({ markdown, onBack, template }: CVPreviewProps) => {
 
       <div className={`container ${theme.container} mx-auto px-6 pt-28 pb-16`}>
         <div
-          className={`rounded-xl border ${theme.fontClass} p-8 md:p-12 shadow-premium leading-relaxed`}
+          className={`rounded-xl border ${theme.fontClass} ${theme.designed ? "p-0 overflow-hidden" : "p-8 md:p-12"} shadow-premium leading-relaxed`}
           style={{ background: theme.pageBg, color: theme.pageText, borderColor: hexA(theme.accent, 0.25) }}
         >
+          {theme.designed ? (
+            <div>
+              {/* header band with name + photo medallion */}
+              <div
+                className="flex items-center justify-between gap-4 px-8 py-7"
+                style={{ background: theme.dark ? hexA(theme.accent, 0.16) : "#eef2f7" }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: "2rem", fontWeight: 800, letterSpacing: ".02em", lineHeight: 1.1, color: theme.dark ? "#fff" : "#111827" }}>{cvName}</div>
+                </div>
+                <div
+                  className="flex shrink-0 items-center justify-center"
+                  style={{ width: 76, height: 76, borderRadius: 9999, background: theme.accent, color: "#fff", fontWeight: 700, fontSize: "1.5rem", boxShadow: `0 0 0 4px ${hexA(theme.accent, 0.2)}` }}
+                  aria-label="photo placeholder"
+                >
+                  {initials}
+                </div>
+              </div>
+
+              {/* two-column body */}
+              <div className="grid gap-0" style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1.9fr)" }}>
+                <div
+                  className="px-7 py-6"
+                  style={{ background: theme.dark ? hexA(theme.accent, 0.08) : "#f1f5f9", alignSelf: "stretch" }}
+                >
+                  {headerRest && <div dangerouslySetInnerHTML={{ __html: bodyHtml(headerRest, theme) }} />}
+                  <div dangerouslySetInnerHTML={{ __html: sections.slice(0, 3).map((s) => sectionHtml(s, theme)).join("") }} />
+                </div>
+                <div className="px-8 py-6" dangerouslySetInnerHTML={{ __html: sections.slice(3).map((s) => sectionHtml(s, theme)).join("") }} />
+              </div>
+            </div>
+          ) : (
+          <div className="contents">
           <div dangerouslySetInnerHTML={{ __html: bodyHtml(header, theme) }} />
 
           {isSidebar ? (
@@ -180,6 +221,8 @@ const CVPreview = ({ markdown, onBack, template }: CVPreviewProps) => {
             </div>
           ) : (
             <div dangerouslySetInnerHTML={{ __html: sections.map((s) => sectionHtml(s, theme)).join("") }} />
+          )}
+          </div>
           )}
         </div>
       </div>

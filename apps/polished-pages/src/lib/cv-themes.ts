@@ -21,6 +21,7 @@ export interface CvTheme {
   pageText: string;     // hex
   mutedText: string;    // hex
   dark: boolean;
+  designed: boolean;    // premium structured layout (header band + photo + sidebar cards)
   headingKind: HeadingKind;
   gradientFrom?: string;
   gradientTo?: string;
@@ -33,6 +34,7 @@ interface Spec {
   layout?: CvLayout;
   heading?: HeadingKind;
   dark?: boolean;
+  designed?: boolean;
   bg?: string;
   text?: string;
   gradient?: [string, string];
@@ -42,6 +44,12 @@ const FONT_CLASS: Record<FontKind, string> = { serif: "font-serif", sans: "font-
 
 // id → spec. Layouts mirror the structural intent of each template's prompt.
 const SPECS: Record<string, Spec> = {
+  // Premium — structured designed layout (header band + photo + sidebar cards)
+  "premium-executive": { accent: "#1d4ed8", font: "sans", layout: "sidebar-left", heading: "band", designed: true },
+  "premium-emerald": { accent: "#059669", font: "sans", layout: "sidebar-left", heading: "band", designed: true },
+  "premium-slate": { accent: "#38bdf8", font: "sans", layout: "sidebar-left", heading: "band", designed: true, dark: true, bg: "#0f172a", text: "#e2e8f0" },
+  "premium-burgundy": { accent: "#9f1239", font: "serif", layout: "sidebar-left", heading: "band", designed: true },
+
   // Classic — serif, single column, rule headings
   professional: { accent: "#1f3a5f", font: "serif", heading: "rule" },
   traditional: { accent: "#1a1a1a", font: "serif", heading: "rule" },
@@ -131,6 +139,7 @@ export function getCvTheme(templateId?: string): CvTheme {
     pageText: s.text ?? (dark ? "#e5e5e5" : "#1f2937"),
     mutedText: dark ? "#a3a3a3" : "#6b7280",
     dark,
+    designed: s.designed ?? false,
     headingKind: s.heading ?? "plain",
     gradientFrom: s.gradient?.[0],
     gradientTo: s.gradient?.[1],

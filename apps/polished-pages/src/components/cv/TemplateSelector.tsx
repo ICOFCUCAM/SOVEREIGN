@@ -15,6 +15,7 @@ import regionalImg from "@/assets/cv-templates/regional.jpg";
 import specialtyImg from "@/assets/cv-templates/specialty.jpg";
 
 const categoryPreviewMap: Record<CVTemplateCategory, string> = {
+  premium: executiveImg,
   classic: classicImg,
   modern: modernImg,
   creative: creativeImg,
