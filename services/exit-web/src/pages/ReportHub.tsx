@@ -1,6 +1,10 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadActiveCompany } from "../lib/active-company";
+import { buildBoardMemo } from "../lib/report-docs";
+import { boardMemoToDdm } from "../lib/dispatch-ddm";
+import { submitToDispatch } from "../lib/dispatch-client";
+import { notify } from "../lib/ui";
 
 // ── PUBLISHING CENTER ───────────────────────────────────────────────
 // The index of every board-ready document ExitOS publishes for the active
@@ -24,6 +28,17 @@ const DOCUMENTS: DocCard[] = [
 const ReportHub: React.FC = () => {
   const nav = useNavigate();
   const { company } = useMemo(() => loadActiveCompany(), []);
+  const [dispatching, setDispatching] = useState(false);
+
+  const submitBoardToDispatch = async (): Promise<void> => {
+    setDispatching(true);
+    const memo = buildBoardMemo(company);
+    const r = await submitToDispatch(boardMemoToDdm(memo), ["pdf"]);
+    setDispatching(false);
+    if (r.ok) notify(`Submitted to Dispatch · ${r.lifecycleState ?? r.status ?? "queued"}${r.documentId ? ` · ${r.documentId.slice(0, 8)}` : ""}`);
+    else if (!r.configured) notify("Sovereign Dispatch not connected yet — deploy the API and set its secrets");
+    else notify(`Dispatch error: ${r.error}`);
+  };
 
   return (
     <div className="min-h-screen bg-[#0a1018] py-10">
@@ -42,7 +57,18 @@ const ReportHub: React.FC = () => {
           </p>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="mt-6 flex flex-wrap items-center gap-3 rounded-lg border border-deal-400/25 bg-deal-600/[0.06] px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-deal-300">Governed publication · Sovereign Dispatch</div>
+            <p className="mt-0.5 text-[12px] text-white/55">Submit the Board Memorandum into the Dispatch pipeline (Submit → Approve → Render → Publish) for a classified, audited institutional document.</p>
+          </div>
+          <button onClick={submitBoardToDispatch} disabled={dispatching}
+            className="shrink-0 rounded-md bg-deal-500 px-4 py-2 text-[12.5px] font-semibold text-ink-950 transition hover:bg-deal-400 disabled:opacity-60">
+            {dispatching ? "Submitting…" : "Submit to Dispatch →"}
+          </button>
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {DOCUMENTS.map((d) => {
             const openable = !!d.href;
             const Inner = (
