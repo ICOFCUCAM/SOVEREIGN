@@ -36,6 +36,10 @@ export interface TokenResponse { access_token: string; token: string; tokenType:
 export const exchangeToken = (client_id: string, secret: string) =>
   request<TokenResponse>("POST", "/v1/token", { body: { client_id, secret } });
 
+// ---- whoami (resolve identity for either token kind) ----
+export interface WhoAmI { tenantId: string; principalType: "user" | "service"; role: string; scopes: string[]; clearance: string; actor: string }
+export const whoami = (token?: string) => request<WhoAmI>("GET", "/v1/whoami", token ? { token } : {});
+
 // ---- documents / lifecycle ----
 export type Lifecycle = "draft" | "submitted" | "in_review" | "approved" | "rejected" | "rendered" | "published" | "withdrawn" | "archived";
 export interface DocListItem {
@@ -82,6 +86,36 @@ export interface JobResult { schemaVersion: string; requestId: string; jobId: st
 export interface JobView { jobId: string; requestId: string; status: string; progress: number; result: JobResult | null; error: ApiError | null; createdAt: string; updatedAt: string }
 export const getJob = (id: string) => request<JobView>("GET", `/v1/jobs/${id}`);
 export const artifactGrant = (id: string) => request<{ downloadUrl: string; expiresIn: number }>("POST", `/v1/artifacts/${id}/grant`, { body: {} });
+
+// ---- admin ----
+export interface AdminClient { id: string; name: string; clientId: string; scopes: string[]; clearance: string; active: boolean; createdAt: string; lastUsedAt?: string | null }
+export const listClients = () => request<{ items: AdminClient[]; count: number }>("GET", "/v1/admin/clients");
+export const createClient = (name: string, scopes?: string[], clearance?: string) =>
+  request<{ id: string; clientId: string; secret: string; scopes: string[]; clearance: string; message: string }>("POST", "/v1/admin/clients", { body: { name, scopes, clearance } });
+export const updateClient = (id: string, patch: { active?: boolean; scopes?: string[]; clearance?: string }) =>
+  request<{ id: string; updated: boolean }>("PATCH", `/v1/admin/clients/${id}`, { body: patch });
+
+export interface AdminMember { id: string; userId: string; role: string; clearance: string; status: string; createdAt: string }
+export const listMembers = () => request<{ items: AdminMember[]; count: number }>("GET", "/v1/admin/members");
+export const upsertMember = (userId: string, role: string, clearance: string) =>
+  request<{ id: string; userId: string; role: string; clearance: string }>("POST", "/v1/admin/members", { body: { userId, role, clearance } });
+
+export interface AdminPolicy { id: string; docType: string | null; classificationLevel: string | null; requiredApprovals: number; minApproverClearance: string | null; autoApproveService: boolean; autoApproveUser: boolean }
+export const listPolicies = () => request<{ items: AdminPolicy[]; count: number }>("GET", "/v1/admin/policies");
+export const upsertPolicy = (p: { docType?: string; classificationLevel?: string; requiredApprovals: number; minApproverClearance?: string; autoApproveService?: boolean; autoApproveUser?: boolean }) =>
+  request<{ id: string; requiredApprovals: number }>("POST", "/v1/admin/policies", { body: p });
+
+export interface RetentionPolicy { id: string; classificationLevel: string | null; retentionDays: number; purgeGraceDays: number }
+export const listRetention = () => request<{ items: RetentionPolicy[]; count: number }>("GET", "/v1/admin/retention-policies");
+export const upsertRetention = (p: { classificationLevel?: string; retentionDays: number; purgeGraceDays: number }) =>
+  request<{ id: string; retentionDays: number; purgeGraceDays: number }>("POST", "/v1/admin/retention-policies", { body: p });
+
+export interface Template { id: string; docType: string; title: string; requiredRoles: string[]; optionalRoles: string[]; active: boolean; overrides: boolean }
+export const listTemplates = () => request<{ builtins: string[]; items: Template[]; count: number }>("GET", "/v1/admin/templates");
+export const upsertTemplate = (p: { docType: string; title?: string; requiredRoles: string[]; optionalRoles?: string[]; active?: boolean }) =>
+  request<{ id: string; docType: string }>("POST", "/v1/admin/templates", { body: p });
+export const deleteTemplate = (docType: string) =>
+  request<{ docType: string; deleted: boolean }>("DELETE", `/v1/admin/templates/${encodeURIComponent(docType)}`);
 
 // ---- audit ----
 export interface AuditEvent { eventId: string; actor: string; actorType: string; action: string; targetType?: string; targetId?: string; classification?: string; requestId?: string; correlationId?: string; sha256?: string; ts: string }

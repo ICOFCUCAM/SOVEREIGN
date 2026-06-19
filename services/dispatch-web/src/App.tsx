@@ -10,11 +10,17 @@ import Review from "./pages/Review";
 import Library from "./pages/Library";
 import DocumentView from "./pages/DocumentView";
 import Audit from "./pages/Audit";
+import Admin from "./pages/Admin";
+import Callback from "./pages/Callback";
 
 // The gated operator/governance console. Everything here requires a session;
-// unauthenticated visitors get the sign-in gate.
+// unauthenticated visitors get the sign-in gate. The OAuth callback is the one
+// exception — it runs without a session to complete the redirect exchange.
 const Console: React.FC = () => {
   const { session } = useAuth();
+  if (window.location.pathname === "/console/callback") return (
+    <Routes><Route path="callback" element={<Callback />} /></Routes>
+  );
   if (!session) return <SignIn />;
   return (
     <Shell>
@@ -25,6 +31,7 @@ const Console: React.FC = () => {
         <Route path="library" element={<Library />} />
         <Route path="documents/:id" element={<DocumentView />} />
         <Route path="audit" element={<Audit />} />
+        <Route path="admin" element={<Admin />} />
         <Route path="*" element={<Navigate to="/console" replace />} />
       </Routes>
     </Shell>

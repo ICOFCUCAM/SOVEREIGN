@@ -8,6 +8,11 @@
     "M5__roles_grants.sql",
     "M6__clearance.sql",
     "M7__governance.sql",
-    "M8__governance_job_insert.sql"
+    "M8__governance_job_insert.sql",
+    "M9__admin_and_retention.sql",
+    "M10__membership_lookup.sql",
+    "M11__refresh_tokens.sql",
+    "M12__retention_policies.sql",
+    "M13__templates.sql"
   ]
 }

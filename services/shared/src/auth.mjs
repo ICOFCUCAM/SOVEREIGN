@@ -23,6 +23,7 @@ import crypto from "node:crypto";
 import { verifyJwt, signJwt, decodeUnverified, JwtError } from "./jwt.mjs";
 
 const TENANT_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE = TENANT_RE; // user `sub` must be a UUID too (membership user_id)
 
 // Service-secret at-rest hashing (R-S1-1).
 //
@@ -84,7 +85,7 @@ export async function resolvePrincipal(pool, authHeader, withClaimsAdmin) {
 
   // ---- Production path: a real JWT (single dot-delimited token) -------------
   if (rest === undefined && kind.split(".").length === 3) {
-    return resolveJwt(kind);
+    return resolveJwt(kind, withClaimsAdmin);
   }
 
   // ---- Dev-only user trust shim --------------------------------------------
@@ -118,7 +119,7 @@ export async function resolvePrincipal(pool, authHeader, withClaimsAdmin) {
 }
 
 // Verify and map a Bearer JWT to a Principal.
-function resolveJwt(token) {
+async function resolveJwt(token, withClaimsAdmin) {
   let header;
   try {
     header = decodeUnverified(token);
@@ -126,9 +127,16 @@ function resolveJwt(token) {
     return { error: { status: 401, code: "UNAUTHENTICATED", message: "malformed bearer token" } };
   }
   const isService = header.principal_type === "service";
-  const secret = isService ? process.env.DISPATCH_TOKEN_SECRET : process.env.SUPABASE_JWT_SECRET;
+  // Dispatch-issued user access tokens (from the session/refresh flow) are
+  // signed with our own secret and carry authoritative claims already resolved
+  // from the membership at issue/refresh time — so they verify like a service
+  // token and we trust their baked-in role/clearance (no per-request DB hit).
+  // An external IdP user JWT (no dispatch_issued flag) still resolves authority
+  // from the membership row below.
+  const isDispatchUser = !isService && header.dispatch_issued === true;
+  const secret = (isService || isDispatchUser) ? process.env.DISPATCH_TOKEN_SECRET : process.env.SUPABASE_JWT_SECRET;
   if (!secret) {
-    return { error: { status: 401, code: "AUTH_NOT_CONFIGURED", message: `${isService ? "DISPATCH_TOKEN_SECRET" : "SUPABASE_JWT_SECRET"} not set` } };
+    return { error: { status: 401, code: "AUTH_NOT_CONFIGURED", message: `${(isService || isDispatchUser) ? "DISPATCH_TOKEN_SECRET" : "SUPABASE_JWT_SECRET"} not set` } };
   }
   let claims;
   try {
@@ -144,8 +152,41 @@ function resolveJwt(token) {
   if (isService) {
     return { principal: { tenantId, principalType: "service", role: "service", scopes: claims.scopes ?? [], clearance: claims.clearance || "none", actor: `svc:${claims.client_id || claims.sub || "service"}` } };
   }
-  const role = claims.dispatch_role || claims.role || "viewer";
-  return { principal: { tenantId, principalType: "user", role, scopes: claims.scopes ?? roleScopes(role), clearance: claims.clearance || "none", actor: `user:${role}` } };
+
+  // Dispatch-issued user access token: claims were resolved from the membership
+  // at issue/refresh time and are trusted for the (short) access TTL. Role
+  // changes / revocation take effect at the next refresh.
+  if (isDispatchUser) {
+    const role = claims.dispatch_role || "viewer";
+    return { principal: { tenantId, principalType: "user", role, scopes: claims.scopes ?? roleScopes(role), clearance: claims.clearance || "none", actor: `user:${claims.sub}` } };
+  }
+
+  // Human SSO: ROLE + CLEARANCE are Dispatch's authority, NOT the identity
+  // provider's. We resolve them from the membership row keyed by (tenant, sub)
+  // and ignore any role/clearance the token tries to assert — so a Supabase
+  // token can never self-escalate. The token only proves identity (sub) and
+  // tenant. Without a usable lookup we fail closed to the lowest role.
+  const userId = claims.sub;
+  if (!UUID_RE.test(userId ?? "")) {
+    return { error: { status: 401, code: "UNAUTHENTICATED", message: "token has no valid subject" } };
+  }
+  let member = null;
+  if (typeof withClaimsAdmin === "function") {
+    try {
+      member = await withClaimsAdmin(async (client) => {
+        const r = await client.query("select role, clearance, status from dispatch.lookup_membership($1,$2)", [tenantId, userId]);
+        return r.rows[0] || null;
+      });
+    } catch { member = null; }
+  }
+  if (!member) {
+    return { error: { status: 403, code: "NO_MEMBERSHIP", message: "no active membership for this user in this tenant" } };
+  }
+  if (member.status && member.status !== "active") {
+    return { error: { status: 403, code: "MEMBERSHIP_DISABLED", message: "membership is disabled" } };
+  }
+  const role = member.role || "viewer";
+  return { principal: { tenantId, principalType: "user", role, scopes: roleScopes(role), clearance: member.clearance || "none", actor: `user:${userId}` } };
 }
 
 /**

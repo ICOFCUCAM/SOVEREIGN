@@ -8,13 +8,15 @@ import crypto from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { validateRequest } from "@dispatch/ddm-schema/validator";
+import { validateRequest, resolveScaffolds, listDocTypes } from "@dispatch/ddm-schema/validator";
 import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
-import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verifyDownloadGrant } from "../../shared/src/auth.mjs";
+import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verifyDownloadGrant, hashSecretScrypt, roleScopes } from "../../shared/src/auth.mjs";
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
-import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition } from "../../shared/src/governance.mjs";
+import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition, resolveRetention } from "../../shared/src/governance.mjs";
+import { oauthConfig, exchangeCode } from "../../shared/src/oauth.mjs";
+import { issueSession, rotateSession, revokeSession } from "../../shared/src/session.mjs";
 
 const ENGINE_VERSION = "dispatch-api@1.0.0";
 const pool = makePool();
@@ -57,6 +59,19 @@ async function readBody(req) {
   return Buffer.concat(chunks).toString("utf8");
 }
 
+// Load the tenant's ACTIVE templates and build a scaffolds overlay keyed by
+// docType (overrides/adds to the built-in v1.0 scaffolds). Returns the merged
+// effective scaffold set used by validation. Failures fall back to built-ins.
+async function tenantScaffolds(principal) {
+  try {
+    const rows = await withClaims(pool, govClaims(principal), (c) =>
+      c.query("select doc_type, title, required_roles, optional_roles from dispatch.templates where active = true").then((r) => r.rows));
+    const overlay = {};
+    for (const r of rows) overlay[r.doc_type] = { title: r.title, requiredRoles: r.required_roles, optionalRoles: r.optional_roles };
+    return resolveScaffolds(overlay);
+  } catch { return resolveScaffolds(null); }
+}
+
 async function handleValidate(req, res, principal) {
   if (!hasScope(principal, "dispatch:validate")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "validate scope required"));
   let body;
@@ -65,7 +80,8 @@ async function handleValidate(req, res, principal) {
   // tenant guard: body source.tenantId must match the principal's tenant
   if (body?.source?.tenantId && body.source.tenantId !== principal.tenantId)
     return send(res, 403, errEnvelope(body.requestId, 403, "TENANT_MISMATCH", "source.tenantId != token tenant"));
-  const v = validateRequest(body);            // shared module — identical to worker
+  const scaffolds = await tenantScaffolds(principal);
+  const v = validateRequest(body, { scaffolds });   // built-ins overlaid with tenant templates
   return send(res, 200, { valid: v.valid, errors: v.errors, warnings: v.warnings, resolved: v.resolved });
 }
 
@@ -82,8 +98,9 @@ async function handleDocuments(req, res, principal) {
   if (body?.source?.tenantId && body.source.tenantId !== principal.tenantId)
     return send(res, 403, errEnvelope(requestId, 403, "TENANT_MISMATCH", "source.tenantId != token tenant"));
 
-  // Validate (same module as /validate and worker)
-  const v = validateRequest(body);
+  // Validate (same module as /validate and worker), with tenant templates.
+  const scaffolds = await tenantScaffolds(principal);
+  const v = validateRequest(body, { scaffolds });
   if (!v.valid) {
     const primary = v.errors[0];
     const statusByCode = { SCAFFOLD_INCOMPLETE: 422, DOC_TYPE_UNSUPPORTED: 422, DOC_TOO_LARGE: 400 };
@@ -277,12 +294,21 @@ async function handleLifecycleAction(req, res, principal, documentId, action) {
         if (docRow.lifecycle_state !== "rendered")
           return { http: 409, body: errEnvelope(null, 409, "NOT_RENDERED", `document is '${docRow.lifecycle_state}'; must be 'rendered' to publish`) };
         assertTransition("rendered", "published");
-        const ret = await client.query("select retention_days from dispatch.tenants where id=$1", [principal.tenantId]);
-        const days = ret.rows[0]?.retention_days || 365;
-        await client.query("update dispatch.documents set lifecycle_state='published', published_at=now(), retention_until=now() + ($2 || ' days')::interval where id=$1", [documentId, String(days)]);
+        // Resolve retention per (tenant, classification) and bake BOTH boundaries
+        // into the document so the cross-tenant purge sweeper stays a pure
+        // timestamp comparison: retention_until (→ archived) and purge_after
+        // (archived + grace → bytes purged).
+        const level = (docRow.classification && docRow.classification.level) || null;
+        const ret = await resolveRetention(client, { tenantId: principal.tenantId, classificationLevel: level });
+        await client.query(
+          `update dispatch.documents set lifecycle_state='published', published_at=now(),
+             retention_until = now() + ($2 || ' days')::interval,
+             purge_after     = now() + (($2::int + $3::int) || ' days')::interval
+           where id=$1`,
+          [documentId, String(ret.retention_days), String(ret.purge_grace_days)]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
           action: "document.published", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
-        return { http: 200, body: { documentId, lifecycle: "published" } };
+        return { http: 200, body: { documentId, lifecycle: "published", retentionDays: ret.retention_days, purgeGraceDays: ret.purge_grace_days } };
       }
       // withdraw
       if (!["published", "rendered"].includes(docRow.lifecycle_state))
@@ -371,6 +397,267 @@ async function handleAudit(res, principal, query) {
   return send(res, 200, { events: rows.map((r) => ({ eventId: r.event_id, actor: r.actor, actorType: r.actor_type,
     action: r.action, targetType: r.target_type, targetId: r.target_id, classification: r.classification,
     requestId: r.request_id, correlationId: r.correlation_id, sha256: r.sha256, ts: r.ts })), count: rows.length });
+}
+
+// ---- Admin surface (clients, members, policies) ----------------------------
+// All admin endpoints require dispatch:admin and are tenant-scoped via RLS.
+function requireAdmin(res, principal) {
+  if (!hasScope(principal, "dispatch:admin")) { send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required")); return false; }
+  return true;
+}
+
+// GET /v1/admin/clients — list this tenant's service clients (no secrets).
+async function handleListClients(res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  const rows = await withClaims(pool, govClaims(principal), (c) =>
+    c.query("select id, name, client_id, scopes, clearance, active, created_at, last_used_at from dispatch.service_clients order by created_at desc")
+      .then((r) => r.rows));
+  return send(res, 200, { items: rows.map((r) => ({ id: r.id, name: r.name, clientId: r.client_id, scopes: r.scopes,
+    clearance: r.clearance, active: r.active, createdAt: r.created_at, lastUsedAt: r.last_used_at })), count: rows.length });
+}
+
+// POST /v1/admin/clients — provision a service client. Returns the generated
+// secret ONCE (never stored in plaintext; scrypt-hashed at rest).
+async function handleCreateClient(req, res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  if (!body?.name) return send(res, 400, errEnvelope(null, 400, "NAME_REQUIRED", "client name required"));
+  const clientId = body.clientId || `svc-${crypto.randomBytes(5).toString("hex")}`;
+  const secret = crypto.randomBytes(24).toString("base64url");
+  const scopes = Array.isArray(body.scopes) && body.scopes.length ? body.scopes : roleScopes("service");
+  const clearance = body.clearance || "none";
+  try {
+    const id = await withClaims(pool, govClaims(principal), async (c) => {
+      const r = await c.query(
+        `insert into dispatch.service_clients (tenant_id, name, client_id, secret_hash, scopes, clearance, active)
+         values ($1,$2,$3,$4,$5,$6,true) returning id`,
+        [principal.tenantId, body.name, clientId, hashSecretScrypt(secret), scopes, clearance]);
+      await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: "admin.client.created", targetType: "service_client", targetId: r.rows[0].id });
+      return r.rows[0].id;
+    });
+    // secret returned exactly once
+    return send(res, 201, { id, clientId, secret, scopes, clearance,
+      message: "store this secret now — it is not recoverable" });
+  } catch (e) {
+    if (String(e.message).includes("duplicate key")) return send(res, 409, errEnvelope(null, 409, "CLIENT_EXISTS", "client_id already in use"));
+    console.error("create client error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
+// PATCH /v1/admin/clients/{id} — toggle active / rotate scopes/clearance.
+async function handleUpdateClient(req, res, principal, id) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  const sets = []; const params = []; let i = 1;
+  if (typeof body.active === "boolean") { sets.push(`active=$${i++}`); params.push(body.active); }
+  if (Array.isArray(body.scopes)) { sets.push(`scopes=$${i++}`); params.push(body.scopes); }
+  if (body.clearance) { sets.push(`clearance=$${i++}`); params.push(body.clearance); }
+  if (!sets.length) return send(res, 400, errEnvelope(null, 400, "NO_FIELDS", "nothing to update"));
+  params.push(id);
+  const updated = await withClaims(pool, govClaims(principal), async (c) => {
+    const r = await c.query(`update dispatch.service_clients set ${sets.join(", ")} where id=$${i} returning id`, params);
+    if (r.rows[0]) await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+      action: "admin.client.updated", targetType: "service_client", targetId: id });
+    return r.rows[0];
+  });
+  if (!updated) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "client not found"));
+  return send(res, 200, { id, updated: true });
+}
+
+// GET /v1/admin/members — list tenant memberships (role + clearance).
+async function handleListMembers(res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  const rows = await withClaims(pool, govClaims(principal), (c) =>
+    c.query("select id, user_id, role, clearance, status, created_at from dispatch.memberships order by created_at desc").then((r) => r.rows));
+  return send(res, 200, { items: rows.map((r) => ({ id: r.id, userId: r.user_id, role: r.role,
+    clearance: r.clearance, status: r.status, createdAt: r.created_at })), count: rows.length });
+}
+
+// POST /v1/admin/members — add or update a member's role/clearance (upsert).
+async function handleUpsertMember(req, res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  if (!body?.userId || !body?.role) return send(res, 400, errEnvelope(null, 400, "FIELDS_REQUIRED", "userId and role required"));
+  try {
+    const id = await withClaims(pool, govClaims(principal), async (c) => {
+      const r = await c.query(
+        `insert into dispatch.memberships (tenant_id, user_id, role, clearance)
+         values ($1,$2,$3,$4)
+         on conflict (tenant_id, user_id) do update set role=excluded.role, clearance=excluded.clearance
+         returning id`,
+        [principal.tenantId, body.userId, body.role, body.clearance || "none"]);
+      await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: "admin.member.upserted", targetType: "membership", targetId: r.rows[0].id });
+      return r.rows[0].id;
+    });
+    return send(res, 200, { id, userId: body.userId, role: body.role, clearance: body.clearance || "none" });
+  } catch (e) {
+    console.error("upsert member error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
+// GET /v1/admin/policies — list approval policies.
+async function handleListPolicies(res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  const rows = await withClaims(pool, govClaims(principal), (c) =>
+    c.query("select id, doc_type, classification_level, required_approvals, min_approver_clearance, auto_approve_service, auto_approve_user from dispatch.approval_policies order by doc_type nulls first, classification_level nulls first").then((r) => r.rows));
+  return send(res, 200, { items: rows.map((r) => ({ id: r.id, docType: r.doc_type, classificationLevel: r.classification_level,
+    requiredApprovals: r.required_approvals, minApproverClearance: r.min_approver_clearance,
+    autoApproveService: r.auto_approve_service, autoApproveUser: r.auto_approve_user })), count: rows.length });
+}
+
+// POST /v1/admin/policies — upsert an approval policy for (docType, level).
+async function handleUpsertPolicy(req, res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  const required = Number.isInteger(body?.requiredApprovals) ? body.requiredApprovals : 1;
+  if (required < 0 || required > 5) return send(res, 400, errEnvelope(null, 400, "BAD_REQUIRED", "requiredApprovals 0..5"));
+  const lvl = body.classificationLevel ? String(body.classificationLevel).toLowerCase() : null;
+  try {
+    const id = await withClaims(pool, govClaims(principal), async (c) => {
+      const r = await c.query(
+        `insert into dispatch.approval_policies (tenant_id, doc_type, classification_level, required_approvals, min_approver_clearance, auto_approve_service, auto_approve_user)
+         values ($1,$2,$3,$4,$5,$6,$7)
+         on conflict (tenant_id, doc_type, classification_level)
+           do update set required_approvals=excluded.required_approvals, min_approver_clearance=excluded.min_approver_clearance,
+                         auto_approve_service=excluded.auto_approve_service, auto_approve_user=excluded.auto_approve_user
+         returning id`,
+        [principal.tenantId, body.docType || null, lvl, required, body.minApproverClearance || null,
+         body.autoApproveService !== false, body.autoApproveUser === true]);
+      await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: "admin.policy.upserted", targetType: "approval_policy", targetId: r.rows[0].id });
+      return r.rows[0].id;
+    });
+    return send(res, 200, { id, docType: body.docType || null, classificationLevel: lvl, requiredApprovals: required });
+  } catch (e) {
+    console.error("upsert policy error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
+// GET /v1/admin/retention-policies — list retention policies.
+async function handleListRetention(res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  const rows = await withClaims(pool, govClaims(principal), (c) =>
+    c.query("select id, classification_level, retention_days, purge_grace_days from dispatch.retention_policies order by classification_level nulls first").then((r) => r.rows));
+  return send(res, 200, { items: rows.map((r) => ({ id: r.id, classificationLevel: r.classification_level,
+    retentionDays: r.retention_days, purgeGraceDays: r.purge_grace_days })), count: rows.length });
+}
+
+// POST /v1/admin/retention-policies — upsert a retention policy for a level.
+async function handleUpsertRetention(req, res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  const retDays = Number.isInteger(body?.retentionDays) ? body.retentionDays : 365;
+  const grace = Number.isInteger(body?.purgeGraceDays) ? body.purgeGraceDays : 30;
+  if (retDays < 0 || retDays > 36500 || grace < 0 || grace > 36500)
+    return send(res, 400, errEnvelope(null, 400, "BAD_DAYS", "retentionDays/purgeGraceDays out of range (0..36500)"));
+  const lvl = body.classificationLevel ? String(body.classificationLevel).toLowerCase() : null;
+  try {
+    const id = await withClaims(pool, govClaims(principal), async (c) => {
+      const r = await c.query(
+        `insert into dispatch.retention_policies (tenant_id, classification_level, retention_days, purge_grace_days)
+         values ($1,$2,$3,$4)
+         on conflict (tenant_id, classification_level)
+           do update set retention_days=excluded.retention_days, purge_grace_days=excluded.purge_grace_days
+         returning id`,
+        [principal.tenantId, lvl, retDays, grace]);
+      await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: "admin.retention.upserted", targetType: "retention_policy", targetId: r.rows[0].id });
+      return r.rows[0].id;
+    });
+    return send(res, 200, { id, classificationLevel: lvl, retentionDays: retDays, purgeGraceDays: grace });
+  } catch (e) {
+    console.error("upsert retention error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
+// GET /v1/admin/templates — list this tenant's templates (overrides/additions)
+// alongside the built-in defaults so the console can show the effective set.
+async function handleListTemplates(res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  const rows = await withClaims(pool, govClaims(principal), (c) =>
+    c.query("select id, doc_type, title, required_roles, optional_roles, active from dispatch.templates order by doc_type").then((r) => r.rows));
+  const builtins = listDocTypes();
+  return send(res, 200, {
+    builtins,
+    items: rows.map((r) => ({ id: r.id, docType: r.doc_type, title: r.title,
+      requiredRoles: r.required_roles, optionalRoles: r.optional_roles, active: r.active,
+      overrides: builtins.includes(r.doc_type) })),
+    count: rows.length,
+  });
+}
+
+// POST /v1/admin/templates — upsert a template for a docType.
+async function handleUpsertTemplate(req, res, principal) {
+  if (!requireAdmin(res, principal)) return;
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  const docType = String(body?.docType || "").trim();
+  if (!docType) return send(res, 400, errEnvelope(null, 400, "DOCTYPE_REQUIRED", "docType required"));
+  if (!Array.isArray(body.requiredRoles) || body.requiredRoles.length === 0)
+    return send(res, 400, errEnvelope(null, 400, "ROLES_REQUIRED", "requiredRoles must be a non-empty array"));
+  const required = body.requiredRoles.map((s) => String(s).trim()).filter(Boolean);
+  const optional = Array.isArray(body.optionalRoles) ? body.optionalRoles.map((s) => String(s).trim()).filter(Boolean) : [];
+  try {
+    const id = await withClaims(pool, govClaims(principal), async (c) => {
+      const r = await c.query(
+        `insert into dispatch.templates (tenant_id, doc_type, title, required_roles, optional_roles, active)
+         values ($1,$2,$3,$4,$5, coalesce($6,true))
+         on conflict (tenant_id, doc_type)
+           do update set title=excluded.title, required_roles=excluded.required_roles,
+                         optional_roles=excluded.optional_roles, active=excluded.active
+         returning id`,
+        [principal.tenantId, docType, body.title || docType, required, optional, body.active]);
+      await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+        action: "admin.template.upserted", targetType: "template", targetId: r.rows[0].id });
+      return r.rows[0].id;
+    });
+    return send(res, 200, { id, docType, title: body.title || docType, requiredRoles: required, optionalRoles: optional });
+  } catch (e) {
+    console.error("upsert template error:", e);
+    return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
+  }
+}
+
+// DELETE /v1/admin/templates/{docType} — remove a tenant template (a built-in
+// docType reverts to its default; a custom docType disappears).
+async function handleDeleteTemplate(res, principal, docType) {
+  if (!requireAdmin(res, principal)) return;
+  const removed = await withClaims(pool, govClaims(principal), async (c) => {
+    const r = await c.query("delete from dispatch.templates where doc_type=$1 returning id", [docType]);
+    if (r.rows[0]) await writeAudit(c, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+      action: "admin.template.deleted", targetType: "template", targetId: r.rows[0].id });
+    return r.rows[0];
+  });
+  if (!removed) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "template not found"));
+  return send(res, 200, { docType, deleted: true });
+}
+
+// GET /v1/doctypes — the EFFECTIVE doc types for this tenant (built-ins overlaid
+// with active templates). Any authenticated principal with read may list them.
+async function handleListDocTypes(res, principal) {
+  if (!hasScope(principal, "dispatch:read") && !hasScope(principal, "dispatch:validate"))
+    return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read or validate scope required"));
+  const sc = await tenantScaffolds(principal);
+  const items = Object.entries(sc).map(([docType, def]) => ({ docType, title: def.title || docType,
+    requiredRoles: def.requiredRoles || [], optionalRoles: def.optionalRoles || [] }));
+  return send(res, 200, { items, count: items.length });
 }
 
 // ---- Retrieve surface (Epic 8) ---------------------------------------------
@@ -504,6 +791,72 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && path === "/v1/version") return send(res, 200, { engineVersion: ENGINE_VERSION, schemaVersion: "1.0" });
     if (req.method === "GET" && path === "/v1/metrics") return send(res, 200, snapshot());
 
+    // OAuth config (public): the SPA reads the IdP authorize URL + client_id to
+    // start a PKCE redirect. No secrets here. { enabled:false } hides the button.
+    if (req.method === "GET" && path === "/v1/auth/config") {
+      const cfg = oauthConfig();
+      return send(res, 200, cfg.enabled
+        ? { enabled: true, authorizeUrl: cfg.authorizeUrl, clientId: cfg.clientId, scopes: cfg.scopes, redirectUri: cfg.redirectUri }
+        : { enabled: false });
+    }
+
+    // OAuth callback (public): exchange the code for the IdP token, resolve the
+    // membership-authoritative principal, then issue a DISPATCH session (short
+    // access token + rotating refresh token). The IdP token is not handed back.
+    if (req.method === "POST" && path === "/v1/auth/callback") {
+      let cb;
+      try { cb = JSON.parse(await readBody(req)); }
+      catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+      const ex = await exchangeCode({ code: cb.code, codeVerifier: cb.codeVerifier || cb.code_verifier, redirectUri: cb.redirectUri || cb.redirect_uri });
+      if (ex.error) return send(res, ex.error.status, errEnvelope(null, ex.error.status, ex.error.code, ex.error.message));
+      const who = await resolvePrincipal(pool, `Bearer ${ex.accessToken}`, withAdmin);
+      if (who.error) return send(res, who.error.status, errEnvelope(null, who.error.status, who.error.code, who.error.message));
+      const sess = await issueSession(who.principal, withAdmin);
+      if (sess.error) return send(res, sess.error.status, errEnvelope(null, sess.error.status, sess.error.code, sess.error.message));
+      const p = who.principal;
+      return send(res, 200, { ...sess, tokenType: "Bearer",
+        principal: { tenantId: p.tenantId, principalType: p.principalType, role: p.role, scopes: p.scopes, clearance: p.clearance || "none", actor: p.actor } });
+    }
+
+    // Refresh: rotate the refresh token, re-resolve authority, return a fresh
+    // access + refresh pair. Reuse of a rotated token revokes the whole family.
+    if (req.method === "POST" && path === "/v1/auth/refresh") {
+      let rb;
+      try { rb = JSON.parse(await readBody(req)); }
+      catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+      const resolveMember = async (tenantId, userId) => withAdmin(async (c) => {
+        const r = await c.query("select role, clearance, status from dispatch.lookup_membership($1,$2)", [tenantId, userId]);
+        const m = r.rows[0]; if (!m) return null;
+        return { ...m, _scopes: roleScopes(m.role || "viewer") };
+      });
+      const rot = await rotateSession(rb.refreshToken || rb.refresh_token, withAdmin, resolveMember);
+      if (rot.error) return send(res, rot.error.status, errEnvelope(null, rot.error.status, rot.error.code, rot.error.message));
+      const p = rot.principal;
+      return send(res, 200, { accessToken: rot.accessToken, expiresIn: rot.expiresIn, refreshToken: rot.refreshToken,
+        refreshExpiresAt: rot.refreshExpiresAt, tokenType: "Bearer",
+        principal: { tenantId: p.tenantId, principalType: p.principalType, role: p.role, scopes: p.scopes, clearance: p.clearance || "none", actor: p.actor } });
+    }
+
+    // Logout: revoke the presented refresh token (or the whole family with
+    // ?everywhere=true). Public — the refresh token itself is the credential.
+    if (req.method === "POST" && path === "/v1/auth/logout") {
+      let lb = {};
+      try { lb = JSON.parse(await readBody(req)); } catch { /* empty body ok */ }
+      await revokeSession(lb.refreshToken || lb.refresh_token, withAdmin, { everywhere: url.searchParams.get("everywhere") === "true" });
+      return send(res, 200, { ok: true });
+    }
+
+    // whoami — resolve the caller's identity/role/scopes/clearance from the
+    // bearer token (service JWT or Supabase user JWT). Used by the console to
+    // render the role-filtered UI after SSO.
+    if (req.method === "GET" && path === "/v1/whoami") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      const p = auth.principal;
+      return send(res, 200, { tenantId: p.tenantId, principalType: p.principalType, role: p.role,
+        scopes: p.scopes, clearance: p.clearance || "none", actor: p.actor });
+    }
+
     // Governance GET surface (auth required, tenant-scoped).
     if (req.method === "GET" && (path === "/v1/approvals" || path === "/v1/documents" || path === "/v1/audit")) {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
@@ -511,6 +864,46 @@ const server = http.createServer(async (req, res) => {
       if (path === "/v1/approvals") return await handleApprovalsInbox(res, auth.principal, url.searchParams);
       if (path === "/v1/documents") return await handleListDocuments(res, auth.principal, url.searchParams);
       if (path === "/v1/audit") return await handleAudit(res, auth.principal, url.searchParams);
+    }
+
+    // Admin GET surface (dispatch:admin, tenant-scoped).
+    if (req.method === "GET" && (path === "/v1/admin/clients" || path === "/v1/admin/members" || path === "/v1/admin/policies" || path === "/v1/admin/retention-policies" || path === "/v1/admin/templates")) {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      if (path === "/v1/admin/clients") return await handleListClients(res, auth.principal);
+      if (path === "/v1/admin/members") return await handleListMembers(res, auth.principal);
+      if (path === "/v1/admin/policies") return await handleListPolicies(res, auth.principal);
+      if (path === "/v1/admin/retention-policies") return await handleListRetention(res, auth.principal);
+      if (path === "/v1/admin/templates") return await handleListTemplates(res, auth.principal);
+    }
+
+    // Effective doc types (built-ins + tenant templates) for any read principal.
+    if (req.method === "GET" && path === "/v1/doctypes") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleListDocTypes(res, auth.principal);
+    }
+
+    // PATCH (admin client update).
+    if (req.method === "PATCH") {
+      const m = /^\/v1\/admin\/clients\/([A-Za-z0-9-]+)$/.exec(path);
+      if (m) {
+        const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+        if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+        return await handleUpdateClient(req, res, auth.principal, m[1]);
+      }
+      return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "not found"));
+    }
+
+    // DELETE (admin template removal).
+    if (req.method === "DELETE") {
+      const m = /^\/v1\/admin\/templates\/([A-Za-z0-9_-]+)$/.exec(path);
+      if (m) {
+        const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+        if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+        return await handleDeleteTemplate(res, auth.principal, m[1]);
+      }
+      return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "not found"));
     }
 
     // Dispatch console (Epic 9) — static page; no auth (it authenticates client-side).
@@ -568,6 +961,13 @@ const server = http.createServer(async (req, res) => {
       if (action === "decision") return await handleDecision(req, res, principal, id);
       return await handleLifecycleAction(req, res, principal, id, action);
     }
+
+    // Admin POST surface.
+    if (path === "/v1/admin/clients") return await handleCreateClient(req, res, principal);
+    if (path === "/v1/admin/members") return await handleUpsertMember(req, res, principal);
+    if (path === "/v1/admin/policies") return await handleUpsertPolicy(req, res, principal);
+    if (path === "/v1/admin/retention-policies") return await handleUpsertRetention(req, res, principal);
+    if (path === "/v1/admin/templates") return await handleUpsertTemplate(req, res, principal);
 
     // Mint a single-artifact download grant (Epic-10 hardening): the artifact must
     // belong to the principal's tenant (RLS-checked) and the principal needs read.

@@ -10,9 +10,8 @@
     "documentId": { "type": "string", "format": "uuid" },
     "docType": {
       "type": "string",
-      "enum": ["executive_briefing","situation_report","intelligence_briefing","policy_paper",
-               "ministerial_report","strategic_memorandum","board_report","regulatory_response",
-               "research_dossier","investor_update","proposal_package"]
+      "pattern": "^[a-z][a-z0-9_]{2,63}$",
+      "$comment": "Supported doc types are governed by the scaffold profile set (built-in + tenant templates), not a frozen enum. An unsupported docType is reported as DOC_TYPE_UNSUPPORTED by the post-schema scaffold check, so tenants can define custom report formats."
     },
     "locale": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$", "default": "en-GB" },
     "metadata": { "$ref": "#/$defs/Metadata" },

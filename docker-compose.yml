@@ -36,6 +36,7 @@ services:
     environment:
       DISPATCH_MIGRATE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@dispatch-db:5432/dispatch
       DISPATCH_APP_PASSWORD: ${DISPATCH_APP_PASSWORD:-dispatch_app}
+      DISPATCH_PURGE_PASSWORD: ${DISPATCH_PURGE_PASSWORD:-dispatch_purge}
     depends_on:
       dispatch-db:
         condition: service_healthy
@@ -44,7 +45,8 @@ services:
       - |
         psql "$$DISPATCH_MIGRATE_URL" -c "create extension if not exists pgcrypto" &&
         node db/migrate.mjs up &&
-        psql "$$DISPATCH_MIGRATE_URL" -c "alter role dispatch_app with login password '$$DISPATCH_APP_PASSWORD'"
+        psql "$$DISPATCH_MIGRATE_URL" -c "alter role dispatch_app with login password '$$DISPATCH_APP_PASSWORD'" &&
+        psql "$$DISPATCH_MIGRATE_URL" -c "alter role dispatch_purge with login password '$$DISPATCH_PURGE_PASSWORD'"
 
   dispatch-api:
     build:
@@ -60,6 +62,13 @@ services:
       DISPATCH_TOKEN_SECRET: ${DISPATCH_TOKEN_SECRET:-dev-dispatch-token-secret-change-me}
       DISPATCH_TOKEN_ISSUER: sovereign-dispatch
       SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:-}
+      # Human SSO (OAuth Authorization Code + PKCE). Unset → console hides SSO.
+      OAUTH_AUTHORIZE_URL: ${OAUTH_AUTHORIZE_URL:-}
+      OAUTH_TOKEN_URL: ${OAUTH_TOKEN_URL:-}
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID:-}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET:-}
+      OAUTH_REDIRECT_URI: ${OAUTH_REDIRECT_URI:-}
+      OAUTH_SCOPES: ${OAUTH_SCOPES:-openid email profile}
       # Storage — MUST match the worker (same backend + creds) so the API can
       # read what the worker wrote. fs backend shares the dispatch-artifacts volume.
       DISPATCH_STORAGE_BACKEND: ${DISPATCH_STORAGE_BACKEND:-fs}
@@ -108,6 +117,27 @@ services:
       S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-}
     volumes:
       - dispatch-artifacts:/artifacts
+    depends_on:
+      dispatch-migrate:
+        condition: service_completed_successfully
+
+  # Retention sweeper — archives published docs past retention_until and expires
+  # (purges) artifact bytes past the grace window. Runs as the privileged
+  # dispatch_purge role (BYPASSRLS); never deletes documents or audit.
+  dispatch-retention:
+    build:
+      context: .
+      dockerfile: services/dispatch-worker/Dockerfile
+    command: ["node", "src/retention.mjs"]
+    environment:
+      NODE_ENV: production
+      PGHOST: dispatch-db
+      PGPORT: "5432"
+      PGDATABASE: dispatch
+      DISPATCH_PURGE_USER: dispatch_purge
+      DISPATCH_PURGE_PASSWORD: ${DISPATCH_PURGE_PASSWORD:-dispatch_purge}
+      DISPATCH_PURGE_GRACE_DAYS: ${DISPATCH_PURGE_GRACE_DAYS:-30}
+      DISPATCH_RETENTION_INTERVAL_MS: ${DISPATCH_RETENTION_INTERVAL_MS:-3600000}
     depends_on:
       dispatch-migrate:
         condition: service_completed_successfully
