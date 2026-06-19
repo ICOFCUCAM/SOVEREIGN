@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { complete, LlmError } from "../_shared/llm.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,9 +20,6 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const assetPrompts: Record<string, string> = {
       blog_post: `Create 3 standalone blog posts (800-1200 words each) from this book content. Each should have a compelling title, SEO-friendly structure with H2/H3 headings, and a call-to-action linking back to the book. Format as markdown with clear separators between posts.`,
@@ -60,52 +58,22 @@ Format as structured markdown.`,
 
     const instruction = assetPrompts[assetType] || assetPrompts.blog_post;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content: `You are an expert content marketer and copywriter. Create high-converting marketing assets from book content.\n\nRULES:\n- Output in clean markdown\n- Make content standalone and valuable\n- Include clear CTAs\n- Optimize for the specific platform/format\n- No meta-commentary`,
-          },
-          {
-            role: "user",
-            content: `Book: "${bookTitle}"\n\n${instruction}\n\nSource content:\n${bookContent.substring(0, 15000)}`,
-          },
-        ],
-      }),
+    const content = await complete({
+      system: `You are an expert content marketer and copywriter. Create high-converting marketing assets from book content.\n\nRULES:\n- Output in clean markdown\n- Make content standalone and valuable\n- Include clear CTAs\n- Optimize for the specific platform/format\n- No meta-commentary`,
+      user: `Book: "${bookTitle}"\n\n${instruction}\n\nSource content:\n${bookContent.substring(0, 15000)}`,
+      maxTokens: 12000,
+      lovableModel: "google/gemini-3-flash-preview",
     });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error("Content repurposing failed");
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
 
     return new Response(JSON.stringify({ content, assetType }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("repurpose-content error:", e);
+    const status = e instanceof LlmError && e.status ? e.status : 500;
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

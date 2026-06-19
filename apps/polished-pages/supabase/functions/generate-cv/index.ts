@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { complete, LlmError } from "../_shared/llm.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -1148,8 +1149,6 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     // Handle CV text parsing (upload feature)
     if (body.action === "parse") {
@@ -1160,13 +1159,8 @@ serve(async (req) => {
         });
       }
 
-      const parseResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: `You are a CV parser. Extract structured data from the provided CV text and return ONLY valid JSON with this exact structure:
+      const raw = await complete({
+        system: `You are a CV parser. Extract structured data from the provided CV text and return ONLY valid JSON with this exact structure:
 {
   "personalInfo": { "fullName": "", "email": "", "phone": "", "location": "", "linkedin": "", "website": "", "summary": "" },
   "experiences": [{ "title": "", "company": "", "startDate": "", "endDate": "", "description": "" }],
@@ -1176,19 +1170,14 @@ serve(async (req) => {
   "languages": "English (Native), etc",
   "references": [{ "name": "", "title": "", "company": "", "email": "", "phone": "", "relationship": "" }]
 }
-Leave empty strings for missing fields. Return ONLY JSON, no markdown.` },
-            { role: "user", content: cvText },
-          ],
-          stream: false,
-        }),
+Leave empty strings for missing fields. Return ONLY JSON, no markdown.`,
+        user: cvText,
+        maxTokens: 4000,
       });
 
-      if (!parseResponse.ok) throw new Error("AI parsing failed");
-      const parseData = await parseResponse.json();
       let parsed;
       try {
-        let content = parseData.choices?.[0]?.message?.content || "{}";
-        content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        const content = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
         parsed = JSON.parse(content);
       } catch {
         throw new Error("Failed to parse CV structure");
@@ -1263,46 +1252,17 @@ ${(references || []).length > 0
 
 ${targetJob ? `**Target Job/Role:** ${targetJob}\nOptimize the CV for this specific role with relevant keywords and tailored content.` : ""}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        stream: false,
-      }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI generation failed");
-    }
-
-    const data = await response.json();
-    const cvContent = data.choices?.[0]?.message?.content;
+    const cvContent = await complete({ system: systemPrompt, user: userPrompt, maxTokens: 8000 });
 
     return new Response(JSON.stringify({ cv: cvContent, template: selectedTemplate, layout: structure.layout }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("generate-cv error:", e);
+    const status = e instanceof LlmError && e.status ? e.status : 500;
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
