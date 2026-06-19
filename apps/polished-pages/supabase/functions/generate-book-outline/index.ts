@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { complete, LlmError } from "../_shared/llm.ts";
+import { getUserId, consumeOrThrow, EntitlementError } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,7 @@ serve(async (req) => {
   }
 
   try {
+    const userId = getUserId(req);
     const { bookTitle, genre, targetAudience, depth, mode, existingContent } = await req.json();
 
     const depthGuide = {
@@ -68,6 +70,7 @@ RULES:
 - Include actionable, practical content
 - ${modeInstructions}`;
 
+    await consumeOrThrow(userId);
     let content = await complete({
       system: systemPrompt,
       user: `Create a ${mode || "guided"} book outline for: "${bookTitle || "Untitled Book"}"`,
@@ -85,7 +88,7 @@ RULES:
     });
   } catch (e) {
     console.error("generate-book-outline error:", e);
-    const status = e instanceof LlmError && e.status ? e.status : 500;
+    const status = e instanceof EntitlementError ? e.status : e instanceof LlmError && e.status ? e.status : 500;
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
       { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }

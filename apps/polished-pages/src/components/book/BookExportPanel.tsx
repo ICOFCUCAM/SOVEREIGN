@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { authHeader } from "@/lib/session";
 import { Download, FileText, BookOpen, Loader2 } from "lucide-react";
 import { useState } from "react";
 
@@ -34,7 +35,7 @@ const BookExportPanel = ({ bookTitle, fullContent, chapterCount }: BookExportPan
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: await authHeader(),
           },
           body: JSON.stringify({ content: fullContent, title: bookTitle, format }),
         }

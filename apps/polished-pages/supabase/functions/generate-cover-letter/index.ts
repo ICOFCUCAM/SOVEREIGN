@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { complete, LlmError } from "../_shared/llm.ts";
+import { getUserId, consumeOrThrow, EntitlementError } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,7 @@ serve(async (req) => {
   }
 
   try {
+    const userId = getUserId(req);
     const { fullName, email, phone, jobDescription, relevantExperience, tone } = await req.json();
 
     const toneGuide = {
@@ -48,6 +50,7 @@ ${jobDescription}
 **Relevant Experience & Achievements:**
 ${relevantExperience || "Not provided — infer from the job description what strengths to highlight."}`;
 
+    await consumeOrThrow(userId);
     const coverLetter = await complete({ system: systemPrompt, user: userPrompt, maxTokens: 4000 });
 
     return new Response(JSON.stringify({ coverLetter }), {
@@ -55,7 +58,7 @@ ${relevantExperience || "Not provided — infer from the job description what st
     });
   } catch (e) {
     console.error("generate-cover-letter error:", e);
-    const status = e instanceof LlmError && e.status ? e.status : 500;
+    const status = e instanceof EntitlementError ? e.status : e instanceof LlmError && e.status ? e.status : 500;
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
       { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }

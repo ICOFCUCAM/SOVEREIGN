@@ -8,6 +8,7 @@ import CVGenerator from "./pages/CVGenerator.tsx";
 import CoverLetterGenerator from "./pages/CoverLetterGenerator.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import AuthGate from "./components/AuthGate.tsx";
 
 const queryClient = new QueryClient();
 
@@ -17,14 +18,16 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/cv" element={<CVGenerator />} />
-          <Route path="/cover-letter" element={<CoverLetterGenerator />} />
-          <Route path="/book" element={<BookCreator />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthGate>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/cv" element={<CVGenerator />} />
+            <Route path="/cover-letter" element={<CoverLetterGenerator />} />
+            <Route path="/book" element={<BookCreator />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthGate>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

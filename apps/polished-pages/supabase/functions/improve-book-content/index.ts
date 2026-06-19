@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { complete, LlmError } from "../_shared/llm.ts";
+import { getUserId, consumeOrThrow, EntitlementError } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,7 @@ serve(async (req) => {
   }
 
   try {
+    const userId = getUserId(req);
     const { content, improvementType, bookContext } = await req.json();
 
     if (!content?.trim()) {
@@ -45,6 +47,7 @@ RULES:
 - Maintain the author's voice while elevating quality
 - Ensure no repetition of ideas or phrases`;
 
+    await consumeOrThrow(userId);
     const improved = await complete({
       system: systemPrompt,
       user: content,
@@ -57,7 +60,7 @@ RULES:
     });
   } catch (e) {
     console.error("improve-book-content error:", e);
-    const status = e instanceof LlmError && e.status ? e.status : 500;
+    const status = e instanceof EntitlementError ? e.status : e instanceof LlmError && e.status ? e.status : 500;
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
       { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -1,5 +1,6 @@
 import { AssetType } from "@/types/book";
 import { Button } from "@/components/ui/button";
+import { authHeader } from "@/lib/session";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Sparkles, FileText, MessageSquare, Mail, GraduationCap, Video, ShoppingBag } from "lucide-react";
 import { useState } from "react";
@@ -33,7 +34,7 @@ const BookRepurposePanel = ({ bookTitle, fullContent }: BookRepurposePanelProps)
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: await authHeader(),
           },
           body: JSON.stringify({ bookContent: fullContent, bookTitle, assetType: type }),
         }

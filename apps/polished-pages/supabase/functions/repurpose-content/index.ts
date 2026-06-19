@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { complete, LlmError } from "../_shared/llm.ts";
+import { getUserId, consumeOrThrow, EntitlementError } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,7 @@ serve(async (req) => {
   }
 
   try {
+    const userId = getUserId(req);
     const { bookContent, bookTitle, assetType } = await req.json();
 
     if (!bookContent?.trim()) {
@@ -58,6 +60,7 @@ Format as structured markdown.`,
 
     const instruction = assetPrompts[assetType] || assetPrompts.blog_post;
 
+    await consumeOrThrow(userId);
     const content = await complete({
       system: `You are an expert content marketer and copywriter. Create high-converting marketing assets from book content.\n\nRULES:\n- Output in clean markdown\n- Make content standalone and valuable\n- Include clear CTAs\n- Optimize for the specific platform/format\n- No meta-commentary`,
       user: `Book: "${bookTitle}"\n\n${instruction}\n\nSource content:\n${bookContent.substring(0, 15000)}`,
@@ -70,7 +73,7 @@ Format as structured markdown.`,
     });
   } catch (e) {
     console.error("repurpose-content error:", e);
-    const status = e instanceof LlmError && e.status ? e.status : 500;
+    const status = e instanceof EntitlementError ? e.status : e instanceof LlmError && e.status ? e.status : 500;
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
       { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }

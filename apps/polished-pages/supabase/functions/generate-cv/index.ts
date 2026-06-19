@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { complete, LlmError } from "../_shared/llm.ts";
+import { getUserId, consumeOrThrow, EntitlementError } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -1148,9 +1149,11 @@ serve(async (req) => {
   }
 
   try {
+    const userId = getUserId(req);
     const body = await req.json();
 
-    // Handle CV text parsing (upload feature)
+    // Handle CV text parsing (upload feature) — requires sign-in, but the
+    // convenience parse does not count against the generation quota.
     if (body.action === "parse") {
       const cvText = body.cvText;
       if (!cvText || typeof cvText !== "string" || cvText.length > 50000) {
@@ -1252,6 +1255,7 @@ ${(references || []).length > 0
 
 ${targetJob ? `**Target Job/Role:** ${targetJob}\nOptimize the CV for this specific role with relevant keywords and tailored content.` : ""}`;
 
+    await consumeOrThrow(userId);
     const cvContent = await complete({ system: systemPrompt, user: userPrompt, maxTokens: 8000 });
 
     return new Response(JSON.stringify({ cv: cvContent, template: selectedTemplate, layout: structure.layout }), {
@@ -1259,7 +1263,7 @@ ${targetJob ? `**Target Job/Role:** ${targetJob}\nOptimize the CV for this speci
     });
   } catch (e) {
     console.error("generate-cv error:", e);
-    const status = e instanceof LlmError && e.status ? e.status : 500;
+    const status = e instanceof EntitlementError ? e.status : e instanceof LlmError && e.status ? e.status : 500;
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
       { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }

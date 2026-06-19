@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { complete, LlmError } from "../_shared/llm.ts";
+import { getUserId, consumeOrThrow, EntitlementError } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,7 @@ serve(async (req) => {
   }
 
   try {
+    const userId = getUserId(req);
     const { bookTitle, genre, targetAudience, chapters, chapterIndex, depth, previousChapters } = await req.json();
 
     const chapter = chapters[chapterIndex];
@@ -69,6 +71,7 @@ ${chapter.hook ? `\nSuggested hook concept: ${chapter.hook}` : ""}
 Write the complete chapter now.`;
 
     // A detailed chapter runs 3500-5000 words (~7k tokens) — give headroom.
+    await consumeOrThrow(userId);
     const content = await complete({
       system: systemPrompt,
       user: userPrompt,
@@ -81,7 +84,7 @@ Write the complete chapter now.`;
     });
   } catch (e) {
     console.error("generate-book-chapter error:", e);
-    const status = e instanceof LlmError && e.status ? e.status : 500;
+    const status = e instanceof EntitlementError ? e.status : e instanceof LlmError && e.status ? e.status : 500;
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
       { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }

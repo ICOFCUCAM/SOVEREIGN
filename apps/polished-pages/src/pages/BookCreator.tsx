@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { authHeader } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -47,7 +48,7 @@ const BookCreator = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: await authHeader(),
           },
           body: JSON.stringify({ bookTitle, genre, targetAudience, depth, mode, existingContent }),
         }
@@ -106,7 +107,7 @@ const BookCreator = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: await authHeader(),
           },
           body: JSON.stringify({
             bookTitle: outline?.title || bookTitle,
@@ -156,7 +157,7 @@ const BookCreator = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: await authHeader(),
           },
           body: JSON.stringify({
             content: ch.content,

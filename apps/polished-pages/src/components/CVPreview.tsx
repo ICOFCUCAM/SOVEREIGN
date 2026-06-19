@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { authHeader } from "@/lib/session";
 import { ArrowLeft, Download, FileText, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Sparkles } from "lucide-react";
@@ -174,7 +175,7 @@ const CVPreview = ({ markdown, onBack, template }: CVPreviewProps) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: await authHeader(),
           },
           body: JSON.stringify({ markdown }),
         }

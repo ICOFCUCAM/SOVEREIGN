@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { authHeader } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, Loader2, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -74,7 +75,7 @@ const CVUploadStep = ({ onParsed }: Props) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: await authHeader(),
           },
           body: JSON.stringify({ action: "parse", cvText: text }),
         }
