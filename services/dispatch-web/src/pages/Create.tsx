@@ -6,13 +6,16 @@ import { Button, Card, Field, inputCls } from "../lib/ui";
 
 // CREATE — the institutional authoring department. Unlike Submit (raw DDM JSON),
 // this composes a valid DDM document from structured forms per document type, so
-// an author can produce an Executive Briefing / Board Report / Policy Paper
-// without writing JSON. The output flows through the same Submit → Approve →
-// Render → Publish pipeline. (Consumer document generation — CV/letter/book —
-// lives in the separate Polished Pages studio, by design.)
+// an author can produce any of the institutional document kinds without writing
+// JSON. The output flows through the same Submit → Approve → Render → Publish
+// pipeline. Each DOC_TYPES entry mirrors a scaffold profile (requiredRoles +
+// blockPolicy) in packages/ddm-schema, so the composed document validates.
+// (Consumer document generation — CV/letter/book — lives in the separate
+// Polished Pages studio, by design.)
 
-type Kind = "paragraph" | "bullets" | "callout";
-interface FieldSpec { role: string; heading: string; kind: Kind; placeholder: string; lead?: boolean }
+type Kind = "paragraph" | "bullets" | "callout" | "timeline";
+type CalloutStyle = "info" | "warning" | "risk" | "recommendation";
+interface FieldSpec { role: string; heading: string; kind: Kind; placeholder: string; lead?: boolean; calloutStyle?: CalloutStyle }
 interface DocTypeSpec { docType: string; label: string; blurb: string; fields: FieldSpec[] }
 
 const DOC_TYPES: DocTypeSpec[] = [
@@ -48,6 +51,86 @@ const DOC_TYPES: DocTypeSpec[] = [
       { role: "recommendation", heading: "Recommendation", kind: "callout", placeholder: "The recommended policy option." },
     ],
   },
+  {
+    docType: "situation_report", label: "Situation Report",
+    blurb: "Current status, timeline of events, impacts, next update.",
+    fields: [
+      { role: "current_status", heading: "Current Status", kind: "paragraph", lead: true, placeholder: "The current state of the situation, bottom line up front." },
+      { role: "timeline", heading: "Timeline", kind: "timeline", placeholder: "0900Z | First report received | optional detail\n1030Z | Response team deployed" },
+      { role: "impacts", heading: "Impacts", kind: "bullets", placeholder: "One impact per line." },
+      { role: "next_update", heading: "Next Update", kind: "paragraph", placeholder: "When the next update will be issued, and by whom." },
+    ],
+  },
+  {
+    docType: "intelligence_briefing", label: "Intelligence Briefing",
+    blurb: "Bottom line, key judgements, assessment, outlook.",
+    fields: [
+      { role: "bottom_line", heading: "Bottom Line", kind: "callout", calloutStyle: "info", placeholder: "The single most decision-relevant judgement." },
+      { role: "key_judgements", heading: "Key Judgements", kind: "bullets", placeholder: "One judgement per line (with confidence where known)." },
+      { role: "assessment", heading: "Assessment", kind: "paragraph", placeholder: "The analytic line supporting the judgements." },
+      { role: "outlook", heading: "Outlook", kind: "paragraph", placeholder: "What to expect next and indicators to watch." },
+    ],
+  },
+  {
+    docType: "ministerial_report", label: "Ministerial Report",
+    blurb: "Summary, issue, considerations, recommendation.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "What the Minister needs to know in one paragraph." },
+      { role: "issue", heading: "Issue", kind: "paragraph", placeholder: "The matter requiring the Minister's attention or decision." },
+      { role: "considerations", heading: "Considerations", kind: "bullets", placeholder: "One consideration per line (policy, legal, financial, presentational)." },
+      { role: "recommendation", heading: "Recommendation", kind: "callout", placeholder: "What the Minister is being asked to agree." },
+    ],
+  },
+  {
+    docType: "strategic_memorandum", label: "Strategic Memorandum",
+    blurb: "Purpose, situation, analysis, recommendation.",
+    fields: [
+      { role: "purpose", heading: "Purpose", kind: "paragraph", lead: true, placeholder: "Why this memorandum exists and the decision it serves." },
+      { role: "situation", heading: "Situation", kind: "paragraph", placeholder: "The strategic context and what has changed." },
+      { role: "analysis", heading: "Analysis", kind: "paragraph", placeholder: "The strategic analysis and its implications." },
+      { role: "recommendation", heading: "Recommendation", kind: "callout", placeholder: "The recommended strategic course of action." },
+    ],
+  },
+  {
+    docType: "regulatory_response", label: "Regulatory Response",
+    blurb: "Summary, matters raised, response, remediation.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "A one-paragraph summary of the response." },
+      { role: "matters_raised", heading: "Matters Raised", kind: "bullets", placeholder: "One matter / question raised by the regulator per line." },
+      { role: "response", heading: "Response", kind: "paragraph", placeholder: "The substantive response to the matters raised." },
+      { role: "remediation", heading: "Remediation & Commitments", kind: "callout", calloutStyle: "warning", placeholder: "The remediation steps and commitments, with dates." },
+    ],
+  },
+  {
+    docType: "research_dossier", label: "Research Dossier",
+    blurb: "Abstract, scope, findings, conclusion.",
+    fields: [
+      { role: "abstract", heading: "Abstract", kind: "paragraph", lead: true, placeholder: "A short abstract of the research and its conclusion." },
+      { role: "scope", heading: "Scope", kind: "paragraph", placeholder: "What the dossier covers and the questions it answers." },
+      { role: "findings", heading: "Findings", kind: "bullets", placeholder: "One finding per line." },
+      { role: "conclusion", heading: "Conclusion", kind: "paragraph", placeholder: "What the findings mean and their implications." },
+    ],
+  },
+  {
+    docType: "investor_update", label: "Investor Update",
+    blurb: "Highlights, progress, metrics, asks.",
+    fields: [
+      { role: "highlights", heading: "Highlights", kind: "bullets", placeholder: "One headline highlight per line." },
+      { role: "progress", heading: "Progress", kind: "paragraph", placeholder: "Progress since the last update." },
+      { role: "metrics", heading: "Metrics", kind: "bullets", placeholder: "One key metric per line (e.g. MRR, growth, runway)." },
+      { role: "asks", heading: "Asks", kind: "callout", calloutStyle: "info", placeholder: "How investors can help — intros, hires, advice." },
+    ],
+  },
+  {
+    docType: "proposal_package", label: "Proposal Package",
+    blurb: "Executive summary, approach, deliverables, commercials.",
+    fields: [
+      { role: "executive_summary", heading: "Executive Summary", kind: "paragraph", lead: true, placeholder: "The proposition in one paragraph." },
+      { role: "approach", heading: "Approach", kind: "paragraph", placeholder: "How the work will be done." },
+      { role: "deliverables", heading: "Deliverables", kind: "bullets", placeholder: "One deliverable per line." },
+      { role: "commercials", heading: "Commercials", kind: "callout", calloutStyle: "info", placeholder: "Pricing and commercial terms." },
+    ],
+  },
 ];
 
 const LEVELS = ["UNCLASSIFIED", "OFFICIAL", "OFFICIAL-SENSITIVE", "CONFIDENTIAL"];
@@ -74,7 +157,8 @@ const Create: React.FC = () => {
       const v = (values[f.role] ?? "").trim();
       let block: Record<string, unknown>;
       if (f.kind === "bullets") block = { id: `b${i + 1}`, type: "bullets", ordered: false, items: v.split(/\n+/).map((s) => s.trim()).filter(Boolean).map((text) => ({ text })) };
-      else if (f.kind === "callout") block = { id: `b${i + 1}`, type: "callout", style: "recommendation", text: v };
+      else if (f.kind === "callout") block = { id: `b${i + 1}`, type: "callout", style: f.calloutStyle ?? "recommendation", text: v };
+      else if (f.kind === "timeline") block = { id: `b${i + 1}`, type: "timeline", events: v.split(/\n+/).map((l) => l.trim()).filter(Boolean).map((l) => { const [ts, label, detail] = l.split("|").map((s) => s.trim()); return { ts: ts || "", label: label || ts || "", ...(detail ? { detail } : {}) }; }) };
       else block = { id: `b${i + 1}`, type: "paragraph", text: v, ...(f.lead ? { style: "lead" } : {}) };
       return { id: `s${i + 1}`, role: f.role, heading: f.heading, level: 1, blocks: [block] };
     });
@@ -130,8 +214,8 @@ const Create: React.FC = () => {
         <Card className="space-y-4 p-5">
           <Field label="Title"><input className={inputCls} value={title} onChange={(e) => { setTitle(e.target.value); setValidation(null); }} placeholder={`${spec.label} title`} /></Field>
           {spec.fields.map((f) => (
-            <Field key={f.role} label={f.heading} hint={f.kind === "bullets" ? "One item per line." : f.kind === "callout" ? "Shown as a highlighted recommendation." : undefined}>
-              <textarea className={`${inputCls} ${f.kind === "bullets" ? "h-24" : "h-20"} leading-relaxed`}
+            <Field key={f.role} label={f.heading} hint={f.kind === "bullets" ? "One item per line." : f.kind === "timeline" ? "One event per line: time | label | detail" : f.kind === "callout" ? "Shown as a highlighted callout." : undefined}>
+              <textarea className={`${inputCls} ${f.kind === "bullets" || f.kind === "timeline" ? "h-24" : "h-20"} leading-relaxed`}
                 value={values[f.role] ?? ""} onChange={(e) => set(f.role, e.target.value)} placeholder={f.placeholder} />
             </Field>
           ))}
