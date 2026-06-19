@@ -1,6 +1,6 @@
 {
- "as_of": "2026-06-18T10:15:24.308Z",
- "totalEvents": 3836,
+ "as_of": "2026-06-19T10:15:39.741Z",
+ "totalEvents": 3837,
  "disclosedEvents": 1142,
  "totalDisclosedUsd": 1413812842501,
  "sectorHeat": [
@@ -218,7 +218,7 @@
   },
   {
    "region": "Europe",
-   "deals": 436,
+   "deals": 437,
    "disclosedUsd": 76487906327
   },
   {
@@ -430,7 +430,7 @@
   {
    "buyer_id": "accenture",
    "name": "Accenture",
-   "deals": 48,
+   "deals": 49,
    "recentDeals": 18,
    "lastDate": "2026-01-01"
   },

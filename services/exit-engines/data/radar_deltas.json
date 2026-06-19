@@ -1,33 +1,24 @@
 {
- "detected_at": "2026-06-18T10:15:25.730Z",
- "count": 3,
+ "detected_at": "2026-06-19T10:15:41.019Z",
+ "count": 2,
  "deltas": [
   {
    "buyer_id": "hilton-worldwide",
    "name": "Hilton Worldwide",
    "kind": "new_acquisition",
-   "before": "584",
-   "after": "587",
-   "detail": "+3 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-06-18T10:15:25.729Z"
+   "before": "587",
+   "after": "588",
+   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-06-19T10:15:41.019Z"
   },
   {
-   "buyer_id": "ibm",
-   "name": "IBM",
+   "buyer_id": "accenture",
+   "name": "Accenture",
    "kind": "new_acquisition",
-   "before": "198",
-   "after": "206",
-   "detail": "+8 indexed event(s) · latest: Confluent",
-   "detected_at": "2026-06-18T10:15:25.729Z"
-  },
-  {
-   "buyer_id": "meta-platforms",
-   "name": "Meta Platforms",
-   "kind": "new_acquisition",
-   "before": "109",
-   "after": "116",
-   "detail": "+7 indexed event(s) · latest: Assured Robot Intelligence",
-   "detected_at": "2026-06-18T10:15:25.729Z"
+   "before": "51",
+   "after": "52",
+   "detail": "+1 indexed event(s) · latest: Faculty",
+   "detected_at": "2026-06-19T10:15:41.019Z"
   }
  ]
 }
