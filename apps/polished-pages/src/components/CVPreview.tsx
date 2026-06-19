@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { authHeader } from "@/lib/session";
-import { ArrowLeft, Download, FileText, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Download, FileText, FileDown, Loader2, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { CV_TEMPLATES } from "@/types/cv";
@@ -80,6 +80,40 @@ const sectionHtml = (s: { title: string; body: string }, t: CvTheme): string => 
 const CVPreview = ({ markdown, onBack, template, photo }: CVPreviewProps) => {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
+  const [isPdf, setIsPdf] = useState(false);
+  const cvRef = useRef<HTMLDivElement>(null);
+
+  // Styled PDF: capture the rendered CV (exactly what's on screen, including the
+  // photo and the premium layouts) and slice it across A4 pages. Image-based, so
+  // it matches the design precisely; the .docx export remains the text/ATS path.
+  const handleDownloadPdf = async () => {
+    if (!cvRef.current) return;
+    setIsPdf(true);
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([import("html2canvas"), import("jspdf")]);
+      const canvas = await html2canvas(cvRef.current, { scale: 2, backgroundColor: theme.pageBg, useCORS: true, logging: false });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgH = (canvas.height * pageW) / canvas.width;
+      let heightLeft = imgH;
+      let position = 0;
+      pdf.addImage(imgData, "PNG", 0, position, pageW, imgH);
+      heightLeft -= pageH;
+      while (heightLeft > 0) {
+        position = heightLeft - imgH;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, pageW, imgH);
+        heightLeft -= pageH;
+      }
+      pdf.save("cv.pdf");
+    } catch (e) {
+      toast({ title: "PDF export failed", description: e instanceof Error ? e.message : "Something went wrong", variant: "destructive" });
+    } finally {
+      setIsPdf(false);
+    }
+  };
 
   const templateInfo = CV_TEMPLATES.find((t) => t.id === template);
   const theme = getCvTheme(template);
@@ -152,9 +186,13 @@ const CVPreview = ({ markdown, onBack, template, photo }: CVPreviewProps) => {
             <Button variant="heroOutline" size="sm" onClick={handleDownloadMd}>
               <Download className="w-4 h-4 mr-1" /> .md
             </Button>
-            <Button variant="hero" size="sm" onClick={handleDownloadDocx} disabled={isExporting}>
+            <Button variant="heroOutline" size="sm" onClick={handleDownloadDocx} disabled={isExporting}>
               {isExporting ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileText className="w-4 h-4 mr-1" />}
               .docx
+            </Button>
+            <Button variant="hero" size="sm" onClick={handleDownloadPdf} disabled={isPdf}>
+              {isPdf ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />}
+              .pdf
             </Button>
           </div>
         </div>
@@ -162,6 +200,7 @@ const CVPreview = ({ markdown, onBack, template, photo }: CVPreviewProps) => {
 
       <div className={`container ${theme.container} mx-auto px-6 pt-28 pb-16`}>
         <div
+          ref={cvRef}
           className={`rounded-xl border ${theme.fontClass} ${theme.designed ? "p-0 overflow-hidden" : "p-8 md:p-12"} shadow-premium leading-relaxed`}
           style={{ background: theme.pageBg, color: theme.pageText, borderColor: hexA(theme.accent, 0.25) }}
         >
