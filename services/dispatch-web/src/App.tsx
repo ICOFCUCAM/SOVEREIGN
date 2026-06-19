@@ -12,9 +12,6 @@ import Library from "./pages/Library";
 import DocumentView from "./pages/DocumentView";
 import Audit from "./pages/Audit";
 import Polished from "./pages/polished/Polished";
-import PolishedCv from "./pages/polished/Cv";
-import PolishedCoverLetter from "./pages/polished/CoverLetter";
-import PolishedBook from "./pages/polished/Book";
 
 // The gated operator/governance console. Everything here requires a session;
 // unauthenticated visitors get the sign-in gate.
@@ -32,9 +29,6 @@ const Console: React.FC = () => {
         <Route path="documents/:id" element={<DocumentView />} />
         <Route path="audit" element={<Audit />} />
         <Route path="polished" element={<Polished />} />
-        <Route path="polished/cv" element={<PolishedCv />} />
-        <Route path="polished/cover-letter" element={<PolishedCoverLetter />} />
-        <Route path="polished/book" element={<PolishedBook />} />
         <Route path="*" element={<Navigate to="/console" replace />} />
       </Routes>
     </Shell>

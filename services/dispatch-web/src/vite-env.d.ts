@@ -2,10 +2,9 @@
 
 interface ImportMetaEnv {
   readonly VITE_DISPATCH_API_URL?: string;
-  // Polished Pages department calls the SOVEREIGN Supabase edge functions
-  // directly; these override the public defaults in lib/polished-pages.
-  readonly VITE_SUPABASE_URL?: string;
-  readonly VITE_SUPABASE_ANON_KEY?: string;
+  // Deployed address of the standalone Polished Pages product; the console's
+  // Polished Pages department links out to it.
+  readonly VITE_POLISHED_PAGES_URL?: string;
 }
 interface ImportMeta {
   readonly env: ImportMetaEnv;
