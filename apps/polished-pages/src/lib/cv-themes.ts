@@ -49,6 +49,9 @@ const SPECS: Record<string, Spec> = {
   "premium-emerald": { accent: "#059669", font: "sans", layout: "sidebar-left", heading: "band", designed: true },
   "premium-slate": { accent: "#38bdf8", font: "sans", layout: "sidebar-left", heading: "band", designed: true, dark: true, bg: "#0f172a", text: "#e2e8f0" },
   "premium-burgundy": { accent: "#9f1239", font: "serif", layout: "sidebar-left", heading: "band", designed: true },
+  "premium-charcoal": { accent: "#f59e0b", font: "sans", layout: "sidebar-left", heading: "band", designed: true, dark: true, bg: "#1c1c1e", text: "#e5e5e5" },
+  "premium-teal": { accent: "#0d9488", font: "sans", layout: "sidebar-left", heading: "band", designed: true },
+  "premium-indigo": { accent: "#4f46e5", font: "sans", layout: "sidebar-left", heading: "band", designed: true },
 
   // Classic — serif, single column, rule headings
   professional: { accent: "#1f3a5f", font: "serif", heading: "rule" },

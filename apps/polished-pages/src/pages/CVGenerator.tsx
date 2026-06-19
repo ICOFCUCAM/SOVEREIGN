@@ -37,6 +37,23 @@ const CVGenerator = () => {
   const [languages, setLanguages] = useState("");
   const [targetJob, setTargetJob] = useState("");
   const [template, setTemplate] = useState<CVTemplate>("professional");
+  const [photo, setPhoto] = useState<string | null>(null);
+
+  const onPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Not an image", description: "Please choose an image file.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Please use an image under 4 MB.", variant: "destructive" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setPhoto(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   const steps = ["Upload / Info", "Experience", "Education & Skills", "References", "Generate"];
 
@@ -131,7 +148,7 @@ const CVGenerator = () => {
   };
 
   if (generatedCV) {
-    return <CVPreview markdown={generatedCV} template={template} onBack={() => setGeneratedCV(null)} />;
+    return <CVPreview markdown={generatedCV} template={template} photo={photo} onBack={() => setGeneratedCV(null)} />;
   }
 
   return (
@@ -229,6 +246,26 @@ const CVGenerator = () => {
                   <div className="space-y-2">
                     <Label className="font-sans font-semibold">Choose a Template</Label>
                     <TemplateSelector selected={template} onChange={setTemplate} />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-sans font-semibold">
+                      Photo <span className="font-normal text-muted-foreground">(optional — used by Premium templates)</span>
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      {photo ? (
+                        <img src={photo} alt="" className="w-16 h-16 rounded-full object-cover border border-border" />
+                      ) : (
+                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-[10px] text-muted-foreground text-center">No photo</div>
+                      )}
+                      <label className="cursor-pointer inline-flex items-center rounded-md border border-input bg-background px-3 py-2 text-sm font-sans hover:bg-accent">
+                        {photo ? "Change photo" : "Upload photo"}
+                        <input type="file" accept="image/*" className="hidden" onChange={onPhotoChange} />
+                      </label>
+                      {photo && (
+                        <Button variant="ghost" size="sm" onClick={() => setPhoto(null)} className="text-muted-foreground">Remove</Button>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-2">

@@ -11,6 +11,7 @@ interface CVPreviewProps {
   markdown: string;
   onBack: () => void;
   template?: string;
+  photo?: string | null;
 }
 
 /* ─── inline-style helpers (accents are runtime values, so not Tailwind) ─── */
@@ -76,7 +77,7 @@ const parseSections = (markdown: string): { header: string; sections: { title: s
 
 const sectionHtml = (s: { title: string; body: string }, t: CvTheme): string => h2Html(s.title, t) + bodyHtml(s.body, t);
 
-const CVPreview = ({ markdown, onBack, template }: CVPreviewProps) => {
+const CVPreview = ({ markdown, onBack, template, photo }: CVPreviewProps) => {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
 
@@ -174,13 +175,22 @@ const CVPreview = ({ markdown, onBack, template }: CVPreviewProps) => {
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: "2rem", fontWeight: 800, letterSpacing: ".02em", lineHeight: 1.1, color: theme.dark ? "#fff" : "#111827" }}>{cvName}</div>
                 </div>
-                <div
-                  className="flex shrink-0 items-center justify-center"
-                  style={{ width: 76, height: 76, borderRadius: 9999, background: theme.accent, color: "#fff", fontWeight: 700, fontSize: "1.5rem", boxShadow: `0 0 0 4px ${hexA(theme.accent, 0.2)}` }}
-                  aria-label="photo placeholder"
-                >
-                  {initials}
-                </div>
+                {photo ? (
+                  <img
+                    src={photo}
+                    alt={cvName}
+                    className="shrink-0 object-cover"
+                    style={{ width: 80, height: 80, borderRadius: 9999, boxShadow: `0 0 0 4px ${hexA(theme.accent, 0.25)}` }}
+                  />
+                ) : (
+                  <div
+                    className="flex shrink-0 items-center justify-center"
+                    style={{ width: 76, height: 76, borderRadius: 9999, background: theme.accent, color: "#fff", fontWeight: 700, fontSize: "1.5rem", boxShadow: `0 0 0 4px ${hexA(theme.accent, 0.2)}` }}
+                    aria-label="photo placeholder"
+                  >
+                    {initials}
+                  </div>
+                )}
               </div>
 
               {/* two-column body */}

@@ -66,6 +66,9 @@ export const CV_TEMPLATES: CVTemplateInfo[] = [
   { id: "premium-emerald", name: "Emerald Pro", description: "Premium two-column design with photo and sidebar cards — emerald accent", category: "premium", icon: "✦" },
   { id: "premium-slate", name: "Slate Pro", description: "Dark premium design with photo, sidebar, and sky accent — striking and modern", category: "premium", icon: "✦" },
   { id: "premium-burgundy", name: "Burgundy Pro", description: "Refined serif premium design with header band, photo, and burgundy accent", category: "premium", icon: "✦" },
+  { id: "premium-charcoal", name: "Charcoal Pro", description: "Dark charcoal premium design with photo and warm amber accent", category: "premium", icon: "✦" },
+  { id: "premium-teal", name: "Teal Pro", description: "Clean premium two-column design with photo and teal accent", category: "premium", icon: "✦" },
+  { id: "premium-indigo", name: "Indigo Pro", description: "Modern premium design with header band, photo, and indigo accent", category: "premium", icon: "✦" },
 
   // Classic (6)
   { id: "professional", name: "Professional", description: "Traditional ATS-optimized format with clear section headings and structured layout", category: "classic", icon: "📄" },
