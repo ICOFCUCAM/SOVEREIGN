@@ -40,6 +40,19 @@
       "citationStyle": "footnote",
       "tocDepth": 3,
       "numbered": true
+    },
+    "board_report": {
+      "docType": "board_report",
+      "template": "board-report",
+      "version": 1,
+      "requiredRoles": ["executive_summary", "performance", "decisions", "risks", "recommendation"],
+      "optionalRoles": ["financials", "outlook", "appendices", "citations"],
+      "roleOrder": ["title_block", "executive_summary", "performance", "financials",
+                    "decisions", "risks", "outlook", "recommendation", "appendices", "citations"],
+      "blockPolicy": { "recommendation": { "require": ["callout"] } },
+      "citationStyle": "endnote",
+      "tocDepth": 2,
+      "numbered": true
     }
   }
 }

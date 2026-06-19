@@ -8,6 +8,7 @@ import { useAuth } from "../lib/auth";
 // information architecture, not a file browser.
 const NAV: { to: string; label: string; scope?: string }[] = [
   { to: "/console", label: "Dashboard" },
+  { to: "/console/create", label: "Create", scope: "dispatch:render" },
   { to: "/console/submit", label: "Submit", scope: "dispatch:render" },
   { to: "/console/review", label: "Review & Approve", scope: "dispatch:approve" },
   { to: "/console/library", label: "Library", scope: "dispatch:read" },

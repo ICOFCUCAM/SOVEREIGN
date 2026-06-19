@@ -5,6 +5,7 @@ import Shell from "./components/Shell";
 import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
+import Create from "./pages/Create";
 import Submit from "./pages/Submit";
 import Review from "./pages/Review";
 import Library from "./pages/Library";
@@ -20,6 +21,7 @@ const Console: React.FC = () => {
     <Shell>
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="create" element={<Create />} />
         <Route path="submit" element={<Submit />} />
         <Route path="review" element={<Review />} />
         <Route path="library" element={<Library />} />
