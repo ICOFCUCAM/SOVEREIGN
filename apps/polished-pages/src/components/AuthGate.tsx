@@ -43,7 +43,9 @@ const SignIn = () => {
     setBusy(true); setMsg(null);
     const { error } = mode === "signin"
       ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password });
+      // Tag the signup so the SOVEREIGN project's institutional triggers skip
+      // it — Polished Pages users stay out of user_roles / bo_user_profiles.
+      : await supabase.auth.signUp({ email, password, options: { data: { app: "polished_pages" } } });
     if (error) setMsg(error.message);
     else if (mode === "signup") setMsg("Account created. If email confirmation is on, confirm it, then sign in.");
     setBusy(false);
