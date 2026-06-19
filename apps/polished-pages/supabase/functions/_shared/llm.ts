@@ -38,12 +38,30 @@ export interface CompleteOptions {
   lovableModel?: string;
 }
 
-// Secrets are frequently pasted with a trailing newline or stray whitespace,
-// which is an illegal HTTP header value ("not a valid ByteString"). Strip it so
-// a clumsy `secrets set` can never break the outbound call.
+// Secrets pasted from a console often pick up stray characters — a trailing
+// newline, or (for long keys copied from a line-wrapped display) a newline in
+// the MIDDLE of the value. Any of these is an illegal HTTP header character and
+// makes the outbound request throw "not a valid ByteString". API keys never
+// contain whitespace, so stripping all of it is always safe.
 function readKey(name: string): string | undefined {
-  const raw = Deno.env.get(name)?.trim();
-  return raw ? raw : undefined;
+  const raw = Deno.env.get(name);
+  if (!raw) return undefined;
+  const cleaned = raw.replace(/\s+/g, "");
+  return cleaned ? cleaned : undefined;
+}
+
+// Reject any non-printable-ASCII byte so a corrupted key surfaces as a clear,
+// actionable message instead of the opaque ByteString error from fetch().
+function assertHeaderSafe(key: string, name: string): void {
+  for (const ch of key) {
+    const code = ch.charCodeAt(0);
+    if (code < 0x20 || code > 0x7e) {
+      throw new LlmError(
+        `${name} contains an invalid character (code ${code}). Re-copy the key — it must be plain ASCII with no spaces or line breaks.`,
+        500,
+      );
+    }
+  }
 }
 
 /** True when at least one provider key is present. */
@@ -69,6 +87,7 @@ export async function complete(opts: CompleteOptions): Promise<string> {
 }
 
 async function completeWithClaude(apiKey: string, system: string, user: string, maxTokens: number): Promise<string> {
+  assertHeaderSafe(apiKey, "ANTHROPIC_API_KEY");
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -110,6 +129,7 @@ async function completeWithClaude(apiKey: string, system: string, user: string, 
 }
 
 async function completeWithLovable(apiKey: string, system: string, user: string, model: string): Promise<string> {
+  assertHeaderSafe(apiKey, "LOVABLE_API_KEY");
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
