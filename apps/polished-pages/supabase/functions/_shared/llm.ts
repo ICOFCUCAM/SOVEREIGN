@@ -38,18 +38,26 @@ export interface CompleteOptions {
   lovableModel?: string;
 }
 
+// Secrets are frequently pasted with a trailing newline or stray whitespace,
+// which is an illegal HTTP header value ("not a valid ByteString"). Strip it so
+// a clumsy `secrets set` can never break the outbound call.
+function readKey(name: string): string | undefined {
+  const raw = Deno.env.get(name)?.trim();
+  return raw ? raw : undefined;
+}
+
 /** True when at least one provider key is present. */
 export function llmConfigured(): boolean {
-  return Boolean(Deno.env.get("ANTHROPIC_API_KEY") || Deno.env.get("LOVABLE_API_KEY"));
+  return Boolean(readKey("ANTHROPIC_API_KEY") || readKey("LOVABLE_API_KEY"));
 }
 
 /** Generate a completion from whichever provider is configured. Returns the text. */
 export async function complete(opts: CompleteOptions): Promise<string> {
   const maxTokens = opts.maxTokens ?? 8000;
-  const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
+  const anthropicKey = readKey("ANTHROPIC_API_KEY");
   if (anthropicKey) return completeWithClaude(anthropicKey, opts.system, opts.user, maxTokens);
 
-  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  const lovableKey = readKey("LOVABLE_API_KEY");
   if (lovableKey) {
     return completeWithLovable(lovableKey, opts.system, opts.user, opts.lovableModel ?? LOVABLE_DEFAULT_MODEL);
   }
