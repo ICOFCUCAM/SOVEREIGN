@@ -15,6 +15,8 @@ import EducationSkillsStep from "@/components/cv/EducationSkillsStep";
 import ReferencesStep from "@/components/cv/ReferencesStep";
 import CVUploadStep from "@/components/cv/CVUploadStep";
 import TemplateSelector from "@/components/cv/TemplateSelector";
+import CvDocument from "@/components/CvDocument";
+import { buildCvMarkdown } from "@/lib/cv-markdown";
 import {
   PersonalInfo, Experience, Education, Reference, CVTemplate,
   defaultExperience, defaultEducation, defaultReference,
@@ -246,6 +248,20 @@ const CVGenerator = () => {
                   <div className="space-y-2">
                     <Label className="font-sans font-semibold">Choose a Template</Label>
                     <TemplateSelector selected={template} onChange={setTemplate} />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-sans font-semibold">Live preview</Label>
+                    <div className="rounded-lg border border-border bg-muted/20 p-4 max-h-[540px] overflow-auto">
+                      <CvDocument
+                        markdown={buildCvMarkdown({ personalInfo, experiences, education, skills, certifications, languages, references })}
+                        template={template}
+                        photo={photo}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground font-sans">
+                      Your details shown in the selected design. Click Generate to let AI polish the wording — the design stays the same.
+                    </p>
                   </div>
 
                   <div className="space-y-2">
