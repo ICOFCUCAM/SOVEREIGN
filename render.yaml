@@ -1,0 +1,81 @@
+# Sovereign Dispatch — Render Blueprint
+# Two Docker services built from Dockerfiles whose build context is the
+# REPOSITORY ROOT (their COPY lines reach into packages/ and services/shared).
+# Therefore: NO rootDir, and dockerContext is "." (repo root).
+#
+# Create in Render: New → Blueprint → select repo ICOFCUCAM/SOVEREIGN and the
+# branch that contains this file (claude/blissful-cori-5epxsz, or main after PR #8
+# is merged). Secrets are marked sync:false — Render will prompt for them; paste
+# the values from the deploy runbook. Non-secret config is set inline.
+
+services:
+  # ── REST API (token, document submit/retrieve, governance) ──────────
+  - type: web
+    name: dispatch-api
+    runtime: docker
+    region: frankfurt                       # closest to the Supabase eu-west-1 DB
+    plan: starter                           # always-on; an API others depend on
+    dockerfilePath: services/dispatch-api/Dockerfile
+    dockerContext: .                        # build context = repo root (critical)
+    healthCheckPath: /v1/health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "8787"
+      - key: PGHOST                         # Supabase SESSION pooler host
+        sync: false
+      - key: PGPORT
+        value: "5432"
+      - key: PGDATABASE
+        value: postgres
+      - key: DISPATCH_DB_USER               # dispatch_app.<project-ref>
+        sync: false
+      - key: PGPASSWORD
+        sync: false
+      - key: PGSSLMODE
+        value: no-verify
+      - key: DISPATCH_TOKEN_SECRET
+        sync: false
+      - key: DISPATCH_TOKEN_ISSUER
+        value: sovereign-dispatch
+      - key: DISPATCH_TOKEN_TTL_SEC
+        value: "900"
+      - key: DISPATCH_CORS_ORIGIN           # the dispatch-web console origin
+        sync: false
+
+  # ── Render worker (PDF/DOCX via headless Chromium → S3 storage) ─────
+  - type: worker
+    name: dispatch-worker
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    dockerfilePath: services/dispatch-worker/Dockerfile
+    dockerContext: .                        # build context = repo root (critical)
+    autoDeploy: true
+    envVars:
+      - key: PGHOST
+        sync: false
+      - key: PGPORT
+        value: "5432"
+      - key: PGDATABASE
+        value: postgres
+      - key: DISPATCH_DB_USER
+        sync: false
+      - key: PGPASSWORD
+        sync: false
+      - key: PGSSLMODE
+        value: no-verify
+      - key: DISPATCH_STORAGE_BACKEND
+        value: s3
+      - key: S3_ENDPOINT                     # https://<ref>.storage.supabase.co/storage/v1/s3
+        sync: false
+      - key: S3_REGION
+        value: us-east-1
+      - key: S3_BUCKET
+        value: dispatch-artifacts
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_FORCE_PATH_STYLE
+        value: "1"
