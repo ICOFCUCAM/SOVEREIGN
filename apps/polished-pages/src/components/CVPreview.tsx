@@ -8,24 +8,28 @@ import { CV_TEMPLATES } from "@/types/cv";
 import { getCvTheme } from "@/lib/cv-themes";
 import { elementToPdf } from "@/lib/export-pdf";
 import CvDocument from "@/components/CvDocument";
+import PremiumCvDocument from "@/components/PremiumCvDocument";
+import { cvDataToMarkdown, type CvData } from "@/lib/cv-data";
 
 interface CVPreviewProps {
-  markdown: string;
+  markdown?: string;
+  data?: CvData;
   onBack: () => void;
   template?: string;
   photo?: string | null;
 }
 
-const CVPreview = ({ markdown, onBack, template, photo }: CVPreviewProps) => {
+const CVPreview = ({ markdown, data, onBack, template, photo }: CVPreviewProps) => {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [isPdf, setIsPdf] = useState(false);
   const cvRef = useRef<HTMLDivElement>(null);
   const theme = getCvTheme(template);
   const templateInfo = CV_TEMPLATES.find((t) => t.id === template);
+  const exportMd = data ? cvDataToMarkdown(data) : (markdown ?? "");
 
   const handleDownloadMd = () => {
-    const blob = new Blob([markdown], { type: "text/markdown" });
+    const blob = new Blob([exportMd], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = "cv.md"; a.click();
@@ -38,7 +42,7 @@ const CVPreview = ({ markdown, onBack, template, photo }: CVPreviewProps) => {
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/export-docx`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: await authHeader() },
-        body: JSON.stringify({ markdown }),
+        body: JSON.stringify({ markdown: exportMd }),
       });
       if (!response.ok) {
         const err = await response.json().catch(() => ({ error: "Export failed" }));
@@ -101,7 +105,11 @@ const CVPreview = ({ markdown, onBack, template, photo }: CVPreviewProps) => {
       </nav>
 
       <div className={`container ${theme.container} mx-auto px-6 pt-28 pb-16`}>
-        <CvDocument markdown={markdown} template={template} photo={photo} innerRef={cvRef} />
+        {data ? (
+          <PremiumCvDocument data={data} template={template} innerRef={cvRef} />
+        ) : (
+          <CvDocument markdown={markdown ?? ""} template={template} photo={photo} innerRef={cvRef} />
+        )}
       </div>
     </div>
   );

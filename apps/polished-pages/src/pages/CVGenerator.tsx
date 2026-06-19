@@ -16,7 +16,9 @@ import ReferencesStep from "@/components/cv/ReferencesStep";
 import CVUploadStep from "@/components/cv/CVUploadStep";
 import TemplateSelector from "@/components/cv/TemplateSelector";
 import CvDocument from "@/components/CvDocument";
+import PremiumCvDocument from "@/components/PremiumCvDocument";
 import { buildCvMarkdown } from "@/lib/cv-markdown";
+import { formToCvData, type CvData } from "@/lib/cv-data";
 import {
   PersonalInfo, Experience, Education, Reference, CVTemplate,
   defaultExperience, defaultEducation, defaultReference,
@@ -27,6 +29,7 @@ const CVGenerator = () => {
   const [step, setStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCV, setGeneratedCV] = useState<string | null>(null);
+  const [generatedData, setGeneratedData] = useState<CvData | null>(null);
 
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     fullName: "", email: "", phone: "", location: "", linkedin: "", website: "", summary: "",
@@ -104,7 +107,15 @@ const CVGenerator = () => {
     return true;
   };
 
+  const formState = () => ({ personalInfo, experiences, education, skills, certifications, languages, references, targetJob, photo });
+
   const handleGenerate = async () => {
+    // Premium templates are designed and render structured data directly — no AI
+    // markdown round-trip, so the export looks exactly like the live preview.
+    if (template.startsWith("premium-")) {
+      setGeneratedData(formToCvData(formState()));
+      return;
+    }
     setIsGenerating(true);
     try {
       const skillsArray = skills.split(",").map((s) => s.trim()).filter(Boolean);
@@ -149,6 +160,9 @@ const CVGenerator = () => {
     }
   };
 
+  if (generatedData) {
+    return <CVPreview data={generatedData} template={template} onBack={() => setGeneratedData(null)} />;
+  }
   if (generatedCV) {
     return <CVPreview markdown={generatedCV} template={template} photo={photo} onBack={() => setGeneratedCV(null)} />;
   }
@@ -253,11 +267,15 @@ const CVGenerator = () => {
                   <div className="space-y-2">
                     <Label className="font-sans font-semibold">Live preview</Label>
                     <div className="rounded-lg border border-border bg-muted/20 p-4 max-h-[540px] overflow-auto">
-                      <CvDocument
-                        markdown={buildCvMarkdown({ personalInfo, experiences, education, skills, certifications, languages, references })}
-                        template={template}
-                        photo={photo}
-                      />
+                      {template.startsWith("premium-") ? (
+                        <PremiumCvDocument data={formToCvData(formState())} template={template} />
+                      ) : (
+                        <CvDocument
+                          markdown={buildCvMarkdown({ personalInfo, experiences, education, skills, certifications, languages, references })}
+                          template={template}
+                          photo={photo}
+                        />
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground font-sans">
                       Your details shown in the selected design. Click Generate to let AI polish the wording — the design stays the same.
@@ -301,7 +319,9 @@ const CVGenerator = () => {
                     <Sparkles className="w-8 h-8 text-primary mx-auto mb-3" />
                     <h3 className="font-serif text-lg font-semibold mb-1">Ready to Generate</h3>
                     <p className="text-sm text-muted-foreground font-sans mb-5">
-                      Our AI will craft a polished, ATS-optimized CV using the <strong>{template}</strong> template.
+                      {template.startsWith("premium-")
+                        ? "Your details, laid out in the selected premium design — open it full-screen and export to PDF."
+                        : "Our AI will craft a polished, ATS-optimized CV using your selected template."}
                     </p>
                     <Button variant="hero" size="lg" className="px-10" onClick={handleGenerate} disabled={isGenerating}>
                       {isGenerating ? (
