@@ -1,4 +1,4 @@
-import { FileText, Target, PenTool, BookOpen, LayoutDashboard, Settings, Library, type LucideIcon } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, Wand2, LayoutDashboard, Settings, Library, type LucideIcon } from "lucide-react";
 
 // The product's canonical name. Used everywhere so branding stays consistent
 // (the app shipped with a mix of "DocuForge" and "Polished Pages").
@@ -61,6 +61,17 @@ export const TOOLS: ToolDef[] = [
     icon: BookOpen,
     action: "Create a book",
     keywords: ["book", "ebook", "epub", "chapters", "publish", "author"],
+  },
+  {
+    id: "book-transform",
+    name: "Transform a Book",
+    short: "Transform",
+    description: "Upload a finished book, describe what to change, and get a new revised version — then design its cover.",
+    path: "/book-transform",
+    icon: Wand2,
+    badge: "New",
+    action: "Transform a book",
+    keywords: ["transform", "revise", "rewrite", "edit", "book", "cover", "upload"],
   },
 ];
 

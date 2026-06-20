@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { authHeader } from "@/lib/session";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package } from "lucide-react";
+import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookChapter, BookOutline, BookMode, BookDepth, BookView, ImprovementType } from "@/types/book";
 import BookSetup from "@/components/book/BookSetup";
@@ -12,6 +12,7 @@ import BookContentViewer from "@/components/book/BookContentViewer";
 import BookExportPanel from "@/components/book/BookExportPanel";
 import BookRepurposePanel from "@/components/book/BookRepurposePanel";
 import BookPublishingPackage from "@/components/book/BookPublishingPackage";
+import CoverGenerator from "@/components/book/CoverGenerator";
 
 const BookCreator = () => {
   const { toast } = useToast();
@@ -189,6 +190,7 @@ const BookCreator = () => {
     { id: "preview", label: "Preview", icon: <Eye className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "export", label: "Export", icon: <Download className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "repurpose", label: "Repurpose", icon: <Repeat className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
+    { id: "cover", label: "Cover", icon: <ImageIcon className="w-3.5 h-3.5" />, show: !!outline },
     { id: "publish", label: "Publish", icon: <Package className="w-3.5 h-3.5" />, show: !!outline },
   ];
 
@@ -293,6 +295,12 @@ const BookCreator = () => {
                 bookTitle={outline?.title || bookTitle}
                 fullContent={fullContent}
               />
+            ) : view === "cover" ? (
+              <div>
+                <h2 className="font-serif text-2xl font-bold mb-1">Cover design</h2>
+                <p className="text-sm text-muted-foreground font-sans mb-5">Generate a front and back cover with AI, guided by your art direction.</p>
+                <CoverGenerator title={outline?.title || bookTitle} subtitle={outline?.subtitle} />
+              </div>
             ) : view === "publish" && outline ? (
               <BookPublishingPackage outline={outline} />
             ) : null}

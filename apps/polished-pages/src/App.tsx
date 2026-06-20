@@ -10,6 +10,7 @@ import JobTailor from "./pages/JobTailor.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Account from "./pages/Account.tsx";
 import LibraryPage from "./pages/LibraryPage.tsx";
+import TransformBook from "./pages/TransformBook.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Gallery from "./pages/Gallery.tsx";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/cover-letter" element={<AuthGate><CoverLetterGenerator /></AuthGate>} />
           <Route path="/tailor" element={<AuthGate><JobTailor /></AuthGate>} />
           <Route path="/book" element={<AuthGate><BookCreator /></AuthGate>} />
+          <Route path="/book-transform" element={<AuthGate><TransformBook /></AuthGate>} />
           {/* internal visual-QA gallery (not linked) */}
           <Route path="/__gallery" element={<Gallery />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

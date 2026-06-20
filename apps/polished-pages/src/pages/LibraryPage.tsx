@@ -9,6 +9,9 @@ import { listDocuments, getDocument, deleteDocument, type DocSummary, type DocKi
 import type { CvData } from "@/lib/cv-data";
 import CVPreview from "@/components/CVPreview";
 import CoverLetterPreview from "@/components/CoverLetterPreview";
+import BookContentViewer from "@/components/book/BookContentViewer";
+import BookExportPanel from "@/components/book/BookExportPanel";
+import { ArrowLeft } from "lucide-react";
 
 const KIND_META: Record<DocKind, { label: string; icon: typeof FileText }> = {
   cv: { label: "CV", icon: FileText },
@@ -19,7 +22,8 @@ const KIND_META: Record<DocKind, { label: string; icon: typeof FileText }> = {
 
 type Opened =
   | { kind: "cv"; data: CvData; template?: string }
-  | { kind: "letter"; markdown: string; fullName: string; email?: string; phone?: string };
+  | { kind: "letter"; markdown: string; fullName: string; email?: string; phone?: string }
+  | { kind: "book"; markdown: string; title: string };
 
 const LibraryPage = () => {
   const { toast } = useToast();
@@ -38,6 +42,8 @@ const LibraryPage = () => {
       const p = row.payload as Record<string, unknown>;
       if (d.kind === "cover-letter") {
         setOpened({ kind: "letter", markdown: String(p.markdown ?? ""), fullName: String(p.fullName ?? d.title), email: p.email as string | undefined, phone: p.phone as string | undefined });
+      } else if (d.kind === "book") {
+        setOpened({ kind: "book", markdown: String(p.markdown ?? ""), title: String(p.title ?? d.title) });
       } else {
         // cv and tailored both restore a CvData document
         setOpened({ kind: "cv", data: p.data as CvData, template: (row.template ?? undefined) || (p.template as string | undefined) });
@@ -63,6 +69,24 @@ const LibraryPage = () => {
   }
   if (opened?.kind === "letter") {
     return <CoverLetterPreview markdown={opened.markdown} fullName={opened.fullName} email={opened.email} phone={opened.phone} canSave={false} onBack={() => setOpened(null)} />;
+  }
+  if (opened?.kind === "book") {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
+          <div className="container flex items-center justify-between h-12 px-6">
+            <span className="text-sm font-medium text-muted-foreground font-sans">{opened.title}</span>
+            <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground">
+              <ArrowLeft className="w-4 h-4 mr-2" /> Library
+            </Button>
+          </div>
+        </div>
+        <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
+          <BookExportPanel bookTitle={opened.title} fullContent={opened.markdown} chapterCount={0} />
+          <div className="mt-6"><BookContentViewer content={opened.markdown} title={opened.title} /></div>
+        </div>
+      </div>
+    );
   }
 
   return (
