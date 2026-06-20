@@ -81,8 +81,8 @@ const Footer = () => {
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 sm:flex-row">
           <p className="text-sm text-muted-foreground font-sans">© {new Date().getFullYear()} {BRAND}. All rights reserved.</p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground font-sans">
-            <Link to="/pricing" className="hover:text-primary transition-colors">Pricing</Link>
-            <Link to="/catalog" className="hover:text-primary transition-colors">Marketplace</Link>
+            <Link to="/for-schools" className="hover:text-primary transition-colors">For Schools</Link>
+            <Link to="/accessibility" className="hover:text-primary transition-colors">Accessibility</Link>
             <Link to="/resources" className="hover:text-primary transition-colors">Resources</Link>
           </div>
         </div>
