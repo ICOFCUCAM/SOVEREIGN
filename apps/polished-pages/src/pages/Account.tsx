@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { fetchPlanStatus, startUpgrade, buyCredits, CREDITS_PER_PACK, type PlanStatus } from "@/lib/session";
 import { getMyProfile, upsertProfile } from "@/lib/profiles";
+import { getBatchUsage } from "@/lib/editions";
 import { planDisplayName } from "@/lib/plans";
 import { BRAND } from "@/lib/tools";
 
@@ -32,8 +33,10 @@ const Account = () => {
   const [bio, setBio] = useState("");
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [batchUnits, setBatchUnits] = useState<number | null>(null);
 
   useEffect(() => {
+    getBatchUsage().then(setBatchUnits).catch(() => setBatchUnits(0));
     fetchPlanStatus().then(setStatus);
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ""));
     getMyProfile()
@@ -118,6 +121,11 @@ const Account = () => {
           {isPro && (
             <p className="text-sm text-muted-foreground font-sans">
               Unlimited everyday documents · {imgUsed} of {imgLim} image credits used this month{bonus > 0 ? ` · ${bonus} purchased credit${bonus === 1 ? "" : "s"} in reserve` : ""}.
+            </p>
+          )}
+          {batchUnits != null && batchUnits > 0 && (
+            <p className="mt-3 text-xs text-muted-foreground font-sans">
+              Heavy operations this month: <span className="font-semibold text-foreground">{batchUnits.toLocaleString()}</span> units across bulk translation and multi-language editions.
             </p>
           )}
           {!status && <p className="text-sm text-muted-foreground font-sans">Loading plan…</p>}

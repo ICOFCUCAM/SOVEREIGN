@@ -27,6 +27,14 @@ export function recordBatchOp(units: number): void {
   rpc().rpc("polished_record_batch_op", { p_units: Math.max(0, Math.round(units)) }).catch(() => {});
 }
 
+// Read this month's recorded heavy-operation units (bulk translation, edition
+// runs, batch covers). Visibility only — there is no limit attached.
+export async function getBatchUsage(): Promise<number> {
+  const { data, error } = await rpc().rpc("polished_batch_usage");
+  if (error) return 0;
+  return typeof data === "number" ? data : Number(data ?? 0);
+}
+
 export async function listEditions(parentId: string): Promise<Edition[]> {
   const { data, error } = await rpc().rpc("polished_list_editions", { p_parent: parentId });
   if (error) throw new Error(error.message || "Could not load editions.");
