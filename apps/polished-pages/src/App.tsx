@@ -20,6 +20,7 @@ import PrimaryBookFactory from "./pages/PrimaryBookFactory.tsx";
 import WorkbookGenerator from "./pages/WorkbookGenerator.tsx";
 import CurriculumBuilder from "./pages/CurriculumBuilder.tsx";
 import TeacherResourceCenter from "./pages/TeacherResourceCenter.tsx";
+import TranslatePublish from "./pages/TranslatePublish.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Gallery from "./pages/Gallery.tsx";
@@ -55,6 +56,7 @@ const App = () => (
           <Route path="/workbooks" element={<AuthGate><WorkbookGenerator /></AuthGate>} />
           <Route path="/curriculum" element={<AuthGate><CurriculumBuilder /></AuthGate>} />
           <Route path="/teacher" element={<AuthGate><TeacherResourceCenter /></AuthGate>} />
+          <Route path="/translate" element={<AuthGate><TranslatePublish /></AuthGate>} />
           {/* internal visual-QA gallery (not linked) */}
           <Route path="/__gallery" element={<Gallery />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
