@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookHeart, Sparkles, Palette, GraduationCap, PencilRuler, NotebookPen, School, BookOpenCheck, ArrowRight } from "lucide-react";
+import { BookHeart, Sparkles, Palette, GraduationCap, PencilRuler, NotebookPen, School, BookOpenCheck, Presentation, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface Product {
@@ -17,10 +17,11 @@ const PRODUCTS: Product[] = [
   { name: "Personalized Books", description: "Make the child the hero of their own adventure — “James and the Lost Forest.” Built into the Storybook Creator: just add the child’s name.", icon: Sparkles, status: "live", path: "/storybook", note: "In Storybook Creator" },
   { name: "Coloring Books", description: "Black-and-white line-art pages from any theme, ready to print and colour.", icon: Palette, status: "live", path: "/coloring" },
   { name: "Educational Readers", description: "Leveled reading, vocabulary and first science / geography readers by age band.", icon: BookOpenCheck, status: "live", path: "/edu-readers" },
+  { name: "Primary School Book Factory", description: "Maths, English, French, Science, History and Geography — textbook, workbook, teacher guide, exam and marking guide.", icon: School, status: "live", path: "/primary-books" },
   { name: "Classroom Packs", description: "Grade + subject + topic → student book, workbook, teacher guide, quiz and a matching answer key.", icon: NotebookPen, status: "live", path: "/classroom" },
-  { name: "Workbooks", description: "Exercises, worksheets and answer keys.", icon: PencilRuler, status: "live", path: "/classroom", note: "In Classroom Packs" },
-  { name: "Primary School Textbooks", description: "Maths, English, French, Science, History and Geography with lessons, illustrations and exercises.", icon: School, status: "soon" },
-  { name: "Curriculum Builder", description: "Country + grade + subject + term → scheme of work, lesson plans, student books and assessments.", icon: GraduationCap, status: "soon" },
+  { name: "Workbook Generator", description: "Practice, activity, revision, exam-prep and homework packs with the exercise types you choose.", icon: PencilRuler, status: "live", path: "/workbooks" },
+  { name: "Teacher Resource Center", description: "Lesson notes, worksheets, quizzes, exams and marking guides — a teacher's kit per topic.", icon: Presentation, status: "live", path: "/teacher" },
+  { name: "Curriculum Builder", description: "Country + grade + subject + term → scheme of work, weekly plan, lesson plan, objectives and assessment.", icon: GraduationCap, status: "live", path: "/curriculum" },
 ];
 
 const ChildrenStudio = () => {

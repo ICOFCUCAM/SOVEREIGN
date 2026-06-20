@@ -8,23 +8,43 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// School-content engine. Generates ONE document at a time so a classroom pack
-// (student book, workbook, teacher guide, quiz, answer key) is produced as a
-// sequence of bounded calls. The answer key is generated against the actual
-// workbook + quiz text (passed as sourceContent) so it always matches.
+// School-content engine. Generates ONE classroom-ready document per call so a
+// pack (textbook + workbook + teacher guide + quiz + answer key, or a full
+// curriculum) is produced as a sequence of bounded calls. Documents that must
+// match an earlier one (answer key, marking guide) are generated against that
+// document's text passed as sourceContent.
 const PROMPTS: Record<string, string> = {
-  reader: `Write an engaging EDUCATIONAL READER. Pitch the vocabulary and sentence length to the grade/age. Open with a hook, teach the topic through clear, friendly explanation and concrete examples (a short illustrative story or scenario is welcome), and finish with 3-5 simple review questions. Use markdown headings.`,
-  "student-book": `Write a STUDENT BOOK / lesson for the topic. Clear learning objectives, structured explanation broken into short sections with subheadings, worked examples, key-term callouts, and a short summary. Age- and grade-appropriate. Markdown.`,
-  workbook: `Create a STUDENT WORKBOOK of exercises for the topic (NO answers — student copy). Mix question types appropriate to the grade: fill-in-the-blank, short answer, matching, true/false, and a couple of applied problems. Number every question. Leave clear space cues for writing. Markdown.`,
-  "teacher-guide": `Write a TEACHER GUIDE for the topic: lesson objectives, materials, a step-by-step lesson plan with timings, key talking points, common misconceptions to watch for, differentiation tips, and extension activities. Markdown.`,
-  quiz: `Create a QUIZ on the topic (questions only — NO answers). 8-12 numbered questions of varied types appropriate to the grade, increasing in difficulty. Markdown.`,
-  "answer-key": `Produce an ANSWER KEY (teacher copy) with the correct answer to EVERY numbered question in the provided workbook and quiz. Match the exact numbering. Add a brief note where a short explanation helps the teacher. Markdown.`,
+  reader: `Write an engaging EDUCATIONAL READER. Pitch the vocabulary and sentence length to the grade/age. Open with a hook, teach the topic through clear, friendly explanation and concrete examples (a short illustrative story or scenario is welcome), and finish with 3-5 simple review questions. Markdown headings.`,
+  textbook: `Write a primary/secondary-school TEXTBOOK unit for the topic. Clear learning objectives, structured sections with subheadings, accurate explanations pitched to the grade, worked examples, key-term callouts, "Did you know?" boxes, and a unit summary. Where a picture would help, add a line like "[Illustration: ...]". Markdown.`,
+  "student-book": `Write a STUDENT BOOK / lesson for the topic. Clear objectives, structured explanation in short sections with subheadings, worked examples, key-term callouts and a short summary. Age- and grade-appropriate. Markdown.`,
+  workbook: `Create a STUDENT WORKBOOK of exercises for the topic (NO answers — student copy). Use the requested exercise types where given. Number every question and leave clear space cues for writing. Markdown.`,
+  "activity-book": `Create an ACTIVITY BOOK of fun, varied, hands-on activities for the topic — puzzles, draw-and-label, matching, simple projects. Age-appropriate and engaging. Markdown.`,
+  revision: `Create a REVISION BOOK: concise summaries of the key points for the topic, with worked examples and a set of practice questions. Markdown.`,
+  "exam-prep": `Create an EXAM PREPARATION pack for the topic: the key topics to master, worked examples, common pitfalls, practice questions and exam technique tips. Markdown.`,
+  "homework-pack": `Create a HOMEWORK PACK: short daily exercises for one week (Day 1–5), each a quick, focused set on the topic. Markdown.`,
+  "teacher-guide": `Write a TEACHER GUIDE: lesson objectives, materials, a step-by-step lesson plan with timings, key talking points, common misconceptions, differentiation tips and extension activities. Markdown.`,
+  "lesson-notes": `Write clear LESSON NOTES the teacher can teach directly from: structured explanation, board notes, examples to use, and questions to ask the class. Markdown.`,
+  "lesson-plan": `Write a detailed LESSON PLAN: objectives, prior knowledge, materials, introduction, development steps with timings, learner activities, assessment for learning, closure and homework. Markdown.`,
+  "weekly-plan": `Produce a WEEKLY PLAN: for each day (Monday–Friday) the lesson focus, objectives, activities and resources for the topic/subject. Markdown.`,
+  "scheme-of-work": `Produce a SCHEME OF WORK for the term as a week-by-week table: week, topic, objectives, teaching activities, resources and assessment. Cover the whole term coherently. Markdown.`,
+  "learning-objectives": `List clear, measurable LEARNING OBJECTIVES for the topic aligned to the grade — organised by knowledge, skills and attitudes/values. Markdown.`,
+  worksheet: `Create a single WORKSHEET of varied exercises for the topic (student copy, NO answers). Number every question. Markdown.`,
+  quiz: `Create a QUIZ on the topic (questions only — NO answers). 8-12 numbered questions of varied types, increasing in difficulty. Markdown.`,
+  exam: `Create an EXAM paper for the topic/subject: a header (subject, grade, time, total marks), clear sections, instructions, and numbered questions with mark allocations. NO answers. Markdown.`,
+  assessment: `Create an ASSESSMENT / test for the topic with a header, varied questions, mark allocations and a short marking rubric at the end. Markdown.`,
+  "answer-key": `Produce an ANSWER KEY (teacher copy) with the correct answer to EVERY numbered question in the provided workbook/quiz. Match the exact numbering. Add brief explanations where helpful. Markdown.`,
+  "marking-guide": `Produce a MARKING GUIDE / mark scheme for the provided exam: model answers, marks per question and notes on awarding partial credit. Match the exact numbering. Markdown.`,
 };
 
 const TITLES: Record<string, string> = {
-  reader: "Reader", "student-book": "Student Book", workbook: "Workbook",
-  "teacher-guide": "Teacher Guide", quiz: "Quiz", "answer-key": "Answer Key",
+  reader: "Reader", textbook: "Textbook", "student-book": "Student Book", workbook: "Workbook",
+  "activity-book": "Activity Book", revision: "Revision Book", "exam-prep": "Exam Prep", "homework-pack": "Homework Pack",
+  "teacher-guide": "Teacher Guide", "lesson-notes": "Lesson Notes", "lesson-plan": "Lesson Plan", "weekly-plan": "Weekly Plan",
+  "scheme-of-work": "Scheme of Work", "learning-objectives": "Learning Objectives", worksheet: "Worksheet",
+  quiz: "Quiz", exam: "Exam", assessment: "Assessment", "answer-key": "Answer Key", "marking-guide": "Marking Guide",
 };
+
+const NEEDS_SOURCE = new Set(["answer-key", "marking-guide"]);
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -37,6 +57,10 @@ serve(async (req) => {
     const subject = String(b.subject ?? "").slice(0, 80);
     const topic = String(b.topic ?? "").slice(0, 200);
     const country = String(b.country ?? "").slice(0, 80);
+    const term = String(b.term ?? "").slice(0, 40);
+    const year = String(b.year ?? "").slice(0, 40);
+    const language = String(b.language ?? "").slice(0, 40);
+    const exerciseTypes = Array.isArray(b.exerciseTypes) ? b.exerciseTypes.slice(0, 12).map((x: unknown) => String(x).slice(0, 40)).join(", ") : "";
     const sourceContent = String(b.sourceContent ?? "").slice(0, 30000);
 
     if (!PROMPTS[docType]) {
@@ -49,29 +73,38 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (docType === "answer-key" && !sourceContent.trim()) {
-      return new Response(JSON.stringify({ error: "Answer key needs the workbook/quiz content." }), {
+    if (NEEDS_SOURCE.has(docType) && !sourceContent.trim()) {
+      return new Response(JSON.stringify({ error: "This document needs the source paper to mark against." }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const system = `You are an experienced curriculum writer and teacher creating classroom-ready materials.
+    const ctx = [
+      grade && `- Grade / level: ${grade}`,
+      subject && `- Subject: ${subject}`,
+      (topic || subject) && `- Topic: ${topic || subject}`,
+      country && `- Curriculum context: ${country}`,
+      term && `- Term: ${term}`,
+      year && `- Academic year: ${year}`,
+      language && `- Language of instruction: ${language}`,
+      exerciseTypes && `- Preferred exercise types: ${exerciseTypes}`,
+    ].filter(Boolean).join("\n");
+
+    const system = `You are an experienced curriculum writer and teacher creating accurate, classroom-ready materials.
 
 ${PROMPTS[docType]}
 
 CONTEXT:
-- Grade / level: ${grade || "primary"}
-- Subject: ${subject || "general"}
-- Topic: ${topic || subject}
-${country ? `- Curriculum context: ${country}` : ""}
+${ctx}
 
 RULES:
-- Pedagogically sound, accurate, and pitched correctly for the grade.
+- Pedagogically sound, factually accurate, and pitched correctly for the grade.
+- ${language && language.toLowerCase() !== "english" ? `Write the document in ${language}.` : "Write in clear English."}
 - Start the document with a clear "# " title line.
 - Output ONLY the document in clean markdown — no meta-commentary.`;
 
-    const user = docType === "answer-key"
-      ? `Here is the workbook and quiz to answer. Produce the matching answer key.\n\n${sourceContent}`
+    const user = NEEDS_SOURCE.has(docType)
+      ? `Here is the paper to mark against. Produce the matching ${TITLES[docType]}.\n\n${sourceContent}`
       : `Create the ${TITLES[docType]} for: ${subject} — ${topic} (${grade}).`;
 
     await consumeOrThrow(userId);
