@@ -79,6 +79,7 @@ export const WORKFLOWS: Workflow[] = [
         items: [
           { label: "Series", path: "/series", desc: "Group books into a collection" },
           { label: "Edition Manager", path: "/editions", desc: "Every language edition, linked" },
+          { label: "Collections", path: "/collections", desc: "Curated, shareable libraries" },
           { label: "Library", path: "/library", desc: "Everything you’ve made" },
         ],
       },
