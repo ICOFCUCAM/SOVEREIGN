@@ -19,6 +19,14 @@ interface RpcClient {
 }
 const rpc = () => supabase as unknown as RpcClient;
 
+// Fire-and-forget telemetry for heavy batch operations. Records consumption
+// only — enforces nothing and never blocks the caller. Used to measure the
+// real cost driver (bulk translation, multi-language editions) before any
+// future metering. Failures are swallowed by design.
+export function recordBatchOp(units: number): void {
+  rpc().rpc("polished_record_batch_op", { p_units: Math.max(0, Math.round(units)) }).catch(() => {});
+}
+
 export async function listEditions(parentId: string): Promise<Edition[]> {
   const { data, error } = await rpc().rpc("polished_list_editions", { p_parent: parentId });
   if (error) throw new Error(error.message || "Could not load editions.");

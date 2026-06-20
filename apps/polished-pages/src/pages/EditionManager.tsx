@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, getDocument, type DocSummary } from "@/lib/documents";
-import { listEditions, saveEdition, type Edition } from "@/lib/editions";
+import { listEditions, saveEdition, recordBatchOp, type Edition } from "@/lib/editions";
 import { translateLocalize } from "@/lib/translate";
 import { LANGUAGE_NAMES, isoFor } from "@/lib/languages";
 import CountryDatalist from "@/components/app/CountryDatalist";
@@ -78,6 +78,8 @@ const EditionManager = () => {
       const cultureLabel = mode === "localize" && culture.trim() ? ` · ${culture.trim()}` : "";
       const edTitle = `${title} (${language.trim()}${cultureLabel})`;
       await saveEdition({ parent: selected, language: language.trim(), kind: row?.kind ?? "book", title: edTitle, payload: { markdown: outMd, title: edTitle }, preview: outMd.slice(0, 160), culture: mode === "localize" ? culture.trim() : undefined });
+      // Telemetry only — measure heavy batch consumption (one unit per chunk).
+      recordBatchOp(parts.length);
       setLanguage(""); setCulture("");
       setEditions(await listEditions(selected));
       toast({ title: "Edition created", description: `${edTitle} saved to your Library.` });
