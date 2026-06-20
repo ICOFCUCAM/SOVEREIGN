@@ -133,17 +133,26 @@ distribute globally."
   accepted directly by Kobo, Apple Books, Google Play Books and Draft2Digital —
   and by KDP/IngramSpark alongside print PDF.
 
+### V2.2 — delivered since
+- **Educational Illustration Studio** (`/illustrations`) — diagrams, science/
+  geography visuals, historical scenes, posters and line art, saved to the
+  Library (new `illustration` kind; images in the media bucket).
+- **Autosave / draft recovery** — `usePersistentState` autosaves the long-form
+  editors (Transform, Translate, Storybook) and restores them on return.
+- **Print trim sizes + EPUB** — the book reader exports EPUB and a Print PDF at a
+  chosen trim (6×9, 5×8, US letter, square, A5); a **Publish & Distribute** page
+  maps each store's format and computes cover spine / full wrap dimensions.
+
 ### Still on the roadmap (honest)
-- **KDP/IngramSpark/Lulu print profiles** — trim sizes (6×9, 8.5×11, square
-  picture-book), bleed/margin validation and metadata sheets. EPUB covers the
-  reflowable stores today; print-spec PDF is the next export.
-- **Library autosave + version history + draft recovery** (requested #2) — not
-  yet built; needs a drafts store + version snapshots.
-- **Educational Illustration Engine** (requested #3) — a standalone diagrams/
-  posters studio saving to the Library (the image engine + media bucket exist).
-- **Per-edition picture-book localization** — `/translate` localizes text
-  documents and storybook text; re-pairing localized text with existing
-  illustrations into a saved picture book is a follow-up.
+- **KDP-validated text PDF interiors** — today's print PDF is image-based
+  (great for picture books and proofs); KDP's strictest interior validator
+  prefers selectable, embedded-font text PDFs. A text-layout PDF path is next.
+- **Server-side version history** — autosave/draft recovery is done client-side;
+  full version snapshots + an update-in-place flow (vs. insert-new) remain.
+- **Per-edition picture-book localization** — `/translate` localizes text and
+  storybook text; re-pairing localized text with existing illustrations into a
+  saved picture book is a follow-up.
+- **School Content Marketplace (Circle 8)** — sharing/licensing model + catalog.
 
 ## Honest limitations
 
