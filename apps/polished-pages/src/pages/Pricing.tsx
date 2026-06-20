@@ -101,9 +101,32 @@ const Pricing = () => {
           Creators keep {100 - MARKETPLACE_FEE_PCT}% of marketplace sales. Need extra images on any plan? Buy image-credit packs from your{" "}
           <Link to="/account" className="text-primary hover:underline">account</Link>.
         </p>
+
+        {/* Objection-handling FAQ — honest answers to the questions that keep
+            people from upgrading. Plain copy, no marketing inflation. */}
+        <section className="mx-auto mt-16 max-w-3xl">
+          <h2 className="text-center font-serif text-2xl font-bold tracking-tight">Questions, answered</h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            {FAQS.map((f) => (
+              <div key={f.q} className="rounded-xl border border-border bg-card/50 p-4">
+                <h3 className="font-sans text-sm font-semibold text-foreground">{f.q}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground font-sans">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
 };
+
+const FAQS: { q: string; a: string }[] = [
+  { q: "What does the free plan include?", a: "20 text generations and 15 image credits a month, plus one published project — enough to make a real CV, a short storybook or a sample, with no card required." },
+  { q: "What is an image credit?", a: "One credit generates one AI image — a book cover, a storybook illustration or a coloring page. Text generation is unlimited on every paid plan; only images are metered." },
+  { q: "Do I own what I create?", a: "Yes. Everything you make is yours, with full commercial rights on paid plans — export to KDP and IngramSpark and sell it without restriction." },
+  { q: "How much do I keep from sales?", a: `Creators keep ${100 - MARKETPLACE_FEE_PCT}% of every paid marketplace sale. There are no listing fees, and free resources stay free.` },
+  { q: "Can I cancel or change plans?", a: "Anytime, from your account. Upgrades take effect immediately; if you cancel you keep access through the period you've paid for." },
+  { q: "Need extra images?", a: "Buy image-credit packs from your account on any plan — they never expire and stack on top of your monthly allowance." },
+];
 
 export default Pricing;
