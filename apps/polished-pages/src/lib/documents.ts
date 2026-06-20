@@ -15,6 +15,9 @@ export interface DocSummary {
   preview: string | null;
   favorite?: boolean;
   shared?: boolean;
+  listed?: boolean;
+  category?: string | null;
+  price_cents?: number;
   created_at: string;
 }
 
@@ -92,6 +95,28 @@ export async function setShared(id: string, shared: boolean): Promise<string | n
   const { data, error } = await rpc().rpc("polished_set_shared", { p_id: id, p_shared: shared });
   if (error) throw new Error(error.message || "Could not update sharing.");
   return (data as string) ?? null;
+}
+
+export const CATALOG_CATEGORIES = [
+  "Children's storybooks", "Coloring books", "Educational readers", "Textbooks",
+  "Workbooks", "Classroom packs", "Curriculum", "Teacher resources", "Other",
+];
+
+export interface CatalogItem { token: string; kind: DocKind; title: string; category: string | null; price_cents: number; preview: string | null; created_at: string }
+
+// Publish (or unpublish) a document to the public catalog. Returns the share token.
+export async function publishDocument(id: string, opts: { listed: boolean; category?: string; priceCents?: number }): Promise<string | null> {
+  const { data, error } = await rpc().rpc("polished_publish", {
+    p_id: id, p_listed: opts.listed, p_category: opts.category ?? null, p_price_cents: opts.priceCents ?? 0,
+  });
+  if (error) throw new Error(error.message || "Could not publish.");
+  return (data as string) ?? null;
+}
+
+export async function catalogList(category?: string): Promise<CatalogItem[]> {
+  const { data, error } = await rpc().rpc("polished_catalog", { p_category: category ?? null });
+  if (error) throw new Error(error.message || "Could not load the catalog.");
+  return (Array.isArray(data) ? data : []) as CatalogItem[];
 }
 
 export interface SharedDoc { kind: DocKind; title: string; template: string | null; payload: unknown }

@@ -24,6 +24,7 @@ import TranslatePublish from "./pages/TranslatePublish.tsx";
 import IllustrationStudio from "./pages/IllustrationStudio.tsx";
 import PublishingPrep from "./pages/PublishingPrep.tsx";
 import SharedDocument from "./pages/SharedDocument.tsx";
+import CatalogPage from "./pages/CatalogPage.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Gallery from "./pages/Gallery.tsx";
@@ -40,8 +41,9 @@ const App = () => (
         <Routes>
           {/* Public marketing landing — the hero stays open to everyone. */}
           <Route path="/" element={<Index />} />
-          {/* Public shared documents (no sign-in) */}
+          {/* Public shared documents + catalog (no sign-in) */}
           <Route path="/shared/:token" element={<SharedDocument />} />
+          <Route path="/catalog" element={<CatalogPage />} />
           {/* Generators require sign-in (metered per user); the gate prompts
               for sign-in only when someone actually goes to create. */}
           <Route path="/dashboard" element={<AuthGate><Dashboard /></AuthGate>} />

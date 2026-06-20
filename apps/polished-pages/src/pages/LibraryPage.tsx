@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2 } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store } from "lucide-react";
+import PublishDialog from "@/components/app/PublishDialog";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -334,6 +335,15 @@ const LibraryPage = () => {
                         <Button size="sm" variant="ghost" className={d.shared ? "text-primary" : "text-muted-foreground"} onClick={() => share(d)} aria-label="Share" title={d.shared ? "Shared — click to copy link or unshare" : "Share publicly"}>
                           <Share2 className="h-4 w-4" />
                         </Button>
+                        <PublishDialog
+                          doc={d}
+                          onChanged={(listed) => setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, listed } : x)) ?? null)}
+                          trigger={
+                            <Button size="sm" variant="ghost" className={d.listed ? "text-gold" : "text-muted-foreground"} aria-label="Publish" title={d.listed ? "Listed in catalog" : "Publish to catalog"}>
+                              <Store className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
                         <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={() => remove(d.id)} aria-label="Delete">
                           <Trash2 className="h-4 w-4" />
                         </Button>
