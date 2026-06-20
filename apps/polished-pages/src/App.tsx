@@ -25,6 +25,8 @@ import IllustrationStudio from "./pages/IllustrationStudio.tsx";
 import PublishingPrep from "./pages/PublishingPrep.tsx";
 import SharedDocument from "./pages/SharedDocument.tsx";
 import CatalogPage from "./pages/CatalogPage.tsx";
+import CollectionsPage from "./pages/CollectionsPage.tsx";
+import PublicCollection from "./pages/PublicCollection.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Gallery from "./pages/Gallery.tsx";
@@ -44,11 +46,13 @@ const App = () => (
           {/* Public shared documents + catalog (no sign-in) */}
           <Route path="/shared/:token" element={<SharedDocument />} />
           <Route path="/catalog" element={<CatalogPage />} />
+          <Route path="/collection/:token" element={<PublicCollection />} />
           {/* Generators require sign-in (metered per user); the gate prompts
               for sign-in only when someone actually goes to create. */}
           <Route path="/dashboard" element={<AuthGate><Dashboard /></AuthGate>} />
           <Route path="/account" element={<AuthGate><Account /></AuthGate>} />
           <Route path="/library" element={<AuthGate><LibraryPage /></AuthGate>} />
+          <Route path="/collections" element={<AuthGate><CollectionsPage /></AuthGate>} />
           <Route path="/cv" element={<AuthGate><CVGenerator /></AuthGate>} />
           <Route path="/cover-letter" element={<AuthGate><CoverLetterGenerator /></AuthGate>} />
           <Route path="/tailor" element={<AuthGate><JobTailor /></AuthGate>} />
