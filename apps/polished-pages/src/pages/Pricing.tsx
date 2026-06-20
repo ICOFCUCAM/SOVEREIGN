@@ -10,6 +10,18 @@ import { PLANS, PLAN_RANK, MARKETPLACE_FEE_PCT, type Plan } from "@/lib/plans";
 import { startUpgrade } from "@/lib/session";
 import { BRAND } from "@/lib/tools";
 
+// Growth-story caption for each rung, so the page reads as a journey
+// (start → grow → publish → organisation → institution) rather than a row of
+// equal boxes.
+const STAGE: Record<string, string> = {
+  creator: "Start here",
+  professional: "Grow here",
+  publisher: "Build a publishing business",
+  business: "Run an organization",
+  school: "Equip an institution",
+  enterprise: "Power a programme",
+};
+
 // Public pricing page rendering the full plan ladder from the plans config.
 const Pricing = () => {
   const { toast } = useToast();
@@ -53,9 +65,9 @@ const Pricing = () => {
 
       <div className="container max-w-6xl mx-auto px-6 py-12">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-          <h1 className="font-serif text-3xl font-bold tracking-tight md:text-5xl">Plans for every <span className="text-gradient-gold italic">creator and publisher</span></h1>
+          <h1 className="font-serif text-3xl font-bold tracking-tight md:text-5xl">A plan for every <span className="text-gradient-gold italic">stage of your journey</span></h1>
           <p className="mx-auto mt-3 max-w-2xl text-muted-foreground font-sans">
-            From a first CV to a multi-language publishing house. Text is unlimited on every paid plan; image credits scale with how much you create.
+            From your first CV to a multi-language publishing catalog to a national programme — each plan is built for a different stage, and grows with you as you scale.
           </p>
         </motion.div>
 
@@ -85,13 +97,17 @@ const Pricing = () => {
           </Card>
         )}
 
-        {/* Progression rail — names the ladder so the hierarchy is legible before
-            the eye even reaches the cards. */}
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs font-sans text-muted-foreground">
-          {ladder.map((p, i) => (
-            <span key={p.id} className="flex items-center gap-2">
-              <span className={p.highlight ? "font-semibold text-primary" : ""}>{p.name}</span>
-              {i < ladder.length - 1 && <ArrowRight className="h-3 w-3 opacity-50" />}
+        {/* Progression rail — the whole growth story in one line (Creator →
+            Professional → Publisher Pro → Business → Enterprise), so the value
+            hierarchy is legible before the eye even reaches the cards. */}
+        <div className="mt-12 hidden flex-wrap items-end justify-center gap-x-1 gap-y-2 md:flex">
+          {[...ladder, PLANS.find((p) => p.id === "enterprise")].filter(Boolean).map((p, i, arr) => (
+            <span key={p!.id} className="flex items-end gap-1">
+              <span className="flex flex-col items-center">
+                <span className={`text-sm font-medium font-sans ${p!.highlight ? "text-primary" : "text-foreground/80"}`}>{p!.name}</span>
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-sans">{STAGE[p!.id]}</span>
+              </span>
+              {i < arr.length - 1 && <ArrowRight className="mb-3.5 h-3.5 w-3.5 text-muted-foreground/50" />}
             </span>
           ))}
         </div>
@@ -140,7 +156,8 @@ const Pricing = () => {
                         <span key={n} className={`h-1 w-5 rounded-full ${n <= rank ? pipColor : "bg-border"}`} />
                       ))}
                     </div>
-                    <div className="mt-3 flex items-center gap-2">
+                    <p className={`mt-3 text-[11px] font-semibold uppercase tracking-wide font-sans ${isGold ? "text-gold" : isTop ? "text-foreground/70" : "text-primary"}`}>{STAGE[plan.id]}</p>
+                    <div className="mt-1 flex items-center gap-2">
                       {featured && <Crown className="h-4 w-4 text-gold" />}
                       {isGold && <Crown className="h-4 w-4 fill-gold text-gold" />}
                       {isTop && <Building2 className="h-4 w-4 text-foreground" />}
@@ -179,20 +196,26 @@ const Pricing = () => {
           <Link to="/account" className="text-primary hover:underline">account</Link>.
         </p>
 
-        {/* Zone 3 — organizations band. Visually separated so schools, NGOs and
-            ministries see a clear, sales-led path distinct from self-serve. */}
+        {/* Zone 3 — organizations band: the apex of the growth story. Richest,
+            most premium treatment on the page so schools, NGOs and ministries
+            read as the top of the ladder, not a sidecar. */}
         {orgs.length > 0 && (
           <div className="mt-16">
             <div className="text-center">
-              <h2 className="font-serif text-2xl font-bold tracking-tight">For schools, NGOs &amp; organizations</h2>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gold font-sans">The top of the ladder</p>
+              <h2 className="mt-1 font-serif text-2xl font-bold tracking-tight">…and when you’re running an institution</h2>
               <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground font-sans">Annual licensing, teacher and student accounts, custom curriculum support and dedicated onboarding — priced to your programme.</p>
             </div>
             <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {orgs.map((plan) => (
-                <Card key={plan.id} className="border-border bg-gradient-to-br from-secondary/40 to-card">
+              {orgs.map((plan) => {
+                const isApex = plan.id === "enterprise";
+                return (
+                <Card key={plan.id} className={`relative flex h-full flex-col overflow-hidden shadow-premium ${isApex ? "border-gold/40 bg-gradient-to-br from-foreground/[0.07] via-card to-gold/[0.05]" : "border-foreground/15 bg-gradient-to-br from-secondary/60 to-card"}`}>
+                  <div className="h-1 w-full bg-gold-gradient" />
                   <CardContent className="flex h-full flex-col p-5">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-primary" />
+                    <p className={`text-[11px] font-semibold uppercase tracking-wide font-sans ${isApex ? "text-gold" : "text-foreground/70"}`}>{STAGE[plan.id]}</p>
+                    <div className="mt-1 flex items-center gap-2">
+                      {isApex ? <Crown className="h-4 w-4 fill-gold text-gold" /> : <Building2 className="h-4 w-4 text-foreground" />}
                       <h3 className="font-serif text-lg font-bold">{plan.name}</h3>
                     </div>
                     <p className="mt-0.5 text-xs text-muted-foreground font-sans">{plan.target}</p>
@@ -200,16 +223,17 @@ const Pricing = () => {
                     <ul className="mt-4 flex-1 space-y-2">
                       {plan.features.map((f) => (
                         <li key={f} className="flex items-start gap-2 text-sm font-sans">
-                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {f}
+                          <Check className={`mt-0.5 h-4 w-4 shrink-0 ${isApex ? "text-gold" : "text-foreground"}`} /> {f}
                         </li>
                       ))}
                     </ul>
-                    <Button variant="hero" className="mt-5 w-full sm:w-auto" disabled={busy === plan.id} onClick={() => choose(plan)}>
+                    <Button variant="hero" className={`mt-5 w-full sm:w-auto ${isApex ? "border-0 bg-gradient-to-r from-gold/90 to-amber-500 text-white hover:from-gold hover:to-amber-400" : ""}`} disabled={busy === plan.id} onClick={() => choose(plan)}>
                       Talk to us <ArrowRight className="ml-1 h-4 w-4" />
                     </Button>
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -234,7 +258,7 @@ const Pricing = () => {
 
 const FAQS: { q: string; a: string }[] = [
   { q: "What does the free plan include?", a: "20 text generations and 15 image credits a month, plus one published project — enough to make a real CV, a short storybook or a sample, with no card required." },
-  { q: "What is an image credit?", a: "One credit generates one AI image — a book cover, a storybook illustration or a coloring page. Text generation is unlimited on every paid plan; only images are metered." },
+  { q: "What is an image credit?", a: "One credit generates one AI image — a book cover, a storybook illustration or a coloring page. Everyday text generation (CVs, letters, single chapters) isn’t capped on paid plans; image generation is metered with monthly credits that scale by tier." },
   { q: "Do I own what I create?", a: "Yes. Everything you make is yours, with full commercial rights on paid plans — export to KDP and IngramSpark and sell it without restriction." },
   { q: "How much do I keep from sales?", a: `Creators keep ${100 - MARKETPLACE_FEE_PCT}% of every paid marketplace sale. There are no listing fees, and free resources stay free.` },
   { q: "Can I cancel or change plans?", a: "Anytime, from your account. Upgrades take effect immediately; if you cancel you keep access through the period you've paid for." },
