@@ -22,6 +22,7 @@ import CurriculumBuilder from "./pages/CurriculumBuilder.tsx";
 import TeacherResourceCenter from "./pages/TeacherResourceCenter.tsx";
 import ExamAssessmentPack from "./pages/ExamAssessmentPack.tsx";
 import TranslatePublish from "./pages/TranslatePublish.tsx";
+import EditionManager from "./pages/EditionManager.tsx";
 import IllustrationStudio from "./pages/IllustrationStudio.tsx";
 import PublishingPrep from "./pages/PublishingPrep.tsx";
 import SharedDocument from "./pages/SharedDocument.tsx";
@@ -80,6 +81,7 @@ const App = () => (
           <Route path="/teacher" element={<AuthGate><RequirePlan feature="educational-studio"><TeacherResourceCenter /></RequirePlan></AuthGate>} />
           <Route path="/assessment" element={<AuthGate><RequirePlan feature="educational-studio"><ExamAssessmentPack /></RequirePlan></AuthGate>} />
           <Route path="/translate" element={<AuthGate><RequirePlan feature="multilingual"><TranslatePublish /></RequirePlan></AuthGate>} />
+          <Route path="/editions" element={<AuthGate><RequirePlan feature="multilingual"><EditionManager /></RequirePlan></AuthGate>} />
           <Route path="/illustrations" element={<AuthGate><IllustrationStudio /></AuthGate>} />
           <Route path="/publishing" element={<AuthGate><PublishingPrep /></AuthGate>} />
           {/* internal visual-QA gallery (not linked) */}

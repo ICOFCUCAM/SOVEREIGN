@@ -19,6 +19,7 @@ const GROUPS: MenuGroup[] = [
     { label: "Book Creator", to: "/book" },
     { label: "Transform a Book", to: "/book-transform" },
     { label: "Illustration Studio", to: "/illustrations" },
+    { label: "Edition Manager", to: "/editions" },
     { label: "Publish & Distribute", to: "/publishing" },
   ] },
   { label: "Education", items: [
