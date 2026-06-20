@@ -43,7 +43,7 @@ Return ONLY valid JSON (no fences):
 Age: ${age || "5"}
 Pages: ${pageCount}`;
 
-    await requirePlanOrThrow(userId, "professional");
+    await requirePlanOrThrow(userId, "creator");
     await consumeOrThrow(userId);
     const raw = await complete({ system, user, maxTokens: 4000 });
 

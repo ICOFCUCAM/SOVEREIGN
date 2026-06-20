@@ -88,7 +88,7 @@ Characters: ${characters || "(invent suitable characters)"}
 ${childName ? `Personalize: the child "${childName}" is the hero.` : ""}
 Pages: about ${pageCount}.`;
 
-    await requirePlanOrThrow(userId, "professional");
+    await requirePlanOrThrow(userId, "creator");
     await consumeOrThrow(userId);
     const raw = await complete({ system, user, maxTokens: 8000 });
 

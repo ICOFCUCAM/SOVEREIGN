@@ -55,8 +55,8 @@ export const PLANS: Plan[] = [
     features: [
       "Unlimited text generations",
       "250 image credits / month",
-      "Full commercial rights",
-      "KDP & IngramSpark export",
+      "Children’s storybooks & coloring books",
+      "Full commercial rights — KDP & IngramSpark export",
       "Library, version history & collections",
       "Publish and sell on the marketplace",
     ],
@@ -75,9 +75,9 @@ export const PLANS: Plan[] = [
     features: [
       "Everything in Creator",
       "800 image credits / month",
-      "Children’s Publishing Studio",
       "Educational Publishing Studio & Curriculum Builder",
-      "Multi-language publishing & localization",
+      "Primary School Book Factory & Teacher Resources",
+      "Multi-language publishing, localization & bulk translation",
       "Priority generation & premium templates",
     ],
   },
@@ -165,7 +165,7 @@ export const PLAN_RANK: Record<string, number> = {
 // (requirePlanOrThrow) in the generation functions.
 export type StudioFeature = "children-studio" | "educational-studio" | "multilingual";
 export const FEATURE_MIN_PLAN: Record<StudioFeature, PlanId> = {
-  "children-studio": "professional",
+  "children-studio": "creator",       // emotional hook — available early
   "educational-studio": "professional",
   "multilingual": "professional",
 };
