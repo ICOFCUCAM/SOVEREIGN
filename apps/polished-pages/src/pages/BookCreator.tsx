@@ -250,9 +250,9 @@ const BookCreator = () => {
             ) : view === "setup" ? (
               <div>
                 <div className="mb-8">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
-                    <BookOpen className="w-4 h-4 text-gold" />
-                    <span className="text-sm text-gold-light font-medium font-sans">Book Creator</span>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-publishing/20 bg-publishing/5 px-4 py-1.5 mb-4">
+                    <BookOpen className="w-4 h-4 text-publishing" />
+                    <span className="text-sm text-publishing font-medium font-sans">Book Creator</span>
                   </div>
                   <h1 className="text-3xl md:text-4xl font-bold font-serif mb-2">
                     Create your <span className="text-gradient-gold italic">book</span>

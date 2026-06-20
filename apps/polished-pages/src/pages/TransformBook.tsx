@@ -117,9 +117,9 @@ const TransformBook = () => {
     <div className="min-h-screen bg-background">
       <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
-            <Wand2 className="w-4 h-4 text-gold" />
-            <span className="text-sm text-gold-light font-medium font-sans">Transform a Book</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-publishing/20 bg-publishing/5 px-4 py-1.5 mb-4">
+            <Wand2 className="w-4 h-4 text-publishing" />
+            <span className="text-sm text-publishing font-medium font-sans">Transform a Book</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold font-serif mb-2">
             Revise an entire <span className="text-gradient-gold italic">book</span>

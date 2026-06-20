@@ -67,8 +67,8 @@ const AssessmentBank = () => {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
-          <ClipboardList className="w-4 h-4 text-gold" /><span className="text-sm text-gold-light font-medium font-sans">Assessment bank</span>
+        <div className="inline-flex items-center gap-2 rounded-full border border-educational/20 bg-educational/5 px-4 py-1.5 mb-4">
+          <ClipboardList className="w-4 h-4 text-educational" /><span className="text-sm text-educational font-medium font-sans">Assessment bank</span>
         </div>
         <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Your <span className="text-gradient-gold italic">assessment bank</span></h1>
         <p className="mt-2 text-muted-foreground font-sans">Build a reusable library of quizzes, exams and worksheets — organized by subject and grade, ready to reuse and adapt across terms.</p>

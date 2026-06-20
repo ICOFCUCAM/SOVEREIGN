@@ -91,9 +91,9 @@ const SeriesPage = () => {
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-3">
-            <Layers className="w-4 h-4 text-gold" />
-            <span className="text-sm text-gold-light font-medium font-sans">Series</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-educational/20 bg-educational/5 px-4 py-1.5 mb-3">
+            <Layers className="w-4 h-4 text-educational" />
+            <span className="text-sm text-educational font-medium font-sans">Series</span>
           </div>
           <h1 className="font-serif text-3xl font-bold tracking-tight">Book series</h1>
           <p className="mt-1 text-muted-foreground font-sans">A shared universe — characters, setting and objective — that every book in the series carries.</p>

@@ -83,8 +83,8 @@ const EditionManager = () => {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
-          <Globe className="w-4 h-4 text-gold" /><span className="text-sm text-gold-light font-medium font-sans">Multi-language editions</span>
+        <div className="inline-flex items-center gap-2 rounded-full border border-publishing/20 bg-publishing/5 px-4 py-1.5 mb-4">
+          <Globe className="w-4 h-4 text-publishing" /><span className="text-sm text-publishing font-medium font-sans">Multi-language editions</span>
         </div>
         <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Edition <span className="text-gradient-gold italic">manager</span></h1>
         <p className="mt-2 text-muted-foreground font-sans">Create and manage every language edition of a book as one linked set — faithful translation or a culturally localized edition.</p>

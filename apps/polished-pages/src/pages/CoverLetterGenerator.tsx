@@ -87,9 +87,9 @@ const CoverLetterGenerator = () => {
             >
               {/* Header */}
               <div className="mb-10">
-                <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
-                  <PenTool className="w-4 h-4 text-gold" />
-                  <span className="text-sm text-gold-light font-medium font-sans">Cover Letter Generator</span>
+                <div className="inline-flex items-center gap-2 rounded-full border border-career/20 bg-career/5 px-4 py-1.5 mb-4">
+                  <PenTool className="w-4 h-4 text-career" />
+                  <span className="text-sm text-career font-medium font-sans">Cover Letter Generator</span>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold font-serif mb-2">
                   Craft a <span className="text-gradient-gold italic">Tailored</span> Cover Letter

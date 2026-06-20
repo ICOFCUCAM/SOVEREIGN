@@ -127,9 +127,9 @@ const TranslatePublish = () => {
     <div className="min-h-screen bg-background">
       <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
         <Link to="/children" className="text-xs text-muted-foreground hover:text-foreground font-sans">← Children’s Publishing Studio</Link>
-        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
-          <Globe className="w-4 h-4 text-gold" />
-          <span className="text-sm text-gold-light font-medium font-sans">Translate &amp; Localize</span>
+        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-publishing/20 bg-publishing/5 px-4 py-1.5 mb-4">
+          <Globe className="w-4 h-4 text-publishing" />
+          <span className="text-sm text-publishing font-medium font-sans">Translate &amp; Localize</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-bold font-serif mb-2">Publish in <span className="text-gradient-gold italic">every language</span></h1>
         <p className="text-muted-foreground font-sans mb-8">Create once, then produce editions in many languages — a faithful translation, or a culturally localized version with names, settings and examples adapted to each culture.</p>

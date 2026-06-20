@@ -33,9 +33,9 @@ const ChildrenStudio = () => {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
-          <BookHeart className="w-4 h-4 text-gold" />
-          <span className="text-sm text-gold-light font-medium font-sans">Children’s Publishing Studio</span>
+        <div className="inline-flex items-center gap-2 rounded-full border border-educational/20 bg-educational/5 px-4 py-1.5 mb-4">
+          <BookHeart className="w-4 h-4 text-educational" />
+          <span className="text-sm text-educational font-medium font-sans">Children’s Publishing Studio</span>
         </div>
         <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Publish for <span className="text-gradient-gold italic">young readers</span></h1>
         <p className="mt-2 max-w-2xl text-muted-foreground font-sans">

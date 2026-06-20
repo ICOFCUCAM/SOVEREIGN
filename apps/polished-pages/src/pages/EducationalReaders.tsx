@@ -60,9 +60,9 @@ const EducationalReaders = () => {
     <div className="min-h-screen bg-background">
       <div className="container max-w-2xl mx-auto px-6 pt-8 pb-16">
         <Link to="/children" className="text-xs text-muted-foreground hover:text-foreground font-sans">← Children’s Publishing Studio</Link>
-        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
-          <BookOpenCheck className="w-4 h-4 text-gold" />
-          <span className="text-sm text-gold-light font-medium font-sans">Educational Readers</span>
+        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-educational/20 bg-educational/5 px-4 py-1.5 mb-4">
+          <BookOpenCheck className="w-4 h-4 text-educational" />
+          <span className="text-sm text-educational font-medium font-sans">Educational Readers</span>
         </div>
         <h1 className="text-3xl md:text-4xl font-bold font-serif mb-2">Create an <span className="text-gradient-gold italic">educational reader</span></h1>
         <p className="text-muted-foreground font-sans mb-8">A leveled reader that teaches a topic through clear explanation, examples and review questions — choose a designed interior and export to print or EPUB.</p>
