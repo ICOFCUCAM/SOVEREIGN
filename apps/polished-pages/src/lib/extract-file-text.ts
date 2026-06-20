@@ -2,16 +2,16 @@ import * as pdfjsLib from "pdfjs-dist";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
-export const CV_ACCEPT = ".pdf,.docx,.txt";
-export const CV_MIME = [
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "text/plain",
-];
+const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-// Extract plain text from an uploaded CV file. PDFs are read page-by-page via
-// pdf.js; everything else is read as text. DOCX is read as text too (not a true
-// unzip) — good enough for the model to parse, and PDF/TXT are the common cases.
+export const CV_ACCEPT = ".pdf,.docx,.txt";
+export const CV_MIME = ["application/pdf", DOCX_MIME, "text/plain"];
+
+const isDocx = (file: File): boolean => file.type === DOCX_MIME || file.name.toLowerCase().endsWith(".docx");
+
+// Extract plain text from an uploaded document. PDFs are read page-by-page via
+// pdf.js; DOCX is properly unzipped via mammoth (lazy-loaded so it never weighs
+// down the main bundle); everything else is read as plain text.
 export async function extractFileText(file: File): Promise<string> {
   let text: string;
   if (file.type === "application/pdf") {
@@ -25,6 +25,11 @@ export async function extractFileText(file: File): Promise<string> {
       pages.push(content.items.map((item) => ("str" in item ? item.str : "")).join(" "));
     }
     text = pages.join("\n\n");
+  } else if (isDocx(file)) {
+    const { default: mammoth } = await import("mammoth");
+    const arrayBuffer = await file.arrayBuffer();
+    const { value } = await mammoth.extractRawText({ arrayBuffer });
+    text = value;
   } else {
     text = await file.text();
   }

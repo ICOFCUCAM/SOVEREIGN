@@ -17,7 +17,7 @@ import TemplateSelector from "@/components/cv/TemplateSelector";
 import CvDocument from "@/components/CvDocument";
 import PremiumCv from "@/components/PremiumCv";
 import { buildCvMarkdown } from "@/lib/cv-markdown";
-import { formToCvData, type CvData } from "@/lib/cv-data";
+import { formToCvData, type CvData, type ParsedCvImport } from "@/lib/cv-data";
 import { isPremiumId } from "@/lib/premium-templates";
 import {
   PersonalInfo, Experience, Education, Reference, CVTemplate,
@@ -80,24 +80,24 @@ const CVGenerator = () => {
   const updateReference = (id: string, field: string, value: string) =>
     setReferences((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
 
-  const handleUploadParsed = (data: any) => {
+  const handleUploadParsed = (data: ParsedCvImport) => {
     if (data.personalInfo) {
       setPersonalInfo((prev) => ({
         ...prev,
-        ...Object.fromEntries(Object.entries(data.personalInfo).filter(([_, v]) => v)),
+        ...Object.fromEntries(Object.entries(data.personalInfo!).filter(([, v]) => v)),
       }));
     }
     if (data.experiences?.length) {
-      setExperiences(data.experiences.map((e: any) => ({ ...defaultExperience(), ...e })));
+      setExperiences(data.experiences.map((e) => ({ ...defaultExperience(), ...e })));
     }
     if (data.education?.length) {
-      setEducation(data.education.map((e: any) => ({ ...defaultEducation(), ...e })));
+      setEducation(data.education.map((e) => ({ ...defaultEducation(), ...e })));
     }
     if (data.skills) setSkills(data.skills);
     if (data.certifications) setCertifications(data.certifications);
     if (data.languages) setLanguages(data.languages);
     if (data.references?.length) {
-      setReferences(data.references.map((r: any) => ({ ...defaultReference(), ...r })));
+      setReferences(data.references.map((r) => ({ ...defaultReference(), ...r })));
     }
   };
 

@@ -4,20 +4,11 @@ import { authHeader } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, Loader2, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import * as pdfjsLib from "pdfjs-dist";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+import { extractFileText } from "@/lib/extract-file-text";
+import type { ParsedCvImport } from "@/lib/cv-data";
 
 interface Props {
-  onParsed: (data: {
-    personalInfo?: any;
-    experiences?: any[];
-    education?: any[];
-    skills?: string;
-    references?: any[];
-    certifications?: string;
-    languages?: string;
-  }) => void;
+  onParsed: (data: ParsedCvImport) => void;
 }
 
 const CVUploadStep = ({ onParsed }: Props) => {
@@ -49,25 +40,7 @@ const CVUploadStep = ({ onParsed }: Props) => {
     if (!file) return;
     setIsParsing(true);
     try {
-      let text: string;
-
-      if (file.type === "application/pdf") {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        const pages: string[] = [];
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          pages.push(content.items.map((item: any) => item.str).join(" "));
-        }
-        text = pages.join("\n\n");
-      } else {
-        text = await file.text();
-      }
-
-      if (!text || text.trim().length < 20) {
-        throw new Error("Could not extract readable text from this file. Please try a different format.");
-      }
+      const text = await extractFileText(file);
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-cv`,

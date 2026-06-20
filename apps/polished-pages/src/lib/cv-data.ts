@@ -27,6 +27,17 @@ export interface CvData {
   github?: string;
 }
 
+// Shape returned by the generate-cv "parse" action when importing an uploaded CV.
+export interface ParsedCvImport {
+  personalInfo?: Partial<PersonalInfo>;
+  experiences?: Partial<Experience>[];
+  education?: Partial<Education>[];
+  skills?: string;
+  certifications?: string;
+  languages?: string;
+  references?: Partial<Reference>[];
+}
+
 export interface CvFormState {
   personalInfo: PersonalInfo;
   experiences: Experience[];
