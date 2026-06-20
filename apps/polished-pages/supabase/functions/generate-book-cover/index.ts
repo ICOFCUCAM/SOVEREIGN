@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     let resp: Response;
     try {
       // Meter only once the request is validated and about to incur cost.
-      await consumeOrThrow(userId);
+      await consumeOrThrow(userId, "image");
       resp = await fetch("https://api.openai.com/v1/images/generations", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },

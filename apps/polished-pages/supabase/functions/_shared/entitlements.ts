@@ -47,8 +47,12 @@ export function getUserContext(req: Request): { id: string; email?: string } {
 }
 
 // Atomically check and increment the user's monthly quota via the service role.
-// Throws 402 when the free allowance is exhausted.
-export async function consumeOrThrow(userId: string): Promise<{ plan: string; used: number; limit: number }> {
+// Text and images are metered separately (images run on a credit pool, since
+// each gpt-image-1 call is a real cost). Throws 402 when the allowance is spent.
+export async function consumeOrThrow(
+  userId: string,
+  kind: "text" | "image" = "text",
+): Promise<{ plan: string; used: number; limit: number }> {
   const url = Deno.env.get("SUPABASE_URL");
   const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) throw new EntitlementError("Metering is not configured on this deployment.", 503);
@@ -56,7 +60,7 @@ export async function consumeOrThrow(userId: string): Promise<{ plan: string; us
   const r = await fetch(`${url}/rest/v1/rpc/polished_consume_generation`, {
     method: "POST",
     headers: { "content-type": "application/json", apikey: key, authorization: `Bearer ${key}` },
-    body: JSON.stringify({ p_user_id: userId }),
+    body: JSON.stringify({ p_user_id: userId, p_kind: kind }),
   });
   if (!r.ok) {
     console.error("polished_consume_generation failed", r.status, await r.text().catch(() => ""));
@@ -68,10 +72,10 @@ export async function consumeOrThrow(userId: string): Promise<{ plan: string; us
   const used = row?.used ?? 0;
   const limit = row?.lim ?? 0;
   if (!row?.allowed) {
-    throw new EntitlementError(
-      `You've used all ${limit} free generations this month. Upgrade to Pro for unlimited.`,
-      402, { plan, used, limit },
-    );
+    const message = kind === "image"
+      ? `You've used all ${limit} image credits this month. Upgrade to Pro for more.`
+      : `You've used all ${limit} free generations this month. Upgrade to Pro for unlimited.`;
+    throw new EntitlementError(message, 402, { plan, used, limit });
   }
   return { plan, used, limit };
 }

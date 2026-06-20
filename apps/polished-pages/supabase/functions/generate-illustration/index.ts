@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     const killer = setTimeout(() => ac.abort(), 55000);
     let resp: Response;
     try {
-      await consumeOrThrow(userId);
+      await consumeOrThrow(userId, "image");
       resp = await fetch("https://api.openai.com/v1/images/generations", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },

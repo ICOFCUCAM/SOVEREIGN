@@ -8,14 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
+import { fetchPlanStatus, startUpgrade, PRO_PRICE_USD, type PlanStatus } from "@/lib/session";
 import { getMyProfile, upsertProfile } from "@/lib/profiles";
 import { BRAND } from "@/lib/tools";
 
 const PRO_PERKS = [
-  "Unlimited CV, cover-letter and book generations",
+  "Unlimited text generations — CVs, letters, books, lessons",
+  "300 image credits / month for storybooks, covers and colouring pages",
+  "Full commercial rights — sell on the marketplace and publish to KDP / IngramSpark",
   "Every premium template family, including the flagship",
-  "Job tailoring with cover letter and fit analysis",
   "Priority generation",
 ];
 
@@ -53,6 +54,9 @@ const Account = () => {
   const used = status?.used ?? 0;
   const lim = status?.lim ?? 0;
   const pct = lim > 0 ? Math.min(100, Math.round((used / lim) * 100)) : 0;
+  const imgUsed = status?.imagesUsed ?? 0;
+  const imgLim = status?.imagesLim ?? 0;
+  const imgPct = imgLim > 0 ? Math.min(100, Math.round((imgUsed / imgLim) * 100)) : 0;
 
   const upgrade = async () => {
     setUpgrading(true);
@@ -75,15 +79,25 @@ const Account = () => {
         </CardHeader>
         <CardContent>
           {!isPro && status && (
-            <div className="max-w-md">
-              <div className="mb-1 flex justify-between text-xs text-muted-foreground font-sans">
-                <span>{used} of {lim} generations used this month</span>
-                <span>{lim - used} left</span>
+            <div className="max-w-md space-y-4">
+              <div>
+                <div className="mb-1 flex justify-between text-xs text-muted-foreground font-sans">
+                  <span>{used} of {lim} text generations this month</span>
+                  <span>{Math.max(0, lim - used)} left</span>
+                </div>
+                <Progress value={pct} className="h-2" />
               </div>
-              <Progress value={pct} className="h-2" />
+              <div>
+                <div className="mb-1 flex justify-between text-xs text-muted-foreground font-sans">
+                  <span>{imgUsed} of {imgLim} image credits this month</span>
+                  <span>{Math.max(0, imgLim - imgUsed)} left</span>
+                </div>
+                <Progress value={imgPct} className="h-2" />
+                <p className="mt-1 text-[11px] text-muted-foreground font-sans">Each storybook page, cover and colouring page uses one image credit.</p>
+              </div>
             </div>
           )}
-          {isPro && <p className="text-sm text-muted-foreground font-sans">You have unlimited generations.</p>}
+          {isPro && <p className="text-sm text-muted-foreground font-sans">Unlimited text generations · {imgUsed} of {imgLim} image credits used this month.</p>}
           {!status && <p className="text-sm text-muted-foreground font-sans">Loading plan…</p>}
         </CardContent>
       </Card>
@@ -92,6 +106,10 @@ const Account = () => {
         <Card className="mt-5 border-primary/30 bg-gradient-to-br from-primary/5 to-background">
           <CardHeader>
             <CardTitle className="font-serif text-lg">Upgrade to Pro</CardTitle>
+            <div className="mt-1 flex items-baseline gap-1">
+              <span className="font-serif text-3xl font-bold">${PRO_PRICE_USD}</span>
+              <span className="text-sm text-muted-foreground font-sans">/ month</span>
+            </div>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">

@@ -24,15 +24,20 @@ export async function startUpgrade(): Promise<void> {
   window.location.href = j.url as string;
 }
 
-export interface PlanStatus { plan: string; used: number; lim: number }
+// Canonical Pro price (USD/month). The matching Stripe price must be set as
+// STRIPE_PRICE_ID for checkout; this is the number shown across the UI.
+export const PRO_PRICE_USD = 18;
 
-// The signed-in user's plan and monthly usage, for the account badge.
+export interface PlanStatus { plan: string; used: number; lim: number; imagesUsed: number; imagesLim: number }
+
+// The signed-in user's plan and monthly usage (text + image credits).
 export async function fetchPlanStatus(): Promise<PlanStatus | null> {
   // Cast: the generated Database types don't know about the polished_* RPCs.
   const { data, error } = await (supabase as unknown as {
     rpc: (fn: string) => Promise<{ data: unknown; error: unknown }>;
   }).rpc("polished_my_status");
   if (error || !data) return null;
-  const row = Array.isArray(data) ? data[0] : data;
-  return (row as PlanStatus) ?? null;
+  const row = (Array.isArray(data) ? data[0] : data) as { plan: string; used: number; lim: number; images_used?: number; images_lim?: number } | undefined;
+  if (!row) return null;
+  return { plan: row.plan, used: row.used, lim: row.lim, imagesUsed: row.images_used ?? 0, imagesLim: row.images_lim ?? 0 };
 }

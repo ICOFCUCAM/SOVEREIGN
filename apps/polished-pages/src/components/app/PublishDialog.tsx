@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { Loader2, Copy, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Copy, Check, Crown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { publishDocument, CATALOG_CATEGORIES, CATALOG_LICENSES, type DocSummary } from "@/lib/documents";
+import { fetchPlanStatus } from "@/lib/session";
 
 // Publish a saved document to the public catalog: choose a category and an
 // optional price, get a public link. (Free items download immediately; charging
@@ -20,14 +21,18 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
   const [busy, setBusy] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isPro, setIsPro] = useState(true); // assume true until known, so we don't flash the upsell
 
+  useEffect(() => { if (open) fetchPlanStatus().then((s) => setIsPro(s?.plan === "pro")).catch(() => {}); }, [open]);
+
+  const priceCents = Math.max(0, Math.round(parseFloat(price || "0") * 100)) || 0;
+  const needsPro = priceCents > 0 && !isPro;
   const link = token ? `${window.location.origin}/shared/${token}` : null;
 
   const publish = async (listed: boolean) => {
     setBusy(true);
     try {
-      const cents = Math.max(0, Math.round(parseFloat(price || "0") * 100)) || 0;
-      const t = await publishDocument(doc.id, { listed, category, priceCents: cents, author, license });
+      const t = await publishDocument(doc.id, { listed, category, priceCents, author, license });
       setToken(listed ? t : null);
       onChanged?.(listed);
       toast({ title: listed ? "Published to catalog" : "Removed from catalog" });
@@ -57,7 +62,7 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
           </div>
           <div className="space-y-1.5">
             <Label className="font-sans text-xs">Publisher / author name (shown publicly)</Label>
-            <Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="e.g. Ms. Okafor’s Classroom" maxLength={80} />
+            <Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="e.g. Bright Start Classroom" maxLength={80} />
           </div>
           <div className="space-y-1.5">
             <Label className="font-sans text-xs">License</Label>
@@ -68,7 +73,11 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
           <div className="space-y-1.5">
             <Label className="font-sans text-xs">Price (USD) — 0 for free</Label>
             <Input type="number" min={0} step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
-            <p className="text-xs text-muted-foreground font-sans">Free items download immediately. Paid pricing is displayed; charging buyers and paying sellers requires Stripe Connect (not yet enabled).</p>
+            {needsPro ? (
+              <p className="flex items-start gap-1.5 text-xs text-gold font-sans"><Crown className="mt-0.5 h-3.5 w-3.5 shrink-0" /> Selling paid items is a Pro feature (commercial rights). Upgrade in Account, or set the price to 0 to share for free.</p>
+            ) : (
+              <p className="text-xs text-muted-foreground font-sans">Free items download immediately. Buyer charging and seller payouts arrive with Stripe Connect (not yet enabled).</p>
+            )}
           </div>
           {link && (
             <div className="rounded-lg border border-border p-2">
@@ -79,7 +88,7 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
             </div>
           )}
           <div className="flex gap-2">
-            <Button variant="hero" className="flex-1" disabled={busy} onClick={() => publish(true)}>
+            <Button variant="hero" className="flex-1" disabled={busy || needsPro} onClick={() => publish(true)}>
               {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null} {doc.listed ? "Update listing" : "Publish"}
             </Button>
             {doc.listed && <Button variant="ghost" disabled={busy} onClick={() => publish(false)}>Unlist</Button>}
