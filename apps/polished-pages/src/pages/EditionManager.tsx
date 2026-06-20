@@ -171,7 +171,21 @@ const EditionManager = () => {
             <p className="text-[11px] text-muted-foreground font-sans">Each edition is a real translation by the AI engine (counts toward your plan) and is saved to your Library, ready to export or publish.</p>
           </CardContent></Card>
 
-          <h2 className="mt-8 font-serif text-lg font-semibold">Editions</h2>
+          <div className="mt-8 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-serif text-lg font-semibold">Editions</h2>
+            {editions && editions.length > 0 && (
+              <span className="text-xs text-muted-foreground font-sans">
+                {editions.length} edition{editions.length === 1 ? "" : "s"} · {editionLangs.size} language{editionLangs.size === 1 ? "" : "s"}
+              </span>
+            )}
+          </div>
+          {editions && editions.length > 0 && editionLangs.size > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {Array.from(editionLangs).map((l) => (
+                <span key={l} className="rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-medium capitalize text-muted-foreground font-sans">{l}</span>
+              ))}
+            </div>
+          )}
           {editions === null ? (
             <div className="mt-3 space-y-2">
               {[0, 1, 2].map((i) => (
