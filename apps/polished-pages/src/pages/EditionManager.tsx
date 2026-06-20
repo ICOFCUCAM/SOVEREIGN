@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, getDocument, type DocSummary } from "@/lib/documents";
 import { listEditions, saveEdition, type Edition } from "@/lib/editions";
@@ -92,7 +93,15 @@ const EditionManager = () => {
         <p className="mt-2 text-muted-foreground font-sans">Create and manage every language edition of a book as one linked set — faithful translation or a culturally localized edition.</p>
       </motion.div>
 
-      {docs === null && <div className="mt-10 flex items-center gap-2 text-muted-foreground font-sans"><Loader2 className="h-4 w-4 animate-spin" /> Loading your books…</div>}
+      {docs === null && (
+        <div className="mt-6 space-y-2">
+          {[0, 1].map((i) => (
+            <div key={i} className="rounded-xl border border-border p-4">
+              <Skeleton className="h-5 w-64" /><Skeleton className="mt-1.5 h-3 w-40" />
+            </div>
+          ))}
+        </div>
+      )}
       {docs && docs.length === 0 && (
         <Card className="mt-8 border-dashed border-border"><CardContent className="flex flex-col items-center gap-3 p-12 text-center">
           <LibraryIcon className="h-10 w-10 text-muted-foreground/60" />

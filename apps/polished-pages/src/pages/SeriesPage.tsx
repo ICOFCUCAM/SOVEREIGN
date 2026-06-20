@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import CountryDatalist from "@/components/app/CountryDatalist";
@@ -120,7 +121,16 @@ const SeriesPage = () => {
         </Dialog>
       </motion.div>
 
-      {series === null && <div className="mt-10 flex items-center gap-2 text-muted-foreground font-sans"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>}
+      {series === null && (
+        <div className="mt-6 space-y-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="rounded-xl border border-border p-4">
+              <div className="flex items-center gap-2"><Skeleton className="h-4 w-4 rounded" /><Skeleton className="h-5 w-48" /><Skeleton className="h-3 w-14" /></div>
+              <Skeleton className="mt-2 h-3 w-full" /><Skeleton className="mt-1 h-3 w-3/4" />
+            </div>
+          ))}
+        </div>
+      )}
       {series && series.length === 0 && (
         <Card className="mt-8 border-dashed border-border"><CardContent className="flex flex-col items-center gap-3 p-12 text-center">
           <Layers className="h-10 w-10 text-muted-foreground/60" />
