@@ -106,13 +106,13 @@ const TranslatePublish = () => {
       <div className="min-h-screen bg-background">
         <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
           <div className="container flex flex-wrap items-center justify-between gap-2 py-2 px-6">
-            <div className="inline-flex flex-wrap rounded-lg border border-border bg-card p-1">
+            <div className="flex max-w-full overflow-x-auto rounded-lg border border-border bg-card p-1">
               {langs.map((l) => {
                 const iso = isoFor(l);
                 const rtl = isRtlLanguage(l);
                 return (
                   <button key={l} onClick={() => setTab(l)}
-                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium font-sans transition ${tab === l ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium font-sans transition ${tab === l ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
                     <span className="font-mono text-[9px] uppercase opacity-70">{iso}</span>
                     {l}
                     {rtl && <span className="opacity-60 text-[9px]">RTL</span>}

@@ -111,10 +111,10 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
       <div className="min-h-screen bg-background">
         <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
           <div className="container flex flex-wrap items-center justify-between gap-2 py-2 px-6">
-            <div className="inline-flex flex-wrap rounded-lg border border-border bg-card p-1">
+            <div className="flex max-w-full overflow-x-auto rounded-lg border border-border bg-card p-1">
               {present.map((p) => (
                 <button key={p.type} onClick={() => setTab(p.type)}
-                  className={`rounded-md px-3 py-1 text-xs font-medium font-sans transition ${tab === p.type ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+                  className={`shrink-0 rounded-md px-3 py-1 text-xs font-medium font-sans transition ${tab === p.type ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
                   {p.label}
                 </button>
               ))}
