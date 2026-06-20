@@ -22,7 +22,7 @@
     --secondary-foreground: 222 30% 22%;
 
     --muted: 215 28% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted-foreground: 215 19% 41%;   /* deepened for AA contrast on light surfaces */
 
     --accent: 221 83% 53%;
     --accent-foreground: 0 0% 100%;
@@ -103,6 +103,17 @@
     font-family: 'Playfair Display', serif;
     letter-spacing: -0.02em;
     text-wrap: balance;
+  }
+
+  /* Consistent, visible keyboard focus on links and clickable non-button
+     elements (buttons/inputs carry their own ring). A real a11y gap on a
+     platform sold to schools and institutions. */
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid hsl(var(--ring) / 0.75);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 }
 
