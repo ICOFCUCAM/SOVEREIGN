@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { extractFileText, CV_ACCEPT, CV_MIME } from "@/lib/extract-file-text";
 import { splitBook } from "@/lib/book-split";
+import { useMemo } from "react";
 import { translateLocalize } from "@/lib/translate";
 import { usePersistentState } from "@/hooks/use-persistent-state";
 import { LANGUAGE_NAMES, isoFor, isRtlLanguage } from "@/lib/languages";
@@ -36,6 +37,14 @@ const TranslatePublish = () => {
   const [savingAll, setSavingAll] = useState(false);
 
   const canRun = (file || source.trim().length > 60) && targets.length > 0 && !progress;
+
+  const sectionEstimate = useMemo(() => {
+    if (!source.trim()) return 0;
+    return splitBook(source.trim()).length;
+  }, [source]);
+
+  const totalCalls = sectionEstimate * targets.length;
+  const estMinutes = Math.ceil(totalCalls * 8 / 60); // ~8s per section call
 
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -211,6 +220,11 @@ const TranslatePublish = () => {
             </Button>
           )}
           {!canRun && !progress && <p className="text-center text-xs text-muted-foreground font-sans">Add your document and pick at least one target language.</p>}
+          {canRun && !progress && totalCalls > 1 && (
+            <p className="text-center text-xs text-muted-foreground font-sans">
+              {sectionEstimate} section{sectionEstimate > 1 ? "s" : ""} × {targets.length} language{targets.length > 1 ? "s" : ""} = {totalCalls} AI calls · estimated {estMinutes < 2 ? "~1 minute" : `~${estMinutes} minutes`}
+            </p>
+          )}
         </div>
       </div>
     </div>
