@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { authHeader, fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
+import { translateLocalize } from "@/lib/translate";
+import { LANGUAGE_NAMES } from "@/lib/languages";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
 
 type Side = "front" | "back";
@@ -30,9 +32,40 @@ const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle }: { ti
   const [instr, setInstr] = useState<Record<Side, string>>({ front: "", back: "" });
   const [img, setImg] = useState<Record<Side, string | null>>({ front: null, back: null });
   const [busy, setBusy] = useState<Side | null>(null);
+  const [coverLangs, setCoverLangs] = useState<string[]>([]);
+  const [batch, setBatch] = useState<{ label: string; done: number; total: number } | null>(null);
+  const [batchImg, setBatchImg] = useState<Record<string, string>>({});
 
   useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
   const isPro = status?.plan === "pro";
+
+  const coverFetch = async (body: Record<string, unknown>) => {
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-book-cover`, {
+      method: "POST", headers: { "Content-Type": "application/json", Authorization: await authHeader() }, body: JSON.stringify(body),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Cover generation failed"); }
+    return (await res.json()).image as string;
+  };
+
+  const generateBatch = async () => {
+    setBatch({ label: "Starting", done: 0, total: coverLangs.length });
+    const out: Record<string, string> = { ...batchImg };
+    try {
+      for (let i = 0; i < coverLangs.length; i++) {
+        const lang = coverLangs[i];
+        setBatch({ label: lang, done: i, total: coverLangs.length });
+        let tTitle = title;
+        if (title.trim()) { try { tTitle = (await translateLocalize({ content: title, targetLanguage: lang, mode: "translate" })).replace(/^#+\s*/, "").trim(); } catch { /* keep original */ } }
+        out[lang] = await coverFetch({ side: "front", instruction: instr.front, title: tTitle, subtitle, author, blurb });
+        setBatchImg({ ...out });
+        setBatch({ label: lang, done: i + 1, total: coverLangs.length });
+      }
+    } catch (e) {
+      toast({ title: "Batch covers failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally {
+      setBatch(null);
+    }
+  };
 
   const generate = async (side: Side) => {
     if (!title.trim() && !instr[side].trim()) {
@@ -163,6 +196,37 @@ const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle }: { ti
           />
         </div>
       )}
+      {/* Multi-language covers: one front cover per language with the title translated. */}
+      <Card className="border-border">
+        <CardHeader className="pb-3"><CardTitle className="font-serif text-base">Covers in other languages</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground font-sans">Generate a front cover per language — the title is translated and the front art direction reused.</p>
+          <div className="flex flex-wrap gap-1.5">
+            {LANGUAGE_NAMES.map((l) => {
+              const on = coverLangs.includes(l);
+              return <button key={l} type="button" onClick={() => setCoverLangs((c) => on ? c.filter((x) => x !== l) : [...c, l])} className={`rounded-full border px-2.5 py-1 text-xs font-sans transition ${on ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>{l}</button>;
+            })}
+          </div>
+          <Button variant="hero" size="sm" disabled={!!batch || coverLangs.length === 0} onClick={generateBatch}>
+            {batch ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />}
+            {batch ? `${batch.label} ${batch.done}/${batch.total}` : `Generate ${coverLangs.length || ""} cover${coverLangs.length === 1 ? "" : "s"}`}
+          </Button>
+          {Object.keys(batchImg).length > 0 && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {Object.entries(batchImg).map(([lang, src]) => (
+                <div key={lang}>
+                  <div className="overflow-hidden rounded-lg border border-border"><img src={src} alt={lang} className="aspect-[2/3] w-full object-cover" /></div>
+                  <div className="mt-1 flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground font-sans">{lang}</span>
+                    <button type="button" onClick={() => { const a = document.createElement("a"); a.href = src; a.download = `cover-${lang}.png`; a.click(); }} className="text-xs text-primary hover:underline"><Download className="inline h-3.5 w-3.5" /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <p className="text-center text-xs text-muted-foreground font-sans">
         Covers are generated by OpenAI’s image model from your title and art direction. Each generation counts toward your plan.
       </p>
