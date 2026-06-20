@@ -13,6 +13,7 @@ export interface DocSummary {
   title: string;
   template: string | null;
   preview: string | null;
+  favorite?: boolean;
   created_at: string;
 }
 
@@ -58,4 +59,9 @@ export async function getDocument(id: string): Promise<(DocSummary & { payload: 
 export async function deleteDocument(id: string): Promise<void> {
   const { error } = await rpc().rpc("polished_delete_document", { p_id: id });
   if (error) throw new Error(error.message || "Could not delete the document.");
+}
+
+export async function toggleFavorite(id: string, favorite: boolean): Promise<void> {
+  const { error } = await rpc().rpc("polished_toggle_favorite", { p_id: id, p_fav: favorite });
+  if (error) throw new Error(error.message || "Could not update favorite.");
 }

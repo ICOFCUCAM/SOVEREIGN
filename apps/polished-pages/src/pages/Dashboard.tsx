@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
+import { listDocuments, type DocSummary } from "@/lib/documents";
 import { TOOLS } from "@/lib/tools";
 
 // The studio home. First thing a signed-in user sees: their plan/usage at a
@@ -13,7 +14,11 @@ import { TOOLS } from "@/lib/tools";
 // dropping users straight into a single generator with no sense of the whole.
 const Dashboard = () => {
   const [status, setStatus] = useState<PlanStatus | null>(null);
-  useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
+  const [recent, setRecent] = useState<DocSummary[]>([]);
+  useEffect(() => {
+    fetchPlanStatus().then(setStatus);
+    listDocuments().then((d) => setRecent(d.slice(0, 4))).catch(() => {});
+  }, []);
 
   const isPro = status?.plan === "pro";
   const used = status?.used ?? 0;
@@ -86,6 +91,30 @@ const Dashboard = () => {
           </motion.div>
         ))}
       </div>
+
+      {/* Recent */}
+      {recent.length > 0 && (
+        <>
+          <div className="mt-10 flex items-center justify-between">
+            <h2 className="font-serif text-lg font-semibold">Recent documents</h2>
+            <Link to="/library" className="text-sm text-primary font-sans hover:underline">View all</Link>
+          </div>
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {recent.map((d) => (
+              <Link key={d.id} to="/library" className="block">
+                <Card className="border-border transition-colors hover:border-primary/40">
+                  <CardContent className="p-4">
+                    <div className="truncate font-sans text-sm font-medium">{d.title}</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground font-sans">
+                      {new Date(d.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* What's new */}
       <h2 className="mt-10 font-serif text-lg font-semibold">What's new</h2>

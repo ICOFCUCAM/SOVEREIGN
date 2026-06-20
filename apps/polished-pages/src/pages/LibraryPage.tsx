@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { listDocuments, getDocument, deleteDocument, type DocSummary, type DocKind } from "@/lib/documents";
+import { listDocuments, getDocument, deleteDocument, toggleFavorite, type DocSummary, type DocKind } from "@/lib/documents";
 import { elementToPdf } from "@/lib/export-pdf";
 import type { CvData } from "@/lib/cv-data";
 import CVPreview from "@/components/CVPreview";
@@ -36,6 +37,8 @@ const LibraryPage = () => {
   const [docs, setDocs] = useState<DocSummary[] | null>(null);
   const [opening, setOpening] = useState<string | null>(null);
   const [opened, setOpened] = useState<Opened | null>(null);
+  const [query, setQuery] = useState("");
+  const [favOnly, setFavOnly] = useState(false);
   const pbRef = useRef<HTMLDivElement>(null);
 
   const load = () => { listDocuments().then(setDocs).catch((e) => { toast({ title: "Could not load library", description: e.message, variant: "destructive" }); setDocs([]); }); };
@@ -73,6 +76,13 @@ const LibraryPage = () => {
     } catch (e) {
       toast({ title: "Could not delete", description: e instanceof Error ? e.message : "Error", variant: "destructive" });
     }
+  };
+
+  const star = async (d: DocSummary) => {
+    const next = !d.favorite;
+    setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, favorite: next } : x)) ?? null);
+    try { await toggleFavorite(d.id, next); }
+    catch { setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, favorite: !next } : x)) ?? null); }
   };
 
   if (opened?.kind === "cv") {
@@ -166,8 +176,20 @@ const LibraryPage = () => {
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="font-serif text-3xl font-bold tracking-tight">Library</h1>
-        <p className="mt-1 text-muted-foreground font-sans">Your saved CVs, cover letters and tailored applications.</p>
+        <p className="mt-1 text-muted-foreground font-sans">Every document you’ve saved — CVs, letters, books, covers and children’s books.</p>
       </motion.div>
+
+      {docs && docs.length > 0 && (
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search your library…" className="pl-8" />
+          </div>
+          <Button variant={favOnly ? "hero" : "heroOutline"} size="sm" onClick={() => setFavOnly((f) => !f)}>
+            <Star className={`mr-1 h-4 w-4 ${favOnly ? "fill-current" : ""}`} /> Favorites
+          </Button>
+        </div>
+      )}
 
       {docs === null && (
         <div className="mt-10 flex items-center gap-2 text-muted-foreground font-sans"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>
@@ -184,39 +206,49 @@ const LibraryPage = () => {
         </Card>
       )}
 
-      {docs && docs.length > 0 && (
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {docs.map((d) => {
-            const meta = KIND_META[d.kind] ?? KIND_META.cv;
-            return (
-              <Card key={d.id} className="group border-border transition-colors hover:border-primary/40">
-                <CardContent className="flex items-start gap-3 p-4">
-                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <meta.icon className="h-4 w-4 text-primary" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate font-sans text-sm font-semibold">{d.title}</span>
+      {docs && docs.length > 0 && (() => {
+        const q = query.trim().toLowerCase();
+        const filtered = docs.filter((d) => (!favOnly || d.favorite) && (!q || d.title.toLowerCase().includes(q) || (d.preview ?? "").toLowerCase().includes(q)));
+        if (filtered.length === 0) {
+          return <p className="mt-8 text-center text-sm text-muted-foreground font-sans">No documents match your filters.</p>;
+        }
+        return (
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {filtered.map((d) => {
+              const meta = KIND_META[d.kind] ?? KIND_META.cv;
+              return (
+                <Card key={d.id} className="group border-border transition-colors hover:border-primary/40">
+                  <CardContent className="flex items-start gap-3 p-4">
+                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                      <meta.icon className="h-4 w-4 text-primary" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate font-sans text-sm font-semibold">{d.title}</span>
+                        <button type="button" onClick={() => star(d)} className="ml-auto shrink-0 text-muted-foreground hover:text-gold" aria-label="Favorite">
+                          <Star className={`h-4 w-4 ${d.favorite ? "fill-gold text-gold" : ""}`} />
+                        </button>
+                      </div>
+                      <div className="mt-0.5 text-xs text-muted-foreground font-sans">
+                        {meta.label} · {new Date(d.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
+                      </div>
+                      {d.preview && <p className="mt-1.5 line-clamp-2 text-xs text-muted-foreground font-sans">{d.preview}</p>}
+                      <div className="mt-3 flex items-center gap-2">
+                        <Button size="sm" variant="heroOutline" disabled={opening === d.id} onClick={() => open(d)}>
+                          {opening === d.id ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null} Open
+                        </Button>
+                        <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={() => remove(d.id)} aria-label="Delete">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="mt-0.5 text-xs text-muted-foreground font-sans">
-                      {meta.label} · {new Date(d.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
-                    </div>
-                    {d.preview && <p className="mt-1.5 line-clamp-2 text-xs text-muted-foreground font-sans">{d.preview}</p>}
-                    <div className="mt-3 flex items-center gap-2">
-                      <Button size="sm" variant="heroOutline" disabled={opening === d.id} onClick={() => open(d)}>
-                        {opening === d.id ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null} Open
-                      </Button>
-                      <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={() => remove(d.id)} aria-label="Delete">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        );
+      })()}
     </div>
   );
 };
