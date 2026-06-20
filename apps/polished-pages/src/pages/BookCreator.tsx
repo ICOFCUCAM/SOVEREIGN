@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { authHeader } from "@/lib/session";
+import { logAiActivity } from "@/lib/ai-activity-log";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -79,6 +80,7 @@ const BookCreator = () => {
         status: "pending" as const,
       }));
       setChapters(newChapters);
+      logAiActivity({ tool: "Book Creator", description: bookTitle, status: "ok" });
 
       if (mode === "quick") {
         setView("writing");
@@ -88,6 +90,7 @@ const BookCreator = () => {
         setView("outline");
       }
     } catch (error) {
+      logAiActivity({ tool: "Book Creator", description: bookTitle, status: "error" });
       toast({ title: "Error", description: error instanceof Error ? error.message : "Failed", variant: "destructive" });
     } finally {
       setIsGeneratingOutline(false);

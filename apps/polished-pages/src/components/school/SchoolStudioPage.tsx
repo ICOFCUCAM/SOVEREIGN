@@ -169,16 +169,24 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
                       {f.options?.map((o) => <option key={o} value={o}>{o}</option>)}
                     </select>
                   ) : f.type === "multiselect" ? (
-                    <div className="flex flex-wrap gap-1.5">
-                      {f.options?.map((o) => {
-                        const on = (multi[f.key as string] ?? []).includes(o);
-                        return (
-                          <button key={o} type="button" onClick={() => setMulti((m) => { const cur = m[f.key as string] ?? []; return { ...m, [f.key]: on ? cur.filter((x) => x !== o) : [...cur, o] }; })}
-                            className={`rounded-full border px-2.5 py-1 text-xs font-sans transition ${on ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
-                            {o}
-                          </button>
-                        );
-                      })}
+                    <div className="space-y-1.5">
+                      <div className="flex flex-wrap gap-1.5">
+                        {f.options?.map((o) => {
+                          const on = (multi[f.key as string] ?? []).includes(o);
+                          return (
+                            <button key={o} type="button" onClick={() => setMulti((m) => { const cur = m[f.key as string] ?? []; return { ...m, [f.key]: on ? cur.filter((x) => x !== o) : [...cur, o] }; })}
+                              className={`rounded-full border px-2.5 py-1 text-xs font-sans transition ${on ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                              {o}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {(multi[f.key as string] ?? []).length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] text-primary font-sans">{(multi[f.key as string] ?? []).length} selected</span>
+                          <button type="button" onClick={() => setMulti((m) => ({ ...m, [f.key]: [] }))} className="text-[11px] text-muted-foreground hover:text-foreground font-sans underline">Clear</button>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <Input value={vals[f.key as string] ?? ""} onChange={(e) => setVals((v) => ({ ...v, [f.key]: e.target.value }))} placeholder={f.placeholder} maxLength={200} list={f.list} />
