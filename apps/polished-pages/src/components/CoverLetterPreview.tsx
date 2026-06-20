@@ -1,8 +1,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { authHeader } from "@/lib/session";
-import { ArrowLeft, Download, FileText, FileDown, Loader2, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, Download, FileText, FileDown, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { elementToPdf } from "@/lib/export-pdf";
 

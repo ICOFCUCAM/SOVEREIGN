@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Sparkles, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import CVPreview from "@/components/CVPreview";
 import PersonalInfoStep from "@/components/cv/PersonalInfoStep";

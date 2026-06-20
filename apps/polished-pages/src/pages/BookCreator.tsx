@@ -2,8 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { authHeader } from "@/lib/session";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookChapter, BookOutline, BookMode, BookDepth, BookView, ImprovementType } from "@/types/book";
 import BookSetup from "@/components/book/BookSetup";
@@ -244,14 +243,14 @@ const BookCreator = () => {
             ) : view === "setup" ? (
               <div>
                 <div className="mb-8">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 mb-4">
-                    <BookOpen className="w-4 h-4 text-primary" />
-                    <span className="text-sm text-primary font-medium">Book Creator</span>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
+                    <BookOpen className="w-4 h-4 text-gold" />
+                    <span className="text-sm text-gold-light font-medium font-sans">Book Creator</span>
                   </div>
                   <h1 className="text-3xl md:text-4xl font-bold font-serif mb-2">
-                    Create Your <span className="text-primary italic">Book</span>
+                    Create your <span className="text-gradient-gold italic">book</span>
                   </h1>
-                  <p className="text-muted-foreground">AI-powered book production with multiple creation modes.</p>
+                  <p className="text-muted-foreground font-sans">Full-length books with structured chapters — outline, write, refine, and export to EPUB, PDF, or print.</p>
                 </div>
                 <BookSetup
                   bookTitle={bookTitle} setBookTitle={setBookTitle}

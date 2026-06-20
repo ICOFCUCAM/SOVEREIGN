@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Loader2, Target, Upload, FileText, Check, ArrowLeft, FileDown, Download, X } from "lucide-react";
+import { Loader2, Target, Upload, FileText, Check, ArrowLeft, FileDown, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
