@@ -1,13 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Search, ChevronDown, LogOut, Settings, LayoutDashboard, Crown } from "lucide-react";
+import { Sparkles, Search, ChevronDown, LogOut, Settings, LayoutDashboard, Crown, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
-import { TOOLS, BRAND, DASHBOARD_NAV, ACCOUNT_NAV } from "@/lib/tools";
+import { TOOLS, BRAND, DASHBOARD_NAV, ACCOUNT_NAV, LIBRARY_NAV } from "@/lib/tools";
 import CommandPalette from "@/components/app/CommandPalette";
 
 // The persistent studio chrome: one global navigation that ties every tool
@@ -84,6 +84,7 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild><Link to={DASHBOARD_NAV.path}><LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to={LIBRARY_NAV.path}><Library className="mr-2 h-4 w-4" /> Library</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to={ACCOUNT_NAV.path}><Settings className="mr-2 h-4 w-4" /> Account & billing</Link></DropdownMenuItem>
                 {!isPro && (
                   <DropdownMenuItem onClick={() => startUpgrade().catch(() => {})}><Crown className="mr-2 h-4 w-4" /> Upgrade to Pro</DropdownMenuItem>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Crown, Sparkles, Zap } from "lucide-react";
+import { ArrowRight, Crown, Sparkles, Zap, Library } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -22,9 +22,14 @@ const Dashboard = () => {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-serif text-3xl font-bold tracking-tight">Your studio</h1>
-        <p className="mt-1 text-muted-foreground font-sans">Create recruiter-grade documents — pick a tool to begin.</p>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-3xl font-bold tracking-tight">Your studio</h1>
+          <p className="mt-1 text-muted-foreground font-sans">Create recruiter-grade documents — pick a tool to begin.</p>
+        </div>
+        <Button asChild variant="heroOutline" size="sm" className="shrink-0">
+          <Link to="/library"><Library className="mr-1.5 h-4 w-4" /> Library</Link>
+        </Button>
       </motion.div>
 
       {/* Plan / usage */}

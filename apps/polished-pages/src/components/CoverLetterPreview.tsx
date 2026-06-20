@@ -4,13 +4,15 @@ import { authHeader } from "@/lib/session";
 import { ArrowLeft, Download, FileText, FileDown, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { elementToPdf } from "@/lib/export-pdf";
+import SaveToLibrary from "@/components/app/SaveToLibrary";
 
 interface Props {
   markdown: string;
   fullName: string;
-  email: string;
+  email?: string;
   phone?: string;
   onBack: () => void;
+  canSave?: boolean;
 }
 
 const ACCENT = "#1f3a5f";
@@ -32,7 +34,7 @@ const letterBodyHtml = (md: string): string => {
   return out.join("");
 };
 
-const CoverLetterPreview = ({ markdown, fullName, email, phone, onBack }: Props) => {
+const CoverLetterPreview = ({ markdown, fullName, email, phone, onBack, canSave = true }: Props) => {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [isPdf, setIsPdf] = useState(false);
@@ -92,6 +94,14 @@ const CoverLetterPreview = ({ markdown, fullName, email, phone, onBack }: Props)
             <Button variant="ghost" onClick={onBack} className="text-muted-foreground">
               <ArrowLeft className="w-4 h-4 mr-2" /> Edit
             </Button>
+            {canSave && (
+              <SaveToLibrary
+                kind="cover-letter"
+                title={`Cover letter — ${fullName}`}
+                payload={{ markdown, fullName, email, phone }}
+                preview={markdown.replace(/^#.*$/m, "").replace(/[#*]/g, "").trim().slice(0, 160)}
+              />
+            )}
             <Button variant="heroOutline" size="sm" onClick={downloadMd}>
               <Download className="w-4 h-4 mr-1" /> .md
             </Button>

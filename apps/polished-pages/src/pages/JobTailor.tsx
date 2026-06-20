@@ -11,6 +11,7 @@ import { formToCvData, cvDataToMarkdown, type CvData, type CvFormState } from "@
 import { elementToPdf } from "@/lib/export-pdf";
 import PremiumCv from "@/components/PremiumCv";
 import { PREMIUM_TEMPLATES, getPremiumTemplate } from "@/lib/premium-templates";
+import SaveToLibrary from "@/components/app/SaveToLibrary";
 
 interface TailorAnalysis {
   matchScore: number;
@@ -254,6 +255,13 @@ const JobTailor = () => {
                   {PREMIUM_TEMPLATES.map((t) => <option key={t.id} value={t.id}>{t.name}{t.flagship ? " ★" : ""}</option>)}
                 </select>
                 <div className="ml-auto flex gap-2">
+                  <SaveToLibrary
+                    kind="tailored"
+                    title={`${cvData.name} — tailored`}
+                    template={template}
+                    payload={{ data: cvData, template }}
+                    preview={cvData.title || cvData.summary?.slice(0, 160)}
+                  />
                   <Button variant="heroOutline" size="sm" onClick={() => exportMd(cvDataToMarkdown(cvData), "tailored-cv.md")}>
                     <Download className="w-4 h-4 mr-1" /> .md
                   </Button>
@@ -272,6 +280,12 @@ const JobTailor = () => {
           {tab === "letter" && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
               <div className="mb-4 flex justify-end gap-2">
+                <SaveToLibrary
+                  kind="cover-letter"
+                  title={`Cover letter — ${cvData.name}`}
+                  payload={{ markdown: result.coverLetter, fullName: cvData.name, email: cvData.contact.email, phone: cvData.contact.phone }}
+                  preview={result.coverLetter.replace(/^#.*$/m, "").replace(/[#*]/g, "").trim().slice(0, 160)}
+                />
                 <Button variant="heroOutline" size="sm" onClick={() => exportMd(result.coverLetter, "cover-letter.md")}>
                   <Download className="w-4 h-4 mr-1" /> .md
                 </Button>

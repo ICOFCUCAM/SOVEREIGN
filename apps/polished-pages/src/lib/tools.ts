@@ -1,4 +1,4 @@
-import { FileText, Target, PenTool, BookOpen, LayoutDashboard, Settings, type LucideIcon } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, LayoutDashboard, Settings, Library, type LucideIcon } from "lucide-react";
 
 // The product's canonical name. Used everywhere so branding stays consistent
 // (the app shipped with a mix of "DocuForge" and "Polished Pages").
@@ -65,4 +65,5 @@ export const TOOLS: ToolDef[] = [
 ];
 
 export const DASHBOARD_NAV = { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard };
+export const LIBRARY_NAV = { name: "Library", path: "/library", icon: Library };
 export const ACCOUNT_NAV = { name: "Account", path: "/account", icon: Settings };

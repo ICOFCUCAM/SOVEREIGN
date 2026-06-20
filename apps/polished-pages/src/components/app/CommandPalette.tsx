@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
-import { TOOLS, DASHBOARD_NAV, ACCOUNT_NAV } from "@/lib/tools";
+import { TOOLS, DASHBOARD_NAV, ACCOUNT_NAV, LIBRARY_NAV } from "@/lib/tools";
 import { LogOut, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { startUpgrade } from "@/lib/session";
@@ -38,6 +38,9 @@ const CommandPalette = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
               <t.icon className="mr-2 h-4 w-4" /> {t.name}
             </CommandItem>
           ))}
+          <CommandItem value="library saved documents" onSelect={() => go(LIBRARY_NAV.path)}>
+            <LIBRARY_NAV.icon className="mr-2 h-4 w-4" /> {LIBRARY_NAV.name}
+          </CommandItem>
           <CommandItem onSelect={() => go(ACCOUNT_NAV.path)}>
             <ACCOUNT_NAV.icon className="mr-2 h-4 w-4" /> {ACCOUNT_NAV.name}
           </CommandItem>

@@ -11,6 +11,7 @@ import CvDocument from "@/components/CvDocument";
 import PremiumCv from "@/components/PremiumCv";
 import { getPremiumTemplate } from "@/lib/premium-templates";
 import { cvDataToMarkdown, type CvData } from "@/lib/cv-data";
+import SaveToLibrary from "@/components/app/SaveToLibrary";
 
 interface CVPreviewProps {
   markdown?: string;
@@ -18,9 +19,10 @@ interface CVPreviewProps {
   onBack: () => void;
   template?: string;
   photo?: string | null;
+  canSave?: boolean;
 }
 
-const CVPreview = ({ markdown, data, onBack, template, photo }: CVPreviewProps) => {
+const CVPreview = ({ markdown, data, onBack, template, photo, canSave = true }: CVPreviewProps) => {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [isPdf, setIsPdf] = useState(false);
@@ -89,6 +91,15 @@ const CVPreview = ({ markdown, data, onBack, template, photo }: CVPreviewProps) 
             <Button variant="ghost" onClick={onBack} className="text-muted-foreground">
               <ArrowLeft className="w-4 h-4 mr-2" /> Edit
             </Button>
+            {data && canSave && (
+              <SaveToLibrary
+                kind="cv"
+                title={data.name || "Untitled CV"}
+                template={template}
+                payload={{ data, template }}
+                preview={data.title || data.summary?.slice(0, 160)}
+              />
+            )}
             <Button variant="heroOutline" size="sm" onClick={handleDownloadMd}>
               <Download className="w-4 h-4 mr-1" /> .md
             </Button>
