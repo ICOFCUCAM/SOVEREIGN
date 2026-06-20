@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, FileText, BookOpen, GraduationCap, Store } from "lucide-react";
+import { ArrowRight, FileText, BookOpen, GraduationCap, Store, Sparkles, Globe, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 
 // The four pillars, shown as the platform's identity rather than a single tool.
@@ -34,6 +34,34 @@ const HeroSection = () => {
       <div className="absolute top-0 left-0 right-0 h-px bg-gold-gradient opacity-70" />
 
       <div className="container relative z-10 px-6 py-20">
+        {/* Floating feature cards — positioned absolutely to add visual depth */}
+        <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7, duration: 0.6 }}
+          className="absolute left-4 top-1/3 hidden xl:flex flex-col gap-2 -translate-y-1/2">
+          {[
+            { icon: FileText, label: "CV Builder", color: "text-career", bg: "bg-career/10" },
+            { icon: BookOpen, label: "Book Creator", color: "text-publishing", bg: "bg-publishing/10" },
+            { icon: Globe, label: "Translate & Localize", color: "text-educational", bg: "bg-educational/10" },
+          ].map((c) => (
+            <div key={c.label} className={`flex items-center gap-2 rounded-xl border border-border ${c.bg} px-3 py-2 backdrop-blur-sm shadow-premium`}>
+              <c.icon className={`h-4 w-4 ${c.color}`} />
+              <span className="text-xs font-medium font-sans text-foreground/80">{c.label}</span>
+            </div>
+          ))}
+        </motion.div>
+        <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
+          className="absolute right-4 top-1/3 hidden xl:flex flex-col gap-2 -translate-y-1/2">
+          {[
+            { icon: GraduationCap, label: "Educational Studio", color: "text-educational", bg: "bg-educational/10" },
+            { icon: Store, label: "Marketplace", color: "text-marketplace", bg: "bg-marketplace/10" },
+            { icon: Layers, label: "14 tools", color: "text-primary", bg: "bg-primary/10" },
+          ].map((c) => (
+            <div key={c.label} className={`flex items-center gap-2 rounded-xl border border-border ${c.bg} px-3 py-2 backdrop-blur-sm shadow-premium`}>
+              <c.icon className={`h-4 w-4 ${c.color}`} />
+              <span className="text-xs font-medium font-sans text-foreground/80">{c.label}</span>
+            </div>
+          ))}
+        </motion.div>
+
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-4xl mx-auto text-center">
           {/* Four-pillar badge */}
           <div className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full border border-border bg-card/70 px-4 py-1.5 mb-8 backdrop-blur">
@@ -53,9 +81,11 @@ const HeroSection = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button variant="hero" size="lg" className="text-base px-8 py-6" asChild>
-              <Link to="/dashboard">Start creating free <ArrowRight className="w-5 h-5 ml-1" /></Link>
-            </Button>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
+              <Button variant="hero" size="lg" className="text-base px-8 py-6 shadow-premium" asChild>
+                <Link to="/dashboard"><Sparkles className="w-5 h-5 mr-2 animate-pulse" />Start creating free <ArrowRight className="w-5 h-5 ml-1" /></Link>
+              </Button>
+            </motion.div>
             <Button variant="heroOutline" size="lg" className="text-base px-8 py-6" asChild>
               <Link to="/catalog">Explore the marketplace</Link>
             </Button>
