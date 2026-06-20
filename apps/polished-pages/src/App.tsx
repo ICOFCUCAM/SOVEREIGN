@@ -28,6 +28,7 @@ import SharedDocument from "./pages/SharedDocument.tsx";
 import CatalogPage from "./pages/CatalogPage.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import RequirePlan from "./components/app/RequirePlan.tsx";
+import SeriesPage from "./pages/SeriesPage.tsx";
 import CollectionsPage from "./pages/CollectionsPage.tsx";
 import PublicCollection from "./pages/PublicCollection.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
@@ -64,6 +65,7 @@ const App = () => (
           <Route path="/book" element={<AuthGate><BookCreator /></AuthGate>} />
           <Route path="/book-transform" element={<AuthGate><TransformBook /></AuthGate>} />
           <Route path="/children" element={<AuthGate><RequirePlan feature="children-studio"><ChildrenStudio /></RequirePlan></AuthGate>} />
+          <Route path="/series" element={<AuthGate><RequirePlan feature="children-studio"><SeriesPage /></RequirePlan></AuthGate>} />
           <Route path="/storybook" element={<AuthGate><RequirePlan feature="children-studio"><StorybookCreator /></RequirePlan></AuthGate>} />
           <Route path="/coloring" element={<AuthGate><RequirePlan feature="children-studio"><ColoringBookCreator /></RequirePlan></AuthGate>} />
           <Route path="/edu-readers" element={<AuthGate><RequirePlan feature="educational-studio"><EducationalReaders /></RequirePlan></AuthGate>} />

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookHeart, Sparkles, Palette, GraduationCap, PencilRuler, NotebookPen, School, BookOpenCheck, Presentation, Globe, ImagePlus, ClipboardCheck, ArrowRight } from "lucide-react";
+import { BookHeart, Sparkles, Palette, GraduationCap, PencilRuler, NotebookPen, School, BookOpenCheck, Presentation, Globe, ImagePlus, ClipboardCheck, Layers, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface Product {
@@ -13,6 +13,7 @@ interface Product {
 }
 
 const PRODUCTS: Product[] = [
+  { name: "Series Creator", description: "Build a whole book series in one shared universe — shared characters, setting and objective across Book 1, Book 2, Book 3.", icon: Layers, status: "live", path: "/series" },
   { name: "Storybook Creator", description: "A complete illustrated picture book — story, illustrations, cover and printable PDF — tuned to a child’s age and reading level.", icon: BookHeart, status: "live", path: "/storybook" },
   { name: "Personalized Books", description: "Make the child the hero of their own adventure — “James and the Lost Forest.” Built into the Storybook Creator: just add the child’s name.", icon: Sparkles, status: "live", path: "/storybook", note: "In Storybook Creator" },
   { name: "Coloring Books", description: "Black-and-white line-art pages from any theme, ready to print and colour.", icon: Palette, status: "live", path: "/coloring" },

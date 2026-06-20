@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Sparkles, Wand2, Download, Loader2, ArrowLeft, BookHeart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import SavePictureBookButton from "@/components/children/SavePictureBookButton";
 import { LANGUAGE_NAMES, isoFor } from "@/lib/languages";
 import CountryDatalist from "@/components/app/CountryDatalist";
 import CharacterLibrary from "@/components/children/CharacterLibrary";
+import { getSeries } from "@/lib/series";
 import { translateLocalize } from "@/lib/translate";
 import { usePersistentState } from "@/hooks/use-persistent-state";
 
@@ -52,6 +53,20 @@ const StorybookCreator = () => {
   const [language, setLanguage] = useState("");
   const [educationalObjective, setEducationalObjective] = useState("");
   const [culturalSetting, setCulturalSetting] = useState("");
+
+  const [seriesName, setSeriesName] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const sid = searchParams.get("series");
+    if (!sid) return;
+    getSeries(sid).then((s) => {
+      if (!s) return;
+      setSeriesName(s.title);
+      if (s.culture) setCulturalSetting(s.culture);
+      if (s.educational_objective) setEducationalObjective(s.educational_objective);
+      if (s.language) setLanguage(s.language);
+    }).catch(() => {});
+  }, [searchParams]);
 
   const [creating, setCreating] = useState(false);
   const [book, setBook] = useState<Storybook | null>(null);
@@ -239,6 +254,12 @@ const StorybookCreator = () => {
           </div>
           <h1 className="text-3xl md:text-4xl font-bold font-serif mb-2">Create an <span className="text-gradient-gold italic">illustrated storybook</span></h1>
           <p className="text-muted-foreground font-sans">A complete picture book — story, illustrations, cover and a printable PDF — tuned to a child’s age and reading level.</p>
+          {seriesName && (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5">
+              <BookHeart className="h-4 w-4 text-primary" />
+              <span className="text-sm font-sans">Part of the series <span className="font-semibold">{seriesName}</span> — setting and objective are prefilled. <Link to="/series" className="text-primary hover:underline">Manage series</Link></span>
+            </div>
+          )}
         </div>
 
         <div className="space-y-6">
