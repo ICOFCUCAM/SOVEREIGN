@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Globe, Loader2, Plus, Library as LibraryIcon, ArrowRight, Check } from "lucide-react";
+import { Globe, Loader2, Plus, Library as LibraryIcon, ArrowRight, Check, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, getDocument, type DocSummary } from "@/lib/documents";
 import { listEditions, saveEdition, type Edition } from "@/lib/editions";
 import { translateLocalize } from "@/lib/translate";
-import { LANGUAGE_NAMES } from "@/lib/languages";
+import { LANGUAGE_NAMES, isoFor } from "@/lib/languages";
 import CountryDatalist from "@/components/app/CountryDatalist";
 
 // Split long markdown into translation-sized chunks at paragraph boundaries
@@ -39,6 +40,7 @@ const EditionManager = () => {
   const [mode, setMode] = useState<"translate" | "localize">("translate");
   const [culture, setCulture] = useState("");
   const [busy, setBusy] = useState(false);
+  const [chunkProgress, setChunkProgress] = useState<{ done: number; total: number } | null>(null);
 
   useEffect(() => {
     listDocuments().then((all) => {
@@ -65,9 +67,11 @@ const EditionManager = () => {
       if (!md.trim()) throw new Error("This book has no translatable text.");
       const title = String(p.title ?? row?.title ?? "Book");
       const parts = chunk(md);
+      setChunkProgress({ done: 0, total: parts.length });
       const translated: string[] = [];
-      for (const part of parts) {
-        translated.push(await translateLocalize({ content: part, targetLanguage: language.trim(), culture: culture.trim() || undefined, mode }));
+      for (let i = 0; i < parts.length; i++) {
+        translated.push(await translateLocalize({ content: parts[i], targetLanguage: language.trim(), culture: culture.trim() || undefined, mode }));
+        setChunkProgress({ done: i + 1, total: parts.length });
       }
       const outMd = translated.join("\n\n");
       const cultureLabel = mode === "localize" && culture.trim() ? ` · ${culture.trim()}` : "";
@@ -78,13 +82,18 @@ const EditionManager = () => {
       toast({ title: "Edition created", description: `${edTitle} saved to your Library.` });
     } catch (e) {
       toast({ title: "Could not create edition", description: e instanceof Error ? e.message : "", variant: "destructive" });
-    } finally { setBusy(false); }
+    } finally { setBusy(false); setChunkProgress(null); }
   };
 
   const editionLangs = new Set((editions ?? []).filter((e) => !e.is_source).map((e) => (e.edition_language ?? "").toLowerCase()));
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <nav className="mb-5 flex items-center gap-1 text-xs text-muted-foreground font-sans">
+        <Link to="/children" className="hover:text-foreground transition-colors">Educational Studio</Link>
+        <ChevronRight className="h-3 w-3 shrink-0" />
+        <span className="text-foreground font-medium">Edition Manager</span>
+      </nav>
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <div className="inline-flex items-center gap-2 rounded-full border border-publishing/20 bg-publishing/5 px-4 py-1.5 mb-4">
           <Globe className="w-4 h-4 text-publishing" /><span className="text-sm text-publishing font-medium font-sans">Multi-language editions</span>
@@ -147,32 +156,59 @@ const EditionManager = () => {
             {language && editionLangs.has(language.trim().toLowerCase()) && (
               <p className="text-xs text-gold font-sans">An edition in {language.trim()} already exists — creating another will add a second.</p>
             )}
-            <Button variant="hero" size="sm" disabled={busy} onClick={createEdition}>
-              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />} Create edition
-            </Button>
+            {chunkProgress ? (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-sans text-muted-foreground">
+                  <span className="flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" /> Translating…</span>
+                  <span>{chunkProgress.done}/{chunkProgress.total} sections</span>
+                </div>
+                <Progress value={Math.round((chunkProgress.done / chunkProgress.total) * 100)} className="h-1.5" />
+              </div>
+            ) : (
+              <Button variant="hero" size="sm" disabled={busy} onClick={createEdition}>
+                <Plus className="mr-2 h-4 w-4" /> Create edition
+              </Button>
+            )}
             <p className="text-[11px] text-muted-foreground font-sans">Each edition is a real translation by the AI engine (counts toward your plan) and is saved to your Library, ready to export or publish.</p>
           </CardContent></Card>
 
           <h2 className="mt-8 font-serif text-lg font-semibold">Editions</h2>
           {editions === null ? (
-            <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground font-sans"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>
+            <div className="mt-3 space-y-2">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="rounded-xl border border-border p-4 flex items-center justify-between gap-3">
+                  <div className="flex-1"><Skeleton className="h-4 w-48" /><Skeleton className="mt-1.5 h-3 w-28" /></div>
+                  <Skeleton className="h-8 w-16 rounded-md" />
+                </div>
+              ))}
+            </div>
+          ) : editions.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground font-sans">No editions yet — create the first one above.</p>
           ) : (
             <div className="mt-3 space-y-2">
-              {editions.map((e) => (
-                <Card key={e.id} className="border-border">
-                  <CardContent className="flex items-center justify-between gap-3 p-4">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate font-sans text-sm font-medium">{e.title}</span>
-                        {e.is_source ? <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">Source</span>
-                          : <span className="rounded-full bg-gold/15 px-1.5 py-0.5 text-[10px] font-semibold text-gold">{e.edition_language}{e.edition_culture ? ` · ${e.edition_culture}` : ""}</span>}
-                        {e.listed && <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground"><Check className="h-3 w-3" /> Published</span>}
+              {editions.map((e) => {
+                const iso = e.edition_language ? isoFor(e.edition_language) : null;
+                return (
+                  <Card key={e.id} className="border-border">
+                    <CardContent className="flex items-center justify-between gap-3 p-4">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate font-sans text-sm font-medium">{e.title}</span>
+                          {e.is_source ? (
+                            <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary font-sans">Source</span>
+                          ) : (
+                            <span className="rounded-full bg-gold/15 px-1.5 py-0.5 text-[10px] font-semibold text-gold font-sans">
+                              {iso && iso !== "en" && <span className="mr-0.5 uppercase">{iso} · </span>}{e.edition_language}{e.edition_culture ? ` · ${e.edition_culture}` : ""}
+                            </span>
+                          )}
+                          {e.listed && <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-600 font-sans"><Check className="h-3 w-3" /> Published</span>}
+                        </div>
                       </div>
-                    </div>
-                    <Button asChild variant="heroOutline" size="sm"><Link to={`/library?open=${e.id}`}>Open <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link></Button>
-                  </CardContent>
-                </Card>
-              ))}
+                      <Button asChild variant="heroOutline" size="sm"><Link to={`/library?open=${e.id}`}>Open <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link></Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </>
