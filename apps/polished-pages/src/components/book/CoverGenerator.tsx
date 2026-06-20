@@ -13,6 +13,15 @@ import SaveToLibrary from "@/components/app/SaveToLibrary";
 
 type Side = "front" | "back";
 
+const STYLE_PRESETS: { label: string; text: string }[] = [
+  { label: "Minimalist", text: "Clean minimalist design with ample white space, bold typography, single focal image." },
+  { label: "Illustrated", text: "Hand-drawn illustration style, warm palette, rich detail reminiscent of classic children's picture books." },
+  { label: "Photographic", text: "Photorealistic composition, cinematic lighting, depth of field, editorial quality." },
+  { label: "Abstract", text: "Abstract geometric shapes, bold primary colours, modern graphic design aesthetic." },
+  { label: "Dark & Moody", text: "Dark dramatic background, high contrast, atmospheric mist or shadow, thriller or literary fiction tone." },
+  { label: "Watercolour", text: "Soft watercolour wash, pastel tones, gentle brushwork, dreamy and ethereal feel." },
+];
+
 const PRO_PERKS = [
   "AI-designed front and back covers",
   "Unlimited regenerations and art-direction tweaks",
@@ -135,6 +144,17 @@ const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle }: { ti
             <ImageIcon className="h-10 w-10 text-muted-foreground/50" />
           )}
         </div>
+        {side === "front" && (
+          <div className="flex flex-wrap gap-1">
+            {STYLE_PRESETS.map((p) => (
+              <button key={p.label} type="button"
+                onClick={() => setInstr((prev) => ({ ...prev, front: prev.front ? `${prev.front} ${p.text}` : p.text }))}
+                className="rounded-full border border-border px-2 py-0.5 text-[11px] font-sans text-muted-foreground hover:border-primary/40 hover:text-primary transition">
+                {p.label}
+              </button>
+            ))}
+          </div>
+        )}
         <Textarea
           placeholder={side === "front" ? "Art direction for the front cover (mood, imagery, colours, style)…" : "Art direction for the back cover…"}
           value={instr[side]}
