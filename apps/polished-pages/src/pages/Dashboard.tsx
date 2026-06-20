@@ -225,11 +225,15 @@ const Dashboard = () => {
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {SNAPSHOT.filter((s) => (counts.get(s.kind) ?? 0) > 0).map((s) => (
-              <Link key={s.kind} to="/library" className="group">
+              <Link key={s.kind} to={`/library?kind=${encodeURIComponent(s.kind)}`} className="group">
                 <Card className="border-border transition-colors hover:border-primary/40">
                   <CardContent className="flex items-center gap-3 p-4">
                     <s.icon className="h-5 w-5 text-primary" />
-                    <div><div className="font-serif text-lg font-bold leading-none">{counts.get(s.kind)}</div><div className="text-xs text-muted-foreground font-sans">{s.label}</div></div>
+                    <div>
+                      <div className="font-serif text-lg font-bold leading-none">{counts.get(s.kind)}</div>
+                      <div className="text-xs text-muted-foreground font-sans">{s.label}</div>
+                    </div>
+                    <ArrowRight className="ml-auto h-3.5 w-3.5 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
                   </CardContent>
                 </Card>
               </Link>
