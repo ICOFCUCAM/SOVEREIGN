@@ -87,7 +87,10 @@ const CatalogPage = () => {
       <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/85 backdrop-blur-lg">
         <div className="container flex items-center justify-between h-14 px-6">
           <Link to="/" className="flex items-center gap-2"><Sparkles className="w-5 h-5 text-gold" /><span className="font-serif text-base font-bold">{BRAND}</span></Link>
-          <Link to="/dashboard" className="text-sm text-primary hover:underline font-sans">Create your own</Link>
+          <div className="flex items-center gap-4">
+            <Link to="/pricing" className="hidden sm:block text-sm text-muted-foreground hover:text-foreground font-sans transition">Pricing</Link>
+            <Link to="/dashboard" className="rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition font-sans">Publish your work</Link>
+          </div>
         </div>
       </nav>
 
