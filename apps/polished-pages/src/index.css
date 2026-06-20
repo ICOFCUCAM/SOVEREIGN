@@ -147,6 +147,10 @@
 }
 
 @layer base {
+  /* Let native UI (scrollbars, form controls, autofill) match the theme. */
+  :root { color-scheme: light; }
+  .dark { color-scheme: dark; }
+
   * {
     @apply border-border;
   }
