@@ -131,13 +131,22 @@ const Dashboard = () => {
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {recent.map((d) => {
               const Icon = KIND_ICON[d.kind] ?? FileText;
+              const statusLabel = d.listed ? "Published" : d.shared ? "Shared" : "Draft";
+              const statusClass = d.listed
+                ? "bg-primary/10 text-primary"
+                : d.shared
+                ? "bg-gold/15 text-gold"
+                : "bg-border text-muted-foreground";
               return (
                 <Link key={d.id} to={`/library?open=${d.id}`} className="group block">
                   <Card className="h-full border-border transition-all hover:border-primary/50 hover:shadow-premium">
                     <CardContent className="p-4">
-                      <Icon className="h-5 w-5 text-primary" />
+                      <div className="flex items-center justify-between">
+                        <Icon className="h-5 w-5 text-primary" />
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold font-sans ${statusClass}`}>{statusLabel}</span>
+                      </div>
                       <div className="mt-2 truncate font-sans text-sm font-semibold">{d.title}</div>
-                      <div className="mt-0.5 text-xs text-muted-foreground font-sans">Continue your {KIND_NOUN[d.kind] ?? "document"}</div>
+                      <div className="mt-0.5 text-xs text-muted-foreground font-sans">{KIND_NOUN[d.kind] ?? "document"}</div>
                       <span className="mt-2 inline-flex items-center text-xs font-medium text-primary font-sans">Resume <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
                     </CardContent>
                   </Card>
