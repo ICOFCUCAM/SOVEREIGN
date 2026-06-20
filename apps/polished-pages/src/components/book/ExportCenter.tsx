@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, FileDown, Loader2, Library as LibraryIcon, Package, Store, Globe, CheckCircle2, Image as ImageIcon } from "lucide-react";
+import { BookOpen, FileDown, Loader2, Library as LibraryIcon, Package, Store, Globe, CheckCircle2, Image as ImageIcon, Sparkles, Users, MapPin, Tags, FileText, DollarSign } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,16 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, getDocument, type DocSummary } from "@/lib/documents";
 import { listEditions } from "@/lib/editions";
+import { getPublishingAdvice, type PublishingAdvice } from "@/lib/publishing-advisor";
 import { TRIM_SIZES, getTrim } from "@/lib/print-sizes";
 import { markdownToEpub } from "@/lib/export-epub";
 import { markdownToPrintPdf } from "@/lib/export-print-pdf";
 import { markdownToIngramSparkPdf } from "@/lib/export-ingramspark-pdf";
 
 type Fmt = "epub" | "kdp" | "ingram" | "all";
+const Chips = ({ items }: { items?: string[] }) => (
+  <div className="flex flex-wrap gap-1.5">{(items ?? []).map((t) => <span key={t} className="rounded-full border border-border bg-background px-2 py-0.5 text-xs font-sans">{t}</span>)}</div>
+);
 
 // One place to take any saved book to every store: EPUB for Kobo/Apple/Google,
 // a KDP-ready interior, and an IngramSpark-grade interior with embedded fonts.
@@ -26,6 +30,8 @@ const ExportCenter = () => {
   const [author, setAuthor] = useState("");
   const [busy, setBusy] = useState<Fmt | null>(null);
   const [editionCount, setEditionCount] = useState<number | null>(null);
+  const [advice, setAdvice] = useState<PublishingAdvice | null>(null);
+  const [advising, setAdvising] = useState(false);
 
   useEffect(() => {
     listDocuments()
@@ -41,8 +47,20 @@ const ExportCenter = () => {
 
   useEffect(() => {
     setEditionCount(null);
+    setAdvice(null);
     if (selected) listEditions(selected).then((e) => setEditionCount(Math.max(0, e.filter((x) => !x.is_source).length))).catch(() => {});
   }, [selected]);
+
+  const runAdvice = async () => {
+    setAdvising(true);
+    try {
+      const doc = await load();
+      if (!doc) { toast({ title: "Pick a book first" }); return; }
+      setAdvice(await getPublishingAdvice({ title: doc.title, content: doc.markdown }));
+    } catch (e) {
+      toast({ title: "Advisor failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally { setAdvising(false); }
+  };
 
   const load = async (): Promise<{ markdown: string; title: string } | null> => {
     if (!selected) return null;
@@ -128,6 +146,30 @@ const ExportCenter = () => {
               <div className="mt-2 text-xs text-muted-foreground font-sans">
                 <ImageIcon className="mr-1 inline h-3.5 w-3.5" /> Need a cover? Generate one in the <Link to="/book" className="text-primary hover:underline">Book Creator</Link> and size it with the spine calculator below.
               </div>
+            </div>
+
+            {/* AI Publishing Advisor — publishing intelligence */}
+            <div className="rounded-lg border border-publishing/30 bg-publishing/5 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 text-sm font-semibold font-sans"><Sparkles className="h-4 w-4 text-publishing" /> AI Publishing Advisor</span>
+                <Button variant="heroOutline" size="sm" disabled={advising} onClick={runAdvice}>
+                  {advising ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />} {advice ? "Refresh plan" : "Get publishing plan"}
+                </Button>
+              </div>
+              {!advice && !advising && <p className="mt-1 text-xs text-muted-foreground font-sans">A go-to-market plan for this book — audience, markets, categories, page count, price, distribution and translation opportunities.</p>}
+              {advice && (
+                <div className="mt-3 space-y-3">
+                  {advice.positioning && <p className="text-sm italic text-foreground font-sans">“{advice.positioning}”</p>}
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {advice.audience && <div><div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground font-sans"><Users className="h-3.5 w-3.5" /> Audience</div><div className="text-sm font-sans">{advice.audience}{advice.readingLevel ? ` · ${advice.readingLevel}` : ""}</div></div>}
+                    {(advice.estimatedPages || advice.price) && <div><div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground font-sans"><FileText className="h-3.5 w-3.5" /> Format & price</div><div className="text-sm font-sans">{advice.estimatedPages ? `~${advice.estimatedPages} pages` : ""}{advice.price ? <> · <DollarSign className="inline h-3.5 w-3.5" />{advice.price.replace(/^\$?/, "")}</> : ""}</div>{advice.priceRationale && <div className="text-[11px] text-muted-foreground font-sans">{advice.priceRationale}</div>}</div>}
+                    {advice.categories?.length ? <div><div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground font-sans"><Tags className="h-3.5 w-3.5" /> Categories</div><div className="mt-1"><Chips items={advice.categories} /></div></div> : null}
+                    {advice.markets?.length ? <div><div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground font-sans"><MapPin className="h-3.5 w-3.5" /> Markets</div><div className="mt-1"><Chips items={advice.markets} /></div></div> : null}
+                    {advice.distribution?.length ? <div><div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground font-sans"><Store className="h-3.5 w-3.5" /> Distribution</div><div className="mt-1"><Chips items={advice.distribution} /></div></div> : null}
+                    {advice.translations?.length ? <div><div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground font-sans"><Globe className="h-3.5 w-3.5" /> Translation opportunities</div><div className="mt-1 flex items-center gap-2"><Chips items={advice.translations} /><Link to="/editions" className="shrink-0 text-xs text-primary hover:underline font-sans">Create editions →</Link></div></div> : null}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans">Export for stores</div>
