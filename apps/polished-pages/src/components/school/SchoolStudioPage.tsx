@@ -48,6 +48,7 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
   const [multi, setMulti] = useState<Record<string, string[]>>({});
   const [pick, setPick] = useState<SchoolDocType>(config.parts[0].type);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [genError, setGenError] = useState<string | null>(null);
   const [docs, setDocs] = useState<Record<string, string> | null>(null);
   const [tab, setTab] = useState<SchoolDocType>(config.parts[0].type);
   const [banking, setBanking] = useState(false);
@@ -75,6 +76,7 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
   });
 
   const run = async () => {
+    setGenError(null);
     const parts = config.mode === "single" ? config.parts.filter((p) => p.type === pick) : config.parts;
     setProgress({ done: 0, total: parts.length });
     const out: Record<string, string> = {};
@@ -91,7 +93,7 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
       setDocs(out);
       setTab(parts[0].type);
     } catch (e) {
-      toast({ title: "Generation failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+      setGenError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
     } finally {
       setProgress(null);
     }
@@ -196,6 +198,15 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
           <p className="mt-3 text-xs text-muted-foreground font-sans">Generates {config.parts.length} documents: {config.parts.map((p) => p.label).join(", ")}.</p>
         )}
 
+        {genError && (
+          <div className="mt-6 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+            <p className="text-sm font-medium font-sans text-destructive">Generation failed</p>
+            <p className="mt-0.5 text-xs text-muted-foreground font-sans">{genError}</p>
+            <Button variant="heroOutline" size="sm" className="mt-3" onClick={run} disabled={!canRun}>
+              <Sparkles className="w-4 h-4 mr-1" /> Try again
+            </Button>
+          </div>
+        )}
         {progress ? (
           <div className="mt-6 rounded-xl border border-border bg-card/50 p-5">
             <div className="mb-2 flex items-center justify-between text-sm font-sans">
@@ -204,12 +215,12 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
             </div>
             <Progress value={Math.round((progress.done / progress.total) * 100)} className="h-2" />
           </div>
-        ) : (
+        ) : !genError ? (
           <Button variant="hero" size="lg" className="mt-6 w-full py-6" onClick={run} disabled={!canRun}>
             <Sparkles className="w-5 h-5 mr-2" /> Generate
           </Button>
-        )}
-        {!canRun && !progress && <p className="mt-2 text-center text-xs text-muted-foreground font-sans">Complete the required fields to continue.</p>}
+        ) : null}
+        {!canRun && !progress && !genError && <p className="mt-2 text-center text-xs text-muted-foreground font-sans">Complete the required fields to continue.</p>}
       </div>
     </div>
   );
