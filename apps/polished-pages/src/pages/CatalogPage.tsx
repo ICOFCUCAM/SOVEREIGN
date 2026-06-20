@@ -9,6 +9,7 @@ import { getAuthorProfile, adminVerifyCreator, type AuthorProfile } from "@/lib/
 import CatalogCard from "@/components/app/CatalogCard";
 import CreateCtaBand from "@/components/app/CreateCtaBand";
 import { BRAND } from "@/lib/tools";
+import { avatarColors, avatarInitials } from "@/lib/avatar";
 
 const trendScore = (i: CatalogItem) => (i.download_count ?? 0) * 3 + (i.view_count ?? 0);
 
@@ -126,9 +127,9 @@ const CatalogPage = () => {
           {author && profile && (
             <div className="mt-4 rounded-xl border border-border bg-card/50 p-4 sm:p-5">
               <div className="flex items-start gap-4">
-                {/* Avatar initial — visual identity without requiring an image upload */}
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary font-serif select-none">
-                  {author.trim()[0]?.toUpperCase() ?? "?"}
+                {/* Avatar — deterministic colour + initials for a stable identity */}
+                <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-xl font-bold font-serif select-none ${avatarColors(author).bg} ${avatarColors(author).text}`}>
+                  {avatarInitials(author)}
                 </div>
                 <div className="min-w-0 flex-1">
                   {profile.bio && <p className="text-sm text-foreground font-sans leading-relaxed">{profile.bio}</p>}
