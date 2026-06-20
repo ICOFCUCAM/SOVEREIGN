@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Crown, LogOut, Zap, Check, UserCircle, Loader2 } from "lucide-react";
+import { Crown, LogOut, Zap, Check, UserCircle, Loader2, ImagePlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchPlanStatus, startUpgrade, PRO_PRICE_USD, type PlanStatus } from "@/lib/session";
+import { fetchPlanStatus, startUpgrade, buyCredits, PRO_PRICE_USD, CREDITS_PER_PACK, type PlanStatus } from "@/lib/session";
 import { getMyProfile, upsertProfile } from "@/lib/profiles";
 import { BRAND } from "@/lib/tools";
 
@@ -25,6 +25,7 @@ const Account = () => {
   const [status, setStatus] = useState<PlanStatus | null>(null);
   const [email, setEmail] = useState("");
   const [upgrading, setUpgrading] = useState(false);
+  const [buyingCredits, setBuyingCredits] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [profileLoaded, setProfileLoaded] = useState(false);
@@ -37,7 +38,12 @@ const Account = () => {
       .then((p) => { if (p) { setDisplayName(p.display_name); setBio(p.bio ?? ""); } })
       .catch(() => {})
       .finally(() => setProfileLoaded(true));
-  }, []);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("credits") === "1") {
+      toast({ title: "Image credits added", description: "Your purchased credits are now on your account." });
+      window.history.replaceState({}, "", "/account");
+    }
+  }, [toast]);
 
   const saveProfile = async () => {
     if (!displayName.trim()) { toast({ title: "Display name required", variant: "destructive" }); return; }
@@ -57,10 +63,17 @@ const Account = () => {
   const imgUsed = status?.imagesUsed ?? 0;
   const imgLim = status?.imagesLim ?? 0;
   const imgPct = imgLim > 0 ? Math.min(100, Math.round((imgUsed / imgLim) * 100)) : 0;
+  const bonus = status?.bonusImages ?? 0;
 
   const upgrade = async () => {
     setUpgrading(true);
     try { await startUpgrade(); } catch (e) { alert(e instanceof Error ? e.message : "Upgrade failed"); setUpgrading(false); }
+  };
+
+  const purchaseCredits = async () => {
+    setBuyingCredits(true);
+    try { await buyCredits(1); }
+    catch (e) { toast({ title: "Could not start checkout", description: e instanceof Error ? e.message : "", variant: "destructive" }); setBuyingCredits(false); }
   };
 
   return (
@@ -93,12 +106,27 @@ const Account = () => {
                   <span>{Math.max(0, imgLim - imgUsed)} left</span>
                 </div>
                 <Progress value={imgPct} className="h-2" />
-                <p className="mt-1 text-[11px] text-muted-foreground font-sans">Each storybook page, cover and colouring page uses one image credit.</p>
+                <p className="mt-1 text-[11px] text-muted-foreground font-sans">
+                  Each storybook page, cover and colouring page uses one image credit.{bonus > 0 ? ` You also have ${bonus} purchased credit${bonus === 1 ? "" : "s"}.` : ""}
+                </p>
               </div>
             </div>
           )}
-          {isPro && <p className="text-sm text-muted-foreground font-sans">Unlimited text generations · {imgUsed} of {imgLim} image credits used this month.</p>}
+          {isPro && (
+            <p className="text-sm text-muted-foreground font-sans">
+              Unlimited text generations · {imgUsed} of {imgLim} image credits used this month{bonus > 0 ? ` · ${bonus} purchased credit${bonus === 1 ? "" : "s"} in reserve` : ""}.
+            </p>
+          )}
           {!status && <p className="text-sm text-muted-foreground font-sans">Loading plan…</p>}
+          {status && (
+            <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4">
+              <Button variant="heroOutline" size="sm" onClick={purchaseCredits} disabled={buyingCredits}>
+                {buyingCredits ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
+                Buy {CREDITS_PER_PACK} image credits
+              </Button>
+              <span className="text-xs text-muted-foreground font-sans">Top-ups never expire and stack on top of your monthly credits.</span>
+            </div>
+          )}
         </CardContent>
       </Card>
 

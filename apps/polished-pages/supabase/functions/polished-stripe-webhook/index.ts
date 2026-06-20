@@ -43,12 +43,28 @@ serve(async (req) => {
     if (!r.ok) console.error("polished_apply_subscription failed", r.status, await r.text().catch(() => ""));
   };
 
+  const grantCredits = async (userId: string, n: number): Promise<void> => {
+    const r = await fetch(`${supabaseUrl}/rest/v1/rpc/polished_grant_image_credits`, {
+      method: "POST",
+      headers: { "content-type": "application/json", apikey: serviceKey, authorization: `Bearer ${serviceKey}` },
+      body: JSON.stringify({ p_user_id: userId, p_n: n }),
+    });
+    if (!r.ok) console.error("polished_grant_image_credits failed", r.status, await r.text().catch(() => ""));
+  };
+
   try {
     switch (event.type) {
       case "checkout.session.completed": {
         const s = event.data.object as Stripe.Checkout.Session;
         const userId = s.client_reference_id || (s.metadata?.user_id ?? null);
-        if (userId) await applyPlan(userId, "pro", s.customer, s.subscription);
+        if (!userId) break;
+        if (s.mode === "payment" && s.metadata?.kind === "credits") {
+          // One-time image-credit pack: grant the purchased credits, never upgrade plan.
+          const credits = parseInt(s.metadata?.credits ?? "0", 10) || 0;
+          if (credits > 0) await grantCredits(userId, credits);
+        } else if (s.mode === "subscription") {
+          await applyPlan(userId, "pro", s.customer, s.subscription);
+        }
         break;
       }
       case "customer.subscription.created":
