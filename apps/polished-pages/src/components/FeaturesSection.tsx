@@ -8,7 +8,17 @@ import featureCv from "@/assets/feature-cv.jpg";
 import featureLetter from "@/assets/feature-letter.jpg";
 import featureBook from "@/assets/feature-book.jpg";
 
-const features = [
+interface Feature {
+  icon: typeof FileText;
+  title: string;
+  description: string;
+  link: string;
+  cta: string;
+  image?: string;
+  chips?: string[];
+}
+
+const features: Feature[] = [
   {
     icon: FileText,
     title: "CV Builder",
@@ -37,7 +47,7 @@ const features = [
     icon: GraduationCap,
     title: "Children’s & Educational Studio",
     description: "Illustrated storybooks and series, coloring books, leveled readers, workbooks, exams and full curricula — in any language.",
-    image: featureLetter,
+    chips: ["Storybooks & series", "Coloring books", "Workbooks & exams", "Curriculum builder", "Any language"],
     link: "/children",
     cta: "Open the Studio",
   },
@@ -45,7 +55,7 @@ const features = [
     icon: PenTool,
     title: "Cover Letters",
     description: "Personalized, human-sounding cover letters aligned to specific job descriptions.",
-    image: featureCv,
+    image: featureLetter,
     link: "/cover-letter",
     cta: "Write a Letter",
   },
@@ -53,7 +63,7 @@ const features = [
     icon: Store,
     title: "Marketplace & Distribution",
     description: "Publish your work to a public marketplace with author pages, trending and discovery — and distribute to every major store.",
-    image: featureBook,
+    chips: ["Author pages", "Trending & featured", "Categories & search", "KDP / IngramSpark", "Sell your work"],
     link: "/catalog",
     cta: "Explore the Marketplace",
   },
@@ -89,19 +99,30 @@ const FeaturesSection = () => {
                 transition={{ duration: 0.6, delay: 0.1 }}
                 className={`flex flex-col ${isReversed ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-10 lg:gap-16`}
               >
-                {/* Image */}
+                {/* Visual: a real photo where we have one, otherwise an on-brand panel */}
                 <div className="flex-1 w-full">
-                  <div className="relative rounded-2xl overflow-hidden shadow-premium border border-border">
-                    <img
-                      src={feature.image}
-                      alt={feature.title}
-                      className="w-full h-64 lg:h-80 object-cover"
-                      loading="lazy"
-                      width={800}
-                      height={800}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-foreground/5 to-transparent" />
-                  </div>
+                  {feature.image ? (
+                    <div className="relative rounded-2xl overflow-hidden shadow-premium border border-border">
+                      <img
+                        src={feature.image}
+                        alt={feature.title}
+                        className="w-full h-64 lg:h-80 object-cover"
+                        loading="lazy"
+                        width={800}
+                        height={800}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/5 to-transparent" />
+                    </div>
+                  ) : (
+                    <div className="relative flex h-64 lg:h-80 flex-col justify-center gap-4 rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-gold/5 p-8 shadow-premium">
+                      <feature.icon className="h-10 w-10 text-gold" />
+                      <div className="flex flex-wrap gap-2">
+                        {feature.chips?.map((c) => (
+                          <span key={c} className="rounded-full border border-border bg-background/60 px-3 py-1 text-xs font-medium text-foreground font-sans">{c}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Text */}

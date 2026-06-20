@@ -33,14 +33,16 @@ const CTASection = () => {
               <span className="text-gradient-gold italic">Extraordinary?</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-8 font-sans">
-              Join thousands of professionals using AI to build career-defining documents and publish their ideas.
+              Build CVs, books, children’s stories and educational content with AI — then publish, translate and sell them, all from one platform. Start free.
             </p>
-            <Button variant="hero" size="lg" className="text-base px-10 py-6" asChild>
-              <Link to="/cv">
-                Start Creating Now
-                <ArrowRight className="w-5 h-5 ml-1" />
-              </Link>
-            </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button variant="hero" size="lg" className="text-base px-10 py-6" asChild>
+                <Link to="/dashboard">Start creating free <ArrowRight className="w-5 h-5 ml-1" /></Link>
+              </Button>
+              <Button variant="heroOutline" size="lg" className="text-base px-10 py-6" asChild>
+                <Link to="/pricing">See pricing</Link>
+              </Button>
+            </div>
           </div>
         </motion.div>
       </div>
