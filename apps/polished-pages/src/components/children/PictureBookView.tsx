@@ -27,7 +27,7 @@ const PictureBookView = ({
   <div ref={innerRef} className="space-y-6 rounded-xl bg-white p-4 sm:p-8">
     {/* Cover */}
     <div className="overflow-hidden rounded-xl border border-border">
-      <div className="relative flex aspect-[3/4] items-center justify-center bg-muted/40">
+      <div className="relative flex aspect-[3/4] items-center justify-center bg-slate-100">
         {book.coverImage ? (
           <img src={book.coverImage} alt="Cover" crossOrigin="anonymous" className="h-full w-full object-cover" />
         ) : (
@@ -48,7 +48,7 @@ const PictureBookView = ({
     {/* Pages */}
     {book.pages.map((p, i) => (
       <div key={i} className="overflow-hidden rounded-xl border border-border">
-        <div className="flex items-center justify-center bg-muted/40" style={{ aspectRatio: pageAspect }}>
+        <div className="flex items-center justify-center bg-slate-100" style={{ aspectRatio: pageAspect }}>
           {p.image ? (
             <img src={p.image} alt={`Page ${i + 1}`} crossOrigin="anonymous" className="h-full w-full object-contain bg-white" />
           ) : (
@@ -59,11 +59,11 @@ const PictureBookView = ({
         </div>
         {(showText && p.text) ? (
           <div className="p-5">
-            <p className="font-serif text-lg leading-relaxed text-foreground">{p.text}</p>
-            <div className="mt-2 text-right text-xs text-muted-foreground font-sans">{i + 1}</div>
+            <p className="font-serif text-lg leading-relaxed text-slate-900">{p.text}</p>
+            <div className="mt-2 text-right text-xs text-slate-500 font-sans">{i + 1}</div>
           </div>
         ) : (
-          <div className="px-5 py-2 text-right text-xs text-muted-foreground font-sans">{i + 1}</div>
+          <div className="px-5 py-2 text-right text-xs text-slate-500 font-sans">{i + 1}</div>
         )}
       </div>
     ))}
