@@ -105,4 +105,16 @@
   .shadow-premium {
     box-shadow: var(--shadow-premium);
   }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted-foreground) / 0.12) 40%,
+      hsl(221 83% 53% / 0.08) 50%,
+      hsl(var(--muted-foreground) / 0.12) 60%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 800px 100%;
+  }
 }

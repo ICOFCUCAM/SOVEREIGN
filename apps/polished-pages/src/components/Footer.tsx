@@ -40,16 +40,30 @@ const COLUMNS: Col[] = [
 const Footer = () => {
   return (
     <footer className="border-t border-border bg-background">
+      {/* Brand accent line — the same top-of-section gold gradient used across the platform */}
+      <div className="h-[2px] bg-gold-gradient opacity-60" />
       <div className="container px-6 py-14">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6">
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <Link to="/" className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
+              <Sparkles className="w-5 h-5 text-gold" />
               <span className="font-serif text-base font-bold text-foreground">{BRAND}</span>
             </Link>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground font-sans">
               Create, publish and distribute professional documents, books and educational content — all in one platform.
             </p>
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {[
+                { dot: "bg-career", label: "Career" },
+                { dot: "bg-publishing", label: "Publishing" },
+                { dot: "bg-educational", label: "Education" },
+                { dot: "bg-marketplace", label: "Marketplace" },
+              ].map((p) => (
+                <span key={p.label} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground font-sans">
+                  <span className={`h-1.5 w-1.5 rounded-full ${p.dot}`} />{p.label}
+                </span>
+              ))}
+            </div>
           </div>
           {COLUMNS.map((col) => (
             <div key={col.title}>
