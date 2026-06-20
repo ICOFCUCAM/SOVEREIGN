@@ -221,9 +221,9 @@ const Dashboard = () => {
             const t = STUDIO_THEME[c.studio];
             return (
               <Link key={c.to} to={c.to} className="group">
-                <Card className={`h-full border-border transition-all hover:shadow-premium ${t.hoverBorder}`}>
+                <Card className={`hover-lift h-full border-border transition-premium ${t.hoverBorder}`}>
                   <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
-                    <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${t.bg}`}><c.icon className={`h-5 w-5 ${t.text}`} /></span>
+                    <span className={`flex h-11 w-11 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110 ${t.bg}`}><c.icon className={`h-5 w-5 ${t.text}`} /></span>
                     <span className="font-sans text-sm font-semibold">{c.label}</span>
                     <span className="text-[11px] text-muted-foreground font-sans">{t.label}</span>
                   </CardContent>
@@ -297,7 +297,7 @@ const Dashboard = () => {
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {SNAPSHOT.filter((s) => (counts.get(s.kind) ?? 0) > 0).map((s) => (
               <Link key={s.kind} to={`/library?kind=${encodeURIComponent(s.kind)}`} className="group">
-                <Card className="border-border transition-colors hover:border-primary/40">
+                <Card className="hover-lift border-border transition-premium hover:border-primary/40">
                   <CardContent className="flex items-center gap-3 p-4">
                     <s.icon className="h-5 w-5 text-primary" />
                     <div>
