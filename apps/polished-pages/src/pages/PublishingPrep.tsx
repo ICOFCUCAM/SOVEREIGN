@@ -4,7 +4,7 @@ import { Rocket, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { TRIM_SIZES, PAPER_MM_PER_PAGE, getTrim, coverSpec } from "@/lib/print-sizes";
+import { TRIM_SIZES, PAPER_MM_PER_PAGE, getTrim, coverSpec, ingramGutterIn, INGRAM_OUTSIDE_MM } from "@/lib/print-sizes";
 
 const TARGETS: { name: string; format: string }[] = [
   { name: "Amazon KDP", format: "EPUB (e-book) · interior PDF + wrap cover (print)" },
@@ -92,6 +92,35 @@ const PublishingPrep = () => {
             </div>
           </div>
           <p className="text-xs text-muted-foreground font-sans">Includes 0.125 in bleed on all outer edges. Spine text is only recommended above ~100 pages. Figures follow KDP guidance; always confirm against your printer’s template before final upload.</p>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6 border-border">
+        <CardHeader><CardTitle className="font-serif text-lg">IngramSpark interior margins</CardTitle><CardDescription className="font-sans">The “IngramSpark” export in the book reader builds these automatically for your page count.</CardDescription></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-lg border border-border p-3">
+              <div className="text-xs text-muted-foreground font-sans">Inside (gutter) margin</div>
+              <div className="mt-1 font-serif text-lg font-semibold">{inIn(ingramGutterIn(pages))}</div>
+              <div className="text-xs text-muted-foreground">grows with page count</div>
+            </div>
+            <div className="rounded-lg border border-border p-3">
+              <div className="text-xs text-muted-foreground font-sans">Outside / top / bottom</div>
+              <div className="mt-1 font-serif text-lg font-semibold">{inIn(INGRAM_OUTSIDE_MM / 25.4)}</div>
+              <div className="text-xs text-muted-foreground">safety margin</div>
+            </div>
+            <div className="rounded-lg border border-border p-3">
+              <div className="text-xs text-muted-foreground font-sans">For</div>
+              <div className="mt-1 font-serif text-lg font-semibold">{pages} pages</div>
+              <div className="text-xs text-muted-foreground">set above</div>
+            </div>
+          </div>
+          <ul className="space-y-1.5 text-sm text-muted-foreground font-sans">
+            <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Mirrored margins — the gutter sits on the binding edge of each left/right page.</li>
+            <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Title page and copyright page generated as front matter.</li>
+            <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Each chapter opens on a right-hand (recto) page; page numbers on the outer edge.</li>
+            <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Uses the base-14 PDF fonts; run IngramSpark’s preflight to confirm embedding before final upload.</li>
+          </ul>
         </CardContent>
       </Card>
 

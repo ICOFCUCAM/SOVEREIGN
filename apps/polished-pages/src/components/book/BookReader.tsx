@@ -1,11 +1,13 @@
 import { useRef, useState } from "react";
 import { Pencil, BookOpen, FileDown, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { elementToPdf } from "@/lib/export-pdf";
 import { markdownToEpub } from "@/lib/export-epub";
 import { markdownToPrintPdf } from "@/lib/export-print-pdf";
+import { markdownToIngramSparkPdf } from "@/lib/export-ingramspark-pdf";
 import { BOOK_THEMES, getBookTheme } from "@/lib/book-themes";
 import { TRIM_SIZES, getTrim } from "@/lib/print-sizes";
 import BookPaper from "@/components/book/BookPaper";
@@ -27,6 +29,7 @@ const BookReader = ({
   const [mode, setMode] = useState<"read" | "edit">("read");
   const [pdf, setPdf] = useState(false);
   const [trimId, setTrimId] = useState("a4");
+  const [author, setAuthor] = useState("");
   const paperRef = useRef<HTMLDivElement>(null);
   const theme = getBookTheme(themeId);
   const editable = typeof onContentChange === "function";
@@ -53,6 +56,18 @@ const BookReader = ({
       toast({ title: "Print PDF failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally {
       setPrinting(false);
+    }
+  };
+
+  const [ingram, setIngram] = useState(false);
+  const ingramInterior = async () => {
+    setIngram(true);
+    try {
+      await markdownToIngramSparkPdf(content, { title: title || "Book", author: author.trim() || undefined, trim: getTrim(trimId) }, `${title || "book"}-ingramspark`);
+    } catch (e) {
+      toast({ title: "IngramSpark PDF failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally {
+      setIngram(false);
     }
   };
 
@@ -87,11 +102,15 @@ const BookReader = ({
               {mode === "edit" ? <><Check className="w-4 h-4 mr-1" /> Done editing</> : <><Pencil className="w-4 h-4 mr-1" /> Edit</>}
             </Button>
           )}
+          <Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Author (for title page)" className="h-8 w-40 text-xs" title="Author name, printed on the IngramSpark title and copyright pages" />
           <select value={trimId} onChange={(e) => setTrimId(e.target.value)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans" title="Print trim size">
             {TRIM_SIZES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
           </select>
-          <Button variant="heroOutline" size="sm" disabled={printing} onClick={printInterior} title="Selectable-text interior at the chosen trim (KDP/IngramSpark)">
+          <Button variant="heroOutline" size="sm" disabled={printing} onClick={printInterior} title="Selectable-text interior at the chosen trim (KDP)">
             {printing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} Print interior
+          </Button>
+          <Button variant="heroOutline" size="sm" disabled={ingram} onClick={ingramInterior} title="Print interior with mirrored gutter margins, front matter and recto chapter starts (IngramSpark)">
+            {ingram ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} IngramSpark
           </Button>
           <Button variant="heroOutline" size="sm" disabled={pdf || mode === "edit"} onClick={themedPdf} title="Designed proof PDF (image of the themed interior)">
             {pdf ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} Design PDF
