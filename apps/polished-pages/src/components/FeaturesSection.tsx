@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { FileText, BookOpen, PenTool, Target } from "lucide-react";
+import { FileText, BookOpen, PenTool, Target, GraduationCap, Store } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -26,20 +26,36 @@ const features = [
     cta: "Tailor My CV",
   },
   {
+    icon: BookOpen,
+    title: "Book Creator & Publishing",
+    description: "Full-length books with structured chapters, illustrated covers, and store-ready EPUB, KDP and IngramSpark exports.",
+    image: featureBook,
+    link: "/book",
+    cta: "Create a Book",
+  },
+  {
+    icon: GraduationCap,
+    title: "Children’s & Educational Studio",
+    description: "Illustrated storybooks and series, coloring books, leveled readers, workbooks, exams and full curricula — in any language.",
+    image: featureLetter,
+    link: "/children",
+    cta: "Open the Studio",
+  },
+  {
     icon: PenTool,
     title: "Cover Letters",
     description: "Personalized, human-sounding cover letters aligned to specific job descriptions.",
-    image: featureLetter,
+    image: featureCv,
     link: "/cover-letter",
-    cta: "Write Letter",
+    cta: "Write a Letter",
   },
   {
-    icon: BookOpen,
-    title: "Book Creator",
-    description: "Full-length books with structured chapters, ready for EPUB, PDF, or print.",
+    icon: Store,
+    title: "Marketplace & Distribution",
+    description: "Publish your work to a public marketplace with author pages, trending and discovery — and distribute to every major store.",
     image: featureBook,
-    link: "/book",
-    cta: "Create Book",
+    link: "/catalog",
+    cta: "Explore the Marketplace",
   },
 ];
 
@@ -54,11 +70,10 @@ const FeaturesSection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-bold mb-4 text-foreground">
-            Everything You Need to{" "}
-            <span className="text-gradient-gold italic">Succeed</span>
+            One platform for <span className="text-gradient-gold italic">career, publishing &amp; education</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto font-sans">
-            Professional-grade tools for career advancement and publishing
+            Create professional documents, full books and educational content — then publish and sell them anywhere.
           </p>
         </motion.div>
 

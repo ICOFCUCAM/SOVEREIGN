@@ -1,36 +1,102 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ChevronDown, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import { TOOLS, BRAND, DASHBOARD_NAV } from "@/lib/tools";
+import { BRAND, DASHBOARD_NAV } from "@/lib/tools";
+
+interface MenuItem { label: string; to: string; note?: string }
+interface MenuGroup { label: string; items: MenuItem[] }
+
+// Category-led navigation that reflects the whole platform (career, publishing,
+// education) plus the marketplace and pricing, rather than a flat list of tools.
+const GROUPS: MenuGroup[] = [
+  { label: "Career", items: [
+    { label: "CV Builder", to: "/cv" },
+    { label: "Tailor to a Job", to: "/tailor" },
+    { label: "Cover Letters", to: "/cover-letter" },
+  ] },
+  { label: "Publishing", items: [
+    { label: "Book Creator", to: "/book" },
+    { label: "Transform a Book", to: "/book-transform" },
+    { label: "Illustration Studio", to: "/illustrations" },
+    { label: "Publish & Distribute", to: "/publishing" },
+  ] },
+  { label: "Education", items: [
+    { label: "Children’s Studio", to: "/children" },
+    { label: "Storybooks & Series", to: "/series" },
+    { label: "Coloring Books", to: "/coloring" },
+    { label: "School Content", to: "/classroom" },
+    { label: "Curriculum Builder", to: "/curriculum" },
+  ] },
+];
+const DIRECT: MenuItem[] = [
+  { label: "Marketplace", to: "/catalog" },
+  { label: "Pricing", to: "/pricing" },
+];
 
 const Navbar = () => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
       <div className="container flex items-center justify-between h-16 px-6">
-        <Link to={DASHBOARD_NAV.path} className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-primary" />
           <span className="text-lg font-bold font-serif tracking-tight text-foreground">{BRAND}</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground font-sans">
-          {TOOLS.map((t) => (
-            <Link key={t.id} to={t.path} className="hover:text-foreground transition-colors">
-              {t.short}
-              {t.badge === "New" && <span className="ml-1 rounded-full bg-gold/15 px-1.5 py-0.5 text-[10px] font-semibold text-gold align-middle">New</span>}
-            </Link>
+        <div className="hidden md:flex items-center gap-7 text-sm text-muted-foreground font-sans">
+          {GROUPS.map((g) => (
+            <div key={g.label} className="relative group">
+              <button className="flex items-center gap-1 py-2 hover:text-foreground transition-colors">
+                {g.label} <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+              </button>
+              <div className="invisible absolute left-0 top-full pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100">
+                <div className="min-w-[220px] rounded-xl border border-border bg-card p-1.5 shadow-premium">
+                  {g.items.map((it) => (
+                    <Link key={it.to} to={it.to} className="block rounded-lg px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary transition-colors">{it.label}</Link>
+                  ))}
+                </div>
+              </div>
+            </div>
           ))}
-          <a href="#features" className="hover:text-foreground transition-colors">Features</a>
+          {DIRECT.map((d) => (
+            <Link key={d.to} to={d.to} className="py-2 hover:text-foreground transition-colors">{d.label}</Link>
+          ))}
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button asChild variant="ghost" size="sm" className="text-muted-foreground font-sans">
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex text-muted-foreground font-sans">
             <Link to={DASHBOARD_NAV.path}>Sign In</Link>
           </Button>
           <Button asChild variant="hero" size="sm" className="font-sans">
             <Link to={DASHBOARD_NAV.path}>Get Started</Link>
           </Button>
+          <button className="md:hidden p-1 text-muted-foreground" onClick={() => setMobileOpen((o) => !o)} aria-label="Menu">
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </div>
+
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border/50 bg-background/95 px-6 py-4">
+          {GROUPS.map((g) => (
+            <div key={g.label} className="mb-3">
+              <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans">{g.label}</div>
+              <div className="flex flex-col">
+                {g.items.map((it) => (
+                  <Link key={it.to} to={it.to} onClick={() => setMobileOpen(false)} className="py-1.5 text-sm text-foreground font-sans">{it.label}</Link>
+                ))}
+              </div>
+            </div>
+          ))}
+          <div className="flex flex-col border-t border-border pt-3">
+            {DIRECT.map((d) => (
+              <Link key={d.to} to={d.to} onClick={() => setMobileOpen(false)} className="py-1.5 text-sm font-medium text-foreground font-sans">{d.label}</Link>
+            ))}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
