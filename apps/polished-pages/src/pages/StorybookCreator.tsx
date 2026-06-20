@@ -15,6 +15,7 @@ import PictureBookView from "@/components/children/PictureBookView";
 import SavePictureBookButton from "@/components/children/SavePictureBookButton";
 import { LANGUAGE_NAMES, isoFor } from "@/lib/languages";
 import CountryDatalist from "@/components/app/CountryDatalist";
+import CharacterLibrary from "@/components/children/CharacterLibrary";
 import { translateLocalize } from "@/lib/translate";
 import { usePersistentState } from "@/hooks/use-persistent-state";
 
@@ -312,6 +313,7 @@ const StorybookCreator = () => {
               <div className="space-y-1.5">
                 <Label className="font-sans text-xs">Characters (optional)</Label>
                 <Textarea value={characters} onChange={(e) => setCharacters(e.target.value)} placeholder="e.g. Pip the fox; Luma the firefly; Old Oak the wise tree." rows={2} maxLength={600} className="resize-none" />
+                <CharacterLibrary onInsert={(n, a) => setCharacters(`${characters ? characters.replace(/\s*;?\s*$/, "; ") : ""}${n} — ${a}`.slice(0, 600))} />
               </div>
             </CardContent>
           </Card>
