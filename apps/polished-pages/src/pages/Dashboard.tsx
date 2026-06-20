@@ -124,9 +124,16 @@ const Dashboard = () => {
               )}
             </div>
           </div>
-          {!isPaid && (
-            <Button variant="hero" onClick={() => startUpgrade("creator").catch(() => {})}><Crown className="mr-2 h-4 w-4" /> Upgrade</Button>
-          )}
+          <div className="flex flex-col items-end gap-2">
+            {imgPct >= 70 && imgLim > 0 && (
+              <p className="text-xs font-sans text-amber-600 dark:text-amber-400 font-medium">{imgLim - imgUsed} image credit{imgLim - imgUsed === 1 ? "" : "s"} remaining</p>
+            )}
+            {!isPaid ? (
+              <Button variant="hero" onClick={() => startUpgrade("creator").catch(() => {})}><Crown className="mr-2 h-4 w-4" /> Upgrade</Button>
+            ) : (
+              <Button asChild variant="heroOutline" size="sm"><Link to="/account">Buy image credits</Link></Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 
