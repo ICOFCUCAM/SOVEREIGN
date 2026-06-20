@@ -109,6 +109,13 @@ const CatalogPage = () => {
             <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Discover <span className="text-gradient-gold italic">published resources</span></h1>
           )}
           <p className="mt-2 text-muted-foreground font-sans">{author ? `Everything ${author} has published, newest first.` : "Storybooks, readers, workbooks and classroom materials published by the community."}</p>
+          {!author && (
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground font-sans">
+              <span className="inline-flex items-center gap-1.5"><BadgeCheck className="h-4 w-4 text-primary" /> Created &amp; owned by independent authors</span>
+              <span className="inline-flex items-center gap-1.5"><Download className="h-4 w-4 text-primary" /> Instant, store-ready downloads</span>
+              <span className="inline-flex items-center gap-1.5"><Store className="h-4 w-4 text-primary" /> Free and paid resources</span>
+            </div>
+          )}
           {author && profile && (
             <div className="mt-4 rounded-xl border border-border bg-card/50 p-4 sm:p-5">
               <div className="flex items-start gap-4">
