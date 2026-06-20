@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Globe, Loader2, Plus, Library as LibraryIcon, ArrowRight, Check, ChevronRight } from "lucide-react";
+import { Globe, Loader2, Plus, Library as LibraryIcon, ArrowRight, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { listEditions, saveEdition, type Edition } from "@/lib/editions";
 import { translateLocalize } from "@/lib/translate";
 import { LANGUAGE_NAMES, isoFor } from "@/lib/languages";
 import CountryDatalist from "@/components/app/CountryDatalist";
+import PublishingWorkspaceNav from "@/components/app/PublishingWorkspaceNav";
 
 // Split long markdown into translation-sized chunks at paragraph boundaries
 // (the translate function caps each request), then translate and rejoin.
@@ -89,11 +90,7 @@ const EditionManager = () => {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <nav className="mb-5 flex items-center gap-1 text-xs text-muted-foreground font-sans">
-        <Link to="/children" className="hover:text-foreground transition-colors">Educational Studio</Link>
-        <ChevronRight className="h-3 w-3 shrink-0" />
-        <span className="text-foreground font-medium">Edition Manager</span>
-      </nav>
+      <PublishingWorkspaceNav />
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <div className="inline-flex items-center gap-2 rounded-full border border-publishing/20 bg-publishing/5 px-4 py-1.5 mb-4">
           <Globe className="w-4 h-4 text-publishing" /><span className="text-sm text-publishing font-medium font-sans">Multi-language editions</span>

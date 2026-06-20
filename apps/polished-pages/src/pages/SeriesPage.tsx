@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import CountryDatalist from "@/components/app/CountryDatalist";
 import LanguageDatalist from "@/components/app/LanguageDatalist";
+import PublishingWorkspaceNav from "@/components/app/PublishingWorkspaceNav";
 import { createSeries, listSeries, getSeries, deleteSeries, setDocumentSeries, setSeriesPublic, type SeriesSummary, type SeriesDetail } from "@/lib/series";
 import { listDocuments, type DocSummary } from "@/lib/documents";
 
@@ -92,6 +93,7 @@ const SeriesPage = () => {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+      <PublishingWorkspaceNav />
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-educational/20 bg-educational/5 px-4 py-1.5 mb-3">

@@ -4,6 +4,7 @@ import { Rocket, Check, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import PublishingWorkspaceNav from "@/components/app/PublishingWorkspaceNav";
 import { TRIM_SIZES, PAPER_MM_PER_PAGE, getTrim, coverSpec, ingramGutterIn, INGRAM_OUTSIDE_MM } from "@/lib/print-sizes";
 import ExportCenter from "@/components/book/ExportCenter";
 
@@ -29,25 +30,13 @@ const PublishingPrep = () => {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <PublishingWorkspaceNav />
       <div className="inline-flex items-center gap-2 rounded-full border border-publishing/20 bg-publishing/5 px-4 py-1.5 mb-4">
         <Rocket className="w-4 h-4 text-publishing" />
         <span className="text-sm text-publishing font-medium font-sans">Publishing Studio</span>
       </div>
       <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Distribution <span className="text-gradient-gold italic">center</span></h1>
       <p className="mt-2 text-muted-foreground font-sans">Export for every major store, size your print cover, and go live on KDP, IngramSpark and beyond.</p>
-
-      {/* Quick nav to related publishing tools */}
-      <div className="mt-5 flex flex-wrap gap-2">
-        <Link to="/series" className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium font-sans hover:border-primary/40 transition">
-          <Rocket className="h-3.5 w-3.5 text-publishing" /> Book series
-        </Link>
-        <Link to="/editions" className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium font-sans hover:border-primary/40 transition">
-          <Rocket className="h-3.5 w-3.5 text-publishing" /> Multi-language editions
-        </Link>
-        <Link to="/catalog" className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium font-sans hover:border-primary/40 transition">
-          <Rocket className="h-3.5 w-3.5 text-marketplace" /> Marketplace
-        </Link>
-      </div>
 
       <div className="mt-6"><ExportCenter /></div>
 
