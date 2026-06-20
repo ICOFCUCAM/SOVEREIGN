@@ -13,6 +13,7 @@ import { pictureBookToEpub } from "@/lib/export-epub";
 import { generateStorybook, generateIllustration, type Storybook, type StoryInput, type StoryType } from "@/lib/storybook";
 import PictureBookView from "@/components/children/PictureBookView";
 import SavePictureBookButton from "@/components/children/SavePictureBookButton";
+import { LANGUAGE_NAMES } from "@/lib/languages";
 
 const READING_LEVELS = [
   "Pre-reader (ages 2–4)",
@@ -28,6 +29,8 @@ const STORY_TYPES: { id: StoryType; label: string }[] = [
   { id: "cartoon", label: "Cartoon" },
   { id: "educational", label: "Educational" },
   { id: "moral", label: "Moral lesson" },
+  { id: "folktale", label: "Folktale" },
+  { id: "legend", label: "Legend / heritage" },
 ];
 
 const StorybookCreator = () => {
@@ -44,6 +47,7 @@ const StorybookCreator = () => {
   const [storyType, setStoryType] = useState<StoryType>("classic");
   const [language, setLanguage] = useState("");
   const [educationalObjective, setEducationalObjective] = useState("");
+  const [culturalSetting, setCulturalSetting] = useState("");
 
   const [creating, setCreating] = useState(false);
   const [book, setBook] = useState<Storybook | null>(null);
@@ -55,7 +59,7 @@ const StorybookCreator = () => {
   const create = async () => {
     setCreating(true);
     try {
-      const input: StoryInput = { childName, childAge, readingLevel, theme, moralLesson, characters, pageCount, storyType, language, educationalObjective };
+      const input: StoryInput = { childName, childAge, readingLevel, theme, moralLesson, characters, pageCount, storyType, language, educationalObjective, culturalSetting };
       setBook(await generateStorybook(input));
     } catch (e) {
       toast({ title: "Could not create story", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
@@ -223,10 +227,15 @@ const StorybookCreator = () => {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label className="font-sans text-xs">Language (optional)</Label>
-                  <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="e.g. English, French, Swahili" maxLength={40} />
+                  <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="e.g. English, French, Swahili" maxLength={40} list="story-langs" />
+                  <datalist id="story-langs">{LANGUAGE_NAMES.map((l) => <option key={l} value={l} />)}</datalist>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="font-sans text-xs">Cultural setting (optional)</Label>
+                  <Input value={culturalSetting} onChange={(e) => setCulturalSetting(e.target.value)} placeholder="e.g. Norway, Cameroon, Japan" maxLength={120} />
                 </div>
                 {storyType === "educational" && (
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 sm:col-span-2">
                     <Label className="font-sans text-xs">Educational objective</Label>
                     <Input value={educationalObjective} onChange={(e) => setEducationalObjective(e.target.value)} placeholder="e.g. Counting to ten" maxLength={200} />
                   </div>

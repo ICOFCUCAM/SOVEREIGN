@@ -27,6 +27,7 @@ serve(async (req) => {
     const childName = String(b.childName ?? "").slice(0, 60).trim();
     const language = String(b.language ?? "").slice(0, 40).trim();
     const eduObjective = String(b.educationalObjective ?? "").slice(0, 200).trim();
+    const culturalSetting = String(b.culturalSetting ?? "").slice(0, 120).trim();
     const storyType = String(b.storyType ?? "classic");
     const pageCount = Math.min(Math.max(parseInt(String(b.pageCount ?? "12"), 10) || 12, 6), 24);
 
@@ -37,6 +38,8 @@ serve(async (req) => {
       cartoon: "a playful, funny cartoon-style story with lively, expressive characters and gentle humour",
       educational: "a fun story that teaches naturally as the plot unfolds",
       moral: "a story built around a clear moral lesson, shown through the characters' choices rather than stated",
+      folktale: "a folktale told in the warm, rhythmic style of a traditional tale, honouring its cultural roots",
+      legend: "a legend about a hero, origin or wonder, told with respect, awe and a sense of heritage",
     };
     const styleDesc = STYLES[storyType] ?? STYLES.classic;
 
@@ -50,6 +53,7 @@ serve(async (req) => {
 
 This should be ${styleDesc}.
 ${eduObjective ? `Educational objective to teach through the story: ${eduObjective}.` : ""}
+${culturalSetting ? `Cultural setting: set the story authentically in the culture of ${culturalSetting} — use real names, landscapes, animals, foods, clothing and traditions from there, depicted respectfully and accurately, never as stereotype. Reflect this in the illustrationPrompts too.` : ""}
 ${language && language.toLowerCase() !== "english" ? `Write all story text (title, dedication, page text) in ${language}. Keep the illustrationPrompts in English.` : ""}
 
 SAFETY (non-negotiable): Content must be completely child-safe and wholesome — no violence, fear, peril beyond gentle age-appropriate tension, no romance, no scary imagery, no branded characters, nothing political or commercial. Kindness, curiosity and warmth throughout.
