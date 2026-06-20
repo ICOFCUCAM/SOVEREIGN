@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Check, Loader2, Crown } from "lucide-react";
+import { Sparkles, Check, Loader2, Crown, CreditCard, ShieldCheck, XCircle, Copyright } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -50,6 +50,15 @@ const Pricing = () => {
             From a first CV to a multi-language publishing house. Text is unlimited on every paid plan; image credits scale with how much you create.
           </p>
         </motion.div>
+
+        {/* Risk-reduction strip: answers the objections that stall the upgrade
+            decision, right above the plan grid where the choice is made. */}
+        <div className="mx-auto mt-7 flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground font-sans">
+          <span className="inline-flex items-center gap-1.5"><CreditCard className="h-4 w-4 text-primary" /> Start free — no card required</span>
+          <span className="inline-flex items-center gap-1.5"><XCircle className="h-4 w-4 text-primary" /> Cancel anytime</span>
+          <span className="inline-flex items-center gap-1.5"><Copyright className="h-4 w-4 text-primary" /> You own what you create</span>
+          <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-primary" /> Keep {100 - MARKETPLACE_FEE_PCT}% of sales</span>
+        </div>
 
         <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {PLANS.map((plan) => (
