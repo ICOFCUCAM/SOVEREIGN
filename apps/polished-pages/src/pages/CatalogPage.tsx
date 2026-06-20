@@ -218,12 +218,18 @@ const CatalogPage = () => {
                 <section className="mt-10">
                   <div className="flex items-baseline gap-2"><Store className="h-4 w-4 text-gold" /><h2 className="font-serif text-xl font-bold">Browse by category</h2></div>
                   <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                    {CATALOG_CATEGORIES.map((c) => (
-                      <button key={c} onClick={() => setCat(c)} className="group flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2.5 text-left transition hover:border-primary/50">
-                        <span className="text-sm font-medium font-sans">{c}</span>
-                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-sans">{categoryCounts.get(c) ?? 0} <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" /></span>
-                      </button>
-                    ))}
+                    {CATALOG_CATEGORIES.map((c) => {
+                      const n = categoryCounts.get(c) ?? 0;
+                      return (
+                        <button key={c} onClick={() => setCat(c)} className={`group flex items-center justify-between rounded-lg border bg-card px-3 py-3 text-left transition hover:border-primary/50 hover:shadow-sm ${n === 0 ? "border-dashed border-border/60 opacity-60" : "border-border"}`}>
+                          <div>
+                            <span className="block text-sm font-medium font-sans">{c}</span>
+                            <span className="text-[11px] text-muted-foreground font-sans">{n} {n === 1 ? "resource" : "resources"}</span>
+                          </div>
+                          <ArrowRight className={`h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 ${n > 0 ? "group-hover:text-primary" : ""}`} />
+                        </button>
+                      );
+                    })}
                   </div>
                 </section>
                 <CreateCtaBand
