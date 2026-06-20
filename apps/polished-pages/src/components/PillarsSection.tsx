@@ -13,6 +13,8 @@ const PILLARS = [
     items: ["CV Builder", "Tailor to a Job", "Cover Letters"],
     to: "/cv",
     text: "text-career", bg: "bg-career/10", border: "hover:border-career/50",
+    glow: "group-hover:shadow-[0_0_32px_0_hsl(var(--career)/0.25)]",
+    iconGlow: "group-hover:shadow-[0_0_16px_0_hsl(var(--career)/0.4)]",
   },
   {
     icon: BookOpen,
@@ -21,6 +23,8 @@ const PILLARS = [
     items: ["Book Creator", "Transform a Book", "Illustration Studio", "Covers & export"],
     to: "/book",
     text: "text-publishing", bg: "bg-publishing/10", border: "hover:border-publishing/50",
+    glow: "group-hover:shadow-[0_0_32px_0_hsl(var(--publishing)/0.25)]",
+    iconGlow: "group-hover:shadow-[0_0_16px_0_hsl(var(--publishing)/0.4)]",
   },
   {
     icon: GraduationCap,
@@ -29,6 +33,8 @@ const PILLARS = [
     items: ["Storybooks & series", "Classroom packs & primary books", "Curriculum builder", "Exams, workbooks & assessment banks"],
     to: "/children",
     text: "text-educational", bg: "bg-educational/10", border: "hover:border-educational/50",
+    glow: "group-hover:shadow-[0_0_32px_0_hsl(var(--educational)/0.25)]",
+    iconGlow: "group-hover:shadow-[0_0_16px_0_hsl(var(--educational)/0.4)]",
   },
   {
     icon: Store,
@@ -37,6 +43,8 @@ const PILLARS = [
     items: ["Discover & trending", "Author pages", "Categories", "Distribution"],
     to: "/catalog",
     text: "text-marketplace", bg: "bg-marketplace/10", border: "hover:border-marketplace/50",
+    glow: "group-hover:shadow-[0_0_32px_0_hsl(var(--marketplace)/0.25)]",
+    iconGlow: "group-hover:shadow-[0_0_16px_0_hsl(var(--marketplace)/0.4)]",
   },
 ];
 
@@ -61,9 +69,9 @@ const PillarsSection = () => (
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: i * 0.08 }}
           >
-            <Link to={p.to} className={`group flex h-full flex-col rounded-2xl border border-border bg-gradient-to-br from-card to-background p-6 shadow-premium transition-all hover:-translate-y-0.5 ${p.border}`}>
-              <span className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${p.bg}`}>
-                <p.icon className={`h-6 w-6 ${p.text}`} />
+            <Link to={p.to} className={`group flex h-full flex-col rounded-2xl border border-border bg-gradient-to-br from-card to-background p-6 shadow-premium transition-all duration-300 hover:-translate-y-1 ${p.border} ${p.glow}`}>
+              <span className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-shadow duration-300 ${p.bg} ${p.iconGlow}`}>
+                <p.icon className={`h-6 w-6 ${p.text} transition-transform duration-200 group-hover:scale-110`} />
               </span>
               <h3 className="font-serif text-xl font-bold">{p.name}</h3>
               <p className="mt-1.5 text-sm text-muted-foreground font-sans">{p.blurb}</p>
