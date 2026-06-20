@@ -313,7 +313,7 @@ const StorybookCreator = () => {
               <div className="space-y-1.5">
                 <Label className="font-sans text-xs">Characters (optional)</Label>
                 <Textarea value={characters} onChange={(e) => setCharacters(e.target.value)} placeholder="e.g. Pip the fox; Luma the firefly; Old Oak the wise tree." rows={2} maxLength={600} className="resize-none" />
-                <CharacterLibrary onInsert={(n, a) => setCharacters(`${characters ? characters.replace(/\s*;?\s*$/, "; ") : ""}${n} — ${a}`.slice(0, 600))} />
+                <CharacterLibrary onInsert={(brief) => setCharacters(`${characters ? characters.replace(/\s*;?\s*$/, ". ") : ""}${brief}`.slice(0, 600))} />
               </div>
             </CardContent>
           </Card>
