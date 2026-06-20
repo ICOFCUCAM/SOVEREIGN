@@ -99,6 +99,7 @@ const CatalogPage = () => {
                     <button onClick={() => setAuthor(it.author_name!)} className="mt-0.5 self-start text-xs text-muted-foreground hover:text-primary font-sans">by {it.author_name}</button>
                   )}
                   {it.preview && <p className="mt-1.5 line-clamp-3 flex-1 text-xs text-muted-foreground font-sans">{it.preview}</p>}
+                  {it.license && <div className="mt-2 text-[11px] text-muted-foreground font-sans">{it.license}</div>}
                   <Link to={`/shared/${it.token}`} className="group mt-3 inline-flex items-center text-sm font-medium text-primary font-sans">
                     View <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                   </Link>

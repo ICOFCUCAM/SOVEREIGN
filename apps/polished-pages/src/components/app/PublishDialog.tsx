@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { publishDocument, CATALOG_CATEGORIES, type DocSummary } from "@/lib/documents";
+import { publishDocument, CATALOG_CATEGORIES, CATALOG_LICENSES, type DocSummary } from "@/lib/documents";
 
 // Publish a saved document to the public catalog: choose a category and an
 // optional price, get a public link. (Free items download immediately; charging
@@ -15,6 +15,7 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState(doc.category ?? CATALOG_CATEGORIES[0]);
   const [author, setAuthor] = useState("");
+  const [license, setLicense] = useState(CATALOG_LICENSES[2]);
   const [price, setPrice] = useState(((doc.price_cents ?? 0) / 100).toFixed(2));
   const [busy, setBusy] = useState(false);
   const [token, setToken] = useState<string | null>(null);
@@ -26,7 +27,7 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
     setBusy(true);
     try {
       const cents = Math.max(0, Math.round(parseFloat(price || "0") * 100)) || 0;
-      const t = await publishDocument(doc.id, { listed, category, priceCents: cents, author });
+      const t = await publishDocument(doc.id, { listed, category, priceCents: cents, author, license });
       setToken(listed ? t : null);
       onChanged?.(listed);
       toast({ title: listed ? "Published to catalog" : "Removed from catalog" });
@@ -57,6 +58,12 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
           <div className="space-y-1.5">
             <Label className="font-sans text-xs">Publisher / author name (shown publicly)</Label>
             <Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="e.g. Ms. Okafor’s Classroom" maxLength={80} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="font-sans text-xs">License</Label>
+            <select value={license} onChange={(e) => setLicense(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+              {CATALOG_LICENSES.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
           </div>
           <div className="space-y-1.5">
             <Label className="font-sans text-xs">Price (USD) — 0 for free</Label>

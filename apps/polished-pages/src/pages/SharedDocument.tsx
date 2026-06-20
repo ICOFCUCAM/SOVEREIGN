@@ -57,7 +57,8 @@ const SharedDocument = () => {
             ) : (
               <p className="text-muted-foreground font-sans">This document type can’t be previewed here.</p>
             )}
-            <p className="mt-8 text-center text-xs text-muted-foreground font-sans">Shared via {BRAND}. <Link to="/" className="text-primary hover:underline">Create your own →</Link></p>
+            {doc.license && <p className="mt-6 text-center text-xs text-muted-foreground font-sans">License: {doc.license}</p>}
+            <p className="mt-2 text-center text-xs text-muted-foreground font-sans">Shared via {BRAND}. <Link to="/" className="text-primary hover:underline">Create your own →</Link></p>
           </>
         )}
       </div>

@@ -102,12 +102,20 @@ export const CATALOG_CATEGORIES = [
   "Workbooks", "Classroom packs", "Curriculum", "Teacher resources", "Other",
 ];
 
-export interface CatalogItem { token: string; kind: DocKind; title: string; category: string | null; price_cents: number; preview: string | null; author_name: string | null; created_at: string }
+export const CATALOG_LICENSES = [
+  "All rights reserved",
+  "Free for personal use",
+  "Free for classroom use",
+  "Creative Commons (CC BY)",
+  "Creative Commons (CC BY-NC)",
+];
+
+export interface CatalogItem { token: string; kind: DocKind; title: string; category: string | null; price_cents: number; preview: string | null; author_name: string | null; license: string | null; created_at: string }
 
 // Publish (or unpublish) a document to the public catalog. Returns the share token.
-export async function publishDocument(id: string, opts: { listed: boolean; category?: string; priceCents?: number; author?: string }): Promise<string | null> {
+export async function publishDocument(id: string, opts: { listed: boolean; category?: string; priceCents?: number; author?: string; license?: string }): Promise<string | null> {
   const { data, error } = await rpc().rpc("polished_publish", {
-    p_id: id, p_listed: opts.listed, p_category: opts.category ?? null, p_price_cents: opts.priceCents ?? 0, p_author: opts.author ?? null,
+    p_id: id, p_listed: opts.listed, p_category: opts.category ?? null, p_price_cents: opts.priceCents ?? 0, p_author: opts.author ?? null, p_license: opts.license ?? null,
   });
   if (error) throw new Error(error.message || "Could not publish.");
   return (data as string) ?? null;
@@ -119,7 +127,7 @@ export async function catalogList(category?: string, search?: string): Promise<C
   return (Array.isArray(data) ? data : []) as CatalogItem[];
 }
 
-export interface SharedDoc { kind: DocKind; title: string; template: string | null; payload: unknown; author_name?: string | null }
+export interface SharedDoc { kind: DocKind; title: string; template: string | null; payload: unknown; author_name?: string | null; license?: string | null }
 // Public read of a shared document by token (no auth required).
 export async function getShared(token: string): Promise<SharedDoc | null> {
   const { data, error } = await rpc().rpc("polished_get_shared", { p_token: token });
