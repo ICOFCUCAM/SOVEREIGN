@@ -9,7 +9,7 @@ import { listDocuments, getDocument, deleteDocument, type DocSummary, type DocKi
 import type { CvData } from "@/lib/cv-data";
 import CVPreview from "@/components/CVPreview";
 import CoverLetterPreview from "@/components/CoverLetterPreview";
-import BookContentViewer from "@/components/book/BookContentViewer";
+import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
 import { ArrowLeft } from "lucide-react";
 
@@ -83,7 +83,13 @@ const LibraryPage = () => {
         </div>
         <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
           <BookExportPanel bookTitle={opened.title} fullContent={opened.markdown} chapterCount={0} />
-          <div className="mt-6"><BookContentViewer content={opened.markdown} title={opened.title} /></div>
+          <div className="mt-6">
+            <BookReader
+              content={opened.markdown}
+              title={opened.title}
+              onContentChange={(s) => setOpened({ kind: "book", markdown: s, title: opened.title })}
+            />
+          </div>
         </div>
       </div>
     );

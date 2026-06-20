@@ -9,6 +9,7 @@ import BookSetup from "@/components/book/BookSetup";
 import BookOutlineEditor from "@/components/book/BookOutlineEditor";
 import BookWritingPanel from "@/components/book/BookWritingPanel";
 import BookContentViewer from "@/components/book/BookContentViewer";
+import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
 import BookRepurposePanel from "@/components/book/BookRepurposePanel";
 import BookPublishingPackage from "@/components/book/BookPublishingPackage";
@@ -32,10 +33,14 @@ const BookCreator = () => {
   const [viewingChapter, setViewingChapter] = useState<number | null>(null);
   const [isGeneratingOutline, setIsGeneratingOutline] = useState(false);
 
+  // Final-copy edits made in the preview override the assembled content for
+  // preview, export and publish (the author's last pass before exporting).
+  const [editedBook, setEditedBook] = useState<string | null>(null);
   const generatedChapters = chapters.filter((ch) => ch.content);
   const fullContent = generatedChapters.length > 0
     ? `# ${outline?.title || bookTitle}\n\n${outline?.subtitle ? `*${outline.subtitle}*\n\n` : ""}${outline?.frontMatter ? `---\n\n${outline.frontMatter}\n\n---\n\n` : ""}${generatedChapters.map((ch) => ch.content).join("\n\n---\n\n")}${outline?.backMatter ? `\n\n---\n\n${outline.backMatter}` : ""}`
     : "";
+  const effectiveContent = editedBook ?? fullContent;
 
   // Generate outline
   const handleGenerateOutline = async () => {
@@ -283,17 +288,17 @@ const BookCreator = () => {
                 isAnyGenerating={isAnyGenerating}
               />
             ) : view === "preview" ? (
-              <BookContentViewer content={fullContent} title={outline?.title || bookTitle} />
+              <BookReader content={effectiveContent} title={outline?.title || bookTitle} onContentChange={setEditedBook} />
             ) : view === "export" ? (
               <BookExportPanel
                 bookTitle={outline?.title || bookTitle}
-                fullContent={fullContent}
+                fullContent={effectiveContent}
                 chapterCount={generatedChapters.length}
               />
             ) : view === "repurpose" ? (
               <BookRepurposePanel
                 bookTitle={outline?.title || bookTitle}
-                fullContent={fullContent}
+                fullContent={effectiveContent}
               />
             ) : view === "cover" ? (
               <div>

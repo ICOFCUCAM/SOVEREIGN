@@ -10,7 +10,7 @@ import { authHeader } from "@/lib/session";
 import { extractFileText, CV_ACCEPT, CV_MIME } from "@/lib/extract-file-text";
 import { splitBook } from "@/lib/book-split";
 import { Progress } from "@/components/ui/progress";
-import BookContentViewer from "@/components/book/BookContentViewer";
+import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
 import CoverGenerator from "@/components/book/CoverGenerator";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
@@ -99,7 +99,7 @@ const TransformBook = () => {
                 <SaveToLibrary kind="book" title={displayTitle} payload={{ markdown: result, title: displayTitle }} preview={instruction.slice(0, 160)} />
               </div>
               <BookExportPanel bookTitle={displayTitle} fullContent={result} chapterCount={0} />
-              <div className="mt-6"><BookContentViewer content={result} title={displayTitle} /></div>
+              <div className="mt-6"><BookReader content={result} title={displayTitle} onContentChange={setResult} /></div>
             </motion.div>
           ) : (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>

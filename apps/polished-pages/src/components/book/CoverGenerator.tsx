@@ -1,27 +1,43 @@
-import { useState } from "react";
-import { ImageIcon, Loader2, Download, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ImageIcon, Loader2, Download, Sparkles, Crown, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { authHeader } from "@/lib/session";
+import { authHeader, fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
 
 type Side = "front" | "back";
 
+const PRO_PERKS = [
+  "AI-designed front and back covers",
+  "Unlimited regenerations and art-direction tweaks",
+  "Print-ready portrait covers you can download",
+];
+
 // AI cover + back-cover design via OpenAI gpt-image-1 (the platform's image
-// engine; Claude has no image model). One side per request. The author's
-// instructions drive the art direction; the title/blurb are passed for context.
-const CoverGenerator = ({ title, subtitle }: { title?: string; subtitle?: string }) => {
+// engine; Claude has no image model). The author fills in the title and art
+// direction before generating. Cover design is a Pro-plan capability.
+const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle }: { title?: string; subtitle?: string }) => {
   const { toast } = useToast();
+  const [status, setStatus] = useState<PlanStatus | null>(null);
+  const [title, setTitle] = useState(initialTitle ?? "");
+  const [subtitle, setSubtitle] = useState(initialSubtitle ?? "");
   const [author, setAuthor] = useState("");
   const [blurb, setBlurb] = useState("");
   const [instr, setInstr] = useState<Record<Side, string>>({ front: "", back: "" });
   const [img, setImg] = useState<Record<Side, string | null>>({ front: null, back: null });
   const [busy, setBusy] = useState<Side | null>(null);
 
+  useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
+  const isPro = status?.plan === "pro";
+
   const generate = async (side: Side) => {
+    if (!title.trim() && !instr[side].trim()) {
+      toast({ title: "Add a title or art direction", description: "Tell the model what to design.", variant: "destructive" });
+      return;
+    }
     setBusy(side);
     try {
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-book-cover`, {
@@ -49,6 +65,26 @@ const CoverGenerator = ({ title, subtitle }: { title?: string; subtitle?: string
     a.href = src; a.download = `book-${side}-cover.png`; a.click();
   };
 
+  // Gate: cover design is a Pro-plan capability.
+  if (status && !isPro) {
+    return (
+      <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-background">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-serif text-lg"><Crown className="h-5 w-5 text-gold" /> Cover design is a Pro feature</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground font-sans">Generate bookstore-quality front and back covers with AI, guided by your own title and art direction.</p>
+          <ul className="mt-3 space-y-1.5">
+            {PRO_PERKS.map((p) => <li key={p} className="flex items-start gap-2 text-sm font-sans"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {p}</li>)}
+          </ul>
+          <Button variant="hero" className="mt-4" onClick={() => startUpgrade().catch(() => {})}>
+            <Crown className="mr-2 h-4 w-4" /> Upgrade to Pro
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const Panel = ({ side, label }: { side: Side; label: string }) => (
     <Card className="border-border">
       <CardHeader className="pb-3"><CardTitle className="font-serif text-base">{label}</CardTitle></CardHeader>
@@ -60,7 +96,7 @@ const CoverGenerator = ({ title, subtitle }: { title?: string; subtitle?: string
               <span className="text-xs font-sans">Designing…</span>
             </div>
           ) : img[side] ? (
-            <img src={img[side]!} alt={`${label}`} className="h-full w-full object-cover" />
+            <img src={img[side]!} alt={label} className="h-full w-full object-cover" />
           ) : (
             <ImageIcon className="h-10 w-10 text-muted-foreground/50" />
           )}
@@ -90,8 +126,17 @@ const CoverGenerator = ({ title, subtitle }: { title?: string; subtitle?: string
 
   return (
     <div className="space-y-5">
+      {/* Title + metadata the author controls before generation */}
       <Card className="border-border bg-card/50">
         <CardContent className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label className="font-sans text-xs">Title (shown on the cover)</Label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Book title" maxLength={120} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="font-sans text-xs">Subtitle (optional)</Label>
+            <Input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="Subtitle" maxLength={160} />
+          </div>
           <div className="space-y-1.5">
             <Label className="font-sans text-xs">Author name (optional)</Label>
             <Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Your name" maxLength={80} />
@@ -102,12 +147,13 @@ const CoverGenerator = ({ title, subtitle }: { title?: string; subtitle?: string
           </div>
         </CardContent>
       </Card>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Panel side="front" label="Front cover" />
         <Panel side="back" label="Back cover" />
       </div>
       <p className="text-center text-xs text-muted-foreground font-sans">
-        Covers are generated by OpenAI’s image model per your art direction. Each generation counts toward your plan.
+        Covers are generated by OpenAI’s image model from your title and art direction. Each generation counts toward your plan.
       </p>
     </div>
   );
