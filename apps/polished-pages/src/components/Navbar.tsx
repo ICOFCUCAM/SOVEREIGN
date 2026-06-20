@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, ChevronDown, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BRAND, DASHBOARD_NAV } from "@/lib/tools";
+import ThemeToggle from "@/components/app/ThemeToggle";
 
 interface MenuItem { label: string; to: string; dot?: string }
 interface MenuGroup { label: string; dot: string; items: MenuItem[] }
@@ -74,6 +75,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle className="hidden sm:inline-flex" />
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex text-muted-foreground font-sans">
             <Link to={DASHBOARD_NAV.path}>Sign In</Link>
           </Button>

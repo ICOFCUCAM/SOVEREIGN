@@ -13,6 +13,7 @@ import CommandPalette from "@/components/app/CommandPalette";
 import WorkflowNav from "@/components/app/WorkflowNav";
 import MobileNav from "@/components/app/MobileNav";
 import MobileTabBar from "@/components/app/MobileTabBar";
+import ThemeToggle from "@/components/app/ThemeToggle";
 
 // The persistent studio chrome: one global navigation that ties every tool
 // together, an account menu with live plan/usage, and the ⌘K command palette.
@@ -68,6 +69,8 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
                 <Link to="/pricing"><Crown className="mr-1 h-3.5 w-3.5" /> Upgrade</Link>
               </Button>
             )}
+
+            <ThemeToggle />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
