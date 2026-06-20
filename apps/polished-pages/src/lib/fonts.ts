@@ -28,8 +28,11 @@ import "@fontsource/fraunces/700.css";
 import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/500.css";
 import "@fontsource/jetbrains-mono/700.css";
+import "@fontsource/space-grotesk/400.css";
+import "@fontsource/space-grotesk/500.css";
+import "@fontsource/space-grotesk/700.css";
 
-export type FontId = "inter" | "manrope" | "jakarta" | "dmsans" | "playfair" | "fraunces" | "mono";
+export type FontId = "inter" | "manrope" | "jakarta" | "dmsans" | "playfair" | "fraunces" | "mono" | "grotesk";
 
 export const FONT_FAMILY: Record<FontId, string> = {
   inter: "'Inter', system-ui, -apple-system, sans-serif",
@@ -39,6 +42,7 @@ export const FONT_FAMILY: Record<FontId, string> = {
   playfair: "'Playfair Display', Georgia, serif",
   fraunces: "'Fraunces', Georgia, serif",
   mono: "'JetBrains Mono', ui-monospace, monospace",
+  grotesk: "'Space Grotesk', system-ui, sans-serif",
 };
 
 // Display family for big headings, paired per template (kept separate so a

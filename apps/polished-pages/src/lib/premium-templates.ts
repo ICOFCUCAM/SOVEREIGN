@@ -41,7 +41,7 @@ export const PREMIUM_TEMPLATES: PremiumTemplate[] = [
   { id: "nordic-professional", name: "Fjord", collection: "nordic", font: "manrope", accent: "#334155", blurb: "Minimalist Scandinavian — hairline rules, generous space." },
   { id: "academic-research", name: "Scholar", collection: "academic", font: "dmsans", display: "fraunces", accent: "#6b2737", blurb: "Serif scholarly hierarchy. Publications, research projects, grants." },
   { id: "creative-professional", name: "Studio", collection: "creative", font: "jakarta", accent: "#7c3aed", blurb: "Bold modern header with a portfolio emphasis." },
-  { id: "startup-leader", name: "Velocity", collection: "startup", font: "inter", accent: "#ea580c", blurb: "Growth-metric band, ventures and product launches." },
+  { id: "startup-leader", name: "Velocity", collection: "startup", font: "inter", display: "grotesk", accent: "#ea580c", blurb: "Condensed display, vivid metric band, ventures as cards. For founders." },
   { id: "government-public", name: "Sentinel", collection: "government", font: "dmsans", accent: "#1e293b", blurb: "Formal, compliance-oriented, with a clearance line." },
   { id: "international-pro", name: "Global", collection: "international", font: "inter", accent: "#0d9488", blurb: "Language-proficiency panel and a global format." },
 ];

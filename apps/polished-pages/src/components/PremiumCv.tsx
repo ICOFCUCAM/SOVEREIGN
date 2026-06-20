@@ -189,29 +189,40 @@ const Terminal = ({ d, k, innerRef }: { d: CvData; k: K; innerRef?: Ref<HTMLDivE
   );
 };
 
-// 4 · CONSULTING — boxed impact-metric band over structured engagements.
+// 4 · CONSULTING — left metrics rail + case-study engagements.
 const Meridian = ({ d, k, innerRef }: { d: CvData; k: K; innerRef?: Ref<HTMLDivElement> }) => (
   <Page k={k} innerRef={innerRef}>
-    <div style={{ paddingBottom: ".7rem" }}>
+    <div style={{ borderBottom: `2px solid ${k.accent}`, paddingBottom: ".8rem" }}>
       <div style={{ fontSize: 29, fontWeight: 800, color: k.strong, letterSpacing: "-.01em" }}>{d.name}</div>
       {d.title && <div style={{ color: k.accent, fontSize: 12.5, fontWeight: 600, letterSpacing: ".12em", textTransform: "uppercase", marginTop: ".25rem" }}>{d.title}</div>}
       <div style={{ marginTop: ".4rem" }}><Contact d={d} k={k} /></div>
     </div>
-    {d.metrics?.length ? (
-      <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(d.metrics.length, 4)}, 1fr)`, border: `1px solid ${k.line}`, borderRadius: 8, overflow: "hidden", margin: ".5rem 0" }}>
-        {d.metrics.map((m, i) => (
-          <div key={i} style={{ padding: "0.9rem 1rem", borderRight: i < d.metrics!.length - 1 ? `1px solid ${k.line}` : "none", textAlign: "center" }}>
-            <div style={{ fontSize: 22, fontWeight: 800, color: k.accent, lineHeight: 1 }}>{m.value}</div>
-            <div style={{ fontSize: 11, color: k.muted, marginTop: ".25rem", textTransform: "uppercase", letterSpacing: ".05em" }}>{m.label}</div>
+    <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,2.15fr)", gap: "0 1.8rem", marginTop: ".3rem" }}>
+      <div style={{ borderRight: `1px solid ${k.line}`, paddingRight: "1.4rem" }}>
+        {d.metrics?.length ? (<><Underline k={k} mt="1.3rem">Impact</Underline>{d.metrics.map((m, i) => (
+          <div key={i} style={{ marginBottom: ".75rem" }}>
+            <div style={{ fontSize: 25, fontWeight: 800, color: k.accent, lineHeight: 1 }}>{m.value}</div>
+            <div style={{ fontSize: 10.5, color: k.muted, textTransform: "uppercase", letterSpacing: ".05em", marginTop: ".15rem" }}>{m.label}</div>
+          </div>
+        ))}</>) : null}
+        <Underline k={k}>Expertise</Underline><Stack items={d.skills} k={k} />
+        <Underline k={k}>Education</Underline><Education d={d} k={k} />
+        <Underline k={k}>Languages</Underline><Stack items={d.languages} k={k} />
+      </div>
+      <div>
+        {d.summary && (<><Underline k={k} mt="1.3rem">Profile</Underline><Summary d={d} k={k} /></>)}
+        <Underline k={k}>Selected Engagements</Underline>
+        {d.experiences.map((x, i) => (
+          <div key={i} style={{ borderLeft: `2px solid ${hexA(k.accent, 0.45)}`, paddingLeft: ".95rem", marginBottom: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "baseline" }}>
+              <span style={{ fontWeight: 700, fontSize: 14, color: k.strong }}>{x.company}</span>
+              {(x.start || x.end) && <span style={{ color: k.muted, fontSize: 11.5 }}>{[x.start, x.end].filter(Boolean).join(" – ")}</span>}
+            </div>
+            <div style={{ color: k.accent, fontSize: 12.5, fontWeight: 600, fontStyle: "italic", marginTop: 1 }}>{x.title}</div>
+            <div style={{ marginTop: ".35rem" }}>{x.bullets.map((b, j) => <Bullet key={j} k={k}>{b}</Bullet>)}</div>
           </div>
         ))}
       </div>
-    ) : null}
-    {d.summary && (<><Underline k={k}>Profile</Underline><Summary d={d} k={k} /></>)}
-    <Underline k={k}>Selected Engagements</Underline><Experience d={d} k={k} />
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 2.2rem" }}>
-      <div><Underline k={k}>Education</Underline><Education d={d} k={k} /></div>
-      <div><Underline k={k}>Expertise</Underline><Chips items={d.skills} k={k} /></div>
     </div>
   </Page>
 );
@@ -333,23 +344,35 @@ const Studio = ({ d, k, innerRef }: { d: CvData; k: K; innerRef?: Ref<HTMLDivEle
   </Page>
 );
 
-// 10 · STARTUP — inline growth metrics, ventures, launches.
+// 10 · STARTUP — condensed display, vivid metric band, ventures as cards.
 const Velocity = ({ d, k, innerRef }: { d: CvData; k: K; innerRef?: Ref<HTMLDivElement> }) => (
-  <Page k={k} innerRef={innerRef}>
-    <div style={{ paddingBottom: ".8rem", borderBottom: `1px solid ${k.line}` }}>
-      <div style={{ fontSize: 32, fontWeight: 800, color: k.strong, letterSpacing: "-.02em" }}>{d.name}</div>
-      {d.title && <div style={{ color: k.accent, fontSize: 13, fontWeight: 700, marginTop: ".3rem" }}>{d.title}</div>}
-      <div style={{ marginTop: ".4rem" }}><Contact d={d} k={k} /></div>
+  <Page k={k} innerRef={innerRef} pad={false}>
+    <div style={{ padding: "2.2rem 2.6rem 1.4rem" }}>
+      <div style={{ fontFamily: k.disp, fontSize: 44, fontWeight: 700, color: k.strong, letterSpacing: "-.02em", lineHeight: 1 }}>{d.name}</div>
+      {d.title && <div style={{ color: k.accent, fontSize: 14, fontWeight: 700, marginTop: ".45rem" }}>{d.title}</div>}
+      <div style={{ marginTop: ".55rem" }}><Contact d={d} k={k} /></div>
     </div>
     {d.metrics?.length ? (
-      <div style={{ display: "flex", gap: "2.2rem", flexWrap: "wrap", margin: "1.2rem 0 .4rem" }}>
-        {d.metrics.map((m, i) => (<div key={i}><span style={{ fontSize: 28, fontWeight: 800, color: k.accent }}>{m.value}</span><div style={{ fontSize: 11.5, color: k.muted, textTransform: "uppercase", letterSpacing: ".05em" }}>{m.label}</div></div>))}
+      <div style={{ background: k.accent, color: "#fff", display: "grid", gridTemplateColumns: `repeat(${Math.min(d.metrics.length, 4)}, 1fr)`, padding: "1.1rem 2.6rem", gap: "1rem" }}>
+        {d.metrics.map((m, i) => (<div key={i}><div style={{ fontFamily: k.disp, fontSize: 27, fontWeight: 700, lineHeight: 1 }}>{m.value}</div><div style={{ fontSize: 10.5, opacity: 0.9, textTransform: "uppercase", letterSpacing: ".06em", marginTop: ".25rem" }}>{m.label}</div></div>))}
       </div>
     ) : null}
-    {d.summary && (<><Tick k={k}>Profile</Tick><Summary d={d} k={k} /></>)}
-    <Tick k={k}>Ventures &amp; Experience</Tick><Experience d={d} k={k} />
-    {d.projects?.length ? (<><Tick k={k}>Product Launches</Tick><Projects d={d} k={k} /></>) : null}
-    <Tick k={k}>Skills</Tick><Chips items={d.skills} k={k} />
+    <div style={{ padding: "1.5rem 2.6rem 2.4rem" }}>
+      {d.summary && <p style={{ fontSize: 13, lineHeight: 1.6, color: k.ink }}>{d.summary}</p>}
+      <Tick k={k}>Ventures &amp; Experience</Tick>
+      {d.experiences.map((x, i) => (
+        <div key={i} style={{ border: `1px solid ${k.line}`, borderRadius: 10, padding: "1rem 1.1rem", marginBottom: ".7rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "baseline" }}>
+            <span style={{ fontFamily: k.disp, fontWeight: 700, fontSize: 15, color: k.strong }}>{x.company}</span>
+            {(x.start || x.end) && <span style={{ color: k.muted, fontSize: 11.5 }}>{[x.start, x.end].filter(Boolean).join(" – ")}</span>}
+          </div>
+          <div style={{ color: k.accent, fontSize: 12.5, fontWeight: 600, marginTop: 1 }}>{x.title}</div>
+          <div style={{ marginTop: ".4rem" }}>{x.bullets.map((b, j) => <Bullet key={j} k={k}>{b}</Bullet>)}</div>
+        </div>
+      ))}
+      {d.projects?.length ? (<><Tick k={k}>Product Launches</Tick><div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".7rem" }}>{d.projects.map((p, i) => (<div key={i} style={{ border: `1px solid ${k.line}`, borderRadius: 10, padding: ".8rem .9rem" }}><div style={{ fontWeight: 700, fontSize: 13, color: k.strong }}>{p.name}</div>{p.tech && <div style={{ fontSize: 11, color: k.accent, fontWeight: 600 }}>{p.tech}</div>}{p.description && <div style={{ fontSize: 12, color: k.ink, marginTop: ".2rem" }}>{p.description}</div>}</div>))}</div></>) : null}
+      <Tick k={k}>Skills</Tick><Chips items={d.skills} k={k} />
+    </div>
   </Page>
 );
 
