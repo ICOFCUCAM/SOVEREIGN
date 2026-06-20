@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { elementToPdf } from "@/lib/export-pdf";
 import { markdownToEpub } from "@/lib/export-epub";
 import { BOOK_THEMES, getBookTheme } from "@/lib/book-themes";
+import { TRIM_SIZES, getTrim } from "@/lib/print-sizes";
 import BookPaper from "@/components/book/BookPaper";
 
 // Themed reader for a finished book, with an editable mode. The edit field is a
@@ -24,6 +25,7 @@ const BookReader = ({
   const [themeId, setThemeId] = useState(BOOK_THEMES[0].id);
   const [mode, setMode] = useState<"read" | "edit">("read");
   const [pdf, setPdf] = useState(false);
+  const [trimId, setTrimId] = useState("a4");
   const paperRef = useRef<HTMLDivElement>(null);
   const theme = getBookTheme(themeId);
   const editable = typeof onContentChange === "function";
@@ -32,7 +34,8 @@ const BookReader = ({
     if (!paperRef.current) return;
     setPdf(true);
     try {
-      await elementToPdf(paperRef.current, `${title || "book"}.pdf`, theme.paper);
+      const t = getTrim(trimId);
+      await elementToPdf(paperRef.current, `${title || "book"}.pdf`, theme.paper, { w: t.wmm, h: t.hmm });
     } catch (e) {
       toast({ title: "PDF export failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally {
@@ -71,8 +74,11 @@ const BookReader = ({
               {mode === "edit" ? <><Check className="w-4 h-4 mr-1" /> Done editing</> : <><Pencil className="w-4 h-4 mr-1" /> Edit</>}
             </Button>
           )}
+          <select value={trimId} onChange={(e) => setTrimId(e.target.value)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans" title="Print trim size">
+            {TRIM_SIZES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+          </select>
           <Button variant="heroOutline" size="sm" disabled={pdf || mode === "edit"} onClick={themedPdf}>
-            {pdf ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} Themed PDF
+            {pdf ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} Print PDF
           </Button>
           <Button variant="heroOutline" size="sm" disabled={epub} onClick={exportEpub}>
             {epub ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <BookOpen className="w-4 h-4 mr-1" />} EPUB
