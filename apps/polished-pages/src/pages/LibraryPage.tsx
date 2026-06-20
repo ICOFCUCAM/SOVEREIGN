@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check } from "lucide-react";
 import PublishDialog from "@/components/app/PublishDialog";
 import AddToCollection from "@/components/app/AddToCollection";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,7 @@ const LibraryPage = () => {
   const [favOnly, setFavOnly] = useState(false);
   const [tplOnly, setTplOnly] = useState(false);
   const [tagFilter, setTagFilter] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const pbRef = useRef<HTMLDivElement>(null);
 
   const load = () => { listDocuments().then(setDocs).catch((e) => { toast({ title: "Could not load library", description: e.message, variant: "destructive" }); setDocs([]); }); };
@@ -126,9 +127,20 @@ const LibraryPage = () => {
   };
 
   const dup = async (d: DocSummary) => {
-    try { await duplicateDocument(d.id); load(); toast({ title: "Duplicated", description: `“${d.title}” copied.` }); }
+    try { await duplicateDocument(d.id); load(); toast({ title: "Duplicated", description: `"${d.title}" copied.` }); }
     catch (e) { toast({ title: "Could not duplicate", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
   };
+
+  const bulkDelete = async () => {
+    if (selected.size === 0) return;
+    const ids = Array.from(selected);
+    setDocs((prev) => prev?.filter((x) => !ids.includes(x.id)) ?? null);
+    setSelected(new Set());
+    try { await Promise.all(ids.map((id) => deleteDocument(id))); toast({ title: `${ids.length} document${ids.length > 1 ? "s" : ""} deleted` }); }
+    catch { load(); toast({ title: "Some deletes failed", variant: "destructive" }); }
+  };
+
+  const toggleSelect = (id: string) => setSelected((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   const star = async (d: DocSummary) => {
     const next = !d.favorite;
@@ -142,7 +154,7 @@ const LibraryPage = () => {
     setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, is_template: next } : x)) ?? null);
     try {
       await setTemplateFlag(d.id, next);
-      toast({ title: next ? "Saved as template" : "Removed from templates", description: next ? `“${d.title}” can now start new documents.` : undefined });
+      toast({ title: next ? "Saved as template" : "Removed from templates", description: next ? `"${d.title}" can now start new documents.` : undefined });
     } catch (e) {
       setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, is_template: !next } : x)) ?? null);
       toast({ title: "Could not update template", description: e instanceof Error ? e.message : "", variant: "destructive" });
@@ -153,7 +165,7 @@ const LibraryPage = () => {
     try {
       await applyTemplate(d.id);
       load();
-      toast({ title: "New document started", description: `Copied from template “${d.title}”.` });
+      toast({ title: "New document started", description: `Copied from template "${d.title}".` });
     } catch (e) {
       toast({ title: "Could not use template", description: e instanceof Error ? e.message : "", variant: "destructive" });
     }
@@ -321,6 +333,16 @@ const LibraryPage = () => {
         <p className="mt-1 text-muted-foreground font-sans">Every document you’ve saved — CVs, letters, books, covers and children’s books.</p>
       </motion.div>
 
+      {selected.size > 0 && (
+        <div className="sticky top-[72px] z-30 mt-4 flex items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-2.5 backdrop-blur-sm">
+          <span className="text-sm font-medium font-sans">{selected.size} selected</span>
+          <div className="flex gap-2">
+            <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())} className="text-muted-foreground">Deselect all</Button>
+            <Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="mr-1 h-3.5 w-3.5" /> Delete {selected.size}</Button>
+          </div>
+        </div>
+      )}
+
       {docs && docs.length > 0 && (
         <div className="mt-5 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -385,7 +407,7 @@ const LibraryPage = () => {
           <CardContent className="flex flex-col items-center gap-3 p-12 text-center">
             <LibraryIcon className="h-10 w-10 text-muted-foreground/60" />
             <p className="font-sans text-sm font-medium">Nothing saved yet</p>
-            <p className="max-w-sm text-sm text-muted-foreground font-sans">Generate a CV, cover letter, or tailored application and choose “Save to library” to keep it here.</p>
+            <p className="max-w-sm text-sm text-muted-foreground font-sans">Generate a CV, cover letter, or tailored application and choose "Save to library" to keep it here.</p>
             <Button asChild variant="hero" size="sm" className="mt-1"><Link to="/cv">Create a CV <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
           </CardContent>
         </Card>
@@ -409,11 +431,13 @@ const LibraryPage = () => {
             {filtered.map((d) => {
               const meta = KIND_META[d.kind] ?? KIND_META.cv;
               return (
-                <Card key={d.id} className="group border-border transition-colors hover:border-primary/40">
+                <Card key={d.id} className={`group border-border transition-colors hover:border-primary/40 ${selected.has(d.id) ? "border-primary/60 bg-primary/5" : ""}`}>
                   <CardContent className="flex items-start gap-3 p-4">
-                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                      <meta.icon className="h-4 w-4 text-primary" />
-                    </span>
+                    <button type="button" onClick={() => toggleSelect(d.id)}
+                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition ${selected.has(d.id) ? "bg-primary" : "bg-primary/10 group-hover:bg-primary/20"}`}
+                      aria-label={selected.has(d.id) ? "Deselect" : "Select"}>
+                      {selected.has(d.id) ? <Check className="h-4 w-4 text-primary-foreground" /> : <meta.icon className="h-4 w-4 text-primary" />}
+                    </button>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate font-sans text-sm font-semibold">{d.title}</span>
