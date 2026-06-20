@@ -16,12 +16,13 @@ const priceLabel = (cents: number) => (cents > 0 ? `$${(cents / 100).toFixed(2)}
 
 // One marketplace listing. Shared by the catalog discovery sections, the
 // filtered grid and author pages so every surface looks consistent.
+// Featured items get a gold accent border to signal curation at a glance.
 const CatalogCard = ({ item: it, admin, onFeature }: { item: CatalogItem; admin?: boolean; onFeature?: (it: CatalogItem) => void }) => (
-  <Card className="flex h-full flex-col border-border transition-all hover:border-primary/50 hover:shadow-premium">
+  <Card className={`flex h-full flex-col transition-all hover:shadow-premium ${it.featured ? "border-gold/40 bg-gradient-to-b from-gold/[0.04] to-transparent hover:border-gold/60" : "border-border hover:border-primary/50"}`}>
     <CardContent className="flex h-full flex-col p-4">
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground font-sans">
-          {it.featured && <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/15 px-1.5 py-0.5 text-gold normal-case"><Star className="h-3 w-3 fill-current" /> Featured</span>}
+          {it.featured && <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/20 px-1.5 py-0.5 text-gold font-semibold normal-case"><Star className="h-3 w-3 fill-current" /> Featured</span>}
           {it.category ?? "Other"}
         </span>
         <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${it.price_cents > 0 ? "bg-gold/15 text-gold" : "bg-primary/10 text-primary"}`}>{priceLabel(it.price_cents)}</span>
