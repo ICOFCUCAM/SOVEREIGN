@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, Loader2, ArrowLeft, type LucideIcon } from "lucide-react";
+import { Sparkles, Loader2, ArrowLeft, ClipboardList, Check, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,10 @@ import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
 import CountryDatalist from "@/components/app/CountryDatalist";
+import { saveAssessment } from "@/lib/assessment-bank";
+
+// Document types that belong in the reusable Assessment Bank.
+const BANKABLE = new Set<SchoolDocType>(["quiz", "exam", "assessment", "worksheet", "answer-key", "marking-guide", "homework-pack", "revision", "exam-prep"]);
 
 export interface SchoolField {
   key: keyof SchoolInput;
@@ -45,6 +49,19 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [docs, setDocs] = useState<Record<string, string> | null>(null);
   const [tab, setTab] = useState<SchoolDocType>(config.parts[0].type);
+  const [banking, setBanking] = useState(false);
+  const [bankedTab, setBankedTab] = useState<SchoolDocType | null>(null);
+
+  const addToBank = async (content: string, docType: SchoolDocType, title: string) => {
+    setBanking(true);
+    try {
+      await saveAssessment({ subject: vals.subject, grade: vals.grade, topic: vals.topic, docType, title, content });
+      setBankedTab(docType);
+      toast({ title: "Added to Assessment Bank", description: "Reuse it from the bank, filtered by subject and grade." });
+    } catch (e) {
+      toast({ title: "Could not add to bank", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    } finally { setBanking(false); }
+  };
 
   const required = config.fields.filter((f) => f.required);
   const canRun = required.every((f) => (vals[f.key as string] ?? "").trim().length > 0) && !progress;
@@ -97,6 +114,12 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
             </div>
             <div className="flex items-center gap-2">
               <SaveToLibrary kind="book" title={docTitle} payload={{ markdown: current, title: docTitle }} preview={`${config.previewLabel} · ${vals.subject ?? ""} ${vals.grade ?? ""}`} />
+              {BANKABLE.has(tab) && (
+                <Button variant="heroOutline" size="sm" disabled={banking || bankedTab === tab} onClick={() => addToBank(current, tab, docTitle)}>
+                  {bankedTab === tab ? <Check className="w-4 h-4 mr-1 text-green-600" /> : banking ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <ClipboardList className="w-4 h-4 mr-1" />}
+                  {bankedTab === tab ? "In bank" : "Save to bank"}
+                </Button>
+              )}
               <Button variant="ghost" size="sm" onClick={() => setDocs(null)} className="text-muted-foreground"><ArrowLeft className="w-4 h-4 mr-1" /> New</Button>
             </div>
           </div>
