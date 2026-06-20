@@ -12,6 +12,7 @@ import { extractFileText, CV_ACCEPT, CV_MIME } from "@/lib/extract-file-text";
 import { splitBook } from "@/lib/book-split";
 import { useMemo } from "react";
 import { translateLocalize } from "@/lib/translate";
+import { recordBatchOp } from "@/lib/editions";
 import { usePersistentState } from "@/hooks/use-persistent-state";
 import { LANGUAGES, isoFor, isRtlLanguage } from "@/lib/languages";
 import { markdownToEpub } from "@/lib/export-epub";
@@ -75,6 +76,7 @@ const TranslatePublish = () => {
       }
       setEditions(out);
       setTab(targets[0]);
+      recordBatchOp(total); // telemetry: one unit per section-language call
     } catch (e) {
       toast({ title: "Translation failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally {

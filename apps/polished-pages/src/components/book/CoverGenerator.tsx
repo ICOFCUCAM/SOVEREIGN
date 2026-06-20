@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { authHeader, fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
 import { translateLocalize } from "@/lib/translate";
+import { recordBatchOp } from "@/lib/editions";
 import { LANGUAGE_NAMES } from "@/lib/languages";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
 
@@ -69,6 +70,7 @@ const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle }: { ti
         setBatchImg({ ...out });
         setBatch({ label: lang, done: i + 1, total: coverLangs.length });
       }
+      recordBatchOp(coverLangs.length); // telemetry: one unit per language cover
     } catch (e) {
       toast({ title: "Batch covers failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally {
