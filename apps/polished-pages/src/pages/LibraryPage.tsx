@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, getDocument, deleteDocument, type DocSummary, type DocKind } from "@/lib/documents";
+import { elementToPdf } from "@/lib/export-pdf";
 import type { CvData } from "@/lib/cv-data";
 import CVPreview from "@/components/CVPreview";
 import CoverLetterPreview from "@/components/CoverLetterPreview";
 import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
+import PictureBookView, { type PictureBookData } from "@/components/children/PictureBookView";
 import { ArrowLeft } from "lucide-react";
 
 const KIND_META: Record<DocKind, { label: string; icon: typeof FileText }> = {
@@ -19,19 +21,22 @@ const KIND_META: Record<DocKind, { label: string; icon: typeof FileText }> = {
   "cover-letter": { label: "Cover letter", icon: PenTool },
   book: { label: "Book", icon: BookOpen },
   cover: { label: "Book cover", icon: ImageIcon },
+  storybook: { label: "Storybook", icon: BookHeart },
 };
 
 type Opened =
   | { kind: "cv"; data: CvData; template?: string }
   | { kind: "letter"; markdown: string; fullName: string; email?: string; phone?: string }
   | { kind: "book"; markdown: string; title: string }
-  | { kind: "cover"; front?: string; back?: string; title: string };
+  | { kind: "cover"; front?: string; back?: string; title: string }
+  | { kind: "picturebook"; book: PictureBookData; pageAspect: string; showText: boolean; title: string };
 
 const LibraryPage = () => {
   const { toast } = useToast();
   const [docs, setDocs] = useState<DocSummary[] | null>(null);
   const [opening, setOpening] = useState<string | null>(null);
   const [opened, setOpened] = useState<Opened | null>(null);
+  const pbRef = useRef<HTMLDivElement>(null);
 
   const load = () => { listDocuments().then(setDocs).catch((e) => { toast({ title: "Could not load library", description: e.message, variant: "destructive" }); setDocs([]); }); };
   useEffect(load, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -48,6 +53,8 @@ const LibraryPage = () => {
         setOpened({ kind: "book", markdown: String(p.markdown ?? ""), title: String(p.title ?? d.title) });
       } else if (d.kind === "cover") {
         setOpened({ kind: "cover", front: p.front as string | undefined, back: p.back as string | undefined, title: String(p.title ?? d.title) });
+      } else if (d.kind === "storybook") {
+        setOpened({ kind: "picturebook", book: p.book as PictureBookData, pageAspect: String(p.pageAspect ?? "16/9"), showText: p.showText !== false, title: d.title });
       } else {
         // cv and tailored both restore a CvData document
         setOpened({ kind: "cv", data: p.data as CvData, template: (row.template ?? undefined) || (p.template as string | undefined) });
@@ -94,6 +101,29 @@ const LibraryPage = () => {
               onContentChange={(s) => setOpened({ kind: "book", markdown: s, title: opened.title })}
             />
           </div>
+        </div>
+      </div>
+    );
+  }
+  if (opened?.kind === "picturebook") {
+    const exportPdf = async () => {
+      if (!pbRef.current) return;
+      try { await elementToPdf(pbRef.current, `${opened.title}.pdf`, "#ffffff"); }
+      catch (e) { toast({ title: "PDF export failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" }); }
+    };
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
+          <div className="container flex items-center justify-between h-12 px-6">
+            <span className="truncate text-sm font-medium text-muted-foreground font-sans">{opened.title}</span>
+            <div className="flex items-center gap-2">
+              <Button variant="heroOutline" size="sm" onClick={exportPdf}><Download className="w-4 h-4 mr-1" /> PDF</Button>
+              <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground"><ArrowLeft className="w-4 h-4 mr-2" /> Library</Button>
+            </div>
+          </div>
+        </div>
+        <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
+          <PictureBookView book={opened.book} innerRef={pbRef} pageAspect={opened.pageAspect} showText={opened.showText} />
         </div>
       </div>
     );

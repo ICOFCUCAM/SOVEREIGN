@@ -29,7 +29,7 @@ const PictureBookView = ({
     <div className="overflow-hidden rounded-xl border border-border">
       <div className="relative flex aspect-[3/4] items-center justify-center bg-muted/40">
         {book.coverImage ? (
-          <img src={book.coverImage} alt="Cover" className="h-full w-full object-cover" />
+          <img src={book.coverImage} alt="Cover" crossOrigin="anonymous" className="h-full w-full object-cover" />
         ) : (
           <div className="flex flex-col items-center gap-3 text-muted-foreground">
             <ImageIcon className="h-10 w-10" />
@@ -50,7 +50,7 @@ const PictureBookView = ({
       <div key={i} className="overflow-hidden rounded-xl border border-border">
         <div className="flex items-center justify-center bg-muted/40" style={{ aspectRatio: pageAspect }}>
           {p.image ? (
-            <img src={p.image} alt={`Page ${i + 1}`} className="h-full w-full object-contain bg-white" />
+            <img src={p.image} alt={`Page ${i + 1}`} crossOrigin="anonymous" className="h-full w-full object-contain bg-white" />
           ) : (
             onIllustratePage && (
               <Button variant="heroOutline" size="sm" onClick={() => onIllustratePage(i)}><ImageIcon className="w-4 h-4 mr-1" /> Illustrate page {i + 1}</Button>

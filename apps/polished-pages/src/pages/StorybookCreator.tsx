@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { elementToPdf } from "@/lib/export-pdf";
 import { generateStorybook, generateIllustration, type Storybook, type StoryInput } from "@/lib/storybook";
 import PictureBookView from "@/components/children/PictureBookView";
+import SavePictureBookButton from "@/components/children/SavePictureBookButton";
 
 const READING_LEVELS = [
   "Pre-reader (ages 2–4)",
@@ -116,6 +117,7 @@ const StorybookCreator = () => {
                 {illustrating ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Wand2 className="w-4 h-4 mr-1" />}
                 {illustrating ? `Illustrating ${illustrating.done}/${illustrating.total}` : "Illustrate all"}
               </Button>
+              <SavePictureBookButton build={() => ({ book: { title: book.title, dedication: book.dedication, coverImage: book.coverImage, pages: book.pages.map((p) => ({ text: p.text, image: p.image })) }, variant: "storybook", pageAspect: "16/9", showText: true })} />
               <Button variant="hero" size="sm" disabled={pdf} onClick={exportPdf}>
                 {pdf ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />} PDF
               </Button>

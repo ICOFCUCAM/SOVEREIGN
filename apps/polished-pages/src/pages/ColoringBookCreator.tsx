@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { elementToPdf } from "@/lib/export-pdf";
 import { generateColoringBook, generateIllustration, type ColoringBook } from "@/lib/storybook";
 import PictureBookView, { type PictureBookData } from "@/components/children/PictureBookView";
+import SavePictureBookButton from "@/components/children/SavePictureBookButton";
 
 const ColoringBookCreator = () => {
   const { toast } = useToast();
@@ -85,6 +86,7 @@ const ColoringBookCreator = () => {
                 {illustrating ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Wand2 className="w-4 h-4 mr-1" />}
                 {illustrating ? `Drawing ${illustrating.done}/${illustrating.total}` : "Draw all pages"}
               </Button>
+              <SavePictureBookButton build={() => ({ book: { title: book.title, coverImage: book.coverImage, pages: book.pages.map((p) => ({ image: p.image })) }, variant: "coloring", pageAspect: "3/4", showText: false })} />
               <Button variant="hero" size="sm" disabled={pdf} onClick={exportPdf}>
                 {pdf ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />} PDF
               </Button>
