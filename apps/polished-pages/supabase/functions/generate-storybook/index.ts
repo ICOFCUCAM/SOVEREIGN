@@ -40,6 +40,10 @@ serve(async (req) => {
       moral: "a story built around a clear moral lesson, shown through the characters' choices rather than stated",
       folktale: "a folktale told in the warm, rhythmic style of a traditional tale, honouring its cultural roots",
       legend: "a legend about a hero, origin or wonder, told with respect, awe and a sense of heritage",
+      historical: "a historical story set in a real time and place, weaving in accurate, age-appropriate period detail (clothing, tools, daily life, customs) while keeping the adventure warm and engaging",
+      cultural: "a story that celebrates a specific culture's traditions, festivals, food, music and values, told authentically and respectfully, never as stereotype",
+      science: "a story that sparks wonder about a real science idea, weaving an accurate, age-appropriate explanation naturally into the plot",
+      faith: "a gentle, values-based story reflecting faith and spirituality in an inclusive, age-appropriate way, centred on kindness, gratitude, hope and wonder",
     };
     const styleDesc = STYLES[storyType] ?? STYLES.classic;
 

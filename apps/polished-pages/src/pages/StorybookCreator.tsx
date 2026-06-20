@@ -36,6 +36,10 @@ const STORY_TYPES: { id: StoryType; label: string }[] = [
   { id: "moral", label: "Moral lesson" },
   { id: "folktale", label: "Folktale" },
   { id: "legend", label: "Legend / heritage" },
+  { id: "historical", label: "Historical" },
+  { id: "cultural", label: "Cultural" },
+  { id: "science", label: "Science" },
+  { id: "faith", label: "Faith-based" },
 ];
 
 const StorybookCreator = () => {

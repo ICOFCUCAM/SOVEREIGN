@@ -12,7 +12,7 @@ export interface Storybook {
   pages: StoryPage[];
 }
 
-export type StoryType = "classic" | "bedtime" | "adventure" | "cartoon" | "educational" | "moral" | "folktale" | "legend";
+export type StoryType = "classic" | "bedtime" | "adventure" | "cartoon" | "educational" | "moral" | "folktale" | "legend" | "historical" | "cultural" | "science" | "faith";
 
 export interface StoryInput {
   childName?: string;
