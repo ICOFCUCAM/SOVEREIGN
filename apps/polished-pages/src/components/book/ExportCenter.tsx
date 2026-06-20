@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, FileDown, Loader2, Library as LibraryIcon, Package } from "lucide-react";
+import { BookOpen, FileDown, Loader2, Library as LibraryIcon, Package, Store, Globe, CheckCircle2, Image as ImageIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, getDocument, type DocSummary } from "@/lib/documents";
+import { listEditions } from "@/lib/editions";
 import { TRIM_SIZES, getTrim } from "@/lib/print-sizes";
 import { markdownToEpub } from "@/lib/export-epub";
 import { markdownToPrintPdf } from "@/lib/export-print-pdf";
@@ -24,6 +25,7 @@ const ExportCenter = () => {
   const [trimId, setTrimId] = useState("6x9");
   const [author, setAuthor] = useState("");
   const [busy, setBusy] = useState<Fmt | null>(null);
+  const [editionCount, setEditionCount] = useState<number | null>(null);
 
   useEffect(() => {
     listDocuments()
@@ -34,6 +36,13 @@ const ExportCenter = () => {
       })
       .catch(() => setDocs([]));
   }, []);
+
+  const selectedDoc = useMemo(() => docs?.find((d) => d.id === selected) ?? null, [docs, selected]);
+
+  useEffect(() => {
+    setEditionCount(null);
+    if (selected) listEditions(selected).then((e) => setEditionCount(Math.max(0, e.filter((x) => !x.is_source).length))).catch(() => {});
+  }, [selected]);
 
   const load = async (): Promise<{ markdown: string; title: string } | null> => {
     if (!selected) return null;
@@ -65,8 +74,8 @@ const ExportCenter = () => {
   return (
     <Card className="border-border">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-serif text-lg"><Package className="h-4 w-4 text-gold" /> Export center</CardTitle>
-        <CardDescription className="font-sans">Take any saved book to every store — EPUB, a KDP interior, and an IngramSpark-grade interior with embedded fonts.</CardDescription>
+        <CardTitle className="flex items-center gap-2 font-serif text-lg"><Package className="h-4 w-4 text-gold" /> Distribution center</CardTitle>
+        <CardDescription className="font-sans">Take any saved book to every store, see its marketplace status, and manage its language editions — all in one place.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {docs === null && <div className="flex items-center gap-2 text-sm text-muted-foreground font-sans"><Loader2 className="h-4 w-4 animate-spin" /> Loading your books…</div>}
@@ -97,6 +106,31 @@ const ExportCenter = () => {
               <Label className="font-sans text-xs">Author (for the IngramSpark title page, optional)</Label>
               <Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="e.g. Alex Morgan" maxLength={80} />
             </div>
+
+            {/* Per-title readiness */}
+            <div className="rounded-lg border border-border bg-card/50 p-3">
+              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans">Title status</div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <div className="flex items-center gap-2 text-sm font-sans">
+                  <CheckCircle2 className="h-4 w-4 text-primary" /> Manuscript ready
+                </div>
+                <div className="flex items-center gap-2 text-sm font-sans">
+                  <Store className="h-4 w-4 text-muted-foreground" />
+                  {selectedDoc?.listed ? <span className="text-foreground">Published to marketplace</span> : <Link to="/library" className="text-primary hover:underline">Publish to marketplace</Link>}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-sans">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  {editionCount === null ? <span className="text-muted-foreground">…</span>
+                    : editionCount > 0 ? <Link to="/editions" className="text-foreground hover:text-primary">{editionCount} language edition{editionCount === 1 ? "" : "s"}</Link>
+                    : <Link to="/editions" className="text-primary hover:underline">Add language editions</Link>}
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground font-sans">
+                <ImageIcon className="mr-1 inline h-3.5 w-3.5" /> Need a cover? Generate one in the <Link to="/book" className="text-primary hover:underline">Book Creator</Link> and size it with the spine calculator below.
+              </div>
+            </div>
+
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans">Export for stores</div>
             <div className="flex flex-wrap gap-2">
               <Button variant="heroOutline" size="sm" disabled={busy !== null} onClick={() => run("epub")}>
                 {busy === "epub" ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <BookOpen className="mr-1 h-4 w-4" />} EPUB
