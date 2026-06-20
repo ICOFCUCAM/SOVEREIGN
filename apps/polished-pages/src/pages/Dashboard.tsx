@@ -12,6 +12,7 @@ import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
 import { listDocuments, catalogList, type DocSummary, type DocKind, type CatalogItem } from "@/lib/documents";
 import { planDisplayName } from "@/lib/plans";
 import { STUDIO_THEME, type Studio } from "@/lib/studio-theme";
+import GettingStarted from "@/components/app/GettingStarted";
 
 // One-click "create" tiles spanning the four studios, each in its studio colour.
 const CREATE: { label: string; to: string; icon: typeof FileText; studio: Studio }[] = [
@@ -116,6 +117,9 @@ const Dashboard = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* First-run onboarding for empty accounts */}
+      {docs !== null && all.length === 0 && <GettingStarted />}
 
       {/* Continue working */}
       {recent.length > 0 && (
