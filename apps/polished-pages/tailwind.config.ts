@@ -56,6 +56,11 @@ export default {
           light: "hsl(var(--gold-light))",
           dark: "hsl(var(--gold-dark))",
         },
+        // Four-pillar ecosystem palette
+        career: "hsl(var(--career))",
+        publishing: "hsl(var(--publishing))",
+        educational: "hsl(var(--educational))",
+        marketplace: "hsl(var(--marketplace))",
         surface: {
           DEFAULT: "hsl(var(--surface))",
           hover: "hsl(var(--surface-hover))",

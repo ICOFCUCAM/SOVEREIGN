@@ -7,54 +7,63 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 220 20% 12%;
+    --foreground: 222 47% 11%;          /* deep navy */
 
-    --card: 0 0% 98%;
-    --card-foreground: 220 20% 12%;
+    --card: 210 40% 99%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 12%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 42 78% 48%;
+    --primary: 221 83% 53%;             /* royal blue #2563EB */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 15% 30%;
+    --secondary: 215 28% 96%;
+    --secondary-foreground: 222 30% 22%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 215 28% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 42 78% 48%;
+    --accent: 221 83% 53%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 14% 90%;
-    --input: 220 14% 90%;
-    --ring: 42 78% 48%;
+    --border: 215 24% 90%;
+    --input: 215 24% 90%;
+    --ring: 221 83% 53%;
 
     --radius: 0.75rem;
 
-    --gold: 42 78% 48%;
-    --gold-light: 42 65% 38%;
-    --gold-dark: 42 85% 35%;
-    --surface: 0 0% 98%;
-    --surface-hover: 220 14% 95%;
-    --hero-gradient: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(220 20% 97%) 50%, hsl(0 0% 100%) 100%);
-    --gold-gradient: linear-gradient(135deg, hsl(42 78% 48%) 0%, hsl(38 85% 40%) 100%);
-    --text-gradient: linear-gradient(135deg, hsl(42 78% 48%), hsl(42 65% 38%));
-    --glow-gold: 0 0 40px hsl(42 78% 48% / 0.1);
-    --shadow-premium: 0 20px 60px -15px hsl(220 20% 12% / 0.08);
+    /* Amber kept as a sparing accent, not the dominant brand colour */
+    --gold: 38 92% 50%;                 /* amber #F59E0B */
+    --gold-light: 38 92% 45%;
+    --gold-dark: 32 95% 44%;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 220 15% 30%;
-    --sidebar-primary: 42 78% 48%;
+    /* Four-pillar ecosystem palette */
+    --career: 221 83% 53%;              /* blue */
+    --publishing: 262 83% 58%;          /* purple */
+    --educational: 160 84% 36%;         /* emerald */
+    --marketplace: 38 92% 50%;          /* amber */
+
+    --surface: 210 40% 99%;
+    --surface-hover: 215 28% 95%;
+    --hero-gradient: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(215 40% 97%) 50%, hsl(0 0% 100%) 100%);
+    /* Brand gradient = blue -> purple (the ecosystem), replacing the gold gradient */
+    --gold-gradient: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(262 83% 58%) 100%);
+    --text-gradient: linear-gradient(120deg, hsl(221 83% 53%), hsl(262 83% 58%));
+    --glow-gold: 0 0 40px hsl(221 83% 53% / 0.12);
+    --shadow-premium: 0 20px 60px -15px hsl(222 47% 11% / 0.10);
+
+    --sidebar-background: 210 40% 99%;
+    --sidebar-foreground: 222 30% 22%;
+    --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 96%;
-    --sidebar-accent-foreground: 220 15% 30%;
-    --sidebar-border: 220 14% 90%;
-    --sidebar-ring: 42 78% 48%;
+    --sidebar-accent: 215 28% 96%;
+    --sidebar-accent-foreground: 222 30% 22%;
+    --sidebar-border: 215 24% 90%;
+    --sidebar-ring: 221 83% 53%;
   }
 }
 

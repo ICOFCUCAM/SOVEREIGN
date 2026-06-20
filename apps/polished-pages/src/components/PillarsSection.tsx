@@ -12,6 +12,7 @@ const PILLARS = [
     blurb: "Land the interview with AI-built, ATS-ready documents.",
     items: ["CV Builder", "Tailor to a Job", "Cover Letters"],
     to: "/cv",
+    text: "text-career", bg: "bg-career/10", border: "hover:border-career/50",
   },
   {
     icon: BookOpen,
@@ -19,6 +20,7 @@ const PILLARS = [
     blurb: "Write, illustrate and produce full books, print-ready.",
     items: ["Book Creator", "Transform a Book", "Illustration Studio", "Covers & export"],
     to: "/book",
+    text: "text-publishing", bg: "bg-publishing/10", border: "hover:border-publishing/50",
   },
   {
     icon: GraduationCap,
@@ -26,6 +28,7 @@ const PILLARS = [
     blurb: "Children's books, classrooms and curricula in any language.",
     items: ["Storybooks & series", "Coloring books", "Workbooks & exams", "Curriculum builder"],
     to: "/children",
+    text: "text-educational", bg: "bg-educational/10", border: "hover:border-educational/50",
   },
   {
     icon: Store,
@@ -33,6 +36,7 @@ const PILLARS = [
     blurb: "Publish, get discovered, and sell to readers and schools.",
     items: ["Discover & trending", "Author pages", "Categories", "Distribution"],
     to: "/catalog",
+    text: "text-marketplace", bg: "bg-marketplace/10", border: "hover:border-marketplace/50",
   },
 ];
 
@@ -57,9 +61,9 @@ const PillarsSection = () => (
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: i * 0.08 }}
           >
-            <Link to={p.to} className="group flex h-full flex-col rounded-2xl border border-border bg-gradient-to-br from-card to-background p-6 shadow-premium transition-all hover:border-primary/50 hover:-translate-y-0.5">
-              <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                <p.icon className="h-6 w-6 text-primary" />
+            <Link to={p.to} className={`group flex h-full flex-col rounded-2xl border border-border bg-gradient-to-br from-card to-background p-6 shadow-premium transition-all hover:-translate-y-0.5 ${p.border}`}>
+              <span className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${p.bg}`}>
+                <p.icon className={`h-6 w-6 ${p.text}`} />
               </span>
               <h3 className="font-serif text-xl font-bold">{p.name}</h3>
               <p className="mt-1.5 text-sm text-muted-foreground font-sans">{p.blurb}</p>
@@ -68,7 +72,7 @@ const PillarsSection = () => (
                   <li key={it} className="text-sm text-foreground/80 font-sans">{it}</li>
                 ))}
               </ul>
-              <span className="mt-5 inline-flex items-center text-sm font-medium text-primary font-sans">
+              <span className={`mt-5 inline-flex items-center text-sm font-medium font-sans ${p.text}`}>
                 Explore <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </span>
             </Link>
