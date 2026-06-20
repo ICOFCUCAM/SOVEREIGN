@@ -56,7 +56,13 @@ const LibraryPage = () => {
   useEffect(load, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // One-click resume from the dashboard: /library?open=<id> auto-opens the doc once.
+  // ?kind=<DocKind> and ?filter=listed|shared|drafts apply initial filters from dashboard links.
   const [searchParams, setSearchParams] = useSearchParams();
+  const [kindFilter, setKindFilter] = useState<DocKind | "">(() => (searchParams.get("kind") ?? "") as DocKind | "");
+  const [statusFilter, setStatusFilter] = useState<"" | "listed" | "shared" | "drafts">(() => {
+    const f = searchParams.get("filter") ?? "";
+    return (["listed", "shared", "drafts"].includes(f) ? f : "") as "" | "listed" | "shared" | "drafts";
+  });
   useEffect(() => {
     const id = searchParams.get("open");
     if (!id || !docs) return;
@@ -316,22 +322,38 @@ const LibraryPage = () => {
       </motion.div>
 
       {docs && docs.length > 0 && (
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search your library…" className="pl-8" />
+        <div className="mt-5 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search your library…" className="pl-8" />
+            </div>
+            <Button variant={favOnly ? "hero" : "heroOutline"} size="sm" onClick={() => setFavOnly((f) => !f)}>
+              <Star className={`mr-1 h-4 w-4 ${favOnly ? "fill-current" : ""}`} /> Favorites
+            </Button>
+            <Button variant={tplOnly ? "hero" : "heroOutline"} size="sm" onClick={() => setTplOnly((t) => !t)}>
+              <LayoutTemplate className="mr-1 h-4 w-4" /> Templates
+            </Button>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans">
+              <option value="">All statuses</option>
+              <option value="listed">Listed</option>
+              <option value="shared">Shared</option>
+              <option value="drafts">Drafts</option>
+            </select>
+            {tagFilter && (
+              <button onClick={() => setTagFilter("")} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary font-sans">
+                <Tag className="h-3 w-3" /> {tagFilter} <X className="h-3 w-3" />
+              </button>
+            )}
           </div>
-          <Button variant={favOnly ? "hero" : "heroOutline"} size="sm" onClick={() => setFavOnly((f) => !f)}>
-            <Star className={`mr-1 h-4 w-4 ${favOnly ? "fill-current" : ""}`} /> Favorites
-          </Button>
-          <Button variant={tplOnly ? "hero" : "heroOutline"} size="sm" onClick={() => setTplOnly((t) => !t)}>
-            <LayoutTemplate className="mr-1 h-4 w-4" /> Templates
-          </Button>
-          {tagFilter && (
-            <button onClick={() => setTagFilter("")} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary font-sans">
-              <Tag className="h-3 w-3" /> {tagFilter} <X className="h-3 w-3" />
-            </button>
-          )}
+          <div className="flex flex-wrap gap-1.5">
+            {([["", "All"], ...Object.entries(KIND_META).map(([k, v]) => [k, v.label])] as [string, string][]).map(([k, label]) => (
+              <button key={k} onClick={() => setKindFilter(k as DocKind | "")}
+                className={`rounded-full border px-2.5 py-0.5 text-xs font-sans transition ${kindFilter === k ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -371,7 +393,14 @@ const LibraryPage = () => {
 
       {docs && docs.length > 0 && (() => {
         const q = query.trim().toLowerCase();
-        const filtered = docs.filter((d) => (!favOnly || d.favorite) && (!tplOnly || d.is_template) && (!tagFilter || (d.tags ?? []).includes(tagFilter)) && (!q || d.title.toLowerCase().includes(q) || (d.preview ?? "").toLowerCase().includes(q)));
+        const filtered = docs.filter((d) =>
+          (!favOnly || d.favorite) &&
+          (!tplOnly || d.is_template) &&
+          (!tagFilter || (d.tags ?? []).includes(tagFilter)) &&
+          (!q || d.title.toLowerCase().includes(q) || (d.preview ?? "").toLowerCase().includes(q)) &&
+          (kindFilter === "" || d.kind === kindFilter) &&
+          (statusFilter === "" || (statusFilter === "listed" ? d.listed : statusFilter === "shared" ? (d.shared && !d.listed) : !d.shared))
+        );
         if (filtered.length === 0) {
           return <p className="mt-8 text-center text-sm text-muted-foreground font-sans">No documents match your filters.</p>;
         }
@@ -388,6 +417,13 @@ const LibraryPage = () => {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate font-sans text-sm font-semibold">{d.title}</span>
+                        {d.listed ? (
+                          <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 font-sans">Listed</span>
+                        ) : d.shared ? (
+                          <span className="inline-flex shrink-0 items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary font-sans">Shared</span>
+                        ) : (
+                          <span className="inline-flex shrink-0 items-center rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground font-sans">Draft</span>
+                        )}
                         {d.is_template && (
                           <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-gold/15 px-1.5 py-0.5 text-[10px] font-medium text-gold font-sans">
                             <LayoutTemplate className="h-3 w-3" /> Template
