@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Check, Loader2, Crown, CreditCard, ShieldCheck, XCircle, Copyright } from "lucide-react";
+import { Sparkles, Check, Loader2, Crown, CreditCard, ShieldCheck, XCircle, Copyright, ArrowRight, Building2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { PLANS, MARKETPLACE_FEE_PCT, type Plan } from "@/lib/plans";
+import { PLANS, PLAN_RANK, MARKETPLACE_FEE_PCT, type Plan } from "@/lib/plans";
 import { startUpgrade } from "@/lib/session";
 import { BRAND } from "@/lib/tools";
 
@@ -34,6 +34,14 @@ const Pricing = () => {
     }
   };
 
+  // Three pricing zones, so the page reads as an ascending ladder rather than a
+  // flat row of equal boxes: a slim free lead-in, the self-serve ladder
+  // (Creator → Professional → Publisher Pro → Business), and a custom-tier band
+  // for schools / NGOs / ministries.
+  const free = PLANS.find((p) => p.id === "free");
+  const ladder = PLANS.filter((p) => ["creator", "professional", "publisher", "business"].includes(p.id));
+  const orgs = PLANS.filter((p) => p.checkout === "contact");
+
   return (
     <div className="min-h-screen bg-background">
       <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/85 backdrop-blur-lg">
@@ -60,32 +68,82 @@ const Pricing = () => {
           <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-primary" /> Keep {100 - MARKETPLACE_FEE_PCT}% of sales</span>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 items-start">
-          {PLANS.map((plan, idx) => {
+        {/* Zone 1 — Free lead-in. De-emphasised so it reads as the entry rung,
+            not a peer of the paid ladder. */}
+        {free && (
+          <Card className="mt-10 border-border bg-card/40">
+            <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-serif text-lg font-bold">{free.name}</h3>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground font-sans">Start here</span>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground font-sans">{free.target} · 20 text generations &amp; 15 image credits / month · 1 published project</p>
+              </div>
+              <Button variant="heroOutline" size="sm" className="shrink-0" disabled={busy === free.id} onClick={() => choose(free)}>Get started free</Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Progression rail — names the ladder so the hierarchy is legible before
+            the eye even reaches the cards. */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs font-sans text-muted-foreground">
+          {ladder.map((p, i) => (
+            <span key={p.id} className="flex items-center gap-2">
+              <span className={p.highlight ? "font-semibold text-primary" : ""}>{p.name}</span>
+              {i < ladder.length - 1 && <ArrowRight className="h-3 w-3 opacity-50" />}
+            </span>
+          ))}
+        </div>
+
+        {/* Zone 2 — the self-serve ladder. Each rung escalates in visual weight:
+            rank pips, a top accent bar that brightens with tier, and distinct
+            treatments for the recommended (Professional) and top (Business) rungs. */}
+        <div className="mt-5 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {ladder.map((plan, idx) => {
+            const rank = PLAN_RANK[plan.id] ?? 1; // 1..4 across the ladder
+            const featured = plan.highlight;       // Professional
             const isGold = plan.id === "publisher";
-            const featured = plan.highlight;
+            const isTop = plan.id === "business";
+            const cardTone = featured
+              ? "border-primary/60 shadow-premium ring-1 ring-primary/20 bg-gradient-to-b from-primary/[0.05] to-card"
+              : isGold
+                ? "border-gold/30 bg-gradient-to-b from-gold/[0.04] to-card"
+                : isTop
+                  ? "border-foreground/25 shadow-premium bg-gradient-to-b from-foreground/[0.05] to-card"
+                  : "border-border";
+            const pipColor = isTop ? "bg-foreground" : isGold ? "bg-gold" : "bg-primary";
             return (
               <motion.div
                 key={plan.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.07 }}
-                className={`relative ${featured ? "md:-mt-3 md:scale-[1.02]" : ""}`}
+                className={`relative ${featured ? "lg:-mt-2" : ""}`}
               >
                 {featured && (
-                  <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/30 via-primary/10 to-gold/20 blur-xl opacity-60" />
+                  <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/30 via-primary/10 to-gold/20 opacity-60 blur-xl" />
                 )}
-                <Card className={`relative flex h-full flex-col ${featured ? "border-primary/60 shadow-premium ring-1 ring-primary/20 bg-gradient-to-b from-primary/[0.04] to-card" : isGold ? "border-gold/30 bg-gradient-to-b from-gold/[0.03] to-card" : "border-border"}`}>
+                <Card className={`relative flex h-full flex-col overflow-hidden ${cardTone}`}>
+                  {/* escalating top accent bar */}
+                  <div className="h-1 w-full bg-gold-gradient" style={{ opacity: 0.25 + rank * 0.18 }} />
                   {featured && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 animate-pulse rounded-full bg-primary px-4 py-0.5 text-xs font-semibold text-primary-foreground font-sans shadow-sm">Most popular</span>
                   )}
-                  {isGold && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-gold/80 to-amber-400 px-4 py-0.5 text-xs font-semibold text-white font-sans">Publisher Pro</span>
+                  {isTop && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-foreground px-4 py-0.5 text-xs font-semibold text-background font-sans">Most powerful</span>
                   )}
                   <CardContent className="flex h-full flex-col p-5">
-                    <div className="flex items-center gap-2">
+                    {/* rank pips — fills 1→4 up the ladder */}
+                    <div className="flex gap-1" aria-hidden>
+                      {[1, 2, 3, 4].map((n) => (
+                        <span key={n} className={`h-1 w-5 rounded-full ${n <= rank ? pipColor : "bg-border"}`} />
+                      ))}
+                    </div>
+                    <div className="mt-3 flex items-center gap-2">
                       {featured && <Crown className="h-4 w-4 text-gold" />}
-                      {isGold && <Crown className="h-4 w-4 text-gold fill-gold" />}
+                      {isGold && <Crown className="h-4 w-4 fill-gold text-gold" />}
+                      {isTop && <Building2 className="h-4 w-4 text-foreground" />}
                       <h3 className="font-serif text-lg font-bold">{plan.name}</h3>
                     </div>
                     <p className="mt-0.5 text-xs text-muted-foreground font-sans">{plan.target}</p>
@@ -96,18 +154,18 @@ const Pricing = () => {
                     <ul className="mt-4 flex-1 space-y-2">
                       {plan.features.map((f) => (
                         <li key={f} className="flex items-start gap-2 text-sm font-sans">
-                          <Check className={`mt-0.5 h-4 w-4 shrink-0 ${isGold ? "text-gold" : "text-primary"}`} /> {f}
+                          <Check className={`mt-0.5 h-4 w-4 shrink-0 ${isGold ? "text-gold" : isTop ? "text-foreground" : "text-primary"}`} /> {f}
                         </li>
                       ))}
                     </ul>
                     <Button
-                      variant={featured || isGold ? "hero" : "heroOutline"}
-                      className={`mt-5 w-full ${isGold ? "bg-gradient-to-r from-gold/90 to-amber-500 text-white border-0 hover:from-gold hover:to-amber-400" : ""}`}
+                      variant={featured || isGold || isTop ? "hero" : "heroOutline"}
+                      className={`mt-5 w-full ${isGold ? "border-0 bg-gradient-to-r from-gold/90 to-amber-500 text-white hover:from-gold hover:to-amber-400" : isTop ? "border-0 bg-foreground text-background hover:bg-foreground/90" : ""}`}
                       disabled={busy === plan.id}
                       onClick={() => choose(plan)}
                     >
                       {busy === plan.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                      {plan.checkout === "contact" ? "Contact sales" : plan.id === "free" ? "Get started" : `Choose ${plan.name}`}
+                      {`Choose ${plan.name}`}
                     </Button>
                   </CardContent>
                 </Card>
@@ -120,6 +178,41 @@ const Pricing = () => {
           Creators keep {100 - MARKETPLACE_FEE_PCT}% of marketplace sales. Need extra images on any plan? Buy image-credit packs from your{" "}
           <Link to="/account" className="text-primary hover:underline">account</Link>.
         </p>
+
+        {/* Zone 3 — organizations band. Visually separated so schools, NGOs and
+            ministries see a clear, sales-led path distinct from self-serve. */}
+        {orgs.length > 0 && (
+          <div className="mt-16">
+            <div className="text-center">
+              <h2 className="font-serif text-2xl font-bold tracking-tight">For schools, NGOs &amp; organizations</h2>
+              <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground font-sans">Annual licensing, teacher and student accounts, custom curriculum support and dedicated onboarding — priced to your programme.</p>
+            </div>
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {orgs.map((plan) => (
+                <Card key={plan.id} className="border-border bg-gradient-to-br from-secondary/40 to-card">
+                  <CardContent className="flex h-full flex-col p-5">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-primary" />
+                      <h3 className="font-serif text-lg font-bold">{plan.name}</h3>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground font-sans">{plan.target}</p>
+                    <div className="mt-3 font-serif text-2xl font-bold">{plan.priceLabel}<span className="ml-1 text-sm font-normal text-muted-foreground font-sans">{plan.cadence}</span></div>
+                    <ul className="mt-4 flex-1 space-y-2">
+                      {plan.features.map((f) => (
+                        <li key={f} className="flex items-start gap-2 text-sm font-sans">
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {f}
+                        </li>
+                      ))}
+                    </ul>
+                    <Button variant="hero" className="mt-5 w-full sm:w-auto" disabled={busy === plan.id} onClick={() => choose(plan)}>
+                      Talk to us <ArrowRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Objection-handling FAQ — honest answers to the questions that keep
             people from upgrading. Plain copy, no marketing inflation. */}
