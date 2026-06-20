@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, Trash2, Loader2, Library as LibraryIcon, ArrowRight } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -18,12 +18,14 @@ const KIND_META: Record<DocKind, { label: string; icon: typeof FileText }> = {
   tailored: { label: "Tailored CV", icon: Target },
   "cover-letter": { label: "Cover letter", icon: PenTool },
   book: { label: "Book", icon: BookOpen },
+  cover: { label: "Book cover", icon: ImageIcon },
 };
 
 type Opened =
   | { kind: "cv"; data: CvData; template?: string }
   | { kind: "letter"; markdown: string; fullName: string; email?: string; phone?: string }
-  | { kind: "book"; markdown: string; title: string };
+  | { kind: "book"; markdown: string; title: string }
+  | { kind: "cover"; front?: string; back?: string; title: string };
 
 const LibraryPage = () => {
   const { toast } = useToast();
@@ -44,6 +46,8 @@ const LibraryPage = () => {
         setOpened({ kind: "letter", markdown: String(p.markdown ?? ""), fullName: String(p.fullName ?? d.title), email: p.email as string | undefined, phone: p.phone as string | undefined });
       } else if (d.kind === "book") {
         setOpened({ kind: "book", markdown: String(p.markdown ?? ""), title: String(p.title ?? d.title) });
+      } else if (d.kind === "cover") {
+        setOpened({ kind: "cover", front: p.front as string | undefined, back: p.back as string | undefined, title: String(p.title ?? d.title) });
       } else {
         // cv and tailored both restore a CvData document
         setOpened({ kind: "cv", data: p.data as CvData, template: (row.template ?? undefined) || (p.template as string | undefined) });
@@ -89,6 +93,39 @@ const LibraryPage = () => {
               title={opened.title}
               onContentChange={(s) => setOpened({ kind: "book", markdown: s, title: opened.title })}
             />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (opened?.kind === "cover") {
+    const dl = (src: string, name: string) => { const a = document.createElement("a"); a.href = src; a.download = name; a.click(); };
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
+          <div className="container flex items-center justify-between h-12 px-6">
+            <span className="text-sm font-medium text-muted-foreground font-sans">{opened.title}</span>
+            <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground">
+              <ArrowLeft className="w-4 h-4 mr-2" /> Library
+            </Button>
+          </div>
+        </div>
+        <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {(["front", "back"] as const).map((side) => {
+              const src = opened[side];
+              if (!src) return null;
+              return (
+                <div key={side}>
+                  <div className="overflow-hidden rounded-lg border border-border shadow-premium">
+                    <img src={src} alt={`${side} cover`} className="w-full" />
+                  </div>
+                  <Button variant="heroOutline" size="sm" className="mt-2 w-full" onClick={() => dl(src, `${opened.title}-${side}.png`)}>
+                    <Download className="w-4 h-4 mr-1" /> {side === "front" ? "Front" : "Back"} PNG
+                  </Button>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
