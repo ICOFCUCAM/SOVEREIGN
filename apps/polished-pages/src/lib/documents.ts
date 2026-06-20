@@ -65,3 +65,23 @@ export async function toggleFavorite(id: string, favorite: boolean): Promise<voi
   const { error } = await rpc().rpc("polished_toggle_favorite", { p_id: id, p_fav: favorite });
   if (error) throw new Error(error.message || "Could not update favorite.");
 }
+
+export interface DocVersion { id: string; preview: string | null; created_at: string }
+
+// Update a saved document in place, snapshotting the previous content as a version.
+export async function updateDocument(id: string, payload: unknown, preview?: string): Promise<void> {
+  const { error } = await rpc().rpc("polished_update_document", { p_id: id, p_payload: payload, p_preview: preview ?? null });
+  if (error) throw new Error(error.message || "Could not save changes.");
+}
+
+export async function listVersions(id: string): Promise<DocVersion[]> {
+  const { data, error } = await rpc().rpc("polished_list_versions", { p_id: id });
+  if (error) throw new Error(error.message || "Could not load history.");
+  return (Array.isArray(data) ? data : []) as DocVersion[];
+}
+
+export async function getVersion(versionId: string): Promise<unknown> {
+  const { data, error } = await rpc().rpc("polished_get_version", { p_version_id: versionId });
+  if (error) throw new Error(error.message || "Could not load that version.");
+  return data;
+}

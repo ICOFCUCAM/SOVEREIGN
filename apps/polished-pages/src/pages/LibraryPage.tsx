@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { listDocuments, getDocument, deleteDocument, toggleFavorite, type DocSummary, type DocKind } from "@/lib/documents";
+import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
 import { elementToPdf } from "@/lib/export-pdf";
 import type { CvData } from "@/lib/cv-data";
 import CVPreview from "@/components/CVPreview";
@@ -39,6 +39,9 @@ const LibraryPage = () => {
   const [docs, setDocs] = useState<DocSummary[] | null>(null);
   const [opening, setOpening] = useState<string | null>(null);
   const [opened, setOpened] = useState<Opened | null>(null);
+  const [openedId, setOpenedId] = useState<string | null>(null);
+  const [savingDoc, setSavingDoc] = useState(false);
+  const [versions, setVersions] = useState<DocVersion[] | null>(null);
   const [query, setQuery] = useState("");
   const [favOnly, setFavOnly] = useState(false);
   const pbRef = useRef<HTMLDivElement>(null);
@@ -48,6 +51,8 @@ const LibraryPage = () => {
 
   const open = async (d: DocSummary) => {
     setOpening(d.id);
+    setOpenedId(d.id);
+    setVersions(null);
     try {
       const row = await getDocument(d.id);
       if (!row) throw new Error("Document not found.");
@@ -96,17 +101,67 @@ const LibraryPage = () => {
     return <CoverLetterPreview markdown={opened.markdown} fullName={opened.fullName} email={opened.email} phone={opened.phone} canSave={false} onBack={() => setOpened(null)} />;
   }
   if (opened?.kind === "book") {
+    const bk = opened;
+    const saveChanges = async () => {
+      if (!openedId) return;
+      setSavingDoc(true);
+      try {
+        await updateDocument(openedId, { markdown: bk.markdown, title: bk.title }, bk.markdown.slice(0, 160));
+        setDocs((prev) => prev?.map((d) => (d.id === openedId ? { ...d, title: bk.title } : d)) ?? null);
+        toast({ title: "Changes saved", description: "Previous version kept in history." });
+        setVersions(null);
+      } catch (e) {
+        toast({ title: "Could not save", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+      } finally { setSavingDoc(false); }
+    };
+    const toggleHistory = async () => {
+      if (versions) { setVersions(null); return; }
+      if (!openedId) return;
+      try { setVersions(await listVersions(openedId)); }
+      catch (e) { toast({ title: "Could not load history", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+    };
+    const restore = async (v: DocVersion) => {
+      try {
+        const payload = (await getVersion(v.id)) as { markdown?: string; title?: string } | null;
+        if (payload?.markdown != null) setOpened({ kind: "book", markdown: String(payload.markdown), title: String(payload.title ?? bk.title) });
+      } catch (e) { toast({ title: "Could not restore", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+    };
     return (
       <div className="min-h-screen bg-background">
         <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
           <div className="container flex items-center justify-between h-12 px-6">
-            <span className="text-sm font-medium text-muted-foreground font-sans">{opened.title}</span>
-            <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Library
-            </Button>
+            <span className="truncate text-sm font-medium text-muted-foreground font-sans">{opened.title}</span>
+            <div className="flex items-center gap-2">
+              <Button variant="heroOutline" size="sm" onClick={toggleHistory}><History className="w-4 h-4 mr-1" /> History</Button>
+              <Button variant="hero" size="sm" disabled={savingDoc} onClick={saveChanges}>
+                {savingDoc ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />} Save changes
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground">
+                <ArrowLeft className="w-4 h-4 mr-2" /> Library
+              </Button>
+            </div>
           </div>
         </div>
         <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
+          {versions && (
+            <Card className="mb-6 border-border">
+              <CardContent className="p-4">
+                <div className="mb-2 text-sm font-semibold font-sans">Version history</div>
+                {versions.length === 0 ? (
+                  <p className="text-xs text-muted-foreground font-sans">No earlier versions yet — they appear here after you save changes.</p>
+                ) : (
+                  <ul className="divide-y divide-border">
+                    {versions.map((v) => (
+                      <li key={v.id} className="flex items-center justify-between gap-3 py-2">
+                        <span className="truncate text-xs text-muted-foreground font-sans">{new Date(v.created_at).toLocaleString()}{v.preview ? ` · ${v.preview.slice(0, 60)}` : ""}</span>
+                        <Button variant="heroOutline" size="sm" onClick={() => restore(v)}>Restore</Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          )}
           <BookExportPanel bookTitle={opened.title} fullContent={opened.markdown} chapterCount={0} />
           <div className="mt-6">
             <BookReader
