@@ -16,6 +16,7 @@ import { STUDIO_THEME, type Studio } from "@/lib/studio-theme";
 import GettingStarted from "@/components/app/GettingStarted";
 import ActivationChecklist from "@/components/app/ActivationChecklist";
 import { getAiActivity, type AiActivity } from "@/lib/ai-activity-log";
+import { getBatchUsage } from "@/lib/editions";
 
 // One-click "create" tiles spanning the four studios, each in its studio colour.
 const CREATE: { label: string; to: string; icon: typeof FileText; studio: Studio }[] = [
@@ -53,9 +54,11 @@ const Dashboard = () => {
   const [docs, setDocs] = useState<DocSummary[] | null>(null);
   const [market, setMarket] = useState<CatalogItem[]>([]);
   const [aiLog] = useState<AiActivity[]>(() => getAiActivity().slice(0, 5));
+  const [batchUnits, setBatchUnits] = useState<number | null>(null);
 
   useEffect(() => {
     fetchPlanStatus().then(setStatus).catch(() => {});
+    getBatchUsage().then(setBatchUnits).catch(() => {});
     listDocuments().then(setDocs).catch(() => setDocs([]));
     catalogList(undefined, undefined, "new").then(setMarket).catch(() => {});
   }, []);
@@ -141,6 +144,11 @@ const Dashboard = () => {
                 </div>
               )}
             </div>
+            {batchUnits != null && batchUnits > 0 && (
+              <p className="mt-3 text-xs text-muted-foreground font-sans">
+                <span className="font-semibold text-foreground">{batchUnits.toLocaleString()}</span> heavy operations this month (bulk translation, editions, batch covers)
+              </p>
+            )}
           </div>
           <div className="flex flex-col items-end gap-2">
             {imgPct >= 70 && imgLim > 0 && (
