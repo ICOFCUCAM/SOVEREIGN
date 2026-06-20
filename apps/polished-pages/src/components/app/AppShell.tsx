@@ -29,7 +29,7 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
 
   const isPro = !!status && status.plan !== "free"; // any paid tier
   const usageLabel = status
-    ? (isPro ? `${planDisplayName(status.plan)} · unlimited text` : `${status.used}/${status.lim} this month`)
+    ? (isPro ? `${planDisplayName(status.plan)} · ${status.imagesUsed}/${status.imagesLim} image credits` : `${status.used}/${status.lim} generations this month`)
     : "";
 
   return (

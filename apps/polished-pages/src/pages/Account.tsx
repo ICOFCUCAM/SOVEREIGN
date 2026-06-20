@@ -15,7 +15,7 @@ import { planDisplayName } from "@/lib/plans";
 import { BRAND } from "@/lib/tools";
 
 const PRO_PERKS = [
-  "Unlimited text generations — CVs, letters, books, lessons",
+  "Unlimited everyday documents — CVs, letters, single chapters & lessons",
   "From 250 image credits / month for storybooks, covers and colouring pages",
   "Full commercial rights — sell on the marketplace and publish to KDP / IngramSpark",
   "Library, version history, collections and premium templates",
@@ -117,7 +117,7 @@ const Account = () => {
           )}
           {isPro && (
             <p className="text-sm text-muted-foreground font-sans">
-              Unlimited text generations · {imgUsed} of {imgLim} image credits used this month{bonus > 0 ? ` · ${bonus} purchased credit${bonus === 1 ? "" : "s"} in reserve` : ""}.
+              Unlimited everyday documents · {imgUsed} of {imgLim} image credits used this month{bonus > 0 ? ` · ${bonus} purchased credit${bonus === 1 ? "" : "s"} in reserve` : ""}.
             </p>
           )}
           {!status && <p className="text-sm text-muted-foreground font-sans">Loading plan…</p>}
