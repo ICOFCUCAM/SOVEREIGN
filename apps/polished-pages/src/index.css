@@ -105,6 +105,13 @@
     text-wrap: balance;
   }
 
+  /* Prevent iOS Safari from auto-zooming when a sub-16px field is focused —
+     a jarring mobile experience. Fields keep their visual sizing on larger
+     screens. */
+  @media (max-width: 640px) {
+    input, textarea, select { font-size: 16px; }
+  }
+
   /* Consistent, visible keyboard focus on links and clickable non-button
      elements (buttons/inputs carry their own ring). A real a11y gap on a
      platform sold to schools and institutions. */
