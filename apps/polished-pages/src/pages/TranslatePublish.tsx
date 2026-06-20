@@ -13,7 +13,7 @@ import { splitBook } from "@/lib/book-split";
 import { useMemo } from "react";
 import { translateLocalize } from "@/lib/translate";
 import { usePersistentState } from "@/hooks/use-persistent-state";
-import { LANGUAGE_NAMES, isoFor, isRtlLanguage } from "@/lib/languages";
+import { LANGUAGES, isoFor, isRtlLanguage } from "@/lib/languages";
 import { markdownToEpub } from "@/lib/export-epub";
 import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
@@ -107,12 +107,18 @@ const TranslatePublish = () => {
         <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
           <div className="container flex flex-wrap items-center justify-between gap-2 py-2 px-6">
             <div className="inline-flex flex-wrap rounded-lg border border-border bg-card p-1">
-              {langs.map((l) => (
-                <button key={l} onClick={() => setTab(l)}
-                  className={`rounded-md px-3 py-1 text-xs font-medium font-sans transition ${tab === l ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
-                  {l}
-                </button>
-              ))}
+              {langs.map((l) => {
+                const iso = isoFor(l);
+                const rtl = isRtlLanguage(l);
+                return (
+                  <button key={l} onClick={() => setTab(l)}
+                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium font-sans transition ${tab === l ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+                    <span className="font-mono text-[9px] uppercase opacity-70">{iso}</span>
+                    {l}
+                    {rtl && <span className="opacity-60 text-[9px]">RTL</span>}
+                  </button>
+                );
+              })}
             </div>
             <div className="flex items-center gap-2">
               <Button variant="heroOutline" size="sm" onClick={() => markdownToEpub(current, { title: editionTitle, language: isoFor(tab) }, editionTitle).catch(() => {})}>EPUB</Button>
@@ -195,10 +201,15 @@ const TranslatePublish = () => {
               <div className="space-y-1.5">
                 <Label className="font-sans text-xs">Target languages ({targets.length} selected)</Label>
                 <div className="flex flex-wrap gap-1.5">
-                  {LANGUAGE_NAMES.map((l) => {
-                    const on = targets.includes(l);
+                  {LANGUAGES.map((lang) => {
+                    const on = targets.includes(lang.name);
                     return (
-                      <button key={l} type="button" onClick={() => toggle(l)} className={`rounded-full border px-2.5 py-1 text-xs font-sans transition ${on ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>{l}</button>
+                      <button key={lang.name} type="button" onClick={() => toggle(lang.name)}
+                        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-sans transition ${on ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                        <span className="font-mono text-[9px] uppercase opacity-60">{lang.iso}</span>
+                        {lang.name}
+                        {lang.rtl && <span className="opacity-50 text-[8px]">↩</span>}
+                      </button>
                     );
                   })}
                 </div>
