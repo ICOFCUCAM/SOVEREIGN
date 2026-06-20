@@ -6,6 +6,20 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { BRAND } from "@/lib/tools";
 
+// A structured enquiry template so the sales-led contact arrives with the
+// context needed to scope a plan — far better than an empty mailto.
+const ENQUIRY = `mailto:?subject=${encodeURIComponent(`${BRAND} — institutional enquiry`)}&body=${encodeURIComponent(
+  [
+    "Organization name:",
+    "Type (school / district / NGO / ministry / business):",
+    "Approximate number of teachers or seats:",
+    "What you'd like to create (curriculum, textbooks, assessments, storybooks…):",
+    "Languages / country / curriculum:",
+    "",
+    "Anything else we should know:",
+  ].join("\n"),
+)}`;
+
 const CAPABILITIES = [
   { icon: Users, title: "Teacher & student accounts", desc: "Roll out the studio across a department, a school or a district, with content that stays inside your organization." },
   { icon: BookOpen, title: "Curriculum at scale", desc: "Generate aligned textbooks, workbooks, exams and full curricula for any grade, subject and country." },
@@ -38,7 +52,7 @@ const ForSchools = () => (
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button asChild variant="hero" size="lg" className="px-8 py-6"><Link to="/pricing">See institutional plans <ArrowRight className="ml-1 h-5 w-5" /></Link></Button>
-              <Button asChild variant="heroOutline" size="lg" className="px-8 py-6"><a href={`mailto:?subject=${encodeURIComponent(`${BRAND} — institutional enquiry`)}`}>Talk to our team</a></Button>
+              <Button asChild variant="heroOutline" size="lg" className="px-8 py-6"><a href={ENQUIRY}>Talk to our team</a></Button>
             </div>
           </motion.div>
         </div>
@@ -90,7 +104,7 @@ const ForSchools = () => (
             <h2 className="mt-3 font-serif text-2xl font-bold md:text-3xl">Bring {BRAND} to your organization</h2>
             <p className="mx-auto mt-2 max-w-xl text-muted-foreground font-sans text-pretty">Annual licensing, onboarding and curriculum support, priced to your programme. Tell us about your needs and we’ll design the right plan.</p>
             <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button asChild variant="hero"><a href={`mailto:?subject=${encodeURIComponent(`${BRAND} — institutional enquiry`)}`}>Contact our team <ArrowRight className="ml-1 h-4 w-4" /></a></Button>
+              <Button asChild variant="hero"><a href={ENQUIRY}>Contact our team <ArrowRight className="ml-1 h-4 w-4" /></a></Button>
               <Button asChild variant="heroOutline"><Link to="/pricing">Compare plans</Link></Button>
             </div>
           </div>
