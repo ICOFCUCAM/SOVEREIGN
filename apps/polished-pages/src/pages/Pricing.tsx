@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PLANS, PLAN_RANK, MARKETPLACE_FEE_PCT, type Plan } from "@/lib/plans";
 import { startUpgrade } from "@/lib/session";
 import { BRAND } from "@/lib/tools";
+import PlanComparison from "@/components/app/PlanComparison";
 
 // Growth-story caption for each rung, so the page reads as a journey
 // (start → grow → publish → organisation → institution) rather than a row of
@@ -237,6 +238,8 @@ const Pricing = () => {
             </div>
           </div>
         )}
+
+        <PlanComparison />
 
         {/* Objection-handling FAQ — honest answers to the questions that keep
             people from upgrading. Plain copy, no marketing inflation. */}
