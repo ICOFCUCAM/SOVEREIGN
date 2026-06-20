@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { elementToPdf } from "@/lib/export-pdf";
+import { pictureBookToEpub } from "@/lib/export-epub";
 import { generateStorybook, generateIllustration, type Storybook, type StoryInput, type StoryType } from "@/lib/storybook";
 import PictureBookView from "@/components/children/PictureBookView";
 import SavePictureBookButton from "@/components/children/SavePictureBookButton";
@@ -114,6 +115,22 @@ const StorybookCreator = () => {
     }
   };
 
+  const [epub, setEpub] = useState(false);
+  const exportEpub = async () => {
+    if (!book) return;
+    setEpub(true);
+    try {
+      await pictureBookToEpub(
+        { title: book.title, dedication: book.dedication, coverImage: book.coverImage, pages: book.pages.map((p) => ({ text: p.text, image: p.image })) },
+        { title: book.title, language }, book.title || "storybook",
+      );
+    } catch (e) {
+      toast({ title: "EPUB export failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally {
+      setEpub(false);
+    }
+  };
+
   // ── Result ──
   if (book) {
     return (
@@ -130,6 +147,9 @@ const StorybookCreator = () => {
                 {illustrating ? `Illustrating ${illustrating.done}/${illustrating.total}` : "Illustrate all"}
               </Button>
               <SavePictureBookButton build={() => ({ book: { title: book.title, dedication: book.dedication, coverImage: book.coverImage, pages: book.pages.map((p) => ({ text: p.text, image: p.image })) }, variant: "storybook", pageAspect: "16/9", showText: true })} />
+              <Button variant="heroOutline" size="sm" disabled={epub} onClick={exportEpub}>
+                {epub ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />} EPUB
+              </Button>
               <Button variant="hero" size="sm" disabled={pdf} onClick={exportPdf}>
                 {pdf ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />} PDF
               </Button>

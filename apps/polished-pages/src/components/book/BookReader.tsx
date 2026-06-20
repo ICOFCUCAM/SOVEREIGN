@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { elementToPdf } from "@/lib/export-pdf";
+import { markdownToEpub } from "@/lib/export-epub";
 import { BOOK_THEMES, getBookTheme } from "@/lib/book-themes";
 import BookPaper from "@/components/book/BookPaper";
 
@@ -39,6 +40,18 @@ const BookReader = ({
     }
   };
 
+  const [epub, setEpub] = useState(false);
+  const exportEpub = async () => {
+    setEpub(true);
+    try {
+      await markdownToEpub(content, { title }, title || "book");
+    } catch (e) {
+      toast({ title: "EPUB export failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally {
+      setEpub(false);
+    }
+  };
+
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -60,6 +73,9 @@ const BookReader = ({
           )}
           <Button variant="heroOutline" size="sm" disabled={pdf || mode === "edit"} onClick={themedPdf}>
             {pdf ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} Themed PDF
+          </Button>
+          <Button variant="heroOutline" size="sm" disabled={epub} onClick={exportEpub}>
+            {epub ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <BookOpen className="w-4 h-4 mr-1" />} EPUB
           </Button>
         </div>
       </div>
