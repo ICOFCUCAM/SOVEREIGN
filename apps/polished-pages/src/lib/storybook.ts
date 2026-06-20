@@ -41,6 +41,26 @@ export async function generateStorybook(input: StoryInput): Promise<Storybook> {
   return data;
 }
 
+export interface ColoringPage { caption: string; illustrationPrompt: string; image?: string | null }
+export interface ColoringBook { title: string; coverImage?: string | null; pages: ColoringPage[] }
+
+export async function generateColoringBook(input: { theme: string; age: string; pageCount: number }): Promise<ColoringBook> {
+  const res = await fetch(fn("generate-coloring-book"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: await authHeader() },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Could not plan the colouring book.");
+  }
+  const data = (await res.json()) as ColoringBook;
+  if (!data?.pages?.length) throw new Error("The colouring book came back empty. Please try again.");
+  data.pages = data.pages.map((p) => ({ ...p, image: null }));
+  data.coverImage = null;
+  return data;
+}
+
 export async function generateIllustration(opts: {
   prompt: string; artStyle?: string; orientation?: "square" | "portrait" | "landscape"; lineArt?: boolean;
 }): Promise<string> {

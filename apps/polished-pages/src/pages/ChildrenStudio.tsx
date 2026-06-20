@@ -15,7 +15,7 @@ interface Product {
 const PRODUCTS: Product[] = [
   { name: "Storybook Creator", description: "A complete illustrated picture book — story, illustrations, cover and printable PDF — tuned to a child’s age and reading level.", icon: BookHeart, status: "live", path: "/storybook" },
   { name: "Personalized Books", description: "Make the child the hero of their own adventure — “James and the Lost Forest.” Built into the Storybook Creator: just add the child’s name.", icon: Sparkles, status: "live", path: "/storybook", note: "In Storybook Creator" },
-  { name: "Coloring Books", description: "Black-and-white line-art pages from any theme, ready to print and colour.", icon: Palette, status: "soon" },
+  { name: "Coloring Books", description: "Black-and-white line-art pages from any theme, ready to print and colour.", icon: Palette, status: "live", path: "/coloring" },
   { name: "Educational Readers", description: "Alphabet, reading, vocabulary and first science / geography books by age band.", icon: BookOpenCheck, status: "soon" },
   { name: "Workbooks", description: "Exercises, worksheets and answer keys to accompany any reader.", icon: PencilRuler, status: "soon" },
   { name: "Classroom Packs", description: "Grade + subject + topic → student book, workbook, teacher guide, quiz and answer sheet.", icon: NotebookPen, status: "soon" },
