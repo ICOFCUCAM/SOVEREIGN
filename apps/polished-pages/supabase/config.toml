@@ -4,3 +4,14 @@ project_id = "qvjdivcdefuprnenedje"
 # Stripe signature instead, so JWT verification must be off.
 [functions.polished-stripe-webhook]
 verify_jwt = false
+
+# Publishes a signed-in user's book to the Wankong store. Called from the
+# browser with the user's JWT (kept on, so the seller's email is verified),
+# then forwards to Wankong's wankong-publish-book with the bridge secret.
+#
+# Required function secrets (set with `supabase secrets set`):
+#   WANKONG_PUBLISH_URL    full URL of Wankong's wankong-publish-book function
+#   WANKONG_BRIDGE_SECRET  shared secret, must match Wankong's copy
+#   (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are injected automatically)
+[functions.polished-publish-to-wankong]
+verify_jwt = true

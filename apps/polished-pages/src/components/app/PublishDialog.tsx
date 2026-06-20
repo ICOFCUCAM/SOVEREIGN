@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { publishDocument, CATALOG_CATEGORIES, CATALOG_LICENSES, type DocSummary } from "@/lib/documents";
 import { fetchPlanStatus } from "@/lib/session";
+import { isWankongPublishable } from "@/lib/wankong";
+import WankongPublishButton from "@/components/app/WankongPublishButton";
 
 // Publish a saved document to the public catalog: choose a category and an
 // optional price, get a public link. (Free items download immediately; charging
@@ -93,6 +95,21 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
             </Button>
             {doc.listed && <Button variant="ghost" disabled={busy} onClick={() => publish(false)}>Unlist</Button>}
           </div>
+
+          {/* Other stores this title can go to. Wankong publishes directly; the
+              rest are manual uploads handled in the Distribution center. */}
+          {isWankongPublishable(doc.kind) && (
+            <div className="space-y-2 border-t border-border pt-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans">Also sell on</p>
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card/50 p-2.5">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium font-sans">Wankong store</div>
+                  <div className="text-xs text-muted-foreground font-sans">Publish straight to Wankong (you’ll need a Wankong account).</div>
+                </div>
+                <WankongPublishButton doc={doc} />
+              </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
