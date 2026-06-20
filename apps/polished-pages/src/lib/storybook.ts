@@ -68,7 +68,7 @@ export async function generateColoringBook(input: { theme: string; age: string; 
 }
 
 export async function generateIllustration(opts: {
-  prompt: string; artStyle?: string; orientation?: "square" | "portrait" | "landscape"; lineArt?: boolean;
+  prompt: string; artStyle?: string; orientation?: "square" | "portrait" | "landscape"; lineArt?: boolean; referenceImage?: string;
 }): Promise<string> {
   const res = await fetch(fn("generate-illustration"), {
     method: "POST",

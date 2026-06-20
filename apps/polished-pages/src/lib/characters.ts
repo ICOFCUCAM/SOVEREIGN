@@ -11,6 +11,7 @@ export interface StoryCharacter {
   personality?: string | null;
   relationships?: string | null;
   age?: string | null;
+  reference_image?: string | null;
   created_at: string;
 }
 
@@ -45,6 +46,12 @@ export async function saveCharacter(c: CharacterInput): Promise<string> {
 export async function deleteCharacter(id: string): Promise<void> {
   const { error } = await rpc().rpc("polished_delete_character", { p_id: id });
   if (error) throw new Error(error.message || "Could not delete the character.");
+}
+
+// Set (or clear, with "") a character's canonical reference image (model sheet).
+export async function setCharacterReference(id: string, url: string): Promise<void> {
+  const { error } = await rpc().rpc("polished_set_character_reference", { p_id: id, p_url: url });
+  if (error) throw new Error(error.message || "Could not save the reference image.");
 }
 
 // One-line brief used when inserting a character into a story prompt, so the

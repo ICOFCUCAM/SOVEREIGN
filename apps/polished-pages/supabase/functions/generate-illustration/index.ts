@@ -26,6 +26,7 @@ Deno.serve(async (req) => {
     const artStyle = String(b.artStyle ?? "").slice(0, 400);
     const orientation = b.orientation === "portrait" ? "portrait" : b.orientation === "landscape" ? "landscape" : "square";
     const lineArt = b.lineArt === true;
+    const referenceImage = String(b.referenceImage ?? "").trim();
 
     if (!prompt.trim()) {
       return new Response(JSON.stringify({ error: "An illustration prompt is required." }), {
@@ -46,12 +47,38 @@ Deno.serve(async (req) => {
     let resp: Response;
     try {
       await consumeOrThrow(userId, "image");
-      resp = await fetch("https://api.openai.com/v1/images/generations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({ model: "gpt-image-1", prompt: fullPrompt, size, n: 1, quality: "medium" }),
-        signal: ac.signal,
-      });
+      // Image Consistency Engine: when a character reference image is provided,
+      // edit from it (gpt-image-1 images/edits) so the character stays on-model.
+      // A reference that can't be fetched falls back to a plain generation.
+      let refBlob: Blob | null = null;
+      if (referenceImage) {
+        try {
+          const r = await fetch(referenceImage, { signal: ac.signal });
+          if (r.ok) refBlob = await r.blob();
+        } catch { refBlob = null; }
+      }
+      if (refBlob) {
+        const form = new FormData();
+        form.append("model", "gpt-image-1");
+        form.append("image", new File([refBlob], "reference.png", { type: refBlob.type || "image/png" }));
+        form.append("prompt", fullPrompt);
+        form.append("size", size);
+        form.append("n", "1");
+        form.append("quality", "medium");
+        resp = await fetch("https://api.openai.com/v1/images/edits", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${apiKey}` },
+          body: form,
+          signal: ac.signal,
+        });
+      } else {
+        resp = await fetch("https://api.openai.com/v1/images/generations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+          body: JSON.stringify({ model: "gpt-image-1", prompt: fullPrompt, size, n: 1, quality: "medium" }),
+          signal: ac.signal,
+        });
+      }
     } catch (e) {
       clearTimeout(killer);
       if (e instanceof EntitlementError) throw e;

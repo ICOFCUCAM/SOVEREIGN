@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Loader2, Plus, X, Users } from "lucide-react";
+import { Loader2, Plus, X, Users, ImagePlus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { listCharacters, saveCharacter, deleteCharacter, characterBrief, type StoryCharacter } from "@/lib/characters";
+import { listCharacters, saveCharacter, deleteCharacter, setCharacterReference, characterBrief, type StoryCharacter } from "@/lib/characters";
+import { generateIllustration } from "@/lib/storybook";
+import { uploadDataUrl } from "@/lib/media-upload";
 
 // Character Bible for the Children's Studio. Click a saved character to drop
 // their full brief (look, age, personality, relationships) into the story so a
@@ -40,6 +42,23 @@ const CharacterLibrary = ({ onInsert }: { onInsert: (brief: string) => void }) =
   const remove = async (c: StoryCharacter) => {
     setChars((prev) => prev?.filter((x) => x.id !== c.id) ?? null);
     try { await deleteCharacter(c.id); } catch { load(); }
+  };
+
+  // Generate a canonical reference portrait (model sheet). If one already
+  // exists, it's passed back so the engine keeps the character on-model.
+  const [portraitBusy, setPortraitBusy] = useState<string | null>(null);
+  const makePortrait = async (c: StoryCharacter) => {
+    setPortraitBusy(c.id);
+    try {
+      const prompt = `Character model-sheet portrait of ${c.name}: ${c.appearance}${c.age ? `, age ${c.age}` : ""}. A single character, full figure, friendly children's picture-book style, clear neutral plain background, consistent recognizable design.`;
+      const dataUrl = await generateIllustration({ prompt, orientation: "portrait", referenceImage: c.reference_image ?? undefined });
+      const url = await uploadDataUrl(dataUrl, "characters", `${c.id}`);
+      await setCharacterReference(c.id, url);
+      load();
+      toast({ title: "Reference portrait saved", description: `${c.name} now has a canonical look for consistency.` });
+    } catch (e) {
+      toast({ title: "Could not create portrait", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    } finally { setPortraitBusy(null); }
   };
 
   return (
@@ -91,11 +110,19 @@ const CharacterLibrary = ({ onInsert }: { onInsert: (brief: string) => void }) =
               <div className="mt-2 max-h-52 space-y-2 overflow-y-auto border-t border-border pt-3">
                 {chars.map((c) => (
                   <div key={c.id} className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium font-sans">{c.name}{c.age ? <span className="text-muted-foreground"> · age {c.age}</span> : null}</div>
-                      <div className="truncate text-xs text-muted-foreground font-sans">{c.appearance}{c.personality ? ` · ${c.personality}` : ""}</div>
+                    <div className="flex min-w-0 items-start gap-2">
+                      {c.reference_image
+                        ? <img src={c.reference_image} alt={c.name} className="h-10 w-10 shrink-0 rounded-md border border-border object-cover" />
+                        : <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-dashed border-border text-muted-foreground"><Users className="h-4 w-4" /></span>}
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium font-sans">{c.name}{c.age ? <span className="text-muted-foreground"> · age {c.age}</span> : null}</div>
+                        <div className="truncate text-xs text-muted-foreground font-sans">{c.appearance}{c.personality ? ` · ${c.personality}` : ""}</div>
+                      </div>
                     </div>
                     <div className="flex shrink-0 gap-1">
+                      <Button type="button" variant="ghost" size="sm" className="text-muted-foreground" disabled={portraitBusy === c.id} onClick={() => makePortrait(c)} title={c.reference_image ? "Regenerate reference portrait" : "Generate a reference portrait"}>
+                        {portraitBusy === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+                      </Button>
                       <Button type="button" variant="heroOutline" size="sm" onClick={() => { onInsert(characterBrief(c)); setOpen(false); }}>Insert</Button>
                       <Button type="button" variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" onClick={() => remove(c)}><X className="h-4 w-4" /></Button>
                     </div>
