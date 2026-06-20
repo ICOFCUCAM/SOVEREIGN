@@ -23,12 +23,13 @@ const GROUPS: MenuGroup[] = [
     { label: "Publish & Distribute", to: "/publishing" },
   ] },
   { label: "Education", dot: "bg-educational", items: [
-    { label: "Children’s Studio", to: "/children" },
-    { label: "Storybooks & Series", to: "/series" },
-    { label: "Coloring Books", to: "/coloring" },
-    { label: "School Content", to: "/classroom" },
+    { label: "Educational Studio — all 14 tools", to: "/children" },
+    { label: "Storybooks & Series", to: "/storybook" },
+    { label: "Classroom Packs", to: "/classroom" },
+    { label: "Teacher Resource Center", to: "/teacher" },
     { label: "Curriculum Builder", to: "/curriculum" },
     { label: "Assessment Bank", to: "/assessment-bank" },
+    { label: "Translate & Localize", to: "/translate" },
   ] },
 ];
 const DIRECT: MenuItem[] = [
