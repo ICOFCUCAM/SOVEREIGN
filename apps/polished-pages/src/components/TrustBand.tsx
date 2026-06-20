@@ -14,7 +14,7 @@ const TRUST = [
 ];
 
 const TrustBand = () => (
-  <section className="border-t border-border/40 bg-card/30 py-20">
+  <section className="border-t border-border/40 bg-card/30 py-14 md:py-20">
     <div className="container px-6">
       <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mx-auto mb-12 max-w-2xl text-center">
         <h2 className="text-3xl font-bold text-foreground md:text-4xl">Built for <span className="text-gradient-gold italic">real, ownable work</span></h2>

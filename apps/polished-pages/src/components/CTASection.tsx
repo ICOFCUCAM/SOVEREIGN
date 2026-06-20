@@ -6,7 +6,7 @@ import ctaImage from "@/assets/cta-workspace.jpg";
 
 const CTASection = () => {
   return (
-    <section className="py-24 bg-hero-gradient">
+    <section className="py-16 md:py-24 bg-hero-gradient">
       <div className="container px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

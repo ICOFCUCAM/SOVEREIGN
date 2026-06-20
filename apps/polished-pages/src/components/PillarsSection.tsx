@@ -49,7 +49,7 @@ const PILLARS = [
 ];
 
 const PillarsSection = () => (
-  <section className="py-24 bg-background border-t border-border/40">
+  <section className="py-16 md:py-24 bg-background border-t border-border/40">
     <div className="container px-6">
       <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
         <h2 className="text-3xl md:text-5xl font-bold mb-4 text-foreground">

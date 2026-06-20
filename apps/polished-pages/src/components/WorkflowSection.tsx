@@ -13,7 +13,7 @@ const STEPS = [
 ];
 
 const WorkflowSection = () => (
-  <section className="border-t border-border/40 bg-background py-24">
+  <section className="border-t border-border/40 bg-background py-16 md:py-24">
     <div className="container px-6">
       <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mx-auto mb-14 max-w-2xl text-center">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans">One platform, the whole journey</p>

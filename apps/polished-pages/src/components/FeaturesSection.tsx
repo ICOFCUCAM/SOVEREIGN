@@ -71,7 +71,7 @@ const features: Feature[] = [
 
 const FeaturesSection = () => {
   return (
-    <section id="features" className="py-24 bg-background">
+    <section id="features" className="py-16 md:py-24 bg-background">
       <div className="container px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
