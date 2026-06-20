@@ -92,12 +92,15 @@ const Dashboard = () => {
     { kind: "cover", label: "Covers", icon: ImageIcon },
   ];
 
+  const hour = new Date().getHours();
+  const greeting = hour < 5 ? "Working late" : hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-serif text-3xl font-bold tracking-tight">Command center</h1>
-          <p className="mt-1 text-muted-foreground font-sans">Create, publish and grow — across career, publishing, education and the marketplace.</p>
+          <h1 className="font-serif text-3xl font-bold tracking-tight">{greeting}</h1>
+          <p className="mt-1 text-muted-foreground font-sans">Your command center — create, publish and grow across every studio.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="heroOutline" size="sm"><Link to="/library"><Library className="mr-1.5 h-4 w-4" /> Library</Link></Button>
