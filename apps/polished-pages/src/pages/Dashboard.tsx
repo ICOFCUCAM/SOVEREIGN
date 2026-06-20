@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowRight, Crown, Zap, Library, FileText, BookOpen, BookHeart, GraduationCap, Palette, School,
-  Store, TrendingUp, Eye, Download, Rocket, Clock, Image as ImageIcon, Send,
+  Store, TrendingUp, Eye, Download, Rocket, Clock, Image as ImageIcon, Send, Layers, Globe,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -175,8 +175,9 @@ const Dashboard = () => {
               ))}
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button asChild variant="heroOutline" size="sm"><Link to="/publishing"><Send className="mr-1 h-3.5 w-3.5" /> Export & distribute</Link></Button>
-              <Button asChild variant="ghost" size="sm" className="text-muted-foreground"><Link to="/library">Publish from library</Link></Button>
+              <Button asChild variant="heroOutline" size="sm"><Link to="/publishing"><Send className="mr-1 h-3.5 w-3.5" /> Distribution center</Link></Button>
+              <Button asChild variant="ghost" size="sm" className="text-muted-foreground"><Link to="/series"><Layers className="mr-1 h-3.5 w-3.5" /> Series</Link></Button>
+              <Button asChild variant="ghost" size="sm" className="text-muted-foreground"><Link to="/editions"><Globe className="mr-1 h-3.5 w-3.5" /> Editions</Link></Button>
             </div>
           </CardContent>
         </Card>
