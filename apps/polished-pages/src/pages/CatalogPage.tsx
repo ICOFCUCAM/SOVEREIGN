@@ -107,18 +107,26 @@ const CatalogPage = () => {
           )}
           <p className="mt-2 text-muted-foreground font-sans">{author ? `Everything ${author} has published, newest first.` : "Storybooks, readers, workbooks and classroom materials published by the community."}</p>
           {author && profile && (
-            <div className="mt-4 rounded-xl border border-border bg-card/50 p-4">
-              {profile.bio && <p className="text-sm text-foreground font-sans">{profile.bio}</p>}
-              <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground font-sans">
-                <span><span className="font-semibold text-foreground">{profile.works}</span> published</span>
-                <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.views}</span> views</span>
-                <span className="inline-flex items-center gap-1"><Download className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.downloads}</span> downloads</span>
+            <div className="mt-4 rounded-xl border border-border bg-card/50 p-4 sm:p-5">
+              <div className="flex items-start gap-4">
+                {/* Avatar initial — visual identity without requiring an image upload */}
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary font-serif select-none">
+                  {author.trim()[0]?.toUpperCase() ?? "?"}
+                </div>
+                <div className="min-w-0 flex-1">
+                  {profile.bio && <p className="text-sm text-foreground font-sans leading-relaxed">{profile.bio}</p>}
+                  <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground font-sans">
+                    <span><span className="font-semibold text-foreground">{profile.works}</span> published</span>
+                    <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.views}</span> views</span>
+                    <span className="inline-flex items-center gap-1"><Download className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.downloads}</span> downloads</span>
+                  </div>
+                  {admin && (
+                    <button onClick={verify} className={`mt-3 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-sans ${profile.verified ? "border-primary text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                      <BadgeCheck className="h-3.5 w-3.5" /> {profile.verified ? "Verified — click to remove" : "Mark verified"}
+                    </button>
+                  )}
+                </div>
               </div>
-              {admin && (
-                <button onClick={verify} className={`mt-3 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-sans ${profile.verified ? "border-primary text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
-                  <BadgeCheck className="h-3.5 w-3.5" /> {profile.verified ? "Verified — click to remove" : "Mark verified"}
-                </button>
-              )}
             </div>
           )}
         </motion.div>
