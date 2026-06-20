@@ -115,6 +115,7 @@ const CatalogPage = () => {
             <select value={sort} onChange={(e) => setSort(e.target.value as CatalogSort)} className="rounded-md border border-border bg-card px-2.5 py-2 text-sm font-sans">
               <option value="new">Recently published</option>
               <option value="trending">Trending</option>
+              <option value="top-rated">Top rated</option>
               <option value="price">Price: low to high</option>
             </select>
           )}

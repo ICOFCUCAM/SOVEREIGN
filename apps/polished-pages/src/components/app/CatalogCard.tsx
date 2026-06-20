@@ -1,5 +1,13 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Star, Eye, Download } from "lucide-react";
+
+const Stars = ({ value }: { value: number }) => (
+  <span className="inline-flex items-center" aria-label={`${value.toFixed(1)} out of 5`}>
+    {[1, 2, 3, 4, 5].map((i) => (
+      <Star key={i} className={`h-3 w-3 ${i <= Math.round(value) ? "fill-gold text-gold" : "text-muted-foreground/40"}`} />
+    ))}
+  </span>
+);
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { CatalogItem } from "@/lib/documents";
@@ -23,6 +31,12 @@ const CatalogCard = ({ item: it, admin, onFeature }: { item: CatalogItem; admin?
       </Link>
       {it.author_name && (
         <Link to={`/catalog/author/${encodeURIComponent(it.author_name)}`} className="mt-0.5 self-start text-xs text-muted-foreground hover:text-primary font-sans">by {it.author_name}</Link>
+      )}
+      {(it.review_count ?? 0) > 0 && it.avg_rating != null && (
+        <div className="mt-1.5 flex items-center gap-1.5">
+          <Stars value={Number(it.avg_rating)} />
+          <span className="text-[11px] text-muted-foreground font-sans">{Number(it.avg_rating).toFixed(1)} · {it.review_count} review{it.review_count === 1 ? "" : "s"}</span>
+        </div>
       )}
       {it.preview && <p className="mt-1.5 line-clamp-3 flex-1 text-xs text-muted-foreground font-sans">{it.preview}</p>}
       {((it.view_count ?? 0) > 0 || (it.download_count ?? 0) > 0) && (
