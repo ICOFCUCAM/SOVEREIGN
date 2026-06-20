@@ -210,13 +210,18 @@ const Dashboard = () => {
           <CardContent className="p-5">
             <h2 className="flex items-center gap-2 font-serif text-base font-semibold"><Rocket className="h-4 w-4 text-publishing" /> Publishing center</h2>
             <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-              {[{ n: published, l: "Published" }, { n: sharedOnly, l: "Shared" }, { n: drafts, l: "Drafts" }].map((s) => (
-                <div key={s.l} className="rounded-lg border border-border p-3">
-                  <div className="font-serif text-2xl font-bold">{s.n}</div>
+              {[{ n: published, l: "Published", to: "/library?filter=listed" }, { n: sharedOnly, l: "Shared", to: "/library?filter=shared" }, { n: drafts, l: "Drafts", to: "/library?filter=drafts" }].map((s) => (
+                <Link key={s.l} to={s.to} className={`group rounded-lg border p-3 transition-colors hover:border-primary/40 ${s.n > 0 ? "border-border" : "border-dashed border-border/60"}`}>
+                  <div className={`font-serif text-2xl font-bold ${s.n === 0 ? "text-muted-foreground/50" : ""}`}>{s.n}</div>
                   <div className="text-xs text-muted-foreground font-sans">{s.l}</div>
-                </div>
+                </Link>
               ))}
             </div>
+            {drafts > 0 && (
+              <p className="mt-3 rounded-lg bg-card px-3 py-2 text-xs text-muted-foreground font-sans border border-border/60">
+                {drafts} draft{drafts > 1 ? "s" : ""} ready to share — open the library to publish or share a link.
+              </p>
+            )}
             <div className="mt-4 flex flex-wrap gap-2">
               <Button asChild variant="heroOutline" size="sm"><Link to="/publishing"><Send className="mr-1 h-3.5 w-3.5" /> Distribution center</Link></Button>
               <Button asChild variant="ghost" size="sm" className="text-muted-foreground"><Link to="/series"><Layers className="mr-1 h-3.5 w-3.5" /> Series</Link></Button>
@@ -228,16 +233,26 @@ const Dashboard = () => {
         <Card className="border-border">
           <CardContent className="p-5">
             <h2 className="flex items-center gap-2 font-serif text-base font-semibold"><TrendingUp className="h-4 w-4 text-gold" /> Creator growth</h2>
-            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-              {[{ n: published, l: "Published", icon: Rocket }, { n: totalViews, l: "Views", icon: Eye }, { n: totalDownloads, l: "Downloads", icon: Download }].map((s) => (
-                <div key={s.l} className="rounded-lg border border-border p-3">
-                  <s.icon className="mx-auto mb-1 h-4 w-4 text-muted-foreground" />
-                  <div className="font-serif text-2xl font-bold">{s.n}</div>
-                  <div className="text-xs text-muted-foreground font-sans">{s.l}</div>
+            {published === 0 ? (
+              <div className="mt-4 rounded-xl border border-dashed border-border/60 px-4 py-6 text-center">
+                <TrendingUp className="mx-auto h-6 w-6 text-muted-foreground/30" />
+                <p className="mt-2 text-sm text-muted-foreground font-sans">Publish your first work to see views and downloads here.</p>
+                <Button asChild variant="heroOutline" size="sm" className="mt-3"><Link to="/publishing"><Send className="mr-1 h-3.5 w-3.5" /> Distribution center</Link></Button>
+              </div>
+            ) : (
+              <>
+                <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+                  {[{ n: published, l: "Published", icon: Rocket }, { n: totalViews, l: "Views", icon: Eye }, { n: totalDownloads, l: "Downloads", icon: Download }].map((s) => (
+                    <div key={s.l} className="rounded-lg border border-border p-3">
+                      <s.icon className="mx-auto mb-1 h-4 w-4 text-muted-foreground" />
+                      <div className="font-serif text-2xl font-bold">{s.n}</div>
+                      <div className="text-xs text-muted-foreground font-sans">{s.l}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <p className="mt-3 text-xs text-muted-foreground font-sans">Across everything you've published to the marketplace. Publish more to grow your reach.</p>
+                <p className="mt-3 text-xs text-muted-foreground font-sans">Your published marketplace reach. Publish more to grow.</p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
