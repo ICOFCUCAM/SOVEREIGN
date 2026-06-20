@@ -7,8 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import PublishingWorkspaceNav from "@/components/app/PublishingWorkspaceNav";
 import { TRIM_SIZES, PAPER_MM_PER_PAGE, getTrim, coverSpec, ingramGutterIn, INGRAM_OUTSIDE_MM } from "@/lib/print-sizes";
 import ExportCenter from "@/components/book/ExportCenter";
+import WankongStoreCard from "@/components/book/WankongStoreCard";
 
-const TARGETS: { name: string; format: string; url: string }[] = [
+// Wankong publishes directly from here (no manual upload); the rest take an
+// EPUB / print PDF you upload to them yourself.
+const TARGETS: { name: string; format: string; url: string; direct?: boolean }[] = [
+  { name: "Wankong store", format: "Direct publish — one click, no upload", url: "#wankong", direct: true },
   { name: "Amazon KDP", format: "EPUB (e-book) · interior PDF + wrap cover (print)", url: "https://kdp.amazon.com" },
   { name: "IngramSpark", format: "EPUB · interior PDF + wrap cover (print)", url: "https://www.ingramspark.com" },
   { name: "Kobo Writing Life", format: "EPUB", url: "https://www.kobo.com/us/en/p/writinglife" },
@@ -75,6 +79,8 @@ const PublishingPrep = () => {
 
       <div className="mt-6"><ExportCenter /></div>
 
+      <div className="mt-6"><WankongStoreCard /></div>
+
       <Card className="mt-6 border-border">
         <CardHeader><CardTitle className="font-serif text-lg">Where it goes</CardTitle><CardDescription className="font-sans">Every book exports to EPUB (in the reader) and to a print PDF at your trim size.</CardDescription></CardHeader>
         <CardContent>
@@ -85,12 +91,19 @@ const PublishingPrep = () => {
               return (
                 <div key={t.name} className="flex items-center justify-between gap-4 py-2.5 text-sm font-sans">
                   <div className="min-w-0">
-                    <a href={t.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium hover:text-primary hover:underline">
-                      {t.name} <ExternalLink className="h-3 w-3 text-muted-foreground" />
-                    </a>
+                    {t.direct ? (
+                      <a href={t.url} className="inline-flex items-center gap-1 font-medium hover:text-publishing hover:underline">
+                        {t.name} <Store className="h-3 w-3 text-publishing" />
+                      </a>
+                    ) : (
+                      <a href={t.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium hover:text-primary hover:underline">
+                        {t.name} <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                      </a>
+                    )}
                     <div className="text-xs text-muted-foreground">{t.format}</div>
                   </div>
                   <div className="flex shrink-0 gap-1.5">
+                    {t.direct && <span className="inline-flex items-center gap-0.5 rounded-full bg-publishing/15 px-2 py-0.5 text-[10px] font-semibold text-publishing"><Check className="h-3 w-3" /> Direct</span>}
                     {epub && <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"><Check className="h-3 w-3" /> EPUB</span>}
                     {print && <span className="inline-flex items-center gap-0.5 rounded-full bg-publishing/10 px-2 py-0.5 text-[10px] font-semibold text-publishing"><Check className="h-3 w-3" /> Print</span>}
                   </div>

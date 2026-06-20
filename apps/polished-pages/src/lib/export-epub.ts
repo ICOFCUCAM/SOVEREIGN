@@ -75,7 +75,10 @@ async function imageToBytes(src: string): Promise<{ bytes: Uint8Array; mime: str
 interface ChapterSpec { id: string; href: string; title: string; xhtml: string }
 interface ImageSpec { id: string; href: string; mime: string; bytes: Uint8Array }
 
-async function buildEpub(meta: BookMeta, chapters: ChapterSpec[], images: ImageSpec[], filename: string, dir: "ltr" | "rtl" = "ltr") {
+// Assemble the EPUB and return it as a Blob (no download). Both the
+// download helpers and the "publish to a store" path go through this, so the
+// bytes are identical wherever a book ends up.
+async function composeEpub(meta: BookMeta, chapters: ChapterSpec[], images: ImageSpec[], dir: "ltr" | "rtl" = "ltr"): Promise<Blob> {
   const { default: JSZip } = await import("jszip");
   const zip = new JSZip();
   const lang = meta.language || "en";
@@ -107,24 +110,29 @@ async function buildEpub(meta: BookMeta, chapters: ChapterSpec[], images: ImageS
 
   oebps.file("toc.ncx", `<?xml version="1.0" encoding="utf-8"?>\n<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="${id}"/><meta name="dtb:depth" content="1"/></head><docTitle><text>${esc(meta.title)}</text></docTitle><navMap>${chapters.map((c, i) => `<navPoint id="np${i + 1}" playOrder="${i + 1}"><navLabel><text>${esc(c.title)}</text></navLabel><content src="${c.href}"/></navPoint>`).join("")}</navMap></ncx>`);
 
-  const blob = await zip.generateAsync({ type: "blob", mimeType: "application/epub+zip" });
+  return zip.generateAsync({ type: "blob", mimeType: "application/epub+zip" });
+}
+
+function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = filename.endsWith(".epub") ? filename : `${filename}.epub`; a.click();
   URL.revokeObjectURL(url);
 }
 
-export async function markdownToEpub(markdown: string, meta: BookMeta, filename: string): Promise<void> {
+// Build the chapter/image specs for the two book shapes, so the download and
+// blob variants share one definition each.
+function markdownToSpecs(markdown: string, meta: BookMeta): { chapters: ChapterSpec[]; images: ImageSpec[]; dir: "ltr" | "rtl" } {
   const lang = meta.language || "en";
   const dir = isRtlText(markdown) ? "rtl" : "ltr";
   const chapters = splitChapters(markdown).map((c, i) => ({
     id: `ch${i + 1}`, href: `chapter-${i + 1}.xhtml`, title: c.title,
     xhtml: xhtml(c.title, lang, c.body, dir),
   }));
-  await buildEpub(meta, chapters, [], filename, dir);
+  return { chapters, images: [], dir };
 }
 
-export async function pictureBookToEpub(book: PictureBookData, meta: BookMeta, filename: string): Promise<void> {
+async function pictureBookToSpecs(book: PictureBookData, meta: BookMeta): Promise<{ chapters: ChapterSpec[]; images: ImageSpec[]; dir: "ltr" | "rtl" }> {
   const lang = meta.language || "en";
   const dir = isRtlText(book.pages.map((p) => p.text ?? "").join(" ")) ? "rtl" : "ltr";
   const chapters: ChapterSpec[] = [];
@@ -142,7 +150,6 @@ export async function pictureBookToEpub(book: PictureBookData, meta: BookMeta, f
     return href;
   };
 
-  // Cover page
   const coverHref = await addImage(book.coverImage);
   chapters.push({
     id: "cover", href: "chapter-1.xhtml", title: book.title,
@@ -157,5 +164,27 @@ export async function pictureBookToEpub(book: PictureBookData, meta: BookMeta, f
       xhtml: xhtml(`Page ${i + 1}`, lang, `${href ? `<img src="${href}" alt="Page ${i + 1}"/>` : ""}${p.text ? `<p class="page-text">${inline(p.text)}</p>` : ""}`, dir),
     });
   }
-  await buildEpub(meta, chapters, images, filename, dir);
+  return { chapters, images, dir };
+}
+
+export async function markdownToEpub(markdown: string, meta: BookMeta, filename: string): Promise<void> {
+  const { chapters, images, dir } = markdownToSpecs(markdown, meta);
+  downloadBlob(await composeEpub(meta, chapters, images, dir), filename);
+}
+
+// Same engine as the download, but returns the .epub bytes for uploading to a
+// store (e.g. publishing to Wankong) instead of triggering a browser download.
+export async function markdownToEpubBlob(markdown: string, meta: BookMeta): Promise<Blob> {
+  const { chapters, images, dir } = markdownToSpecs(markdown, meta);
+  return composeEpub(meta, chapters, images, dir);
+}
+
+export async function pictureBookToEpub(book: PictureBookData, meta: BookMeta, filename: string): Promise<void> {
+  const { chapters, images, dir } = await pictureBookToSpecs(book, meta);
+  downloadBlob(await composeEpub(meta, chapters, images, dir), filename);
+}
+
+export async function pictureBookToEpubBlob(book: PictureBookData, meta: BookMeta): Promise<Blob> {
+  const { chapters, images, dir } = await pictureBookToSpecs(book, meta);
+  return composeEpub(meta, chapters, images, dir);
 }
