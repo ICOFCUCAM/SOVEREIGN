@@ -37,6 +37,17 @@ const KIND_ICON: Record<DocKind, typeof FileText> = {
 };
 const trendScore = (i: CatalogItem) => (i.download_count ?? 0) * 3 + (i.view_count ?? 0);
 
+// Compact relative time for orientation on recent-work cards.
+const relTime = (iso: string): string => {
+  const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 3600) return "just now";
+  if (s < 86_400) { const h = Math.floor(s / 3600); return `${h}h ago`; }
+  const d = Math.floor(s / 86_400);
+  if (d < 30) return `${d}d ago`;
+  const mo = Math.floor(d / 30);
+  return mo < 12 ? `${mo}mo ago` : `${Math.floor(mo / 12)}y ago`;
+};
+
 const Dashboard = () => {
   const [status, setStatus] = useState<PlanStatus | null>(null);
   const [docs, setDocs] = useState<DocSummary[] | null>(null);
@@ -184,14 +195,14 @@ const Dashboard = () => {
                 : "bg-border text-muted-foreground";
               return (
                 <Link key={d.id} to={`/library?open=${d.id}`} className="group block">
-                  <Card className="h-full border-border transition-all hover:border-primary/50 hover:shadow-premium">
+                  <Card className="hover-lift h-full border-border transition-premium hover:border-primary/50">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <Icon className="h-5 w-5 text-primary" />
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold font-sans ${statusClass}`}>{statusLabel}</span>
                       </div>
                       <div className="mt-2 truncate font-sans text-sm font-semibold">{d.title}</div>
-                      <div className="mt-0.5 text-xs text-muted-foreground font-sans">{KIND_NOUN[d.kind] ?? "document"}</div>
+                      <div className="mt-0.5 text-xs text-muted-foreground font-sans">{KIND_NOUN[d.kind] ?? "document"} · {relTime(d.created_at)}</div>
                       <span className="mt-2 inline-flex items-center text-xs font-medium text-primary font-sans">Resume <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
                     </CardContent>
                   </Card>
