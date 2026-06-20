@@ -25,8 +25,8 @@ const PILLARS = [
   {
     icon: GraduationCap,
     name: "Educational Studio",
-    blurb: "Children's books, classrooms and curricula in any language.",
-    items: ["Storybooks & series", "Coloring books", "Workbooks & exams", "Curriculum builder"],
+    blurb: "14 tools for children's publishing, classrooms and curricula in any language.",
+    items: ["Storybooks & series", "Classroom packs & primary books", "Curriculum builder", "Exams, workbooks & assessment banks"],
     to: "/children",
     text: "text-educational", bg: "bg-educational/10", border: "hover:border-educational/50",
   },

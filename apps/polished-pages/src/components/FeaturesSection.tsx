@@ -45,9 +45,9 @@ const features: Feature[] = [
   },
   {
     icon: GraduationCap,
-    title: "Children’s & Educational Studio",
-    description: "Illustrated storybooks and series, coloring books, leveled readers, workbooks, exams and full curricula — in any language.",
-    chips: ["Storybooks & series", "Coloring books", "Workbooks & exams", "Curriculum builder", "Any language"],
+    title: "Educational Studio — 14 tools",
+    description: "Illustrated storybooks, classroom packs, primary school books, curriculum plans, workbooks, exams and assessment banks — in any language, for any curriculum.",
+    chips: ["Storybooks & series", "Classroom packs", "Curriculum builder", "Exams & assessment banks", "Any language"],
     link: "/children",
     cta: "Open the Studio",
   },
