@@ -25,7 +25,20 @@ serve(async (req) => {
     const moral = String(b.moralLesson ?? "").slice(0, 200);
     const characters = String(b.characters ?? "").slice(0, 600);
     const childName = String(b.childName ?? "").slice(0, 60).trim();
+    const language = String(b.language ?? "").slice(0, 40).trim();
+    const eduObjective = String(b.educationalObjective ?? "").slice(0, 200).trim();
+    const storyType = String(b.storyType ?? "classic");
     const pageCount = Math.min(Math.max(parseInt(String(b.pageCount ?? "12"), 10) || 12, 6), 24);
+
+    const STYLES: Record<string, string> = {
+      classic: "a timeless, warm classic picture-book story",
+      bedtime: "a gentle, soothing bedtime story with a calm, drowsy, reassuring ending",
+      adventure: "an exciting adventure with a brave journey, a gentle challenge and a satisfying, happy triumph",
+      cartoon: "a playful, funny cartoon-style story with lively, expressive characters and gentle humour",
+      educational: "a fun story that teaches naturally as the plot unfolds",
+      moral: "a story built around a clear moral lesson, shown through the characters' choices rather than stated",
+    };
+    const styleDesc = STYLES[storyType] ?? STYLES.classic;
 
     if (!theme.trim()) {
       return new Response(JSON.stringify({ error: "A theme or story idea is required." }), {
@@ -34,6 +47,10 @@ serve(async (req) => {
     }
 
     const system = `You are an award-winning children's picture-book author and an art director. You write wholesome, imaginative, age-appropriate stories and specify illustrations for them.
+
+This should be ${styleDesc}.
+${eduObjective ? `Educational objective to teach through the story: ${eduObjective}.` : ""}
+${language && language.toLowerCase() !== "english" ? `Write all story text (title, dedication, page text) in ${language}. Keep the illustrationPrompts in English.` : ""}
 
 SAFETY (non-negotiable): Content must be completely child-safe and wholesome — no violence, fear, peril beyond gentle age-appropriate tension, no romance, no scary imagery, no branded characters, nothing political or commercial. Kindness, curiosity and warmth throughout.
 

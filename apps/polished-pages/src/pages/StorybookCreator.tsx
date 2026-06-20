@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { elementToPdf } from "@/lib/export-pdf";
-import { generateStorybook, generateIllustration, type Storybook, type StoryInput } from "@/lib/storybook";
+import { generateStorybook, generateIllustration, type Storybook, type StoryInput, type StoryType } from "@/lib/storybook";
 import PictureBookView from "@/components/children/PictureBookView";
 import SavePictureBookButton from "@/components/children/SavePictureBookButton";
 
@@ -18,6 +18,15 @@ const READING_LEVELS = [
   "Early reader (ages 4–6)",
   "Developing reader (ages 6–8)",
   "Confident reader (ages 8–10)",
+];
+
+const STORY_TYPES: { id: StoryType; label: string }[] = [
+  { id: "classic", label: "Classic" },
+  { id: "bedtime", label: "Bedtime" },
+  { id: "adventure", label: "Adventure" },
+  { id: "cartoon", label: "Cartoon" },
+  { id: "educational", label: "Educational" },
+  { id: "moral", label: "Moral lesson" },
 ];
 
 const StorybookCreator = () => {
@@ -31,6 +40,9 @@ const StorybookCreator = () => {
   const [moralLesson, setMoralLesson] = useState("");
   const [characters, setCharacters] = useState("");
   const [pageCount, setPageCount] = useState(12);
+  const [storyType, setStoryType] = useState<StoryType>("classic");
+  const [language, setLanguage] = useState("");
+  const [educationalObjective, setEducationalObjective] = useState("");
 
   const [creating, setCreating] = useState(false);
   const [book, setBook] = useState<Storybook | null>(null);
@@ -42,7 +54,7 @@ const StorybookCreator = () => {
   const create = async () => {
     setCreating(true);
     try {
-      const input: StoryInput = { childName, childAge, readingLevel, theme, moralLesson, characters, pageCount };
+      const input: StoryInput = { childName, childAge, readingLevel, theme, moralLesson, characters, pageCount, storyType, language, educationalObjective };
       setBook(await generateStorybook(input));
     } catch (e) {
       toast({ title: "Could not create story", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
@@ -174,8 +186,31 @@ const StorybookCreator = () => {
             <CardHeader><CardTitle className="font-serif text-lg">The story</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
+                <Label className="font-sans text-xs">Story type</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {STORY_TYPES.map((s) => (
+                    <button key={s.id} type="button" onClick={() => setStoryType(s.id)}
+                      className={`rounded-full border px-2.5 py-1 text-xs font-sans transition ${storyType === s.id ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1.5">
                 <Label className="font-sans text-xs">Theme or idea *</Label>
                 <Textarea value={theme} onChange={(e) => setTheme(e.target.value)} placeholder="e.g. A shy little fox who learns to make friends in a glowing forest." rows={3} maxLength={400} className="resize-none" />
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label className="font-sans text-xs">Language (optional)</Label>
+                  <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="e.g. English, French, Swahili" maxLength={40} />
+                </div>
+                {storyType === "educational" && (
+                  <div className="space-y-1.5">
+                    <Label className="font-sans text-xs">Educational objective</Label>
+                    <Input value={educationalObjective} onChange={(e) => setEducationalObjective(e.target.value)} placeholder="e.g. Counting to ten" maxLength={200} />
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">

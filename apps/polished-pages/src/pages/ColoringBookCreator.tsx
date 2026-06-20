@@ -12,6 +12,11 @@ import { generateColoringBook, generateIllustration, type ColoringBook } from "@
 import PictureBookView, { type PictureBookData } from "@/components/children/PictureBookView";
 import SavePictureBookButton from "@/components/children/SavePictureBookButton";
 
+const COLORING_PRESETS = [
+  "Alphabet (A–Z)", "Friendly animals", "Dinosaurs", "Vehicles & machines", "Under the sea",
+  "Fairy tales & castles", "Space & planets", "African patterns & culture", "Numbers & shapes", "Farm life",
+];
+
 const ColoringBookCreator = () => {
   const { toast } = useToast();
   const bookRef = useRef<HTMLDivElement>(null);
@@ -115,6 +120,17 @@ const ColoringBookCreator = () => {
         <Card className="border-border bg-card/50">
           <CardHeader><CardTitle className="font-serif text-lg">Your coloring book</CardTitle><CardDescription className="font-sans">A clear theme works best — animals, vehicles, dinosaurs, fairy tales, the ocean…</CardDescription></CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">Quick themes</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {COLORING_PRESETS.map((p) => (
+                  <button key={p} type="button" onClick={() => setTheme(p)}
+                    className={`rounded-full border px-2.5 py-1 text-xs font-sans transition ${theme === p ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="space-y-1.5">
               <Label className="font-sans text-xs">Theme *</Label>
               <Textarea value={theme} onChange={(e) => setTheme(e.target.value)} placeholder="e.g. Friendly jungle animals" rows={2} maxLength={200} className="resize-none" />

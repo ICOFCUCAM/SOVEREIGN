@@ -12,6 +12,8 @@ export interface Storybook {
   pages: StoryPage[];
 }
 
+export type StoryType = "classic" | "bedtime" | "adventure" | "cartoon" | "educational" | "moral";
+
 export interface StoryInput {
   childName?: string;
   childAge: string;
@@ -20,6 +22,9 @@ export interface StoryInput {
   moralLesson?: string;
   characters?: string;
   pageCount: number;
+  storyType?: StoryType;
+  language?: string;
+  educationalObjective?: string;
 }
 
 const fn = (name: string) => `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${name}`;
