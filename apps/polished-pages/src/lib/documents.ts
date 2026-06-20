@@ -14,6 +14,7 @@ export interface DocSummary {
   template: string | null;
   preview: string | null;
   favorite?: boolean;
+  shared?: boolean;
   created_at: string;
 }
 
@@ -84,4 +85,19 @@ export async function getVersion(versionId: string): Promise<unknown> {
   const { data, error } = await rpc().rpc("polished_get_version", { p_version_id: versionId });
   if (error) throw new Error(error.message || "Could not load that version.");
   return data;
+}
+
+// Toggle public sharing. Returns the share token when turning on, null when off.
+export async function setShared(id: string, shared: boolean): Promise<string | null> {
+  const { data, error } = await rpc().rpc("polished_set_shared", { p_id: id, p_shared: shared });
+  if (error) throw new Error(error.message || "Could not update sharing.");
+  return (data as string) ?? null;
+}
+
+export interface SharedDoc { kind: DocKind; title: string; template: string | null; payload: unknown }
+// Public read of a shared document by token (no auth required).
+export async function getShared(token: string): Promise<SharedDoc | null> {
+  const { data, error } = await rpc().rpc("polished_get_shared", { p_token: token });
+  if (error) throw new Error(error.message || "Could not load the shared document.");
+  return (data as SharedDoc | null) ?? null;
 }

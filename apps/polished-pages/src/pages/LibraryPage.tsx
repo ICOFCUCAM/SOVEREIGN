@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
+import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
 import { elementToPdf } from "@/lib/export-pdf";
 import type { CvData } from "@/lib/cv-data";
 import CVPreview from "@/components/CVPreview";
@@ -84,6 +84,23 @@ const LibraryPage = () => {
       setDocs((prev) => prev?.filter((d) => d.id !== id) ?? null);
     } catch (e) {
       toast({ title: "Could not delete", description: e instanceof Error ? e.message : "Error", variant: "destructive" });
+    }
+  };
+
+  const share = async (d: DocSummary) => {
+    const next = !d.shared;
+    try {
+      const token = await setShared(d.id, next);
+      setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, shared: next } : x)) ?? null);
+      if (next && token) {
+        const url = `${window.location.origin}/shared/${token}`;
+        await navigator.clipboard.writeText(url).catch(() => {});
+        toast({ title: "Public link copied", description: url });
+      } else {
+        toast({ title: "Sharing turned off" });
+      }
+    } catch (e) {
+      toast({ title: "Could not update sharing", description: e instanceof Error ? e.message : "", variant: "destructive" });
     }
   };
 
@@ -313,6 +330,9 @@ const LibraryPage = () => {
                       <div className="mt-3 flex items-center gap-2">
                         <Button size="sm" variant="heroOutline" disabled={opening === d.id} onClick={() => open(d)}>
                           {opening === d.id ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null} Open
+                        </Button>
+                        <Button size="sm" variant="ghost" className={d.shared ? "text-primary" : "text-muted-foreground"} onClick={() => share(d)} aria-label="Share" title={d.shared ? "Shared — click to copy link or unshare" : "Share publicly"}>
+                          <Share2 className="h-4 w-4" />
                         </Button>
                         <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={() => remove(d.id)} aria-label="Delete">
                           <Trash2 className="h-4 w-4" />
