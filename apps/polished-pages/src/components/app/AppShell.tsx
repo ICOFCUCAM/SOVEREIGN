@@ -12,6 +12,7 @@ import { BRAND, DASHBOARD_NAV, ACCOUNT_NAV, LIBRARY_NAV } from "@/lib/tools";
 import CommandPalette from "@/components/app/CommandPalette";
 import WorkflowNav from "@/components/app/WorkflowNav";
 import MobileNav from "@/components/app/MobileNav";
+import MobileTabBar from "@/components/app/MobileTabBar";
 
 // The persistent studio chrome: one global navigation that ties every tool
 // together, an account menu with live plan/usage, and the ⌘K command palette.
@@ -110,7 +111,8 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
       <MobileNav open={mobileOpen} onClose={() => setMobileOpen(false)} />
 
-      <main id="main" className="pt-14">{children}</main>
+      <main id="main" className="pt-14 pb-20 md:pb-0">{children}</main>
+      <MobileTabBar onMenu={() => setMobileOpen(true)} />
     </div>
   );
 };
