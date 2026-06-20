@@ -16,7 +16,7 @@ const config: SchoolStudioConfig = {
     { key: "subject", label: "Subject", placeholder: "e.g. Biology", required: true },
     { key: "topic", label: "Topic", placeholder: "e.g. The human digestive system", required: true },
     { key: "country", label: "Country / curriculum (optional)", placeholder: "e.g. United States", list: "country-options" },
-    { key: "language", label: "Language (optional)", placeholder: "e.g. English" },
+    { key: "language", label: "Language (optional)", placeholder: "e.g. English", list: "language-options" },
   ],
   parts: [
     { type: "learning-objectives", label: "Learning objectives" },

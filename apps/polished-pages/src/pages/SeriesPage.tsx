@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import CountryDatalist from "@/components/app/CountryDatalist";
+import LanguageDatalist from "@/components/app/LanguageDatalist";
 import { createSeries, listSeries, getSeries, deleteSeries, setDocumentSeries, setSeriesPublic, type SeriesSummary, type SeriesDetail } from "@/lib/series";
 import { listDocuments, type DocSummary } from "@/lib/documents";
 
@@ -112,7 +113,7 @@ const SeriesPage = () => {
                 <div className="space-y-1.5"><Label className="text-xs font-sans">Educational objective</Label><Input value={form.objective} onChange={(e) => setForm({ ...form, objective: e.target.value })} placeholder="e.g. courage & kindness" maxLength={200} /></div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1.5"><Label className="text-xs font-sans">Language</Label><Input value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })} placeholder="e.g. English" maxLength={40} /></div>
+                <div className="space-y-1.5"><Label className="text-xs font-sans">Language</Label><Input value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })} placeholder="e.g. English" maxLength={40} list="language-options" /><LanguageDatalist /></div>
                 <div className="space-y-1.5"><Label className="text-xs font-sans">Culture / country</Label><Input value={form.culture} onChange={(e) => setForm({ ...form, culture: e.target.value })} placeholder="e.g. United States" maxLength={120} list="country-options" /><CountryDatalist /></div>
               </div>
               <Button variant="hero" size="sm" onClick={create} disabled={creating}>{creating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />} Create series</Button>

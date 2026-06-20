@@ -12,6 +12,7 @@ import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
 import CountryDatalist from "@/components/app/CountryDatalist";
+import LanguageDatalist from "@/components/app/LanguageDatalist";
 import { saveAssessment } from "@/lib/assessment-bank";
 
 // Document types that belong in the reusable Assessment Bank.
@@ -152,6 +153,7 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
           <CardHeader><CardTitle className="font-serif text-lg">Details</CardTitle><CardDescription className="font-sans">Fill in the lesson details to generate classroom-ready materials.</CardDescription></CardHeader>
           <CardContent className="space-y-4">
             <CountryDatalist />
+            <LanguageDatalist />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {config.fields.map((f) => (
                 <div key={f.key as string} className={`space-y-1.5 ${f.type === "multiselect" ? "sm:col-span-2" : ""}`}>
