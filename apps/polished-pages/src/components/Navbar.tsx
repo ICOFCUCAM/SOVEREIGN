@@ -49,6 +49,7 @@ const Navbar = () => {
         </Link>
 
         <div className="hidden md:flex items-center gap-7 text-sm text-muted-foreground font-sans">
+          <Link to="/" className="py-2 hover:text-foreground transition-colors">Home</Link>
           {GROUPS.map((g) => (
             <div key={g.label} className="relative group">
               <button className="flex items-center gap-1 py-2 hover:text-foreground transition-colors">
@@ -83,6 +84,7 @@ const Navbar = () => {
 
       {mobileOpen && (
         <div className="md:hidden border-t border-border/50 bg-background/95 px-6 py-4">
+          <Link to="/" onClick={() => setMobileOpen(false)} className="mb-3 block text-sm font-medium text-foreground font-sans">Home</Link>
           {GROUPS.map((g) => (
             <div key={g.label} className="mb-3">
               <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans">{g.label}</div>
