@@ -8,8 +8,8 @@ interface RpcClient {
 }
 const rpc = () => supabase as unknown as RpcClient;
 
-export interface MyProfile { display_name: string; bio: string | null }
-export interface AuthorProfile { display_name: string; bio: string | null; verified?: boolean; works: number; views: number; downloads: number }
+export interface MyProfile { display_name: string; bio: string | null; tagline: string | null; website: string | null }
+export interface AuthorProfile { display_name: string; bio: string | null; tagline?: string | null; website?: string | null; verified?: boolean; works: number; views: number; downloads: number }
 
 export async function getMyProfile(): Promise<MyProfile | null> {
   const { data, error } = await rpc().rpc("polished_get_my_profile");
@@ -18,8 +18,11 @@ export async function getMyProfile(): Promise<MyProfile | null> {
   return row ?? null;
 }
 
-export async function upsertProfile(displayName: string, bio: string): Promise<void> {
-  const { error } = await rpc().rpc("polished_upsert_profile", { p_display_name: displayName, p_bio: bio });
+export async function upsertProfile(displayName: string, bio: string, tagline?: string, website?: string): Promise<void> {
+  const { error } = await rpc().rpc("polished_upsert_profile", {
+    p_display_name: displayName, p_bio: bio,
+    p_tagline: tagline ?? null, p_website: website ?? null,
+  });
   if (error) throw new Error(error.message || "Could not save your profile.");
 }
 
