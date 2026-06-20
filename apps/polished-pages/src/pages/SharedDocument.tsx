@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Sparkles, Loader2 } from "lucide-react";
-import { getShared, type SharedDoc } from "@/lib/documents";
+import { getShared, recordView, type SharedDoc } from "@/lib/documents";
 import { BRAND } from "@/lib/tools";
 import type { CvData } from "@/lib/cv-data";
 import BookReader from "@/components/book/BookReader";
@@ -17,7 +17,7 @@ const SharedDocument = () => {
 
   useEffect(() => {
     if (!token) { setState("missing"); return; }
-    getShared(token).then((d) => { if (d) { setDoc(d); setState("ready"); } else setState("missing"); }).catch(() => setState("missing"));
+    getShared(token).then((d) => { if (d) { setDoc(d); setState("ready"); recordView(token); } else setState("missing"); }).catch(() => setState("missing"));
   }, [token]);
 
   const p = (doc?.payload ?? {}) as Record<string, unknown>;

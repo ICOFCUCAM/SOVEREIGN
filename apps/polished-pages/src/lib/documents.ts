@@ -20,6 +20,8 @@ export interface DocSummary {
   price_cents?: number;
   tags?: string[];
   is_template?: boolean;
+  view_count?: number;
+  download_count?: number;
   created_at: string;
 }
 
@@ -112,7 +114,9 @@ export const CATALOG_LICENSES = [
   "Creative Commons (CC BY-NC)",
 ];
 
-export interface CatalogItem { token: string; kind: DocKind; title: string; category: string | null; price_cents: number; preview: string | null; author_name: string | null; license: string | null; featured?: boolean; created_at: string }
+export interface CatalogItem { token: string; kind: DocKind; title: string; category: string | null; price_cents: number; preview: string | null; author_name: string | null; license: string | null; featured?: boolean; view_count?: number; download_count?: number; created_at: string }
+
+export type CatalogSort = "new" | "trending" | "price";
 
 export async function setTags(id: string, tags: string[]): Promise<void> {
   const { error } = await rpc().rpc("polished_set_tags", { p_id: id, p_tags: tags });
@@ -162,10 +166,19 @@ export async function publishDocument(id: string, opts: { listed: boolean; categ
   return (data as string) ?? null;
 }
 
-export async function catalogList(category?: string, search?: string): Promise<CatalogItem[]> {
-  const { data, error } = await rpc().rpc("polished_catalog", { p_category: category ?? null, p_search: search ?? null });
+export async function catalogList(category?: string, search?: string, sort: CatalogSort = "new", author?: string): Promise<CatalogItem[]> {
+  const { data, error } = await rpc().rpc("polished_catalog", { p_category: category ?? null, p_search: search ?? null, p_sort: sort, p_author: author ?? null });
   if (error) throw new Error(error.message || "Could not load the catalog.");
   return (Array.isArray(data) ? data : []) as CatalogItem[];
+}
+
+// Public, fire-and-forget analytics for shared catalog items.
+export async function recordView(token: string): Promise<void> {
+  try { await rpc().rpc("polished_record_view", { p_token: token }); } catch { /* analytics is best-effort */ }
+}
+
+export async function recordDownload(token: string): Promise<void> {
+  try { await rpc().rpc("polished_record_download", { p_token: token }); } catch { /* analytics is best-effort */ }
 }
 
 export interface SharedDoc { kind: DocKind; title: string; template: string | null; payload: unknown; author_name?: string | null; license?: string | null }

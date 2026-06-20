@@ -1,23 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Loader2, Store, ArrowRight, Search, X, Star } from "lucide-react";
+import { Sparkles, Loader2, Store, ArrowRight, Search, X, Star, TrendingUp, Eye, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem } from "@/lib/documents";
+import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem, type CatalogSort } from "@/lib/documents";
 import { BRAND } from "@/lib/tools";
 
 const priceLabel = (cents: number) => (cents > 0 ? `$${(cents / 100).toFixed(2)}` : "Free");
-type Sort = "new" | "price-asc" | "free";
 
 // Public catalog of shared/published educational resources. No sign-in required.
+// Doubles as an author page when reached via /catalog/author/:author.
 const CatalogPage = () => {
+  const { author: authorParam } = useParams();
+  const navigate = useNavigate();
+  const author = authorParam ?? "";
   const [items, setItems] = useState<CatalogItem[] | null>(null);
   const [cat, setCat] = useState<string>("");
   const [query, setQuery] = useState("");
-  const [author, setAuthor] = useState<string>("");
-  const [sort, setSort] = useState<Sort>("new");
+  const [sort, setSort] = useState<CatalogSort>("new");
   const [admin, setAdmin] = useState(false);
 
   useEffect(() => { isAdmin().then(setAdmin).catch(() => {}); }, []);
@@ -25,10 +27,10 @@ const CatalogPage = () => {
   useEffect(() => {
     setItems(null);
     const id = setTimeout(() => {
-      catalogList(cat || undefined, query.trim() || undefined).then(setItems).catch(() => setItems([]));
+      catalogList(cat || undefined, query.trim() || undefined, sort, author || undefined).then(setItems).catch(() => setItems([]));
     }, query ? 300 : 0);
     return () => clearTimeout(id);
-  }, [cat, query]);
+  }, [cat, query, sort, author]);
 
   const feature = async (it: CatalogItem) => {
     const next = !it.featured;
@@ -36,14 +38,7 @@ const CatalogPage = () => {
     try { await adminFeature(it.token, next); } catch { setItems((prev) => prev?.map((x) => (x.token === it.token ? { ...x, featured: !next } : x)) ?? null); }
   };
 
-  const view = useMemo(() => {
-    let list = items ?? [];
-    if (author) list = list.filter((i) => (i.author_name ?? "") === author);
-    if (sort === "free") list = [...list].sort((a, b) => a.price_cents - b.price_cents);
-    else if (sort === "price-asc") list = [...list].sort((a, b) => a.price_cents - b.price_cents);
-    else list = [...list].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
-    return list;
-  }, [items, author, sort]);
+  const view = items ?? [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -57,11 +52,15 @@ const CatalogPage = () => {
       <div className="container max-w-5xl mx-auto px-6 py-10">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
-            <Store className="w-4 h-4 text-gold" />
-            <span className="text-sm text-gold-light font-medium font-sans">Content Catalog</span>
+            {sort === "trending" ? <TrendingUp className="w-4 h-4 text-gold" /> : <Store className="w-4 h-4 text-gold" />}
+            <span className="text-sm text-gold-light font-medium font-sans">{author ? "Author" : sort === "trending" ? "Trending now" : "Content Catalog"}</span>
           </div>
-          <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Browse <span className="text-gradient-gold italic">published resources</span></h1>
-          <p className="mt-2 text-muted-foreground font-sans">Storybooks, readers, workbooks and classroom materials shared by the community.</p>
+          {author ? (
+            <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Resources by <span className="text-gradient-gold italic">{author}</span></h1>
+          ) : (
+            <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Browse <span className="text-gradient-gold italic">published resources</span></h1>
+          )}
+          <p className="mt-2 text-muted-foreground font-sans">{author ? `Everything ${author} has published, newest first.` : "Storybooks, readers, workbooks and classroom materials shared by the community."}</p>
         </motion.div>
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
@@ -69,10 +68,10 @@ const CatalogPage = () => {
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search the catalog…" className="pl-8" />
           </div>
-          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="rounded-md border border-border bg-card px-2.5 py-2 text-sm font-sans">
-            <option value="new">Newest</option>
-            <option value="price-asc">Price: low to high</option>
-            <option value="free">Free first</option>
+          <select value={sort} onChange={(e) => setSort(e.target.value as CatalogSort)} className="rounded-md border border-border bg-card px-2.5 py-2 text-sm font-sans">
+            <option value="new">Recently published</option>
+            <option value="trending">Trending</option>
+            <option value="price">Price: low to high</option>
           </select>
         </div>
 
@@ -85,7 +84,7 @@ const CatalogPage = () => {
 
         {author && (
           <div className="mt-3">
-            <button onClick={() => setAuthor("")} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary font-sans">
+            <button onClick={() => navigate("/catalog")} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary font-sans">
               By {author} <X className="h-3 w-3" />
             </button>
           </div>
@@ -109,9 +108,15 @@ const CatalogPage = () => {
                     <h3 className="font-serif text-base font-semibold leading-snug group-hover:text-primary">{it.title}</h3>
                   </Link>
                   {it.author_name && (
-                    <button onClick={() => setAuthor(it.author_name!)} className="mt-0.5 self-start text-xs text-muted-foreground hover:text-primary font-sans">by {it.author_name}</button>
+                    <Link to={`/catalog/author/${encodeURIComponent(it.author_name)}`} className="mt-0.5 self-start text-xs text-muted-foreground hover:text-primary font-sans">by {it.author_name}</Link>
                   )}
                   {it.preview && <p className="mt-1.5 line-clamp-3 flex-1 text-xs text-muted-foreground font-sans">{it.preview}</p>}
+                  {((it.view_count ?? 0) > 0 || (it.download_count ?? 0) > 0) && (
+                    <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground font-sans">
+                      {(it.view_count ?? 0) > 0 && <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" /> {it.view_count}</span>}
+                      {(it.download_count ?? 0) > 0 && <span className="inline-flex items-center gap-1"><Download className="h-3 w-3" /> {it.download_count}</span>}
+                    </div>
+                  )}
                   {it.license && <div className="mt-2 text-[11px] text-muted-foreground font-sans">{it.license}</div>}
                   <div className="mt-3 flex items-center justify-between">
                     <Link to={`/shared/${it.token}`} className="group inline-flex items-center text-sm font-medium text-primary font-sans">

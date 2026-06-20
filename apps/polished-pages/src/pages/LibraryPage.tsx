@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye } from "lucide-react";
 import PublishDialog from "@/components/app/PublishDialog";
 import AddToCollection from "@/components/app/AddToCollection";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, setTemplateFlag, useTemplate, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
+import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, setTemplateFlag, useTemplate as applyTemplate, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
 import TagEditor from "@/components/app/TagEditor";
 import { elementToPdf } from "@/lib/export-pdf";
 import type { CvData } from "@/lib/cv-data";
@@ -135,7 +135,7 @@ const LibraryPage = () => {
 
   const startFromTemplate = async (d: DocSummary) => {
     try {
-      await useTemplate(d.id);
+      await applyTemplate(d.id);
       load();
       toast({ title: "New document started", description: `Copied from template “${d.title}”.` });
     } catch (e) {
@@ -368,8 +368,14 @@ const LibraryPage = () => {
                           <Star className={`h-4 w-4 ${d.favorite ? "fill-gold text-gold" : ""}`} />
                         </button>
                       </div>
-                      <div className="mt-0.5 text-xs text-muted-foreground font-sans">
-                        {meta.label} · {new Date(d.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground font-sans">
+                        <span>{meta.label} · {new Date(d.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
+                        {d.listed && ((d.view_count ?? 0) > 0 || (d.download_count ?? 0) > 0) && (
+                          <span className="inline-flex items-center gap-2">
+                            <span className="inline-flex items-center gap-0.5"><Eye className="h-3 w-3" /> {d.view_count ?? 0}</span>
+                            <span className="inline-flex items-center gap-0.5"><Download className="h-3 w-3" /> {d.download_count ?? 0}</span>
+                          </span>
+                        )}
                       </div>
                       {d.preview && <p className="mt-1.5 line-clamp-2 text-xs text-muted-foreground font-sans">{d.preview}</p>}
                       {(d.tags ?? []).length > 0 && (

@@ -46,6 +46,7 @@ const App = () => (
           {/* Public shared documents + catalog (no sign-in) */}
           <Route path="/shared/:token" element={<SharedDocument />} />
           <Route path="/catalog" element={<CatalogPage />} />
+          <Route path="/catalog/author/:author" element={<CatalogPage />} />
           <Route path="/collection/:token" element={<PublicCollection />} />
           {/* Generators require sign-in (metered per user); the gate prompts
               for sign-in only when someone actually goes to create. */}
