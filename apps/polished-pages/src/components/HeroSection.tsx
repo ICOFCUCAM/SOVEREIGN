@@ -54,12 +54,13 @@ const HeroSection = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button variant="hero" size="lg" className="text-base px-8 py-6" asChild>
-              <Link to="/dashboard">Start creating <ArrowRight className="w-5 h-5 ml-1" /></Link>
+              <Link to="/dashboard">Start creating free <ArrowRight className="w-5 h-5 ml-1" /></Link>
             </Button>
             <Button variant="heroOutline" size="lg" className="text-base px-8 py-6" asChild>
               <Link to="/catalog">Explore the marketplace</Link>
             </Button>
           </div>
+          <p className="mt-3 text-xs text-muted-foreground font-sans">No card required · You own what you create · Cancel anytime</p>
         </motion.div>
 
         {/* Capability strip (real capabilities, not vanity metrics) */}
