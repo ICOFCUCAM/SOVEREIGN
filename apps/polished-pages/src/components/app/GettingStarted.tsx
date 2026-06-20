@@ -30,7 +30,7 @@ const GettingStarted = () => (
             const t = STUDIO_THEME[s.studio];
             return (
               <motion.div key={s.to} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
-                <Link to={s.to} className={`group flex h-full flex-col rounded-xl border border-border bg-background/70 p-4 transition-all hover:-translate-y-0.5 hover:shadow-premium ${t.hoverBorder}`}>
+                <Link to={s.to} className={`hover-lift group flex h-full flex-col rounded-xl border border-border bg-background/70 p-4 transition-premium ${t.hoverBorder}`}>
                   <span className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg ${t.bg}`}><s.icon className={`h-5 w-5 ${t.text}`} /></span>
                   <div className="font-sans text-sm font-semibold">{s.title}</div>
                   <p className="mt-1 flex-1 text-xs text-muted-foreground font-sans">{s.desc}</p>
@@ -40,6 +40,9 @@ const GettingStarted = () => (
             );
           })}
         </div>
+        <p className="mt-5 text-xs text-muted-foreground font-sans">
+          Tip: press <kbd className="rounded border border-border bg-background px-1.5 py-0.5 font-sans text-[10px]">⌘K</kbd> any time to jump to any tool or action.
+        </p>
       </CardContent>
     </Card>
   </section>
