@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { elementToPdf } from "@/lib/export-pdf";
 import { markdownToEpub } from "@/lib/export-epub";
+import { markdownToPrintPdf } from "@/lib/export-print-pdf";
 import { BOOK_THEMES, getBookTheme } from "@/lib/book-themes";
 import { TRIM_SIZES, getTrim } from "@/lib/print-sizes";
 import BookPaper from "@/components/book/BookPaper";
@@ -35,11 +36,23 @@ const BookReader = ({
     setPdf(true);
     try {
       const t = getTrim(trimId);
-      await elementToPdf(paperRef.current, `${title || "book"}.pdf`, theme.paper, { w: t.wmm, h: t.hmm });
+      await elementToPdf(paperRef.current, `${title || "book"}-design.pdf`, theme.paper, { w: t.wmm, h: t.hmm });
     } catch (e) {
       toast({ title: "PDF export failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally {
       setPdf(false);
+    }
+  };
+
+  const [printing, setPrinting] = useState(false);
+  const printInterior = async () => {
+    setPrinting(true);
+    try {
+      await markdownToPrintPdf(content, { title: title || "Book", trim: getTrim(trimId) }, `${title || "book"}-interior`);
+    } catch (e) {
+      toast({ title: "Print PDF failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally {
+      setPrinting(false);
     }
   };
 
@@ -77,8 +90,11 @@ const BookReader = ({
           <select value={trimId} onChange={(e) => setTrimId(e.target.value)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans" title="Print trim size">
             {TRIM_SIZES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
           </select>
-          <Button variant="heroOutline" size="sm" disabled={pdf || mode === "edit"} onClick={themedPdf}>
-            {pdf ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} Print PDF
+          <Button variant="heroOutline" size="sm" disabled={printing} onClick={printInterior} title="Selectable-text interior at the chosen trim (KDP/IngramSpark)">
+            {printing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} Print interior
+          </Button>
+          <Button variant="heroOutline" size="sm" disabled={pdf || mode === "edit"} onClick={themedPdf} title="Designed proof PDF (image of the themed interior)">
+            {pdf ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} Design PDF
           </Button>
           <Button variant="heroOutline" size="sm" disabled={epub} onClick={exportEpub}>
             {epub ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <BookOpen className="w-4 h-4 mr-1" />} EPUB
