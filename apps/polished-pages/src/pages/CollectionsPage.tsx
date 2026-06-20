@@ -12,6 +12,7 @@ const CollectionsPage = () => {
   const { toast } = useToast();
   const [cols, setCols] = useState<Collection[] | null>(null);
   const [title, setTitle] = useState("");
+  const [desc, setDesc] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -21,7 +22,7 @@ const CollectionsPage = () => {
   const create = async () => {
     if (title.trim().length < 2) return;
     setBusy(true);
-    try { await createCollection(title); setTitle(""); load(); }
+    try { await createCollection(title, desc.trim() || undefined); setTitle(""); setDesc(""); load(); }
     catch (e) { toast({ title: "Could not create", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
     finally { setBusy(false); }
   };
@@ -57,11 +58,14 @@ const CollectionsPage = () => {
         <p className="mt-1 text-muted-foreground font-sans">Group your work into curated sets — then publish a collection as a public, shareable repository for a class, a team or the world. Add items from the Library.</p>
       </motion.div>
 
-      <div className="mt-6 flex items-center gap-2">
-        <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="New collection name (e.g. Grade 4 Science)" maxLength={80} />
-        <Button variant="hero" disabled={busy || title.trim().length < 2} onClick={create}>
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <FolderPlus className="mr-1 h-4 w-4" />} Create
-        </Button>
+      <div className="mt-6 space-y-2">
+        <div className="flex items-center gap-2">
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="New collection name (e.g. Grade 4 Science)" maxLength={80} />
+          <Button variant="hero" disabled={busy || title.trim().length < 2} onClick={create}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <FolderPlus className="mr-1 h-4 w-4" />} Create
+          </Button>
+        </div>
+        <Input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Optional description — what's in this collection and who it's for" maxLength={240} />
       </div>
 
       {cols === null && (
@@ -93,6 +97,7 @@ const CollectionsPage = () => {
                       <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${c.public ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"}`}>{c.public ? "Public" : "Private"}</span>
                     </div>
                     <div className="text-xs text-muted-foreground font-sans">{c.item_count} item{c.item_count === 1 ? "" : "s"}</div>
+                    {c.description && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground font-sans">{c.description}</p>}
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant={c.public ? "hero" : "heroOutline"} size="sm" onClick={() => togglePublic(c)}>
