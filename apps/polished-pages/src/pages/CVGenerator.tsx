@@ -42,7 +42,7 @@ const CVGenerator = () => {
   const [certifications, setCertifications] = useState("");
   const [languages, setLanguages] = useState("");
   const [targetJob, setTargetJob] = useState("");
-  const [template, setTemplate] = useState<CVTemplate>("executive-boardroom");
+  const [template, setTemplate] = useState<CVTemplate>("sovereign-executive");
   const [photo, setPhoto] = useState<string | null>(null);
 
   const onPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {

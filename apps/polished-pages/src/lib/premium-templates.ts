@@ -15,6 +15,7 @@ export interface PremiumTemplate {
   display?: FontId;   // heading/name font (defaults to body)
   accent: string;
   dark?: boolean;
+  flagship?: boolean;
   blurb: string;
 }
 
@@ -32,6 +33,7 @@ export const PREMIUM_COLLECTIONS: { id: PremiumCollection; label: string; blurb:
 ];
 
 export const PREMIUM_TEMPLATES: PremiumTemplate[] = [
+  { id: "sovereign-executive", name: "Sovereign Executive", collection: "executive", font: "manrope", display: "fraunces", accent: "#243240", flagship: true, blurb: "The flagship. Nordic-restrained, board-grade and ATS-safe — a senior professional's résumé at a glance." },
   { id: "executive-boardroom", name: "Boardroom", collection: "executive", font: "jakarta", display: "playfair", accent: "#1a2238", blurb: "Editorial serif, oversized name, achievements-first. For directors and C-suite." },
   { id: "premium-single", name: "Monarch", collection: "executive", font: "inter", accent: "#1f2937", blurb: "Elite single-column. Maximum ATS compatibility." },
   { id: "tech-architect", name: "Terminal", collection: "technology", font: "mono", accent: "#34d399", dark: true, blurb: "Dark, code-inspired. Tech-stack matrix, projects, GitHub. For engineers and architects." },

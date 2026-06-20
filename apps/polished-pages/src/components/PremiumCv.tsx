@@ -143,16 +143,17 @@ const Boardroom = ({ d, k, innerRef }: { d: CvData; k: K; innerRef?: Ref<HTMLDiv
 // 2 · ATS ULTRA — elite centered single-column, maximum parse-safety.
 const Monarch = ({ d, k, innerRef }: { d: CvData; k: K; innerRef?: Ref<HTMLDivElement> }) => (
   <Page k={k} innerRef={innerRef}>
-    <div style={{ textAlign: "center", paddingBottom: "1rem", borderBottom: `1px solid ${k.line}` }}>
-      <div style={{ fontSize: 31, fontWeight: 700, letterSpacing: ".02em", color: k.strong }}>{d.name}</div>
-      {d.title && <div style={{ marginTop: ".4rem", fontSize: 12.5, letterSpacing: ".2em", textTransform: "uppercase", color: k.accent }}>{d.title}</div>}
-      <div style={{ marginTop: ".6rem", display: "flex", justifyContent: "center" }}><Contact d={d} k={k} /></div>
+    <div style={{ textAlign: "center", paddingBottom: "1.15rem", borderBottom: `1px solid ${k.line}` }}>
+      <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: ".035em", color: k.strong, lineHeight: 1.05 }}>{d.name}</div>
+      {d.title && <div style={{ marginTop: ".55rem", fontSize: 12, letterSpacing: ".26em", textTransform: "uppercase", color: k.accent, fontWeight: 600 }}>{d.title}</div>}
+      <div style={{ width: 34, height: 2, background: k.accent, margin: ".85rem auto 0", borderRadius: 2 }} />
+      <div style={{ marginTop: ".8rem", display: "flex", justifyContent: "center" }}><Contact d={d} k={k} sep="     ·     " /></div>
     </div>
-    {d.summary && (<><Plain k={k} mt="1.3rem">Profile</Plain><Summary d={d} k={k} /></>)}
-    <Plain k={k}>Experience</Plain><Experience d={d} k={k} />
-    <Plain k={k}>Education</Plain><Education d={d} k={k} />
-    <Plain k={k}>Skills</Plain><div style={{ fontSize: 12.8, color: k.ink, lineHeight: 1.7 }}>{d.skills.join("  ·  ")}</div>
-    {d.certifications.length > 0 && (<><Plain k={k}>Certifications</Plain><div style={{ fontSize: 12.8, color: k.ink }}>{d.certifications.join("  ·  ")}</div></>)}
+    {d.summary && (<><Plain k={k} mt="1.7rem">Profile</Plain><p style={{ fontSize: 13.2, lineHeight: 1.7, color: k.ink, textAlign: "center", maxWidth: "92%", margin: "0 auto" }}>{d.summary}</p></>)}
+    <Plain k={k} mt="1.9rem">Experience</Plain><Experience d={d} k={k} />
+    <Plain k={k} mt="1.9rem">Education</Plain><Education d={d} k={k} />
+    <Plain k={k} mt="1.9rem">Skills</Plain><div style={{ fontSize: 12.8, color: k.ink, lineHeight: 1.85, textAlign: "center" }}>{d.skills.join("    ·    ")}</div>
+    {d.certifications.length > 0 && (<><Plain k={k} mt="1.9rem">Certifications</Plain><div style={{ fontSize: 12.8, color: k.ink, lineHeight: 1.8, textAlign: "center" }}>{d.certifications.join("    ·    ")}</div></>)}
   </Page>
 );
 
@@ -418,7 +419,85 @@ const Global = ({ d, k, innerRef }: { d: CvData; k: K; innerRef?: Ref<HTMLDivEle
   </Page>
 );
 
+// ★ FLAGSHIP · SOVEREIGN EXECUTIVE — Nordic-restrained, board-grade, ATS-safe.
+// Single text column (parses cleanly), serif gravitas over a humanist-sans body,
+// hairline section rules, a restrained impact strip. Premium via space + hierarchy.
+const Sovereign = ({ d, k, innerRef }: { d: CvData; k: K; innerRef?: Ref<HTMLDivElement> }) => {
+  const Label = ({ children, mt = "1.95rem" }: { children: ReactNode; mt?: string }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: ".9rem", margin: `${mt} 0 .85rem` }}>
+      <span style={{ color: k.strong, fontSize: 10.5, fontWeight: 700, letterSpacing: ".26em", textTransform: "uppercase" }}>{children}</span>
+      <span style={{ flex: 1, height: 1, background: k.line }} />
+    </div>
+  );
+  const parts = (d.summary ?? "").split(/(?<=\.)\s+/).filter(Boolean);
+  const contacts = [d.contact.location, d.contact.email, d.contact.phone, d.contact.linkedin, d.contact.website].filter(Boolean) as string[];
+  return (
+    <Page k={k} innerRef={innerRef}>
+      {/* masthead */}
+      <div style={{ fontFamily: k.disp, fontSize: 46, fontWeight: 600, color: k.strong, letterSpacing: "-.015em", lineHeight: 1.02 }}>{d.name}</div>
+      {d.title && <div style={{ fontSize: 12, letterSpacing: ".32em", textTransform: "uppercase", color: k.accent, marginTop: ".75rem", fontWeight: 600 }}>{d.title}</div>}
+      <div style={{ marginTop: "1.1rem", paddingTop: "1rem", borderTop: `1px solid ${k.line}`, display: "flex", flexWrap: "wrap", gap: ".3rem 1.7rem", fontSize: 12, color: k.muted }}>
+        {contacts.map((c, i) => <span key={i}>{c}</span>)}
+      </div>
+
+      {/* executive summary — serif lead, sans continuation */}
+      {parts.length > 0 && (<>
+        <Label mt="1.8rem">Executive Summary</Label>
+        <p style={{ fontFamily: k.disp, fontSize: 15.5, lineHeight: 1.6, color: k.strong, fontWeight: 400 }}>{parts[0]}</p>
+        {parts.length > 1 && <p style={{ fontSize: 13, lineHeight: 1.7, color: k.ink, marginTop: ".55rem" }}>{parts.slice(1).join(" ")}</p>}
+      </>)}
+
+      {/* restrained impact strip */}
+      {d.metrics?.length ? (
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(d.metrics.length, 4)}, 1fr)`, marginTop: "1.75rem", border: `1px solid ${k.line}`, borderRadius: 3 }}>
+          {d.metrics.slice(0, 4).map((m, i) => (
+            <div key={i} style={{ padding: "1rem 1.1rem", borderLeft: i ? `1px solid ${k.line}` : "none" }}>
+              <div style={{ fontFamily: k.disp, fontSize: 26, fontWeight: 600, color: k.strong, lineHeight: 1 }}>{m.value}</div>
+              <div style={{ fontSize: 9.5, color: k.muted, textTransform: "uppercase", letterSpacing: ".11em", marginTop: ".45rem" }}>{m.label}</div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {/* selected achievements */}
+      {d.achievements?.length ? (<>
+        <Label>Selected Achievements</Label>
+        {d.achievements.map((a, i) => (
+          <div key={i} style={{ display: "flex", gap: ".85rem", margin: ".5rem 0" }}>
+            <span style={{ width: 6, height: 6, borderRadius: 9999, border: `1.5px solid ${k.accent}`, marginTop: 6, flexShrink: 0 }} />
+            <span style={{ fontSize: 13.3, lineHeight: 1.55, color: k.strong }}>{a}</span>
+          </div>
+        ))}
+      </>) : null}
+
+      {/* experience — company-first, dates right, role in accent */}
+      <Label>Professional Experience</Label>
+      {d.experiences.map((x, i) => (
+        <div key={i} style={{ marginBottom: i === d.experiences.length - 1 ? 0 : "1.3rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "baseline" }}>
+            <span style={{ fontWeight: 700, fontSize: 14.5, color: k.strong }}>{x.company}</span>
+            {(x.start || x.end) && <span style={{ color: k.muted, fontSize: 11.5, letterSpacing: ".04em", whiteSpace: "nowrap" }}>{[x.start, x.end].filter(Boolean).join(" — ")}</span>}
+          </div>
+          {x.title && <div style={{ color: k.accent, fontSize: 12.8, fontWeight: 600, marginTop: 2, letterSpacing: ".01em" }}>{x.title}</div>}
+          <div style={{ marginTop: ".45rem" }}>{x.bullets.map((b, j) => <Bullet key={j} k={k}>{b}</Bullet>)}</div>
+        </div>
+      ))}
+
+      {/* footer — two restrained columns */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 2.6rem" }}>
+        <div><Label>Education</Label><Education d={d} k={k} /></div>
+        <div><Label>Areas of Expertise</Label><div style={{ fontSize: 12.6, color: k.ink, lineHeight: 1.95 }}>{d.skills.join("   ·   ")}</div></div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 2.6rem" }}>
+        <div><Label>Languages</Label><div style={{ fontSize: 12.6, color: k.ink, lineHeight: 1.85 }}>{d.languages.join("   ·   ")}</div></div>
+        {d.certifications.length > 0 && <div><Label>Certifications</Label><div style={{ fontSize: 12.4, color: k.ink, lineHeight: 1.75 }}>{d.certifications.join("   ·   ")}</div></div>}
+      </div>
+    </Page>
+  );
+};
+
 const RENDERERS: Record<string, (p: { d: CvData; k: K; innerRef?: Ref<HTMLDivElement> }) => JSX.Element> = {
+  "sovereign-executive": Sovereign,
   "executive-boardroom": Boardroom,
   "premium-single": Monarch,
   "tech-architect": Terminal,

@@ -33,18 +33,63 @@ const PreviewCard = ({ id, name, blurb, selected, onChange }: { id: string; name
   </button>
 );
 
+const FLAGSHIP_SCALE = 0.42;
+const FLAGSHIP_W = Math.round(794 * FLAGSHIP_SCALE); // ~334
+
 const TemplateSelector = ({ selected, onChange }: Props) => {
   const [showClassic, setShowClassic] = useState(false);
+  const flagship = PREMIUM_TEMPLATES.find((t) => t.flagship);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
+      {/* ── Flagship hero ── */}
+      {flagship && (
+        <div className="rounded-xl border border-border bg-gradient-to-br from-muted/40 to-background p-5">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+            <button type="button" onClick={() => onChange(flagship.id)} className="shrink-0 text-left">
+              <div
+                className={`relative overflow-hidden rounded-lg border bg-white shadow-sm transition ${selected === flagship.id ? "ring-2 ring-primary border-primary" : "border-border hover:border-primary/50"}`}
+                style={{ width: FLAGSHIP_W, height: Math.round(FLAGSHIP_W * 1.414) }}
+              >
+                <div style={{ width: 794, transform: `scale(${FLAGSHIP_SCALE})`, transformOrigin: "top left", pointerEvents: "none" }}>
+                  <PremiumCv data={MOCK_CV} template={flagship.id} />
+                </div>
+                {selected === flagship.id && (
+                  <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Check className="h-3 w-3" />
+                  </div>
+                )}
+              </div>
+            </button>
+            <div className="min-w-0">
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary font-sans">The Flagship</div>
+              <h3 className="mt-1 font-serif text-2xl font-semibold">{flagship.name}</h3>
+              <p className="mt-2 max-w-md text-sm text-muted-foreground font-sans">{flagship.blurb}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {["Board-ready", "Consulting-ready", "Enterprise-ready", "ATS-safe", "Nordic-inspired"].map((tag) => (
+                  <span key={tag} className="rounded-full border border-border bg-background px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground font-sans">{tag}</span>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => onChange(flagship.id)}
+                className={`mt-4 rounded-md px-3.5 py-1.5 text-sm font-medium font-sans transition ${selected === flagship.id ? "bg-primary text-primary-foreground" : "border border-primary text-primary hover:bg-primary/10"}`}
+              >
+                {selected === flagship.id ? "Selected" : "Use this template"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Career Collections ── */}
       {PREMIUM_COLLECTIONS.map((c) => {
-        const items = PREMIUM_TEMPLATES.filter((t) => t.collection === c.id);
+        const items = PREMIUM_TEMPLATES.filter((t) => t.collection === c.id && !t.flagship);
         if (!items.length) return null;
         return (
           <div key={c.id}>
-            <div className="mb-3">
-              <h3 className="font-serif text-lg font-semibold">{c.label}</h3>
+            <div className="mb-3 border-b border-border pb-2">
+              <h3 className="font-serif text-lg font-semibold">{c.label} Collection</h3>
               <p className="text-xs text-muted-foreground font-sans">{c.blurb}</p>
             </div>
             <div className="flex flex-wrap gap-4">
