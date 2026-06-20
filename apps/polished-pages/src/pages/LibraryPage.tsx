@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus } from "lucide-react";
 import PublishDialog from "@/components/app/PublishDialog";
 import AddToCollection from "@/components/app/AddToCollection";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
+import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, setTemplateFlag, useTemplate, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
 import TagEditor from "@/components/app/TagEditor";
 import { elementToPdf } from "@/lib/export-pdf";
 import type { CvData } from "@/lib/cv-data";
@@ -47,6 +47,7 @@ const LibraryPage = () => {
   const [versions, setVersions] = useState<DocVersion[] | null>(null);
   const [query, setQuery] = useState("");
   const [favOnly, setFavOnly] = useState(false);
+  const [tplOnly, setTplOnly] = useState(false);
   const [tagFilter, setTagFilter] = useState("");
   const pbRef = useRef<HTMLDivElement>(null);
 
@@ -118,6 +119,28 @@ const LibraryPage = () => {
     setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, favorite: next } : x)) ?? null);
     try { await toggleFavorite(d.id, next); }
     catch { setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, favorite: !next } : x)) ?? null); }
+  };
+
+  const toggleTemplate = async (d: DocSummary) => {
+    const next = !d.is_template;
+    setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, is_template: next } : x)) ?? null);
+    try {
+      await setTemplateFlag(d.id, next);
+      toast({ title: next ? "Saved as template" : "Removed from templates", description: next ? `“${d.title}” can now start new documents.` : undefined });
+    } catch (e) {
+      setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, is_template: !next } : x)) ?? null);
+      toast({ title: "Could not update template", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    }
+  };
+
+  const startFromTemplate = async (d: DocSummary) => {
+    try {
+      await useTemplate(d.id);
+      load();
+      toast({ title: "New document started", description: `Copied from template “${d.title}”.` });
+    } catch (e) {
+      toast({ title: "Could not use template", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    }
   };
 
   if (opened?.kind === "cv") {
@@ -291,6 +314,9 @@ const LibraryPage = () => {
           <Button variant={favOnly ? "hero" : "heroOutline"} size="sm" onClick={() => setFavOnly((f) => !f)}>
             <Star className={`mr-1 h-4 w-4 ${favOnly ? "fill-current" : ""}`} /> Favorites
           </Button>
+          <Button variant={tplOnly ? "hero" : "heroOutline"} size="sm" onClick={() => setTplOnly((t) => !t)}>
+            <LayoutTemplate className="mr-1 h-4 w-4" /> Templates
+          </Button>
           {tagFilter && (
             <button onClick={() => setTagFilter("")} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary font-sans">
               <Tag className="h-3 w-3" /> {tagFilter} <X className="h-3 w-3" />
@@ -316,7 +342,7 @@ const LibraryPage = () => {
 
       {docs && docs.length > 0 && (() => {
         const q = query.trim().toLowerCase();
-        const filtered = docs.filter((d) => (!favOnly || d.favorite) && (!tagFilter || (d.tags ?? []).includes(tagFilter)) && (!q || d.title.toLowerCase().includes(q) || (d.preview ?? "").toLowerCase().includes(q)));
+        const filtered = docs.filter((d) => (!favOnly || d.favorite) && (!tplOnly || d.is_template) && (!tagFilter || (d.tags ?? []).includes(tagFilter)) && (!q || d.title.toLowerCase().includes(q) || (d.preview ?? "").toLowerCase().includes(q)));
         if (filtered.length === 0) {
           return <p className="mt-8 text-center text-sm text-muted-foreground font-sans">No documents match your filters.</p>;
         }
@@ -333,6 +359,11 @@ const LibraryPage = () => {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate font-sans text-sm font-semibold">{d.title}</span>
+                        {d.is_template && (
+                          <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-gold/15 px-1.5 py-0.5 text-[10px] font-medium text-gold font-sans">
+                            <LayoutTemplate className="h-3 w-3" /> Template
+                          </span>
+                        )}
                         <button type="button" onClick={() => star(d)} className="ml-auto shrink-0 text-muted-foreground hover:text-gold" aria-label="Favorite">
                           <Star className={`h-4 w-4 ${d.favorite ? "fill-gold text-gold" : ""}`} />
                         </button>
@@ -351,6 +382,14 @@ const LibraryPage = () => {
                       <div className="mt-3 flex items-center gap-2">
                         <Button size="sm" variant="heroOutline" disabled={opening === d.id} onClick={() => open(d)}>
                           {opening === d.id ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null} Open
+                        </Button>
+                        {d.is_template && (
+                          <Button size="sm" variant="hero" onClick={() => startFromTemplate(d)} title="Start a new document from this template">
+                            <Plus className="mr-1 h-3.5 w-3.5" /> Use
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost" className={d.is_template ? "text-gold" : "text-muted-foreground"} onClick={() => toggleTemplate(d)} aria-label="Template" title={d.is_template ? "Remove from templates" : "Save as template"}>
+                          <LayoutTemplate className="h-4 w-4" />
                         </Button>
                         <TagEditor
                           documentId={d.id}

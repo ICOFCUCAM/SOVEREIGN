@@ -19,6 +19,7 @@ export interface DocSummary {
   category?: string | null;
   price_cents?: number;
   tags?: string[];
+  is_template?: boolean;
   created_at: string;
 }
 
@@ -121,6 +122,17 @@ export async function setTags(id: string, tags: string[]): Promise<void> {
 export async function duplicateDocument(id: string): Promise<string> {
   const { data, error } = await rpc().rpc("polished_duplicate_document", { p_id: id });
   if (error) throw new Error(error.message || "Could not duplicate.");
+  return data as string;
+}
+
+export async function setTemplateFlag(id: string, isTemplate: boolean): Promise<void> {
+  const { error } = await rpc().rpc("polished_set_template", { p_id: id, p_is_template: isTemplate });
+  if (error) throw new Error(error.message || "Could not update template.");
+}
+
+export async function useTemplate(id: string): Promise<string> {
+  const { data, error } = await rpc().rpc("polished_use_template", { p_id: id });
+  if (error) throw new Error(error.message || "Could not use template.");
   return data as string;
 }
 
