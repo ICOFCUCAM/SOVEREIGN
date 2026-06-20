@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem, type CatalogSort } from "@/lib/documents";
+import { getAuthorProfile, type AuthorProfile } from "@/lib/profiles";
 import { BRAND } from "@/lib/tools";
 
 const priceLabel = (cents: number) => (cents > 0 ? `$${(cents / 100).toFixed(2)}` : "Free");
@@ -21,8 +22,14 @@ const CatalogPage = () => {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<CatalogSort>("new");
   const [admin, setAdmin] = useState(false);
+  const [profile, setProfile] = useState<AuthorProfile | null>(null);
 
   useEffect(() => { isAdmin().then(setAdmin).catch(() => {}); }, []);
+
+  useEffect(() => {
+    setProfile(null);
+    if (author) getAuthorProfile(author).then(setProfile).catch(() => {});
+  }, [author]);
 
   useEffect(() => {
     setItems(null);
@@ -61,6 +68,16 @@ const CatalogPage = () => {
             <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Browse <span className="text-gradient-gold italic">published resources</span></h1>
           )}
           <p className="mt-2 text-muted-foreground font-sans">{author ? `Everything ${author} has published, newest first.` : "Storybooks, readers, workbooks and classroom materials shared by the community."}</p>
+          {author && profile && (
+            <div className="mt-4 rounded-xl border border-border bg-card/50 p-4">
+              {profile.bio && <p className="text-sm text-foreground font-sans">{profile.bio}</p>}
+              <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground font-sans">
+                <span><span className="font-semibold text-foreground">{profile.works}</span> published</span>
+                <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.views}</span> views</span>
+                <span className="inline-flex items-center gap-1"><Download className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.downloads}</span> downloads</span>
+              </div>
+            </div>
+          )}
         </motion.div>
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
