@@ -21,8 +21,10 @@ export interface CvData {
   projects?: { name: string; description?: string; tech?: string }[];
   publications?: string[];
   languageLevels?: { language: string; level: string }[];
+  skillGroups?: { label: string; items: string[] }[];
   clearance?: string;
   portfolio?: string;
+  github?: string;
 }
 
 export interface CvFormState {

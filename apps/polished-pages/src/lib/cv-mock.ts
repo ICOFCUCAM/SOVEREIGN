@@ -87,4 +87,11 @@ export const MOCK_CV: CvData = {
   ],
   clearance: "Security clearance: SECRET (Norwegian NSM) — active",
   portfolio: "astridhalvorsen.design",
+  github: "github.com/ahalvorsen",
+  skillGroups: [
+    { label: "Product", items: ["Product Strategy", "Roadmapping", "Discovery & Research"] },
+    { label: "Data & Analytics", items: ["SQL", "A/B Testing", "BigQuery", "dbt"] },
+    { label: "Delivery", items: ["Agile / Scrum", "OKRs", "Stakeholder Mgmt"] },
+    { label: "Tools", items: ["Figma", "Looker", "Jira", "Amplitude"] },
+  ],
 };

@@ -11,7 +11,8 @@ export interface PremiumTemplate {
   id: string;
   name: string;
   collection: PremiumCollection;
-  font: FontId;
+  font: FontId;       // body font
+  display?: FontId;   // heading/name font (defaults to body)
   accent: string;
   dark?: boolean;
   blurb: string;
@@ -31,14 +32,14 @@ export const PREMIUM_COLLECTIONS: { id: PremiumCollection; label: string; blurb:
 ];
 
 export const PREMIUM_TEMPLATES: PremiumTemplate[] = [
-  { id: "executive-boardroom", name: "Boardroom", collection: "executive", font: "jakarta", accent: "#0f172a", blurb: "Oversized name banner, executive summary, achievement-led experience." },
+  { id: "executive-boardroom", name: "Boardroom", collection: "executive", font: "jakarta", display: "playfair", accent: "#1a2238", blurb: "Editorial serif, oversized name, achievements-first. For directors and C-suite." },
   { id: "premium-single", name: "Monarch", collection: "executive", font: "inter", accent: "#1f2937", blurb: "Elite single-column. Maximum ATS compatibility." },
-  { id: "tech-architect", name: "Architect", collection: "technology", font: "inter", accent: "#2563eb", blurb: "Skills matrix, certifications and project highlights." },
+  { id: "tech-architect", name: "Terminal", collection: "technology", font: "mono", accent: "#34d399", dark: true, blurb: "Dark, code-inspired. Tech-stack matrix, projects, GitHub. For engineers and architects." },
   { id: "consulting-elite", name: "Meridian", collection: "consulting", font: "jakarta", accent: "#1e3a5f", blurb: "Impact-metric band over structured engagements." },
   { id: "corporate-modern", name: "Vanguard", collection: "corporate", font: "inter", accent: "#0369a1", blurb: "Contemporary enterprise design with a strong hierarchy." },
-  { id: "premium-twocol", name: "Atlas", collection: "corporate", font: "manrope", accent: "#475569", blurb: "Two-column with a skills & certifications panel." },
+  { id: "premium-twocol", name: "Vertex", collection: "corporate", font: "manrope", accent: "#111827", blurb: "Full-height dark side rail with photo, contact and skills." },
   { id: "nordic-professional", name: "Fjord", collection: "nordic", font: "manrope", accent: "#334155", blurb: "Minimalist Scandinavian — hairline rules, generous space." },
-  { id: "academic-research", name: "Scholar", collection: "academic", font: "jakarta", accent: "#6b2737", blurb: "Publications, research projects, grants and conferences." },
+  { id: "academic-research", name: "Scholar", collection: "academic", font: "dmsans", display: "fraunces", accent: "#6b2737", blurb: "Serif scholarly hierarchy. Publications, research projects, grants." },
   { id: "creative-professional", name: "Studio", collection: "creative", font: "jakarta", accent: "#7c3aed", blurb: "Bold modern header with a portfolio emphasis." },
   { id: "startup-leader", name: "Velocity", collection: "startup", font: "inter", accent: "#ea580c", blurb: "Growth-metric band, ventures and product launches." },
   { id: "government-public", name: "Sentinel", collection: "government", font: "dmsans", accent: "#1e293b", blurb: "Formal, compliance-oriented, with a clearance line." },
