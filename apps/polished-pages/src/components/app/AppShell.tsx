@@ -8,8 +8,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { fetchPlanStatus, type PlanStatus } from "@/lib/session";
 import { planDisplayName } from "@/lib/plans";
-import { TOOLS, BRAND, DASHBOARD_NAV, ACCOUNT_NAV, LIBRARY_NAV } from "@/lib/tools";
+import { BRAND, DASHBOARD_NAV, ACCOUNT_NAV, LIBRARY_NAV } from "@/lib/tools";
 import CommandPalette from "@/components/app/CommandPalette";
+import WorkflowNav from "@/components/app/WorkflowNav";
 
 // The persistent studio chrome: one global navigation that ties every tool
 // together, an account menu with live plan/usage, and the ⌘K command palette.
@@ -35,21 +36,13 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
             <span className="font-serif text-base font-bold tracking-tight">{BRAND}</span>
           </Link>
 
-          <nav className="ml-2 hidden items-center gap-1 md:flex">
-            {TOOLS.map((t) => {
-              const active = pathname === t.path;
-              return (
-                <Link
-                  key={t.id}
-                  to={t.path}
-                  className={`relative rounded-md px-3 py-1.5 text-sm font-sans transition-colors ${active ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"}`}
-                >
-                  {t.short}
-                  {t.badge === "New" && <span className="ml-1.5 rounded-full bg-gold/15 px-1.5 py-0.5 text-[10px] font-semibold text-gold align-middle">New</span>}
-                </Link>
-              );
-            })}
-          </nav>
+          <Link
+            to={DASHBOARD_NAV.path}
+            className={`ml-2 hidden rounded-md px-3 py-1.5 text-sm font-sans transition-premium md:block ${pathname === DASHBOARD_NAV.path ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            Dashboard
+          </Link>
+          <WorkflowNav />
 
           <div className="ml-auto flex items-center gap-2">
             <button
