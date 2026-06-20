@@ -37,6 +37,15 @@ const depths: { value: BookDepth; label: string; desc: string }[] = [
   { value: "detailed", label: "Detailed", desc: "10-12 chapters, 3500-5000 words each" },
 ];
 
+const VOICE_PRESETS = [
+  { label: "Conversational", tag: "conversational, friendly, approachable" },
+  { label: "Academic", tag: "scholarly, precise, well-cited" },
+  { label: "Storytelling", tag: "narrative-driven, vivid, engaging storytelling" },
+  { label: "Playful", tag: "playful, humorous, light-hearted" },
+  { label: "Authoritative", tag: "confident, definitive, expert authority" },
+  { label: "Inspirational", tag: "motivational, uplifting, empowering" },
+];
+
 const BookSetup = ({
   bookTitle, setBookTitle, genre, setGenre, targetAudience, setTargetAudience,
   depth, setDepth, mode, setMode, existingContent, setExistingContent,
@@ -104,6 +113,23 @@ const BookSetup = ({
                   <span className="text-[10px] text-muted-foreground">{d.desc}</span>
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Writing voice presets */}
+          <div>
+            <Label className="font-sans text-sm mb-2 block">Writing voice <span className="text-muted-foreground font-normal">(optional — click to append to audience)</span></Label>
+            <div className="flex flex-wrap gap-1.5">
+              {VOICE_PRESETS.map((v) => {
+                const active = targetAudience.includes(v.tag);
+                return (
+                  <button key={v.label} type="button"
+                    onClick={() => setTargetAudience(active ? targetAudience.replace(`, ${v.tag}`, "").replace(v.tag, "").trim() : `${targetAudience}${targetAudience ? ", " : ""}${v.tag}`)}
+                    className={`rounded-full border px-2.5 py-1 text-xs font-sans transition ${active ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                    {v.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
