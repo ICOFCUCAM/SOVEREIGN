@@ -27,7 +27,7 @@ const SharedDocument = () => {
       <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/85 backdrop-blur-lg">
         <div className="container flex items-center justify-between h-14 px-6">
           <Link to="/" className="flex items-center gap-2"><Sparkles className="w-5 h-5 text-gold" /><span className="font-serif text-base font-bold">{BRAND}</span></Link>
-          {state === "ready" && <span className="truncate text-sm text-muted-foreground font-sans">{doc?.title}</span>}
+          {state === "ready" && <span className="truncate text-sm text-muted-foreground font-sans">{doc?.title}{doc?.author_name ? ` · by ${doc.author_name}` : ""}</span>}
         </div>
       </nav>
 

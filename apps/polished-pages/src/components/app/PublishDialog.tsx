@@ -14,6 +14,7 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState(doc.category ?? CATALOG_CATEGORIES[0]);
+  const [author, setAuthor] = useState("");
   const [price, setPrice] = useState(((doc.price_cents ?? 0) / 100).toFixed(2));
   const [busy, setBusy] = useState(false);
   const [token, setToken] = useState<string | null>(null);
@@ -25,7 +26,7 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
     setBusy(true);
     try {
       const cents = Math.max(0, Math.round(parseFloat(price || "0") * 100)) || 0;
-      const t = await publishDocument(doc.id, { listed, category, priceCents: cents });
+      const t = await publishDocument(doc.id, { listed, category, priceCents: cents, author });
       setToken(listed ? t : null);
       onChanged?.(listed);
       toast({ title: listed ? "Published to catalog" : "Removed from catalog" });
@@ -52,6 +53,10 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
             <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
               {CATALOG_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="font-sans text-xs">Publisher / author name (shown publicly)</Label>
+            <Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="e.g. Ms. Okafor’s Classroom" maxLength={80} />
           </div>
           <div className="space-y-1.5">
             <Label className="font-sans text-xs">Price (USD) — 0 for free</Label>
