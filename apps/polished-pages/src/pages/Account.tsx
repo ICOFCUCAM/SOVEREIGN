@@ -8,16 +8,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchPlanStatus, startUpgrade, buyCredits, PRO_PRICE_USD, CREDITS_PER_PACK, type PlanStatus } from "@/lib/session";
+import { Link } from "react-router-dom";
+import { fetchPlanStatus, startUpgrade, buyCredits, CREDITS_PER_PACK, type PlanStatus } from "@/lib/session";
 import { getMyProfile, upsertProfile } from "@/lib/profiles";
+import { planDisplayName } from "@/lib/plans";
 import { BRAND } from "@/lib/tools";
 
 const PRO_PERKS = [
   "Unlimited text generations — CVs, letters, books, lessons",
-  "300 image credits / month for storybooks, covers and colouring pages",
+  "From 250 image credits / month for storybooks, covers and colouring pages",
   "Full commercial rights — sell on the marketplace and publish to KDP / IngramSpark",
-  "Every premium template family, including the flagship",
-  "Priority generation",
+  "Library, version history, collections and premium templates",
+  "Higher tiers add the publishing studios, multi-language and priority",
 ];
 
 const Account = () => {
@@ -56,7 +58,8 @@ const Account = () => {
     } finally { setSavingProfile(false); }
   };
 
-  const isPro = status?.plan === "pro";
+  const isPaid = !!status && status.plan !== "free";
+  const isPro = isPaid; // unlimited text on any paid tier
   const used = status?.used ?? 0;
   const lim = status?.lim ?? 0;
   const pct = lim > 0 ? Math.min(100, Math.round((used / lim) * 100)) : 0;
@@ -65,9 +68,9 @@ const Account = () => {
   const imgPct = imgLim > 0 ? Math.min(100, Math.round((imgUsed / imgLim) * 100)) : 0;
   const bonus = status?.bonusImages ?? 0;
 
-  const upgrade = async () => {
+  const upgrade = async (plan?: string) => {
     setUpgrading(true);
-    try { await startUpgrade(); } catch (e) { alert(e instanceof Error ? e.message : "Upgrade failed"); setUpgrading(false); }
+    try { await startUpgrade(plan); } catch (e) { alert(e instanceof Error ? e.message : "Upgrade failed"); setUpgrading(false); }
   };
 
   const purchaseCredits = async () => {
@@ -86,8 +89,8 @@ const Account = () => {
       <Card className="mt-6 border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-serif text-base">
-            {isPro ? <Crown className="h-4 w-4 text-gold" /> : <Zap className="h-4 w-4 text-primary" />}
-            {isPro ? "Pro plan" : "Free plan"}
+            {isPaid ? <Crown className="h-4 w-4 text-gold" /> : <Zap className="h-4 w-4 text-primary" />}
+            {planDisplayName(status?.plan)} plan
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -130,12 +133,13 @@ const Account = () => {
         </CardContent>
       </Card>
 
-      {!isPro && (
+      {!isPaid && (
         <Card className="mt-5 border-primary/30 bg-gradient-to-br from-primary/5 to-background">
           <CardHeader>
-            <CardTitle className="font-serif text-lg">Upgrade to Pro</CardTitle>
+            <CardTitle className="font-serif text-lg">Upgrade your plan</CardTitle>
             <div className="mt-1 flex items-baseline gap-1">
-              <span className="font-serif text-3xl font-bold">${PRO_PRICE_USD}</span>
+              <span className="text-sm text-muted-foreground font-sans">From</span>
+              <span className="font-serif text-3xl font-bold">$19</span>
               <span className="text-sm text-muted-foreground font-sans">/ month</span>
             </div>
           </CardHeader>
@@ -147,9 +151,14 @@ const Account = () => {
                 </li>
               ))}
             </ul>
-            <Button variant="hero" className="mt-5" onClick={upgrade} disabled={upgrading}>
-              <Crown className="mr-2 h-4 w-4" /> {upgrading ? "Starting checkout…" : "Upgrade to Pro"}
-            </Button>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Button variant="hero" onClick={() => upgrade("creator")} disabled={upgrading}>
+                <Crown className="mr-2 h-4 w-4" /> {upgrading ? "Starting checkout…" : "Get Creator"}
+              </Button>
+              <Button asChild variant="heroOutline">
+                <Link to="/pricing">Compare all plans</Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}

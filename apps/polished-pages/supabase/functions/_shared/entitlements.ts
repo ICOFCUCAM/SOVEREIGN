@@ -73,8 +73,8 @@ export async function consumeOrThrow(
   const limit = row?.lim ?? 0;
   if (!row?.allowed) {
     const message = kind === "image"
-      ? `You've used all ${limit} image credits this month. Upgrade to Pro for more.`
-      : `You've used all ${limit} free generations this month. Upgrade to Pro for unlimited.`;
+      ? `You've used all ${limit} image credits this month. Upgrade for more.`
+      : `You've used all ${limit} free generations this month. Upgrade for unlimited text.`;
     throw new EntitlementError(message, 402, { plan, used, limit });
   }
   return { plan, used, limit };

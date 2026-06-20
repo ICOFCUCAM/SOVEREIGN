@@ -25,6 +25,7 @@ import IllustrationStudio from "./pages/IllustrationStudio.tsx";
 import PublishingPrep from "./pages/PublishingPrep.tsx";
 import SharedDocument from "./pages/SharedDocument.tsx";
 import CatalogPage from "./pages/CatalogPage.tsx";
+import Pricing from "./pages/Pricing.tsx";
 import CollectionsPage from "./pages/CollectionsPage.tsx";
 import PublicCollection from "./pages/PublicCollection.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           {/* Public shared documents + catalog (no sign-in) */}
           <Route path="/shared/:token" element={<SharedDocument />} />
+          <Route path="/pricing" element={<Pricing />} />
           <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/catalog/author/:author" element={<CatalogPage />} />
           <Route path="/collection/:token" element={<PublicCollection />} />

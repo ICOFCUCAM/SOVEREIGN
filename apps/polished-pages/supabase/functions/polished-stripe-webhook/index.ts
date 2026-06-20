@@ -30,7 +30,7 @@ serve(async (req) => {
     return new Response("bad signature", { status: 400 });
   }
 
-  const applyPlan = async (userId: string, plan: "free" | "pro", customer: unknown, subscription: unknown): Promise<void> => {
+  const applyPlan = async (userId: string, plan: string, customer: unknown, subscription: unknown): Promise<void> => {
     const r = await fetch(`${supabaseUrl}/rest/v1/rpc/polished_apply_subscription`, {
       method: "POST",
       headers: { "content-type": "application/json", apikey: serviceKey, authorization: `Bearer ${serviceKey}` },
@@ -63,7 +63,7 @@ serve(async (req) => {
           const credits = parseInt(s.metadata?.credits ?? "0", 10) || 0;
           if (credits > 0) await grantCredits(userId, credits);
         } else if (s.mode === "subscription") {
-          await applyPlan(userId, "pro", s.customer, s.subscription);
+          await applyPlan(userId, s.metadata?.plan || "pro", s.customer, s.subscription);
         }
         break;
       }
@@ -73,7 +73,7 @@ serve(async (req) => {
         const userId = sub.metadata?.user_id;
         if (userId) {
           const active = sub.status === "active" || sub.status === "trialing";
-          await applyPlan(userId, active ? "pro" : "free", sub.customer, sub.id);
+          await applyPlan(userId, active ? (sub.metadata?.plan || "pro") : "free", sub.customer, sub.id);
         }
         break;
       }

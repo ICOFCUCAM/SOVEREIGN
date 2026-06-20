@@ -49,15 +49,25 @@ serve(async (req) => {
       });
     }
 
-    // Default: Pro subscription.
-    const price = Deno.env.get("STRIPE_PRICE_ID");
-    if (!price) throw new EntitlementError("Billing is not configured.", 503);
+    // Subscription: each paid tier maps to its own Stripe price. A missing
+    // plan falls back to the legacy single-Pro price.
+    const PRICE_ENV: Record<string, string> = {
+      creator: "STRIPE_PRICE_CREATOR",
+      professional: "STRIPE_PRICE_PROFESSIONAL",
+      publisher: "STRIPE_PRICE_PUBLISHER",
+      business: "STRIPE_PRICE_BUSINESS",
+    };
+    const planParam = typeof body?.plan === "string" ? body.plan : "";
+    const known = Object.prototype.hasOwnProperty.call(PRICE_ENV, planParam);
+    const plan = known ? planParam : "pro";
+    const price = Deno.env.get(known ? PRICE_ENV[planParam] : "STRIPE_PRICE_ID");
+    if (!price) throw new EntitlementError("This plan is not configured for checkout yet.", 503);
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price, quantity: 1 }],
       client_reference_id: userId,
-      metadata: { user_id: userId },
-      subscription_data: { metadata: { user_id: userId } },
+      metadata: { user_id: userId, plan },
+      subscription_data: { metadata: { user_id: userId, plan } },
       customer_email: email || undefined,
       allow_promotion_codes: true,
       success_url: `${origin}/?upgraded=1`,

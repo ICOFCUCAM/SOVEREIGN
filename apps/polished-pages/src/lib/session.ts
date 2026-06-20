@@ -11,13 +11,14 @@ export async function authHeader(): Promise<string> {
   return `Bearer ${data.session?.access_token ?? ANON}`;
 }
 
-// Start a Stripe Checkout to upgrade to Pro and redirect the browser to it.
-export async function startUpgrade(): Promise<void> {
+// Start a Stripe Checkout to subscribe to a paid plan and redirect to it.
+// Defaults to the legacy single-Pro price when no plan is given.
+export async function startUpgrade(plan?: string): Promise<void> {
   const { data } = await supabase.auth.getSession();
   const r = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/polished-create-checkout`, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${data.session?.access_token ?? ANON}` },
-    body: "{}",
+    body: JSON.stringify(plan ? { plan } : {}),
   });
   const j = await r.json().catch(() => ({}));
   if (!r.ok || !j.url) throw new Error(j.error || "Could not start checkout.");

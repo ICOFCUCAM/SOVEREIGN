@@ -6,7 +6,8 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
+import { fetchPlanStatus, type PlanStatus } from "@/lib/session";
+import { planDisplayName } from "@/lib/plans";
 import { TOOLS, BRAND, DASHBOARD_NAV, ACCOUNT_NAV, LIBRARY_NAV } from "@/lib/tools";
 import CommandPalette from "@/components/app/CommandPalette";
 
@@ -20,9 +21,9 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
 
   useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
 
-  const isPro = status?.plan === "pro";
+  const isPro = !!status && status.plan !== "free"; // any paid tier
   const usageLabel = status
-    ? (isPro ? "Pro · unlimited" : `${status.used}/${status.lim} this month`)
+    ? (isPro ? `${planDisplayName(status.plan)} · unlimited text` : `${status.used}/${status.lim} this month`)
     : "";
 
   return (
@@ -63,8 +64,8 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
             </button>
 
             {!isPro && status && (
-              <Button size="sm" variant="hero" className="hidden sm:inline-flex" onClick={() => startUpgrade().catch(() => {})}>
-                <Crown className="mr-1 h-3.5 w-3.5" /> Upgrade
+              <Button asChild size="sm" variant="hero" className="hidden sm:inline-flex">
+                <Link to="/pricing"><Crown className="mr-1 h-3.5 w-3.5" /> Upgrade</Link>
               </Button>
             )}
 
@@ -89,9 +90,7 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
                 <DropdownMenuItem asChild><Link to="/publishing"><Rocket className="mr-2 h-4 w-4" /> Publish &amp; distribute</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/catalog"><Store className="mr-2 h-4 w-4" /> Content catalog</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to={ACCOUNT_NAV.path}><Settings className="mr-2 h-4 w-4" /> Account & billing</Link></DropdownMenuItem>
-                {!isPro && (
-                  <DropdownMenuItem onClick={() => startUpgrade().catch(() => {})}><Crown className="mr-2 h-4 w-4" /> Upgrade to Pro</DropdownMenuItem>
-                )}
+                <DropdownMenuItem asChild><Link to="/pricing"><Crown className="mr-2 h-4 w-4" /> Plans &amp; pricing</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => supabase.auth.signOut()}><LogOut className="mr-2 h-4 w-4" /> Sign out</DropdownMenuItem>
               </DropdownMenuContent>
