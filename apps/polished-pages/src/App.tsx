@@ -42,6 +42,7 @@ import NotFound from "./pages/NotFound.tsx";
 import Gallery from "./pages/Gallery.tsx";
 import AuthGate from "./components/AuthGate.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
+import ScrollToTop from "./components/ScrollToTop.tsx";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <ErrorBoundary>
         <Routes>
           {/* Public marketing landing — the hero stays open to everyone. */}
