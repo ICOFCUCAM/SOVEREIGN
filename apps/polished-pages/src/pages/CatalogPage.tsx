@@ -63,6 +63,12 @@ const CatalogPage = () => {
   const all = useMemo(() => items ?? [], [items]);
   const featured = useMemo(() => all.filter((i) => i.featured).slice(0, 6), [all]);
   const trending = useMemo(() => all.filter((i) => trendScore(i) > 0).sort((a, b) => trendScore(b) - trendScore(a)).slice(0, 6), [all]);
+  const topRated = useMemo(
+    () => all.filter((i) => (i.review_count ?? 0) > 0 && i.avg_rating != null)
+      .sort((a, b) => Number(b.avg_rating) - Number(a.avg_rating) || (b.review_count ?? 0) - (a.review_count ?? 0))
+      .slice(0, 6),
+    [all],
+  );
   const recent = useMemo(() => all.slice(0, 9), [all]);
   const categoryCounts = useMemo(() => {
     const m = new Map<string, number>();
@@ -228,6 +234,7 @@ const CatalogPage = () => {
               <>
                 {featured.length > 0 && <Section icon={Star} title="Featured" hint="hand-picked" list={featured} />}
                 {trending.length > 0 && <Section icon={TrendingUp} title="Trending now" hint="most downloaded" list={trending} ranked />}
+                {topRated.length > 0 && <Section icon={Star} title="Top rated" hint="highest reader ratings" list={topRated} />}
                 <Section icon={Clock} title="Recently published" list={recent} />
                 <section className="mt-10">
                   <div className="flex items-baseline gap-2"><Store className="h-4 w-4 text-gold" /><h2 className="font-serif text-xl font-bold">Browse by category</h2></div>
