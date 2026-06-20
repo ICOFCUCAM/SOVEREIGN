@@ -4,6 +4,7 @@ import PillarsSection from "@/components/PillarsSection";
 import WorkflowSection from "@/components/WorkflowSection";
 import PlatformStats from "@/components/PlatformStats";
 import FeaturesSection from "@/components/FeaturesSection";
+import TrustBand from "@/components/TrustBand";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
@@ -16,6 +17,7 @@ const Index = () => {
       <WorkflowSection />
       <PlatformStats />
       <FeaturesSection />
+      <TrustBand />
       <CTASection />
       <Footer />
     </div>
