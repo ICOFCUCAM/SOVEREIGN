@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import CVGenerator from "./pages/CVGenerator.tsx";
 import CoverLetterGenerator from "./pages/CoverLetterGenerator.tsx";
+import JobTailor from "./pages/JobTailor.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Gallery from "./pages/Gallery.tsx";
@@ -26,6 +27,7 @@ const App = () => (
               for sign-in only when someone actually goes to create. */}
           <Route path="/cv" element={<AuthGate><CVGenerator /></AuthGate>} />
           <Route path="/cover-letter" element={<AuthGate><CoverLetterGenerator /></AuthGate>} />
+          <Route path="/tailor" element={<AuthGate><JobTailor /></AuthGate>} />
           <Route path="/book" element={<AuthGate><BookCreator /></AuthGate>} />
           {/* internal visual-QA gallery (not linked) */}
           <Route path="/__gallery" element={<Gallery />} />

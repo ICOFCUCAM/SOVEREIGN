@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { FileText, BookOpen, PenTool } from "lucide-react";
+import { FileText, BookOpen, PenTool, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -16,6 +16,14 @@ const features = [
     image: featureCv,
     link: "/cv",
     cta: "Build CV",
+  },
+  {
+    icon: Target,
+    title: "Tailor to a Job",
+    description: "Upload your CV and a job posting — get a re-focused CV, a matching cover letter, and an honest fit score in one step.",
+    image: featureLetter,
+    link: "/tailor",
+    cta: "Tailor My CV",
   },
   {
     icon: PenTool,
