@@ -14,6 +14,13 @@ import type { CatalogItem } from "@/lib/documents";
 
 const priceLabel = (cents: number) => (cents > 0 ? `$${(cents / 100).toFixed(2)}` : "Free");
 
+// "New" if published within the last 14 days — a real recency signal, not a
+// fabricated badge.
+const isNew = (createdAt: string) => {
+  const days = (Date.now() - new Date(createdAt).getTime()) / 86_400_000;
+  return days >= 0 && days <= 14;
+};
+
 // One marketplace listing. Shared by the catalog discovery sections, the
 // filtered grid and author pages so every surface looks consistent.
 // Featured items get a gold accent border to signal curation at a glance.
@@ -23,6 +30,7 @@ const CatalogCard = ({ item: it, admin, onFeature }: { item: CatalogItem; admin?
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground font-sans">
           {it.featured && <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/20 px-1.5 py-0.5 text-gold font-semibold normal-case"><Star className="h-3 w-3 fill-current" /> Featured</span>}
+          {!it.featured && isNew(it.created_at) && <span className="rounded-full bg-educational/15 px-1.5 py-0.5 font-semibold normal-case text-educational">New</span>}
           {it.category ?? "Other"}
         </span>
         <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${it.price_cents > 0 ? "bg-gold/15 text-gold" : "bg-primary/10 text-primary"}`}>{priceLabel(it.price_cents)}</span>
