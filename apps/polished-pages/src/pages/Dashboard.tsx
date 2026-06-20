@@ -1,40 +1,90 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Crown, Sparkles, Zap, Library } from "lucide-react";
+import {
+  ArrowRight, Crown, Zap, Library, FileText, BookOpen, BookHeart, GraduationCap, Palette, School,
+  Store, TrendingUp, Eye, Download, Rocket, Clock, Image as ImageIcon, Send,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
-import { listDocuments, type DocSummary } from "@/lib/documents";
-import { TOOLS } from "@/lib/tools";
+import { listDocuments, catalogList, type DocSummary, type DocKind, type CatalogItem } from "@/lib/documents";
+import { planDisplayName } from "@/lib/plans";
 
-// The studio home. First thing a signed-in user sees: their plan/usage at a
-// glance, one-click entry to every tool, and what's worth trying next. Replaces
-// dropping users straight into a single generator with no sense of the whole.
+// One-click "create" tiles spanning the four studios.
+const CREATE = [
+  { label: "CV", to: "/cv", icon: FileText, studio: "Career" },
+  { label: "Book", to: "/book", icon: BookOpen, studio: "Publishing" },
+  { label: "Storybook", to: "/storybook", icon: BookHeart, studio: "Education" },
+  { label: "Textbook", to: "/primary-books", icon: School, studio: "Education" },
+  { label: "Workbook", to: "/workbooks", icon: GraduationCap, studio: "Education" },
+  { label: "Coloring book", to: "/coloring", icon: Palette, studio: "Education" },
+];
+
+const KIND_NOUN: Record<DocKind, string> = {
+  cv: "CV", tailored: "tailored CV", "cover-letter": "cover letter", book: "book",
+  cover: "book cover", storybook: "storybook", illustration: "illustration",
+};
+const KIND_ICON: Record<DocKind, typeof FileText> = {
+  cv: FileText, tailored: FileText, "cover-letter": FileText, book: BookOpen,
+  cover: ImageIcon, storybook: BookHeart, illustration: ImageIcon,
+};
+const trendScore = (i: CatalogItem) => (i.download_count ?? 0) * 3 + (i.view_count ?? 0);
+
 const Dashboard = () => {
   const [status, setStatus] = useState<PlanStatus | null>(null);
-  const [recent, setRecent] = useState<DocSummary[]>([]);
+  const [docs, setDocs] = useState<DocSummary[] | null>(null);
+  const [market, setMarket] = useState<CatalogItem[]>([]);
+
   useEffect(() => {
-    fetchPlanStatus().then(setStatus);
-    listDocuments().then((d) => setRecent(d.slice(0, 4))).catch(() => {});
+    fetchPlanStatus().then(setStatus).catch(() => {});
+    listDocuments().then(setDocs).catch(() => setDocs([]));
+    catalogList(undefined, undefined, "new").then(setMarket).catch(() => {});
   }, []);
 
-  const isPro = status?.plan === "pro";
-  const used = status?.used ?? 0;
-  const lim = status?.lim ?? 0;
+  const all = useMemo(() => docs ?? [], [docs]);
+  const isPaid = !!status && status.plan !== "free";
+  const used = status?.used ?? 0, lim = status?.lim ?? 0;
   const pct = lim > 0 ? Math.min(100, Math.round((used / lim) * 100)) : 0;
+  const imgUsed = status?.imagesUsed ?? 0, imgLim = status?.imagesLim ?? 0;
+  const imgPct = imgLim > 0 ? Math.min(100, Math.round((imgUsed / imgLim) * 100)) : 0;
+
+  const recent = all.slice(0, 4);
+  const counts = useMemo(() => {
+    const m = new Map<DocKind, number>();
+    for (const d of all) m.set(d.kind, (m.get(d.kind) ?? 0) + 1);
+    return m;
+  }, [all]);
+  const published = all.filter((d) => d.listed).length;
+  const sharedOnly = all.filter((d) => d.shared && !d.listed).length;
+  const drafts = all.filter((d) => !d.shared).length;
+  const totalViews = all.reduce((s, d) => s + (d.view_count ?? 0), 0);
+  const totalDownloads = all.reduce((s, d) => s + (d.download_count ?? 0), 0);
+
+  const trending = useMemo(() => [...market].filter((i) => trendScore(i) > 0).sort((a, b) => trendScore(b) - trendScore(a)).slice(0, 4), [market]);
+  const recentPubs = market.slice(0, 4);
+
+  const SNAPSHOT: { kind: DocKind; label: string; icon: typeof FileText }[] = [
+    { kind: "book", label: "Books", icon: BookOpen },
+    { kind: "storybook", label: "Storybooks", icon: BookHeart },
+    { kind: "cv", label: "CVs", icon: FileText },
+    { kind: "cover-letter", label: "Cover letters", icon: FileText },
+    { kind: "illustration", label: "Illustrations", icon: ImageIcon },
+    { kind: "cover", label: "Covers", icon: ImageIcon },
+  ];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between gap-4">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-serif text-3xl font-bold tracking-tight">Your studio</h1>
-          <p className="mt-1 text-muted-foreground font-sans">Create recruiter-grade documents — pick a tool to begin.</p>
+          <h1 className="font-serif text-3xl font-bold tracking-tight">Command center</h1>
+          <p className="mt-1 text-muted-foreground font-sans">Create, publish and grow — across career, publishing, education and the marketplace.</p>
         </div>
-        <Button asChild variant="heroOutline" size="sm" className="shrink-0">
-          <Link to="/library"><Library className="mr-1.5 h-4 w-4" /> Library</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="heroOutline" size="sm"><Link to="/library"><Library className="mr-1.5 h-4 w-4" /> Library</Link></Button>
+          <Button asChild variant="heroOutline" size="sm"><Link to="/catalog"><Store className="mr-1.5 h-4 w-4" /> Marketplace</Link></Button>
+        </div>
       </motion.div>
 
       {/* Plan / usage */}
@@ -42,96 +92,171 @@ const Dashboard = () => {
         <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              {isPro ? <Crown className="h-4 w-4 text-gold" /> : <Zap className="h-4 w-4 text-primary" />}
-              <span className="font-sans text-sm font-semibold">{isPro ? "Pro plan" : "Free plan"}</span>
+              {isPaid ? <Crown className="h-4 w-4 text-gold" /> : <Zap className="h-4 w-4 text-primary" />}
+              <span className="font-sans text-sm font-semibold">{planDisplayName(status?.plan)} plan</span>
             </div>
-            {!isPro && status && (
-              <div className="mt-3 max-w-md">
-                <div className="mb-1 flex justify-between text-xs text-muted-foreground font-sans">
-                  <span>{used} of {lim} generations used this month</span>
-                  <span>{lim - used} left</span>
+            <div className="mt-3 grid max-w-xl gap-3 sm:grid-cols-2">
+              {!isPaid && status && (
+                <div>
+                  <div className="mb-1 flex justify-between text-xs text-muted-foreground font-sans"><span>{used}/{lim} text</span><span>{Math.max(0, lim - used)} left</span></div>
+                  <Progress value={pct} className="h-2" />
                 </div>
-                <Progress value={pct} className="h-2" />
-              </div>
-            )}
-            {isPro && <p className="mt-1 text-sm text-muted-foreground font-sans">Unlimited generations. Thank you for being a Pro member.</p>}
+              )}
+              {status && (
+                <div>
+                  <div className="mb-1 flex justify-between text-xs text-muted-foreground font-sans"><span>{imgUsed}/{imgLim} image credits</span><span>{Math.max(0, imgLim - imgUsed)} left</span></div>
+                  <Progress value={imgPct} className="h-2" />
+                </div>
+              )}
+            </div>
           </div>
-          {!isPro && (
-            <Button variant="hero" onClick={() => startUpgrade().catch(() => {})}>
-              <Crown className="mr-2 h-4 w-4" /> Upgrade to Pro
-            </Button>
+          {!isPaid && (
+            <Button variant="hero" onClick={() => startUpgrade("creator").catch(() => {})}><Crown className="mr-2 h-4 w-4" /> Upgrade</Button>
           )}
         </CardContent>
       </Card>
 
-      {/* Tools */}
-      <h2 className="mt-10 font-serif text-lg font-semibold">Tools</h2>
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
-        {TOOLS.map((t, i) => (
-          <motion.div key={t.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-            <Link to={t.path} className="group block h-full">
+      {/* Continue working */}
+      {recent.length > 0 && (
+        <section className="mt-10">
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-serif text-lg font-semibold"><Clock className="h-4 w-4 text-gold" /> Continue working</h2>
+            <Link to="/library" className="text-sm text-primary font-sans hover:underline">View all</Link>
+          </div>
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {recent.map((d) => {
+              const Icon = KIND_ICON[d.kind] ?? FileText;
+              return (
+                <Link key={d.id} to={`/library?open=${d.id}`} className="group block">
+                  <Card className="h-full border-border transition-all hover:border-primary/50 hover:shadow-premium">
+                    <CardContent className="p-4">
+                      <Icon className="h-5 w-5 text-primary" />
+                      <div className="mt-2 truncate font-sans text-sm font-semibold">{d.title}</div>
+                      <div className="mt-0.5 text-xs text-muted-foreground font-sans">Continue your {KIND_NOUN[d.kind] ?? "document"}</div>
+                      <span className="mt-2 inline-flex items-center text-xs font-medium text-primary font-sans">Resume <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Create new */}
+      <section className="mt-10">
+        <h2 className="font-serif text-lg font-semibold">Create new</h2>
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {CREATE.map((c) => (
+            <Link key={c.to} to={c.to} className="group">
               <Card className="h-full border-border transition-all hover:border-primary/50 hover:shadow-premium">
-                <CardContent className="flex h-full flex-col p-5">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                      <t.icon className="h-5 w-5 text-primary" />
-                    </span>
-                    <span className="font-serif text-lg font-semibold">{t.name}</span>
-                    {t.badge && (
-                      <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold">{t.badge}</span>
-                    )}
-                  </div>
-                  <p className="mt-3 flex-1 text-sm text-muted-foreground font-sans">{t.description}</p>
-                  <span className="mt-4 inline-flex items-center text-sm font-medium text-primary font-sans">
-                    {t.action} <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </span>
+                <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10"><c.icon className="h-5 w-5 text-primary" /></span>
+                  <span className="font-sans text-sm font-semibold">{c.label}</span>
+                  <span className="text-[11px] text-muted-foreground font-sans">{c.studio}</span>
                 </CardContent>
               </Card>
             </Link>
-          </motion.div>
-        ))}
+          ))}
+        </div>
+      </section>
+
+      {/* Publishing center + Creator growth */}
+      <div className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card className="border-border">
+          <CardContent className="p-5">
+            <h2 className="flex items-center gap-2 font-serif text-base font-semibold"><Rocket className="h-4 w-4 text-gold" /> Publishing center</h2>
+            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+              {[{ n: published, l: "Published" }, { n: sharedOnly, l: "Shared" }, { n: drafts, l: "Drafts" }].map((s) => (
+                <div key={s.l} className="rounded-lg border border-border p-3">
+                  <div className="font-serif text-2xl font-bold">{s.n}</div>
+                  <div className="text-xs text-muted-foreground font-sans">{s.l}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button asChild variant="heroOutline" size="sm"><Link to="/publishing"><Send className="mr-1 h-3.5 w-3.5" /> Export & distribute</Link></Button>
+              <Button asChild variant="ghost" size="sm" className="text-muted-foreground"><Link to="/library">Publish from library</Link></Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border">
+          <CardContent className="p-5">
+            <h2 className="flex items-center gap-2 font-serif text-base font-semibold"><TrendingUp className="h-4 w-4 text-gold" /> Creator growth</h2>
+            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+              {[{ n: published, l: "Published", icon: Rocket }, { n: totalViews, l: "Views", icon: Eye }, { n: totalDownloads, l: "Downloads", icon: Download }].map((s) => (
+                <div key={s.l} className="rounded-lg border border-border p-3">
+                  <s.icon className="mx-auto mb-1 h-4 w-4 text-muted-foreground" />
+                  <div className="font-serif text-2xl font-bold">{s.n}</div>
+                  <div className="text-xs text-muted-foreground font-sans">{s.l}</div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground font-sans">Across everything you've published to the marketplace. Publish more to grow your reach.</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Recent */}
-      {recent.length > 0 && (
-        <>
-          <div className="mt-10 flex items-center justify-between">
-            <h2 className="font-serif text-lg font-semibold">Recent documents</h2>
-            <Link to="/library" className="text-sm text-primary font-sans hover:underline">View all</Link>
+      {/* Library snapshot */}
+      {all.length > 0 && (
+        <section className="mt-10">
+          <div className="flex items-center justify-between">
+            <h2 className="font-serif text-lg font-semibold">Your library</h2>
+            <Link to="/library" className="text-sm text-primary font-sans hover:underline">Open library</Link>
           </div>
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {recent.map((d) => (
-              <Link key={d.id} to="/library" className="block">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {SNAPSHOT.filter((s) => (counts.get(s.kind) ?? 0) > 0).map((s) => (
+              <Link key={s.kind} to="/library" className="group">
                 <Card className="border-border transition-colors hover:border-primary/40">
-                  <CardContent className="p-4">
-                    <div className="truncate font-sans text-sm font-medium">{d.title}</div>
-                    <div className="mt-0.5 text-xs text-muted-foreground font-sans">
-                      {new Date(d.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-                    </div>
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <s.icon className="h-5 w-5 text-primary" />
+                    <div><div className="font-serif text-lg font-bold leading-none">{counts.get(s.kind)}</div><div className="text-xs text-muted-foreground font-sans">{s.label}</div></div>
                   </CardContent>
                 </Card>
               </Link>
             ))}
           </div>
-        </>
+        </section>
       )}
 
-      {/* What's new */}
-      <h2 className="mt-10 font-serif text-lg font-semibold">What's new</h2>
-      <Card className="mt-4 border-border bg-gradient-to-br from-muted/40 to-background">
-        <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
-            <div>
-              <p className="font-sans text-sm font-semibold">Sovereign Executive — the new flagship template</p>
-              <p className="mt-0.5 text-sm text-muted-foreground font-sans">Board-grade, Nordic-restrained, ATS-safe. Now the default in the CV Builder.</p>
-            </div>
+      {/* Marketplace activity */}
+      {(trending.length > 0 || recentPubs.length > 0) && (
+        <section className="mt-10">
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-serif text-lg font-semibold"><Store className="h-4 w-4 text-gold" /> Marketplace activity</h2>
+            <Link to="/catalog" className="text-sm text-primary font-sans hover:underline">Browse all</Link>
           </div>
-          <Button asChild variant="heroOutline" size="sm" className="shrink-0">
-            <Link to="/cv">Open CV Builder</Link>
-          </Button>
-        </CardContent>
-      </Card>
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {trending.length > 0 && (
+              <Card className="border-border"><CardContent className="p-5">
+                <div className="mb-3 flex items-center gap-1.5 text-sm font-semibold font-sans"><TrendingUp className="h-4 w-4 text-gold" /> Trending now</div>
+                <ul className="divide-y divide-border">
+                  {trending.map((it) => (
+                    <li key={it.token} className="py-2"><Link to={`/shared/${it.token}`} className="group flex items-center justify-between gap-2">
+                      <span className="min-w-0"><span className="block truncate text-sm font-medium font-sans group-hover:text-primary">{it.title}</span><span className="text-xs text-muted-foreground font-sans">{it.category ?? "Other"}{it.author_name ? ` · ${it.author_name}` : ""}</span></span>
+                      <span className="shrink-0 text-xs text-muted-foreground font-sans">{(it.download_count ?? 0)} ↓</span>
+                    </Link></li>
+                  ))}
+                </ul>
+              </CardContent></Card>
+            )}
+            {recentPubs.length > 0 && (
+              <Card className="border-border"><CardContent className="p-5">
+                <div className="mb-3 flex items-center gap-1.5 text-sm font-semibold font-sans"><Clock className="h-4 w-4 text-gold" /> Recently published</div>
+                <ul className="divide-y divide-border">
+                  {recentPubs.map((it) => (
+                    <li key={it.token} className="py-2"><Link to={`/shared/${it.token}`} className="group flex items-center justify-between gap-2">
+                      <span className="min-w-0"><span className="block truncate text-sm font-medium font-sans group-hover:text-primary">{it.title}</span><span className="text-xs text-muted-foreground font-sans">{it.category ?? "Other"}{it.author_name ? ` · ${it.author_name}` : ""}</span></span>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${it.price_cents > 0 ? "bg-gold/15 text-gold" : "bg-primary/10 text-primary"}`}>{it.price_cents > 0 ? `$${(it.price_cents / 100).toFixed(2)}` : "Free"}</span>
+                    </Link></li>
+                  ))}
+                </ul>
+              </CardContent></Card>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye } from "lucide-react";
 import PublishDialog from "@/components/app/PublishDialog";
@@ -53,6 +53,15 @@ const LibraryPage = () => {
 
   const load = () => { listDocuments().then(setDocs).catch((e) => { toast({ title: "Could not load library", description: e.message, variant: "destructive" }); setDocs([]); }); };
   useEffect(load, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // One-click resume from the dashboard: /library?open=<id> auto-opens the doc once.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const id = searchParams.get("open");
+    if (!id || !docs) return;
+    const d = docs.find((x) => x.id === id);
+    if (d) { open(d); setSearchParams({}, { replace: true }); }
+  }, [docs]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const open = async (d: DocSummary) => {
     setOpening(d.id);
