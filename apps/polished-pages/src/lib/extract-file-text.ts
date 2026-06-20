@@ -21,8 +21,8 @@ export async function extractFileText(file: File): Promise<string> {
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-      // pdf.js typed items expose `str` on TextItem; cast as the upstream code does.
-      pages.push(content.items.map((item: any) => (item.str as string) ?? "").join(" "));
+      // pdf.js content items are TextItem | TextMarkedContent; only TextItem has `str`.
+      pages.push(content.items.map((item) => ("str" in item ? item.str : "")).join(" "));
     }
     text = pages.join("\n\n");
   } else {

@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { authHeader } from "@/lib/session";
-import { ArrowLeft, Download, FileText, FileDown, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Download, FileText, FileDown, Loader2, Target, PenTool } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { CV_TEMPLATES } from "@/types/cv";
@@ -104,12 +104,27 @@ const CVPreview = ({ markdown, data, onBack, template, photo }: CVPreviewProps) 
         </div>
       </nav>
 
-      <div className={`container ${theme.container} mx-auto px-6 pt-8 pb-16`}>
+      <div className={`container ${theme.container} mx-auto px-6 pt-8 pb-10`}>
         {data ? (
           <PremiumCv data={data} template={template} innerRef={cvRef} />
         ) : (
           <CvDocument markdown={markdown ?? ""} template={template} photo={photo} innerRef={cvRef} />
         )}
+      </div>
+
+      {/* Next steps — keep momentum from a finished CV into a job application. */}
+      <div className="container max-w-3xl mx-auto px-6 pb-16">
+        <div className="rounded-xl border border-border bg-card/50 p-5">
+          <div className="text-sm font-semibold font-sans">Next steps</div>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+            <Button asChild variant="heroOutline" className="flex-1 justify-start">
+              <Link to="/tailor"><Target className="mr-2 h-4 w-4" /> Tailor this CV to a job</Link>
+            </Button>
+            <Button asChild variant="heroOutline" className="flex-1 justify-start">
+              <Link to="/cover-letter"><PenTool className="mr-2 h-4 w-4" /> Write a matching cover letter</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
