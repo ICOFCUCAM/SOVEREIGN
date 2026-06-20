@@ -23,6 +23,7 @@ const KIND_META: Record<DocKind, { label: string; icon: typeof FileText }> = {
   book: { label: "Book", icon: BookOpen },
   cover: { label: "Book cover", icon: ImageIcon },
   storybook: { label: "Storybook", icon: BookHeart },
+  illustration: { label: "Illustration", icon: ImageIcon },
 };
 
 type Opened =
@@ -30,6 +31,7 @@ type Opened =
   | { kind: "letter"; markdown: string; fullName: string; email?: string; phone?: string }
   | { kind: "book"; markdown: string; title: string }
   | { kind: "cover"; front?: string; back?: string; title: string }
+  | { kind: "image"; src: string; title: string }
   | { kind: "picturebook"; book: PictureBookData; pageAspect: string; showText: boolean; title: string };
 
 const LibraryPage = () => {
@@ -56,6 +58,8 @@ const LibraryPage = () => {
         setOpened({ kind: "book", markdown: String(p.markdown ?? ""), title: String(p.title ?? d.title) });
       } else if (d.kind === "cover") {
         setOpened({ kind: "cover", front: p.front as string | undefined, back: p.back as string | undefined, title: String(p.title ?? d.title) });
+      } else if (d.kind === "illustration") {
+        setOpened({ kind: "image", src: String(p.image ?? ""), title: d.title });
       } else if (d.kind === "storybook") {
         setOpened({ kind: "picturebook", book: p.book as PictureBookData, pageAspect: String(p.pageAspect ?? "16/9"), showText: p.showText !== false, title: d.title });
       } else {
@@ -134,6 +138,24 @@ const LibraryPage = () => {
         </div>
         <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
           <PictureBookView book={opened.book} innerRef={pbRef} pageAspect={opened.pageAspect} showText={opened.showText} />
+        </div>
+      </div>
+    );
+  }
+  if (opened?.kind === "image") {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
+          <div className="container flex items-center justify-between h-12 px-6">
+            <span className="truncate text-sm font-medium text-muted-foreground font-sans">{opened.title}</span>
+            <div className="flex items-center gap-2">
+              <Button variant="heroOutline" size="sm" onClick={() => { const a = document.createElement("a"); a.href = opened.src; a.download = `${opened.title}.png`; a.click(); }}><Download className="w-4 h-4 mr-1" /> PNG</Button>
+              <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground"><ArrowLeft className="w-4 h-4 mr-2" /> Library</Button>
+            </div>
+          </div>
+        </div>
+        <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
+          <div className="overflow-hidden rounded-xl border border-border shadow-premium bg-white"><img src={opened.src} alt={opened.title} className="w-full" /></div>
         </div>
       </div>
     );

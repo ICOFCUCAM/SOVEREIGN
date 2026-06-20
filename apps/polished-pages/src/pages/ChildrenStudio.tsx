@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookHeart, Sparkles, Palette, GraduationCap, PencilRuler, NotebookPen, School, BookOpenCheck, Presentation, Globe, ArrowRight } from "lucide-react";
+import { BookHeart, Sparkles, Palette, GraduationCap, PencilRuler, NotebookPen, School, BookOpenCheck, Presentation, Globe, ImagePlus, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface Product {
@@ -23,6 +23,7 @@ const PRODUCTS: Product[] = [
   { name: "Teacher Resource Center", description: "Lesson notes, worksheets, quizzes, exams and marking guides — a teacher's kit per topic.", icon: Presentation, status: "live", path: "/teacher" },
   { name: "Curriculum Builder", description: "Country + grade + subject + term → scheme of work, weekly plan, lesson plan, objectives and assessment.", icon: GraduationCap, status: "live", path: "/curriculum" },
   { name: "Translate & Localize", description: "Create once, then publish in many languages — faithful translation or a culturally localized edition with adapted names and settings.", icon: Globe, status: "live", path: "/translate" },
+  { name: "Illustration Studio", description: "Diagrams, science and geography visuals, historical scenes, posters and line art — saved to your Library to reuse.", icon: ImagePlus, status: "live", path: "/illustrations" },
 ];
 
 const ChildrenStudio = () => {

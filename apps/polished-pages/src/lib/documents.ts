@@ -5,7 +5,7 @@ import type { CvData } from "@/lib/cv-data";
 // reached only through the public.polished_* SECURITY DEFINER RPCs, which scope
 // every row to auth.uid(). The generated Database types don't know these RPCs,
 // so we cast (same pattern as session.ts).
-export type DocKind = "cv" | "cover-letter" | "book" | "tailored" | "cover" | "storybook";
+export type DocKind = "cv" | "cover-letter" | "book" | "tailored" | "cover" | "storybook" | "illustration";
 
 export interface DocSummary {
   id: string;
