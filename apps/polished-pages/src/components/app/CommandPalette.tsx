@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
-import { TOOLS, DASHBOARD_NAV, ACCOUNT_NAV, LIBRARY_NAV } from "@/lib/tools";
-import { LogOut, Sparkles } from "lucide-react";
+import { DASHBOARD_NAV, ACCOUNT_NAV, LIBRARY_NAV } from "@/lib/tools";
+import { WORKFLOWS } from "@/lib/nav";
+import { LogOut, Sparkles, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { startUpgrade } from "@/lib/session";
 
@@ -26,33 +27,43 @@ const CommandPalette = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput placeholder="Search tools and actions…" />
+      <CommandInput placeholder="Search every tool and action…" />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup heading="Go to">
-          <CommandItem onSelect={() => go(DASHBOARD_NAV.path)}>
+        <CommandGroup heading="Workspace">
+          <CommandItem value="dashboard home" onSelect={() => go(DASHBOARD_NAV.path)}>
             <DASHBOARD_NAV.icon className="mr-2 h-4 w-4" /> {DASHBOARD_NAV.name}
           </CommandItem>
-          {TOOLS.map((t) => (
-            <CommandItem key={t.id} value={`${t.name} ${t.keywords.join(" ")}`} onSelect={() => go(t.path)}>
-              <t.icon className="mr-2 h-4 w-4" /> {t.name}
-            </CommandItem>
-          ))}
           <CommandItem value="library saved documents" onSelect={() => go(LIBRARY_NAV.path)}>
             <LIBRARY_NAV.icon className="mr-2 h-4 w-4" /> {LIBRARY_NAV.name}
           </CommandItem>
-          <CommandItem onSelect={() => go(ACCOUNT_NAV.path)}>
+          <CommandItem value="account billing settings plan" onSelect={() => go(ACCOUNT_NAV.path)}>
             <ACCOUNT_NAV.icon className="mr-2 h-4 w-4" /> {ACCOUNT_NAV.name}
           </CommandItem>
         </CommandGroup>
-        <CommandGroup heading="Quick actions">
-          {TOOLS.map((t) => (
-            <CommandItem key={`a-${t.id}`} value={`${t.action} ${t.keywords.join(" ")}`} onSelect={() => go(t.path)}>
-              <t.icon className="mr-2 h-4 w-4" /> {t.action}
-            </CommandItem>
-          ))}
-          <CommandItem value="upgrade pro billing plan" onSelect={() => { onOpenChange(false); startUpgrade().catch(() => {}); }}>
-            <Sparkles className="mr-2 h-4 w-4" /> Upgrade to Pro
+
+        {/* One group per lifecycle verb, so the whole platform is reachable
+            from a single keystroke and organised the same way as the nav. */}
+        {WORKFLOWS.map((w) => {
+          const items = w.columns.flatMap((c) => c.items);
+          return (
+            <CommandGroup key={w.id} heading={w.label}>
+              {items.map((it) => (
+                <CommandItem key={`${w.id}-${it.path}-${it.label}`} value={`${w.label} ${it.label} ${it.desc ?? ""}`} onSelect={() => go(it.path)}>
+                  <w.icon className="mr-2 h-4 w-4 opacity-70" /> {it.label}
+                  {it.desc && <span className="ml-auto text-xs text-muted-foreground">{it.desc}</span>}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          );
+        })}
+
+        <CommandGroup heading="Actions">
+          <CommandItem value="upgrade pro billing plan pricing" onSelect={() => { onOpenChange(false); startUpgrade().catch(() => {}); }}>
+            <Sparkles className="mr-2 h-4 w-4" /> Upgrade your plan
+          </CommandItem>
+          <CommandItem value="pricing plans compare" onSelect={() => go("/pricing")}>
+            <ArrowRight className="mr-2 h-4 w-4" /> Compare plans
           </CommandItem>
           <CommandItem value="sign out logout" onSelect={() => { onOpenChange(false); supabase.auth.signOut(); }}>
             <LogOut className="mr-2 h-4 w-4" /> Sign out
