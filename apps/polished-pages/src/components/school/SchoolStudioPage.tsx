@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, Loader2, ArrowLeft, ClipboardList, Check, type LucideIcon } from "lucide-react";
+import { Sparkles, Loader2, ArrowLeft, ClipboardList, Check, ChevronRight, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -135,8 +135,13 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container max-w-2xl mx-auto px-6 pt-8 pb-16">
-        <Link to="/children" className="text-xs text-muted-foreground hover:text-foreground font-sans">← Children’s Publishing Studio</Link>
-        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-educational/20 bg-educational/5 px-4 py-1.5 mb-4">
+        {/* Breadcrumb */}
+        <nav className="mb-5 flex items-center gap-1 text-xs text-muted-foreground font-sans">
+          <Link to="/children" className="hover:text-foreground transition-colors">Educational Studio</Link>
+          <ChevronRight className="h-3 w-3 shrink-0" />
+          <span className="text-foreground font-medium">{config.badge}</span>
+        </nav>
+        <div className="inline-flex items-center gap-2 rounded-full border border-educational/20 bg-educational/5 px-4 py-1.5 mb-4">
           <config.icon className="w-4 h-4 text-educational" />
           <span className="text-sm text-educational font-medium font-sans">{config.badge}</span>
         </div>
