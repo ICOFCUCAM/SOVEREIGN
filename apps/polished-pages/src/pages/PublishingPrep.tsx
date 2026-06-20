@@ -70,16 +70,24 @@ const PublishingPrep = () => {
         <CardHeader><CardTitle className="font-serif text-lg">Where it goes</CardTitle><CardDescription className="font-sans">Every book exports to EPUB (in the reader) and to a print PDF at your trim size.</CardDescription></CardHeader>
         <CardContent>
           <div className="divide-y divide-border">
-            {TARGETS.map((t) => (
-              <div key={t.name} className="flex items-center justify-between gap-4 py-2 text-sm font-sans">
-                <div>
-                  <a href={t.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium hover:text-primary hover:underline">
-                    {t.name} <ExternalLink className="h-3 w-3 text-muted-foreground" />
-                  </a>
-                  <div className="text-xs text-muted-foreground">{t.format}</div>
+            {TARGETS.map((t) => {
+              const epub = /epub/i.test(t.format);
+              const print = /pdf|print/i.test(t.format);
+              return (
+                <div key={t.name} className="flex items-center justify-between gap-4 py-2.5 text-sm font-sans">
+                  <div className="min-w-0">
+                    <a href={t.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium hover:text-primary hover:underline">
+                      {t.name} <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </a>
+                    <div className="text-xs text-muted-foreground">{t.format}</div>
+                  </div>
+                  <div className="flex shrink-0 gap-1.5">
+                    {epub && <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"><Check className="h-3 w-3" /> EPUB</span>}
+                    {print && <span className="inline-flex items-center gap-0.5 rounded-full bg-publishing/10 px-2 py-0.5 text-[10px] font-semibold text-publishing"><Check className="h-3 w-3" /> Print</span>}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <ul className="mt-4 space-y-1.5 text-sm text-muted-foreground font-sans">
             <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> EPUB is built in the book reader (Kobo, Apple, Google, Draft2Digital take it directly).</li>
