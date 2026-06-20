@@ -28,6 +28,7 @@ const GROUPS: MenuGroup[] = [
     { label: "Coloring Books", to: "/coloring" },
     { label: "School Content", to: "/classroom" },
     { label: "Curriculum Builder", to: "/curriculum" },
+    { label: "Assessment Bank", to: "/assessment-bank" },
   ] },
 ];
 const DIRECT: MenuItem[] = [

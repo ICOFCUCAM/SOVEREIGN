@@ -21,6 +21,7 @@ import WorkbookGenerator from "./pages/WorkbookGenerator.tsx";
 import CurriculumBuilder from "./pages/CurriculumBuilder.tsx";
 import TeacherResourceCenter from "./pages/TeacherResourceCenter.tsx";
 import ExamAssessmentPack from "./pages/ExamAssessmentPack.tsx";
+import AssessmentBank from "./pages/AssessmentBank.tsx";
 import TranslatePublish from "./pages/TranslatePublish.tsx";
 import EditionManager from "./pages/EditionManager.tsx";
 import IllustrationStudio from "./pages/IllustrationStudio.tsx";
@@ -80,6 +81,7 @@ const App = () => (
           <Route path="/curriculum" element={<AuthGate><RequirePlan feature="educational-studio"><CurriculumBuilder /></RequirePlan></AuthGate>} />
           <Route path="/teacher" element={<AuthGate><RequirePlan feature="educational-studio"><TeacherResourceCenter /></RequirePlan></AuthGate>} />
           <Route path="/assessment" element={<AuthGate><RequirePlan feature="educational-studio"><ExamAssessmentPack /></RequirePlan></AuthGate>} />
+          <Route path="/assessment-bank" element={<AuthGate><RequirePlan feature="educational-studio"><AssessmentBank /></RequirePlan></AuthGate>} />
           <Route path="/translate" element={<AuthGate><RequirePlan feature="multilingual"><TranslatePublish /></RequirePlan></AuthGate>} />
           <Route path="/editions" element={<AuthGate><RequirePlan feature="multilingual"><EditionManager /></RequirePlan></AuthGate>} />
           <Route path="/illustrations" element={<AuthGate><IllustrationStudio /></AuthGate>} />
