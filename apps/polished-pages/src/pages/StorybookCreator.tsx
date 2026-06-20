@@ -27,6 +27,14 @@ const READING_LEVELS = [
   "Confident reader (ages 8–10)",
 ];
 
+// Reading-level engine: one click sets the age, reading level and length, which
+// the engine uses to tune vocabulary, sentence complexity and story structure.
+const AGE_BANDS: { label: string; age: string; level: string; pages: number }[] = [
+  { label: "Ages 3–5", age: "4", level: READING_LEVELS[0], pages: 8 },
+  { label: "Ages 6–8", age: "7", level: READING_LEVELS[2], pages: 12 },
+  { label: "Ages 9–12", age: "10", level: READING_LEVELS[3], pages: 16 },
+];
+
 const STORY_TYPES: { id: StoryType; label: string }[] = [
   { id: "classic", label: "Classic" },
   { id: "bedtime", label: "Bedtime" },
@@ -270,6 +278,21 @@ const StorybookCreator = () => {
           <Card className="border-border bg-card/50">
             <CardHeader><CardTitle className="font-serif text-lg">The child & reading level</CardTitle><CardDescription className="font-sans">Used to pitch the vocabulary and pacing.</CardDescription></CardHeader>
             <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="space-y-1.5 sm:col-span-3">
+                <Label className="font-sans text-xs">Reading level</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {AGE_BANDS.map((band) => {
+                    const active = childAge === band.age && readingLevel === band.level;
+                    return (
+                      <button key={band.label} type="button" onClick={() => { setChildAge(band.age); setReadingLevel(band.level); setPageCount(band.pages); }}
+                        className={`rounded-full border px-3 py-1 text-xs font-sans transition ${active ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                        {band.label}
+                      </button>
+                    );
+                  })}
+                  <span className="self-center text-[11px] text-muted-foreground font-sans">tunes vocabulary, sentence length & story length</span>
+                </div>
+              </div>
               <div className="space-y-1.5">
                 <Label className="font-sans text-xs">Child’s name (optional — makes them the hero)</Label>
                 <Input value={childName} onChange={(e) => setChildName(e.target.value)} placeholder="e.g. James" maxLength={60} />
