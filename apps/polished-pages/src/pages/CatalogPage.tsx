@@ -140,10 +140,15 @@ const CatalogPage = () => {
 
         {!author && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            <button onClick={() => setCat("")} className={`rounded-full border px-2.5 py-1 text-xs font-sans transition ${cat === "" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>All</button>
-            {CATALOG_CATEGORIES.map((c) => (
-              <button key={c} onClick={() => setCat(c)} className={`rounded-full border px-2.5 py-1 text-xs font-sans transition ${cat === c ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>{c}</button>
-            ))}
+            <button onClick={() => setCat("")} className={`rounded-full border px-2.5 py-1 text-xs font-sans transition ${cat === "" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>All {all.length > 0 ? <span className="ml-0.5 opacity-60">· {all.length}</span> : ""}</button>
+            {CATALOG_CATEGORIES.map((c) => {
+              const n = categoryCounts.get(c) ?? 0;
+              return (
+                <button key={c} onClick={() => setCat(c)} className={`rounded-full border px-2.5 py-1 text-xs font-sans transition ${cat === c ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                  {c}{n > 0 ? <span className="ml-0.5 opacity-60">· {n}</span> : ""}
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -172,7 +177,21 @@ const CatalogPage = () => {
         {/* Filtered / author view: flat grid */}
         {items && filtering && (
           all.length === 0
-            ? <p className="mt-10 text-center text-sm text-muted-foreground font-sans">No published resources found.</p>
+            ? (
+              <div className="mt-10 text-center">
+                <Search className="mx-auto h-8 w-8 text-muted-foreground/30" />
+                <p className="mt-3 text-sm font-sans text-foreground font-medium">No results found</p>
+                <p className="mt-1 text-sm text-muted-foreground font-sans">
+                  {query ? `Nothing matched "${query}"` : cat ? `Nothing in ${cat} yet` : "No resources found for this author"}.
+                </p>
+                {(query || cat) && (
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                    {query && <button onClick={() => setQuery("")} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-sans hover:border-primary/40"><X className="h-3 w-3" /> Clear search</button>}
+                    {cat && <button onClick={() => setCat("")} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-sans hover:border-primary/40"><X className="h-3 w-3" /> Clear category</button>}
+                  </div>
+                )}
+              </div>
+            )
             : <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">{all.map((it) => <CatalogCard key={it.token} item={it} admin={admin} onFeature={feature} />)}</div>
         )}
 
