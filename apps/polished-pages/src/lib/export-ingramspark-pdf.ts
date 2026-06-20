@@ -9,12 +9,13 @@
 //   • folios (page numbers) on the outside bottom corner, suppressed on front
 //     matter and blank pages.
 // Page count is detected automatically with a measuring pass so the gutter is
-// sized correctly. jsPDF is loaded dynamically. Uses the standard Times family
-// (the base-14 PDF fonts, substituted identically by every reader) — for
-// guaranteed font embedding, run the file through IngramSpark's preflight.
+// sized correctly. jsPDF is loaded dynamically. The interior is set in Liberation
+// Serif (SIL OFL, metric-compatible with Times) and fully embedded, so the file
+// passes print-preflight "all fonts embedded" checks.
 import type { TrimSize } from "@/lib/print-sizes";
 import { ingramGutterMm, INGRAM_OUTSIDE_MM } from "@/lib/print-sizes";
 import { isRtlText } from "@/lib/languages";
+import { registerEmbeddedSerif } from "@/lib/embed-serif-font";
 import { BRAND } from "@/lib/tools";
 
 const PT_TO_MM = 0.352778;
@@ -26,12 +27,13 @@ export interface IngramOpts { title: string; author?: string; trim: TrimSize; ye
 type Jspdf = any;
 
 // Build the full interior at a given gutter; returns the doc and its page count.
-function build(JsPDF: Jspdf, markdown: string, opts: IngramOpts, gutterMm: number): { pdf: Jspdf; pages: number } {
+async function build(JsPDF: Jspdf, markdown: string, opts: IngramOpts, gutterMm: number): Promise<{ pdf: Jspdf; pages: number }> {
   const { wmm: pageW, hmm: pageH } = opts.trim;
   const out = INGRAM_OUTSIDE_MM, mTop = 14, mBottom = 16;
   const contentW = pageW - gutterMm - out;
   const bodyStartPage = 3; // title (1) + copyright (2), body opens on recto (3)
   const pdf = new JsPDF({ orientation: pageW > pageH ? "l" : "p", unit: "mm", format: [pageW, pageH] });
+  const FONT = await registerEmbeddedSerif(pdf); // Liberation Serif, fully embedded
 
   let pageNo = 1, y = mTop, dirty = false;
   const recto = () => pageNo % 2 === 1;          // odd physical page = right-hand
@@ -40,7 +42,7 @@ function build(JsPDF: Jspdf, markdown: string, opts: IngramOpts, gutterMm: numbe
 
   const folio = () => {
     if (pageNo < bodyStartPage || !dirty) return;
-    pdf.setFont("times", "normal"); pdf.setFontSize(9); pdf.setTextColor(120);
+    pdf.setFont(FONT, "normal"); pdf.setFontSize(9); pdf.setTextColor(120);
     const n = String(pageNo - (bodyStartPage - 1));
     if (recto()) pdf.text(n, pageW - out, pageH - 9, { align: "right" });
     else pdf.text(n, out, pageH - 9, { align: "left" });
@@ -50,7 +52,7 @@ function build(JsPDF: Jspdf, markdown: string, opts: IngramOpts, gutterMm: numbe
 
   const emit = (text: string, pt: number, font: "normal" | "bold" | "italic", gapBefore = 0, gapAfter = 1.5) => {
     if (!text.trim()) return;
-    pdf.setFont("times", font); pdf.setFontSize(pt);
+    pdf.setFont(FONT, font); pdf.setFontSize(pt);
     const lh = lineHeight(pt); y += gapBefore;
     const lines = pdf.splitTextToSize(text, contentW) as string[];
     for (const line of lines) {
@@ -62,17 +64,17 @@ function build(JsPDF: Jspdf, markdown: string, opts: IngramOpts, gutterMm: numbe
 
   // Title page (recto, page 1).
   pdf.setTextColor(20);
-  pdf.setFont("times", "bold"); pdf.setFontSize(26);
+  pdf.setFont(FONT, "bold"); pdf.setFontSize(26);
   pdf.text(pdf.splitTextToSize(strip(opts.title), contentW) as string[], pageW / 2, pageH / 2 - 12, { align: "center" });
   if (opts.author) {
-    pdf.setFont("times", "italic"); pdf.setFontSize(13);
+    pdf.setFont(FONT, "italic"); pdf.setFontSize(13);
     pdf.text(pdf.splitTextToSize(opts.author, contentW) as string[], pageW / 2, pageH / 2 + 2, { align: "center" });
   }
 
   // Copyright page (verso, page 2).
   pdf.addPage(); pageNo = 2; y = mTop; dirty = false;
   const year = opts.year ?? new Date().getFullYear();
-  pdf.setFont("times", "normal"); pdf.setFontSize(10); pdf.setTextColor(60);
+  pdf.setFont(FONT, "normal"); pdf.setFontSize(10); pdf.setTextColor(60);
   const cw = pageW - out - gutterMm;
   const cLines = [
     strip(opts.title),
@@ -124,8 +126,8 @@ export async function markdownToIngramSparkPdf(markdown: string, opts: IngramOpt
   }
   const { jsPDF } = await import("jspdf");
   // Pass 1: measure with a provisional gutter to learn the page count…
-  const { pages } = build(jsPDF, markdown, opts, 15.875);
+  const { pages } = await build(jsPDF, markdown, opts, 15.875);
   // …then render final with the gutter sized for that page count.
-  const { pdf } = build(jsPDF, markdown, opts, ingramGutterMm(pages));
+  const { pdf } = await build(jsPDF, markdown, opts, ingramGutterMm(pages));
   pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`);
 }

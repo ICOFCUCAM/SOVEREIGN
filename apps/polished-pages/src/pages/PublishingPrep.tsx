@@ -119,7 +119,7 @@ const PublishingPrep = () => {
             <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Mirrored margins — the gutter sits on the binding edge of each left/right page.</li>
             <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Title page and copyright page generated as front matter.</li>
             <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Each chapter opens on a right-hand (recto) page; page numbers on the outer edge.</li>
-            <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Uses the base-14 PDF fonts; run IngramSpark’s preflight to confirm embedding before final upload.</li>
+            <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Set in Liberation Serif (SIL OFL), fully embedded so it passes “all fonts embedded” preflight.</li>
           </ul>
         </CardContent>
       </Card>
