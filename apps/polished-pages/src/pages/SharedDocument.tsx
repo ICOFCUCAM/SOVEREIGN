@@ -9,6 +9,7 @@ import BookReader from "@/components/book/BookReader";
 import PremiumCv from "@/components/PremiumCv";
 import PictureBookView, { type PictureBookData } from "@/components/children/PictureBookView";
 import ReviewsPanel from "@/components/app/ReviewsPanel";
+import CreateCtaBand from "@/components/app/CreateCtaBand";
 
 // Public, read-only view of a shared document (the marketplace foundation:
 // publish a resource, share the link, anyone can view and export it).
@@ -78,7 +79,10 @@ const SharedDocument = () => {
             )}
             {doc.license && <p className="mt-6 text-center text-xs text-muted-foreground font-sans">License: {doc.license}</p>}
             {token && <ReviewsPanel token={token} />}
-            <p className="mt-6 text-center text-xs text-muted-foreground font-sans">Shared via {BRAND}. <Link to="/" className="text-primary hover:underline">Create your own →</Link></p>
+            <CreateCtaBand
+              heading={`Create something like this with ${BRAND}`}
+              sub="Build CVs, books, storybooks and educational content with AI — then publish, translate and sell them. Start on the free plan."
+            />
           </>
         )}
       </div>
