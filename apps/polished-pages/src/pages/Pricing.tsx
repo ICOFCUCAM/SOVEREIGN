@@ -60,41 +60,60 @@ const Pricing = () => {
           <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-primary" /> Keep {100 - MARKETPLACE_FEE_PCT}% of sales</span>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {PLANS.map((plan) => (
-            <Card key={plan.id} className={`relative flex h-full flex-col border-border ${plan.highlight ? "border-primary/60 shadow-premium" : ""}`}>
-              {plan.highlight && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground font-sans">Most popular</span>
-              )}
-              <CardContent className="flex h-full flex-col p-5">
-                <div className="flex items-center gap-2">
-                  {plan.highlight && <Crown className="h-4 w-4 text-gold" />}
-                  <h3 className="font-serif text-lg font-bold">{plan.name}</h3>
-                </div>
-                <p className="mt-0.5 text-xs text-muted-foreground font-sans">{plan.target}</p>
-                <div className="mt-3 flex items-baseline gap-1">
-                  <span className="font-serif text-3xl font-bold">{plan.priceLabel}</span>
-                  {plan.cadence && <span className="text-sm text-muted-foreground font-sans">{plan.cadence}</span>}
-                </div>
-                <ul className="mt-4 flex-1 space-y-2">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm font-sans">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  variant={plan.highlight ? "hero" : "heroOutline"}
-                  className="mt-5 w-full"
-                  disabled={busy === plan.id}
-                  onClick={() => choose(plan)}
-                >
-                  {busy === plan.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  {plan.checkout === "contact" ? "Contact sales" : plan.id === "free" ? "Get started" : `Choose ${plan.name}`}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 items-start">
+          {PLANS.map((plan, idx) => {
+            const isGold = plan.id === "publisher";
+            const featured = plan.highlight;
+            return (
+              <motion.div
+                key={plan.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.07 }}
+                className={`relative ${featured ? "md:-mt-3 md:scale-[1.02]" : ""}`}
+              >
+                {featured && (
+                  <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/30 via-primary/10 to-gold/20 blur-xl opacity-60" />
+                )}
+                <Card className={`relative flex h-full flex-col ${featured ? "border-primary/60 shadow-premium ring-1 ring-primary/20 bg-gradient-to-b from-primary/[0.04] to-card" : isGold ? "border-gold/30 bg-gradient-to-b from-gold/[0.03] to-card" : "border-border"}`}>
+                  {featured && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 animate-pulse rounded-full bg-primary px-4 py-0.5 text-xs font-semibold text-primary-foreground font-sans shadow-sm">Most popular</span>
+                  )}
+                  {isGold && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-gold/80 to-amber-400 px-4 py-0.5 text-xs font-semibold text-white font-sans">Publisher Pro</span>
+                  )}
+                  <CardContent className="flex h-full flex-col p-5">
+                    <div className="flex items-center gap-2">
+                      {featured && <Crown className="h-4 w-4 text-gold" />}
+                      {isGold && <Crown className="h-4 w-4 text-gold fill-gold" />}
+                      <h3 className="font-serif text-lg font-bold">{plan.name}</h3>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground font-sans">{plan.target}</p>
+                    <div className="mt-3 flex items-baseline gap-1">
+                      <span className={`font-serif text-3xl font-bold ${isGold ? "text-gold" : featured ? "text-primary" : ""}`}>{plan.priceLabel}</span>
+                      {plan.cadence && <span className="text-sm text-muted-foreground font-sans">{plan.cadence}</span>}
+                    </div>
+                    <ul className="mt-4 flex-1 space-y-2">
+                      {plan.features.map((f) => (
+                        <li key={f} className="flex items-start gap-2 text-sm font-sans">
+                          <Check className={`mt-0.5 h-4 w-4 shrink-0 ${isGold ? "text-gold" : "text-primary"}`} /> {f}
+                        </li>
+                      ))}
+                    </ul>
+                    <Button
+                      variant={featured || isGold ? "hero" : "heroOutline"}
+                      className={`mt-5 w-full ${isGold ? "bg-gradient-to-r from-gold/90 to-amber-500 text-white border-0 hover:from-gold hover:to-amber-400" : ""}`}
+                      disabled={busy === plan.id}
+                      onClick={() => choose(plan)}
+                    >
+                      {busy === plan.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      {plan.checkout === "contact" ? "Contact sales" : plan.id === "free" ? "Get started" : `Choose ${plan.name}`}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
 
         <p className="mt-8 text-center text-sm text-muted-foreground font-sans">
