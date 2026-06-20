@@ -1,16 +1,76 @@
 import { Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import { BRAND } from "@/lib/tools";
+
+interface Col { title: string; links: { label: string; to: string }[] }
+
+const COLUMNS: Col[] = [
+  { title: "Career", links: [
+    { label: "CV Builder", to: "/cv" },
+    { label: "Tailor to a Job", to: "/tailor" },
+    { label: "Cover Letters", to: "/cover-letter" },
+  ] },
+  { title: "Publishing", links: [
+    { label: "Book Creator", to: "/book" },
+    { label: "Transform a Book", to: "/book-transform" },
+    { label: "Illustration Studio", to: "/illustrations" },
+    { label: "Publish & Distribute", to: "/publishing" },
+  ] },
+  { title: "Education", links: [
+    { label: "Children’s Studio", to: "/children" },
+    { label: "Storybooks & Series", to: "/series" },
+    { label: "Coloring Books", to: "/coloring" },
+    { label: "School Content", to: "/classroom" },
+    { label: "Curriculum Builder", to: "/curriculum" },
+  ] },
+  { title: "Platform", links: [
+    { label: "Marketplace", to: "/catalog" },
+    { label: "Pricing", to: "/pricing" },
+    { label: "Resources", to: "/resources" },
+  ] },
+  { title: "For you", links: [
+    { label: "Authors", to: "/book" },
+    { label: "Publishers", to: "/pricing" },
+    { label: "Teachers", to: "/children" },
+    { label: "Schools", to: "/curriculum" },
+    { label: "Parents", to: "/storybook" },
+  ] },
+];
 
 const Footer = () => {
   return (
-    <footer className="border-t border-border py-12 bg-background">
-      <div className="container px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <span className="font-serif font-semibold text-foreground">DocuForge</span>
+    <footer className="border-t border-border bg-background">
+      <div className="container px-6 py-14">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
+            <Link to="/" className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="font-serif text-base font-bold text-foreground">{BRAND}</span>
+            </Link>
+            <p className="mt-3 max-w-xs text-sm text-muted-foreground font-sans">
+              Create, publish and distribute professional documents, books and educational content — all in one platform.
+            </p>
+          </div>
+          {COLUMNS.map((col) => (
+            <div key={col.title}>
+              <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans">{col.title}</div>
+              <ul className="space-y-2">
+                {col.links.map((l) => (
+                  <li key={l.label}><Link to={l.to} className="text-sm text-foreground/80 hover:text-primary transition-colors font-sans">{l.label}</Link></li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <p className="text-sm text-muted-foreground font-sans">
-          © 2026 DocuForge. All rights reserved.
-        </p>
+
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 sm:flex-row">
+          <p className="text-sm text-muted-foreground font-sans">© {new Date().getFullYear()} {BRAND}. All rights reserved.</p>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground font-sans">
+            <Link to="/pricing" className="hover:text-primary transition-colors">Pricing</Link>
+            <Link to="/catalog" className="hover:text-primary transition-colors">Marketplace</Link>
+            <Link to="/resources" className="hover:text-primary transition-colors">Resources</Link>
+          </div>
+        </div>
       </div>
     </footer>
   );
