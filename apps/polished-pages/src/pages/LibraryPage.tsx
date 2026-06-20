@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X } from "lucide-react";
 import PublishDialog from "@/components/app/PublishDialog";
 import AddToCollection from "@/components/app/AddToCollection";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
+import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
+import TagEditor from "@/components/app/TagEditor";
 import { elementToPdf } from "@/lib/export-pdf";
 import type { CvData } from "@/lib/cv-data";
 import CVPreview from "@/components/CVPreview";
@@ -46,6 +47,7 @@ const LibraryPage = () => {
   const [versions, setVersions] = useState<DocVersion[] | null>(null);
   const [query, setQuery] = useState("");
   const [favOnly, setFavOnly] = useState(false);
+  const [tagFilter, setTagFilter] = useState("");
   const pbRef = useRef<HTMLDivElement>(null);
 
   const load = () => { listDocuments().then(setDocs).catch((e) => { toast({ title: "Could not load library", description: e.message, variant: "destructive" }); setDocs([]); }); };
@@ -104,6 +106,11 @@ const LibraryPage = () => {
     } catch (e) {
       toast({ title: "Could not update sharing", description: e instanceof Error ? e.message : "", variant: "destructive" });
     }
+  };
+
+  const dup = async (d: DocSummary) => {
+    try { await duplicateDocument(d.id); load(); toast({ title: "Duplicated", description: `“${d.title}” copied.` }); }
+    catch (e) { toast({ title: "Could not duplicate", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
   };
 
   const star = async (d: DocSummary) => {
@@ -284,6 +291,11 @@ const LibraryPage = () => {
           <Button variant={favOnly ? "hero" : "heroOutline"} size="sm" onClick={() => setFavOnly((f) => !f)}>
             <Star className={`mr-1 h-4 w-4 ${favOnly ? "fill-current" : ""}`} /> Favorites
           </Button>
+          {tagFilter && (
+            <button onClick={() => setTagFilter("")} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary font-sans">
+              <Tag className="h-3 w-3" /> {tagFilter} <X className="h-3 w-3" />
+            </button>
+          )}
         </div>
       )}
 
@@ -304,7 +316,7 @@ const LibraryPage = () => {
 
       {docs && docs.length > 0 && (() => {
         const q = query.trim().toLowerCase();
-        const filtered = docs.filter((d) => (!favOnly || d.favorite) && (!q || d.title.toLowerCase().includes(q) || (d.preview ?? "").toLowerCase().includes(q)));
+        const filtered = docs.filter((d) => (!favOnly || d.favorite) && (!tagFilter || (d.tags ?? []).includes(tagFilter)) && (!q || d.title.toLowerCase().includes(q) || (d.preview ?? "").toLowerCase().includes(q)));
         if (filtered.length === 0) {
           return <p className="mt-8 text-center text-sm text-muted-foreground font-sans">No documents match your filters.</p>;
         }
@@ -329,10 +341,24 @@ const LibraryPage = () => {
                         {meta.label} · {new Date(d.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
                       </div>
                       {d.preview && <p className="mt-1.5 line-clamp-2 text-xs text-muted-foreground font-sans">{d.preview}</p>}
+                      {(d.tags ?? []).length > 0 && (
+                        <div className="mt-1.5 flex flex-wrap gap-1">
+                          {(d.tags ?? []).map((t) => (
+                            <button key={t} onClick={() => setTagFilter(t)} className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground hover:text-primary font-sans">{t}</button>
+                          ))}
+                        </div>
+                      )}
                       <div className="mt-3 flex items-center gap-2">
                         <Button size="sm" variant="heroOutline" disabled={opening === d.id} onClick={() => open(d)}>
                           {opening === d.id ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null} Open
                         </Button>
+                        <TagEditor
+                          documentId={d.id}
+                          current={d.tags ?? []}
+                          onSaved={(tags) => setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, tags } : x)) ?? null)}
+                          trigger={<Button size="sm" variant="ghost" className="text-muted-foreground" aria-label="Edit tags" title="Edit tags"><Tag className="h-4 w-4" /></Button>}
+                        />
+                        <Button size="sm" variant="ghost" className="text-muted-foreground" onClick={() => dup(d)} aria-label="Duplicate" title="Duplicate"><Copy className="h-4 w-4" /></Button>
                         <Button size="sm" variant="ghost" className={d.shared ? "text-primary" : "text-muted-foreground"} onClick={() => share(d)} aria-label="Share" title={d.shared ? "Shared — click to copy link or unshare" : "Share publicly"}>
                           <Share2 className="h-4 w-4" />
                         </Button>

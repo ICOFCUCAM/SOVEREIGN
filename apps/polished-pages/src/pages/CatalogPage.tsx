@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Loader2, Store, ArrowRight, Search, X } from "lucide-react";
+import { Sparkles, Loader2, Store, ArrowRight, Search, X, Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { catalogList, CATALOG_CATEGORIES, type CatalogItem } from "@/lib/documents";
+import { Button } from "@/components/ui/button";
+import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem } from "@/lib/documents";
 import { BRAND } from "@/lib/tools";
 
 const priceLabel = (cents: number) => (cents > 0 ? `$${(cents / 100).toFixed(2)}` : "Free");
@@ -17,6 +18,9 @@ const CatalogPage = () => {
   const [query, setQuery] = useState("");
   const [author, setAuthor] = useState<string>("");
   const [sort, setSort] = useState<Sort>("new");
+  const [admin, setAdmin] = useState(false);
+
+  useEffect(() => { isAdmin().then(setAdmin).catch(() => {}); }, []);
 
   useEffect(() => {
     setItems(null);
@@ -25,6 +29,12 @@ const CatalogPage = () => {
     }, query ? 300 : 0);
     return () => clearTimeout(id);
   }, [cat, query]);
+
+  const feature = async (it: CatalogItem) => {
+    const next = !it.featured;
+    setItems((prev) => prev?.map((x) => (x.token === it.token ? { ...x, featured: next } : x)) ?? null);
+    try { await adminFeature(it.token, next); } catch { setItems((prev) => prev?.map((x) => (x.token === it.token ? { ...x, featured: !next } : x)) ?? null); }
+  };
 
   const view = useMemo(() => {
     let list = items ?? [];
@@ -89,7 +99,10 @@ const CatalogPage = () => {
               <Card key={it.token} className="flex h-full flex-col border-border transition-all hover:border-primary/50 hover:shadow-premium">
                 <CardContent className="flex h-full flex-col p-4">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans">{it.category ?? "Other"}</span>
+                    <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground font-sans">
+                      {it.featured && <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/15 px-1.5 py-0.5 text-gold normal-case"><Star className="h-3 w-3 fill-current" /> Featured</span>}
+                      {it.category ?? "Other"}
+                    </span>
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${it.price_cents > 0 ? "bg-gold/15 text-gold" : "bg-primary/10 text-primary"}`}>{priceLabel(it.price_cents)}</span>
                   </div>
                   <Link to={`/shared/${it.token}`} className="group mt-2 block">
@@ -100,9 +113,16 @@ const CatalogPage = () => {
                   )}
                   {it.preview && <p className="mt-1.5 line-clamp-3 flex-1 text-xs text-muted-foreground font-sans">{it.preview}</p>}
                   {it.license && <div className="mt-2 text-[11px] text-muted-foreground font-sans">{it.license}</div>}
-                  <Link to={`/shared/${it.token}`} className="group mt-3 inline-flex items-center text-sm font-medium text-primary font-sans">
-                    View <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
+                  <div className="mt-3 flex items-center justify-between">
+                    <Link to={`/shared/${it.token}`} className="group inline-flex items-center text-sm font-medium text-primary font-sans">
+                      View <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+                    {admin && (
+                      <Button variant="ghost" size="sm" className={it.featured ? "text-gold" : "text-muted-foreground"} onClick={() => feature(it)} title={it.featured ? "Unfeature" : "Feature"}>
+                        <Star className={`h-4 w-4 ${it.featured ? "fill-current" : ""}`} />
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}
