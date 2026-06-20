@@ -34,6 +34,7 @@ const GROUPS: MenuGroup[] = [
 ];
 const DIRECT: MenuItem[] = [
   { label: "Marketplace", to: "/catalog", dot: "bg-marketplace" },
+  { label: "For Schools", to: "/for-schools" },
   { label: "Pricing", to: "/pricing" },
   { label: "Resources", to: "/resources" },
 ];
