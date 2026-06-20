@@ -20,6 +20,7 @@ import PrimaryBookFactory from "./pages/PrimaryBookFactory.tsx";
 import WorkbookGenerator from "./pages/WorkbookGenerator.tsx";
 import CurriculumBuilder from "./pages/CurriculumBuilder.tsx";
 import TeacherResourceCenter from "./pages/TeacherResourceCenter.tsx";
+import ExamAssessmentPack from "./pages/ExamAssessmentPack.tsx";
 import TranslatePublish from "./pages/TranslatePublish.tsx";
 import IllustrationStudio from "./pages/IllustrationStudio.tsx";
 import PublishingPrep from "./pages/PublishingPrep.tsx";
@@ -71,6 +72,7 @@ const App = () => (
           <Route path="/workbooks" element={<AuthGate><RequirePlan feature="educational-studio"><WorkbookGenerator /></RequirePlan></AuthGate>} />
           <Route path="/curriculum" element={<AuthGate><RequirePlan feature="educational-studio"><CurriculumBuilder /></RequirePlan></AuthGate>} />
           <Route path="/teacher" element={<AuthGate><RequirePlan feature="educational-studio"><TeacherResourceCenter /></RequirePlan></AuthGate>} />
+          <Route path="/assessment" element={<AuthGate><RequirePlan feature="educational-studio"><ExamAssessmentPack /></RequirePlan></AuthGate>} />
           <Route path="/translate" element={<AuthGate><RequirePlan feature="multilingual"><TranslatePublish /></RequirePlan></AuthGate>} />
           <Route path="/illustrations" element={<AuthGate><IllustrationStudio /></AuthGate>} />
           <Route path="/publishing" element={<AuthGate><PublishingPrep /></AuthGate>} />
