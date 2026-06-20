@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem, type CatalogSort } from "@/lib/documents";
 import { getAuthorProfile, adminVerifyCreator, type AuthorProfile } from "@/lib/profiles";
 import CatalogCard from "@/components/app/CatalogCard";
+import CreateCtaBand from "@/components/app/CreateCtaBand";
 import { BRAND } from "@/lib/tools";
 
 const trendScore = (i: CatalogItem) => (i.download_count ?? 0) * 3 + (i.view_count ?? 0);
@@ -195,6 +196,11 @@ const CatalogPage = () => {
                     ))}
                   </div>
                 </section>
+                <CreateCtaBand
+                  heading={`Publish your work on ${BRAND}`}
+                  sub="Create storybooks, workbooks, books and curricula with AI — then list them here and reach readers, parents and teachers worldwide."
+                  cta="Start publishing free"
+                />
               </>
             )
         )}
