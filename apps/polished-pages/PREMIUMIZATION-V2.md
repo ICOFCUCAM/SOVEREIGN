@@ -105,6 +105,46 @@ demonstrates per-feature gating).
    public catalog view + premium downloads; foundation before any payments.
 5. **Tier rollout.** Stripe products for the five Pro tiers + per-feature gating.
 
+---
+
+## V2.1 — Global Children's Publishing Platform
+
+Turning the studio into "create, translate, localize, illustrate, publish and
+distribute globally."
+
+- **Native multi-language creation.** A 23-language catalogue (English → French,
+  Spanish, Portuguese, German, Italian, Dutch, Norwegian, Swedish, Danish,
+  Finnish, Arabic, Swahili, Lingala, Hausa, Fulfulde, Zulu, Chinese, Japanese,
+  Korean, Hindi, Bengali, Tamil — plus any language typed free-form). Storybooks
+  and educational documents generate directly in the chosen language.
+- **Cultural localization (not just translation).** The Storybook Creator takes a
+  **cultural setting** so a story is set authentically in, say, Norway vs Cameroon
+  vs Japan — names, landscapes, animals, foods and traditions adapted respectfully
+  (illustration prompts too).
+- **Translate & Localize (multi-language publishing).** `/translate`: one
+  document → editions in many languages at once, as a faithful **translation** or
+  a culturally **localized** edition per culture. Long documents are chunked;
+  each edition gets a designed interior, edit, PDF + EPUB export and Library save.
+- **Cultural preservation.** Folktale and Legend/Heritage story types for
+  publishing traditional tales, local heroes and origin stories under-represented
+  in mainstream publishing.
+- **Global distribution exports.** A real **EPUB 3** export (with NCX fallback)
+  from any book and from illustrated picture books (cover + per-page art),
+  accepted directly by Kobo, Apple Books, Google Play Books and Draft2Digital —
+  and by KDP/IngramSpark alongside print PDF.
+
+### Still on the roadmap (honest)
+- **KDP/IngramSpark/Lulu print profiles** — trim sizes (6×9, 8.5×11, square
+  picture-book), bleed/margin validation and metadata sheets. EPUB covers the
+  reflowable stores today; print-spec PDF is the next export.
+- **Library autosave + version history + draft recovery** (requested #2) — not
+  yet built; needs a drafts store + version snapshots.
+- **Educational Illustration Engine** (requested #3) — a standalone diagrams/
+  posters studio saving to the Library (the image engine + media bucket exist).
+- **Per-edition picture-book localization** — `/translate` localizes text
+  documents and storybook text; re-pairing localized text with existing
+  illustrations into a saved picture book is a follow-up.
+
 ## Honest limitations
 
 - Live image flows (illustrations, covers) require a signed-in Pro account and
