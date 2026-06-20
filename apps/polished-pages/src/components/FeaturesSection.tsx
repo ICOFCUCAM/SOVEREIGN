@@ -79,11 +79,12 @@ const FeaturesSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 text-foreground">
-            One platform for <span className="text-gradient-gold italic">career, publishing &amp; education</span>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans">Four studios, one operating system</p>
+          <h2 className="mt-2 text-3xl md:text-5xl font-bold text-foreground">
+            Everything you need to <span className="text-gradient-gold italic">create and sell</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto font-sans">
-            Create professional documents, full books and educational content — then publish and sell them anywhere.
+          <p className="mt-4 text-muted-foreground text-lg max-w-xl mx-auto font-sans text-pretty">
+            Professional documents, full books, and educational content — each in a dedicated studio, all sharing one library, marketplace and distribution pipeline.
           </p>
         </motion.div>
 
@@ -102,7 +103,7 @@ const FeaturesSection = () => {
                 {/* Visual: a real photo where we have one, otherwise an on-brand panel */}
                 <div className="flex-1 w-full">
                   {feature.image ? (
-                    <div className="relative rounded-2xl overflow-hidden shadow-premium border border-border">
+                    <div className="hover-lift relative rounded-2xl overflow-hidden shadow-e2 border border-border">
                       <img
                         src={feature.image}
                         alt={feature.title}
