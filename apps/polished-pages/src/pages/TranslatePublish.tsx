@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { extractFileText, CV_ACCEPT, CV_MIME } from "@/lib/extract-file-text";
 import { splitBook } from "@/lib/book-split";
 import { translateLocalize } from "@/lib/translate";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 import { LANGUAGE_NAMES, isoFor } from "@/lib/languages";
 import { markdownToEpub } from "@/lib/export-epub";
 import BookReader from "@/components/book/BookReader";
@@ -22,8 +23,8 @@ const TranslatePublish = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [file, setFile] = useState<File | null>(null);
-  const [source, setSource] = useState("");
-  const [title, setTitle] = useState("");
+  const [source, setSource] = usePersistentState("translate.source", "");
+  const [title, setTitle] = usePersistentState("translate.title", "");
   const [mode, setMode] = useState<"translate" | "localize">("translate");
   const [culture, setCulture] = useState("");
   const [targets, setTargets] = useState<string[]>([]);

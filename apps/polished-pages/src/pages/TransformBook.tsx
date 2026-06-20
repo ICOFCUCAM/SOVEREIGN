@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { authHeader } from "@/lib/session";
 import { extractFileText, CV_ACCEPT, CV_MIME } from "@/lib/extract-file-text";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 import { splitBook } from "@/lib/book-split";
 import { Progress } from "@/components/ui/progress";
 import BookReader from "@/components/book/BookReader";
@@ -20,9 +21,9 @@ const TransformBook = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [file, setFile] = useState<File | null>(null);
-  const [bookText, setBookText] = useState("");
-  const [title, setTitle] = useState("");
-  const [instruction, setInstruction] = useState("");
+  const [bookText, setBookText] = usePersistentState("transform.bookText", "");
+  const [title, setTitle] = usePersistentState("transform.title", "");
+  const [instruction, setInstruction] = usePersistentState("transform.instruction", "");
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [tab, setTab] = useState<"book" | "cover">("book");

@@ -14,6 +14,7 @@ import { generateStorybook, generateIllustration, type Storybook, type StoryInpu
 import PictureBookView from "@/components/children/PictureBookView";
 import SavePictureBookButton from "@/components/children/SavePictureBookButton";
 import { LANGUAGE_NAMES } from "@/lib/languages";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 
 const READING_LEVELS = [
   "Pre-reader (ages 2–4)",
@@ -40,9 +41,9 @@ const StorybookCreator = () => {
   const [childName, setChildName] = useState("");
   const [childAge, setChildAge] = useState("5");
   const [readingLevel, setReadingLevel] = useState(READING_LEVELS[1]);
-  const [theme, setTheme] = useState("");
+  const [theme, setTheme] = usePersistentState("storybook.theme", "");
   const [moralLesson, setMoralLesson] = useState("");
-  const [characters, setCharacters] = useState("");
+  const [characters, setCharacters] = usePersistentState("storybook.characters", "");
   const [pageCount, setPageCount] = useState(12);
   const [storyType, setStoryType] = useState<StoryType>("classic");
   const [language, setLanguage] = useState("");
