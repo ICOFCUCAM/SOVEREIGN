@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Loader2, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck } from "lucide-react";
+import { Sparkles, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem, type CatalogSort } from "@/lib/documents";
 import { getAuthorProfile, adminVerifyCreator, type AuthorProfile } from "@/lib/profiles";
 import CatalogCard from "@/components/app/CatalogCard";
@@ -153,7 +154,19 @@ const CatalogPage = () => {
           </div>
         )}
 
-        {items === null && <div className="mt-10 flex items-center gap-2 text-muted-foreground font-sans"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>}
+        {items === null && (
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-border p-4">
+                <div className="flex items-center justify-between"><Skeleton className="h-3 w-20" /><Skeleton className="h-4 w-10 rounded-full" /></div>
+                <Skeleton className="mt-3 h-5 w-3/4" />
+                <Skeleton className="mt-2 h-3 w-24" />
+                <Skeleton className="mt-3 h-3 w-full" /><Skeleton className="mt-1.5 h-3 w-5/6" />
+                <Skeleton className="mt-4 h-4 w-16" />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Filtered / author view: flat grid */}
         {items && filtering && (
