@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Sparkles, Loader2, ArrowRight, BookHeart, Layers } from "lucide-react";
+import { Sparkles, ArrowRight, BookHeart, Layers } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getPublicSeries, type PublicSeries } from "@/lib/series";
+import CreateCtaBand from "@/components/app/CreateCtaBand";
 import { BRAND } from "@/lib/tools";
 
 // Public, read-only series storefront: the shared universe and its published
@@ -27,7 +29,13 @@ const PublicSeriesPage = () => {
       </nav>
 
       <div className="container max-w-4xl mx-auto px-6 py-10">
-        {state === "loading" && <div className="flex items-center gap-2 text-muted-foreground font-sans"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>}
+        {state === "loading" && (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-border p-4"><Skeleton className="h-3 w-16" /><Skeleton className="mt-2 h-5 w-2/3" /><Skeleton className="mt-2 h-3 w-full" /></div>
+            ))}
+          </div>
+        )}
         {state === "missing" && (
           <div className="py-20 text-center">
             <h1 className="font-serif text-2xl font-bold">This series isn’t available</h1>
@@ -57,7 +65,7 @@ const PublicSeriesPage = () => {
             ) : (
               <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {series.books.map((b, i) => (
-                  <Card key={b.token} className="border-border transition-all hover:border-primary/50 hover:shadow-premium">
+                  <Card key={b.token} className="hover-lift border-border transition-premium hover:border-primary/50">
                     <CardContent className="p-4">
                       <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans">Book {b.series_index ?? i + 1}</div>
                       <Link to={`/shared/${b.token}`} className="group mt-1 flex items-start gap-2">
@@ -71,7 +79,11 @@ const PublicSeriesPage = () => {
                 ))}
               </div>
             )}
-            <p className="mt-8 text-center text-xs text-muted-foreground font-sans">A series made with {BRAND}. <Link to="/" className="text-primary hover:underline">Create your own →</Link></p>
+            <CreateCtaBand
+              heading={`Create your own series on ${BRAND}`}
+              sub="Build an illustrated, multi-book series with a shared universe — then publish it as a public page like this one."
+              cta="Start free"
+            />
           </>
         )}
       </div>
