@@ -11,15 +11,16 @@ import { Button } from "@/components/ui/button";
 import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
 import { listDocuments, catalogList, type DocSummary, type DocKind, type CatalogItem } from "@/lib/documents";
 import { planDisplayName } from "@/lib/plans";
+import { STUDIO_THEME, type Studio } from "@/lib/studio-theme";
 
-// One-click "create" tiles spanning the four studios.
-const CREATE = [
-  { label: "CV", to: "/cv", icon: FileText, studio: "Career" },
-  { label: "Book", to: "/book", icon: BookOpen, studio: "Publishing" },
-  { label: "Storybook", to: "/storybook", icon: BookHeart, studio: "Education" },
-  { label: "Textbook", to: "/primary-books", icon: School, studio: "Education" },
-  { label: "Workbook", to: "/workbooks", icon: GraduationCap, studio: "Education" },
-  { label: "Coloring book", to: "/coloring", icon: Palette, studio: "Education" },
+// One-click "create" tiles spanning the four studios, each in its studio colour.
+const CREATE: { label: string; to: string; icon: typeof FileText; studio: Studio }[] = [
+  { label: "CV", to: "/cv", icon: FileText, studio: "career" },
+  { label: "Book", to: "/book", icon: BookOpen, studio: "publishing" },
+  { label: "Storybook", to: "/storybook", icon: BookHeart, studio: "educational" },
+  { label: "Textbook", to: "/primary-books", icon: School, studio: "educational" },
+  { label: "Workbook", to: "/workbooks", icon: GraduationCap, studio: "educational" },
+  { label: "Coloring book", to: "/coloring", icon: Palette, studio: "educational" },
 ];
 
 const KIND_NOUN: Record<DocKind, string> = {
@@ -147,17 +148,20 @@ const Dashboard = () => {
       <section className="mt-10">
         <h2 className="font-serif text-lg font-semibold">Create new</h2>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {CREATE.map((c) => (
-            <Link key={c.to} to={c.to} className="group">
-              <Card className="h-full border-border transition-all hover:border-primary/50 hover:shadow-premium">
-                <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10"><c.icon className="h-5 w-5 text-primary" /></span>
-                  <span className="font-sans text-sm font-semibold">{c.label}</span>
-                  <span className="text-[11px] text-muted-foreground font-sans">{c.studio}</span>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+          {CREATE.map((c) => {
+            const t = STUDIO_THEME[c.studio];
+            return (
+              <Link key={c.to} to={c.to} className="group">
+                <Card className={`h-full border-border transition-all hover:shadow-premium ${t.hoverBorder}`}>
+                  <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
+                    <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${t.bg}`}><c.icon className={`h-5 w-5 ${t.text}`} /></span>
+                    <span className="font-sans text-sm font-semibold">{c.label}</span>
+                    <span className="text-[11px] text-muted-foreground font-sans">{t.label}</span>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -165,7 +169,7 @@ const Dashboard = () => {
       <div className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card className="border-border">
           <CardContent className="p-5">
-            <h2 className="flex items-center gap-2 font-serif text-base font-semibold"><Rocket className="h-4 w-4 text-gold" /> Publishing center</h2>
+            <h2 className="flex items-center gap-2 font-serif text-base font-semibold"><Rocket className="h-4 w-4 text-publishing" /> Publishing center</h2>
             <div className="mt-4 grid grid-cols-3 gap-3 text-center">
               {[{ n: published, l: "Published" }, { n: sharedOnly, l: "Shared" }, { n: drafts, l: "Drafts" }].map((s) => (
                 <div key={s.l} className="rounded-lg border border-border p-3">
@@ -225,7 +229,7 @@ const Dashboard = () => {
       {(trending.length > 0 || recentPubs.length > 0) && (
         <section className="mt-10">
           <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 font-serif text-lg font-semibold"><Store className="h-4 w-4 text-gold" /> Marketplace activity</h2>
+            <h2 className="flex items-center gap-2 font-serif text-lg font-semibold"><Store className="h-4 w-4 text-marketplace" /> Marketplace activity</h2>
             <Link to="/catalog" className="text-sm text-primary font-sans hover:underline">Browse all</Link>
           </div>
           <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
