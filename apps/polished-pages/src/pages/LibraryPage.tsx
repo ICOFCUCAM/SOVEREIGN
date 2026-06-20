@@ -112,7 +112,7 @@ const LibraryPage = () => {
     const next = !d.shared;
     try {
       const token = await setShared(d.id, next);
-      setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, shared: next } : x)) ?? null);
+      setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, shared: next, share_token: next ? token : null } : x)) ?? null);
       if (next && token) {
         const url = `${window.location.origin}/shared/${token}`;
         await navigator.clipboard.writeText(url).catch(() => {});
@@ -448,6 +448,14 @@ const LibraryPage = () => {
                           {(d.tags ?? []).map((t) => (
                             <button key={t} onClick={() => setTagFilter(t)} className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground hover:text-primary font-sans">{t}</button>
                           ))}
+                        </div>
+                      )}
+                      {d.shared && d.share_token && (
+                        <div className="mt-2 flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1">
+                          <span className="min-w-0 flex-1 truncate text-[10px] text-muted-foreground font-sans">{`${window.location.origin}/shared/${d.share_token}`}</span>
+                          <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(`${window.location.origin}/shared/${d.share_token}`).catch(() => {}); toast({ title: "Link copied" }); }} className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-primary" title="Copy link">
+                            <Copy className="h-3 w-3" />
+                          </button>
                         </div>
                       )}
                       <div className="mt-3 flex items-center gap-2">

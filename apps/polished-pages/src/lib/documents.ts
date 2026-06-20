@@ -15,6 +15,7 @@ export interface DocSummary {
   preview: string | null;
   favorite?: boolean;
   shared?: boolean;
+  share_token?: string | null;
   listed?: boolean;
   category?: string | null;
   price_cents?: number;
