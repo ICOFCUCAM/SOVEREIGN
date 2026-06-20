@@ -24,7 +24,14 @@ const SaveToLibrary = ({
     try {
       await saveDocument({ kind, title, template, payload, preview });
       setState("saved");
-      toast({ title: "Saved to library", description: "Find it any time under Library." });
+      // Celebrate the very first save — the activation moment that matters most.
+      const firstSave = !localStorage.getItem("pp_first_save");
+      if (firstSave) {
+        try { localStorage.setItem("pp_first_save", "1"); } catch { /* ignore */ }
+        toast({ title: "🎉 Your first creation is saved!", description: "It's in your Library — share it or list it on the marketplace next." });
+      } else {
+        toast({ title: "Saved to library", description: "Find it any time under Library." });
+      }
     } catch (e) {
       setState("idle");
       toast({ title: "Could not save", description: e instanceof Error ? e.message : "Please try again.", variant: "destructive" });
