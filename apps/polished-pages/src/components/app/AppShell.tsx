@@ -34,6 +34,7 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
 
   return (
     <div className="min-h-screen bg-background">
+      <a href="#main" className="sr-only z-[100] rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-2">Skip to content</a>
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-lg">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-6">
           <Link to={DASHBOARD_NAV.path} className="flex shrink-0 items-center gap-2">
@@ -109,7 +110,7 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
       <MobileNav open={mobileOpen} onClose={() => setMobileOpen(false)} />
 
-      <main className="pt-14">{children}</main>
+      <main id="main" className="pt-14">{children}</main>
     </div>
   );
 };
