@@ -32,6 +32,7 @@ const GROUPS: MenuGroup[] = [
 const DIRECT: MenuItem[] = [
   { label: "Marketplace", to: "/catalog" },
   { label: "Pricing", to: "/pricing" },
+  { label: "Resources", to: "/resources" },
 ];
 
 const Navbar = () => {
