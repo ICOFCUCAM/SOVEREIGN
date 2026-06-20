@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Rocket, Check } from "lucide-react";
+import { Rocket, Check, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { TRIM_SIZES, PAPER_MM_PER_PAGE, getTrim, coverSpec, ingramGutterIn, INGRAM_OUTSIDE_MM } from "@/lib/print-sizes";
 import ExportCenter from "@/components/book/ExportCenter";
 
-const TARGETS: { name: string; format: string }[] = [
-  { name: "Amazon KDP", format: "EPUB (e-book) · interior PDF + wrap cover (print)" },
-  { name: "IngramSpark", format: "EPUB · interior PDF + wrap cover (print)" },
-  { name: "Kobo", format: "EPUB" },
-  { name: "Apple Books", format: "EPUB" },
-  { name: "Google Play Books", format: "EPUB or PDF" },
-  { name: "Draft2Digital", format: "EPUB" },
-  { name: "Lulu", format: "EPUB · interior PDF + cover (print)" },
+const TARGETS: { name: string; format: string; url: string }[] = [
+  { name: "Amazon KDP", format: "EPUB (e-book) · interior PDF + wrap cover (print)", url: "https://kdp.amazon.com" },
+  { name: "IngramSpark", format: "EPUB · interior PDF + wrap cover (print)", url: "https://www.ingramspark.com" },
+  { name: "Kobo Writing Life", format: "EPUB", url: "https://www.kobo.com/us/en/p/writinglife" },
+  { name: "Apple Books", format: "EPUB", url: "https://authors.apple.com" },
+  { name: "Google Play Books", format: "EPUB or PDF", url: "https://play.google.com/books/publish" },
+  { name: "Draft2Digital", format: "EPUB (distributes to 40+ stores)", url: "https://www.draft2digital.com" },
+  { name: "Lulu", format: "EPUB · interior PDF + cover (print)", url: "https://www.lulu.com" },
 ];
 
 const inIn = (n: number) => `${n.toFixed(3)} in`;
@@ -44,8 +44,12 @@ const PublishingPrep = () => {
           <div className="divide-y divide-border">
             {TARGETS.map((t) => (
               <div key={t.name} className="flex items-center justify-between gap-4 py-2 text-sm font-sans">
-                <span className="font-medium">{t.name}</span>
-                <span className="text-right text-muted-foreground">{t.format}</span>
+                <div>
+                  <a href={t.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium hover:text-primary hover:underline">
+                    {t.name} <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                  </a>
+                  <div className="text-xs text-muted-foreground">{t.format}</div>
+                </div>
               </div>
             ))}
           </div>
