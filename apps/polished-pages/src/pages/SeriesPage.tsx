@@ -149,7 +149,13 @@ const SeriesPage = () => {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <button onClick={() => openSeries(s.id)} className="min-w-0 flex-1 text-left">
-                    <div className="flex items-center gap-2"><BookHeart className="h-4 w-4 text-primary" /><span className="font-serif text-base font-semibold">{s.title}</span><span className="text-xs text-muted-foreground font-sans">{s.book_count} book{s.book_count === 1 ? "" : "s"}</span></div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <BookHeart className="h-4 w-4 text-primary" />
+                      <span className="font-serif text-base font-semibold">{s.title}</span>
+                      <span className="text-xs text-muted-foreground font-sans">{s.book_count} book{s.book_count === 1 ? "" : "s"}</span>
+                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold font-sans ${s.listed ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"}`}>{s.listed ? "Public" : "Private"}</span>
+                      {s.language && <span className="rounded-full bg-publishing/10 px-1.5 py-0.5 text-[10px] font-medium capitalize text-publishing font-sans">{s.language}</span>}
+                    </div>
                     {s.premise && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground font-sans">{s.premise}</p>}
                     <div className="mt-1 flex flex-wrap gap-x-3 text-[11px] text-muted-foreground font-sans">
                       {s.setting && <span>Setting: {s.setting}</span>}
