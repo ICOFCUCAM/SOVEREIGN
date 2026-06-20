@@ -41,7 +41,9 @@ const EditionManager = () => {
 
   useEffect(() => {
     listDocuments().then((all) => {
-      const books = all.filter((d) => d.kind === "book" || d.kind === "tailored");
+      // Storybooks are the primary multilingual educational use case —
+      // include them alongside long-form books and tailored CVs.
+      const books = all.filter((d) => ["book", "tailored", "storybook"].includes(d.kind));
       setDocs(books);
       if (books[0]) setSelected(books[0].id);
     }).catch(() => setDocs([]));
@@ -94,8 +96,11 @@ const EditionManager = () => {
       {docs && docs.length === 0 && (
         <Card className="mt-8 border-dashed border-border"><CardContent className="flex flex-col items-center gap-3 p-12 text-center">
           <LibraryIcon className="h-10 w-10 text-muted-foreground/60" />
-          <p className="font-sans text-sm font-medium">No books to translate yet</p>
-          <Button asChild variant="hero" size="sm"><Link to="/book">Create a book</Link></Button>
+          <p className="font-sans text-sm font-medium">No books or storybooks to translate yet</p>
+          <div className="flex gap-2">
+            <Button asChild variant="hero" size="sm"><Link to="/book">Create a book</Link></Button>
+            <Button asChild variant="heroOutline" size="sm"><Link to="/storybook">Create a storybook</Link></Button>
+          </div>
         </CardContent></Card>
       )}
 
