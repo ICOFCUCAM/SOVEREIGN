@@ -20,7 +20,21 @@ export interface SeriesSummary {
   language: string | null;
   culture: string | null;
   book_count: number;
+  listed: boolean;
+  share_token: string | null;
   created_at: string;
+}
+
+export interface PublicSeriesBook { token: string; title: string; preview: string | null; series_index: number | null }
+export interface PublicSeries {
+  title: string;
+  premise: string | null;
+  setting: string | null;
+  objective: string | null;
+  language: string | null;
+  culture: string | null;
+  author: string | null;
+  books: PublicSeriesBook[];
 }
 
 export interface SeriesBook { id: string; title: string; kind: string; series_index: number | null; created_at: string }
@@ -69,4 +83,18 @@ export async function deleteSeries(id: string): Promise<void> {
 export async function setDocumentSeries(documentId: string, seriesId: string | null, index?: number | null): Promise<void> {
   const { error } = await rpc().rpc("polished_set_document_series", { p_document_id: documentId, p_series_id: seriesId, p_index: index ?? null });
   if (error) throw new Error(error.message || "Could not update the series.");
+}
+
+// Publish (or unpublish) a series as a public page. Returns the share token.
+export async function setSeriesPublic(id: string, isPublic: boolean): Promise<string | null> {
+  const { data, error } = await rpc().rpc("polished_set_series_public", { p_id: id, p_public: isPublic });
+  if (error) throw new Error(error.message || "Could not update sharing.");
+  return (data as string) ?? null;
+}
+
+// Public read of a published series by token (no auth required).
+export async function getPublicSeries(token: string): Promise<PublicSeries | null> {
+  const { data, error } = await rpc().rpc("polished_get_public_series", { p_token: token });
+  if (error) throw new Error(error.message || "Could not load the series.");
+  return (data as PublicSeries | null) ?? null;
 }

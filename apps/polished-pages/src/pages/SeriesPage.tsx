@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Library as LibraryIcon, Loader2, Plus, Trash2, BookHeart, ArrowRight, X, Layers } from "lucide-react";
+import { Library as LibraryIcon, Loader2, Plus, Trash2, BookHeart, ArrowRight, X, Layers, Share2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import CountryDatalist from "@/components/app/CountryDatalist";
-import { createSeries, listSeries, getSeries, deleteSeries, setDocumentSeries, type SeriesSummary, type SeriesDetail } from "@/lib/series";
+import { createSeries, listSeries, getSeries, deleteSeries, setDocumentSeries, setSeriesPublic, type SeriesSummary, type SeriesDetail } from "@/lib/series";
 import { listDocuments, type DocSummary } from "@/lib/documents";
 
 const BOOK_KINDS = new Set(["storybook", "book", "tailored", "cover"]);
@@ -60,6 +60,23 @@ const SeriesPage = () => {
     const nextIdx = (detail?.books.length ?? 0) + 1;
     try { await setDocumentSeries(documentId, seriesId, nextIdx); setDetail(await getSeries(seriesId)); loadSeries(); }
     catch (e) { toast({ title: "Could not add book", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+  };
+
+  const share = async (s: SeriesSummary) => {
+    const next = !s.listed;
+    try {
+      const token = await setSeriesPublic(s.id, next);
+      setSeries((prev) => prev?.map((x) => (x.id === s.id ? { ...x, listed: next, share_token: token } : x)) ?? null);
+      if (next && token) {
+        const url = `${window.location.origin}/series/public/${token}`;
+        await navigator.clipboard.writeText(url).catch(() => {});
+        toast({ title: "Series page is public", description: url });
+      } else {
+        toast({ title: "Series page is private" });
+      }
+    } catch (e) {
+      toast({ title: "Could not update sharing", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    }
   };
 
   const detach = async (seriesId: string, documentId: string) => {
@@ -128,6 +145,7 @@ const SeriesPage = () => {
                   </button>
                   <div className="flex shrink-0 items-center gap-1">
                     <Button asChild variant="heroOutline" size="sm"><Link to={`/storybook?series=${s.id}`}>New book <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link></Button>
+                    <Button variant="ghost" size="sm" className={s.listed ? "text-primary" : "text-muted-foreground"} onClick={() => share(s)} aria-label="Share series" title={s.listed ? "Public — click to copy link or make private" : "Publish a public series page"}><Share2 className="h-4 w-4" /></Button>
                     <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" onClick={() => removeSeries(s.id)} aria-label="Delete series"><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </div>

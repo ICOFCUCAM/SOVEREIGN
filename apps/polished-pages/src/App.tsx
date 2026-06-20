@@ -29,6 +29,7 @@ import CatalogPage from "./pages/CatalogPage.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import RequirePlan from "./components/app/RequirePlan.tsx";
 import SeriesPage from "./pages/SeriesPage.tsx";
+import PublicSeriesPage from "./pages/PublicSeries.tsx";
 import CollectionsPage from "./pages/CollectionsPage.tsx";
 import PublicCollection from "./pages/PublicCollection.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
@@ -53,6 +54,7 @@ const App = () => (
           <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/catalog/author/:author" element={<CatalogPage />} />
           <Route path="/collection/:token" element={<PublicCollection />} />
+          <Route path="/series/public/:token" element={<PublicSeriesPage />} />
           {/* Generators require sign-in (metered per user); the gate prompts
               for sign-in only when someone actually goes to create. */}
           <Route path="/dashboard" element={<AuthGate><Dashboard /></AuthGate>} />
