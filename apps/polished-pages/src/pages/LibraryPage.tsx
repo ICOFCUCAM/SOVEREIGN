@@ -51,6 +51,7 @@ const LibraryPage = () => {
   const [tplOnly, setTplOnly] = useState(false);
   const [tagFilter, setTagFilter] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = useState<"date" | "title" | "views">("date");
   const pbRef = useRef<HTMLDivElement>(null);
 
   const load = () => { listDocuments().then(setDocs).catch((e) => { toast({ title: "Could not load library", description: e.message, variant: "destructive" }); setDocs([]); }); };
@@ -362,6 +363,11 @@ const LibraryPage = () => {
               <option value="shared">Shared</option>
               <option value="drafts">Drafts</option>
             </select>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans">
+              <option value="date">Newest first</option>
+              <option value="title">A → Z</option>
+              <option value="views">Most viewed</option>
+            </select>
             {tagFilter && (
               <button onClick={() => setTagFilter("")} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary font-sans">
                 <Tag className="h-3 w-3" /> {tagFilter} <X className="h-3 w-3" />
@@ -422,9 +428,25 @@ const LibraryPage = () => {
           (!q || d.title.toLowerCase().includes(q) || (d.preview ?? "").toLowerCase().includes(q)) &&
           (kindFilter === "" || d.kind === kindFilter) &&
           (statusFilter === "" || (statusFilter === "listed" ? d.listed : statusFilter === "shared" ? (d.shared && !d.listed) : !d.shared))
+        ).sort((a, b) =>
+          sortBy === "title" ? a.title.localeCompare(b.title)
+          : sortBy === "views" ? ((b.view_count ?? 0) - (a.view_count ?? 0))
+          : new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
         if (filtered.length === 0) {
-          return <p className="mt-8 text-center text-sm text-muted-foreground font-sans">No documents match your filters.</p>;
+          return (
+            <div className="mt-8 rounded-xl border border-dashed border-border/60 p-10 text-center">
+              <Search className="mx-auto h-7 w-7 text-muted-foreground/30" />
+              <p className="mt-3 text-sm font-medium font-sans">No documents match your filters</p>
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
+                {(query || kindFilter || statusFilter || favOnly || tplOnly || tagFilter) && (
+                  <Button size="sm" variant="heroOutline" onClick={() => { setQuery(""); setKindFilter(""); setStatusFilter(""); setFavOnly(false); setTplOnly(false); setTagFilter(""); }}>
+                    <X className="mr-1 h-3.5 w-3.5" /> Clear all filters
+                  </Button>
+                )}
+              </div>
+            </div>
+          );
         }
         return (
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
