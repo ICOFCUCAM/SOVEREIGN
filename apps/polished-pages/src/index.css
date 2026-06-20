@@ -56,6 +56,13 @@
     --glow-gold: 0 0 40px hsl(221 83% 53% / 0.12);
     --shadow-premium: 0 20px 60px -15px hsl(222 47% 11% / 0.10);
 
+    /* Layered elevation scale — soft, multi-shadow depth in the spirit of
+       Stripe / Linear, so surfaces read as physical rather than outlined. */
+    --elevation-1: 0 1px 2px hsl(222 47% 11% / 0.04), 0 1px 3px hsl(222 47% 11% / 0.05);
+    --elevation-2: 0 2px 4px hsl(222 47% 11% / 0.04), 0 4px 10px hsl(222 47% 11% / 0.06);
+    --elevation-3: 0 6px 12px hsl(222 47% 11% / 0.05), 0 14px 30px hsl(222 47% 11% / 0.08);
+    --elevation-4: 0 10px 20px hsl(222 47% 11% / 0.06), 0 28px 56px hsl(222 47% 11% / 0.11);
+
     --sidebar-background: 210 40% 99%;
     --sidebar-foreground: 222 30% 22%;
     --sidebar-primary: 221 83% 53%;
@@ -105,6 +112,11 @@
   .shadow-premium {
     box-shadow: var(--shadow-premium);
   }
+
+  .shadow-e1 { box-shadow: var(--elevation-1); }
+  .shadow-e2 { box-shadow: var(--elevation-2); }
+  .shadow-e3 { box-shadow: var(--elevation-3); }
+  .shadow-e4 { box-shadow: var(--elevation-4); }
 
   .skeleton-shimmer {
     background: linear-gradient(
