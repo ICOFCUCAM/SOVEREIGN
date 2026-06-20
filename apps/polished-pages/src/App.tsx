@@ -26,6 +26,7 @@ import PublishingPrep from "./pages/PublishingPrep.tsx";
 import SharedDocument from "./pages/SharedDocument.tsx";
 import CatalogPage from "./pages/CatalogPage.tsx";
 import Pricing from "./pages/Pricing.tsx";
+import RequirePlan from "./components/app/RequirePlan.tsx";
 import CollectionsPage from "./pages/CollectionsPage.tsx";
 import PublicCollection from "./pages/PublicCollection.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
@@ -61,16 +62,16 @@ const App = () => (
           <Route path="/tailor" element={<AuthGate><JobTailor /></AuthGate>} />
           <Route path="/book" element={<AuthGate><BookCreator /></AuthGate>} />
           <Route path="/book-transform" element={<AuthGate><TransformBook /></AuthGate>} />
-          <Route path="/children" element={<AuthGate><ChildrenStudio /></AuthGate>} />
-          <Route path="/storybook" element={<AuthGate><StorybookCreator /></AuthGate>} />
-          <Route path="/coloring" element={<AuthGate><ColoringBookCreator /></AuthGate>} />
-          <Route path="/edu-readers" element={<AuthGate><EducationalReaders /></AuthGate>} />
-          <Route path="/classroom" element={<AuthGate><ClassroomPacks /></AuthGate>} />
-          <Route path="/primary-books" element={<AuthGate><PrimaryBookFactory /></AuthGate>} />
-          <Route path="/workbooks" element={<AuthGate><WorkbookGenerator /></AuthGate>} />
-          <Route path="/curriculum" element={<AuthGate><CurriculumBuilder /></AuthGate>} />
-          <Route path="/teacher" element={<AuthGate><TeacherResourceCenter /></AuthGate>} />
-          <Route path="/translate" element={<AuthGate><TranslatePublish /></AuthGate>} />
+          <Route path="/children" element={<AuthGate><RequirePlan feature="children-studio"><ChildrenStudio /></RequirePlan></AuthGate>} />
+          <Route path="/storybook" element={<AuthGate><RequirePlan feature="children-studio"><StorybookCreator /></RequirePlan></AuthGate>} />
+          <Route path="/coloring" element={<AuthGate><RequirePlan feature="children-studio"><ColoringBookCreator /></RequirePlan></AuthGate>} />
+          <Route path="/edu-readers" element={<AuthGate><RequirePlan feature="educational-studio"><EducationalReaders /></RequirePlan></AuthGate>} />
+          <Route path="/classroom" element={<AuthGate><RequirePlan feature="educational-studio"><ClassroomPacks /></RequirePlan></AuthGate>} />
+          <Route path="/primary-books" element={<AuthGate><RequirePlan feature="educational-studio"><PrimaryBookFactory /></RequirePlan></AuthGate>} />
+          <Route path="/workbooks" element={<AuthGate><RequirePlan feature="educational-studio"><WorkbookGenerator /></RequirePlan></AuthGate>} />
+          <Route path="/curriculum" element={<AuthGate><RequirePlan feature="educational-studio"><CurriculumBuilder /></RequirePlan></AuthGate>} />
+          <Route path="/teacher" element={<AuthGate><RequirePlan feature="educational-studio"><TeacherResourceCenter /></RequirePlan></AuthGate>} />
+          <Route path="/translate" element={<AuthGate><RequirePlan feature="multilingual"><TranslatePublish /></RequirePlan></AuthGate>} />
           <Route path="/illustrations" element={<AuthGate><IllustrationStudio /></AuthGate>} />
           <Route path="/publishing" element={<AuthGate><PublishingPrep /></AuthGate>} />
           {/* internal visual-QA gallery (not linked) */}

@@ -155,6 +155,25 @@ export const PLANS: Plan[] = [
   },
 ];
 
+// Tier ranking, mirroring polished.plan_rank in the database. Used to decide
+// whether a plan unlocks a Professional+ studio.
+export const PLAN_RANK: Record<string, number> = {
+  free: 0, creator: 1, professional: 2, pro: 2, publisher: 3, business: 4, school: 5, enterprise: 6,
+};
+
+// Studios reserved to a minimum tier. Keep in sync with the server-side gate
+// (requirePlanOrThrow) in the generation functions.
+export type StudioFeature = "children-studio" | "educational-studio" | "multilingual";
+export const FEATURE_MIN_PLAN: Record<StudioFeature, PlanId> = {
+  "children-studio": "professional",
+  "educational-studio": "professional",
+  "multilingual": "professional",
+};
+
+export function planAllows(plan: string | undefined, feature: StudioFeature): boolean {
+  return (PLAN_RANK[plan ?? "free"] ?? 0) >= PLAN_RANK[FEATURE_MIN_PLAN[feature]];
+}
+
 export const planById = (id: string): Plan | undefined => PLANS.find((p) => p.id === id);
 
 // Display name for whatever plan string the backend returns ('pro' is legacy).

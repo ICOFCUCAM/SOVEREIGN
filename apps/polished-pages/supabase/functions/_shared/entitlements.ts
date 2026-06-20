@@ -46,6 +46,31 @@ export function getUserContext(req: Request): { id: string; email?: string } {
   return { id: c.sub, email: c.email };
 }
 
+const PLAN_LABEL: Record<string, string> = {
+  creator: "Creator", professional: "Professional", publisher: "Publisher Pro", business: "Business",
+};
+
+// Gate a Professional+ studio: throws 402 if the user's plan is below the
+// required tier. Checked via the service role before any generation runs.
+export async function requirePlanOrThrow(userId: string, minPlan: string): Promise<void> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) throw new EntitlementError("Metering is not configured on this deployment.", 503);
+  const r = await fetch(`${url}/rest/v1/rpc/polished_plan_allows`, {
+    method: "POST",
+    headers: { "content-type": "application/json", apikey: key, authorization: `Bearer ${key}` },
+    body: JSON.stringify({ p_user_id: userId, p_min_plan: minPlan }),
+  });
+  if (!r.ok) {
+    console.error("polished_plan_allows failed", r.status, await r.text().catch(() => ""));
+    throw new EntitlementError("Could not verify your plan. Please try again.", 502);
+  }
+  const allowed = await r.json();
+  if (allowed !== true) {
+    throw new EntitlementError(`This studio requires the ${PLAN_LABEL[minPlan] ?? minPlan} plan. Upgrade to unlock it.`, 402);
+  }
+}
+
 // Atomically check and increment the user's monthly quota via the service role.
 // Text and images are metered separately (images run on a credit pool, since
 // each gpt-image-1 call is a real cost). Throws 402 when the allowance is spent.

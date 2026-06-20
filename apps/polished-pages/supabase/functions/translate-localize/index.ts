@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { complete, LlmError } from "../_shared/llm.ts";
-import { getUserId, consumeOrThrow, EntitlementError } from "../_shared/entitlements.ts";
+import { getUserId, consumeOrThrow, requirePlanOrThrow, EntitlementError } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,6 +57,7 @@ This is localization, not mere translation:
 - Use natural, idiomatic ${targetLanguage}.
 - Return ONLY the translated document in markdown — no notes or commentary.`;
 
+    await requirePlanOrThrow(userId, "professional");
     await consumeOrThrow(userId);
     const out = await complete({ system, user: content, maxTokens: 16000 });
 

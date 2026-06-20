@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { complete, LlmError } from "../_shared/llm.ts";
-import { getUserId, consumeOrThrow, EntitlementError } from "../_shared/entitlements.ts";
+import { getUserId, consumeOrThrow, requirePlanOrThrow, EntitlementError } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,6 +43,7 @@ Return ONLY valid JSON (no fences):
 Age: ${age || "5"}
 Pages: ${pageCount}`;
 
+    await requirePlanOrThrow(userId, "professional");
     await consumeOrThrow(userId);
     const raw = await complete({ system, user, maxTokens: 4000 });
 
