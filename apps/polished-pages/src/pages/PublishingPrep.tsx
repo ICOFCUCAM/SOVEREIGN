@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Rocket, Check, ExternalLink } from "lucide-react";
+import { Rocket, Check, ExternalLink, BookOpen, Image as ImageIcon, FileDown, Store } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -16,6 +16,15 @@ const TARGETS: { name: string; format: string; url: string }[] = [
   { name: "Google Play Books", format: "EPUB or PDF", url: "https://play.google.com/books/publish" },
   { name: "Draft2Digital", format: "EPUB (distributes to 40+ stores)", url: "https://www.draft2digital.com" },
   { name: "Lulu", format: "EPUB · interior PDF + cover (print)", url: "https://www.lulu.com" },
+];
+
+// Deterministic pre-flight: the real steps a title goes through before it's
+// store-ready. Each links to the tool that completes it.
+const READINESS: { label: string; hint: string; to: string; icon: typeof BookOpen }[] = [
+  { label: "Finish your manuscript", hint: "Write or transform the full book", to: "/book", icon: BookOpen },
+  { label: "Design a cover", hint: "Front + back wrap, print-ready", to: "/illustrations", icon: ImageIcon },
+  { label: "Export EPUB & print PDF", hint: "At your chosen trim size", to: "/library", icon: FileDown },
+  { label: "List on the marketplace", hint: "Reach readers and schools", to: "/catalog", icon: Store },
 ];
 
 const inIn = (n: number) => `${n.toFixed(3)} in`;
@@ -37,6 +46,23 @@ const PublishingPrep = () => {
       </div>
       <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Distribution <span className="text-gradient-gold italic">center</span></h1>
       <p className="mt-2 text-muted-foreground font-sans">Export for every major store, size your print cover, and go live on KDP, IngramSpark and beyond.</p>
+
+      {/* Pre-flight: the path from manuscript to store-ready. */}
+      <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {READINESS.map((r, i) => (
+          <Link key={r.label} to={r.to} className="hover-lift group flex items-start gap-3 rounded-xl border border-border bg-card/50 p-3 transition-premium">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-publishing/10 text-publishing">
+              <r.icon className="h-4 w-4" />
+            </span>
+            <div>
+              <div className="flex items-center gap-1.5 text-sm font-semibold font-sans">
+                <span className="text-[11px] text-muted-foreground">{i + 1}.</span> {r.label}
+              </div>
+              <div className="text-[11px] text-muted-foreground font-sans">{r.hint}</div>
+            </div>
+          </Link>
+        ))}
+      </div>
 
       <div className="mt-6"><ExportCenter /></div>
 
