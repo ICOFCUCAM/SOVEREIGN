@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowRight, Crown, Zap, Library, FileText, BookOpen, BookHeart, GraduationCap, Palette, School,
-  Store, TrendingUp, Eye, Download, Rocket, Clock, Image as ImageIcon, Send, Layers, Globe,
+  Store, TrendingUp, Eye, Download, Rocket, Clock, Image as ImageIcon, Send, Layers, Globe, Lightbulb,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -67,6 +67,18 @@ const Dashboard = () => {
   const trending = useMemo(() => [...market].filter((i) => trendScore(i) > 0).sort((a, b) => trendScore(b) - trendScore(a)).slice(0, 4), [market]);
   const recentPubs = market.slice(0, 4);
 
+  // Smart next-step: pick the single most relevant action for this creator
+  // right now. Priority order: drafts → unpublished → growth → upgrade.
+  const nudge: { msg: string; cta: string; to: string } | null = useMemo(() => {
+    if (docs === null) return null;
+    if (drafts > 0) return { msg: `You have ${drafts} unpublished draft${drafts > 1 ? "s" : ""}.`, cta: "Go to library", to: "/library" };
+    if (sharedOnly > 0) return { msg: `${sharedOnly} work${sharedOnly > 1 ? "s" : ""} shared but not listed on the marketplace.`, cta: "List on marketplace", to: "/library" };
+    if (published > 0 && totalViews === 0) return { msg: "Your published work has no views yet. Share the link to get your first readers.", cta: "Browse marketplace", to: "/catalog" };
+    if (published === 0 && all.length > 0) return { msg: "You have content but nothing published yet. List your best work and reach an audience.", cta: "Open publishing center", to: "/publishing" };
+    if (imgPct >= 70 && !isPaid) return { msg: `You've used ${imgPct}% of your image credits this month. Upgrade to keep creating.`, cta: "See plans", to: "/pricing" };
+    return null;
+  }, [docs, drafts, sharedOnly, published, totalViews, all.length, imgPct, isPaid]);
+
   const SNAPSHOT: { kind: DocKind; label: string; icon: typeof FileText }[] = [
     { kind: "book", label: "Books", icon: BookOpen },
     { kind: "storybook", label: "Storybooks", icon: BookHeart },
@@ -117,6 +129,20 @@ const Dashboard = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Smart next-step nudge — one contextual action, derived from real state */}
+      {nudge && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-primary/20 bg-primary/[0.05] px-4 py-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <Lightbulb className="h-4 w-4 shrink-0 text-primary" />
+            <p className="text-sm font-sans text-foreground">{nudge.msg}</p>
+          </div>
+          <Button asChild variant="heroOutline" size="sm" className="shrink-0">
+            <Link to={nudge.to}>{nudge.cta} <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
+          </Button>
+        </motion.div>
+      )}
 
       {/* First-run onboarding for empty accounts */}
       {docs !== null && all.length === 0 && <GettingStarted />}
