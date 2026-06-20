@@ -55,8 +55,36 @@ export const MOCK_CV: CvData = {
     "SQL & Analytics", "Stakeholder Management", "Agile / Scrum", "Figma", "Go-to-Market", "OKRs",
   ],
   languages: ["Norwegian (Native)", "English (Fluent)", "German (B1)"],
-  certifications: ["Pragmatic Institute — PMC III", "Certified Scrum Product Owner (CSPO)"],
+  certifications: ["Pragmatic Institute — PMC III", "Certified Scrum Product Owner (CSPO)", "AWS Cloud Practitioner"],
   references: [
     { name: "Henrik Solberg", title: "VP Product", company: "Equinor", email: "h.solberg@email.com" },
   ],
+  metrics: [
+    { value: "3.4×", label: "Platform growth" },
+    { value: "€2.3M", label: "Revenue impact" },
+    { value: "18", label: "Team led" },
+    { value: "41%", label: "Fraud reduction" },
+  ],
+  achievements: [
+    "Scaled an internal data platform to 4,000+ engineers, tripling weekly active users.",
+    "Delivered €2.3M incremental annual revenue through a pricing experimentation programme.",
+    "Built and led an 18-person cross-functional product organisation.",
+  ],
+  projects: [
+    { name: "Self-Serve Analytics Suite", description: "Cut report turnaround from days to minutes for 4,000+ users.", tech: "BigQuery · dbt · Looker" },
+    { name: "Trust & Safety Platform", description: "ML-assisted fraud detection reducing fraudulent listings 41%.", tech: "Python · Kafka · GCP" },
+    { name: "Mobile Onboarding", description: "Re-architected KYC flow lifting completion 27% across three markets.", tech: "React Native · Node" },
+  ],
+  publications: [
+    "Halvorsen, A. & Lien, M. (2023). “Opportunity-Solution Discovery at Scale.” Nordic Product Conference.",
+    "Halvorsen, A. (2021). “Pricing Experimentation in Two-Sided Marketplaces.” Journal of Digital Commerce, 14(2).",
+  ],
+  languageLevels: [
+    { language: "Norwegian", level: "Native" },
+    { language: "English", level: "C2 — Fluent" },
+    { language: "German", level: "B1 — Intermediate" },
+    { language: "Swedish", level: "B2 — Working" },
+  ],
+  clearance: "Security clearance: SECRET (Norwegian NSM) — active",
+  portfolio: "astridhalvorsen.design",
 };

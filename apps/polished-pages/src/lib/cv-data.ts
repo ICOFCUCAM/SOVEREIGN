@@ -15,6 +15,14 @@ export interface CvData {
   languages: string[];
   certifications: string[];
   references: { name?: string; title?: string; company?: string; email?: string; phone?: string }[];
+  // Optional sections used by specific premium architectures (shown when present).
+  metrics?: { value: string; label: string }[];
+  achievements?: string[];
+  projects?: { name: string; description?: string; tech?: string }[];
+  publications?: string[];
+  languageLevels?: { language: string; level: string }[];
+  clearance?: string;
+  portfolio?: string;
 }
 
 export interface CvFormState {
