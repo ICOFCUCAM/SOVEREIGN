@@ -11,12 +11,9 @@ const PILLARS = [
   { label: "Marketplace", color: "bg-marketplace" },
 ];
 
-const CAPABILITIES = [
-  { icon: FileText, label: "Professional CVs", color: "text-career" },
-  { icon: BookOpen, label: "Books & publishing", color: "text-publishing" },
-  { icon: GraduationCap, label: "Educational content", color: "text-educational" },
-  { icon: Store, label: "Marketplace distribution", color: "text-marketplace" },
-];
+// The publishing lifecycle the platform runs end to end — the heart of the
+// "operating system" positioning.
+const LIFECYCLE = ["Create", "Publish", "Localize", "Distribute", "Sell"];
 
 const HeroSection = () => {
   return (
@@ -73,11 +70,11 @@ const HeroSection = () => {
           </div>
 
           <h1 className="text-display text-4xl md:text-6xl font-bold leading-[1.1] mb-6 text-foreground">
-            Create, publish and distribute <span className="text-gradient-gold italic">documents, books and educational content</span>
+            The operating system for <span className="text-gradient-gold italic">publishing &amp; educational creation</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-sans">
-            The AI platform for career, publishing and education. Build CVs, books, children’s storybooks, workbooks and curricula — then translate into any language, publish to KDP and IngramSpark, and sell in the marketplace.
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-sans text-pretty">
+            Create CVs, books, storybooks, workbooks and curricula with AI — then localize into any language, publish to KDP and IngramSpark, and sell in a global marketplace. One platform, the whole journey.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -93,17 +90,18 @@ const HeroSection = () => {
           <p className="mt-3 text-xs text-muted-foreground font-sans">No card required · You own what you create · Cancel anytime</p>
         </motion.div>
 
-        {/* Capability strip (real capabilities, not vanity metrics) */}
+        {/* Lifecycle strip — the five stages the platform runs end to end. */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="mt-14 max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-x-6 gap-y-3 border-t border-border pt-8"
+          className="mt-14 max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-x-3 gap-y-2 border-t border-border pt-8"
         >
-          {CAPABILITIES.map((c) => (
-            <div key={c.label} className="inline-flex items-center gap-2 text-sm text-muted-foreground font-sans">
-              <c.icon className={`h-4 w-4 ${c.color}`} /> {c.label}
-            </div>
+          {LIFECYCLE.map((stage, i) => (
+            <span key={stage} className="inline-flex items-center gap-3">
+              <span className="text-sm font-semibold tracking-tight text-foreground font-sans">{stage}</span>
+              {i < LIFECYCLE.length - 1 && <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/50" />}
+            </span>
           ))}
         </motion.div>
       </div>
