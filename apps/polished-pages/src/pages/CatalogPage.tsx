@@ -69,7 +69,7 @@ const CatalogPage = () => {
     return m;
   }, [all]);
 
-  const Section = ({ icon: Icon, title, hint, list }: { icon: typeof Store; title: string; hint?: string; list: CatalogItem[] }) => (
+  const Section = ({ icon: Icon, title, hint, list, ranked }: { icon: typeof Store; title: string; hint?: string; list: CatalogItem[]; ranked?: boolean }) => (
     <section className="mt-10">
       <div className="flex items-baseline gap-2">
         <Icon className="h-4 w-4 text-gold" />
@@ -77,7 +77,7 @@ const CatalogPage = () => {
         {hint && <span className="text-xs text-muted-foreground font-sans">{hint}</span>}
       </div>
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((it) => <CatalogCard key={it.token} item={it} admin={admin} onFeature={feature} />)}
+        {list.map((it, i) => <CatalogCard key={it.token} item={it} admin={admin} onFeature={feature} rank={ranked && i < 3 ? i + 1 : undefined} />)}
       </div>
     </section>
   );
@@ -220,7 +220,7 @@ const CatalogPage = () => {
             : (
               <>
                 {featured.length > 0 && <Section icon={Star} title="Featured" hint="hand-picked" list={featured} />}
-                {trending.length > 0 && <Section icon={TrendingUp} title="Trending now" hint="most downloaded" list={trending} />}
+                {trending.length > 0 && <Section icon={TrendingUp} title="Trending now" hint="most downloaded" list={trending} ranked />}
                 <Section icon={Clock} title="Recently published" list={recent} />
                 <section className="mt-10">
                   <div className="flex items-baseline gap-2"><Store className="h-4 w-4 text-gold" /><h2 className="font-serif text-xl font-bold">Browse by category</h2></div>

@@ -24,11 +24,12 @@ const isNew = (createdAt: string) => {
 // One marketplace listing. Shared by the catalog discovery sections, the
 // filtered grid and author pages so every surface looks consistent.
 // Featured items get a gold accent border to signal curation at a glance.
-const CatalogCard = ({ item: it, admin, onFeature }: { item: CatalogItem; admin?: boolean; onFeature?: (it: CatalogItem) => void }) => (
+const CatalogCard = ({ item: it, admin, onFeature, rank }: { item: CatalogItem; admin?: boolean; onFeature?: (it: CatalogItem) => void; rank?: number }) => (
   <Card className={`hover-lift flex h-full flex-col transition-premium ${it.featured ? "border-gold/40 bg-gradient-to-b from-gold/[0.04] to-transparent hover:border-gold/60" : "border-border hover:border-primary/50"}`}>
     <CardContent className="flex h-full flex-col p-4">
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground font-sans">
+          {rank != null && <span className="inline-flex items-center rounded-full bg-marketplace/15 px-1.5 py-0.5 font-bold normal-case text-marketplace">#{rank}</span>}
           {it.featured && <span className="inline-flex items-center gap-0.5 rounded-full bg-gold/20 px-1.5 py-0.5 text-gold font-semibold normal-case"><Star className="h-3 w-3 fill-current" /> Featured</span>}
           {!it.featured && isNew(it.created_at) && <span className="rounded-full bg-educational/15 px-1.5 py-0.5 font-semibold normal-case text-educational">New</span>}
           {it.category ?? "Other"}
