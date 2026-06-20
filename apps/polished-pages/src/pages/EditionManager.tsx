@@ -11,6 +11,7 @@ import { listDocuments, getDocument, type DocSummary } from "@/lib/documents";
 import { listEditions, saveEdition, type Edition } from "@/lib/editions";
 import { translateLocalize } from "@/lib/translate";
 import { LANGUAGE_NAMES } from "@/lib/languages";
+import CountryDatalist from "@/components/app/CountryDatalist";
 
 // Split long markdown into translation-sized chunks at paragraph boundaries
 // (the translate function caps each request), then translate and rejoin.
@@ -66,8 +67,9 @@ const EditionManager = () => {
         translated.push(await translateLocalize({ content: part, targetLanguage: language.trim(), culture: culture.trim() || undefined, mode }));
       }
       const outMd = translated.join("\n\n");
-      const edTitle = `${title} (${language.trim()})`;
-      await saveEdition({ parent: selected, language: language.trim(), kind: row?.kind ?? "book", title: edTitle, payload: { markdown: outMd, title: edTitle }, preview: outMd.slice(0, 160) });
+      const cultureLabel = mode === "localize" && culture.trim() ? ` · ${culture.trim()}` : "";
+      const edTitle = `${title} (${language.trim()}${cultureLabel})`;
+      await saveEdition({ parent: selected, language: language.trim(), kind: row?.kind ?? "book", title: edTitle, payload: { markdown: outMd, title: edTitle }, preview: outMd.slice(0, 160), culture: mode === "localize" ? culture.trim() : undefined });
       setLanguage(""); setCulture("");
       setEditions(await listEditions(selected));
       toast({ title: "Edition created", description: `${edTitle} saved to your Library.` });
@@ -122,8 +124,10 @@ const EditionManager = () => {
             </div>
             {mode === "localize" && (
               <div className="space-y-1.5">
-                <Label className="font-sans text-xs">Culture / country (optional)</Label>
-                <Input value={culture} onChange={(e) => setCulture(e.target.value)} placeholder="e.g. Japan — adapts names, settings and references" maxLength={120} />
+                <Label className="font-sans text-xs">Culture / country</Label>
+                <Input value={culture} onChange={(e) => setCulture(e.target.value)} placeholder="e.g. Japan, Cameroon, Brazil, Norway" maxLength={120} list="country-options" />
+                <CountryDatalist />
+                <p className="text-[11px] text-muted-foreground font-sans">A culture-native edition: names, places, food, festivals, idioms and units adapted to feel written from within that culture.</p>
               </div>
             )}
             {language && editionLangs.has(language.trim().toLowerCase()) && (
@@ -147,7 +151,7 @@ const EditionManager = () => {
                       <div className="flex items-center gap-2">
                         <span className="truncate font-sans text-sm font-medium">{e.title}</span>
                         {e.is_source ? <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">Source</span>
-                          : <span className="rounded-full bg-gold/15 px-1.5 py-0.5 text-[10px] font-semibold text-gold">{e.edition_language}</span>}
+                          : <span className="rounded-full bg-gold/15 px-1.5 py-0.5 text-[10px] font-semibold text-gold">{e.edition_language}{e.edition_culture ? ` · ${e.edition_culture}` : ""}</span>}
                         {e.listed && <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground"><Check className="h-3 w-3" /> Published</span>}
                       </div>
                     </div>

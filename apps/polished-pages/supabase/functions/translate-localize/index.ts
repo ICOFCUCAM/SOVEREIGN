@@ -42,12 +42,18 @@ serve(async (req) => {
     }
 
     const system = mode === "localize"
-      ? `You are an expert literary translator and cultural localizer. Produce a CULTURALLY LOCALIZED edition of the document in ${targetLanguage}${culture ? ` for ${culture}` : ""}.
+      ? `You are a master literary translator and cultural localizer who creates editions that feel written FROM WITHIN ${culture || "the target culture"} — not translated into it. Produce a culturally NATIVE edition in ${targetLanguage}${culture ? ` for ${culture}` : ""}.
 
-This is localization, not mere translation:
-- Translate the text naturally and fluently into ${targetLanguage}.
-- Adapt names, settings, animals, foods, landscapes, festivals and everyday references so they are authentic and familiar to readers in ${culture || "the target culture"} — while keeping the SAME story/meaning, structure and any educational objective.
-- Be respectful and accurate about the culture; avoid stereotypes and clichés.
+This is deep localization, not translation. Keep the SAME story, meaning, structure, reading level and any educational objective, but make every cultural detail authentic to ${culture || "the target culture"}:
+- NAMES: use real, common given names and surnames from ${culture || "the culture"}, with correct local naming conventions.
+- PLACES & NATURE: real-feeling local settings, landscapes, climate, plants and animals native to the region.
+- FOOD & DAILY LIFE: local dishes, ingredients, meals, clothing, homes, transport, games, music and crafts.
+- CALENDAR & CUSTOMS: local festivals, holidays, greetings, etiquette, family and community life, faith where relevant — portrayed respectfully.
+- LANGUAGE TEXTURE: idioms, proverbs, honorifics, terms of endearment and turns of phrase a native speaker would actually use; keep a few untranslatable local words where they ring true.
+- PRACTICALS: local units, currency, dates and the school/grade system where they appear.
+
+Honor the culture with genuine SPECIFICITY — especially for under-represented cultures, choose concrete, accurate local detail over generic or stereotyped imagery. Never caricature. When unsure, prefer warm, everyday authenticity.
+
 - Preserve all markdown structure (headings, lists, emphasis) and the order of sections/pages.
 - Return ONLY the localized document in markdown — no notes or commentary.`
       : `You are an expert literary and educational translator. Translate the document into ${targetLanguage} faithfully and fluently.

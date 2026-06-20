@@ -6,6 +6,7 @@ export interface Edition {
   id: string;
   title: string;
   edition_language: string | null;
+  edition_culture: string | null;
   is_source: boolean;
   listed: boolean;
   shared: boolean;
@@ -24,10 +25,10 @@ export async function listEditions(parentId: string): Promise<Edition[]> {
   return (Array.isArray(data) ? data : []) as Edition[];
 }
 
-export async function saveEdition(input: { parent: string; language: string; kind: string; title: string; payload: unknown; preview?: string }): Promise<string> {
+export async function saveEdition(input: { parent: string; language: string; kind: string; title: string; payload: unknown; preview?: string; culture?: string }): Promise<string> {
   const { data, error } = await rpc().rpc("polished_save_edition", {
     p_parent: input.parent, p_language: input.language, p_kind: input.kind,
-    p_title: input.title, p_payload: input.payload, p_preview: input.preview ?? null,
+    p_title: input.title, p_payload: input.payload, p_preview: input.preview ?? null, p_culture: input.culture ?? null,
   });
   if (error) throw new Error(error.message || "Could not save the edition.");
   return data as string;
