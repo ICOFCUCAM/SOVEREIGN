@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Search, ChevronDown, LogOut, Settings, LayoutDashboard, Crown, Library, Rocket, Store, FolderOpen } from "lucide-react";
+import { Sparkles, Search, ChevronDown, LogOut, Settings, LayoutDashboard, Crown, Library, Rocket, Store, FolderOpen, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
@@ -11,14 +11,19 @@ import { planDisplayName } from "@/lib/plans";
 import { BRAND, DASHBOARD_NAV, ACCOUNT_NAV, LIBRARY_NAV } from "@/lib/tools";
 import CommandPalette from "@/components/app/CommandPalette";
 import WorkflowNav from "@/components/app/WorkflowNav";
+import MobileNav from "@/components/app/MobileNav";
 
 // The persistent studio chrome: one global navigation that ties every tool
 // together, an account menu with live plan/usage, and the ⌘K command palette.
 // Rendered once (by AuthGate) around the whole signed-in app.
 const AppShell = ({ email, children }: { email: string; children: ReactNode }) => {
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [status, setStatus] = useState<PlanStatus | null>(null);
   const { pathname } = useLocation();
+
+  // Close the mobile drawer whenever the route changes.
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
 
@@ -68,7 +73,7 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                     {(email[0] || "?").toUpperCase()}
                   </span>
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  <ChevronDown className="hidden h-3.5 w-3.5 text-muted-foreground sm:block" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -88,11 +93,21 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
                 <DropdownMenuItem onClick={() => supabase.auth.signOut()}><LogOut className="mr-2 h-4 w-4" /> Sign out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              className="rounded-md p-1.5 text-muted-foreground hover:bg-muted md:hidden"
+              aria-label="Open menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </header>
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      <MobileNav open={mobileOpen} onClose={() => setMobileOpen(false)} />
 
       <main className="pt-14">{children}</main>
     </div>
