@@ -14,6 +14,7 @@ import { listDocuments, catalogList, type DocSummary, type DocKind, type Catalog
 import { planDisplayName } from "@/lib/plans";
 import { STUDIO_THEME, type Studio } from "@/lib/studio-theme";
 import GettingStarted from "@/components/app/GettingStarted";
+import ActivationChecklist from "@/components/app/ActivationChecklist";
 import { getAiActivity, type AiActivity } from "@/lib/ai-activity-log";
 
 // One-click "create" tiles spanning the four studios, each in its studio colour.
@@ -156,6 +157,11 @@ const Dashboard = () => {
 
       {/* First-run onboarding for empty accounts */}
       {docs !== null && all.length === 0 && <GettingStarted />}
+
+      {/* Activation checklist for started-but-not-activated accounts */}
+      {docs !== null && all.length > 0 && (
+        <ActivationChecklist state={{ created: all.length > 0, shared: all.some((d) => d.shared), listed: published > 0, hasReader: totalViews > 0 }} />
+      )}
 
       {/* Continue working */}
       {recent.length > 0 && (
