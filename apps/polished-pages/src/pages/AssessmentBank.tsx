@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ClipboardList, Loader2, Plus, Trash2, FileDown, Eye, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,8 +104,23 @@ const AssessmentBank = () => {
         </div>
       </div>
 
-      {items === null && <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground font-sans"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>}
-      {items && items.length === 0 && <p className="mt-4 text-sm text-muted-foreground font-sans">Nothing in your bank yet — generate your first assessment above.</p>}
+      {items === null && (
+        <div className="mt-4 space-y-2">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="rounded-xl border border-border p-4 flex items-center justify-between gap-3">
+              <div className="flex-1"><Skeleton className="h-4 w-48" /><Skeleton className="mt-1.5 h-3 w-32" /></div>
+              <Skeleton className="h-8 w-16 rounded-md" />
+            </div>
+          ))}
+        </div>
+      )}
+      {items && items.length === 0 && (
+        <div className="mt-6 rounded-xl border border-dashed border-border/60 p-10 text-center">
+          <ClipboardList className="mx-auto h-8 w-8 text-muted-foreground/30" />
+          <p className="mt-3 text-sm font-medium font-sans">Your bank is empty</p>
+          <p className="mt-1 text-sm text-muted-foreground font-sans">Generate your first assessment above, or save items from the <Link to="/assessment" className="text-primary hover:underline">Exam & Assessment Pack</Link> or <Link to="/teacher" className="text-primary hover:underline">Teacher Resource Center</Link>.</p>
+        </div>
+      )}
       {items && items.length > 0 && (
         <div className="mt-4 space-y-2">
           {items.map((a) => (
