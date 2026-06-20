@@ -72,7 +72,7 @@ const HeroSection = () => {
             ))}
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-6 text-foreground">
+          <h1 className="text-display text-4xl md:text-6xl font-bold leading-[1.1] mb-6 text-foreground">
             Create, publish and distribute <span className="text-gradient-gold italic">documents, books and educational content</span>
           </h1>
 

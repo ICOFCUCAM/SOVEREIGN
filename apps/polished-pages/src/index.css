@@ -91,10 +91,18 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', sans-serif;
+    /* Crisp rendering + subtle optical tightening for a refined text feel. */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11", "ss01";
+    letter-spacing: -0.011em;
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', serif;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
   }
 }
 
@@ -144,6 +152,15 @@
     .hover-lift, .press, .transition-premium { transition: none; }
     .hover-lift:hover { transform: none; }
   }
+
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+  .text-display {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+  }
+  .tracking-tightest { letter-spacing: -0.03em; }
 
   .skeleton-shimmer {
     background: linear-gradient(
