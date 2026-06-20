@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Rocket, Check, ExternalLink, BookOpen, Image as ImageIcon, FileDown, Store } from "lucide-react";
+import { Rocket, Check, ExternalLink, BookOpen, Image as ImageIcon, FileDown, Store, Lightbulb, AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -36,6 +36,15 @@ const PublishingPrep = () => {
   const [pages, setPages] = useState(40);
   const trim = getTrim(trimId);
   const spec = coverSpec(trim, pages, paper);
+
+  // Deterministic, rule-based publishing advice from the current print
+  // settings — print-industry conventions, not generated text.
+  const advice: { kind: "tip" | "warn"; text: string }[] = [];
+  if (pages < 24) advice.push({ kind: "warn", text: "Most print-on-demand printers require a minimum of ~24 pages. Add content or choose a smaller trim before ordering print." });
+  if (pages >= 100) advice.push({ kind: "tip", text: "At this page count the spine is wide enough for text — add the title and author to the spine of your wrap cover." });
+  else advice.push({ kind: "tip", text: "Below ~100 pages the spine is narrow; leave spine text off so it can't wrap onto the front or back." });
+  advice.push({ kind: "tip", text: paper === "White" ? "White paper suits non-fiction, workbooks and any color or image-heavy interior." : "Cream paper is the convention for novels, chapter books and long-form prose — easier on the eyes." });
+  if (trimId === "6x9") advice.push({ kind: "tip", text: "6×9 in is the standard trade-paperback size and a safe default for most fiction and non-fiction." });
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
@@ -135,6 +144,25 @@ const PublishingPrep = () => {
             </div>
           </div>
           <p className="text-xs text-muted-foreground font-sans">Includes 0.125 in bleed on all outer edges. Spine text is only recommended above ~100 pages. Figures follow KDP guidance; always confirm against your printer’s template before final upload.</p>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6 border-publishing/20 bg-publishing/[0.03]">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-serif text-lg"><Lightbulb className="h-4 w-4 text-publishing" /> Publishing advisor</CardTitle>
+          <CardDescription className="font-sans">Print-industry guidance for your current settings — {trim.label}, {paper.toLowerCase()} paper, {pages} pages.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2 text-sm font-sans">
+            {advice.map((a) => (
+              <li key={a.text} className="flex gap-2">
+                {a.kind === "warn"
+                  ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                  : <Check className="mt-0.5 h-4 w-4 shrink-0 text-publishing" />}
+                <span className={a.kind === "warn" ? "text-foreground" : "text-muted-foreground"}>{a.text}</span>
+              </li>
+            ))}
+          </ul>
         </CardContent>
       </Card>
 
