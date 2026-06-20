@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { TRIM_SIZES, PAPER_MM_PER_PAGE, getTrim, coverSpec, ingramGutterIn, INGRAM_OUTSIDE_MM } from "@/lib/print-sizes";
+import ExportCenter from "@/components/book/ExportCenter";
 
 const TARGETS: { name: string; format: string }[] = [
   { name: "Amazon KDP", format: "EPUB (e-book) · interior PDF + wrap cover (print)" },
@@ -34,6 +35,8 @@ const PublishingPrep = () => {
       </div>
       <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Get <span className="text-gradient-gold italic">store-ready</span></h1>
       <p className="mt-2 text-muted-foreground font-sans">Export your book where each store needs it, and size your print cover correctly.</p>
+
+      <div className="mt-6"><ExportCenter /></div>
 
       <Card className="mt-6 border-border">
         <CardHeader><CardTitle className="font-serif text-lg">Where it goes</CardTitle><CardDescription className="font-sans">Every book exports to EPUB (in the reader) and to a print PDF at your trim size.</CardDescription></CardHeader>
