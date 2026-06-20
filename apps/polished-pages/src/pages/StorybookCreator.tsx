@@ -14,6 +14,7 @@ import { generateStorybook, generateIllustration, type Storybook, type StoryInpu
 import PictureBookView from "@/components/children/PictureBookView";
 import SavePictureBookButton from "@/components/children/SavePictureBookButton";
 import { LANGUAGE_NAMES, isoFor } from "@/lib/languages";
+import CountryDatalist from "@/components/app/CountryDatalist";
 import { translateLocalize } from "@/lib/translate";
 import { usePersistentState } from "@/hooks/use-persistent-state";
 
@@ -281,12 +282,13 @@ const StorybookCreator = () => {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label className="font-sans text-xs">Language (optional)</Label>
-                  <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="e.g. English, French, Swahili" maxLength={40} list="story-langs" />
+                  <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="e.g. English, French, Spanish" maxLength={40} list="story-langs" />
                   <datalist id="story-langs">{LANGUAGE_NAMES.map((l) => <option key={l} value={l} />)}</datalist>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="font-sans text-xs">Cultural setting (optional)</Label>
-                  <Input value={culturalSetting} onChange={(e) => setCulturalSetting(e.target.value)} placeholder="e.g. Norway, Cameroon, Japan" maxLength={120} />
+                  <Input value={culturalSetting} onChange={(e) => setCulturalSetting(e.target.value)} placeholder="e.g. United States, Japan, France" maxLength={120} list="country-options" />
+                  <CountryDatalist />
                 </div>
                 {storyType === "educational" && (
                   <div className="space-y-1.5 sm:col-span-2">

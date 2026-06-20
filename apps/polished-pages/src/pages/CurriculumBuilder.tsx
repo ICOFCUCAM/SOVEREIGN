@@ -9,7 +9,7 @@ const config: SchoolStudioConfig = {
   mode: "pack",
   previewLabel: "Curriculum",
   fields: [
-    { key: "country", label: "Country / curriculum", placeholder: "e.g. Nigeria", required: true },
+    { key: "country", label: "Country / curriculum", placeholder: "e.g. United States", required: true, list: "country-options" },
     { key: "grade", label: "Grade", placeholder: "e.g. Grade 5", required: true },
     { key: "subject", label: "Subject", placeholder: "e.g. Science", required: true },
     { key: "term", label: "Term", type: "select", options: ["Term 1", "Term 2", "Term 3"] },

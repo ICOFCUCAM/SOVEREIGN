@@ -11,6 +11,7 @@ import { generateSchoolContent, NEEDS_SOURCE, SOURCE_TYPES, type SchoolDocType, 
 import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
+import CountryDatalist from "@/components/app/CountryDatalist";
 
 export interface SchoolField {
   key: keyof SchoolInput;
@@ -19,6 +20,7 @@ export interface SchoolField {
   type?: "text" | "select" | "multiselect";
   options?: string[];
   required?: boolean;
+  list?: string; // datalist id for free-text suggestions (e.g. "country-options")
 }
 export interface SchoolPart { type: SchoolDocType; label: string }
 
@@ -121,6 +123,7 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
         <Card className="border-border bg-card/50">
           <CardHeader><CardTitle className="font-serif text-lg">Details</CardTitle><CardDescription className="font-sans">Fill in the lesson details to generate classroom-ready materials.</CardDescription></CardHeader>
           <CardContent className="space-y-4">
+            <CountryDatalist />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {config.fields.map((f) => (
                 <div key={f.key as string} className={`space-y-1.5 ${f.type === "multiselect" ? "sm:col-span-2" : ""}`}>
@@ -142,7 +145,7 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
                       })}
                     </div>
                   ) : (
-                    <Input value={vals[f.key as string] ?? ""} onChange={(e) => setVals((v) => ({ ...v, [f.key]: e.target.value }))} placeholder={f.placeholder} maxLength={200} />
+                    <Input value={vals[f.key as string] ?? ""} onChange={(e) => setVals((v) => ({ ...v, [f.key]: e.target.value }))} placeholder={f.placeholder} maxLength={200} list={f.list} />
                   )}
                 </div>
               ))}

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import CountryDatalist from "@/components/app/CountryDatalist";
 import { generateSchoolContent, type SchoolDocType } from "@/lib/school";
 import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
@@ -104,7 +105,7 @@ const ClassroomPacks = () => {
               <div className="space-y-1.5"><Label className="font-sans text-xs">Subject *</Label><Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. Science" maxLength={80} /></div>
             </div>
             <div className="space-y-1.5"><Label className="font-sans text-xs">Topic *</Label><Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. The life cycle of plants" maxLength={200} /></div>
-            <div className="space-y-1.5"><Label className="font-sans text-xs">Curriculum / country (optional)</Label><Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="e.g. Cameroon primary curriculum" maxLength={80} /></div>
+            <div className="space-y-1.5"><Label className="font-sans text-xs">Curriculum / country (optional)</Label><Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="e.g. US Common Core" maxLength={80} list="country-options" /><CountryDatalist /></div>
           </CardContent>
         </Card>
 

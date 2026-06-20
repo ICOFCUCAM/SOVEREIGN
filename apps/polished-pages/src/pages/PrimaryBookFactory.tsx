@@ -15,7 +15,7 @@ const config: SchoolStudioConfig = {
     { key: "subject", label: "Subject", type: "select", options: SUBJECTS, required: true },
     { key: "grade", label: "Grade", type: "select", options: GRADES, required: true },
     { key: "topic", label: "Topic / unit", placeholder: "e.g. Fractions", required: true },
-    { key: "country", label: "Country / curriculum (optional)", placeholder: "e.g. Cameroon" },
+    { key: "country", label: "Country / curriculum (optional)", placeholder: "e.g. United States", list: "country-options" },
     { key: "language", label: "Language (optional)", placeholder: "e.g. English" },
   ],
   parts: [

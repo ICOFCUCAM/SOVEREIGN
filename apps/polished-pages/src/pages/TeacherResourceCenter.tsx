@@ -12,7 +12,7 @@ const config: SchoolStudioConfig = {
     { key: "grade", label: "Grade / level", placeholder: "e.g. Grade 6", required: true },
     { key: "subject", label: "Subject", placeholder: "e.g. History", required: true },
     { key: "topic", label: "Topic", placeholder: "e.g. Ancient kingdoms", required: true },
-    { key: "country", label: "Country / curriculum (optional)", placeholder: "e.g. Ghana" },
+    { key: "country", label: "Country / curriculum (optional)", placeholder: "e.g. United States", list: "country-options" },
   ],
   parts: [
     { type: "lesson-notes", label: "Lesson notes" },

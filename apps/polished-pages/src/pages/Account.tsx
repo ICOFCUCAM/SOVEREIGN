@@ -122,7 +122,7 @@ const Account = () => {
             <div className="max-w-lg space-y-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground font-sans">Display name</label>
-                <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="e.g. Maria Okonkwo" maxLength={80} />
+                <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="e.g. Alex Morgan" maxLength={80} />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground font-sans">Bio</label>

@@ -17,6 +17,7 @@ import { markdownToEpub } from "@/lib/export-epub";
 import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
+import CountryDatalist from "@/components/app/CountryDatalist";
 import { saveDocument } from "@/lib/documents";
 
 const TranslatePublish = () => {
@@ -167,7 +168,8 @@ const TranslatePublish = () => {
               {mode === "localize" && (
                 <div className="space-y-1.5">
                   <Label className="font-sans text-xs">Culture / country per edition (optional)</Label>
-                  <Input value={culture} onChange={(e) => setCulture(e.target.value)} placeholder="e.g. Norway, Cameroon, Japan — applied to each edition" maxLength={120} />
+                  <Input value={culture} onChange={(e) => setCulture(e.target.value)} placeholder="e.g. United States, Japan, Brazil — applied to each edition" maxLength={120} list="country-options" />
+                  <CountryDatalist />
                 </div>
               )}
               <div className="space-y-1.5">
