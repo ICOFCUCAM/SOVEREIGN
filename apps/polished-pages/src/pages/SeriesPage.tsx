@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Library as LibraryIcon, Loader2, Plus, Trash2, BookHeart, ArrowRight, X, Layers, Share2 } from "lucide-react";
+import { Library as LibraryIcon, Loader2, Plus, Trash2, BookHeart, ArrowRight, X, Layers, Share2, Copy, Check as CheckIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ const SeriesPage = () => {
   const [openId, setOpenId] = useState<string | null>(null);
   const [detail, setDetail] = useState<SeriesDetail | null>(null);
   const [creating, setCreating] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
   const [dlgOpen, setDlgOpen] = useState(false);
   const [form, setForm] = useState({ title: "", premise: "", setting: "", objective: "", language: "", culture: "" });
 
@@ -134,7 +135,7 @@ const SeriesPage = () => {
             <Card key={s.id} className="border-border">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <button onClick={() => openSeries(s.id)} className="min-w-0 text-left">
+                  <button onClick={() => openSeries(s.id)} className="min-w-0 flex-1 text-left">
                     <div className="flex items-center gap-2"><BookHeart className="h-4 w-4 text-primary" /><span className="font-serif text-base font-semibold">{s.title}</span><span className="text-xs text-muted-foreground font-sans">{s.book_count} book{s.book_count === 1 ? "" : "s"}</span></div>
                     {s.premise && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground font-sans">{s.premise}</p>}
                     <div className="mt-1 flex flex-wrap gap-x-3 text-[11px] text-muted-foreground font-sans">
@@ -143,6 +144,21 @@ const SeriesPage = () => {
                       {s.culture && <span>Culture: {s.culture}</span>}
                     </div>
                   </button>
+                  {/* Persistent public URL shown inline when series is listed */}
+                  {s.listed && s.share_token && (
+                    <div className="mt-1 flex items-center gap-1.5 self-end">
+                      <span className="hidden truncate font-mono text-[11px] text-muted-foreground sm:block" style={{maxWidth: "14rem"}}>
+                        {`${window.location.origin}/series/public/${s.share_token}`}
+                      </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/series/public/${s.share_token}`; navigator.clipboard.writeText(url).catch(() => {}); setCopied(s.id); setTimeout(() => setCopied(null), 2000); }}
+                        className="shrink-0 rounded-full border border-border p-1 text-muted-foreground hover:border-primary/40 hover:text-primary"
+                        aria-label="Copy public link"
+                      >
+                        {copied === s.id ? <CheckIcon className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+                      </button>
+                    </div>
+                  )}
                   <div className="flex shrink-0 items-center gap-1">
                     <Button asChild variant="heroOutline" size="sm"><Link to={`/storybook?series=${s.id}`}>New book <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link></Button>
                     <Button variant="ghost" size="sm" className={s.listed ? "text-primary" : "text-muted-foreground"} onClick={() => share(s)} aria-label="Share series" title={s.listed ? "Public — click to copy link or make private" : "Publish a public series page"}><Share2 className="h-4 w-4" /></Button>
