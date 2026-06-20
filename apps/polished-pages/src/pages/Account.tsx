@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Crown, LogOut, Zap, Check, UserCircle, Loader2, ImagePlus } from "lucide-react";
+import { Crown, LogOut, Zap, Check, UserCircle, Loader2, ImagePlus, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,10 @@ import { getMyProfile, upsertProfile } from "@/lib/profiles";
 import { getBatchUsage } from "@/lib/editions";
 import { planDisplayName } from "@/lib/plans";
 import { BRAND } from "@/lib/tools";
+
+// Soft, informational threshold for the heavy-usage advisory. Not a limit —
+// it only changes the copy shown, never blocks anything.
+const HEAVY_USAGE_NOTICE = 500;
 
 const PRO_PERKS = [
   "Unlimited everyday documents — CVs, letters, single chapters & lessons",
@@ -127,6 +131,12 @@ const Account = () => {
             <p className="mt-3 text-xs text-muted-foreground font-sans">
               Heavy operations this month: <span className="font-semibold text-foreground">{batchUnits.toLocaleString()}</span> units across bulk translation and multi-language editions.
             </p>
+          )}
+          {batchUnits != null && batchUnits >= HEAVY_USAGE_NOTICE && (
+            <div className="mt-2 flex items-start gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground font-sans">
+              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+              <span>You’re making heavy use of bulk publishing — these multi-language operations are the most resource-intensive on the platform. No limits today; we’ll always tell you before anything changes.</span>
+            </div>
           )}
           {!status && <p className="text-sm text-muted-foreground font-sans">Loading plan…</p>}
           {status && (
