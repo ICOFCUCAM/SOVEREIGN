@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Star, Eye, Download } from "lucide-react";
+import { ArrowRight, Star, Eye, Download, BadgeCheck } from "lucide-react";
 
 const Stars = ({ value }: { value: number }) => (
   <span className="inline-flex items-center" aria-label={`${value.toFixed(1)} out of 5`}>
@@ -30,7 +30,10 @@ const CatalogCard = ({ item: it, admin, onFeature }: { item: CatalogItem; admin?
         <h3 className="font-serif text-base font-semibold leading-snug group-hover:text-primary">{it.title}</h3>
       </Link>
       {it.author_name && (
-        <Link to={`/catalog/author/${encodeURIComponent(it.author_name)}`} className="mt-0.5 self-start text-xs text-muted-foreground hover:text-primary font-sans">by {it.author_name}</Link>
+        <span className="mt-0.5 inline-flex items-center gap-1 self-start text-xs font-sans">
+          <Link to={`/catalog/author/${encodeURIComponent(it.author_name)}`} className="text-muted-foreground hover:text-primary">by {it.author_name}</Link>
+          {it.author_verified && <BadgeCheck className="h-3.5 w-3.5 text-primary" aria-label="Verified creator" />}
+        </span>
       )}
       {(it.review_count ?? 0) > 0 && it.avg_rating != null && (
         <div className="mt-1.5 flex items-center gap-1.5">

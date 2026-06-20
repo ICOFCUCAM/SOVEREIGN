@@ -114,7 +114,7 @@ export const CATALOG_LICENSES = [
   "Creative Commons (CC BY-NC)",
 ];
 
-export interface CatalogItem { token: string; kind: DocKind; title: string; category: string | null; price_cents: number; preview: string | null; author_name: string | null; license: string | null; featured?: boolean; view_count?: number; download_count?: number; avg_rating?: number | null; review_count?: number; created_at: string }
+export interface CatalogItem { token: string; kind: DocKind; title: string; category: string | null; price_cents: number; preview: string | null; author_name: string | null; author_verified?: boolean; license: string | null; featured?: boolean; view_count?: number; download_count?: number; avg_rating?: number | null; review_count?: number; created_at: string }
 
 export type CatalogSort = "new" | "trending" | "top-rated" | "price";
 
