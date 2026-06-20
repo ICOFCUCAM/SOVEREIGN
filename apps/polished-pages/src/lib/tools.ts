@@ -1,4 +1,4 @@
-import { FileText, Target, PenTool, BookOpen, Wand2, LayoutDashboard, Settings, Library, type LucideIcon } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, Wand2, BookHeart, LayoutDashboard, Settings, Library, type LucideIcon } from "lucide-react";
 
 // The product's canonical name. Used everywhere so branding stays consistent
 // (the app shipped with a mix of "DocuForge" and "Polished Pages").
@@ -69,9 +69,19 @@ export const TOOLS: ToolDef[] = [
     description: "Upload a finished book, describe what to change, and get a new revised version — then design its cover.",
     path: "/book-transform",
     icon: Wand2,
-    badge: "New",
     action: "Transform a book",
     keywords: ["transform", "revise", "rewrite", "edit", "book", "cover", "upload"],
+  },
+  {
+    id: "children",
+    name: "Children’s Studio",
+    short: "Children’s",
+    description: "Children’s Publishing Studio — illustrated storybooks, personalized books, and educational readers for young readers.",
+    path: "/children",
+    icon: BookHeart,
+    badge: "New",
+    action: "Create a children’s storybook",
+    keywords: ["children", "kids", "storybook", "picture book", "illustrated", "school", "educational", "personalized"],
   },
 ];
 

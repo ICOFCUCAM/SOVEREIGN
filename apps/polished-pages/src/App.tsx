@@ -11,6 +11,8 @@ import Dashboard from "./pages/Dashboard.tsx";
 import Account from "./pages/Account.tsx";
 import LibraryPage from "./pages/LibraryPage.tsx";
 import TransformBook from "./pages/TransformBook.tsx";
+import ChildrenStudio from "./pages/ChildrenStudio.tsx";
+import StorybookCreator from "./pages/StorybookCreator.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Gallery from "./pages/Gallery.tsx";
@@ -37,6 +39,8 @@ const App = () => (
           <Route path="/tailor" element={<AuthGate><JobTailor /></AuthGate>} />
           <Route path="/book" element={<AuthGate><BookCreator /></AuthGate>} />
           <Route path="/book-transform" element={<AuthGate><TransformBook /></AuthGate>} />
+          <Route path="/children" element={<AuthGate><ChildrenStudio /></AuthGate>} />
+          <Route path="/storybook" element={<AuthGate><StorybookCreator /></AuthGate>} />
           {/* internal visual-QA gallery (not linked) */}
           <Route path="/__gallery" element={<Gallery />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
