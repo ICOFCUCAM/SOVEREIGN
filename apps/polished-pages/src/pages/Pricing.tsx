@@ -239,6 +239,26 @@ const Pricing = () => {
           </div>
         )}
 
+        {/* Honest usage model — replaces vague "unlimited" hype with a clear
+            explanation of what is and isn't metered. */}
+        <section className="mx-auto mt-16 max-w-4xl">
+          <h2 className="text-center font-serif text-2xl font-bold tracking-tight">How usage works</h2>
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="rounded-xl border border-border bg-card/50 p-5">
+              <h3 className="font-sans text-sm font-semibold text-foreground">Everyday documents — unlimited</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground font-sans text-pretty">CVs, cover letters, single chapters, lessons and assessments aren’t capped on any paid plan. Create as many as you need.</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card/50 p-5">
+              <h3 className="font-sans text-sm font-semibold text-foreground">Images — metered by credits</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground font-sans text-pretty">Each cover, illustration or coloring page uses one credit. Your tier sets the monthly allowance; top-up packs never expire.</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card/50 p-5">
+              <h3 className="font-sans text-sm font-semibold text-foreground">Large projects scale with tier</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground font-sans text-pretty">Bulk translation and multi-language editions are the heaviest work, so they unlock on Publisher Pro and above where the allowances fit.</p>
+            </div>
+          </div>
+        </section>
+
         <PlanComparison />
 
         {/* Objection-handling FAQ — honest answers to the questions that keep
