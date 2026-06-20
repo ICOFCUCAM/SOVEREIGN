@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Globe, Sparkles, Loader2, ArrowLeft, Upload, FileText, Save } from "lucide-react";
+import { Globe, Sparkles, Loader2, ArrowLeft, Upload, FileText, Save, ChevronRight, Languages, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +12,7 @@ import { extractFileText, CV_ACCEPT, CV_MIME } from "@/lib/extract-file-text";
 import { splitBook } from "@/lib/book-split";
 import { translateLocalize } from "@/lib/translate";
 import { usePersistentState } from "@/hooks/use-persistent-state";
-import { LANGUAGE_NAMES, isoFor } from "@/lib/languages";
+import { LANGUAGE_NAMES, isoFor, isRtlLanguage } from "@/lib/languages";
 import { markdownToEpub } from "@/lib/export-epub";
 import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
@@ -115,7 +115,7 @@ const TranslatePublish = () => {
             </div>
           </div>
         </div>
-        <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
+        <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16" dir={isRtlLanguage(tab) ? "rtl" : undefined}>
           <BookExportPanel bookTitle={editionTitle} fullContent={current} chapterCount={0} />
           <div className="mt-6"><BookReader content={current} title={editionTitle} onContentChange={(s) => setEditions((e) => (e ? { ...e, [tab]: s } : e))} /></div>
         </div>
@@ -126,8 +126,12 @@ const TranslatePublish = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
-        <Link to="/children" className="text-xs text-muted-foreground hover:text-foreground font-sans">← Children’s Publishing Studio</Link>
-        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-publishing/20 bg-publishing/5 px-4 py-1.5 mb-4">
+        <nav className="mb-5 flex items-center gap-1 text-xs text-muted-foreground font-sans">
+          <Link to="/children" className="hover:text-foreground transition-colors">Educational Studio</Link>
+          <ChevronRight className="h-3 w-3 shrink-0" />
+          <span className="text-foreground font-medium">Translate &amp; Localize</span>
+        </nav>
+        <div className="inline-flex items-center gap-2 rounded-full border border-publishing/20 bg-publishing/5 px-4 py-1.5 mb-4">
           <Globe className="w-4 h-4 text-publishing" />
           <span className="text-sm text-publishing font-medium font-sans">Translate &amp; Localize</span>
         </div>
@@ -148,6 +152,11 @@ const TranslatePublish = () => {
               </div>
               <div className="text-center text-xs text-muted-foreground font-sans">or paste</div>
               <Textarea value={source} onChange={(e) => { setSource(e.target.value); if (file) setFile(null); }} rows={6} maxLength={300000} placeholder="Paste your document text…" className="resize-none" disabled={!!file} />
+              {source.trim().length > 0 && (
+                <p className="text-[11px] text-muted-foreground font-sans">
+                  {source.trim().split(/\s+/).length.toLocaleString()} words
+                </p>
+              )}
               <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title (optional)" maxLength={200} />
             </CardContent>
           </Card>
@@ -155,14 +164,16 @@ const TranslatePublish = () => {
           <Card className="border-border bg-card/50">
             <CardHeader><CardTitle className="font-serif text-lg">2 · How &amp; where</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setMode("translate")} className={`flex-1 rounded-lg border p-3 text-left transition ${mode === "translate" ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border hover:border-primary/30"}`}>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => setMode("translate")} className={`rounded-lg border p-4 text-left transition ${mode === "translate" ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border hover:border-primary/30"}`}>
+                  <Languages className={`mb-2 h-5 w-5 ${mode === "translate" ? "text-primary" : "text-muted-foreground"}`} />
                   <div className="text-sm font-semibold font-sans">Translate</div>
-                  <div className="text-xs text-muted-foreground font-sans">Faithful translation, same story.</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground font-sans">Faithful — same story, every word.</div>
                 </button>
-                <button type="button" onClick={() => setMode("localize")} className={`flex-1 rounded-lg border p-3 text-left transition ${mode === "localize" ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border hover:border-primary/30"}`}>
+                <button type="button" onClick={() => setMode("localize")} className={`rounded-lg border p-4 text-left transition ${mode === "localize" ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border hover:border-primary/30"}`}>
+                  <Wand2 className={`mb-2 h-5 w-5 ${mode === "localize" ? "text-primary" : "text-muted-foreground"}`} />
                   <div className="text-sm font-semibold font-sans">Culturally localize</div>
-                  <div className="text-xs text-muted-foreground font-sans">Adapt names, settings &amp; examples.</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground font-sans">Adapt names, settings &amp; examples.</div>
                 </button>
               </div>
               {mode === "localize" && (
