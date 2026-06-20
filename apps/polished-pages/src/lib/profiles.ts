@@ -9,7 +9,7 @@ interface RpcClient {
 const rpc = () => supabase as unknown as RpcClient;
 
 export interface MyProfile { display_name: string; bio: string | null }
-export interface AuthorProfile { display_name: string; bio: string | null; works: number; views: number; downloads: number }
+export interface AuthorProfile { display_name: string; bio: string | null; verified?: boolean; works: number; views: number; downloads: number }
 
 export async function getMyProfile(): Promise<MyProfile | null> {
   const { data, error } = await rpc().rpc("polished_get_my_profile");
@@ -27,4 +27,10 @@ export async function getAuthorProfile(name: string): Promise<AuthorProfile | nu
   const { data, error } = await rpc().rpc("polished_get_author_profile", { p_name: name });
   if (error) throw new Error(error.message || "Could not load the author.");
   return (data as AuthorProfile | null) ?? null;
+}
+
+// Admin curation: mark a creator (by public display name) verified or not.
+export async function adminVerifyCreator(displayName: string, verified: boolean): Promise<void> {
+  const { error } = await rpc().rpc("polished_admin_verify_creator", { p_display_name: displayName, p_verified: verified });
+  if (error) throw new Error(error.message || "Could not update verification.");
 }

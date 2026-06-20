@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Loader2, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight } from "lucide-react";
+import { Sparkles, Loader2, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem, type CatalogSort } from "@/lib/documents";
-import { getAuthorProfile, type AuthorProfile } from "@/lib/profiles";
+import { getAuthorProfile, adminVerifyCreator, type AuthorProfile } from "@/lib/profiles";
 import CatalogCard from "@/components/app/CatalogCard";
 import { BRAND } from "@/lib/tools";
 
@@ -50,6 +50,13 @@ const CatalogPage = () => {
     try { await adminFeature(it.token, next); } catch { setItems((prev) => prev?.map((x) => (x.token === it.token ? { ...x, featured: !next } : x)) ?? null); }
   };
 
+  const verify = async () => {
+    if (!author || !profile) return;
+    const next = !profile.verified;
+    setProfile({ ...profile, verified: next });
+    try { await adminVerifyCreator(author, next); } catch { setProfile({ ...profile, verified: !next }); }
+  };
+
   const all = useMemo(() => items ?? [], [items]);
   const featured = useMemo(() => all.filter((i) => i.featured).slice(0, 6), [all]);
   const trending = useMemo(() => all.filter((i) => trendScore(i) > 0).sort((a, b) => trendScore(b) - trendScore(a)).slice(0, 6), [all]);
@@ -89,7 +96,10 @@ const CatalogPage = () => {
             <span className="text-sm text-gold-light font-medium font-sans">{author ? "Author" : "Marketplace"}</span>
           </div>
           {author ? (
-            <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Resources by <span className="text-gradient-gold italic">{author}</span></h1>
+            <h1 className="flex flex-wrap items-center gap-2 font-serif text-3xl font-bold tracking-tight md:text-4xl">
+              <span>Resources by <span className="text-gradient-gold italic">{author}</span></span>
+              {profile?.verified && <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary"><BadgeCheck className="h-4 w-4" /> Verified</span>}
+            </h1>
           ) : (
             <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Discover <span className="text-gradient-gold italic">published resources</span></h1>
           )}
@@ -102,6 +112,11 @@ const CatalogPage = () => {
                 <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.views}</span> views</span>
                 <span className="inline-flex items-center gap-1"><Download className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.downloads}</span> downloads</span>
               </div>
+              {admin && (
+                <button onClick={verify} className={`mt-3 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-sans ${profile.verified ? "border-primary text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                  <BadgeCheck className="h-3.5 w-3.5" /> {profile.verified ? "Verified — click to remove" : "Mark verified"}
+                </button>
+              )}
             </div>
           )}
         </motion.div>
