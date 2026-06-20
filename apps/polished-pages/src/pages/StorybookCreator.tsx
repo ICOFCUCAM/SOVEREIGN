@@ -13,7 +13,8 @@ import { pictureBookToEpub } from "@/lib/export-epub";
 import { generateStorybook, generateIllustration, type Storybook, type StoryInput, type StoryType } from "@/lib/storybook";
 import PictureBookView from "@/components/children/PictureBookView";
 import SavePictureBookButton from "@/components/children/SavePictureBookButton";
-import { LANGUAGE_NAMES } from "@/lib/languages";
+import { LANGUAGE_NAMES, isoFor } from "@/lib/languages";
+import { translateLocalize } from "@/lib/translate";
 import { usePersistentState } from "@/hooks/use-persistent-state";
 
 const READING_LEVELS = [
@@ -55,17 +56,58 @@ const StorybookCreator = () => {
   const [illustrating, setIllustrating] = useState<{ done: number; total: number } | null>(null);
   const [pdf, setPdf] = useState(false);
 
+  // Per-edition localization: the base (original) book and a cache of translated
+  // editions that reuse the same illustrations.
+  const baseBook = useRef<Storybook | null>(null);
+  const editionCache = useRef<Record<string, Storybook>>({});
+  const [editionLang, setEditionLang] = useState("");
+  const [translating, setTranslating] = useState<{ done: number; total: number } | null>(null);
+
   const canCreate = theme.trim().length > 3 && !creating;
 
   const create = async () => {
     setCreating(true);
     try {
       const input: StoryInput = { childName, childAge, readingLevel, theme, moralLesson, characters, pageCount, storyType, language, educationalObjective, culturalSetting };
-      setBook(await generateStorybook(input));
+      const b = await generateStorybook(input);
+      baseBook.current = b;
+      editionCache.current = {};
+      setEditionLang("");
+      setBook(b);
     } catch (e) {
       toast({ title: "Could not create story", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally {
       setCreating(false);
+    }
+  };
+
+  // Switch to a language edition (translating page text + title, keeping images).
+  const selectEdition = async (lang: string) => {
+    const base = baseBook.current;
+    if (!base) return;
+    if (lang === "") { setEditionLang(""); setBook(base); return; }
+    if (editionCache.current[lang]) { setEditionLang(lang); setBook(editionCache.current[lang]); return; }
+    const texts = [base.title, base.dedication ?? "", ...base.pages.map((p) => p.text ?? "")];
+    setTranslating({ done: 0, total: texts.length });
+    try {
+      const out: string[] = [];
+      for (let i = 0; i < texts.length; i++) {
+        out.push(texts[i].trim() ? await translateLocalize({ content: texts[i], targetLanguage: lang, mode: "translate" }) : "");
+        setTranslating({ done: i + 1, total: texts.length });
+      }
+      const edition: Storybook = {
+        ...base,
+        title: out[0],
+        dedication: out[1] || undefined,
+        pages: base.pages.map((p, i) => ({ ...p, text: out[i + 2] })),
+      };
+      editionCache.current[lang] = edition;
+      setEditionLang(lang);
+      setBook(edition);
+    } catch (e) {
+      toast({ title: "Translation failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally {
+      setTranslating(null);
     }
   };
 
@@ -127,7 +169,7 @@ const StorybookCreator = () => {
     try {
       await pictureBookToEpub(
         { title: book.title, dedication: book.dedication, coverImage: book.coverImage, pages: book.pages.map((p) => ({ text: p.text, image: p.image })) },
-        { title: book.title, language }, book.title || "storybook",
+        { title: book.title, language: editionLang ? isoFor(editionLang) : (language ? isoFor(language) : "en") }, book.title || "storybook",
       );
     } catch (e) {
       toast({ title: "EPUB export failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
@@ -144,6 +186,17 @@ const StorybookCreator = () => {
           <div className="container flex items-center justify-between h-12 px-6">
             <span className="truncate text-sm font-medium text-muted-foreground font-sans">{book.title}</span>
             <div className="flex items-center gap-2">
+              <select
+                value={editionLang}
+                disabled={!!translating}
+                onChange={(e) => selectEdition(e.target.value)}
+                title="Language edition (illustrations preserved)"
+                className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans"
+              >
+                <option value="">Original</option>
+                {LANGUAGE_NAMES.map((l) => <option key={l} value={l}>{l}</option>)}
+              </select>
+              {translating && <span className="text-xs text-muted-foreground font-sans"><Loader2 className="inline h-3.5 w-3.5 animate-spin" /> {translating.done}/{translating.total}</span>}
               <Button variant="ghost" size="sm" onClick={() => setBook(null)} className="text-muted-foreground">
                 <ArrowLeft className="w-4 h-4 mr-1" /> New
               </Button>
