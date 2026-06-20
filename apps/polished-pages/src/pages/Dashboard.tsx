@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight, Crown, Zap, Library, FileText, BookOpen, BookHeart, GraduationCap, Palette, School,
   Store, TrendingUp, Eye, Download, Rocket, Clock, Image as ImageIcon, Send, Layers, Globe, Lightbulb,
+  Sparkles, CheckCircle2, XCircle,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -13,6 +14,7 @@ import { listDocuments, catalogList, type DocSummary, type DocKind, type Catalog
 import { planDisplayName } from "@/lib/plans";
 import { STUDIO_THEME, type Studio } from "@/lib/studio-theme";
 import GettingStarted from "@/components/app/GettingStarted";
+import { getAiActivity, type AiActivity } from "@/lib/ai-activity-log";
 
 // One-click "create" tiles spanning the four studios, each in its studio colour.
 const CREATE: { label: string; to: string; icon: typeof FileText; studio: Studio }[] = [
@@ -38,6 +40,7 @@ const Dashboard = () => {
   const [status, setStatus] = useState<PlanStatus | null>(null);
   const [docs, setDocs] = useState<DocSummary[] | null>(null);
   const [market, setMarket] = useState<CatalogItem[]>([]);
+  const [aiLog] = useState<AiActivity[]>(() => getAiActivity().slice(0, 5));
 
   useEffect(() => {
     fetchPlanStatus().then(setStatus).catch(() => {});
@@ -325,6 +328,25 @@ const Dashboard = () => {
               </CardContent></Card>
             )}
           </div>
+        </section>
+      )}
+      {aiLog.length > 0 && (
+        <section className="mt-10">
+          <h2 className="flex items-center gap-2 font-serif text-lg font-semibold"><Sparkles className="h-4 w-4 text-primary" /> Recent AI generations</h2>
+          <Card className="mt-4 border-border"><CardContent className="divide-y divide-border p-0">
+            {aiLog.map((a) => (
+              <div key={a.id} className="flex items-center gap-3 px-5 py-3">
+                {a.status === "ok" ? <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" /> : <XCircle className="h-4 w-4 shrink-0 text-destructive/70" />}
+                <div className="min-w-0 flex-1">
+                  <span className="text-sm font-medium font-sans">{a.tool}</span>
+                  {a.description && <span className="ml-1.5 text-xs text-muted-foreground font-sans">{a.description}</span>}
+                </div>
+                <span className="shrink-0 text-xs text-muted-foreground font-sans">
+                  {new Date(a.ts).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              </div>
+            ))}
+          </CardContent></Card>
         </section>
       )}
     </div>

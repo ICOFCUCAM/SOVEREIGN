@@ -14,6 +14,7 @@ import SaveToLibrary from "@/components/app/SaveToLibrary";
 import CountryDatalist from "@/components/app/CountryDatalist";
 import LanguageDatalist from "@/components/app/LanguageDatalist";
 import { saveAssessment } from "@/lib/assessment-bank";
+import { logAiActivity } from "@/lib/ai-activity-log";
 
 // Document types that belong in the reusable Assessment Bank.
 const BANKABLE = new Set<SchoolDocType>(["quiz", "exam", "assessment", "worksheet", "answer-key", "marking-guide", "homework-pack", "revision", "exam-prep"]);
@@ -92,8 +93,11 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
       }
       setDocs(out);
       setTab(parts[0].type);
+      logAiActivity({ tool: config.badge, description: `${vals.subject || vals.topic || ""} ${vals.grade || ""}`.trim(), status: "ok" });
     } catch (e) {
-      setGenError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      const msg = e instanceof Error ? e.message : "Something went wrong. Please try again.";
+      logAiActivity({ tool: config.badge, description: `${vals.subject || vals.topic || ""} ${vals.grade || ""}`.trim(), status: "error" });
+      setGenError(msg);
     } finally {
       setProgress(null);
     }
