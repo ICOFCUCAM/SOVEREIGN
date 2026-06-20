@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck } from "lucide-react";
+import { Sparkles, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck, Link2, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem, type CatalogSort } from "@/lib/documents";
@@ -25,6 +25,7 @@ const CatalogPage = () => {
   const [sort, setSort] = useState<CatalogSort>("new");
   const [admin, setAdmin] = useState(false);
   const [profile, setProfile] = useState<AuthorProfile | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const filtering = !!(query.trim() || cat || author);
 
@@ -125,10 +126,16 @@ const CatalogPage = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   {profile.bio && <p className="text-sm text-foreground font-sans leading-relaxed">{profile.bio}</p>}
-                  <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground font-sans">
+                  <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-muted-foreground font-sans">
                     <span><span className="font-semibold text-foreground">{profile.works}</span> published</span>
                     <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.views}</span> views</span>
                     <span className="inline-flex items-center gap-1"><Download className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.downloads}</span> downloads</span>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(window.location.href).catch(() => {}); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
+                      className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-medium transition-premium hover:border-primary/40 hover:text-foreground"
+                    >
+                      {linkCopied ? <><Check className="h-3 w-3 text-primary" /> Copied</> : <><Link2 className="h-3 w-3" /> Share author</>}
+                    </button>
                   </div>
                   {admin && (
                     <button onClick={verify} className={`mt-3 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-sans ${profile.verified ? "border-primary text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
