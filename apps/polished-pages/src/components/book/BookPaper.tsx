@@ -1,6 +1,7 @@
 import type { Ref } from "react";
 import { FONT_FAMILY } from "@/lib/fonts";
 import { getBookTheme, type BookTheme } from "@/lib/book-themes";
+import { isRtlText } from "@/lib/languages";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const inline = (s: string) =>
@@ -8,9 +9,10 @@ const inline = (s: string) =>
 
 // Render markdown book content into a themed page. Inline styles only, so the
 // design is captured faithfully by the image-based PDF export.
-function renderBook(content: string, t: BookTheme): string {
+function renderBook(content: string, t: BookTheme, rtl: boolean): string {
   const body = FONT_FAMILY[t.body];
   const disp = FONT_FAMILY[t.display];
+  const align = rtl && t.align === "left" ? "right" : t.align;
   const lines = content.replace(/\r\n/g, "\n").split("\n");
   const out: string[] = [];
   let chapterNo = 0;
@@ -68,7 +70,7 @@ function renderBook(content: string, t: BookTheme): string {
       html = `<span style="float:left;font-family:${disp};font-size:${t.size * 3.2}px;line-height:.72;padding:.02em .08em 0 0;font-weight:700;color:${t.heading}">${esc(ch)}</span>${inline(tr.slice(1))}`;
     }
     const indent = !first && t.indent ? `text-indent:${t.size * 1.6}px;` : "";
-    out.push(`<p style="font-family:${body};color:${t.ink};font-size:${t.size}px;line-height:${t.leading};text-align:${t.align};margin:0 0 ${first ? "1em" : ".2em"};${indent}">${html}</p>`);
+    out.push(`<p style="font-family:${body};color:${t.ink};font-size:${t.size}px;line-height:${t.leading};text-align:${align};margin:0 0 ${first ? "1em" : ".2em"};${indent}">${html}</p>`);
   }
   closeList();
   return out.join("");
@@ -76,15 +78,17 @@ function renderBook(content: string, t: BookTheme): string {
 
 const BookPaper = ({ content, themeId, innerRef }: { content: string; themeId?: string; innerRef?: Ref<HTMLDivElement> }) => {
   const t = getBookTheme(themeId);
+  const rtl = isRtlText(content);
   return (
     <div
       ref={innerRef}
+      dir={rtl ? "rtl" : "ltr"}
       className="rounded-xl border shadow-premium overflow-hidden"
       style={{ background: t.paper, borderColor: "rgba(0,0,0,0.08)" }}
     >
       <div
         style={{ maxWidth: 640, margin: "0 auto", padding: "3.5rem 3rem" }}
-        dangerouslySetInnerHTML={{ __html: renderBook(content, t) }}
+        dangerouslySetInnerHTML={{ __html: renderBook(content, t, rtl) }}
       />
     </div>
   );

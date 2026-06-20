@@ -3,6 +3,7 @@
 // Draft2Digital (and KDP/IngramSpark, which also take EPUB). JSZip is loaded
 // dynamically so it never weighs down the main bundle.
 import type { PictureBookData } from "@/components/children/PictureBookView";
+import { isRtlText } from "@/lib/languages";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const inline = (s: string) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
@@ -13,8 +14,8 @@ interface BookMeta { title: string; author?: string; language?: string }
 
 const CSS = `body{font-family:Georgia,serif;line-height:1.6;margin:5%}h1{font-size:1.6em;margin:1em 0 .5em}h2{font-size:1.3em;margin:1.2em 0 .4em}h3{font-size:1.1em}p{margin:.5em 0;text-align:justify}img{max-width:100%;height:auto;display:block;margin:1em auto}ul{margin:.5em 0 .5em 1.2em}.page-text{font-size:1.15em;line-height:1.7;text-align:center;margin-top:1em}`;
 
-const xhtml = (title: string, lang: string, body: string) =>
-  `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${lang}" xml:lang="${lang}"><head><meta charset="utf-8"/><title>${esc(title)}</title><link rel="stylesheet" type="text/css" href="styles.css"/></head><body>${body}</body></html>`;
+const xhtml = (title: string, lang: string, body: string, dir: "ltr" | "rtl" = "ltr") =>
+  `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${lang}" xml:lang="${lang}" dir="${dir}"><head><meta charset="utf-8"/><title>${esc(title)}</title><link rel="stylesheet" type="text/css" href="styles.css"/></head><body dir="${dir}">${body}</body></html>`;
 
 // Minimal markdown -> XHTML for a chapter body.
 function mdToXhtml(md: string): string {
@@ -74,7 +75,7 @@ async function imageToBytes(src: string): Promise<{ bytes: Uint8Array; mime: str
 interface ChapterSpec { id: string; href: string; title: string; xhtml: string }
 interface ImageSpec { id: string; href: string; mime: string; bytes: Uint8Array }
 
-async function buildEpub(meta: BookMeta, chapters: ChapterSpec[], images: ImageSpec[], filename: string) {
+async function buildEpub(meta: BookMeta, chapters: ChapterSpec[], images: ImageSpec[], filename: string, dir: "ltr" | "rtl" = "ltr") {
   const { default: JSZip } = await import("jszip");
   const zip = new JSZip();
   const lang = meta.language || "en";
@@ -98,10 +99,11 @@ async function buildEpub(meta: BookMeta, chapters: ChapterSpec[], images: ImageS
     ...images.map((im) => `<item id="${im.id}" href="${im.href}" media-type="${im.mime}"/>`),
   ].join("\n");
   const spine = chapters.map((c) => `<itemref idref="${c.id}"/>`).join("\n");
+  const ppd = ` page-progression-direction="${dir}"`;
 
-  oebps.file("content.opf", `<?xml version="1.0" encoding="utf-8"?>\n<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid" xml:lang="${lang}"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="bookid">${id}</dc:identifier><dc:title>${esc(meta.title)}</dc:title><dc:creator>${esc(meta.author || "Polished Pages")}</dc:creator><dc:language>${lang}</dc:language><meta property="dcterms:modified">${modified}</meta></metadata><manifest>${manifest}</manifest><spine toc="ncx">${spine}</spine></package>`);
+  oebps.file("content.opf", `<?xml version="1.0" encoding="utf-8"?>\n<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid" xml:lang="${lang}"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="bookid">${id}</dc:identifier><dc:title>${esc(meta.title)}</dc:title><dc:creator>${esc(meta.author || "Polished Pages")}</dc:creator><dc:language>${lang}</dc:language><meta property="dcterms:modified">${modified}</meta></metadata><manifest>${manifest}</manifest><spine toc="ncx"${ppd}>${spine}</spine></package>`);
 
-  oebps.file("nav.xhtml", `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${lang}"><head><meta charset="utf-8"/><title>Contents</title></head><body><nav epub:type="toc" id="toc"><h1>Contents</h1><ol>${chapters.map((c) => `<li><a href="${c.href}">${esc(c.title)}</a></li>`).join("")}</ol></nav></body></html>`);
+  oebps.file("nav.xhtml", `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${lang}" dir="${dir}"><head><meta charset="utf-8"/><title>Contents</title></head><body dir="${dir}"><nav epub:type="toc" id="toc"><h1>Contents</h1><ol>${chapters.map((c) => `<li><a href="${c.href}">${esc(c.title)}</a></li>`).join("")}</ol></nav></body></html>`);
 
   oebps.file("toc.ncx", `<?xml version="1.0" encoding="utf-8"?>\n<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="${id}"/><meta name="dtb:depth" content="1"/></head><docTitle><text>${esc(meta.title)}</text></docTitle><navMap>${chapters.map((c, i) => `<navPoint id="np${i + 1}" playOrder="${i + 1}"><navLabel><text>${esc(c.title)}</text></navLabel><content src="${c.href}"/></navPoint>`).join("")}</navMap></ncx>`);
 
@@ -114,15 +116,17 @@ async function buildEpub(meta: BookMeta, chapters: ChapterSpec[], images: ImageS
 
 export async function markdownToEpub(markdown: string, meta: BookMeta, filename: string): Promise<void> {
   const lang = meta.language || "en";
+  const dir = isRtlText(markdown) ? "rtl" : "ltr";
   const chapters = splitChapters(markdown).map((c, i) => ({
     id: `ch${i + 1}`, href: `chapter-${i + 1}.xhtml`, title: c.title,
-    xhtml: xhtml(c.title, lang, c.body),
+    xhtml: xhtml(c.title, lang, c.body, dir),
   }));
-  await buildEpub(meta, chapters, [], filename);
+  await buildEpub(meta, chapters, [], filename, dir);
 }
 
 export async function pictureBookToEpub(book: PictureBookData, meta: BookMeta, filename: string): Promise<void> {
   const lang = meta.language || "en";
+  const dir = isRtlText(book.pages.map((p) => p.text ?? "").join(" ")) ? "rtl" : "ltr";
   const chapters: ChapterSpec[] = [];
   const images: ImageSpec[] = [];
   let imgN = 0;
@@ -142,7 +146,7 @@ export async function pictureBookToEpub(book: PictureBookData, meta: BookMeta, f
   const coverHref = await addImage(book.coverImage);
   chapters.push({
     id: "cover", href: "chapter-1.xhtml", title: book.title,
-    xhtml: xhtml(book.title, lang, `${coverHref ? `<img src="${coverHref}" alt="Cover"/>` : ""}<h1 style="text-align:center">${esc(book.title)}</h1>${book.dedication ? `<p style="text-align:center"><em>${esc(book.dedication)}</em></p>` : ""}`),
+    xhtml: xhtml(book.title, lang, `${coverHref ? `<img src="${coverHref}" alt="Cover"/>` : ""}<h1 style="text-align:center">${esc(book.title)}</h1>${book.dedication ? `<p style="text-align:center"><em>${esc(book.dedication)}</em></p>` : ""}`, dir),
   });
 
   for (let i = 0; i < book.pages.length; i++) {
@@ -150,8 +154,8 @@ export async function pictureBookToEpub(book: PictureBookData, meta: BookMeta, f
     const href = await addImage(p.image);
     chapters.push({
       id: `pg${i + 1}`, href: `chapter-${i + 2}.xhtml`, title: `Page ${i + 1}`,
-      xhtml: xhtml(`Page ${i + 1}`, lang, `${href ? `<img src="${href}" alt="Page ${i + 1}"/>` : ""}${p.text ? `<p class="page-text">${inline(p.text)}</p>` : ""}`),
+      xhtml: xhtml(`Page ${i + 1}`, lang, `${href ? `<img src="${href}" alt="Page ${i + 1}"/>` : ""}${p.text ? `<p class="page-text">${inline(p.text)}</p>` : ""}`, dir),
     });
   }
-  await buildEpub(meta, chapters, images, filename);
+  await buildEpub(meta, chapters, images, filename, dir);
 }

@@ -3,6 +3,7 @@ import { PREMIUM_TEMPLATES, PREMIUM_COLLECTIONS, isPremiumId, getPremiumTemplate
 import { TOOLS } from "@/lib/tools";
 import { BOOK_THEMES, getBookTheme } from "@/lib/book-themes";
 import { FONT_FAMILY } from "@/lib/fonts";
+import { isRtlText, isRtlLanguage, LANGUAGES } from "@/lib/languages";
 
 describe("premium templates registry", () => {
   it("has unique ids", () => {
@@ -40,6 +41,20 @@ describe("tools registry", () => {
 
   it("every tool path is absolute", () => {
     for (const t of TOOLS) expect(t.path.startsWith("/")).toBe(true);
+  });
+});
+
+describe("languages & RTL", () => {
+  it("detects Arabic/Hebrew text as RTL and English as LTR", () => {
+    expect(isRtlText("هذا كتاب للأطفال عن الصداقة والكرم")).toBe(true);
+    expect(isRtlText("This is a children's book about friendship.")).toBe(false);
+    expect(isRtlText("")).toBe(false);
+  });
+  it("flags Arabic as an RTL language and unique ISO codes", () => {
+    expect(isRtlLanguage("Arabic")).toBe(true);
+    expect(isRtlLanguage("English")).toBe(false);
+    const isos = LANGUAGES.map((l) => l.iso);
+    expect(new Set(isos).size).toBe(isos.length);
   });
 });
 

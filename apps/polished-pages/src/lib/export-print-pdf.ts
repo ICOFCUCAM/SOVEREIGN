@@ -4,6 +4,7 @@
 // starting on a new page, and page numbers. Suitable for KDP/IngramSpark
 // interiors. jsPDF is loaded dynamically.
 import type { TrimSize } from "@/lib/print-sizes";
+import { isRtlText } from "@/lib/languages";
 
 const PT_TO_MM = 0.352778;
 const strip = (s: string) => s.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1").replace(/`/g, "");
@@ -13,6 +14,11 @@ export async function markdownToPrintPdf(
   opts: { title: string; trim: TrimSize },
   filename: string,
 ): Promise<void> {
+  // The standard PDF fonts can't shape right-to-left scripts; for RTL content the
+  // EPUB and design-PDF (browser-rendered) paths handle direction correctly.
+  if (isRtlText(markdown)) {
+    throw new Error("For right-to-left languages, export EPUB or the Design PDF — the text-interior PDF can't shape this script.");
+  }
   const { jsPDF } = await import("jspdf");
   const { wmm: pageW, hmm: pageH } = opts.trim;
   const pdf = new jsPDF({ orientation: pageW > pageH ? "l" : "p", unit: "mm", format: [pageW, pageH] });

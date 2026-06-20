@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Globe, Sparkles, Loader2, ArrowLeft, Upload, FileText } from "lucide-react";
+import { Globe, Sparkles, Loader2, ArrowLeft, Upload, FileText, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +17,7 @@ import { markdownToEpub } from "@/lib/export-epub";
 import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
+import { saveDocument } from "@/lib/documents";
 
 const TranslatePublish = () => {
   const { toast } = useToast();
@@ -31,6 +32,7 @@ const TranslatePublish = () => {
   const [progress, setProgress] = useState<{ label: string; done: number; total: number } | null>(null);
   const [editions, setEditions] = useState<Record<string, string> | null>(null);
   const [tab, setTab] = useState("");
+  const [savingAll, setSavingAll] = useState(false);
 
   const canRun = (file || source.trim().length > 60) && targets.length > 0 && !progress;
 
@@ -70,6 +72,22 @@ const TranslatePublish = () => {
     }
   };
 
+  const saveAll = async () => {
+    if (!editions) return;
+    setSavingAll(true);
+    try {
+      const base = title || "Document";
+      for (const [lang, md] of Object.entries(editions)) {
+        await saveDocument({ kind: "book", title: `${base} — ${lang}`, payload: { markdown: md, title: `${base} — ${lang}` }, preview: `${mode === "localize" ? "Localized" : "Translated"} edition · ${lang}` });
+      }
+      toast({ title: "Saved to library", description: `${Object.keys(editions).length} editions saved.` });
+    } catch (e) {
+      toast({ title: "Could not save all", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally {
+      setSavingAll(false);
+    }
+  };
+
   if (editions) {
     const langs = Object.keys(editions);
     const current = editions[tab] ?? "";
@@ -89,6 +107,9 @@ const TranslatePublish = () => {
             <div className="flex items-center gap-2">
               <Button variant="heroOutline" size="sm" onClick={() => markdownToEpub(current, { title: editionTitle, language: isoFor(tab) }, editionTitle).catch(() => {})}>EPUB</Button>
               <SaveToLibrary kind="book" title={editionTitle} payload={{ markdown: current, title: editionTitle }} preview={`${mode === "localize" ? "Localized" : "Translated"} · ${tab}`} />
+              <Button variant="hero" size="sm" disabled={savingAll} onClick={saveAll}>
+                {savingAll ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />} Save all {langs.length}
+              </Button>
               <Button variant="ghost" size="sm" onClick={() => setEditions(null)} className="text-muted-foreground"><ArrowLeft className="w-4 h-4 mr-1" /> New</Button>
             </div>
           </div>
