@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
+import AppShell from "@/components/app/AppShell";
+import { BRAND } from "@/lib/tools";
 
 // Polished Pages generation is metered per user, so the studio sits behind a
 // sign-in gate. This wraps the whole app: no session → sign-in screen; session →
-// the app plus a thin account bar showing plan/usage and sign-out.
+// the full studio shell (global nav, command palette, account menu).
 const AuthGate = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,12 +24,7 @@ const AuthGate = ({ children }: { children: ReactNode }) => {
 
   if (loading) return null;
   if (!session) return <SignIn />;
-  return (
-    <div className="min-h-screen">
-      <AccountBar email={session.user.email ?? ""} />
-      {children}
-    </div>
-  );
+  return <AppShell email={session.user.email ?? ""}>{children}</AppShell>;
 };
 
 const SignIn = () => {
@@ -56,7 +52,7 @@ const SignIn = () => {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>{mode === "signin" ? "Sign in" : "Create account"}</CardTitle>
-          <p className="text-sm text-muted-foreground">Polished Pages — your document studio</p>
+          <p className="text-sm text-muted-foreground">{BRAND} — your document studio</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
@@ -82,33 +78,6 @@ const SignIn = () => {
           </button>
         </CardContent>
       </Card>
-    </div>
-  );
-};
-
-const AccountBar = ({ email }: { email: string }) => {
-  const [status, setStatus] = useState<PlanStatus | null>(null);
-  const [upgrading, setUpgrading] = useState(false);
-  useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
-
-  const isFree = status ? status.plan !== "pro" : false;
-  const label = status
-    ? (status.plan === "pro" ? "Pro · unlimited" : `Free · ${status.used}/${status.lim} generations this month`)
-    : "";
-
-  const onUpgrade = async (): Promise<void> => {
-    setUpgrading(true);
-    try { await startUpgrade(); } catch (e) { alert(e instanceof Error ? e.message : "Upgrade failed"); setUpgrading(false); }
-  };
-
-  return (
-    <div className="flex items-center justify-end gap-3 border-b px-4 py-2 text-sm">
-      {label && <span className="text-muted-foreground">{label}</span>}
-      {isFree && (
-        <Button size="sm" onClick={onUpgrade} disabled={upgrading}>{upgrading ? "…" : "Upgrade to Pro"}</Button>
-      )}
-      <span className="text-muted-foreground">{email}</span>
-      <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>Sign out</Button>
     </div>
   );
 };

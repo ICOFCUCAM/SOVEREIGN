@@ -195,13 +195,8 @@ const BookCreator = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-        <div className="container flex items-center justify-between h-16 px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span className="text-lg font-bold font-serif tracking-tight">DocuForge</span>
-          </Link>
-
+      <nav className="sticky top-14 z-40 border-b border-border/50 bg-background/80 backdrop-blur-lg">
+        <div className="container flex items-center justify-between h-12 px-6">
           {/* Tabs */}
           {view !== "setup" && (
             <div className="hidden md:flex items-center gap-1 bg-secondary/50 rounded-lg p-1">
@@ -229,7 +224,7 @@ const BookCreator = () => {
         </div>
       </nav>
 
-      <div className="container max-w-4xl mx-auto px-6 pt-28 pb-16">
+      <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
         <AnimatePresence mode="wait">
           <motion.div
             key={viewingChapter !== null ? `ch-${viewingChapter}` : view}

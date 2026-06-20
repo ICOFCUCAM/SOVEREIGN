@@ -86,12 +86,9 @@ const CoverLetterPreview = ({ markdown, fullName, email, phone, onBack }: Props)
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-        <div className="container flex items-center justify-between h-16 px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-gold" />
-            <span className="text-lg font-bold font-serif tracking-tight">DocuForge</span>
-          </Link>
+      <nav className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
+        <div className="container flex items-center justify-between h-12 px-6">
+          <span className="text-sm font-medium text-muted-foreground font-sans">Preview</span>
           <div className="flex items-center gap-3">
             <Button variant="ghost" onClick={onBack} className="text-muted-foreground">
               <ArrowLeft className="w-4 h-4 mr-2" /> Edit
@@ -111,7 +108,7 @@ const CoverLetterPreview = ({ markdown, fullName, email, phone, onBack }: Props)
         </div>
       </nav>
 
-      <div className="container max-w-3xl mx-auto px-6 pt-28 pb-16">
+      <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
         <div
           ref={ref}
           className="rounded-xl border font-serif p-10 md:p-14 shadow-premium leading-relaxed"

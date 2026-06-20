@@ -76,17 +76,7 @@ const CoverLetterGenerator = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-        <div className="container flex items-center justify-between h-16 px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-gold" />
-            <span className="text-lg font-bold font-serif tracking-tight">DocuForge</span>
-          </Link>
-        </div>
-      </nav>
-
-      <div className="container max-w-4xl mx-auto px-6 pt-28 pb-16">
+      <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
         <AnimatePresence mode="wait">
           {(
             <motion.div

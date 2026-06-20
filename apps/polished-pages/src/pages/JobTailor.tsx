@@ -167,19 +167,16 @@ const JobTailor = () => {
     const today = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
     return (
       <div className="min-h-screen bg-background">
-        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-          <div className="container flex items-center justify-between h-16 px-6">
-            <Link to="/" className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-gold" />
-              <span className="text-lg font-bold font-serif tracking-tight">DocuForge</span>
-            </Link>
-            <Button variant="ghost" onClick={() => setResult(null)} className="text-muted-foreground">
+        <nav className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
+          <div className="container flex items-center justify-between h-12 px-6">
+            <span className="text-sm font-medium text-muted-foreground font-sans">Tailored application</span>
+            <Button variant="ghost" size="sm" onClick={() => setResult(null)} className="text-muted-foreground">
               <ArrowLeft className="w-4 h-4 mr-2" /> New tailoring
             </Button>
           </div>
         </nav>
 
-        <div className="container max-w-4xl mx-auto px-6 pt-24 pb-16">
+        <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
           {/* tab switcher */}
           <div className="mb-6 inline-flex rounded-lg border border-border bg-card p-1">
             {([["match", "Match analysis"], ["cv", "Tailored CV"], ["letter", "Cover letter"]] as const).map(([id, label]) => (
@@ -304,16 +301,7 @@ const JobTailor = () => {
   // ───────────────────────── INPUT VIEW ─────────────────────────
   return (
     <div className="min-h-screen bg-background">
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-        <div className="container flex items-center justify-between h-16 px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-gold" />
-            <span className="text-lg font-bold font-serif tracking-tight">DocuForge</span>
-          </Link>
-        </div>
-      </nav>
-
-      <div className="container max-w-4xl mx-auto px-6 pt-28 pb-16">
+      <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
             <Target className="w-4 h-4 text-gold" />

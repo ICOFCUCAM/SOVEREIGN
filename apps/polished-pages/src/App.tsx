@@ -7,6 +7,8 @@ import Index from "./pages/Index.tsx";
 import CVGenerator from "./pages/CVGenerator.tsx";
 import CoverLetterGenerator from "./pages/CoverLetterGenerator.tsx";
 import JobTailor from "./pages/JobTailor.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
+import Account from "./pages/Account.tsx";
 import BookCreator from "./pages/BookCreator.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Gallery from "./pages/Gallery.tsx";
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           {/* Generators require sign-in (metered per user); the gate prompts
               for sign-in only when someone actually goes to create. */}
+          <Route path="/dashboard" element={<AuthGate><Dashboard /></AuthGate>} />
+          <Route path="/account" element={<AuthGate><Account /></AuthGate>} />
           <Route path="/cv" element={<AuthGate><CVGenerator /></AuthGate>} />
           <Route path="/cover-letter" element={<AuthGate><CoverLetterGenerator /></AuthGate>} />
           <Route path="/tailor" element={<AuthGate><JobTailor /></AuthGate>} />
