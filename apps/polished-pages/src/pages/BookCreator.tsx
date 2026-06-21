@@ -418,7 +418,7 @@ const BookCreator = () => {
               <div>
                 <h2 className="font-serif text-2xl font-bold mb-1">Audiobook</h2>
                 <p className="text-sm text-muted-foreground font-sans mb-5">Narrate your book chapter by chapter with a natural AI voice, preview it, and download the MP3 files. Localize first to narrate a language edition.</p>
-                <AudiobookPanel chapters={generatedChapters.map((c) => ({ title: c.title, content: c.content! }))} bookTitle={outline?.title || bookTitle || "Untitled book"} />
+                <AudiobookPanel chapters={generatedChapters.map((c) => ({ title: c.title, content: c.content! }))} bookTitle={outline?.title || bookTitle || "Untitled book"} parentId={autosave.docId} ensureSaved={() => autosave.flush()} />
               </div>
             ) : view === "cover" ? (
               <div>

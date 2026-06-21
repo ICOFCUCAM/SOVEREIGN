@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink, Building2, Sparkles, Languages } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink, Building2, Sparkles, Languages, Headphones } from "lucide-react";
 import { isoFor } from "@/lib/languages";
+import type { AudiobookData } from "@/lib/audiobook";
 import PublishDialog from "@/components/app/PublishDialog";
 import BulkPublishDialog from "@/components/app/BulkPublishDialog";
 import AddToCollection from "@/components/app/AddToCollection";
@@ -35,6 +36,7 @@ const KIND_META: Record<DocKind, { label: string; icon: typeof FileText }> = {
   cover: { label: "Book cover", icon: ImageIcon },
   storybook: { label: "Storybook", icon: BookHeart },
   illustration: { label: "Illustration", icon: ImageIcon },
+  audiobook: { label: "Audiobook", icon: Headphones },
 };
 
 type Opened =
@@ -43,7 +45,8 @@ type Opened =
   | { kind: "book"; markdown: string; title: string }
   | { kind: "cover"; front?: string; back?: string; title: string }
   | { kind: "image"; src: string; title: string }
-  | { kind: "picturebook"; book: PictureBookData; pageAspect: string; showText: boolean; title: string };
+  | { kind: "picturebook"; book: PictureBookData; pageAspect: string; showText: boolean; title: string }
+  | { kind: "audiobook"; chapters: { title: string; url: string }[]; voice: string; title: string };
 
 const LibraryPage = () => {
   const { toast } = useToast();
@@ -111,6 +114,9 @@ const LibraryPage = () => {
         setOpened({ kind: "image", src: String(p.image ?? ""), title: d.title });
       } else if (d.kind === "storybook") {
         setOpened({ kind: "picturebook", book: p.book as PictureBookData, pageAspect: String(p.pageAspect ?? "16/9"), showText: p.showText !== false, title: d.title });
+      } else if (d.kind === "audiobook") {
+        const ab = p as unknown as AudiobookData;
+        setOpened({ kind: "audiobook", chapters: ab.chapters ?? [], voice: String(ab.voice ?? ""), title: d.title });
       } else {
         // cv and tailored both restore a CvData document
         setOpened({ kind: "cv", data: p.data as CvData, template: (row.template ?? undefined) || (p.template as string | undefined) });
@@ -326,6 +332,33 @@ const LibraryPage = () => {
         </div>
         <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
           <div className="overflow-hidden rounded-xl border border-border shadow-premium bg-white"><img src={opened.src} alt={opened.title} className="w-full" /></div>
+        </div>
+      </div>
+    );
+  }
+  if (opened?.kind === "audiobook") {
+    const ab = opened;
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
+          <div className="container flex items-center justify-between h-12 px-6">
+            <span className="truncate text-sm font-medium text-muted-foreground font-sans">{ab.title}</span>
+            <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground"><ArrowLeft className="w-4 h-4 mr-2" /> Library</Button>
+          </div>
+        </div>
+        <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
+          <div className="mb-5 flex items-center gap-2"><Headphones className="h-5 w-5 text-primary" /><h1 className="font-serif text-2xl font-bold">{ab.title}</h1></div>
+          {ab.voice && <p className="mb-5 text-sm text-muted-foreground font-sans">Narrated by the “{ab.voice}” voice · {ab.chapters.length} chapter{ab.chapters.length === 1 ? "" : "s"}</p>}
+          <div className="space-y-2">
+            {ab.chapters.map((c, i) => (
+              <Card key={i} className="border-border"><CardContent className="flex flex-wrap items-center gap-3 p-3.5">
+                <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                <span className="min-w-0 flex-1 truncate font-sans text-sm font-medium">{c.title}</span>
+                <audio controls preload="none" src={c.url} className="h-9 max-w-[260px]" />
+                <a href={c.url} download className="inline-flex items-center rounded-md border border-border px-2 py-1 text-muted-foreground hover:text-primary"><Download className="h-3.5 w-3.5" /></a>
+              </CardContent></Card>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -582,11 +615,13 @@ const LibraryPage = () => {
         // current filtered view is promoted to a top-level card so nothing hides.
         const inView = new Set(filtered.map((d) => d.id));
         const editionsByParent = new Map<string, DocSummary[]>();
+        const audiobooksByParent = new Map<string, DocSummary[]>();
         const topLevel: DocSummary[] = [];
         for (const d of filtered) {
           if (d.parent_document_id && inView.has(d.parent_document_id)) {
-            const arr = editionsByParent.get(d.parent_document_id) ?? [];
-            arr.push(d); editionsByParent.set(d.parent_document_id, arr);
+            const map = d.kind === "audiobook" ? audiobooksByParent : editionsByParent;
+            const arr = map.get(d.parent_document_id) ?? [];
+            arr.push(d); map.set(d.parent_document_id, arr);
           } else {
             topLevel.push(d);
           }
@@ -596,6 +631,7 @@ const LibraryPage = () => {
             {topLevel.map((d) => {
               const meta = KIND_META[d.kind] ?? KIND_META.cv;
               const editions = editionsByParent.get(d.id) ?? [];
+              const audiobooks = audiobooksByParent.get(d.id) ?? [];
               return (
                 <Card key={d.id} className={`group border-border transition-colors hover:border-primary/40 ${selected.has(d.id) ? "border-primary/60 bg-primary/5" : ""}`}>
                   <CardContent className="flex items-start gap-3 p-4">
@@ -680,6 +716,24 @@ const LibraryPage = () => {
                               </span>
                             );
                           })}
+                        </div>
+                      )}
+                      {audiobooks.length > 0 && (
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] font-sans">
+                          <span className="inline-flex items-center gap-1 text-muted-foreground"><Headphones className="h-3 w-3" /> Audiobook</span>
+                          {audiobooks.map((a) => (
+                            <span key={a.id} className="inline-flex items-center overflow-hidden rounded-full border border-border bg-card text-muted-foreground">
+                              <button onClick={(ev) => { ev.stopPropagation(); open(a); }} disabled={opening === a.id}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 transition-colors hover:text-primary" title="Open audiobook">
+                                {opening === a.id && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+                                Listen{a.listed && <Store className="h-2.5 w-2.5 text-marketplace" />}
+                              </button>
+                              <button onClick={(ev) => { ev.stopPropagation(); remove(a.id); }} title="Delete this audiobook"
+                                className="border-l border-border px-1 py-0.5 text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive">
+                                <X className="h-2.5 w-2.5" />
+                              </button>
+                            </span>
+                          ))}
                         </div>
                       )}
                       {(d.tags ?? []).length > 0 && (

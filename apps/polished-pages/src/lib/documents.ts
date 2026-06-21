@@ -5,7 +5,7 @@ import type { CvData } from "@/lib/cv-data";
 // reached only through the public.polished_* SECURITY DEFINER RPCs, which scope
 // every row to auth.uid(). The generated Database types don't know these RPCs,
 // so we cast (same pattern as session.ts).
-export type DocKind = "cv" | "cover-letter" | "book" | "tailored" | "cover" | "storybook" | "illustration";
+export type DocKind = "cv" | "cover-letter" | "book" | "tailored" | "cover" | "storybook" | "illustration" | "audiobook";
 
 export interface DocSummary {
   id: string;
@@ -45,6 +45,7 @@ export async function saveDocument(input: {
   template?: string | null;
   payload: unknown;
   preview?: string;
+  parent?: string | null; // link as a project asset under a parent document
 }): Promise<string> {
   const { data, error } = await rpc().rpc("polished_save_document", {
     p_kind: input.kind,
@@ -52,6 +53,7 @@ export async function saveDocument(input: {
     p_template: input.template ?? null,
     p_payload: input.payload,
     p_preview: input.preview ?? null,
+    p_parent: input.parent ?? null,
   });
   if (error) throw new Error(error.message || "Could not save the document.");
   return data as string;

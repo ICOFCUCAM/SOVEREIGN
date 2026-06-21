@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight, Crown, Zap, Library, FileText, BookOpen, BookHeart, GraduationCap, Palette, School,
   Store, TrendingUp, Eye, Download, Rocket, Clock, Image as ImageIcon, Send, Layers, Globe, Lightbulb,
-  Sparkles, CheckCircle2, XCircle, PenLine, Share2,
+  Sparkles, CheckCircle2, XCircle, PenLine, Share2, Headphones,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,11 +31,11 @@ const CREATE: { label: string; to: string; icon: typeof FileText; studio: Studio
 
 const KIND_NOUN: Record<DocKind, string> = {
   cv: "CV", tailored: "tailored CV", "cover-letter": "cover letter", book: "book",
-  cover: "book cover", storybook: "storybook", illustration: "illustration",
+  cover: "book cover", storybook: "storybook", illustration: "illustration", audiobook: "audiobook",
 };
 const KIND_ICON: Record<DocKind, typeof FileText> = {
   cv: FileText, tailored: FileText, "cover-letter": FileText, book: BookOpen,
-  cover: ImageIcon, storybook: BookHeart, illustration: ImageIcon,
+  cover: ImageIcon, storybook: BookHeart, illustration: ImageIcon, audiobook: Headphones,
 };
 const trendScore = (i: CatalogItem) => (i.download_count ?? 0) * 3 + (i.view_count ?? 0);
 

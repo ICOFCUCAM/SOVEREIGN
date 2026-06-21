@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Headphones, Loader2, Download, Crown, Check, Play, RefreshCw } from "lucide-react";
+import { Headphones, Loader2, Download, Crown, Check, Play, RefreshCw, Save } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { fetchPlanStatus, type PlanStatus } from "@/lib/session";
 import { planAtLeast, planDisplayName } from "@/lib/plans";
-import { narrate, NARRATION_VOICES } from "@/lib/audiobook";
+import { narrate, saveAudiobook, NARRATION_VOICES } from "@/lib/audiobook";
 
 const sanitize = (s: string) => s.replace(/[^\w\d -]+/g, "").trim().slice(0, 60) || "chapter";
 const download = (dataUrl: string, name: string) => { const a = document.createElement("a"); a.href = dataUrl; a.download = name; a.click(); };
@@ -15,13 +15,14 @@ const download = (dataUrl: string, name: string) => { const a = document.createE
 // Turn a finished book into a narrated audiobook (one MP3 per chapter), preview
 // it in the browser and download the files. Audiobooks are an Enterprise
 // capability — the gate is enforced server-side too in generate-narration.
-const AudiobookPanel = ({ chapters, bookTitle }: { chapters: { title: string; content: string }[]; bookTitle: string }) => {
+const AudiobookPanel = ({ chapters, bookTitle, parentId, ensureSaved }: { chapters: { title: string; content: string }[]; bookTitle: string; parentId?: string | null; ensureSaved?: () => Promise<string | null> }) => {
   const { toast } = useToast();
   const [status, setStatus] = useState<PlanStatus | null>(null);
   const [voice, setVoice] = useState<string>(NARRATION_VOICES[0].id);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [tracks, setTracks] = useState<Record<number, string>>({});
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
 
   useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
   const isEnterprise = planAtLeast(status?.plan, "enterprise-plus");
@@ -31,6 +32,7 @@ const AudiobookPanel = ({ chapters, bookTitle }: { chapters: { title: string; co
     try {
       const audio = await narrate(chapters[i].content, voice);
       setTracks((t) => ({ ...t, [i]: audio }));
+      setSaveState("idle");
     } catch (e) {
       toast({ title: `Chapter ${i + 1} narration failed`, description: e instanceof Error ? e.message : "", variant: "destructive" });
     } finally { setBusy(false); }
@@ -40,6 +42,7 @@ const AudiobookPanel = ({ chapters, bookTitle }: { chapters: { title: string; co
     setBusy(true);
     setProgress({ done: 0, total: chapters.length });
     setTracks({});
+    setSaveState("idle");
     for (let i = 0; i < chapters.length; i++) {
       try {
         const audio = await narrate(chapters[i].content, voice);
@@ -55,6 +58,22 @@ const AudiobookPanel = ({ chapters, bookTitle }: { chapters: { title: string; co
 
   const downloadAll = () => {
     chapters.forEach((c, i) => { const t = tracks[i]; if (t) download(t, `${String(i + 1).padStart(2, "0")} - ${sanitize(c.title)}.mp3`); });
+  };
+
+  const saveToLibrary = async () => {
+    setSaveState("saving");
+    try {
+      let parent = parentId ?? null;
+      if (!parent && ensureSaved) parent = await ensureSaved();
+      const ordered = chapters.map((c, i) => (tracks[i] ? { title: c.title, dataUrl: tracks[i] } : null)).filter(Boolean) as { title: string; dataUrl: string }[];
+      if (ordered.length === 0) throw new Error("Narrate at least one chapter first.");
+      await saveAudiobook({ bookId: parent, bookTitle, voice, tracks: ordered });
+      setSaveState("saved");
+      toast({ title: "Audiobook saved", description: "It's in your Library, linked to this book." });
+    } catch (e) {
+      setSaveState("idle");
+      toast({ title: "Could not save audiobook", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    }
   };
 
   const made = Object.keys(tracks).length;
@@ -83,7 +102,7 @@ const AudiobookPanel = ({ chapters, bookTitle }: { chapters: { title: string; co
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label className="font-sans text-xs">Narrator voice</Label>
-            <select value={voice} onChange={(e) => { setVoice(e.target.value); setTracks({}); }} disabled={busy} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+            <select value={voice} onChange={(e) => { setVoice(e.target.value); setTracks({}); setSaveState("idle"); }} disabled={busy} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
               {NARRATION_VOICES.map((v) => <option key={v.id} value={v.id}>{v.label} — {v.hint}</option>)}
             </select>
           </div>
@@ -102,6 +121,12 @@ const AudiobookPanel = ({ chapters, bookTitle }: { chapters: { title: string; co
                   <Headphones className="mr-2 h-4 w-4" /> {made > 0 ? "Re-narrate book" : "Narrate book"}
                 </Button>
                 {made > 0 && <Button variant="heroOutline" size="sm" disabled={busy} onClick={downloadAll}><Download className="mr-1.5 h-4 w-4" /> Download all</Button>}
+                {made > 0 && (
+                  <Button variant="heroOutline" size="sm" disabled={busy || saveState === "saving"} onClick={saveToLibrary}>
+                    {saveState === "saving" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : saveState === "saved" ? <Check className="mr-1.5 h-4 w-4 text-green-600" /> : <Save className="mr-1.5 h-4 w-4" />}
+                    {saveState === "saved" ? "Saved" : "Save to library"}
+                  </Button>
+                )}
               </div>
             )}
           </div>

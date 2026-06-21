@@ -98,6 +98,16 @@ const SharedDocument = () => {
               <PremiumCv data={p.data as CvData} template={doc.template ?? undefined} />
             ) : doc.kind === "storybook" && p.book ? (
               <PictureBookView book={p.book as PictureBookData} pageAspect={String(p.pageAspect ?? "16/9")} showText={p.showText !== false} />
+            ) : doc.kind === "audiobook" && Array.isArray(p.chapters) ? (
+              <div className="space-y-2">
+                {(p.chapters as { title: string; url: string }[]).map((c, i) => (
+                  <div key={i} className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3.5">
+                    <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium font-sans">{c.title}</span>
+                    <audio controls preload="none" src={c.url} className="h-9 max-w-[260px]" />
+                  </div>
+                ))}
+              </div>
             ) : (doc.kind === "cover" || doc.kind === "illustration") ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 {[p.front, p.back, p.image].filter(Boolean).map((src, i) => (

@@ -7,7 +7,7 @@ import PublishDialog from "@/components/app/PublishDialog";
 
 const KIND_NOUN: Record<DocKind, string> = {
   cv: "CV", "cover-letter": "cover letter", book: "book", tailored: "CV",
-  cover: "cover", storybook: "storybook", illustration: "illustration",
+  cover: "cover", storybook: "storybook", illustration: "illustration", audiobook: "audiobook",
 };
 
 // One-tap "Save to library" used on every preview. Idempotent per click: once
