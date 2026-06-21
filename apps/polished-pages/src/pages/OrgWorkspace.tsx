@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft, Users, Mail, FolderPlus, ExternalLink, Loader2, Trash2, BadgeCheck,
   Globe, Library as LibraryIcon, Languages, BookOpen, GraduationCap, Megaphone, Layers,
-  ShieldCheck, Activity, Settings2, Save, Building2, Rocket, Check,
+  ShieldCheck, Activity, Settings2, Save, Building2, Rocket, Check, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -149,7 +149,10 @@ const OrgWorkspace = () => {
             <h1 className="text-display mt-2 truncate text-3xl font-bold md:text-4xl">{org.name}</h1>
             <p className="mt-1 text-sm text-white/65 font-sans">{pres!.workspaceLine}</p>
           </div>
-          <Link to={`/org/${org.slug}`} className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold backdrop-blur transition-colors hover:bg-white/20"><ExternalLink className="h-4 w-4" /> Storefront</Link>
+          <div className="flex shrink-0 flex-wrap gap-2 self-start">
+            <Link to={`/organizations/${org.slug}/analytics`} className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold backdrop-blur transition-colors hover:bg-white/20"><BarChart3 className="h-4 w-4" /> Analytics</Link>
+            <Link to={`/org/${org.slug}`} className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold backdrop-blur transition-colors hover:bg-white/20"><ExternalLink className="h-4 w-4" /> Storefront</Link>
+          </div>
         </div>
       </section>
 
