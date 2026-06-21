@@ -188,12 +188,12 @@ const CatalogPage = () => {
                   <span className="eyebrow text-white/70">The marketplace</span>
                 </div>
                 <h1 className="text-display mt-4 text-4xl font-bold tracking-tight md:text-5xl">
-                  Stories &amp; lessons from{" "}
-                  <span className="bg-gradient-to-r from-[hsl(38_92%_62%)] via-[hsl(330_80%_70%)] to-[hsl(262_85%_74%)] bg-clip-text italic text-transparent">independent creators</span>
+                  Books, lessons &amp; curricula —{" "}
+                  <span className="bg-gradient-to-r from-[hsl(38_92%_62%)] via-[hsl(330_80%_70%)] to-[hsl(262_85%_74%)] bg-clip-text italic text-transparent">published to the world</span>
                 </h1>
-                <p className="mt-4 max-w-md text-lg text-white/55 font-sans">Storybooks, readers, workbooks and classroom materials — created, owned and sold by authors worldwide.</p>
+                <p className="mt-4 max-w-md text-lg text-white/55 font-sans">Storybooks, readers, workbooks, curricula and assessments — created and owned by their authors, and built for publishers, schools and ministries.</p>
                 <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/70 font-sans">
-                  <span className="inline-flex items-center gap-1.5"><BadgeCheck className="h-4 w-4 text-[hsl(217_91%_70%)]" /> Independent authors</span>
+                  <span className="inline-flex items-center gap-1.5"><Building2 className="h-4 w-4 text-[hsl(217_91%_70%)]" /> Creators &amp; institutions</span>
                   <span className="inline-flex items-center gap-1.5"><Download className="h-4 w-4 text-[hsl(217_91%_70%)]" /> Store-ready downloads</span>
                   <span className="inline-flex items-center gap-1.5"><Store className="h-4 w-4 text-[hsl(217_91%_70%)]" /> Free &amp; paid</span>
                 </div>
@@ -345,9 +345,26 @@ const CatalogPage = () => {
         {items && !filtering && (
           all.length === 0
             ? (
-              <div className="mt-16 flex flex-col items-center gap-4 text-center">
-                <SpineMark size="md" className="justify-center" />
-                <p className="text-sm text-muted-foreground font-sans">Nothing published yet — be the first to share something.</p>
+              <div className="mt-12">
+                <div className="flex flex-col items-center gap-3 rounded-3xl border border-border bg-gradient-to-b from-secondary/40 to-card px-6 py-14 text-center">
+                  <SpineMark size="md" className="justify-center" />
+                  <h2 className="mt-2 font-serif text-2xl font-bold">The shelves are being stocked</h2>
+                  <p className="max-w-md text-sm text-muted-foreground font-sans">The first works are on their way. Publish yours to be among the first authors, publishers and schools on the marketplace.</p>
+                  <Link to="/dashboard" className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground font-sans">Publish your work <ArrowRight className="h-4 w-4" /></Link>
+                </div>
+                {/* Keep the page structured: browse the categories the marketplace will fill */}
+                <section className="mt-10">
+                  <div className="flex items-baseline gap-2"><Store className="h-4 w-4 text-gold" /><h2 className="font-serif text-xl font-bold">Browse by category</h2></div>
+                  <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {CATALOG_CATEGORIES.map((c) => (
+                      <button key={c} onClick={() => setCat(c)} className="group flex items-center justify-between rounded-xl border border-border/60 bg-card px-4 py-3.5 text-left transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-e2">
+                        <span className="text-sm font-medium font-sans">{c}</span>
+                        <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                      </button>
+                    ))}
+                  </div>
+                </section>
+                <div className="mt-10"><Link to="/institutions" className="flex items-center gap-3 rounded-2xl border border-dashed border-border p-4 text-sm transition-colors hover:border-primary/40"><Building2 className="h-4 w-4 text-marketplace" /><span className="font-sans">Explore institutions on Polished Pages</span><ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" /></Link></div>
               </div>
             )
             : (
