@@ -175,7 +175,7 @@ export interface OrgLibraryItem { id: string; kind: string; title: string; previ
 export interface OrgContentRow { kind: string; total: number; published: number }
 export interface OrgCategoryRow { category: string; total: number }
 export interface OrgAuditRow { id: string; actor_email: string | null; action: string; detail: string | null; created_at: string }
-export interface OrgShowcaseRow { slug: string; name: string; type: OrgType; tagline: string | null; verified: boolean; works: number; languages: number }
+export interface OrgShowcaseRow { slug: string; name: string; type: OrgType; tagline: string | null; verified: boolean; works: number; languages: number; collections: number; created_at: string }
 
 type Rpc = { rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message?: string } | null }> };
 const r = () => supabase as unknown as Rpc;
