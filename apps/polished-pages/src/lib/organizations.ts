@@ -355,6 +355,21 @@ export async function marketTrendingOrgs(): Promise<MarketTrendingOrg[]> {
   const { data, error } = await r().rpc("polished_marketplace_trending_orgs");
   return error ? [] : rows<MarketTrendingOrg>(data);
 }
+export interface MarketplaceCollection { token: string; title: string; description: string | null; works: number; listed_works: number }
+export async function marketplaceCollections(): Promise<MarketplaceCollection[]> {
+  const { data, error } = await r().rpc("polished_marketplace_collections");
+  return error ? [] : rows<MarketplaceCollection>(data);
+}
+export interface MarketplaceHealth {
+  listings: number; paid_listings: number; free_listings: number; listing_views: number; listing_downloads: number;
+  organizations: number; publishing_organizations: number; repositories: number; public_collections: number;
+  listed_languages: number; documents_total: number; documents_in_orgs: number;
+  unpublished_works: number; orphaned_documents: number; empty_storefronts: number; empty_repositories: number;
+}
+export async function marketplaceHealth(): Promise<MarketplaceHealth | null> {
+  const { data, error } = await r().rpc("polished_marketplace_health");
+  return error ? null : one<MarketplaceHealth>(data);
+}
 
 export interface DocOrgInfo { org_id: string; org_slug: string; org_name: string; org_type: OrgType; listed: boolean; collections: string[] }
 interface DocOrgRow extends DocOrgInfo { document_id: string }
