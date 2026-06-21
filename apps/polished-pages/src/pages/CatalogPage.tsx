@@ -7,9 +7,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem, type CatalogSort } from "@/lib/documents";
 import { getAuthorProfile, adminVerifyCreator, type AuthorProfile } from "@/lib/profiles";
 import CatalogCard from "@/components/app/CatalogCard";
+import ShelfCard from "@/components/app/ShelfCard";
 import CreateCtaBand from "@/components/app/CreateCtaBand";
 import { BRAND } from "@/lib/tools";
 import { avatarColors, avatarInitials } from "@/lib/avatar";
+import { coverArt } from "@/lib/cover-art";
 
 const trendScore = (i: CatalogItem) => (i.download_count ?? 0) * 3 + (i.view_count ?? 0);
 
@@ -70,7 +72,10 @@ const CatalogPage = () => {
       .slice(0, 6),
     [all],
   );
-  const recent = useMemo(() => all.slice(0, 9), [all]);
+  const recent = useMemo(() => all.slice(0, 12), [all]);
+  // The single title to spotlight in the editorial hero — real data only,
+  // preferring a hand-picked feature, then the most-downloaded, then newest.
+  const spotlight = useMemo(() => featured[0] ?? trending[0] ?? recent[0] ?? null, [featured, trending, recent]);
   // Aggregate rating across this author's listed works (review-weighted).
   const authorRating = useMemo(() => {
     if (!author) return null;
@@ -86,15 +91,17 @@ const CatalogPage = () => {
     return m;
   }, [all]);
 
-  const Section = ({ icon: Icon, title, hint, list, ranked }: { icon: typeof Store; title: string; hint?: string; list: CatalogItem[]; ranked?: boolean }) => (
-    <section className="mt-10">
+  // Editorial shelf — a horizontal, scroll-snapped row of cover tiles, the way
+  // Apple Books / Netflix present a collection.
+  const Shelf = ({ icon: Icon, title, hint, list, ranked }: { icon: typeof Store; title: string; hint?: string; list: CatalogItem[]; ranked?: boolean }) => (
+    <section className="mt-12">
       <div className="flex items-baseline gap-2">
-        <Icon className="h-4 w-4 text-gold" />
+        <Icon className="h-4 w-4 text-marketplace" />
         <h2 className="font-serif text-xl font-bold">{title}</h2>
         {hint && <span className="text-xs text-muted-foreground font-sans">{hint}</span>}
       </div>
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((it, i) => <CatalogCard key={it.token} item={it} admin={admin} onFeature={feature} rank={ranked && i < 3 ? i + 1 : undefined} />)}
+      <div className="-mx-1 mt-4 flex snap-x gap-4 overflow-x-auto px-1 pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {list.map((it, i) => <ShelfCard key={it.token} item={it} rank={ranked && i < 3 ? i + 1 : undefined} />)}
       </div>
     </section>
   );
@@ -111,29 +118,73 @@ const CatalogPage = () => {
         </div>
       </nav>
 
-      <div className="container max-w-5xl mx-auto px-6 py-10">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
-            <Store className="w-4 h-4 text-gold" />
-            <span className="text-sm text-gold-light font-medium font-sans">{author ? "Author" : "Marketplace"}</span>
+      {/* Editorial storefront hero — a dark, immersive open with a real
+          spotlight title, in the spirit of Apple Books / Netflix. */}
+      {!author && (
+        <section className="relative overflow-hidden text-white" style={{ background: "radial-gradient(120% 90% at 50% -10%, hsl(222 47% 12%) 0%, hsl(222 47% 7%) 45%, hsl(224 60% 4%) 100%)" }}>
+          <div className="pointer-events-none absolute inset-0 -z-10">
+            <div className="absolute -top-28 left-1/4 h-[26rem] w-[26rem] animate-glow-pulse rounded-full bg-[hsl(38_92%_50%)]/20 blur-[120px]" />
+            <div className="absolute -top-16 right-1/4 h-[22rem] w-[22rem] animate-glow-pulse rounded-full bg-[hsl(262_83%_58%)]/25 blur-[120px]" style={{ animationDelay: "2s" }} />
           </div>
-          {author ? (
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[hsl(262_83%_64%)]/60 to-transparent" />
+          <div className="container relative max-w-5xl px-6 pb-14 pt-12">
+            <div className="grid items-center gap-10 lg:grid-cols-[1.25fr_1fr]">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5">
+                  <Store className="h-4 w-4 text-[hsl(38_92%_62%)]" />
+                  <span className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-white/70">The marketplace</span>
+                </div>
+                <h1 className="text-display mt-4 text-4xl font-bold tracking-tight md:text-5xl">
+                  Stories &amp; lessons from{" "}
+                  <span className="bg-gradient-to-r from-[hsl(38_92%_62%)] via-[hsl(330_80%_70%)] to-[hsl(262_85%_74%)] bg-clip-text italic text-transparent">independent creators</span>
+                </h1>
+                <p className="mt-4 max-w-md text-lg text-white/55 font-sans">Storybooks, readers, workbooks and classroom materials — created, owned and sold by authors worldwide.</p>
+                <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/70 font-sans">
+                  <span className="inline-flex items-center gap-1.5"><BadgeCheck className="h-4 w-4 text-[hsl(217_91%_70%)]" /> Independent authors</span>
+                  <span className="inline-flex items-center gap-1.5"><Download className="h-4 w-4 text-[hsl(217_91%_70%)]" /> Store-ready downloads</span>
+                  <span className="inline-flex items-center gap-1.5"><Store className="h-4 w-4 text-[hsl(217_91%_70%)]" /> Free &amp; paid</span>
+                </div>
+              </div>
+              {spotlight && (
+                <Link to={`/shared/${spotlight.token}`} className="group relative flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl transition-colors hover:bg-white/[0.07]">
+                  <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-[radial-gradient(60%_60%_at_50%_40%,hsl(38_92%_50%/0.25),transparent_70%)] blur-2xl" />
+                  <div className="relative w-24 shrink-0 overflow-hidden rounded-md rounded-l-[3px] shadow-2xl ring-1 ring-white/10" style={{ aspectRatio: "3 / 4", backgroundImage: `linear-gradient(150deg, ${coverArt(`${spotlight.title}·${spotlight.category ?? ""}`).from}, ${coverArt(`${spotlight.title}·${spotlight.category ?? ""}`).to})` }}>
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/30" />
+                    <div className="absolute inset-x-0 bottom-0 p-2"><div className="line-clamp-4 font-serif text-[11px] font-bold leading-tight text-white drop-shadow">{spotlight.title}</div></div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="inline-flex items-center gap-1 rounded-full bg-[hsl(38_92%_50%)]/15 px-2 py-0.5 text-[10px] font-semibold text-[hsl(38_92%_66%)]">{spotlight.featured ? "Featured" : "Spotlight"}</div>
+                    <div className="mt-1.5 line-clamp-2 font-serif text-base font-bold text-white">{spotlight.title}</div>
+                    {spotlight.author_name && <div className="mt-0.5 text-xs text-white/55">by {spotlight.author_name}</div>}
+                    <div className="mt-2 flex items-center gap-2 text-xs">
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 font-semibold text-white">{spotlight.price_cents > 0 ? `$${(spotlight.price_cents / 100).toFixed(2)}` : "Free"}</span>
+                      {(spotlight.review_count ?? 0) > 0 && spotlight.avg_rating != null && (
+                        <span className="inline-flex items-center gap-1 text-white/70"><Star className="h-3 w-3 fill-gold text-gold" /> {Number(spotlight.avg_rating).toFixed(1)}</span>
+                      )}
+                    </div>
+                    <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-white">View <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
+                  </div>
+                </Link>
+              )}
+            </div>
+          </div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-background" />
+        </section>
+      )}
+
+      <div className="container max-w-5xl mx-auto px-6 py-10">
+        {author && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 mb-4">
+              <Store className="w-4 h-4 text-gold" />
+              <span className="text-sm text-gold-light font-medium font-sans">Author</span>
+            </div>
             <h1 className="flex flex-wrap items-center gap-2 font-serif text-3xl font-bold tracking-tight md:text-4xl">
               <span>Resources by <span className="text-gradient-gold italic">{author}</span></span>
               {profile?.verified && <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary"><BadgeCheck className="h-4 w-4" /> Verified</span>}
             </h1>
-          ) : (
-            <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">Discover <span className="text-gradient-gold italic">published resources</span></h1>
-          )}
-          <p className="mt-2 text-muted-foreground font-sans">{author ? `Everything ${author} has published, newest first.` : "Storybooks, readers, workbooks and classroom materials published by the community."}</p>
-          {!author && (
-            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground font-sans">
-              <span className="inline-flex items-center gap-1.5"><BadgeCheck className="h-4 w-4 text-primary" /> Created &amp; owned by independent authors</span>
-              <span className="inline-flex items-center gap-1.5"><Download className="h-4 w-4 text-primary" /> Instant, store-ready downloads</span>
-              <span className="inline-flex items-center gap-1.5"><Store className="h-4 w-4 text-primary" /> Free and paid resources</span>
-            </div>
-          )}
-          {author && profile && (
+            <p className="mt-2 text-muted-foreground font-sans">{`Everything ${author} has published, newest first.`}</p>
+          {profile && (
             <div className="mt-4 rounded-xl border border-border bg-card/50 p-4 sm:p-5">
               <div className="flex items-start gap-4">
                 {/* Avatar — deterministic colour + initials for a stable identity */}
@@ -172,7 +223,8 @@ const CatalogPage = () => {
               </div>
             </div>
           )}
-        </motion.div>
+          </motion.div>
+        )}
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
           <div className="relative min-w-[200px] flex-1">
@@ -252,10 +304,10 @@ const CatalogPage = () => {
             ? <p className="mt-10 text-center text-sm text-muted-foreground font-sans">Nothing published yet — be the first to share something.</p>
             : (
               <>
-                {featured.length > 0 && <Section icon={Star} title="Featured" hint="hand-picked" list={featured} />}
-                {trending.length > 0 && <Section icon={TrendingUp} title="Trending now" hint="most downloaded" list={trending} ranked />}
-                {topRated.length > 0 && <Section icon={Star} title="Top rated" hint="highest reader ratings" list={topRated} />}
-                <Section icon={Clock} title="Recently published" list={recent} />
+                {featured.length > 0 && <Shelf icon={Star} title="Featured" hint="hand-picked" list={featured} />}
+                {trending.length > 0 && <Shelf icon={TrendingUp} title="Trending now" hint="most downloaded" list={trending} ranked />}
+                {topRated.length > 0 && <Shelf icon={Star} title="Top rated" hint="highest reader ratings" list={topRated} />}
+                <Shelf icon={Clock} title="Recently published" list={recent} />
                 <section className="mt-10">
                   <div className="flex items-baseline gap-2"><Store className="h-4 w-4 text-gold" /><h2 className="font-serif text-xl font-bold">Browse by category</h2></div>
                   <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
