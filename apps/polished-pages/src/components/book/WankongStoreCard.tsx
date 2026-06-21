@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Store, Loader2, Library as LibraryIcon, Zap, ExternalLink, CheckCircle2 } from "lucide-react";
+import { Store, Loader2, Zap, ExternalLink, CheckCircle2 } from "lucide-react";
+import SpineMark from "@/components/brand/SpineMark";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -63,9 +64,9 @@ const WankongStoreCard = () => {
       <CardContent className="space-y-4">
         {docs === null && <div className="flex items-center gap-2 text-sm text-muted-foreground font-sans"><Loader2 className="h-4 w-4 animate-spin" /> Loading your books…</div>}
         {docs && docs.length === 0 && (
-          <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-6 text-center">
-            <LibraryIcon className="h-8 w-8 text-muted-foreground/60" />
-            <p className="text-sm text-muted-foreground font-sans">No books or storybooks saved yet.</p>
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/70 p-8 text-center">
+            <SpineMark size="sm" className="justify-center" />
+            <p className="text-sm text-muted-foreground font-sans">Finish a book or storybook and publish it straight to the Wankong store.</p>
             <Button asChild variant="hero" size="sm"><Link to="/book">Create a book</Link></Button>
           </div>
         )}
