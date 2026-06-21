@@ -6,6 +6,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { listReviews, submitReview, type Review } from "@/lib/reviews";
+import { avatarColors, avatarInitials } from "@/lib/avatar";
+
+const relTime = (iso: string): string => {
+  const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 86_400) return "today";
+  const d = Math.floor(s / 86_400);
+  if (d < 30) return `${d}d ago`;
+  const mo = Math.floor(d / 30);
+  return mo < 12 ? `${mo}mo ago` : `${Math.floor(mo / 12)}y ago`;
+};
 
 const Stars = ({ value, size = "h-4 w-4" }: { value: number; size?: string }) => (
   <span className="inline-flex items-center" aria-label={`${value.toFixed(1)} of 5`}>
@@ -102,16 +112,24 @@ const ReviewsPanel = ({ token }: { token: string }) => {
         <p className="mt-4 text-sm text-muted-foreground font-sans">No reviews yet — be the first.</p>
       ) : (
         <ul className="mt-4 space-y-3">
-          {reviews.map((r, i) => (
-            <li key={i} className="rounded-lg border border-border p-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium font-sans">{r.reviewer}</span>
-                <Stars value={r.rating} size="h-3.5 w-3.5" />
-              </div>
-              {r.body && <p className="mt-1 text-sm text-muted-foreground font-sans">{r.body}</p>}
-              <div className="mt-1 text-[11px] text-muted-foreground font-sans">{new Date(r.created_at).toLocaleDateString()}</div>
-            </li>
-          ))}
+          {reviews.map((r, i) => {
+            const ac = avatarColors(r.reviewer);
+            return (
+              <li key={i} className="rounded-lg border border-border p-3">
+                <div className="flex items-center gap-2.5">
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${ac.bg} ${ac.text}`}>{avatarInitials(r.reviewer)}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate text-sm font-medium font-sans">{r.reviewer}</span>
+                      <Stars value={r.rating} size="h-3.5 w-3.5" />
+                    </div>
+                    <div className="text-[11px] text-muted-foreground font-sans">{relTime(r.created_at)}</div>
+                  </div>
+                </div>
+                {r.body && <p className="mt-2 text-sm text-muted-foreground font-sans">{r.body}</p>}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
