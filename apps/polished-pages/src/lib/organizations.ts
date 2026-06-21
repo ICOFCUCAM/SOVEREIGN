@@ -265,6 +265,13 @@ export async function orgAudit(orgId: string): Promise<OrgAuditRow[]> {
   const { data, error } = await r().rpc("polished_org_audit", { p_org: orgId });
   return error ? [] : rows<OrgAuditRow>(data);
 }
+export async function orgAuditLog(orgId: string, limit = 200): Promise<OrgAuditRow[]> {
+  const { data, error } = await r().rpc("polished_org_audit_log", { p_org: orgId, p_limit: limit });
+  return error ? [] : rows<OrgAuditRow>(data);
+}
+export async function transferOwnership(orgId: string, userId: string): Promise<void> {
+  await ok(r().rpc("polished_org_transfer_ownership", { p_org: orgId, p_user: userId }), "Could not transfer ownership.");
+}
 export async function orgShowcase(): Promise<OrgShowcaseRow[]> {
   const { data, error } = await r().rpc("polished_org_showcase");
   return error ? [] : rows<OrgShowcaseRow>(data);
