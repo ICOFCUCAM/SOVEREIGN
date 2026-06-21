@@ -118,6 +118,10 @@ export default {
           "0%, 100%": { transform: "translate3d(0,0,0)" },
           "50%": { transform: "translate3d(0,-14px,0)" },
         },
+        "book-breathe": {
+          "0%, 100%": { transform: "scaleY(1)" },
+          "50%": { transform: "scaleY(1.14)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -128,6 +132,7 @@ export default {
         "marquee-reverse": "marquee-reverse 75s linear infinite",
         "glow-pulse": "glow-pulse 7s ease-in-out infinite",
         "drift": "drift 9s ease-in-out infinite",
+        "book-breathe": "book-breathe 2s ease-in-out infinite",
       },
     },
   },
