@@ -62,6 +62,7 @@ const LibraryPage = () => {
 
   const [wankong, setWankong] = useState<Record<string, WankongListing>>({});
   const [orgMap, setOrgMap] = useState<Record<string, DocOrgInfo>>({});
+  const [orgFilter, setOrgFilter] = useState("");
 
   const load = () => { listDocuments().then(setDocs).catch((e) => { toast({ title: "Could not load library", description: e.message, variant: "destructive" }); setDocs([]); }); };
   useEffect(load, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -480,6 +481,15 @@ const LibraryPage = () => {
               <option value="shared">Shared</option>
               <option value="drafts">Drafts</option>
             </select>
+            {(() => {
+              const libOrgs = Array.from(new Map(Object.values(orgMap).map((v) => [v.org_slug, v.org_name])).entries());
+              return libOrgs.length > 0 ? (
+                <select value={orgFilter} onChange={(e) => setOrgFilter(e.target.value)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans select-premium" aria-label="Filter by organization">
+                  <option value="">All organizations</option>
+                  {libOrgs.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}
+                </select>
+              ) : null;
+            })()}
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans select-premium">
               <option value="date">Newest first</option>
               <option value="title">A → Z</option>
@@ -544,6 +554,7 @@ const LibraryPage = () => {
           (!tagFilter || (d.tags ?? []).includes(tagFilter)) &&
           (!q || d.title.toLowerCase().includes(q) || (d.preview ?? "").toLowerCase().includes(q)) &&
           (kindFilter === "" || d.kind === kindFilter) &&
+          (!orgFilter || orgMap[d.id]?.org_slug === orgFilter) &&
           (statusFilter === "" || (statusFilter === "listed" ? d.listed : statusFilter === "shared" ? (d.shared && !d.listed) : !d.shared))
         ).sort((a, b) =>
           sortBy === "title" ? a.title.localeCompare(b.title)
@@ -556,8 +567,8 @@ const LibraryPage = () => {
               <Search className="mx-auto h-7 w-7 text-muted-foreground/30" />
               <p className="mt-3 text-sm font-medium font-sans">No documents match your filters</p>
               <div className="mt-3 flex flex-wrap justify-center gap-2">
-                {(query || kindFilter || statusFilter || favOnly || tplOnly || tagFilter) && (
-                  <Button size="sm" variant="heroOutline" onClick={() => { setQuery(""); setKindFilter(""); setStatusFilter(""); setFavOnly(false); setTplOnly(false); setTagFilter(""); }}>
+                {(query || kindFilter || statusFilter || favOnly || tplOnly || tagFilter || orgFilter) && (
+                  <Button size="sm" variant="heroOutline" onClick={() => { setQuery(""); setKindFilter(""); setStatusFilter(""); setFavOnly(false); setTplOnly(false); setTagFilter(""); setOrgFilter(""); }}>
                     <X className="mr-1 h-3.5 w-3.5" /> Clear all filters
                   </Button>
                 )}
