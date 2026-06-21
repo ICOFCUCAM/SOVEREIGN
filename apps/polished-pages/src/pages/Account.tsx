@@ -35,6 +35,8 @@ const Account = () => {
   const [buyingCredits, setBuyingCredits] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [website, setWebsite] = useState("");
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [batchUnits, setBatchUnits] = useState<number | null>(null);
@@ -44,7 +46,7 @@ const Account = () => {
     fetchPlanStatus().then(setStatus);
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ""));
     getMyProfile()
-      .then((p) => { if (p) { setDisplayName(p.display_name); setBio(p.bio ?? ""); } })
+      .then((p) => { if (p) { setDisplayName(p.display_name); setBio(p.bio ?? ""); setTagline(p.tagline ?? ""); setWebsite(p.website ?? ""); } })
       .catch(() => {})
       .finally(() => setProfileLoaded(true));
     const params = new URLSearchParams(window.location.search);
@@ -58,7 +60,7 @@ const Account = () => {
     if (!displayName.trim()) { toast({ title: "Display name required", variant: "destructive" }); return; }
     setSavingProfile(true);
     try {
-      await upsertProfile(displayName.trim(), bio);
+      await upsertProfile(displayName.trim(), bio, tagline.trim(), website.trim());
       toast({ title: "Profile saved", description: "It appears on your public author page." });
     } catch (e) {
       toast({ title: "Could not save profile", description: e instanceof Error ? e.message : "", variant: "destructive" });
@@ -198,8 +200,16 @@ const Account = () => {
                 <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="e.g. Alex Morgan" maxLength={80} />
               </div>
               <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground font-sans">Tagline</label>
+                <Input value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="e.g. Bilingual storybooks for early readers" maxLength={120} />
+              </div>
+              <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground font-sans">Bio</label>
                 <Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="A sentence or two about the kind of books and learning materials you create." rows={3} maxLength={600} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground font-sans">Website (optional)</label>
+                <Input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://yoursite.com" maxLength={200} inputMode="url" />
               </div>
               <Button variant="hero" size="sm" onClick={saveProfile} disabled={savingProfile}>
                 {savingProfile ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Save profile
