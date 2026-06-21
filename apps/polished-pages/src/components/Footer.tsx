@@ -27,6 +27,7 @@ const COLUMNS: Col[] = [
   { title: "Platform", links: [
     { label: "Marketplace", to: "/catalog" },
     { label: "Organizations", to: "/organizations" },
+    { label: "Institutions", to: "/institutions" },
     { label: "For Schools", to: "/for-schools" },
     { label: "Pricing", to: "/pricing" },
     { label: "Resources", to: "/resources" },

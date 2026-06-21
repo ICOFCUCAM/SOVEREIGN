@@ -41,6 +41,8 @@ const SharedDocument = lazy(() => import("./pages/SharedDocument.tsx"));
 const CatalogPage = lazy(() => import("./pages/CatalogPage.tsx"));
 const OrgStorefront = lazy(() => import("./pages/OrgStorefront.tsx"));
 const Organizations = lazy(() => import("./pages/Organizations.tsx"));
+const OrgWorkspace = lazy(() => import("./pages/OrgWorkspace.tsx"));
+const Institutions = lazy(() => import("./pages/Institutions.tsx"));
 const Pricing = lazy(() => import("./pages/Pricing.tsx"));
 const Resources = lazy(() => import("./pages/Resources.tsx"));
 const ForSchools = lazy(() => import("./pages/ForSchools.tsx"));
@@ -79,6 +81,7 @@ const App = () => (
           <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/catalog/author/:author" element={<CatalogPage />} />
           <Route path="/org/:slug" element={<OrgStorefront />} />
+          <Route path="/institutions" element={<Institutions />} />
           <Route path="/collection/:token" element={<PublicCollection />} />
           <Route path="/series/public/:token" element={<PublicSeriesPage />} />
           {/* Generators require sign-in (metered per user); the gate prompts
@@ -89,6 +92,7 @@ const App = () => (
           <Route path="/library" element={<AuthGate><LibraryPage /></AuthGate>} />
           <Route path="/collections" element={<AuthGate><CollectionsPage /></AuthGate>} />
           <Route path="/organizations" element={<AuthGate><Organizations /></AuthGate>} />
+          <Route path="/organizations/:slug" element={<AuthGate><OrgWorkspace /></AuthGate>} />
           <Route path="/cv" element={<AuthGate><CVGenerator /></AuthGate>} />
           <Route path="/cover-letter" element={<AuthGate><CoverLetterGenerator /></AuthGate>} />
           <Route path="/tailor" element={<AuthGate><JobTailor /></AuthGate>} />
