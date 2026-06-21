@@ -59,6 +59,7 @@ const OrgStorefront = () => {
               {initials(org.name)}
             </div>
             <div className="min-w-0 flex-1">
+              <div className="eyebrow mb-1.5 text-white/55">{ORG_PRESENTATION[org.type].storefrontKicker}</div>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-white/80">
                   <Building2 className="h-3 w-3" /> {typeLabel(org.type)}

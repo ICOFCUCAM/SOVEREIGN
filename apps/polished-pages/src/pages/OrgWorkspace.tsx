@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft, Users, Mail, FolderPlus, ExternalLink, Loader2, Trash2, BadgeCheck,
-  Globe, Library as LibraryIcon, Languages, BookOpen, GraduationCap, Megaphone, Layers,
-  ShieldCheck, Activity, Settings2, Save, Building2, Rocket, Check, BarChart3,
+  Globe, Languages, BookOpen, GraduationCap, Megaphone, Layers,
+  ShieldCheck, Activity, Settings2, Save, Building2, Rocket, Check, BarChart3, Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,18 +11,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import SpineMark from "@/components/brand/SpineMark";
+import OrgCommandModules from "@/components/org/OrgCommandModules";
 import {
-  getOrganization, orgMembers, orgInvitations, orgAnalytics, orgCollections, orgContent,
+  getOrganization, orgMembers, orgInvitations, orgAnalytics, orgCollections,
   orgCategories, orgAudit, updateOrganization, inviteToOrg, setOrgRole, removeOrgMember,
   createOrgCollection, can, ORG_TYPES, ROLE_LABEL, ORG_PRESENTATION, COLLECTION_KINDS,
   EDUCATIONAL_CATEGORIES,
   type OrgDetail, type OrgMember, type OrgInvite, type OrgAnalytics, type OrgCollection,
-  type OrgContentRow, type OrgCategoryRow, type OrgAuditRow, type OrgRole, type CollectionKind,
+  type OrgCategoryRow, type OrgAuditRow, type OrgRole, type CollectionKind, type RepoTemplate,
 } from "@/lib/organizations";
 
 const typeLabel = (t: string) => ORG_TYPES.find((x) => x.value === t)?.label ?? t;
 const initials = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "O";
-const KIND_LABEL: Record<string, string> = { book: "Books", storybook: "Storybooks", cv: "CVs", tailored: "Tailored", cover: "Covers", illustration: "Illustrations", "cover-letter": "Cover letters", other: "Other" };
 const COLLECTION_KIND_LABEL = Object.fromEntries(COLLECTION_KINDS.map((k) => [k.value, k.label])) as Record<CollectionKind, string>;
 
 const FOCUS_ICON = {
@@ -57,7 +57,6 @@ const OrgWorkspace = () => {
   const [members, setMembers] = useState<OrgMember[]>([]);
   const [invites, setInvites] = useState<OrgInvite[]>([]);
   const [collections, setCollections] = useState<OrgCollection[]>([]);
-  const [content, setContent] = useState<OrgContentRow[]>([]);
   const [categories, setCategories] = useState<OrgCategoryRow[]>([]);
   const [audit, setAudit] = useState<OrgAuditRow[]>([]);
 
@@ -69,7 +68,6 @@ const OrgWorkspace = () => {
     orgAnalytics(id).then(setStats).catch(() => {});
     orgMembers(id).then(setMembers).catch(() => {});
     orgCollections(id).then(setCollections).catch(() => {});
-    orgContent(id).then(setContent).catch(() => {});
     orgCategories(id).then(setCategories).catch(() => {});
     if (can.manage(role)) {
       orgInvitations(id).then(setInvites).catch(() => {});
@@ -236,43 +234,8 @@ const OrgWorkspace = () => {
         </div>
       )}
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-2">
-        {/* Content mix */}
-        <div>
-          <SectionTitle icon={LibraryIcon}>Content mix</SectionTitle>
-          {content.length === 0 ? (
-            <p className="text-sm text-muted-foreground font-sans">No content in the shared library yet. Add works to this organization from your Library.</p>
-          ) : (
-            <div className="space-y-2">
-              {content.map((c) => {
-                const max = Math.max(...content.map((x) => x.total), 1);
-                return (
-                  <div key={c.kind}>
-                    <div className="flex items-center justify-between text-sm font-sans"><span className="font-medium">{KIND_LABEL[c.kind] ?? c.kind}</span><span className="text-muted-foreground">{c.published}/{c.total} published</span></div>
-                    <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-gold-gradient" style={{ width: `${(c.total / max) * 100}%` }} /></div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Educational / category coverage */}
-        <div>
-          <SectionTitle icon={GraduationCap}>{org.type === "school" || org.type === "ministry" ? "Educational assets" : "Category coverage"}</SectionTitle>
-          {categories.length === 0 ? (
-            <p className="text-sm text-muted-foreground font-sans">No published categories yet. Once works are listed on the marketplace, their categories appear here.</p>
-          ) : (
-            <div className="flex flex-wrap gap-1.5">
-              {categories.map((c) => (
-                <span key={c.category} className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium font-sans ${EDUCATIONAL_CATEGORIES.includes(c.category) ? "border-educational/40 bg-educational/10" : "border-border"}`}>
-                  {c.category} <span className="text-muted-foreground">· {c.total}</span>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Type-specific command center modules (Phase C) */}
+      <OrgCommandModules type={org.type} orgId={org.id} stats={stats} categories={categories} />
 
       {/* Shared repositories (typed collections) */}
       <div id="repositories" className="mt-8 scroll-mt-20">
@@ -292,6 +255,20 @@ const OrgWorkspace = () => {
           </div>
         ) : (
           <p className="text-sm text-muted-foreground font-sans">No repositories yet.{edit ? " Create one below to organize curriculum, series or programs." : ""}</p>
+        )}
+        {edit && (
+          <div className="mt-3">
+            <div className="mb-1.5 text-xs text-muted-foreground font-sans">Quick-start repositories for a {typeLabel(org.type).toLowerCase()}</div>
+            <div className="flex flex-wrap gap-1.5">
+              {pres!.repoTemplates.map((t: RepoTemplate) => (
+                <button key={t.name} title={t.hint}
+                  onClick={async () => { try { await createOrgCollection(org.id, t.name, t.kind); reload(); toast({ title: "Repository created", description: t.name }); } catch (e) { toast({ title: "Could not create", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}
+                  className="inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-xs font-medium font-sans transition-colors hover:border-primary/40 hover:text-primary">
+                  <Plus className="h-3 w-3" /> {t.name} <span className="text-muted-foreground">· {COLLECTION_KIND_LABEL[t.kind]}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         )}
         {edit && <CollectionCreator orgId={org.id} suggested={pres!.collectionKinds} onCreated={reload} onError={(m) => toast({ title: "Could not create", description: m, variant: "destructive" })} />}
       </div>
