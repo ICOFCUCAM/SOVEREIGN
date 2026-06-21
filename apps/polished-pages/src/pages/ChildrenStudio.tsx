@@ -98,7 +98,7 @@ const ChildrenStudio = () => {
         <div className="container relative max-w-5xl px-6 pb-12 pt-12">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5">
             <GraduationCap className="h-4 w-4 text-[hsl(160_84%_55%)]" />
-            <span className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-white/70">Educational workspace</span>
+            <span className="eyebrow text-white/70">Educational workspace</span>
           </div>
           <h1 className="text-display mt-4 max-w-2xl text-4xl font-bold tracking-tight md:text-5xl">
             The curriculum <span className="bg-gradient-to-r from-[hsl(160_84%_60%)] via-[hsl(190_84%_64%)] to-[hsl(217_91%_72%)] bg-clip-text italic text-transparent">operating system</span>
