@@ -26,8 +26,10 @@ const CTASection = () => {
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[hsl(262_83%_64%)]/60 to-transparent" />
 
           <div className="relative z-10">
-            <h2 className="text-display mx-auto max-w-2xl text-3xl font-bold md:text-5xl">{t("cta.heading")}</h2>
-            <p className="mx-auto mt-5 max-w-md text-lg font-medium text-white/55 font-sans">{t("hero.tagline")}</p>
+            <h2 className="text-display mx-auto max-w-3xl text-4xl font-bold leading-[1.12] md:text-6xl">
+              One manuscript.{" "}
+              <span className="bg-gradient-to-r from-[hsl(217_91%_72%)] via-[hsl(245_85%_76%)] to-[hsl(280_85%_76%)] bg-clip-text text-transparent">Every language. Every classroom. Every bookstore. Every reader.</span>
+            </h2>
 
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
