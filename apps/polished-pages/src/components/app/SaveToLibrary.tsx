@@ -15,7 +15,7 @@ const KIND_NOUN: Record<DocKind, string> = {
 // it immediately offers Publish-at-Creation, so finished work flows straight to
 // the marketplace / a storefront instead of stalling as a draft.
 const SaveToLibrary = ({
-  kind, title, template, payload, preview, size = "sm",
+  kind, title, template, payload, preview, size = "sm", onSaved, savedExternally, externalId,
 }: {
   kind: DocKind;
   title: string;
@@ -23,16 +23,24 @@ const SaveToLibrary = ({
   payload: unknown;
   preview?: string;
   size?: "sm" | "default";
+  onSaved?: (id: string) => void;
+  // The parent already persisted this document elsewhere (e.g. an on-demand save
+  // to create a language edition); reflect that and don't insert a duplicate.
+  savedExternally?: boolean;
+  externalId?: string | null;
 }) => {
   const { toast } = useToast();
   const [state, setState] = useState<"idle" | "saving" | "saved">("idle");
   const [savedId, setSavedId] = useState<string | null>(null);
+  const effectiveId = savedId ?? externalId ?? null;
+  const isSaved = state === "saved" || (!!savedExternally && !!effectiveId);
 
   const onSave = async () => {
     setState("saving");
     try {
       const id = await saveDocument({ kind, title, template, payload, preview });
       setSavedId(id);
+      onSaved?.(id);
       setState("saved");
       const firstSave = !localStorage.getItem("pp_first_save");
       if (firstSave) {
@@ -49,11 +57,11 @@ const SaveToLibrary = ({
 
   // Minimal document shape the publish dialog needs.
   const docForPublish: DocSummary = {
-    id: savedId ?? "", kind, title, template: template ?? null, preview: preview ?? null,
+    id: effectiveId ?? "", kind, title, template: template ?? null, preview: preview ?? null,
     listed: false, category: null, price_cents: 0, created_at: new Date().toISOString(),
   };
 
-  if (state === "saved" && savedId) {
+  if (isSaved && effectiveId) {
     return (
       <div className="inline-flex items-center gap-2">
         <span className="inline-flex items-center gap-1 text-sm font-medium text-green-600 font-sans"><Check className="h-4 w-4" /> Saved</span>

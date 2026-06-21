@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Sparkles, Loader2, ArrowLeft, ClipboardList, Check, ChevronRight, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,9 @@ import BookExportPanel from "@/components/book/BookExportPanel";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
 import CountryDatalist from "@/components/app/CountryDatalist";
 import LanguageDatalist from "@/components/app/LanguageDatalist";
+import LocalizePanel from "@/components/app/LocalizePanel";
+import { localizeMarkdown, markdownEdition } from "@/lib/localize";
+import { saveDocument } from "@/lib/documents";
 import { saveAssessment } from "@/lib/assessment-bank";
 import { logAiActivity } from "@/lib/ai-activity-log";
 
@@ -54,6 +57,11 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
   const [tab, setTab] = useState<SchoolDocType>(config.parts[0].type);
   const [banking, setBanking] = useState(false);
   const [bankedTab, setBankedTab] = useState<SchoolDocType | null>(null);
+  // Saved library doc id per generated document (tab) — the parent that language
+  // editions link to. Ref mirror so the localize flow reads it synchronously.
+  const [savedIds, setSavedIds] = useState<Record<string, string>>({});
+  const savedIdsRef = useRef<Record<string, string>>({});
+  const markDocSaved = (t: string, id: string) => { savedIdsRef.current[t] = id; setSavedIds((m) => ({ ...m, [t]: id })); };
 
   const addToBank = async (content: string, docType: SchoolDocType, title: string) => {
     setBanking(true);
@@ -78,6 +86,7 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
 
   const run = async () => {
     setGenError(null);
+    savedIdsRef.current = {}; setSavedIds({});
     const parts = config.mode === "single" ? config.parts.filter((p) => p.type === pick) : config.parts;
     setProgress({ done: 0, total: parts.length });
     const out: Record<string, string> = {};
@@ -107,6 +116,20 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
     const present = config.parts.filter((p) => docs[p.type] != null);
     const current = docs[tab] ?? "";
     const docTitle = `${titleBase} — ${config.parts.find((p) => p.type === tab)?.label}`;
+    const docPreview = `${config.previewLabel} · ${vals.subject ?? ""} ${vals.grade ?? ""}`.trim();
+
+    // Persist the current document on demand so its language editions link to it.
+    const ensureDocSaved = async (): Promise<string | null> => {
+      const existing = savedIdsRef.current[tab];
+      if (existing) return existing;
+      const id = await saveDocument({ kind: "book", title: docTitle, payload: { markdown: current, title: docTitle }, preview: docPreview });
+      markDocSaved(tab, id);
+      return id;
+    };
+    const buildDocEdition = async ({ language, mode, culture, onProgress }: { language: string; mode: "translate" | "localize"; culture?: string; onProgress?: (done: number, total: number) => void }) => {
+      const body = await localizeMarkdown(current, { language, mode, culture, onProgress });
+      return markdownEdition(docTitle, body, language, mode, culture);
+    };
     return (
       <div className="min-h-screen bg-background">
         <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
@@ -120,7 +143,8 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <SaveToLibrary kind="book" title={docTitle} payload={{ markdown: current, title: docTitle }} preview={`${config.previewLabel} · ${vals.subject ?? ""} ${vals.grade ?? ""}`} />
+              <SaveToLibrary key={tab} kind="book" title={docTitle} payload={{ markdown: current, title: docTitle }} preview={docPreview}
+                onSaved={(id) => markDocSaved(tab, id)} savedExternally={!!savedIds[tab]} externalId={savedIds[tab] ?? null} />
               {BANKABLE.has(tab) && (
                 <Button variant="heroOutline" size="sm" disabled={banking || bankedTab === tab} onClick={() => addToBank(current, tab, docTitle)}>
                   {bankedTab === tab ? <Check className="w-4 h-4 mr-1 text-green-600" /> : banking ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <ClipboardList className="w-4 h-4 mr-1" />}
@@ -134,6 +158,19 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
         <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
           <BookExportPanel bookTitle={docTitle} fullContent={current} chapterCount={0} />
           <div className="mt-6"><BookReader content={current} title={docTitle} onContentChange={(s) => setDocs((d) => (d ? { ...d, [tab]: s } : d))} /></div>
+
+          <div className="mt-10 border-t border-border/60 pt-8">
+            <h2 className="font-serif text-xl font-bold mb-1">Localize this {config.previewLabel.toLowerCase()}</h2>
+            <p className="text-sm text-muted-foreground font-sans mb-5">Translate or culturally adapt the open document into other languages for your classrooms — each edition links to it and lands in your Library.</p>
+            <LocalizePanel
+              parentId={savedIds[tab] ?? null}
+              ensureSaved={ensureDocSaved}
+              kind="book"
+              sourceTitle={docTitle}
+              hasContent={!!current.trim()}
+              buildEdition={buildDocEdition}
+            />
+          </div>
         </div>
       </div>
     );
