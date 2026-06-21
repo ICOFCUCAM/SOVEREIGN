@@ -78,3 +78,16 @@ export function unseenCount(alerts: Alert[]): number {
 export function markAlertsSeen(alerts: Alert[]): void {
   try { localStorage.setItem(SEEN_KEY, alertsHash(alerts)); } catch { /* ignore */ }
 }
+
+const DISMISS_KEY = "pp_alerts_dismissed";
+
+export function getDismissed(): string[] {
+  try { return JSON.parse(localStorage.getItem(DISMISS_KEY) ?? "[]"); } catch { return []; }
+}
+
+export function dismissAlert(id: string): void {
+  try {
+    const next = Array.from(new Set([...getDismissed(), id])).slice(-50);
+    localStorage.setItem(DISMISS_KEY, JSON.stringify(next));
+  } catch { /* ignore */ }
+}
