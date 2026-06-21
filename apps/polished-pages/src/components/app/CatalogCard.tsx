@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Star, Eye, Download, BadgeCheck } from "lucide-react";
+import { ArrowRight, Star, Eye, Download, BadgeCheck, Building2, Globe } from "lucide-react";
 
 const Stars = ({ value }: { value: number }) => (
   <span className="inline-flex items-center" aria-label={`${value.toFixed(1)} out of 5`}>
@@ -44,6 +44,15 @@ const CatalogCard = ({ item: it, admin, onFeature, rank }: { item: CatalogItem; 
           <Link to={`/catalog/author/${encodeURIComponent(it.author_name)}`} className="text-muted-foreground hover:text-primary">by {it.author_name}</Link>
           {it.author_verified && <BadgeCheck className="h-3.5 w-3.5 text-primary" aria-label="Verified creator" />}
         </span>
+      )}
+      {it.org_name && it.org_slug && (
+        <Link to={`/org/${it.org_slug}`} className="mt-1 inline-flex items-center gap-1 self-start rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/20 font-sans" title="Published by this institution">
+          <Building2 className="h-3 w-3" /> {it.org_name}
+          {it.org_verified && <BadgeCheck className="h-3 w-3" aria-label="Verified institution" />}
+        </Link>
+      )}
+      {it.edition_language && (
+        <span className="mt-1 inline-flex items-center gap-1 self-start text-[11px] text-muted-foreground font-sans"><Globe className="h-3 w-3 text-educational" /> {it.edition_language} edition</span>
       )}
       {(it.review_count ?? 0) > 0 && it.avg_rating != null && (
         <div className="mt-1.5 flex items-center gap-1.5">

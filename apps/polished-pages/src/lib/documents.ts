@@ -115,7 +115,7 @@ export const CATALOG_LICENSES = [
   "Creative Commons (CC BY-NC)",
 ];
 
-export interface CatalogItem { token: string; kind: DocKind; title: string; category: string | null; price_cents: number; preview: string | null; author_name: string | null; author_verified?: boolean; license: string | null; featured?: boolean; view_count?: number; download_count?: number; avg_rating?: number | null; review_count?: number; created_at: string }
+export interface CatalogItem { token: string; kind: DocKind; title: string; category: string | null; price_cents: number; preview: string | null; author_name: string | null; author_verified?: boolean; license: string | null; featured?: boolean; view_count?: number; download_count?: number; avg_rating?: number | null; review_count?: number; created_at: string; edition_language?: string | null; org_slug?: string | null; org_name?: string | null; org_verified?: boolean }
 
 export type CatalogSort = "new" | "trending" | "top-rated" | "price";
 
@@ -167,8 +167,8 @@ export async function publishDocument(id: string, opts: { listed: boolean; categ
   return (data as string) ?? null;
 }
 
-export async function catalogList(category?: string, search?: string, sort: CatalogSort = "new", author?: string): Promise<CatalogItem[]> {
-  const { data, error } = await rpc().rpc("polished_catalog", { p_category: category ?? null, p_search: search ?? null, p_sort: sort, p_author: author ?? null });
+export async function catalogList(category?: string, search?: string, sort: CatalogSort = "new", author?: string, language?: string, org?: string): Promise<CatalogItem[]> {
+  const { data, error } = await rpc().rpc("polished_catalog", { p_category: category ?? null, p_search: search ?? null, p_sort: sort, p_author: author ?? null, p_language: language ?? null, p_org: org ?? null });
   if (error) throw new Error(error.message || "Could not load the catalog.");
   return (Array.isArray(data) ? data : []) as CatalogItem[];
 }
