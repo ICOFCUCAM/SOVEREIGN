@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { listReviews, submitReview, type Review } from "@/lib/reviews";
 import { avatarColors, avatarInitials } from "@/lib/avatar";
 
+const RATING_LABEL = ["Poor", "Fair", "Good", "Great", "Excellent"];
+
 const relTime = (iso: string): string => {
   const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
   if (s < 86_400) return "today";
@@ -30,6 +32,7 @@ const ReviewsPanel = ({ token }: { token: string }) => {
   const [reviews, setReviews] = useState<Review[] | null>(null);
   const [signedIn, setSignedIn] = useState(false);
   const [rating, setRating] = useState(5);
+  const [hover, setHover] = useState(0);
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -89,11 +92,14 @@ const ReviewsPanel = ({ token }: { token: string }) => {
           <>
             <div className="flex items-center gap-2">
               <span className="text-sm font-sans">Your rating:</span>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <button key={i} type="button" onClick={() => setRating(i)} aria-label={`${i} star`}>
-                  <Star className={`h-5 w-5 ${i <= rating ? "fill-gold text-gold" : "text-muted-foreground/40"}`} />
-                </button>
-              ))}
+              <div className="flex items-center" onMouseLeave={() => setHover(0)}>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <button key={i} type="button" onClick={() => setRating(i)} onMouseEnter={() => setHover(i)} aria-label={`${i} star${i === 1 ? "" : "s"}`} className="px-0.5 transition-transform hover:scale-110">
+                    <Star className={`h-6 w-6 ${i <= (hover || rating) ? "fill-gold text-gold" : "text-muted-foreground/40"}`} />
+                  </button>
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground font-sans">{RATING_LABEL[(hover || rating) - 1]}</span>
             </div>
             <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={2} maxLength={1000} placeholder="Share what you thought (optional)…" className="mt-3 resize-none" />
             <Button variant="hero" size="sm" className="mt-3" disabled={busy} onClick={submit}>
