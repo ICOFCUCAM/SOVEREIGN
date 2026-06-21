@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
 import { listDocuments, catalogList, type DocSummary, type DocKind, type CatalogItem } from "@/lib/documents";
 import { wankongListingsByDoc } from "@/lib/wankong";
+import CountUp from "@/components/brand/CountUp";
 import { planDisplayName } from "@/lib/plans";
 import { STUDIO_THEME, type Studio } from "@/lib/studio-theme";
 import GettingStarted from "@/components/app/GettingStarted";
@@ -147,7 +148,7 @@ const Dashboard = () => {
           <div className="mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-4">
             {COCKPIT.map((s) => (
               <Link key={s.l} to={s.to} className="group bg-[hsl(222_47%_8%)] px-4 py-4 transition-colors hover:bg-[hsl(222_47%_11%)]">
-                <div className="font-serif text-3xl font-bold text-white">{s.v}</div>
+                <div className="font-serif text-3xl font-bold text-white"><CountUp value={s.v} /></div>
                 <div className="mt-0.5 font-sans text-[11px] uppercase tracking-wide text-white/45">{s.l}</div>
               </Link>
             ))}
