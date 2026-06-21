@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { GraduationCap, Users, FolderLock, Globe, BookOpen, ShieldCheck, ArrowRight, Building2, Sparkles } from "lucide-react";
+import { GraduationCap, Users, FolderLock, Globe, BookOpen, ShieldCheck, ArrowRight, Building2, Sparkles, Landmark, HeartHandshake, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -19,6 +19,14 @@ const ENQUIRY = `mailto:?subject=${encodeURIComponent(`${BRAND} — institutiona
     "Anything else we should know:",
   ].join("\n"),
 )}`;
+
+const AUDIENCES = [
+  { icon: GraduationCap, title: "Schools & districts", desc: "Roll the studio out across classrooms with a shared library of approved, on-curriculum resources." },
+  { icon: BookOpen, title: "Publishers", desc: "Produce, illustrate and localize whole catalogs, then distribute to every major store." },
+  { icon: Landmark, title: "Ministries of education", desc: "National curricula, textbooks and assessments — in every official language of your country." },
+  { icon: HeartHandshake, title: "NGOs", desc: "Low-cost, culturally-adapted learning materials for the communities you serve." },
+  { icon: Layers, title: "Educational programs", desc: "Branded course content, workbooks and exams produced at scale, under your imprint." },
+];
 
 const CAPABILITIES = [
   { icon: Users, title: "Teacher & student accounts", desc: "Roll out the studio across a department, a school or a district, with content that stays inside your organization." },
@@ -67,6 +75,32 @@ const ForSchools = () => (
           </motion.div>
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-background" />
+      </section>
+
+      {/* Audiences — infrastructure for every kind of institution */}
+      <section className="py-20">
+        <div className="container px-6">
+          <div className="text-center">
+            <p className="eyebrow text-educational">Infrastructure</p>
+            <h2 className="mt-2 font-serif text-3xl font-bold md:text-4xl">One platform, every kind of institution</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground font-sans text-pretty">From a single school to a national programme, {BRAND} is the system institutions run their knowledge creation and distribution on.</p>
+          </div>
+          <div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {AUDIENCES.map((a, i) => (
+              <motion.div key={a.title} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
+                className="rounded-2xl border border-border bg-card p-6 shadow-e1 transition-all hover:-translate-y-0.5 hover:border-educational/40 hover:shadow-e3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-educational/10"><a.icon className="h-5 w-5 text-educational" /></span>
+                <h3 className="mt-4 font-serif text-lg font-bold">{a.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground font-sans text-pretty">{a.desc}</p>
+              </motion.div>
+            ))}
+            <motion.a href={ENQUIRY} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.25 }}
+              className="group flex flex-col justify-center rounded-2xl border border-dashed border-educational/30 bg-educational/[0.04] p-6 text-left transition-colors hover:bg-educational/[0.08]">
+              <span className="font-serif text-lg font-bold text-foreground">Something else?</span>
+              <span className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-semibold text-educational font-sans">Talk to our team <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
+            </motion.a>
+          </div>
+        </div>
       </section>
 
       {/* Capabilities */}
