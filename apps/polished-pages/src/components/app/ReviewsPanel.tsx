@@ -40,13 +40,38 @@ const ReviewsPanel = ({ token }: { token: string }) => {
 
   const avg = reviews && reviews.length > 0 ? Number(reviews[0].avg_rating ?? 0) : 0;
   const count = reviews && reviews.length > 0 ? reviews[0].review_count : 0;
+  // Distribution from the loaded reviews (5★ → 1★).
+  const dist = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    n: (reviews ?? []).filter((r) => Math.round(r.rating) === star).length,
+  }));
+  const loaded = reviews?.length ?? 0;
 
   return (
     <div className="mt-10 border-t border-border pt-8">
-      <div className="flex items-center gap-3">
-        <h2 className="font-serif text-xl font-bold">Reviews</h2>
-        {count > 0 && <div className="flex items-center gap-1.5"><Stars value={avg} /><span className="text-sm text-muted-foreground font-sans">{avg.toFixed(1)} · {count}</span></div>}
-      </div>
+      <h2 className="font-serif text-xl font-bold">Reviews</h2>
+
+      {count > 0 && (
+        <div className="mt-4 flex flex-col gap-5 rounded-xl border border-border bg-card/40 p-5 sm:flex-row sm:items-center">
+          <div className="flex shrink-0 flex-col items-center sm:w-32">
+            <div className="font-serif text-4xl font-bold">{avg.toFixed(1)}</div>
+            <Stars value={avg} />
+            <div className="mt-1 text-xs text-muted-foreground font-sans">{count} review{count === 1 ? "" : "s"}</div>
+          </div>
+          <div className="flex-1 space-y-1">
+            {dist.map((d) => (
+              <div key={d.star} className="flex items-center gap-2 text-xs font-sans">
+                <span className="w-3 text-muted-foreground">{d.star}</span>
+                <Star className="h-3 w-3 fill-gold text-gold" />
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div className="h-full rounded-full bg-gold" style={{ width: loaded > 0 ? `${(d.n / loaded) * 100}%` : "0%" }} />
+                </div>
+                <span className="w-6 text-right text-muted-foreground">{d.n}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Submit */}
       <div className="mt-4 rounded-xl border border-border bg-card/50 p-4">
