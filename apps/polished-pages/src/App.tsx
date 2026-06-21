@@ -42,6 +42,7 @@ const CatalogPage = lazy(() => import("./pages/CatalogPage.tsx"));
 const OrgStorefront = lazy(() => import("./pages/OrgStorefront.tsx"));
 const Organizations = lazy(() => import("./pages/Organizations.tsx"));
 const OrgWorkspace = lazy(() => import("./pages/OrgWorkspace.tsx"));
+const OrgAnalyticsPage = lazy(() => import("./pages/OrgAnalyticsPage.tsx"));
 const Institutions = lazy(() => import("./pages/Institutions.tsx"));
 const Pricing = lazy(() => import("./pages/Pricing.tsx"));
 const Resources = lazy(() => import("./pages/Resources.tsx"));
@@ -93,6 +94,7 @@ const App = () => (
           <Route path="/collections" element={<AuthGate><CollectionsPage /></AuthGate>} />
           <Route path="/organizations" element={<AuthGate><Organizations /></AuthGate>} />
           <Route path="/organizations/:slug" element={<AuthGate><OrgWorkspace /></AuthGate>} />
+          <Route path="/organizations/:slug/analytics" element={<AuthGate><OrgAnalyticsPage /></AuthGate>} />
           <Route path="/cv" element={<AuthGate><CVGenerator /></AuthGate>} />
           <Route path="/cover-letter" element={<AuthGate><CoverLetterGenerator /></AuthGate>} />
           <Route path="/tailor" element={<AuthGate><JobTailor /></AuthGate>} />

@@ -222,6 +222,33 @@ export async function orgShowcase(): Promise<OrgShowcaseRow[]> {
   return error ? [] : rows<OrgShowcaseRow>(data);
 }
 
+export interface OrgTrendRow { period: string; created: number; published: number; editions: number }
+export interface OrgTopWork { title: string; kind: string; views: number; downloads: number; listed: boolean }
+export interface OrgContribution { email: string; role: OrgRole; works: number; published: number }
+export interface OrgLanguageRow { language: string; total: number }
+export interface OrgCollectionHealth { id: string; name: string; kind: CollectionKind; items: number; published: number }
+
+export async function orgTrends(orgId: string): Promise<OrgTrendRow[]> {
+  const { data, error } = await r().rpc("polished_org_trends", { p_org: orgId });
+  return error ? [] : rows<OrgTrendRow>(data);
+}
+export async function orgTopWorks(orgId: string): Promise<OrgTopWork[]> {
+  const { data, error } = await r().rpc("polished_org_top_works", { p_org: orgId });
+  return error ? [] : rows<OrgTopWork>(data);
+}
+export async function orgMemberContributions(orgId: string): Promise<OrgContribution[]> {
+  const { data, error } = await r().rpc("polished_org_member_contributions", { p_org: orgId });
+  return error ? [] : rows<OrgContribution>(data);
+}
+export async function orgLanguages(orgId: string): Promise<OrgLanguageRow[]> {
+  const { data, error } = await r().rpc("polished_org_languages", { p_org: orgId });
+  return error ? [] : rows<OrgLanguageRow>(data);
+}
+export async function orgCollectionHealth(orgId: string): Promise<OrgCollectionHealth[]> {
+  const { data, error } = await r().rpc("polished_org_collection_health", { p_org: orgId });
+  return error ? [] : rows<OrgCollectionHealth>(data);
+}
+
 export interface DocOrgInfo { org_id: string; org_slug: string; org_name: string; org_type: OrgType; listed: boolean; collections: string[] }
 interface DocOrgRow extends DocOrgInfo { document_id: string }
 // A lookup of the creator's own documents → the organization (and repositories)
