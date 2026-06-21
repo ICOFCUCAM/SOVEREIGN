@@ -346,7 +346,7 @@ const CatalogPage = () => {
                     {CATALOG_CATEGORIES.map((c) => {
                       const n = categoryCounts.get(c) ?? 0;
                       return (
-                        <button key={c} onClick={() => setCat(c)} className={`group flex items-center justify-between rounded-lg border bg-card px-3 py-3 text-left transition hover:border-primary/50 hover:shadow-sm ${n === 0 ? "border-dashed border-border/60 opacity-60" : "border-border"}`}>
+                        <button key={c} onClick={() => setCat(c)} className={`group flex items-center justify-between rounded-xl border bg-card px-4 py-3.5 text-left transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-e2 ${n === 0 ? "border-border/50" : "border-border"}`}>
                           <div>
                             <span className="block text-sm font-medium font-sans">{c}</span>
                             <span className="text-[11px] text-muted-foreground font-sans">{n} {n === 1 ? "resource" : "resources"}</span>
