@@ -28,9 +28,10 @@ const CTASection = () => {
 
           <div className="relative z-10">
             <SpineMark size="md" animated className="mx-auto mb-8 justify-center" />
+            <p className="eyebrow mb-5 text-white/45">The operating system for the world’s knowledge</p>
             <h2 className="text-display mx-auto max-w-3xl text-4xl font-bold leading-[1.12] md:text-6xl">
-              One manuscript.{" "}
-              <span className="bg-gradient-to-r from-[hsl(217_91%_72%)] via-[hsl(245_85%_76%)] to-[hsl(280_85%_76%)] bg-clip-text text-transparent">Every language. Every classroom. Every bookstore. Every reader.</span>
+              Every lesson. Every book. Every language.{" "}
+              <span className="bg-gradient-to-r from-[hsl(217_91%_72%)] via-[hsl(245_85%_76%)] to-[hsl(280_85%_76%)] bg-clip-text text-transparent">One global knowledge network.</span>
             </h2>
 
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
