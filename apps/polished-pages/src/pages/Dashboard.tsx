@@ -7,7 +7,6 @@ import {
   Sparkles, CheckCircle2, XCircle,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
 import { listDocuments, catalogList, type DocSummary, type DocKind, type CatalogItem } from "@/lib/documents";
@@ -153,52 +152,38 @@ const Dashboard = () => {
               </Link>
             ))}
           </div>
+
+          {status && (
+            <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex flex-1 flex-wrap gap-x-8 gap-y-2">
+                {!isPaid && (
+                  <div className="min-w-[150px] flex-1">
+                    <div className="mb-1 flex justify-between font-sans text-[11px] text-white/50"><span>{used}/{lim} text</span><span>{Math.max(0, lim - used)} left</span></div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-[hsl(221_83%_60%)] to-[hsl(262_83%_66%)]" style={{ width: `${pct}%` }} /></div>
+                  </div>
+                )}
+                <div className="min-w-[150px] flex-1">
+                  <div className="mb-1 flex justify-between font-sans text-[11px] text-white/50"><span>{imgUsed}/{imgLim} image credits</span><span>{Math.max(0, imgLim - imgUsed)} left</span></div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-[hsl(38_92%_56%)] to-[hsl(24_86%_52%)]" style={{ width: `${imgPct}%` }} /></div>
+                </div>
+              </div>
+              {!isPaid ? (
+                <button onClick={() => startUpgrade("creator").catch(() => {})} className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-[hsl(38_92%_54%)] to-[hsl(24_86%_50%)] px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-[1.03]">
+                  <Crown className="h-4 w-4" /> Upgrade
+                </button>
+              ) : (
+                <Link to="/account" className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10">Buy image credits</Link>
+              )}
+            </div>
+          )}
+          {batchUnits != null && batchUnits > 0 && (
+            <p className="mt-3 font-sans text-[11px] text-white/45"><span className="font-semibold text-white/80">{batchUnits.toLocaleString()}</span> heavy operations this month — bulk translation, editions, batch covers</p>
+          )}
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-b from-transparent to-background" />
       </section>
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-
-      {/* Plan / usage */}
-      <Card className="mt-6 border-border">
-        <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              {isPaid ? <Crown className="h-4 w-4 text-gold" /> : <Zap className="h-4 w-4 text-primary" />}
-              <span className="font-sans text-sm font-semibold">{planDisplayName(status?.plan)} plan</span>
-            </div>
-            <div className="mt-3 grid max-w-xl gap-3 sm:grid-cols-2">
-              {!isPaid && status && (
-                <div>
-                  <div className="mb-1 flex justify-between text-xs text-muted-foreground font-sans"><span>{used}/{lim} text</span><span>{Math.max(0, lim - used)} left</span></div>
-                  <Progress value={pct} className="h-2" />
-                </div>
-              )}
-              {status && (
-                <div>
-                  <div className="mb-1 flex justify-between text-xs text-muted-foreground font-sans"><span>{imgUsed}/{imgLim} image credits</span><span>{Math.max(0, imgLim - imgUsed)} left</span></div>
-                  <Progress value={imgPct} className="h-2" />
-                </div>
-              )}
-            </div>
-            {batchUnits != null && batchUnits > 0 && (
-              <p className="mt-3 text-xs text-muted-foreground font-sans">
-                <span className="font-semibold text-foreground">{batchUnits.toLocaleString()}</span> heavy operations this month (bulk translation, editions, batch covers)
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            {imgPct >= 70 && imgLim > 0 && (
-              <p className="text-xs font-sans text-amber-600 dark:text-amber-400 font-medium">{imgLim - imgUsed} image credit{imgLim - imgUsed === 1 ? "" : "s"} remaining</p>
-            )}
-            {!isPaid ? (
-              <Button variant="hero" onClick={() => startUpgrade("creator").catch(() => {})}><Crown className="mr-2 h-4 w-4" /> Upgrade</Button>
-            ) : (
-              <Button asChild variant="heroOutline" size="sm"><Link to="/account">Buy image credits</Link></Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Smart next-step nudge — one contextual action, derived from real state */}
       {nudge && (
