@@ -101,10 +101,10 @@ const Navbar = () => {
 
       {mobileOpen && (
         <div className="md:hidden border-t border-border/50 bg-background/95 px-6 py-4">
-          <Link to="/" onClick={() => setMobileOpen(false)} className="mb-3 block text-sm font-medium text-foreground font-sans">Home</Link>
+          <Link to="/" onClick={() => setMobileOpen(false)} className="mb-3 block text-sm font-medium text-foreground font-sans">{t("nav.home")}</Link>
           {GROUPS.map((g) => (
             <div key={g.label} className="mb-3">
-              <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans"><span className={`h-1.5 w-1.5 rounded-full ${g.dot}`} /> {g.label}</div>
+              <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans"><span className={`h-1.5 w-1.5 rounded-full ${g.dot}`} /> {navLabel(g.label)}</div>
               <div className="flex flex-col">
                 {g.items.map((it) => (
                   <Link key={it.to} to={it.to} onClick={() => setMobileOpen(false)} className="py-1.5 text-sm text-foreground font-sans">{it.label}</Link>
@@ -114,8 +114,12 @@ const Navbar = () => {
           ))}
           <div className="flex flex-col border-t border-border pt-3">
             {DIRECT.map((d) => (
-              <Link key={d.to} to={d.to} onClick={() => setMobileOpen(false)} className="py-1.5 text-sm font-medium text-foreground font-sans">{d.label}</Link>
+              <Link key={d.to} to={d.to} onClick={() => setMobileOpen(false)} className="py-1.5 text-sm font-medium text-foreground font-sans">{navLabel(d.label)}</Link>
             ))}
+          </div>
+          <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
+            <LanguageSwitcher />
+            <ThemeToggle />
           </div>
         </div>
       )}
