@@ -32,7 +32,7 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
   const [cols, setCols] = useState<OrgCollection[]>([]);
   const [colId, setColId] = useState("");
 
-  useEffect(() => { if (open) fetchPlanStatus().then((s) => setIsPro(s?.plan === "pro")).catch(() => {}); }, [open]);
+  useEffect(() => { if (open) fetchPlanStatus().then((s) => setIsPro(!!s?.plan && s.plan !== "free")).catch(() => {}); }, [open]);
   useEffect(() => { if (open) myOrganizations().then((list) => setOrgs(list.filter((o) => can.edit(o.role)))).catch(() => {}); }, [open]);
   useEffect(() => {
     setColId("");
