@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink } from "lucide-react";
 import PublishDialog from "@/components/app/PublishDialog";
 import AddToCollection from "@/components/app/AddToCollection";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, setTemplateFlag, useTemplate as applyTemplate, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
+import { wankongListingsByDoc, type WankongListing } from "@/lib/wankong";
 import TagEditor from "@/components/app/TagEditor";
 import { elementToPdf } from "@/lib/export-pdf";
 import type { CvData } from "@/lib/cv-data";
@@ -55,8 +56,14 @@ const LibraryPage = () => {
   const [sortBy, setSortBy] = useState<"date" | "title" | "views">("date");
   const pbRef = useRef<HTMLDivElement>(null);
 
+  const [wankong, setWankong] = useState<Record<string, WankongListing>>({});
+
   const load = () => { listDocuments().then(setDocs).catch((e) => { toast({ title: "Could not load library", description: e.message, variant: "destructive" }); setDocs([]); }); };
   useEffect(load, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Per-document Wankong store status, fetched once for the whole library so
+  // cards can show a "live in store" badge without a query each.
+  useEffect(() => { wankongListingsByDoc().then(setWankong).catch(() => {}); }, []);
 
   // One-click resume from the dashboard: /library?open=<id> auto-opens the doc once.
   // ?kind=<DocKind> and ?filter=listed|shared|drafts apply initial filters from dashboard links.
@@ -491,6 +498,18 @@ const LibraryPage = () => {
                           <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-gold/15 px-1.5 py-0.5 text-[10px] font-medium text-gold font-sans">
                             <LayoutTemplate className="h-3 w-3" /> Template
                           </span>
+                        )}
+                        {wankong[d.id]?.status === "live" && (
+                          wankong[d.id]?.external_url ? (
+                            <a href={wankong[d.id]!.external_url!} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+                              className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-publishing/15 px-1.5 py-0.5 text-[10px] font-medium text-publishing font-sans hover:bg-publishing/25" title="Live in the Wankong store">
+                              <Store className="h-3 w-3" /> Wankong <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
+                          ) : (
+                            <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-publishing/15 px-1.5 py-0.5 text-[10px] font-medium text-publishing font-sans" title="Live in the Wankong store">
+                              <Store className="h-3 w-3" /> Wankong
+                            </span>
+                          )
                         )}
                         <button type="button" onClick={() => star(d)} className="ml-auto shrink-0 text-muted-foreground hover:text-gold" aria-label="Favorite">
                           <Star className={`h-4 w-4 ${d.favorite ? "fill-gold text-gold" : ""}`} />
