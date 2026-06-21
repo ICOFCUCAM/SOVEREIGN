@@ -9,6 +9,7 @@ import RequirePlan from "./components/app/RequirePlan.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 import RouteFallback from "./components/RouteFallback.tsx";
+import { I18nProvider } from "@/lib/i18n";
 
 // Every page is code-split so the initial bundle stays small; each route loads
 // its own chunk on demand behind a branded fallback.
@@ -54,6 +55,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <I18nProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -111,6 +113,7 @@ const App = () => (
         </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
+    </I18nProvider>
   </QueryClientProvider>
 );
 
