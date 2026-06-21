@@ -1,0 +1,14 @@
+{
+  "name": "Polished Pages",
+  "short_name": "Polished Pages",
+  "description": "The operating system for publishing and educational creation — create CVs, books, storybooks, workbooks and curricula, then localize, publish and sell.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
