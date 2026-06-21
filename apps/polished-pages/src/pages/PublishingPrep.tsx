@@ -78,7 +78,7 @@ const PublishingPrep = () => {
         <div className="container relative max-w-5xl px-6 pb-12 pt-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5">
             <Rocket className="h-4 w-4 text-[hsl(262_83%_72%)]" />
-            <span className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-white/70">Publishing command center</span>
+            <span className="eyebrow text-white/70">Publishing command center</span>
           </div>
           <h1 className="text-display mt-4 max-w-2xl text-4xl font-bold tracking-tight md:text-5xl">
             Run your <span className="bg-gradient-to-r from-[hsl(217_91%_70%)] via-[hsl(245_85%_74%)] to-[hsl(280_85%_74%)] bg-clip-text italic text-transparent">publishing operation</span>
@@ -188,13 +188,13 @@ const PublishingPrep = () => {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="space-y-1.5">
                 <Label className="font-sans text-xs">Trim size</Label>
-                <select value={trimId} onChange={(e) => setTrimId(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                <select value={trimId} onChange={(e) => setTrimId(e.target.value)} className="w-full field select-premium font-sans">
                   {TRIM_SIZES.filter((t) => t.id !== "a4").map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
                 </select>
               </div>
               <div className="space-y-1.5">
                 <Label className="font-sans text-xs">Paper</Label>
-                <select value={paper} onChange={(e) => setPaper(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                <select value={paper} onChange={(e) => setPaper(e.target.value)} className="w-full field select-premium font-sans">
                   {Object.keys(PAPER_MM_PER_PAGE).map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>

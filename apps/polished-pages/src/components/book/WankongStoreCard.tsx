@@ -74,7 +74,7 @@ const WankongStoreCard = () => {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <div className="flex-1 space-y-1.5">
                 <Label className="font-sans text-xs">Book</Label>
-                <select value={selected} onChange={(e) => setSelected(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                <select value={selected} onChange={(e) => setSelected(e.target.value)} className="w-full field select-premium font-sans">
                   {docs.map((d) => <option key={d.id} value={d.id}>{d.title}</option>)}
                 </select>
               </div>
