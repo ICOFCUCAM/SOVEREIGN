@@ -124,10 +124,17 @@ const PublishingPrep = () => {
 
         {/* Distribution network */}
         <section className="mt-12">
-          <div className="flex items-baseline gap-2">
+          <p className="eyebrow text-publishing">Distribution console</p>
+          <div className="mt-2 flex items-baseline gap-2">
             <Network className="h-4 w-4 text-publishing" />
-            <h2 className="font-serif text-xl font-bold">Distribution network</h2>
-            <span className="text-xs text-muted-foreground font-sans">where your book goes</span>
+            <h2 className="font-serif text-xl font-bold">Your book, on the world’s shelves</h2>
+          </div>
+          {/* Readiness strip — reads like an ops console, not a list */}
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-xl border border-border bg-card/60 px-4 py-2.5 text-xs font-sans">
+            <span className="inline-flex items-center gap-1.5"><Network className="h-3.5 w-3.5 text-publishing" /><span className="font-semibold text-foreground">{TARGETS.length}</span> channels</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-publishing" /> 1 direct · 1-click</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40" /> {TARGETS.length - 1} export-ready</span>
+            <span className="ml-auto inline-flex items-center gap-1.5 text-publishing"><Check className="h-3.5 w-3.5" /> Print &amp; digital</span>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {TARGETS.map((t, i) => {
@@ -145,6 +152,11 @@ const PublishingPrep = () => {
                     {t.direct && <span className="rounded-full bg-publishing/15 px-1.5 py-0.5 text-[9px] font-bold text-publishing">DIRECT</span>}
                     {epub && <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold text-primary">EPUB</span>}
                     {print && <span className="rounded-full bg-educational/10 px-1.5 py-0.5 text-[9px] font-bold text-educational">PRINT</span>}
+                  </div>
+                  <div className="mt-2 flex items-center gap-1.5 text-[9px] font-medium">
+                    {t.direct
+                      ? <><span className="h-1.5 w-1.5 rounded-full bg-publishing" /><span className="text-publishing">Connected · 1-click</span></>
+                      : <><span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40" /><span className="text-muted-foreground">Export-ready</span></>}
                   </div>
                 </div>
               );
