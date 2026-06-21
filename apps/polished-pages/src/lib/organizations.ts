@@ -309,6 +309,28 @@ export async function orgCollectionHealth(orgId: string): Promise<OrgCollectionH
   return error ? [] : rows<OrgCollectionHealth>(data);
 }
 
+export interface OrgStorefrontStats { works: number; languages: number; collections: number; series: number; editions: number }
+export interface MarketLanguageRow { language: string; works: number }
+export interface MarketLocalizedWork { token: string; title: string; author_name: string | null; category: string | null; price_cents: number; editions: number }
+export interface MarketTrendingOrg { slug: string; name: string; type: OrgType; verified: boolean; works: number; engagement: number }
+
+export async function orgStorefrontStats(slug: string): Promise<OrgStorefrontStats | null> {
+  const { data, error } = await r().rpc("polished_org_storefront_stats", { p_slug: slug });
+  return error ? null : one<OrgStorefrontStats>(data);
+}
+export async function marketLanguages(): Promise<MarketLanguageRow[]> {
+  const { data, error } = await r().rpc("polished_marketplace_languages");
+  return error ? [] : rows<MarketLanguageRow>(data);
+}
+export async function marketMostLocalized(): Promise<MarketLocalizedWork[]> {
+  const { data, error } = await r().rpc("polished_marketplace_most_localized");
+  return error ? [] : rows<MarketLocalizedWork>(data);
+}
+export async function marketTrendingOrgs(): Promise<MarketTrendingOrg[]> {
+  const { data, error } = await r().rpc("polished_marketplace_trending_orgs");
+  return error ? [] : rows<MarketTrendingOrg>(data);
+}
+
 export interface DocOrgInfo { org_id: string; org_slug: string; org_name: string; org_type: OrgType; listed: boolean; collections: string[] }
 interface DocOrgRow extends DocOrgInfo { document_id: string }
 // A lookup of the creator's own documents → the organization (and repositories)

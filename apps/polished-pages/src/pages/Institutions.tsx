@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SpineMark from "@/components/brand/SpineMark";
 import { coverArt } from "@/lib/cover-art";
-import { orgShowcase, ORG_TYPES, ORG_PRESENTATION, type OrgShowcaseRow, type OrgType } from "@/lib/organizations";
+import { orgShowcase, marketLanguages, ORG_TYPES, ORG_PRESENTATION, type OrgShowcaseRow, type OrgType } from "@/lib/organizations";
 
 const initials = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "O";
 const typeLabel = (t: string) => ORG_TYPES.find((x) => x.value === t)?.label ?? t;
@@ -16,10 +16,24 @@ const isNew = (iso: string) => Date.now() - new Date(iso).getTime() < 30 * 24 * 
 // showcase RPC inner-joins published works), so nothing here is fabricated.
 const Institutions = () => {
   const [orgs, setOrgs] = useState<OrgShowcaseRow[] | null>(null);
+  const [langCount, setLangCount] = useState(0);
   const [type, setType] = useState<OrgType | "">("");
   const [sort, setSort] = useState<"featured" | "newest">("featured");
 
-  useEffect(() => { orgShowcase().then(setOrgs).catch(() => setOrgs([])); }, []);
+  useEffect(() => {
+    orgShowcase().then(setOrgs).catch(() => setOrgs([]));
+    marketLanguages().then((l) => setLangCount(l.length)).catch(() => {});
+  }, []);
+
+  const network = useMemo(() => {
+    const list = orgs ?? [];
+    return {
+      institutions: list.length,
+      works: list.reduce((s, o) => s + o.works, 0),
+      collections: list.reduce((s, o) => s + o.collections, 0),
+      languages: langCount,
+    };
+  }, [orgs, langCount]);
 
   const present = useMemo(() => {
     const types = new Set((orgs ?? []).map((o) => o.type));
@@ -73,6 +87,30 @@ const Institutions = () => {
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-background" />
       </section>
+
+      {/* Knowledge network — the ecosystem at a glance (real aggregates) */}
+      {orgs && orgs.length > 0 && (
+        <div className="border-b border-border bg-card/40">
+          <div className="container px-6 py-5">
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-3 sm:gap-x-5">
+              {[
+                { v: network.institutions, l: "Institutions" },
+                { v: network.works, l: "Published works" },
+                { v: network.collections, l: "Collections" },
+                { v: network.languages, l: "Languages" },
+              ].map((n, i, arr) => (
+                <div key={n.l} className="flex items-center gap-3 sm:gap-5">
+                  <div className="text-center">
+                    <div className="font-serif text-2xl font-bold tabular-nums">{n.v}</div>
+                    <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans">{n.l}</div>
+                  </div>
+                  {i < arr.length - 1 && <span className="hidden h-px w-8 bg-gradient-to-r from-primary/40 to-transparent sm:block" />}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <main id="main" className="container px-6 py-12">
         {orgs === null ? (

@@ -6,7 +6,7 @@ import { BadgeCheck, Globe, Building2, Library as LibraryIcon, Settings } from "
 import ShelfCard from "@/components/app/ShelfCard";
 import SpineMark from "@/components/brand/SpineMark";
 import { coverArt } from "@/lib/cover-art";
-import { getOrganization, orgStorefront, ORG_TYPES, ORG_PRESENTATION, can, type OrgDetail } from "@/lib/organizations";
+import { getOrganization, orgStorefront, orgStorefrontStats, ORG_TYPES, ORG_PRESENTATION, can, type OrgDetail, type OrgStorefrontStats } from "@/lib/organizations";
 import type { CatalogItem } from "@/lib/documents";
 
 const typeLabel = (t: string) => ORG_TYPES.find((x) => x.value === t)?.label ?? t;
@@ -20,12 +20,14 @@ const OrgStorefront = () => {
   const { slug } = useParams();
   const [org, setOrg] = useState<OrgDetail | null | undefined>(undefined);
   const [items, setItems] = useState<CatalogItem[] | null>(null);
+  const [stats, setStats] = useState<OrgStorefrontStats | null>(null);
 
   useEffect(() => {
     if (!slug) return;
-    setOrg(undefined); setItems(null);
+    setOrg(undefined); setItems(null); setStats(null);
     getOrganization(slug).then(setOrg).catch(() => setOrg(null));
     orgStorefront(slug).then(setItems).catch(() => setItems([]));
+    orgStorefrontStats(slug).then(setStats).catch(() => {});
   }, [slug]);
 
   if (org === undefined) {
@@ -85,6 +87,26 @@ const OrgStorefront = () => {
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-background" />
       </section>
+
+      {/* Brand stats — a publisher/institution presented as a brand */}
+      {stats && stats.works > 0 && (
+        <div className="border-b border-border bg-card/40">
+          <div className="container flex flex-wrap gap-x-8 gap-y-3 px-6 py-4">
+            {[
+              { v: stats.works, l: "Published works" },
+              { v: stats.languages, l: "Languages" },
+              { v: stats.editions, l: "Editions" },
+              { v: stats.series, l: "Series" },
+              { v: stats.collections, l: "Collections" },
+            ].filter((s) => s.l === "Published works" || s.v > 0).map((s) => (
+              <div key={s.l}>
+                <div className="font-serif text-xl font-bold tabular-nums">{s.v}</div>
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans">{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <main id="main" className="container px-6 py-12">
         <div className="flex items-baseline gap-2">
