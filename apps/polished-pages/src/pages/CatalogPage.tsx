@@ -15,7 +15,7 @@ import { coverArt } from "@/lib/cover-art";
 import SpineMark from "@/components/brand/SpineMark";
 import CreatorCard from "@/components/app/CreatorCard";
 import CreatorStorefront from "@/components/app/CreatorStorefront";
-import { orgShowcase, marketTrendingOrgs, marketLanguages, marketMostLocalized, EDUCATIONAL_CATEGORIES, type OrgShowcaseRow, type MarketTrendingOrg, type MarketLanguageRow, type MarketLocalizedWork } from "@/lib/organizations";
+import { orgShowcase, marketTrendingOrgs, marketLanguages, marketMostLocalized, marketplaceCollections, EDUCATIONAL_CATEGORIES, type OrgShowcaseRow, type MarketTrendingOrg, type MarketLanguageRow, type MarketLocalizedWork, type MarketplaceCollection } from "@/lib/organizations";
 
 const orgInitials = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "O";
 
@@ -51,6 +51,7 @@ const CatalogPage = () => {
   const [trendingOrgs, setTrendingOrgs] = useState<MarketTrendingOrg[]>([]);
   const [languages, setLanguages] = useState<MarketLanguageRow[]>([]);
   const [mostLocalized, setMostLocalized] = useState<MarketLocalizedWork[]>([]);
+  const [collections, setCollections] = useState<MarketplaceCollection[]>([]);
 
   const filtering = !!(query.trim() || cat || author || lang || orgFilter);
 
@@ -61,6 +62,7 @@ const CatalogPage = () => {
     marketTrendingOrgs().then(setTrendingOrgs).catch(() => {});
     marketLanguages().then(setLanguages).catch(() => {});
     marketMostLocalized().then(setMostLocalized).catch(() => {});
+    marketplaceCollections().then(setCollections).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -351,6 +353,33 @@ const CatalogPage = () => {
             : (
               <>
                 {featured.length > 0 && <Shelf icon={Star} title="Featured" hint="hand-picked" list={featured} />}
+                {/* Featured collections — collections are the primary discovery unit,
+                    more valuable than a single document. Real public collections only. */}
+                {collections.length > 0 && (
+                  <section className="mt-12">
+                    <div className="flex items-baseline gap-2">
+                      <BookOpen className="h-4 w-4 text-marketplace" />
+                      <h2 className="font-serif text-xl font-bold">Featured collections</h2>
+                      <span className="text-xs text-muted-foreground font-sans">curated sets &amp; series</span>
+                    </div>
+                    <div className="-mx-1 mt-4 flex snap-x gap-4 overflow-x-auto px-1 pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      {collections.map((c) => {
+                        const g = coverArt(c.title);
+                        return (
+                          <Link key={c.token} to={`/collection/${c.token}`} className="group w-60 shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-card transition-colors hover:border-primary/40">
+                            <div className="relative h-24" style={{ backgroundImage: `linear-gradient(135deg, ${g.from}, ${g.to})` }}>
+                              <span className="absolute right-2 top-2 rounded-full bg-black/30 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur">{c.listed_works} work{c.listed_works === 1 ? "" : "s"}</span>
+                            </div>
+                            <div className="p-4">
+                              <div className="truncate font-serif text-base font-bold group-hover:text-primary">{c.title}</div>
+                              {c.description && <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground font-sans">{c.description}</p>}
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
                 {trending.length > 0 && <Shelf icon={TrendingUp} title="Trending now" hint="most downloaded" list={trending} ranked />}
                 {creators.length >= 2 && (
                   <section className="mt-12">
