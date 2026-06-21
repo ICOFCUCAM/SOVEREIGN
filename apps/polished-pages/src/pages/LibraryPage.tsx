@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, setTemplateFlag, useTemplate as applyTemplate, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
-import { wankongListingsByDoc, type WankongListing } from "@/lib/wankong";
+import { wankongListingsByDoc, publishAudiobookToWankong, WANKONG_STORE_URL, type WankongListing } from "@/lib/wankong";
 import { documentOrgMap, type DocOrgInfo } from "@/lib/organizations";
 import SpineMark from "@/components/brand/SpineMark";
 import TagEditor from "@/components/app/TagEditor";
@@ -67,6 +67,25 @@ const LibraryPage = () => {
   const [wankong, setWankong] = useState<Record<string, WankongListing>>({});
   const [orgMap, setOrgMap] = useState<Record<string, DocOrgInfo>>({});
   const [orgFilter, setOrgFilter] = useState("");
+  const [wkBusy, setWkBusy] = useState(false);
+
+  // Publish an opened audiobook to the Wankong store (its chapter audio URLs).
+  const publishAudiobookWk = async (ab: { title: string; voice: string; chapters: { title: string; url: string }[] }) => {
+    if (!openedId) return;
+    setWkBusy(true);
+    try {
+      const res = await publishAudiobookToWankong({ docId: openedId, title: ab.title, voice: ab.voice, chapters: ab.chapters });
+      if (res.needs_account) {
+        toast({ title: "Create a Wankong account", description: "Use the same email as here, then publish again." });
+        window.open(WANKONG_STORE_URL, "_blank", "noopener");
+      } else {
+        setWankong((w) => ({ ...w, [openedId]: { channel: "wankong", external_id: res.productId ?? null, external_url: res.url ?? null, status: res.status ?? "live", updated_at: new Date().toISOString() } }));
+        toast({ title: "Published to Wankong", description: "Your audiobook is live in the store." });
+      }
+    } catch (e) {
+      toast({ title: "Could not publish to Wankong", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    } finally { setWkBusy(false); }
+  };
 
   const load = () => { listDocuments().then(setDocs).catch((e) => { toast({ title: "Could not load library", description: e.message, variant: "destructive" }); setDocs([]); }); };
   useEffect(load, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -343,7 +362,16 @@ const LibraryPage = () => {
         <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
           <div className="container flex items-center justify-between h-12 px-6">
             <span className="truncate text-sm font-medium text-muted-foreground font-sans">{ab.title}</span>
-            <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground"><ArrowLeft className="w-4 h-4 mr-2" /> Library</Button>
+            <div className="flex items-center gap-2">
+              {wankong[openedId ?? ""]?.status === "live" ? (
+                <span className="inline-flex items-center gap-1 rounded-md bg-publishing/15 px-2 py-1 text-xs font-medium text-publishing font-sans"><Check className="h-3.5 w-3.5" /> Live on Wankong</span>
+              ) : (
+                <Button variant="heroOutline" size="sm" disabled={wkBusy} onClick={() => publishAudiobookWk(ab)}>
+                  {wkBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Store className="w-4 h-4 mr-1" />} Publish to Wankong
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground"><ArrowLeft className="w-4 h-4 mr-2" /> Library</Button>
+            </div>
           </div>
         </div>
         <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
