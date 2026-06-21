@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft, Users, Mail, FolderPlus, ExternalLink, Loader2, Trash2, BadgeCheck,
   Globe, Library as LibraryIcon, Languages, BookOpen, GraduationCap, Megaphone, Layers,
-  ShieldCheck, Activity, Settings2, Save, Building2,
+  ShieldCheck, Activity, Settings2, Save, Building2, Rocket, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -184,6 +184,55 @@ const OrgWorkspace = () => {
         </div>
       </div>
 
+      {/* Onboarding / activation — shown until the basics are in place (Circle 5) */}
+      {edit && stats && (() => {
+        const steps = [
+          { done: stats.collections > 0, label: "Create your first repository", hint: "Group curriculum, series or programs", href: "#repositories" as const },
+          { done: stats.members > 1, label: "Invite your team", hint: "Add editors and contributors", href: "#members" as const },
+          { done: stats.works > 0, label: "Add your first work", hint: "Move or copy from your Library", to: "/library" as const },
+          { done: stats.published > 0, label: "Publish to your storefront", hint: "List a work on the marketplace", to: "/library" as const },
+        ];
+        const done = steps.filter((s) => s.done).length;
+        if (done === steps.length) return null;
+        return (
+          <div className="mt-6 rounded-2xl border border-primary/30 bg-primary/[0.04] p-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-sm font-semibold font-sans"><Rocket className="h-4 w-4 text-primary" /> Get {org.name} up and running</div>
+              <span className="text-xs text-muted-foreground font-sans">{done}/{steps.length} complete</span>
+            </div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-gold-gradient transition-all" style={{ width: `${(done / steps.length) * 100}%` }} /></div>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {steps.map((st) => {
+                const inner = (
+                  <div className={`flex items-start gap-2 rounded-xl border p-3 transition-colors ${st.done ? "border-border bg-background/60" : "border-border bg-card hover:border-primary/40"}`}>
+                    <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${st.done ? "bg-primary text-primary-foreground" : "border border-border"}`}>{st.done ? <Check className="h-3 w-3" /> : null}</span>
+                    <div><div className={`text-sm font-medium font-sans ${st.done ? "text-muted-foreground line-through" : ""}`}>{st.label}</div><div className="text-xs text-muted-foreground font-sans">{st.hint}</div></div>
+                  </div>
+                );
+                if (st.done) return <div key={st.label}>{inner}</div>;
+                return "to" in st ? <Link key={st.label} to={st.to}>{inner}</Link> : <a key={st.label} href={st.href}>{inner}</a>;
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Activity feed — real organization activity (Circle 3) */}
+      {manage && audit.length > 0 && (
+        <div className="mt-8">
+          <SectionTitle icon={Activity}>Activity</SectionTitle>
+          <div className="divide-y divide-border rounded-xl border border-border">
+            {audit.slice(0, 8).map((a) => (
+              <div key={a.id} className="flex items-center gap-3 px-3 py-2.5 text-sm font-sans">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">{(a.actor_email ?? "?").slice(0, 2).toUpperCase()}</span>
+                <span className="min-w-0 flex-1 truncate"><span className="font-medium">{a.actor_email ?? "Someone"}</span> <span className="text-muted-foreground">{ACTION_LABEL[a.action] ?? a.action}</span>{a.detail ? <span className="font-medium"> · {a.detail}</span> : null}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">{new Date(a.created_at).toLocaleDateString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         {/* Content mix */}
         <div>
@@ -223,7 +272,7 @@ const OrgWorkspace = () => {
       </div>
 
       {/* Shared repositories (typed collections) */}
-      <div className="mt-8">
+      <div id="repositories" className="mt-8 scroll-mt-20">
         <SectionTitle icon={Layers}>Shared repositories</SectionTitle>
         {collections.length > 0 ? (
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -245,7 +294,7 @@ const OrgWorkspace = () => {
       </div>
 
       {/* Members */}
-      <div className="mt-8">
+      <div id="members" className="mt-8 scroll-mt-20">
         <SectionTitle icon={Users}>Members</SectionTitle>
         <div className="divide-y divide-border rounded-xl border border-border">
           {members.map((m) => (
@@ -267,23 +316,15 @@ const OrgWorkspace = () => {
         {manage && <InviteRow orgId={org.id} onInvited={() => orgInvitations(org.id).then(setInvites)} onError={(m) => toast({ title: "Could not invite", description: m, variant: "destructive" })} invites={invites} />}
       </div>
 
-      {/* Governance & activity (managers) — Circle 8 */}
+      {/* Governance (managers) — Circle 8 auditability */}
       {manage && (
         <div className="mt-8">
-          <SectionTitle icon={ShieldCheck}>Governance &amp; activity</SectionTitle>
-          {audit.length === 0 ? (
-            <p className="text-sm text-muted-foreground font-sans">No recorded activity yet. Member, role, content and settings changes are logged here for accountability.</p>
-          ) : (
-            <div className="divide-y divide-border rounded-xl border border-border">
-              {audit.slice(0, 12).map((a) => (
-                <div key={a.id} className="flex items-center gap-3 px-3 py-2 text-sm font-sans">
-                  <Activity className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                  <span className="min-w-0 flex-1 truncate"><span className="font-medium">{a.actor_email ?? "Someone"}</span> <span className="text-muted-foreground">{ACTION_LABEL[a.action] ?? a.action}</span>{a.detail ? <span className="text-muted-foreground"> · {a.detail}</span> : null}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground">{new Date(a.created_at).toLocaleDateString()}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          <SectionTitle icon={ShieldCheck}>Governance</SectionTitle>
+          <p className="rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground font-sans">
+            {audit.length === 0
+              ? "Member, role, content and settings changes are recorded here for accountability."
+              : `${audit.length} action${audit.length === 1 ? "" : "s"} recorded. Every member, role, content and settings change is logged for accountability — the most recent appear in Activity above.`}
+          </p>
         </div>
       )}
 

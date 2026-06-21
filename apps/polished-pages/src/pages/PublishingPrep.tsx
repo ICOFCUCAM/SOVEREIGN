@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Rocket, Check, ExternalLink, BookOpen, Image as ImageIcon, FileDown, Store, Lightbulb, AlertTriangle, Globe, Languages, Network, ArrowRight, Zap } from "lucide-react";
+import { Rocket, Check, ExternalLink, BookOpen, Image as ImageIcon, FileDown, Store, Lightbulb, AlertTriangle, Globe, Languages, Network, ArrowRight, Zap, Building2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -121,6 +121,16 @@ const PublishingPrep = () => {
             </div>
           </div>
         </section>
+
+        {/* Publish under an institution */}
+        <Link to="/organizations" className="group mt-8 flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/40 sm:p-5">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Building2 className="h-5 w-5" /></span>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold font-sans">Publishing as an institution?</div>
+            <p className="text-xs text-muted-foreground font-sans">Move titles into your organization’s shared library and branded storefront — open a book from the Library and choose <span className="font-medium text-foreground">Organization</span>.</p>
+          </div>
+          <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+        </Link>
 
         {/* Distribution network */}
         <section className="mt-12">
