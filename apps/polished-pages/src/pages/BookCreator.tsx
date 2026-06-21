@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { authHeader } from "@/lib/session";
 import { logAiActivity } from "@/lib/ai-activity-log";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon, Check, Loader2, HardDrive } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookChapter, BookOutline, BookMode, BookDepth, BookView, ImprovementType } from "@/types/book";
+import { useDraftAutosave, readDraft } from "@/hooks/use-draft-autosave";
 import BookSetup from "@/components/book/BookSetup";
 import BookOutlineEditor from "@/components/book/BookOutlineEditor";
 import BookWritingPanel from "@/components/book/BookWritingPanel";
@@ -16,32 +17,106 @@ import BookRepurposePanel from "@/components/book/BookRepurposePanel";
 import BookPublishingPackage from "@/components/book/BookPublishingPackage";
 import CoverGenerator from "@/components/book/CoverGenerator";
 
+// One book workspace = one auto-saved draft. The whole working state is mirrored
+// to localStorage on every change and checkpointed into the library, so a
+// refresh, crash, lost connection or logout never loses a generated book.
+const DRAFT_KEY = "book.workspace";
+
+interface BookDraft {
+  bookTitle: string; genre: string; targetAudience: string;
+  depth: BookDepth; mode: BookMode; existingContent: string;
+  view: BookView; outline: BookOutline | null; chapters: BookChapter[];
+  editedBook: string | null;
+}
+
+// Assemble the publishable markdown from a draft (same shape the reader/export
+// and the marketplace expect).
+const assembleBook = (d: BookDraft): string => {
+  const gen = d.chapters.filter((ch) => ch.content);
+  if (gen.length === 0) return "";
+  return `# ${d.outline?.title || d.bookTitle}\n\n${d.outline?.subtitle ? `*${d.outline.subtitle}*\n\n` : ""}${d.outline?.frontMatter ? `---\n\n${d.outline.frontMatter}\n\n---\n\n` : ""}${gen.map((ch) => ch.content).join("\n\n---\n\n")}${d.outline?.backMatter ? `\n\n---\n\n${d.outline.backMatter}` : ""}`;
+};
+
+const draftPreview = (full: string): string =>
+  full.replace(/^#[^\n]*\n/, "").replace(/[#*_>`]/g, " ").replace(/\s+/g, " ").trim().slice(0, 200);
+
+const relTime = (ts: number | null): string => {
+  if (!ts) return "";
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 5) return "just now";
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  return `${Math.floor(m / 60)}h ago`;
+};
+
 const BookCreator = () => {
   const { toast } = useToast();
 
+  // Restore any saved draft synchronously, so there's no empty-flash and the
+  // first persisted value equals what we restored (no clobber on mount).
+  const restored = useRef(readDraft<BookDraft>(DRAFT_KEY)).current;
+  const init = restored?.data;
+
   // Book metadata
-  const [bookTitle, setBookTitle] = useState("");
-  const [genre, setGenre] = useState("");
-  const [targetAudience, setTargetAudience] = useState("");
-  const [depth, setDepth] = useState<BookDepth>("standard");
-  const [mode, setMode] = useState<BookMode>("guided");
-  const [existingContent, setExistingContent] = useState("");
+  const [bookTitle, setBookTitle] = useState(init?.bookTitle ?? "");
+  const [genre, setGenre] = useState(init?.genre ?? "");
+  const [targetAudience, setTargetAudience] = useState(init?.targetAudience ?? "");
+  const [depth, setDepth] = useState<BookDepth>(init?.depth ?? "standard");
+  const [mode, setMode] = useState<BookMode>(init?.mode ?? "guided");
+  const [existingContent, setExistingContent] = useState(init?.existingContent ?? "");
 
   // State
-  const [view, setView] = useState<BookView>("setup");
-  const [outline, setOutline] = useState<BookOutline | null>(null);
-  const [chapters, setChapters] = useState<BookChapter[]>([]);
+  const [view, setView] = useState<BookView>(init?.view ?? "setup");
+  const [outline, setOutline] = useState<BookOutline | null>(init?.outline ?? null);
+  // Drop any transient "generating" flags that were saved mid-run.
+  const [chapters, setChapters] = useState<BookChapter[]>(
+    (init?.chapters ?? []).map((c) => ({ ...c, isGenerating: false, status: c.content ? (c.status === "generating" ? "complete" : c.status) : "pending" }))
+  );
   const [viewingChapter, setViewingChapter] = useState<number | null>(null);
   const [isGeneratingOutline, setIsGeneratingOutline] = useState(false);
 
   // Final-copy edits made in the preview override the assembled content for
   // preview, export and publish (the author's last pass before exporting).
-  const [editedBook, setEditedBook] = useState<string | null>(null);
+  const [editedBook, setEditedBook] = useState<string | null>(init?.editedBook ?? null);
+
+  const draft: BookDraft = useMemo(
+    () => ({ bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook }),
+    [bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook]
+  );
+
+  const autosave = useDraftAutosave<BookDraft>({
+    storageKey: DRAFT_KEY,
+    data: draft,
+    initialDocId: restored?.docId ?? null,
+    hasContent: (d) => !!d.outline || d.chapters.some((c) => c.content),
+    toDocument: (d) => {
+      const full = d.editedBook ?? assembleBook(d);
+      if (!full && !d.outline) return null;
+      return { kind: "book", title: d.outline?.title || d.bookTitle || "Untitled book", payload: { markdown: full, draft: d }, preview: draftPreview(full) };
+    },
+  });
+
+  // Let the author know their work came back.
+  useEffect(() => {
+    if (restored && (restored.data.outline || restored.data.chapters.some((c) => c.content))) {
+      toast({ title: "Recovered your draft", description: "Picking up where you left off — this book auto-saves as you work." });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const generatedChapters = chapters.filter((ch) => ch.content);
-  const fullContent = generatedChapters.length > 0
-    ? `# ${outline?.title || bookTitle}\n\n${outline?.subtitle ? `*${outline.subtitle}*\n\n` : ""}${outline?.frontMatter ? `---\n\n${outline.frontMatter}\n\n---\n\n` : ""}${generatedChapters.map((ch) => ch.content).join("\n\n---\n\n")}${outline?.backMatter ? `\n\n---\n\n${outline.backMatter}` : ""}`
-    : "";
+  const fullContent = assembleBook(draft);
   const effectiveContent = editedBook ?? fullContent;
+
+  // Start a fresh book — checkpoint the current one to the library first so it's
+  // safely under Drafts, then clear the local workspace and reset.
+  const newBook = async () => {
+    await autosave.flush().catch(() => {});
+    autosave.discard();
+    setBookTitle(""); setGenre(""); setTargetAudience(""); setDepth("standard"); setMode("guided"); setExistingContent("");
+    setOutline(null); setChapters([]); setEditedBook(null); setViewingChapter(null); setView("setup");
+  };
 
   // Generate outline
   const handleGenerateOutline = async () => {
@@ -202,6 +277,20 @@ const BookCreator = () => {
     { id: "publish", label: "Publish", icon: <Package className="w-3.5 h-3.5" />, show: !!outline },
   ];
 
+  // Discreet auto-save indicator, shown once there's something to keep.
+  const showStatus = autosave.status !== "idle";
+  const SaveStatus = () => (
+    <span className="hidden items-center gap-1.5 text-xs font-sans text-muted-foreground sm:inline-flex" title={autosave.lastSavedAt ? `Last saved ${relTime(autosave.lastSavedAt)}` : undefined}>
+      {autosave.status === "saving" ? (
+        <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…</>
+      ) : autosave.status === "local" ? (
+        <><HardDrive className="h-3.5 w-3.5" /> Saved on this device</>
+      ) : (
+        <><Check className="h-3.5 w-3.5 text-green-600" /> Saved{autosave.lastSavedAt ? ` · ${relTime(autosave.lastSavedAt)}` : ""}</>
+      )}
+    </span>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <nav className="sticky top-14 z-40 border-b border-border/50 bg-background/80 backdrop-blur-lg">
@@ -223,9 +312,10 @@ const BookCreator = () => {
             </div>
           )}
 
-          <div className="flex gap-2">
+          <div className="ml-auto flex items-center gap-3">
+            {showStatus && <SaveStatus />}
             {view !== "setup" && (
-              <Button variant="ghost" size="sm" onClick={() => { setView("setup"); setViewingChapter(null); }}>
+              <Button variant="ghost" size="sm" onClick={() => { void newBook(); }}>
                 <ArrowLeft className="w-4 h-4 mr-1" /> New Book
               </Button>
             )}
