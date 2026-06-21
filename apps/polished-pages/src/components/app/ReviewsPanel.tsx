@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { listReviews, submitReview, type Review } from "@/lib/reviews";
@@ -113,9 +114,20 @@ const ReviewsPanel = ({ token }: { token: string }) => {
 
       {/* List */}
       {reviews === null ? (
-        <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground font-sans"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>
+        <div className="mt-4 space-y-3">
+          {[0, 1].map((i) => (
+            <div key={i} className="rounded-lg border border-border p-3">
+              <div className="flex items-center gap-2.5"><Skeleton className="h-8 w-8 rounded-full" /><div className="flex-1"><Skeleton className="h-3.5 w-28" /><Skeleton className="mt-1.5 h-3 w-16" /></div></div>
+              <Skeleton className="mt-2 h-3 w-full" />
+            </div>
+          ))}
+        </div>
       ) : reviews.length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground font-sans">No reviews yet — be the first.</p>
+        <div className="mt-4 rounded-xl border border-dashed border-border/60 p-8 text-center">
+          <Star className="mx-auto h-7 w-7 text-muted-foreground/30" />
+          <p className="mt-2 text-sm font-medium font-sans">No reviews yet</p>
+          <p className="mt-0.5 text-sm text-muted-foreground font-sans">{signedIn ? "Be the first to rate this — it helps other readers." : "Sign in to be the first to review."}</p>
+        </div>
       ) : (
         <ul className="mt-4 space-y-3">
           {reviews.map((r, i) => {
