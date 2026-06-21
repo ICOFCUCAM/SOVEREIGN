@@ -14,6 +14,7 @@ import WorkflowNav from "@/components/app/WorkflowNav";
 import MobileNav from "@/components/app/MobileNav";
 import MobileTabBar from "@/components/app/MobileTabBar";
 import ThemeToggle from "@/components/app/ThemeToggle";
+import NotificationBell from "@/components/app/NotificationBell";
 
 // The persistent studio chrome: one global navigation that ties every tool
 // together, an account menu with live plan/usage, and the ⌘K command palette.
@@ -70,6 +71,7 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
               </Button>
             )}
 
+            <NotificationBell />
             <ThemeToggle />
 
             <DropdownMenu>
