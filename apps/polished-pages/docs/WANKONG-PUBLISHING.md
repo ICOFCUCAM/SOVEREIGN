@@ -34,21 +34,26 @@ Nothing below is in code — these are the one-time setup steps that make the
 Generate one strong value, e.g. `openssl rand -hex 32`. The **same** value goes
 on both projects as the bridge secret.
 
-### 2. Wankong project (`kwvjxinrjjzfzxbkvfsc`)
+### 2. Wankong project (`lebpsirnikkjlbvhavgc`)
+
+The store schema (`ecom_products`, `ecom_product_variants` + RLS), the bridge
+objects (`source`/`source_doc_id`/`seller_id`/`file_url` columns, the
+`polished_books` storage bucket, and `wankong_find_user_by_email`), and the
+`wankong-publish-book` function (`verify_jwt=false`) are already provisioned on
+this project. The only manual step left is the secrets:
 
 ```bash
-# from the Wankong repo
-supabase db push                       # runs 003_polished_pages_bridge.sql
-supabase functions deploy wankong-publish-book   # verify_jwt=false (config.toml)
-
 supabase secrets set \
   WANKONG_BRIDGE_SECRET="<shared-secret>" \
-  WANKONG_SITE_URL="https://<wankong-store-domain>"
+  WANKONG_SITE_URL="https://wankonglobal.com"
 # SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are injected automatically
 ```
 
-Note the deployed function URL — it looks like
-`https://kwvjxinrjjzfzxbkvfsc.supabase.co/functions/v1/wankong-publish-book`.
+The deployed function URL is
+`https://lebpsirnikkjlbvhavgc.supabase.co/functions/v1/wankong-publish-book`.
+
+> The old `kwvjxinrjjzfzxbkvfsc.databasepad.com` backend is retired — the store
+> now lives on the `lebpsirnikkjlbvhavgc` Supabase project.
 
 ### 3. Polished Pages project (`qvjdivcdefuprnenedje`)
 
@@ -58,7 +63,7 @@ supabase db push                       # runs 20260620800000_polished_external_l
 supabase functions deploy polished-publish-to-wankong   # verify_jwt=true
 
 supabase secrets set \
-  WANKONG_PUBLISH_URL="https://kwvjxinrjjzfzxbkvfsc.supabase.co/functions/v1/wankong-publish-book" \
+  WANKONG_PUBLISH_URL="https://lebpsirnikkjlbvhavgc.supabase.co/functions/v1/wankong-publish-book" \
   WANKONG_BRIDGE_SECRET="<shared-secret>"   # MUST match Wankong's value
 ```
 
