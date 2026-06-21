@@ -2,6 +2,7 @@ import { Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BRAND } from "@/lib/tools";
 import { useI18n } from "@/lib/i18n";
+import SpineMark from "@/components/brand/SpineMark";
 
 interface Col { title: string; links: { label: string; to: string }[] }
 
@@ -48,6 +49,7 @@ const Footer = () => {
       <div className="container px-6 py-14">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6">
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
+            <SpineMark size="sm" className="mb-4" />
             <Link to="/" className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-gold" />
               <span className="font-serif text-base font-bold text-foreground">{BRAND}</span>
