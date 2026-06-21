@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft, Users, Mail, FolderPlus, ExternalLink, Loader2, Trash2, BadgeCheck,
   Globe, Languages, BookOpen, GraduationCap, Megaphone, Layers,
-  ShieldCheck, Activity, Settings2, Save, Building2, Rocket, Check, BarChart3, Plus,
+  ShieldCheck, Activity, Settings2, Save, Building2, Rocket, Check, BarChart3, Plus, Download, Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import SpineMark from "@/components/brand/SpineMark";
 import OrgCommandModules from "@/components/org/OrgCommandModules";
 import {
   getOrganization, orgMembers, orgInvitations, orgAnalytics, orgCollections,
-  orgCategories, orgAudit, updateOrganization, inviteToOrg, setOrgRole, removeOrgMember,
+  orgCategories, orgAudit, orgAuditLog, transferOwnership, updateOrganization, inviteToOrg, setOrgRole, removeOrgMember,
   createOrgCollection, can, ORG_TYPES, ROLE_LABEL, ORG_PRESENTATION, COLLECTION_KINDS,
   EDUCATIONAL_CATEGORIES,
   type OrgDetail, type OrgMember, type OrgInvite, type OrgAnalytics, type OrgCollection,
@@ -59,10 +59,12 @@ const OrgWorkspace = () => {
   const [collections, setCollections] = useState<OrgCollection[]>([]);
   const [categories, setCategories] = useState<OrgCategoryRow[]>([]);
   const [audit, setAudit] = useState<OrgAuditRow[]>([]);
+  const [transferTo, setTransferTo] = useState("");
 
   const pres = org ? ORG_PRESENTATION[org.type] : null;
   const manage = can.manage(org?.my_role);
   const edit = can.edit(org?.my_role);
+  const transferTargets = members.filter((m) => m.role !== "owner");
 
   const loadOrgData = useCallback((id: string, role: OrgRole | null) => {
     orgAnalytics(id).then(setStats).catch(() => {});
@@ -85,6 +87,29 @@ const OrgWorkspace = () => {
   }, [slug, loadOrgData]);
 
   const reload = () => { if (org) loadOrgData(org.id, org.my_role); };
+
+  const exportAudit = async () => {
+    if (!org) return;
+    const rows = await orgAuditLog(org.id, 1000);
+    const esc = (v: string) => `"${(v ?? "").replace(/"/g, '""')}"`;
+    const csv = ["Date,Actor,Action,Detail",
+      ...rows.map((a) => [new Date(a.created_at).toISOString(), a.actor_email ?? "", a.action, a.detail ?? ""].map(esc).join(",")),
+    ].join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    const link = document.createElement("a");
+    link.href = url; link.download = `${org.slug}-audit-log.csv`; link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const doTransfer = async () => {
+    if (!org || !transferTo) return;
+    try {
+      await transferOwnership(org.id, transferTo);
+      setTransferTo("");
+      toast({ title: "Ownership transferred" });
+      getOrganization(org.slug).then((o) => { if (o) { setOrg(o); loadOrgData(o.id, o.my_role); } });
+    } catch (e) { toast({ title: "Could not transfer", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+  };
 
   const eduAssets = useMemo(
     () => categories.filter((c) => EDUCATIONAL_CATEGORIES.includes(c.category)).reduce((s, c) => s + c.total, 0),
@@ -296,15 +321,32 @@ const OrgWorkspace = () => {
         {manage && <InviteRow orgId={org.id} onInvited={() => orgInvitations(org.id).then(setInvites)} onError={(m) => toast({ title: "Could not invite", description: m, variant: "destructive" })} invites={invites} />}
       </div>
 
-      {/* Governance (managers) — Circle 8 auditability */}
+      {/* Governance (managers) — auditability + ownership */}
       {manage && (
         <div className="mt-8">
           <SectionTitle icon={ShieldCheck}>Governance</SectionTitle>
-          <p className="rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground font-sans">
-            {audit.length === 0
-              ? "Member, role, content and settings changes are recorded here for accountability."
-              : `${audit.length} action${audit.length === 1 ? "" : "s"} recorded. Every member, role, content and settings change is logged for accountability — the most recent appear in Activity above.`}
-          </p>
+          <div className="space-y-3 rounded-2xl border border-border bg-card p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground font-sans">
+                {audit.length === 0
+                  ? "Member, role, content and settings changes are recorded for accountability."
+                  : `${audit.length}+ actions recorded. Every member, role, content and settings change is logged.`}
+              </p>
+              <Button variant="heroOutline" size="sm" onClick={exportAudit}><Download className="mr-1 h-4 w-4" /> Export audit (CSV)</Button>
+            </div>
+            {org.my_role === "owner" && transferTargets.length > 0 && (
+              <div className="border-t border-border pt-3">
+                <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans"><Crown className="h-3.5 w-3.5" /> Transfer ownership</div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <select value={transferTo} onChange={(e) => setTransferTo(e.target.value)} className="field select-premium flex-1 font-sans">
+                    <option value="">Choose a member…</option>
+                    {transferTargets.map((m) => <option key={m.user_id} value={m.user_id}>{m.email}</option>)}
+                  </select>
+                  <Button variant="heroOutline" size="sm" disabled={!transferTo} onClick={doTransfer}>Transfer &amp; step down to Admin</Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
