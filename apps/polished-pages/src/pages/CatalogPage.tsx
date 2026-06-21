@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck, Link2, Check, Globe } from "lucide-react";
+import { Sparkles, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck, Link2, Check, Globe, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem, type CatalogSort } from "@/lib/documents";
@@ -13,6 +13,7 @@ import { BRAND } from "@/lib/tools";
 import { avatarColors, avatarInitials } from "@/lib/avatar";
 import { coverArt } from "@/lib/cover-art";
 import SpineMark from "@/components/brand/SpineMark";
+import CreatorCard from "@/components/app/CreatorCard";
 
 const trendScore = (i: CatalogItem) => (i.download_count ?? 0) * 3 + (i.view_count ?? 0);
 
@@ -90,6 +91,19 @@ const CatalogPage = () => {
     const m = new Map<string, number>();
     for (const i of all) m.set(i.category ?? "Other", (m.get(i.category ?? "Other") ?? 0) + 1);
     return m;
+  }, [all]);
+  // Real creators derived from published listings — bylines grouped into authors
+  // with their works and verified status, for the marketplace creator rail.
+  const creators = useMemo(() => {
+    const m = new Map<string, { name: string; verified: boolean; works: CatalogItem[] }>();
+    for (const i of all) {
+      if (!i.author_name) continue;
+      const e = m.get(i.author_name) ?? { name: i.author_name, verified: false, works: [] as CatalogItem[] };
+      e.works.push(i);
+      if (i.author_verified) e.verified = true;
+      m.set(i.author_name, e);
+    }
+    return [...m.values()].sort((a, b) => b.works.length - a.works.length).slice(0, 10);
   }, [all]);
 
   // Editorial shelf — a horizontal, scroll-snapped row of cover tiles, the way
@@ -312,6 +326,18 @@ const CatalogPage = () => {
               <>
                 {featured.length > 0 && <Shelf icon={Star} title="Featured" hint="hand-picked" list={featured} />}
                 {trending.length > 0 && <Shelf icon={TrendingUp} title="Trending now" hint="most downloaded" list={trending} ranked />}
+                {creators.length >= 2 && (
+                  <section className="mt-12">
+                    <div className="flex items-baseline gap-2">
+                      <Users className="h-4 w-4 text-marketplace" />
+                      <h2 className="font-serif text-xl font-bold">Featured creators</h2>
+                      <span className="text-xs text-muted-foreground font-sans">authors &amp; publishers on {BRAND}</span>
+                    </div>
+                    <div className="-mx-1 mt-4 flex snap-x gap-4 overflow-x-auto px-1 pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      {creators.map((c) => <CreatorCard key={c.name} name={c.name} verified={c.verified} works={c.works} />)}
+                    </div>
+                  </section>
+                )}
                 {topRated.length > 0 && <Shelf icon={Star} title="Top rated" hint="highest reader ratings" list={topRated} />}
                 <Shelf icon={Clock} title="Recently published" list={recent} />
                 <section className="mt-10">
