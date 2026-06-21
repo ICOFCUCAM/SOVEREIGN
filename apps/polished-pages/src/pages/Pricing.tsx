@@ -73,7 +73,7 @@ const Pricing = () => {
         </div>
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[hsl(262_83%_64%)]/60 to-transparent" />
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="container relative max-w-4xl px-6 pb-20 pt-20 text-center">
-          <p className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Plans that scale with you</p>
+          <p className="eyebrow text-white/50">Plans that scale with you</p>
           <h1 className="text-display mt-3 text-4xl font-bold tracking-tight md:text-6xl">
             A plan for every{" "}
             <span className="bg-gradient-to-r from-[hsl(217_91%_70%)] via-[hsl(245_85%_74%)] to-[hsl(280_85%_74%)] bg-clip-text italic text-transparent">stage of your journey</span>
