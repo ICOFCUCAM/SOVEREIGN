@@ -69,7 +69,7 @@ supabase secrets set \
 
 Optionally set `VITE_WANKONG_STORE_URL` (build-time) to the public store URL
 used in the "create a Wankong account" prompt; it defaults to
-`https://wankong.app`.
+`https://wankonglobal.com`.
 
 ### 4. Smoke test
 
