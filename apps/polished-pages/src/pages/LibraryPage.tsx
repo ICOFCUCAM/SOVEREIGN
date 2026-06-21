@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink, Building2 } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink, Building2, Sparkles } from "lucide-react";
 import PublishDialog from "@/components/app/PublishDialog";
 import BulkPublishDialog from "@/components/app/BulkPublishDialog";
 import AddToCollection from "@/components/app/AddToCollection";
@@ -399,6 +399,40 @@ const LibraryPage = () => {
           </div>
         </div>
       )}
+
+      {/* Draft Recovery — finished work that never got published is the biggest
+          untapped source of marketplace supply. Surface aging drafts with the
+          three actions that move them forward. */}
+      {docs && (() => {
+        const stale = docs
+          .filter((d) => !d.listed && (Date.now() - new Date(d.created_at).getTime()) >= 3 * 86_400_000)
+          .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        if (stale.length === 0) return null;
+        const ageLabel = (iso: string) => { const days = (Date.now() - new Date(iso).getTime()) / 86_400_000; return days >= 30 ? "30+ days" : days >= 7 ? "7+ days" : "3+ days"; };
+        return (
+          <div className="mt-5 rounded-2xl border border-gold/30 bg-gold/[0.04] p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-gold" />
+                <span className="text-sm font-semibold font-sans">{stale.length} finished work{stale.length === 1 ? "" : "s"} waiting to be published</span>
+              </div>
+              <BulkPublishDialog docs={stale} onDone={afterOrgChange} trigger={<Button size="sm" variant="hero"><Store className="mr-1 h-3.5 w-3.5" /> Publish all {stale.length}</Button>} />
+            </div>
+            <div className="mt-3 divide-y divide-gold/15">
+              {stale.slice(0, 6).map((d) => (
+                <div key={d.id} className="flex items-center gap-2 py-2">
+                  <span className="min-w-0 flex-1 truncate text-sm font-sans">{d.title}</span>
+                  <span className="shrink-0 rounded-full bg-gold/10 px-2 py-0.5 text-[10px] font-semibold text-gold font-sans">{ageLabel(d.created_at)}</span>
+                  <Button size="sm" variant="ghost" className="text-muted-foreground" onClick={() => open(d)} disabled={opening === d.id}>Edit</Button>
+                  <PublishDialog doc={d} onChanged={(listed) => setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, listed } : x)) ?? null)} trigger={<Button size="sm" variant="heroOutline">Publish</Button>} />
+                  <MoveToOrganization documentId={d.id} listed={d.listed} onDone={afterOrgChange} trigger={<Button size="sm" variant="ghost" className="text-muted-foreground" title="Move to an organization"><Building2 className="h-4 w-4" /></Button>} />
+                </div>
+              ))}
+            </div>
+            {stale.length > 6 && <div className="mt-1 text-xs text-muted-foreground font-sans">+{stale.length - 6} more — use “Publish all” or open Drafts below.</div>}
+          </div>
+        );
+      })()}
 
       {docs && docs.length > 0 && (
         <div className="mt-5 space-y-2">
