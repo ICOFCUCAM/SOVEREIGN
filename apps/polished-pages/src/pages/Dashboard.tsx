@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight, Crown, Zap, Library, FileText, BookOpen, BookHeart, GraduationCap, Palette, School,
   Store, TrendingUp, Eye, Download, Rocket, Clock, Image as ImageIcon, Send, Layers, Globe, Lightbulb,
-  Sparkles, CheckCircle2, XCircle,
+  Sparkles, CheckCircle2, XCircle, PenLine, Share2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -83,9 +83,19 @@ const Dashboard = () => {
   }, [all]);
   const published = all.filter((d) => d.listed).length;
   const sharedOnly = all.filter((d) => d.shared && !d.listed).length;
+  const sharedTotal = all.filter((d) => d.shared).length;
   const drafts = all.filter((d) => !d.shared).length;
   const totalViews = all.reduce((s, d) => s + (d.view_count ?? 0), 0);
   const totalDownloads = all.reduce((s, d) => s + (d.download_count ?? 0), 0);
+
+  // The creator's real publishing funnel, framed like the homepage's numbered
+  // lifecycle (Create → Distribute → Reach). Every count is real.
+  const PIPELINE = [
+    { n: "01", l: "Created", v: all.length, to: "/library", icon: PenLine, tint: "hsl(221 83% 66%)" },
+    { n: "02", l: "Shared", v: sharedTotal, to: "/library?filter=shared", icon: Share2, tint: "hsl(160 84% 50%)" },
+    { n: "03", l: "Listed", v: published, to: "/library?filter=listed", icon: Store, tint: "hsl(38 92% 58%)" },
+    { n: "04", l: "Reader views", v: totalViews, to: "/insights", icon: Eye, tint: "hsl(262 83% 68%)" },
+  ];
 
   const trending = useMemo(() => [...market].filter((i) => trendScore(i) > 0).sort((a, b) => trendScore(b) - trendScore(a)).slice(0, 4), [market]);
   const recentPubs = market.slice(0, 4);
@@ -182,6 +192,44 @@ const Dashboard = () => {
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-b from-transparent to-background" />
       </section>
+
+      {/* Knowledge pipeline — the creator's real funnel, rendered as a connected
+          rail in the homepage's numbered-lifecycle language. Extends the dark
+          command-center feel into the body instead of dropping into cards. */}
+      {docs !== null && all.length > 0 && (
+        <section className="relative overflow-hidden border-b border-white/5 text-white" style={{ background: "linear-gradient(180deg, hsl(222 47% 7%) 0%, hsl(224 60% 4%) 100%)" }}>
+          <div className="pointer-events-none absolute inset-0 -z-10">
+            <div className="absolute left-1/3 top-0 h-40 w-[28rem] animate-glow-pulse rounded-full bg-[hsl(221_83%_53%)]/12 blur-[120px]" />
+          </div>
+          <div className="container max-w-6xl px-6 py-8">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="font-mono text-xs text-white/40">PIPELINE</span>
+              <span className="h-px w-8 bg-white/15" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">Your knowledge, in motion</span>
+            </div>
+            <div className="flex flex-col gap-2 md:flex-row md:items-center">
+              {PIPELINE.map((p, i) => (
+                <div key={p.l} className="flex flex-1 items-center">
+                  <Link to={p.to} className="group relative flex-1 rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition-colors hover:bg-white/[0.07]">
+                    <div className="flex items-center justify-between">
+                      <p.icon className="h-5 w-5" style={{ color: p.tint }} />
+                      <span className="font-mono text-[11px] text-white/30">{p.n}</span>
+                    </div>
+                    <div className="mt-3 font-serif text-3xl font-bold"><CountUp value={p.v} /></div>
+                    <div className="text-[11px] uppercase tracking-wide text-white/45 font-sans">{p.l}</div>
+                  </Link>
+                  {i < PIPELINE.length - 1 && (
+                    <svg className="mx-1 hidden h-3 w-8 shrink-0 md:block" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden>
+                      <line x1="0" y1="2" x2="100" y2="2" stroke="hsl(0 0% 100% / 0.12)" strokeWidth="2" />
+                      <line x1="0" y1="2" x2="100" y2="2" stroke={p.tint} strokeWidth="2" strokeDasharray="2 8" className="animate-flow" />
+                    </svg>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
 
