@@ -216,6 +216,7 @@ const Pricing = () => {
               <p className="text-xs font-semibold uppercase tracking-wide text-gold font-sans">The top of the ladder</p>
               <h2 className="mt-1 font-serif text-2xl font-bold tracking-tight">…and when you’re running an institution</h2>
               <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground font-sans">Annual licensing, teacher and student accounts, custom curriculum support and dedicated onboarding — priced to your programme. <Link to="/for-schools" className="text-primary hover:underline">See how it works for schools →</Link></p>
+              <p className="mt-1.5 text-xs text-muted-foreground font-sans">Procurement-ready: <Link to="/security" className="text-primary hover:underline">Security &amp; Governance overview</Link></p>
             </div>
             {/* Enterprise trust signals — capability-based, the assurances an
                 institution checks before committing. */}
