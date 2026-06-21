@@ -1,49 +1,54 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import CVGenerator from "./pages/CVGenerator.tsx";
-import CoverLetterGenerator from "./pages/CoverLetterGenerator.tsx";
-import JobTailor from "./pages/JobTailor.tsx";
-import Dashboard from "./pages/Dashboard.tsx";
-import Account from "./pages/Account.tsx";
-import Insights from "./pages/Insights.tsx";
-import LibraryPage from "./pages/LibraryPage.tsx";
-import TransformBook from "./pages/TransformBook.tsx";
-import ChildrenStudio from "./pages/ChildrenStudio.tsx";
-import StorybookCreator from "./pages/StorybookCreator.tsx";
-import ColoringBookCreator from "./pages/ColoringBookCreator.tsx";
-import EducationalReaders from "./pages/EducationalReaders.tsx";
-import ClassroomPacks from "./pages/ClassroomPacks.tsx";
-import PrimaryBookFactory from "./pages/PrimaryBookFactory.tsx";
-import WorkbookGenerator from "./pages/WorkbookGenerator.tsx";
-import CurriculumBuilder from "./pages/CurriculumBuilder.tsx";
-import TeacherResourceCenter from "./pages/TeacherResourceCenter.tsx";
-import ExamAssessmentPack from "./pages/ExamAssessmentPack.tsx";
-import AssessmentBank from "./pages/AssessmentBank.tsx";
-import TranslatePublish from "./pages/TranslatePublish.tsx";
-import EditionManager from "./pages/EditionManager.tsx";
-import IllustrationStudio from "./pages/IllustrationStudio.tsx";
-import PublishingPrep from "./pages/PublishingPrep.tsx";
-import SharedDocument from "./pages/SharedDocument.tsx";
-import CatalogPage from "./pages/CatalogPage.tsx";
-import Pricing from "./pages/Pricing.tsx";
-import Resources from "./pages/Resources.tsx";
-import ForSchools from "./pages/ForSchools.tsx";
-import Accessibility from "./pages/Accessibility.tsx";
-import RequirePlan from "./components/app/RequirePlan.tsx";
-import SeriesPage from "./pages/SeriesPage.tsx";
-import PublicSeriesPage from "./pages/PublicSeries.tsx";
-import CollectionsPage from "./pages/CollectionsPage.tsx";
-import PublicCollection from "./pages/PublicCollection.tsx";
-import BookCreator from "./pages/BookCreator.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import Gallery from "./pages/Gallery.tsx";
 import AuthGate from "./components/AuthGate.tsx";
+import RequirePlan from "./components/app/RequirePlan.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
+import RouteFallback from "./components/RouteFallback.tsx";
+
+// Every page is code-split so the initial bundle stays small; each route loads
+// its own chunk on demand behind a branded fallback.
+const Index = lazy(() => import("./pages/Index.tsx"));
+const CVGenerator = lazy(() => import("./pages/CVGenerator.tsx"));
+const CoverLetterGenerator = lazy(() => import("./pages/CoverLetterGenerator.tsx"));
+const JobTailor = lazy(() => import("./pages/JobTailor.tsx"));
+const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
+const Account = lazy(() => import("./pages/Account.tsx"));
+const Insights = lazy(() => import("./pages/Insights.tsx"));
+const LibraryPage = lazy(() => import("./pages/LibraryPage.tsx"));
+const TransformBook = lazy(() => import("./pages/TransformBook.tsx"));
+const ChildrenStudio = lazy(() => import("./pages/ChildrenStudio.tsx"));
+const StorybookCreator = lazy(() => import("./pages/StorybookCreator.tsx"));
+const ColoringBookCreator = lazy(() => import("./pages/ColoringBookCreator.tsx"));
+const EducationalReaders = lazy(() => import("./pages/EducationalReaders.tsx"));
+const ClassroomPacks = lazy(() => import("./pages/ClassroomPacks.tsx"));
+const PrimaryBookFactory = lazy(() => import("./pages/PrimaryBookFactory.tsx"));
+const WorkbookGenerator = lazy(() => import("./pages/WorkbookGenerator.tsx"));
+const CurriculumBuilder = lazy(() => import("./pages/CurriculumBuilder.tsx"));
+const TeacherResourceCenter = lazy(() => import("./pages/TeacherResourceCenter.tsx"));
+const ExamAssessmentPack = lazy(() => import("./pages/ExamAssessmentPack.tsx"));
+const AssessmentBank = lazy(() => import("./pages/AssessmentBank.tsx"));
+const TranslatePublish = lazy(() => import("./pages/TranslatePublish.tsx"));
+const EditionManager = lazy(() => import("./pages/EditionManager.tsx"));
+const IllustrationStudio = lazy(() => import("./pages/IllustrationStudio.tsx"));
+const PublishingPrep = lazy(() => import("./pages/PublishingPrep.tsx"));
+const SharedDocument = lazy(() => import("./pages/SharedDocument.tsx"));
+const CatalogPage = lazy(() => import("./pages/CatalogPage.tsx"));
+const Pricing = lazy(() => import("./pages/Pricing.tsx"));
+const Resources = lazy(() => import("./pages/Resources.tsx"));
+const ForSchools = lazy(() => import("./pages/ForSchools.tsx"));
+const Accessibility = lazy(() => import("./pages/Accessibility.tsx"));
+const SeriesPage = lazy(() => import("./pages/SeriesPage.tsx"));
+const PublicSeriesPage = lazy(() => import("./pages/PublicSeries.tsx"));
+const CollectionsPage = lazy(() => import("./pages/CollectionsPage.tsx"));
+const PublicCollection = lazy(() => import("./pages/PublicCollection.tsx"));
+const BookCreator = lazy(() => import("./pages/BookCreator.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const Gallery = lazy(() => import("./pages/Gallery.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -55,6 +60,7 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <ErrorBoundary>
+        <Suspense fallback={<RouteFallback />}>
         <Routes>
           {/* Public marketing landing — the hero stays open to everyone. */}
           <Route path="/" element={<Index />} />
@@ -101,6 +107,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
         </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
