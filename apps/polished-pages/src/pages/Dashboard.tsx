@@ -270,7 +270,10 @@ const Dashboard = () => {
 
         <Card className="border-border">
           <CardContent className="p-5">
-            <h2 className="flex items-center gap-2 font-serif text-base font-semibold"><TrendingUp className="h-4 w-4 text-gold" /> Creator growth</h2>
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="flex items-center gap-2 font-serif text-base font-semibold"><TrendingUp className="h-4 w-4 text-gold" /> Creator growth</h2>
+              {published > 0 && <Link to="/insights" className="text-xs text-primary font-sans hover:underline">View insights</Link>}
+            </div>
             {published === 0 ? (
               <div className="mt-4 rounded-xl border border-dashed border-border/60 px-4 py-6 text-center">
                 <TrendingUp className="mx-auto h-6 w-6 text-muted-foreground/30" />

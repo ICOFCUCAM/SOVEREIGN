@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Search, ChevronDown, LogOut, Settings, LayoutDashboard, Crown, Library, Rocket, Store, FolderOpen, Menu } from "lucide-react";
+import { Sparkles, Search, ChevronDown, LogOut, Settings, LayoutDashboard, Crown, Library, Rocket, Store, FolderOpen, Menu, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
@@ -92,6 +92,7 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
                 <DropdownMenuItem asChild><Link to="/collections"><FolderOpen className="mr-2 h-4 w-4" /> Collections</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/publishing"><Rocket className="mr-2 h-4 w-4" /> Publish &amp; distribute</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/catalog"><Store className="mr-2 h-4 w-4" /> Content catalog</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/insights"><BarChart3 className="mr-2 h-4 w-4" /> Insights</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to={ACCOUNT_NAV.path}><Settings className="mr-2 h-4 w-4" /> Account & billing</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/pricing"><Crown className="mr-2 h-4 w-4" /> Plans &amp; pricing</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
