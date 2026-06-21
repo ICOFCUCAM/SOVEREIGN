@@ -249,10 +249,22 @@
   .text-pretty { text-wrap: pretty; }
   .text-display {
     font-family: 'Playfair Display', serif;
-    letter-spacing: -0.025em;
-    line-height: 1.05;
+    letter-spacing: -0.03em;
+    line-height: 1.0;
+    font-optical-sizing: auto;
+    text-wrap: balance;
   }
   .tracking-tightest { letter-spacing: -0.03em; }
+
+  /* One editorial eyebrow treatment, used to label every section so the page
+     reads with magazine-grade hierarchy rather than ad-hoc small text. */
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+  }
 
   .skeleton-shimmer {
     background: linear-gradient(
