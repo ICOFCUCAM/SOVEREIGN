@@ -84,6 +84,7 @@ const Footer = () => {
           <p className="text-sm text-muted-foreground font-sans">© {new Date().getFullYear()} {BRAND}. All rights reserved.</p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground font-sans">
             <Link to="/for-schools" className="hover:text-primary transition-colors">For Schools</Link>
+            <Link to="/security" className="hover:text-primary transition-colors">Security &amp; Governance</Link>
             <Link to="/accessibility" className="hover:text-primary transition-colors">Accessibility</Link>
             <Link to="/resources" className="hover:text-primary transition-colors">Resources</Link>
           </div>
