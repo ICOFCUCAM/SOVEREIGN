@@ -1,4 +1,3 @@
-import { Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BRAND } from "@/lib/tools";
 import { useI18n } from "@/lib/i18n";
@@ -51,7 +50,7 @@ const Footer = () => {
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <SpineMark size="sm" className="mb-4" />
             <Link to="/" className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-gold" />
+              <img src="/logo-mark.png" alt="" className="h-6 w-auto" width={35} height={24} />
               <span className="font-serif text-base font-bold text-foreground">{BRAND}</span>
             </Link>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground font-sans">
