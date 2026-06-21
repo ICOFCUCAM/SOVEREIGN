@@ -50,6 +50,19 @@ const relTime = (iso: string): string => {
   return mo < 12 ? `${mo}mo ago` : `${Math.floor(mo / 12)}y ago`;
 };
 
+// Consistent body section header — an eyebrow category tag over a serif title,
+// the same intentional system the homepage uses, so the dashboard body reads as
+// a command center rather than a stack of generic admin widgets.
+const SectionHead = ({ eyebrow, title, action }: { eyebrow: string; title: string; action?: React.ReactNode }) => (
+  <div className="flex items-end justify-between gap-3">
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70 font-sans">{eyebrow}</p>
+      <h2 className="mt-1 font-serif text-xl font-bold tracking-tight">{title}</h2>
+    </div>
+    {action}
+  </div>
+);
+
 const Dashboard = () => {
   const [status, setStatus] = useState<PlanStatus | null>(null);
   const [docs, setDocs] = useState<DocSummary[] | null>(null);
@@ -258,10 +271,7 @@ const Dashboard = () => {
       {/* Continue working */}
       {recent.length > 0 && (
         <section className="mt-10">
-          <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 font-serif text-lg font-semibold"><Clock className="h-4 w-4 text-gold" /> Continue working</h2>
-            <Link to="/library" className="text-sm text-primary font-sans hover:underline">View all</Link>
-          </div>
+          <SectionHead eyebrow="Recent" title="Continue working" action={<Link to="/library" className="text-sm text-primary font-sans hover:underline">View all</Link>} />
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {recent.map((d) => {
               const Icon = KIND_ICON[d.kind] ?? FileText;
@@ -293,7 +303,7 @@ const Dashboard = () => {
 
       {/* Create new */}
       <section className="mt-10">
-        <h2 className="font-serif text-lg font-semibold">Create new</h2>
+        <SectionHead eyebrow="Studios" title="Create new" />
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {CREATE.map((c) => {
             const t = STUDIO_THEME[c.studio];
@@ -378,10 +388,7 @@ const Dashboard = () => {
       {/* Library snapshot */}
       {all.length > 0 && (
         <section className="mt-10">
-          <div className="flex items-center justify-between">
-            <h2 className="font-serif text-lg font-semibold">Your library</h2>
-            <Link to="/library" className="text-sm text-primary font-sans hover:underline">Open library</Link>
-          </div>
+          <SectionHead eyebrow="Library" title="Your knowledge library" action={<Link to="/library" className="text-sm text-primary font-sans hover:underline">Open library</Link>} />
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {SNAPSHOT.filter((s) => (counts.get(s.kind) ?? 0) > 0).map((s) => (
               <Link key={s.kind} to={`/library?kind=${encodeURIComponent(s.kind)}`} className="group">
@@ -404,10 +411,7 @@ const Dashboard = () => {
       {/* Marketplace activity */}
       {(trending.length > 0 || recentPubs.length > 0) && (
         <section className="mt-10">
-          <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 font-serif text-lg font-semibold"><Store className="h-4 w-4 text-marketplace" /> Marketplace activity</h2>
-            <Link to="/catalog" className="text-sm text-primary font-sans hover:underline">Browse all</Link>
-          </div>
+          <SectionHead eyebrow="Marketplace" title="Marketplace activity" action={<Link to="/catalog" className="text-sm text-primary font-sans hover:underline">Browse all</Link>} />
           <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {trending.length > 0 && (
               <Card className="border-border"><CardContent className="p-5">
