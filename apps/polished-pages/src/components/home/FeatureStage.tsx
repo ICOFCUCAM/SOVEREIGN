@@ -19,16 +19,16 @@ interface Props {
 }
 
 const FeatureStage = ({ eyebrow, eyebrowClass = "text-primary", title, body, ctaLabel, ctaTo, visual, glow = "hsl(221 83% 53% / 0.18)", reversed }: Props) => (
-  <section className="relative border-t border-border/40 bg-background py-20 md:py-28">
+  <section className="relative border-t border-border/40 bg-background py-24 md:py-32">
     <div className="container px-6">
-      <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
         <motion.div
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           transition={{ duration: 0.6 }}
           className={reversed ? "lg:order-2" : ""}
         >
-          <p className={`font-sans text-xs font-semibold uppercase tracking-[0.18em] ${eyebrowClass}`}>{eyebrow}</p>
-          <h2 className="mt-3 font-serif text-3xl font-bold leading-[1.08] text-foreground md:text-[2.6rem]">{title}</h2>
+          <p className={`eyebrow ${eyebrowClass}`}>{eyebrow}</p>
+          <h2 className="text-display mt-4 text-3xl font-bold text-foreground md:text-[2.9rem]">{title}</h2>
           <p className="mt-4 max-w-md text-lg text-muted-foreground font-sans text-pretty">{body}</p>
           <Link to={ctaTo} className="group mt-7 inline-flex items-center gap-3 text-base font-semibold text-foreground font-sans">
             {ctaLabel}
