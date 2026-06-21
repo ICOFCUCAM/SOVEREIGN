@@ -7,15 +7,20 @@ import type { PictureBookData } from "@/components/children/PictureBookView";
 
 // Saves an illustrated picture book to the Library (uploading its images to
 // storage first). `build` is called on click so it captures the latest images.
-const SavePictureBookButton = ({ build }: { build: () => { book: PictureBookData } & PictureBookSaveOpts }) => {
+// `savedExternally` lets the parent mark the book already persisted (e.g. it was
+// saved on demand to create a language edition), so this button reflects that
+// and won't insert a duplicate.
+const SavePictureBookButton = ({ build, onSaved, savedExternally }: { build: () => { book: PictureBookData } & PictureBookSaveOpts; onSaved?: (id: string) => void; savedExternally?: boolean }) => {
   const { toast } = useToast();
   const [state, setState] = useState<"idle" | "saving" | "saved">("idle");
+  const saved = state === "saved" || !!savedExternally;
 
   const onSave = async () => {
     setState("saving");
     try {
       const { book, ...opts } = build();
-      await savePictureBook(book, opts);
+      const id = await savePictureBook(book, opts);
+      onSaved?.(id);
       setState("saved");
       toast({ title: "Saved to library", description: "Find it any time under Library." });
     } catch (e) {
@@ -25,11 +30,11 @@ const SavePictureBookButton = ({ build }: { build: () => { book: PictureBookData
   };
 
   return (
-    <Button variant="heroOutline" size="sm" onClick={onSave} disabled={state !== "idle"}>
+    <Button variant="heroOutline" size="sm" onClick={onSave} disabled={state === "saving" || saved}>
       {state === "saving" ? <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-        : state === "saved" ? <Check className="w-4 h-4 mr-1 text-green-600" />
+        : saved ? <Check className="w-4 h-4 mr-1 text-green-600" />
         : <Save className="w-4 h-4 mr-1" />}
-      {state === "saved" ? "Saved" : "Save"}
+      {saved ? "Saved" : "Save"}
     </Button>
   );
 };

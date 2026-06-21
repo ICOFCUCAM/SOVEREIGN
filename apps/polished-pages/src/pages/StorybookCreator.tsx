@@ -20,6 +20,11 @@ import DedicationNotes from "@/components/children/DedicationNotes";
 import { getSeries } from "@/lib/series";
 import { translateLocalize } from "@/lib/translate";
 import { usePersistentState } from "@/hooks/use-persistent-state";
+import LocalizePanel from "@/components/app/LocalizePanel";
+import { localizeStrings } from "@/lib/localize";
+import { savePictureBook } from "@/lib/picture-book-save";
+import { getDocument } from "@/lib/documents";
+import type { PictureBookData } from "@/components/children/PictureBookView";
 
 const READING_LEVELS = [
   "Pre-reader (ages 2–4)",
@@ -86,6 +91,13 @@ const StorybookCreator = () => {
   const [illustrating, setIllustrating] = useState<{ done: number; total: number } | null>(null);
   const [pdf, setPdf] = useState(false);
 
+  // The saved parent document id, once this storybook is in the Library — the
+  // anchor that language editions link to. Kept in a ref too so the localize
+  // flow can read it synchronously right after an on-demand save.
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const savedIdRef = useRef<string | null>(null);
+  const markSaved = (id: string) => { savedIdRef.current = id; setSavedId(id); };
+
   // Per-edition localization: the base (original) book and a cache of translated
   // editions that reuse the same illustrations.
   const baseBook = useRef<Storybook | null>(null);
@@ -103,6 +115,7 @@ const StorybookCreator = () => {
       baseBook.current = b;
       editionCache.current = {};
       setEditionLang("");
+      savedIdRef.current = null; setSavedId(null);
       setBook(b);
     } catch (e) {
       toast({ title: "Could not create story", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
@@ -208,6 +221,38 @@ const StorybookCreator = () => {
     }
   };
 
+  // Persist the storybook on demand (if not already saved) so language editions
+  // have a parent to link to. Reuses the same upload+save path as the Save button.
+  const ensureSaved = async (): Promise<string | null> => {
+    if (savedIdRef.current) return savedIdRef.current;
+    if (!book) return null;
+    const id = await savePictureBook(
+      { title: book.title, dedication: book.dedication, coverImage: book.coverImage, pages: book.pages.map((p) => ({ text: p.text, image: p.image })) },
+      { variant: "storybook", pageAspect: "16/9", showText: true },
+    );
+    markSaved(id);
+    return id;
+  };
+
+  // Build a linked language edition: translate the saved parent's text fields and
+  // reuse its already-uploaded illustration URLs (so the edition row stays small).
+  const buildStorybookEdition = async ({ language, mode, culture, onProgress }: { language: string; mode: "translate" | "localize"; culture?: string; onProgress?: (done: number, total: number) => void }) => {
+    const pid = savedIdRef.current;
+    if (!pid) throw new Error("Save your storybook first, then localize it.");
+    const parent = await getDocument(pid);
+    const pb = ((parent?.payload as Record<string, unknown>)?.book ?? {}) as PictureBookData;
+    const texts = [pb.title ?? "", pb.dedication ?? "", ...pb.pages.map((p) => p.text ?? "")];
+    const out = await localizeStrings(texts, { language, mode, culture, onProgress });
+    const edBook: PictureBookData = {
+      title: out[0] || (pb.title ?? ""),
+      dedication: out[1] || undefined,
+      coverImage: pb.coverImage,
+      pages: pb.pages.map((p, i) => ({ text: out[i + 2] ?? p.text, image: p.image })),
+    };
+    const edTitle = `${pb.title ?? book?.title ?? "Storybook"} (${language}${mode === "localize" && culture ? ` · ${culture}` : ""})`;
+    return { title: edTitle, payload: { variant: "storybook", pageAspect: "16/9", showText: true, book: edBook }, preview: "Illustrated storybook" };
+  };
+
   // ── Result ──
   if (book) {
     return (
@@ -234,7 +279,11 @@ const StorybookCreator = () => {
                 {illustrating ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Wand2 className="w-4 h-4 mr-1" />}
                 {illustrating ? `Illustrating ${illustrating.done}/${illustrating.total}` : "Illustrate all"}
               </Button>
-              <SavePictureBookButton build={() => ({ book: { title: book.title, dedication: book.dedication, coverImage: book.coverImage, pages: book.pages.map((p) => ({ text: p.text, image: p.image })) }, variant: "storybook", pageAspect: "16/9", showText: true })} />
+              <SavePictureBookButton
+                build={() => ({ book: { title: book.title, dedication: book.dedication, coverImage: book.coverImage, pages: book.pages.map((p) => ({ text: p.text, image: p.image })) }, variant: "storybook", pageAspect: "16/9", showText: true })}
+                onSaved={markSaved}
+                savedExternally={!!savedId}
+              />
               <Button variant="heroOutline" size="sm" disabled={epub} onClick={exportEpub}>
                 {epub ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />} EPUB
               </Button>
@@ -251,6 +300,19 @@ const StorybookCreator = () => {
             Illustrations are generated by OpenAI’s image model in your story’s art style. Each illustration counts toward your plan.
           </p>
           <DedicationNotes title={book.title} childName={childName} theme={theme} objective={educationalObjective} />
+
+          <div className="mt-10 border-t border-border/60 pt-8">
+            <h2 className="font-serif text-xl font-bold mb-1">Language editions</h2>
+            <p className="text-sm text-muted-foreground font-sans mb-5">Save translated or culturally-adapted editions of this storybook — the illustrations are reused, so only the words change. Each edition links to this project and lands in your Library.</p>
+            <LocalizePanel
+              parentId={savedId}
+              ensureSaved={ensureSaved}
+              kind="storybook"
+              sourceTitle={book.title}
+              hasContent={!!book}
+              buildEdition={buildStorybookEdition}
+            />
+          </div>
         </div>
       </div>
     );
