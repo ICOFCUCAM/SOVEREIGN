@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
 import { listDocuments, catalogList, type DocSummary, type DocKind, type CatalogItem } from "@/lib/documents";
+import { wankongListingsByDoc } from "@/lib/wankong";
 import { planDisplayName } from "@/lib/plans";
 import { STUDIO_THEME, type Studio } from "@/lib/studio-theme";
 import GettingStarted from "@/components/app/GettingStarted";
@@ -55,12 +56,16 @@ const Dashboard = () => {
   const [market, setMarket] = useState<CatalogItem[]>([]);
   const [aiLog] = useState<AiActivity[]>(() => getAiActivity().slice(0, 5));
   const [batchUnits, setBatchUnits] = useState<number | null>(null);
+  const [wankongLive, setWankongLive] = useState(0);
 
   useEffect(() => {
     fetchPlanStatus().then(setStatus).catch(() => {});
     getBatchUsage().then(setBatchUnits).catch(() => {});
     listDocuments().then(setDocs).catch(() => setDocs([]));
     catalogList(undefined, undefined, "new").then(setMarket).catch(() => {});
+    wankongListingsByDoc()
+      .then((m) => setWankongLive(Object.values(m).filter((l) => l.status === "live").length))
+      .catch(() => {});
   }, []);
 
   const all = useMemo(() => docs ?? [], [docs]);
@@ -259,6 +264,13 @@ const Dashboard = () => {
               <p className="mt-3 rounded-lg bg-card px-3 py-2 text-xs text-muted-foreground font-sans border border-border/60">
                 {drafts} draft{drafts > 1 ? "s" : ""} ready to share — open the library to publish or share a link.
               </p>
+            )}
+            {wankongLive > 0 && (
+              <Link to="/publishing#wankong" className="mt-3 flex items-center gap-2 rounded-lg border border-publishing/30 bg-publishing/[0.05] px-3 py-2 text-xs font-sans text-publishing transition-colors hover:bg-publishing/10">
+                <Store className="h-3.5 w-3.5 shrink-0" />
+                <span><span className="font-semibold">{wankongLive}</span> {wankongLive === 1 ? "title" : "titles"} live in the Wankong store</span>
+                <ArrowRight className="ml-auto h-3.5 w-3.5" />
+              </Link>
             )}
             <div className="mt-4 flex flex-wrap gap-2">
               <Button asChild variant="heroOutline" size="sm"><Link to="/publishing"><Send className="mr-1 h-3.5 w-3.5" /> Distribution center</Link></Button>
