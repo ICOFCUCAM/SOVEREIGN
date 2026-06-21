@@ -5,10 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
-  myOrganizations, orgCollections, setDocumentOrg, copyDocumentToOrg, addToOrgCollection,
+  myOrganizations, orgCollections, setDocumentOrg, copyDocumentToOrg, addToOrgCollection, suggestCollections,
   can, ORG_TYPES, COLLECTION_KINDS,
   type OrgSummary, type OrgCollection, type CollectionKind,
 } from "@/lib/organizations";
+import { Sparkles } from "lucide-react";
 
 const typeLabel = (t: string) => ORG_TYPES.find((x) => x.value === t)?.label ?? t;
 const KIND_LABEL = Object.fromEntries(COLLECTION_KINDS.map((k) => [k.value, k.label])) as Record<CollectionKind, string>;
@@ -17,8 +18,8 @@ const KIND_LABEL = Object.fromEntries(COLLECTION_KINDS.map((k) => [k.value, k.la
 // Move (re-assign ownership) or Copy (leave a draft) into an organization the
 // user can edit, optionally filing it into a repository — in as few clicks as
 // possible (a single org pre-selects; "Move" then confirms in two clicks).
-const MoveToOrganization = ({ documentId, listed, onDone, trigger }: {
-  documentId: string; listed?: boolean; onDone?: () => void; trigger: React.ReactNode;
+const MoveToOrganization = ({ documentId, listed, title, category, kind, onDone, trigger }: {
+  documentId: string; listed?: boolean; title?: string; category?: string | null; kind?: string | null; onDone?: () => void; trigger: React.ReactNode;
 }) => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -109,6 +110,20 @@ const MoveToOrganization = ({ documentId, listed, onDone, trigger }: {
             {orgId && (
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans">Repository <span className="font-normal normal-case">(optional)</span></label>
+                {title && (() => {
+                  const suggestions = suggestCollections({ title, category, kind }, cols);
+                  return suggestions.length > 0 ? (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-[11px] text-muted-foreground font-sans">Suggested:</span>
+                      {suggestions.slice(0, 3).map((c, i) => (
+                        <button key={c.id} type="button" onClick={() => setColId(c.id)}
+                          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium font-sans transition-colors ${colId === c.id ? "border-primary bg-primary/10 text-primary" : "border-dashed border-primary/40 text-foreground hover:bg-primary/5"}`}>
+                          {i === 0 && colId !== c.id && <Sparkles className="h-3 w-3 text-gold" />} {c.name}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
                 <select value={colId} onChange={(e) => setColId(e.target.value)} className="field select-premium w-full font-sans">
                   <option value="">— No repository —</option>
                   {cols.map((c) => <option key={c.id} value={c.id}>{c.name} · {KIND_LABEL[c.kind]}</option>)}

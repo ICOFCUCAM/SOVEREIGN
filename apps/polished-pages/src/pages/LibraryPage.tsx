@@ -425,7 +425,7 @@ const LibraryPage = () => {
                   <span className="shrink-0 rounded-full bg-gold/10 px-2 py-0.5 text-[10px] font-semibold text-gold font-sans">{ageLabel(d.created_at)}</span>
                   <Button size="sm" variant="ghost" className="text-muted-foreground" onClick={() => open(d)} disabled={opening === d.id}>Edit</Button>
                   <PublishDialog doc={d} onChanged={(listed) => setDocs((prev) => prev?.map((x) => (x.id === d.id ? { ...x, listed } : x)) ?? null)} trigger={<Button size="sm" variant="heroOutline">Publish</Button>} />
-                  <MoveToOrganization documentId={d.id} listed={d.listed} onDone={afterOrgChange} trigger={<Button size="sm" variant="ghost" className="text-muted-foreground" title="Move to an organization"><Building2 className="h-4 w-4" /></Button>} />
+                  <MoveToOrganization documentId={d.id} listed={d.listed} title={d.title} category={d.category} kind={d.kind} onDone={afterOrgChange} trigger={<Button size="sm" variant="ghost" className="text-muted-foreground" title="Move to an organization"><Building2 className="h-4 w-4" /></Button>} />
                 </div>
               ))}
             </div>
@@ -652,6 +652,9 @@ const LibraryPage = () => {
                         <MoveToOrganization
                           documentId={d.id}
                           listed={d.listed}
+                          title={d.title}
+                          category={d.category}
+                          kind={d.kind}
                           onDone={afterOrgChange}
                           trigger={
                             <Button size="sm" variant="ghost" className="text-muted-foreground" aria-label="Add to organization" title="Add to an organization">

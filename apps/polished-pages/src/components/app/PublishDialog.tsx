@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Copy, Check, Crown, Building2 } from "lucide-react";
+import { Loader2, Copy, Check, Crown, Building2, Sparkles } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { publishDocument, CATALOG_CATEGORIES, CATALOG_LICENSES, type DocSummary 
 import { fetchPlanStatus } from "@/lib/session";
 import { isWankongPublishable } from "@/lib/wankong";
 import WankongPublishButton from "@/components/app/WankongPublishButton";
-import { myOrganizations, orgCollections, setDocumentOrg, addToOrgCollection, can, type OrgSummary, type OrgCollection } from "@/lib/organizations";
+import { myOrganizations, orgCollections, setDocumentOrg, addToOrgCollection, suggestCollections, can, type OrgSummary, type OrgCollection } from "@/lib/organizations";
 
 // Publish a saved document to the public catalog: choose a category and an
 // optional price, get a public link. (Free items download immediately; charging
@@ -109,12 +109,28 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
                 <option value="">Just my marketplace listing</option>
                 {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
               </select>
-              {orgId && (
-                <select value={colId} onChange={(e) => setColId(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
-                  <option value="">No repository</option>
-                  {cols.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              )}
+              {orgId && (() => {
+                const suggestions = suggestCollections({ title: doc.title, category: doc.category, kind: doc.kind }, cols);
+                return (
+                  <>
+                    {suggestions.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[11px] text-muted-foreground font-sans">Suggested:</span>
+                        {suggestions.slice(0, 3).map((c, i) => (
+                          <button key={c.id} type="button" onClick={() => setColId(c.id)}
+                            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium font-sans transition-colors ${colId === c.id ? "border-primary bg-primary/10 text-primary" : "border-dashed border-primary/40 text-foreground hover:bg-primary/5"}`}>
+                            {i === 0 && colId !== c.id && <Sparkles className="h-3 w-3 text-gold" />} {c.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <select value={colId} onChange={(e) => setColId(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                      <option value="">No repository</option>
+                      {cols.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                  </>
+                );
+              })()}
             </div>
           )}
 
