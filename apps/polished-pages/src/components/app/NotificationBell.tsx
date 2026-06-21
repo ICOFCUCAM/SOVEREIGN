@@ -19,8 +19,15 @@ const NotificationBell = () => {
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
-    fetchPlanStatus().then(setStatus).catch(() => {});
-    listDocuments().then(setDocs).catch(() => setDocs([]));
+    const refresh = () => {
+      fetchPlanStatus().then(setStatus).catch(() => {});
+      listDocuments().then(setDocs).catch(() => setDocs([]));
+    };
+    refresh();
+    // Re-check when the user returns to the tab so alerts reflect current state.
+    const onVisible = () => { if (document.visibilityState === "visible") refresh(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
   }, []);
 
   useEffect(() => {
