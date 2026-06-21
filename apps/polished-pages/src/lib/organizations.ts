@@ -20,6 +20,95 @@ export const ROLE_LABEL: Record<OrgRole, string> = {
   owner: "Owner", admin: "Admin", editor: "Editor", contributor: "Contributor", viewer: "Viewer",
 };
 
+export type CollectionKind = "general" | "curriculum" | "publishing" | "program" | "series";
+export const COLLECTION_KINDS: { value: CollectionKind; label: string }[] = [
+  { value: "general", label: "General" },
+  { value: "curriculum", label: "Curriculum" },
+  { value: "publishing", label: "Publishing" },
+  { value: "program", label: "Program" },
+  { value: "series", label: "Series" },
+];
+
+// Per-type presentation — what makes a publisher's workspace feel like a
+// publishing house and a school's feel like an educational system. Drives the
+// command-center language, accent, and the focus lenses each institution sees.
+export interface OrgPresentation {
+  noun: string;            // "publishing house", "educational system", …
+  workspaceLine: string;   // command-center subtitle
+  accent: [string, string]; // gradient hsl stops for the institutional banner
+  collectionKinds: CollectionKind[]; // suggested repository types
+  // ordered focus lenses, each maps to real data the workspace renders
+  focus: { key: "catalog" | "localization" | "collections" | "education" | "programs" | "members"; label: string }[];
+}
+
+export const ORG_PRESENTATION: Record<OrgType, OrgPresentation> = {
+  publisher: {
+    noun: "publishing house",
+    workspaceLine: "Run your catalog, editions and distribution from one place.",
+    accent: ["hsl(265 70% 22%)", "hsl(222 60% 10%)"],
+    collectionKinds: ["publishing", "series", "general"],
+    focus: [
+      { key: "catalog", label: "Publishing catalog" },
+      { key: "localization", label: "Editions & localization" },
+      { key: "collections", label: "Series & collections" },
+      { key: "members", label: "Editorial team" },
+    ],
+  },
+  school: {
+    noun: "educational system",
+    workspaceLine: "Organize curriculum, subjects, assessments and teacher resources.",
+    accent: ["hsl(199 70% 24%)", "hsl(222 60% 10%)"],
+    collectionKinds: ["curriculum", "general", "series"],
+    focus: [
+      { key: "education", label: "Curriculum & assessments" },
+      { key: "collections", label: "Grade & subject collections" },
+      { key: "catalog", label: "Published resources" },
+      { key: "members", label: "Teachers & staff" },
+    ],
+  },
+  ngo: {
+    noun: "program",
+    workspaceLine: "Manage literacy programs, campaigns and multi-language deployments.",
+    accent: ["hsl(160 60% 20%)", "hsl(222 60% 10%)"],
+    collectionKinds: ["program", "curriculum", "general"],
+    focus: [
+      { key: "programs", label: "Programs & campaigns" },
+      { key: "localization", label: "Languages & reach" },
+      { key: "catalog", label: "Published content" },
+      { key: "members", label: "Program team" },
+    ],
+  },
+  ministry: {
+    noun: "educational infrastructure",
+    workspaceLine: "Coordinate national curriculum, regional initiatives and languages.",
+    accent: ["hsl(222 65% 26%)", "hsl(222 60% 9%)"],
+    collectionKinds: ["program", "curriculum", "general"],
+    focus: [
+      { key: "programs", label: "Initiatives & curriculum" },
+      { key: "localization", label: "Languages & regions" },
+      { key: "education", label: "Educational assets" },
+      { key: "members", label: "Ministry team" },
+    ],
+  },
+  company: {
+    noun: "company",
+    workspaceLine: "Manage your content library, team and storefront.",
+    accent: ["hsl(28 60% 28%)", "hsl(222 60% 10%)"],
+    collectionKinds: ["general", "publishing", "series"],
+    focus: [
+      { key: "catalog", label: "Content library" },
+      { key: "collections", label: "Collections" },
+      { key: "localization", label: "Localization" },
+      { key: "members", label: "Team" },
+    ],
+  },
+};
+
+// Categories that count as educational assets (schools / ministries).
+export const EDUCATIONAL_CATEGORIES = [
+  "Educational readers", "Textbooks", "Workbooks", "Classroom packs", "Curriculum", "Teacher resources",
+];
+
 // What each role can do (mirrors the server checks; used to gate UI).
 export const can = {
   manage: (r?: OrgRole | null) => r === "owner" || r === "admin",
@@ -32,9 +121,13 @@ export interface OrgSummary { id: string; slug: string; name: string; type: OrgT
 export interface OrgDetail { id: string; slug: string; name: string; type: OrgType; tagline: string | null; bio: string | null; website: string | null; verified: boolean; my_role: OrgRole | null }
 export interface OrgMember { user_id: string; role: OrgRole; email: string; created_at: string }
 export interface OrgInvite { id: string; email: string; role: OrgRole; status: string; created_at: string }
-export interface OrgAnalytics { works: number; published: number; views: number; downloads: number; members: number; collections: number }
-export interface OrgCollection { id: string; name: string; description: string | null; item_count: number }
+export interface OrgAnalytics { works: number; published: number; views: number; downloads: number; members: number; collections: number; translations: number; languages: number }
+export interface OrgCollection { id: string; name: string; description: string | null; kind: CollectionKind; item_count: number }
 export interface OrgLibraryItem { id: string; kind: string; title: string; preview: string | null; listed: boolean; created_at: string; author_name: string | null }
+export interface OrgContentRow { kind: string; total: number; published: number }
+export interface OrgCategoryRow { category: string; total: number }
+export interface OrgAuditRow { id: string; actor_email: string | null; action: string; detail: string | null; created_at: string }
+export interface OrgShowcaseRow { slug: string; name: string; type: OrgType; tagline: string | null; verified: boolean; works: number; languages: number }
 
 type Rpc = { rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message?: string } | null }> };
 const r = () => supabase as unknown as Rpc;
@@ -99,8 +192,24 @@ export async function removeOrgMember(orgId: string, userId: string): Promise<vo
 export async function setDocumentOrg(docId: string, orgId: string | null): Promise<void> {
   await ok(r().rpc("polished_org_set_document", { p_doc: docId, p_org: orgId }), "Could not move to the organization.");
 }
-export async function createOrgCollection(orgId: string, name: string, description?: string): Promise<string> {
-  const { data, error } = await r().rpc("polished_org_collection_create", { p_org: orgId, p_name: name, p_desc: description ?? null });
+export async function createOrgCollection(orgId: string, name: string, kind: CollectionKind = "general", description?: string): Promise<string> {
+  const { data, error } = await r().rpc("polished_org_collection_create", { p_org: orgId, p_name: name, p_desc: description ?? null, p_kind: kind });
   if (error) throw new Error(error.message || "Could not create collection.");
   return data as string;
+}
+export async function orgContent(orgId: string): Promise<OrgContentRow[]> {
+  const { data, error } = await r().rpc("polished_org_content", { p_org: orgId });
+  return error ? [] : rows<OrgContentRow>(data);
+}
+export async function orgCategories(orgId: string): Promise<OrgCategoryRow[]> {
+  const { data, error } = await r().rpc("polished_org_categories", { p_org: orgId });
+  return error ? [] : rows<OrgCategoryRow>(data);
+}
+export async function orgAudit(orgId: string): Promise<OrgAuditRow[]> {
+  const { data, error } = await r().rpc("polished_org_audit", { p_org: orgId });
+  return error ? [] : rows<OrgAuditRow>(data);
+}
+export async function orgShowcase(): Promise<OrgShowcaseRow[]> {
+  const { data, error } = await r().rpc("polished_org_showcase");
+  return error ? [] : rows<OrgShowcaseRow>(data);
 }

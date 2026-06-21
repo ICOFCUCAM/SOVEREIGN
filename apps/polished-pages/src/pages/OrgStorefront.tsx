@@ -6,7 +6,7 @@ import { BadgeCheck, Globe, Building2, Library as LibraryIcon, Settings } from "
 import ShelfCard from "@/components/app/ShelfCard";
 import SpineMark from "@/components/brand/SpineMark";
 import { coverArt } from "@/lib/cover-art";
-import { getOrganization, orgStorefront, ORG_TYPES, can, type OrgDetail } from "@/lib/organizations";
+import { getOrganization, orgStorefront, ORG_TYPES, ORG_PRESENTATION, can, type OrgDetail } from "@/lib/organizations";
 import type { CatalogItem } from "@/lib/documents";
 
 const typeLabel = (t: string) => ORG_TYPES.find((x) => x.value === t)?.label ?? t;
@@ -45,12 +45,13 @@ const OrgStorefront = () => {
   }
 
   const g = coverArt(org.name);
+  const pres = ORG_PRESENTATION[org.type];
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      {/* Storefront banner */}
-      <section className="relative overflow-hidden text-white" style={{ background: "radial-gradient(120% 100% at 50% -10%, hsl(222 47% 12%) 0%, hsl(222 47% 7%) 55%, hsl(224 60% 4%) 100%)" }}>
-        <div className="absolute inset-0 -z-10 opacity-60" style={{ background: `radial-gradient(60% 80% at 20% 0%, ${g.from}, transparent 60%)` }} />
+      {/* Storefront banner — branded per institution type, not a user profile */}
+      <section className="relative overflow-hidden text-white" style={{ background: `linear-gradient(135deg, ${pres.accent[0]}, ${pres.accent[1]})` }}>
+        <div className="absolute inset-0 -z-10 opacity-50" style={{ background: `radial-gradient(60% 80% at 20% 0%, ${g.from}, transparent 60%)` }} />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
         <div className="container relative px-6 pb-12 pt-28">
           <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-end">
@@ -87,7 +88,7 @@ const OrgStorefront = () => {
       <main id="main" className="container px-6 py-12">
         <div className="flex items-baseline gap-2">
           <LibraryIcon className="h-4 w-4 text-marketplace" />
-          <h2 className="font-serif text-xl font-bold">Published catalog</h2>
+          <h2 className="font-serif text-xl font-bold">{org.type === "school" || org.type === "ministry" ? "Educational catalog" : org.type === "ngo" ? "Published programs" : "Published catalog"}</h2>
           {items && items.length > 0 && <span className="text-xs text-muted-foreground font-sans">{items.length} title{items.length === 1 ? "" : "s"}</span>}
         </div>
         {items === null ? (
