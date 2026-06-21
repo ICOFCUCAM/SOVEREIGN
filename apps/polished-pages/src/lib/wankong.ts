@@ -6,7 +6,7 @@ import type { PictureBookData } from "@/components/children/PictureBookView";
 // Public Wankong store URL — used for the "create an account" prompt when a
 // user tries to publish without one. Override per-environment if needed.
 export const WANKONG_STORE_URL =
-  (import.meta.env.VITE_WANKONG_STORE_URL as string | undefined) || "https://wankong.app";
+  (import.meta.env.VITE_WANKONG_STORE_URL as string | undefined) || "https://wankonglobal.com";
 
 // The Wankong store sells books, so only book-shaped documents can go there.
 export const WANKONG_PUBLISHABLE_KINDS: DocKind[] = ["book", "tailored", "storybook"];
