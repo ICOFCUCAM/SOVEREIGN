@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
+import SpineMark from "@/components/brand/SpineMark";
 
 // Closing stage — the dark bookend to the hero, so the page opens and closes on
 // the same premium note. No stock photography; the depth comes from the brand
@@ -26,6 +27,7 @@ const CTASection = () => {
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[hsl(262_83%_64%)]/60 to-transparent" />
 
           <div className="relative z-10">
+            <SpineMark size="md" animated className="mx-auto mb-8 justify-center" />
             <h2 className="text-display mx-auto max-w-3xl text-4xl font-bold leading-[1.12] md:text-6xl">
               One manuscript.{" "}
               <span className="bg-gradient-to-r from-[hsl(217_91%_72%)] via-[hsl(245_85%_76%)] to-[hsl(280_85%_76%)] bg-clip-text text-transparent">Every language. Every classroom. Every bookstore. Every reader.</span>
