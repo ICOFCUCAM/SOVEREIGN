@@ -77,6 +77,19 @@ const Insights = () => {
             ))}
           </div>
 
+          {ranked[0] && (ranked[0].view_count ?? 0) > 0 && (
+            <Card className="mt-6 border-primary/20 bg-gradient-to-br from-primary/[0.05] to-card">
+              <CardContent className="flex flex-wrap items-center justify-between gap-3 p-5">
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-primary font-sans">Top performer</div>
+                  <Link to={`/library?open=${ranked[0].id}`} className="mt-0.5 block truncate font-serif text-lg font-bold hover:text-primary">{ranked[0].title}</Link>
+                  <p className="mt-0.5 text-sm text-muted-foreground font-sans">{(ranked[0].view_count ?? 0).toLocaleString()} views · {(ranked[0].download_count ?? 0).toLocaleString()} downloads{byType[0] ? ` · ${KIND_LABEL[byType[0].kind] ?? byType[0].kind} lead your reach` : ""}.</p>
+                </div>
+                <Button asChild variant="heroOutline" size="sm"><Link to="/catalog">View on marketplace <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link></Button>
+              </CardContent>
+            </Card>
+          )}
+
           {byType.length > 1 && (
             <>
               <h2 className="mt-10 font-serif text-lg font-semibold">Reach by content type</h2>
