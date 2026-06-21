@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { authHeader } from "@/lib/session";
 import { logAiActivity } from "@/lib/ai-activity-log";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon, Check, Loader2, HardDrive, Languages } from "lucide-react";
+import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon, Check, Loader2, HardDrive, Languages, Headphones } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookChapter, BookOutline, BookMode, BookDepth, BookView, ImprovementType } from "@/types/book";
 import { useDraftAutosave, readDraft } from "@/hooks/use-draft-autosave";
 import LocalizePanel from "@/components/app/LocalizePanel";
+import AudiobookPanel from "@/components/book/AudiobookPanel";
 import { localizeMarkdown, markdownEdition } from "@/lib/localize";
 import BookSetup from "@/components/book/BookSetup";
 import BookOutlineEditor from "@/components/book/BookOutlineEditor";
@@ -276,6 +277,7 @@ const BookCreator = () => {
     { id: "export", label: "Export", icon: <Download className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "repurpose", label: "Repurpose", icon: <Repeat className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "localize", label: "Localize", icon: <Languages className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
+    { id: "audiobook", label: "Audiobook", icon: <Headphones className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "cover", label: "Cover", icon: <ImageIcon className="w-3.5 h-3.5" />, show: !!outline },
     { id: "publish", label: "Publish", icon: <Package className="w-3.5 h-3.5" />, show: !!outline },
   ];
@@ -411,6 +413,12 @@ const BookCreator = () => {
                     return markdownEdition(outline?.title || bookTitle || "Untitled book", body, language, mode, culture);
                   }}
                 />
+              </div>
+            ) : view === "audiobook" ? (
+              <div>
+                <h2 className="font-serif text-2xl font-bold mb-1">Audiobook</h2>
+                <p className="text-sm text-muted-foreground font-sans mb-5">Narrate your book chapter by chapter with a natural AI voice, preview it, and download the MP3 files. Localize first to narrate a language edition.</p>
+                <AudiobookPanel chapters={generatedChapters.map((c) => ({ title: c.title, content: c.content! }))} bookTitle={outline?.title || bookTitle || "Untitled book"} />
               </div>
             ) : view === "cover" ? (
               <div>

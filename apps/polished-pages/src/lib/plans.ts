@@ -174,6 +174,11 @@ export function planAllows(plan: string | undefined, feature: StudioFeature): bo
   return (PLAN_RANK[plan ?? "free"] ?? 0) >= PLAN_RANK[FEATURE_MIN_PLAN[feature]];
 }
 
+// Generic tier check against the plan ladder (e.g. planAtLeast(plan, "enterprise")).
+export function planAtLeast(plan: string | undefined, min: PlanId): boolean {
+  return (PLAN_RANK[plan ?? "free"] ?? 0) >= (PLAN_RANK[min] ?? 99);
+}
+
 // How many ADDITIONAL language editions a project may have (the original
 // language is always free). -1 = unlimited. Mirrors polished.localization_limit
 // in the database, which enforces this server-side in polished_save_edition.
