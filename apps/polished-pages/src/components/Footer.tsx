@@ -1,6 +1,7 @@
 import { Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BRAND } from "@/lib/tools";
+import { useI18n } from "@/lib/i18n";
 
 interface Col { title: string; links: { label: string; to: string }[] }
 
@@ -39,6 +40,7 @@ const COLUMNS: Col[] = [
 ];
 
 const Footer = () => {
+  const { t } = useI18n();
   return (
     <footer className="border-t border-border bg-background">
       {/* Brand accent line — the same top-of-section gold gradient used across the platform */}
@@ -51,7 +53,7 @@ const Footer = () => {
               <span className="font-serif text-base font-bold text-foreground">{BRAND}</span>
             </Link>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground font-sans">
-              Create, publish and distribute professional documents, books and educational content — all in one platform.
+              {t("footer.tagline")}
             </p>
             <div className="mt-4 flex flex-wrap gap-1.5">
               {[
