@@ -43,6 +43,7 @@ const Pricing = lazy(() => import("./pages/Pricing.tsx"));
 const Resources = lazy(() => import("./pages/Resources.tsx"));
 const ForSchools = lazy(() => import("./pages/ForSchools.tsx"));
 const Accessibility = lazy(() => import("./pages/Accessibility.tsx"));
+const Security = lazy(() => import("./pages/Security.tsx"));
 const SeriesPage = lazy(() => import("./pages/SeriesPage.tsx"));
 const PublicSeriesPage = lazy(() => import("./pages/PublicSeries.tsx"));
 const CollectionsPage = lazy(() => import("./pages/CollectionsPage.tsx"));
@@ -72,6 +73,7 @@ const App = () => (
           <Route path="/resources" element={<Resources />} />
           <Route path="/for-schools" element={<ForSchools />} />
           <Route path="/accessibility" element={<Accessibility />} />
+          <Route path="/security" element={<Security />} />
           <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/catalog/author/:author" element={<CatalogPage />} />
           <Route path="/collection/:token" element={<PublicCollection />} />
