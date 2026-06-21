@@ -3,7 +3,7 @@
 // pricing page, Account screen and checkout stay in sync. Self-serve tiers map to
 // a Stripe price via STRIPE_PRICE_<ID> on the checkout function; "contact" tiers
 // are sales-led.
-export type PlanId = "free" | "creator" | "professional" | "publisher" | "business" | "school" | "enterprise";
+export type PlanId = "free" | "creator" | "professional" | "publisher" | "business" | "school" | "enterprise" | "enterprise-plus";
 
 export interface Plan {
   id: PlanId;
@@ -153,12 +153,30 @@ export const PLANS: Plan[] = [
       "Priority SLA & onboarding",
     ],
   },
+  {
+    id: "enterprise-plus",
+    name: "Enterprise Plus",
+    priceLabel: "Custom",
+    cadence: "",
+    priceMonthly: null,
+    target: "National-scale publishing & distribution programmes",
+    imageCredits: null,
+    textLabel: "Unlimited",
+    checkout: "contact",
+    features: [
+      "Everything in Enterprise, plus:",
+      "Audiobook production (AI narration)",
+      "Direct distribution to the Wankong store",
+      "Institutional localization workflows",
+      "Regional & cultural adaptation controls",
+    ],
+  },
 ];
 
 // Tier ranking, mirroring polished.plan_rank in the database. Used to decide
 // whether a plan unlocks a Professional+ studio.
 export const PLAN_RANK: Record<string, number> = {
-  free: 0, creator: 1, professional: 2, pro: 2, publisher: 3, business: 4, school: 5, enterprise: 6,
+  free: 0, creator: 1, professional: 2, pro: 2, publisher: 3, business: 4, school: 5, enterprise: 6, "enterprise-plus": 7,
 };
 
 // Studios reserved to a minimum tier. Keep in sync with the server-side gate
@@ -183,7 +201,7 @@ export function planAtLeast(plan: string | undefined, min: PlanId): boolean {
 // language is always free). -1 = unlimited. Mirrors polished.localization_limit
 // in the database, which enforces this server-side in polished_save_edition.
 export const LOCALIZATION_LIMIT: Record<string, number> = {
-  free: 0, creator: 1, professional: 2, pro: 2, publisher: 5, business: 10, school: -1, enterprise: -1,
+  free: 0, creator: 1, professional: 2, pro: 2, publisher: 5, business: 10, school: -1, enterprise: -1, "enterprise-plus": -1,
 };
 
 export function localizationLimit(plan: string | undefined): number {

@@ -24,7 +24,7 @@ const AudiobookPanel = ({ chapters, bookTitle }: { chapters: { title: string; co
   const [tracks, setTracks] = useState<Record<number, string>>({});
 
   useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
-  const isEnterprise = planAtLeast(status?.plan, "enterprise");
+  const isEnterprise = planAtLeast(status?.plan, "enterprise-plus");
 
   const narrateOne = async (i: number) => {
     setBusy(true);
@@ -64,8 +64,8 @@ const AudiobookPanel = ({ chapters, bookTitle }: { chapters: { title: string; co
     return (
       <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-background">
         <CardContent className="p-6">
-          <div className="flex items-center gap-2"><Headphones className="h-5 w-5 text-gold" /><h3 className="font-serif text-lg font-bold">Audiobooks are an Enterprise feature</h3></div>
-          <p className="mt-2 text-sm text-muted-foreground font-sans">Narrate your book into a downloadable audiobook — natural AI voices, chapter by chapter. Available on the Enterprise plan{status?.plan ? ` (you're on ${planDisplayName(status.plan)})` : ""}.</p>
+          <div className="flex items-center gap-2"><Headphones className="h-5 w-5 text-gold" /><h3 className="font-serif text-lg font-bold">Audiobooks are an Enterprise Plus feature</h3></div>
+          <p className="mt-2 text-sm text-muted-foreground font-sans">Narrate your book into a downloadable audiobook — natural AI voices, chapter by chapter. Available on the Enterprise Plus plan{status?.plan ? ` (you're on ${planDisplayName(status.plan)})` : ""}.</p>
           <ul className="mt-3 space-y-1.5">
             {["Studio-quality narration in six voices", "One MP3 per chapter, preview before you download", "Localize first, then narrate any language edition"].map((p) => (
               <li key={p} className="flex items-start gap-2 text-sm font-sans"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {p}</li>

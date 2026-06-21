@@ -79,8 +79,8 @@ Deno.serve(async (req) => {
     if (!text) return json({ error: "There is no text to narrate." }, 400);
     if (text.length > MAX_INPUT) return json({ error: "This section is too long to narrate in one request. Narrate it by chapter." }, 413);
 
-    // Audiobooks are an Enterprise capability — verified before any TTS cost.
-    await requirePlanOrThrow(userId, "enterprise");
+    // Audiobooks are an Enterprise Plus capability — verified before any TTS cost.
+    await requirePlanOrThrow(userId, "enterprise-plus");
 
     const parts = splitForTts(text);
     const buffers: Uint8Array[] = [];
