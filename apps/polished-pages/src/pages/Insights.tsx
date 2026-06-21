@@ -20,6 +20,8 @@ const Insights = () => {
     downloads: published.reduce((s, d) => s + (d.download_count ?? 0), 0),
   }), [published]);
   const convRate = totals.views > 0 ? Math.round((totals.downloads / totals.views) * 100) : 0;
+  const ranked = useMemo(() => [...published].sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0)), [published]);
+  const maxViews = ranked[0]?.view_count ?? 0;
 
   const HEAD = [
     { label: "Published works", value: totals.works, icon: Rocket },
@@ -49,16 +51,38 @@ const Insights = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {HEAD.map((h) => (
-            <Card key={h.label} className="border-border">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground font-sans"><h.icon className="h-3.5 w-3.5" /> {h.label}</div>
-                <div className="mt-2 font-serif text-3xl font-bold">{typeof h.value === "number" ? h.value.toLocaleString() : h.value}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <>
+          <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {HEAD.map((h) => (
+              <Card key={h.label} className="border-border">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground font-sans"><h.icon className="h-3.5 w-3.5" /> {h.label}</div>
+                  <div className="mt-2 font-serif text-3xl font-bold">{typeof h.value === "number" ? h.value.toLocaleString() : h.value}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <h2 className="mt-10 font-serif text-lg font-semibold">Performance by work</h2>
+          <div className="mt-3 space-y-2">
+            {ranked.map((d) => (
+              <Card key={d.id} className="border-border">
+                <CardContent className="flex items-center gap-4 p-4">
+                  <div className="min-w-0 flex-1">
+                    <Link to={`/library?open=${d.id}`} className="truncate font-sans text-sm font-semibold hover:text-primary">{d.title}</Link>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div className="h-full rounded-full bg-gold-gradient" style={{ width: maxViews > 0 ? `${((d.view_count ?? 0) / maxViews) * 100}%` : "0%" }} />
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 gap-4 text-xs text-muted-foreground font-sans">
+                    <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {d.view_count ?? 0}</span>
+                    <span className="inline-flex items-center gap-1"><Download className="h-3.5 w-3.5" /> {d.download_count ?? 0}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
