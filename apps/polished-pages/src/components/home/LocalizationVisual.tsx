@@ -1,70 +1,55 @@
-import { Globe } from "lucide-react";
+import { Globe, Sparkles } from "lucide-react";
 import BookCover, { type BookSpec } from "./BookCover";
 
-// Localization made iconic: one manuscript becomes a fan of language editions
-// over a globe — write once, sell in every market. The covers share a design
-// and differ only in language, which is the whole point.
-const EDITIONS: BookSpec[] = [
-  { title: "The Atlas of Tomorrow", author: "A. Okonkwo", lang: "EN", from: "hsl(221 83% 52%)", to: "hsl(221 83% 34%)" },
-  { title: "El Atlas del Mañana", author: "A. Okonkwo", lang: "ES", from: "hsl(38 92% 52%)", to: "hsl(24 84% 42%)" },
-  { title: "L’Atlas de Demain", author: "A. Okonkwo", lang: "FR", from: "hsl(160 84% 38%)", to: "hsl(190 84% 30%)" },
-  { title: "Atlasi ya Kesho", author: "A. Okonkwo", lang: "SW", from: "hsl(330 80% 52%)", to: "hsl(262 83% 44%)" },
-  { title: "أطلس الغد", author: "A. Okonkwo", lang: "AR", from: "hsl(262 83% 56%)", to: "hsl(221 83% 38%)" },
+// Localization as a superpower: one manuscript becomes eight language editions
+// at once, shown as a shelf over a globe. The covers share a design and differ
+// only in language — write once, sell in every market.
+const EDITIONS: (BookSpec & { source?: boolean })[] = [
+  { title: "The Atlas of Tomorrow", author: "A. Okonkwo", tag: "Fiction", lang: "EN", from: "hsl(221 83% 52%)", to: "hsl(221 83% 34%)", source: true },
+  { title: "L’Atlas de Demain", author: "A. Okonkwo", tag: "Fiction", lang: "FR", from: "hsl(262 83% 56%)", to: "hsl(221 83% 38%)" },
+  { title: "El Atlas del Mañana", author: "A. Okonkwo", tag: "Fiction", lang: "ES", from: "hsl(38 92% 52%)", to: "hsl(24 84% 42%)" },
+  { title: "أطلس الغد", author: "A. Okonkwo", tag: "Fiction", lang: "AR", from: "hsl(330 80% 52%)", to: "hsl(262 83% 44%)" },
+  { title: "未来之书", author: "A. Okonkwo", tag: "Fiction", lang: "中文", from: "hsl(0 78% 52%)", to: "hsl(14 84% 40%)" },
+  { title: "Atlasi ya Kesho", author: "A. Okonkwo", tag: "Fiction", lang: "SW", from: "hsl(160 84% 40%)", to: "hsl(190 84% 30%)" },
+  { title: "O Atlas do Amanhã", author: "A. Okonkwo", tag: "Fiction", lang: "PT", from: "hsl(142 70% 40%)", to: "hsl(160 84% 28%)" },
+  { title: "Der Atlas von Morgen", author: "A. Okonkwo", tag: "Fiction", lang: "DE", from: "hsl(222 30% 38%)", to: "hsl(222 40% 22%)" },
 ];
 
 const LocalizationVisual = () => (
-  <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-card to-background p-6 shadow-e3">
+  <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-card to-background p-5 shadow-e3">
     {/* Globe backdrop */}
-    <svg viewBox="0 0 320 320" className="pointer-events-none absolute left-1/2 top-[42%] h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 opacity-[0.5]" aria-hidden>
-      <defs>
-        <radialGradient id="loc-globe" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="hsl(221 83% 53% / 0.12)" />
-          <stop offset="100%" stopColor="hsl(221 83% 53% / 0)" />
-        </radialGradient>
-      </defs>
-      <circle cx="160" cy="160" r="150" fill="url(#loc-globe)" />
-      <circle cx="160" cy="160" r="150" fill="none" stroke="hsl(var(--primary) / 0.18)" strokeWidth="1" />
-      {[40, 80, 120].map((r) => (
-        <ellipse key={`lat${r}`} cx="160" cy="160" rx="150" ry={r} fill="none" stroke="hsl(var(--primary) / 0.12)" strokeWidth="1" />
-      ))}
-      {[40, 80, 120].map((r) => (
-        <ellipse key={`lon${r}`} cx="160" cy="160" rx={r} ry="150" fill="none" stroke="hsl(var(--primary) / 0.12)" strokeWidth="1" />
-      ))}
+    <svg viewBox="0 0 320 320" className="pointer-events-none absolute left-1/2 top-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2 opacity-50" aria-hidden>
+      <circle cx="160" cy="160" r="150" fill="none" stroke="hsl(var(--primary) / 0.16)" strokeWidth="1" />
+      {[45, 90, 130].map((r) => <ellipse key={`a${r}`} cx="160" cy="160" rx="150" ry={r} fill="none" stroke="hsl(var(--primary) / 0.1)" strokeWidth="1" />)}
+      {[45, 90, 130].map((r) => <ellipse key={`b${r}`} cx="160" cy="160" rx={r} ry="150" fill="none" stroke="hsl(var(--primary) / 0.1)" strokeWidth="1" />)}
     </svg>
 
     <div className="relative">
-      {/* Reach badge */}
-      <div className="mb-2 flex justify-center">
+      <div className="mb-3 flex items-center justify-center gap-1.5">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary font-sans">
-          <Globe className="h-3.5 w-3.5" /> 1 manuscript → 40+ languages
+          <Globe className="h-3.5 w-3.5" /> One title → 8 languages
         </span>
       </div>
 
-      {/* Fanned editions */}
-      <div className="flex items-end justify-center">
-        {EDITIONS.map((e, i) => {
-          const mid = (EDITIONS.length - 1) / 2;
-          const rot = (i - mid) * 6;
-          const lift = Math.abs(i - mid) * 12;
-          return (
-            <div
-              key={e.lang}
-              className="w-[80px] shrink-0 transition-transform duration-300 hover:-translate-y-3"
-              style={{ transform: `rotate(${rot}deg) translateY(${lift}px)`, marginLeft: i === 0 ? 0 : -16, zIndex: EDITIONS.length - Math.abs(i - mid) }}
-            >
-              <BookCover spec={e} />
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-4 gap-2.5">
+        {EDITIONS.map((e) => (
+          <div key={e.lang} className="relative">
+            {e.source && (
+              <span className="absolute -top-1.5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-primary px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-wide text-primary-foreground shadow">
+                <Sparkles className="mr-0.5 inline h-2 w-2" />Source
+              </span>
+            )}
+            <BookCover spec={e} />
+          </div>
+        ))}
       </div>
 
-      {/* Language ticker */}
-      <div className="mt-7 flex flex-wrap items-center justify-center gap-1.5">
-        {["English", "Español", "Français", "Kiswahili", "العربية", "中文", "Português", "हिन्दी"].map((l) => (
-          <span key={l} className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-foreground/70 font-sans">{l}</span>
-        ))}
-        <span className="rounded-full bg-educational/10 px-2 py-0.5 text-[11px] font-semibold text-educational font-sans">+32 more</span>
+      <div className="mt-4 flex items-center justify-center gap-x-3 text-[11px] font-medium text-muted-foreground font-sans">
+        <span>English · Français · Español · العربية</span>
+        <span className="text-muted-foreground/40">·</span>
+        <span>中文 · Kiswahili · Português · Deutsch</span>
       </div>
+      <div className="mt-1 text-center text-[11px] text-muted-foreground/70 font-sans">…and 40+ more, each a sellable edition</div>
     </div>
   </div>
 );
