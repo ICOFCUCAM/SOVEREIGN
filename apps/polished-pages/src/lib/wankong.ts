@@ -128,3 +128,15 @@ export async function wankongListing(docId: string): Promise<WankongListing | nu
   const rows = (Array.isArray(data) ? data : []) as WankongListing[];
   return rows.find((r) => r.channel === "wankong") ?? null;
 }
+
+// All of the caller's Wankong listings, keyed by document id — one query for the
+// whole library, so cards can show store status without N round-trips.
+export async function wankongListingsByDoc(): Promise<Record<string, WankongListing>> {
+  const rpc = supabase as unknown as { rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> };
+  const { data, error } = await rpc.rpc("polished_external_listings_all");
+  if (error) return {};
+  const rows = (Array.isArray(data) ? data : []) as (WankongListing & { document_id: string })[];
+  const map: Record<string, WankongListing> = {};
+  for (const r of rows) if (r.channel === "wankong" && r.document_id) map[r.document_id] = r;
+  return map;
+}
