@@ -42,6 +42,8 @@ const CatalogPage = () => {
   const [cat, setCat] = useState<string>("");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<CatalogSort>("new");
+  const [lang, setLang] = useState("");
+  const [orgFilter, setOrgFilter] = useState("");
   const [admin, setAdmin] = useState(false);
   const [profile, setProfile] = useState<AuthorProfile | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -50,7 +52,7 @@ const CatalogPage = () => {
   const [languages, setLanguages] = useState<MarketLanguageRow[]>([]);
   const [mostLocalized, setMostLocalized] = useState<MarketLocalizedWork[]>([]);
 
-  const filtering = !!(query.trim() || cat || author);
+  const filtering = !!(query.trim() || cat || author || lang || orgFilter);
 
   useEffect(() => { isAdmin().then(setAdmin).catch(() => {}); }, []);
   // Real institutions, engagement and localization — the ecosystem layer.
@@ -69,13 +71,13 @@ const CatalogPage = () => {
   useEffect(() => {
     setItems(null);
     const id = setTimeout(() => {
-      const f = !!(query.trim() || cat || author);
+      const f = !!(query.trim() || cat || author || lang || orgFilter);
       // Discovery fetches the newest 200 and derives sections client-side.
-      catalogList(cat || undefined, query.trim() || undefined, f ? sort : "new", author || undefined)
+      catalogList(cat || undefined, query.trim() || undefined, f ? sort : "new", author || undefined, lang || undefined, orgFilter || undefined)
         .then(setItems).catch(() => setItems([]));
     }, query ? 300 : 0);
     return () => clearTimeout(id);
-  }, [cat, query, sort, author]);
+  }, [cat, query, sort, author, lang, orgFilter]);
 
   const feature = async (it: CatalogItem) => {
     const next = !it.featured;
@@ -100,6 +102,15 @@ const CatalogPage = () => {
     [all],
   );
   const recent = useMemo(() => all.slice(0, 12), [all]);
+  // Trending within education and across languages — real engagement only.
+  const trendingEdu = useMemo(
+    () => all.filter((i) => EDUCATIONAL_CATEGORIES.includes(i.category ?? "") && trendScore(i) > 0).sort((a, b) => trendScore(b) - trendScore(a)).slice(0, 6),
+    [all],
+  );
+  const trendingMulti = useMemo(
+    () => all.filter((i) => i.edition_language && trendScore(i) > 0).sort((a, b) => trendScore(b) - trendScore(a)).slice(0, 6),
+    [all],
+  );
   // The single title to spotlight in the editorial hero — real data only,
   // preferring a hand-picked feature, then the most-downloaded, then newest.
   const spotlight = useMemo(() => featured[0] ?? trending[0] ?? recent[0] ?? null, [featured, trending, recent]);
@@ -243,6 +254,18 @@ const CatalogPage = () => {
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search the marketplace…" className="pl-8" />
           </div>
+          {!author && institutions.length > 0 && (
+            <select value={orgFilter} onChange={(e) => setOrgFilter(e.target.value)} className="field select-premium font-sans" aria-label="Filter by institution">
+              <option value="">All institutions</option>
+              {institutions.map((o) => <option key={o.slug} value={o.slug}>{o.name}</option>)}
+            </select>
+          )}
+          {!author && languages.length > 0 && (
+            <select value={lang} onChange={(e) => setLang(e.target.value)} className="field select-premium font-sans" aria-label="Filter by language">
+              <option value="">All languages</option>
+              {languages.map((l) => <option key={l.language} value={l.language}>{l.language}</option>)}
+            </select>
+          )}
           {filtering && !author && (
             <select value={sort} onChange={(e) => setSort(e.target.value as CatalogSort)} className="field select-premium font-sans">
               <option value="new">Recently published</option>
@@ -252,6 +275,12 @@ const CatalogPage = () => {
             </select>
           )}
         </div>
+        {!author && (orgFilter || lang) && (
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {orgFilter && <button onClick={() => setOrgFilter("")} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary font-sans">Institution: {institutions.find((o) => o.slug === orgFilter)?.name ?? orgFilter} <X className="h-3 w-3" /></button>}
+            {lang && <button onClick={() => setLang("")} className="inline-flex items-center gap-1 rounded-full bg-educational/10 px-2.5 py-1 text-xs font-medium text-educational font-sans">Language: {lang} <X className="h-3 w-3" /></button>}
+          </div>
+        )}
 
         {!author && (
           <div className="mt-3 flex flex-wrap gap-1.5">
@@ -297,7 +326,7 @@ const CatalogPage = () => {
                 <Search className="mx-auto h-8 w-8 text-muted-foreground/30" />
                 <p className="mt-3 text-sm font-sans text-foreground font-medium">No results found</p>
                 <p className="mt-1 text-sm text-muted-foreground font-sans">
-                  {query ? `Nothing matched "${query}"` : cat ? `Nothing in ${cat} yet` : "No resources found for this author"}.
+                  {query ? `Nothing matched "${query}"` : cat ? `Nothing in ${cat} yet` : orgFilter ? "Nothing from this institution yet" : lang ? `Nothing in ${lang} yet` : "No resources found for this author"}.
                 </p>
                 {(query || cat) && (
                   <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
@@ -390,6 +419,8 @@ const CatalogPage = () => {
                     </div>
                   </section>
                 )}
+                {trendingEdu.length > 0 && <Shelf icon={GraduationCap} title="Trending in education" hint="most engaged classroom &amp; curriculum content" list={trendingEdu} ranked />}
+                {trendingMulti.length > 0 && <Shelf icon={Globe} title="Trending multilingual works" hint="most engaged localized editions" list={trendingMulti} ranked />}
                 {topRated.length > 0 && <Shelf icon={Star} title="Top rated" hint="highest reader ratings" list={topRated} />}
                 {COLLECTIONS.map((col) => {
                   const list = all.filter(col.match).slice(0, 12);
