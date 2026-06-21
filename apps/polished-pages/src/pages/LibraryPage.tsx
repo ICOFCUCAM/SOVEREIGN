@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink, Building2, Sparkles } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink, Building2, Sparkles, Languages } from "lucide-react";
+import { isoFor } from "@/lib/languages";
 import PublishDialog from "@/components/app/PublishDialog";
 import BulkPublishDialog from "@/components/app/BulkPublishDialog";
 import AddToCollection from "@/components/app/AddToCollection";
@@ -576,10 +577,25 @@ const LibraryPage = () => {
             </div>
           );
         }
+        // Project model: nest language editions under their source document so
+        // each book reads as one project. An edition whose source isn't in the
+        // current filtered view is promoted to a top-level card so nothing hides.
+        const inView = new Set(filtered.map((d) => d.id));
+        const editionsByParent = new Map<string, DocSummary[]>();
+        const topLevel: DocSummary[] = [];
+        for (const d of filtered) {
+          if (d.parent_document_id && inView.has(d.parent_document_id)) {
+            const arr = editionsByParent.get(d.parent_document_id) ?? [];
+            arr.push(d); editionsByParent.set(d.parent_document_id, arr);
+          } else {
+            topLevel.push(d);
+          }
+        }
         return (
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {filtered.map((d) => {
+            {topLevel.map((d) => {
               const meta = KIND_META[d.kind] ?? KIND_META.cv;
+              const editions = editionsByParent.get(d.id) ?? [];
               return (
                 <Card key={d.id} className={`group border-border transition-colors hover:border-primary/40 ${selected.has(d.id) ? "border-primary/60 bg-primary/5" : ""}`}>
                   <CardContent className="flex items-start gap-3 p-4">
@@ -640,6 +656,30 @@ const LibraryPage = () => {
                           {orgMap[d.id].listed && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-marketplace/10 px-2 py-0.5 font-medium text-marketplace"><Store className="h-3 w-3" /> Marketplace</span>
                           )}
+                        </div>
+                      )}
+                      {editions.length > 0 && (
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] font-sans">
+                          <span className="inline-flex items-center gap-1 text-muted-foreground"><Languages className="h-3 w-3" /> {editions.length} edition{editions.length === 1 ? "" : "s"}</span>
+                          {editions.map((e) => {
+                            const iso = e.edition_language ? isoFor(e.edition_language) : null;
+                            return (
+                              <span key={e.id} className="inline-flex items-center overflow-hidden rounded-full border border-border bg-card text-muted-foreground">
+                                <button onClick={(ev) => { ev.stopPropagation(); open(e); }} disabled={opening === e.id}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 capitalize transition-colors hover:text-primary"
+                                  title={`Open ${e.edition_language ?? "edition"}${e.edition_culture ? ` · ${e.edition_culture}` : ""}${e.listed ? " (published)" : ""}`}>
+                                  {opening === e.id && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+                                  {iso && iso !== "en" && <span className="uppercase">{iso}</span>}
+                                  {e.edition_language ?? "Edition"}
+                                  {e.listed && <Store className="h-2.5 w-2.5 text-marketplace" />}
+                                </button>
+                                <button onClick={(ev) => { ev.stopPropagation(); remove(e.id); }} title="Delete this edition"
+                                  className="border-l border-border px-1 py-0.5 text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive">
+                                  <X className="h-2.5 w-2.5" />
+                                </button>
+                              </span>
+                            );
+                          })}
                         </div>
                       )}
                       {(d.tags ?? []).length > 0 && (

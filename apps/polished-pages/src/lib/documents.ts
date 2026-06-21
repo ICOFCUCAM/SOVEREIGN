@@ -24,6 +24,11 @@ export interface DocSummary {
   view_count?: number;
   download_count?: number;
   created_at: string;
+  // Project model: editions link to a source document via parent_document_id.
+  parent_document_id?: string | null;
+  edition_language?: string | null;
+  edition_culture?: string | null;
+  updated_at?: string;
 }
 
 export interface CvPayload { data: CvData }
