@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, FileDown, Loader2, Library as LibraryIcon, Package, Store, Globe, CheckCircle2, Image as ImageIcon, Sparkles, Users, MapPin, Tags, FileText, DollarSign } from "lucide-react";
+import { BookOpen, FileDown, Loader2, Package, Store, Globe, CheckCircle2, Image as ImageIcon, Sparkles, Users, MapPin, Tags, FileText, DollarSign } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { TRIM_SIZES, getTrim } from "@/lib/print-sizes";
 import { markdownToEpub } from "@/lib/export-epub";
 import { markdownToPrintPdf } from "@/lib/export-print-pdf";
 import { markdownToIngramSparkPdf } from "@/lib/export-ingramspark-pdf";
+import SpineMark from "@/components/brand/SpineMark";
 
 type Fmt = "epub" | "kdp" | "ingram" | "all";
 const Chips = ({ items }: { items?: string[] }) => (
@@ -98,10 +99,11 @@ const ExportCenter = () => {
       <CardContent className="space-y-4">
         {docs === null && <div className="flex items-center gap-2 text-sm text-muted-foreground font-sans"><Loader2 className="h-4 w-4 animate-spin" /> Loading your books…</div>}
         {docs && docs.length === 0 && (
-          <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-6 text-center">
-            <LibraryIcon className="h-8 w-8 text-muted-foreground/60" />
-            <p className="text-sm text-muted-foreground font-sans">No books saved yet.</p>
-            <Button asChild variant="hero" size="sm"><Link to="/book">Create a book</Link></Button>
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/70 p-10 text-center">
+            <SpineMark size="sm" className="justify-center" />
+            <p className="text-sm font-medium text-foreground font-sans">Your distribution center is ready</p>
+            <p className="max-w-sm text-sm text-muted-foreground font-sans">Write or transform a book and it appears here — export to EPUB, KDP and IngramSpark, and take it to every major store.</p>
+            <Button asChild variant="hero" size="sm" className="mt-1"><Link to="/book">Create a book</Link></Button>
           </div>
         )}
         {docs && docs.length > 0 && (
@@ -109,13 +111,13 @@ const ExportCenter = () => {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="space-y-1.5 sm:col-span-2">
                 <Label className="font-sans text-xs">Book</Label>
-                <select value={selected} onChange={(e) => setSelected(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                <select value={selected} onChange={(e) => setSelected(e.target.value)} className="w-full field select-premium font-sans">
                   {docs.map((d) => <option key={d.id} value={d.id}>{d.title}</option>)}
                 </select>
               </div>
               <div className="space-y-1.5">
                 <Label className="font-sans text-xs">Trim size</Label>
-                <select value={trimId} onChange={(e) => setTrimId(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                <select value={trimId} onChange={(e) => setTrimId(e.target.value)} className="w-full field select-premium font-sans">
                   {TRIM_SIZES.filter((t) => t.id !== "a4").map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
                 </select>
               </div>
