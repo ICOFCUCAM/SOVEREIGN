@@ -132,7 +132,7 @@ const CatalogPage = () => {
               <div>
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5">
                   <Store className="h-4 w-4 text-[hsl(38_92%_62%)]" />
-                  <span className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-white/70">The marketplace</span>
+                  <span className="eyebrow text-white/70">The marketplace</span>
                 </div>
                 <h1 className="text-display mt-4 text-4xl font-bold tracking-tight md:text-5xl">
                   Stories &amp; lessons from{" "}
@@ -232,7 +232,7 @@ const CatalogPage = () => {
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search the marketplace…" className="pl-8" />
           </div>
           {filtering && !author && (
-            <select value={sort} onChange={(e) => setSort(e.target.value as CatalogSort)} className="rounded-md border border-border bg-card px-2.5 py-2 text-sm font-sans">
+            <select value={sort} onChange={(e) => setSort(e.target.value as CatalogSort)} className="field select-premium font-sans">
               <option value="new">Recently published</option>
               <option value="trending">Trending</option>
               <option value="top-rated">Top rated</option>

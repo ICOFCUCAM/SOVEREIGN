@@ -381,13 +381,13 @@ const LibraryPage = () => {
             <Button variant={tplOnly ? "hero" : "heroOutline"} size="sm" onClick={() => setTplOnly((t) => !t)}>
               <LayoutTemplate className="mr-1 h-4 w-4" /> Templates
             </Button>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans select-premium">
               <option value="">All statuses</option>
               <option value="listed">Listed</option>
               <option value="shared">Shared</option>
               <option value="drafts">Drafts</option>
             </select>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans">
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans select-premium">
               <option value="date">Newest first</option>
               <option value="title">A → Z</option>
               <option value="views">Most viewed</option>
