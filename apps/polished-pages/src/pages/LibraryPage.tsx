@@ -365,8 +365,35 @@ const LibraryPage = () => {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-serif text-3xl font-bold tracking-tight">Library</h1>
-        <p className="mt-1 text-muted-foreground font-sans">Every document you’ve saved — CVs, letters, books, covers and children’s books.</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70 font-sans">Content operating system</p>
+        <h1 className="mt-1 font-serif text-3xl font-bold tracking-tight">Library</h1>
+        <p className="mt-1 max-w-2xl text-muted-foreground font-sans">Every work you create — and the controls to publish, localize and route it into the marketplace, your organizations and their repositories.</p>
+        {docs && docs.length > 0 && (() => {
+          const published = docs.filter((d) => d.listed).length;
+          const draftCount = docs.filter((d) => !d.shared).length;
+          const inOrgs = Object.keys(orgMap).length;
+          const tile = "rounded-xl border border-border bg-card p-3 text-left transition-colors hover:border-primary/40";
+          return (
+            <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <button onClick={() => setStatusFilter("")} className={tile}>
+                <div className="font-serif text-2xl font-bold tabular-nums">{docs.length}</div>
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans">Works</div>
+              </button>
+              <button onClick={() => setStatusFilter("listed")} className={tile}>
+                <div className="font-serif text-2xl font-bold tabular-nums">{published}</div>
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans">Published</div>
+              </button>
+              <button onClick={() => setStatusFilter("drafts")} className={tile}>
+                <div className="font-serif text-2xl font-bold tabular-nums">{draftCount}</div>
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans">Drafts</div>
+              </button>
+              <Link to="/organizations" className={`${tile} block`}>
+                <div className="font-serif text-2xl font-bold tabular-nums">{inOrgs}</div>
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans">In organizations</div>
+              </Link>
+            </div>
+          );
+        })()}
       </motion.div>
 
       {selected.size > 0 && (
