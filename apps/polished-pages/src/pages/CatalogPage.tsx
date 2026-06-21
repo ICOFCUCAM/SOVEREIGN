@@ -14,6 +14,7 @@ import { avatarColors, avatarInitials } from "@/lib/avatar";
 import { coverArt } from "@/lib/cover-art";
 import SpineMark from "@/components/brand/SpineMark";
 import CreatorCard from "@/components/app/CreatorCard";
+import CreatorStorefront from "@/components/app/CreatorStorefront";
 
 const trendScore = (i: CatalogItem) => (i.download_count ?? 0) * 3 + (i.view_count ?? 0);
 
@@ -210,43 +211,15 @@ const CatalogPage = () => {
             </h1>
             <p className="mt-2 text-muted-foreground font-sans">{`Everything ${author} has published, newest first.`}</p>
           {profile && (
-            <div className="mt-4 rounded-xl border border-border bg-card/50 p-4 sm:p-5">
-              <div className="flex items-start gap-4">
-                {/* Avatar — deterministic colour + initials for a stable identity */}
-                <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-xl font-bold font-serif select-none ${avatarColors(author).bg} ${avatarColors(author).text}`}>
-                  {avatarInitials(author)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  {profile.tagline && <p className="text-sm font-medium text-foreground font-sans">{profile.tagline}</p>}
-                  {profile.bio && <p className="mt-1 text-sm text-muted-foreground font-sans leading-relaxed">{profile.bio}</p>}
-                  {profile.website && (
-                    <a href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`} target="_blank" rel="noopener noreferrer nofollow"
-                      className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline font-sans">
-                      <Globe className="h-3.5 w-3.5" /> {profile.website.replace(/^https?:\/\//, "")}
-                    </a>
-                  )}
-                  <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-muted-foreground font-sans">
-                    <span><span className="font-semibold text-foreground">{profile.works}</span> published</span>
-                    <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.views}</span> views</span>
-                    <span className="inline-flex items-center gap-1"><Download className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.downloads}</span> downloads</span>
-                    {authorRating && (
-                      <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-gold text-gold" /> <span className="font-semibold text-foreground">{authorRating.avg.toFixed(1)}</span> · {authorRating.count} review{authorRating.count === 1 ? "" : "s"}</span>
-                    )}
-                    <button
-                      onClick={() => { navigator.clipboard.writeText(window.location.href).catch(() => {}); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
-                      className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-medium transition-premium hover:border-primary/40 hover:text-foreground"
-                    >
-                      {linkCopied ? <><Check className="h-3 w-3 text-primary" /> Copied</> : <><Link2 className="h-3 w-3" /> Share author</>}
-                    </button>
-                  </div>
-                  {admin && (
-                    <button onClick={verify} className={`mt-3 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-sans ${profile.verified ? "border-primary text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
-                      <BadgeCheck className="h-3.5 w-3.5" /> {profile.verified ? "Verified — click to remove" : "Mark verified"}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+            <CreatorStorefront
+              author={author}
+              profile={profile}
+              rating={authorRating}
+              copied={linkCopied}
+              onShare={() => { navigator.clipboard.writeText(window.location.href).catch(() => {}); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
+              admin={admin}
+              onVerify={verify}
+            />
           )}
           </motion.div>
         )}
