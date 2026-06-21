@@ -221,3 +221,17 @@ export async function orgShowcase(): Promise<OrgShowcaseRow[]> {
   const { data, error } = await r().rpc("polished_org_showcase");
   return error ? [] : rows<OrgShowcaseRow>(data);
 }
+
+export interface DocOrgInfo { org_id: string; org_slug: string; org_name: string; org_type: OrgType; listed: boolean; collections: string[] }
+interface DocOrgRow extends DocOrgInfo { document_id: string }
+// A lookup of the creator's own documents → the organization (and repositories)
+// they belong to, so the Library can show where each document lives.
+export async function documentOrgMap(): Promise<Record<string, DocOrgInfo>> {
+  const { data, error } = await r().rpc("polished_doc_orgs");
+  if (error) return {};
+  const out: Record<string, DocOrgInfo> = {};
+  for (const row of rows<DocOrgRow>(data)) {
+    out[row.document_id] = { org_id: row.org_id, org_slug: row.org_slug, org_name: row.org_name, org_type: row.org_type, listed: row.listed, collections: row.collections ?? [] };
+  }
+  return out;
+}

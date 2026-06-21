@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, setTemplateFlag, useTemplate as applyTemplate, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
 import { wankongListingsByDoc, type WankongListing } from "@/lib/wankong";
+import { documentOrgMap, type DocOrgInfo } from "@/lib/organizations";
 import SpineMark from "@/components/brand/SpineMark";
 import TagEditor from "@/components/app/TagEditor";
 import { elementToPdf } from "@/lib/export-pdf";
@@ -59,6 +60,7 @@ const LibraryPage = () => {
   const pbRef = useRef<HTMLDivElement>(null);
 
   const [wankong, setWankong] = useState<Record<string, WankongListing>>({});
+  const [orgMap, setOrgMap] = useState<Record<string, DocOrgInfo>>({});
 
   const load = () => { listDocuments().then(setDocs).catch((e) => { toast({ title: "Could not load library", description: e.message, variant: "destructive" }); setDocs([]); }); };
   useEffect(load, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -66,6 +68,12 @@ const LibraryPage = () => {
   // Per-document Wankong store status, fetched once for the whole library so
   // cards can show a "live in store" badge without a query each.
   useEffect(() => { wankongListingsByDoc().then(setWankong).catch(() => {}); }, []);
+
+  // Where each document lives — its organization and repositories — so a card
+  // can always show "Owned by / Collection / Published".
+  const loadOrgMap = () => documentOrgMap().then(setOrgMap).catch(() => {});
+  useEffect(() => { loadOrgMap(); }, []);
+  const afterOrgChange = () => { load(); loadOrgMap(); };
 
   // One-click resume from the dashboard: /library?open=<id> auto-opens the doc once.
   // ?kind=<DocKind> and ?filter=listed|shared|drafts apply initial filters from dashboard links.
@@ -224,6 +232,14 @@ const LibraryPage = () => {
               <Button variant="hero" size="sm" disabled={savingDoc} onClick={saveChanges}>
                 {savingDoc ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />} Save changes
               </Button>
+              {openedId && (
+                <MoveToOrganization
+                  documentId={openedId}
+                  listed={docs?.find((x) => x.id === openedId)?.listed}
+                  onDone={afterOrgChange}
+                  trigger={<Button variant="heroOutline" size="sm"><Building2 className="w-4 h-4 mr-1" /> Organization</Button>}
+                />
+              )}
               <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground">
                 <ArrowLeft className="w-4 h-4 mr-2" /> Library
               </Button>
@@ -275,6 +291,14 @@ const LibraryPage = () => {
             <span className="truncate text-sm font-medium text-muted-foreground font-sans">{opened.title}</span>
             <div className="flex items-center gap-2">
               <Button variant="heroOutline" size="sm" onClick={exportPdf}><Download className="w-4 h-4 mr-1" /> PDF</Button>
+              {openedId && (
+                <MoveToOrganization
+                  documentId={openedId}
+                  listed={docs?.find((x) => x.id === openedId)?.listed}
+                  onDone={afterOrgChange}
+                  trigger={<Button variant="heroOutline" size="sm"><Building2 className="w-4 h-4 mr-1" /> Organization</Button>}
+                />
+              )}
               <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground"><ArrowLeft className="w-4 h-4 mr-2" /> Library</Button>
             </div>
           </div>
@@ -527,6 +551,19 @@ const LibraryPage = () => {
                         )}
                       </div>
                       {d.preview && <p className="mt-1.5 line-clamp-2 text-xs text-muted-foreground font-sans">{d.preview}</p>}
+                      {orgMap[d.id] && (
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] font-sans">
+                          <Link to={`/org/${orgMap[d.id].org_slug}`} onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary hover:bg-primary/20" title="Owned by this organization">
+                            <Building2 className="h-3 w-3" /> {orgMap[d.id].org_name}
+                          </Link>
+                          {orgMap[d.id].collections.map((c) => (
+                            <span key={c} className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground">{c}</span>
+                          ))}
+                          {orgMap[d.id].listed && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-marketplace/10 px-2 py-0.5 font-medium text-marketplace"><Store className="h-3 w-3" /> Marketplace</span>
+                          )}
+                        </div>
+                      )}
                       {(d.tags ?? []).length > 0 && (
                         <div className="mt-1.5 flex flex-wrap gap-1">
                           {(d.tags ?? []).map((t) => (
@@ -575,7 +612,7 @@ const LibraryPage = () => {
                         <MoveToOrganization
                           documentId={d.id}
                           listed={d.listed}
-                          onDone={load}
+                          onDone={afterOrgChange}
                           trigger={
                             <Button size="sm" variant="ghost" className="text-muted-foreground" aria-label="Add to organization" title="Add to an organization">
                               <Building2 className="h-4 w-4" />
