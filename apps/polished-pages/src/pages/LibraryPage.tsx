@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, setTemplateFlag, useTemplate as applyTemplate, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
 import { wankongListingsByDoc, type WankongListing } from "@/lib/wankong";
+import SpineMark from "@/components/brand/SpineMark";
 import TagEditor from "@/components/app/TagEditor";
 import { elementToPdf } from "@/lib/export-pdf";
 import type { CvData } from "@/lib/cv-data";
@@ -435,7 +436,7 @@ const LibraryPage = () => {
       {docs && docs.length === 0 && (
         <Card className="mt-8 border-dashed border-border">
           <CardContent className="flex flex-col items-center gap-3 p-12 text-center">
-            <LibraryIcon className="h-10 w-10 text-muted-foreground/60" />
+            <SpineMark size="sm" className="mb-2 justify-center" />
             <p className="font-sans text-sm font-medium">Nothing saved yet</p>
             <p className="max-w-sm text-sm text-muted-foreground font-sans">Generate a CV, cover letter, or tailored application and choose "Save to library" to keep it here.</p>
             <Button asChild variant="hero" size="sm" className="mt-1"><Link to="/cv">Create a CV <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>

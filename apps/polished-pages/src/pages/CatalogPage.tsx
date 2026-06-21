@@ -12,6 +12,7 @@ import CreateCtaBand from "@/components/app/CreateCtaBand";
 import { BRAND } from "@/lib/tools";
 import { avatarColors, avatarInitials } from "@/lib/avatar";
 import { coverArt } from "@/lib/cover-art";
+import SpineMark from "@/components/brand/SpineMark";
 
 const trendScore = (i: CatalogItem) => (i.download_count ?? 0) * 3 + (i.view_count ?? 0);
 
@@ -301,7 +302,12 @@ const CatalogPage = () => {
         {/* Discovery homepage: curated sections */}
         {items && !filtering && (
           all.length === 0
-            ? <p className="mt-10 text-center text-sm text-muted-foreground font-sans">Nothing published yet — be the first to share something.</p>
+            ? (
+              <div className="mt-16 flex flex-col items-center gap-4 text-center">
+                <SpineMark size="md" className="justify-center" />
+                <p className="text-sm text-muted-foreground font-sans">Nothing published yet — be the first to share something.</p>
+              </div>
+            )
             : (
               <>
                 {featured.length > 0 && <Shelf icon={Star} title="Featured" hint="hand-picked" list={featured} />}
