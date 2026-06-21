@@ -7,6 +7,7 @@ import LocalizationVisual from "@/components/home/LocalizationVisual";
 import MarketplaceVisual from "@/components/home/MarketplaceVisual";
 import CurriculumVisual from "@/components/home/CurriculumVisual";
 import TrustBand from "@/components/TrustBand";
+import EnterpriseBand from "@/components/home/EnterpriseBand";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
@@ -66,6 +67,7 @@ const Index = () => {
         />
 
         <TrustBand />
+        <EnterpriseBand />
         <CTASection />
       </main>
       <Footer />
