@@ -5,6 +5,14 @@ import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
 import "@fontsource/inter/700.css";
 import "@fontsource/inter/800.css";
+// UI display face — bundled locally so the app no longer depends on a
+// render-blocking Google Fonts request.
+import "@fontsource/playfair-display/400.css";
+import "@fontsource/playfair-display/500.css";
+import "@fontsource/playfair-display/600.css";
+import "@fontsource/playfair-display/700.css";
+import "@fontsource/playfair-display/400-italic.css";
+import "@fontsource/playfair-display/500-italic.css";
 import "@fontsource/manrope/400.css";
 import "@fontsource/manrope/500.css";
 import "@fontsource/manrope/600.css";
