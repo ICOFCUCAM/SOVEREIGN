@@ -17,6 +17,10 @@ export default {
         sans: ["Inter", "sans-serif"],
         serif: ["Playfair Display", "serif"],
       },
+      transitionTimingFunction: {
+        premium: "var(--ease-premium)",
+        emphasis: "var(--ease-emphasis)",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
