@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BRAND, DASHBOARD_NAV } from "@/lib/tools";
 import ThemeToggle from "@/components/app/ThemeToggle";
@@ -57,7 +57,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
       <div className="container flex items-center justify-between h-16 px-6">
         <Link to="/" className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" />
+          <img src="/logo-mark.png" alt="" className="h-7 w-auto" width={41} height={28} />
           <span className="text-lg font-bold font-serif tracking-tight text-foreground">{BRAND}</span>
         </Link>
 
