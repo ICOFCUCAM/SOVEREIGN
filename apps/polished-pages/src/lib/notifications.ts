@@ -18,6 +18,12 @@ export function buildAlerts(status: PlanStatus | null, docs: DocSummary[] | null
   const out: Alert[] = [];
   const all = docs ?? [];
 
+  // Brand-new account: a friendly first step instead of an empty bell.
+  if (docs !== null && all.length === 0) {
+    out.push({ id: "welcome", kind: "activity", title: "Welcome to Polished Pages", body: "Create your first CV, book or storybook to get started.", to: "/dashboard" });
+    return out;
+  }
+
   // Usage: low image credits (paid plans meter images).
   if (status && status.imagesLim > 0) {
     const left = status.imagesLim - status.imagesUsed;
