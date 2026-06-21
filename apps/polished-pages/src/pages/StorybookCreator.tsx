@@ -26,6 +26,15 @@ import { savePictureBook } from "@/lib/picture-book-save";
 import { getDocument } from "@/lib/documents";
 import type { PictureBookData } from "@/components/children/PictureBookView";
 
+// Auto-save the story text + illustration prompts (NOT the base64 images, which
+// would blow the localStorage quota) so a refresh or crash never loses a
+// generated story. Pages can be re-illustrated from the saved prompts; an
+// explicit Save uploads and durably preserves the illustrations server-side.
+const STORY_DRAFT_KEY = "pp:draft:storybook.book";
+const stripImages = (b: Storybook): Storybook => ({ ...b, coverImage: null, pages: b.pages.map((p) => ({ ...p, image: null })) });
+const readStoryDraft = (): Storybook | null => { try { const s = localStorage.getItem(STORY_DRAFT_KEY); return s ? (JSON.parse(s) as Storybook) : null; } catch { return null; } };
+const clearStoryDraft = () => { try { localStorage.removeItem(STORY_DRAFT_KEY); } catch { /* ignore */ } };
+
 const READING_LEVELS = [
   "Pre-reader (ages 2–4)",
   "Early reader (ages 4–6)",
@@ -86,10 +95,22 @@ const StorybookCreator = () => {
     }).catch(() => {});
   }, [searchParams]);
 
+  const restoredBook = useRef(readStoryDraft()).current;
   const [creating, setCreating] = useState(false);
-  const [book, setBook] = useState<Storybook | null>(null);
+  const [book, setBook] = useState<Storybook | null>(restoredBook);
   const [illustrating, setIllustrating] = useState<{ done: number; total: number } | null>(null);
   const [pdf, setPdf] = useState(false);
+
+  // Persist the current story (text + prompts only) for crash/refresh recovery.
+  useEffect(() => {
+    if (!book) { clearStoryDraft(); return; }
+    const t = window.setTimeout(() => { try { localStorage.setItem(STORY_DRAFT_KEY, JSON.stringify(stripImages(book))); } catch { /* quota */ } }, 500);
+    return () => window.clearTimeout(t);
+  }, [book]);
+  useEffect(() => {
+    if (restoredBook) toast({ title: "Recovered your story", description: "Your story text is back — re-illustrate any pages you like; the prompts were saved." });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // The saved parent document id, once this storybook is in the Library — the
   // anchor that language editions link to. Kept in a ref too so the localize
@@ -100,7 +121,7 @@ const StorybookCreator = () => {
 
   // Per-edition localization: the base (original) book and a cache of translated
   // editions that reuse the same illustrations.
-  const baseBook = useRef<Storybook | null>(null);
+  const baseBook = useRef<Storybook | null>(restoredBook);
   const editionCache = useRef<Record<string, Storybook>>({});
   const [editionLang, setEditionLang] = useState("");
   const [translating, setTranslating] = useState<{ done: number; total: number } | null>(null);
@@ -272,7 +293,7 @@ const StorybookCreator = () => {
                 {LANGUAGE_NAMES.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
               {translating && <span className="text-xs text-muted-foreground font-sans"><Loader2 className="inline h-3.5 w-3.5 animate-spin" /> {translating.done}/{translating.total}</span>}
-              <Button variant="ghost" size="sm" onClick={() => setBook(null)} className="text-muted-foreground">
+              <Button variant="ghost" size="sm" onClick={() => { setBook(null); savedIdRef.current = null; setSavedId(null); clearStoryDraft(); }} className="text-muted-foreground">
                 <ArrowLeft className="w-4 h-4 mr-1" /> New
               </Button>
               <Button variant="heroOutline" size="sm" disabled={!!illustrating} onClick={illustrateAll}>
