@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck, Link2, Check, Globe, Users } from "lucide-react";
+import { Sparkles, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck, Link2, Check, Globe, Users, BookHeart, GraduationCap, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem, type CatalogSort } from "@/lib/documents";
@@ -16,6 +16,16 @@ import SpineMark from "@/components/brand/SpineMark";
 import CreatorCard from "@/components/app/CreatorCard";
 
 const trendScore = (i: CatalogItem) => (i.download_count ?? 0) * 3 + (i.view_count ?? 0);
+
+// Editorial collections — themed rows derived from the real catalog (category /
+// price), so discovery reads like Apple Books shelves. A collection only shows
+// when it has enough titles to look intentional.
+const COLLECTIONS: { title: string; hint: string; icon: typeof Store; match: (i: CatalogItem) => boolean }[] = [
+  { title: "Children’s library", hint: "storybooks & early years", icon: BookHeart, match: (i) => i.kind === "storybook" || /child|story|early|colou?ring|folk|picture/i.test(i.category ?? "") },
+  { title: "For the classroom", hint: "curriculum, workbooks & exams", icon: GraduationCap, match: (i) => /educat|curricul|workbook|textbook|class|teacher|assess|exam|reader|primary|lesson|science|math/i.test(i.category ?? "") },
+  { title: "Fiction & literature", hint: "novels, memoir & poetry", icon: BookOpen, match: (i) => /fiction|novel|memoir|poetry|sci|adventure|literary|romance|thriller/i.test(i.category ?? "") },
+  { title: "Free to read", hint: "no cost, instant download", icon: Sparkles, match: (i) => (i.price_cents ?? 0) === 0 },
+];
 
 // Public marketplace. Default view is a discovery homepage (Featured, Trending,
 // Recently published, Browse by category). Searching or picking a category drops
@@ -339,6 +349,10 @@ const CatalogPage = () => {
                   </section>
                 )}
                 {topRated.length > 0 && <Shelf icon={Star} title="Top rated" hint="highest reader ratings" list={topRated} />}
+                {COLLECTIONS.map((col) => {
+                  const list = all.filter(col.match).slice(0, 12);
+                  return list.length >= 3 ? <Shelf key={col.title} icon={col.icon} title={col.title} hint={col.hint} list={list} /> : null;
+                })}
                 <Shelf icon={Clock} title="Recently published" list={recent} />
                 <section className="mt-10">
                   <div className="flex items-baseline gap-2"><Store className="h-4 w-4 text-gold" /><h2 className="font-serif text-xl font-bold">Browse by category</h2></div>

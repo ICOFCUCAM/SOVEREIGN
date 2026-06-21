@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import GlobalKnowledgeNetwork from "@/components/home/GlobalKnowledgeNetwork";
 import PlatformStats from "@/components/PlatformStats";
 import FeatureStage from "@/components/home/FeatureStage";
 import PublishingVisual from "@/components/home/PublishingVisual";
@@ -18,6 +19,7 @@ const Index = () => {
       <Navbar />
       <main id="main">
         <HeroSection />
+        <GlobalKnowledgeNetwork />
         <PlatformStats />
 
         <FeatureStage
