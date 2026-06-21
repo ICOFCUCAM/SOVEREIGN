@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, FileText, BookOpen, GraduationCap, Store, Sparkles, Globe, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useI18n } from "@/lib/i18n";
 
 // The four pillars, shown as the platform's identity rather than a single tool.
 const PILLARS = [
@@ -16,6 +17,7 @@ const PILLARS = [
 const LIFECYCLE = ["Create", "Publish", "Localize", "Distribute", "Sell"];
 
 const HeroSection = () => {
+  const { t } = useI18n();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
       {/* Abstract four-pillar background — no document imagery */}
@@ -70,24 +72,24 @@ const HeroSection = () => {
           </div>
 
           <h1 className="text-display text-4xl md:text-6xl font-bold leading-[1.1] mb-6 text-foreground">
-            The operating system for <span className="text-gradient-gold italic">publishing &amp; educational creation</span>
+            {t("hero.headlineA")} <span className="text-gradient-gold italic">{t("hero.headlineB")}</span>
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-sans text-pretty">
-            Create CVs, books, storybooks, workbooks and curricula with AI — then localize into any language, publish to KDP and IngramSpark, and sell in a global marketplace. One platform, the whole journey.
+            {t("hero.sub")}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
               <Button variant="hero" size="lg" className="text-base px-8 py-6 shadow-premium" asChild>
-                <Link to="/dashboard"><Sparkles className="w-5 h-5 mr-2 animate-pulse" />Start creating free <ArrowRight className="w-5 h-5 ml-1" /></Link>
+                <Link to="/dashboard"><Sparkles className="w-5 h-5 mr-2 animate-pulse" />{t("hero.ctaPrimary")} <ArrowRight className="w-5 h-5 ml-1" /></Link>
               </Button>
             </motion.div>
             <Button variant="heroOutline" size="lg" className="text-base px-8 py-6" asChild>
-              <Link to="/catalog">Explore the marketplace</Link>
+              <Link to="/catalog">{t("hero.ctaSecondary")}</Link>
             </Button>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground font-sans">No card required · You own what you create · Cancel anytime</p>
+          <p className="mt-3 text-xs text-muted-foreground font-sans">{t("hero.trust")}</p>
         </motion.div>
 
         {/* Lifecycle strip — the five stages the platform runs end to end. */}
