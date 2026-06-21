@@ -4,6 +4,14 @@ import { Sparkles, ChevronDown, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BRAND, DASHBOARD_NAV } from "@/lib/tools";
 import ThemeToggle from "@/components/app/ThemeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useI18n } from "@/lib/i18n";
+
+// Maps the English nav labels (used as data keys) to i18n keys.
+const NAV_KEY: Record<string, string> = {
+  Career: "nav.career", Publishing: "nav.publishing", Education: "nav.education",
+  Marketplace: "nav.marketplace", "For Schools": "nav.forSchools", Pricing: "nav.pricing", Resources: "nav.resources",
+};
 
 interface MenuItem { label: string; to: string; dot?: string }
 interface MenuGroup { label: string; dot: string; items: MenuItem[] }
@@ -42,6 +50,8 @@ const DIRECT: MenuItem[] = [
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { t } = useI18n();
+  const navLabel = (label: string) => (NAV_KEY[label] ? t(NAV_KEY[label]) : label);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
@@ -52,11 +62,11 @@ const Navbar = () => {
         </Link>
 
         <div className="hidden md:flex items-center gap-7 text-sm text-muted-foreground font-sans">
-          <Link to="/" className="py-2 hover:text-foreground transition-colors">Home</Link>
+          <Link to="/" className="py-2 hover:text-foreground transition-colors">{t("nav.home")}</Link>
           {GROUPS.map((g) => (
             <div key={g.label} className="relative group">
               <button className="flex items-center gap-1.5 py-2 hover:text-foreground transition-colors">
-                <span className={`h-1.5 w-1.5 rounded-full ${g.dot}`} /> {g.label} <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+                <span className={`h-1.5 w-1.5 rounded-full ${g.dot}`} /> {navLabel(g.label)} <ChevronDown className="h-3.5 w-3.5 opacity-60" />
               </button>
               <div className="invisible absolute left-0 top-full pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100">
                 <div className="min-w-[220px] rounded-xl border border-border bg-card p-1.5 shadow-premium">
@@ -69,18 +79,19 @@ const Navbar = () => {
           ))}
           {DIRECT.map((d) => (
             <Link key={d.to} to={d.to} className="flex items-center gap-1.5 py-2 hover:text-foreground transition-colors">
-              {d.dot && <span className={`h-1.5 w-1.5 rounded-full ${d.dot}`} />}{d.label}
+              {d.dot && <span className={`h-1.5 w-1.5 rounded-full ${d.dot}`} />}{navLabel(d.label)}
             </Link>
           ))}
         </div>
 
         <div className="flex items-center gap-2">
+          <LanguageSwitcher className="hidden sm:inline-flex" />
           <ThemeToggle className="hidden sm:inline-flex" />
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex text-muted-foreground font-sans">
-            <Link to={DASHBOARD_NAV.path}>Sign In</Link>
+            <Link to={DASHBOARD_NAV.path}>{t("nav.signIn")}</Link>
           </Button>
           <Button asChild variant="hero" size="sm" className="font-sans">
-            <Link to={DASHBOARD_NAV.path}>Get Started</Link>
+            <Link to={DASHBOARD_NAV.path}>{t("nav.getStarted")}</Link>
           </Button>
           <button className="md:hidden p-1 text-muted-foreground" onClick={() => setMobileOpen((o) => !o)} aria-label="Menu">
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
