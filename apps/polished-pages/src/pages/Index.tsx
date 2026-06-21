@@ -7,6 +7,7 @@ import PublishingVisual from "@/components/home/PublishingVisual";
 import LocalizationVisual from "@/components/home/LocalizationVisual";
 import MarketplaceVisual from "@/components/home/MarketplaceVisual";
 import CurriculumVisual from "@/components/home/CurriculumVisual";
+import KnowledgeEcosystem from "@/components/home/KnowledgeEcosystem";
 import TrustBand from "@/components/TrustBand";
 import EnterpriseBand from "@/components/home/EnterpriseBand";
 import CTASection from "@/components/CTASection";
@@ -23,6 +24,7 @@ const Index = () => {
         <PlatformStats />
 
         <FeatureStage
+          chapter="01" act="Create"
           eyebrow="Publishing Studio"
           eyebrowClass="text-publishing"
           title={<>From blank page to a book the <span className="italic text-publishing">world can buy</span>.</>}
@@ -34,6 +36,7 @@ const Index = () => {
         />
 
         <FeatureStage
+          chapter="02" act="Localize" alt
           eyebrow="Localization"
           eyebrowClass="text-primary"
           title={<>Write once. Sell in <span className="italic text-primary">forty languages</span>.</>}
@@ -46,6 +49,7 @@ const Index = () => {
         />
 
         <FeatureStage
+          chapter="03" act="Distribute"
           eyebrow="Marketplace"
           eyebrowClass="text-marketplace"
           title={<>A global storefront the day you <span className="italic text-marketplace">finish</span>.</>}
@@ -57,6 +61,7 @@ const Index = () => {
         />
 
         <FeatureStage
+          chapter="04" act="Teach" alt
           eyebrow="Educational Studio"
           eyebrowClass="text-educational"
           title={<>Whole curricula, <span className="italic text-educational">classroom-ready</span>.</>}
@@ -68,6 +73,7 @@ const Index = () => {
           visual={<CurriculumVisual />}
         />
 
+        <KnowledgeEcosystem />
         <TrustBand />
         <EnterpriseBand />
         <CTASection />
