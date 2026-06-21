@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BookHeart, Sparkles, Palette, GraduationCap, PencilRuler, NotebookPen, School, BookOpenCheck, Presentation, Globe, ImagePlus, ClipboardCheck, ClipboardList, Layers, ArrowRight, Crown } from "lucide-react";
+import { StatValue } from "@/components/brand/CountUp";
 
 interface Product {
   name: string;
@@ -107,7 +108,7 @@ const ChildrenStudio = () => {
           <div className="mt-8 grid max-w-2xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-4">
             {STATS.map((s) => (
               <div key={s.l} className="bg-[hsl(222_47%_8%)] px-4 py-4 text-center">
-                <div className="font-serif text-2xl font-bold text-white">{s.v}</div>
+                <div className="font-serif text-2xl font-bold text-white"><StatValue text={s.v} /></div>
                 <div className="mt-0.5 font-sans text-[11px] uppercase tracking-wide text-white/45">{s.l}</div>
               </div>
             ))}
