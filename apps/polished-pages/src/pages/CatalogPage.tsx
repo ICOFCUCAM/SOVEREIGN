@@ -15,7 +15,7 @@ import { coverArt } from "@/lib/cover-art";
 import SpineMark from "@/components/brand/SpineMark";
 import CreatorCard from "@/components/app/CreatorCard";
 import CreatorStorefront from "@/components/app/CreatorStorefront";
-import { orgShowcase, EDUCATIONAL_CATEGORIES, type OrgShowcaseRow } from "@/lib/organizations";
+import { orgShowcase, marketTrendingOrgs, marketLanguages, marketMostLocalized, EDUCATIONAL_CATEGORIES, type OrgShowcaseRow, type MarketTrendingOrg, type MarketLanguageRow, type MarketLocalizedWork } from "@/lib/organizations";
 
 const orgInitials = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "O";
 
@@ -46,12 +46,20 @@ const CatalogPage = () => {
   const [profile, setProfile] = useState<AuthorProfile | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [institutions, setInstitutions] = useState<OrgShowcaseRow[]>([]);
+  const [trendingOrgs, setTrendingOrgs] = useState<MarketTrendingOrg[]>([]);
+  const [languages, setLanguages] = useState<MarketLanguageRow[]>([]);
+  const [mostLocalized, setMostLocalized] = useState<MarketLocalizedWork[]>([]);
 
   const filtering = !!(query.trim() || cat || author);
 
   useEffect(() => { isAdmin().then(setAdmin).catch(() => {}); }, []);
-  // Real institutions actively publishing — the marketplace's ecosystem layer.
-  useEffect(() => { orgShowcase().then(setInstitutions).catch(() => {}); }, []);
+  // Real institutions, engagement and localization — the ecosystem layer.
+  useEffect(() => {
+    orgShowcase().then(setInstitutions).catch(() => {});
+    marketTrendingOrgs().then(setTrendingOrgs).catch(() => {});
+    marketLanguages().then(setLanguages).catch(() => {});
+    marketMostLocalized().then(setMostLocalized).catch(() => {});
+  }, []);
 
   useEffect(() => {
     setProfile(null);
@@ -357,6 +365,31 @@ const CatalogPage = () => {
                     </div>
                   </section>
                 )}
+                {/* Trending institutions — by real engagement */}
+                {trendingOrgs.length > 0 && (
+                  <section className="mt-12">
+                    <div className="flex items-baseline gap-2">
+                      <TrendingUp className="h-4 w-4 text-marketplace" />
+                      <h2 className="font-serif text-xl font-bold">Trending institutions</h2>
+                      <span className="text-xs text-muted-foreground font-sans">most engaged this catalog</span>
+                    </div>
+                    <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                      {trendingOrgs.slice(0, 6).map((o, i) => {
+                        const g = coverArt(o.name);
+                        return (
+                          <Link key={o.slug} to={`/org/${o.slug}`} className="group flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/40">
+                            <span className="font-serif text-sm font-bold text-muted-foreground/60">{i + 1}</span>
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-serif text-xs font-bold text-white" style={{ backgroundImage: `linear-gradient(150deg, ${g.from}, ${g.to})` }}>{orgInitials(o.name)}</span>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1"><span className="truncate text-sm font-semibold font-sans">{o.name}</span>{o.verified && <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-primary" />}</div>
+                              <div className="text-[11px] text-muted-foreground font-sans">{o.works} work{o.works === 1 ? "" : "s"} · {o.engagement} interactions</div>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
                 {topRated.length > 0 && <Shelf icon={Star} title="Top rated" hint="highest reader ratings" list={topRated} />}
                 {COLLECTIONS.map((col) => {
                   const list = all.filter(col.match).slice(0, 12);
@@ -382,6 +415,40 @@ const CatalogPage = () => {
                     })}
                   </div>
                 </section>
+
+                {/* Multilingual — localization as a marketplace strength */}
+                {(mostLocalized.length > 0 || languages.length > 0) && (
+                  <section className="mt-12">
+                    <div className="flex items-baseline gap-2"><Globe className="h-4 w-4 text-educational" /><h2 className="font-serif text-xl font-bold">Multilingual knowledge</h2><span className="text-xs text-muted-foreground font-sans">translated &amp; localized works</span></div>
+                    {mostLocalized.length > 0 && (
+                      <div className="-mx-1 mt-4 flex snap-x gap-4 overflow-x-auto px-1 pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        {mostLocalized.map((w) => {
+                          const g = coverArt(`${w.title}·${w.category ?? ""}`);
+                          return (
+                            <Link key={w.token} to={`/shared/${w.token}`} className="group w-40 shrink-0 snap-start">
+                              <div className="relative overflow-hidden rounded-md rounded-l-[3px] shadow-e2 ring-1 ring-border" style={{ aspectRatio: "3 / 4", backgroundImage: `linear-gradient(150deg, ${g.from}, ${g.to})` }}>
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/30" />
+                                <span className="absolute right-1.5 top-1.5 inline-flex items-center gap-0.5 rounded-full bg-educational/90 px-1.5 py-0.5 text-[10px] font-bold text-white"><Languages className="h-2.5 w-2.5" /> {w.editions + 1}</span>
+                                <div className="absolute inset-x-0 bottom-0 p-2"><div className="line-clamp-3 font-serif text-[11px] font-bold leading-tight text-white drop-shadow">{w.title}</div></div>
+                              </div>
+                              <div className="mt-1.5 truncate text-xs font-medium font-sans group-hover:text-primary">{w.title}</div>
+                              <div className="text-[11px] text-muted-foreground font-sans">{w.editions + 1} language editions</div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {languages.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-1.5">
+                        {languages.map((l) => (
+                          <span key={l.language} className="inline-flex items-center gap-1 rounded-full border border-educational/30 bg-educational/[0.06] px-2.5 py-1 text-xs font-medium font-sans">
+                            <Globe className="h-3 w-3 text-educational" /> {l.language} <span className="text-muted-foreground">· {l.works}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                )}
 
                 <section className="mt-10">
                   <div className="flex items-baseline gap-2"><Store className="h-4 w-4 text-gold" /><h2 className="font-serif text-xl font-bold">Browse by category</h2></div>
