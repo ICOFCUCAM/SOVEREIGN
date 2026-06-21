@@ -122,6 +122,14 @@ export default {
           "0%, 100%": { transform: "scaleY(1)" },
           "50%": { transform: "scaleY(1.14)" },
         },
+        "flow": {
+          to: { strokeDashoffset: "-28" },
+        },
+        "node-pop": {
+          "0%": { transform: "scale(0.6)", opacity: "0" },
+          "70%": { transform: "scale(1.06)" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -133,6 +141,7 @@ export default {
         "glow-pulse": "glow-pulse 7s ease-in-out infinite",
         "drift": "drift 9s ease-in-out infinite",
         "book-breathe": "book-breathe 2s ease-in-out infinite",
+        "flow": "flow 1.1s linear infinite",
       },
     },
   },

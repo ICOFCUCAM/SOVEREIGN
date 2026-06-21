@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useI18n } from "@/lib/i18n";
-import HeroShowcase from "@/components/home/HeroShowcase";
+import LivingGraph from "@/components/home/LivingGraph";
 import CatalogWall from "@/components/home/CatalogWall";
 
 // The four pillars, shown as the platform's identity eyebrow.
@@ -86,9 +86,9 @@ const HeroSection = () => {
             <p className="mt-5 text-xs text-white/40">{t("hero.trust")}</p>
           </motion.div>
 
-          {/* Crafted product surface */}
+          {/* Iconic signature — the living publishing graph */}
           <div className="lg:pl-4">
-            <HeroShowcase />
+            <LivingGraph />
           </div>
         </div>
 
