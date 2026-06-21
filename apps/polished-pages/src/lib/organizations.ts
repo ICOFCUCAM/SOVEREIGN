@@ -29,22 +29,36 @@ export const COLLECTION_KINDS: { value: CollectionKind; label: string }[] = [
   { value: "series", label: "Series" },
 ];
 
+// The ordered command-center modules each institution type sees. Each key maps
+// to a real, data-backed panel rendered in the workspace.
+export type ModuleKey =
+  | "catalog" | "pipeline" | "series" | "localization" | "curriculum"
+  | "assets" | "programs" | "regions" | "distribution" | "repositories";
+
+// Repository templates — one-click starting points that feel native to the
+// institution (a publisher starts a Series; a school starts Grade 1).
+export interface RepoTemplate { name: string; kind: CollectionKind; hint: string }
+
 // Per-type presentation — what makes a publisher's workspace feel like a
 // publishing house and a school's feel like an educational system. Drives the
-// command-center language, accent, and the focus lenses each institution sees.
+// command-center language, accent, modules, and repository templates.
 export interface OrgPresentation {
   noun: string;            // "publishing house", "educational system", …
   workspaceLine: string;   // command-center subtitle
+  storefrontKicker: string; // storefront eyebrow, e.g. "Publishing house"
   accent: [string, string]; // gradient hsl stops for the institutional banner
   collectionKinds: CollectionKind[]; // suggested repository types
   // ordered focus lenses, each maps to real data the workspace renders
   focus: { key: "catalog" | "localization" | "collections" | "education" | "programs" | "members"; label: string }[];
+  modules: ModuleKey[];          // ordered, type-specific command modules
+  repoTemplates: RepoTemplate[]; // one-click repositories to get started
 }
 
 export const ORG_PRESENTATION: Record<OrgType, OrgPresentation> = {
   publisher: {
     noun: "publishing house",
     workspaceLine: "Run your catalog, editions and distribution from one place.",
+    storefrontKicker: "Publishing house",
     accent: ["hsl(265 70% 22%)", "hsl(222 60% 10%)"],
     collectionKinds: ["publishing", "series", "general"],
     focus: [
@@ -53,10 +67,17 @@ export const ORG_PRESENTATION: Record<OrgType, OrgPresentation> = {
       { key: "collections", label: "Series & collections" },
       { key: "members", label: "Editorial team" },
     ],
+    modules: ["catalog", "pipeline", "series", "localization"],
+    repoTemplates: [
+      { name: "Front list", kind: "publishing", hint: "Your current catalog" },
+      { name: "New series", kind: "series", hint: "A multi-title series" },
+      { name: "Imprint", kind: "publishing", hint: "A distinct imprint" },
+    ],
   },
   school: {
     noun: "educational system",
     workspaceLine: "Organize curriculum, subjects, assessments and teacher resources.",
+    storefrontKicker: "Educational institution",
     accent: ["hsl(199 70% 24%)", "hsl(222 60% 10%)"],
     collectionKinds: ["curriculum", "general", "series"],
     focus: [
@@ -65,10 +86,18 @@ export const ORG_PRESENTATION: Record<OrgType, OrgPresentation> = {
       { key: "catalog", label: "Published resources" },
       { key: "members", label: "Teachers & staff" },
     ],
+    modules: ["curriculum", "assets", "catalog", "localization"],
+    repoTemplates: [
+      { name: "Grade 1", kind: "curriculum", hint: "Grade-level materials" },
+      { name: "Mathematics", kind: "curriculum", hint: "A subject area" },
+      { name: "Teacher resources", kind: "general", hint: "Staff materials" },
+      { name: "Assessments", kind: "curriculum", hint: "Tests & quizzes" },
+    ],
   },
   ngo: {
     noun: "program",
     workspaceLine: "Manage literacy programs, campaigns and multi-language deployments.",
+    storefrontKicker: "Non-profit organization",
     accent: ["hsl(160 60% 20%)", "hsl(222 60% 10%)"],
     collectionKinds: ["program", "curriculum", "general"],
     focus: [
@@ -77,10 +106,17 @@ export const ORG_PRESENTATION: Record<OrgType, OrgPresentation> = {
       { key: "catalog", label: "Published content" },
       { key: "members", label: "Program team" },
     ],
+    modules: ["programs", "regions", "localization", "pipeline"],
+    repoTemplates: [
+      { name: "Literacy program", kind: "program", hint: "A field program" },
+      { name: "Teacher training", kind: "program", hint: "Training resources" },
+      { name: "Campaign", kind: "program", hint: "An awareness campaign" },
+    ],
   },
   ministry: {
     noun: "educational infrastructure",
     workspaceLine: "Coordinate national curriculum, regional initiatives and languages.",
+    storefrontKicker: "Government / ministry",
     accent: ["hsl(222 65% 26%)", "hsl(222 60% 9%)"],
     collectionKinds: ["program", "curriculum", "general"],
     focus: [
@@ -89,10 +125,17 @@ export const ORG_PRESENTATION: Record<OrgType, OrgPresentation> = {
       { key: "education", label: "Educational assets" },
       { key: "members", label: "Ministry team" },
     ],
+    modules: ["programs", "regions", "localization", "distribution"],
+    repoTemplates: [
+      { name: "National curriculum", kind: "curriculum", hint: "Standard curriculum" },
+      { name: "Regional curriculum", kind: "curriculum", hint: "Region-specific" },
+      { name: "National program", kind: "program", hint: "A rollout initiative" },
+    ],
   },
   company: {
     noun: "company",
     workspaceLine: "Manage your content library, team and storefront.",
+    storefrontKicker: "Company",
     accent: ["hsl(28 60% 28%)", "hsl(222 60% 10%)"],
     collectionKinds: ["general", "publishing", "series"],
     focus: [
@@ -100,6 +143,11 @@ export const ORG_PRESENTATION: Record<OrgType, OrgPresentation> = {
       { key: "collections", label: "Collections" },
       { key: "localization", label: "Localization" },
       { key: "members", label: "Team" },
+    ],
+    modules: ["catalog", "repositories", "localization"],
+    repoTemplates: [
+      { name: "Content library", kind: "general", hint: "General content" },
+      { name: "Product series", kind: "series", hint: "A product line" },
     ],
   },
 };
@@ -243,6 +291,11 @@ export async function orgMemberContributions(orgId: string): Promise<OrgContribu
 export async function orgLanguages(orgId: string): Promise<OrgLanguageRow[]> {
   const { data, error } = await r().rpc("polished_org_languages", { p_org: orgId });
   return error ? [] : rows<OrgLanguageRow>(data);
+}
+export interface OrgRegionRow { region: string; total: number }
+export async function orgRegions(orgId: string): Promise<OrgRegionRow[]> {
+  const { data, error } = await r().rpc("polished_org_regions", { p_org: orgId });
+  return error ? [] : rows<OrgRegionRow>(data);
 }
 export async function orgCollectionHealth(orgId: string): Promise<OrgCollectionHealth[]> {
   const { data, error } = await r().rpc("polished_org_collection_health", { p_org: orgId });
