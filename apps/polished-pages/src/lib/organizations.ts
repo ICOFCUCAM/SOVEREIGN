@@ -157,6 +157,31 @@ export const EDUCATIONAL_CATEGORIES = [
   "Educational readers", "Textbooks", "Workbooks", "Classroom packs", "Curriculum", "Teacher resources",
 ];
 
+// Smart collection suggestions — recommend the repository a work belongs in,
+// using simple, explainable heuristics (no AI): shared words between the work's
+// title/category and the repository name, category/kind affinity. Returns the
+// best matches first; an empty array means "no confident suggestion".
+const STOPWORDS = new Set(["the", "and", "for", "with", "edition", "book", "pack", "vol", "part", "your", "new"]);
+const tokenize = (s: string): string[] =>
+  (s || "").toLowerCase().split(/[^a-z0-9]+/).filter((t) => (t.length > 2 || /^\d+$/.test(t)) && !STOPWORDS.has(t));
+
+export function suggestCollections(
+  input: { title: string; category?: string | null; kind?: string | null },
+  collections: OrgCollection[],
+): OrgCollection[] {
+  const docTokens = new Set([...tokenize(input.title), ...tokenize(input.category ?? "")]);
+  const educational = !!input.category && EDUCATIONAL_CATEGORIES.includes(input.category);
+  const scored = collections.map((c) => {
+    let score = 0;
+    for (const t of tokenize(c.name)) if (docTokens.has(t)) score += 3;
+    if (input.category && c.name.toLowerCase().includes(input.category.toLowerCase())) score += 4;
+    if (educational && c.kind === "curriculum") score += 2;
+    if ((input.kind === "storybook" || input.kind === "book") && (c.kind === "series" || c.kind === "publishing")) score += 1;
+    return { c, score };
+  });
+  return scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score).map((s) => s.c);
+}
+
 // What each role can do (mirrors the server checks; used to gate UI).
 export const can = {
   manage: (r?: OrgRole | null) => r === "owner" || r === "admin",
