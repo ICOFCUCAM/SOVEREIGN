@@ -1,10 +1,11 @@
-import { Sparkles } from "lucide-react";
+import SpineMark from "@/components/brand/SpineMark";
 
-// Lightweight, on-brand fallback shown while a lazily-loaded route chunk is
-// fetched. Intentionally minimal so it appears instantly.
+// On-brand fallback shown while a lazily-loaded route chunk is fetched. Uses the
+// signature spine mark so even the loading moment is unmistakably Polished Pages.
 const RouteFallback = () => (
-  <div className="flex min-h-screen items-center justify-center bg-background">
-    <Sparkles className="h-6 w-6 animate-pulse text-primary" aria-label="Loading" />
+  <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-background" role="status" aria-label="Loading">
+    <SpineMark size="md" animated />
+    <span className="eyebrow text-muted-foreground/70">Polished Pages</span>
   </div>
 );
 
