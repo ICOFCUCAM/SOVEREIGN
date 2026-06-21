@@ -71,6 +71,15 @@ const CatalogPage = () => {
     [all],
   );
   const recent = useMemo(() => all.slice(0, 9), [all]);
+  // Aggregate rating across this author's listed works (review-weighted).
+  const authorRating = useMemo(() => {
+    if (!author) return null;
+    const rated = all.filter((i) => (i.review_count ?? 0) > 0 && i.avg_rating != null);
+    const totalReviews = rated.reduce((s, i) => s + (i.review_count ?? 0), 0);
+    if (totalReviews === 0) return null;
+    const weighted = rated.reduce((s, i) => s + Number(i.avg_rating) * (i.review_count ?? 0), 0);
+    return { avg: weighted / totalReviews, count: totalReviews };
+  }, [all, author]);
   const categoryCounts = useMemo(() => {
     const m = new Map<string, number>();
     for (const i of all) m.set(i.category ?? "Other", (m.get(i.category ?? "Other") ?? 0) + 1);
@@ -144,6 +153,9 @@ const CatalogPage = () => {
                     <span><span className="font-semibold text-foreground">{profile.works}</span> published</span>
                     <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.views}</span> views</span>
                     <span className="inline-flex items-center gap-1"><Download className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.downloads}</span> downloads</span>
+                    {authorRating && (
+                      <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-gold text-gold" /> <span className="font-semibold text-foreground">{authorRating.avg.toFixed(1)}</span> · {authorRating.count} review{authorRating.count === 1 ? "" : "s"}</span>
+                    )}
                     <button
                       onClick={() => { navigator.clipboard.writeText(window.location.href).catch(() => {}); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
                       className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-medium transition-premium hover:border-primary/40 hover:text-foreground"
