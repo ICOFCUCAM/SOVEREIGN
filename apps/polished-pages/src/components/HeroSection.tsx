@@ -13,6 +13,10 @@ const PILLARS = [
   { label: "Marketplace", color: "bg-marketplace" },
 ];
 
+// The page's arc, previewed here as an overture and paid off chapter by chapter
+// below (01 Create → 05 Institutionalize).
+const ARC = ["Create", "Localize", "Distribute", "Teach", "Institutionalize"];
+
 // A dark, cinematic stage. The hero is its own lit room regardless of the site
 // theme — the Stripe/Linear/Arc move — so the crafted product surface glows and
 // the page reads premium before a sentence is read. Visual proof first, copy
@@ -100,6 +104,21 @@ const HeroSection = () => {
             <span className="text-[11px] font-medium text-white/40">40+ languages · every genre</span>
           </div>
           <CatalogWall />
+        </motion.div>
+
+        {/* Arc overture — the journey a single idea takes, paid off chapter by
+            chapter below. Ties the hero into the page's one continuous story. */}
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="mt-14 border-t border-white/10 pt-6">
+          <div className="flex flex-col items-center gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-0">
+            {ARC.map((a, i) => (
+              <div key={a} className="flex items-center">
+                <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">
+                  <span className="font-mono text-white/65">{String(i + 1).padStart(2, "0")}</span> {a}
+                </span>
+                {i < ARC.length - 1 && <ArrowRight className="mx-3 hidden h-3 w-3 text-white/25 sm:block" />}
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
 
