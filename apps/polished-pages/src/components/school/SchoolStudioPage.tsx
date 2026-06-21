@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Sparkles, Loader2, ArrowLeft, ClipboardList, Check, ChevronRight, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,15 @@ import { logAiActivity } from "@/lib/ai-activity-log";
 
 // Document types that belong in the reusable Assessment Bank.
 const BANKABLE = new Set<SchoolDocType>(["quiz", "exam", "assessment", "worksheet", "answer-key", "marking-guide", "homework-pack", "revision", "exam-prep"]);
+
+// Auto-save the studio's inputs + generated documents to localStorage (text
+// only — no images here) so a refresh, crash or accidental close never loses
+// generated curriculum/packs. One draft per studio (keyed by badge).
+interface SchoolDraft { vals: Record<string, string>; multi: Record<string, string[]>; docs: Record<string, string> | null; tab: SchoolDocType }
+const draftKey = (badge: string) => `pp:draft:school:${badge}`;
+const readSchoolDraft = (badge: string): Partial<SchoolDraft> | null => {
+  try { const s = localStorage.getItem(draftKey(badge)); return s ? (JSON.parse(s) as Partial<SchoolDraft>) : null; } catch { return null; }
+};
 
 export interface SchoolField {
   key: keyof SchoolInput;
@@ -47,14 +56,31 @@ export interface SchoolStudioConfig {
 
 const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
   const { toast } = useToast();
+  // Restore any saved draft synchronously (no empty-flash, no clobber).
+  const restored = useRef(readSchoolDraft(config.badge)).current;
   const [vals, setVals] = useState<Record<string, string>>(() =>
-    Object.fromEntries(config.fields.filter((f) => f.type === "select").map((f) => [f.key as string, f.options?.[0] ?? ""])));
-  const [multi, setMulti] = useState<Record<string, string[]>>({});
+    restored?.vals ?? Object.fromEntries(config.fields.filter((f) => f.type === "select").map((f) => [f.key as string, f.options?.[0] ?? ""])));
+  const [multi, setMulti] = useState<Record<string, string[]>>(restored?.multi ?? {});
   const [pick, setPick] = useState<SchoolDocType>(config.parts[0].type);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
-  const [docs, setDocs] = useState<Record<string, string> | null>(null);
-  const [tab, setTab] = useState<SchoolDocType>(config.parts[0].type);
+  const [docs, setDocs] = useState<Record<string, string> | null>(restored?.docs ?? null);
+  const [tab, setTab] = useState<SchoolDocType>(restored?.tab && config.parts.some((p) => p.type === restored.tab) ? restored.tab : config.parts[0].type);
+
+  // Persist inputs + generated docs (debounced) for crash/refresh recovery.
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      try { localStorage.setItem(draftKey(config.badge), JSON.stringify({ vals, multi, docs, tab })); } catch { /* quota / private mode */ }
+    }, 500);
+    return () => window.clearTimeout(t);
+  }, [vals, multi, docs, tab, config.badge]);
+
+  useEffect(() => {
+    if (restored?.docs && Object.keys(restored.docs).length > 0) {
+      toast({ title: "Recovered your work", description: `Your ${config.badge} draft was restored — pick up where you left off.` });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [banking, setBanking] = useState(false);
   const [bankedTab, setBankedTab] = useState<SchoolDocType | null>(null);
   // Saved library doc id per generated document (tab) — the parent that language
