@@ -174,6 +174,20 @@ export function planAllows(plan: string | undefined, feature: StudioFeature): bo
   return (PLAN_RANK[plan ?? "free"] ?? 0) >= PLAN_RANK[FEATURE_MIN_PLAN[feature]];
 }
 
+// How many ADDITIONAL language editions a project may have (the original
+// language is always free). -1 = unlimited. Mirrors polished.localization_limit
+// in the database, which enforces this server-side in polished_save_edition.
+export const LOCALIZATION_LIMIT: Record<string, number> = {
+  free: 0, creator: 1, professional: 2, pro: 2, publisher: 5, business: 10, school: -1, enterprise: -1,
+};
+
+export function localizationLimit(plan: string | undefined): number {
+  const v = LOCALIZATION_LIMIT[plan ?? "free"];
+  return v === undefined ? 0 : v;
+}
+
+export const isUnlimitedLocalization = (limit: number): boolean => limit < 0;
+
 export const planById = (id: string): Plan | undefined => PLANS.find((p) => p.id === id);
 
 // Display name for whatever plan string the backend returns ('pro' is legacy).

@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { authHeader } from "@/lib/session";
 import { logAiActivity } from "@/lib/ai-activity-log";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon, Check, Loader2, HardDrive } from "lucide-react";
+import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon, Check, Loader2, HardDrive, Languages } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookChapter, BookOutline, BookMode, BookDepth, BookView, ImprovementType } from "@/types/book";
 import { useDraftAutosave, readDraft } from "@/hooks/use-draft-autosave";
+import LocalizePanel from "@/components/app/LocalizePanel";
+import { localizeMarkdown, markdownEdition } from "@/lib/localize";
 import BookSetup from "@/components/book/BookSetup";
 import BookOutlineEditor from "@/components/book/BookOutlineEditor";
 import BookWritingPanel from "@/components/book/BookWritingPanel";
@@ -273,6 +275,7 @@ const BookCreator = () => {
     { id: "preview", label: "Preview", icon: <Eye className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "export", label: "Export", icon: <Download className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "repurpose", label: "Repurpose", icon: <Repeat className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
+    { id: "localize", label: "Localize", icon: <Languages className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "cover", label: "Cover", icon: <ImageIcon className="w-3.5 h-3.5" />, show: !!outline },
     { id: "publish", label: "Publish", icon: <Package className="w-3.5 h-3.5" />, show: !!outline },
   ];
@@ -393,6 +396,22 @@ const BookCreator = () => {
                 bookTitle={outline?.title || bookTitle}
                 fullContent={effectiveContent}
               />
+            ) : view === "localize" ? (
+              <div>
+                <h2 className="font-serif text-2xl font-bold mb-1">Localize your book</h2>
+                <p className="text-sm text-muted-foreground font-sans mb-5">Create faithful translations or culturally adapted editions — each one stays linked to this book and lands in your Library, ready to publish.</p>
+                <LocalizePanel
+                  parentId={autosave.docId}
+                  ensureSaved={() => autosave.flush()}
+                  kind="book"
+                  sourceTitle={outline?.title || bookTitle || "Untitled book"}
+                  hasContent={generatedChapters.length > 0}
+                  buildEdition={async ({ language, mode, culture, onProgress }) => {
+                    const body = await localizeMarkdown(effectiveContent, { language, mode, culture, onProgress });
+                    return markdownEdition(outline?.title || bookTitle || "Untitled book", body, language, mode, culture);
+                  }}
+                />
+              </div>
             ) : view === "cover" ? (
               <div>
                 <h2 className="font-serif text-2xl font-bold mb-1">Cover design</h2>

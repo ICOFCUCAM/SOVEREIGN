@@ -38,8 +38,8 @@ export interface DraftAutosave {
   status: AutosaveStatus;
   lastSavedAt: number | null;
   docId: string | null;
-  flush: () => Promise<void>; // force a server checkpoint now
-  discard: () => void;        // clear local + forget the server draft (e.g. "New")
+  flush: () => Promise<string | null>; // force a server checkpoint now; resolves to the doc id
+  discard: () => void;                  // clear local + forget the server draft (e.g. "New")
 }
 
 export function useDraftAutosave<T>(opts: {
