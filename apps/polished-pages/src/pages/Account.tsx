@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { fetchPlanStatus, startUpgrade, buyCredits, CREDITS_PER_PACK, type PlanStatus } from "@/lib/session";
 import { getMyProfile, upsertProfile } from "@/lib/profiles";
 import { getBatchUsage } from "@/lib/editions";
+import { avatarColors, avatarInitials } from "@/lib/avatar";
 import { planDisplayName } from "@/lib/plans";
 import { BRAND } from "@/lib/tools";
 
@@ -211,9 +212,17 @@ const Account = () => {
                 <label className="mb-1 block text-xs font-medium text-muted-foreground font-sans">Website (optional)</label>
                 <Input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://yoursite.com" maxLength={200} inputMode="url" />
               </div>
-              <Button variant="hero" size="sm" onClick={saveProfile} disabled={savingProfile}>
-                {savingProfile ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Save profile
-              </Button>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button variant="hero" size="sm" onClick={saveProfile} disabled={savingProfile}>
+                  {savingProfile ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Save profile
+                </Button>
+                {displayName.trim() && (
+                  <Link to={`/catalog/author/${encodeURIComponent(displayName.trim())}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline font-sans">
+                    <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${avatarColors(displayName).bg} ${avatarColors(displayName).text}`}>{avatarInitials(displayName)}</span>
+                    View your public page
+                  </Link>
+                )}
+              </div>
             </div>
           )}
         </CardContent>
