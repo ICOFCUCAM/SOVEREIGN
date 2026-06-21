@@ -7,6 +7,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { listDocuments, type DocSummary } from "@/lib/documents";
 
+const KIND_LABEL: Record<string, string> = {
+  cv: "CVs", tailored: "Tailored CVs", "cover-letter": "Cover letters", book: "Books",
+  cover: "Book covers", storybook: "Storybooks", illustration: "Illustrations",
+};
+
 // Creator analytics, computed entirely from the user's real published works —
 // views, downloads, and reach by content type. No fabricated metrics.
 const Insights = () => {
@@ -22,6 +27,15 @@ const Insights = () => {
   const convRate = totals.views > 0 ? Math.round((totals.downloads / totals.views) * 100) : 0;
   const ranked = useMemo(() => [...published].sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0)), [published]);
   const maxViews = ranked[0]?.view_count ?? 0;
+  const byType = useMemo(() => {
+    const m = new Map<string, { works: number; views: number; downloads: number }>();
+    for (const d of published) {
+      const cur = m.get(d.kind) ?? { works: 0, views: 0, downloads: 0 };
+      cur.works += 1; cur.views += d.view_count ?? 0; cur.downloads += d.download_count ?? 0;
+      m.set(d.kind, cur);
+    }
+    return Array.from(m.entries()).map(([kind, v]) => ({ kind, ...v })).sort((a, b) => b.views - a.views);
+  }, [published]);
 
   const HEAD = [
     { label: "Published works", value: totals.works, icon: Rocket },
@@ -62,6 +76,23 @@ const Insights = () => {
               </Card>
             ))}
           </div>
+
+          {byType.length > 1 && (
+            <>
+              <h2 className="mt-10 font-serif text-lg font-semibold">Reach by content type</h2>
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {byType.map((t) => (
+                  <Card key={t.kind} className="border-border">
+                    <CardContent className="p-4">
+                      <div className="text-xs font-medium capitalize text-muted-foreground font-sans">{KIND_LABEL[t.kind] ?? t.kind}</div>
+                      <div className="mt-1 font-serif text-xl font-bold">{t.views.toLocaleString()}<span className="ml-1 text-xs font-normal text-muted-foreground">views</span></div>
+                      <div className="mt-0.5 text-[11px] text-muted-foreground font-sans">{t.works} work{t.works === 1 ? "" : "s"} · {t.downloads} download{t.downloads === 1 ? "" : "s"}</div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
+          )}
 
           <h2 className="mt-10 font-serif text-lg font-semibold">Performance by work</h2>
           <div className="mt-3 space-y-2">
