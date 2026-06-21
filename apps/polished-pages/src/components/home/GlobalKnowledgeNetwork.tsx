@@ -1,16 +1,17 @@
 import { motion } from "framer-motion";
-import { PenLine, Languages, BookOpen, Send, Store } from "lucide-react";
+import { PenLine, Languages, Store, GraduationCap, Landmark } from "lucide-react";
 
-// The Global Knowledge Network — Polished Pages' signature: the full lifecycle
-// (Create -> Localize -> Publish -> Distribute -> Sell) drawn as one living,
-// connected ecosystem, with the content that flows through each stage. The
-// flowing links make it read as a system in motion, not a static diagram.
+// The Global Knowledge Network — Polished Pages' signature, and the visual
+// payoff of the hero's arc overture. The same five numbered acts
+// (01 Create → 05 Institutionalize) drawn as one living, connected system, with
+// the content and institutions that flow through each stage. The numbering is a
+// brand device reused across the site (hero overture, feature chapters, here).
 const STAGES = [
-  { icon: PenLine, label: "Create", tint: "hsl(221 83% 62%)", chips: ["Books", "Children's", "Curricula", "CVs", "Assessments"] },
-  { icon: Languages, label: "Localize", tint: "hsl(160 84% 50%)", chips: ["EN", "ES", "FR", "AR", "SW", "中文"] },
-  { icon: BookOpen, label: "Publish", tint: "hsl(262 83% 68%)", chips: ["EPUB", "Print PDF", "Editions"] },
-  { icon: Send, label: "Distribute", tint: "hsl(217 91% 66%)", chips: ["KDP", "IngramSpark", "Apple", "Schools"] },
-  { icon: Store, label: "Sell", tint: "hsl(38 92% 58%)", chips: ["Marketplace", "Readers", "Royalties"] },
+  { n: "01", icon: PenLine, label: "Create", tint: "hsl(221 83% 62%)", chips: ["Books", "Children's", "Curricula", "Assessments", "Storybooks"] },
+  { n: "02", icon: Languages, label: "Localize", tint: "hsl(160 84% 50%)", chips: ["EN", "ES", "FR", "AR", "SW", "中文"] },
+  { n: "03", icon: Store, label: "Distribute", tint: "hsl(38 92% 58%)", chips: ["Marketplace", "KDP", "IngramSpark", "Apple"] },
+  { n: "04", icon: GraduationCap, label: "Teach", tint: "hsl(160 84% 45%)", chips: ["Curricula", "Lessons", "Workbooks", "Exams"] },
+  { n: "05", icon: Landmark, label: "Institutionalize", tint: "hsl(262 83% 68%)", chips: ["Publishers", "Schools", "NGOs", "Ministries"] },
 ];
 
 const Connector = () => (
@@ -26,13 +27,17 @@ const GlobalKnowledgeNetwork = () => (
       <div className="absolute left-1/4 top-0 h-72 w-72 animate-glow-pulse rounded-full bg-[hsl(221_83%_53%)]/18 blur-[120px]" />
       <div className="absolute right-1/4 top-10 h-72 w-72 animate-glow-pulse rounded-full bg-[hsl(262_83%_58%)]/18 blur-[120px]" style={{ animationDelay: "2s" }} />
     </div>
-    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[hsl(217_91%_64%)]/50 to-transparent" />
+    {/* Thread continuing from the hero's overture — the eye flows into the network */}
+    <div className="pointer-events-none absolute left-1/2 top-0 flex -translate-x-1/2 flex-col items-center" aria-hidden>
+      <div className="h-12 w-px bg-gradient-to-b from-transparent to-white/25" />
+      <span className="-mt-1 h-2 w-2 rounded-full bg-[hsl(217_91%_66%)] shadow-[0_0_12px_2px_hsl(217_91%_66%/0.5)]" />
+    </div>
 
     <div className="container relative px-6 py-20 md:py-28">
       <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mx-auto max-w-2xl text-center">
         <p className="eyebrow text-[hsl(217_91%_72%)]">One connected system</p>
         <h2 className="text-display mt-3 text-3xl font-bold md:text-[2.7rem]">The global knowledge network</h2>
-        <p className="mt-4 text-lg text-white/55 font-sans text-pretty">Every kind of knowledge — books, children's titles, curricula, assessments — flows through one living pipeline, from first draft to a reader on the other side of the world.</p>
+        <p className="mt-4 text-lg text-white/55 font-sans text-pretty">The five stages above, drawn as one living pipeline: a single idea becomes a book, a localized edition, a marketplace listing, a classroom resource — and an institution's catalog.</p>
       </motion.div>
 
       {/* Icon rail with flowing connectors */}
@@ -44,6 +49,7 @@ const GlobalKnowledgeNetwork = () => (
               className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] shadow-xl backdrop-blur"
             >
               <s.icon className="h-6 w-6" style={{ color: s.tint }} />
+              <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[hsl(222_47%_9%)] font-mono text-[10px] font-bold text-white/70 ring-1 ring-white/15">{s.n}</span>
             </motion.span>
             {i < STAGES.length - 1 && <Connector />}
           </div>
@@ -59,9 +65,15 @@ const GlobalKnowledgeNetwork = () => (
             className="text-center md:px-1"
           >
             <div className="mb-3 flex items-center justify-center gap-2 md:hidden">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06]"><s.icon className="h-4 w-4" style={{ color: s.tint }} /></span>
+              <span className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06]">
+                <s.icon className="h-4 w-4" style={{ color: s.tint }} />
+                <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[hsl(222_47%_9%)] font-mono text-[9px] font-bold text-white/70 ring-1 ring-white/15">{s.n}</span>
+              </span>
             </div>
-            <div className="font-serif text-base font-bold text-white">{s.label}</div>
+            <div className="flex items-center justify-center gap-1.5">
+              <span className="hidden font-mono text-xs text-white/35 md:inline">{s.n}</span>
+              <div className="font-serif text-base font-bold text-white">{s.label}</div>
+            </div>
             <div className="mt-2.5 flex flex-wrap justify-center gap-1.5">
               {s.chips.map((c) => (
                 <span key={c} className="rounded-full border border-white/10 bg-white/[0.05] px-2 py-0.5 text-[10px] font-medium text-white/65 font-sans">{c}</span>
