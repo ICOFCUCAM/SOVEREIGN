@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink, Building2 } from "lucide-react";
 import PublishDialog from "@/components/app/PublishDialog";
+import BulkPublishDialog from "@/components/app/BulkPublishDialog";
 import AddToCollection from "@/components/app/AddToCollection";
 import MoveToOrganization from "@/components/app/MoveToOrganization";
 import { Input } from "@/components/ui/input";
@@ -369,10 +370,15 @@ const LibraryPage = () => {
       </motion.div>
 
       {selected.size > 0 && (
-        <div className="sticky top-[72px] z-30 mt-4 flex items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-2.5 backdrop-blur-sm">
+        <div className="sticky top-[72px] z-30 mt-4 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 backdrop-blur-sm">
           <span className="text-sm font-medium font-sans">{selected.size} selected</span>
           <div className="flex gap-2">
             <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())} className="text-muted-foreground">Deselect all</Button>
+            <BulkPublishDialog
+              docs={(docs ?? []).filter((d) => selected.has(d.id))}
+              onDone={() => { setSelected(new Set()); afterOrgChange(); }}
+              trigger={<Button size="sm" variant="hero"><Store className="mr-1 h-3.5 w-3.5" /> Publish {selected.size}</Button>}
+            />
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button size="sm" variant="destructive"><Trash2 className="mr-1 h-3.5 w-3.5" /> Delete {selected.size}</Button>

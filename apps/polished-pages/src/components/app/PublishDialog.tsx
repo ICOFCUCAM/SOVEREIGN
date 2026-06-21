@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Copy, Check, Crown } from "lucide-react";
+import { Loader2, Copy, Check, Crown, Building2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { publishDocument, CATALOG_CATEGORIES, CATALOG_LICENSES, type DocSummary 
 import { fetchPlanStatus } from "@/lib/session";
 import { isWankongPublishable } from "@/lib/wankong";
 import WankongPublishButton from "@/components/app/WankongPublishButton";
+import { myOrganizations, orgCollections, setDocumentOrg, addToOrgCollection, can, type OrgSummary, type OrgCollection } from "@/lib/organizations";
 
 // Publish a saved document to the public catalog: choose a category and an
 // optional price, get a public link. (Free items download immediately; charging
@@ -24,8 +25,20 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
   const [token, setToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isPro, setIsPro] = useState(true); // assume true until known, so we don't flash the upsell
+  // Optional: publish under an organization (→ shared library + storefront) and
+  // file into a repository, all in this one action.
+  const [orgs, setOrgs] = useState<OrgSummary[]>([]);
+  const [orgId, setOrgId] = useState("");
+  const [cols, setCols] = useState<OrgCollection[]>([]);
+  const [colId, setColId] = useState("");
 
   useEffect(() => { if (open) fetchPlanStatus().then((s) => setIsPro(s?.plan === "pro")).catch(() => {}); }, [open]);
+  useEffect(() => { if (open) myOrganizations().then((list) => setOrgs(list.filter((o) => can.edit(o.role)))).catch(() => {}); }, [open]);
+  useEffect(() => {
+    setColId("");
+    if (!orgId) { setCols([]); return; }
+    orgCollections(orgId).then(setCols).catch(() => setCols([]));
+  }, [orgId]);
 
   const priceCents = Math.max(0, Math.round(parseFloat(price || "0") * 100)) || 0;
   const needsPro = priceCents > 0 && !isPro;
@@ -35,9 +48,15 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
     setBusy(true);
     try {
       const t = await publishDocument(doc.id, { listed, category, priceCents, author, license });
+      // In the same action: assign to an organization and (optionally) a repository.
+      if (listed && orgId) {
+        await setDocumentOrg(doc.id, orgId);
+        if (colId) await addToOrgCollection(colId, doc.id);
+      }
       setToken(listed ? t : null);
       onChanged?.(listed);
-      toast({ title: listed ? "Published to catalog" : "Removed from catalog" });
+      const orgName = orgId ? orgs.find((o) => o.id === orgId)?.name : null;
+      toast({ title: listed ? "Published" : "Removed from catalog", description: listed && orgName ? `On the marketplace and ${orgName}’s storefront.` : undefined });
     } catch (e) {
       toast({ title: "Could not update", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally {
@@ -52,8 +71,8 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-serif">Publish to catalog</DialogTitle>
-          <DialogDescription>List “{doc.title}” in the public catalog with a shareable link.</DialogDescription>
+          <DialogTitle className="font-serif">Publish “{doc.title}”</DialogTitle>
+          <DialogDescription>List it on the marketplace — and, in the same step, publish it under an organization and into a repository.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
@@ -81,6 +100,24 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
               <p className="text-xs text-muted-foreground font-sans">Free items download immediately. Buyer charging and seller payouts arrive with Stripe Connect (not yet enabled).</p>
             )}
           </div>
+          {/* Publish under an organization — one action lists it AND puts it on
+              the institution's storefront and (optionally) a repository. */}
+          {orgs.length > 0 && (
+            <div className="space-y-2 rounded-lg border border-border bg-card/40 p-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground font-sans"><Building2 className="h-3.5 w-3.5" /> Publish under an organization <span className="font-normal normal-case">(optional)</span></div>
+              <select value={orgId} onChange={(e) => setOrgId(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                <option value="">Just my marketplace listing</option>
+                {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+              </select>
+              {orgId && (
+                <select value={colId} onChange={(e) => setColId(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                  <option value="">No repository</option>
+                  {cols.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              )}
+            </div>
+          )}
+
           {link && (
             <div className="rounded-lg border border-border p-2">
               <div className="flex items-center gap-2">
