@@ -9,6 +9,7 @@ import CoverLetterGenerator from "./pages/CoverLetterGenerator.tsx";
 import JobTailor from "./pages/JobTailor.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Account from "./pages/Account.tsx";
+import Insights from "./pages/Insights.tsx";
 import LibraryPage from "./pages/LibraryPage.tsx";
 import TransformBook from "./pages/TransformBook.tsx";
 import ChildrenStudio from "./pages/ChildrenStudio.tsx";
@@ -71,6 +72,7 @@ const App = () => (
               for sign-in only when someone actually goes to create. */}
           <Route path="/dashboard" element={<AuthGate><Dashboard /></AuthGate>} />
           <Route path="/account" element={<AuthGate><Account /></AuthGate>} />
+          <Route path="/insights" element={<AuthGate><Insights /></AuthGate>} />
           <Route path="/library" element={<AuthGate><LibraryPage /></AuthGate>} />
           <Route path="/collections" element={<AuthGate><CollectionsPage /></AuthGate>} />
           <Route path="/cv" element={<AuthGate><CVGenerator /></AuthGate>} />
