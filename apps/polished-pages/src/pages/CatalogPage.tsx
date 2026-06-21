@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck, Link2, Check } from "lucide-react";
+import { Sparkles, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck, Link2, Check, Globe } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem, type CatalogSort } from "@/lib/documents";
@@ -132,7 +132,14 @@ const CatalogPage = () => {
                   {avatarInitials(author)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  {profile.bio && <p className="text-sm text-foreground font-sans leading-relaxed">{profile.bio}</p>}
+                  {profile.tagline && <p className="text-sm font-medium text-foreground font-sans">{profile.tagline}</p>}
+                  {profile.bio && <p className="mt-1 text-sm text-muted-foreground font-sans leading-relaxed">{profile.bio}</p>}
+                  {profile.website && (
+                    <a href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`} target="_blank" rel="noopener noreferrer nofollow"
+                      className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline font-sans">
+                      <Globe className="h-3.5 w-3.5" /> {profile.website.replace(/^https?:\/\//, "")}
+                    </a>
+                  )}
                   <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-muted-foreground font-sans">
                     <span><span className="font-semibold text-foreground">{profile.works}</span> published</span>
                     <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> <span className="font-semibold text-foreground">{profile.views}</span> views</span>
