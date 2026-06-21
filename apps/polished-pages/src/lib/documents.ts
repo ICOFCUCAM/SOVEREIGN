@@ -182,7 +182,25 @@ export async function recordDownload(token: string): Promise<void> {
   try { await rpc().rpc("polished_record_download", { p_token: token }); } catch { /* analytics is best-effort */ }
 }
 
-export interface SharedDoc { kind: DocKind; title: string; template: string | null; payload: unknown; author_name?: string | null; license?: string | null }
+export interface SharedDoc {
+  kind: DocKind;
+  title: string;
+  template: string | null;
+  payload: unknown;
+  author_name?: string | null;
+  author_verified?: boolean;
+  license?: string | null;
+  listed?: boolean;
+  category?: string | null;
+  price_cents?: number;
+  view_count?: number;
+  download_count?: number;
+  edition_language?: string | null;
+  created_at?: string;
+  org_slug?: string | null;
+  org_name?: string | null;
+  org_verified?: boolean;
+}
 // Public read of a shared document by token (no auth required).
 export async function getShared(token: string): Promise<SharedDoc | null> {
   const { data, error } = await rpc().rpc("polished_get_shared", { p_token: token });
