@@ -1,8 +1,9 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { Compass, ArrowRight, Home, Store } from "lucide-react";
+import { ArrowRight, Home, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BRAND } from "@/lib/tools";
+import SpineMark from "@/components/brand/SpineMark";
 
 const NotFound = () => {
   const location = useLocation();
@@ -21,9 +22,7 @@ const NotFound = () => {
       <div className="absolute inset-x-0 top-0 h-[2px] bg-gold-gradient opacity-70" />
 
       <div className="relative z-10 mx-auto max-w-md text-center">
-        <span className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-          <Compass className="h-6 w-6 text-primary" />
-        </span>
+        <SpineMark size="md" animated className="mx-auto mb-7 justify-center" />
         <p className="font-serif text-5xl font-bold tracking-tightest text-foreground">404</p>
         <h1 className="mt-3 font-serif text-2xl font-bold tracking-tight">This page wandered off</h1>
         <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground font-sans text-pretty">
