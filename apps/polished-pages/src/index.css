@@ -266,6 +266,33 @@
     font-family: 'Inter', sans-serif;
   }
 
+  /* One premium field treatment, so native selects/inputs stop looking like raw
+     browser controls. Custom chevron, soft focus ring, consistent radius. */
+  .field {
+    border-radius: 0.625rem;
+    border: 1px solid hsl(var(--border));
+    background-color: hsl(var(--card));
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    color: hsl(var(--foreground));
+    transition: border-color var(--dur-fast) var(--ease-premium), box-shadow var(--dur-fast) var(--ease-premium);
+  }
+  .field:focus,
+  .field:focus-visible {
+    outline: none;
+    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.15);
+  }
+  .select-premium {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    padding-right: 2.25rem;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+  }
+
   .skeleton-shimmer {
     background: linear-gradient(
       90deg,
