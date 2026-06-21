@@ -192,6 +192,14 @@ export async function removeOrgMember(orgId: string, userId: string): Promise<vo
 export async function setDocumentOrg(docId: string, orgId: string | null): Promise<void> {
   await ok(r().rpc("polished_org_set_document", { p_doc: docId, p_org: orgId }), "Could not move to the organization.");
 }
+export async function copyDocumentToOrg(docId: string, orgId: string): Promise<string> {
+  const { data, error } = await r().rpc("polished_org_copy_document", { p_doc: docId, p_org: orgId });
+  if (error) throw new Error(error.message || "Could not copy to the organization.");
+  return data as string;
+}
+export async function addToOrgCollection(collectionId: string, docId: string): Promise<void> {
+  await ok(r().rpc("polished_org_collection_add", { p_collection: collectionId, p_doc: docId }), "Could not add to the repository.");
+}
 export async function createOrgCollection(orgId: string, name: string, kind: CollectionKind = "general", description?: string): Promise<string> {
   const { data, error } = await r().rpc("polished_org_collection_create", { p_org: orgId, p_name: name, p_desc: description ?? null, p_kind: kind });
   if (error) throw new Error(error.message || "Could not create collection.");

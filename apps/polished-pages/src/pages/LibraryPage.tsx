@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink, Building2 } from "lucide-react";
 import PublishDialog from "@/components/app/PublishDialog";
 import AddToCollection from "@/components/app/AddToCollection";
+import MoveToOrganization from "@/components/app/MoveToOrganization";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -568,6 +569,16 @@ const LibraryPage = () => {
                           trigger={
                             <Button size="sm" variant="ghost" className="text-muted-foreground" aria-label="Add to collection" title="Add to collection">
                               <FolderPlus className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        <MoveToOrganization
+                          documentId={d.id}
+                          listed={d.listed}
+                          onDone={load}
+                          trigger={
+                            <Button size="sm" variant="ghost" className="text-muted-foreground" aria-label="Add to organization" title="Add to an organization">
+                              <Building2 className="h-4 w-4" />
                             </Button>
                           }
                         />
