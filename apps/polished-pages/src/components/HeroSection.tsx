@@ -56,7 +56,7 @@ const HeroSection = () => {
               ))}
             </div>
 
-            <h1 className="text-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl xl:text-6xl">
+            <h1 className="text-display text-5xl font-bold sm:text-6xl xl:text-[4.5rem]">
               {t("hero.headlineA")}{" "}
               <span className="bg-gradient-to-r from-[hsl(217_91%_70%)] via-[hsl(245_85%_74%)] to-[hsl(280_85%_74%)] bg-clip-text italic text-transparent">
                 {t("hero.headlineB")}
