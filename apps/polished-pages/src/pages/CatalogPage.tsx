@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck, Link2, Check, Globe, Users, BookHeart, GraduationCap, BookOpen } from "lucide-react";
+import { Sparkles, Store, Search, X, Eye, Download, TrendingUp, Clock, Star, ArrowRight, BadgeCheck, Link2, Check, Globe, Users, BookHeart, GraduationCap, BookOpen, Building2, Languages, Layers } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { catalogList, CATALOG_CATEGORIES, isAdmin, adminFeature, type CatalogItem, type CatalogSort } from "@/lib/documents";
@@ -15,6 +15,9 @@ import { coverArt } from "@/lib/cover-art";
 import SpineMark from "@/components/brand/SpineMark";
 import CreatorCard from "@/components/app/CreatorCard";
 import CreatorStorefront from "@/components/app/CreatorStorefront";
+import { orgShowcase, EDUCATIONAL_CATEGORIES, type OrgShowcaseRow } from "@/lib/organizations";
+
+const orgInitials = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "O";
 
 const trendScore = (i: CatalogItem) => (i.download_count ?? 0) * 3 + (i.view_count ?? 0);
 
@@ -42,10 +45,13 @@ const CatalogPage = () => {
   const [admin, setAdmin] = useState(false);
   const [profile, setProfile] = useState<AuthorProfile | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [institutions, setInstitutions] = useState<OrgShowcaseRow[]>([]);
 
   const filtering = !!(query.trim() || cat || author);
 
   useEffect(() => { isAdmin().then(setAdmin).catch(() => {}); }, []);
+  // Real institutions actively publishing — the marketplace's ecosystem layer.
+  useEffect(() => { orgShowcase().then(setInstitutions).catch(() => {}); }, []);
 
   useEffect(() => {
     setProfile(null);
@@ -321,12 +327,62 @@ const CatalogPage = () => {
                     </div>
                   </section>
                 )}
+                {/* Featured institutions — real organizations publishing on the platform */}
+                {institutions.length > 0 && (
+                  <section className="mt-12">
+                    <div className="flex items-baseline gap-2">
+                      <Building2 className="h-4 w-4 text-marketplace" />
+                      <h2 className="font-serif text-xl font-bold">Featured institutions</h2>
+                      <span className="text-xs text-muted-foreground font-sans">publishers, schools, NGOs &amp; ministries</span>
+                      <Link to="/institutions" className="ml-auto inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline font-sans">All <ArrowRight className="h-3.5 w-3.5" /></Link>
+                    </div>
+                    <div className="-mx-1 mt-4 flex snap-x gap-4 overflow-x-auto px-1 pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      {institutions.slice(0, 10).map((o) => {
+                        const g = coverArt(o.name);
+                        return (
+                          <Link key={o.slug} to={`/org/${o.slug}`} className="group w-56 shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-card transition-colors hover:border-primary/40">
+                            <div className="h-16" style={{ backgroundImage: `linear-gradient(135deg, ${g.from}, ${g.to})` }} />
+                            <div className="-mt-7 px-4 pb-4">
+                              <span className="flex h-12 w-12 items-center justify-center rounded-xl border-4 border-card font-serif text-base font-bold text-white" style={{ backgroundImage: `linear-gradient(150deg, ${g.from}, ${g.to})` }}>{orgInitials(o.name)}</span>
+                              <div className="mt-1.5 flex items-center gap-1"><span className="truncate font-serif text-sm font-bold">{o.name}</span>{o.verified && <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-primary" />}</div>
+                              <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[11px] text-muted-foreground font-sans">
+                                <span className="inline-flex items-center gap-0.5"><BookOpen className="h-3 w-3" /> {o.works}</span>
+                                {o.languages > 0 && <span className="inline-flex items-center gap-0.5"><Languages className="h-3 w-3" /> {o.languages}</span>}
+                                {o.collections > 0 && <span className="inline-flex items-center gap-0.5"><Layers className="h-3 w-3" /> {o.collections}</span>}
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
                 {topRated.length > 0 && <Shelf icon={Star} title="Top rated" hint="highest reader ratings" list={topRated} />}
                 {COLLECTIONS.map((col) => {
                   const list = all.filter(col.match).slice(0, 12);
                   return list.length >= 3 ? <Shelf key={col.title} icon={col.icon} title={col.title} hint={col.hint} list={list} /> : null;
                 })}
                 <Shelf icon={Clock} title="Recently published" list={recent} />
+
+                {/* Education — the platform's strongest long-term surface */}
+                <section className="mt-12">
+                  <div className="flex items-baseline gap-2"><GraduationCap className="h-4 w-4 text-educational" /><h2 className="font-serif text-xl font-bold">For education</h2><span className="text-xs text-muted-foreground font-sans">curriculum, classroom &amp; teacher resources</span></div>
+                  <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {EDUCATIONAL_CATEGORIES.map((c) => {
+                      const n = categoryCounts.get(c) ?? 0;
+                      return (
+                        <button key={c} onClick={() => setCat(c)} className="group flex items-center justify-between rounded-xl border border-educational/30 bg-educational/[0.04] px-4 py-3.5 text-left transition hover:-translate-y-0.5 hover:border-educational/60 hover:shadow-e2">
+                          <div>
+                            <span className="block text-sm font-medium font-sans">{c}</span>
+                            <span className="text-[11px] text-muted-foreground font-sans">{n} {n === 1 ? "resource" : "resources"}</span>
+                          </div>
+                          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-educational/50 transition-transform group-hover:translate-x-0.5" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+
                 <section className="mt-10">
                   <div className="flex items-baseline gap-2"><Store className="h-4 w-4 text-gold" /><h2 className="font-serif text-xl font-bold">Browse by category</h2></div>
                   <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
