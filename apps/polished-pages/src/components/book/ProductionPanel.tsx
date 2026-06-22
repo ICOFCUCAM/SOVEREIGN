@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import { CheckCircle2, Circle, ClipboardCheck, Globe, Headphones, FileDown, BookOpen, Package, Sparkles, Loader2, Store, Eye, Download, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { CATALOG_CATEGORIES } from "@/lib/documents";
+import { LANGUAGE_NAMES } from "@/lib/languages";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, type DocSummary } from "@/lib/documents";
 import { wankongListingsByDoc, type WankongListing } from "@/lib/wankong";
@@ -23,13 +26,26 @@ const spineInches = (pages: number, paper?: string): string =>
 export interface BookMeta {
   author?: string;
   subtitle?: string;
+  description?: string;
+  category?: string;
+  keywords?: string;
+  language?: string;
   isbn?: string;
+  isbnStatus?: string; // "Missing" | "Assigned" | "Registered"
   publisher?: string;
   imprint?: string;
+  edition?: string;
+  format?: string;
   trimSize?: string;
   pageCount?: string;
-  paper?: string; // "white" | "cream" — affects spine width
+  paper?: string; // affects spine width
+  kdpStatus?: string;
+  ingramStatus?: string;
 }
+
+const ISBN_STATUS = ["Missing", "Assigned", "Registered"];
+const FORMATS = ["Paperback", "Hardcover", "Coil-bound", "eBook", "Audiobook"];
+const DIST_STATUS = ["Not submitted", "Submitted", "Live"];
 
 // The Book Production Center: a project-centric readiness view + the publishing
 // metadata that turns a manuscript into a distributable book.
@@ -101,7 +117,9 @@ const ProductionPanel = ({
   const marketplaceListed = projectDocs.some((d) => d.listed);
   const wankongLive = projectDocs.some((d) => wankong[d.id]?.status === "live");
 
-  const set = (k: keyof BookMeta) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setMeta({ ...meta, [k]: e.target.value });
+  const set = (k: keyof BookMeta) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setMeta({ ...meta, [k]: e.target.value });
+  // ISBN status defaults to Missing/Assigned based on whether an ISBN is set.
+  const isbnStatus = meta.isbnStatus || (meta.isbn?.trim() ? "Assigned" : "Missing");
 
   const items: { label: string; ok: boolean; hint?: string }[] = [
     { label: "Manuscript written", ok: manuscriptComplete },
@@ -177,9 +195,52 @@ const ProductionPanel = ({
               <div className="mt-0.5 font-serif text-lg font-bold tabular-nums">{totalDownloads.toLocaleString()}</div>
             </div>
           </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">KDP status</Label>
+              <select value={meta.kdpStatus ?? "Not submitted"} onChange={set("kdpStatus")} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                {DIST_STATUS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">IngramSpark status</Label>
+              <select value={meta.ingramStatus ?? "Not submitted"} onChange={set("ingramStatus")} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                {DIST_STATUS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
           <p className="text-[11px] text-muted-foreground font-sans">
-            Counts cover this book and its {editions} edition{editions === 1 ? "" : "s"}{hasAudiobook ? " + audiobook" : ""}. Manage distribution from the <Link to="/library" className="text-primary hover:underline">Library</Link>. Sales figures aren’t synced back from Wankong yet.
+            Counts cover this book and its {editions} edition{editions === 1 ? "" : "s"}{hasAudiobook ? " + audiobook" : ""}. KDP/IngramSpark are tracked manually (you export the files here, then upload to those platforms). Sales figures aren’t synced back from Wankong yet.
           </p>
+        </CardContent>
+      </Card>
+
+      {/* Catalogue details — the core listing metadata for every store. */}
+      <Card className="border-border">
+        <CardContent className="space-y-4 p-5">
+          <h3 className="font-serif text-base font-semibold">Catalogue details</h3>
+          <div className="space-y-1.5">
+            <Label className="font-sans text-xs">Description</Label>
+            <Textarea value={meta.description ?? ""} onChange={set("description")} placeholder="The back-cover / store description for this book." rows={3} maxLength={2000} className="resize-none" />
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">Category</Label>
+              <select value={meta.category ?? ""} onChange={set("category")} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                <option value="">Choose…</option>
+                {CATALOG_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">Language</Label>
+              <Input value={meta.language ?? ""} onChange={set("language")} placeholder="e.g. English" list="prod-langs" maxLength={40} />
+              <datalist id="prod-langs">{LANGUAGE_NAMES.map((l) => <option key={l} value={l} />)}</datalist>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">Keywords</Label>
+              <Input value={meta.keywords ?? ""} onChange={set("keywords")} placeholder="comma, separated, terms" maxLength={300} />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -201,12 +262,29 @@ const ProductionPanel = ({
               <Input value={meta.isbn ?? ""} onChange={set("isbn")} placeholder="978-1-23456-789-0" maxLength={20} />
             </div>
             <div className="space-y-1.5">
+              <Label className="font-sans text-xs">ISBN status</Label>
+              <select value={isbnStatus} onChange={set("isbnStatus")} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                {ISBN_STATUS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1.5">
               <Label className="font-sans text-xs">Publisher</Label>
               <Input value={meta.publisher ?? ""} onChange={set("publisher")} placeholder="e.g. Polished Pages" maxLength={120} />
             </div>
             <div className="space-y-1.5">
               <Label className="font-sans text-xs">Imprint <span className="text-muted-foreground/60">(optional)</span></Label>
               <Input value={meta.imprint ?? ""} onChange={set("imprint")} placeholder="e.g. Wankong Publishing" maxLength={120} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">Edition</Label>
+              <Input value={meta.edition ?? ""} onChange={set("edition")} placeholder="e.g. First edition" maxLength={60} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">Format</Label>
+              <select value={meta.format ?? ""} onChange={set("format")} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                <option value="">Choose…</option>
+                {FORMATS.map((f) => <option key={f} value={f}>{f}</option>)}
+              </select>
             </div>
             <div className="space-y-1.5">
               <Label className="font-sans text-xs">Trim size</Label>

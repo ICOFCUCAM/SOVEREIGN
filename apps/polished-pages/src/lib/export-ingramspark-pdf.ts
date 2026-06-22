@@ -3,7 +3,10 @@
 //   • mirrored margins — the inside (gutter) margin sits on the correct edge of
 //     each recto/verso page instead of always on the left;
 //   • a gutter that grows with page count (thicker books need more binding room);
-//   • front matter — a title page (recto) and a copyright page (verso);
+//   • front matter — a title page (recto), a copyright page (verso) and a table
+//     of contents with accurate folios;
+//   • running headers (book title on verso, chapter on recto), omitted on
+//     front matter and chapter-opening pages;
 //   • chapters that always open on a recto (right-hand) page, inserting a blank
 //     verso when needed, the way printed books are laid out;
 //   • folios (page numbers) on the outside bottom corner, suppressed on front
@@ -31,24 +34,42 @@ async function build(JsPDF: Jspdf, markdown: string, opts: IngramOpts, gutterMm:
   const { wmm: pageW, hmm: pageH } = opts.trim;
   const out = INGRAM_OUTSIDE_MM, mTop = 14, mBottom = 16;
   const contentW = pageW - gutterMm - out;
-  const bodyStartPage = 3; // title (1) + copyright (2), body opens on recto (3)
   const pdf = new JsPDF({ orientation: pageW > pageH ? "l" : "p", unit: "mm", format: [pageW, pageH] });
   const FONT = await registerEmbeddedSerif(pdf); // Liberation Serif, fully embedded
 
+  const rows = markdown.replace(/\r\n/g, "\n").split("\n");
+  // Pre-scan chapters (level-1 headings) to reserve the table of contents.
+  const chapterTitles = rows.filter((l) => /^#\s+/.test(l.trim())).map((l) => strip(l.trim().replace(/^#\s+/, "")));
+  const tocLineH = 7;
+  const tocUsableH = pageH - mTop - mBottom - 16;
+  const perTocPage = Math.max(1, Math.floor(tocUsableH / tocLineH));
+  const tocPages = chapterTitles.length ? Math.ceil(chapterTitles.length / perTocPage) : 0;
+
   let pageNo = 1, y = mTop, dirty = false;
-  const recto = () => pageNo % 2 === 1;          // odd physical page = right-hand
+  let bodyStartPage = 3;          // set after front matter is laid out
+  let currentChapter = "";
+  let chapterStartPage = false;   // current page opens a chapter → no running head
+  const chapterStarts: { title: string; folio: number }[] = [];
+  const recto = () => pageNo % 2 === 1;           // odd physical page = right-hand
   const xLeft = () => (recto() ? gutterMm : out); // gutter flips to the binding edge
   const lineHeight = (pt: number) => pt * PT_TO_MM * 1.5;
+  const folioNum = () => pageNo - (bodyStartPage - 1);
 
   const folio = () => {
     if (pageNo < bodyStartPage || !dirty) return;
     pdf.setFont(FONT, "normal"); pdf.setFontSize(9); pdf.setTextColor(120);
-    const n = String(pageNo - (bodyStartPage - 1));
+    const n = String(folioNum());
     if (recto()) pdf.text(n, pageW - out, pageH - 9, { align: "right" });
     else pdf.text(n, out, pageH - 9, { align: "left" });
     pdf.setTextColor(20);
   };
-  const nextPage = () => { folio(); pdf.addPage(); pageNo += 1; y = mTop; dirty = false; };
+  const header = () => {
+    if (pageNo < bodyStartPage || chapterStartPage) return;
+    pdf.setFont(FONT, "italic"); pdf.setFontSize(8.5); pdf.setTextColor(150);
+    pdf.text(recto() ? (currentChapter || strip(opts.title)) : strip(opts.title), pageW / 2, 9, { align: "center", maxWidth: contentW });
+    pdf.setTextColor(20);
+  };
+  const nextPage = () => { folio(); pdf.addPage(); pageNo += 1; y = mTop; dirty = false; chapterStartPage = false; header(); };
 
   const emit = (text: string, pt: number, font: "normal" | "bold" | "italic", gapBefore = 0, gapAfter = 1.5) => {
     if (!text.trim()) return;
@@ -87,20 +108,26 @@ async function build(JsPDF: Jspdf, markdown: string, opts: IngramOpts, gutterMm:
   for (const l of cLines) { if (l) pdf.text(pdf.splitTextToSize(l, cw) as string[], out, cy); cy += 5; }
   pdf.setTextColor(20);
 
-  // Body opens on a recto (page 3).
-  pdf.addPage(); pageNo = 3; y = mTop; dirty = false;
+  // Reserve the table of contents (pages 3 .. 2+tocPages), then open the body
+  // on a recto (padding with a blank verso if needed).
+  for (let i = 0; i < tocPages; i++) { pdf.addPage(); pageNo += 1; }
+  pdf.addPage(); pageNo += 1; y = mTop; dirty = false;
+  if (!recto()) { pdf.addPage(); pageNo += 1; }
+  bodyStartPage = pageNo;
 
-  const openChapter = () => { nextPage(); if (!recto()) nextPage(); };
+  const openChapter = () => { nextPage(); if (!recto()) nextPage(); chapterStartPage = true; };
 
-  const rows = markdown.replace(/\r\n/g, "\n").split("\n");
   let firstChapter = true;
   for (const raw of rows) {
     const t = raw.trim();
     if (/^#\s+/.test(t)) {
-      if (!firstChapter || dirty) openChapter();
+      const title = strip(t.replace(/^#\s+/, ""));
+      if (!firstChapter || dirty) openChapter(); else chapterStartPage = true;
+      currentChapter = title;
+      chapterStarts.push({ title, folio: folioNum() });
       firstChapter = false;
       y += 10;
-      emit(strip(t.replace(/^#\s+/, "")), 20, "bold", 0, 6);
+      emit(title, 20, "bold", 0, 6);
     } else if (/^##\s+/.test(t)) {
       if (y > pageH * 0.78) nextPage();
       emit(strip(t.replace(/^##\s+/, "")), 15, "bold", 4, 3);
@@ -115,6 +142,44 @@ async function build(JsPDF: Jspdf, markdown: string, opts: IngramOpts, gutterMm:
     }
   }
   folio(); // last body page
+
+  // ── Fill the reserved table of contents (mirrored margins per page) ──
+  if (tocPages > 0) {
+    let idx = 0;
+    for (let p = 0; p < tocPages; p++) {
+      const tocPageNo = 3 + p;
+      pdf.setPage(tocPageNo);
+      const isRecto = tocPageNo % 2 === 1;
+      const leftX = isRecto ? gutterMm : out;
+      const rightX = pageW - (isRecto ? out : gutterMm);
+      const cW = pageW - gutterMm - out;
+      let ty = mTop;
+      if (p === 0) {
+        pdf.setFont(FONT, "bold"); pdf.setFontSize(18); pdf.setTextColor(20);
+        pdf.text("Contents", pageW / 2, ty, { align: "center" });
+        ty += 16;
+      }
+      pdf.setFont(FONT, "normal"); pdf.setFontSize(11); pdf.setTextColor(40);
+      const dotW = pdf.getTextWidth(".");
+      for (let k = 0; k < perTocPage && idx < chapterStarts.length; k++, idx++) {
+        const e = chapterStarts[idx];
+        const num = String(e.folio);
+        const numW = pdf.getTextWidth(num);
+        const tt = (pdf.splitTextToSize(e.title, cW - numW - 8) as string[])[0] ?? e.title;
+        pdf.text(tt, leftX, ty);
+        pdf.text(num, rightX, ty, { align: "right" });
+        const sX = leftX + pdf.getTextWidth(tt) + 2;
+        const eX = rightX - numW - 2;
+        if (eX > sX && dotW > 0) {
+          pdf.setTextColor(175);
+          pdf.text(".".repeat(Math.max(0, Math.floor((eX - sX) / dotW))), sX, ty);
+          pdf.setTextColor(40);
+        }
+        ty += tocLineH;
+      }
+    }
+  }
+
   return { pdf, pages: pageNo };
 }
 
