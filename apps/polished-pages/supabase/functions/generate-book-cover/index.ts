@@ -66,7 +66,9 @@ Deno.serve(async (req) => {
     if (!resp.ok) {
       const detail = await resp.text().catch(() => "");
       console.error("OpenAI image error", resp.status, detail.slice(0, 400));
-      return new Response(JSON.stringify({ error: `Image generation failed (${resp.status}).` }), {
+      let reason = "";
+      try { reason = JSON.parse(detail)?.error?.message ?? ""; } catch { /* non-JSON body */ }
+      return new Response(JSON.stringify({ error: reason ? `Cover generation failed: ${reason}` : `Cover generation failed (${resp.status}).` }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
