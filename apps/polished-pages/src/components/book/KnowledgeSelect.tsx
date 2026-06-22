@@ -3,15 +3,17 @@ import { BrainCircuit, FileText } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { fetchPlanStatus } from "@/lib/session";
 import { planAtLeast } from "@/lib/plans";
-import { listKnowledgeBases, listKnowledgeDocs, buildGenerationKnowledge, type KnowledgeBase, type KnowledgeDoc } from "@/lib/knowledge";
+import { listKnowledgeBases, listKnowledgeDocs, type KnowledgeBase, type KnowledgeDoc } from "@/lib/knowledge";
 import type { BookKnowledge } from "@/components/book/KnowledgePanel";
+
+// The raw selection — the studio builds the final knowledge at generation time
+// with a query, so reference documents are retrieved by vector search.
+export interface KnowledgeSelection { rules: BookKnowledge | null; docIds: string[] }
 
 // Compact picker to apply a saved Knowledge Base (rules/terminology/forbidden)
 // and reference documents to a generation in the storybook / educational
-// studios. Enterprise Plus only, shown only when the user has bases or docs. It
-// emits the fully-built knowledge (base rules + the selected documents' text
-// folded in) so the studio can pass it straight to generation.
-const KnowledgeSelect = ({ onChange }: { onChange: (k: BookKnowledge | null) => void }) => {
+// studios. Enterprise Plus only, shown only when the user has bases or docs.
+const KnowledgeSelect = ({ onChange }: { onChange: (sel: KnowledgeSelection) => void }) => {
   const [allowed, setAllowed] = useState(false);
   const [bases, setBases] = useState<KnowledgeBase[]>([]);
   const [docs, setDocs] = useState<KnowledgeDoc[]>([]);
@@ -29,11 +31,9 @@ const KnowledgeSelect = ({ onChange }: { onChange: (k: BookKnowledge | null) => 
     }).catch(() => {});
   }, []);
 
-  // Rebuild and emit whenever the base or selected documents change.
-  const emit = async (nextBaseId: string, nextDocIds: string[]) => {
+  const emit = (nextBaseId: string, nextDocIds: string[]) => {
     const b = bases.find((x) => x.id === nextBaseId);
-    const rules = b ? { rules: b.rules, terminology: b.terminology, forbidden: b.forbidden } : null;
-    onChange(await buildGenerationKnowledge(rules, nextDocIds));
+    onChange({ rules: b ? { rules: b.rules, terminology: b.terminology, forbidden: b.forbidden } : null, docIds: nextDocIds });
   };
 
   if (!allowed || (bases.length === 0 && docs.length === 0)) return null;
