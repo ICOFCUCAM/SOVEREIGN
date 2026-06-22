@@ -25,14 +25,15 @@ async function uploadImage(uid: string, folder: string, name: string, dataUrl: s
   return supabase.storage.from("polished-media").getPublicUrl(path).data.publicUrl;
 }
 
-// Persist an illustrated picture book: upload any inline (data-URL) images to the
-// per-user media bucket, then store the book with image URLs so the document row
-// stays small. Restorable from the Library.
-export async function savePictureBook(book: PictureBookData, opts: PictureBookSaveOpts): Promise<void> {
+// Upload any inline (data-URL) images in a picture book to the per-user media
+// bucket and return a copy whose images are stable URLs, so document rows stay
+// small. Images that are already URLs are left as-is. Shared by save and by
+// localized-edition creation (which reuses the parent's uploaded URLs).
+export async function uploadBookImages(book: PictureBookData, variant: PictureVariant): Promise<PictureBookData> {
   const { data: u } = await supabase.auth.getUser();
   const uid = u.user?.id;
   if (!uid) throw new Error("Sign in to save.");
-  const folder = `${opts.variant}-${(crypto.randomUUID?.() ?? Date.now().toString(36))}`;
+  const folder = `${variant}-${(crypto.randomUUID?.() ?? Date.now().toString(36))}`;
 
   const coverImage = isDataUrl(book.coverImage) ? await uploadImage(uid, folder, "cover", book.coverImage) : (book.coverImage ?? null);
   const pages: PictureBookData["pages"] = [];
@@ -41,9 +42,13 @@ export async function savePictureBook(book: PictureBookData, opts: PictureBookSa
     const image = isDataUrl(p.image) ? await uploadImage(uid, folder, `p${i}`, p.image) : (p.image ?? null);
     pages.push({ text: p.text, image });
   }
+  return { title: book.title, dedication: book.dedication, coverImage, pages };
+}
 
-  const stored: PictureBookData = { title: book.title, dedication: book.dedication, coverImage, pages };
-  await saveDocument({
+// Persist an illustrated picture book to the Library and return its document id.
+export async function savePictureBook(book: PictureBookData, opts: PictureBookSaveOpts): Promise<string> {
+  const stored = await uploadBookImages(book, opts.variant);
+  return saveDocument({
     kind: "storybook",
     title: book.title || (opts.variant === "coloring" ? "Coloring book" : "Storybook"),
     payload: { variant: opts.variant, pageAspect: opts.pageAspect, showText: opts.showText, book: stored },

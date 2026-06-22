@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Sparkles, Loader2, ArrowLeft, ClipboardList, Check, ChevronRight, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,23 @@ import BookExportPanel from "@/components/book/BookExportPanel";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
 import CountryDatalist from "@/components/app/CountryDatalist";
 import LanguageDatalist from "@/components/app/LanguageDatalist";
+import LocalizePanel from "@/components/app/LocalizePanel";
+import { localizeMarkdown, markdownEdition } from "@/lib/localize";
+import { saveDocument } from "@/lib/documents";
 import { saveAssessment } from "@/lib/assessment-bank";
 import { logAiActivity } from "@/lib/ai-activity-log";
 
 // Document types that belong in the reusable Assessment Bank.
 const BANKABLE = new Set<SchoolDocType>(["quiz", "exam", "assessment", "worksheet", "answer-key", "marking-guide", "homework-pack", "revision", "exam-prep"]);
+
+// Auto-save the studio's inputs + generated documents to localStorage (text
+// only — no images here) so a refresh, crash or accidental close never loses
+// generated curriculum/packs. One draft per studio (keyed by badge).
+interface SchoolDraft { vals: Record<string, string>; multi: Record<string, string[]>; docs: Record<string, string> | null; tab: SchoolDocType }
+const draftKey = (badge: string) => `pp:draft:school:${badge}`;
+const readSchoolDraft = (badge: string): Partial<SchoolDraft> | null => {
+  try { const s = localStorage.getItem(draftKey(badge)); return s ? (JSON.parse(s) as Partial<SchoolDraft>) : null; } catch { return null; }
+};
 
 export interface SchoolField {
   key: keyof SchoolInput;
@@ -44,16 +56,38 @@ export interface SchoolStudioConfig {
 
 const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
   const { toast } = useToast();
+  // Restore any saved draft synchronously (no empty-flash, no clobber).
+  const restored = useRef(readSchoolDraft(config.badge)).current;
   const [vals, setVals] = useState<Record<string, string>>(() =>
-    Object.fromEntries(config.fields.filter((f) => f.type === "select").map((f) => [f.key as string, f.options?.[0] ?? ""])));
-  const [multi, setMulti] = useState<Record<string, string[]>>({});
+    restored?.vals ?? Object.fromEntries(config.fields.filter((f) => f.type === "select").map((f) => [f.key as string, f.options?.[0] ?? ""])));
+  const [multi, setMulti] = useState<Record<string, string[]>>(restored?.multi ?? {});
   const [pick, setPick] = useState<SchoolDocType>(config.parts[0].type);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
-  const [docs, setDocs] = useState<Record<string, string> | null>(null);
-  const [tab, setTab] = useState<SchoolDocType>(config.parts[0].type);
+  const [docs, setDocs] = useState<Record<string, string> | null>(restored?.docs ?? null);
+  const [tab, setTab] = useState<SchoolDocType>(restored?.tab && config.parts.some((p) => p.type === restored.tab) ? restored.tab : config.parts[0].type);
+
+  // Persist inputs + generated docs (debounced) for crash/refresh recovery.
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      try { localStorage.setItem(draftKey(config.badge), JSON.stringify({ vals, multi, docs, tab })); } catch { /* quota / private mode */ }
+    }, 500);
+    return () => window.clearTimeout(t);
+  }, [vals, multi, docs, tab, config.badge]);
+
+  useEffect(() => {
+    if (restored?.docs && Object.keys(restored.docs).length > 0) {
+      toast({ title: "Recovered your work", description: `Your ${config.badge} draft was restored — pick up where you left off.` });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [banking, setBanking] = useState(false);
   const [bankedTab, setBankedTab] = useState<SchoolDocType | null>(null);
+  // Saved library doc id per generated document (tab) — the parent that language
+  // editions link to. Ref mirror so the localize flow reads it synchronously.
+  const [savedIds, setSavedIds] = useState<Record<string, string>>({});
+  const savedIdsRef = useRef<Record<string, string>>({});
+  const markDocSaved = (t: string, id: string) => { savedIdsRef.current[t] = id; setSavedIds((m) => ({ ...m, [t]: id })); };
 
   const addToBank = async (content: string, docType: SchoolDocType, title: string) => {
     setBanking(true);
@@ -78,6 +112,7 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
 
   const run = async () => {
     setGenError(null);
+    savedIdsRef.current = {}; setSavedIds({});
     const parts = config.mode === "single" ? config.parts.filter((p) => p.type === pick) : config.parts;
     setProgress({ done: 0, total: parts.length });
     const out: Record<string, string> = {};
@@ -107,6 +142,20 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
     const present = config.parts.filter((p) => docs[p.type] != null);
     const current = docs[tab] ?? "";
     const docTitle = `${titleBase} — ${config.parts.find((p) => p.type === tab)?.label}`;
+    const docPreview = `${config.previewLabel} · ${vals.subject ?? ""} ${vals.grade ?? ""}`.trim();
+
+    // Persist the current document on demand so its language editions link to it.
+    const ensureDocSaved = async (): Promise<string | null> => {
+      const existing = savedIdsRef.current[tab];
+      if (existing) return existing;
+      const id = await saveDocument({ kind: "book", title: docTitle, payload: { markdown: current, title: docTitle }, preview: docPreview });
+      markDocSaved(tab, id);
+      return id;
+    };
+    const buildDocEdition = async ({ language, mode, culture, onProgress }: { language: string; mode: "translate" | "localize"; culture?: string; onProgress?: (done: number, total: number) => void }) => {
+      const body = await localizeMarkdown(current, { language, mode, culture, onProgress });
+      return markdownEdition(docTitle, body, language, mode, culture);
+    };
     return (
       <div className="min-h-screen bg-background">
         <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
@@ -120,7 +169,8 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <SaveToLibrary kind="book" title={docTitle} payload={{ markdown: current, title: docTitle }} preview={`${config.previewLabel} · ${vals.subject ?? ""} ${vals.grade ?? ""}`} />
+              <SaveToLibrary key={tab} kind="book" title={docTitle} payload={{ markdown: current, title: docTitle }} preview={docPreview}
+                onSaved={(id) => markDocSaved(tab, id)} savedExternally={!!savedIds[tab]} externalId={savedIds[tab] ?? null} />
               {BANKABLE.has(tab) && (
                 <Button variant="heroOutline" size="sm" disabled={banking || bankedTab === tab} onClick={() => addToBank(current, tab, docTitle)}>
                   {bankedTab === tab ? <Check className="w-4 h-4 mr-1 text-green-600" /> : banking ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <ClipboardList className="w-4 h-4 mr-1" />}
@@ -134,6 +184,19 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
         <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
           <BookExportPanel bookTitle={docTitle} fullContent={current} chapterCount={0} />
           <div className="mt-6"><BookReader content={current} title={docTitle} onContentChange={(s) => setDocs((d) => (d ? { ...d, [tab]: s } : d))} /></div>
+
+          <div className="mt-10 border-t border-border/60 pt-8">
+            <h2 className="font-serif text-xl font-bold mb-1">Localize this {config.previewLabel.toLowerCase()}</h2>
+            <p className="text-sm text-muted-foreground font-sans mb-5">Translate or culturally adapt the open document into other languages for your classrooms — each edition links to it and lands in your Library.</p>
+            <LocalizePanel
+              parentId={savedIds[tab] ?? null}
+              ensureSaved={ensureDocSaved}
+              kind="book"
+              sourceTitle={docTitle}
+              hasContent={!!current.trim()}
+              buildEdition={buildDocEdition}
+            />
+          </div>
         </div>
       </div>
     );

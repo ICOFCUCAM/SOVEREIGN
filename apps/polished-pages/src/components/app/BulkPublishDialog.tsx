@@ -27,7 +27,7 @@ const BulkPublishDialog = ({ docs, onDone, trigger }: { docs: DocSummary[]; onDo
   const [done, setDone] = useState(0);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { if (open) { fetchPlanStatus().then((s) => setIsPro(s?.plan === "pro")).catch(() => {}); myOrganizations().then((l) => setOrgs(l.filter((o) => can.edit(o.role)))).catch(() => {}); } }, [open]);
+  useEffect(() => { if (open) { fetchPlanStatus().then((s) => setIsPro(!!s?.plan && s.plan !== "free")).catch(() => {}); myOrganizations().then((l) => setOrgs(l.filter((o) => can.edit(o.role)))).catch(() => {}); } }, [open]);
   useEffect(() => { setColId(""); if (!orgId) { setCols([]); return; } orgCollections(orgId).then(setCols).catch(() => setCols([])); }, [orgId]);
 
   const priceCents = Math.max(0, Math.round(parseFloat(price || "0") * 100)) || 0;

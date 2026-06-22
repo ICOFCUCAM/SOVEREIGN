@@ -47,7 +47,7 @@ const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle }: { ti
   const [batchImg, setBatchImg] = useState<Record<string, string>>({});
 
   useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
-  const isPro = status?.plan === "pro";
+  const isPro = !!status?.plan && status.plan !== "free"; // any paid tier
 
   const coverFetch = async (body: Record<string, unknown>) => {
     const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-book-cover`, {

@@ -5,7 +5,7 @@ import type { CvData } from "@/lib/cv-data";
 // reached only through the public.polished_* SECURITY DEFINER RPCs, which scope
 // every row to auth.uid(). The generated Database types don't know these RPCs,
 // so we cast (same pattern as session.ts).
-export type DocKind = "cv" | "cover-letter" | "book" | "tailored" | "cover" | "storybook" | "illustration";
+export type DocKind = "cv" | "cover-letter" | "book" | "tailored" | "cover" | "storybook" | "illustration" | "audiobook";
 
 export interface DocSummary {
   id: string;
@@ -24,6 +24,11 @@ export interface DocSummary {
   view_count?: number;
   download_count?: number;
   created_at: string;
+  // Project model: editions link to a source document via parent_document_id.
+  parent_document_id?: string | null;
+  edition_language?: string | null;
+  edition_culture?: string | null;
+  updated_at?: string;
 }
 
 export interface CvPayload { data: CvData }
@@ -40,6 +45,7 @@ export async function saveDocument(input: {
   template?: string | null;
   payload: unknown;
   preview?: string;
+  parent?: string | null; // link as a project asset under a parent document
 }): Promise<string> {
   const { data, error } = await rpc().rpc("polished_save_document", {
     p_kind: input.kind,
@@ -47,6 +53,7 @@ export async function saveDocument(input: {
     p_template: input.template ?? null,
     p_payload: input.payload,
     p_preview: input.preview ?? null,
+    p_parent: input.parent ?? null,
   });
   if (error) throw new Error(error.message || "Could not save the document.");
   return data as string;
@@ -182,7 +189,25 @@ export async function recordDownload(token: string): Promise<void> {
   try { await rpc().rpc("polished_record_download", { p_token: token }); } catch { /* analytics is best-effort */ }
 }
 
-export interface SharedDoc { kind: DocKind; title: string; template: string | null; payload: unknown; author_name?: string | null; license?: string | null }
+export interface SharedDoc {
+  kind: DocKind;
+  title: string;
+  template: string | null;
+  payload: unknown;
+  author_name?: string | null;
+  author_verified?: boolean;
+  license?: string | null;
+  listed?: boolean;
+  category?: string | null;
+  price_cents?: number;
+  view_count?: number;
+  download_count?: number;
+  edition_language?: string | null;
+  created_at?: string;
+  org_slug?: string | null;
+  org_name?: string | null;
+  org_verified?: boolean;
+}
 // Public read of a shared document by token (no auth required).
 export async function getShared(token: string): Promise<SharedDoc | null> {
   const { data, error } = await rpc().rpc("polished_get_shared", { p_token: token });

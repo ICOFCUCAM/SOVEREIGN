@@ -120,6 +120,47 @@ export interface WankongListing {
   updated_at: string;
 }
 
+// Publish a saved audiobook (its chapter audio URLs + metadata) to the Wankong
+// store via the publish-audiobook-to-wankong edge function. Audiobooks are an
+// Enterprise Plus capability; the function holds the bridge secret and matches
+// the seller by their verified email.
+export async function publishAudiobookToWankong(input: {
+  docId: string;
+  title: string;
+  author?: string;
+  description?: string;
+  priceCents?: number;
+  language?: string;
+  voice?: string;
+  chapters: { title: string; url: string }[];
+}): Promise<WankongPublishResult> {
+  if (input.chapters.length === 0) throw new Error("This audiobook has no chapters to publish.");
+  const { data, error } = await supabase.functions.invoke("publish-audiobook-to-wankong", {
+    body: {
+      docId: input.docId,
+      title: input.title,
+      author: input.author ?? null,
+      description: input.description ?? "",
+      priceCents: Math.max(0, Math.round(input.priceCents || 0)),
+      language: input.language || "en",
+      voice: input.voice ?? null,
+      chapters: input.chapters,
+    },
+  });
+  if (error) {
+    let message = error.message || "Could not publish to Wankong.";
+    try {
+      const ctx = (error as unknown as { context?: Response }).context;
+      if (ctx && typeof ctx.json === "function") {
+        const body = await ctx.json();
+        if (body?.error) message = body.error;
+      }
+    } catch { /* keep default */ }
+    throw new Error(message);
+  }
+  return (data ?? {}) as WankongPublishResult;
+}
+
 // The current Wankong listing for a document (for library status), or null.
 export async function wankongListing(docId: string): Promise<WankongListing | null> {
   const rpc = supabase as unknown as { rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> };

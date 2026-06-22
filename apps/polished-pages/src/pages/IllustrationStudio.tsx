@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ImagePlus, Sparkles, Loader2, Download, Save, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,15 @@ import { useToast } from "@/hooks/use-toast";
 import { generateIllustration } from "@/lib/storybook";
 import { uploadDataUrl } from "@/lib/media-upload";
 import { saveDocument } from "@/lib/documents";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 
 type Orient = "square" | "portrait" | "landscape";
+
+// The last generated image is cached separately and best-effort (a single image
+// can be large): if it exceeds the localStorage quota it's silently dropped,
+// while the prompt/style/orientation inputs always persist.
+const IMG_KEY = "pp:draft:illustration.image";
+const readCachedImage = (): string | null => { try { return localStorage.getItem(IMG_KEY); } catch { return null; } };
 const STYLES = [
   { id: "picture", label: "Picture", art: "Soft, warm children's picture-book illustration, gentle colour palette.", lineArt: false },
   { id: "diagram", label: "Diagram", art: "Clean, clearly-labelled educational diagram, flat vector style, simple colours, school textbook quality.", lineArt: false },
@@ -23,12 +30,23 @@ const STYLES = [
 
 const IllustrationStudio = () => {
   const { toast } = useToast();
-  const [prompt, setPrompt] = useState("");
-  const [styleId, setStyleId] = useState<string>("diagram");
-  const [orient, setOrient] = useState<Orient>("landscape");
+  const [prompt, setPrompt] = usePersistentState("illustration.prompt", "");
+  const [styleId, setStyleId] = usePersistentState<string>("illustration.style", "diagram");
+  const [orient, setOrient] = usePersistentState<Orient>("illustration.orient", "landscape");
   const [busy, setBusy] = useState(false);
-  const [image, setImage] = useState<string | null>(null);
+  const restoredImage = useRef(readCachedImage()).current;
+  const [image, setImage] = useState<string | null>(restoredImage);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+
+  // Best-effort cache of the generated image; quota failures drop only the image.
+  useEffect(() => {
+    try { if (image) localStorage.setItem(IMG_KEY, image); else localStorage.removeItem(IMG_KEY); }
+    catch { try { localStorage.removeItem(IMG_KEY); } catch { /* ignore */ } }
+  }, [image]);
+  useEffect(() => {
+    if (restoredImage) toast({ title: "Recovered your illustration", description: "Your last illustration and prompt were restored." });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const style = STYLES.find((s) => s.id === styleId) ?? STYLES[0];
 

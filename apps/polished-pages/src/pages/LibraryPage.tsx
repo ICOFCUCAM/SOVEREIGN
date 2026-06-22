@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink, Building2, Sparkles } from "lucide-react";
+import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink, Building2, Sparkles, Languages, Headphones } from "lucide-react";
+import { isoFor } from "@/lib/languages";
+import type { AudiobookData } from "@/lib/audiobook";
 import PublishDialog from "@/components/app/PublishDialog";
 import BulkPublishDialog from "@/components/app/BulkPublishDialog";
 import AddToCollection from "@/components/app/AddToCollection";
@@ -13,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, setTemplateFlag, useTemplate as applyTemplate, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
-import { wankongListingsByDoc, type WankongListing } from "@/lib/wankong";
+import { wankongListingsByDoc, publishAudiobookToWankong, WANKONG_STORE_URL, type WankongListing } from "@/lib/wankong";
 import { documentOrgMap, type DocOrgInfo } from "@/lib/organizations";
 import SpineMark from "@/components/brand/SpineMark";
 import TagEditor from "@/components/app/TagEditor";
@@ -34,6 +36,7 @@ const KIND_META: Record<DocKind, { label: string; icon: typeof FileText }> = {
   cover: { label: "Book cover", icon: ImageIcon },
   storybook: { label: "Storybook", icon: BookHeart },
   illustration: { label: "Illustration", icon: ImageIcon },
+  audiobook: { label: "Audiobook", icon: Headphones },
 };
 
 type Opened =
@@ -42,7 +45,8 @@ type Opened =
   | { kind: "book"; markdown: string; title: string }
   | { kind: "cover"; front?: string; back?: string; title: string }
   | { kind: "image"; src: string; title: string }
-  | { kind: "picturebook"; book: PictureBookData; pageAspect: string; showText: boolean; title: string };
+  | { kind: "picturebook"; book: PictureBookData; pageAspect: string; showText: boolean; title: string }
+  | { kind: "audiobook"; chapters: { title: string; url: string }[]; voice: string; title: string };
 
 const LibraryPage = () => {
   const { toast } = useToast();
@@ -63,6 +67,25 @@ const LibraryPage = () => {
   const [wankong, setWankong] = useState<Record<string, WankongListing>>({});
   const [orgMap, setOrgMap] = useState<Record<string, DocOrgInfo>>({});
   const [orgFilter, setOrgFilter] = useState("");
+  const [wkBusy, setWkBusy] = useState(false);
+
+  // Publish an opened audiobook to the Wankong store (its chapter audio URLs).
+  const publishAudiobookWk = async (ab: { title: string; voice: string; chapters: { title: string; url: string }[] }) => {
+    if (!openedId) return;
+    setWkBusy(true);
+    try {
+      const res = await publishAudiobookToWankong({ docId: openedId, title: ab.title, voice: ab.voice, chapters: ab.chapters });
+      if (res.needs_account) {
+        toast({ title: "Create a Wankong account", description: "Use the same email as here, then publish again." });
+        window.open(WANKONG_STORE_URL, "_blank", "noopener");
+      } else {
+        setWankong((w) => ({ ...w, [openedId]: { channel: "wankong", external_id: res.productId ?? null, external_url: res.url ?? null, status: res.status ?? "live", updated_at: new Date().toISOString() } }));
+        toast({ title: "Published to Wankong", description: "Your audiobook is live in the store." });
+      }
+    } catch (e) {
+      toast({ title: "Could not publish to Wankong", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    } finally { setWkBusy(false); }
+  };
 
   const load = () => { listDocuments().then(setDocs).catch((e) => { toast({ title: "Could not load library", description: e.message, variant: "destructive" }); setDocs([]); }); };
   useEffect(load, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -110,6 +133,9 @@ const LibraryPage = () => {
         setOpened({ kind: "image", src: String(p.image ?? ""), title: d.title });
       } else if (d.kind === "storybook") {
         setOpened({ kind: "picturebook", book: p.book as PictureBookData, pageAspect: String(p.pageAspect ?? "16/9"), showText: p.showText !== false, title: d.title });
+      } else if (d.kind === "audiobook") {
+        const ab = p as unknown as AudiobookData;
+        setOpened({ kind: "audiobook", chapters: ab.chapters ?? [], voice: String(ab.voice ?? ""), title: d.title });
       } else {
         // cv and tailored both restore a CvData document
         setOpened({ kind: "cv", data: p.data as CvData, template: (row.template ?? undefined) || (p.template as string | undefined) });
@@ -325,6 +351,42 @@ const LibraryPage = () => {
         </div>
         <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
           <div className="overflow-hidden rounded-xl border border-border shadow-premium bg-white"><img src={opened.src} alt={opened.title} className="w-full" /></div>
+        </div>
+      </div>
+    );
+  }
+  if (opened?.kind === "audiobook") {
+    const ab = opened;
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="sticky top-14 z-40 border-b border-border/50 bg-background/85 backdrop-blur-lg">
+          <div className="container flex items-center justify-between h-12 px-6">
+            <span className="truncate text-sm font-medium text-muted-foreground font-sans">{ab.title}</span>
+            <div className="flex items-center gap-2">
+              {wankong[openedId ?? ""]?.status === "live" ? (
+                <span className="inline-flex items-center gap-1 rounded-md bg-publishing/15 px-2 py-1 text-xs font-medium text-publishing font-sans"><Check className="h-3.5 w-3.5" /> Live on Wankong</span>
+              ) : (
+                <Button variant="heroOutline" size="sm" disabled={wkBusy} onClick={() => publishAudiobookWk(ab)}>
+                  {wkBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Store className="w-4 h-4 mr-1" />} Publish to Wankong
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={() => setOpened(null)} className="text-muted-foreground"><ArrowLeft className="w-4 h-4 mr-2" /> Library</Button>
+            </div>
+          </div>
+        </div>
+        <div className="container max-w-3xl mx-auto px-6 pt-8 pb-16">
+          <div className="mb-5 flex items-center gap-2"><Headphones className="h-5 w-5 text-primary" /><h1 className="font-serif text-2xl font-bold">{ab.title}</h1></div>
+          {ab.voice && <p className="mb-5 text-sm text-muted-foreground font-sans">Narrated by the “{ab.voice}” voice · {ab.chapters.length} chapter{ab.chapters.length === 1 ? "" : "s"}</p>}
+          <div className="space-y-2">
+            {ab.chapters.map((c, i) => (
+              <Card key={i} className="border-border"><CardContent className="flex flex-wrap items-center gap-3 p-3.5">
+                <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                <span className="min-w-0 flex-1 truncate font-sans text-sm font-medium">{c.title}</span>
+                <audio controls preload="none" src={c.url} className="h-9 max-w-[260px]" />
+                <a href={c.url} download className="inline-flex items-center rounded-md border border-border px-2 py-1 text-muted-foreground hover:text-primary"><Download className="h-3.5 w-3.5" /></a>
+              </CardContent></Card>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -576,10 +638,28 @@ const LibraryPage = () => {
             </div>
           );
         }
+        // Project model: nest language editions under their source document so
+        // each book reads as one project. An edition whose source isn't in the
+        // current filtered view is promoted to a top-level card so nothing hides.
+        const inView = new Set(filtered.map((d) => d.id));
+        const editionsByParent = new Map<string, DocSummary[]>();
+        const audiobooksByParent = new Map<string, DocSummary[]>();
+        const topLevel: DocSummary[] = [];
+        for (const d of filtered) {
+          if (d.parent_document_id && inView.has(d.parent_document_id)) {
+            const map = d.kind === "audiobook" ? audiobooksByParent : editionsByParent;
+            const arr = map.get(d.parent_document_id) ?? [];
+            arr.push(d); map.set(d.parent_document_id, arr);
+          } else {
+            topLevel.push(d);
+          }
+        }
         return (
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {filtered.map((d) => {
+            {topLevel.map((d) => {
               const meta = KIND_META[d.kind] ?? KIND_META.cv;
+              const editions = editionsByParent.get(d.id) ?? [];
+              const audiobooks = audiobooksByParent.get(d.id) ?? [];
               return (
                 <Card key={d.id} className={`group border-border transition-colors hover:border-primary/40 ${selected.has(d.id) ? "border-primary/60 bg-primary/5" : ""}`}>
                   <CardContent className="flex items-start gap-3 p-4">
@@ -640,6 +720,48 @@ const LibraryPage = () => {
                           {orgMap[d.id].listed && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-marketplace/10 px-2 py-0.5 font-medium text-marketplace"><Store className="h-3 w-3" /> Marketplace</span>
                           )}
+                        </div>
+                      )}
+                      {editions.length > 0 && (
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] font-sans">
+                          <span className="inline-flex items-center gap-1 text-muted-foreground"><Languages className="h-3 w-3" /> {editions.length} edition{editions.length === 1 ? "" : "s"}</span>
+                          {editions.map((e) => {
+                            const iso = e.edition_language ? isoFor(e.edition_language) : null;
+                            return (
+                              <span key={e.id} className="inline-flex items-center overflow-hidden rounded-full border border-border bg-card text-muted-foreground">
+                                <button onClick={(ev) => { ev.stopPropagation(); open(e); }} disabled={opening === e.id}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 capitalize transition-colors hover:text-primary"
+                                  title={`Open ${e.edition_language ?? "edition"}${e.edition_culture ? ` · ${e.edition_culture}` : ""}${e.listed ? " (published)" : ""}`}>
+                                  {opening === e.id && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+                                  {iso && iso !== "en" && <span className="uppercase">{iso}</span>}
+                                  {e.edition_language ?? "Edition"}
+                                  {e.listed && <Store className="h-2.5 w-2.5 text-marketplace" />}
+                                </button>
+                                <button onClick={(ev) => { ev.stopPropagation(); remove(e.id); }} title="Delete this edition"
+                                  className="border-l border-border px-1 py-0.5 text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive">
+                                  <X className="h-2.5 w-2.5" />
+                                </button>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {audiobooks.length > 0 && (
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] font-sans">
+                          <span className="inline-flex items-center gap-1 text-muted-foreground"><Headphones className="h-3 w-3" /> Audiobook</span>
+                          {audiobooks.map((a) => (
+                            <span key={a.id} className="inline-flex items-center overflow-hidden rounded-full border border-border bg-card text-muted-foreground">
+                              <button onClick={(ev) => { ev.stopPropagation(); open(a); }} disabled={opening === a.id}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 transition-colors hover:text-primary" title="Open audiobook">
+                                {opening === a.id && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+                                Listen{a.listed && <Store className="h-2.5 w-2.5 text-marketplace" />}
+                              </button>
+                              <button onClick={(ev) => { ev.stopPropagation(); remove(a.id); }} title="Delete this audiobook"
+                                className="border-l border-border px-1 py-0.5 text-muted-foreground/60 transition-colors hover:bg-destructive/10 hover:text-destructive">
+                                <X className="h-2.5 w-2.5" />
+                              </button>
+                            </span>
+                          ))}
                         </div>
                       )}
                       {(d.tags ?? []).length > 0 && (

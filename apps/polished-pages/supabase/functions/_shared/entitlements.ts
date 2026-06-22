@@ -48,6 +48,7 @@ export function getUserContext(req: Request): { id: string; email?: string } {
 
 const PLAN_LABEL: Record<string, string> = {
   creator: "Creator", professional: "Professional", publisher: "Publisher Pro", business: "Business",
+  enterprise: "Enterprise", "enterprise-plus": "Enterprise Plus",
 };
 
 // Gate a Professional+ studio: throws 402 if the user's plan is below the

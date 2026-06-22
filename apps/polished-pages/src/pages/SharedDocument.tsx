@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Sparkles, Loader2, BadgeCheck } from "lucide-react";
+import { Sparkles, Loader2, BadgeCheck, Building2, Eye, Download } from "lucide-react";
 import { getShared, recordView, type SharedDoc } from "@/lib/documents";
-import { getAuthorProfile } from "@/lib/profiles";
 import { BRAND } from "@/lib/tools";
 import type { CvData } from "@/lib/cv-data";
 import BookReader from "@/components/book/BookReader";
@@ -11,25 +10,27 @@ import PictureBookView, { type PictureBookData } from "@/components/children/Pic
 import ReviewsPanel from "@/components/app/ReviewsPanel";
 import CreateCtaBand from "@/components/app/CreateCtaBand";
 
-// Public, read-only view of a shared document (the marketplace foundation:
-// publish a resource, share the link, anyone can view and export it).
+// Public, read-only view of a shared document. When the work is listed on the
+// marketplace it reads as a proper listing — title hero, price, category,
+// author/institution provenance and reach — above the live preview. Private
+// share links (listed = false) keep the minimal document-viewer framing.
+const priceLabel = (cents?: number) => ((cents ?? 0) > 0 ? `$${((cents ?? 0) / 100).toFixed(2)}` : "Free to read");
+
 const SharedDocument = () => {
   const { token } = useParams();
   const [doc, setDoc] = useState<SharedDoc | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "missing">("loading");
-  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
     if (!token) { setState("missing"); return; }
     getShared(token).then((d) => {
-      if (d) {
-        setDoc(d); setState("ready"); recordView(token);
-        if (d.author_name) getAuthorProfile(d.author_name).then((a) => setVerified(!!a?.verified)).catch(() => {});
-      } else setState("missing");
+      if (d) { setDoc(d); setState("ready"); recordView(token); }
+      else setState("missing");
     }).catch(() => setState("missing"));
   }, [token]);
 
   const p = (doc?.payload ?? {}) as Record<string, unknown>;
+  const listed = !!doc?.listed;
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,7 +44,7 @@ const SharedDocument = () => {
                 <>
                   <span aria-hidden className="text-border">·</span>
                   <span className="shrink-0">by <Link to={`/catalog/author/${encodeURIComponent(doc.author_name)}`} className="font-medium text-foreground hover:text-primary hover:underline">{doc.author_name}</Link></span>
-                  {verified && <BadgeCheck className="h-4 w-4 shrink-0 text-primary" aria-label="Verified creator" />}
+                  {doc.author_verified && <BadgeCheck className="h-4 w-4 shrink-0 text-primary" aria-label="Verified creator" />}
                 </>
               )}
             </span>
@@ -62,12 +63,51 @@ const SharedDocument = () => {
         )}
         {state === "ready" && doc && (
           <>
+            {listed && (
+              <header className="mb-10 border-b border-border/60 pb-8">
+                <div className="flex flex-wrap items-center gap-2">
+                  {doc.category && <span className="eyebrow text-primary">{doc.category}</span>}
+                  {doc.edition_language && <span className="rounded-full border border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground font-sans">{doc.edition_language}</span>}
+                </div>
+                <h1 className="text-display mt-3 text-3xl font-bold md:text-[2.6rem] md:leading-[1.1]">{doc.title}</h1>
+                <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-sans text-muted-foreground">
+                  {doc.author_name && (
+                    <span className="inline-flex items-center gap-1.5">
+                      by <Link to={`/catalog/author/${encodeURIComponent(doc.author_name)}`} className="font-medium text-foreground hover:text-primary hover:underline">{doc.author_name}</Link>
+                      {doc.author_verified && <BadgeCheck className="h-4 w-4 text-primary" aria-label="Verified creator" />}
+                    </span>
+                  )}
+                  {doc.org_name && doc.org_slug && (
+                    <Link to={`/org/${doc.org_slug}`} className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-primary hover:underline">
+                      <Building2 className="h-4 w-4" /> {doc.org_name}
+                      {doc.org_verified && <BadgeCheck className="h-4 w-4 text-primary" aria-label="Verified institution" />}
+                    </Link>
+                  )}
+                  <span className="inline-flex items-center gap-1.5"><Eye className="h-4 w-4" /> {doc.view_count ?? 0} {(doc.view_count ?? 0) === 1 ? "view" : "views"}</span>
+                  {(doc.download_count ?? 0) > 0 && <span className="inline-flex items-center gap-1.5"><Download className="h-4 w-4" /> {doc.download_count} {doc.download_count === 1 ? "download" : "downloads"}</span>}
+                </div>
+                <div className="mt-6 flex flex-wrap items-center gap-3">
+                  <span className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">{priceLabel(doc.price_cents)}</span>
+                  {doc.license && <span className="text-xs text-muted-foreground font-sans">{doc.license}</span>}
+                </div>
+              </header>
+            )}
             {(doc.kind === "book" || doc.kind === "tailored") && typeof p.markdown === "string" ? (
               <BookReader content={String(p.markdown)} title={doc.title} />
             ) : doc.kind === "cv" && p.data ? (
               <PremiumCv data={p.data as CvData} template={doc.template ?? undefined} />
             ) : doc.kind === "storybook" && p.book ? (
               <PictureBookView book={p.book as PictureBookData} pageAspect={String(p.pageAspect ?? "16/9")} showText={p.showText !== false} />
+            ) : doc.kind === "audiobook" && Array.isArray(p.chapters) ? (
+              <div className="space-y-2">
+                {(p.chapters as { title: string; url: string }[]).map((c, i) => (
+                  <div key={i} className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3.5">
+                    <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium font-sans">{c.title}</span>
+                    <audio controls preload="none" src={c.url} className="h-9 max-w-[260px]" />
+                  </div>
+                ))}
+              </div>
             ) : (doc.kind === "cover" || doc.kind === "illustration") ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 {[p.front, p.back, p.image].filter(Boolean).map((src, i) => (
@@ -77,7 +117,7 @@ const SharedDocument = () => {
             ) : (
               <p className="text-muted-foreground font-sans">This document type can’t be previewed here.</p>
             )}
-            {doc.license && <p className="mt-6 text-center text-xs text-muted-foreground font-sans">License: {doc.license}</p>}
+            {doc.license && !listed && <p className="mt-6 text-center text-xs text-muted-foreground font-sans">License: {doc.license}</p>}
             {token && <ReviewsPanel token={token} />}
             <CreateCtaBand
               heading={`Create something like this with ${BRAND}`}
