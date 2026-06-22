@@ -5,7 +5,7 @@ import type { CatalogItem } from "@/lib/documents";
 // Polished Pages as an organization rather than a single account. All access is
 // through security-definer RPCs that enforce role permissions server-side.
 
-export type OrgType = "publisher" | "school" | "ngo" | "ministry" | "company";
+export type OrgType = "publisher" | "school" | "ngo" | "ministry" | "company" | "university";
 export type OrgRole = "owner" | "admin" | "editor" | "contributor" | "viewer";
 
 export const ORG_TYPES: { value: OrgType; label: string }[] = [
@@ -13,6 +13,7 @@ export const ORG_TYPES: { value: OrgType; label: string }[] = [
   { value: "school", label: "School / District" },
   { value: "ngo", label: "NGO" },
   { value: "ministry", label: "Ministry of Education" },
+  { value: "university", label: "University / College" },
   { value: "company", label: "Company" },
 ];
 
@@ -130,6 +131,26 @@ export const ORG_PRESENTATION: Record<OrgType, OrgPresentation> = {
       { name: "National curriculum", kind: "curriculum", hint: "Standard curriculum" },
       { name: "Regional curriculum", kind: "curriculum", hint: "Region-specific" },
       { name: "National program", kind: "program", hint: "A rollout initiative" },
+    ],
+  },
+  university: {
+    noun: "academic institution",
+    workspaceLine: "Organize courses, research, journals and a campus library.",
+    storefrontKicker: "University / College",
+    accent: ["hsl(231 55% 26%)", "hsl(222 60% 9%)"],
+    collectionKinds: ["curriculum", "series", "general"],
+    focus: [
+      { key: "education", label: "Courses & research" },
+      { key: "collections", label: "Library & journals" },
+      { key: "catalog", label: "Published works" },
+      { key: "members", label: "Faculty & staff" },
+    ],
+    modules: ["curriculum", "catalog", "repositories", "localization"],
+    repoTemplates: [
+      { name: "Courses", kind: "curriculum", hint: "Course materials" },
+      { name: "Research", kind: "general", hint: "Papers & monographs" },
+      { name: "Journals", kind: "series", hint: "A periodical series" },
+      { name: "Library", kind: "general", hint: "General collection" },
     ],
   },
   company: {
