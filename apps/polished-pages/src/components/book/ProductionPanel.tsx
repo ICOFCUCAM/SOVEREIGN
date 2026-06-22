@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle2, Circle, ClipboardCheck, Globe, Headphones } from "lucide-react";
+import { CheckCircle2, Circle, ClipboardCheck, Globe, Headphones, FileDown, BookOpen, Package, Sparkles, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { listDocuments, type DocSummary } from "@/lib/documents";
-import { TRIM_SIZES, PAPER_MM_PER_PAGE } from "@/lib/print-sizes";
+import { TRIM_SIZES, PAPER_MM_PER_PAGE, getTrim } from "@/lib/print-sizes";
+import { markdownToPrintPdf } from "@/lib/export-print-pdf";
+import { markdownToIngramSparkPdf } from "@/lib/export-ingramspark-pdf";
+import { markdownToEpub } from "@/lib/export-epub";
+import { getPublishingAdvice, type PublishingAdvice } from "@/lib/publishing-advisor";
 
 const MM_PER_IN = 25.4;
 const spineInches = (pages: number, paper?: string): string =>
@@ -27,7 +33,7 @@ export interface BookMeta {
 // The Book Production Center: a project-centric readiness view + the publishing
 // metadata that turns a manuscript into a distributable book.
 const ProductionPanel = ({
-  meta, setMeta, bookTitle, manuscriptComplete, coverDone, parentId,
+  meta, setMeta, bookTitle, manuscriptComplete, coverDone, parentId, content,
 }: {
   meta: BookMeta;
   setMeta: (m: BookMeta) => void;
@@ -35,8 +41,39 @@ const ProductionPanel = ({
   manuscriptComplete: boolean;
   coverDone: boolean;
   parentId: string | null;
+  content: string;
 }) => {
+  const { toast } = useToast();
   const [children, setChildren] = useState<DocSummary[] | null>(null);
+  const [exporting, setExporting] = useState<string | null>(null);
+  const [advice, setAdvice] = useState<PublishingAdvice | null>(null);
+  const [advising, setAdvising] = useState(false);
+
+  const trim = getTrim(meta.trimSize || "6x9");
+
+  // Reuse the existing export engine (the same one the Preview/Export Center
+  // uses) so output is identical — driven here by the project's metadata.
+  const runExport = async (fmt: "kdp" | "ingram" | "epub" | "all") => {
+    if (!content.trim()) { toast({ title: "Nothing to export yet", description: "Generate the manuscript first." }); return; }
+    setExporting(fmt);
+    const base = bookTitle || "book";
+    try {
+      if (fmt === "kdp" || fmt === "all") await markdownToPrintPdf(content, { title: bookTitle, trim }, `${base}-kdp-interior`);
+      if (fmt === "ingram" || fmt === "all") await markdownToIngramSparkPdf(content, { title: bookTitle, author: meta.author?.trim() || undefined, trim }, `${base}-ingramspark`);
+      if (fmt === "epub" || fmt === "all") await markdownToEpub(content, { title: bookTitle }, base);
+      if (fmt === "all") toast({ title: "Store bundle exported", description: "KDP + IngramSpark interiors + EPUB downloaded." });
+    } catch (e) {
+      toast({ title: "Export failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally { setExporting(null); }
+  };
+
+  const runAdvice = async () => {
+    if (!content.trim()) { toast({ title: "Generate the manuscript first" }); return; }
+    setAdvising(true);
+    try { setAdvice(await getPublishingAdvice({ title: bookTitle, content })); }
+    catch (e) { toast({ title: "Advisor failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" }); }
+    finally { setAdvising(false); }
+  };
 
   // The project's saved assets (language editions + audiobook) link back via
   // parent_document_id, so we can score readiness across the whole project.
@@ -148,6 +185,54 @@ const ProductionPanel = ({
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground font-sans">ISBN and publisher feed the cover’s barcode and imprint mark; trim size and page count size the spine and print wrap.</p>
+        </CardContent>
+      </Card>
+
+      {/* Print & store files — the same engine the Preview/Export Center uses,
+          driven by this project's trim + author. */}
+      <Card className="border-border">
+        <CardContent className="space-y-3 p-5">
+          <h3 className="font-serif text-base font-semibold">Print &amp; store files</h3>
+          <p className="text-[11px] text-muted-foreground font-sans">Paginated, selectable-text interiors at {trim.label}{meta.author ? ` · ${meta.author}` : ""}. Choose the interior design in the Preview tab.</p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="heroOutline" size="sm" disabled={exporting !== null} onClick={() => runExport("kdp")}>
+              {exporting === "kdp" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <FileDown className="mr-1.5 h-4 w-4" />} KDP interior
+            </Button>
+            <Button variant="heroOutline" size="sm" disabled={exporting !== null} onClick={() => runExport("ingram")}>
+              {exporting === "ingram" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <FileDown className="mr-1.5 h-4 w-4" />} IngramSpark interior
+            </Button>
+            <Button variant="heroOutline" size="sm" disabled={exporting !== null} onClick={() => runExport("epub")}>
+              {exporting === "epub" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <BookOpen className="mr-1.5 h-4 w-4" />} EPUB
+            </Button>
+            <Button variant="hero" size="sm" disabled={exporting !== null} onClick={() => runExport("all")} title="KDP + IngramSpark interiors + EPUB">
+              {exporting === "all" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Package className="mr-1.5 h-4 w-4" />} Store bundle
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Publishing Advisor — a go-to-market plan for this book. */}
+      <Card className="border-publishing/30 bg-publishing/[0.03]">
+        <CardContent className="space-y-3 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="flex items-center gap-2 font-serif text-base font-semibold"><Sparkles className="h-4 w-4 text-publishing" /> Publishing advisor</h3>
+            <Button variant="heroOutline" size="sm" disabled={advising} onClick={runAdvice}>
+              {advising ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />} {advice ? "Refresh plan" : "Get publishing plan"}
+            </Button>
+          </div>
+          {!advice && !advising && <p className="text-xs text-muted-foreground font-sans">Audience, markets, categories, suggested page count and price, distribution channels and translation opportunities for this book.</p>}
+          {advice && (
+            <div className="space-y-2 text-sm font-sans">
+              {advice.positioning && <p className="italic text-foreground">“{advice.positioning}”</p>}
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {advice.audience && <div><span className="text-xs font-semibold text-muted-foreground">Audience</span><div>{advice.audience}{advice.readingLevel ? ` · ${advice.readingLevel}` : ""}</div></div>}
+                {(advice.estimatedPages || advice.price) && <div><span className="text-xs font-semibold text-muted-foreground">Format &amp; price</span><div>{advice.estimatedPages ? `~${advice.estimatedPages} pages` : ""}{advice.price ? ` · ${advice.price}` : ""}</div></div>}
+                {advice.categories?.length ? <div><span className="text-xs font-semibold text-muted-foreground">Categories</span><div className="mt-0.5 flex flex-wrap gap-1">{advice.categories.map((c) => <span key={c} className="rounded-full border border-border px-2 py-0.5 text-[11px]">{c}</span>)}</div></div> : null}
+                {advice.markets?.length ? <div><span className="text-xs font-semibold text-muted-foreground">Markets</span><div className="mt-0.5 flex flex-wrap gap-1">{advice.markets.map((m) => <span key={m} className="rounded-full border border-border px-2 py-0.5 text-[11px]">{m}</span>)}</div></div> : null}
+                {advice.translations?.length ? <div className="sm:col-span-2"><span className="text-xs font-semibold text-muted-foreground">Translation opportunities</span><div className="mt-0.5 flex flex-wrap items-center gap-1">{advice.translations.map((t) => <span key={t} className="rounded-full border border-border px-2 py-0.5 text-[11px]">{t}</span>)}</div></div> : null}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
