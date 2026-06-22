@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { BrainCircuit, Crown, Check, Ban, BookText, Tags, Loader2, FolderInput, Save, Trash2 } from "lucide-react";
+import { BrainCircuit, Crown, Check, Ban, BookText, Tags, Loader2, FolderInput, Save, Trash2, FileText, Upload } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { fetchPlanStatus, type PlanStatus } from "@/lib/session";
 import { planAtLeast, planDisplayName } from "@/lib/plans";
-import { listKnowledgeBases, saveKnowledgeBase, deleteKnowledgeBase, type KnowledgeBase } from "@/lib/knowledge";
+import { listKnowledgeBases, saveKnowledgeBase, deleteKnowledgeBase, listKnowledgeDocs, saveKnowledgeDoc, deleteKnowledgeDoc, type KnowledgeBase, type KnowledgeDoc } from "@/lib/knowledge";
+import { extractFileText } from "@/lib/extract-file-text";
 import { myOrganizations, can, type OrgSummary } from "@/lib/organizations";
 
 export interface BookKnowledge { rules: string; terminology: string; forbidden: string }
@@ -22,11 +23,13 @@ export const hasKnowledge = (k?: BookKnowledge): boolean => !!k && !!(k.rules.tr
 // every generation in the project and persist with it, so chapter 20 respects
 // the same doctrine, terminology and style as chapter 1. (Document upload +
 // retrieval is a separate, heavier capability.)
-const KnowledgePanel = ({ knowledge, setKnowledge }: { knowledge: BookKnowledge; setKnowledge: (k: BookKnowledge) => void }) => {
+const KnowledgePanel = ({ knowledge, setKnowledge, activeDocIds = [], onActiveDocsChange }: { knowledge: BookKnowledge; setKnowledge: (k: BookKnowledge) => void; activeDocIds?: string[]; onActiveDocsChange?: (ids: string[]) => void }) => {
   const { toast } = useToast();
   const [status, setStatus] = useState<PlanStatus | null>(null);
   const [bases, setBases] = useState<KnowledgeBase[]>([]);
   const [orgs, setOrgs] = useState<OrgSummary[]>([]);
+  const [docs, setDocs] = useState<KnowledgeDoc[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [loadId, setLoadId] = useState("");
   const [saveName, setSaveName] = useState("");
   const [saveOrg, setSaveOrg] = useState("");
@@ -36,8 +39,37 @@ const KnowledgePanel = ({ knowledge, setKnowledge }: { knowledge: BookKnowledge;
   useEffect(() => {
     if (!allowed) return;
     listKnowledgeBases().then(setBases).catch(() => {});
+    listKnowledgeDocs().then(setDocs).catch(() => {});
     myOrganizations().then((l) => setOrgs(l.filter((o) => can.edit(o.role)))).catch(() => {});
   }, [allowed]);
+
+  const uploadDocs = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    const added: string[] = [];
+    try {
+      for (const file of Array.from(files)) {
+        try {
+          const text = await extractFileText(file);
+          if (!text.trim()) { toast({ title: `No text found in ${file.name}`, variant: "destructive" }); continue; }
+          const id = await saveKnowledgeDoc({ name: file.name, content: text });
+          added.push(id);
+        } catch (e) {
+          toast({ title: `Could not add ${file.name}`, description: e instanceof Error ? e.message : "", variant: "destructive" });
+        }
+      }
+      if (added.length) {
+        setDocs(await listKnowledgeDocs());
+        onActiveDocsChange?.([...activeDocIds, ...added]); // newly uploaded are active by default
+        toast({ title: `${added.length} document${added.length === 1 ? "" : "s"} added` });
+      }
+    } finally { setUploading(false); }
+  };
+  const toggleDoc = (id: string) => onActiveDocsChange?.(activeDocIds.includes(id) ? activeDocIds.filter((x) => x !== id) : [...activeDocIds, id]);
+  const removeDoc = async (id: string) => {
+    try { await deleteKnowledgeDoc(id); setDocs(await listKnowledgeDocs()); onActiveDocsChange?.(activeDocIds.filter((x) => x !== id)); }
+    catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+  };
   const set = (k: keyof BookKnowledge) => (e: React.ChangeEvent<HTMLTextAreaElement>) => setKnowledge({ ...knowledge, [k]: e.target.value });
 
   const loadBase = () => {
@@ -111,6 +143,35 @@ const KnowledgePanel = ({ knowledge, setKnowledge }: { knowledge: BookKnowledge;
               {busy ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Save className="mr-1.5 h-4 w-4" />} Save current as base
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Reference documents — the AI writes in line with these sources. */}
+      <Card className="border-border">
+        <CardContent className="space-y-3 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <Label className="flex items-center gap-2 font-sans text-sm font-semibold"><FileText className="h-4 w-4 text-primary" /> Reference documents</Label>
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs font-medium font-sans hover:border-primary/40">
+              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />} Upload
+              <input type="file" multiple accept=".pdf,.doc,.docx,.txt,.md,.markdown" className="hidden" disabled={uploading} onChange={(e) => { uploadDocs(e.target.files); e.target.value = ""; }} />
+            </label>
+          </div>
+          <p className="text-[11px] text-muted-foreground font-sans">Upload doctrine, a terminology guide, research or previous books (PDF, DOCX, TXT, MD). Checked documents are used as source material the AI must stay consistent with when writing this book.</p>
+          {docs.length > 0 ? (
+            <div className="space-y-1.5">
+              {docs.map((d) => (
+                <div key={d.id} className="flex items-center gap-2 rounded-md border border-border bg-card/50 px-2.5 py-1.5">
+                  <input type="checkbox" checked={activeDocIds.includes(d.id)} onChange={() => toggleDoc(d.id)} className="h-3.5 w-3.5 accent-primary" />
+                  <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <span className="min-w-0 flex-1 truncate text-sm font-sans">{d.name}{d.org_name ? <span className="text-muted-foreground"> · {d.org_name}</span> : ""}</span>
+                  <span className="shrink-0 text-[11px] text-muted-foreground font-sans">{Math.round(d.chars / 1000)}k</span>
+                  <button onClick={() => removeDoc(d.id)} className="shrink-0 text-muted-foreground/60 hover:text-destructive" title="Delete document"><Trash2 className="h-3.5 w-3.5" /></button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground font-sans">No documents yet. Upload reference material the AI should follow.</p>
+          )}
         </CardContent>
       </Card>
 
