@@ -445,6 +445,7 @@ const BookCreator = () => {
                   manuscriptComplete={chapters.length > 0 && generatedChapters.length === chapters.length}
                   coverDone={coverDone}
                   parentId={autosave.docId}
+                  content={effectiveContent}
                 />
               </div>
             ) : view === "publish" && outline ? (
