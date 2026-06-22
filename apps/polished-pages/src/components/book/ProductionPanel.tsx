@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { CATALOG_CATEGORIES } from "@/lib/documents";
 import { LANGUAGE_NAMES } from "@/lib/languages";
+import IsbnCenter from "@/components/book/IsbnCenter";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, type DocSummary } from "@/lib/documents";
 import { wankongListingsByDoc, type WankongListing } from "@/lib/wankong";
@@ -287,7 +288,10 @@ const ProductionPanel = ({
               <Input value={meta.subtitle ?? ""} onChange={set("subtitle")} placeholder="e.g. Recovering the Original Authority…" maxLength={200} />
             </div>
             <div className="space-y-1.5">
-              <Label className="font-sans text-xs">ISBN <span className="text-muted-foreground/60">(optional)</span></Label>
+              <Label className="flex items-center justify-between font-sans text-xs">
+                <span>ISBN <span className="text-muted-foreground/60">(optional)</span></span>
+                <IsbnCenter trigger={<button type="button" className="font-medium text-primary hover:underline">Need one?</button>} />
+              </Label>
               <Input value={meta.isbn ?? ""} onChange={set("isbn")} placeholder="978-1-23456-789-0" maxLength={20} />
             </div>
             <div className="space-y-1.5">
