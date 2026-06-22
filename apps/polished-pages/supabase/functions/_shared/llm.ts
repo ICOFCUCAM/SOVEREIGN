@@ -88,44 +88,58 @@ export async function complete(opts: CompleteOptions): Promise<string> {
 
 async function completeWithClaude(apiKey: string, system: string, user: string, maxTokens: number): Promise<string> {
   assertHeaderSafe(apiKey, "ANTHROPIC_API_KEY");
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": apiKey,
-      "anthropic-version": ANTHROPIC_VERSION,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model: ANTHROPIC_MODEL,
-      max_tokens: maxTokens,
-      system,
-      messages: [{ role: "user", content: user }],
-    }),
-  });
+  // Transient upstream conditions (overload/5xx/rate) are common on long-form
+  // generation; retry a bounded number of times with backoff so a blip
+  // self-heals instead of surfacing as a hard failure. Kept small so the total
+  // stays within the function's wall-clock budget (a success runs ~50-60s).
+  const RETRYABLE = new Set([408, 409, 429, 500, 502, 503, 504, 529]);
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  let lastStatus = 0;
 
-  if (!response.ok) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await sleep(700 * attempt); // 0, 700ms, 1400ms
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": ANTHROPIC_VERSION,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: ANTHROPIC_MODEL,
+        max_tokens: maxTokens,
+        system,
+        messages: [{ role: "user", content: user }],
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      // Refusals arrive as HTTP 200 with stop_reason "refusal" — check before reading content.
+      if (data.stop_reason === "refusal") {
+        throw new LlmError("Polished Scribe declined to complete this request. Please revise the input and try again.", 422);
+      }
+      const text = Array.isArray(data.content)
+        ? data.content.filter((b: { type?: string }) => b?.type === "text").map((b: { text?: string }) => b.text ?? "").join("")
+        : "";
+      if (!text.trim()) throw new LlmError("Polished Scribe returned an empty response. Please try again.", 502);
+      return text;
+    }
+
+    lastStatus = response.status;
     const detail = await safeText(response);
-    if (response.status === 429) throw new LlmError("Rate limit exceeded. Please try again in a moment.", 429);
     if (response.status === 401 || response.status === 403) {
       throw new LlmError("AI provider rejected the API key. Check ANTHROPIC_API_KEY.", 502);
     }
-    console.error("Claude API error:", response.status, detail);
-    throw new LlmError("AI generation failed", 502);
+    console.error(`Claude API error (attempt ${attempt + 1}):`, response.status, detail.slice(0, 300));
+    if (!RETRYABLE.has(response.status)) throw new LlmError("Polished Scribe Failed", 502);
+    // otherwise loop and retry
   }
 
-  const data = await response.json();
-
-  // Refusals arrive as HTTP 200 with stop_reason "refusal" — check before reading content.
-  if (data.stop_reason === "refusal") {
-    throw new LlmError("The AI declined to complete this request. Please revise the input and try again.", 422);
-  }
-
-  const text = Array.isArray(data.content)
-    ? data.content.filter((b: { type?: string }) => b?.type === "text").map((b: { text?: string }) => b.text ?? "").join("")
-    : "";
-
-  if (!text.trim()) throw new LlmError("AI returned an empty response. Please try again.", 502);
-  return text;
+  // Exhausted retries on a retryable condition.
+  if (lastStatus === 429) throw new LlmError("Polished Scribe is rate-limited right now. Please try again in a moment.", 429);
+  throw new LlmError("Polished Scribe is temporarily overloaded. Please try again in a moment.", 503);
 }
 
 async function completeWithLovable(apiKey: string, system: string, user: string, model: string): Promise<string> {
@@ -148,12 +162,12 @@ async function completeWithLovable(apiKey: string, system: string, user: string,
     if (response.status === 429) throw new LlmError("Rate limit exceeded. Please try again in a moment.", 429);
     if (response.status === 402) throw new LlmError("AI credits exhausted. Please add funds.", 402);
     console.error("Lovable gateway error:", response.status, detail);
-    throw new LlmError("AI generation failed", 502);
+    throw new LlmError("Polished Scribe Failed", 502);
   }
 
   const data = await response.json();
   const text = data.choices?.[0]?.message?.content ?? "";
-  if (!text.trim()) throw new LlmError("AI returned an empty response. Please try again.", 502);
+  if (!text.trim()) throw new LlmError("Polished Scribe returned an empty response. Please try again.", 502);
   return text;
 }
 
