@@ -39,10 +39,13 @@ export interface BookMeta {
   trimSize?: string;
   pageCount?: string;
   paper?: string; // affects spine width
+  kdpStatus?: string;
+  ingramStatus?: string;
 }
 
 const ISBN_STATUS = ["Missing", "Assigned", "Registered"];
 const FORMATS = ["Paperback", "Hardcover", "Coil-bound", "eBook", "Audiobook"];
+const DIST_STATUS = ["Not submitted", "Submitted", "Live"];
 
 // The Book Production Center: a project-centric readiness view + the publishing
 // metadata that turns a manuscript into a distributable book.
@@ -192,8 +195,22 @@ const ProductionPanel = ({
               <div className="mt-0.5 font-serif text-lg font-bold tabular-nums">{totalDownloads.toLocaleString()}</div>
             </div>
           </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">KDP status</Label>
+              <select value={meta.kdpStatus ?? "Not submitted"} onChange={set("kdpStatus")} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                {DIST_STATUS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">IngramSpark status</Label>
+              <select value={meta.ingramStatus ?? "Not submitted"} onChange={set("ingramStatus")} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                {DIST_STATUS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
           <p className="text-[11px] text-muted-foreground font-sans">
-            Counts cover this book and its {editions} edition{editions === 1 ? "" : "s"}{hasAudiobook ? " + audiobook" : ""}. Manage distribution from the <Link to="/library" className="text-primary hover:underline">Library</Link>. Sales figures aren’t synced back from Wankong yet.
+            Counts cover this book and its {editions} edition{editions === 1 ? "" : "s"}{hasAudiobook ? " + audiobook" : ""}. KDP/IngramSpark are tracked manually (you export the files here, then upload to those platforms). Sales figures aren’t synced back from Wankong yet.
           </p>
         </CardContent>
       </Card>
