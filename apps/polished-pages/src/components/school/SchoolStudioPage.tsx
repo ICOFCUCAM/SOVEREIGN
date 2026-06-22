@@ -18,8 +18,8 @@ import { localizeMarkdown, markdownEdition } from "@/lib/localize";
 import { saveDocument } from "@/lib/documents";
 import { saveAssessment } from "@/lib/assessment-bank";
 import { logAiActivity } from "@/lib/ai-activity-log";
-import KnowledgeSelect from "@/components/book/KnowledgeSelect";
-import type { BookKnowledge } from "@/components/book/KnowledgePanel";
+import KnowledgeSelect, { type KnowledgeSelection } from "@/components/book/KnowledgeSelect";
+import { buildGenerationKnowledge } from "@/lib/knowledge";
 
 // Document types that belong in the reusable Assessment Bank.
 const BANKABLE = new Set<SchoolDocType>(["quiz", "exam", "assessment", "worksheet", "answer-key", "marking-guide", "homework-pack", "revision", "exam-prep"]);
@@ -104,10 +104,10 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
 
   const required = config.fields.filter((f) => f.required);
   const canRun = required.every((f) => (vals[f.key as string] ?? "").trim().length > 0) && !progress;
-  const [knowledge, setKnowledge] = useState<BookKnowledge | null>(null);
+  const [knowledgeSel, setKnowledgeSel] = useState<KnowledgeSelection | null>(null);
   const titleBase = `${vals.subject || vals.topic || config.badge}${vals.grade ? ` (${vals.grade})` : ""}`;
 
-  const baseInput = (): Omit<SchoolInput, "docType"> => ({
+  const baseInput = (knowledge: SchoolInput["knowledge"]): Omit<SchoolInput, "docType"> => ({
     grade: vals.grade, subject: vals.subject, topic: vals.topic, country: vals.country,
     term: vals.term, year: vals.year, language: vals.language,
     exerciseTypes: multi.exerciseTypes, knowledge,
@@ -120,12 +120,16 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
     setProgress({ done: 0, total: parts.length });
     const out: Record<string, string> = {};
     try {
+      const knowledge = await buildGenerationKnowledge(
+        knowledgeSel?.rules ?? null, knowledgeSel?.docIds ?? [],
+        `${vals.subject ?? ""} ${vals.topic ?? ""} ${vals.grade ?? ""}`.trim(),
+      );
       for (let i = 0; i < parts.length; i++) {
         const t = parts[i].type;
         const sourceContent = NEEDS_SOURCE.includes(t)
           ? SOURCE_TYPES.map((s) => out[s]).filter(Boolean).join("\n\n")
           : undefined;
-        const doc = await generateSchoolContent({ ...baseInput(), docType: t, sourceContent });
+        const doc = await generateSchoolContent({ ...baseInput(knowledge), docType: t, sourceContent });
         out[t] = doc.content;
         setProgress({ done: i + 1, total: parts.length });
       }
@@ -269,7 +273,7 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
                 </select>
               </div>
             )}
-            <KnowledgeSelect onChange={setKnowledge} />
+            <KnowledgeSelect onChange={setKnowledgeSel} />
           </CardContent>
         </Card>
 
