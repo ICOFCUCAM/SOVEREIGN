@@ -11,6 +11,7 @@ import { translateLocalize } from "@/lib/translate";
 import { recordBatchOp } from "@/lib/editions";
 import { LANGUAGE_NAMES } from "@/lib/languages";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
+import CoverPackage from "@/components/book/CoverPackage";
 
 type Side = "front" | "back";
 
@@ -32,7 +33,7 @@ const PRO_PERKS = [
 // AI cover + back-cover design via OpenAI gpt-image-1 (the platform's image
 // engine; Claude has no image model). The author fills in the title and art
 // direction before generating. Cover design is a Pro-plan capability.
-const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle, isbn, publisher, onGenerated }: { title?: string; subtitle?: string; isbn?: string; publisher?: string; onGenerated?: () => void }) => {
+const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle, isbn, publisher, pageCount, paper, trimSize, onGenerated }: { title?: string; subtitle?: string; isbn?: string; publisher?: string; pageCount?: string; paper?: string; trimSize?: string; onGenerated?: () => void }) => {
   const { toast } = useToast();
   const [status, setStatus] = useState<PlanStatus | null>(null);
   const [title, setTitle] = useState(initialTitle ?? "");
@@ -218,6 +219,9 @@ const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle, isbn, 
             preview="AI-designed book cover"
           />
         </div>
+      )}
+      {img.front && (
+        <CoverPackage frontSrc={img.front} title={title || "Book"} author={author} subtitle={subtitle} pageCount={pageCount} paper={paper} trimSize={trimSize} />
       )}
       {/* Multi-language covers: one front cover per language with the title translated. */}
       <Card className="border-border">
