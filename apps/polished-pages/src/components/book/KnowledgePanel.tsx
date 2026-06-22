@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { BrainCircuit, Crown, Check, Ban, BookText, Tags } from "lucide-react";
+import { BrainCircuit, Crown, Check, Ban, BookText, Tags, Loader2, FolderInput, Save, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import { fetchPlanStatus, type PlanStatus } from "@/lib/session";
 import { planAtLeast, planDisplayName } from "@/lib/plans";
+import { listKnowledgeBases, saveKnowledgeBase, deleteKnowledgeBase, type KnowledgeBase } from "@/lib/knowledge";
+import { myOrganizations, can, type OrgSummary } from "@/lib/organizations";
 
 export interface BookKnowledge { rules: string; terminology: string; forbidden: string }
 export const emptyKnowledge = (): BookKnowledge => ({ rules: "", terminology: "", forbidden: "" });
@@ -19,10 +23,47 @@ export const hasKnowledge = (k?: BookKnowledge): boolean => !!k && !!(k.rules.tr
 // the same doctrine, terminology and style as chapter 1. (Document upload +
 // retrieval is a separate, heavier capability.)
 const KnowledgePanel = ({ knowledge, setKnowledge }: { knowledge: BookKnowledge; setKnowledge: (k: BookKnowledge) => void }) => {
+  const { toast } = useToast();
   const [status, setStatus] = useState<PlanStatus | null>(null);
+  const [bases, setBases] = useState<KnowledgeBase[]>([]);
+  const [orgs, setOrgs] = useState<OrgSummary[]>([]);
+  const [loadId, setLoadId] = useState("");
+  const [saveName, setSaveName] = useState("");
+  const [saveOrg, setSaveOrg] = useState("");
+  const [busy, setBusy] = useState(false);
   useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
   const allowed = planAtLeast(status?.plan, "enterprise-plus");
+  useEffect(() => {
+    if (!allowed) return;
+    listKnowledgeBases().then(setBases).catch(() => {});
+    myOrganizations().then((l) => setOrgs(l.filter((o) => can.edit(o.role)))).catch(() => {});
+  }, [allowed]);
   const set = (k: keyof BookKnowledge) => (e: React.ChangeEvent<HTMLTextAreaElement>) => setKnowledge({ ...knowledge, [k]: e.target.value });
+
+  const loadBase = () => {
+    const b = bases.find((x) => x.id === loadId);
+    if (!b) return;
+    setKnowledge({ rules: b.rules, terminology: b.terminology, forbidden: b.forbidden });
+    toast({ title: "Loaded", description: `“${b.name}” applied to this book.` });
+  };
+  const saveBase = async () => {
+    if (!saveName.trim()) { toast({ title: "Name your knowledge base first" }); return; }
+    setBusy(true);
+    try {
+      await saveKnowledgeBase({ name: saveName.trim(), rules: knowledge.rules, terminology: knowledge.terminology, forbidden: knowledge.forbidden, orgId: saveOrg || null });
+      setBases(await listKnowledgeBases());
+      setSaveName("");
+      toast({ title: "Knowledge base saved", description: saveOrg ? "Shared with your organization." : "Saved to your library — reuse it on any book." });
+    } catch (e) {
+      toast({ title: "Could not save", description: e instanceof Error ? e.message : "", variant: "destructive" });
+    } finally { setBusy(false); }
+  };
+  const removeBase = async () => {
+    const b = bases.find((x) => x.id === loadId);
+    if (!b) return;
+    try { await deleteKnowledgeBase(b.id); setBases(await listKnowledgeBases()); setLoadId(""); toast({ title: "Deleted" }); }
+    catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+  };
 
   if (status && !allowed) {
     return (
@@ -43,6 +84,36 @@ const KnowledgePanel = ({ knowledge, setKnowledge }: { knowledge: BookKnowledge;
 
   return (
     <div className="space-y-4">
+      {/* Reusable, optionally org-shared knowledge bases. */}
+      <Card className="border-border bg-card/50">
+        <CardContent className="space-y-3 p-5">
+          <Label className="flex items-center gap-2 font-sans text-sm font-semibold"><FolderInput className="h-4 w-4 text-primary" /> Reusable knowledge bases</Label>
+          <p className="text-[11px] text-muted-foreground font-sans">Define rules once and reuse them across books — and share them with your institution so every author inherits the same standards.</p>
+          {bases.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <select value={loadId} onChange={(e) => setLoadId(e.target.value)} className="min-w-[200px] flex-1 rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                <option value="">Choose a saved base…</option>
+                {bases.map((b) => <option key={b.id} value={b.id}>{b.name}{b.org_name ? ` · ${b.org_name}` : ""}</option>)}
+              </select>
+              <Button variant="heroOutline" size="sm" disabled={!loadId} onClick={loadBase}>Load into this book</Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" disabled={!loadId} onClick={removeBase} title="Delete this base"><Trash2 className="h-4 w-4" /></Button>
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
+            <Input value={saveName} onChange={(e) => setSaveName(e.target.value)} placeholder="Name (e.g. Yahusha Series house rules)" maxLength={80} className="min-w-[200px] flex-1 text-sm" />
+            {orgs.length > 0 && (
+              <select value={saveOrg} onChange={(e) => setSaveOrg(e.target.value)} className="rounded-md border border-border bg-card px-3 py-2 text-sm font-sans" title="Share with an organization">
+                <option value="">Personal</option>
+                {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+              </select>
+            )}
+            <Button variant="hero" size="sm" disabled={busy} onClick={saveBase}>
+              {busy ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Save className="mr-1.5 h-4 w-4" />} Save current as base
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="border-border">
         <CardContent className="space-y-2 p-5">
           <Label className="flex items-center gap-2 font-sans text-sm font-semibold"><BookText className="h-4 w-4 text-primary" /> Writing rules</Label>
