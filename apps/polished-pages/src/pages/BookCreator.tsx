@@ -10,7 +10,8 @@ import { useDraftAutosave, readDraft } from "@/hooks/use-draft-autosave";
 import LocalizePanel from "@/components/app/LocalizePanel";
 import AudiobookPanel from "@/components/book/AudiobookPanel";
 import ProductionPanel, { type BookMeta } from "@/components/book/ProductionPanel";
-import KnowledgePanel, { type BookKnowledge, emptyKnowledge, hasKnowledge } from "@/components/book/KnowledgePanel";
+import KnowledgePanel, { type BookKnowledge, emptyKnowledge } from "@/components/book/KnowledgePanel";
+import { buildGenerationKnowledge } from "@/lib/knowledge";
 import { localizeMarkdown, markdownEdition } from "@/lib/localize";
 import BookSetup from "@/components/book/BookSetup";
 import BookOutlineEditor from "@/components/book/BookOutlineEditor";
@@ -34,6 +35,7 @@ interface BookDraft {
   editedBook: string | null;
   meta: BookMeta; coverDone: boolean;
   knowledge: BookKnowledge;
+  knowledgeDocIds: string[];
 }
 
 // Assemble the publishable markdown from a draft (same shape the reader/export
@@ -92,10 +94,11 @@ const BookCreator = () => {
   const [coverDone, setCoverDone] = useState<boolean>(init?.coverDone ?? false);
   // Knowledge Base & Author Memory — rules/terminology/forbidden, injected into generation.
   const [knowledge, setKnowledge] = useState<BookKnowledge>(init?.knowledge ?? emptyKnowledge());
+  const [knowledgeDocIds, setKnowledgeDocIds] = useState<string[]>(init?.knowledgeDocIds ?? []);
 
   const draft: BookDraft = useMemo(
-    () => ({ bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone, knowledge }),
-    [bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone, knowledge]
+    () => ({ bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone, knowledge, knowledgeDocIds }),
+    [bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone, knowledge, knowledgeDocIds]
   );
 
   const autosave = useDraftAutosave<BookDraft>({
@@ -129,7 +132,7 @@ const BookCreator = () => {
     autosave.discard();
     setBookTitle(""); setGenre(""); setTargetAudience(""); setDepth("standard"); setMode("guided"); setExistingContent("");
     setOutline(null); setChapters([]); setEditedBook(null); setViewingChapter(null); setView("setup");
-    setMeta({}); setCoverDone(false); setKnowledge(emptyKnowledge());
+    setMeta({}); setCoverDone(false); setKnowledge(emptyKnowledge()); setKnowledgeDocIds([]);
   };
 
   // Generate outline
@@ -137,6 +140,7 @@ const BookCreator = () => {
     if (!bookTitle.trim()) return;
     setIsGeneratingOutline(true);
     try {
+      const gk = await buildGenerationKnowledge(knowledge, knowledgeDocIds);
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-book-outline`,
         {
@@ -145,7 +149,7 @@ const BookCreator = () => {
             "Content-Type": "application/json",
             Authorization: await authHeader(),
           },
-          body: JSON.stringify({ bookTitle, genre, targetAudience, depth, mode, existingContent, knowledge: hasKnowledge(knowledge) ? knowledge : undefined }),
+          body: JSON.stringify({ bookTitle, genre, targetAudience, depth, mode, existingContent, knowledge: gk ?? undefined }),
         }
       );
 
@@ -197,6 +201,7 @@ const BookCreator = () => {
     try {
       // Collect previous chapter summaries for anti-repetition
       const previousChapters = currentChapters.slice(0, index).filter((c) => c.content).map((c) => c.content!.substring(0, 600));
+      const gk = await buildGenerationKnowledge(knowledge, knowledgeDocIds);
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-book-chapter`,
@@ -214,7 +219,7 @@ const BookCreator = () => {
             chapterIndex: index,
             depth,
             previousChapters,
-            knowledge: hasKnowledge(knowledge) ? knowledge : undefined,
+            knowledge: gk ?? undefined,
           }),
         }
       );
@@ -444,7 +449,7 @@ const BookCreator = () => {
               <div>
                 <h2 className="font-serif text-2xl font-bold mb-1">Knowledge base &amp; author memory</h2>
                 <p className="text-sm text-muted-foreground font-sans mb-5">Teach the AI your project’s rules, required terminology and forbidden content. It’s applied to every generation in this book and saved with it — so chapter 20 respects the same rules as chapter 1.</p>
-                <KnowledgePanel knowledge={knowledge} setKnowledge={setKnowledge} />
+                <KnowledgePanel knowledge={knowledge} setKnowledge={setKnowledge} activeDocIds={knowledgeDocIds} onActiveDocsChange={setKnowledgeDocIds} />
               </div>
             ) : view === "production" ? (
               <div>
