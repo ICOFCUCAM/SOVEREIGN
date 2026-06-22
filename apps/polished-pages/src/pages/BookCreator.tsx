@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { authHeader } from "@/lib/session";
 import { logAiActivity } from "@/lib/ai-activity-log";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon, Check, Loader2, HardDrive, Languages, Headphones, ClipboardCheck } from "lucide-react";
+import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon, Check, Loader2, HardDrive, Languages, Headphones, ClipboardCheck, BrainCircuit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookChapter, BookOutline, BookMode, BookDepth, BookView, ImprovementType } from "@/types/book";
 import { useDraftAutosave, readDraft } from "@/hooks/use-draft-autosave";
 import LocalizePanel from "@/components/app/LocalizePanel";
 import AudiobookPanel from "@/components/book/AudiobookPanel";
 import ProductionPanel, { type BookMeta } from "@/components/book/ProductionPanel";
+import KnowledgePanel, { type BookKnowledge, emptyKnowledge, hasKnowledge } from "@/components/book/KnowledgePanel";
 import { localizeMarkdown, markdownEdition } from "@/lib/localize";
 import BookSetup from "@/components/book/BookSetup";
 import BookOutlineEditor from "@/components/book/BookOutlineEditor";
@@ -32,6 +33,7 @@ interface BookDraft {
   view: BookView; outline: BookOutline | null; chapters: BookChapter[];
   editedBook: string | null;
   meta: BookMeta; coverDone: boolean;
+  knowledge: BookKnowledge;
 }
 
 // Assemble the publishable markdown from a draft (same shape the reader/export
@@ -88,10 +90,12 @@ const BookCreator = () => {
   // Publishing metadata + production signals (Book Production Center).
   const [meta, setMeta] = useState<BookMeta>(init?.meta ?? {});
   const [coverDone, setCoverDone] = useState<boolean>(init?.coverDone ?? false);
+  // Knowledge Base & Author Memory — rules/terminology/forbidden, injected into generation.
+  const [knowledge, setKnowledge] = useState<BookKnowledge>(init?.knowledge ?? emptyKnowledge());
 
   const draft: BookDraft = useMemo(
-    () => ({ bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone }),
-    [bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone]
+    () => ({ bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone, knowledge }),
+    [bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone, knowledge]
   );
 
   const autosave = useDraftAutosave<BookDraft>({
@@ -125,7 +129,7 @@ const BookCreator = () => {
     autosave.discard();
     setBookTitle(""); setGenre(""); setTargetAudience(""); setDepth("standard"); setMode("guided"); setExistingContent("");
     setOutline(null); setChapters([]); setEditedBook(null); setViewingChapter(null); setView("setup");
-    setMeta({}); setCoverDone(false);
+    setMeta({}); setCoverDone(false); setKnowledge(emptyKnowledge());
   };
 
   // Generate outline
@@ -141,7 +145,7 @@ const BookCreator = () => {
             "Content-Type": "application/json",
             Authorization: await authHeader(),
           },
-          body: JSON.stringify({ bookTitle, genre, targetAudience, depth, mode, existingContent }),
+          body: JSON.stringify({ bookTitle, genre, targetAudience, depth, mode, existingContent, knowledge: hasKnowledge(knowledge) ? knowledge : undefined }),
         }
       );
 
@@ -210,6 +214,7 @@ const BookCreator = () => {
             chapterIndex: index,
             depth,
             previousChapters,
+            knowledge: hasKnowledge(knowledge) ? knowledge : undefined,
           }),
         }
       );
@@ -280,6 +285,7 @@ const BookCreator = () => {
   const tabs: { id: BookView; label: string; icon: React.ReactNode; show: boolean }[] = [
     { id: "outline", label: "Outline", icon: <BookOpen className="w-3.5 h-3.5" />, show: !!outline },
     { id: "writing", label: "Write", icon: <PenTool className="w-3.5 h-3.5" />, show: !!outline },
+    { id: "knowledge", label: "Knowledge", icon: <BrainCircuit className="w-3.5 h-3.5" />, show: !!outline },
     { id: "preview", label: "Preview", icon: <Eye className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "export", label: "Export", icon: <Download className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "repurpose", label: "Repurpose", icon: <Repeat className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
@@ -433,6 +439,12 @@ const BookCreator = () => {
                 <h2 className="font-serif text-2xl font-bold mb-1">Cover design</h2>
                 <p className="text-sm text-muted-foreground font-sans mb-5">Generate a front and back cover with AI, guided by your art direction. ISBN &amp; publisher (set under Production) shape the barcode and imprint.</p>
                 <CoverGenerator title={outline?.title || bookTitle} subtitle={outline?.subtitle || meta.subtitle} isbn={meta.isbn} publisher={meta.publisher} pageCount={meta.pageCount} paper={meta.paper} trimSize={meta.trimSize} onGenerated={() => setCoverDone(true)} />
+              </div>
+            ) : view === "knowledge" ? (
+              <div>
+                <h2 className="font-serif text-2xl font-bold mb-1">Knowledge base &amp; author memory</h2>
+                <p className="text-sm text-muted-foreground font-sans mb-5">Teach the AI your project’s rules, required terminology and forbidden content. It’s applied to every generation in this book and saved with it — so chapter 20 respects the same rules as chapter 1.</p>
+                <KnowledgePanel knowledge={knowledge} setKnowledge={setKnowledge} />
               </div>
             ) : view === "production" ? (
               <div>

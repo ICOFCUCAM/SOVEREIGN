@@ -8,6 +8,24 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Project Knowledge Base / Author Memory: the author's rules, approved
+// terminology and forbidden terms, injected at the very top of the system
+// prompt as the highest-priority constraints so the model obeys them across
+// every chapter.
+function knowledgeBlock(k: unknown): string {
+  if (!k || typeof k !== "object") return "";
+  const kb = k as { rules?: unknown; terminology?: unknown; forbidden?: unknown };
+  const parts: string[] = [];
+  const rules = String(kb.rules ?? "").trim();
+  const terms = String(kb.terminology ?? "").trim();
+  const forbidden = String(kb.forbidden ?? "").trim();
+  if (rules) parts.push("WRITING RULES (follow exactly):\n" + rules);
+  if (terms) parts.push("APPROVED TERMINOLOGY (always use the preferred term):\n" + terms);
+  if (forbidden) parts.push("FORBIDDEN — never use these names, terms or concepts under any circumstances. If one would naturally appear, rephrase using the approved terminology:\n" + forbidden);
+  if (!parts.length) return "";
+  return "=== PROJECT KNOWLEDGE BASE — HIGHEST PRIORITY. These rules override all default style and must be obeyed in every sentence. ===\n" + parts.join("\n\n") + "\n=== END KNOWLEDGE BASE ===\n\n";
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -15,7 +33,7 @@ serve(async (req) => {
 
   try {
     const userId = getUserId(req);
-    const { bookTitle, genre, targetAudience, chapters, chapterIndex, depth, previousChapters } = await req.json();
+    const { bookTitle, genre, targetAudience, chapters, chapterIndex, depth, previousChapters, knowledge } = await req.json();
 
     const chapter = chapters[chapterIndex];
     const outlineContext = chapters
@@ -33,7 +51,7 @@ serve(async (req) => {
       detailed: "Write a comprehensive chapter of 3500-5000 words with extensive examples and analysis.",
     }[depth || "standard"];
 
-    const systemPrompt = `You are a bestselling author and ghostwriter. Write compelling, publication-ready book chapters.
+    const systemPrompt = knowledgeBlock(knowledge) + `You are a bestselling author and ghostwriter. Write compelling, publication-ready book chapters.
 
 RULES:
 - Genre: ${genre || "general non-fiction"}
