@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle2, Circle, ClipboardCheck, Globe, Headphones, FileDown, BookOpen, Package, Sparkles, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle, ClipboardCheck, Globe, Headphones, FileDown, BookOpen, Package, Sparkles, Loader2, Store, Eye, Download, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { listDocuments, type DocSummary } from "@/lib/documents";
+import { wankongListingsByDoc, type WankongListing } from "@/lib/wankong";
 import { TRIM_SIZES, PAPER_MM_PER_PAGE, getTrim } from "@/lib/print-sizes";
 import { markdownToPrintPdf } from "@/lib/export-print-pdf";
 import { markdownToIngramSparkPdf } from "@/lib/export-ingramspark-pdf";
@@ -75,16 +76,30 @@ const ProductionPanel = ({
     finally { setAdvising(false); }
   };
 
-  // The project's saved assets (language editions + audiobook) link back via
-  // parent_document_id, so we can score readiness across the whole project.
+  // The project's saved assets (the book itself + its language editions and
+  // audiobook, linked via parent_document_id) — so we can score readiness and
+  // summarise distribution/analytics across the whole project.
+  const [self, setSelf] = useState<DocSummary | null>(null);
+  const [wankong, setWankong] = useState<Record<string, WankongListing>>({});
   useEffect(() => {
-    if (!parentId) { setChildren([]); return; }
-    listDocuments().then((all) => setChildren(all.filter((d) => d.parent_document_id === parentId))).catch(() => setChildren([]));
+    if (!parentId) { setChildren([]); setSelf(null); return; }
+    listDocuments().then((all) => {
+      setChildren(all.filter((d) => d.parent_document_id === parentId));
+      setSelf(all.find((d) => d.id === parentId) ?? null);
+    }).catch(() => setChildren([]));
+    wankongListingsByDoc().then(setWankong).catch(() => {});
   }, [parentId]);
 
   const editions = (children ?? []).filter((c) => c.edition_language).length;
   const hasAudiobook = (children ?? []).some((c) => c.kind === "audiobook");
   const pages = Number(meta.pageCount) || 0;
+
+  // Distribution + analytics across the whole project (real counts only).
+  const projectDocs = [self, ...(children ?? [])].filter(Boolean) as DocSummary[];
+  const totalViews = projectDocs.reduce((n, d) => n + (d.view_count ?? 0), 0);
+  const totalDownloads = projectDocs.reduce((n, d) => n + (d.download_count ?? 0), 0);
+  const marketplaceListed = projectDocs.some((d) => d.listed);
+  const wankongLive = projectDocs.some((d) => wankong[d.id]?.status === "live");
 
   const set = (k: keyof BookMeta) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setMeta({ ...meta, [k]: e.target.value });
 
@@ -137,6 +152,34 @@ const ProductionPanel = ({
               <Link to="/library" className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-primary hover:bg-primary/5">Open in Library →</Link>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Distribution & analytics — real counts across the project's assets. */}
+      <Card className="border-border">
+        <CardContent className="space-y-3 p-5">
+          <h3 className="flex items-center gap-2 font-serif text-base font-semibold"><Store className="h-4 w-4 text-primary" /> Distribution &amp; analytics</h3>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="rounded-lg border border-border bg-card/50 p-3">
+              <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans">Marketplace</div>
+              <div className="mt-0.5 text-sm font-medium font-sans">{marketplaceListed ? <span className="text-emerald-600">Listed</span> : <span className="text-muted-foreground">Not listed</span>}</div>
+            </div>
+            <div className="rounded-lg border border-border bg-card/50 p-3">
+              <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans">Wankong store</div>
+              <div className="mt-0.5 text-sm font-medium font-sans">{wankongLive ? <span className="inline-flex items-center gap-1 text-publishing">Live <ExternalLink className="h-3 w-3" /></span> : <span className="text-muted-foreground">Not published</span>}</div>
+            </div>
+            <div className="rounded-lg border border-border bg-card/50 p-3">
+              <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans"><Eye className="mr-1 inline h-3 w-3" />Views</div>
+              <div className="mt-0.5 font-serif text-lg font-bold tabular-nums">{totalViews.toLocaleString()}</div>
+            </div>
+            <div className="rounded-lg border border-border bg-card/50 p-3">
+              <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-sans"><Download className="mr-1 inline h-3 w-3" />Downloads</div>
+              <div className="mt-0.5 font-serif text-lg font-bold tabular-nums">{totalDownloads.toLocaleString()}</div>
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground font-sans">
+            Counts cover this book and its {editions} edition{editions === 1 ? "" : "s"}{hasAudiobook ? " + audiobook" : ""}. Manage distribution from the <Link to="/library" className="text-primary hover:underline">Library</Link>. Sales figures aren’t synced back from Wankong yet.
+          </p>
         </CardContent>
       </Card>
 
