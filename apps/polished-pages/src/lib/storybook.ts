@@ -26,6 +26,7 @@ export interface StoryInput {
   language?: string;
   educationalObjective?: string;
   culturalSetting?: string;
+  knowledge?: { rules: string; terminology: string; forbidden: string } | null;
 }
 
 const fn = (name: string) => `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${name}`;

@@ -19,6 +19,7 @@ export interface SchoolInput {
   language?: string;
   exerciseTypes?: string[];
   sourceContent?: string;
+  knowledge?: { rules: string; terminology: string; forbidden: string } | null;
 }
 
 // Documents whose content must match an earlier paper (generated against it).
