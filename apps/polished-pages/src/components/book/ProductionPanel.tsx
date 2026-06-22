@@ -84,6 +84,35 @@ const ProductionPanel = ({
     } finally { setExporting(null); }
   };
 
+  // A copy-ready metadata sheet for KDP / IngramSpark listing forms.
+  const downloadMetadata = () => {
+    const lines = [
+      `TITLE: ${bookTitle || ""}`,
+      `SUBTITLE: ${meta.subtitle ?? ""}`,
+      `AUTHOR: ${meta.author ?? ""}`,
+      `LANGUAGE: ${meta.language ?? ""}`,
+      `CATEGORY: ${meta.category ?? ""}`,
+      `KEYWORDS: ${meta.keywords ?? ""}`,
+      `ISBN: ${meta.isbn ?? ""} (${isbnStatus})`,
+      `PUBLISHER: ${meta.publisher ?? ""}`,
+      `IMPRINT: ${meta.imprint ?? ""}`,
+      `EDITION: ${meta.edition ?? ""}`,
+      `FORMAT: ${meta.format ?? ""}`,
+      `TRIM SIZE: ${meta.trimSize ? trim.label : ""}`,
+      `PAGE COUNT: ${meta.pageCount ?? ""}`,
+      `PAPER: ${meta.paper ?? ""}`,
+      `PUBLICATION DATE: ${new Date().toISOString().slice(0, 10)}`,
+      "",
+      "DESCRIPTION:",
+      meta.description ?? "",
+    ].join("\n");
+    const blob = new Blob([lines], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `${bookTitle || "book"}-metadata.txt`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const runAdvice = async () => {
     if (!content.trim()) { toast({ title: "Generate the manuscript first" }); return; }
     setAdvising(true);
@@ -327,6 +356,9 @@ const ProductionPanel = ({
             </Button>
             <Button variant="hero" size="sm" disabled={exporting !== null} onClick={() => runExport("all")} title="KDP + IngramSpark interiors + EPUB">
               {exporting === "all" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Package className="mr-1.5 h-4 w-4" />} Store bundle
+            </Button>
+            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={downloadMetadata} title="A copy-ready metadata sheet for KDP / IngramSpark listing forms">
+              <FileDown className="mr-1.5 h-4 w-4" /> Metadata sheet
             </Button>
           </div>
         </CardContent>
