@@ -5,6 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { listDocuments, type DocSummary } from "@/lib/documents";
+import { TRIM_SIZES, PAPER_MM_PER_PAGE } from "@/lib/print-sizes";
+
+const MM_PER_IN = 25.4;
+const spineInches = (pages: number, paper?: string): string =>
+  ((pages * (PAPER_MM_PER_PAGE[paper ?? "Cream"] ?? PAPER_MM_PER_PAGE["White"])) / MM_PER_IN).toFixed(3);
 
 // Publishing metadata captured on a book project. Stored with the book draft and
 // fed into the cover (ISBN/publisher) and — later — the spine and print package.
@@ -18,12 +23,6 @@ export interface BookMeta {
   pageCount?: string;
   paper?: string; // "white" | "cream" — affects spine width
 }
-
-export const TRIM_SIZES = ["5 × 8 in", "5.25 × 8 in", "5.5 × 8.5 in", "6 × 9 in", "7 × 10 in", "8.5 × 11 in"];
-
-// Approx spine width for white/cream paper (inches) — pages × per-page thickness.
-// Shown as guidance; the print package will use it to size the full wrap.
-const spineInches = (pages: number) => (pages > 0 ? (pages * 0.0025).toFixed(3) : null);
 
 // The Book Production Center: a project-centric readiness view + the publishing
 // metadata that turns a manuscript into a distributable book.
@@ -133,19 +132,18 @@ const ProductionPanel = ({
               <Label className="font-sans text-xs">Trim size</Label>
               <select value={meta.trimSize ?? ""} onChange={set("trimSize")} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
                 <option value="">Choose…</option>
-                {TRIM_SIZES.map((t) => <option key={t} value={t}>{t}</option>)}
+                {TRIM_SIZES.filter((t) => t.id !== "a4").map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
               </select>
             </div>
             <div className="space-y-1.5">
               <Label className="font-sans text-xs">Page count</Label>
               <Input value={meta.pageCount ?? ""} onChange={set("pageCount")} placeholder="e.g. 220" inputMode="numeric" maxLength={5} />
-              {pages > 0 && <p className="text-[11px] text-muted-foreground font-sans">Approx spine width: {spineInches(pages)} in</p>}
+              {pages > 0 && <p className="text-[11px] text-muted-foreground font-sans">Approx spine width: {spineInches(pages, meta.paper)} in</p>}
             </div>
             <div className="space-y-1.5">
               <Label className="font-sans text-xs">Paper</Label>
-              <select value={meta.paper ?? "cream"} onChange={set("paper")} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
-                <option value="cream">Cream (novels, trade)</option>
-                <option value="white">White (textbooks, color)</option>
+              <select value={meta.paper ?? "Cream"} onChange={set("paper")} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                {Object.keys(PAPER_MM_PER_PAGE).map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
           </div>

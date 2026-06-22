@@ -65,9 +65,12 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   return lines;
 }
 
-// Per-page paper thickness (inches): cream is bulkier than white.
-const PAPER_FACTOR: Record<string, number> = { white: 0.002252, cream: 0.0025 };
-export const spineWidthInches = (pages: number, paper: string): number => pages * (PAPER_FACTOR[paper] ?? 0.0025);
+// Spine width comes from the shared print system (print-sizes.ts) so there's a
+// single source of truth for paper thickness and trim across cover + interior.
+import { getTrim, PAPER_MM_PER_PAGE } from "@/lib/print-sizes";
+const MM_PER_IN = 25.4;
+export const spineWidthInches = (pages: number, paper: string): number =>
+  (pages * (PAPER_MM_PER_PAGE[paper] ?? PAPER_MM_PER_PAGE["White"])) / MM_PER_IN;
 
 // Print spine: width derived from page count + paper, height from trim. The
 // background is sampled from the cover so the wrap reads as one piece.
@@ -167,13 +170,14 @@ export async function composeCoverPackage(o: {
   author?: string;
   subtitle?: string;
   pages?: number;
-  trimHeightIn?: number;
+  trimId?: string;
   paper?: string;
 }): Promise<ComposedAsset[]> {
   const front = await loadImage(o.frontSrc);
   const out: ComposedAsset[] = [];
+  const trimHeightIn = getTrim(o.trimId ?? "6x9").hmm / MM_PER_IN;
   if (o.pages && o.pages > 0) {
-    out.push(await composeSpine(front, { title: o.title, author: o.author, pages: o.pages, trimHeightIn: o.trimHeightIn ?? 9, paper: o.paper ?? "cream" }));
+    out.push(await composeSpine(front, { title: o.title, author: o.author, pages: o.pages, trimHeightIn, paper: o.paper ?? "Cream" }));
   }
   out.push(await composeThumb(front));
   out.push(await composeAudiobook(front));
@@ -181,11 +185,3 @@ export async function composeCoverPackage(o: {
   out.push(await composeBanner(front, { title: o.title, author: o.author, subtitle: o.subtitle }));
   return out;
 }
-
-// Parse the height (second number) from a trim string like "6 × 9 in".
-export const trimHeightFrom = (trim?: string): number => {
-  if (!trim) return 9;
-  const parts = trim.split(/[×x]/);
-  const h = parseFloat((parts[1] ?? "").replace(/[^0-9.]/g, ""));
-  return h > 0 ? h : 9;
-};

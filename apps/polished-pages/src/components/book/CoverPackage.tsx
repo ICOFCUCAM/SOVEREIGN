@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Layers, Loader2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { composeCoverPackage, trimHeightFrom, type ComposedAsset } from "@/lib/cover-package";
+import { composeCoverPackage, type ComposedAsset } from "@/lib/cover-package";
 
 const download = (src: string, name: string) => { const a = document.createElement("a"); a.href = src; a.download = name; a.click(); };
 
@@ -27,7 +27,7 @@ const CoverPackage = ({ frontSrc, title, author, subtitle, pageCount, paper, tri
   const build = async () => {
     setBusy(true); setErr(null);
     try {
-      setAssets(await composeCoverPackage({ frontSrc, title, author, subtitle, pages, paper, trimHeightIn: trimHeightFrom(trimSize) }));
+      setAssets(await composeCoverPackage({ frontSrc, title, author, subtitle, pages, paper, trimId: trimSize }));
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Could not compose the package.");
     } finally { setBusy(false); }
