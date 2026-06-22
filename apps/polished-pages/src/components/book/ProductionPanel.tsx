@@ -16,6 +16,7 @@ export interface BookMeta {
   imprint?: string;
   trimSize?: string;
   pageCount?: string;
+  paper?: string; // "white" | "cream" — affects spine width
 }
 
 export const TRIM_SIZES = ["5 × 8 in", "5.25 × 8 in", "5.5 × 8.5 in", "6 × 9 in", "7 × 10 in", "8.5 × 11 in"];
@@ -139,6 +140,13 @@ const ProductionPanel = ({
               <Label className="font-sans text-xs">Page count</Label>
               <Input value={meta.pageCount ?? ""} onChange={set("pageCount")} placeholder="e.g. 220" inputMode="numeric" maxLength={5} />
               {pages > 0 && <p className="text-[11px] text-muted-foreground font-sans">Approx spine width: {spineInches(pages)} in</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">Paper</Label>
+              <select value={meta.paper ?? "cream"} onChange={set("paper")} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
+                <option value="cream">Cream (novels, trade)</option>
+                <option value="white">White (textbooks, color)</option>
+              </select>
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground font-sans">ISBN and publisher feed the cover’s barcode and imprint mark; trim size and page count size the spine and print wrap.</p>

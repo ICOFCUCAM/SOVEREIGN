@@ -432,7 +432,7 @@ const BookCreator = () => {
               <div>
                 <h2 className="font-serif text-2xl font-bold mb-1">Cover design</h2>
                 <p className="text-sm text-muted-foreground font-sans mb-5">Generate a front and back cover with AI, guided by your art direction. ISBN &amp; publisher (set under Production) shape the barcode and imprint.</p>
-                <CoverGenerator title={outline?.title || bookTitle} subtitle={outline?.subtitle || meta.subtitle} isbn={meta.isbn} publisher={meta.publisher} onGenerated={() => setCoverDone(true)} />
+                <CoverGenerator title={outline?.title || bookTitle} subtitle={outline?.subtitle || meta.subtitle} isbn={meta.isbn} publisher={meta.publisher} pageCount={meta.pageCount} paper={meta.paper} trimSize={meta.trimSize} onGenerated={() => setCoverDone(true)} />
               </div>
             ) : view === "production" ? (
               <div>

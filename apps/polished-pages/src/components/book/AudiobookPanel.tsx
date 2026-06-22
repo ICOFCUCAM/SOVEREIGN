@@ -105,6 +105,10 @@ const AudiobookPanel = ({ chapters, bookTitle, parentId, ensureSaved }: { chapte
             <select value={voice} onChange={(e) => { setVoice(e.target.value); setTracks({}); setSaveState("idle"); }} disabled={busy} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-sans">
               {NARRATION_VOICES.map((v) => <option key={v.id} value={v.id}>{v.label} — {v.hint}</option>)}
             </select>
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+              <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600 font-sans">Standard voices · included</span>
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground font-sans" title="Premium narrator & character voices will be available as a usage-based add-on">Premium &amp; narrator voices · add-on (coming soon)</span>
+            </div>
           </div>
           <div className="flex items-end">
             {progress ? (
