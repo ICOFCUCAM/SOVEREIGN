@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { authHeader } from "@/lib/session";
 import { logAiActivity } from "@/lib/ai-activity-log";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon, Check, Loader2, HardDrive, Languages, Headphones } from "lucide-react";
+import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon, Check, Loader2, HardDrive, Languages, Headphones, ClipboardCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BookChapter, BookOutline, BookMode, BookDepth, BookView, ImprovementType } from "@/types/book";
 import { useDraftAutosave, readDraft } from "@/hooks/use-draft-autosave";
 import LocalizePanel from "@/components/app/LocalizePanel";
 import AudiobookPanel from "@/components/book/AudiobookPanel";
+import ProductionPanel, { type BookMeta } from "@/components/book/ProductionPanel";
 import { localizeMarkdown, markdownEdition } from "@/lib/localize";
 import BookSetup from "@/components/book/BookSetup";
 import BookOutlineEditor from "@/components/book/BookOutlineEditor";
@@ -30,6 +31,7 @@ interface BookDraft {
   depth: BookDepth; mode: BookMode; existingContent: string;
   view: BookView; outline: BookOutline | null; chapters: BookChapter[];
   editedBook: string | null;
+  meta: BookMeta; coverDone: boolean;
 }
 
 // Assemble the publishable markdown from a draft (same shape the reader/export
@@ -83,9 +85,13 @@ const BookCreator = () => {
   // preview, export and publish (the author's last pass before exporting).
   const [editedBook, setEditedBook] = useState<string | null>(init?.editedBook ?? null);
 
+  // Publishing metadata + production signals (Book Production Center).
+  const [meta, setMeta] = useState<BookMeta>(init?.meta ?? {});
+  const [coverDone, setCoverDone] = useState<boolean>(init?.coverDone ?? false);
+
   const draft: BookDraft = useMemo(
-    () => ({ bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook }),
-    [bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook]
+    () => ({ bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone }),
+    [bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone]
   );
 
   const autosave = useDraftAutosave<BookDraft>({
@@ -119,6 +125,7 @@ const BookCreator = () => {
     autosave.discard();
     setBookTitle(""); setGenre(""); setTargetAudience(""); setDepth("standard"); setMode("guided"); setExistingContent("");
     setOutline(null); setChapters([]); setEditedBook(null); setViewingChapter(null); setView("setup");
+    setMeta({}); setCoverDone(false);
   };
 
   // Generate outline
@@ -279,6 +286,7 @@ const BookCreator = () => {
     { id: "localize", label: "Localize", icon: <Languages className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "audiobook", label: "Audiobook", icon: <Headphones className="w-3.5 h-3.5" />, show: generatedChapters.length > 0 },
     { id: "cover", label: "Cover", icon: <ImageIcon className="w-3.5 h-3.5" />, show: !!outline },
+    { id: "production", label: "Production", icon: <ClipboardCheck className="w-3.5 h-3.5" />, show: !!outline },
     { id: "publish", label: "Publish", icon: <Package className="w-3.5 h-3.5" />, show: !!outline },
   ];
 
@@ -423,8 +431,21 @@ const BookCreator = () => {
             ) : view === "cover" ? (
               <div>
                 <h2 className="font-serif text-2xl font-bold mb-1">Cover design</h2>
-                <p className="text-sm text-muted-foreground font-sans mb-5">Generate a front and back cover with AI, guided by your art direction.</p>
-                <CoverGenerator title={outline?.title || bookTitle} subtitle={outline?.subtitle} />
+                <p className="text-sm text-muted-foreground font-sans mb-5">Generate a front and back cover with AI, guided by your art direction. ISBN &amp; publisher (set under Production) shape the barcode and imprint.</p>
+                <CoverGenerator title={outline?.title || bookTitle} subtitle={outline?.subtitle || meta.subtitle} isbn={meta.isbn} publisher={meta.publisher} onGenerated={() => setCoverDone(true)} />
+              </div>
+            ) : view === "production" ? (
+              <div>
+                <h2 className="font-serif text-2xl font-bold mb-1">Production center</h2>
+                <p className="text-sm text-muted-foreground font-sans mb-5">Everything that turns this manuscript into a distributable book — metadata, ISBN, print specs, and how ready it is to publish.</p>
+                <ProductionPanel
+                  meta={meta}
+                  setMeta={setMeta}
+                  bookTitle={outline?.title || bookTitle}
+                  manuscriptComplete={chapters.length > 0 && generatedChapters.length === chapters.length}
+                  coverDone={coverDone}
+                  parentId={autosave.docId}
+                />
               </div>
             ) : view === "publish" && outline ? (
               <BookPublishingPackage outline={outline} />
