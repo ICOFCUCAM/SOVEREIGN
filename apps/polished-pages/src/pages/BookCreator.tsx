@@ -140,7 +140,7 @@ const BookCreator = () => {
     if (!bookTitle.trim()) return;
     setIsGeneratingOutline(true);
     try {
-      const gk = await buildGenerationKnowledge(knowledge, knowledgeDocIds);
+      const gk = await buildGenerationKnowledge(knowledge, knowledgeDocIds, `${bookTitle} ${genre} ${targetAudience}`.trim());
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-book-outline`,
         {
@@ -201,7 +201,7 @@ const BookCreator = () => {
     try {
       // Collect previous chapter summaries for anti-repetition
       const previousChapters = currentChapters.slice(0, index).filter((c) => c.content).map((c) => c.content!.substring(0, 600));
-      const gk = await buildGenerationKnowledge(knowledge, knowledgeDocIds);
+      const gk = await buildGenerationKnowledge(knowledge, knowledgeDocIds, `${ch.title} ${ch.summary ?? ""} ${(ch.keyPoints ?? []).join(" ")}`.trim());
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-book-chapter`,

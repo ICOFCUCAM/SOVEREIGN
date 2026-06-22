@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { fetchPlanStatus, type PlanStatus } from "@/lib/session";
 import { planAtLeast, planDisplayName } from "@/lib/plans";
-import { listKnowledgeBases, saveKnowledgeBase, deleteKnowledgeBase, listKnowledgeDocs, saveKnowledgeDoc, deleteKnowledgeDoc, type KnowledgeBase, type KnowledgeDoc } from "@/lib/knowledge";
+import { listKnowledgeBases, saveKnowledgeBase, deleteKnowledgeBase, listKnowledgeDocs, saveKnowledgeDoc, deleteKnowledgeDoc, indexKnowledgeDoc, type KnowledgeBase, type KnowledgeDoc } from "@/lib/knowledge";
 import { extractFileText } from "@/lib/extract-file-text";
 import { myOrganizations, can, type OrgSummary } from "@/lib/organizations";
 
@@ -53,6 +53,7 @@ const KnowledgePanel = ({ knowledge, setKnowledge, activeDocIds = [], onActiveDo
           const text = await extractFileText(file);
           if (!text.trim()) { toast({ title: `No text found in ${file.name}`, variant: "destructive" }); continue; }
           const id = await saveKnowledgeDoc({ name: file.name, content: text });
+          indexKnowledgeDoc(id, text); // chunk + embed for vector search (background)
           added.push(id);
         } catch (e) {
           toast({ title: `Could not add ${file.name}`, description: e instanceof Error ? e.message : "", variant: "destructive" });

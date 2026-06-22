@@ -61,23 +61,43 @@ async function knowledgeDocsText(ids: string[]): Promise<{ id: string; name: str
   return (Array.isArray(data) ? data : []) as { id: string; name: string; content: string }[];
 }
 
+// Chunk + embed a document for vector search (best-effort, runs after upload).
+export async function indexKnowledgeDoc(docId: string, content: string): Promise<void> {
+  try { await supabase.functions.invoke("embed-knowledge-doc", { body: { docId, content } }); } catch { /* indexing is best-effort */ }
+}
+
+// Vector-search the selected documents for the passages most relevant to a query.
+async function retrieveKnowledge(docIds: string[], query: string): Promise<string> {
+  try {
+    const { data } = await supabase.functions.invoke("knowledge-retrieve", { body: { docIds, query, k: 8 } });
+    return ((data as { context?: string })?.context) ?? "";
+  } catch { return ""; }
+}
+
 interface RuleSet { rules: string; terminology: string; forbidden: string }
 const hasAny = (k: RuleSet) => !!(k.rules.trim() || k.terminology.trim() || k.forbidden.trim());
 
 // Build the knowledge object to send to a generator: fold the selected reference
-// documents into the rules as grounding material (capped to a context budget),
-// so the existing generators inject it with no redeploy.
-export async function buildGenerationKnowledge(knowledge: RuleSet | null, docIds: string[]): Promise<RuleSet | null> {
+// documents into the rules as grounding material. With a query (e.g. a chapter
+// brief) it uses vector search to pull only the most relevant passages; without
+// one it falls back to the documents' full text (capped to a context budget).
+export async function buildGenerationKnowledge(knowledge: RuleSet | null, docIds: string[], query?: string): Promise<RuleSet | null> {
   const k = knowledge ?? { rules: "", terminology: "", forbidden: "" };
   if (!docIds.length) return hasAny(k) ? k : null;
-  const docs = await knowledgeDocsText(docIds).catch(() => []);
-  if (!docs.length) return hasAny(k) ? k : null;
   const BUDGET = 60000;
-  let ref = "REFERENCE MATERIAL — draw on these source documents and stay fully consistent with them (facts, terminology, positions, prior books):\n\n";
-  for (const d of docs) {
-    if (ref.length >= BUDGET) break;
-    const head = `--- ${d.name} ---\n`;
-    ref += head + d.content.slice(0, Math.max(0, BUDGET - ref.length - head.length)) + "\n\n";
+  let refText = "";
+  if (query && query.trim()) refText = await retrieveKnowledge(docIds, query.trim());
+  if (!refText) {
+    const docs = await knowledgeDocsText(docIds).catch(() => []);
+    let acc = "";
+    for (const d of docs) {
+      if (acc.length >= BUDGET) break;
+      const head = `--- ${d.name} ---\n`;
+      acc += head + d.content.slice(0, Math.max(0, BUDGET - acc.length - head.length)) + "\n\n";
+    }
+    refText = acc;
   }
+  if (!refText.trim()) return hasAny(k) ? k : null;
+  const ref = "REFERENCE MATERIAL — draw on these source passages and stay fully consistent with them (facts, terminology, positions, prior books):\n\n" + refText.slice(0, BUDGET);
   return { rules: [k.rules, ref].filter((s) => s && s.trim()).join("\n\n"), terminology: k.terminology, forbidden: k.forbidden };
 }
