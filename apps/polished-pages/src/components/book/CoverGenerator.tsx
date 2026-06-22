@@ -32,7 +32,7 @@ const PRO_PERKS = [
 // AI cover + back-cover design via OpenAI gpt-image-1 (the platform's image
 // engine; Claude has no image model). The author fills in the title and art
 // direction before generating. Cover design is a Pro-plan capability.
-const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle }: { title?: string; subtitle?: string }) => {
+const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle, isbn, publisher, onGenerated }: { title?: string; subtitle?: string; isbn?: string; publisher?: string; onGenerated?: () => void }) => {
   const { toast } = useToast();
   const [status, setStatus] = useState<PlanStatus | null>(null);
   const [title, setTitle] = useState(initialTitle ?? "");
@@ -66,7 +66,7 @@ const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle }: { ti
         setBatch({ label: lang, done: i, total: coverLangs.length });
         let tTitle = title;
         if (title.trim()) { try { tTitle = (await translateLocalize({ content: title, targetLanguage: lang, mode: "translate" })).replace(/^#+\s*/, "").trim(); } catch { /* keep original */ } }
-        out[lang] = await coverFetch({ side: "front", instruction: instr.front, title: tTitle, subtitle, author, blurb });
+        out[lang] = await coverFetch({ side: "front", instruction: instr.front, title: tTitle, subtitle, author, blurb, isbn, publisher });
         setBatchImg({ ...out });
         setBatch({ label: lang, done: i + 1, total: coverLangs.length });
       }
@@ -88,7 +88,7 @@ const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle }: { ti
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-book-cover`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: await authHeader() },
-        body: JSON.stringify({ side, instruction: instr[side], title, subtitle, author, blurb }),
+        body: JSON.stringify({ side, instruction: instr[side], title, subtitle, author, blurb, isbn, publisher }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -96,6 +96,7 @@ const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle }: { ti
       }
       const data = await res.json();
       setImg((p) => ({ ...p, [side]: data.image as string }));
+      onGenerated?.();
     } catch (e) {
       toast({ title: "Could not generate cover", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally {

@@ -28,6 +28,8 @@ Deno.serve(async (req) => {
     const subtitle: string = (body.subtitle || "").toString();
     const author: string = (body.author || "").toString();
     const blurb: string = (body.blurb || "").toString();
+    const isbn: string = (body.isbn || "").toString().trim();
+    const publisher: string = (body.publisher || "").toString().trim();
 
     if (!instruction.trim() && !title.trim()) {
       return new Response(JSON.stringify({ error: "Describe the cover you want, or provide a title." }), {
@@ -35,10 +37,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    // The barcode area is only meaningful with an ISBN. Without one, an empty
+    // white rectangle looks like an unfinished placeholder — so explicitly
+    // suppress it; with an ISBN, leave a real space for the printed barcode.
+    const barcode = isbn
+      ? ` Leave a clean white rectangular area at the bottom-right sized for a printed ISBN barcode (do not draw the barcode itself).`
+      : ` Do NOT include any barcode, barcode box, white rectangle or empty placeholder area anywhere — keep the whole cover as finished, intentional design.`;
+    const imprint = publisher ? ` Include a small, tasteful publisher imprint mark reading "${publisher.slice(0, 60)}" near the bottom.` : "";
+
     const base =
       side === "front"
         ? `Design a professional, premium FRONT BOOK COVER, portrait orientation, print-ready.${title ? ` Title text to feature prominently: "${title.slice(0, 120)}".` : ""}${subtitle ? ` Subtitle: "${subtitle.slice(0, 160)}".` : ""}${author ? ` Author name: "${author.slice(0, 80)}".` : ""} Strong typographic hierarchy, balanced composition, bookstore-quality.`
-        : `Design a professional BACK BOOK COVER, portrait orientation, print-ready, visually consistent with a premium front cover.${blurb ? ` Leave a clean area for this back-cover blurb text: "${blurb.slice(0, 400)}".` : " Leave a clean area for back-cover blurb text."} Include a subtle area suggesting a barcode at the bottom. Restrained, elegant.`;
+        : `Design a professional BACK BOOK COVER, portrait orientation, print-ready, visually consistent with a premium front cover.${blurb ? ` Leave a clean area for this back-cover blurb text: "${blurb.slice(0, 400)}".` : " Leave a clean area for back-cover blurb text."}${barcode}${imprint} Restrained, elegant.`;
 
     const prompt = `${base}${instruction.trim() ? ` Art direction from the author: ${instruction.slice(0, 1200)}.` : ""} High production value, sharp, professional book-cover design.`;
 
