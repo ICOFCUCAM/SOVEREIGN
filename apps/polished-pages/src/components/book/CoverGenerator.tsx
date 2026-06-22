@@ -221,7 +221,7 @@ const CoverGenerator = ({ title: initialTitle, subtitle: initialSubtitle, isbn, 
         </div>
       )}
       {img.front && (
-        <CoverPackage frontSrc={img.front} title={title || "Book"} author={author} subtitle={subtitle} pageCount={pageCount} paper={paper} trimSize={trimSize} />
+        <CoverPackage frontSrc={img.front} backSrc={img.back} title={title || "Book"} author={author} subtitle={subtitle} pageCount={pageCount} paper={paper} trimSize={trimSize} />
       )}
       {/* Multi-language covers: one front cover per language with the title translated. */}
       <Card className="border-border">

@@ -1,17 +1,19 @@
 import { useState } from "react";
-import { Layers, Loader2, Download } from "lucide-react";
+import { Layers, Loader2, Download, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { composeCoverPackage, type ComposedAsset } from "@/lib/cover-package";
+import { composeFullWrapPdf } from "@/lib/export-cover-wrap";
 
 const download = (src: string, name: string) => { const a = document.createElement("a"); a.href = src; a.download = name; a.click(); };
 
 // The Cover Package: from one front cover + the book's metadata, Polished Pages
 // composes the production and marketing derivatives (spine, marketplace
-// thumbnail, audiobook cover, social square, marketing banner). Pure publishing
-// layer — no image generation.
-const CoverPackage = ({ frontSrc, title, author, subtitle, pageCount, paper, trimSize }: {
+// thumbnail, audiobook cover, social square, marketing banner) and a print-ready
+// full-wrap PDF (back + spine + front). Pure publishing layer — no image generation.
+const CoverPackage = ({ frontSrc, backSrc, title, author, subtitle, pageCount, paper, trimSize }: {
   frontSrc: string;
+  backSrc?: string | null;
   title: string;
   author?: string;
   subtitle?: string;
@@ -21,6 +23,7 @@ const CoverPackage = ({ frontSrc, title, author, subtitle, pageCount, paper, tri
 }) => {
   const [assets, setAssets] = useState<ComposedAsset[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [wrapBusy, setWrapBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const pages = Number(pageCount) || 0;
 
@@ -33,6 +36,15 @@ const CoverPackage = ({ frontSrc, title, author, subtitle, pageCount, paper, tri
     } finally { setBusy(false); }
   };
 
+  const buildWrap = async () => {
+    setWrapBusy(true); setErr(null);
+    try {
+      await composeFullWrapPdf({ frontSrc, backSrc, title, author, pages, trimId: trimSize || "6x9", paper: paper || "Cream", filename: `${title || "book"}-full-wrap` });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Could not build the full-wrap PDF.");
+    } finally { setWrapBusy(false); }
+  };
+
   return (
     <div className="mt-8 border-t border-border/60 pt-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -43,6 +55,9 @@ const CoverPackage = ({ frontSrc, title, author, subtitle, pageCount, paper, tri
         <div className="flex gap-2">
           <Button variant="hero" size="sm" disabled={busy} onClick={build}>
             {busy ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Layers className="mr-1.5 h-4 w-4" />} {assets ? "Rebuild package" : "Build cover package"}
+          </Button>
+          <Button variant="heroOutline" size="sm" disabled={wrapBusy || pages === 0} onClick={buildWrap} title={pages === 0 ? "Set a page count under Production first" : "Print-ready back + spine + front PDF"}>
+            {wrapBusy ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <FileDown className="mr-1.5 h-4 w-4" />} Full-wrap PDF
           </Button>
           {assets && assets.length > 0 && (
             <Button variant="heroOutline" size="sm" onClick={() => assets.forEach((a) => download(a.src, a.filename))}><Download className="mr-1.5 h-4 w-4" /> Download all</Button>
