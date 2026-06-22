@@ -19,6 +19,7 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState(doc.category ?? CATALOG_CATEGORIES[0]);
   const [author, setAuthor] = useState("");
+  const [imprint, setImprint] = useState("");
   const [license, setLicense] = useState(CATALOG_LICENSES[2]);
   const [price, setPrice] = useState(((doc.price_cents ?? 0) / 100).toFixed(2));
   const [busy, setBusy] = useState(false);
@@ -47,7 +48,7 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
   const publish = async (listed: boolean) => {
     setBusy(true);
     try {
-      const t = await publishDocument(doc.id, { listed, category, priceCents, author, license });
+      const t = await publishDocument(doc.id, { listed, category, priceCents, author, license, imprint });
       // In the same action: assign to an organization and (optionally) a repository.
       if (listed && orgId) {
         await setDocumentOrg(doc.id, orgId);
@@ -84,6 +85,10 @@ const PublishDialog = ({ doc, trigger, onChanged }: { doc: DocSummary; trigger: 
           <div className="space-y-1.5">
             <Label className="font-sans text-xs">Publisher / author name (shown publicly)</Label>
             <Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="e.g. Bright Start Classroom" maxLength={80} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="font-sans text-xs">Imprint <span className="text-muted-foreground/60">(optional)</span></Label>
+            <Input value={imprint} onChange={(e) => setImprint(e.target.value)} placeholder="A publishing line, e.g. African Voices Series" maxLength={80} />
           </div>
           <div className="space-y-1.5">
             <Label className="font-sans text-xs">License</Label>
