@@ -18,6 +18,8 @@ import { localizeMarkdown, markdownEdition } from "@/lib/localize";
 import { saveDocument } from "@/lib/documents";
 import { saveAssessment } from "@/lib/assessment-bank";
 import { logAiActivity } from "@/lib/ai-activity-log";
+import KnowledgeSelect from "@/components/book/KnowledgeSelect";
+import type { BookKnowledge } from "@/components/book/KnowledgePanel";
 
 // Document types that belong in the reusable Assessment Bank.
 const BANKABLE = new Set<SchoolDocType>(["quiz", "exam", "assessment", "worksheet", "answer-key", "marking-guide", "homework-pack", "revision", "exam-prep"]);
@@ -102,12 +104,13 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
 
   const required = config.fields.filter((f) => f.required);
   const canRun = required.every((f) => (vals[f.key as string] ?? "").trim().length > 0) && !progress;
+  const [knowledge, setKnowledge] = useState<BookKnowledge | null>(null);
   const titleBase = `${vals.subject || vals.topic || config.badge}${vals.grade ? ` (${vals.grade})` : ""}`;
 
   const baseInput = (): Omit<SchoolInput, "docType"> => ({
     grade: vals.grade, subject: vals.subject, topic: vals.topic, country: vals.country,
     term: vals.term, year: vals.year, language: vals.language,
-    exerciseTypes: multi.exerciseTypes,
+    exerciseTypes: multi.exerciseTypes, knowledge,
   });
 
   const run = async () => {
@@ -266,6 +269,7 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
                 </select>
               </div>
             )}
+            <KnowledgeSelect onChange={setKnowledge} />
           </CardContent>
         </Card>
 

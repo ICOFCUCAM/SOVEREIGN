@@ -8,6 +8,22 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Project Knowledge Base / Author Memory — highest-priority rules, terminology
+// and forbidden content injected at the top of the system prompt.
+function knowledgeBlock(k: unknown): string {
+  if (!k || typeof k !== "object") return "";
+  const kb = k as { rules?: unknown; terminology?: unknown; forbidden?: unknown };
+  const parts: string[] = [];
+  const rules = String(kb.rules ?? "").trim();
+  const terms = String(kb.terminology ?? "").trim();
+  const forbidden = String(kb.forbidden ?? "").trim();
+  if (rules) parts.push("WRITING RULES (follow exactly):\n" + rules);
+  if (terms) parts.push("APPROVED TERMINOLOGY (always use the preferred term):\n" + terms);
+  if (forbidden) parts.push("FORBIDDEN — never use these names, terms or concepts under any circumstances. If one would naturally appear, rephrase using the approved terminology:\n" + forbidden);
+  if (!parts.length) return "";
+  return "=== PROJECT KNOWLEDGE BASE — HIGHEST PRIORITY. These rules override all default style and must be obeyed. ===\n" + parts.join("\n\n") + "\n=== END KNOWLEDGE BASE ===\n\n";
+}
+
 // School-content engine. Generates ONE classroom-ready document per call so a
 // pack (textbook + workbook + teacher guide + quiz + answer key, or a full
 // curriculum) is produced as a sequence of bounded calls. Documents that must
@@ -90,7 +106,7 @@ serve(async (req) => {
       exerciseTypes && `- Preferred exercise types: ${exerciseTypes}`,
     ].filter(Boolean).join("\n");
 
-    const system = `You are an experienced curriculum writer and teacher creating accurate, classroom-ready materials.
+    const system = knowledgeBlock(b.knowledge) + `You are an experienced curriculum writer and teacher creating accurate, classroom-ready materials.
 
 ${PROMPTS[docType]}
 

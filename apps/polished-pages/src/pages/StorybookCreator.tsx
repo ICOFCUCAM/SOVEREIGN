@@ -25,6 +25,8 @@ import { localizeStrings } from "@/lib/localize";
 import { savePictureBook } from "@/lib/picture-book-save";
 import { getDocument } from "@/lib/documents";
 import type { PictureBookData } from "@/components/children/PictureBookView";
+import KnowledgeSelect from "@/components/book/KnowledgeSelect";
+import type { BookKnowledge } from "@/components/book/KnowledgePanel";
 
 // Auto-save the story text + illustration prompts (NOT the base64 images, which
 // would blow the localStorage quota) so a refresh or crash never loses a
@@ -80,6 +82,7 @@ const StorybookCreator = () => {
   const [language, setLanguage] = useState("");
   const [educationalObjective, setEducationalObjective] = useState("");
   const [culturalSetting, setCulturalSetting] = useState("");
+  const [knowledge, setKnowledge] = useState<BookKnowledge | null>(null);
 
   const [seriesName, setSeriesName] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
@@ -131,7 +134,7 @@ const StorybookCreator = () => {
   const create = async () => {
     setCreating(true);
     try {
-      const input: StoryInput = { childName, childAge, readingLevel, theme, moralLesson, characters, pageCount, storyType, language, educationalObjective, culturalSetting };
+      const input: StoryInput = { childName, childAge, readingLevel, theme, moralLesson, characters, pageCount, storyType, language, educationalObjective, culturalSetting, knowledge };
       const b = await generateStorybook(input);
       baseBook.current = b;
       editionCache.current = {};
@@ -451,6 +454,7 @@ const StorybookCreator = () => {
             </CardContent>
           </Card>
 
+          <KnowledgeSelect onChange={setKnowledge} />
           <Button variant="hero" size="lg" className="w-full py-6" onClick={create} disabled={!canCreate}>
             {creating ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Writing the story…</> : <><Sparkles className="w-5 h-5 mr-2" /> Create story</>}
           </Button>
