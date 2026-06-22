@@ -166,9 +166,9 @@ export async function adminFeature(token: string, featured: boolean): Promise<vo
 }
 
 // Publish (or unpublish) a document to the public catalog. Returns the share token.
-export async function publishDocument(id: string, opts: { listed: boolean; category?: string; priceCents?: number; author?: string; license?: string }): Promise<string | null> {
+export async function publishDocument(id: string, opts: { listed: boolean; category?: string; priceCents?: number; author?: string; license?: string; imprint?: string }): Promise<string | null> {
   const { data, error } = await rpc().rpc("polished_publish", {
-    p_id: id, p_listed: opts.listed, p_category: opts.category ?? null, p_price_cents: opts.priceCents ?? 0, p_author: opts.author ?? null, p_license: opts.license ?? null,
+    p_id: id, p_listed: opts.listed, p_category: opts.category ?? null, p_price_cents: opts.priceCents ?? 0, p_author: opts.author ?? null, p_license: opts.license ?? null, p_imprint: opts.imprint ?? null,
   });
   if (error) throw new Error(error.message || "Could not publish.");
   return (data as string) ?? null;
@@ -204,6 +204,7 @@ export interface SharedDoc {
   download_count?: number;
   edition_language?: string | null;
   created_at?: string;
+  imprint?: string | null;
   org_slug?: string | null;
   org_name?: string | null;
   org_verified?: boolean;

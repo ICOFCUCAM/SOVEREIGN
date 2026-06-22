@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Sparkles, Loader2, BadgeCheck, Building2, Eye, Download } from "lucide-react";
+import { Sparkles, Loader2, BadgeCheck, Building2, Eye, Download, BookMarked } from "lucide-react";
 import { getShared, recordView, type SharedDoc } from "@/lib/documents";
 import { BRAND } from "@/lib/tools";
 import type { CvData } from "@/lib/cv-data";
@@ -82,6 +82,9 @@ const SharedDocument = () => {
                       <Building2 className="h-4 w-4" /> {doc.org_name}
                       {doc.org_verified && <BadgeCheck className="h-4 w-4 text-primary" aria-label="Verified institution" />}
                     </Link>
+                  )}
+                  {doc.imprint && (
+                    <span className="inline-flex items-center gap-1.5" title="Imprint"><BookMarked className="h-4 w-4" /> {doc.imprint}</span>
                   )}
                   <span className="inline-flex items-center gap-1.5"><Eye className="h-4 w-4" /> {doc.view_count ?? 0} {(doc.view_count ?? 0) === 1 ? "view" : "views"}</span>
                   {(doc.download_count ?? 0) > 0 && <span className="inline-flex items-center gap-1.5"><Download className="h-4 w-4" /> {doc.download_count} {doc.download_count === 1 ? "download" : "downloads"}</span>}
