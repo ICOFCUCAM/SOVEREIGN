@@ -64,10 +64,10 @@ const Landing: React.FC = () => {
           {/* narrative + charter */}
           <div className="max-w-xl">
             <p className="mb-8 text-[12.5px] font-semibold uppercase tracking-[0.34em] text-gold-400">Institutional Publication Infrastructure</p>
-            <h1 className="font-serif text-4xl font-bold leading-[1.06] tracking-[-0.01em] sm:text-[3.25rem] 2xl:text-[3.6rem]">
+            <h1 className="font-serif text-[2.65rem] font-bold leading-[1.03] tracking-[-0.022em] sm:text-[3.25rem] 2xl:text-[3.6rem]">
               From Information<br />to <span className="text-gold-400">Official Record.</span>
             </h1>
-            <p className="mt-7 max-w-md text-[17px] leading-relaxed text-white/60">
+            <p className="mt-7 max-w-[27rem] text-[17px] leading-[1.7] text-white/60">
               Sovereign Dispatch is the operating system for institutional publication — the authority that turns
               information into a sealed, governed and permanent record.
             </p>
