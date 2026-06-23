@@ -33,6 +33,30 @@ const Landing: React.FC = () => {
   const nav = useNavigate();
   // Restrained reveal — content sections rise gently into view once, then settle.
   useReveal();
+  // Whisper-subtle pointer parallax on the instrument — a few degrees of physical
+  // presence on fine pointers only, fully disabled under reduced-motion.
+  const heroRef = React.useRef<HTMLDivElement>(null);
+  const artRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const hero = heroRef.current, art = artRef.current;
+    if (!hero || !art) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const onMove = (e: PointerEvent) => {
+      const r = hero.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        art.style.transform = `perspective(1600px) rotateY(${px * 3}deg) rotateX(${-py * 2.4}deg) translate3d(${px * 8}px, ${py * 6}px, 0)`;
+      });
+    };
+    const onLeave = () => { cancelAnimationFrame(raf); art.style.transform = ""; };
+    hero.addEventListener("pointermove", onMove);
+    hero.addEventListener("pointerleave", onLeave);
+    return () => { hero.removeEventListener("pointermove", onMove); hero.removeEventListener("pointerleave", onLeave); cancelAnimationFrame(raf); };
+  }, []);
   return (
     <div className="relative bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
@@ -70,7 +94,7 @@ const Landing: React.FC = () => {
       <div id="top" className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_45%_at_72%_32%,rgba(233,200,120,0.055),transparent_72%)]" aria-hidden />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
-        <div className="relative z-10 mx-auto grid min-h-0 max-w-[1540px] grid-cols-1 items-center gap-12 px-5 py-16 sm:min-h-[760px] sm:gap-14 sm:px-8 sm:py-20 lg:px-12 xl:min-h-[980px] xl:grid-cols-[38fr_62fr] xl:gap-12">
+        <div ref={heroRef} className="relative z-10 mx-auto grid min-h-0 max-w-[1540px] grid-cols-1 items-center gap-12 px-5 py-16 sm:min-h-[760px] sm:gap-14 sm:px-8 sm:py-20 lg:px-12 xl:min-h-[980px] xl:grid-cols-[38fr_62fr] xl:gap-12">
           {/* narrative + charter */}
           <div className="hero-stagger max-w-xl">
             <div className="mb-8 flex items-center gap-3">
@@ -114,7 +138,9 @@ const Landing: React.FC = () => {
           </div>
           {/* the instrument — the dominant visual object */}
           <div className="relative flex justify-center xl:justify-end">
-            <RecordArtifact className="w-full max-w-[420px] xl:max-w-[700px]" />
+            <div ref={artRef} className="w-full max-w-[420px] transition-transform duration-200 ease-out [transform-style:preserve-3d] will-change-transform xl:max-w-[700px]">
+              <RecordArtifact className="w-full" />
+            </div>
           </div>
         </div>
         {/* scroll cue — a quiet invitation to read on */}
