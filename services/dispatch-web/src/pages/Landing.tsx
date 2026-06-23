@@ -212,10 +212,10 @@ const Landing: React.FC = () => {
           {["Submit", "Govern", "Approve", "Render", "Publish", "Preserve"].map((n, i, a) => (
             <React.Fragment key={n}>
               <div className="flex items-center gap-2.5">
-                <span className="tnum font-mono text-[10px] text-gold-400/70">{`0${i + 1}`}</span>
-                <span className="text-[11.5px] font-semibold uppercase tracking-[0.12em] text-white/65">{n}</span>
+                <span className="tnum font-mono text-[10px] text-gold-400/75">{`0${i + 1}`}</span>
+                <span className="text-[11.5px] font-semibold uppercase tracking-[0.12em] text-white/70">{n}</span>
               </div>
-              {i < a.length - 1 && <div className="mx-3 h-px w-6 bg-gradient-to-r from-gold-500/35 to-gold-500/10 sm:w-9" />}
+              {i < a.length - 1 && <div className="lc-connector mx-3 h-px w-6 bg-gradient-to-r from-gold-500/40 to-gold-500/10 sm:w-9" />}
             </React.Fragment>
           ))}
         </div>
