@@ -37,28 +37,29 @@ for (let x = 120; x < 900; x += 8.5) for (let y = 70; y < 450; y += 8.5)
   if (POLYS.some((p) => inPoly(x, y, p))) MAP_DOTS.push({ nx: (x - 120) / 780, ny: (y - 70) / 380 });
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
-interface Cord { startY: number; off: number; amp: number; freq: number; phase: number }
+interface Cord { startY: number; off: number; arc: number; wob: number; phase: number }
 const CORDS: Cord[] = [];
 let seed = 7;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) & 0x7fffffff; return seed / 0x7fffffff; };
-// Each institution is a coherent RIBBON: its cords share frequency + phase and
-// are merely offset in baseline, so they flow as ordered, parallel silk waves
-// (not a tangle). Bands differ in phase/frequency → distinct layered wave groups.
+// Benchmark rays: smooth single-arc sweeps converging at Submit. Upper bands bow
+// UP, lower bands bow DOWN, the middle runs straight — forming a converging lens.
+// Outer cords arc more, so each institution reads as a nested set of silk arcs.
 BANDS.forEach((b, bi) => {
-  const n = [13, 11, 9, 11, 13][bi];
-  const freq = 1.5 + bi * 0.12;
-  const phase = bi * 1.05 + 0.4;
-  const bandAmp = 0.045 + Math.abs(bi - 2) * 0.012;
+  const dir = bi < 2 ? -1 : bi > 2 ? 1 : 0;
+  const n = [11, 10, 8, 10, 11][bi];
+  const baseArc = 0.05 + Math.abs(bi - 2) * 0.052;
   for (let k = 0; k < n; k++) {
-    const off = (k - (n - 1) / 2) * 0.011;
-    CORDS.push({ startY: b, off, amp: bandAmp * (0.85 + rnd() * 0.3), freq, phase: phase + k * 0.05 });
+    const off = (k - (n - 1) / 2) * 0.012;
+    const arc = dir * (baseArc + Math.abs(off) * 1.6);
+    CORDS.push({ startY: b, off, arc, wob: 0.006 + rnd() * 0.01, phase: rnd() * 6.28 });
   }
 });
 const pointOn = (c: Cord, t: number, W: number, H: number): [number, number] => {
   const x = SX0 + (CX - SX0) * t;
-  const baseY = (c.startY + c.off) + (CY + c.off * 0.25 - (c.startY + c.off)) * smooth(t);
-  const y = baseY + Math.sin(t * c.freq * 6.283 + c.phase) * c.amp * (1 - t * 0.7);
-  return [x * W, y * H];
+  const baseY = (c.startY + c.off) + (CY + c.off * 0.2 - (c.startY + c.off)) * smooth(t);
+  const arc = c.arc * Math.sin(t * Math.PI);                 // single graceful sweep
+  const wob = c.wob * Math.sin(t * 9 + c.phase) * t * (1 - t); // faint life, 0 at ends
+  return [x * W, (baseY + arc + wob) * H];
 };
 
 interface Code { c: number; t: number; sp: number; size: number; br: boolean }
