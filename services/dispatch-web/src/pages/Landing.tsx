@@ -289,11 +289,13 @@ const Landing: React.FC = () => {
             ["Education", "Universities · Research bodies", "Confer and preserve official records — credentials, resolutions and research outputs — under the institution's own seal."],
             ["Enterprise", "Regulated industries · Critical infrastructure", "Turn board and compliance decisions into permanent, defensible records a regulator can trust."],
           ].map(([cat, who, story]) => (
-            <div key={cat} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/30 p-7">
+            <div key={cat} className="group/i relative overflow-hidden rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/30">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent transition duration-500 group-hover/i:via-gold-500/40" aria-hidden />
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                 <div className="text-[13px] font-bold uppercase tracking-[0.16em] text-gold-400/90">{cat}</div>
                 <div className="text-[11px] uppercase tracking-[0.1em] text-white/50">{who}</div>
               </div>
+              <div className="mt-4 h-px w-full bg-white/[0.07]" aria-hidden />
               <p className="mt-4 text-[14px] leading-relaxed text-white/60">{story}</p>
             </div>
           ))}
