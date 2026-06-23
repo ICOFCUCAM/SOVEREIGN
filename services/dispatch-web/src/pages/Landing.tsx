@@ -213,7 +213,7 @@ const Landing: React.FC = () => {
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement</p>
           <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">Ready for institutional evaluation.</h2>
-          <p className="mt-5 mx-auto max-w-[42rem] text-lg leading-[1.7] text-white/55">The architecture, security and procurement materials your evaluation team needs — self-serve, before any human contact.</p>
+          <p className="mx-auto mt-5 max-w-[40rem] text-lg leading-[1.7] text-white/55">Architecture, security and procurement materials — self-serve, before any human contact.</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button onClick={() => nav(PROCUREMENT_ROUTE)}
               className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-8 py-4 text-sm font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_26px_-10px_rgba(0,0,0,0.65)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
