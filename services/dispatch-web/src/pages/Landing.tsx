@@ -41,8 +41,14 @@ const Landing: React.FC = () => {
     return () => io.disconnect();
   }, []);
   return (
-    <div className="bg-[#070707] text-white">
+    <div className="relative bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
+      {/* film grain — fine tactile texture over the dark field (no flat-black banding) */}
+      <div
+        className="pointer-events-none fixed inset-0 z-[1] opacity-[0.038] mix-blend-soft-light"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }}
+        aria-hidden
+      />
 
       {/* ── sticky top nav ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/80 backdrop-blur-md shadow-[0_10px_30px_-22px_rgba(0,0,0,0.85)]">
