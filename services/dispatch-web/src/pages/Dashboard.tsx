@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { listDocuments, type DocListItem, type Lifecycle } from "../lib/api";
+import { listDocuments, audit, type DocListItem, type AuditEvent, type Lifecycle } from "../lib/api";
 import { Card, ClassBadge, LifecycleBadge, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 
@@ -26,6 +26,7 @@ const ALL = [...PIPELINE, ...ASIDE];
 const Dashboard: React.FC = () => {
   const { has } = useAuth();
   const [counts, setCounts] = useState<Record<string, DocListItem[]>>({});
+  const [activity, setActivity] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
@@ -40,8 +41,12 @@ const Dashboard: React.FC = () => {
       } catch (e) { if (live) setErr(e instanceof Error ? e.message : "load failed"); }
       finally { if (live) setLoading(false); }
     })();
+    // Recent activity feed — only for principals with the audit scope.
+    if (has("dispatch:audit")) {
+      audit({ limit: 12 }).then((r) => { if (live) setActivity(r.events); }).catch(() => {});
+    }
     return () => { live = false; };
-  }, []);
+  }, [has]);
 
   const n = (s: string) => counts[s]?.length ?? 0;
   const inPipeline = PIPELINE.reduce((a, s) => a + n(s.state), 0);
@@ -89,14 +94,48 @@ const Dashboard: React.FC = () => {
         </div>
       </Card>
 
-      {has("dispatch:approve") && (
-        <Queue title="Needs your review" items={counts["in_review"] ?? []} empty="Nothing awaiting review." cta={{ to: "/console/review", label: "Open review queue →" }} />
-      )}
-      <Queue title="Ready to publish" items={counts["rendered"] ?? []} empty="Nothing waiting to publish." />
-      <Queue title="Recently published" items={counts["published"] ?? []} empty="No published documents yet." />
+      <div className={`grid gap-8 ${has("dispatch:audit") ? "lg:grid-cols-3" : ""}`}>
+        <div className={`space-y-8 ${has("dispatch:audit") ? "lg:col-span-2" : ""}`}>
+          {has("dispatch:approve") && (
+            <Queue title="Needs your review" items={counts["in_review"] ?? []} empty="Nothing awaiting review." cta={{ to: "/console/review", label: "Open review queue →" }} />
+          )}
+          <Queue title="Recently approved" items={counts["approved"] ?? []} empty="No documents awaiting render." />
+          <Queue title="Ready to publish" items={counts["rendered"] ?? []} empty="Nothing waiting to publish." />
+          <Queue title="Recently published" items={counts["published"] ?? []} empty="No published documents yet." />
+        </div>
+        {has("dispatch:audit") && <ActivityTimeline events={activity} />}
+      </div>
     </div>
   );
 };
+
+// Live activity feed from the append-only audit trail (auditor scope only).
+const ActivityTimeline: React.FC<{ events: AuditEvent[] }> = ({ events }) => (
+  <aside>
+    <div className="mb-2 flex items-center justify-between">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-white/60">Recent activity</h2>
+      <Link to="/console/audit" className="text-xs font-semibold text-seal-light hover:underline">Audit Center →</Link>
+    </div>
+    <Card className="p-4">
+      {events.length === 0 ? (
+        <p className="py-4 text-center text-sm text-white/30">No recorded events yet.</p>
+      ) : (
+        <ol className="space-y-0">
+          {events.map((e, i) => (
+            <li key={e.eventId} className="relative flex gap-3 pb-4 last:pb-0">
+              {i < events.length - 1 && <span className="absolute left-[5px] top-3.5 h-full w-px bg-white/8" aria-hidden />}
+              <span className="relative z-10 mt-1 h-2.5 w-2.5 shrink-0 rounded-full border border-emerald-400/60 bg-emerald-400/20" />
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-mono text-[12px] text-white/80">{e.action}</div>
+                <div className="text-[11px] text-white/40">{e.actor} · {timeAgo(e.ts)}</div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
+    </Card>
+  </aside>
+);
 
 const Queue: React.FC<{ title: string; items: DocListItem[]; empty: string; cta?: { to: string; label: string } }> = ({ title, items, empty, cta }) => (
   <section className="mb-8">

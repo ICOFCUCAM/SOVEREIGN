@@ -1,23 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { DeploymentMatrix } from "../components/DeploymentMatrix";
+import { HeroFlow, LastPublishedCard, LifecycleTrail, PublicAuditTimeline, CapabilitiesDashboard } from "../components/operations";
 import { PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE } from "../lib/routes";
 
 // Public marketing landing — the front door to Dispatch. A cinematic hero over
 // the institutional product story, with a sticky top nav that scrolls to the
 // six real sections (Overview, Capabilities, Workflow, Security, Integrations,
 // Resources). "Launch Dispatch" / "Log in" route into the gated console.
-const NAV = ["Overview", "Capabilities", "Workflow", "Security", "Deployment", "Compliance", "Institutions", "Procurement", "Integrations", "Resources"];
-
-const Feature: React.FC<{ icon: React.ReactNode; title: string; sub: string }> = ({ icon, title, sub }) => (
-  <div className="flex items-start gap-3">
-    <div className="mt-0.5 text-gold-400">{icon}</div>
-    <div>
-      <div className="text-sm font-bold leading-tight text-white">{title}</div>
-      <div className="text-xs leading-snug text-white/45">{sub}</div>
-    </div>
-  </div>
-);
+const NAV = ["Overview", "Capabilities", "Workflow", "Evidence", "Security", "Sovereignty", "Deployment", "Compliance", "Institutions", "Procurement", "Integrations", "Resources"];
 
 const SectionHead: React.FC<{ kicker: string; title: string; sub?: string }> = ({ kicker, title, sub }) => (
   <div className="mx-auto max-w-3xl text-center">
@@ -68,33 +59,64 @@ const Landing: React.FC = () => {
         <div className="pointer-events-none absolute inset-0 bg-cover bg-right bg-no-repeat" style={{ backgroundImage: "url(/Dispatchhero.png)" }} aria-hidden />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/85 to-transparent" aria-hidden />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
-        <div className="relative z-10 mx-auto flex min-h-[88vh] max-w-[1500px] items-center px-8 lg:px-12">
-          <div className="max-w-2xl py-16">
+        <div className="relative z-10 mx-auto grid min-h-[88vh] max-w-[1500px] grid-cols-1 items-center gap-12 px-8 py-16 lg:grid-cols-[minmax(0,1fr)_400px] lg:px-12">
+          <div className="max-w-2xl">
             <p className="mb-6 text-sm font-semibold uppercase tracking-[0.25em] text-gold-400">Institutional Publication Infrastructure</p>
             <h1 className="font-serif text-6xl font-bold leading-[1.02] tracking-tight sm:text-7xl">
               From Information<br />to <span className="text-gold-400">Official Record.</span>
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-relaxed text-white/60">
-              Generate briefings, board reports, policy papers, regulatory submissions, operational packages and official records at sovereign scale.
+              Sovereign Dispatch is the operating system for institutional publication — purpose-built to submit, govern,
+              approve, render, publish and archive with sovereignty, auditability and trust.
             </p>
-            <div className="mt-10 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-4">
-              <Feature icon={<ShieldCheck />} title="Trusted" sub="by Institutions That Cannot Fail" />
-              <Feature icon={<Lock />} title="Sovereign by Design" sub="Data. Residency. Operations." />
-              <Feature icon={<DocFlow />} title="Governed End to End" sub="From Draft to Publication." />
-              <Feature icon={<Seal />} title="Auditable Always" sub="Every Action. Every Version." />
-            </div>
             <div className="mt-11 flex flex-wrap items-center gap-4">
               <button onClick={() => nav("/console")}
                 className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
                 Launch Dispatch
                 <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
               </button>
-              <a href="#capabilities"
+              <a href={ARCHITECTURE_ROUTE}
                 className="inline-flex items-center rounded border border-white/20 px-7 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/40 hover:bg-white/5">
-                View Publication Infrastructure
+                View Architecture
               </a>
             </div>
+            <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-3 text-[13px] font-medium text-white/55">
+              <span className="inline-flex items-center gap-2"><ShieldCheck /> Sovereign by Design</span>
+              <span className="text-gold-400/30">·</span>
+              <span className="inline-flex items-center gap-2"><Lock /> Auditable by Default</span>
+              <span className="text-gold-400/30">·</span>
+              <span className="inline-flex items-center gap-2"><Bank /> Institution Ready</span>
+            </div>
           </div>
+          {/* governed-publication flow — institutions to official record */}
+          <div className="hidden lg:block"><HeroFlow /></div>
+        </div>
+      </div>
+
+      {/* ── value strip (capability statements, no metrics) ────────── */}
+      <div className="border-t border-white/5 px-8 py-10 lg:px-12">
+        <div className="mx-auto grid max-w-[1500px] gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {[
+            ["Sovereign Control", "Your data, your rules — end-to-end sovereignty by design."],
+            ["Auditable by Default", "Every action recorded, traceable and reviewable across the lifecycle."],
+            ["Data Residency", "Deploy where your data must live. You decide the boundaries."],
+            ["Deploy Your Way", "Cloud, Private, Sovereign, On-Premise or Air-Gapped — your choice."],
+            ["Built to Endure", "Security, isolation and operational resilience at the core."],
+            ["Institutional Support", "Engagement and implementation planning for mission-critical operations."],
+          ].map(([t, b]) => (
+            <div key={t} className="border-l border-gold-500/30 pl-4">
+              <div className="text-[12px] font-bold uppercase tracking-wide text-white">{t}</div>
+              <p className="mt-1.5 text-[12.5px] leading-snug text-white/50">{b}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── trusted by ─────────────────────────────────────────────── */}
+      <div className="border-t border-white/5 bg-white/[0.015] px-8 py-7 lg:px-12">
+        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.3em] text-white/35">Trusted by institutions that cannot fail</p>
+        <div className="mx-auto mt-4 flex max-w-[1100px] flex-wrap items-center justify-center gap-x-12 gap-y-2 text-[12px] font-semibold uppercase tracking-[0.25em] text-white/45">
+          {["Government", "Education", "Healthcare", "NGOs", "Enterprise"].map((s) => <span key={s}>{s}</span>)}
         </div>
       </div>
 
@@ -145,8 +167,21 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
+      {/* ── Evidence ───────────────────────────────────────────────── */}
+      <section id="evidence" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-24 lg:px-12">
+        <SectionHead kicker="Evidence" title="See the governance, not the promise."
+          sub="Every official record carries its own provenance — approval, render, publication and an immutable audit trail. This is what a published record looks like." />
+        <div className="mx-auto mt-14 grid max-w-5xl items-start gap-6 lg:grid-cols-2">
+          <LastPublishedCard />
+          <LifecycleTrail />
+        </div>
+        <div className="mx-auto mt-6 max-w-5xl">
+          <PublicAuditTimeline />
+        </div>
+      </section>
+
       {/* ── Security ───────────────────────────────────────────────── */}
-      <section id="security" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-24 lg:px-12">
+      <section id="security" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
         <SectionHead kicker="Security" title="Sovereign by design."
           sub="Built for classified and regulated material — isolation, clearance and an immutable record at the core, not bolted on." />
         <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -156,6 +191,15 @@ const Landing: React.FC = () => {
           <Card title="Least-privilege roles" body="Author, reviewer, approver, publisher, auditor, tenant-admin — each scoped to exactly what it may do." />
           <Card title="Data residency" body="Runs against its own database in the residency you choose; independent of any other platform." />
           <Card title="Client-credentials auth" body="Machine consumers authenticate with a client_id + secret for short-lived, scoped JWTs." />
+        </div>
+      </section>
+
+      {/* ── Sovereignty dashboard ──────────────────────────────────── */}
+      <section id="sovereignty" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-24 lg:px-12">
+        <SectionHead kicker="Sovereignty" title="Capabilities, not badges."
+          sub="What the platform actually does — across deployment, security and governance. Each capability is available by deployment model and verifiable during evaluation." />
+        <div className="mx-auto mt-14 max-w-5xl">
+          <CapabilitiesDashboard />
         </div>
       </section>
 
@@ -356,9 +400,8 @@ const DispatchMark: React.FC<{ className?: string }> = ({ className }) => (
 const Chevron: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 16 16" fill="none" className={className}><path d="M5 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
-const ShieldCheck = () => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 2.5V11c0 4.6-3 8-7 9.5C8 19 5 15.6 5 11V5.5L12 3z" stroke="currentColor" strokeWidth="1.5" /><path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>);
-const Lock = () => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" /><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" strokeWidth="1.5" /></svg>);
-const DocFlow = () => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /><path d="M14 3v4h4M9 13h6M9 16h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>);
-const Seal = () => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="5.5" stroke="currentColor" strokeWidth="1.5" /><path d="M9 14l-1.5 7 4.5-2.5L16.5 21 15 14" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /></svg>);
+const ShieldCheck = () => (<svg width="17" height="17" viewBox="0 0 24 24" fill="none" className="text-gold-400"><path d="M12 3l7 2.5V11c0 4.6-3 8-7 9.5C8 19 5 15.6 5 11V5.5L12 3z" stroke="currentColor" strokeWidth="1.5" /><path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>);
+const Lock = () => (<svg width="17" height="17" viewBox="0 0 24 24" fill="none" className="text-gold-400"><rect x="5" y="10" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" /><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" strokeWidth="1.5" /></svg>);
+const Bank = () => (<svg width="17" height="17" viewBox="0 0 24 24" fill="none" className="text-gold-400"><path d="M4 9l8-5 8 5M5 9v8m4-8v8m6-8v8m4-8v8M3 20h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>);
 
 export default Landing;
