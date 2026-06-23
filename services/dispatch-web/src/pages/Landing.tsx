@@ -122,9 +122,9 @@ const Landing: React.FC = () => {
         </div>
       </div>
 
-      {/* ── trusted by — institutional sectors, not logos ──────────── */}
+      {/* ── built for — institutional sectors, not logos ──────────── */}
       <div className="border-t border-white/5 bg-white/[0.015] px-8 py-14 lg:px-12">
-        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.3em] text-white/35">Trusted by institutions that cannot fail</p>
+        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.3em] text-white/35">Built for institutions that cannot fail</p>
         <div className="mx-auto mt-9 grid max-w-5xl gap-8 sm:grid-cols-3 lg:grid-cols-5">
           {[
             ["Government", ["National ministries", "Regulators", "Authorities"]],
@@ -142,6 +142,35 @@ const Landing: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* ── Why Dispatch Exists — strategic context + outcomes ─────── */}
+      <section id="why" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Why Dispatch Exists</p>
+          <h2 className="mt-4 font-serif text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
+            Most systems manage documents.<br />Dispatch governs the path to official record.
+          </h2>
+          <p className="mt-6 text-lg leading-relaxed text-white/55">
+            Institutions produce decisions every day — briefings, policies, board resolutions, regulatory submissions,
+            official notices. Most tools store and share those files. None of them govern the moment information becomes
+            the official record.
+          </p>
+        </div>
+        <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          {[
+            ["Enforce governance before publication", "Nothing is published until it clears its approval policy."],
+            ["Eliminate unofficial records", "One governed path — no shadow copies or unverified files."],
+            ["Maintain evidentiary chains", "Every action hash-stamped to an append-only audit trail."],
+            ["Preserve institutional memory", "Every version retained and retrievable, by policy."],
+            ["Reduce publication risk", "Classification, clearance and review enforced by the system."],
+          ].map(([t, b]) => (
+            <div key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+              <div className="text-[14px] font-bold leading-snug text-white">{t}</div>
+              <p className="mt-2 text-[12.5px] leading-snug text-white/50">{b}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* ── Overview ───────────────────────────────────────────────── */}
       <section id="overview" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
@@ -233,6 +262,7 @@ const Landing: React.FC = () => {
           <Card title="Least-privilege roles" body="Author, reviewer, approver, publisher, auditor, tenant-admin — each scoped to exactly what it may do." />
           <Card title="Data residency" body="Runs against its own database in the residency you choose; independent of any other platform." />
           <Card title="Client-credentials auth" body="Machine consumers authenticate with a client_id + secret for short-lived, scoped JWTs." />
+          <Card title="Operational continuity" body="Architected for backup, recovery, retention and continuity requirements — defined per deployment." />
         </div>
       </section>
 
@@ -340,12 +370,12 @@ const Landing: React.FC = () => {
           sub="The materials and engagement model an evaluation team needs — available the moment a qualified institution asks." />
         <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            ["Security Documentation", "Available during evaluation."],
-            ["Architecture Review", "Technical review materials available."],
-            ["Data Residency Discussion", "Deployment options reviewed per institution."],
-            ["Enterprise Agreements", "Custom institutional contracts supported."],
-            ["Support Models", "Commercial support options available."],
-            ["Deployment Planning", "Implementation planning available for qualified engagements."],
+            ["Security Documentation", "Security control documentation provided to evaluation teams during assessment."],
+            ["Architecture Review", "Technical architecture package available for evaluation teams."],
+            ["Data Residency Discussion", "Deployment and residency options reviewed per institution."],
+            ["Enterprise Agreements", "Custom institutional agreements supported per engagement."],
+            ["Support Models", "Institutional support and escalation paths available by engagement."],
+            ["Deployment Planning", "Implementation and rollout planning for qualified engagements."],
           ].map(([t, b]) => (
             <div key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
               <div className="text-base font-bold text-white">{t}</div>
@@ -396,16 +426,17 @@ const Landing: React.FC = () => {
 
       {/* ── Resources / CTA ────────────────────────────────────────── */}
       <section id="resources" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
-        <SectionHead kicker="Resources" title="Open the console." sub="Sign in with your service credentials to submit, govern and retrieve official records." />
+        <SectionHead kicker="Evaluation" title="Begin an institutional evaluation."
+          sub="Review the governed platform in the console, or request the procurement package for your evaluation team." />
         <div className="mx-auto mt-12 flex max-w-3xl flex-wrap items-center justify-center gap-4">
-          <button onClick={() => nav("/console")}
+          <button onClick={() => nav(PROCUREMENT_ROUTE)}
             className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-8 py-4 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
-            Launch Dispatch
+            Request Procurement Package
             <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
           </button>
           <button onClick={() => nav("/console")}
             className="inline-flex items-center rounded border border-white/20 px-8 py-4 text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/40 hover:bg-white/5">
-            Log in to the console
+            Review the platform
           </button>
         </div>
       </section>

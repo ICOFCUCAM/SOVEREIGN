@@ -115,7 +115,25 @@ export const LastPublishedCard: React.FC = () => (
         </div>
       ))}
     </dl>
-    <p className="mt-5 text-[11px] italic text-white/30">Sample record — illustrating the provenance every publication carries.</p>
+
+    <div className="mt-6 border-t border-white/8 pt-4">
+      <div className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">Other recent records</div>
+      <ul className="space-y-2.5">
+        {[
+          ["Budget Authorization Package", "Operational package", "DSP-2026-48402"],
+          ["Regulatory Impact Assessment", "Regulatory submission", "DSP-2026-48417"],
+        ].map(([title, type, id]) => (
+          <li key={id} className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="truncate text-[13px] font-medium text-white/85">{title}</div>
+              <div className="text-[11px] text-white/40">{type}</div>
+            </div>
+            <span className="shrink-0 font-mono text-[11px] text-white/45">{id}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <p className="mt-5 text-[11px] italic text-white/30">Sample records — illustrating the provenance every publication carries.</p>
   </div>
 );
 
