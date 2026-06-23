@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { DeploymentMatrix } from "../components/DeploymentMatrix";
 import { LastPublishedCard, LifecycleTrail, PublicAuditTimeline, CapabilitiesDashboard } from "../components/operations";
 import { HeroVisual } from "../components/HeroVisual";
+import { HeroCanvas } from "../components/HeroCanvas";
 import { PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE } from "../lib/routes";
 
 // Public marketing landing — the front door to Dispatch. A cinematic hero over
@@ -73,11 +74,12 @@ const Landing: React.FC = () => {
 
       {/* ── hero ───────────────────────────────────────────────────── */}
       <div id="top" className="relative overflow-hidden">
-        {/* layered environment — map, mesh, streams, illuminated Official Record */}
-        <div className="pointer-events-none absolute right-0 top-1/2 hidden h-[130vh] w-[72%] -translate-y-1/2 sm:block" aria-hidden
-          style={{ background: "radial-gradient(ellipse at 72% 50%, rgba(233,200,120,0.11), rgba(233,200,120,0.03) 45%, transparent 62%)" }} />
-        <HeroVisual className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[69%] xl:block" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/85 to-transparent xl:via-[#070707]/45" aria-hidden />
+        {/* layered hero: canvas atmosphere (cords/map/bloom) + crisp SVG overlay */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[70%] xl:block" aria-hidden>
+          <HeroCanvas className="absolute inset-0 h-full w-full" />
+          <HeroVisual className="absolute inset-0 h-full w-full" />
+        </div>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/80 to-transparent xl:from-[#070707] xl:via-[#070707]/20 xl:via-30% xl:to-transparent xl:to-65%" aria-hidden />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
         <div className="relative z-10 mx-auto grid min-h-[920px] max-w-[1640px] grid-cols-1 items-center gap-10 px-8 py-20 lg:px-12 xl:min-h-[960px] xl:grid-cols-[32fr_68fr] xl:gap-6">
           <div className="max-w-md">
