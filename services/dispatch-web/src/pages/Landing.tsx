@@ -50,12 +50,12 @@ const Landing: React.FC = () => {
 
       {/* ── sticky top nav ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-white/5 bg-[#070707]/85 backdrop-blur">
-        <div className="mx-auto flex max-w-[1500px] items-center justify-between px-8 py-4 lg:px-12">
-          <a href="#top" className="flex items-center gap-3">
-            <DispatchMark className="h-8 w-8 text-gold-400" />
-            <span className="text-lg font-bold tracking-tight">SOVEREIGN <span className="text-gold-400">DISPATCH</span></span>
+        <div className="mx-auto flex max-w-[1640px] items-center justify-between px-8 py-3 lg:px-12">
+          <a href="#top" className="flex items-center gap-2.5">
+            <DispatchMark className="h-7 w-7 text-gold-400" />
+            <span className="text-base font-bold tracking-tight">SOVEREIGN <span className="text-gold-400">DISPATCH</span></span>
           </a>
-          <nav className="hidden items-center gap-x-5 xl:flex">
+          <nav className="hidden items-center gap-x-4 xl:flex">
             {NAV.map((n) => (
               <a key={n} href={`#${n.toLowerCase()}`} className="text-[12px] font-medium uppercase tracking-wide text-white/70 transition hover:text-white">{n}</a>
             ))}
@@ -76,10 +76,10 @@ const Landing: React.FC = () => {
         {/* layered environment — map, mesh, streams, illuminated Official Record */}
         <div className="pointer-events-none absolute right-0 top-1/2 hidden h-[130vh] w-[72%] -translate-y-1/2 sm:block" aria-hidden
           style={{ background: "radial-gradient(ellipse at 72% 50%, rgba(233,200,120,0.11), rgba(233,200,120,0.03) 45%, transparent 62%)" }} />
-        <HeroVisual className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[66%] xl:block" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/85 to-transparent xl:via-[#070707]/55" aria-hidden />
+        <HeroVisual className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[69%] xl:block" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/85 to-transparent xl:via-[#070707]/45" aria-hidden />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
-        <div className="relative z-10 mx-auto grid min-h-[90vh] max-w-[1500px] grid-cols-1 items-center gap-10 px-8 py-20 lg:px-12 xl:grid-cols-[35fr_65fr] xl:gap-6">
+        <div className="relative z-10 mx-auto grid min-h-[90vh] max-w-[1640px] grid-cols-1 items-center gap-10 px-8 py-20 lg:px-12 xl:grid-cols-[34fr_66fr] xl:gap-6">
           <div className="max-w-lg">
             <p className="mb-8 text-[13px] font-semibold uppercase tracking-[0.28em] text-gold-400">Institutional Publication Infrastructure</p>
             <h1 className="font-serif text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl 2xl:text-[3.25rem]">
