@@ -65,28 +65,28 @@ interface Strand {
 const STRANDS: Strand[] = [];
 for (let inst = 0; inst < INST_Y.length; inst++) {
   const oy = INST_Y[inst];
-  const n = 8 + Math.floor(rnd() * 8);                         // 8–15 strands per ribbon
+  const n = 9 + Math.floor(rnd() * 7);                         // 9–15 strands per ribbon
   for (let k = 0; k < n; k++) {
     const spread = (k / (n - 1) - 0.5);                        // -0.5..0.5 across the ribbon
-    // origin: emerges from AROUND the node, not a single point
-    const x0 = INSTX + (rnd() - 0.5) * 0.018;
-    const y0 = oy + spread * 0.052 + (rnd() - 0.5) * 0.012;
-    // control 1: bloom outward from the node (curvature varies per strand)
-    const c1x = INSTX + 0.045 + rnd() * 0.07;
-    const c1y = oy + spread * (0.10 + rnd() * 0.10);
-    // control 2: interweave and begin compressing toward the lane centre
-    const c2x = 0.155 + rnd() * 0.045;
-    const c2y = 0.5 + (oy - 0.5) * (0.32 + rnd() * 0.22) + (rnd() - 0.5) * 0.075;
+    // origin: a FOCUSED point just right of the node that spreads into many fine lines
+    const x0 = INSTX + 0.016 + (rnd() - 0.5) * 0.006;
+    const y0 = oy + spread * 0.020 + (rnd() - 0.5) * 0.006;
+    // control 1: water-like spread mid-flight (flows rightward, gentle wave — not a high fan)
+    const c1x = INSTX + 0.08 + rnd() * 0.07;
+    const c1y = oy + spread * (0.05 + rnd() * 0.08) + (rnd() - 0.5) * 0.03;
+    // control 2: interweave and compress toward the lane centre
+    const c2x = 0.158 + rnd() * 0.045;
+    const c2y = 0.5 + (oy - 0.5) * (0.28 + rnd() * 0.2) + (rnd() - 0.5) * 0.05;
     // end: nested band inside the merge field (not a single point)
-    const ex = MERGEX + (rnd() - 0.5) * 0.018;
-    const ey = 0.5 + (oy - 0.5) * 0.07 + (rnd() - 0.5) * 0.035;
+    const ex = MERGEX + (rnd() - 0.5) * 0.016;
+    const ey = 0.5 + (oy - 0.5) * 0.06 + (rnd() - 0.5) * 0.03;
     const r = rnd();
-    const maxT = 0.55 + r * r * 0.45;                          // varied length, skewed long
+    const maxT = 0.6 + r * r * 0.4;                            // varied length, skewed long
     STRANDS.push({
       x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT,
-      width: 0.4 + rnd() * 1.5,                                // varied thickness
-      bright: 0.6 + rnd() * 0.9,                               // varied brightness
-      reach: maxT > 0.9,
+      width: 0.3 + rnd() * 0.9,                                // fine strands
+      bright: 0.55 + rnd() * 0.85,                             // varied brightness
+      reach: maxT > 0.92,
     });
   }
 }
@@ -146,16 +146,18 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         ctx.fillStyle = g; ctx.fillRect(gx - 0.07 * W, gy - 0.07 * W, 0.14 * W, 0.14 * W);
       }
 
-      // ribbons: interweaving strands, compressing institution→merge; brighter as they converge
+      // ribbons: fine WHITE strands from each institution that flow like water, interweave
+      // and compress into the merge; colour shifts white→gold as they converge (govern)
       for (const s of STRANDS) {
-        const N = 26; let prev = sPoint(s, 0);
+        const N = 28; let prev = sPoint(s, 0);
         for (let i = 1; i <= N; i++) {
           const tp = i / N, t = tp * s.maxT;
           const [x, y] = sPoint(s, t);
-          const tipFade = (!s.reach && tp > 0.72) ? 1 - (tp - 0.72) / 0.28 : 1;  // short strands dissipate
-          const a = (0.025 + 0.22 * t) * s.bright * tipFade;
-          ctx.strokeStyle = `rgba(233,200,120,${a.toFixed(3)})`;
-          ctx.lineWidth = s.width * (0.55 + 0.9 * t);                            // taper: thin at source, full at merge
+          const tipFade = (!s.reach && tp > 0.74) ? 1 - (tp - 0.74) / 0.26 : 1;  // short strands dissipate
+          const a = (0.03 + 0.17 * t) * s.bright * tipFade;
+          const g = (255 - 55 * t) | 0, b = (255 - 135 * t) | 0;                 // white at source → warm gold at merge
+          ctx.strokeStyle = `rgba(255,${g},${b},${a.toFixed(3)})`;
+          ctx.lineWidth = s.width * (0.5 + 0.8 * t);                             // taper: thin at source, full at merge
           ctx.beginPath(); ctx.moveTo(prev[0] * W, prev[1] * H); ctx.lineTo(x * W, y * H); ctx.stroke();
           prev = [x, y];
         }
@@ -172,15 +174,15 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       core.addColorStop(0, `rgba(255,240,200,${(0.35 + 0.25 * pulse).toFixed(3)})`); core.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = core; ctx.fillRect((MERGEX - 0.04) * W, my - 0.06 * W, 0.12 * W, 0.12 * W);
 
-      // particles travelling INSIDE the strands toward the merge (brighter on arrival)
+      // particles travelling INSIDE the strands toward the merge (white→gold, brighter on arrival)
       for (const p of codes) {
         const s = STRANDS[p.s];
         p.t += p.sp; if (p.t > s.maxT) p.t -= s.maxT;
         const [x, y] = sPoint(s, p.t);
-        const col = p.br ? "255,231,173" : "233,200,120";
         const norm = p.t / s.maxT;
-        ctx.fillStyle = `rgba(${col},${(0.1 + 0.55 * norm).toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(x * W, y * H, p.size, 0, 6.283); ctx.fill();
+        const g = (255 - 50 * norm) | 0, b = (255 - 130 * norm) | 0;
+        ctx.fillStyle = `rgba(255,${g},${b},${(0.12 + 0.5 * norm).toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(x * W, y * H, p.size * (p.br ? 1.3 : 1), 0, 6.283); ctx.fill();
       }
 
       // pipeline momentum: particles between every stage, brighter toward the seal
