@@ -23,7 +23,7 @@ export const SectionHead: React.FC<{ kicker: string; title: string; sub?: string
   <div className="mx-auto max-w-3xl text-center">
     <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
     <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">{kicker}</p>
-    <h2 className="mx-auto mt-5 max-w-[20ch] font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">{title}</h2>
+    <h2 className="mx-auto mt-5 max-w-[20ch] font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">{title}</h2>
     {sub && <p className="mx-auto mt-6 max-w-[42rem] text-lg leading-[1.7] text-white/55">{sub}</p>}
   </div>
 );
@@ -68,6 +68,31 @@ export const PublicFooter: React.FC = () => (
     </div>
   </footer>
 );
+
+// Fine tactile grain over the dark field — kills flat-black banding. Fixed,
+// decorative, identical to the homepage so every marketing surface reads alike.
+export const FilmGrain: React.FC = () => (
+  <div
+    className="pointer-events-none fixed inset-0 z-[1] opacity-[0.038] mix-blend-soft-light"
+    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }}
+    aria-hidden
+  />
+);
+
+// Restrained scroll reveal — each id'd section rises gently into view once, then
+// settles. Shared with the homepage; pair with the `stagger` class for sequenced
+// children. Honours prefers-reduced-motion via the CSS that styles `.reveal`.
+export const useReveal = (): void => {
+  React.useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>("section[id]"));
+    els.forEach((el) => el.classList.add("reveal"));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.08 });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+};
 
 // Sticky public header shared by the procurement + architecture pages. `actions`
 // renders on the right (e.g. a print button). `.no-print` keeps it out of PDFs.

@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { RecordArtifact } from "../components/RecordArtifact";
 import { Guilloche } from "../components/Guilloche";
-import { DispatchMark, Chevron, PublicFooter, TrustStrip } from "../components/brand";
+import { DispatchMark, Chevron, PublicFooter, TrustStrip, FilmGrain, useReveal } from "../components/brand";
 import {
   PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE,
   PLATFORM_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE,
@@ -32,24 +32,12 @@ const NAV: { label: string; href: string }[] = [
 const Landing: React.FC = () => {
   const nav = useNavigate();
   // Restrained reveal — content sections rise gently into view once, then settle.
-  React.useEffect(() => {
-    const els = Array.from(document.querySelectorAll<HTMLElement>("section[id]"));
-    els.forEach((el) => el.classList.add("reveal"));
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.08 });
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+  useReveal();
   return (
     <div className="relative bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
       {/* film grain — fine tactile texture over the dark field (no flat-black banding) */}
-      <div
-        className="pointer-events-none fixed inset-0 z-[1] opacity-[0.038] mix-blend-soft-light"
-        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }}
-        aria-hidden
-      />
+      <FilmGrain />
 
       {/* ── sticky top nav ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/80 backdrop-blur-md shadow-[0_10px_30px_-22px_rgba(0,0,0,0.85)]">
