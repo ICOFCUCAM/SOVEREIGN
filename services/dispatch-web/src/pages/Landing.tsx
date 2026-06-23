@@ -89,7 +89,7 @@ const Landing: React.FC = () => {
                 <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
               </button>
               <a href={ARCHITECTURE_ROUTE}
-                className="inline-flex items-center justify-center rounded border border-white/20 px-6 py-3.5 text-sm font-semibold uppercase tracking-[0.08em] text-white/85 transition active:translate-y-px hover:border-white/40 hover:bg-white/5">
+                className="inline-flex items-center justify-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-6 py-3.5 text-sm font-semibold uppercase tracking-[0.08em] text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
                 View Architecture
               </a>
             </div>
@@ -222,7 +222,7 @@ const Landing: React.FC = () => {
               <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </button>
             <a href={ARCHITECTURE_ROUTE}
-              className="inline-flex items-center rounded border border-white/20 px-8 py-4 text-sm font-semibold uppercase tracking-[0.08em] text-white/85 transition active:translate-y-px hover:border-white/40 hover:bg-white/5">
+              className="inline-flex items-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-8 py-4 text-sm font-semibold uppercase tracking-[0.08em] text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
               View Architecture
             </a>
           </div>

@@ -42,7 +42,7 @@ const Procurement: React.FC = () => {
               Architecture Overview <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
             </a>
             <button onClick={() => nav("/console")}
-              className="inline-flex items-center rounded border border-white/20 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition active:translate-y-px hover:border-white/40 hover:bg-white/5">
+              className="inline-flex items-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
               Begin Evaluation
             </button>
           </div>
@@ -211,7 +211,7 @@ const Procurement: React.FC = () => {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <a href={ARCHITECTURE_ROUTE}
-              className="inline-flex items-center rounded border border-white/20 px-7 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition active:translate-y-px hover:border-white/40 hover:bg-white/5">
+              className="inline-flex items-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-7 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
               Architecture Overview
             </a>
             <button onClick={() => nav("/console")}
