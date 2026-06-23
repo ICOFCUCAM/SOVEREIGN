@@ -10,8 +10,8 @@ import React, { useEffect, useRef } from "react";
 const SEALX = 0.8333;                                // Official Record = light source on the right
 const CARD_FX = [0.3264, 0.3972, 0.4681, 0.55, 0.6319, 0.7139, SEALX]; // 6 cards + seal
 
-// institution origins (match HeroVisual circles, moved left): x≈0.044, 5 lanes
-const INSTX = 0.044;
+// institution origins (match HeroVisual circles, moved left): x≈0.028, 5 lanes
+const INSTX = 0.028;
 const INST_Y = [0.275, 0.388, 0.5, 0.613, 0.725];
 
 // continents → map sample
@@ -67,35 +67,40 @@ interface Strand {
 const STRANDS: Strand[] = [];
 // Per-lane BUNDLES travel as distinct rivers, keeping institutional identity through
 // the travel zone, then compress late. Plus a few inter-lane threads weave the mesh.
-const mkStrand = (laneY: number, neighbourY: number, identity: number, lanePos: number, cls: number): Strand => {
-  // a WIDE source mouth around the institution (funnel widened ~50%): strands fan from
-  // a vertical band at the lane, not a single point
-  const x0 = INSTX + 0.018 + rnd() * 0.028;
-  const y0 = laneY + lanePos * 0.05 + (rnd() - 0.5) * 0.012;
-  // travel zone: hold near lane height (blend only slightly toward a neighbour) — identity preserved
-  const travelY = laneY + (neighbourY - laneY) * (1 - identity) * 0.5;
-  const c1x = 0.12 + rnd() * 0.06;
-  const c1y = travelY + lanePos * 0.03;
-  // late compression toward the centre line — only in the final stretch (large radius, controlled)
-  const c2x = COMPRESS_X + rnd() * 0.025;
-  const c2y = FOCAL.y + (travelY - FOCAL.y) * (0.2 + rnd() * 0.1);
-  // mouth: strands run INTO the Submit card, no visible gap, very tight band
+// A governance FABRIC, not a funnel. Each lane owns a few bright primary strands that
+// keep their identity; dimmer secondary strands weave toward neighbours (cross/merge/
+// rejoin); a wash of near-invisible tertiary strands is the atmosphere. All travel a
+// long, mostly-flat distance, then bend LATE into Submit — the mesh is the visual of
+// governance gradually collapsing into a controlled submission point.
+const mkStrand = (laneY: number, cls: number, lanePos: number, crossTarget: number, drift: number): Strand => {
+  const x0 = INSTX + 0.01 + rnd() * 0.02;
+  const y0 = laneY + lanePos * 0.05 + (rnd() - 0.5) * 0.01;
+  const travelY = laneY + (crossTarget - laneY) * drift;       // weaving: drift toward a neighbour lane
+  // keep the curve mostly FLAT through the travel zone (c1 sits late, near lane height),
+  // so convergence is delayed — the mesh occupies most of the width before bending
+  const c1x = 0.15 + rnd() * 0.06;
+  const c1y = travelY + lanePos * 0.018;
+  const c2x = COMPRESS_X + 0.02 + rnd() * 0.02;
+  const c2y = FOCAL.y + (travelY - FOCAL.y) * (0.3 + rnd() * 0.12);
+  // mouth: strands run INTO the Submit card, no visible gap
   const ex = FOCAL.x + (rnd() - 0.5) * 0.006;
-  const ey = FOCAL.y + (laneY - FOCAL.y) * 0.025 + (rnd() - 0.5) * 0.01;
-  const width = cls === 0 ? 1.5 + rnd() * 0.5 : cls === 1 ? 0.75 + rnd() * 0.2 : 0.38 + rnd() * 0.18;
-  const bright = cls === 0 ? 0.62 : cls === 1 ? 0.22 : 0.05;  // strong hierarchy: primary leads, tertiary atmospheric
-  const maxT = cls === 2 ? 0.78 + rnd() * 0.22 : 0.97 + rnd() * 0.03;
-  // controlled meander (small, smooth — engineered, not spaghetti)
-  return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls,
-    amp: cls === 0 ? 0.003 + rnd() * 0.004 : 0.004 + rnd() * 0.007, freq: 1 + rnd() * 1.3, ph: rnd() * 6.28 };
+  const ey = FOCAL.y + (laneY - FOCAL.y) * 0.02 + (rnd() - 0.5) * 0.008;
+  const width = cls === 0 ? 1.4 + rnd() * 0.5 : cls === 1 ? 0.7 + rnd() * 0.2 : 0.36 + rnd() * 0.16;
+  const bright = cls === 0 ? 0.6 : cls === 1 ? 0.14 : 0.04;    // few bright primaries, atmospheric rest
+  const maxT = cls === 2 ? 0.8 + rnd() * 0.2 : 0.97 + rnd() * 0.03;
+  // weaving meander: large lateral wander for secondary (cross/rejoin), tiny for primary
+  const amp = cls === 0 ? 0.003 + rnd() * 0.003 : cls === 1 ? 0.01 + rnd() * 0.016 : 0.008 + rnd() * 0.013;
+  return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls, amp, freq: 0.8 + rnd() * 1.3, ph: rnd() * 6.28 };
 };
 for (let li = 0; li < INST_Y.length; li++) {
   const laneY = INST_Y[li];
   const above = INST_Y[Math.max(0, li - 1)], below = INST_Y[Math.min(INST_Y.length - 1, li + 1)];
-  // three structured layers per lane: tertiary (atmospheric) · secondary (support) · primary (leads)
-  for (let k = 0; k < 16; k++) STRANDS.push(mkStrand(laneY, rnd() < 0.5 ? above : below, 0.82 + rnd() * 0.14, (k / 15 - 0.5) * 2, 2));
-  for (let k = 0; k < 9; k++) STRANDS.push(mkStrand(laneY, rnd() < 0.5 ? above : below, 0.78 + rnd() * 0.16, (k / 8 - 0.5) * 2, 1));
-  for (let k = 0; k < 4; k++) STRANDS.push(mkStrand(laneY, rnd() < 0.5 ? above : below, 0.85 + rnd() * 0.12, (k / 3 - 0.5) * 1.4, 0));
+  // primary: own the lane, stay in it (identity preserved), few & bright
+  for (let k = 0; k < 4; k++) STRANDS.push(mkStrand(laneY, 0, (k / 3 - 0.5) * 1.2, laneY, 0));
+  // secondary: weave toward neighbours (cross / merge / rejoin), dim support fabric
+  for (let k = 0; k < 7; k++) STRANDS.push(mkStrand(laneY, 1, (k / 6 - 0.5) * 2, rnd() < 0.5 ? above : below, 0.25 + rnd() * 0.4));
+  // tertiary: near-invisible atmospheric fabric
+  for (let k = 0; k < 13; k++) STRANDS.push(mkStrand(laneY, 2, (k / 12 - 0.5) * 2, rnd() < 0.5 ? above : below, rnd() * 0.5));
 }
 const sPoint = (s: Strand, t: number, tm = 0): [number, number] => {
   const mt = 1 - t, a = mt * mt * mt, b = 3 * mt * mt * t, c = 3 * mt * t * t, d = t * t * t;
@@ -129,7 +134,14 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       };
       dots = [...MAP_DOTS.map((d) => mk(d, 0.1)), ...CLUSTER_DOTS.map((d) => mk(d, 0.18))];
       codes = [];
-      for (let s = 0; s < STRANDS.length; s++) { const n = 2 + Math.floor(STRANDS[s].maxT * 6); for (let k = 0; k < n; k++) codes.push({ s, t: rnd() * STRANDS[s].maxT, sp: 0.0018 + rnd() * 0.003, size: 0.6 + rnd() * 1.2, br: rnd() < 0.3 }); }
+      for (let s = 0; s < STRANDS.length; s++) {
+        const n = 2 + Math.floor(STRANDS[s].maxT * 5);
+        for (let k = 0; k < n; k++) {
+          const vel = rnd();                                   // layered velocity: slow / medium / fast
+          const sp = vel < 0.45 ? 0.0012 + rnd() * 0.0008 : vel < 0.8 ? 0.0024 + rnd() * 0.0012 : 0.004 + rnd() * 0.0022;
+          codes.push({ s, t: rnd() * STRANDS[s].maxT, sp, size: 0.6 + rnd() * 1.2, br: rnd() < 0.3 });
+        }
+      }
       pps = [];
       for (let g = 0; g < CARD_FX.length - 1; g++) for (let k = 0; k < 4; k++) pps.push({ g, t: rnd(), sp: 0.004 + rnd() * 0.004, size: 0.8 + rnd() * 1.1 });
       // ambient particle noise — micro-particles everywhere so the whole canvas is quietly active
@@ -154,8 +166,8 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       haze.addColorStop(0, "rgba(233,200,120,0.012)"); haze.addColorStop(0.5, "rgba(233,200,120,0.022)"); haze.addColorStop(1, "rgba(233,200,120,0.01)");
       ctx.fillStyle = haze; ctx.fillRect(0, 0, W, H);
 
-      // world map: lat/long grid (kept well below the flow) + dots + clusters
-      ctx.strokeStyle = "rgba(233,200,120,0.02)"; ctx.lineWidth = 1;
+      // world map: lat/long grid (a supporting actor — noticed only after several seconds)
+      ctx.strokeStyle = "rgba(233,200,120,0.012)"; ctx.lineWidth = 1;
       for (let i = 1; i < 6; i++) { const y = (0.1 + i * 0.13) * H; ctx.beginPath(); for (let x = 0.04; x < 0.96; x += 0.02) ctx.lineTo(x * W, y + Math.sin(x * 6) * 0.012 * H); ctx.stroke(); }
       for (let i = 1; i < 11; i++) { const x = (0.06 + i * 0.085) * W; ctx.beginPath(); ctx.moveTo(x, 0.08 * H); ctx.lineTo(x, 0.82 * H); ctx.stroke(); }
       for (const d of dots) { ctx.fillStyle = `rgba(233,200,120,${d.a})`; ctx.fillRect(d.x, d.y, 1.6, 1.6); }
@@ -213,6 +225,13 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
           prev = [x, y];
         }
       }
+
+      // map participates in the flow field: flow-band dots sit IN FRONT of the mesh,
+      // so the strands read as travelling THROUGH the world map, not over it
+      for (const d of dots)
+        if (d.x < 0.34 * W && Math.abs(d.y - FOCAL.y * H) < 0.26 * H) {
+          ctx.fillStyle = `rgba(233,200,120,${(d.a * 0.75).toFixed(3)})`; ctx.fillRect(d.x, d.y, 1.6, 1.6);
+        }
 
       // convergence — restrained (dimmer than Submit): a gentle compression that hands off,
       // not a flashbang. Submit (drawn in the SVG overlay) is the true focal node.

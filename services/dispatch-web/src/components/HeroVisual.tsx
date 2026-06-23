@@ -11,7 +11,7 @@ const GOLD = "#e9c878";
 const BRIGHT = "#ffe7ad";
 const WHITE_DIM = "rgba(255,255,255,0.55)";
 const CY = 480;
-const INST_CX = 64;                          // institutions moved further left for breathing room
+const INST_CX = 40;                          // institutions moved further left — long mesh travel
 const INST: { label: string; y: number }[] = [
   { label: "MINISTRIES", y: 264 }, { label: "UNIVERSITIES", y: 372 }, { label: "HOSPITALS", y: 480 },
   { label: "AGENCIES", y: 588 }, { label: "AUTHORITIES", y: 696 },
@@ -74,15 +74,17 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
     {/* governed pipeline — Submit is the focal governance node (brightest card) */}
     {SX.map((x, i) => {
       const submit = i === 0;
+      // Submit is THE GATE the mesh terminates into — larger than the other nodes
+      const T = submit ? 96 : TILE;
       return (
         <g key={i}>
-          {submit && <rect x={x - TILE / 2 - 7} y={CY - TILE / 2 - 7} width={TILE + 14} height={TILE + 14} rx="20" fill={BRIGHT} opacity="0.3" filter="url(#hv-bloom)" />}
-          <rect x={x - TILE / 2} y={CY - TILE / 2} width={TILE} height={TILE} rx="16" fill={GOLD} opacity={submit ? 0.16 : 0.04 + i * 0.015} filter="url(#hv-bloom)" />
-          <rect x={x - TILE / 2} y={CY - TILE / 2} width={TILE} height={TILE} rx="16" fill="#0c0c0c" fillOpacity={submit ? 0.68 : 0.82} stroke={submit ? BRIGHT : `rgba(233,200,120,${0.32 + i * 0.1})`} strokeWidth={submit ? 1.8 : 1.2} />
-          <Glyph name={STAGES[i]} x={x} y={CY - 3} s={1.7} color={submit ? "#ffffff" : `rgba(255,255,255,${(0.7 + i * 0.045).toFixed(2)})`} sw={1.5} />
-          <text x={x} y={CY + TILE / 2 + 24} textAnchor="middle" fontSize="12.5" fontWeight="700" letterSpacing="1.2" fill={submit ? BRIGHT : WHITE_DIM} style={{ fontFamily: "inherit" }}>{STAGES[i]}</text>
+          {submit && <rect x={x - T / 2 - 8} y={CY - T / 2 - 8} width={T + 16} height={T + 16} rx="22" fill={BRIGHT} opacity="0.32" filter="url(#hv-bloom)" />}
+          <rect x={x - T / 2} y={CY - T / 2} width={T} height={T} rx={submit ? 18 : 16} fill={GOLD} opacity={submit ? 0.18 : 0.04 + i * 0.015} filter="url(#hv-bloom)" />
+          <rect x={x - T / 2} y={CY - T / 2} width={T} height={T} rx={submit ? 18 : 16} fill="#0c0c0c" fillOpacity={submit ? 0.66 : 0.82} stroke={submit ? BRIGHT : `rgba(233,200,120,${0.32 + i * 0.1})`} strokeWidth={submit ? 2 : 1.2} />
+          <Glyph name={STAGES[i]} x={x} y={CY - 3} s={submit ? 2.1 : 1.7} color={submit ? "#ffffff" : `rgba(255,255,255,${(0.7 + i * 0.045).toFixed(2)})`} sw={1.5} />
+          <text x={x} y={CY + T / 2 + 24} textAnchor="middle" fontSize={submit ? 13.5 : 12.5} fontWeight="700" letterSpacing="1.2" fill={submit ? BRIGHT : WHITE_DIM} style={{ fontFamily: "inherit" }}>{STAGES[i]}</text>
           {submit && (
-            <rect x={x - TILE / 2 - 3} y={CY - TILE / 2 - 3} width={TILE + 6} height={TILE + 6} rx="18" fill="none" stroke={BRIGHT} strokeWidth="1" opacity="0.5">
+            <rect x={x - T / 2 - 3} y={CY - T / 2 - 3} width={T + 6} height={T + 6} rx="20" fill="none" stroke={BRIGHT} strokeWidth="1" opacity="0.5">
               <animate attributeName="opacity" values="0.5;0.16;0.5" dur="3.5s" repeatCount="indefinite" />
             </rect>
           )}
