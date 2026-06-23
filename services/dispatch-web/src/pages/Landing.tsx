@@ -120,10 +120,9 @@ const Landing: React.FC = () => {
           <h2 className="mt-5 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">
             Most systems manage documents.<br />Dispatch governs the path to official record.
           </h2>
-          <p className="mx-auto mt-7 max-w-[44rem] text-lg leading-[1.7] text-white/55">
-            Institutions produce decisions every day — briefings, policies, board resolutions, regulatory submissions,
-            official notices. Most tools store and share those files. None of them govern the moment information becomes
-            the official record.
+          <p className="mx-auto mt-7 max-w-[42rem] text-lg leading-[1.7] text-white/55">
+            Institutions produce decisions every day — briefings, policies, resolutions, regulatory filings. Most tools
+            store and share those files. None govern the moment one becomes the official record.
           </p>
         </div>
         <div className="mx-auto mt-16 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-5">
