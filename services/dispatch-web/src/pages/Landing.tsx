@@ -186,7 +186,8 @@ const Landing: React.FC = () => {
           <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">A Record That Proves Itself.</h2>
           <p className="mx-auto mt-6 max-w-[44rem] text-lg leading-[1.7] text-white/55">
             Every Dispatch record carries its own evidence — sealed, attributed and verifiable long after the people who
-            created it have moved on. The institution doesn't ask you to trust the record. The record proves itself.
+            created it have moved on. The institution doesn't ask you to trust the record.{" "}
+            <span className="font-medium text-white/90">The record proves itself.</span>
           </p>
         </div>
         <div className="mx-auto mt-16 grid max-w-4xl gap-6 sm:grid-cols-3">
