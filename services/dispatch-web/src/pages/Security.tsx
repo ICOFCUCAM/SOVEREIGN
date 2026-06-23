@@ -29,7 +29,7 @@ const Security: React.FC = () => {
         </section>
 
         {/* ── Sovereignty dashboard ──────────────────────────────────── */}
-        <section id="sovereignty" className="scroll-mt-24 border-t border-white/[0.06] bg-white/[0.015] px-8 py-24 lg:px-12">
+        <section id="sovereignty" className="scroll-mt-24 border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-white/[0.008] px-8 py-24 lg:px-12">
           <SectionHead index="02" kicker="Sovereignty" title="Capabilities, not badges."
             sub="What the platform actually does — across deployment, security and governance. Each capability is available by deployment model and verifiable during evaluation." />
           <div className="mx-auto mt-14 max-w-5xl">

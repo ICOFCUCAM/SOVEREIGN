@@ -204,7 +204,7 @@ const Procurement: React.FC = () => {
       </div>
 
       {/* closing CTA — no email; routes into the console / evaluation */}
-      <section className="border-t border-white/5 bg-white/[0.015] px-8 py-20 lg:px-12">
+      <section className="border-t border-white/5 bg-gradient-to-b from-white/[0.025] to-white/[0.008] px-8 py-20 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="font-serif text-3xl font-bold text-white">Begin your evaluation.</h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-white/55">

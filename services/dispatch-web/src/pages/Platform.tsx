@@ -24,7 +24,7 @@ const Platform: React.FC = () => {
         </section>
 
         {/* ── Capabilities ───────────────────────────────────────────── */}
-        <section id="capabilities" className="scroll-mt-24 border-t border-white/[0.06] bg-white/[0.015] px-8 py-24 lg:px-12">
+        <section id="capabilities" className="scroll-mt-24 border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-white/[0.008] px-8 py-24 lg:px-12">
           <SectionHead index="02" kicker="Capabilities" title="One pipeline, every official document."
             sub="Templates and validation per document type; deterministic, classification-banded rendering to print-grade output." />
           <div className="mx-auto mt-14 grid stagger max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -60,7 +60,7 @@ const Platform: React.FC = () => {
         </section>
 
         {/* ── Integrations ───────────────────────────────────────────── */}
-        <section id="integrations" className="scroll-mt-24 border-t border-white/[0.06] bg-white/[0.015] px-8 py-24 lg:px-12">
+        <section id="integrations" className="scroll-mt-24 border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-white/[0.008] px-8 py-24 lg:px-12">
           <SectionHead index="04" kicker="Integrations" title="An API others build on."
             sub="Dispatch provisions scoped API access per consumer and accepts documents over a stable REST surface." />
           <div className="mx-auto mt-14 grid stagger max-w-5xl gap-5 lg:grid-cols-2">
