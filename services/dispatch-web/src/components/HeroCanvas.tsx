@@ -7,8 +7,8 @@ import React, { useEffect, useRef } from "react";
 // micro-particles keep the whole canvas quietly active. Gold rises left→right to
 // the Official Record. Governance is what merges the institutional streams.
 
-const SEALX = 0.8333;                                // Official Record = light source on the right
-const CARD_FX = [0.3264, 0.3972, 0.4681, 0.55, 0.6319, 0.7139, SEALX]; // 6 cards + seal
+const SEALX = 0.7465;                                // Official Record = light source on the right
+const CARD_FX = [0.3264, 0.3819, 0.4375, 0.5014, 0.5653, 0.6292, SEALX]; // 6 cards + seal (tighter)
 
 // institution origins (match HeroVisual circles, moved left): x≈0.028, 5 lanes
 const INSTX = 0.028;
@@ -54,58 +54,59 @@ const FOCAL = { x: 0.305, y: 0.5 };                  // convergence sits INSIDE 
 const COMPRESS_X = 0.24;                              // compression begins late → long in-lane travel zone
 
 interface Strand {
-  x0: number; y0: number;       // birth at the institution lane
-  c1x: number; c1y: number;     // control 1 — long horizontal travel at lane height (identity preserved)
-  c2x: number; c2y: number;     // control 2 — late compression toward the centre line
-  ex: number; ey: number;       // mouth at the convergence, just left of Submit
-  maxT: number;                 // length (tertiary threads fall short)
+  x0: number; y0: number;       // birth around the institution (ecosystem of trajectories)
+  c1x: number; c1y: number;     // control 1 — gentle, gradual narrowing begins
+  c2x: number; c2y: number;     // control 2 — shared field, continuing to narrow
+  ex: number; ey: number;       // mouth at the Submit gate, order preserved
+  maxT: number;
   width: number;                // thickness by class
-  bright: number;               // base opacity by class
+  bright: number;               // base opacity by class (10% bright · 20% medium · 70% faint)
   cls: number;                  // 0 primary · 1 secondary · 2 tertiary
-  amp: number; freq: number; ph: number;  // river meander (perpendicular wander, fades on compression)
+  amp: number; freq: number; ph: number;  // flow-field wander
+  amp2: number; freq2: number; ph2: number; // second harmonic → micro-turbulence (splits/merges)
 }
 const STRANDS: Strand[] = [];
-// Per-lane BUNDLES travel as distinct rivers, keeping institutional identity through
-// the travel zone, then compress late. Plus a few inter-lane threads weave the mesh.
-// FIELD TOPOLOGY, not particles. The strands are stable, coherent CONTOUR LINES of a
-// flow field — they keep their order (no scattering), compress through a shared field
-// and narrow into Submit. Three zones: lane identity → shared governance field (ordered
-// compression) → controlled narrowing. The motion is slow and inevitable, never fast.
+// A continuous luminous FIELD — not countable strands. Hundreds of mostly near-invisible
+// trajectories overlap into a glowing fabric; each institution feeds an ECOSYSTEM of
+// neighbouring paths. The band narrows GRADUALLY over a wide area (a field that breathes),
+// keeps its order (contour lines), and carries micro-turbulence so it never looks perfect.
 const mkStrand = (laneY: number, cls: number, lanePos: number): Strand => {
-  const rel = laneY - 0.5;                                     // signed offset from centre — preserved order
-  const x0 = INSTX + 0.008 + rnd() * 0.016;
-  const y0 = laneY + lanePos * 0.05 + (rnd() - 0.5) * 0.006;
-  // c1 — lanes travel in their own band first (identity preserved, river-like)
-  const c1x = 0.125 + rnd() * 0.035;
-  const c1y = 0.5 + rel * (0.86 + (rnd() - 0.5) * 0.08) + lanePos * 0.022;
-  // c2 — the SHARED FIELD breathes: lines run near-parallel through a long, ordered band
-  //      (this x is pushed right so the field occupies more width before narrowing)
-  const c2x = COMPRESS_X + 0.03 + rnd() * 0.02;
-  const c2y = 0.5 + rel * (0.40 + (rnd() - 0.5) * 0.06);
-  // mouth — controlled narrowing INTO the Submit gate, order preserved, no visible gap
-  const ex = FOCAL.x + (rnd() - 0.5) * 0.004;
-  const ey = FOCAL.y + rel * 0.03 + (rnd() - 0.5) * 0.005;
-  const width = cls === 0 ? 1.3 + rnd() * 0.4 : cls === 1 ? 0.7 + rnd() * 0.18 : 0.34 + rnd() * 0.14;
-  const bright = cls === 0 ? 0.52 : cls === 1 ? 0.14 : 0.04;   // few bright contours over an atmospheric wash
-  const maxT = cls === 2 ? 0.82 + rnd() * 0.18 : 0.98 + rnd() * 0.02;
-  // very small, slow flow-field wander — coherent, never a streak
-  const amp = cls === 0 ? 0.002 + rnd() * 0.002 : 0.004 + rnd() * 0.006;
-  return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls, amp, freq: 0.6 + rnd() * 0.9, ph: rnd() * 6.28 };
+  const rel = laneY - 0.5;                                     // signed offset — order preserved
+  // ecosystem origin: a small cloud of birth points around the institution node
+  const x0 = INSTX + (rnd() - 0.2) * 0.04;
+  const y0 = laneY + lanePos * 0.055 + (rnd() - 0.5) * 0.02;
+  // gradual narrowing: the band tapers smoothly across the whole width (≈300–400px),
+  // not a late collapse. Each control keeps a decreasing share of the lane offset.
+  const c1x = 0.11 + rnd() * 0.05;
+  const c1y = 0.5 + rel * (0.74 + (rnd() - 0.5) * 0.12) + lanePos * 0.03;
+  const c2x = 0.2 + rnd() * 0.05;
+  const c2y = 0.5 + rel * (0.4 + (rnd() - 0.5) * 0.1);
+  const ex = FOCAL.x + (rnd() - 0.5) * 0.006;
+  const ey = FOCAL.y + rel * (0.08 + rnd() * 0.05) + (rnd() - 0.5) * 0.006;
+  const width = cls === 0 ? 1.1 + rnd() * 0.4 : cls === 1 ? 0.6 + rnd() * 0.18 : 0.32 + rnd() * 0.14;
+  const bright = cls === 0 ? 0.42 : cls === 1 ? 0.12 : 0.03;   // 10/20/70 hierarchy → depth, glowing fabric
+  const maxT = cls === 2 ? 0.84 + rnd() * 0.16 : 0.98 + rnd() * 0.02;
+  const amp = cls === 0 ? 0.002 + rnd() * 0.002 : 0.004 + rnd() * 0.007;
+  // micro-turbulence: a faster, smaller secondary wander → tiny splits/merges (tertiary most)
+  const amp2 = cls === 2 ? 0.003 + rnd() * 0.004 : 0.0015 + rnd() * 0.002;
+  return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls,
+    amp, freq: 0.6 + rnd() * 0.9, ph: rnd() * 6.28, amp2, freq2: 2.5 + rnd() * 2.5, ph2: rnd() * 6.28 };
 };
 for (let li = 0; li < INST_Y.length; li++) {
   const laneY = INST_Y[li];
-  // ordered contour layers per lane: primary (few, read as lines) over atmospheric fabric
-  for (let k = 0; k < 4; k++) STRANDS.push(mkStrand(laneY, 0, (k / 3 - 0.5) * 1.2));
-  for (let k = 0; k < 7; k++) STRANDS.push(mkStrand(laneY, 1, (k / 6 - 0.5) * 2));
-  for (let k = 0; k < 13; k++) STRANDS.push(mkStrand(laneY, 2, (k / 12 - 0.5) * 2));
+  // ecosystem per institution, distribution ≈ 10% primary · 20% secondary · 70% tertiary
+  for (let k = 0; k < 5; k++) STRANDS.push(mkStrand(laneY, 0, (k / 4 - 0.5) * 1.4));
+  for (let k = 0; k < 10; k++) STRANDS.push(mkStrand(laneY, 1, (k / 9 - 0.5) * 2));
+  for (let k = 0; k < 35; k++) STRANDS.push(mkStrand(laneY, 2, (k / 34 - 0.5) * 2.2));
 }
 const sPoint = (s: Strand, t: number, tm = 0): [number, number] => {
   const mt = 1 - t, a = mt * mt * mt, b = 3 * mt * mt * t, c = 3 * mt * t * t, d = t * t * t;
   const x = a * s.x0 + b * s.c1x + c * s.c2x + d * s.ex;
   let y = a * s.y0 + b * s.c1y + c * s.c2y + d * s.ey;
-  // river meander: perpendicular wander, windowed to 0 at both ends, fading as it compresses
+  // flow-field wander + micro-turbulence (second harmonic), windowed to 0 at both ends
   const window = Math.sin(Math.PI * t) * (1 - t * 0.7);
   y += s.amp * Math.sin(s.freq * t * 6.283 + s.ph + tm) * window;
+  y += s.amp2 * Math.sin(s.freq2 * t * 6.283 + s.ph2 + tm * 1.7) * window;
   return [x, y];
 };
 
@@ -168,10 +169,10 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         ctx.beginPath(); ctx.arc(m.x, m.y, m.size, 0, 6.283); ctx.fill();
       }
 
-      // destination bloom behind the Official Record — precision, not floodlight (−35%)
+      // destination bloom behind the Official Record — a quiet presence, never a floodlight
       const bx = SEALX * W, by = 0.5 * H;
-      const bloom = ctx.createRadialGradient(bx, by, 0, bx, by, 0.4 * W);
-      bloom.addColorStop(0, "rgba(233,200,120,0.13)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.035)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
+      const bloom = ctx.createRadialGradient(bx, by, 0, bx, by, 0.28 * W);
+      bloom.addColorStop(0, "rgba(233,200,120,0.08)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.025)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = bloom; ctx.fillRect(0, 0, W, H);
 
       // soft glow at each institution node + Layer 1: the five institution lanes
@@ -220,17 +221,17 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
           ctx.fillStyle = `rgba(233,200,120,${(d.a * 0.75).toFixed(3)})`; ctx.fillRect(d.x, d.y, 1.6, 1.6);
         }
 
-      // convergence — restrained (dimmer than Submit): a gentle compression that hands off,
-      // not a flashbang. Submit (drawn in the SVG overlay) is the true focal node.
+      // convergence = an ACCUMULATION, not a flash. The light gathers where the dense field
+      // arrives; the incoming density does the work, the bloom is a quiet pressure point.
       const mx = FOCAL.x * W, my = FOCAL.y * H;
-      const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 600);
-      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.07 * W);
-      merge.addColorStop(0, "rgba(255,236,190,0.1)"); merge.addColorStop(0.3, "rgba(233,200,120,0.04)");
+      const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 700);
+      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.06 * W);
+      merge.addColorStop(0, "rgba(255,236,190,0.055)"); merge.addColorStop(0.35, "rgba(233,200,120,0.022)");
       merge.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = merge; ctx.fillRect(mx - 0.09 * W, my - 0.09 * W, 0.18 * W, 0.18 * W);
-      const core = ctx.createRadialGradient(mx, my, 0, mx, my, 0.02 * W);
-      core.addColorStop(0, `rgba(255,246,222,${(0.08 + 0.06 * pulse).toFixed(3)})`); core.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = core; ctx.fillRect(mx - 0.03 * W, my - 0.03 * W, 0.06 * W, 0.06 * W);
+      ctx.fillStyle = merge; ctx.fillRect(mx - 0.08 * W, my - 0.08 * W, 0.16 * W, 0.16 * W);
+      const core = ctx.createRadialGradient(mx, my, 0, mx, my, 0.016 * W);
+      core.addColorStop(0, `rgba(255,246,222,${(0.045 + 0.035 * pulse).toFixed(3)})`); core.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = core; ctx.fillRect(mx - 0.024 * W, my - 0.024 * W, 0.048 * W, 0.048 * W);
 
       // (no in-mesh particles: the mesh is a stable field, not a meteor shower. The only
       //  flowing particles live in the governed pipeline, to the right of Submit.)

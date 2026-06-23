@@ -16,13 +16,13 @@ const INST: { label: string; y: number }[] = [
   { label: "MINISTRIES", y: 264 }, { label: "UNIVERSITIES", y: 372 }, { label: "HOSPITALS", y: 480 },
   { label: "AGENCIES", y: 588 }, { label: "AUTHORITIES", y: 696 },
 ];
-// pipeline shifted right to open a longer mesh-travel zone before Submit
-const SX = [470, 572, 674, 792, 910, 1028];
+// tighter pipeline — six stages read as one system, not separate cards
+const SX = [470, 550, 630, 722, 814, 906];
 const TILE = 78;
-const SEAL = { x: 1200, y: CY, r: 72 };      // Official Record reduced ~22%
+const SEAL = { x: 1075, y: CY, r: 64 };      // Official Record — smaller, less dominant
 const STAGES = ["SUBMIT", "GOVERN", "APPROVE", "RENDER", "PUBLISH", "ARCHIVE"];
-// 11 thin precise authority rings
-const RINGS = [78, 86, 94, 102, 110, 118, 126, 134, 142, 150, 158];
+// soft, atmospheric resonance rings (irregular spacing — field resonance, not sonar)
+const RINGS = [72, 81, 89, 99, 106, 117, 126, 138, 149];
 
 const ICON: Record<string, React.ReactNode> = {
   MINISTRIES: <path d="M4 9l8-5 8 5M5 9v8m4-8v8m6-8v8m4-8v8M3 20h18" />,
@@ -46,6 +46,7 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 1440 960" preserveAspectRatio="xMidYMid meet" aria-hidden className={className}>
     <defs>
       <filter id="hv-bloom" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="11" /></filter>
+      <filter id="hv-soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.4" /></filter>
       <radialGradient id="hv-seal" cx="0.5" cy="0.4" r="0.62">
         <stop offset="0" stopColor={BRIGHT} stopOpacity="0.95" />
         <stop offset="0.7" stopColor={GOLD} stopOpacity="0.85" />
@@ -94,17 +95,20 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
 
     {/* Official Record — seal in 8 concentric authority rings (≈1.7× a pipeline node) */}
     <g>
-      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r + 6} fill={BRIGHT} opacity="0.22" filter="url(#hv-bloom)" />
-      {RINGS.map((r, i) => (
-        <circle key={r} cx={SEAL.x} cy={SEAL.y} r={r} fill="none" stroke={GOLD} strokeWidth="0.8" opacity={Math.max(0.04, 0.38 - i * 0.034)}>
-          {i === 0 && <><animate attributeName="r" values={`${r};${r + 6};${r}`} dur="5s" repeatCount="indefinite" /><animate attributeName="opacity" values="0.38;0.54;0.38" dur="5s" repeatCount="indefinite" /></>}
-        </circle>
-      ))}
-      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r} fill="url(#hv-seal)" stroke={BRIGHT} strokeWidth="2" />
-      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r - 13} fill="none" stroke="#171008" strokeWidth="1.2" opacity="0.5" />
-      <Glyph name="SEAL" x={SEAL.x} y={SEAL.y} s={3.6} color="#171008" sw={1.6} />
-      <text x={SEAL.x} y={SEAL.y + SEAL.r + 36} textAnchor="middle" fontSize="17" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>OFFICIAL</text>
-      <text x={SEAL.x} y={SEAL.y + SEAL.r + 59} textAnchor="middle" fontSize="17" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>RECORD</text>
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r + 5} fill={BRIGHT} opacity="0.15" filter="url(#hv-bloom)" />
+      {/* atmospheric resonance — soft, blurred, irregular rings (influence propagating, not radar) */}
+      <g filter="url(#hv-soft)">
+        {RINGS.map((r, i) => (
+          <circle key={r} cx={SEAL.x} cy={SEAL.y} r={r} fill="none" stroke={GOLD} strokeWidth={i % 2 ? 0.6 : 0.9} opacity={Math.max(0.03, 0.26 - i * 0.025)}>
+            {i === 0 && <><animate attributeName="r" values={`${r};${r + 5};${r}`} dur="6s" repeatCount="indefinite" /><animate attributeName="opacity" values="0.26;0.4;0.26" dur="6s" repeatCount="indefinite" /></>}
+          </circle>
+        ))}
+      </g>
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r} fill="url(#hv-seal)" stroke={BRIGHT} strokeWidth="1.8" />
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r - 12} fill="none" stroke="#171008" strokeWidth="1.1" opacity="0.5" />
+      <Glyph name="SEAL" x={SEAL.x} y={SEAL.y} s={3.2} color="#171008" sw={1.6} />
+      <text x={SEAL.x} y={SEAL.y + SEAL.r + 34} textAnchor="middle" fontSize="16" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>OFFICIAL</text>
+      <text x={SEAL.x} y={SEAL.y + SEAL.r + 56} textAnchor="middle" fontSize="16" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>RECORD</text>
     </g>
   </svg>
 );
