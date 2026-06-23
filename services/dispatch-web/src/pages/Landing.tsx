@@ -162,14 +162,14 @@ const Landing: React.FC = () => {
         </div>
         <div className="mx-auto grid stagger max-w-6xl gap-px overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.07] shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)] sm:grid-cols-3">
           {[
-            ["01", "The System of Record", "Not document management. The authority that decides when information becomes official — and seals it."],
-            ["02", "The Governance Layer", "The institutional layer between a decision and its published record. Nothing reaches the record ungoverned."],
-            ["03", "The Sovereign Standard", "Infrastructure that runs under your jurisdiction — never a vendor's cloud. The standard institutions adopt for decades."],
+            ["I", "The System of Record", "Not document management. The authority that decides when information becomes official — and seals it."],
+            ["II", "The Governance Layer", "The institutional layer between a decision and its published record. Nothing reaches the record ungoverned."],
+            ["III", "The Sovereign Standard", "Infrastructure that runs under your jurisdiction — never a vendor's cloud. The standard institutions adopt for decades."],
           ].map(([n, t, b]) => (
-            <div key={t} className="group/p relative bg-[#070707] p-9 transition duration-300 hover:bg-[#0b0a07]">
+            <div key={t} className="group/p relative bg-[#070707] p-9 transition duration-300 hover:bg-[#0b0a07] sm:p-10">
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent transition duration-300 group-hover/p:via-gold-500/45" aria-hidden />
-              <div className="tnum font-mono text-[12px] text-gold-400/70">{n}</div>
-              <h3 className="mt-5 font-serif text-[1.7rem] font-bold leading-[1.12] tracking-[-0.01em] text-[#f4efe3]">{t}</h3>
+              <div className="font-serif text-[2.3rem] font-semibold leading-none text-gold-400/45 transition duration-300 group-hover/p:text-gold-400/80">{n}</div>
+              <h3 className="mt-6 font-serif text-[1.7rem] font-bold leading-[1.12] tracking-[-0.01em] text-[#f4efe3]">{t}</h3>
               <p className="mt-4 text-[14px] leading-relaxed text-white/55">{b}</p>
             </div>
           ))}
