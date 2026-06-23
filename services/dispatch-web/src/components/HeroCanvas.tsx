@@ -98,18 +98,18 @@ const mkStrand = (instIdx: number, cls: number): Strand => {
   // TUBE: a tight, slightly irregular bundle running through Submit into Govern
   const ex = GOVERN_X + (rnd() - 0.5) * 0.022;
   const ey = 0.5 + rel * (0.01 + rnd() * 0.025) + (rnd() - 0.5) * 0.013;
-  // strong hierarchy: dominant institutions are brighter, thicker, denser
-  const width = (cls === 0 ? 1.0 : cls === 1 ? 0.5 : 0.26) * (0.65 + 0.7 * mag) + rnd() * 0.25;
-  const bright = (cls === 0 ? 0.55 : cls === 1 ? 0.16 : 0.035) * (0.35 + 0.95 * mag);
-  const maxT = cls === 2 ? 0.62 + rnd() * 0.38 : 0.94 + rnd() * 0.06;  // some fall short → organic edges
-  const amp = (cls === 0 ? 0.0025 : 0.006) * (0.5 + rnd());   // more meander → alive, not cabled
-  const amp2 = (cls === 2 ? 0.005 : 0.0025) * (0.4 + rnd());
+  // strong hierarchy but QUIET — the field is perceived, not noticed (opacity ~halved)
+  const width = (cls === 0 ? 0.85 : cls === 1 ? 0.45 : 0.24) * (0.65 + 0.7 * mag) + rnd() * 0.2;
+  const bright = (cls === 0 ? 0.28 : cls === 1 ? 0.08 : 0.018) * (0.35 + 0.95 * mag);
+  const maxT = cls === 2 ? 0.6 + rnd() * 0.4 : 0.94 + rnd() * 0.06;  // some fall short → organic edges
+  const amp = (cls === 0 ? 0.003 : 0.007) * (0.5 + rnd() * 1.3);   // more randomness, same quantity
+  const amp2 = (cls === 2 ? 0.006 : 0.003) * (0.4 + rnd() * 1.2);
   return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls,
     amp, freq: 0.5 + rnd() * 1.3, ph: rnd() * 6.28, amp2, freq2: 2 + rnd() * 3.5, ph2: rnd() * 6.28 };
 };
 for (let i = 0; i < INST_Y.length; i++) {
-  const m = MAG[i];                                           // dominance scales with m² → Ministries lead
-  const nP = Math.round(2 + m * m * 8), nS = Math.round(3 + m * m * 13), nT = Math.round(6 + m * m * 42);
+  const m = MAG[i];                                          // ~40% fewer strands than before
+  const nP = Math.round(1 + m * m * 5), nS = Math.round(2 + m * m * 8), nT = Math.round(4 + m * m * 25);
   for (let k = 0; k < nP; k++) STRANDS.push(mkStrand(i, 0));
   for (let k = 0; k < nS; k++) STRANDS.push(mkStrand(i, 1));
   for (let k = 0; k < nT; k++) STRANDS.push(mkStrand(i, 2));
@@ -120,14 +120,14 @@ for (let i = 0; i < INST_Y.length; i++) {
 interface Arc { sx: number; sy: number; cx: number; cy: number; ex: number; ey: number; w: number; a: number }
 const ARCS: Arc[] = [];
 // orbital paths — varied radius, elevation, length and brightness (not parallel rails)
-for (let k = 0; k < 16; k++) {
+for (let k = 0; k < 10; k++) {
   const elev = rnd();                                         // how low the arc dips
   const len = 0.35 + rnd() * 0.55;                            // varied length toward the record
   ARCS.push({
     sx: INSTX - 0.02 + (rnd() - 0.5) * 0.08, sy: 0.58 + rnd() * 0.34,
     cx: 0.3 + rnd() * 0.34, cy: 0.7 + elev * 0.26,
     ex: SEALX - 0.12 + len * 0.24, ey: 0.46 + (rnd() - 0.3) * 0.16,
-    w: 0.4 + rnd() * 1.7, a: (k < 5 ? 0.045 + rnd() * 0.05 : 0.014 + rnd() * 0.022) * (0.6 + rnd() * 0.8),
+    w: 0.4 + rnd() * 1.3, a: (k < 4 ? 0.022 + rnd() * 0.022 : 0.007 + rnd() * 0.012) * (0.6 + rnd() * 0.8),
   });
 }
 const sPoint = (s: Strand, t: number, tm = 0): [number, number] => {
@@ -172,7 +172,7 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       for (let i = 0; i < 60; i++) noise.push({ x: (0.04 + rnd() * 0.18) * W, y: (0.06 + rnd() * 0.4) * H, vx: 0.04 + rnd() * 0.1, vy: 0.01 + rnd() * 0.03, size: rnd() * 0.7 + 0.2, a: 0.03 + rnd() * 0.1 });
       // micro-points of light riding the strands — subtle perceived complexity (not streaks)
       sparks = [];
-      for (let i = 0; i < 75; i++) { const s = Math.floor(rnd() * STRANDS.length); sparks.push({ s, t: 0.2 + rnd() * 0.78, ph: rnd() * 6.28, sz: 0.5 + rnd() * 1.1 }); }
+      for (let i = 0; i < 28; i++) { const s = Math.floor(rnd() * STRANDS.length); sparks.push({ s, t: 0.2 + rnd() * 0.78, ph: rnd() * 6.28, sz: 0.45 + rnd() * 0.9 }); }
     };
     const resize = () => {
       const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
@@ -234,27 +234,26 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
             const tp = i / N, t = tp * s.maxT;
             const [x, y] = sPoint(s, t, tm);
             const tipFade = (s.cls === 2 && tp > 0.7) ? 1 - (tp - 0.7) / 0.3 : 1;
-            const a = (0.05 + 0.26 * t + 0.18 * t * t) * s.bright * tipFade;
-            const g = (255 - 55 * t) | 0, b = (255 - 135 * t) | 0;
+            const a = (0.05 + 0.1 * t + 0.05 * t * t) * s.bright * tipFade;   // flat ramp → no white explosion
+            const g = (255 - 80 * t) | 0, b = (255 - 170 * t) | 0;            // warmer gold, less white at the neck
             mctx.strokeStyle = `rgba(255,${g},${b},${a.toFixed(3)})`;
             mctx.lineWidth = s.width * (0.5 + 0.7 * t);
             mctx.beginPath(); mctx.moveTo(prev[0] * W, prev[1] * H); mctx.lineTo(x * W, y * H); mctx.stroke();
             prev = [x, y];
           }
         }
-        // composite with DEPTH: a far atmospheric layer (heavy blur), a soft mid glow, and a
-        // sharp near pass so the field reads as layered, not flat
+        // composite with DEPTH but LOW weight: faint far atmosphere, soft mid, restrained near
         ctx.save();
-        ctx.filter = "blur(4px)"; ctx.globalAlpha = 0.5; ctx.drawImage(off, 0, 0, W, H);
-        ctx.filter = "blur(0.9px)"; ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0, W, H);
-        ctx.filter = "none"; ctx.globalAlpha = 0.82; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "blur(3px)"; ctx.globalAlpha = 0.28; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "blur(0.9px)"; ctx.globalAlpha = 0.62; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "none"; ctx.globalAlpha = 0.5; ctx.drawImage(off, 0, 0, W, H);
         ctx.globalAlpha = 1; ctx.restore();
 
-        // micro-points of light riding the strands (subtle twinkle, never streaks)
+        // micro-points of light riding the strands (very subtle twinkle)
         for (const sp of sparks) {
           const st = STRANDS[sp.s]; const [x, y] = sPoint(st, sp.t * st.maxT, tm);
           const tw = 0.5 + 0.5 * Math.sin(tm * 6 + sp.ph);
-          ctx.fillStyle = `rgba(255,240,205,${(0.06 + 0.16 * tw).toFixed(3)})`;
+          ctx.fillStyle = `rgba(255,240,205,${(0.03 + 0.08 * tw).toFixed(3)})`;
           ctx.beginPath(); ctx.arc(x * W, y * H, sp.sz, 0, 6.283); ctx.fill();
         }
       }
@@ -268,10 +267,10 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
 
       // where the field meets the pipeline — a SOFT, quiet glow (Submit is not a focal flash)
       const mx = ENTRY.x * W, my = ENTRY.y * H;
-      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.065 * W);
-      merge.addColorStop(0, "rgba(255,236,190,0.016)"); merge.addColorStop(0.4, "rgba(233,200,120,0.007)");
+      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.055 * W);
+      merge.addColorStop(0, "rgba(255,236,190,0.006)"); merge.addColorStop(0.4, "rgba(233,200,120,0.003)");
       merge.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = merge; ctx.fillRect(mx - 0.085 * W, my - 0.085 * W, 0.17 * W, 0.17 * W);
+      ctx.fillStyle = merge; ctx.fillRect(mx - 0.07 * W, my - 0.07 * W, 0.14 * W, 0.14 * W);
 
       // (no in-mesh particles: the mesh is a stable field, not a meteor shower. The only
       //  flowing particles live in the governed pipeline, to the right of Submit.)
