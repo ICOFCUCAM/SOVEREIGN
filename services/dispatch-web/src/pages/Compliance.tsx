@@ -9,7 +9,7 @@ const Compliance: React.FC = () => {
       <PublicHeader />
       <main>
         {/* ── Compliance & Security ──────────────────────────────────── */}
-        <section id="compliance" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
+        <section id="compliance" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">
           <SectionHead kicker="Compliance & Security" title="Built around modern governance frameworks."
             sub="Sovereign Dispatch is engineered around the control frameworks institutions are assessed against — described in honest terms, with evidence available during evaluation." />
           <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">

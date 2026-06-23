@@ -35,7 +35,7 @@ const Landing: React.FC = () => {
       <style>{`html{scroll-behavior:smooth}`}</style>
 
       {/* ── sticky top nav ─────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#070707]/85 backdrop-blur">
+      <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/85 backdrop-blur">
         <div className="mx-auto flex max-w-[1640px] items-center justify-between px-8 py-3.5 lg:px-12">
           <a href="#top" className="flex items-center gap-2.5">
             <DispatchMark className="h-7 w-7 text-gold-400" />
@@ -103,7 +103,7 @@ const Landing: React.FC = () => {
       </div>
 
       {/* ── Why Dispatch Exists — strategic context + outcomes ─────── */}
-      <section id="why" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
+      <section id="why" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Why Dispatch Exists</p>
@@ -133,7 +133,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Category-owning Pillars ────────────────────────────────── */}
-      <section id="pillars" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
+      <section id="pillars" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-28 lg:px-12">
         <div className="mx-auto grid max-w-6xl gap-px overflow-hidden rounded-xl border border-white/10 bg-white/[0.06] sm:grid-cols-3">
           {[
             ["01", "The System of Record", "Not document management. The authority that decides when information becomes official — and seals it."],
@@ -150,7 +150,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Record Lifecycle — quieted to a compact inline strip (−30%) ── */}
-      <section id="lifecycle" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-16 lg:px-12">
+      <section id="lifecycle" className="scroll-mt-24 border-t border-white/[0.06] bg-white/[0.015] px-8 py-16 lg:px-12">
         <div className="mx-auto max-w-5xl text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/35">The Record Lifecycle</p>
           <p className="mx-auto mt-3 max-w-xl text-[14px] leading-relaxed text-white/45">One governed path — every official document travels the same controlled route.</p>
@@ -169,7 +169,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── A Record That Proves Itself — provenance positioning ─────── */}
-      <section id="proof" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
+      <section id="proof" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Provenance</p>
@@ -197,7 +197,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Procurement CTA (above institutions) ───────────────────── */}
-      <section id="procurement" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-28 lg:px-12">
+      <section id="procurement" className="scroll-mt-24 border-t border-white/[0.06] bg-white/[0.015] px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement</p>
@@ -218,7 +218,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Institutions — outcome-driven narratives ───────────────── */}
-      <section id="institutions" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
+      <section id="institutions" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-5xl">
           <div className="mb-5 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Built for institutions that cannot fail</p>

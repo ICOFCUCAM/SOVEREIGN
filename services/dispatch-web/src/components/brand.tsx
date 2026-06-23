@@ -51,7 +51,7 @@ export const TrustStrip: React.FC = () => (
 
 // Shared public footer — DispatchMark + institutional wordmark.
 export const PublicFooter: React.FC = () => (
-  <footer className="border-t border-white/5 px-8 py-12 lg:px-12">
+  <footer className="border-t border-white/[0.06] px-8 py-12 lg:px-12">
     <div className="mx-auto flex max-w-[1500px] flex-col items-center justify-between gap-4 text-[12px] text-white/40 sm:flex-row">
       <div className="flex items-center gap-2"><DispatchMark className="h-5 w-5 text-gold-400" /> Sovereign Dispatch · Institutional Publication Infrastructure</div>
       <div>Sovereign by design · Auditable always</div>
@@ -64,7 +64,7 @@ export const PublicFooter: React.FC = () => (
 export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions }) => {
   const nav = useNavigate();
   return (
-    <header className="no-print sticky top-0 z-50 border-b border-white/5 bg-[#070707]/85 backdrop-blur">
+    <header className="no-print sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/85 backdrop-blur">
       <div className="mx-auto flex max-w-[1500px] items-center justify-between px-8 py-4 lg:px-12">
         <button onClick={() => nav("/")} className="flex items-center gap-3">
           <DispatchMark className="h-8 w-8 text-gold-400" />

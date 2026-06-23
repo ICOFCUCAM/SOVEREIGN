@@ -30,7 +30,7 @@ const Evidence: React.FC = () => {
       <PublicHeader />
       <main>
         {/* ── Evidence ───────────────────────────────────────────────── */}
-        <section id="evidence" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
+        <section id="evidence" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">
           <SectionHead kicker="Evidence" title="See the governance, not the promise."
             sub="Every official record carries its own provenance — from how it works, to how it is governed, to what gets produced and how it is deployed." />
           <div className="mx-auto mt-16 max-w-5xl space-y-12">
