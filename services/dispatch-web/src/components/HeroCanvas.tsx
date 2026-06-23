@@ -74,25 +74,26 @@ interface Strand {
   amp2: number; freq2: number; ph2: number; // second harmonic → micro-turbulence (splits/merges)
 }
 const STRANDS: Strand[] = [];
-// Nested funnels: each institution emits its own field whose ENVELOPE width scales with MAG.
-// Outer institutions bow furthest from the centre line (outer envelope), inner ones stay
-// closest — funnel inside funnel. All stay ALIVE until Submit (fibres reach behind the card),
-// keep their order, and carry the 70/20/10 hierarchy. Blurred into one continuous surface.
-const mkStrand = (instIdx: number, cls: number, lanePos: number): Strand => {
+// Nested funnels that START AT the institution nodes and never cross above them. Each
+// institution's strands emanate from its node TOWARD the centre only and descend
+// monotonically into Submit. Ministries/Authorities are furthest from centre → the widest,
+// longest OUTER envelope; Hospitals the medium middle; Universities/Agencies the inner. The
+// envelopes stay distinct through the travel (slow convergence) and merge only near Submit.
+const mkStrand = (instIdx: number, cls: number, u: number): Strand => {
   const instY = INST_Y[instIdx], mag = MAG[instIdx];
-  const side = instY < 0.5 ? -1 : instY > 0.5 ? 1 : 0;
-  const band = 0.5 + side * mag * 0.34;                       // this institution's envelope band (nested)
-  // outer (large mag) institutions emit the LONGEST strands → start a touch further left
-  const x0 = INSTX - (mag - 0.45) * 0.05 + (rnd() - 0.3) * 0.03;
-  const y0 = instY + lanePos * (0.016 + 0.035 * mag);
-  // reach the envelope EARLY and HOLD it (c1 and c2 both sit on the band) so the three
-  // envelopes stay visually distinct through the travel and only merge near Submit
-  const c1x = 0.155 + rnd() * 0.03;
-  const c1y = band + lanePos * (0.025 + 0.05 * mag) + (side === 0 ? lanePos * 0.16 : 0);
-  const c2x = 0.245 + rnd() * 0.025;                          // hold the envelope until late
-  const c2y = band + lanePos * (0.02 + 0.04 * mag) + (side === 0 ? lanePos * 0.1 : 0);
-  const ex = SUBMIT_X + 0.008 + (rnd() - 0.5) * 0.012;        // alive INTO / behind the Submit card
-  const ey = 0.5 + (band - 0.5) * 0.1 + (rnd() - 0.5) * 0.006;// merge only here, near Submit
+  const dir = instY < 0.5 ? 1 : instY > 0.5 ? -1 : 0;        // direction toward the centre line
+  const fan = 0.02 + 0.05 * mag;                              // band thickness at the node
+  // offset within the institution's band: outer fans toward centre [0..fan]; Hospitals symmetric
+  const off = dir === 0 ? (u - 0.5) * 0.14 : u * fan;
+  // y at convergence fraction f: f=0 sits in the node band, f=1 reaches the centre; the band
+  // offset shrinks to 0 as it converges, so strands never cross above their node
+  const yAt = (f: number) => (dir === 0 ? 0.5 : instY + (0.5 - instY) * f) + (dir === 0 ? off : dir * off) * (1 - f);
+  const x0 = INSTX - (mag - 0.45) * 0.055 + (rnd() - 0.3) * 0.022;  // outer start furthest left → longest
+  const y0 = yAt(0);
+  const c1x = 0.15 + rnd() * 0.03;  const c1y = yAt(0.1 + rnd() * 0.05);
+  const c2x = 0.245 + rnd() * 0.025; const c2y = yAt(0.38 + rnd() * 0.08);  // hold the envelope late
+  const ex = SUBMIT_X + 0.008 + (rnd() - 0.5) * 0.012;       // alive INTO / behind the Submit card
+  const ey = yAt(0.9) + (rnd() - 0.5) * 0.005;               // merge only here, near Submit
   const width = cls === 0 ? 1.0 + rnd() * 0.35 : cls === 1 ? 0.55 + rnd() * 0.16 : 0.3 + rnd() * 0.13;
   const bright = (cls === 0 ? 0.4 : cls === 1 ? 0.12 : 0.03) * (0.75 + 0.35 * mag);
   const maxT = 0.99 + rnd() * 0.01;
@@ -104,9 +105,9 @@ const mkStrand = (instIdx: number, cls: number, lanePos: number): Strand => {
 for (let i = 0; i < INST_Y.length; i++) {
   const m = MAG[i];                                           // larger envelope → denser field
   const nP = Math.round(m * 5) + 1, nS = Math.round(m * 10) + 2, nT = Math.round(m * 34) + 6;
-  for (let k = 0; k < nP; k++) STRANDS.push(mkStrand(i, 0, (k / (nP - 1 || 1) - 0.5) * 1.6));
-  for (let k = 0; k < nS; k++) STRANDS.push(mkStrand(i, 1, (k / (nS - 1) - 0.5) * 2));
-  for (let k = 0; k < nT; k++) STRANDS.push(mkStrand(i, 2, (k / (nT - 1) - 0.5) * 2.2));
+  for (let k = 0; k < nP; k++) STRANDS.push(mkStrand(i, 0, k / (nP - 1 || 1)));
+  for (let k = 0; k < nS; k++) STRANDS.push(mkStrand(i, 1, k / (nS - 1)));
+  for (let k = 0; k < nT; k++) STRANDS.push(mkStrand(i, 2, k / (nT - 1)));
 }
 
 // Lower arcs: continuation of the SAME governance field — they originate from the lower
