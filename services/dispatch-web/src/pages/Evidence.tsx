@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { SectionHead, Chevron, PublicHeader, PublicFooter, TrustStrip } from "../components/brand";
+import { SectionHead, Chevron, PublicHeader, PublicFooter, TrustStrip, FilmGrain, useReveal } from "../components/brand";
 import { LastPublishedCard, LifecycleTrail, PublicAuditTimeline } from "../components/operations";
 import { ARCHITECTURE_ROUTE } from "../lib/routes";
 
@@ -14,7 +14,7 @@ const EvidenceStep: React.FC<{ n: string; label: string; lead: string; children:
         <span className="font-mono text-[13px] font-bold text-gold-400">{n}</span>
         <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-white/80">{label}</span>
       </div>
-      <p className="mt-2 max-w-[230px] text-[13px] leading-relaxed text-white/45">{lead}</p>
+      <p className="mt-2 max-w-[230px] text-[13px] leading-relaxed text-white/55">{lead}</p>
     </div>
     <div className="min-w-0">{children}</div>
   </div>
@@ -24,9 +24,11 @@ const EvidenceStep: React.FC<{ n: string; label: string; lead: string; children:
 // it is governed, what gets produced, and how it is deployed.
 const Evidence: React.FC = () => {
   const nav = useNavigate();
+  useReveal();
   return (
-    <div className="min-h-full bg-[#070707] text-white">
+    <div className="relative min-h-full bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
+      <FilmGrain />
       <PublicHeader />
       <main>
         {/* ── Evidence ───────────────────────────────────────────────── */}
@@ -44,11 +46,11 @@ const Evidence: React.FC = () => {
               <LastPublishedCard />
             </EvidenceStep>
             <EvidenceStep n="04" label="How it is deployed" lead="Into the sovereignty model your mandate requires.">
-              <div className="rounded-xl border border-white/10 bg-white/[0.02] p-7">
+              <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                 <div className="flex flex-wrap items-center justify-between gap-5">
                   <div>
                     <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-400">Architecture Overview</span>
-                    <div className="mt-2 font-serif text-xl font-bold text-white">System, governance, security &amp; deployment — one reference.</div>
+                    <div className="mt-2 font-serif text-xl font-bold text-[#f4efe3]">System, governance, security &amp; deployment — one reference.</div>
                     <p className="mt-1.5 text-[13px] text-white/50">Cloud · Private · Sovereign · On-Premise · Air-Gapped. Print-ready for procurement.</p>
                   </div>
                   <button onClick={() => nav(ARCHITECTURE_ROUTE)}
