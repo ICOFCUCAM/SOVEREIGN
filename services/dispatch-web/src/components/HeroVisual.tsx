@@ -11,17 +11,17 @@ const GOLD = "#e9c878";
 const BRIGHT = "#ffe7ad";
 const WHITE_DIM = "rgba(255,255,255,0.55)";
 const CY = 480;
-const INST_CX = 118;
+const INST_CX = 64;                          // institutions moved further left for breathing room
 const INST: { label: string; y: number }[] = [
   { label: "MINISTRIES", y: 264 }, { label: "UNIVERSITIES", y: 372 }, { label: "HOSPITALS", y: 480 },
   { label: "AGENCIES", y: 588 }, { label: "AUTHORITIES", y: 696 },
 ];
-// phase-based spacing (tight governance, wider production/publication)
-const SX = [380, 488, 596, 720, 844, 968];
+// pipeline shifted right to open a longer mesh-travel zone before Submit
+const SX = [430, 538, 646, 770, 894, 1018];
 const TILE = 78;
-const SEAL = { x: 1195, y: CY, r: 92 };
+const SEAL = { x: 1198, y: CY, r: 72 };      // Official Record reduced ~22%
 const STAGES = ["SUBMIT", "GOVERN", "APPROVE", "RENDER", "PUBLISH", "ARCHIVE"];
-const RINGS = [104, 120, 136, 152, 168, 184, 200, 216];
+const RINGS = [82, 94, 106, 118, 130, 142, 154, 166];
 
 const ICON: Record<string, React.ReactNode> = {
   MINISTRIES: <path d="M4 9l8-5 8 5M5 9v8m4-8v8m6-8v8m4-8v8M3 20h18" />,
@@ -40,11 +40,6 @@ const ICON: Record<string, React.ReactNode> = {
 const Glyph: React.FC<{ name: string; x: number; y: number; s?: number; color?: string; sw?: number }> = ({ name, x, y, s = 1, color = GOLD, sw = 1.6 }) => (
   <g transform={`translate(${x - 12 * s} ${y - 12 * s}) scale(${s})`} fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">{ICON[name]}</g>
 );
-const Arrow: React.FC<{ cx: number; y: number; bright?: number }> = ({ cx, y, bright = 0.8 }) => (
-  <g stroke={GOLD} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity={bright}>
-    <line x1={cx - 8} y1={y} x2={cx + 8} y2={y} /><path d={`M${cx + 3},${y - 4} l5,4 -5,4`} />
-  </g>
-);
 
 export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 1440 960" preserveAspectRatio="xMidYMid meet" aria-hidden className={className}>
@@ -57,53 +52,56 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
       </radialGradient>
     </defs>
 
-    {/* institutions — WHITE icons in gold rings, each with a guide line toward the workflow */}
+    {/* institutions — WHITE icons in gold rings, with a long lane line toward the workflow */}
     {INST.map((it) => (
       <g key={it.label}>
-        {/* alignment anchor: faint guide line extending toward the pipeline */}
-        <line x1={INST_CX + 30} y1={it.y} x2={INST_CX + 88} y2={it.y} stroke="rgba(233,200,120,0.28)" strokeWidth="1" strokeDasharray="2 5" />
+        {/* institution lane: the true source path — runs well into the travel zone */}
+        <line x1={INST_CX + 30} y1={it.y} x2={INST_CX + 150} y2={it.y} stroke="rgba(233,200,120,0.22)" strokeWidth="1" strokeDasharray="2 6" />
         <circle cx={INST_CX} cy={it.y} r="29" fill="#0c0c0c" fillOpacity="0.55" stroke="rgba(233,200,120,0.5)" strokeWidth="1.2" />
         <Glyph name={it.label} x={INST_CX} y={it.y} s={1.2} color={BRIGHT} />
         <text x={INST_CX + 46} y={it.y + 5} fontSize="15" fontWeight="600" letterSpacing="1.5" fill="rgba(255,255,255,0.9)" style={{ fontFamily: "inherit" }}>{it.label}</text>
       </g>
     ))}
 
-    {/* glowing energy beams between stages — gold core + soft halo, brightening rightward */}
+    {/* continuous governance energy chain (●──●──●), not isolated boxes */}
+    <line x1={SX[0]} y1={CY} x2={SEAL.x - SEAL.r} y2={CY} stroke={GOLD} strokeWidth="2" opacity="0.16" filter="url(#hv-bloom)" />
     {SX.slice(0, -1).map((x, i) => (
-      <line key={`beam${i}`} x1={x + TILE / 2} y1={CY} x2={SX[i + 1] - TILE / 2} y2={CY} stroke={GOLD} strokeWidth="3.2" strokeLinecap="round" opacity={0.1 + i * 0.04} filter="url(#hv-bloom)" />
+      <line key={`beam${i}`} x1={x + TILE / 2} y1={CY} x2={SX[i + 1] - TILE / 2} y2={CY} stroke={GOLD} strokeWidth="3" strokeLinecap="round" opacity={0.16 + i * 0.05} filter="url(#hv-bloom)" />
     ))}
-    <line x1={SX[5] + TILE / 2} y1={CY} x2={SEAL.x - SEAL.r} y2={CY} stroke={BRIGHT} strokeWidth="3.6" strokeLinecap="round" opacity="0.4" filter="url(#hv-bloom)" />
+    <line x1={SX[5] + TILE / 2} y1={CY} x2={SEAL.x - SEAL.r} y2={CY} stroke={BRIGHT} strokeWidth="3.4" strokeLinecap="round" opacity="0.5" filter="url(#hv-bloom)" />
 
-    {/* arrow into Submit (the nexus the mesh compresses into) */}
-    <Arrow cx={SX[0] - TILE / 2 - 16} y={CY} bright={0.7} />
+    {/* governed pipeline — Submit is the focal governance node (brightest card) */}
+    {SX.map((x, i) => {
+      const submit = i === 0;
+      return (
+        <g key={i}>
+          {submit && <rect x={x - TILE / 2 - 7} y={CY - TILE / 2 - 7} width={TILE + 14} height={TILE + 14} rx="20" fill={BRIGHT} opacity="0.3" filter="url(#hv-bloom)" />}
+          <rect x={x - TILE / 2} y={CY - TILE / 2} width={TILE} height={TILE} rx="16" fill={GOLD} opacity={submit ? 0.16 : 0.04 + i * 0.015} filter="url(#hv-bloom)" />
+          <rect x={x - TILE / 2} y={CY - TILE / 2} width={TILE} height={TILE} rx="16" fill="#0c0c0c" fillOpacity={submit ? 0.68 : 0.82} stroke={submit ? BRIGHT : `rgba(233,200,120,${0.32 + i * 0.1})`} strokeWidth={submit ? 1.8 : 1.2} />
+          <Glyph name={STAGES[i]} x={x} y={CY - 3} s={1.7} color={submit ? "#ffffff" : `rgba(255,255,255,${(0.7 + i * 0.045).toFixed(2)})`} sw={1.5} />
+          <text x={x} y={CY + TILE / 2 + 24} textAnchor="middle" fontSize="12.5" fontWeight="700" letterSpacing="1.2" fill={submit ? BRIGHT : WHITE_DIM} style={{ fontFamily: "inherit" }}>{STAGES[i]}</text>
+          {submit && (
+            <rect x={x - TILE / 2 - 3} y={CY - TILE / 2 - 3} width={TILE + 6} height={TILE + 6} rx="18" fill="none" stroke={BRIGHT} strokeWidth="1" opacity="0.5">
+              <animate attributeName="opacity" values="0.5;0.16;0.5" dur="3.5s" repeatCount="indefinite" />
+            </rect>
+          )}
+        </g>
+      );
+    })}
 
-    {/* governed pipeline — gold intensity rising left→right */}
-    {SX.map((x, i) => (
-      <g key={i}>
-        <rect x={x - TILE / 2} y={CY - TILE / 2} width={TILE} height={TILE} rx="16" fill={GOLD} opacity={0.04 + i * 0.015} filter="url(#hv-bloom)" />
-        <rect x={x - TILE / 2} y={CY - TILE / 2} width={TILE} height={TILE} rx="16" fill="#0c0c0c" fillOpacity="0.82" stroke={`rgba(233,200,120,${0.32 + i * 0.1})`} strokeWidth="1.2" />
-        <Glyph name={STAGES[i]} x={x} y={CY - 3} s={1.7} color={`rgba(255,255,255,${(0.78 + i * 0.04).toFixed(2)})`} sw={1.5} />
-        <text x={x} y={CY + TILE / 2 + 24} textAnchor="middle" fontSize="12.5" fontWeight="700" letterSpacing="1.2" fill={WHITE_DIM} style={{ fontFamily: "inherit" }}>{STAGES[i]}</text>
-        {i < SX.length - 1 && <Arrow cx={(x + TILE / 2 + SX[i + 1] - TILE / 2) / 2} y={CY} bright={0.5 + i * 0.08} />}
-      </g>
-    ))}
-
-    {/* arrow archive → seal */}
-    <Arrow cx={(SX[5] + TILE / 2 + SEAL.x - SEAL.r) / 2} y={CY} bright={0.95} />
-
-    {/* Official Record — dominant seal in 8 concentric authority rings */}
+    {/* Official Record — seal in 8 concentric authority rings (≈1.7× a pipeline node) */}
     <g>
-      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r + 8} fill={BRIGHT} opacity="0.4" filter="url(#hv-bloom)" />
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r + 7} fill={BRIGHT} opacity="0.34" filter="url(#hv-bloom)" />
       {RINGS.map((r, i) => (
-        <circle key={r} cx={SEAL.x} cy={SEAL.y} r={r} fill="none" stroke={GOLD} strokeWidth="1.1" opacity={Math.max(0.05, 0.42 - i * 0.05)}>
-          {i === 0 && <><animate attributeName="r" values={`${r};${r + 8};${r}`} dur="5s" repeatCount="indefinite" /><animate attributeName="opacity" values="0.42;0.58;0.42" dur="5s" repeatCount="indefinite" /></>}
+        <circle key={r} cx={SEAL.x} cy={SEAL.y} r={r} fill="none" stroke={GOLD} strokeWidth="1.1" opacity={Math.max(0.05, 0.4 - i * 0.05)}>
+          {i === 0 && <><animate attributeName="r" values={`${r};${r + 7};${r}`} dur="5s" repeatCount="indefinite" /><animate attributeName="opacity" values="0.4;0.56;0.4" dur="5s" repeatCount="indefinite" /></>}
         </circle>
       ))}
       <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r} fill="url(#hv-seal)" stroke={BRIGHT} strokeWidth="2" />
-      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r - 16} fill="none" stroke="#171008" strokeWidth="1.2" opacity="0.5" />
-      <Glyph name="SEAL" x={SEAL.x} y={SEAL.y} s={4.6} color="#171008" sw={1.5} />
-      <text x={SEAL.x} y={SEAL.y + SEAL.r + 40} textAnchor="middle" fontSize="18" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>OFFICIAL</text>
-      <text x={SEAL.x} y={SEAL.y + SEAL.r + 64} textAnchor="middle" fontSize="18" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>RECORD</text>
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r - 13} fill="none" stroke="#171008" strokeWidth="1.2" opacity="0.5" />
+      <Glyph name="SEAL" x={SEAL.x} y={SEAL.y} s={3.6} color="#171008" sw={1.6} />
+      <text x={SEAL.x} y={SEAL.y + SEAL.r + 36} textAnchor="middle" fontSize="17" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>OFFICIAL</text>
+      <text x={SEAL.x} y={SEAL.y + SEAL.r + 59} textAnchor="middle" fontSize="17" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>RECORD</text>
     </g>
   </svg>
 );
