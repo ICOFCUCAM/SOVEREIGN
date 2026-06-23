@@ -7,12 +7,9 @@ import React, { useEffect, useRef } from "react";
 // micro-particles keep the whole canvas quietly active. Gold rises left→right to
 // the Official Record. Governance is what merges the institutional streams.
 
-const SEALX = 0.7465;                                // Official Record = light source on the right
-const CARD_FX = [0.3264, 0.3819, 0.4375, 0.5014, 0.5653, 0.6292, SEALX]; // 6 cards + seal (tighter)
+const SEALX = 0.8715;                                // Official Record = brightest, distributed terminus
+const CARD_FX = [0.2986, 0.384, 0.4694, 0.5549, 0.6403, 0.7257, SEALX]; // 6 equal cards + seal
 
-// institution origins (match HeroVisual circles, moved left): x≈0.028, 5 lanes
-const INSTX = 0.028;
-const INST_Y = [0.275, 0.388, 0.5, 0.613, 0.725];
 
 // continents → map sample
 const CONTS = [
@@ -50,8 +47,11 @@ for (const [cx, cy] of CLUSTERS) for (let i = 0; i < 18; i++)
 
 // ── reverse river delta: a layered thread mesh born BETWEEN institution lanes,
 // compressing through a funnel into one bright convergence node at Submit ──────
-const FOCAL = { x: 0.305, y: 0.5 };                  // convergence sits INSIDE the Submit card (no gap)
-const COMPRESS_X = 0.24;                              // compression begins late → long in-lane travel zone
+// The mesh is a FABRIC entering from the upper-left (above/behind the institutions,
+// implying offscreen systems) that drapes into the TOP of the pipeline near Submit.
+// Large faint LOWER ARCS sweep beneath from the lower-left toward the record, balancing
+// the upper mesh. Submit is NOT a focal point — the field simply arrives.
+const ENTRY = { x: 0.268, y: 0.452 };                // where the upper fabric drapes into the pipeline
 
 interface Strand {
   x0: number; y0: number;       // birth around the institution (ecosystem of trajectories)
@@ -66,38 +66,43 @@ interface Strand {
   amp2: number; freq2: number; ph2: number; // second harmonic → micro-turbulence (splits/merges)
 }
 const STRANDS: Strand[] = [];
-// A continuous luminous FIELD — not countable strands. Hundreds of mostly near-invisible
-// trajectories overlap into a glowing fabric; each institution feeds an ECOSYSTEM of
-// neighbouring paths. The band narrows GRADUALLY over a wide area (a field that breathes),
-// keeps its order (contour lines), and carries micro-turbulence so it never looks perfect.
-const mkStrand = (laneY: number, cls: number, lanePos: number): Strand => {
-  const rel = laneY - 0.5;                                     // signed offset — order preserved
-  // ecosystem origin: a small cloud of birth points around the institution node
-  const x0 = INSTX + (rnd() - 0.2) * 0.04;
-  const y0 = laneY + lanePos * 0.055 + (rnd() - 0.5) * 0.02;
-  // gradual narrowing: the band tapers smoothly across the whole width (≈300–400px),
-  // not a late collapse. Each control keeps a decreasing share of the lane offset.
-  const c1x = 0.11 + rnd() * 0.05;
-  const c1y = 0.5 + rel * (0.74 + (rnd() - 0.5) * 0.12) + lanePos * 0.03;
-  const c2x = 0.2 + rnd() * 0.05;
-  const c2y = 0.5 + rel * (0.4 + (rnd() - 0.5) * 0.1);
-  const ex = FOCAL.x + (rnd() - 0.5) * 0.006;
-  const ey = FOCAL.y + rel * (0.08 + rnd() * 0.05) + (rnd() - 0.5) * 0.006;
-  const width = cls === 0 ? 1.1 + rnd() * 0.4 : cls === 1 ? 0.6 + rnd() * 0.18 : 0.32 + rnd() * 0.14;
-  const bright = cls === 0 ? 0.42 : cls === 1 ? 0.12 : 0.03;   // 10/20/70 hierarchy → depth, glowing fabric
-  const maxT = cls === 2 ? 0.84 + rnd() * 0.16 : 0.98 + rnd() * 0.02;
-  const amp = cls === 0 ? 0.002 + rnd() * 0.002 : 0.004 + rnd() * 0.007;
-  // micro-turbulence: a faster, smaller secondary wander → tiny splits/merges (tertiary most)
-  const amp2 = cls === 2 ? 0.003 + rnd() * 0.004 : 0.0015 + rnd() * 0.002;
+// Upper fabric: hundreds of fine contour lines entering from the UPPER-LEFT (some offscreen,
+// implying larger systems), sweeping down-right and draping into the pipeline near Submit.
+// Order preserved (contour lines), 70/20/10 hierarchy, blurred into a continuous surface.
+const mkStrand = (spanY: number, cls: number, jit: number): Strand => {
+  const y0 = 0.07 + spanY * 0.4 + jit * 0.02;                 // upper-left band, above the pipeline
+  const x0 = 0.02 + rnd() * 0.2;                              // sources around/left of the institutions
+  const rel = y0 - ENTRY.y;                                   // signed offset — order preserved
+  const c1x = x0 + 0.06 + rnd() * 0.07;
+  const c1y = y0 + (ENTRY.y - y0) * (0.18 + rnd() * 0.12);    // gentle start of the down-sweep
+  const c2x = 0.18 + rnd() * 0.06;
+  const c2y = ENTRY.y + rel * (0.28 + (rnd() - 0.5) * 0.08);  // ordered compression toward the drape
+  const ex = ENTRY.x + (rnd() - 0.4) * 0.04;                  // drape into the top of the pipeline
+  const ey = ENTRY.y + rel * (0.06 + rnd() * 0.04) + (rnd() - 0.5) * 0.006;
+  const width = cls === 0 ? 1.0 + rnd() * 0.35 : cls === 1 ? 0.55 + rnd() * 0.16 : 0.3 + rnd() * 0.13;
+  const bright = cls === 0 ? 0.4 : cls === 1 ? 0.12 : 0.03;   // 10/20/70 hierarchy → glowing surface
+  const maxT = cls === 2 ? 0.86 + rnd() * 0.14 : 0.98 + rnd() * 0.02;
+  const amp = cls === 0 ? 0.0015 + rnd() * 0.002 : 0.003 + rnd() * 0.006;
+  const amp2 = cls === 2 ? 0.0025 + rnd() * 0.003 : 0.0012 + rnd() * 0.0018;
   return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls,
     amp, freq: 0.6 + rnd() * 0.9, ph: rnd() * 6.28, amp2, freq2: 2.5 + rnd() * 2.5, ph2: rnd() * 6.28 };
 };
-for (let li = 0; li < INST_Y.length; li++) {
-  const laneY = INST_Y[li];
-  // ecosystem per institution, distribution ≈ 10% primary · 20% secondary · 70% tertiary
-  for (let k = 0; k < 5; k++) STRANDS.push(mkStrand(laneY, 0, (k / 4 - 0.5) * 1.4));
-  for (let k = 0; k < 10; k++) STRANDS.push(mkStrand(laneY, 1, (k / 9 - 0.5) * 2));
-  for (let k = 0; k < 35; k++) STRANDS.push(mkStrand(laneY, 2, (k / 34 - 0.5) * 2.2));
+// distribution ≈ 10% primary · 20% secondary · 70% tertiary, spread across the fabric
+for (let k = 0; k < 26; k++) STRANDS.push(mkStrand(k / 25, 0, rnd() - 0.5));
+for (let k = 0; k < 52; k++) STRANDS.push(mkStrand(k / 51, 1, rnd() - 0.5));
+for (let k = 0; k < 182; k++) STRANDS.push(mkStrand(rnd(), 2, rnd() - 0.5));
+
+// Lower arcs: a few large, faint gold sweeps from the LOWER-left, passing beneath the
+// pipeline and rising toward the record — balancing the upper fabric (enter from below).
+interface Arc { sx: number; sy: number; cx: number; cy: number; ex: number; ey: number; w: number; a: number }
+const ARCS: Arc[] = [];
+for (let k = 0; k < 16; k++) {
+  ARCS.push({
+    sx: 0.03 + rnd() * 0.18, sy: 0.56 + rnd() * 0.36,
+    cx: 0.36 + rnd() * 0.24, cy: 0.74 + rnd() * 0.2,
+    ex: 0.62 + rnd() * 0.26, ey: 0.5 + rnd() * 0.12,
+    w: 0.5 + rnd() * 1.4, a: k < 4 ? 0.06 + rnd() * 0.05 : 0.02 + rnd() * 0.03,
+  });
 }
 const sPoint = (s: Strand, t: number, tm = 0): [number, number] => {
   const mt = 1 - t, a = mt * mt * mt, b = 3 * mt * mt * t, c = 3 * mt * t * t, d = t * t * t;
@@ -127,20 +132,17 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     const mctx = off.getContext("2d");
 
     const init = () => {
-      // map is part of the flow field: dots brighten inside the travel band (x<0.34, mid-height)
-      const mk = (d: { nx: number; ny: number }, base: number) => {
-        const x = (0.02 + d.nx * 0.94) * W, y = (0.07 + d.ny * 0.72) * H;
-        const inFlow = x < 0.34 * W && Math.abs(y - FOCAL.y * H) < 0.26 * H;
-        return { x, y, a: base * (inFlow ? 1.9 : 1) };
-      };
-      dots = [...MAP_DOTS.map((d) => mk(d, 0.1)), ...CLUSTER_DOTS.map((d) => mk(d, 0.18))];
+      // world map: a subtle, uniform dotted stage behind the whole process (10–15% feel)
+      const mk = (d: { nx: number; ny: number }, base: number) =>
+        ({ x: (0.04 + d.nx * 0.92) * W, y: (0.07 + d.ny * 0.72) * H, a: base });
+      dots = [...MAP_DOTS.map((d) => mk(d, 0.07)), ...CLUSTER_DOTS.map((d) => mk(d, 0.12))];
       pps = [];
       for (let g = 0; g < CARD_FX.length - 1; g++) for (let k = 0; k < 4; k++) pps.push({ g, t: rnd(), sp: 0.004 + rnd() * 0.004, size: 0.8 + rnd() * 1.1 });
       // ambient particle noise — micro-particles everywhere so the whole canvas is quietly active
       noise = [];
       for (let i = 0; i < 150; i++) noise.push({ x: rnd() * W, y: rnd() * H, vx: (rnd() - 0.5) * 0.08, vy: (rnd() - 0.5) * 0.06, size: rnd() * 0.85 + 0.25, a: 0.03 + rnd() * 0.1 });
-      // gold dust concentrated around the travel zone, drifting rightward into the convergence
-      for (let i = 0; i < 70; i++) noise.push({ x: (0.07 + rnd() * 0.18) * W, y: (FOCAL.y + (rnd() - 0.5) * 0.36) * H, vx: 0.05 + rnd() * 0.13, vy: (rnd() - 0.5) * 0.05, size: rnd() * 0.75 + 0.2, a: 0.04 + rnd() * 0.12 });
+      // gold dust drifting in the upper-left fabric region
+      for (let i = 0; i < 60; i++) noise.push({ x: (0.04 + rnd() * 0.18) * W, y: (0.06 + rnd() * 0.4) * H, vx: 0.04 + rnd() * 0.1, vy: 0.01 + rnd() * 0.03, size: rnd() * 0.7 + 0.2, a: 0.03 + rnd() * 0.1 });
     };
     const resize = () => {
       const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
@@ -178,44 +180,31 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
 
       // destination bloom behind the Official Record — a quiet presence, never a floodlight
       const bx = SEALX * W, by = 0.5 * H;
-      const bloom = ctx.createRadialGradient(bx, by, 0, bx, by, 0.26 * W);
-      bloom.addColorStop(0, "rgba(233,200,120,0.056)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.018)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
+      const bloom = ctx.createRadialGradient(bx, by, 0, bx, by, 0.3 * W);
+      bloom.addColorStop(0, "rgba(233,200,120,0.075)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.022)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = bloom; ctx.fillRect(0, 0, W, H);
 
-      // soft glow at each institution node + Layer 1: the five institution lanes
-      for (const oy of INST_Y) {
-        const gx = INSTX * W, gy = oy * H;
-        const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, 0.055 * W);
-        g.addColorStop(0, "rgba(233,200,120,0.10)"); g.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = g; ctx.fillRect(gx - 0.07 * W, gy - 0.07 * W, 0.14 * W, 0.14 * W);
-      }
-      ctx.strokeStyle = "rgba(233,200,120,0.06)"; ctx.lineWidth = 1;
-      for (const oy of INST_Y) {
-        ctx.beginPath();
-        ctx.moveTo(INSTX * W, oy * H);
-        ctx.bezierCurveTo(0.14 * W, oy * H, COMPRESS_X * W, FOCAL.y * H, FOCAL.x * W, FOCAL.y * H);
-        ctx.stroke();
-      }
-
-      // restrained volumetric bloom along the travel zone (compression, not explosion)
-      const vg = ctx.createRadialGradient(0.17 * W, FOCAL.y * H, 0, 0.17 * W, FOCAL.y * H, 0.18 * W);
-      vg.addColorStop(0, "rgba(233,200,120,0.04)"); vg.addColorStop(0.5, "rgba(233,200,120,0.016)"); vg.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.save(); ctx.translate(0.17 * W, FOCAL.y * H); ctx.scale(1, 0.5); ctx.translate(-0.17 * W, -FOCAL.y * H);
-      ctx.fillStyle = vg; ctx.fillRect(0.02 * W, FOCAL.y * H - 0.22 * W, 0.36 * W, 0.44 * W); ctx.restore();
-
-      // the governance field: hundreds of ordered contour lines drawn SHARP on an offscreen
-      // layer, then composited back BLURRED → a continuous luminous fabric. Slow, inevitable.
+      // the governance field: the upper FABRIC + the lower ARCS, drawn SHARP on an offscreen
+      // layer then composited back BLURRED → one continuous luminous surface. Slow, inevitable.
       const tm = Date.now() / 6000;
       if (mctx) {
         mctx.clearRect(0, 0, W, H);
         mctx.globalCompositeOperation = "lighter";
+        // lower arcs first (they sit beneath), large faint gold sweeps toward the record
+        for (const arc of ARCS) {
+          mctx.strokeStyle = `rgba(233,200,120,${arc.a.toFixed(3)})`;
+          mctx.lineWidth = arc.w;
+          mctx.beginPath(); mctx.moveTo(arc.sx * W, arc.sy * H);
+          mctx.quadraticCurveTo(arc.cx * W, arc.cy * H, arc.ex * W, arc.ey * H); mctx.stroke();
+        }
+        // upper fabric — ordered contour lines, white→gold as they drape into the pipeline
         for (const s of STRANDS) {
           const N = 30; let prev = sPoint(s, 0, tm);
           for (let i = 1; i <= N; i++) {
             const tp = i / N, t = tp * s.maxT;
             const [x, y] = sPoint(s, t, tm);
             const tipFade = (s.cls === 2 && tp > 0.7) ? 1 - (tp - 0.7) / 0.3 : 1;
-            const a = (0.04 + 0.28 * t + 0.2 * t * t) * s.bright * tipFade;
+            const a = (0.05 + 0.26 * t + 0.18 * t * t) * s.bright * tipFade;
             const g = (255 - 55 * t) | 0, b = (255 - 135 * t) | 0;
             mctx.strokeStyle = `rgba(255,${g},${b},${a.toFixed(3)})`;
             mctx.lineWidth = s.width * (0.5 + 0.7 * t);
@@ -225,29 +214,24 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         }
         // composite: a soft blurred glow (fabric) + a faint sharp pass (structure beneath)
         ctx.save();
-        ctx.filter = "blur(1.6px)"; ctx.drawImage(off, 0, 0, W, H);
-        ctx.filter = "none"; ctx.globalAlpha = 0.45; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "blur(1.7px)"; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "none"; ctx.globalAlpha = 0.4; ctx.drawImage(off, 0, 0, W, H);
         ctx.globalAlpha = 1; ctx.restore();
       }
 
-      // map participates in the flow field: flow-band dots sit IN FRONT of the mesh,
-      // so the strands read as travelling THROUGH the world map, not over it
+      // map weaves with the field: a few dots sit IN FRONT of the fabric so it reads as flowing
+      // through the world map (kept subtle)
       for (const d of dots)
-        if (d.x < 0.34 * W && Math.abs(d.y - FOCAL.y * H) < 0.26 * H) {
-          ctx.fillStyle = `rgba(233,200,120,${(d.a * 0.75).toFixed(3)})`; ctx.fillRect(d.x, d.y, 1.6, 1.6);
+        if (d.x < 0.5 * W && d.y < 0.55 * H && d.y > 0.1 * H) {
+          ctx.fillStyle = `rgba(233,200,120,${(d.a * 0.7).toFixed(3)})`; ctx.fillRect(d.x, d.y, 1.6, 1.6);
         }
 
-      // convergence = an ACCUMULATION, not a flash. The light gathers where the dense field
-      // arrives; the incoming density does the work, the bloom is a quiet pressure point.
-      const mx = FOCAL.x * W, my = FOCAL.y * H;
-      const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 700);
-      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.06 * W);
-      merge.addColorStop(0, "rgba(255,236,190,0.055)"); merge.addColorStop(0.35, "rgba(233,200,120,0.022)");
+      // where the fabric drapes into the pipeline — a soft, quiet glow (Submit is NOT a focal flash)
+      const mx = ENTRY.x * W, my = ENTRY.y * H;
+      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.075 * W);
+      merge.addColorStop(0, "rgba(255,236,190,0.05)"); merge.addColorStop(0.4, "rgba(233,200,120,0.02)");
       merge.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = merge; ctx.fillRect(mx - 0.08 * W, my - 0.08 * W, 0.16 * W, 0.16 * W);
-      const core = ctx.createRadialGradient(mx, my, 0, mx, my, 0.016 * W);
-      core.addColorStop(0, `rgba(255,246,222,${(0.045 + 0.035 * pulse).toFixed(3)})`); core.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = core; ctx.fillRect(mx - 0.024 * W, my - 0.024 * W, 0.048 * W, 0.048 * W);
+      ctx.fillStyle = merge; ctx.fillRect(mx - 0.1 * W, my - 0.1 * W, 0.2 * W, 0.2 * W);
 
       // (no in-mesh particles: the mesh is a stable field, not a meteor shower. The only
       //  flowing particles live in the governed pipeline, to the right of Submit.)
