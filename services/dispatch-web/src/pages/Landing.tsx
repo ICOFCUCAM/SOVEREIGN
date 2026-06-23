@@ -172,7 +172,7 @@ const Landing: React.FC = () => {
             ["Preserve institutional memory", "Every version retained and retrievable, by policy."],
             ["Reduce publication risk", "Classification, clearance and review enforced by the system."],
           ].map(([t, b]) => (
-            <div key={t} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/25 p-6">
+            <div key={t} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/30 p-6">
               <div className="text-[14px] font-bold leading-snug text-white">{t}</div>
               <p className="mt-2 text-[12.5px] leading-snug text-white/50">{b}</p>
             </div>
@@ -203,7 +203,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Record Lifecycle — quieted to a compact inline strip (−30%) ── */}
-      <section id="lifecycle" className="edge-rule scroll-mt-24 bg-white/[0.015] px-5 py-14 sm:px-8 sm:py-16 lg:px-12">
+      <section id="lifecycle" className="edge-rule scroll-mt-24 bg-gradient-to-b from-white/[0.025] to-white/[0.008] px-5 py-14 sm:px-8 sm:py-16 lg:px-12">
         <div className="mx-auto max-w-5xl text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50"><span className="tnum font-mono tracking-normal text-gold-400/55">03</span><span className="mx-2 font-normal text-white/25">·</span>The Record Lifecycle</p>
           <p className="mx-auto mt-3 max-w-xl text-[14px] leading-relaxed text-white/55">One governed path — every official document travels the same controlled route.</p>
@@ -240,7 +240,7 @@ const Landing: React.FC = () => {
             ["Append-only history", "Every action preserved in order. Nothing is quietly edited or removed."],
             ["Verifiable integrity", "A cryptographic seal anyone authorized can check, for the life of the record."],
           ].map(([t, b]) => (
-            <div key={t} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/25 p-6 text-center">
+            <div key={t} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/30 p-6 text-center">
               <div className="text-[14px] font-bold text-white">{t}</div>
               <p className="mt-2 text-[12.5px] leading-relaxed text-white/50">{b}</p>
             </div>
@@ -255,7 +255,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Procurement CTA (above institutions) ───────────────────── */}
-      <section id="procurement" className="edge-rule scroll-mt-24 bg-white/[0.015] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
+      <section id="procurement" className="edge-rule scroll-mt-24 bg-gradient-to-b from-white/[0.025] to-white/[0.008] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400"><span className="tnum font-mono tracking-normal text-gold-400/55">05</span><span className="mx-2 font-normal text-gold-400/30">·</span>Procurement</p>
@@ -289,7 +289,7 @@ const Landing: React.FC = () => {
             ["Education", "Universities · Research bodies", "Confer and preserve official records — credentials, resolutions and research outputs — under the institution's own seal."],
             ["Enterprise", "Regulated industries · Critical infrastructure", "Turn board and compliance decisions into permanent, defensible records a regulator can trust."],
           ].map(([cat, who, story]) => (
-            <div key={cat} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/25 p-7">
+            <div key={cat} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/30 p-7">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                 <div className="text-[13px] font-bold uppercase tracking-[0.16em] text-gold-400/90">{cat}</div>
                 <div className="text-[11px] uppercase tracking-[0.1em] text-white/50">{who}</div>
