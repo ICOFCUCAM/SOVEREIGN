@@ -15,7 +15,7 @@ import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/stora
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
 import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition } from "../../shared/src/governance.mjs";
-import { issueClientTx, rotateSecretTx, revokeClientTx, listClientsTx, ProvisioningError } from "../../shared/src/provisioning.mjs";
+import { issueClientTx, rotateSecretTx, revokeClientTx, listClientsTx, signupTenantTx, ProvisioningError } from "../../shared/src/provisioning.mjs";
 
 const ENGINE_VERSION = "dispatch-api@1.0.0";
 const pool = makePool();
@@ -121,6 +121,13 @@ async function handleDocuments(req, res, principal) {
       if (existing.rows[0]) {
         return { replay: true, jobId: existing.rows[0].id, requestId: existing.rows[0].request_id, state: existing.rows[0].state };
       }
+      // Free-tier quota: a tenant without an active subscription may hold at most
+      // doc_quota documents. Counted after idempotency, so replays don't consume it.
+      const tq = await client.query("select subscription_status, doc_quota from dispatch.tenants where id=$1", [principal.tenantId]);
+      if (tq.rows[0]?.subscription_status !== "active") {
+        const used = await client.query("select count(*)::int n from dispatch.documents where tenant_id=$1", [principal.tenantId]);
+        if (used.rows[0].n >= (tq.rows[0]?.doc_quota ?? 3)) { const e = new Error("QUOTA_EXCEEDED"); e.code = "QUOTA_EXCEEDED"; throw e; }
+      }
       // Persist document (governance lifecycle starts at 'submitted').
       const dres = await client.query(
         `insert into dispatch.documents (tenant_id, doc_type, title, classification, status, lifecycle_state, submitted_at, submitted_by, source_system, correlation_id, owner_user_id)
@@ -167,6 +174,7 @@ async function handleDocuments(req, res, principal) {
     return send(res, 202, { requestId: result.requestId, jobId: result.jobId, documentId: result.documentId,
       status: result.replay ? (result.state || "queued") : "queued", statusUrl: `/v1/jobs/${result.jobId}`, replay: !!result.replay });
   } catch (e) {
+    if (e.code === "QUOTA_EXCEEDED") return send(res, 402, errEnvelope(requestId, 402, "QUOTA_EXCEEDED", "free plan document limit reached — subscribe to create more"));
     if (String(e.message).includes("idempotency")) return send(res, 409, errEnvelope(requestId, 409, "IDEMPOTENCY_CONFLICT", "duplicate idempotency key with different body"));
     console.error("documents error:", e);
     return send(res, 500, errEnvelope(requestId, 500, "ENGINE_ERROR", "internal error"));
@@ -397,6 +405,47 @@ async function handleAudit(res, principal, query) {
 // cross-tenant id → we surface 404 (never leak existence across tenants).
 const claimsFor = (p) => ({ tenant_id: p.tenantId, dispatch_role: p.role, principal_type: p.principalType, actor: p.actor });
 
+// ── Plans & billing ──────────────────────────────────────────────────────────
+// Read a tenant's plan + usage. Downloads are gated on an active subscription;
+// the free tier may create up to doc_quota documents and preview metadata.
+async function tenantBilling(tenantId) {
+  const claims = { tenant_id: tenantId, dispatch_role: "service", principal_type: "system", actor: "billing" };
+  return withClaims(pool, claims, async (c) => {
+    const t = await c.query("select plan, subscription_status, doc_quota from dispatch.tenants where id=$1", [tenantId]);
+    const n = await c.query("select count(*)::int n from dispatch.documents where tenant_id=$1", [tenantId]);
+    const row = t.rows[0] || {};
+    return { plan: row.plan || "free", subscriptionStatus: row.subscription_status || "inactive", docQuota: row.doc_quota ?? 3, documentsUsed: n.rows[0]?.n ?? 0 };
+  });
+}
+const billingView = (b) => ({ plan: b.plan, subscriptionStatus: b.subscriptionStatus, documentsUsed: b.documentsUsed,
+  documentQuota: b.docQuota, quotaRemaining: Math.max(0, b.docQuota - b.documentsUsed), canDownload: b.subscriptionStatus === "active" });
+
+// Public self-serve signup — create a FREE tenant + owner credential. No auth.
+async function handleSignup(req, res) {
+  let body; try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  try {
+    const out = await withClaims(pool, { principal_type: "system" }, (c) => signupTenantTx(c, { name: body.name }));
+    return send(res, 201, { tenantId: out.tenantId, client_id: out.clientId, secret: out.secret, plan: out.plan,
+      scopes: out.scopes, note: "store the secret now — it is shown only once" });
+  } catch (e) {
+    if (e instanceof ProvisioningError) return send(res, 400, errEnvelope(null, 400, e.code, e.message));
+    console.error("signup error:", e); return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "signup failed"));
+  }
+}
+
+// Billing status + the (stubbed) subscribe action. The stub flips the tenant to
+// active; swap the body of `subscribe` for a Stripe Checkout session + webhook.
+async function handleBilling(req, res, principal, action) {
+  if (action === "subscribe") {
+    if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
+    await withClaims(pool, claimsFor(principal), (c) => c.query("select dispatch.set_subscription('active', $1)", ["stub_" + crypto.randomUUID()]));
+    const b = await tenantBilling(principal.tenantId);
+    return send(res, 200, { ...billingView(b), activated: true, note: "stub activation — wire Stripe Checkout + webhook here" });
+  }
+  return send(res, 200, billingView(await tenantBilling(principal.tenantId)));
+}
+
 // ── Admin: tenant self-service for service-client credentials ────────────────
 // Gated on dispatch:admin (a tenant_admin's JWT carries it). All writes run
 // under the caller's claims, so RLS (M9) confines them to the caller's tenant.
@@ -404,7 +453,12 @@ const claimsFor = (p) => ({ tenant_id: p.tenantId, dispatch_role: p.role, princi
 async function handleAdminClients(req, res, principal, method, clientId, action) {
   if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
   const actorType = principal.principalType === "service" ? "service" : "user";
-  const claims = claimsFor(principal);
+  // The dispatch:admin gate above is the authority; express it to the DB as the
+  // tenant_admin role so the M9 RLS policy authorises the write. This lets BOTH a
+  // tenant_admin user and an admin-scoped service credential (the console signs in
+  // with one) manage clients — the tenant_id claim keeps every write confined to
+  // the caller's own tenant.
+  const claims = { ...claimsFor(principal), dispatch_role: "tenant_admin" };
   try {
     if (method === "GET") {
       const clients = await withClaims(pool, claims, (c) => listClientsTx(c));
@@ -527,6 +581,12 @@ async function handleGetArtifact(req, res, principal, artifactId, query) {
       pages: row.pages, sha256: row.sha256, classification: row.classification, storage: "signed_url", expiresAt: row.expires_at });
   }
 
+  // Download paywall: the free tier can create + preview metadata, but pulling the
+  // bytes requires an active subscription. (Metadata disposition returned above.)
+  if (!billingView(await tenantBilling(claims.tenant_id)).canDownload) {
+    return send(res, 402, errEnvelope(null, 402, "PAYMENT_REQUIRED", "downloading records requires an active subscription"));
+  }
+
   // Not expired (checked above): bytes should exist. A read failure here is a
   // storage/integrity problem, NOT expiry — surface it distinctly (don't mask as 410).
   let bytes;
@@ -585,6 +645,13 @@ const server = http.createServer(async (req, res) => {
       return await handleAdminClients(req, res, auth.principal, "GET");
     }
 
+    // Billing status — the caller tenant's plan, usage and download eligibility.
+    if (req.method === "GET" && path === "/v1/billing") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleBilling(req, res, auth.principal, "status");
+    }
+
     // Dispatch console (Epic 9) — static page; no auth (it authenticates client-side).
     if (req.method === "GET" && (path === "/" || path === "/console")) {
       const html = consoleHtml();
@@ -625,12 +692,18 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { ...minted, access_token: minted.token, tenantId: ex.principal.tenantId, scopes: ex.principal.scopes });
     }
 
+    // Public self-serve signup — create a FREE tenant + owner credential (no auth).
+    if (path === "/v1/signup") return await handleSignup(req, res);
+
     const auth = await resolvePrincipal(pool, req.headers["authorization"], withAdmin);
     if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
     const principal = auth.principal;
 
     if (path === "/v1/validate") return await handleValidate(req, res, principal);
     if (path === "/v1/documents") return await handleDocuments(req, res, principal);
+
+    // Billing: subscribe (stub) — flips the tenant to paid and unlocks downloads.
+    if (path === "/v1/billing/subscribe") return await handleBilling(req, res, principal, "subscribe");
 
     // Admin: issue / rotate / revoke this tenant's service clients (dispatch:admin).
     if (path === "/v1/admin/clients") return await handleAdminClients(req, res, principal, "POST");
@@ -665,6 +738,8 @@ const server = http.createServer(async (req, res) => {
       // Enforce clearance at mint time so a grant can't bypass the gate.
       const gcl = clearanceAllows(principal.clearance, arow.doc_classification || {});
       if (!gcl.allowed) { inc("clearance_denied_total"); return send(res, 403, errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", gcl.reason)); }
+      // Download paywall — a grant is a download, so it too requires a subscription.
+      if (!billingView(await tenantBilling(principal.tenantId)).canDownload) return send(res, 402, errEnvelope(null, 402, "PAYMENT_REQUIRED", "downloading records requires an active subscription"));
       const g = mintDownloadGrant(principal, id);
       if (g.error) return send(res, g.error.status, errEnvelope(null, g.error.status, g.error.code, g.error.message));
       return send(res, 200, { downloadUrl: `/v1/artifacts/${id}?grant=${encodeURIComponent(g.token)}`, expiresIn: g.expiresIn });

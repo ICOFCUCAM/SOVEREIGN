@@ -154,6 +154,31 @@ export async function revokeClientTx(client, { tenantId, clientId, actor, actorT
   return { clientId, revoked: true };
 }
 
+// Default scopes for a self-serve owner credential: admin (manage credentials +
+// billing) plus the create/render/read surface. Download is gated on billing,
+// not scope, so the free tier still gets read.
+export const OWNER_SCOPES = ["dispatch:admin", "dispatch:validate", "dispatch:render", "dispatch:read"];
+
+/**
+ * Self-serve signup: create a FREE tenant and its owner credential atomically
+ * via the SECURITY DEFINER signup_tenant() (the app role can't insert tenants
+ * under RLS). Returns { tenantId, clientId, secret, plan } — secret shown once.
+ * Runs on the unprivileged app pool; no operator/superuser needed.
+ */
+export async function signupTenantTx(client, { name }) {
+  const clean = String(name || "").trim();
+  if (clean.length < 2) throw new ProvisioningError("INVALID_TENANT", "institution name is required");
+  const slug = `${slugify(clean)}-${crypto.randomBytes(3).toString("hex")}`;
+  const clientId = genClientId(slug);
+  const secret = genSecret();
+  const secretHash = hashSecretScrypt(secret);
+  const r = await client.query(
+    "select tenant_id, client_id from dispatch.signup_tenant($1,$2,$3,$4,$5)",
+    [clean, slug, clientId, secretHash, OWNER_SCOPES],
+  );
+  return { tenantId: r.rows[0].tenant_id, clientId, secret, plan: "free", scopes: OWNER_SCOPES };
+}
+
 /** List a tenant's service clients — safe fields only, never the secret hash. */
 export async function listClientsTx(client) {
   const r = await client.query(

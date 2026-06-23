@@ -89,6 +89,10 @@ jobs:
         working-directory: services
         run: node test/sprint1-retry.mjs
 
-      - name: Provisioning — account + secret (14)
+      - name: Provisioning — account + secret (15)
         working-directory: services
         run: node test/provisioning.test.mjs
+
+      - name: Billing — free plan + subscribe (14)
+        working-directory: services
+        run: node test/billing.test.mjs
