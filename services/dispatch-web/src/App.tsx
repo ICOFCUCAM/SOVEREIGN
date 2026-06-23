@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./lib/auth";
 import Shell from "./components/Shell";
 import Landing from "./pages/Landing";
+import Procurement from "./pages/Procurement";
+import Architecture from "./pages/Architecture";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
 import Create from "./pages/Create";
@@ -43,6 +45,9 @@ const App: React.FC = () => (
   <Routes>
     {/* public marketing landing — the front door */}
     <Route path="/" element={<Landing />} />
+    {/* public procurement + architecture dossier (no auth) */}
+    <Route path="/procurement" element={<Procurement />} />
+    <Route path="/architecture" element={<Architecture />} />
     {/* gated console */}
     <Route path="/console/*" element={<Console />} />
     <Route path="*" element={<Navigate to="/" replace />} />

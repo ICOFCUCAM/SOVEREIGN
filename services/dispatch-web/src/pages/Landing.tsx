@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { DeploymentMatrix } from "../components/DeploymentMatrix";
+import { PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE } from "../lib/routes";
 
 // Public marketing landing — the front door to Dispatch. A cinematic hero over
 // the institutional product story, with a sticky top nav that scrolls to the
@@ -189,6 +191,12 @@ const Landing: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {/* capability-by-deployment matrix */}
+        <div className="mx-auto mt-16 max-w-4xl">
+          <p className="mb-5 text-center text-[12px] font-semibold uppercase tracking-[0.25em] text-white/35">Capability by deployment</p>
+          <DeploymentMatrix />
+        </div>
       </section>
 
       {/* ── Compliance & Security ──────────────────────────────────── */}
@@ -259,11 +267,15 @@ const Landing: React.FC = () => {
             </div>
           ))}
         </div>
-        <div className="mx-auto mt-12 flex max-w-3xl justify-center">
-          <a href="mailto:icofcucam@gmail.com?subject=Sovereign%20Dispatch%20%E2%80%94%20Procurement%20Package%20Request"
+        <div className="mx-auto mt-12 flex max-w-3xl flex-wrap items-center justify-center gap-4">
+          <button onClick={() => nav(PROCUREMENT_ROUTE)}
             className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-8 py-4 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
             Request Procurement Package
             <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
+          </button>
+          <a href={ARCHITECTURE_ROUTE}
+            className="inline-flex items-center rounded border border-white/20 px-8 py-4 text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/40 hover:bg-white/5">
+            Architecture Overview
           </a>
         </div>
       </section>
