@@ -7,11 +7,11 @@ import React, { useEffect, useRef } from "react";
 // dim gold dotted world map and a warm bloom on the right. Brand gold only.
 
 // convergence point (matches SUBMIT in the SVG overlay: x≈0.28 of width, centre)
-const CX = 0.28, CY = 0.5, SX0 = 0.0;
-// two silk bands flow from the far left, draw together near SUBMIT (CX) and
-// stretch through cards 1→3, fading by APPROVE
-const XEND = 0.40;
-const TC = (CX - SX0) / (XEND - SX0); // path fraction at Submit (~0.61)
+const CX = 0.28, CY = 0.5;
+// the mesh SCATTERS from the pipeline's left end (≈Submit) into the upper-left
+// and lower-left — a fountain of fine gold lines, bright at the origin and
+// dispersing/fading toward the scattered ends.
+const OX = 0.265, OY = 0.5;
 
 // continents → dotted map
 const CONTS = [
@@ -39,29 +39,35 @@ const MAP_DOTS: { nx: number; ny: number }[] = [];
 for (let x = 120; x < 900; x += 8.5) for (let y = 70; y < 450; y += 8.5)
   if (POLYS.some((p) => inPoly(x, y, p))) MAP_DOTS.push({ nx: (x - 120) / 780, ny: (y - 70) / 380 });
 
-const smooth = (t: number) => t * t * (3 - 2 * t);
-interface Cord { y0: number; y1: number; hump: number; sign: number; amp: number; freq: number; phase: number }
+interface Cord { ex: number; ey: number; cx: number; cy: number; amp: number; freq: number; phase: number }
 const CORDS: Cord[] = [];
 let seed = 7;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) & 0x7fffffff; return seed / 0x7fffffff; };
-// Benchmark mesh = one big wave on the left in two halves funnelling into SUBMIT:
-// an UPPER half that rises to a CREST (peak near x≈13%) then breaks down into the
-// pipeline, and a larger LOWER half that dips into a TROUGH then sweeps up. Nested
-// gold contour lines, densest at the crest/trough; fading by ~Govern.
+// A fountain of fine lines scattering from the Submit origin: an UPPER spray into
+// the top-left and a (larger) LOWER spray into the bottom-left. Each line is a
+// quadratic Bézier O→C→E; endpoints fan out by angle, with a bowed control point
+// for the silk-wave curve and a little scatter so it isn't a rigid fan.
 const NB = 24;
-for (let k = 0; k < NB; k++) {
-  const u = k / (NB - 1);              // 0 = outer (bigger), 1 = inner
-  const amp = 0.004 + rnd() * 0.008;
-  const freq = 0.8 + rnd() * 1.2;
-  CORDS.push({ y0: 0.30 + u * 0.10, y1: 0.44 + u * 0.05, hump: 0.22 - u * 0.12, sign: -1, amp, freq, phase: rnd() * 6.28 }); // upper crest
-  CORDS.push({ y0: 0.70 - u * 0.10, y1: 0.56 - u * 0.05, hump: 0.30 - u * 0.16, sign: 1, amp, freq, phase: rnd() * 6.28 });  // lower trough
-}
+const fan = (sign: number) => {
+  for (let k = 0; k < NB; k++) {
+    const u = k / (NB - 1);
+    const ang = (6 + u * 70) * Math.PI / 180 + (rnd() - 0.5) * 0.1;                       // 6°..76° off horizontal-left
+    const len = (sign < 0 ? 0.20 : 0.24) + u * (sign < 0 ? 0.08 : 0.12) + rnd() * 0.04;   // lower spray larger
+    const ex = OX - Math.cos(ang) * len;
+    const ey = OY + sign * Math.sin(ang) * len;
+    const cx = OX - Math.cos(ang) * len * 0.5;
+    const cy = OY + sign * Math.sin(ang) * len * 0.5 + sign * (0.015 + rnd() * 0.03);     // bow outward
+    CORDS.push({ ex, ey, cx, cy, amp: 0.004 + rnd() * 0.007, freq: 0.8 + rnd() * 1.2, phase: rnd() * 6.28 });
+  }
+};
+fan(-1); // upper spray
+fan(1);  // lower spray
 const pointOn = (c: Cord, t: number, W: number, H: number): [number, number] => {
-  const x = SX0 + (XEND - SX0) * t;
-  const base = c.y0 + (c.y1 - c.y0) * smooth(t);
-  const crest = c.hump * Math.sin(Math.sqrt(t) * Math.PI); // peak near t≈0.25, zero at ends
-  const wave = Math.sin(t * c.freq * 6.283 + c.phase) * c.amp * (1 - t * 0.5);
-  return [x * W, (base + c.sign * crest + wave) * H];
+  const mt = 1 - t;
+  const x = mt * mt * OX + 2 * mt * t * c.cx + t * t * c.ex;
+  const y = mt * mt * OY + 2 * mt * t * c.cy + t * t * c.ey;
+  const wave = Math.sin(t * c.freq * 6.283 + c.phase) * c.amp * t; // ripple grows toward the scattered end
+  return [x * W, (y + wave) * H];
 };
 
 interface Code { c: number; t: number; sp: number; size: number; br: boolean }
@@ -102,26 +108,27 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       g.addColorStop(0, "rgba(233,200,120,0.12)"); g.addColorStop(0.45, "rgba(233,200,120,0.03)"); g.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
-      // the cords — S-waves converging at Submit then stretching through cards 1→3
+      // the cords — fine gold lines scattering from Submit: bright at the origin,
+      // dispersing/fading toward the scattered ends
       ctx.lineWidth = 1;
       for (const c of CORDS) {
-        ctx.strokeStyle = "rgba(233,200,120,0.16)";          // phase 1: source → Submit
+        ctx.strokeStyle = "rgba(233,200,120,0.18)";          // near origin (bright)
         ctx.beginPath();
-        for (let i = 0; i <= 20; i++) { const [x, y] = pointOn(c, (i / 20) * TC, W, H); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+        for (let i = 0; i <= 12; i++) { const [x, y] = pointOn(c, i / 24, W, H); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
         ctx.stroke();
-        ctx.strokeStyle = "rgba(233,200,120,0.08)";          // phase 2: Submit → Approve, fading
+        ctx.strokeStyle = "rgba(233,200,120,0.07)";          // scattered ends (fading)
         ctx.beginPath();
-        for (let i = 0; i <= 14; i++) { const [x, y] = pointOn(c, TC + (i / 14) * (1 - TC), W, H); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+        for (let i = 12; i <= 24; i++) { const [x, y] = pointOn(c, i / 24, W, H); i === 12 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
         ctx.stroke();
       }
 
-      // travelling code particles converging on Submit
+      // travelling code particles flowing inward toward Submit
       for (const p of codes) {
-        p.t += p.sp; if (p.t > 1) p.t -= 1;
+        p.t -= p.sp; if (p.t < 0) p.t += 1;
         const [x, y] = pointOn(CORDS[p.c], p.t, W, H);
-        const a = Math.min(1, p.t / 0.05) * Math.min(1, (1 - p.t) / 0.05 + 0.4);
+        const a = 1 - 0.85 * p.t;                            // bright near origin, faint at the ends
         const col = p.br ? "255,231,173" : "233,200,120";
-        ctx.fillStyle = `rgba(${col},${(0.5 * a).toFixed(3)})`;
+        ctx.fillStyle = `rgba(${col},${(0.55 * a).toFixed(3)})`;
         ctx.beginPath(); ctx.arc(x, y, p.size, 0, 6.283); ctx.fill();
       }
 
