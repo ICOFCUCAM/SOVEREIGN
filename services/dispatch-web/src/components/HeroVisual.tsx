@@ -11,7 +11,7 @@ const GOLD = "#e9c878";
 const BRIGHT = "#ffe7ad";
 const WHITE_DIM = "rgba(255,255,255,0.55)";
 const CY = 480;
-const INST_CX = 150;                         // institutions are small SOURCES (clear of the headline)
+const INST_CX = 165;                         // institutions are small SOURCES (clear of the headline)
 const INST: { label: string; y: number }[] = [
   { label: "MINISTRIES", y: 264 }, { label: "UNIVERSITIES", y: 372 }, { label: "HOSPITALS", y: 480 },
   { label: "AGENCIES", y: 588 }, { label: "AUTHORITIES", y: 696 },
@@ -63,13 +63,13 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
       </radialGradient>
     </defs>
 
-    {/* institutions — small WHITE icons in thin gold rings; sources, not anchors */}
+    {/* institutions — always clearly readable: solid node + bright icon + bright label */}
     {INST.map((it) => (
       <g key={it.label}>
-        <line x1={INST_CX + 26} y1={it.y} x2={INST_CX + 96} y2={it.y} stroke="rgba(233,200,120,0.2)" strokeWidth="1" strokeDasharray="2 6" />
-        <circle cx={INST_CX} cy={it.y} r="24" fill="#0c0c0c" fillOpacity="0.5" stroke="rgba(233,200,120,0.45)" strokeWidth="1.1" />
+        <line x1={INST_CX + 26} y1={it.y} x2={INST_CX + 92} y2={it.y} stroke="rgba(233,200,120,0.22)" strokeWidth="1" strokeDasharray="2 6" />
+        <circle cx={INST_CX} cy={it.y} r="24" fill="#080808" fillOpacity="0.92" stroke="rgba(233,200,120,0.6)" strokeWidth="1.2" />
         <Glyph name={it.label} x={INST_CX} y={it.y} s={1.0} color={BRIGHT} />
-        <text x={INST_CX + 40} y={it.y + 5} fontSize="14" fontWeight="600" letterSpacing="1.4" fill="rgba(255,255,255,0.85)" style={{ fontFamily: "inherit" }}>{it.label}</text>
+        <text x={INST_CX + 40} y={it.y + 5} fontSize="14" fontWeight="600" letterSpacing="1.4" fill="rgba(255,255,255,0.95)" style={{ fontFamily: "inherit" }}>{it.label}</text>
       </g>
     ))}
 
