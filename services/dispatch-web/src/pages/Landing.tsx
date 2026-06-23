@@ -80,8 +80,8 @@ const Landing: React.FC = () => {
         <div className="relative z-10 mx-auto grid min-h-[88vh] max-w-[1500px] grid-cols-1 items-center gap-10 px-8 py-16 lg:px-12 xl:grid-cols-[42fr_58fr] xl:gap-8">
           <div className="max-w-xl">
             <p className="mb-6 text-sm font-semibold uppercase tracking-[0.25em] text-gold-400">Institutional Publication Infrastructure</p>
-            <h1 className="font-serif text-6xl font-bold leading-[1.02] tracking-tight sm:text-7xl xl:text-6xl 2xl:text-7xl">
-              From Information<br />to <span className="text-gold-400">Official Record.</span>
+            <h1 className="font-serif text-5xl font-bold leading-[1.04] tracking-tight sm:text-6xl xl:text-5xl 2xl:text-6xl">
+              Govern information<br />before it becomes <span className="text-gold-400">record.</span>
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-relaxed text-white/60">
               Sovereign Dispatch is the operating system for institutional publication — purpose-built to submit, govern,
