@@ -29,12 +29,16 @@ body {
 html { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.18) transparent; }
 
 /* ── Typographic foundation — editorial headings, calm legible body ──────── */
-body { text-rendering: optimizeLegibility; -moz-osx-font-smoothing: grayscale; }
+body { text-rendering: optimizeLegibility; -moz-osx-font-smoothing: grayscale;
+  /* kerning + ligatures on body Inter; hang punctuation into the margins (Safari) */
+  font-feature-settings: "kern", "liga", "calt"; hanging-punctuation: first last; }
 /* Fraunces is an optical serif — size its drawing to the rendered size, tighten */
 .font-serif { font-optical-sizing: auto; font-feature-settings: "kern", "liga", "calt"; letter-spacing: -0.014em; }
 /* headings wrap evenly (no single orphan word); paragraphs avoid short runts */
 h1, h2, h3 { text-wrap: balance; }
 p { text-wrap: pretty; }
+/* short lead paragraphs read more intentionally with balanced line lengths */
+.lead-balance { text-wrap: balance; }
 
 /* ── Restrained motion — confident reveals, no gimmicks ──────────────────── */
 @media (prefers-reduced-motion: no-preference) {

@@ -104,7 +104,7 @@ const Landing: React.FC = () => {
             <h1 className="font-serif text-[2.65rem] font-bold leading-[1.03] tracking-[-0.022em] text-[#f4efe3] sm:text-[3.25rem] 2xl:text-[3.6rem]">
               From Information<br />to <span className="text-gold-400">Official Record.</span>
             </h1>
-            <p className="mt-7 max-w-[27rem] text-[17px] leading-[1.7] text-white/60">
+            <p className="lead-balance mt-7 max-w-[27rem] text-[17px] leading-[1.7] text-white/60">
               The operating system for institutional publication — where information becomes a
               sealed, governed, permanent record.
             </p>
@@ -159,7 +159,7 @@ const Landing: React.FC = () => {
           <h2 className="mt-5 font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">
             Most systems manage documents.<br />Dispatch governs the path to official record.
           </h2>
-          <p className="mx-auto mt-7 max-w-[42rem] text-lg leading-[1.7] text-white/55">
+          <p className="lead-balance mx-auto mt-7 max-w-[42rem] text-lg leading-[1.7] text-white/55">
             Institutions produce decisions every day — briefings, policies, resolutions, regulatory filings. Most tools
             store and share those files. None govern the moment one becomes the official record.
           </p>
@@ -228,7 +228,7 @@ const Landing: React.FC = () => {
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400"><span className="tnum font-mono tracking-normal text-gold-400/55">04</span><span className="mx-2 font-normal text-gold-400/30">·</span>Provenance</p>
           <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">A Record That Proves Itself.</h2>
-          <p className="mx-auto mt-6 max-w-[44rem] text-lg leading-[1.7] text-white/55">
+          <p className="lead-balance mx-auto mt-6 max-w-[44rem] text-lg leading-[1.7] text-white/55">
             Every Dispatch record carries its own evidence — sealed, attributed and verifiable long after the people who
             created it have moved on. The institution doesn't ask you to trust the record.{" "}
             <span className="font-medium text-white/90">The record proves itself.</span>
@@ -260,7 +260,7 @@ const Landing: React.FC = () => {
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400"><span className="tnum font-mono tracking-normal text-gold-400/55">05</span><span className="mx-2 font-normal text-gold-400/30">·</span>Procurement</p>
           <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">Ready for institutional evaluation.</h2>
-          <p className="mx-auto mt-5 max-w-[40rem] text-lg leading-[1.7] text-white/55">Architecture, security and procurement materials — self-serve, before any human contact.</p>
+          <p className="lead-balance mx-auto mt-5 max-w-[40rem] text-lg leading-[1.7] text-white/55">Architecture, security and procurement materials — self-serve, before any human contact.</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button onClick={() => nav(PROCUREMENT_ROUTE)}
               className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-8 py-4 text-sm font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_26px_-10px_rgba(0,0,0,0.65)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
