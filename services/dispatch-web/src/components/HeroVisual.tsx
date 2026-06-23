@@ -11,7 +11,7 @@ const GOLD = "#e9c878";
 const BRIGHT = "#ffe7ad";
 const WHITE_DIM = "rgba(255,255,255,0.55)";
 const CY = 480;
-const INST_CX = 115;                         // institutions moved left → longer mesh journey
+const INST_CX = 150;                         // institutions clear of the headline column, still a long journey
 const INST: { label: string; y: number }[] = [
   { label: "MINISTRIES", y: 264 }, { label: "UNIVERSITIES", y: 372 }, { label: "HOSPITALS", y: 480 },
   { label: "AGENCIES", y: 588 }, { label: "AUTHORITIES", y: 696 },

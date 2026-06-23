@@ -14,7 +14,7 @@ const GOVERN_X = 0.384;                              // fibers stay a visible ba
 // institution sources (match HeroVisual circles). MAG = nested-funnel hierarchy: the outer
 // institutions (Ministries, Authorities) generate the LARGEST envelope; Hospitals medium;
 // Universities/Agencies the smallest inner field → funnel inside funnel inside funnel.
-const INSTX = 0.08;                                  // moved left → longer journey to the convergence
+const INSTX = 0.104;                                 // clear of the headline column, still a long journey
 const INST_Y = [0.275, 0.388, 0.5, 0.613, 0.725];
 const MAG = [1.0, 0.4, 0.68, 0.4, 1.0];              // Ministries/Authorities DOMINATE the field
 
