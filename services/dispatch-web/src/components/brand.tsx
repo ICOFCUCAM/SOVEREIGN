@@ -17,6 +17,47 @@ export const Chevron: React.FC<{ className?: string }> = ({ className }) => (
 
 export const Dot: React.FC = () => <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-gold-400" />;
 
+// Centered section heading — kicker, serif title, optional sub. Shared across the
+// public pages so positioning copy reads consistently.
+export const SectionHead: React.FC<{ kicker: string; title: string; sub?: string }> = ({ kicker, title, sub }) => (
+  <div className="mx-auto max-w-3xl text-center">
+    <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">{kicker}</p>
+    <h2 className="mt-4 font-serif text-4xl font-bold tracking-tight text-white sm:text-5xl">{title}</h2>
+    {sub && <p className="mt-5 text-lg leading-relaxed text-white/55">{sub}</p>}
+  </div>
+);
+
+// Bordered capability card — title + body, with a subtle hover lift.
+export const Card: React.FC<{ title: string; body: string }> = ({ title, body }) => (
+  <div className="rounded-lg border border-white/10 bg-white/[0.02] p-6 transition hover:border-gold-500/30 hover:bg-white/[0.04]">
+    <div className="text-base font-bold text-white">{title}</div>
+    <p className="mt-2 text-[13.5px] leading-relaxed text-white/55">{body}</p>
+  </div>
+);
+
+// Shared trust strip — the three positioning pillars, full-bleed.
+export const TrustStrip: React.FC = () => (
+  <div className="border-t border-white/10 bg-white/[0.02] px-8 py-6 lg:px-12">
+    <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-x-10 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-white/45">
+      <span>Sovereign by Design</span>
+      <span className="hidden text-gold-400/40 sm:inline">·</span>
+      <span>Auditable by Default</span>
+      <span className="hidden text-gold-400/40 sm:inline">·</span>
+      <span>Institution Ready</span>
+    </div>
+  </div>
+);
+
+// Shared public footer — DispatchMark + institutional wordmark.
+export const PublicFooter: React.FC = () => (
+  <footer className="border-t border-white/5 px-8 py-10 lg:px-12">
+    <div className="mx-auto flex max-w-[1500px] flex-col items-center justify-between gap-4 text-[12px] text-white/40 sm:flex-row">
+      <div className="flex items-center gap-2"><DispatchMark className="h-5 w-5 text-gold-400" /> Sovereign Dispatch · Institutional Publication Infrastructure</div>
+      <div>Sovereign by design · Auditable always</div>
+    </div>
+  </footer>
+);
+
 // Sticky public header shared by the procurement + architecture pages. `actions`
 // renders on the right (e.g. a print button). `.no-print` keeps it out of PDFs.
 export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions }) => {

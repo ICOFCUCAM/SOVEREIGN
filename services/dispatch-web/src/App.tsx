@@ -5,6 +5,10 @@ import Shell from "./components/Shell";
 import Landing from "./pages/Landing";
 import Procurement from "./pages/Procurement";
 import Architecture from "./pages/Architecture";
+import Platform from "./pages/Platform";
+import Security from "./pages/Security";
+import Compliance from "./pages/Compliance";
+import Evidence from "./pages/Evidence";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
 import Create from "./pages/Create";
@@ -48,6 +52,10 @@ const App: React.FC = () => (
     {/* public procurement + architecture dossier (no auth) */}
     <Route path="/procurement" element={<Procurement />} />
     <Route path="/architecture" element={<Architecture />} />
+    <Route path="/platform" element={<Platform />} />
+    <Route path="/security" element={<Security />} />
+    <Route path="/compliance" element={<Compliance />} />
+    <Route path="/evidence" element={<Evidence />} />
     {/* gated console */}
     <Route path="/console/*" element={<Console />} />
     <Route path="*" element={<Navigate to="/" replace />} />
