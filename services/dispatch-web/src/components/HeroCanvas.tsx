@@ -10,7 +10,7 @@ import React, { useEffect, useRef } from "react";
 const CX = 0.28, CY = 0.5, SX0 = 0.0;
 // two silk bands flow from the far left, draw together near SUBMIT (CX) and
 // stretch through cards 1→3, fading by APPROVE
-const XEND = 0.46;
+const XEND = 0.40;
 const TC = (CX - SX0) / (XEND - SX0); // path fraction at Submit (~0.61)
 
 // continents → dotted map
@@ -40,26 +40,28 @@ for (let x = 120; x < 900; x += 8.5) for (let y = 70; y < 450; y += 8.5)
   if (POLYS.some((p) => inPoly(x, y, p))) MAP_DOTS.push({ nx: (x - 120) / 780, ny: (y - 70) / 380 });
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
-interface Cord { y0: number; y1: number; amp: number; freq: number; phase: number }
+interface Cord { y0: number; y1: number; hump: number; sign: number; amp: number; freq: number; phase: number }
 const CORDS: Cord[] = [];
 let seed = 7;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) & 0x7fffffff; return seed / 0x7fffffff; };
-// Benchmark mesh = TWO dense silk bands of near-parallel contour lines: an UPPER
-// band sweeping from the top-left down and a LOWER band from the bottom-left up,
-// each an S-swoosh (smoothstep) that flattens as it meets the pipeline.
-const NB = 26;
+// Benchmark mesh = one big wave on the left in two halves funnelling into SUBMIT:
+// an UPPER half that rises to a CREST (peak near x≈13%) then breaks down into the
+// pipeline, and a larger LOWER half that dips into a TROUGH then sweeps up. Nested
+// gold contour lines, densest at the crest/trough; fading by ~Govern.
+const NB = 24;
 for (let k = 0; k < NB; k++) {
-  const u = k / (NB - 1);
-  const amp = 0.006 + rnd() * 0.012;
+  const u = k / (NB - 1);              // 0 = outer (bigger), 1 = inner
+  const amp = 0.004 + rnd() * 0.008;
   const freq = 0.8 + rnd() * 1.2;
-  CORDS.push({ y0: 0.05 + u * 0.30, y1: 0.425 + u * 0.07, amp, freq, phase: rnd() * 6.28 }); // upper band
-  CORDS.push({ y0: 0.95 - u * 0.30, y1: 0.575 - u * 0.07, amp, freq, phase: rnd() * 6.28 }); // lower band
+  CORDS.push({ y0: 0.30 + u * 0.10, y1: 0.44 + u * 0.05, hump: 0.22 - u * 0.12, sign: -1, amp, freq, phase: rnd() * 6.28 }); // upper crest
+  CORDS.push({ y0: 0.70 - u * 0.10, y1: 0.56 - u * 0.05, hump: 0.30 - u * 0.16, sign: 1, amp, freq, phase: rnd() * 6.28 });  // lower trough
 }
 const pointOn = (c: Cord, t: number, W: number, H: number): [number, number] => {
   const x = SX0 + (XEND - SX0) * t;
-  const e = smooth(t);                           // S-swoosh: flat at source and at the pipeline
+  const base = c.y0 + (c.y1 - c.y0) * smooth(t);
+  const crest = c.hump * Math.sin(Math.sqrt(t) * Math.PI); // peak near t≈0.25, zero at ends
   const wave = Math.sin(t * c.freq * 6.283 + c.phase) * c.amp * (1 - t * 0.5);
-  return [x * W, (c.y0 + (c.y1 - c.y0) * e + wave) * H];
+  return [x * W, (base + c.sign * crest + wave) * H];
 };
 
 interface Code { c: number; t: number; sp: number; size: number; br: boolean }
