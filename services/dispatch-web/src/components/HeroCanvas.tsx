@@ -74,38 +74,38 @@ interface Strand {
   amp2: number; freq2: number; ph2: number; // second harmonic → micro-turbulence (splits/merges)
 }
 const STRANDS: Strand[] = [];
-// Nested funnels that START AT the institution nodes and never cross above them. Each
-// institution's strands emanate from its node TOWARD the centre only and descend
-// monotonically into Submit. Ministries/Authorities are furthest from centre → the widest,
-// longest OUTER envelope; Hospitals the medium middle; Universities/Agencies the inner. The
-// envelopes stay distinct through the travel (slow convergence) and merge only near Submit.
+// NESTED FUNNELS (horns), all sharing the apex at Submit. Each institution is one tight
+// funnel WALL: the strands leave the node nearly horizontally (the flared mouth) then curve
+// — concave — into the apex. Ministries(top)+Authorities(bottom) are the OUTER funnel walls;
+// Universities(top)+Agencies(bottom) the INNER funnel; Hospitals the axis. Walls never cross
+// above their node, and the cones nest: small funnel inside medium inside large.
 const mkStrand = (instIdx: number, cls: number, u: number): Strand => {
   const instY = INST_Y[instIdx], mag = MAG[instIdx];
-  const dir = instY < 0.5 ? 1 : instY > 0.5 ? -1 : 0;        // direction toward the centre line
-  const fan = 0.02 + 0.05 * mag;                              // band thickness at the node
-  // offset within the institution's band: outer fans toward centre [0..fan]; Hospitals symmetric
-  const off = dir === 0 ? (u - 0.5) * 0.14 : u * fan;
-  // y at convergence fraction f: f=0 sits in the node band, f=1 reaches the centre; the band
-  // offset shrinks to 0 as it converges, so strands never cross above their node
-  const yAt = (f: number) => (dir === 0 ? 0.5 : instY + (0.5 - instY) * f) + (dir === 0 ? off : dir * off) * (1 - f);
-  const x0 = INSTX - (mag - 0.45) * 0.055 + (rnd() - 0.3) * 0.022;  // outer start furthest left → longest
-  const y0 = yAt(0);
-  const c1x = 0.15 + rnd() * 0.03;  const c1y = yAt(0.1 + rnd() * 0.05);
-  const c2x = 0.245 + rnd() * 0.025; const c2y = yAt(0.38 + rnd() * 0.08);  // hold the envelope late
-  const ex = SUBMIT_X + 0.008 + (rnd() - 0.5) * 0.012;       // alive INTO / behind the Submit card
-  const ey = yAt(0.9) + (rnd() - 0.5) * 0.005;               // merge only here, near Submit
-  const width = cls === 0 ? 1.0 + rnd() * 0.35 : cls === 1 ? 0.55 + rnd() * 0.16 : 0.3 + rnd() * 0.13;
-  const bright = (cls === 0 ? 0.4 : cls === 1 ? 0.12 : 0.03) * (0.75 + 0.35 * mag);
+  const rel = instY - 0.5;                                    // signed distance from the apex line
+  const bandT = 0.01 + 0.022 * mag;                           // tight wall thickness (clean silhouette)
+  const wallY = instY + (u - 0.5) * bandT;
+  const x0 = INSTX - (mag - 0.45) * 0.05 + (rnd() - 0.3) * 0.016;  // outer walls start furthest left
+  const y0 = wallY;
+  // long flared mouth: hold the node height (the wide opening of the funnel)
+  const c1x = 0.16 + rnd() * 0.03;
+  const c1y = wallY - rel * 0.02;
+  // then a sharp concave bend into the apex — the curved funnel wall (a horn, not a straight fan)
+  const c2x = 0.242 + rnd() * 0.016;
+  const c2y = wallY - rel * 0.5;
+  const ex = SUBMIT_X + 0.006 + (rnd() - 0.5) * 0.008;       // alive INTO / behind the Submit card
+  const ey = 0.5 + rel * 0.03 + (rnd() - 0.5) * 0.003;        // apex, walls nested in order
+  const width = cls === 0 ? 1.1 + rnd() * 0.4 : cls === 1 ? 0.55 + rnd() * 0.16 : 0.28 + rnd() * 0.1;
+  const bright = (cls === 0 ? 0.62 : cls === 1 ? 0.17 : 0.03) * (0.7 + 0.4 * mag);
   const maxT = 0.99 + rnd() * 0.01;
-  const amp = cls === 0 ? 0.0015 + rnd() * 0.002 : 0.003 + rnd() * 0.006;
-  const amp2 = cls === 2 ? 0.0025 + rnd() * 0.003 : 0.0012 + rnd() * 0.0018;
+  const amp = cls === 0 ? 0.0012 + rnd() * 0.0016 : 0.0022 + rnd() * 0.004;
+  const amp2 = cls === 2 ? 0.002 + rnd() * 0.0025 : 0.001 + rnd() * 0.0015;
   return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls,
     amp, freq: 0.6 + rnd() * 0.9, ph: rnd() * 6.28, amp2, freq2: 2.5 + rnd() * 2.5, ph2: rnd() * 6.28 };
 };
 for (let i = 0; i < INST_Y.length; i++) {
-  const m = MAG[i];                                           // larger envelope → denser field
-  const nP = Math.round(m * 5) + 1, nS = Math.round(m * 10) + 2, nT = Math.round(m * 34) + 6;
-  for (let k = 0; k < nP; k++) STRANDS.push(mkStrand(i, 0, k / (nP - 1 || 1)));
+  const m = MAG[i];                                           // larger wall → slightly denser
+  const nP = Math.round(m * 7) + 2, nS = Math.round(m * 9) + 2, nT = Math.round(m * 12) + 3;
+  for (let k = 0; k < nP; k++) STRANDS.push(mkStrand(i, 0, k / (nP - 1)));
   for (let k = 0; k < nS; k++) STRANDS.push(mkStrand(i, 1, k / (nS - 1)));
   for (let k = 0; k < nT; k++) STRANDS.push(mkStrand(i, 2, k / (nT - 1)));
 }
@@ -230,10 +230,10 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
             prev = [x, y];
           }
         }
-        // composite: a soft blurred glow (fabric) + a faint sharp pass (structure beneath)
+        // composite: a soft blurred glow + a stronger SHARP pass so the funnel walls read
         ctx.save();
-        ctx.filter = "blur(1.7px)"; ctx.drawImage(off, 0, 0, W, H);
-        ctx.filter = "none"; ctx.globalAlpha = 0.4; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "blur(0.9px)"; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "none"; ctx.globalAlpha = 0.85; ctx.drawImage(off, 0, 0, W, H);
         ctx.globalAlpha = 1; ctx.restore();
       }
 
