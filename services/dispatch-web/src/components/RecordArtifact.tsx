@@ -62,24 +62,24 @@ export const RecordArtifact: React.FC<{ className?: string }> = ({ className }) 
             <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
             <feColorMatrix type="matrix" values="0 0 0 0 0.11  0 0 0 0 0.09  0 0 0 0 0.06  0 0 0 0.028 0" />
           </filter>
-          <clipPath id="ra-clip"><rect x="88" y="92" width="424" height="568" rx="7" /></clipPath>
+          <clipPath id="ra-clip"><rect x="88" y="92" width="424" height="568" rx="2" /></clipPath>
           <path id="ra-rim" d="M300,470 m-54,0 a54,54 0 1,1 108,0 a54,54 0 1,1 -108,0" />
         </defs>
 
-        {/* archival depth — edges of further records behind the instrument */}
-        <rect x="118" y="58" width="372" height="588" rx="6" fill="#cdc4b0" opacity="0.28" />
-        <rect x="104" y="74" width="392" height="588" rx="6" fill="#ddd4c0" opacity="0.5" />
+        {/* archival depth — edges of further records behind the instrument (square-filed) */}
+        <rect x="118" y="58" width="372" height="588" rx="2" fill="#cdc4b0" opacity="0.28" />
+        <rect x="104" y="74" width="392" height="588" rx="2" fill="#ddd4c0" opacity="0.5" />
 
         {/* environmental light the record sits in */}
         <ellipse cx="300" cy="320" rx="320" ry="360" fill="url(#ra-light)" />
 
-        {/* the instrument */}
+        {/* the instrument — square corners (a document, not a UI card) */}
         <g filter="url(#ra-shadow)">
-          <rect x="88" y="92" width="424" height="568" rx="7" fill="url(#ra-paper)" stroke="#1d1810" strokeOpacity="0.12" strokeWidth="1" />
-          <rect x="88" y="92" width="424" height="568" rx="7" filter="url(#ra-grain)" clipPath="url(#ra-clip)" />
+          <rect x="88" y="92" width="424" height="568" rx="2" fill="url(#ra-paper)" stroke="#1d1810" strokeOpacity="0.12" strokeWidth="1" />
+          <rect x="88" y="92" width="424" height="568" rx="2" filter="url(#ra-grain)" clipPath="url(#ra-clip)" />
           {/* engraved double frame + corner ticks */}
-          <rect x="100" y="104" width="400" height="544" rx="3" fill="none" stroke={INK} strokeOpacity="0.18" strokeWidth="1" />
-          <rect x="106" y="110" width="388" height="532" rx="2" fill="none" stroke={INK} strokeOpacity="0.08" strokeWidth="1" />
+          <rect x="100" y="104" width="400" height="544" rx="1" fill="none" stroke={INK} strokeOpacity="0.18" strokeWidth="1" />
+          <rect x="106" y="110" width="388" height="532" rx="1" fill="none" stroke={INK} strokeOpacity="0.08" strokeWidth="1" />
           <Tick x={100} y={104} dx={1} dy={1} /><Tick x={500} y={104} dx={-1} dy={1} />
           <Tick x={100} y={648} dx={1} dy={-1} /><Tick x={500} y={648} dx={-1} dy={-1} />
 
@@ -93,6 +93,14 @@ export const RecordArtifact: React.FC<{ className?: string }> = ({ className }) 
 
           <text x="124" y="216" fontFamily="Georgia, 'Times New Roman', serif" fontSize="40" fontWeight="700" letterSpacing="0.5" fill={INK}>Official Record</text>
           <text x="126" y="242" fontFamily="ui-monospace, monospace" fontSize="11" letterSpacing="3" fill={MUTED}>INSTRUMENT OF PUBLICATION</text>
+
+          {/* struck ink stamp — in the clear right margin, below the title (keeps it legible) */}
+          <g transform="rotate(-7 414 250)" opacity="0.48">
+            <rect x="360" y="231" width="108" height="38" fill="none" stroke="#8a5e22" strokeWidth="1.5" />
+            <rect x="364" y="235" width="100" height="30" fill="none" stroke="#8a5e22" strokeWidth="0.6" />
+            <text x="414" y="251" textAnchor="middle" fontFamily="Georgia, serif" fontSize="12" fontWeight="700" letterSpacing="2.5" fill="#8a5e22">SEALED</text>
+            <text x="414" y="261" textAnchor="middle" fontFamily="ui-monospace, monospace" fontSize="6.5" letterSpacing="2" fill="#8a5e22">· MMXXXVI ·</text>
+          </g>
 
           {/* metadata ledger */}
           {META.map(([k, v], i) => {
