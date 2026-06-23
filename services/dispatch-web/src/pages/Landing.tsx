@@ -25,6 +25,22 @@ const Card: React.FC<{ title: string; body: string }> = ({ title, body }) => (
   </div>
 );
 
+// Evidence step — a left rail (number + mental-model label + one line) beside the
+// proof component, so the section reads as a narrative: how it works → how it is
+// governed → what gets produced → how it is deployed.
+const EvidenceStep: React.FC<{ n: string; label: string; lead: string; children: React.ReactNode }> = ({ n, label, lead, children }) => (
+  <div className="grid gap-4 lg:grid-cols-[230px_1fr] lg:gap-8">
+    <div className="lg:pt-1">
+      <div className="flex items-center gap-3">
+        <span className="font-mono text-[13px] font-bold text-gold-400">{n}</span>
+        <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-white/80">{label}</span>
+      </div>
+      <p className="mt-2 max-w-[230px] text-[13px] leading-relaxed text-white/45">{lead}</p>
+    </div>
+    <div className="min-w-0">{children}</div>
+  </div>
+);
+
 const Landing: React.FC = () => {
   const nav = useNavigate();
   return (
@@ -59,10 +75,10 @@ const Landing: React.FC = () => {
         <div className="pointer-events-none absolute inset-0 bg-cover bg-right bg-no-repeat" style={{ backgroundImage: "url(/Dispatchhero.png)" }} aria-hidden />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/85 to-transparent" aria-hidden />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
-        <div className="relative z-10 mx-auto grid min-h-[88vh] max-w-[1500px] grid-cols-1 items-center gap-12 px-8 py-16 lg:grid-cols-[minmax(0,1fr)_400px] lg:px-12">
-          <div className="max-w-2xl">
+        <div className="relative z-10 mx-auto grid min-h-[88vh] max-w-[1500px] grid-cols-1 items-center gap-10 px-8 py-16 lg:px-12 xl:grid-cols-[40fr_60fr] xl:gap-8">
+          <div className="max-w-xl">
             <p className="mb-6 text-sm font-semibold uppercase tracking-[0.25em] text-gold-400">Institutional Publication Infrastructure</p>
-            <h1 className="font-serif text-6xl font-bold leading-[1.02] tracking-tight sm:text-7xl">
+            <h1 className="font-serif text-6xl font-bold leading-[1.02] tracking-tight sm:text-7xl xl:text-6xl 2xl:text-7xl">
               From Information<br />to <span className="text-gold-400">Official Record.</span>
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-relaxed text-white/60">
@@ -89,34 +105,39 @@ const Landing: React.FC = () => {
             </div>
           </div>
           {/* governed-publication flow — institutions to official record */}
-          <div className="hidden lg:block"><HeroFlow /></div>
+          <div className="hidden xl:block"><HeroFlow /></div>
         </div>
       </div>
 
-      {/* ── value strip (capability statements, no metrics) ────────── */}
-      <div className="border-t border-white/5 px-8 py-10 lg:px-12">
-        <div className="mx-auto grid max-w-[1500px] gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {[
-            ["Sovereign Control", "Your data, your rules — end-to-end sovereignty by design."],
-            ["Auditable by Default", "Every action recorded, traceable and reviewable across the lifecycle."],
-            ["Data Residency", "Deploy where your data must live. You decide the boundaries."],
-            ["Deploy Your Way", "Cloud, Private, Sovereign, On-Premise or Air-Gapped — your choice."],
-            ["Built to Endure", "Security, isolation and operational resilience at the core."],
-            ["Institutional Support", "Engagement and implementation planning for mission-critical operations."],
-          ].map(([t, b]) => (
-            <div key={t} className="border-l border-gold-500/30 pl-4">
-              <div className="text-[12px] font-bold uppercase tracking-wide text-white">{t}</div>
-              <p className="mt-1.5 text-[12.5px] leading-snug text-white/50">{b}</p>
-            </div>
+      {/* ── value strip — compact, scannable capability statements ──── */}
+      <div className="border-t border-white/5 px-8 py-5 lg:px-12">
+        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          {["Sovereign Control", "Auditable by Default", "Data Residency", "Deploy Your Way", "Built to Endure", "Institutional Support"].map((t) => (
+            <span key={t} className="inline-flex items-center gap-2 text-[12.5px] font-semibold uppercase tracking-wide text-white/75">
+              <Tick /> {t}
+            </span>
           ))}
         </div>
       </div>
 
-      {/* ── trusted by ─────────────────────────────────────────────── */}
-      <div className="border-t border-white/5 bg-white/[0.015] px-8 py-7 lg:px-12">
+      {/* ── trusted by — institutional sectors, not logos ──────────── */}
+      <div className="border-t border-white/5 bg-white/[0.015] px-8 py-14 lg:px-12">
         <p className="text-center text-[11px] font-semibold uppercase tracking-[0.3em] text-white/35">Trusted by institutions that cannot fail</p>
-        <div className="mx-auto mt-4 flex max-w-[1100px] flex-wrap items-center justify-center gap-x-12 gap-y-2 text-[12px] font-semibold uppercase tracking-[0.25em] text-white/45">
-          {["Government", "Education", "Healthcare", "NGOs", "Enterprise"].map((s) => <span key={s}>{s}</span>)}
+        <div className="mx-auto mt-9 grid max-w-5xl gap-8 sm:grid-cols-3 lg:grid-cols-5">
+          {[
+            ["Government", ["National ministries", "Regulators", "Authorities"]],
+            ["Education", ["Universities", "Schools", "Research institutes"]],
+            ["Healthcare", ["Hospitals", "Health agencies"]],
+            ["NGOs", ["International organizations", "Foundations"]],
+            ["Enterprise", ["Regulated industries", "Critical infrastructure"]],
+          ].map(([sector, items]) => (
+            <div key={sector as string} className="text-center sm:text-left">
+              <div className="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-400/90">{sector as string}</div>
+              <ul className="mt-3 space-y-1.5 text-[12.5px] leading-snug text-white/50">
+                {(items as string[]).map((it) => <li key={it}>{it}</li>)}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -170,13 +191,32 @@ const Landing: React.FC = () => {
       {/* ── Evidence ───────────────────────────────────────────────── */}
       <section id="evidence" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-24 lg:px-12">
         <SectionHead kicker="Evidence" title="See the governance, not the promise."
-          sub="Every official record carries its own provenance — approval, render, publication and an immutable audit trail. This is what a published record looks like." />
-        <div className="mx-auto mt-14 grid max-w-5xl items-start gap-6 lg:grid-cols-2">
-          <LastPublishedCard />
-          <LifecycleTrail />
-        </div>
-        <div className="mx-auto mt-6 max-w-5xl">
-          <PublicAuditTimeline />
+          sub="Every official record carries its own provenance — from how it works, to how it is governed, to what gets produced and how it is deployed." />
+        <div className="mx-auto mt-16 max-w-5xl space-y-12">
+          <EvidenceStep n="01" label="How it works" lead="A submission becomes an official record through a single governed path.">
+            <LifecycleTrail />
+          </EvidenceStep>
+          <EvidenceStep n="02" label="How it is governed" lead="Every action is recorded to an append-only, hash-verified audit trail.">
+            <PublicAuditTimeline />
+          </EvidenceStep>
+          <EvidenceStep n="03" label="What gets produced" lead="A faithful, classified, hash-stamped record — PDF and DOCX.">
+            <LastPublishedCard />
+          </EvidenceStep>
+          <EvidenceStep n="04" label="How it is deployed" lead="Into the sovereignty model your mandate requires.">
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-7">
+              <div className="flex flex-wrap items-center justify-between gap-5">
+                <div>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-400">Architecture Overview</span>
+                  <div className="mt-2 font-serif text-xl font-bold text-white">System, governance, security &amp; deployment — one reference.</div>
+                  <p className="mt-1.5 text-[13px] text-white/50">Cloud · Private · Sovereign · On-Premise · Air-Gapped. Print-ready for procurement.</p>
+                </div>
+                <button onClick={() => nav(ARCHITECTURE_ROUTE)}
+                  className="group inline-flex shrink-0 items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-lg shadow-gold-700/20 transition hover:from-gold-200 hover:to-gold-500">
+                  View Architecture <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                </button>
+              </div>
+            </div>
+          </EvidenceStep>
         </div>
       </section>
 
@@ -403,5 +443,6 @@ const Chevron: React.FC<{ className?: string }> = ({ className }) => (
 const ShieldCheck = () => (<svg width="17" height="17" viewBox="0 0 24 24" fill="none" className="text-gold-400"><path d="M12 3l7 2.5V11c0 4.6-3 8-7 9.5C8 19 5 15.6 5 11V5.5L12 3z" stroke="currentColor" strokeWidth="1.5" /><path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>);
 const Lock = () => (<svg width="17" height="17" viewBox="0 0 24 24" fill="none" className="text-gold-400"><rect x="5" y="10" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" /><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" strokeWidth="1.5" /></svg>);
 const Bank = () => (<svg width="17" height="17" viewBox="0 0 24 24" fill="none" className="text-gold-400"><path d="M4 9l8-5 8 5M5 9v8m4-8v8m6-8v8m4-8v8M3 20h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>);
+const Tick = () => (<svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0 text-gold-400"><path d="M3 8.5l3.5 3.5L13 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>);
 
 export default Landing;

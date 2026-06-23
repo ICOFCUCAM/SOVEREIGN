@@ -39,54 +39,54 @@ export const HeroFlow: React.FC = () => {
     return () => clearInterval(id);
   }, []);
   return (
-    <div className="relative select-none">
-      <div className="flex items-center justify-center gap-3 xl:gap-5">
-        {/* institution feeders */}
-        <div className="hidden flex-col gap-3 md:flex">
+    <div className="relative select-none py-4">
+      <div className="flex items-center justify-center gap-3 2xl:gap-6">
+        {/* institution feeders — shown where the column is wide enough (xl+) */}
+        <div className="hidden flex-col gap-4 2xl:flex">
           {INSTITUTIONS.map(([label, icon]) => (
             <div key={label} className="flex items-center justify-end gap-2.5">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-white/55">{label}</span>
-              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/[0.03] text-gold-400/80">{icon("h-4 w-4")}</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/[0.03] text-gold-400/80">{icon("h-4 w-4")}</span>
             </div>
           ))}
         </div>
         <Converge />
         {/* governed pipeline */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 2xl:gap-2.5">
           {STAGES.map(([label, icon], i) => {
             const active = i === stage;
             const done = stage > i || stage === STAGES.length;
             return (
               <React.Fragment key={label}>
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-lg border transition-all duration-500 ${active ? "border-gold-400/70 bg-gold-500/[0.12] text-gold-300 shadow-lg shadow-gold-700/20" : done ? "border-emerald-400/30 bg-white/[0.03] text-white/70" : "border-white/12 bg-white/[0.02] text-white/45"}`}>{icon("h-5 w-5")}</div>
-                  <span className={`text-[9px] font-bold uppercase tracking-wide ${active ? "text-gold-300" : "text-white/45"}`}>{label}</span>
+                <div className="flex flex-col items-center gap-2">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-lg border transition-all duration-500 2xl:h-16 2xl:w-16 ${active ? "border-gold-400/70 bg-gold-500/[0.12] text-gold-300 shadow-lg shadow-gold-700/20" : done ? "border-emerald-400/30 bg-white/[0.03] text-white/70" : "border-white/12 bg-white/[0.02] text-white/45"}`}>{icon("h-5 w-5 2xl:h-6 2xl:w-6")}</div>
+                  <span className={`text-[9.5px] font-bold uppercase tracking-wide 2xl:text-[10.5px] ${active ? "text-gold-300" : "text-white/45"}`}>{label}</span>
                 </div>
-                {i < STAGES.length - 1 && <span className={`mb-4 h-px w-3 transition-colors duration-500 xl:w-5 ${done ? "bg-gold-400/50" : "bg-white/12"}`} />}
+                {i < STAGES.length - 1 && <span className={`mb-5 h-px w-4 transition-colors duration-500 2xl:w-7 ${done ? "bg-gold-400/50" : "bg-white/12"}`} />}
               </React.Fragment>
             );
           })}
         </div>
-        <span className={`mb-4 h-px w-3 xl:w-5 ${stage === STAGES.length ? "bg-gold-400/60" : "bg-white/12"}`} />
+        <span className={`mb-5 h-px w-4 2xl:w-7 ${stage === STAGES.length ? "bg-gold-400/60" : "bg-white/12"}`} />
         {/* official record */}
         <div className="flex flex-col items-center gap-2">
-          <div className="relative flex h-16 w-16 items-center justify-center">
+          <div className="relative flex h-16 w-16 items-center justify-center 2xl:h-20 2xl:w-20">
             <span className={`absolute inset-0 rounded-full border transition-all duration-700 ${stage === STAGES.length ? "border-gold-400/50 scale-110" : "border-white/10"}`} />
             <span className={`absolute -inset-2 rounded-full border transition-all duration-700 ${stage === STAGES.length ? "border-gold-400/20" : "border-transparent"}`} />
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-b from-gold-400/20 to-gold-700/10 text-gold-300">{I.seal("h-6 w-6")}</span>
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-b from-gold-400/20 to-gold-700/10 text-gold-300 2xl:h-14 2xl:w-14">{I.seal("h-6 w-6 2xl:h-7 2xl:w-7")}</span>
           </div>
-          <span className="max-w-[72px] text-center text-[9.5px] font-bold uppercase leading-tight tracking-wide text-gold-300">Official Record</span>
+          <span className="max-w-[80px] text-center text-[10px] font-bold uppercase leading-tight tracking-wide text-gold-300">Official Record</span>
         </div>
       </div>
-      <p className="mt-6 text-center text-[10px] uppercase tracking-[0.2em] text-white/30">Submit · Govern · Approve · Render · Publish · Archive</p>
+      <p className="mt-7 text-center text-[10px] uppercase tracking-[0.25em] text-white/30">Submit · Govern · Approve · Render · Publish · Archive</p>
     </div>
   );
 };
 
 const Converge: React.FC = () => (
-  <svg viewBox="0 0 40 140" className="hidden h-32 w-8 text-gold-400/30 md:block" fill="none" preserveAspectRatio="none">
-    {[12, 40, 70, 100, 128].map((y) => (
-      <path key={y} d={`M0 ${y} C 20 ${y}, 20 70, 40 70`} stroke="currentColor" strokeWidth="1" />
+  <svg viewBox="0 0 40 200" className="hidden h-40 w-9 text-gold-400/30 2xl:block" fill="none" preserveAspectRatio="none">
+    {[16, 58, 100, 142, 184].map((y) => (
+      <path key={y} d={`M0 ${y} C 22 ${y}, 18 100, 40 100`} stroke="currentColor" strokeWidth="1" />
     ))}
   </svg>
 );
