@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { PublicHeader, Chevron, Dot } from "../components/brand";
+import { PublicHeader, Chevron, Dot, FilmGrain, useReveal } from "../components/brand";
 import { DeploymentMatrix } from "../components/DeploymentMatrix";
 import { ARCHITECTURE_ROUTE } from "../lib/routes";
 
@@ -22,16 +22,18 @@ const CONTENTS = [
 
 const Procurement: React.FC = () => {
   const nav = useNavigate();
+  useReveal();
   return (
-    <div className="min-h-full bg-[#070707] text-white">
+    <div className="relative min-h-full bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
+      <FilmGrain />
       <PublicHeader />
 
       {/* hero */}
       <section className="border-b border-white/5 px-8 py-20 lg:px-12">
         <div className="mx-auto max-w-[1100px]">
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement Package</p>
-          <h1 className="mt-4 max-w-3xl font-serif text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl">Everything your evaluation team needs.</h1>
+          <h1 className="mt-4 max-w-3xl font-serif text-5xl font-bold leading-[1.05] tracking-tight text-[#f4efe3] sm:text-6xl">Everything your evaluation team needs.</h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/60">
             A self-serve procurement dossier — architecture, governance, security, residency and the evaluation path — so
             technical reviewers and procurement officers can assess Sovereign Dispatch before any call.
