@@ -7,7 +7,7 @@ import React, { useEffect, useRef } from "react";
 // micro-particles keep the whole canvas quietly active. Gold rises left→right to
 // the Official Record. Governance is what merges the institutional streams.
 
-const SEALX = 0.8715;                                // Official Record = brightest, distributed terminus
+const SEALX = 0.9028;                                // Official Record = the destination (largest object)
 const CARD_FX = [0.2986, 0.384, 0.4694, 0.5549, 0.6403, 0.7257, SEALX]; // 6 equal cards + seal
 const GOVERN_X = 0.384;                              // fibers stay a visible band under Submit, on toward here
 
@@ -91,19 +91,19 @@ const mkStrand = (instIdx: number, cls: number): Strand => {
   // LONG flared mouth (varied hold distance per strand → irregular, not a wireframe)
   const c1x = 0.17 + rnd() * 0.08;
   const c1y = wallY - rel * (0.04 + rnd() * 0.1);
-  // GRADUAL taper — the field NEVER fully collapses: it stays a wide band that is still
-  // distinctly fibrous as it passes UNDER the Submit card, narrowing only slowly afterward
-  const c2x = 0.255 + rnd() * 0.03;
-  const c2y = 0.5 + rel * (0.3 + rnd() * 0.1) + (rnd() - 0.5) * 0.02;
-  // fibers run INTO / under Submit and on toward Govern, still a visible band (not a point)
-  const ex = GOVERN_X + (rnd() - 0.5) * 0.03;
-  const ey = 0.5 + rel * (0.09 + rnd() * 0.06) + (rnd() - 0.5) * 0.012;
-  // strong hierarchy but QUIET — the field is perceived, not noticed (opacity ~halved)
-  const width = (cls === 0 ? 0.85 : cls === 1 ? 0.45 : 0.24) * (0.65 + 0.7 * mag) + rnd() * 0.2;
-  const bright = (cls === 0 ? 0.28 : cls === 1 ? 0.08 : 0.018) * (0.35 + 0.95 * mag);
-  const maxT = cls === 2 ? 0.6 + rnd() * 0.4 : 0.94 + rnd() * 0.06;  // some fall short → organic edges
-  const amp = (cls === 0 ? 0.003 : 0.007) * (0.5 + rnd() * 1.3);   // more randomness, same quantity
-  const amp2 = (cls === 2 ? 0.006 : 0.003) * (0.4 + rnd() * 1.2);
+  // a BROAD governance VOLUME, not a choke point: the band stays tall across the field zone
+  // and only gathers near Submit, then passes under the pipeline as a visible band
+  const c2x = 0.27 + rnd() * 0.04;
+  const c2y = 0.5 + rel * (0.52 + rnd() * 0.14) + (rnd() - 0.5) * 0.025;
+  const ex = GOVERN_X + (rnd() - 0.5) * 0.04;
+  const ey = 0.5 + rel * (0.13 + rnd() * 0.08) + (rnd() - 0.5) * 0.014;
+  // hierarchy but VERY quiet — opacity roughly halved again; the eye should discover the field
+  const width = (cls === 0 ? 0.8 : cls === 1 ? 0.42 : 0.22) * (0.65 + 0.7 * mag) + rnd() * 0.2;
+  const bright = (cls === 0 ? 0.15 : cls === 1 ? 0.045 : 0.01) * (0.35 + 0.95 * mag);
+  const maxT = cls === 2 ? 0.55 + rnd() * 0.45 : 0.92 + rnd() * 0.08;  // varied length → organic edges
+  // organic currents: larger, more varied wander so the coils read as rivers, not Bézier strokes
+  const amp = (cls === 0 ? 0.004 : 0.01) * (0.4 + rnd() * 1.7);
+  const amp2 = (cls === 2 ? 0.009 : 0.004) * (0.3 + rnd() * 1.5);
   return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls,
     amp, freq: 0.5 + rnd() * 1.3, ph: rnd() * 6.28, amp2, freq2: 2 + rnd() * 3.5, ph2: rnd() * 6.28 };
 };
@@ -209,10 +209,11 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         ctx.beginPath(); ctx.arc(m.x, m.y, m.size, 0, 6.283); ctx.fill();
       }
 
-      // destination bloom behind the Official Record — the STRONGEST glow on the canvas
+      // ENVIRONMENTAL illumination behind the Official Record — a large, soft physical light the
+      // whole right half is immersed in (not a tight spotlight)
       const bx = SEALX * W, by = 0.5 * H;
-      const bloom = ctx.createRadialGradient(bx, by, 0, bx, by, 0.26 * W);
-      bloom.addColorStop(0, "rgba(233,200,120,0.13)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.035)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
+      const bloom = ctx.createRadialGradient(bx, by, 0, bx, by, 0.5 * W);
+      bloom.addColorStop(0, "rgba(233,200,120,0.1)"); bloom.addColorStop(0.35, "rgba(233,200,120,0.035)"); bloom.addColorStop(0.7, "rgba(233,200,120,0.012)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = bloom; ctx.fillRect(0, 0, W, H);
 
       // the governance field: the upper FABRIC + the lower ARCS, drawn SHARP on an offscreen
@@ -235,8 +236,8 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
             const tp = i / N, t = tp * s.maxT;
             const [x, y] = sPoint(s, t, tm);
             const tipFade = (s.cls === 2 && tp > 0.7) ? 1 - (tp - 0.7) / 0.3 : 1;
-            const a = (0.055 + 0.15 * t + 0.09 * t * t) * s.bright * tipFade;  // density gradient: dim edge → brighter core
-            const g = (255 - 78 * t) | 0, b = (255 - 168 * t) | 0;            // warmer gold, never white-hot
+            const a = (0.05 + 0.12 * t + 0.06 * t * t) * s.bright * tipFade;  // softer core so the Record is the single focus
+            const g = (255 - 80 * t) | 0, b = (255 - 170 * t) | 0;            // warm gold, never white-hot
             mctx.strokeStyle = `rgba(255,${g},${b},${a.toFixed(3)})`;
             mctx.lineWidth = s.width * (0.5 + 0.7 * t);
             mctx.beginPath(); mctx.moveTo(prev[0] * W, prev[1] * H); mctx.lineTo(x * W, y * H); mctx.stroke();
@@ -245,9 +246,9 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         }
         // composite with DEPTH but LOW weight: faint far atmosphere, soft mid, restrained near
         ctx.save();
-        ctx.filter = "blur(3px)"; ctx.globalAlpha = 0.28; ctx.drawImage(off, 0, 0, W, H);
-        ctx.filter = "blur(0.9px)"; ctx.globalAlpha = 0.62; ctx.drawImage(off, 0, 0, W, H);
-        ctx.filter = "none"; ctx.globalAlpha = 0.5; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "blur(3.4px)"; ctx.globalAlpha = 0.32; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "blur(1px)"; ctx.globalAlpha = 0.55; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "none"; ctx.globalAlpha = 0.4; ctx.drawImage(off, 0, 0, W, H);
         ctx.globalAlpha = 1; ctx.restore();
 
         // micro-points of light riding the strands (very subtle twinkle)

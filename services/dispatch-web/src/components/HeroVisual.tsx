@@ -19,10 +19,10 @@ const INST: { label: string; y: number }[] = [
 // equal-spaced pipeline — six stages of one family, none larger or brighter than another
 const SX = [430, 553, 676, 799, 922, 1045];
 const TILE = 84;
-const SEAL = { x: 1262, y: CY, r: 48 };      // Official Record — smaller; authority via space, rings, glow
+const SEAL = { x: 1300, y: CY, r: 84 };      // Official Record — THE destination: the largest object
 const STAGES = ["SUBMIT", "GOVERN", "APPROVE", "RENDER", "PUBLISH", "ARCHIVE"];
-// a few subtle ripple rings (not a radar screen)
-const RINGS = [62, 78, 98, 122];
+// concentric authority rings — restrained but sized to the larger seal
+const RINGS = [104, 124, 146, 170, 196];
 
 const ICON: Record<string, React.ReactNode> = {
   MINISTRIES: <path d="M4 9l8-5 8 5M5 9v8m4-8v8m6-8v8m4-8v8M3 20h18" />,
@@ -88,22 +88,24 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
       </g>
     ))}
 
-    {/* Official Record — small seal, the BRIGHTEST element (glow + ripples + negative space) */}
+    {/* Official Record — the DESTINATION: largest object, authority via scale, rings, glow, space */}
     <g>
-      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r * 3.4} fill="url(#hv-glow)" />
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r * 3.1} fill="url(#hv-glow)" />
       <g filter="url(#hv-soft)">
         {RINGS.map((r, i) => (
-          <circle key={r} cx={SEAL.x} cy={SEAL.y} r={r} fill="none" stroke={GOLD} strokeWidth="1" opacity={Math.max(0.05, 0.34 - i * 0.07)}>
-            {i === 0 && <><animate attributeName="r" values={`${r};${r + 6};${r}`} dur="6s" repeatCount="indefinite" /><animate attributeName="opacity" values="0.34;0.5;0.34" dur="6s" repeatCount="indefinite" /></>}
+          <circle key={r} cx={SEAL.x} cy={SEAL.y} r={r} fill="none" stroke={GOLD} strokeWidth="1" opacity={Math.max(0.04, 0.32 - i * 0.055)}>
+            {i === 0 && <><animate attributeName="r" values={`${r};${r + 8};${r}`} dur="6s" repeatCount="indefinite" /><animate attributeName="opacity" values="0.32;0.48;0.32" dur="6s" repeatCount="indefinite" /></>}
           </circle>
         ))}
       </g>
-      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r + 4} fill={BRIGHT} opacity="0.3" filter="url(#hv-bloom)" />
-      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r} fill="url(#hv-seal)" stroke={BRIGHT} strokeWidth="1.6" />
-      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r - 9} fill="none" stroke="#171008" strokeWidth="1" opacity="0.5" />
-      <Glyph name="SEAL" x={SEAL.x} y={SEAL.y} s={2.4} color="#171008" sw={1.6} />
-      <text x={SEAL.x} y={SEAL.y + SEAL.r + 32} textAnchor="middle" fontSize="15.5" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>OFFICIAL</text>
-      <text x={SEAL.x} y={SEAL.y + SEAL.r + 53} textAnchor="middle" fontSize="15.5" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>RECORD</text>
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r + 7} fill={BRIGHT} opacity="0.28" filter="url(#hv-bloom)" />
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r} fill="url(#hv-seal)" stroke={BRIGHT} strokeWidth="2" />
+      {/* embossed minted-seal detail — two hairlines (Auditor cap) */}
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r - 7} fill="none" stroke="#3a2a12" strokeWidth="1" opacity="0.55" />
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r - 15} fill="none" stroke="#171008" strokeWidth="1.2" opacity="0.45" />
+      <Glyph name="SEAL" x={SEAL.x} y={SEAL.y} s={4.3} color="#171008" sw={1.5} />
+      <text x={SEAL.x} y={SEAL.y + SEAL.r + 40} textAnchor="middle" fontSize="19" fontWeight="700" letterSpacing="3" fill={BRIGHT} style={{ fontFamily: "inherit" }}>OFFICIAL</text>
+      <text x={SEAL.x} y={SEAL.y + SEAL.r + 66} textAnchor="middle" fontSize="19" fontWeight="700" letterSpacing="3" fill={BRIGHT} style={{ fontFamily: "inherit" }}>RECORD</text>
     </g>
   </svg>
 );

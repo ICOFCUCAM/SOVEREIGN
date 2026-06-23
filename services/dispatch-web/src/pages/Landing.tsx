@@ -83,8 +83,8 @@ const Landing: React.FC = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
         <div className="relative z-10 mx-auto grid min-h-[920px] max-w-[1640px] grid-cols-1 items-center gap-10 px-8 py-20 lg:px-12 xl:min-h-[960px] xl:grid-cols-[27fr_73fr] xl:gap-6">
           <div className="max-w-lg xl:max-w-[26rem]">
-            <p className="mb-8 text-[13px] font-semibold uppercase tracking-[0.28em] text-gold-400">Institutional Publication Infrastructure</p>
-            <h1 className="font-serif text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl xl:text-[2.5rem] 2xl:text-[2.75rem]">
+            <p className="mb-8 text-[12.5px] font-semibold uppercase tracking-[0.34em] text-gold-400">Institutional Publication Infrastructure</p>
+            <h1 className="font-serif text-4xl font-bold leading-[1.07] tracking-[-0.01em] sm:text-5xl xl:text-[2.5rem] 2xl:text-[2.75rem]">
               From Information<br />to <span className="text-gold-400">Official Record.</span>
             </h1>
             <p className="mt-8 max-w-md text-[17px] leading-relaxed text-white/60">
