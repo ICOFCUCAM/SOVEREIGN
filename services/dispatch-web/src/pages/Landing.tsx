@@ -133,7 +133,7 @@ const Landing: React.FC = () => {
             store and share those files. None govern the moment one becomes the official record.
           </p>
         </div>
-        <div className="mx-auto mt-16 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mx-auto mt-16 grid stagger max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-5">
           {[
             ["Enforce governance before publication", "Nothing is published until it clears its approval policy."],
             ["Eliminate unofficial records", "One governed path — no shadow copies or unverified files."],
@@ -151,7 +151,7 @@ const Landing: React.FC = () => {
 
       {/* ── Category-owning Pillars ────────────────────────────────── */}
       <section id="pillars" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-28 lg:px-12">
-        <div className="mx-auto grid max-w-6xl gap-px overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.07] shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)] sm:grid-cols-3">
+        <div className="mx-auto grid stagger max-w-6xl gap-px overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.07] shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)] sm:grid-cols-3">
           {[
             ["01", "The System of Record", "Not document management. The authority that decides when information becomes official — and seals it."],
             ["02", "The Governance Layer", "The institutional layer between a decision and its published record. Nothing reaches the record ungoverned."],
@@ -199,7 +199,7 @@ const Landing: React.FC = () => {
             <span className="font-medium text-white/90">The record proves itself.</span>
           </p>
         </div>
-        <div className="relative z-10 mx-auto mt-16 grid max-w-4xl gap-6 sm:grid-cols-3">
+        <div className="relative z-10 mx-auto mt-16 grid stagger max-w-4xl gap-6 sm:grid-cols-3">
           {[
             ["Sealed provenance", "Who issued it, under what authority, and when — bound into the record itself."],
             ["Append-only history", "Every action preserved in order. Nothing is quietly edited or removed."],
@@ -244,7 +244,7 @@ const Landing: React.FC = () => {
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Built for institutions that cannot fail</p>
           <h2 className="mt-5 max-w-[20ch] font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">What each institution turns into a record.</h2>
         </div>
-        <div className="mx-auto mt-14 grid max-w-5xl gap-6 sm:grid-cols-2">
+        <div className="mx-auto mt-14 grid stagger max-w-5xl gap-6 sm:grid-cols-2">
           {[
             ["Government", "Ministries · Regulators · Authorities", "Publish policy, legislation and official notices as sealed records — full provenance, no shadow copies."],
             ["Healthcare", "Hospitals · Health authorities", "Issue clinical, safety and regulatory records that withstand audit and time — every version preserved, every release attributable."],
