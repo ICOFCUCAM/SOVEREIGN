@@ -45,7 +45,7 @@ const Landing: React.FC = () => {
       <style>{`html{scroll-behavior:smooth}`}</style>
 
       {/* ── sticky top nav ─────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/85 backdrop-blur">
+      <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/80 backdrop-blur-md shadow-[0_10px_30px_-22px_rgba(0,0,0,0.85)]">
         <div className="mx-auto flex max-w-[1640px] items-center justify-between px-8 py-3.5 lg:px-12">
           <a href="#top" className="flex items-center gap-2.5">
             <DispatchMark className="h-7 w-7 text-gold-400" />

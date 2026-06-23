@@ -74,7 +74,7 @@ export const PublicFooter: React.FC = () => (
 export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions }) => {
   const nav = useNavigate();
   return (
-    <header className="no-print sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/85 backdrop-blur">
+    <header className="no-print sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/80 backdrop-blur-md shadow-[0_10px_30px_-22px_rgba(0,0,0,0.85)]">
       <div className="mx-auto flex max-w-[1500px] items-center justify-between px-8 py-4 lg:px-12">
         <button onClick={() => nav("/")} className="flex items-center gap-3">
           <DispatchMark className="h-8 w-8 text-gold-400" />
