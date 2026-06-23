@@ -81,7 +81,7 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
     {/* governed pipeline — six EQUAL cards, white icons, restrained */}
     {SX.map((x, i) => (
       <g key={i}>
-        <rect x={x - TILE / 2 - 3} y={CY - TILE / 2 - 3} width={TILE + 6} height={TILE + 6} rx="18" fill={GOLD} opacity="0.05" filter="url(#hv-bloom)" />
+        <rect x={x - TILE / 2 - 3} y={CY - TILE / 2 - 3} width={TILE + 6} height={TILE + 6} rx="18" fill={GOLD} opacity={(0.06 + i * 0.012).toFixed(3)} filter="url(#hv-bloom)" />
         <rect x={x - TILE / 2} y={CY - TILE / 2} width={TILE} height={TILE} rx="16" fill="#0d0d0d" fillOpacity="0.9" stroke="rgba(233,200,120,0.42)" strokeWidth="1.2" />
         <Glyph name={STAGES[i]} x={x} y={CY - 2} s={1.7} color="#ffffff" sw={1.5} />
         <text x={x} y={CY + TILE / 2 + 24} textAnchor="middle" fontSize="12.5" fontWeight="700" letterSpacing="1.2" fill={WHITE_DIM} style={{ fontFamily: "inherit" }}>{STAGES[i]}</text>

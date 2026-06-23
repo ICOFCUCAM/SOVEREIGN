@@ -81,18 +81,21 @@ const STRANDS: Strand[] = [];
 const mkStrand = (instIdx: number, cls: number, lanePos: number): Strand => {
   const instY = INST_Y[instIdx], mag = MAG[instIdx];
   const side = instY < 0.5 ? -1 : instY > 0.5 ? 1 : 0;
-  const band = 0.5 + side * mag * 0.3;                        // this institution's envelope band (nested)
-  const x0 = INSTX + (rnd() - 0.3) * 0.03;                    // emerges from around the node
-  const y0 = instY + lanePos * (0.018 + 0.04 * mag);
-  const c1x = 0.15 + rnd() * 0.04;
-  const c1y = instY + (band - instY) * (0.5 + rnd() * 0.2);   // bow out toward the envelope
-  const c2x = 0.215 + rnd() * 0.04;                           // envelope reached mid-late
-  const c2y = band + lanePos * (0.03 + 0.06 * mag) + (side === 0 ? lanePos * 0.12 : 0);
-  const ex = SUBMIT_X + (rnd() - 0.5) * 0.014;                // alive AT / behind the Submit card
-  const ey = 0.5 + (band - 0.5) * 0.12 + (rnd() - 0.5) * 0.007;
+  const band = 0.5 + side * mag * 0.34;                       // this institution's envelope band (nested)
+  // outer (large mag) institutions emit the LONGEST strands → start a touch further left
+  const x0 = INSTX - (mag - 0.45) * 0.05 + (rnd() - 0.3) * 0.03;
+  const y0 = instY + lanePos * (0.016 + 0.035 * mag);
+  // reach the envelope EARLY and HOLD it (c1 and c2 both sit on the band) so the three
+  // envelopes stay visually distinct through the travel and only merge near Submit
+  const c1x = 0.155 + rnd() * 0.03;
+  const c1y = band + lanePos * (0.025 + 0.05 * mag) + (side === 0 ? lanePos * 0.16 : 0);
+  const c2x = 0.245 + rnd() * 0.025;                          // hold the envelope until late
+  const c2y = band + lanePos * (0.02 + 0.04 * mag) + (side === 0 ? lanePos * 0.1 : 0);
+  const ex = SUBMIT_X + 0.008 + (rnd() - 0.5) * 0.012;        // alive INTO / behind the Submit card
+  const ey = 0.5 + (band - 0.5) * 0.1 + (rnd() - 0.5) * 0.006;// merge only here, near Submit
   const width = cls === 0 ? 1.0 + rnd() * 0.35 : cls === 1 ? 0.55 + rnd() * 0.16 : 0.3 + rnd() * 0.13;
   const bright = (cls === 0 ? 0.4 : cls === 1 ? 0.12 : 0.03) * (0.75 + 0.35 * mag);
-  const maxT = 0.98 + rnd() * 0.02;
+  const maxT = 0.99 + rnd() * 0.01;
   const amp = cls === 0 ? 0.0015 + rnd() * 0.002 : 0.003 + rnd() * 0.006;
   const amp2 = cls === 2 ? 0.0025 + rnd() * 0.003 : 0.0012 + rnd() * 0.0018;
   return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls,
@@ -149,7 +152,7 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       // world map: a subtle, uniform dotted stage behind the whole process (10–15% feel)
       const mk = (d: { nx: number; ny: number }, base: number) =>
         ({ x: (0.04 + d.nx * 0.92) * W, y: (0.07 + d.ny * 0.72) * H, a: base });
-      dots = [...MAP_DOTS.map((d) => mk(d, 0.045)), ...CLUSTER_DOTS.map((d) => mk(d, 0.08))];
+      dots = [...MAP_DOTS.map((d) => mk(d, 0.028)), ...CLUSTER_DOTS.map((d) => mk(d, 0.05))];
       pps = [];
       for (let g = 0; g < CARD_FX.length - 1; g++) for (let k = 0; k < 4; k++) pps.push({ g, t: rnd(), sp: 0.004 + rnd() * 0.004, size: 0.8 + rnd() * 1.1 });
       // ambient particle noise — micro-particles everywhere so the whole canvas is quietly active
@@ -242,10 +245,10 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
 
       // where the field meets the pipeline — a SOFT, quiet glow (Submit is not a focal flash)
       const mx = ENTRY.x * W, my = ENTRY.y * H;
-      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.07 * W);
-      merge.addColorStop(0, "rgba(255,236,190,0.028)"); merge.addColorStop(0.4, "rgba(233,200,120,0.012)");
+      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.065 * W);
+      merge.addColorStop(0, "rgba(255,236,190,0.016)"); merge.addColorStop(0.4, "rgba(233,200,120,0.007)");
       merge.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = merge; ctx.fillRect(mx - 0.09 * W, my - 0.09 * W, 0.18 * W, 0.18 * W);
+      ctx.fillStyle = merge; ctx.fillRect(mx - 0.085 * W, my - 0.085 * W, 0.17 * W, 0.17 * W);
 
       // (no in-mesh particles: the mesh is a stable field, not a meteor shower. The only
       //  flowing particles live in the governed pipeline, to the right of Submit.)
@@ -256,14 +259,14 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         const x0 = CARD_FX[g], x1 = CARD_FX[g + 1], lvl = g / (CARD_FX.length - 1);
         for (let s = 1; s <= 2; s++) {
           const nx = (x0 + (x1 - x0) * (s / 3)) * W;
-          ctx.fillStyle = `rgba(255,231,173,${(0.16 + 0.18 * lvl).toFixed(3)})`;
-          ctx.beginPath(); ctx.arc(nx, 0.5 * H, 1.1, 0, 6.283); ctx.fill();
+          ctx.fillStyle = `rgba(255,231,173,${(0.2 + 0.2 * lvl).toFixed(3)})`;
+          ctx.beginPath(); ctx.arc(nx, 0.5 * H, 1.2, 0, 6.283); ctx.fill();
         }
       }
       for (const p of pps) {
         p.t += p.sp * (0.55 + 1.0 * p.t); if (p.t > 1) p.t -= 1;   // accelerate across each gap
         const x = (CARD_FX[p.g] + (CARD_FX[p.g + 1] - CARD_FX[p.g]) * p.t) * W;
-        const a = 0.34 + 0.5 * (p.g / (CARD_FX.length - 1));
+        const a = 0.4 + 0.45 * (p.g / (CARD_FX.length - 1));
         ctx.fillStyle = `rgba(255,231,173,${a.toFixed(3)})`;
         ctx.beginPath(); ctx.arc(x, 0.5 * H, p.size, 0, 6.283); ctx.fill();
       }
