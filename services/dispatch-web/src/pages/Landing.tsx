@@ -160,7 +160,7 @@ const Landing: React.FC = () => {
           ].map(([n, t, b]) => (
             <div key={t} className="group/p relative bg-[#070707] p-9 transition duration-300 hover:bg-[#0b0a07]">
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent transition duration-300 group-hover/p:via-gold-500/45" aria-hidden />
-              <div className="font-mono text-[12px] text-gold-400/70">{n}</div>
+              <div className="tnum font-mono text-[12px] text-gold-400/70">{n}</div>
               <h3 className="mt-5 font-serif text-[1.7rem] font-bold leading-[1.12] tracking-[-0.01em] text-[#f4efe3]">{t}</h3>
               <p className="mt-4 text-[14px] leading-relaxed text-white/55">{b}</p>
             </div>
@@ -178,7 +178,7 @@ const Landing: React.FC = () => {
           {["Submit", "Govern", "Approve", "Render", "Publish", "Preserve"].map((n, i, a) => (
             <React.Fragment key={n}>
               <div className="flex items-center gap-2.5">
-                <span className="font-mono text-[10px] text-gold-400/70">{`0${i + 1}`}</span>
+                <span className="tnum font-mono text-[10px] text-gold-400/70">{`0${i + 1}`}</span>
                 <span className="text-[11.5px] font-semibold uppercase tracking-[0.12em] text-white/65">{n}</span>
               </div>
               {i < a.length - 1 && <div className="mx-3 h-px w-6 bg-gradient-to-r from-gold-500/35 to-gold-500/10 sm:w-9" />}
