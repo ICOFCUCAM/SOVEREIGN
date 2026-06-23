@@ -42,8 +42,8 @@ const CORDS: Cord[] = [];
 let seed = 7;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) & 0x7fffffff; return seed / 0x7fffffff; };
 BANDS.forEach((b, bi) => {
-  const n = [12, 10, 8, 8, 10][bi];
-  for (let k = 0; k < n; k++) CORDS.push({ startY: b + (rnd() - 0.5) * 0.07, amp: 0.015 + rnd() * 0.05, freq: 1 + rnd() * 2.2, phase: rnd() * 6.28 });
+  const n = [15, 13, 11, 11, 13][bi];
+  for (let k = 0; k < n; k++) CORDS.push({ startY: b + (rnd() - 0.5) * 0.07, amp: 0.012 + rnd() * 0.046, freq: 1 + rnd() * 2.2, phase: rnd() * 6.28 });
 });
 const pointOn = (c: Cord, t: number, W: number, H: number): [number, number] => {
   const x = SX0 + (CX - SX0) * t;
@@ -63,10 +63,10 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
 
     const init = () => {
       dots = MAP_DOTS.map((d) => ({ x: (0.27 + d.nx * 0.68) * W, y: (0.1 + d.ny * 0.66) * H }));
-      const per = 8;
+      const per = 11;
       codes = [];
       for (let c = 0; c < CORDS.length; c++)
-        for (let k = 0; k < per; k++) codes.push({ c, t: rnd(), sp: 0.0014 + rnd() * 0.0022, size: 0.7 + rnd() * 1.5, br: rnd() < 0.25 });
+        for (let k = 0; k < per; k++) codes.push({ c, t: rnd(), sp: 0.0017 + rnd() * 0.0027, size: 0.7 + rnd() * 1.6, br: rnd() < 0.32 });
     };
     const resize = () => {
       const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
@@ -80,7 +80,8 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       ctx.globalCompositeOperation = "lighter";
 
       // dotted world map
-      for (const d of dots) { ctx.fillStyle = "rgba(233,200,120,0.08)"; ctx.fillRect(d.x, d.y, 1.5, 1.5); }
+      ctx.fillStyle = "rgba(233,200,120,0.13)";
+      for (const d of dots) ctx.fillRect(d.x, d.y, 1.7, 1.7);
 
       // warm bloom on the right (seal side)
       const gx = 0.82 * W, gy = 0.5 * H;
@@ -102,14 +103,14 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         const [x, y] = pointOn(CORDS[p.c], p.t, W, H);
         const a = Math.min(1, p.t / 0.05) * Math.min(1, (1 - p.t) / 0.05 + 0.4);
         const col = p.br ? "255,231,173" : "233,200,120";
-        ctx.fillStyle = `rgba(${col},${(0.6 * a).toFixed(3)})`;
+        ctx.fillStyle = `rgba(${col},${(0.74 * a).toFixed(3)})`;
         ctx.beginPath(); ctx.arc(x, y, p.size, 0, 6.283); ctx.fill();
       }
 
       // convergence glow at Submit
       const cgx = CX * W, cgy = CY * H;
       const cg = ctx.createRadialGradient(cgx, cgy, 0, cgx, cgy, 0.08 * W);
-      cg.addColorStop(0, "rgba(255,231,173,0.18)"); cg.addColorStop(1, "rgba(0,0,0,0)");
+      cg.addColorStop(0, "rgba(255,231,173,0.24)"); cg.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = cg; ctx.fillRect(cgx - 0.1 * W, cgy - 0.1 * W, 0.2 * W, 0.2 * W);
 
       raf = requestAnimationFrame(tick);
