@@ -129,7 +129,7 @@ const Landing: React.FC = () => {
       <section id="why" className="edge-rule scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
-          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Why Dispatch Exists</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400"><span className="tnum font-mono tracking-normal text-gold-400/55">01</span><span className="mx-2 font-normal text-gold-400/30">·</span>Why Dispatch Exists</p>
           <h2 className="mt-5 font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">
             Most systems manage documents.<br />Dispatch governs the path to official record.
           </h2>
@@ -156,6 +156,10 @@ const Landing: React.FC = () => {
 
       {/* ── Category-owning Pillars ────────────────────────────────── */}
       <section id="pillars" className="edge-rule scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
+        <div className="mx-auto mb-12 max-w-3xl text-center">
+          <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
+          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400"><span className="tnum font-mono tracking-normal text-gold-400/55">02</span><span className="mx-2 font-normal text-gold-400/30">·</span>What Dispatch Is</p>
+        </div>
         <div className="mx-auto grid stagger max-w-6xl gap-px overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.07] shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)] sm:grid-cols-3">
           {[
             ["01", "The System of Record", "Not document management. The authority that decides when information becomes official — and seals it."],
@@ -175,7 +179,7 @@ const Landing: React.FC = () => {
       {/* ── Record Lifecycle — quieted to a compact inline strip (−30%) ── */}
       <section id="lifecycle" className="edge-rule scroll-mt-24 bg-white/[0.015] px-5 py-14 sm:px-8 sm:py-16 lg:px-12">
         <div className="mx-auto max-w-5xl text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50">The Record Lifecycle</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50"><span className="tnum font-mono tracking-normal text-gold-400/55">03</span><span className="mx-2 font-normal text-white/25">·</span>The Record Lifecycle</p>
           <p className="mx-auto mt-3 max-w-xl text-[14px] leading-relaxed text-white/55">One governed path — every official document travels the same controlled route.</p>
         </div>
         <div className="mx-auto mt-9 flex max-w-3xl flex-wrap items-center justify-center gap-y-4">
@@ -196,7 +200,7 @@ const Landing: React.FC = () => {
         <Guilloche className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[760px] w-[760px] -translate-x-1/2 -translate-y-1/2 opacity-[0.05]" />
         <div className="relative z-10 mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
-          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Provenance</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400"><span className="tnum font-mono tracking-normal text-gold-400/55">04</span><span className="mx-2 font-normal text-gold-400/30">·</span>Provenance</p>
           <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">A Record That Proves Itself.</h2>
           <p className="mx-auto mt-6 max-w-[44rem] text-lg leading-[1.7] text-white/55">
             Every Dispatch record carries its own evidence — sealed, attributed and verifiable long after the people who
@@ -225,7 +229,7 @@ const Landing: React.FC = () => {
       <section id="procurement" className="edge-rule scroll-mt-24 bg-white/[0.015] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
-          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400"><span className="tnum font-mono tracking-normal text-gold-400/55">05</span><span className="mx-2 font-normal text-gold-400/30">·</span>Procurement</p>
           <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">Ready for institutional evaluation.</h2>
           <p className="mx-auto mt-5 max-w-[40rem] text-lg leading-[1.7] text-white/55">Architecture, security and procurement materials — self-serve, before any human contact.</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
@@ -246,7 +250,7 @@ const Landing: React.FC = () => {
       <section id="institutions" className="edge-rule scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto max-w-5xl">
           <div className="mb-5 h-px w-10 bg-gold-500/45" aria-hidden />
-          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Built for institutions that cannot fail</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400"><span className="tnum font-mono tracking-normal text-gold-400/55">06</span><span className="mx-2 font-normal text-gold-400/30">·</span>Built for institutions that cannot fail</p>
           <h2 className="mt-5 max-w-[20ch] font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">What each institution turns into a record.</h2>
         </div>
         <div className="mx-auto mt-14 grid stagger max-w-5xl gap-6 sm:grid-cols-2">
