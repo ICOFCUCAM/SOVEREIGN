@@ -22,8 +22,8 @@ export const Dot: React.FC = () => <span className="inline-block h-1.5 w-1.5 shr
 export const SectionHead: React.FC<{ kicker: string; title: string; sub?: string }> = ({ kicker, title, sub }) => (
   <div className="mx-auto max-w-3xl text-center">
     <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">{kicker}</p>
-    <h2 className="mt-4 font-serif text-4xl font-bold tracking-tight text-white sm:text-5xl">{title}</h2>
-    {sub && <p className="mt-5 text-lg leading-relaxed text-white/55">{sub}</p>}
+    <h2 className="mx-auto mt-5 max-w-[20ch] font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">{title}</h2>
+    {sub && <p className="mx-auto mt-6 max-w-[42rem] text-lg leading-[1.7] text-white/55">{sub}</p>}
   </div>
 );
 

@@ -106,10 +106,10 @@ const Landing: React.FC = () => {
       <section id="why" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Why Dispatch Exists</p>
-          <h2 className="mt-4 font-serif text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
+          <h2 className="mt-5 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">
             Most systems manage documents.<br />Dispatch governs the path to official record.
           </h2>
-          <p className="mt-6 text-lg leading-relaxed text-white/55">
+          <p className="mx-auto mt-7 max-w-[44rem] text-lg leading-[1.7] text-white/55">
             Institutions produce decisions every day — briefings, policies, board resolutions, regulatory submissions,
             official notices. Most tools store and share those files. None of them govern the moment information becomes
             the official record.
