@@ -7,8 +7,11 @@ import React, { useEffect, useRef } from "react";
 // dim gold dotted world map and a warm bloom on the right. Brand gold only.
 
 // convergence point (matches SUBMIT in the SVG overlay: x≈0.28 of width, centre)
-const CX = 0.28, CY = 0.5, SX0 = 0.086;
-const BANDS = [0.28, 0.39, 0.5, 0.61, 0.72]; // institution rows (normalised y)
+const CX = 0.28, CY = 0.5, SX0 = 0.0;
+// two silk bands flow from the far left, draw together near SUBMIT (CX) and
+// stretch through cards 1→3, fading by APPROVE
+const XEND = 0.46;
+const TC = (CX - SX0) / (XEND - SX0); // path fraction at Submit (~0.61)
 
 // continents → dotted map
 const CONTS = [
@@ -36,30 +39,28 @@ const MAP_DOTS: { nx: number; ny: number }[] = [];
 for (let x = 120; x < 900; x += 8.5) for (let y = 70; y < 450; y += 8.5)
   if (POLYS.some((p) => inPoly(x, y, p))) MAP_DOTS.push({ nx: (x - 120) / 780, ny: (y - 70) / 380 });
 
-const smooth = (t: number) => t * t * (3 - 2 * t);
-interface Cord { startY: number; off: number; arc: number; wob: number; phase: number }
+interface Cord { y0: number; y1: number; ease: number; amp: number; freq: number; phase: number }
 const CORDS: Cord[] = [];
 let seed = 7;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) & 0x7fffffff; return seed / 0x7fffffff; };
-// Benchmark rays: smooth single-arc sweeps converging at Submit. Upper bands bow
-// UP, lower bands bow DOWN, the middle runs straight — forming a converging lens.
-// Outer cords arc more, so each institution reads as a nested set of silk arcs.
-BANDS.forEach((b, bi) => {
-  const dir = bi < 2 ? -1 : bi > 2 ? 1 : 0;
-  const n = [11, 10, 8, 10, 11][bi];
-  const baseArc = 0.05 + Math.abs(bi - 2) * 0.052;
-  for (let k = 0; k < n; k++) {
-    const off = (k - (n - 1) / 2) * 0.012;
-    const arc = dir * (baseArc + Math.abs(off) * 1.6);
-    CORDS.push({ startY: b, off, arc, wob: 0.006 + rnd() * 0.01, phase: rnd() * 6.28 });
-  }
-});
+// Benchmark mesh = TWO sweeping silk bands of near-parallel contour lines: an
+// UPPER band flowing from the top-left down into the pipeline, and a LOWER band
+// from the bottom-left up. Each line eases (concave) toward the centreline and
+// stretches through cards 1→3.
+const NB = 22;
+for (let k = 0; k < NB; k++) {
+  const u = k / (NB - 1);
+  const ease = 1.55 + rnd() * 0.5;
+  const amp = 0.007 + rnd() * 0.014;
+  const freq = 0.8 + rnd() * 1.3;
+  CORDS.push({ y0: 0.03 + u * 0.35, y1: 0.40 + u * 0.10, ease, amp, freq, phase: rnd() * 6.28 }); // upper band
+  CORDS.push({ y0: 0.97 - u * 0.35, y1: 0.60 - u * 0.10, ease, amp, freq, phase: rnd() * 6.28 }); // lower band
+}
 const pointOn = (c: Cord, t: number, W: number, H: number): [number, number] => {
-  const x = SX0 + (CX - SX0) * t;
-  const baseY = (c.startY + c.off) + (CY + c.off * 0.2 - (c.startY + c.off)) * smooth(t);
-  const arc = c.arc * Math.sin(t * Math.PI);                 // single graceful sweep
-  const wob = c.wob * Math.sin(t * 9 + c.phase) * t * (1 - t); // faint life, 0 at ends
-  return [x * W, (baseY + arc + wob) * H];
+  const x = SX0 + (XEND - SX0) * t;
+  const e = Math.pow(t, c.ease);                 // concave swoosh toward the centreline
+  const wave = Math.sin(t * c.freq * 6.283 + c.phase) * c.amp * (1 - t * 0.55);
+  return [x * W, (c.y0 + (c.y1 - c.y0) * e + wave) * H];
 };
 
 interface Code { c: number; t: number; sp: number; size: number; br: boolean }
@@ -100,12 +101,16 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       g.addColorStop(0, "rgba(233,200,120,0.12)"); g.addColorStop(0.45, "rgba(233,200,120,0.03)"); g.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
-      // the cords — smooth, parallel silk-wave lines (the visible mesh)
+      // the cords — S-waves converging at Submit then stretching through cards 1→3
       ctx.lineWidth = 1;
-      ctx.strokeStyle = "rgba(233,200,120,0.12)";
       for (const c of CORDS) {
+        ctx.strokeStyle = "rgba(233,200,120,0.13)";          // phase 1: institution → Submit
         ctx.beginPath();
-        for (let i = 0; i <= 28; i++) { const [x, y] = pointOn(c, i / 28, W, H); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+        for (let i = 0; i <= 20; i++) { const [x, y] = pointOn(c, (i / 20) * TC, W, H); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+        ctx.stroke();
+        ctx.strokeStyle = "rgba(233,200,120,0.055)";         // phase 2: Submit → Approve, fading
+        ctx.beginPath();
+        for (let i = 0; i <= 14; i++) { const [x, y] = pointOn(c, TC + (i / 14) * (1 - TC), W, H); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
         ctx.stroke();
       }
 
