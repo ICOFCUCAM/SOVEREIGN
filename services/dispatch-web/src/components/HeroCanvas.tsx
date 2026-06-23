@@ -46,22 +46,26 @@ for (const [cx, cy] of CLUSTERS) for (let i = 0; i < 18; i++)
   CLUSTER_DOTS.push({ nx: (cx + (rnd() - 0.5) * 34 - 120) / 780, ny: (cy + (rnd() - 0.5) * 34 - 70) / 380 });
 
 // ── strands: off-screen-left → curved/merging → SUBMIT nexus ────────────────
-interface Strand { x0: number; y0: number; cx: number; cy: number; maxT: number; reach: boolean }
+interface Strand { x0: number; y0: number; ex: number; ey: number; cx: number; cy: number; maxT: number; reach: boolean }
 const STRANDS: Strand[] = [];
-const NS = 54;
+const NEXUSX = 0.238;                                                 // nexus band = Submit's left face
+const NS = 60;
 for (let k = 0; k < NS; k++) {
   const upper = k % 2 === 0;
-  const x0 = -0.12 + rnd() * 0.18;                                   // off-screen-left to ~0.06
-  const y0 = upper ? 0.02 + rnd() * 0.40 : 0.58 + rnd() * 0.40;
-  const cx = x0 + (SUBMIT.x - x0) * (0.42 + rnd() * 0.22);
-  const cy = y0 + (SUBMIT.y - y0) * (0.32 + rnd() * 0.30) + (rnd() - 0.5) * 0.16; // unique curvature
+  const x0 = -0.14 + rnd() * 0.20;                                    // off-screen-left
+  const y0 = upper ? rnd() * 0.42 : 0.58 + rnd() * 0.42;
+  const ey = 0.5 + (y0 - 0.5) * 0.14 + (rnd() - 0.5) * 0.03;          // compressed into a nexus BAND (nested, not a point)
+  const ex = NEXUSX + rnd() * 0.02;
+  const mx = x0 + (ex - x0) * (0.42 + rnd() * 0.16);
+  const my = y0 + (ey - y0) * 0.5 + (rnd() - 0.5) * 0.04;
+  const cx = mx - (0.05 + rnd() * 0.10);                              // bow LEFT → each strand a ")" arc convex toward the pipeline
   const r = rnd();
-  const maxT = 0.40 + r * r * 0.60;                                  // skewed: many dissipate early (compression)
-  STRANDS.push({ x0, y0, cx, cy, maxT, reach: maxT > 0.86 });
+  const maxT = 0.42 + r * r * 0.58;                                   // skewed: many dissipate early (compression)
+  STRANDS.push({ x0, y0, ex, ey, cx, cy: my, maxT, reach: maxT > 0.86 });
 }
 const sPoint = (s: Strand, t: number): [number, number] => {
   const mt = 1 - t;
-  return [mt * mt * s.x0 + 2 * mt * t * s.cx + t * t * SUBMIT.x, mt * mt * s.y0 + 2 * mt * t * s.cy + t * t * SUBMIT.y];
+  return [mt * mt * s.x0 + 2 * mt * t * s.cx + t * t * s.ex, mt * mt * s.y0 + 2 * mt * t * s.cy + t * t * s.ey];
 };
 
 interface Code { s: number; t: number; sp: number; size: number; br: boolean }
