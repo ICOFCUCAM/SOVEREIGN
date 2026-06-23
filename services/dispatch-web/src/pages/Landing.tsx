@@ -94,7 +94,7 @@ const Landing: React.FC = () => {
               </a>
             </div>
             {/* the charter — quieted so the instrument dominates */}
-            <div className="mt-11 border-t border-white/10 pt-6">
+            <div className="mt-11 border-t border-white/[0.08] pt-6">
               <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/30">The Governed Lifecycle</p>
               <dl className="mt-4 grid max-w-md grid-cols-2 gap-x-8 gap-y-0">
                 {ARTICLES.map(([num, label]) => (

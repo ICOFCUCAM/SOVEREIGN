@@ -38,8 +38,8 @@ export const Card: React.FC<{ title: string; body: string }> = ({ title, body })
 
 // Shared trust strip — the three positioning pillars, full-bleed.
 export const TrustStrip: React.FC = () => (
-  <div className="border-t border-white/10 bg-white/[0.02] px-8 py-7 lg:px-12">
-    <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-x-10 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-white/45">
+  <div className="border-t border-white/[0.06] bg-white/[0.015] px-8 py-7 lg:px-12">
+    <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-x-10 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50">
       <span>Sovereign by Design</span>
       <span className="hidden text-gold-400/40 sm:inline">·</span>
       <span>Auditable by Default</span>
