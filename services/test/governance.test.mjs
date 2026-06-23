@@ -20,7 +20,10 @@ const pool = makePool();
 // append-only audit has no app SELECT policy for these actions → count via the
 // superuser inspector (same pattern as sprint1-e2e).
 const adminPool = new pgpkg.Pool({ host: process.env.PGHOST || "/tmp", port: Number(process.env.PGPORT || 55432),
-  user: "postgres", database: process.env.PGDATABASE || "dispatch", max: 3 });
+  // superuser password pinned explicitly (see sprint1-e2e) so PGPASSWORD for the
+  // app role isn't inherited and rejected under scram; ignored under local trust.
+  user: "postgres", password: process.env.PGADMIN_PASSWORD || "postgres",
+  database: process.env.PGDATABASE || "dispatch", max: 3 });
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log(`  PASS ${m}`); } else { fail++; console.log(`  FAIL ${m}`); } };
 
