@@ -38,6 +38,9 @@ p { text-wrap: pretty; }
   .reveal.in { opacity: 1; transform: none; }
 }
 
+/* gold text selection — a small mark of craft */
+::selection { background: rgba(201, 162, 75, 0.32); color: #fff; }
+
 /* keyboard focus — a single restrained gold ring everywhere (accessible + premium) */
 a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   outline: 2px solid rgba(212, 175, 82, 0.65);
