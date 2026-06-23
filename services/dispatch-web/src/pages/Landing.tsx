@@ -82,7 +82,7 @@ const Landing: React.FC = () => {
           {/* narrative + charter */}
           <div className="max-w-xl">
             <p className="mb-8 text-[12.5px] font-semibold uppercase tracking-[0.34em] text-gold-400">Institutional Publication Infrastructure</p>
-            <h1 className="font-serif text-[2.65rem] font-bold leading-[1.03] tracking-[-0.022em] sm:text-[3.25rem] 2xl:text-[3.6rem]">
+            <h1 className="font-serif text-[2.65rem] font-bold leading-[1.03] tracking-[-0.022em] text-[#f4efe3] sm:text-[3.25rem] 2xl:text-[3.6rem]">
               From Information<br />to <span className="text-gold-400">Official Record.</span>
             </h1>
             <p className="mt-7 max-w-[27rem] text-[17px] leading-[1.7] text-white/60">
@@ -118,6 +118,12 @@ const Landing: React.FC = () => {
             <RecordArtifact className="w-full max-w-[420px] xl:max-w-[700px]" />
           </div>
         </div>
+        {/* scroll cue — a quiet invitation to read on */}
+        <a href="#why" aria-label="Scroll to read more"
+          className="group absolute inset-x-0 bottom-7 z-10 mx-auto hidden w-fit flex-col items-center gap-2 xl:flex">
+          <span className="text-[9.5px] font-semibold uppercase tracking-[0.34em] text-white/35 transition group-hover:text-white/60">Scroll</span>
+          <Chevron className="scroll-cue h-3.5 w-3.5 rotate-90 text-gold-400/70 transition group-hover:text-gold-300" />
+        </a>
       </div>
 
       {/* ── Why Dispatch Exists — strategic context + outcomes ─────── */}
@@ -125,7 +131,7 @@ const Landing: React.FC = () => {
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Why Dispatch Exists</p>
-          <h2 className="mt-5 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">
+          <h2 className="mt-5 font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">
             Most systems manage documents.<br />Dispatch governs the path to official record.
           </h2>
           <p className="mx-auto mt-7 max-w-[42rem] text-lg leading-[1.7] text-white/55">
@@ -160,7 +166,7 @@ const Landing: React.FC = () => {
             <div key={t} className="group/p relative bg-[#070707] p-9 transition duration-300 hover:bg-[#0b0a07]">
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent transition duration-300 group-hover/p:via-gold-500/45" aria-hidden />
               <div className="font-mono text-[12px] text-gold-400/70">{n}</div>
-              <h3 className="mt-5 font-serif text-[1.7rem] font-bold leading-[1.12] tracking-[-0.01em] text-white">{t}</h3>
+              <h3 className="mt-5 font-serif text-[1.7rem] font-bold leading-[1.12] tracking-[-0.01em] text-[#f4efe3]">{t}</h3>
               <p className="mt-4 text-[14px] leading-relaxed text-white/55">{b}</p>
             </div>
           ))}
@@ -192,7 +198,7 @@ const Landing: React.FC = () => {
         <div className="relative z-10 mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Provenance</p>
-          <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">A Record That Proves Itself.</h2>
+          <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">A Record That Proves Itself.</h2>
           <p className="mx-auto mt-6 max-w-[44rem] text-lg leading-[1.7] text-white/55">
             Every Dispatch record carries its own evidence — sealed, attributed and verifiable long after the people who
             created it have moved on. The institution doesn't ask you to trust the record.{" "}
@@ -221,7 +227,7 @@ const Landing: React.FC = () => {
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement</p>
-          <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">Ready for institutional evaluation.</h2>
+          <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">Ready for institutional evaluation.</h2>
           <p className="mx-auto mt-5 max-w-[40rem] text-lg leading-[1.7] text-white/55">Architecture, security and procurement materials — self-serve, before any human contact.</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button onClick={() => nav(PROCUREMENT_ROUTE)}
@@ -242,7 +248,7 @@ const Landing: React.FC = () => {
         <div className="mx-auto max-w-5xl">
           <div className="mb-5 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Built for institutions that cannot fail</p>
-          <h2 className="mt-5 max-w-[20ch] font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">What each institution turns into a record.</h2>
+          <h2 className="mt-5 max-w-[20ch] font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">What each institution turns into a record.</h2>
         </div>
         <div className="mx-auto mt-14 grid stagger max-w-5xl gap-6 sm:grid-cols-2">
           {[
