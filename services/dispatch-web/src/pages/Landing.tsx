@@ -237,10 +237,10 @@ const Landing: React.FC = () => {
         </div>
         <div className="mx-auto mt-14 grid max-w-5xl gap-6 sm:grid-cols-2">
           {[
-            ["Government", "Ministries · Regulators · Authorities", "Publish policy, legislation and official notices as sealed records — full provenance, and no shadow copies circulating outside the system."],
+            ["Government", "Ministries · Regulators · Authorities", "Publish policy, legislation and official notices as sealed records — full provenance, no shadow copies."],
             ["Healthcare", "Hospitals · Health authorities", "Issue clinical, safety and regulatory records that withstand audit and time — every version preserved, every release attributable."],
             ["Education", "Universities · Research bodies", "Confer and preserve official records — credentials, resolutions and research outputs — under the institution's own seal."],
-            ["Enterprise", "Regulated industries · Critical infrastructure", "Turn board, compliance and operational decisions into permanent, defensible records a regulator can trust."],
+            ["Enterprise", "Regulated industries · Critical infrastructure", "Turn board and compliance decisions into permanent, defensible records a regulator can trust."],
           ].map(([cat, who, story]) => (
             <div key={cat} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/25 p-7">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
