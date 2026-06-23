@@ -30,7 +30,7 @@ export const SectionHead: React.FC<{ kicker: string; title: string; sub?: string
 
 // Bordered capability card — title + body, with a subtle hover lift.
 export const Card: React.FC<{ title: string; body: string }> = ({ title, body }) => (
-  <div className="rounded-lg border border-white/10 bg-white/[0.02] p-6 transition hover:border-gold-500/30 hover:bg-white/[0.04]">
+  <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:border-gold-500/30 hover:from-white/[0.06]">
     <div className="text-[15px] font-bold tracking-[-0.005em] text-white">{title}</div>
     <p className="mt-2.5 text-[13.5px] leading-[1.65] text-white/55">{body}</p>
   </div>
