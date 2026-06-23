@@ -88,3 +88,7 @@ jobs:
       - name: Retry / DLQ (3)
         working-directory: services
         run: node test/sprint1-retry.mjs
+
+      - name: Provisioning — account + secret (14)
+        working-directory: services
+        run: node test/provisioning.test.mjs

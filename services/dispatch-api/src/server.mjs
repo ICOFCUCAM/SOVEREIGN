@@ -15,6 +15,7 @@ import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/stora
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
 import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition } from "../../shared/src/governance.mjs";
+import { issueClientTx, rotateSecretTx, revokeClientTx, listClientsTx, ProvisioningError } from "../../shared/src/provisioning.mjs";
 
 const ENGINE_VERSION = "dispatch-api@1.0.0";
 const pool = makePool();
@@ -396,6 +397,50 @@ async function handleAudit(res, principal, query) {
 // cross-tenant id → we surface 404 (never leak existence across tenants).
 const claimsFor = (p) => ({ tenant_id: p.tenantId, dispatch_role: p.role, principal_type: p.principalType, actor: p.actor });
 
+// ── Admin: tenant self-service for service-client credentials ────────────────
+// Gated on dispatch:admin (a tenant_admin's JWT carries it). All writes run
+// under the caller's claims, so RLS (M9) confines them to the caller's tenant.
+// The raw secret is returned exactly once, at issue and at rotation.
+async function handleAdminClients(req, res, principal, method, clientId, action) {
+  if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
+  const actorType = principal.principalType === "service" ? "service" : "user";
+  const claims = claimsFor(principal);
+  try {
+    if (method === "GET") {
+      const clients = await withClaims(pool, claims, (c) => listClientsTx(c));
+      return send(res, 200, { clients });
+    }
+    if (method === "POST" && !clientId) {
+      let body; try { body = JSON.parse(await readBody(req)); }
+      catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+      const out = await withClaims(pool, claims, (c) => issueClientTx(c, {
+        tenantId: principal.tenantId, name: body.name, scopes: body.scopes, clearance: body.clearance || "none",
+        actor: principal.actor, actorType,
+      }));
+      return send(res, 201, { client_id: out.clientId, secret: out.secret, name: out.name, scopes: out.scopes,
+        tenantId: principal.tenantId, note: "store the secret now — it is shown only once" });
+    }
+    if (method === "POST" && clientId && action === "rotate") {
+      const out = await withClaims(pool, claims, (c) => rotateSecretTx(c, { tenantId: principal.tenantId, clientId, actor: principal.actor, actorType }));
+      return send(res, 200, { client_id: out.clientId, secret: out.secret, note: "store the secret now — it is shown only once" });
+    }
+    if (method === "POST" && clientId && action === "revoke") {
+      await withClaims(pool, claims, (c) => revokeClientTx(c, { tenantId: principal.tenantId, clientId, actor: principal.actor, actorType }));
+      return send(res, 200, { client_id: clientId, revoked: true });
+    }
+    return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "not found"));
+  } catch (e) {
+    if (e instanceof ProvisioningError) {
+      // The endpoint-level admin gate already returned 403 for an unauthorised
+      // caller; any ProvisioningError here is a payload problem (400) except a
+      // missing target (404).
+      const status = e.code === "NOT_FOUND" ? 404 : 400;
+      return send(res, status, errEnvelope(null, status, e.code, e.message));
+    }
+    throw e;
+  }
+}
+
 async function handleGetJob(res, principal, jobId) {
   if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
   const row = await withClaims(pool, claimsFor(principal), async (c) => {
@@ -533,6 +578,13 @@ const server = http.createServer(async (req, res) => {
       if (path === "/v1/audit") return await handleAudit(res, auth.principal, url.searchParams);
     }
 
+    // Admin: list this tenant's service clients (auth + dispatch:admin).
+    if (req.method === "GET" && path === "/v1/admin/clients") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleAdminClients(req, res, auth.principal, "GET");
+    }
+
     // Dispatch console (Epic 9) — static page; no auth (it authenticates client-side).
     if (req.method === "GET" && (path === "/" || path === "/console")) {
       const html = consoleHtml();
@@ -579,6 +631,11 @@ const server = http.createServer(async (req, res) => {
 
     if (path === "/v1/validate") return await handleValidate(req, res, principal);
     if (path === "/v1/documents") return await handleDocuments(req, res, principal);
+
+    // Admin: issue / rotate / revoke this tenant's service clients (dispatch:admin).
+    if (path === "/v1/admin/clients") return await handleAdminClients(req, res, principal, "POST");
+    const adminMatch = /^\/v1\/admin\/clients\/([A-Za-z0-9_-]+)\/(rotate|revoke)$/.exec(path);
+    if (adminMatch) return await handleAdminClients(req, res, principal, "POST", adminMatch[1], adminMatch[2]);
 
     // Governance actions on a document: decision (approve/reject/return),
     // publish, withdraw.

@@ -8,6 +8,7 @@
     "M5__roles_grants.sql",
     "M6__clearance.sql",
     "M7__governance.sql",
-    "M8__governance_job_insert.sql"
+    "M8__governance_job_insert.sql",
+    "M9__provisioning.sql"
   ]
 }
