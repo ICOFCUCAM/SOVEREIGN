@@ -9,8 +9,7 @@ import React, { useEffect, useRef } from "react";
 
 const SEALX = 0.8715;                                // Official Record = brightest, distributed terminus
 const CARD_FX = [0.2986, 0.384, 0.4694, 0.5549, 0.6403, 0.7257, SEALX]; // 6 equal cards + seal
-const SUBMIT_X = 0.2986;                             // the funnel NECK (mouth narrows here)
-const GOVERN_X = 0.384;                              // the funnel TUBE extends through to here
+const GOVERN_X = 0.384;                              // fibers stay a visible band under Submit, on toward here
 
 // institution sources (match HeroVisual circles). MAG = nested-funnel hierarchy: the outer
 // institutions (Ministries, Authorities) generate the LARGEST envelope; Hospitals medium;
@@ -91,13 +90,14 @@ const mkStrand = (instIdx: number, cls: number): Strand => {
   const y0 = wallY;
   // LONG flared mouth (varied hold distance per strand → irregular, not a wireframe)
   const c1x = 0.17 + rnd() * 0.08;
-  const c1y = wallY - rel * (0.02 + rnd() * 0.08);
-  // concave bend to the NECK at Submit — does NOT fully collapse (residual spread behind the card)
-  const c2x = SUBMIT_X + (rnd() - 0.5) * 0.025;
-  const c2y = 0.5 + rel * (0.05 + rnd() * 0.07) + (rnd() - 0.5) * 0.022;
-  // TUBE: a tight, slightly irregular bundle running through Submit into Govern
-  const ex = GOVERN_X + (rnd() - 0.5) * 0.022;
-  const ey = 0.5 + rel * (0.01 + rnd() * 0.025) + (rnd() - 0.5) * 0.013;
+  const c1y = wallY - rel * (0.04 + rnd() * 0.1);
+  // GRADUAL taper — the field NEVER fully collapses: it stays a wide band that is still
+  // distinctly fibrous as it passes UNDER the Submit card, narrowing only slowly afterward
+  const c2x = 0.255 + rnd() * 0.03;
+  const c2y = 0.5 + rel * (0.3 + rnd() * 0.1) + (rnd() - 0.5) * 0.02;
+  // fibers run INTO / under Submit and on toward Govern, still a visible band (not a point)
+  const ex = GOVERN_X + (rnd() - 0.5) * 0.03;
+  const ey = 0.5 + rel * (0.09 + rnd() * 0.06) + (rnd() - 0.5) * 0.012;
   // strong hierarchy but QUIET — the field is perceived, not noticed (opacity ~halved)
   const width = (cls === 0 ? 0.85 : cls === 1 ? 0.45 : 0.24) * (0.65 + 0.7 * mag) + rnd() * 0.2;
   const bright = (cls === 0 ? 0.28 : cls === 1 ? 0.08 : 0.018) * (0.35 + 0.95 * mag);
@@ -120,14 +120,15 @@ for (let i = 0; i < INST_Y.length; i++) {
 interface Arc { sx: number; sy: number; cx: number; cy: number; ex: number; ey: number; w: number; a: number }
 const ARCS: Arc[] = [];
 // orbital paths — varied radius, elevation, length and brightness (not parallel rails)
-for (let k = 0; k < 10; k++) {
+for (let k = 0; k < 11; k++) {
   const elev = rnd();                                         // how low the arc dips
-  const len = 0.35 + rnd() * 0.55;                            // varied length toward the record
+  const short = k % 3 === 0;                                  // a third stop short of the record
+  const ex = short ? 0.45 + rnd() * 0.18 : SEALX - 0.1 + rnd() * 0.16;
   ARCS.push({
-    sx: INSTX - 0.02 + (rnd() - 0.5) * 0.08, sy: 0.58 + rnd() * 0.34,
-    cx: 0.3 + rnd() * 0.34, cy: 0.7 + elev * 0.26,
-    ex: SEALX - 0.12 + len * 0.24, ey: 0.46 + (rnd() - 0.3) * 0.16,
-    w: 0.4 + rnd() * 1.3, a: (k < 4 ? 0.022 + rnd() * 0.022 : 0.007 + rnd() * 0.012) * (0.6 + rnd() * 0.8),
+    sx: INSTX - 0.02 + (rnd() - 0.5) * 0.09, sy: 0.58 + rnd() * 0.34,
+    cx: 0.3 + rnd() * 0.36, cy: 0.7 + elev * 0.27,
+    ex, ey: 0.46 + (rnd() - 0.3) * 0.17,
+    w: 0.4 + rnd() * 1.3, a: (k < 4 ? 0.019 + rnd() * 0.019 : 0.006 + rnd() * 0.01) * (0.6 + rnd() * 0.85),
   });
 }
 const sPoint = (s: Strand, t: number, tm = 0): [number, number] => {
@@ -234,8 +235,8 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
             const tp = i / N, t = tp * s.maxT;
             const [x, y] = sPoint(s, t, tm);
             const tipFade = (s.cls === 2 && tp > 0.7) ? 1 - (tp - 0.7) / 0.3 : 1;
-            const a = (0.05 + 0.1 * t + 0.05 * t * t) * s.bright * tipFade;   // flat ramp → no white explosion
-            const g = (255 - 80 * t) | 0, b = (255 - 170 * t) | 0;            // warmer gold, less white at the neck
+            const a = (0.055 + 0.15 * t + 0.09 * t * t) * s.bright * tipFade;  // density gradient: dim edge → brighter core
+            const g = (255 - 78 * t) | 0, b = (255 - 168 * t) | 0;            // warmer gold, never white-hot
             mctx.strokeStyle = `rgba(255,${g},${b},${a.toFixed(3)})`;
             mctx.lineWidth = s.width * (0.5 + 0.7 * t);
             mctx.beginPath(); mctx.moveTo(prev[0] * W, prev[1] * H); mctx.lineTo(x * W, y * H); mctx.stroke();

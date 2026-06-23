@@ -19,10 +19,10 @@ const INST: { label: string; y: number }[] = [
 // equal-spaced pipeline — six stages of one family, none larger or brighter than another
 const SX = [430, 553, 676, 799, 922, 1045];
 const TILE = 84;
-const SEAL = { x: 1255, y: CY, r: 54 };      // Official Record — small, but the brightest element
+const SEAL = { x: 1262, y: CY, r: 48 };      // Official Record — smaller; authority via space, rings, glow
 const STAGES = ["SUBMIT", "GOVERN", "APPROVE", "RENDER", "PUBLISH", "ARCHIVE"];
 // a few subtle ripple rings (not a radar screen)
-const RINGS = [70, 88, 110, 136];
+const RINGS = [62, 78, 98, 122];
 
 const ICON: Record<string, React.ReactNode> = {
   MINISTRIES: <path d="M4 9l8-5 8 5M5 9v8m4-8v8m6-8v8m4-8v8M3 20h18" />,
@@ -67,9 +67,9 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
     {INST.map((it) => (
       <g key={it.label}>
         <line x1={INST_CX + 26} y1={it.y} x2={INST_CX + 92} y2={it.y} stroke="rgba(233,200,120,0.22)" strokeWidth="1" strokeDasharray="2 6" />
-        <circle cx={INST_CX} cy={it.y} r="24" fill="#080808" fillOpacity="0.92" stroke="rgba(233,200,120,0.6)" strokeWidth="1.2" />
+        <circle cx={INST_CX} cy={it.y} r="24" fill="#070707" fillOpacity="0.96" stroke="rgba(233,200,120,0.8)" strokeWidth="1.3" />
         <Glyph name={it.label} x={INST_CX} y={it.y} s={1.0} color={BRIGHT} />
-        <text x={INST_CX + 40} y={it.y + 5} fontSize="14" fontWeight="600" letterSpacing="1.4" fill="rgba(255,255,255,0.95)" style={{ fontFamily: "inherit" }}>{it.label}</text>
+        <text x={INST_CX + 40} y={it.y + 5} fontSize="14" fontWeight="700" letterSpacing="1.5" fill="#ffffff" style={{ fontFamily: "inherit" }}>{it.label}</text>
       </g>
     ))}
 
@@ -100,8 +100,8 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
       </g>
       <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r + 4} fill={BRIGHT} opacity="0.3" filter="url(#hv-bloom)" />
       <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r} fill="url(#hv-seal)" stroke={BRIGHT} strokeWidth="1.6" />
-      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r - 10} fill="none" stroke="#171008" strokeWidth="1" opacity="0.5" />
-      <Glyph name="SEAL" x={SEAL.x} y={SEAL.y} s={2.7} color="#171008" sw={1.6} />
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r - 9} fill="none" stroke="#171008" strokeWidth="1" opacity="0.5" />
+      <Glyph name="SEAL" x={SEAL.x} y={SEAL.y} s={2.4} color="#171008" sw={1.6} />
       <text x={SEAL.x} y={SEAL.y + SEAL.r + 32} textAnchor="middle" fontSize="15.5" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>OFFICIAL</text>
       <text x={SEAL.x} y={SEAL.y + SEAL.r + 53} textAnchor="middle" fontSize="15.5" fontWeight="700" letterSpacing="2.5" fill={BRIGHT} style={{ fontFamily: "inherit" }}>RECORD</text>
     </g>
