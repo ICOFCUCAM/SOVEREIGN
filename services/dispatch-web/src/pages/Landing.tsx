@@ -69,7 +69,10 @@ const Landing: React.FC = () => {
         <div className="relative z-10 mx-auto grid min-h-[820px] max-w-[1540px] grid-cols-1 items-center gap-14 px-8 py-20 lg:px-12 xl:min-h-[980px] xl:grid-cols-[38fr_62fr] xl:gap-12">
           {/* narrative + charter */}
           <div className="max-w-xl">
-            <p className="mb-8 text-[12.5px] font-semibold uppercase tracking-[0.34em] text-gold-400">Institutional Publication Infrastructure</p>
+            <div className="mb-8 flex items-center gap-3">
+              <span className="h-px w-7 bg-gold-500/55" aria-hidden />
+              <p className="text-[12.5px] font-semibold uppercase tracking-[0.34em] text-gold-400">Institutional Publication Infrastructure</p>
+            </div>
             <h1 className="font-serif text-[2.65rem] font-bold leading-[1.03] tracking-[-0.022em] text-[#f4efe3] sm:text-[3.25rem] 2xl:text-[3.6rem]">
               From Information<br />to <span className="text-gold-400">Official Record.</span>
             </h1>
@@ -88,6 +91,10 @@ const Landing: React.FC = () => {
                 View Architecture
               </a>
             </div>
+            <p className="mt-5 flex items-center gap-2.5 text-[12.5px] text-white/45">
+              <span className="inline-block h-1 w-1 shrink-0 rounded-full bg-gold-400/80" aria-hidden />
+              Evaluate in your own environment — no sales call required.
+            </p>
             {/* the charter — quieted so the instrument dominates */}
             <div className="mt-11 border-t border-white/[0.08] pt-6">
               <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/45">The Governed Lifecycle</p>
