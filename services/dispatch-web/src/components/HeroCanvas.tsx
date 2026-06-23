@@ -7,8 +7,8 @@ import React, { useEffect, useRef } from "react";
 // micro-particles keep the whole canvas quietly active. Gold rises left→right to
 // the Official Record. Governance is what merges the institutional streams.
 
-const SEALX = 0.832;                                 // Official Record = light source on the right
-const CARD_FX = [0.2986, 0.3736, 0.4486, 0.5347, 0.6208, 0.7069, SEALX]; // 6 cards + seal
+const SEALX = 0.8333;                                // Official Record = light source on the right
+const CARD_FX = [0.3264, 0.3972, 0.4681, 0.55, 0.6319, 0.7139, SEALX]; // 6 cards + seal
 
 // institution origins (match HeroVisual circles, moved left): x≈0.044, 5 lanes
 const INSTX = 0.044;
@@ -50,8 +50,8 @@ for (const [cx, cy] of CLUSTERS) for (let i = 0; i < 18; i++)
 
 // ── reverse river delta: a layered thread mesh born BETWEEN institution lanes,
 // compressing through a funnel into one bright convergence node at Submit ──────
-const FOCAL = { x: 0.262, y: 0.5 };                  // restrained convergence — leads INTO the Submit card
-const COMPRESS_X = 0.205;                             // compression zone begins here; left of it = travel zone
+const FOCAL = { x: 0.305, y: 0.5 };                  // convergence sits INSIDE the Submit card (no gap)
+const COMPRESS_X = 0.24;                              // compression begins late → long in-lane travel zone
 
 interface Strand {
   x0: number; y0: number;       // birth at the institution lane
@@ -67,33 +67,35 @@ interface Strand {
 const STRANDS: Strand[] = [];
 // Per-lane BUNDLES travel as distinct rivers, keeping institutional identity through
 // the travel zone, then compress late. Plus a few inter-lane threads weave the mesh.
-const mkStrand = (laneY: number, neighbourY: number, identity: number): Strand => {
-  const x0 = INSTX + 0.03 + rnd() * 0.03;                     // leaves from its lane, right of the icon
-  const y0 = laneY + (rnd() - 0.5) * 0.03;
-  // travel zone: stay near lane height (blend slightly toward a neighbour for the mesh weave)
-  const travelY = laneY + (neighbourY - laneY) * (1 - identity) * rnd();
-  const c1x = 0.11 + rnd() * 0.07;
-  const c1y = travelY + (rnd() - 0.5) * 0.03;
-  // late compression toward the centre line — only in the last stretch
-  const c2x = COMPRESS_X + rnd() * 0.03;
-  const c2y = FOCAL.y + (travelY - FOCAL.y) * (0.18 + rnd() * 0.12) + (rnd() - 0.5) * 0.02;
-  const ex = FOCAL.x + (rnd() - 0.5) * 0.008;
-  const ey = FOCAL.y + (laneY - FOCAL.y) * 0.04 + (rnd() - 0.5) * 0.014;
-  const r = rnd();
-  const cls = r < 0.16 ? 0 : r < 0.52 ? 1 : 2;
-  const width = cls === 0 ? 1.3 + rnd() * 0.5 : cls === 1 ? 0.75 + rnd() * 0.25 : 0.4 + rnd() * 0.2;
-  const bright = cls === 0 ? 0.4 : cls === 1 ? 0.2 : 0.08;
-  const maxT = cls === 2 ? 0.72 + rnd() * 0.28 : 0.95 + rnd() * 0.05;
+const mkStrand = (laneY: number, neighbourY: number, identity: number, lanePos: number, cls: number): Strand => {
+  // a WIDE source mouth around the institution (funnel widened ~50%): strands fan from
+  // a vertical band at the lane, not a single point
+  const x0 = INSTX + 0.018 + rnd() * 0.028;
+  const y0 = laneY + lanePos * 0.05 + (rnd() - 0.5) * 0.012;
+  // travel zone: hold near lane height (blend only slightly toward a neighbour) — identity preserved
+  const travelY = laneY + (neighbourY - laneY) * (1 - identity) * 0.5;
+  const c1x = 0.12 + rnd() * 0.06;
+  const c1y = travelY + lanePos * 0.03;
+  // late compression toward the centre line — only in the final stretch (large radius, controlled)
+  const c2x = COMPRESS_X + rnd() * 0.025;
+  const c2y = FOCAL.y + (travelY - FOCAL.y) * (0.2 + rnd() * 0.1);
+  // mouth: strands run INTO the Submit card, no visible gap, very tight band
+  const ex = FOCAL.x + (rnd() - 0.5) * 0.006;
+  const ey = FOCAL.y + (laneY - FOCAL.y) * 0.025 + (rnd() - 0.5) * 0.01;
+  const width = cls === 0 ? 1.5 + rnd() * 0.5 : cls === 1 ? 0.75 + rnd() * 0.2 : 0.38 + rnd() * 0.18;
+  const bright = cls === 0 ? 0.62 : cls === 1 ? 0.22 : 0.05;  // strong hierarchy: primary leads, tertiary atmospheric
+  const maxT = cls === 2 ? 0.78 + rnd() * 0.22 : 0.97 + rnd() * 0.03;
+  // controlled meander (small, smooth — engineered, not spaghetti)
   return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls,
-    amp: 0.006 + rnd() * 0.014, freq: 1.4 + rnd() * 1.8, ph: rnd() * 6.28 };
+    amp: cls === 0 ? 0.003 + rnd() * 0.004 : 0.004 + rnd() * 0.007, freq: 1 + rnd() * 1.3, ph: rnd() * 6.28 };
 };
 for (let li = 0; li < INST_Y.length; li++) {
   const laneY = INST_Y[li];
   const above = INST_Y[Math.max(0, li - 1)], below = INST_Y[Math.min(INST_Y.length - 1, li + 1)];
-  // dense bundle that keeps this lane's identity (high identity = stays in its lane)
-  for (let k = 0; k < 13; k++) STRANDS.push(mkStrand(laneY, rnd() < 0.5 ? above : below, 0.78 + rnd() * 0.18));
-  // a few inter-lane weave threads (lower identity → blend toward neighbour) for the mesh
-  for (let k = 0; k < 4; k++) STRANDS.push(mkStrand(laneY, rnd() < 0.5 ? above : below, 0.35 + rnd() * 0.25));
+  // three structured layers per lane: tertiary (atmospheric) · secondary (support) · primary (leads)
+  for (let k = 0; k < 16; k++) STRANDS.push(mkStrand(laneY, rnd() < 0.5 ? above : below, 0.82 + rnd() * 0.14, (k / 15 - 0.5) * 2, 2));
+  for (let k = 0; k < 9; k++) STRANDS.push(mkStrand(laneY, rnd() < 0.5 ? above : below, 0.78 + rnd() * 0.16, (k / 8 - 0.5) * 2, 1));
+  for (let k = 0; k < 4; k++) STRANDS.push(mkStrand(laneY, rnd() < 0.5 ? above : below, 0.85 + rnd() * 0.12, (k / 3 - 0.5) * 1.4, 0));
 }
 const sPoint = (s: Strand, t: number, tm = 0): [number, number] => {
   const mt = 1 - t, a = mt * mt * mt, b = 3 * mt * mt * t, c = 3 * mt * t * t, d = t * t * t;
@@ -167,10 +169,10 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         ctx.beginPath(); ctx.arc(m.x, m.y, m.size, 0, 6.283); ctx.fill();
       }
 
-      // giant destination bloom (sunrise behind the Official Record)
+      // destination bloom behind the Official Record — precision, not floodlight (−35%)
       const bx = SEALX * W, by = 0.5 * H;
-      const bloom = ctx.createRadialGradient(bx, by, 0, bx, by, 0.62 * W);
-      bloom.addColorStop(0, "rgba(233,200,120,0.20)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.05)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
+      const bloom = ctx.createRadialGradient(bx, by, 0, bx, by, 0.4 * W);
+      bloom.addColorStop(0, "rgba(233,200,120,0.13)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.035)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = bloom; ctx.fillRect(0, 0, W, H);
 
       // soft glow at each institution node + Layer 1: the five institution lanes
@@ -216,18 +218,21 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       // not a flashbang. Submit (drawn in the SVG overlay) is the true focal node.
       const mx = FOCAL.x * W, my = FOCAL.y * H;
       const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 600);
-      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.085 * W);
-      merge.addColorStop(0, "rgba(255,236,190,0.18)"); merge.addColorStop(0.3, "rgba(233,200,120,0.07)");
+      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.07 * W);
+      merge.addColorStop(0, "rgba(255,236,190,0.1)"); merge.addColorStop(0.3, "rgba(233,200,120,0.04)");
       merge.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = merge; ctx.fillRect(mx - 0.11 * W, my - 0.11 * W, 0.22 * W, 0.22 * W);
-      const core = ctx.createRadialGradient(mx, my, 0, mx, my, 0.026 * W);
-      core.addColorStop(0, `rgba(255,246,222,${(0.16 + 0.1 * pulse).toFixed(3)})`); core.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = core; ctx.fillRect(mx - 0.04 * W, my - 0.04 * W, 0.08 * W, 0.08 * W);
+      ctx.fillStyle = merge; ctx.fillRect(mx - 0.09 * W, my - 0.09 * W, 0.18 * W, 0.18 * W);
+      const core = ctx.createRadialGradient(mx, my, 0, mx, my, 0.02 * W);
+      core.addColorStop(0, `rgba(255,246,222,${(0.08 + 0.06 * pulse).toFixed(3)})`); core.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = core; ctx.fillRect(mx - 0.03 * W, my - 0.03 * W, 0.06 * W, 0.06 * W);
 
-      // particles travelling INSIDE the rivers toward governance (white→gold, brighter on arrival)
+      // particles travelling INSIDE the rivers toward governance — ACCELERATING as they near
+      // Submit (creates anticipation); white→gold, brighter on arrival
       for (const p of codes) {
         const s = STRANDS[p.s];
-        p.t += p.sp; if (p.t > s.maxT) p.t -= s.maxT;
+        const norm0 = p.t / s.maxT;
+        p.t += p.sp * (0.45 + 1.7 * norm0);                 // visual acceleration toward the convergence
+        if (p.t > s.maxT) p.t -= s.maxT;
         const [x, y] = sPoint(s, p.t, tm);
         const norm = p.t / s.maxT;
         const g = (255 - 50 * norm) | 0, b = (255 - 130 * norm) | 0;
@@ -235,11 +240,20 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         ctx.beginPath(); ctx.arc(x * W, y * H, p.size * (p.br ? 1.3 : 1), 0, 6.283); ctx.fill();
       }
 
-      // pipeline momentum: particles between every stage, brighter toward the seal
+      // governance pipeline = continuous transmission system: micro-nodes along every
+      // connector + particles that accelerate stage→stage toward the Official Record
+      for (let g = 0; g < CARD_FX.length - 1; g++) {
+        const x0 = CARD_FX[g], x1 = CARD_FX[g + 1], lvl = g / (CARD_FX.length - 1);
+        for (let s = 1; s <= 2; s++) {
+          const nx = (x0 + (x1 - x0) * (s / 3)) * W;
+          ctx.fillStyle = `rgba(255,231,173,${(0.16 + 0.18 * lvl).toFixed(3)})`;
+          ctx.beginPath(); ctx.arc(nx, 0.5 * H, 1.1, 0, 6.283); ctx.fill();
+        }
+      }
       for (const p of pps) {
-        p.t += p.sp; if (p.t > 1) p.t -= 1;
+        p.t += p.sp * (0.55 + 1.0 * p.t); if (p.t > 1) p.t -= 1;   // accelerate across each gap
         const x = (CARD_FX[p.g] + (CARD_FX[p.g + 1] - CARD_FX[p.g]) * p.t) * W;
-        const a = 0.3 + 0.5 * (p.g / (CARD_FX.length - 1));
+        const a = 0.34 + 0.5 * (p.g / (CARD_FX.length - 1));
         ctx.fillStyle = `rgba(255,231,173,${a.toFixed(3)})`;
         ctx.beginPath(); ctx.arc(x, 0.5 * H, p.size, 0, 6.283); ctx.fill();
       }

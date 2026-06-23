@@ -17,11 +17,12 @@ const INST: { label: string; y: number }[] = [
   { label: "AGENCIES", y: 588 }, { label: "AUTHORITIES", y: 696 },
 ];
 // pipeline shifted right to open a longer mesh-travel zone before Submit
-const SX = [430, 538, 646, 770, 894, 1018];
+const SX = [470, 572, 674, 792, 910, 1028];
 const TILE = 78;
-const SEAL = { x: 1198, y: CY, r: 72 };      // Official Record reduced ~22%
+const SEAL = { x: 1200, y: CY, r: 72 };      // Official Record reduced ~22%
 const STAGES = ["SUBMIT", "GOVERN", "APPROVE", "RENDER", "PUBLISH", "ARCHIVE"];
-const RINGS = [82, 94, 106, 118, 130, 142, 154, 166];
+// 11 thin precise authority rings
+const RINGS = [78, 86, 94, 102, 110, 118, 126, 134, 142, 150, 158];
 
 const ICON: Record<string, React.ReactNode> = {
   MINISTRIES: <path d="M4 9l8-5 8 5M5 9v8m4-8v8m6-8v8m4-8v8M3 20h18" />,
@@ -91,10 +92,10 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
 
     {/* Official Record — seal in 8 concentric authority rings (≈1.7× a pipeline node) */}
     <g>
-      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r + 7} fill={BRIGHT} opacity="0.34" filter="url(#hv-bloom)" />
+      <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r + 6} fill={BRIGHT} opacity="0.22" filter="url(#hv-bloom)" />
       {RINGS.map((r, i) => (
-        <circle key={r} cx={SEAL.x} cy={SEAL.y} r={r} fill="none" stroke={GOLD} strokeWidth="1.1" opacity={Math.max(0.05, 0.4 - i * 0.05)}>
-          {i === 0 && <><animate attributeName="r" values={`${r};${r + 7};${r}`} dur="5s" repeatCount="indefinite" /><animate attributeName="opacity" values="0.4;0.56;0.4" dur="5s" repeatCount="indefinite" /></>}
+        <circle key={r} cx={SEAL.x} cy={SEAL.y} r={r} fill="none" stroke={GOLD} strokeWidth="0.8" opacity={Math.max(0.04, 0.38 - i * 0.034)}>
+          {i === 0 && <><animate attributeName="r" values={`${r};${r + 6};${r}`} dur="5s" repeatCount="indefinite" /><animate attributeName="opacity" values="0.38;0.54;0.38" dur="5s" repeatCount="indefinite" /></>}
         </circle>
       ))}
       <circle cx={SEAL.x} cy={SEAL.y} r={SEAL.r} fill="url(#hv-seal)" stroke={BRIGHT} strokeWidth="2" />
