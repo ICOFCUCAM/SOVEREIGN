@@ -115,7 +115,7 @@ const Landing: React.FC = () => {
       </div>
 
       {/* ── Why Dispatch Exists — strategic context + outcomes ─────── */}
-      <section id="why" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-28 lg:px-12">
+      <section id="why" className="edge-rule scroll-mt-24 px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Why Dispatch Exists</p>
@@ -144,7 +144,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Category-owning Pillars ────────────────────────────────── */}
-      <section id="pillars" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-28 lg:px-12">
+      <section id="pillars" className="edge-rule scroll-mt-24 px-8 py-28 lg:px-12">
         <div className="mx-auto grid stagger max-w-6xl gap-px overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.07] shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)] sm:grid-cols-3">
           {[
             ["01", "The System of Record", "Not document management. The authority that decides when information becomes official — and seals it."],
@@ -162,7 +162,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Record Lifecycle — quieted to a compact inline strip (−30%) ── */}
-      <section id="lifecycle" className="scroll-mt-24 border-t border-white/[0.06] bg-white/[0.015] px-8 py-16 lg:px-12">
+      <section id="lifecycle" className="edge-rule scroll-mt-24 bg-white/[0.015] px-8 py-16 lg:px-12">
         <div className="mx-auto max-w-5xl text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50">The Record Lifecycle</p>
           <p className="mx-auto mt-3 max-w-xl text-[14px] leading-relaxed text-white/55">One governed path — every official document travels the same controlled route.</p>
@@ -181,7 +181,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── A Record That Proves Itself — provenance positioning ─────── */}
-      <section id="proof" className="relative scroll-mt-24 overflow-hidden border-t border-white/[0.06] px-8 py-28 lg:px-12">
+      <section id="proof" className="edge-rule relative scroll-mt-24 overflow-hidden px-8 py-28 lg:px-12">
         <Guilloche className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[760px] w-[760px] -translate-x-1/2 -translate-y-1/2 opacity-[0.05]" />
         <div className="relative z-10 mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
@@ -211,7 +211,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Procurement CTA (above institutions) ───────────────────── */}
-      <section id="procurement" className="scroll-mt-24 border-t border-white/[0.06] bg-white/[0.015] px-8 py-28 lg:px-12">
+      <section id="procurement" className="edge-rule scroll-mt-24 bg-white/[0.015] px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement</p>
@@ -232,7 +232,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Institutions — outcome-driven narratives ───────────────── */}
-      <section id="institutions" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-28 lg:px-12">
+      <section id="institutions" className="edge-rule scroll-mt-24 px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-5xl">
           <div className="mb-5 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Built for institutions that cannot fail</p>

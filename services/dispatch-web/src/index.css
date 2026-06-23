@@ -53,6 +53,19 @@ p { text-wrap: pretty; }
 /* gold text selection — a small mark of craft */
 ::selection { background: rgba(201, 162, 75, 0.32); color: #fff; }
 
+/* ── Refined section divider — a centred hairline that fades at both edges with a
+   faint gold core, instead of a hard full-bleed rule. The luxury/institutional
+   signal (Stripe, Linear) over the startup full-width border. ─────────────────── */
+.edge-rule { position: relative; }
+.edge-rule::before {
+  content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: min(1180px, 90%); height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.09) 16%, rgba(212,175,82,0.26) 50%, rgba(255,255,255,0.09) 84%, transparent);
+}
+
+/* engineered ledger numerals — even-width, lining figures for indices & hashes */
+.tnum { font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum", "lnum"; }
+
 /* keyboard focus — a single restrained gold ring everywhere (accessible + premium) */
 a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   outline: 2px solid rgba(212, 175, 82, 0.65);
