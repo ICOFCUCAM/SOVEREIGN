@@ -20,6 +20,81 @@ body {
   background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0 10px, transparent 10px 20px);
 }
 
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #27375c; border-radius: 6px; }
+/* refined, theme-neutral scrollbar — a slim inset translucent thumb that reads as
+   premium on both the dark marketing field and the console, warming to gold on hover */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.13); border-radius: 8px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(212,175,82,0.40); background-clip: padding-box; }
 ::-webkit-scrollbar-track { background: transparent; }
+html { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.18) transparent; }
+
+/* ── Typographic foundation — editorial headings, calm legible body ──────── */
+body { text-rendering: optimizeLegibility; -moz-osx-font-smoothing: grayscale;
+  /* kerning + ligatures on body Inter; hang punctuation into the margins (Safari) */
+  font-feature-settings: "kern", "liga", "calt"; hanging-punctuation: first last; }
+/* Fraunces is an optical serif — size its drawing to the rendered size, tighten */
+.font-serif { font-optical-sizing: auto; font-feature-settings: "kern", "liga", "calt"; letter-spacing: -0.014em; }
+/* headings wrap evenly (no single orphan word); paragraphs avoid short runts */
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+/* short lead paragraphs read more intentionally with balanced line lengths */
+.lead-balance { text-wrap: balance; }
+
+/* ── Restrained motion — confident reveals, no gimmicks ──────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.8s cubic-bezier(.16,1,.3,1), transform 0.8s cubic-bezier(.16,1,.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  /* staggered children — cards rise in sequence once their section reveals */
+  .reveal .stagger > * { opacity: 0; transform: translateY(16px); transition: opacity 0.7s cubic-bezier(.16,1,.3,1), transform 0.7s cubic-bezier(.16,1,.3,1); }
+  .reveal.in .stagger > * { opacity: 1; transform: none; }
+  .reveal.in .stagger > :nth-child(1) { transition-delay: 0.06s; }
+  .reveal.in .stagger > :nth-child(2) { transition-delay: 0.12s; }
+  .reveal.in .stagger > :nth-child(3) { transition-delay: 0.18s; }
+  .reveal.in .stagger > :nth-child(4) { transition-delay: 0.24s; }
+  .reveal.in .stagger > :nth-child(5) { transition-delay: 0.30s; }
+  .reveal.in .stagger > :nth-child(6) { transition-delay: 0.36s; }
+  /* lifecycle spine — the governed path traces itself as the section reveals */
+  .reveal .lc-connector { transform: scaleX(0); transform-origin: left center; transition: transform 0.7s cubic-bezier(.16,1,.3,1) 0.15s; }
+  .reveal.in .lc-connector { transform: scaleX(1); }
+  /* hero scroll cue — a slow, restrained drift inviting the eye downward */
+  @keyframes cue-drift { 0%, 100% { transform: translateY(0); opacity: 0.55; } 50% { transform: translateY(5px); opacity: 1; } }
+  .scroll-cue { animation: cue-drift 2.6s cubic-bezier(.45,0,.55,1) infinite; }
+  /* hero entrance — the narrative cascades in on load, in concert with the
+     instrument's own mount reveal, so the fold settles rather than snaps */
+  @keyframes hero-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .hero-stagger > * { opacity: 0; animation: hero-rise 0.85s cubic-bezier(.16,1,.3,1) forwards; }
+  .hero-stagger > :nth-child(1) { animation-delay: 0.05s; }
+  .hero-stagger > :nth-child(2) { animation-delay: 0.14s; }
+  .hero-stagger > :nth-child(3) { animation-delay: 0.23s; }
+  .hero-stagger > :nth-child(4) { animation-delay: 0.32s; }
+  .hero-stagger > :nth-child(5) { animation-delay: 0.41s; }
+  .hero-stagger > :nth-child(6) { animation-delay: 0.50s; }
+}
+
+/* gold text selection — a small mark of craft */
+::selection { background: rgba(201, 162, 75, 0.32); color: #fff; }
+
+/* ── Refined section divider — a centred hairline that fades at both edges with a
+   faint gold core, instead of a hard full-bleed rule. The luxury/institutional
+   signal (Stripe, Linear) over the startup full-width border. ─────────────────── */
+.edge-rule { position: relative; }
+.edge-rule::before {
+  content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: min(1180px, 90%); height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.09) 16%, rgba(212,175,82,0.26) 50%, rgba(255,255,255,0.09) 84%, transparent);
+}
+
+/* engineered ledger numerals — even-width, lining figures for indices & hashes */
+.tnum { font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum", "lnum"; }
+
+/* honour an explicit request for more contrast — drop the soft-light grain wash */
+@media (prefers-contrast: more) {
+  .mix-blend-soft-light { display: none; }
+}
+
+/* keyboard focus — a single restrained gold ring everywhere (accessible + premium) */
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid rgba(212, 175, 82, 0.65);
+  outline-offset: 3px;
+  border-radius: 5px;
+}

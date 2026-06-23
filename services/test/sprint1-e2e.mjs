@@ -15,7 +15,12 @@ const pool = makePool();
 // Out-of-band inspector connection (superuser) — tests legitimately verify DB
 // state directly, including append-only audit which has no app SELECT policy.
 const adminPool = new pgpkg.Pool({ host: process.env.PGHOST || "/tmp", port: Number(process.env.PGPORT || 55432),
-  user: "postgres", database: process.env.PGDATABASE || "dispatch", max: 3 });
+  // Pin the superuser password explicitly. The CI job exports PGPASSWORD for the
+  // app role (dispatch_app); without this the pg driver inherits it for the
+  // "postgres" superuser and auth fails under scram. Defaults to the CI
+  // POSTGRES_PASSWORD and is ignored under local trust/peer (socket) auth.
+  user: "postgres", password: process.env.PGADMIN_PASSWORD || "postgres",
+  database: process.env.PGDATABASE || "dispatch", max: 3 });
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log(`  PASS ${m}`); } else { fail++; console.log(`  FAIL ${m}`); } };

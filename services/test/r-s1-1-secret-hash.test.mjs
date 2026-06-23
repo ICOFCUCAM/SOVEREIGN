@@ -30,7 +30,7 @@ async function main() {
   if (API) {
     // Provision a service client out-of-band as the owner/admin role (service_clients
     // has no app INSERT policy by design — provisioning is an admin operation).
-    const admin = new pgpkg.Pool({ host: process.env.PGHOST || "localhost", port: Number(process.env.PGPORT || 5432), user: "postgres", database: process.env.PGDATABASE || "dispatch", max: 2 });
+    const admin = new pgpkg.Pool({ host: process.env.PGHOST || "localhost", port: Number(process.env.PGPORT || 5432), user: "postgres", password: process.env.PGADMIN_PASSWORD || "postgres", database: process.env.PGDATABASE || "dispatch", max: 2 });
     const clientId = "scrypt-" + crypto.randomUUID().slice(0, 8);
     const clientSecret = crypto.randomUUID();
     await admin.query("insert into dispatch.service_clients (tenant_id, name, client_id, secret_hash, scopes) values ($1,$2,$3,$4,$5)",

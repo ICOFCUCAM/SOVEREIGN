@@ -6,7 +6,9 @@ import { makePool, withClaims } from "../shared/src/db.mjs";
 
 const TENANT_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const pool = makePool();
-const admin = new pgpkg.Pool({ host: process.env.PGHOST || "/tmp", port: Number(process.env.PGPORT || 55432), user: "postgres", database: "dispatch", max: 3 });
+// superuser password pinned explicitly: the CI job exports PGPASSWORD for the app
+// role, which the pg driver would otherwise inherit here and reject under scram.
+const admin = new pgpkg.Pool({ host: process.env.PGHOST || "/tmp", port: Number(process.env.PGPORT || 55432), user: "postgres", password: process.env.PGADMIN_PASSWORD || "postgres", database: "dispatch", max: 3 });
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; console.log(`  PASS ${m}`); } else { fail++; console.log(`  FAIL ${m}`); } };
 

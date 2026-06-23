@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { PublicHeader, Chevron, Dot } from "../components/brand";
+import { PublicHeader, Chevron, Dot, FilmGrain, useReveal } from "../components/brand";
 import { DeploymentMatrix } from "../components/DeploymentMatrix";
 import { ARCHITECTURE_ROUTE } from "../lib/routes";
 
@@ -22,27 +22,29 @@ const CONTENTS = [
 
 const Procurement: React.FC = () => {
   const nav = useNavigate();
+  useReveal();
   return (
-    <div className="min-h-full bg-[#070707] text-white">
+    <div className="relative min-h-full bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
+      <FilmGrain />
       <PublicHeader />
 
       {/* hero */}
       <section className="border-b border-white/5 px-8 py-20 lg:px-12">
         <div className="mx-auto max-w-[1100px]">
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement Package</p>
-          <h1 className="mt-4 max-w-3xl font-serif text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl">Everything your evaluation team needs.</h1>
+          <h1 className="mt-4 max-w-3xl font-serif text-5xl font-bold leading-[1.05] tracking-tight text-[#f4efe3] sm:text-6xl">Everything your evaluation team needs.</h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/60">
             A self-serve procurement dossier — architecture, governance, security, residency and the evaluation path — so
             technical reviewers and procurement officers can assess Sovereign Dispatch before any call.
           </p>
           <div className="mt-9 flex flex-wrap gap-4">
             <a href={ARCHITECTURE_ROUTE}
-              className="group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-lg shadow-gold-700/20 transition hover:from-gold-200 hover:to-gold-500">
+              className="group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
               Architecture Overview <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
             </a>
             <button onClick={() => nav("/console")}
-              className="inline-flex items-center rounded border border-white/20 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/40 hover:bg-white/5">
+              className="inline-flex items-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
               Begin Evaluation
             </button>
           </div>
@@ -211,11 +213,11 @@ const Procurement: React.FC = () => {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <a href={ARCHITECTURE_ROUTE}
-              className="inline-flex items-center rounded border border-white/20 px-7 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/40 hover:bg-white/5">
+              className="inline-flex items-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-7 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
               Architecture Overview
             </a>
             <button onClick={() => nav("/console")}
-              className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
+              className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_26px_-10px_rgba(0,0,0,0.65)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
               Begin Evaluation <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </button>
           </div>

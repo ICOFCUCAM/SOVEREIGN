@@ -43,7 +43,7 @@ async function main() {
 
   if (!API) { console.log("  (skip e2e — DISPATCH_API_URL not set)"); console.log(`\nTOTAL: ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0); }
   const TA = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-  const admin = new pgpkg.Pool({ host: process.env.PGHOST || "localhost", port: Number(process.env.PGPORT || 5432), user: "postgres", database: process.env.PGDATABASE || "dispatch", max: 2 });
+  const admin = new pgpkg.Pool({ host: process.env.PGHOST || "localhost", port: Number(process.env.PGPORT || 5432), user: "postgres", password: process.env.PGADMIN_PASSWORD || "postgres", database: process.env.PGDATABASE || "dispatch", max: 2 });
 
   // Two clients in tenant A: svc-a (we set clearance=secret), svc-low (clearance=none)
   await admin.query("update dispatch.service_clients set clearance='secret' where client_id='svc-a'");
