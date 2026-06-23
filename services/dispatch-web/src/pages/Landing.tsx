@@ -53,7 +53,7 @@ const Landing: React.FC = () => {
           </a>
           <nav className="hidden items-center gap-x-6 xl:flex">
             {NAV.map(({ label, href }) => (
-              <a key={label} href={href} className="text-[12px] font-medium uppercase tracking-wide text-white/70 transition hover:text-white">{label}</a>
+              <a key={label} href={href} className="relative text-[12px] font-medium uppercase tracking-wide text-white/70 transition after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-gold-400/70 after:transition-all after:duration-300 hover:text-white hover:after:w-full">{label}</a>
             ))}
           </nav>
           <div className="flex items-center gap-4">
