@@ -79,11 +79,11 @@ const Landing: React.FC = () => {
         <HeroVisual className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[69%] xl:block" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/85 to-transparent xl:via-[#070707]/45" aria-hidden />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
-        <div className="relative z-10 mx-auto grid min-h-[90vh] max-w-[1640px] grid-cols-1 items-center gap-10 px-8 py-20 lg:px-12 xl:grid-cols-[34fr_66fr] xl:gap-6">
-          <div className="max-w-lg">
+        <div className="relative z-10 mx-auto grid min-h-[920px] max-w-[1640px] grid-cols-1 items-center gap-10 px-8 py-20 lg:px-12 xl:min-h-[960px] xl:grid-cols-[32fr_68fr] xl:gap-6">
+          <div className="max-w-md">
             <p className="mb-8 text-[13px] font-semibold uppercase tracking-[0.28em] text-gold-400">Institutional Publication Infrastructure</p>
-            <h1 className="font-serif text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl 2xl:text-[3.25rem]">
-              Govern information<br />before it becomes <span className="text-gold-400">record.</span>
+            <h1 className="font-serif text-4xl font-bold leading-[1.06] tracking-tight sm:text-5xl 2xl:text-[3.4rem]">
+              From Information<br />to <span className="text-gold-400">Official Record.</span>
             </h1>
             <p className="mt-8 max-w-md text-[17px] leading-relaxed text-white/60">
               Sovereign Dispatch is the operating system for institutional publication — purpose-built to submit, govern,
