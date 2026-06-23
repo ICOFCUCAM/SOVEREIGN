@@ -37,17 +37,27 @@ for (let x = 120; x < 900; x += 8.5) for (let y = 70; y < 450; y += 8.5)
   if (POLYS.some((p) => inPoly(x, y, p))) MAP_DOTS.push({ nx: (x - 120) / 780, ny: (y - 70) / 380 });
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
-interface Cord { startY: number; amp: number; freq: number; phase: number }
+interface Cord { startY: number; off: number; amp: number; freq: number; phase: number }
 const CORDS: Cord[] = [];
 let seed = 7;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) & 0x7fffffff; return seed / 0x7fffffff; };
+// Each institution is a coherent RIBBON: its cords share frequency + phase and
+// are merely offset in baseline, so they flow as ordered, parallel silk waves
+// (not a tangle). Bands differ in phase/frequency → distinct layered wave groups.
 BANDS.forEach((b, bi) => {
-  const n = [15, 13, 11, 11, 13][bi];
-  for (let k = 0; k < n; k++) CORDS.push({ startY: b + (rnd() - 0.5) * 0.07, amp: 0.012 + rnd() * 0.046, freq: 1 + rnd() * 2.2, phase: rnd() * 6.28 });
+  const n = [13, 11, 9, 11, 13][bi];
+  const freq = 1.5 + bi * 0.12;
+  const phase = bi * 1.05 + 0.4;
+  const bandAmp = 0.045 + Math.abs(bi - 2) * 0.012;
+  for (let k = 0; k < n; k++) {
+    const off = (k - (n - 1) / 2) * 0.011;
+    CORDS.push({ startY: b, off, amp: bandAmp * (0.85 + rnd() * 0.3), freq, phase: phase + k * 0.05 });
+  }
 });
 const pointOn = (c: Cord, t: number, W: number, H: number): [number, number] => {
   const x = SX0 + (CX - SX0) * t;
-  const y = c.startY + (CY - c.startY) * smooth(t) + Math.sin(t * c.freq * 6.283 + c.phase) * c.amp * (1 - t);
+  const baseY = (c.startY + c.off) + (CY + c.off * 0.25 - (c.startY + c.off)) * smooth(t);
+  const y = baseY + Math.sin(t * c.freq * 6.283 + c.phase) * c.amp * (1 - t * 0.7);
   return [x * W, y * H];
 };
 
@@ -63,10 +73,10 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
 
     const init = () => {
       dots = MAP_DOTS.map((d) => ({ x: (0.27 + d.nx * 0.68) * W, y: (0.1 + d.ny * 0.66) * H }));
-      const per = 11;
+      const per = 6;
       codes = [];
       for (let c = 0; c < CORDS.length; c++)
-        for (let k = 0; k < per; k++) codes.push({ c, t: rnd(), sp: 0.0017 + rnd() * 0.0027, size: 0.7 + rnd() * 1.6, br: rnd() < 0.32 });
+        for (let k = 0; k < per; k++) codes.push({ c, t: rnd(), sp: 0.0016 + rnd() * 0.0024, size: 0.6 + rnd() * 1.3, br: rnd() < 0.28 });
     };
     const resize = () => {
       const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
@@ -89,12 +99,13 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       g.addColorStop(0, "rgba(233,200,120,0.12)"); g.addColorStop(0.45, "rgba(233,200,120,0.03)"); g.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
-      // faint cords (the strings)
+      // the cords — smooth, parallel silk-wave lines (the visible mesh)
       ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(233,200,120,0.12)";
       for (const c of CORDS) {
         ctx.beginPath();
-        for (let i = 0; i <= 20; i++) { const [x, y] = pointOn(c, i / 20, W, H); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
-        ctx.strokeStyle = "rgba(233,200,120,0.05)"; ctx.stroke();
+        for (let i = 0; i <= 28; i++) { const [x, y] = pointOn(c, i / 28, W, H); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+        ctx.stroke();
       }
 
       // travelling code particles converging on Submit
@@ -103,7 +114,7 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         const [x, y] = pointOn(CORDS[p.c], p.t, W, H);
         const a = Math.min(1, p.t / 0.05) * Math.min(1, (1 - p.t) / 0.05 + 0.4);
         const col = p.br ? "255,231,173" : "233,200,120";
-        ctx.fillStyle = `rgba(${col},${(0.74 * a).toFixed(3)})`;
+        ctx.fillStyle = `rgba(${col},${(0.5 * a).toFixed(3)})`;
         ctx.beginPath(); ctx.arc(x, y, p.size, 0, 6.283); ctx.fill();
       }
 
