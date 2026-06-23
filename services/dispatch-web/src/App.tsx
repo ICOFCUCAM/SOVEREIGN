@@ -11,6 +11,8 @@ import Review from "./pages/Review";
 import Library from "./pages/Library";
 import DocumentView from "./pages/DocumentView";
 import Audit from "./pages/Audit";
+import Sovereignty from "./pages/Sovereignty";
+import Integrations from "./pages/Integrations";
 import Polished from "./pages/polished/Polished";
 
 // The gated operator/governance console. Everything here requires a session;
@@ -28,6 +30,8 @@ const Console: React.FC = () => {
         <Route path="library" element={<Library />} />
         <Route path="documents/:id" element={<DocumentView />} />
         <Route path="audit" element={<Audit />} />
+        <Route path="sovereignty" element={<Sovereignty />} />
+        <Route path="integrations" element={<Integrations />} />
         <Route path="polished" element={<Polished />} />
         <Route path="*" element={<Navigate to="/console" replace />} />
       </Routes>

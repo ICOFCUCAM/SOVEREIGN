@@ -2,24 +2,52 @@ import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 
-// Role-filtered navigation rail. Items are gated by scope so an auditor sees the
-// governance surface and an author sees the operator surface — one app, two
-// faces. The lifecycle ordering (Submit → Review → Render → Library) is the
-// information architecture, not a file browser.
-const NAV: { to: string; label: string; scope?: string }[] = [
-  { to: "/console", label: "Dashboard" },
-  { to: "/console/create", label: "Create", scope: "dispatch:render" },
-  { to: "/console/submit", label: "Submit", scope: "dispatch:render" },
-  { to: "/console/review", label: "Review & Approve", scope: "dispatch:approve" },
-  { to: "/console/library", label: "Library", scope: "dispatch:read" },
-  { to: "/console/audit", label: "Audit", scope: "dispatch:audit" },
-  { to: "/console/polished", label: "Polished Pages" },
+// Role-filtered navigation rail, organised as institutional sections rather than
+// a flat file menu. Items are gated by scope so an auditor sees the governance
+// surface and an author sees the operator surface — one app, two faces. The
+// lifecycle ordering (Operations → Pipeline → Governance → Records) is the
+// information architecture, not a file browser. A section with no visible items
+// is hidden entirely.
+type NavItem = { to: string; label: string; scope?: string; end?: boolean };
+const SECTIONS: { heading: string; items: NavItem[] }[] = [
+  {
+    heading: "Operations",
+    items: [{ to: "/console", label: "Operations", end: true }],
+  },
+  {
+    heading: "Publication Pipeline",
+    items: [
+      { to: "/console/create", label: "Create", scope: "dispatch:render" },
+      { to: "/console/submit", label: "Submit", scope: "dispatch:render" },
+    ],
+  },
+  {
+    heading: "Governance",
+    items: [
+      { to: "/console/review", label: "Review & Approve", scope: "dispatch:approve" },
+      { to: "/console/audit", label: "Audit Center", scope: "dispatch:audit" },
+    ],
+  },
+  {
+    heading: "Records",
+    items: [{ to: "/console/library", label: "Official Records", scope: "dispatch:read" }],
+  },
+  {
+    heading: "Platform",
+    items: [
+      { to: "/console/sovereignty", label: "Sovereignty" },
+      { to: "/console/integrations", label: "Integrations" },
+      { to: "/console/polished", label: "Polished Pages" },
+    ],
+  },
 ];
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session, signOut, has } = useAuth();
   const nav = useNavigate();
-  const items = NAV.filter((n) => !n.scope || has(n.scope));
+  const sections = SECTIONS
+    .map((s) => ({ ...s, items: s.items.filter((n) => !n.scope || has(n.scope)) }))
+    .filter((s) => s.items.length > 0);
 
   return (
     <div className="flex h-full flex-col">
@@ -35,13 +63,18 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">Publication Infra</div>
             </div>
           </div>
-          <nav className="flex-1 space-y-1 px-3 py-2">
-            {items.map((n) => (
-              <NavLink key={n.to} to={n.to} end={n.to === "/console"}
-                className={({ isActive }) =>
-                  `block rounded-md px-3 py-2 text-sm font-medium transition ${isActive ? "bg-seal/30 text-white ring-1 ring-seal-light/40" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>
-                {n.label}
-              </NavLink>
+          <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-3">
+            {sections.map((s) => (
+              <div key={s.heading} className="space-y-1">
+                <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/30">{s.heading}</div>
+                {s.items.map((n) => (
+                  <NavLink key={n.to} to={n.to} end={n.end}
+                    className={({ isActive }) =>
+                      `block rounded-md px-3 py-2 text-sm font-medium transition ${isActive ? "bg-seal/30 text-white ring-1 ring-seal-light/40" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>
+                    {n.label}
+                  </NavLink>
+                ))}
+              </div>
             ))}
           </nav>
           <div className="border-t border-white/10 px-4 py-3">

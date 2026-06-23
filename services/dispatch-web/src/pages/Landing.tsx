@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 // the institutional product story, with a sticky top nav that scrolls to the
 // six real sections (Overview, Capabilities, Workflow, Security, Integrations,
 // Resources). "Launch Dispatch" / "Log in" route into the gated console.
-const NAV = ["Overview", "Capabilities", "Workflow", "Security", "Integrations", "Resources"];
+const NAV = ["Overview", "Capabilities", "Workflow", "Security", "Deployment", "Compliance", "Institutions", "Integrations"];
 
 const Feature: React.FC<{ icon: React.ReactNode; title: string; sub: string }> = ({ icon, title, sub }) => (
   <div className="flex items-start gap-3">
@@ -45,7 +45,7 @@ const Landing: React.FC = () => {
             <DispatchMark className="h-8 w-8 text-gold-400" />
             <span className="text-lg font-bold tracking-tight">SOVEREIGN <span className="text-gold-400">DISPATCH</span></span>
           </a>
-          <nav className="hidden items-center gap-9 lg:flex">
+          <nav className="hidden items-center gap-7 lg:flex">
             {NAV.map((n) => (
               <a key={n} href={`#${n.toLowerCase()}`} className="text-[13px] font-medium uppercase tracking-wide text-white/70 transition hover:text-white">{n}</a>
             ))}
@@ -157,8 +157,93 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
+      {/* ── Deployment ─────────────────────────────────────────────── */}
+      <section id="deployment" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
+        <SectionHead kicker="Deployment" title="Deploy on your terms."
+          sub="The same governed pipeline, delivered into the operating model your mandate requires — from managed cloud to a fully air-gapped enclave." />
+        <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["Cloud", "Managed, single-tenant database in your chosen region.", "Available"],
+            ["Private Cloud", "Your cloud account and VPC; we operate, you own the tenancy.", "Per engagement"],
+            ["On-Premise", "Inside your data centre, under your operational control.", "Per engagement"],
+            ["Air-Gapped", "Disconnected enclave for the most sensitive estates.", "Per engagement"],
+          ].map(([t, b, tag]) => (
+            <div key={t} className="flex flex-col rounded-lg border border-white/10 bg-white/[0.02] p-6">
+              <div className="text-base font-bold text-white">{t}</div>
+              <p className="mt-2 flex-1 text-[13px] leading-relaxed text-white/55">{b}</p>
+              <span className={`mt-4 inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tag === "Available" ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30" : "bg-white/5 text-white/45 ring-1 ring-white/10"}`}>{tag}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* architecture diagram */}
+        <div className="mx-auto mt-16 max-w-5xl">
+          <p className="mb-5 text-center text-[12px] font-semibold uppercase tracking-[0.25em] text-white/35">Reference architecture</p>
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
+            {["Institution", "Dispatch API", "Governance Engine", "Render Cluster", "Immutable Record Store", "Publication Archive"].map((n, i, a) => (
+              <React.Fragment key={n}>
+                <div className="rounded-md border border-white/10 bg-white/[0.03] px-4 py-2.5 text-center text-[12px] font-semibold text-white/80">{n}</div>
+                {i < a.length - 1 && <Chevron className="h-3.5 w-3.5 text-gold-400/60" />}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Compliance / Institutional readiness ───────────────────── */}
+      <section id="compliance" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-24 lg:px-12">
+        <SectionHead kicker="Institutional Readiness" title="Built around the controls you answer to."
+          sub="Dispatch is engineered to the control frameworks institutions are assessed against. We state what is architected versus certified — and provide the evidence dossier on request." />
+        <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            ["ISO 27001", "Architected around the Annex A control families — access, cryptography, operations, supplier and incident management."],
+            ["SOC 2", "Designed around the security, availability and confidentiality trust-service principles."],
+            ["GDPR", "Data-minimising by construction; residency, retention and processing terms set per institution."],
+            ["NIS2", "An operational model aligned to the directive's risk-management and reporting expectations."],
+            ["WCAG 2.1 AA", "The operator console is built to the AA accessibility standard as a design target."],
+            ["Audit evidence", "An append-only, SHA-256-hashed trail of every submission, decision and publish — exportable for assessors."],
+          ].map(([t, b]) => (
+            <div key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-bold text-white">{t}</span>
+                <span className="rounded-full bg-gold-500/15 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-gold-300 ring-1 ring-gold-500/30">Architected for</span>
+              </div>
+              <p className="mt-2 text-[13px] leading-relaxed text-white/55">{b}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mx-auto mt-8 max-w-3xl text-center text-[12px] leading-relaxed text-white/35">
+          "Architected for" denotes control-aligned design, not an independent certification. Certification scope, data
+          residency and retention are defined per deployment. Request the assurance dossier for evidence and auditor reports.
+        </p>
+      </section>
+
+      {/* ── Institutions ───────────────────────────────────────────── */}
+      <section id="institutions" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
+        <SectionHead kicker="Built for Every Institution" title="One platform, the whole public estate."
+          sub="The same governed pipeline serves any institution that turns information into an official record — each isolated in its own tenancy." />
+        <div className="mx-auto mt-14 grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {["Ministries", "Government Agencies", "Municipalities", "Regulators", "Central Banks", "Parliaments", "Universities", "Research Institutions", "State-Owned Enterprises", "NGOs", "Defence & Security", "Intergovernmental Bodies"].map((t) => (
+            <div key={t} className="flex items-center gap-2.5 rounded-md border border-white/10 bg-white/[0.02] px-4 py-3 text-[13px] font-medium text-white/75">
+              <Dot /> {t}
+            </div>
+          ))}
+        </div>
+
+        {/* procurement */}
+        <div className="mx-auto mt-16 max-w-5xl rounded-xl border border-white/10 bg-white/[0.02] p-8">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement</p>
+          <h3 className="mt-2 font-serif text-2xl font-bold text-white">Ready for how institutions buy.</h3>
+          <div className="mt-6 grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+            {["Annual & multi-year licensing", "Enterprise framework agreements", "Data Processing Agreements", "Dedicated institutional support", "Guided onboarding & migration", "Multi-institution deployment"].map((t) => (
+              <div key={t} className="flex items-center gap-2.5 text-[13.5px] text-white/70"><Dot /> {t}</div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Integrations ───────────────────────────────────────────── */}
-      <section id="integrations" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
+      <section id="integrations" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-24 lg:px-12">
         <SectionHead kicker="Integrations" title="An API others build on."
           sub="Dispatch provisions scoped API access per consumer and accepts documents over a stable REST surface." />
         <div className="mx-auto mt-14 grid max-w-5xl gap-5 lg:grid-cols-2">
