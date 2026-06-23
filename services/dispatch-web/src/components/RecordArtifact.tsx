@@ -51,9 +51,13 @@ export const RecordArtifact: React.FC<{ className?: string }> = ({ className }) 
             <stop offset="0.5" stopColor="#e9c878" stopOpacity="0.04" />
             <stop offset="1" stopColor="#e9c878" stopOpacity="0" />
           </radialGradient>
-          <filter id="ra-shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="18" stdDeviation="26" floodColor="#000000" floodOpacity="0.55" />
+          <filter id="ra-shadow" x="-25%" y="-25%" width="150%" height="150%">
+            <feDropShadow dx="0" dy="24" stdDeviation="32" floodColor="#000000" floodOpacity="0.62" />
           </filter>
+          <radialGradient id="ra-vig" cx="0.5" cy="0.46" r="0.72">
+            <stop offset="0.55" stopColor="#241d0c" stopOpacity="0" />
+            <stop offset="1" stopColor="#241d0c" stopOpacity="0.13" />
+          </radialGradient>
           <filter id="ra-emboss" x="-30%" y="-30%" width="160%" height="160%">
             <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#3a2207" floodOpacity="0.45" />
           </filter>
@@ -77,6 +81,8 @@ export const RecordArtifact: React.FC<{ className?: string }> = ({ className }) 
         <g filter="url(#ra-shadow)">
           <rect x="88" y="92" width="424" height="568" rx="2" fill="url(#ra-paper)" stroke="#1d1810" strokeOpacity="0.12" strokeWidth="1" />
           <rect x="88" y="92" width="424" height="568" rx="2" filter="url(#ra-grain)" clipPath="url(#ra-clip)" />
+          {/* paper vignette — edges fall into shadow (physical stock under light) */}
+          <rect x="88" y="92" width="424" height="568" rx="2" fill="url(#ra-vig)" clipPath="url(#ra-clip)" />
           {/* engraved double frame + corner ticks */}
           <rect x="100" y="104" width="400" height="544" rx="1" fill="none" stroke={INK} strokeOpacity="0.18" strokeWidth="1" />
           <rect x="106" y="110" width="388" height="532" rx="1" fill="none" stroke={INK} strokeOpacity="0.08" strokeWidth="1" />
