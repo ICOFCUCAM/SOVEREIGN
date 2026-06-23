@@ -97,6 +97,7 @@ const sPoint = (s: Strand, t: number): [number, number] => {
 
 interface Code { s: number; t: number; sp: number; size: number; br: boolean }
 interface Pp { g: number; t: number; sp: number; size: number }
+interface Noise { x: number; y: number; vx: number; vy: number; size: number; a: number }
 
 export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -105,7 +106,7 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     const ctx = cv.getContext("2d"); if (!ctx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let W = 0, H = 0, raf = 0;
-    let dots: { x: number; y: number; a: number }[] = [], codes: Code[] = [], pps: Pp[] = [];
+    let dots: { x: number; y: number; a: number }[] = [], codes: Code[] = [], pps: Pp[] = [], noise: Noise[] = [];
 
     const init = () => {
       const mk = (d: { nx: number; ny: number }, a: number) => ({ x: (0.02 + d.nx * 0.94) * W, y: (0.07 + d.ny * 0.72) * H, a });
@@ -114,6 +115,9 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       for (let s = 0; s < STRANDS.length; s++) { const n = 2 + Math.floor(STRANDS[s].maxT * 6); for (let k = 0; k < n; k++) codes.push({ s, t: rnd() * STRANDS[s].maxT, sp: 0.0018 + rnd() * 0.003, size: 0.6 + rnd() * 1.2, br: rnd() < 0.3 }); }
       pps = [];
       for (let g = 0; g < CARD_FX.length - 1; g++) for (let k = 0; k < 4; k++) pps.push({ g, t: rnd(), sp: 0.004 + rnd() * 0.004, size: 0.8 + rnd() * 1.1 });
+      // ambient particle noise — tiny floating motes drifting throughout, makes the field alive
+      noise = [];
+      for (let i = 0; i < 90; i++) noise.push({ x: rnd() * W, y: rnd() * H, vx: (rnd() - 0.5) * 0.08, vy: (rnd() - 0.5) * 0.06, size: rnd() * 0.9 + 0.3, a: 0.04 + rnd() * 0.12 });
     };
     const resize = () => {
       const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
@@ -131,6 +135,15 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       for (let i = 1; i < 6; i++) { const y = (0.1 + i * 0.13) * H; ctx.beginPath(); for (let x = 0.04; x < 0.96; x += 0.02) ctx.lineTo(x * W, y + Math.sin(x * 6) * 0.012 * H); ctx.stroke(); }
       for (let i = 1; i < 11; i++) { const x = (0.06 + i * 0.085) * W; ctx.beginPath(); ctx.moveTo(x, 0.08 * H); ctx.lineTo(x, 0.82 * H); ctx.stroke(); }
       for (const d of dots) { ctx.fillStyle = `rgba(233,200,120,${d.a})`; ctx.fillRect(d.x, d.y, 1.6, 1.6); }
+
+      // ambient particle noise — slow floating motes throughout the field
+      for (const m of noise) {
+        m.x += m.vx; m.y += m.vy;
+        if (m.x < 0) m.x += W; else if (m.x > W) m.x -= W;
+        if (m.y < 0) m.y += H; else if (m.y > H) m.y -= H;
+        ctx.fillStyle = `rgba(233,200,120,${m.a})`;
+        ctx.beginPath(); ctx.arc(m.x, m.y, m.size, 0, 6.283); ctx.fill();
+      }
 
       // giant destination bloom (sunrise behind the Official Record)
       const bx = SEALX * W, by = 0.5 * H;

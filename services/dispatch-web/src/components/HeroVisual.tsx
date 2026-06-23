@@ -22,7 +22,6 @@ const TILE = 78;
 const SEAL = { x: 1195, y: CY, r: 92 };
 const STAGES = ["SUBMIT", "GOVERN", "APPROVE", "RENDER", "PUBLISH", "ARCHIVE"];
 const RINGS = [104, 120, 136, 152, 168, 184, 200, 216];
-const goldA = (i: number) => 0.58 + i * 0.07; // gold intensity rises left→right
 
 const ICON: Record<string, React.ReactNode> = {
   MINISTRIES: <path d="M4 9l8-5 8 5M5 9v8m4-8v8m6-8v8m4-8v8M3 20h18" />,
@@ -58,14 +57,22 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
       </radialGradient>
     </defs>
 
-    {/* institutions — labels sitting on top of the incoming mesh */}
+    {/* institutions — WHITE icons in gold rings, each with a guide line toward the workflow */}
     {INST.map((it) => (
       <g key={it.label}>
+        {/* alignment anchor: faint guide line extending toward the pipeline */}
+        <line x1={INST_CX + 30} y1={it.y} x2={INST_CX + 88} y2={it.y} stroke="rgba(233,200,120,0.28)" strokeWidth="1" strokeDasharray="2 5" />
         <circle cx={INST_CX} cy={it.y} r="29" fill="#0c0c0c" fillOpacity="0.55" stroke="rgba(233,200,120,0.5)" strokeWidth="1.2" />
-        <Glyph name={it.label} x={INST_CX} y={it.y} s={1.2} color={GOLD} />
+        <Glyph name={it.label} x={INST_CX} y={it.y} s={1.2} color={BRIGHT} />
         <text x={INST_CX + 46} y={it.y + 5} fontSize="15" fontWeight="600" letterSpacing="1.5" fill="rgba(255,255,255,0.9)" style={{ fontFamily: "inherit" }}>{it.label}</text>
       </g>
     ))}
+
+    {/* glowing energy beams between stages — gold core + soft halo, brightening rightward */}
+    {SX.slice(0, -1).map((x, i) => (
+      <line key={`beam${i}`} x1={x + TILE / 2} y1={CY} x2={SX[i + 1] - TILE / 2} y2={CY} stroke={GOLD} strokeWidth="3.2" strokeLinecap="round" opacity={0.1 + i * 0.04} filter="url(#hv-bloom)" />
+    ))}
+    <line x1={SX[5] + TILE / 2} y1={CY} x2={SEAL.x - SEAL.r} y2={CY} stroke={BRIGHT} strokeWidth="3.6" strokeLinecap="round" opacity="0.4" filter="url(#hv-bloom)" />
 
     {/* arrow into Submit (the nexus the mesh compresses into) */}
     <Arrow cx={SX[0] - TILE / 2 - 16} y={CY} bright={0.7} />
@@ -75,7 +82,7 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
       <g key={i}>
         <rect x={x - TILE / 2} y={CY - TILE / 2} width={TILE} height={TILE} rx="16" fill={GOLD} opacity={0.04 + i * 0.015} filter="url(#hv-bloom)" />
         <rect x={x - TILE / 2} y={CY - TILE / 2} width={TILE} height={TILE} rx="16" fill="#0c0c0c" fillOpacity="0.82" stroke={`rgba(233,200,120,${0.32 + i * 0.1})`} strokeWidth="1.2" />
-        <Glyph name={STAGES[i]} x={x} y={CY - 3} s={1.7} color={`rgba(233,200,120,${goldA(i)})`} sw={1.5} />
+        <Glyph name={STAGES[i]} x={x} y={CY - 3} s={1.7} color={`rgba(255,255,255,${(0.78 + i * 0.04).toFixed(2)})`} sw={1.5} />
         <text x={x} y={CY + TILE / 2 + 24} textAnchor="middle" fontSize="12.5" fontWeight="700" letterSpacing="1.2" fill={WHITE_DIM} style={{ fontFamily: "inherit" }}>{STAGES[i]}</text>
         {i < SX.length - 1 && <Arrow cx={(x + TILE / 2 + SX[i + 1] - TILE / 2) / 2} y={CY} bright={0.5 + i * 0.08} />}
       </g>
