@@ -69,6 +69,7 @@ const Landing: React.FC = () => {
 
       {/* ── hero — THE RECORD: a sealed official instrument beside a formal charter ── */}
       <div id="top" className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_45%_at_72%_32%,rgba(233,200,120,0.055),transparent_72%)]" aria-hidden />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
         <div className="relative z-10 mx-auto grid min-h-[820px] max-w-[1540px] grid-cols-1 items-center gap-14 px-8 py-20 lg:px-12 xl:min-h-[980px] xl:grid-cols-[38fr_62fr] xl:gap-12">
           {/* narrative + charter */}
