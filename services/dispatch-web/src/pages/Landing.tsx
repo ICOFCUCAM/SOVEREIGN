@@ -39,6 +39,9 @@ const Landing: React.FC = () => {
       {/* film grain — fine tactile texture over the dark field (no flat-black banding) */}
       <FilmGrain />
 
+      {/* keyboard skip link — first focusable element, bypasses the nav */}
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded focus:bg-gold-400 focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-[#1c1407]">Skip to content</a>
+
       {/* ── sticky top nav ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/80 backdrop-blur-md shadow-[0_10px_30px_-22px_rgba(0,0,0,0.85)]">
         <div className="mx-auto flex max-w-[1640px] items-center justify-between gap-3 px-5 py-3.5 sm:px-8 lg:px-12">
@@ -62,6 +65,7 @@ const Landing: React.FC = () => {
         </div>
       </header>
 
+      <main id="main" tabIndex={-1} className="outline-none">
       {/* ── hero — THE RECORD: a sealed official instrument beside a formal charter ── */}
       <div id="top" className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_45%_at_72%_32%,rgba(233,200,120,0.055),transparent_72%)]" aria-hidden />
@@ -116,7 +120,7 @@ const Landing: React.FC = () => {
         {/* scroll cue — a quiet invitation to read on */}
         <a href="#why" aria-label="Scroll to read more"
           className="group absolute inset-x-0 bottom-7 z-10 mx-auto hidden w-fit flex-col items-center gap-2 xl:flex">
-          <span className="text-[9.5px] font-semibold uppercase tracking-[0.34em] text-white/35 transition group-hover:text-white/60">Scroll</span>
+          <span className="text-[9.5px] font-semibold uppercase tracking-[0.34em] text-white/50 transition group-hover:text-white/75">Scroll</span>
           <Chevron className="scroll-cue h-3.5 w-3.5 rotate-90 text-gold-400/70 transition group-hover:text-gold-300" />
         </a>
       </div>
@@ -262,6 +266,8 @@ const Landing: React.FC = () => {
           ))}
         </div>
       </section>
+
+      </main>
 
       {/* ── trust strip + footer ───────────────────────────────────── */}
       <TrustStrip />

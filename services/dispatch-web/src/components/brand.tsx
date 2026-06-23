@@ -9,14 +9,14 @@ import {
 // historical reasons; Procurement + Architecture use these). No dependency on an
 // icon library — institutional, not glossy.
 export const DispatchMark: React.FC<{ className?: string }> = ({ className }) => (
-  <svg viewBox="0 0 32 32" fill="none" className={className}>
+  <svg viewBox="0 0 32 32" fill="none" className={className} aria-hidden="true" focusable="false">
     <path d="M16 2l11 4v9c0 7-4.7 12.4-11 15-6.3-2.6-11-8-11-15V6l11-4z" stroke="currentColor" strokeWidth="1.6" />
     <path d="M16 9v9m-4-5l4-4 4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 export const Chevron: React.FC<{ className?: string }> = ({ className }) => (
-  <svg viewBox="0 0 16 16" fill="none" className={className}><path d="M5 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+  <svg viewBox="0 0 16 16" fill="none" className={className} aria-hidden="true" focusable="false"><path d="M5 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
 
 export const Dot: React.FC = () => <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-gold-400" />;
@@ -62,7 +62,7 @@ export const TrustStrip: React.FC = () => (
 // One navigation column in the footer — a quiet uppercase label over restrained links.
 const FooterCol: React.FC<{ title: string; links: [string, string][] }> = ({ title, links }) => (
   <div>
-    <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{title}</div>
+    <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55">{title}</div>
     <ul className="mt-4 space-y-2.5">
       {links.map(([label, href]) => (
         <li key={label}>
@@ -94,7 +94,7 @@ export const PublicFooter: React.FC = () => (
         <FooterCol title="Access" links={[["Launch Dispatch", "/console"], ["Log in", "/console"]]} />
       </div>
       <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/[0.05] pt-7 sm:flex-row sm:items-center">
-        <div className="text-[12px] text-white/40">
+        <div className="text-[12px] text-white/55">
           © <span className="font-mono tracking-[0.1em]">MMXXXVI</span> Sovereign Dispatch
           <span className="text-white/25"> · </span>Institutional Publication Infrastructure
         </div>
