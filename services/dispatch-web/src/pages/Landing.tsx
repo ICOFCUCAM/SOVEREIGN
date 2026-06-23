@@ -30,6 +30,16 @@ const NAV: { label: string; href: string }[] = [
 
 const Landing: React.FC = () => {
   const nav = useNavigate();
+  // Restrained reveal — content sections rise gently into view once, then settle.
+  React.useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>("section[id]"));
+    els.forEach((el) => el.classList.add("reveal"));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.08 });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
   return (
     <div className="bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
