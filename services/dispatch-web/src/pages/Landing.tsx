@@ -103,7 +103,7 @@ const Landing: React.FC = () => {
       </div>
 
       {/* ── Why Dispatch Exists — strategic context + outcomes ─────── */}
-      <section id="why" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
+      <section id="why" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Why Dispatch Exists</p>
           <h2 className="mt-5 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">
@@ -132,7 +132,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Category-owning Pillars ────────────────────────────────── */}
-      <section id="pillars" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
+      <section id="pillars" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
         <div className="mx-auto grid max-w-6xl gap-px overflow-hidden rounded-xl border border-white/10 bg-white/[0.06] sm:grid-cols-3">
           {[
             ["01", "The System of Record", "Not document management. The authority that decides when information becomes official — and seals it."],
@@ -168,7 +168,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── A Record That Proves Itself — provenance positioning ─────── */}
-      <section id="proof" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
+      <section id="proof" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Provenance</p>
           <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">A Record That Proves Itself.</h2>
@@ -195,7 +195,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Procurement CTA (above institutions) ───────────────────── */}
-      <section id="procurement" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-24 lg:px-12">
+      <section id="procurement" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement</p>
           <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">Ready for institutional evaluation.</h2>
@@ -215,7 +215,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Institutions — outcome-driven narratives ───────────────── */}
-      <section id="institutions" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
+      <section id="institutions" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
         <SectionHead kicker="Built for institutions that cannot fail" title="What each institution turns into a record." />
         <div className="mx-auto mt-14 grid max-w-5xl gap-6 sm:grid-cols-2">
           {[
