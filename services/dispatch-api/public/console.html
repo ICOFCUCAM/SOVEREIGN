@@ -126,7 +126,7 @@ function buildReq(){
 
 $("btnValidate").onclick = async () => {
   try { const req = buildReq(); const r = await api("POST","/v1/validate",{ body:req, auth:true }); show(r.json);
-    $("result").innerHTML = r.json.valid ? '<span class="pill succeeded">valid</span>' : '<span class="pill failed">invalid</span> '+(r.json.errors||[]).map(e=>e.code).join(", ');
+    $("result").innerHTML = r.json.valid ? '<span class="pill succeeded">valid</span>' : '<span class="pill failed">invalid</span> '+(r.json.errors||[]).map(e=>e.code).join(", ");
   } catch(e){ $("result").innerHTML='<span class="err">'+e.message+'</span>'; }
 };
 
