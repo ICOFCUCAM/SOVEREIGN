@@ -38,7 +38,7 @@ const Procurement: React.FC = () => {
           </p>
           <div className="mt-9 flex flex-wrap gap-4">
             <a href={ARCHITECTURE_ROUTE}
-              className="group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-lg shadow-gold-700/20 transition hover:from-gold-200 hover:to-gold-500">
+              className="group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition hover:from-gold-200 hover:to-gold-500">
               Architecture Overview <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
             </a>
             <button onClick={() => nav("/console")}
@@ -215,7 +215,7 @@ const Procurement: React.FC = () => {
               Architecture Overview
             </a>
             <button onClick={() => nav("/console")}
-              className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
+              className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_26px_-10px_rgba(0,0,0,0.65)] transition hover:from-gold-200 hover:to-gold-500">
               Begin Evaluation <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </button>
           </div>
