@@ -38,7 +38,7 @@ export const Card: React.FC<{ title: string; body: string }> = ({ title, body })
 
 // Shared trust strip — the three positioning pillars, full-bleed.
 export const TrustStrip: React.FC = () => (
-  <div className="border-t border-white/10 bg-white/[0.02] px-8 py-6 lg:px-12">
+  <div className="border-t border-white/10 bg-white/[0.02] px-8 py-7 lg:px-12">
     <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-x-10 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-white/45">
       <span>Sovereign by Design</span>
       <span className="hidden text-gold-400/40 sm:inline">·</span>
@@ -51,7 +51,7 @@ export const TrustStrip: React.FC = () => (
 
 // Shared public footer — DispatchMark + institutional wordmark.
 export const PublicFooter: React.FC = () => (
-  <footer className="border-t border-white/5 px-8 py-10 lg:px-12">
+  <footer className="border-t border-white/5 px-8 py-12 lg:px-12">
     <div className="mx-auto flex max-w-[1500px] flex-col items-center justify-between gap-4 text-[12px] text-white/40 sm:flex-row">
       <div className="flex items-center gap-2"><DispatchMark className="h-5 w-5 text-gold-400" /> Sovereign Dispatch · Institutional Publication Infrastructure</div>
       <div>Sovereign by design · Auditable always</div>

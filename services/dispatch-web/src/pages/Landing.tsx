@@ -36,12 +36,12 @@ const Landing: React.FC = () => {
 
       {/* ── sticky top nav ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-white/5 bg-[#070707]/85 backdrop-blur">
-        <div className="mx-auto flex max-w-[1640px] items-center justify-between px-8 py-3 lg:px-12">
+        <div className="mx-auto flex max-w-[1640px] items-center justify-between px-8 py-3.5 lg:px-12">
           <a href="#top" className="flex items-center gap-2.5">
             <DispatchMark className="h-7 w-7 text-gold-400" />
             <span className="text-base font-bold tracking-tight">SOVEREIGN <span className="text-gold-400">DISPATCH</span></span>
           </a>
-          <nav className="hidden items-center gap-x-4 xl:flex">
+          <nav className="hidden items-center gap-x-6 xl:flex">
             {NAV.map(({ label, href }) => (
               <a key={label} href={href} className="text-[12px] font-medium uppercase tracking-wide text-white/70 transition hover:text-white">{label}</a>
             ))}
