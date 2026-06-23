@@ -141,7 +141,7 @@ const Landing: React.FC = () => {
           ].map(([n, t, b]) => (
             <div key={t} className="bg-[#070707] p-9">
               <div className="font-mono text-[12px] text-gold-400/70">{n}</div>
-              <h3 className="mt-5 font-serif text-[1.7rem] font-bold leading-tight text-white">{t}</h3>
+              <h3 className="mt-5 font-serif text-[1.7rem] font-bold leading-[1.12] tracking-[-0.01em] text-white">{t}</h3>
               <p className="mt-4 text-[14px] leading-relaxed text-white/55">{b}</p>
             </div>
           ))}
@@ -171,8 +171,8 @@ const Landing: React.FC = () => {
       <section id="proof" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Provenance</p>
-          <h2 className="mt-4 font-serif text-4xl font-bold tracking-tight text-white sm:text-5xl">A Record That Proves Itself.</h2>
-          <p className="mt-6 text-lg leading-relaxed text-white/55">
+          <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">A Record That Proves Itself.</h2>
+          <p className="mx-auto mt-6 max-w-[44rem] text-lg leading-[1.7] text-white/55">
             Every Dispatch record carries its own evidence — sealed, attributed and verifiable long after the people who
             created it have moved on. The institution doesn't ask you to trust the record. The record proves itself.
           </p>
@@ -198,8 +198,8 @@ const Landing: React.FC = () => {
       <section id="procurement" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-24 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement</p>
-          <h2 className="mt-4 font-serif text-4xl font-bold tracking-tight text-white sm:text-5xl">Ready for institutional evaluation.</h2>
-          <p className="mt-5 text-lg leading-relaxed text-white/55">The architecture, security and procurement materials your evaluation team needs — self-serve, before any human contact.</p>
+          <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">Ready for institutional evaluation.</h2>
+          <p className="mt-5 mx-auto max-w-[42rem] text-lg leading-[1.7] text-white/55">The architecture, security and procurement materials your evaluation team needs — self-serve, before any human contact.</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button onClick={() => nav(PROCUREMENT_ROUTE)}
               className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-8 py-4 text-sm font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
