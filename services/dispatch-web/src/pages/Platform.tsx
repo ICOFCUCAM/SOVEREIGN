@@ -14,7 +14,7 @@ const Platform: React.FC = () => {
       <main>
         {/* ── Overview ───────────────────────────────────────────────── */}
         <section id="overview" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">
-          <SectionHead kicker="Overview" title="Information becomes the official record."
+          <SectionHead index="01" kicker="Overview" title="Information becomes the official record."
             sub="Dispatch is the institutional layer between a draft and a published document. Every artefact — briefing, board pack, regulatory filing — is submitted as structured data, governed through approval, rendered to a faithful PDF/DOCX, and published with a permanent, auditable provenance trail." />
           <div className="mx-auto mt-14 grid stagger max-w-5xl gap-5 sm:grid-cols-3">
             <Card title="Not a word processor" body="Documents are structured data (DDM), validated and scaffolded by type — not freeform files. The format is the contract." />
@@ -24,8 +24,8 @@ const Platform: React.FC = () => {
         </section>
 
         {/* ── Capabilities ───────────────────────────────────────────── */}
-        <section id="capabilities" className="scroll-mt-24 border-t border-white/[0.06] bg-white/[0.015] px-8 py-24 lg:px-12">
-          <SectionHead kicker="Capabilities" title="One pipeline, every official document."
+        <section id="capabilities" className="scroll-mt-24 border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-white/[0.008] px-8 py-24 lg:px-12">
+          <SectionHead index="02" kicker="Capabilities" title="One pipeline, every official document."
             sub="Templates and validation per document type; deterministic, classification-banded rendering to print-grade output." />
           <div className="mx-auto mt-14 grid stagger max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <Card title="Document types" body="Executive briefings, board reports, policy papers, regulatory submissions, operational packages and official records — each with its own required scaffold." />
@@ -39,7 +39,7 @@ const Platform: React.FC = () => {
 
         {/* ── Workflow ───────────────────────────────────────────────── */}
         <section id="workflow" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">
-          <SectionHead kicker="Workflow" title="Submit → Govern → Approve → Render → Publish → Retrieve."
+          <SectionHead index="03" kicker="Workflow" title="Submit → Govern → Approve → Render → Publish → Retrieve."
             sub="The full lifecycle of an official document, enforced by the platform." />
           <div className="mx-auto mt-14 grid stagger max-w-6xl gap-4 sm:grid-cols-3 lg:grid-cols-6">
             {[
@@ -60,8 +60,8 @@ const Platform: React.FC = () => {
         </section>
 
         {/* ── Integrations ───────────────────────────────────────────── */}
-        <section id="integrations" className="scroll-mt-24 border-t border-white/[0.06] bg-white/[0.015] px-8 py-24 lg:px-12">
-          <SectionHead kicker="Integrations" title="An API others build on."
+        <section id="integrations" className="scroll-mt-24 border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-white/[0.008] px-8 py-24 lg:px-12">
+          <SectionHead index="04" kicker="Integrations" title="An API others build on."
             sub="Dispatch provisions scoped API access per consumer and accepts documents over a stable REST surface." />
           <div className="mx-auto mt-14 grid stagger max-w-5xl gap-5 lg:grid-cols-2">
             <div className={`${SURFACE} p-7`}>

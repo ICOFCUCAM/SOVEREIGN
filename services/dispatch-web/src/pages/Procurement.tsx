@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { PublicHeader, Chevron, Dot, FilmGrain, useReveal } from "../components/brand";
+import { PublicHeader, Chevron, Dot, FilmGrain, useReveal, SURFACE } from "../components/brand";
 import { DeploymentMatrix } from "../components/DeploymentMatrix";
 import { ARCHITECTURE_ROUTE } from "../lib/routes";
 
@@ -82,7 +82,7 @@ const Procurement: React.FC = () => {
               ["On-Premise", "Available for institutions requiring local control."],
               ["Air-Gapped", "Architecture designed to support isolated deployments. Availability subject to engagement scope."],
             ].map(([t, b]) => (
-              <div key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+              <div key={t} className={`${SURFACE} p-5`}>
                 <div className="text-[15px] font-bold text-white">{t}</div>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-white/55">{b}</p>
               </div>
@@ -125,7 +125,7 @@ const Procurement: React.FC = () => {
               ["Immutable audit", "Append-only, SHA-256-hashed trail of every submission, decision and publish."],
               ["Classification-forward", "Documents carry visible classification; reads are gated against clearance."],
             ].map(([t, b]) => (
-              <div key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+              <div key={t} className={`${SURFACE} p-5`}>
                 <div className="text-[14.5px] font-bold text-white">{t}</div>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-white/55">{b}</p>
               </div>
@@ -156,7 +156,7 @@ const Procurement: React.FC = () => {
               ["Support Models", "Commercial support options available."],
               ["Deployment Planning", "Implementation planning available for qualified engagements."],
             ].map(([t, b]) => (
-              <div key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+              <div key={t} className={`${SURFACE} p-5`}>
                 <div className="text-[14.5px] font-bold text-white">{t}</div>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-white/55">{b}</p>
               </div>
@@ -175,7 +175,7 @@ const Procurement: React.FC = () => {
               ["Security Review", "Controls, residency and audit evidence reviewed."],
               ["Production Rollout", "Phased deployment into operations."],
             ].map(([t, b], i) => (
-              <li key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+              <li key={t} className={`${SURFACE} p-5`}>
                 <div className="font-mono text-[12px] font-bold text-gold-400">{String(i + 1).padStart(2, "0")}</div>
                 <div className="mt-2 text-[14px] font-bold text-white">{t}</div>
                 <p className="mt-1 text-[12.5px] leading-snug text-white/50">{b}</p>
@@ -193,7 +193,7 @@ const Procurement: React.FC = () => {
               ["Priority", "Faster response targets for production institutional deployments."],
               ["Dedicated", "Named support and implementation planning for sovereign and on-premise estates."],
             ].map(([t, b]) => (
-              <div key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+              <div key={t} className={`${SURFACE} p-5`}>
                 <div className="text-[14.5px] font-bold text-white">{t}</div>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-white/55">{b}</p>
               </div>
@@ -204,7 +204,7 @@ const Procurement: React.FC = () => {
       </div>
 
       {/* closing CTA — no email; routes into the console / evaluation */}
-      <section className="border-t border-white/5 bg-white/[0.015] px-8 py-20 lg:px-12">
+      <section className="border-t border-white/5 bg-gradient-to-b from-white/[0.025] to-white/[0.008] px-8 py-20 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="font-serif text-3xl font-bold text-white">Begin your evaluation.</h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-white/55">
