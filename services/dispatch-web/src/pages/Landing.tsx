@@ -78,8 +78,8 @@ const Landing: React.FC = () => {
               From Information<br />to <span className="text-gold-400">Official Record.</span>
             </h1>
             <p className="mt-7 max-w-[27rem] text-[17px] leading-[1.7] text-white/60">
-              Sovereign Dispatch is the operating system for institutional publication — the authority that turns
-              information into a sealed, governed and permanent record.
+              The operating system for institutional publication — where information becomes a
+              sealed, governed, permanent record.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <button onClick={() => nav("/console")}
