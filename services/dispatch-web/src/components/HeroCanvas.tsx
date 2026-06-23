@@ -9,7 +9,8 @@ import React, { useEffect, useRef } from "react";
 
 const SEALX = 0.8715;                                // Official Record = brightest, distributed terminus
 const CARD_FX = [0.2986, 0.384, 0.4694, 0.5549, 0.6403, 0.7257, SEALX]; // 6 equal cards + seal
-const SUBMIT_X = 0.2986;                             // the mesh stays alive until / behind this card
+const SUBMIT_X = 0.2986;                             // the funnel NECK (mouth narrows here)
+const GOVERN_X = 0.384;                              // the funnel TUBE extends through to here
 
 // institution sources (match HeroVisual circles). MAG = nested-funnel hierarchy: the outer
 // institutions (Ministries, Authorities) generate the LARGEST envelope; Hospitals medium;
@@ -86,14 +87,15 @@ const mkStrand = (instIdx: number, cls: number, u: number): Strand => {
   const wallY = instY + (u - 0.5) * bandT;
   const x0 = INSTX - (mag - 0.45) * 0.05 + (rnd() - 0.3) * 0.016;  // outer walls start furthest left
   const y0 = wallY;
-  // long flared mouth: hold the node height (the wide opening of the funnel)
-  const c1x = 0.16 + rnd() * 0.03;
-  const c1y = wallY - rel * 0.02;
-  // then a sharp concave bend into the apex — the curved funnel wall (a horn, not a straight fan)
-  const c2x = 0.242 + rnd() * 0.016;
-  const c2y = wallY - rel * 0.5;
-  const ex = SUBMIT_X + 0.006 + (rnd() - 0.5) * 0.008;       // alive INTO / behind the Submit card
-  const ey = 0.5 + rel * 0.03 + (rnd() - 0.5) * 0.003;        // apex, walls nested in order
+  // LONG flared mouth: hold the node height far to the right (the wide open funnel mouth)
+  const c1x = 0.205 + rnd() * 0.03;
+  const c1y = wallY - rel * 0.03;
+  // sharp concave bend down to the NECK at Submit (the funnel pinches here)
+  const c2x = SUBMIT_X + (rnd() - 0.5) * 0.01;
+  const c2y = 0.5 + rel * 0.06;
+  // then the TUBE: a tight, near-parallel bundle running through to Govern
+  const ex = GOVERN_X + (rnd() - 0.5) * 0.008;
+  const ey = 0.5 + rel * 0.016 + (rnd() - 0.5) * 0.003;
   const width = cls === 0 ? 1.1 + rnd() * 0.4 : cls === 1 ? 0.55 + rnd() * 0.16 : 0.28 + rnd() * 0.1;
   const bright = (cls === 0 ? 0.62 : cls === 1 ? 0.17 : 0.03) * (0.7 + 0.4 * mag);
   const maxT = 0.99 + rnd() * 0.01;
