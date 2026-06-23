@@ -134,7 +134,7 @@ const Landing: React.FC = () => {
             ["Preserve institutional memory", "Every version retained and retrievable, by policy."],
             ["Reduce publication risk", "Classification, clearance and review enforced by the system."],
           ].map(([t, b]) => (
-            <div key={t} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 p-6">
+            <div key={t} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/25 p-6">
               <div className="text-[14px] font-bold leading-snug text-white">{t}</div>
               <p className="mt-2 text-[12.5px] leading-snug text-white/50">{b}</p>
             </div>
@@ -196,7 +196,7 @@ const Landing: React.FC = () => {
             ["Append-only history", "Every action preserved in order. Nothing is quietly edited or removed."],
             ["Verifiable integrity", "A cryptographic seal anyone authorized can check, for the life of the record."],
           ].map(([t, b]) => (
-            <div key={t} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 p-6 text-center">
+            <div key={t} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/25 p-6 text-center">
               <div className="text-[14px] font-bold text-white">{t}</div>
               <p className="mt-2 text-[12.5px] leading-relaxed text-white/50">{b}</p>
             </div>
@@ -242,7 +242,7 @@ const Landing: React.FC = () => {
             ["Education", "Universities · Research bodies", "Confer and preserve official records — credentials, resolutions and research outputs — under the institution's own seal."],
             ["Enterprise", "Regulated industries · Critical infrastructure", "Turn board, compliance and operational decisions into permanent, defensible records a regulator can trust."],
           ].map(([cat, who, story]) => (
-            <div key={cat} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 p-7">
+            <div key={cat} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/25 p-7">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                 <div className="text-[13px] font-bold uppercase tracking-[0.16em] text-gold-400/90">{cat}</div>
                 <div className="text-[11px] uppercase tracking-[0.1em] text-white/35">{who}</div>
