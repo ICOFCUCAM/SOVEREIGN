@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { RecordArtifact } from "../components/RecordArtifact";
-import { SectionHead, DispatchMark, Chevron, PublicFooter, TrustStrip } from "../components/brand";
+import { DispatchMark, Chevron, PublicFooter, TrustStrip } from "../components/brand";
 import {
   PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE,
   PLATFORM_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE,
@@ -219,8 +219,12 @@ const Landing: React.FC = () => {
 
       {/* ── Institutions — outcome-driven narratives ───────────────── */}
       <section id="institutions" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
-        <SectionHead kicker="Built for institutions that cannot fail" title="What each institution turns into a record." />
-        <div className="mx-auto mt-16 grid max-w-5xl gap-6 sm:grid-cols-2">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-5 h-px w-10 bg-gold-500/45" aria-hidden />
+          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Built for institutions that cannot fail</p>
+          <h2 className="mt-5 max-w-[20ch] font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">What each institution turns into a record.</h2>
+        </div>
+        <div className="mx-auto mt-14 grid max-w-5xl gap-6 sm:grid-cols-2">
           {[
             ["Government", "Ministries · Regulators · Authorities", "Publish policy, legislation and official notices as sealed records — full provenance, and no shadow copies circulating outside the system."],
             ["Healthcare", "Hospitals · Health authorities", "Issue clinical, safety and regulatory records that withstand audit and time — every version preserved, every release attributable."],
