@@ -1,5 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  PLATFORM_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE,
+  PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE, EVIDENCE_ROUTE,
+} from "../lib/routes";
 
 // Shared marketing chrome for the public pages (Landing keeps its own copies for
 // historical reasons; Procurement + Architecture use these). No dependency on an
@@ -55,21 +59,50 @@ export const TrustStrip: React.FC = () => (
   </div>
 );
 
-// Shared public footer — DispatchMark + institutional wordmark.
+// One navigation column in the footer — a quiet uppercase label over restrained links.
+const FooterCol: React.FC<{ title: string; links: [string, string][] }> = ({ title, links }) => (
+  <div>
+    <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{title}</div>
+    <ul className="mt-4 space-y-2.5">
+      {links.map(([label, href]) => (
+        <li key={label}>
+          <a href={href} className="text-[13px] text-white/60 transition hover:text-gold-300">{label}</a>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+// Shared public footer — an institutional sitemap (wordmark + positioning over
+// three navigation columns) above a legal/assurance baseline. Substantial, the way
+// infrastructure footers are — not a single thin credit line.
 export const PublicFooter: React.FC = () => (
-  <footer className="border-t border-white/[0.06] px-8 py-12 lg:px-12">
-    <div className="mx-auto flex max-w-[1500px] flex-col items-center justify-between gap-5 sm:flex-row">
-      <div className="flex items-center gap-2.5 text-[12.5px] text-white/45">
-        <DispatchMark className="h-5 w-5 text-gold-400" />
-        <span className="font-semibold tracking-tight text-white/75">Sovereign Dispatch</span>
-        <span className="text-white/25">·</span> Institutional Publication Infrastructure
+  <footer className="border-t border-white/[0.06] px-8 py-14 lg:px-12">
+    <div className="mx-auto max-w-[1500px]">
+      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+        <div className="max-w-xs">
+          <div className="flex items-center gap-2.5">
+            <DispatchMark className="h-6 w-6 text-gold-400" />
+            <span className="font-semibold tracking-tight text-white/85">Sovereign Dispatch</span>
+          </div>
+          <p className="mt-4 text-[12.5px] leading-relaxed text-white/45">
+            The operating system for institutional publication — where information becomes a sealed, governed, permanent record.
+          </p>
+        </div>
+        <FooterCol title="Platform" links={[["Overview", PLATFORM_ROUTE], ["Security", SECURITY_ROUTE], ["Compliance", COMPLIANCE_ROUTE]]} />
+        <FooterCol title="Evaluate" links={[["Procurement", PROCUREMENT_ROUTE], ["Architecture", ARCHITECTURE_ROUTE], ["Evidence", EVIDENCE_ROUTE]]} />
+        <FooterCol title="Access" links={[["Launch Dispatch", "/console"], ["Log in", "/console"]]} />
       </div>
-      <div className="flex items-center gap-4 text-[11px] uppercase tracking-[0.18em] text-white/45">
-        <span>Sovereign by design</span>
-        <span className="text-gold-400/30">·</span>
-        <span>Auditable always</span>
-        <span className="text-gold-400/30">·</span>
-        <span className="font-mono tracking-[0.1em]">© MMXXXVI</span>
+      <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/[0.05] pt-7 sm:flex-row sm:items-center">
+        <div className="text-[12px] text-white/40">
+          © <span className="font-mono tracking-[0.1em]">MMXXXVI</span> Sovereign Dispatch
+          <span className="text-white/25"> · </span>Institutional Publication Infrastructure
+        </div>
+        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/45">
+          <span>Sovereign by design</span>
+          <span className="text-gold-400/30">·</span>
+          <span>Auditable always</span>
+        </div>
       </div>
     </div>
   </footer>
