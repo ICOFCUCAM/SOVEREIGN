@@ -23,3 +23,11 @@ body {
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: #27375c; border-radius: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* ── Typographic foundation — editorial headings, calm legible body ──────── */
+body { text-rendering: optimizeLegibility; -moz-osx-font-smoothing: grayscale; }
+/* Fraunces is an optical serif — size its drawing to the rendered size, tighten */
+.font-serif { font-optical-sizing: auto; font-feature-settings: "kern", "liga", "calt"; letter-spacing: -0.014em; }
+/* headings wrap evenly (no single orphan word); paragraphs avoid short runts */
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
