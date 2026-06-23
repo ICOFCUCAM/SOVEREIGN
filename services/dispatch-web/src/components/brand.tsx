@@ -28,6 +28,12 @@ export const SectionHead: React.FC<{ kicker: string; title: string; sub?: string
   </div>
 );
 
+// The engineered card surface — top-lit gradient, inset highlight, gold hover
+// lift. Shared so every bespoke panel across the marketing pages matches the
+// homepage's material instead of the older flat `bg-white/[0.02]` boxes.
+export const SURFACE =
+  "rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/30 hover:from-white/[0.06]";
+
 // Bordered capability card — title + body, with a subtle hover lift.
 export const Card: React.FC<{ title: string; body: string }> = ({ title, body }) => (
   <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/30 hover:from-white/[0.06]">
