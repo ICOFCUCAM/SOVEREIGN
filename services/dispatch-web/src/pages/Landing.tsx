@@ -41,21 +41,21 @@ const Landing: React.FC = () => {
 
       {/* ── sticky top nav ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/80 backdrop-blur-md shadow-[0_10px_30px_-22px_rgba(0,0,0,0.85)]">
-        <div className="mx-auto flex max-w-[1640px] items-center justify-between px-8 py-3.5 lg:px-12">
-          <a href="#top" className="flex items-center gap-2.5">
+        <div className="mx-auto flex max-w-[1640px] items-center justify-between gap-3 px-5 py-3.5 sm:px-8 lg:px-12">
+          <a href="#top" className="flex shrink-0 items-center gap-2.5">
             <DispatchMark className="h-7 w-7 text-gold-400" />
-            <span className="text-base font-bold tracking-tight">SOVEREIGN <span className="text-gold-400">DISPATCH</span></span>
+            <span className="whitespace-nowrap text-[15px] font-bold tracking-tight sm:text-base">SOVEREIGN <span className="text-gold-400">DISPATCH</span></span>
           </a>
           <nav className="hidden items-center gap-x-6 xl:flex">
             {NAV.map(({ label, href }) => (
               <a key={label} href={href} className="relative text-[12px] font-medium uppercase tracking-wide text-white/70 transition after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-gold-400/70 after:transition-all after:duration-300 hover:text-white hover:after:w-full">{label}</a>
             ))}
           </nav>
-          <div className="flex items-center gap-4">
-            <button onClick={() => nav("/console")} className="text-[13px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-white">Log in</button>
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+            <button onClick={() => nav("/console")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-white sm:inline-block">Log in</button>
             <button onClick={() => nav("/console")}
-              className="group inline-flex items-center gap-2 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
-              Launch Dispatch
+              className="group inline-flex items-center gap-2 whitespace-nowrap rounded bg-gradient-to-b from-gold-300 to-gold-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500 sm:px-5">
+              <span className="sm:hidden">Launch</span><span className="hidden sm:inline">Launch Dispatch</span>
               <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
             </button>
           </div>
@@ -66,7 +66,7 @@ const Landing: React.FC = () => {
       <div id="top" className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_45%_at_72%_32%,rgba(233,200,120,0.055),transparent_72%)]" aria-hidden />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
-        <div className="relative z-10 mx-auto grid min-h-[820px] max-w-[1540px] grid-cols-1 items-center gap-14 px-8 py-20 lg:px-12 xl:min-h-[980px] xl:grid-cols-[38fr_62fr] xl:gap-12">
+        <div className="relative z-10 mx-auto grid min-h-0 max-w-[1540px] grid-cols-1 items-center gap-12 px-5 py-16 sm:min-h-[760px] sm:gap-14 sm:px-8 sm:py-20 lg:px-12 xl:min-h-[980px] xl:grid-cols-[38fr_62fr] xl:gap-12">
           {/* narrative + charter */}
           <div className="max-w-xl">
             <div className="mb-8 flex items-center gap-3">
@@ -122,7 +122,7 @@ const Landing: React.FC = () => {
       </div>
 
       {/* ── Why Dispatch Exists — strategic context + outcomes ─────── */}
-      <section id="why" className="edge-rule scroll-mt-24 px-8 py-28 lg:px-12">
+      <section id="why" className="edge-rule scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Why Dispatch Exists</p>
@@ -151,7 +151,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Category-owning Pillars ────────────────────────────────── */}
-      <section id="pillars" className="edge-rule scroll-mt-24 px-8 py-28 lg:px-12">
+      <section id="pillars" className="edge-rule scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto grid stagger max-w-6xl gap-px overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.07] shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)] sm:grid-cols-3">
           {[
             ["01", "The System of Record", "Not document management. The authority that decides when information becomes official — and seals it."],
@@ -169,7 +169,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Record Lifecycle — quieted to a compact inline strip (−30%) ── */}
-      <section id="lifecycle" className="edge-rule scroll-mt-24 bg-white/[0.015] px-8 py-16 lg:px-12">
+      <section id="lifecycle" className="edge-rule scroll-mt-24 bg-white/[0.015] px-5 py-14 sm:px-8 sm:py-16 lg:px-12">
         <div className="mx-auto max-w-5xl text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50">The Record Lifecycle</p>
           <p className="mx-auto mt-3 max-w-xl text-[14px] leading-relaxed text-white/55">One governed path — every official document travels the same controlled route.</p>
@@ -188,7 +188,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── A Record That Proves Itself — provenance positioning ─────── */}
-      <section id="proof" className="edge-rule relative scroll-mt-24 overflow-hidden px-8 py-28 lg:px-12">
+      <section id="proof" className="edge-rule relative scroll-mt-24 overflow-hidden px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <Guilloche className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[760px] w-[760px] -translate-x-1/2 -translate-y-1/2 opacity-[0.05]" />
         <div className="relative z-10 mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
@@ -218,7 +218,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Procurement CTA (above institutions) ───────────────────── */}
-      <section id="procurement" className="edge-rule scroll-mt-24 bg-white/[0.015] px-8 py-28 lg:px-12">
+      <section id="procurement" className="edge-rule scroll-mt-24 bg-white/[0.015] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement</p>
@@ -239,7 +239,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Institutions — outcome-driven narratives ───────────────── */}
-      <section id="institutions" className="edge-rule scroll-mt-24 px-8 py-28 lg:px-12">
+      <section id="institutions" className="edge-rule scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto max-w-5xl">
           <div className="mb-5 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Built for institutions that cannot fail</p>

@@ -48,7 +48,7 @@ export const Card: React.FC<{ title: string; body: string }> = ({ title, body })
 
 // Shared trust strip — the three positioning pillars, full-bleed.
 export const TrustStrip: React.FC = () => (
-  <div className="border-t border-white/[0.06] bg-white/[0.015] px-8 py-7 lg:px-12">
+  <div className="border-t border-white/[0.06] bg-white/[0.015] px-5 py-7 sm:px-8 lg:px-12">
     <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-x-10 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50">
       <span>Sovereign by Design</span>
       <span className="hidden text-gold-400/40 sm:inline">·</span>
@@ -77,7 +77,7 @@ const FooterCol: React.FC<{ title: string; links: [string, string][] }> = ({ tit
 // three navigation columns) above a legal/assurance baseline. Substantial, the way
 // infrastructure footers are — not a single thin credit line.
 export const PublicFooter: React.FC = () => (
-  <footer className="border-t border-white/[0.06] px-8 py-14 lg:px-12">
+  <footer className="border-t border-white/[0.06] px-5 py-14 sm:px-8 lg:px-12">
     <div className="mx-auto max-w-[1500px]">
       <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div className="max-w-xs">
@@ -139,17 +139,17 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
   const nav = useNavigate();
   return (
     <header className="no-print sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/80 backdrop-blur-md shadow-[0_10px_30px_-22px_rgba(0,0,0,0.85)]">
-      <div className="mx-auto flex max-w-[1500px] items-center justify-between px-8 py-4 lg:px-12">
-        <button onClick={() => nav("/")} className="flex items-center gap-3">
+      <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3 px-5 py-4 sm:px-8 lg:px-12">
+        <button onClick={() => nav("/")} className="flex shrink-0 items-center gap-3">
           <DispatchMark className="h-8 w-8 text-gold-400" />
-          <span className="text-lg font-bold tracking-tight">SOVEREIGN <span className="text-gold-400">DISPATCH</span></span>
+          <span className="whitespace-nowrap text-base font-bold tracking-tight sm:text-lg">SOVEREIGN <span className="text-gold-400">DISPATCH</span></span>
         </button>
-        <div className="flex items-center gap-4">
-          <button onClick={() => nav("/")} className="text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white">Home</button>
+        <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+          <button onClick={() => nav("/")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white sm:inline-block">Home</button>
           {actions}
           <button onClick={() => nav("/console")}
-            className="group inline-flex items-center gap-2 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
-            Launch Dispatch
+            className="group inline-flex items-center gap-2 whitespace-nowrap rounded bg-gradient-to-b from-gold-300 to-gold-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500 sm:px-5">
+            <span className="sm:hidden">Launch</span><span className="hidden sm:inline">Launch Dispatch</span>
             <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
           </button>
         </div>
