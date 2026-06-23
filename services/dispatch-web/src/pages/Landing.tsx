@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { RecordArtifact } from "../components/RecordArtifact";
+import { Guilloche } from "../components/Guilloche";
 import { DispatchMark, Chevron, PublicFooter, TrustStrip } from "../components/brand";
 import {
   PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE,
@@ -186,8 +187,9 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── A Record That Proves Itself — provenance positioning ─────── */}
-      <section id="proof" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-28 lg:px-12">
-        <div className="mx-auto max-w-3xl text-center">
+      <section id="proof" className="relative scroll-mt-24 overflow-hidden border-t border-white/[0.06] px-8 py-28 lg:px-12">
+        <Guilloche className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[760px] w-[760px] -translate-x-1/2 -translate-y-1/2 opacity-[0.05]" />
+        <div className="relative z-10 mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Provenance</p>
           <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">A Record That Proves Itself.</h2>
@@ -197,7 +199,7 @@ const Landing: React.FC = () => {
             <span className="font-medium text-white/90">The record proves itself.</span>
           </p>
         </div>
-        <div className="mx-auto mt-16 grid max-w-4xl gap-6 sm:grid-cols-3">
+        <div className="relative z-10 mx-auto mt-16 grid max-w-4xl gap-6 sm:grid-cols-3">
           {[
             ["Sealed provenance", "Who issued it, under what authority, and when — bound into the record itself."],
             ["Append-only history", "Every action preserved in order. Nothing is quietly edited or removed."],
@@ -209,7 +211,7 @@ const Landing: React.FC = () => {
             </div>
           ))}
         </div>
-        <div className="mt-12 text-center">
+        <div className="relative z-10 mt-12 text-center">
           <a href={EVIDENCE_ROUTE} className="text-[13px] font-semibold uppercase tracking-wide text-gold-400 transition hover:text-gold-300">See the evidence →</a>
         </div>
       </section>
