@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./lib/auth";
 import Shell from "./components/Shell";
 import Landing from "./pages/Landing";
+import Procurement from "./pages/Procurement";
+import Architecture from "./pages/Architecture";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
 import Create from "./pages/Create";
@@ -11,6 +13,8 @@ import Review from "./pages/Review";
 import Library from "./pages/Library";
 import DocumentView from "./pages/DocumentView";
 import Audit from "./pages/Audit";
+import Sovereignty from "./pages/Sovereignty";
+import Integrations from "./pages/Integrations";
 import Polished from "./pages/polished/Polished";
 
 // The gated operator/governance console. Everything here requires a session;
@@ -28,6 +32,8 @@ const Console: React.FC = () => {
         <Route path="library" element={<Library />} />
         <Route path="documents/:id" element={<DocumentView />} />
         <Route path="audit" element={<Audit />} />
+        <Route path="sovereignty" element={<Sovereignty />} />
+        <Route path="integrations" element={<Integrations />} />
         <Route path="polished" element={<Polished />} />
         <Route path="*" element={<Navigate to="/console" replace />} />
       </Routes>
@@ -39,6 +45,9 @@ const App: React.FC = () => (
   <Routes>
     {/* public marketing landing — the front door */}
     <Route path="/" element={<Landing />} />
+    {/* public procurement + architecture dossier (no auth) */}
+    <Route path="/procurement" element={<Procurement />} />
+    <Route path="/architecture" element={<Architecture />} />
     {/* gated console */}
     <Route path="/console/*" element={<Console />} />
     <Route path="*" element={<Navigate to="/" replace />} />

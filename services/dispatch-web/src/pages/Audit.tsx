@@ -22,9 +22,12 @@ const Audit: React.FC = () => {
 
   return (
     <div>
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Audit</h1>
-        <p className="text-sm text-white/50">Append-only event trail. Read-only, tenant-scoped.</p>
+      <header className="mb-6 flex items-end justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Audit Center</h1>
+          <p className="text-sm text-white/50">Append-only event trail. Read-only, tenant-scoped, SHA-256 hashed.</p>
+        </div>
+        {!loading && <div className="text-right"><div className="text-2xl font-bold tabular-nums text-white">{events.length}</div><div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Events</div></div>}
       </header>
 
       <form onSubmit={(e) => { e.preventDefault(); load(); }} className="mb-4 flex flex-wrap gap-2">
@@ -42,19 +45,25 @@ const Audit: React.FC = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10 text-left text-[11px] uppercase tracking-wide text-white/40">
-                  <th className="px-4 py-2 font-semibold">Time</th>
-                  <th className="px-4 py-2 font-semibold">Action</th>
+                  <th className="px-4 py-2 font-semibold">Timestamp</th>
                   <th className="px-4 py-2 font-semibold">Actor</th>
-                  <th className="px-4 py-2 font-semibold">Target</th>
+                  <th className="px-4 py-2 font-semibold">Action</th>
+                  <th className="px-4 py-2 font-semibold">Document</th>
+                  <th className="px-4 py-2 font-semibold">Audit ID</th>
+                  <th className="px-4 py-2 font-semibold">Integrity</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {events.map((e) => (
                   <tr key={e.eventId} className="hover:bg-white/5">
                     <td className="px-4 py-2 text-xs text-white/40">{new Date(e.ts).toLocaleString()}</td>
-                    <td className="px-4 py-2"><span className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-xs text-white/80">{e.action}</span></td>
                     <td className="px-4 py-2 text-xs text-white/60">{e.actor} <span className="text-white/30">({e.actorType})</span></td>
-                    <td className="px-4 py-2 font-mono text-[10px] text-white/40">{e.targetType}/{e.targetId?.slice(0, 8)}…</td>
+                    <td className="px-4 py-2"><span className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-xs text-white/80">{e.action}</span></td>
+                    <td className="px-4 py-2 font-mono text-[10px] text-white/45">{e.targetId ? <>{e.targetType ?? "target"}/{e.targetId.slice(0, 8)}…</> : <span className="text-white/25">—</span>}</td>
+                    <td className="px-4 py-2 font-mono text-[10px] text-white/45" title={e.eventId}>{e.eventId.slice(0, 8)}…</td>
+                    <td className="px-4 py-2 font-mono text-[10px] text-white/35" title={e.sha256 ? `sha256: ${e.sha256}` : undefined}>
+                      {e.sha256 ? <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400/70" />Verified</span> : <span className="text-white/25">—</span>}
+                    </td>
                   </tr>
                 ))}
               </tbody>

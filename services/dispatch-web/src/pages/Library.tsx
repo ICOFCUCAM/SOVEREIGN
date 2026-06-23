@@ -5,6 +5,10 @@ import { Card, ClassBadge, LifecycleBadge, inputCls, timeAgo } from "../lib/ui";
 
 const STATES: (Lifecycle | "")[] = ["", "in_review", "approved", "rendered", "published", "withdrawn", "archived", "rejected"];
 
+// Records show absolute dates for publication + retention (not relative): an
+// official record's release and disposal dates are facts, not "3d ago".
+const fmtDate = (iso?: string): string => (iso ? new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—");
+
 // The library / archive: every document the viewer is cleared to see, filtered
 // by lifecycle state, type and title. Clearance scoping happens server-side —
 // under-cleared documents simply don't appear (no existence leak).
@@ -27,8 +31,8 @@ const Library: React.FC = () => {
   return (
     <div>
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Library</h1>
-        <p className="text-sm text-white/50">Published and archived documents, versions and artifacts.</p>
+        <h1 className="text-2xl font-bold text-white">Official Records</h1>
+        <p className="text-sm text-white/50">The institutional record — every document, version, classification and retention horizon you are cleared to see.</p>
       </header>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -53,6 +57,9 @@ const Library: React.FC = () => {
                   <th className="px-4 py-2 font-semibold">Title</th>
                   <th className="px-4 py-2 font-semibold">Type</th>
                   <th className="px-4 py-2 font-semibold">State</th>
+                  <th className="px-4 py-2 text-right font-semibold">Ver.</th>
+                  <th className="px-4 py-2 font-semibold">Published</th>
+                  <th className="px-4 py-2 font-semibold">Retention</th>
                   <th className="px-4 py-2 text-right font-semibold">Updated</th>
                 </tr>
               </thead>
@@ -63,6 +70,9 @@ const Library: React.FC = () => {
                     <td className="px-4 py-2.5"><Link to={`/console/documents/${d.documentId}`} className="font-medium text-white hover:text-seal-light">{d.title || "(untitled)"}</Link></td>
                     <td className="px-4 py-2.5 text-white/50">{d.docType}</td>
                     <td className="px-4 py-2.5"><LifecycleBadge state={d.lifecycle} /></td>
+                    <td className="px-4 py-2.5 text-right font-mono text-xs text-white/50">v{d.version ?? "—"}</td>
+                    <td className="px-4 py-2.5 text-xs text-white/50">{fmtDate(d.publishedAt)}</td>
+                    <td className="px-4 py-2.5 text-xs text-white/50">{fmtDate(d.retentionUntil)}</td>
                     <td className="px-4 py-2.5 text-right text-xs text-white/40">{timeAgo(d.updatedAt)}</td>
                   </tr>
                 ))}

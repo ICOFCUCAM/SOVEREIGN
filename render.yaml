@@ -42,6 +42,24 @@ services:
         value: "900"
       - key: DISPATCH_CORS_ORIGIN           # the dispatch-web console origin
         sync: false
+      # Storage (READ): the API streams rendered artifacts back to clients, so it
+      # needs the SAME bucket the worker writes to. Without this the API falls back
+      # to its own local disk and GET /v1/artifacts/:id fails ARTIFACT_UNAVAILABLE.
+      # These must match the worker's S3_* values exactly.
+      - key: DISPATCH_STORAGE_BACKEND
+        value: s3
+      - key: S3_ENDPOINT                     # https://<ref>.storage.supabase.co/storage/v1/s3
+        sync: false
+      - key: S3_REGION
+        value: us-east-1
+      - key: S3_BUCKET
+        value: dispatch-artifacts
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_FORCE_PATH_STYLE
+        value: "1"
 
   # ── Render worker (PDF/DOCX via headless Chromium → S3 storage) ─────
   - type: worker
