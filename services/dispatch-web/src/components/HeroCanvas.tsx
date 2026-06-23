@@ -1,19 +1,17 @@
 import React, { useEffect, useRef } from "react";
 
-// Atmospheric layer (canvas). The institutional "cords" — guitar-string-like
-// strands — fan out from the five institution rows on the left and CONVERGE at
-// the SUBMIT card; bright "code" particles travel along them toward that point.
-// From Submit, the crisp SVG pipeline carries the flow right to the seal. Plus a
-// dim gold dotted world map and a warm bloom on the right. Brand gold only.
+// Hero as a NETWORK visualization, not a workflow diagram. A wide gold dotted
+// world map (with lat/long lines + node clusters) is the substrate; 50+ tapered
+// strands enter off-screen-left, emerge from the map field, curve and MERGE
+// (many dissipate) as they compress into a luminous SUBMIT nexus, then the SVG
+// pipeline carries the flow to a dominant Official Record under a large bloom.
+// Gold intensity rises left→right. Brand gold only.
 
-// convergence point (matches SUBMIT in the SVG overlay: x≈0.28 of width, centre)
-const CX = 0.28, CY = 0.5;
-// the mesh SCATTERS from the pipeline's left end (≈Submit) into the upper-left
-// and lower-left — a fountain of fine gold lines, bright at the origin and
-// dispersing/fading toward the scattered ends.
-const OX = 0.265, OY = 0.5;
+const SUBMIT = { x: 0.264, y: 0.5 };                 // nexus (aligns with SVG Submit)
+const SEALX = 0.83;                                  // Official Record (bloom centre)
+const CARD_FX = [0.264, 0.339, 0.414, 0.500, 0.586, 0.672, SEALX]; // 6 cards + seal
 
-// continents → dotted map
+// continents → map sample
 const CONTS = [
   "M150,92 L243,82 L300,120 L286,168 L304,201 L250,242 L208,212 L188,160 L152,150 Z",
   "M283,268 L332,258 L352,300 L332,382 L300,432 L286,360 L300,320 Z",
@@ -35,42 +33,39 @@ const inPoly = (x: number, y: number, poly: [number, number][]) => {
   }
   return c;
 };
-const MAP_DOTS: { nx: number; ny: number }[] = [];
-for (let x = 120; x < 900; x += 8.5) for (let y = 70; y < 450; y += 8.5)
-  if (POLYS.some((p) => inPoly(x, y, p))) MAP_DOTS.push({ nx: (x - 120) / 780, ny: (y - 70) / 380 });
-
-interface Cord { ex: number; ey: number; cx: number; cy: number; amp: number; freq: number; phase: number }
-const CORDS: Cord[] = [];
 let seed = 7;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) & 0x7fffffff; return seed / 0x7fffffff; };
-// A fountain of fine lines scattering from the Submit origin: an UPPER spray into
-// the top-left and a (larger) LOWER spray into the bottom-left. Each line is a
-// quadratic Bézier O→C→E; endpoints fan out by angle, with a bowed control point
-// for the silk-wave curve and a little scatter so it isn't a rigid fan.
-const NB = 24;
-const fan = (sign: number) => {
-  for (let k = 0; k < NB; k++) {
-    const u = k / (NB - 1);
-    const ang = (6 + u * 70) * Math.PI / 180 + (rnd() - 0.5) * 0.1;                       // 6°..76° off horizontal-left
-    const len = (sign < 0 ? 0.20 : 0.24) + u * (sign < 0 ? 0.08 : 0.12) + rnd() * 0.04;   // lower spray larger
-    const ex = OX - Math.cos(ang) * len;
-    const ey = OY + sign * Math.sin(ang) * len;
-    const cx = OX - Math.cos(ang) * len * 0.5;
-    const cy = OY + sign * Math.sin(ang) * len * 0.5 + sign * (0.015 + rnd() * 0.03);     // bow outward
-    CORDS.push({ ex, ey, cx, cy, amp: 0.004 + rnd() * 0.007, freq: 0.8 + rnd() * 1.2, phase: rnd() * 6.28 });
-  }
-};
-fan(-1); // upper spray
-fan(1);  // lower spray
-const pointOn = (c: Cord, t: number, W: number, H: number): [number, number] => {
+// denser dotted map (≈4× density), normalised to continent bbox 120..900 × 70..450
+const MAP_DOTS: { nx: number; ny: number }[] = [];
+for (let x = 120; x < 900; x += 5) for (let y = 70; y < 450; y += 5)
+  if (POLYS.some((p) => inPoly(x, y, p))) MAP_DOTS.push({ nx: (x - 120) / 780, ny: (y - 70) / 380 });
+// node-density clusters (no labels) — rough city positions in the same space
+const CLUSTERS: [number, number][] = [[210, 150], [470, 130], [560, 150], [690, 175], [770, 155], [560, 270], [800, 365], [300, 300]];
+const CLUSTER_DOTS: { nx: number; ny: number }[] = [];
+for (const [cx, cy] of CLUSTERS) for (let i = 0; i < 18; i++)
+  CLUSTER_DOTS.push({ nx: (cx + (rnd() - 0.5) * 34 - 120) / 780, ny: (cy + (rnd() - 0.5) * 34 - 70) / 380 });
+
+// ── strands: off-screen-left → curved/merging → SUBMIT nexus ────────────────
+interface Strand { x0: number; y0: number; cx: number; cy: number; maxT: number; reach: boolean }
+const STRANDS: Strand[] = [];
+const NS = 54;
+for (let k = 0; k < NS; k++) {
+  const upper = k % 2 === 0;
+  const x0 = -0.12 + rnd() * 0.18;                                   // off-screen-left to ~0.06
+  const y0 = upper ? 0.02 + rnd() * 0.40 : 0.58 + rnd() * 0.40;
+  const cx = x0 + (SUBMIT.x - x0) * (0.42 + rnd() * 0.22);
+  const cy = y0 + (SUBMIT.y - y0) * (0.32 + rnd() * 0.30) + (rnd() - 0.5) * 0.16; // unique curvature
+  const r = rnd();
+  const maxT = 0.40 + r * r * 0.60;                                  // skewed: many dissipate early (compression)
+  STRANDS.push({ x0, y0, cx, cy, maxT, reach: maxT > 0.86 });
+}
+const sPoint = (s: Strand, t: number): [number, number] => {
   const mt = 1 - t;
-  const x = mt * mt * OX + 2 * mt * t * c.cx + t * t * c.ex;
-  const y = mt * mt * OY + 2 * mt * t * c.cy + t * t * c.ey;
-  const wave = Math.sin(t * c.freq * 6.283 + c.phase) * c.amp * t; // ripple grows toward the scattered end
-  return [x * W, (y + wave) * H];
+  return [mt * mt * s.x0 + 2 * mt * t * s.cx + t * t * SUBMIT.x, mt * mt * s.y0 + 2 * mt * t * s.cy + t * t * SUBMIT.y];
 };
 
-interface Code { c: number; t: number; sp: number; size: number; br: boolean }
+interface Code { s: number; t: number; sp: number; size: number; br: boolean }
+interface Pp { g: number; t: number; sp: number; size: number }
 
 export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -78,14 +73,16 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     const cv = ref.current; if (!cv) return;
     const ctx = cv.getContext("2d"); if (!ctx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let W = 0, H = 0, raf = 0, codes: Code[] = [], dots: { x: number; y: number }[] = [];
+    let W = 0, H = 0, raf = 0;
+    let dots: { x: number; y: number; a: number }[] = [], codes: Code[] = [], pps: Pp[] = [];
 
     const init = () => {
-      dots = MAP_DOTS.map((d) => ({ x: (0.27 + d.nx * 0.68) * W, y: (0.1 + d.ny * 0.66) * H }));
-      const per = 6;
+      const mk = (d: { nx: number; ny: number }, a: number) => ({ x: (0.02 + d.nx * 0.94) * W, y: (0.07 + d.ny * 0.72) * H, a });
+      dots = [...MAP_DOTS.map((d) => mk(d, 0.085)), ...CLUSTER_DOTS.map((d) => mk(d, 0.16))];
       codes = [];
-      for (let c = 0; c < CORDS.length; c++)
-        for (let k = 0; k < per; k++) codes.push({ c, t: rnd(), sp: 0.0016 + rnd() * 0.0024, size: 0.6 + rnd() * 1.3, br: rnd() < 0.28 });
+      for (let s = 0; s < STRANDS.length; s++) { const n = 2 + Math.floor(STRANDS[s].maxT * 7); for (let k = 0; k < n; k++) codes.push({ s, t: rnd() * STRANDS[s].maxT, sp: 0.0016 + rnd() * 0.0026, size: 0.6 + rnd() * 1.2, br: rnd() < 0.3 }); }
+      pps = [];
+      for (let g = 0; g < CARD_FX.length - 1; g++) for (let k = 0; k < 4; k++) pps.push({ g, t: rnd(), sp: 0.004 + rnd() * 0.004, size: 0.8 + rnd() * 1.1 });
     };
     const resize = () => {
       const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
@@ -95,48 +92,59 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
 
     const tick = () => {
       ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = "rgba(7,7,7,0.2)"; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "rgba(7,7,7,0.22)"; ctx.fillRect(0, 0, W, H);
       ctx.globalCompositeOperation = "lighter";
 
-      // dotted world map
-      ctx.fillStyle = "rgba(233,200,120,0.13)";
-      for (const d of dots) ctx.fillRect(d.x, d.y, 1.7, 1.7);
+      // world map: lat/long lines + dots + clusters
+      ctx.strokeStyle = "rgba(233,200,120,0.035)"; ctx.lineWidth = 1;
+      for (let i = 1; i < 6; i++) { const y = (0.1 + i * 0.13) * H; ctx.beginPath(); for (let x = 0.04; x < 0.96; x += 0.02) ctx.lineTo(x * W, y + Math.sin(x * 6) * 0.012 * H); ctx.stroke(); }
+      for (let i = 1; i < 11; i++) { const x = (0.06 + i * 0.085) * W; ctx.beginPath(); ctx.moveTo(x, 0.08 * H); ctx.lineTo(x, 0.82 * H); ctx.stroke(); }
+      for (const d of dots) { ctx.fillStyle = `rgba(233,200,120,${d.a})`; ctx.fillRect(d.x, d.y, 1.6, 1.6); }
 
-      // warm bloom on the right (seal side)
-      const gx = 0.82 * W, gy = 0.5 * H;
-      const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, 0.5 * W);
-      g.addColorStop(0, "rgba(233,200,120,0.12)"); g.addColorStop(0.45, "rgba(233,200,120,0.03)"); g.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      // giant destination bloom (sunrise behind the Official Record)
+      const bx = SEALX * W, by = 0.5 * H;
+      const bloom = ctx.createRadialGradient(bx, by, 0, bx, by, 0.62 * W);
+      bloom.addColorStop(0, "rgba(233,200,120,0.20)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.05)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = bloom; ctx.fillRect(0, 0, W, H);
 
-      // the cords — fine gold lines scattering from Submit: bright at the origin,
-      // dispersing/fading toward the scattered ends
-      ctx.lineWidth = 1;
-      for (const c of CORDS) {
-        ctx.strokeStyle = "rgba(233,200,120,0.18)";          // near origin (bright)
-        ctx.beginPath();
-        for (let i = 0; i <= 12; i++) { const [x, y] = pointOn(c, i / 24, W, H); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
-        ctx.stroke();
-        ctx.strokeStyle = "rgba(233,200,120,0.07)";          // scattered ends (fading)
-        ctx.beginPath();
-        for (let i = 12; i <= 24; i++) { const [x, y] = pointOn(c, i / 24, W, H); i === 12 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
-        ctx.stroke();
+      // strands: curved, tapered, merging into the Submit nexus; brighter left→right
+      for (const s of STRANDS) {
+        const N = 20; let prev = sPoint(s, 0);
+        for (let i = 1; i <= N; i++) {
+          const tp = i / N, t = tp * s.maxT;
+          const [x, y] = sPoint(s, t);
+          const tipFade = (!s.reach && tp > 0.7) ? 1 - (tp - 0.7) / 0.3 : 1;   // short strands dissipate
+          ctx.strokeStyle = `rgba(233,200,120,${((0.03 + 0.2 * t) * tipFade).toFixed(3)})`;
+          ctx.lineWidth = 0.4 + 1.2 * t;
+          ctx.beginPath(); ctx.moveTo(prev[0] * W, prev[1] * H); ctx.lineTo(x * W, y * H); ctx.stroke();
+          prev = [x, y];
+        }
       }
 
-      // travelling code particles flowing inward toward Submit
+      // Submit nexus bloom (energy router)
+      const nx = SUBMIT.x * W, ny = SUBMIT.y * H;
+      const nexus = ctx.createRadialGradient(nx, ny, 0, nx, ny, 0.1 * W);
+      nexus.addColorStop(0, "rgba(255,231,173,0.3)"); nexus.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = nexus; ctx.fillRect(nx - 0.13 * W, ny - 0.13 * W, 0.26 * W, 0.26 * W);
+
+      // code particles flowing inward to the nexus (brighter as they arrive)
       for (const p of codes) {
-        p.t -= p.sp; if (p.t < 0) p.t += 1;
-        const [x, y] = pointOn(CORDS[p.c], p.t, W, H);
-        const a = 1 - 0.85 * p.t;                            // bright near origin, faint at the ends
+        const s = STRANDS[p.s];
+        p.t += p.sp; if (p.t > s.maxT) p.t -= s.maxT;
+        const [x, y] = sPoint(s, p.t);
         const col = p.br ? "255,231,173" : "233,200,120";
-        ctx.fillStyle = `rgba(${col},${(0.55 * a).toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(x, y, p.size, 0, 6.283); ctx.fill();
+        ctx.fillStyle = `rgba(${col},${(0.12 + 0.5 * p.t).toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(x * W, y * H, p.size, 0, 6.283); ctx.fill();
       }
 
-      // convergence glow at Submit
-      const cgx = CX * W, cgy = CY * H;
-      const cg = ctx.createRadialGradient(cgx, cgy, 0, cgx, cgy, 0.08 * W);
-      cg.addColorStop(0, "rgba(255,231,173,0.24)"); cg.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = cg; ctx.fillRect(cgx - 0.1 * W, cgy - 0.1 * W, 0.2 * W, 0.2 * W);
+      // pipeline momentum: particles between every stage, brighter toward the seal
+      for (const p of pps) {
+        p.t += p.sp; if (p.t > 1) p.t -= 1;
+        const x = (CARD_FX[p.g] + (CARD_FX[p.g + 1] - CARD_FX[p.g]) * p.t) * W;
+        const a = 0.3 + 0.5 * (p.g / (CARD_FX.length - 1));
+        ctx.fillStyle = `rgba(255,231,173,${a.toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(x, 0.5 * H, p.size, 0, 6.283); ctx.fill();
+      }
 
       raf = requestAnimationFrame(tick);
     };
