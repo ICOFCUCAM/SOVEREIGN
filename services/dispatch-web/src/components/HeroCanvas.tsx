@@ -15,9 +15,9 @@ const GOVERN_X = 0.384;                              // the funnel TUBE extends 
 // institution sources (match HeroVisual circles). MAG = nested-funnel hierarchy: the outer
 // institutions (Ministries, Authorities) generate the LARGEST envelope; Hospitals medium;
 // Universities/Agencies the smallest inner field → funnel inside funnel inside funnel.
-const INSTX = 0.1146;
+const INSTX = 0.08;                                  // moved left → longer journey to the convergence
 const INST_Y = [0.275, 0.388, 0.5, 0.613, 0.725];
-const MAG = [1.0, 0.45, 0.7, 0.45, 1.0];
+const MAG = [1.0, 0.4, 0.68, 0.4, 1.0];              // Ministries/Authorities DOMINATE the field
 
 
 // continents → map sample
@@ -80,48 +80,54 @@ const STRANDS: Strand[] = [];
 // — concave — into the apex. Ministries(top)+Authorities(bottom) are the OUTER funnel walls;
 // Universities(top)+Agencies(bottom) the INNER funnel; Hospitals the axis. Walls never cross
 // above their node, and the cones nest: small funnel inside medium inside large.
-const mkStrand = (instIdx: number, cls: number, u: number): Strand => {
+const mkStrand = (instIdx: number, cls: number): Strand => {
   const instY = INST_Y[instIdx], mag = MAG[instIdx];
   const rel = instY - 0.5;                                    // signed distance from the apex line
-  const bandT = 0.01 + 0.022 * mag;                           // tight wall thickness (clean silhouette)
-  const wallY = instY + (u - 0.5) * bandT;
-  const x0 = INSTX - (mag - 0.45) * 0.05 + (rnd() - 0.3) * 0.016;  // outer walls start furthest left
+  // ORGANIC band: wider for dominant institutions, randomly (not evenly) populated
+  const bandT = 0.014 + 0.06 * mag;
+  const u = rnd();                                            // random position in the band (not parallel)
+  const wallY = instY + (u - 0.5) * bandT * (0.6 + rnd() * 0.8);
+  const x0 = INSTX - mag * 0.04 + (rnd() - 0.5) * 0.03;       // dominant walls start furthest left → longest
   const y0 = wallY;
-  // LONG flared mouth: hold the node height far to the right (the wide open funnel mouth)
-  const c1x = 0.205 + rnd() * 0.03;
-  const c1y = wallY - rel * 0.03;
-  // sharp concave bend down to the NECK at Submit (the funnel pinches here)
-  const c2x = SUBMIT_X + (rnd() - 0.5) * 0.01;
-  const c2y = 0.5 + rel * 0.06;
-  // then the TUBE: a tight, near-parallel bundle running through to Govern
-  const ex = GOVERN_X + (rnd() - 0.5) * 0.008;
-  const ey = 0.5 + rel * 0.016 + (rnd() - 0.5) * 0.003;
-  const width = cls === 0 ? 1.1 + rnd() * 0.4 : cls === 1 ? 0.55 + rnd() * 0.16 : 0.28 + rnd() * 0.1;
-  const bright = (cls === 0 ? 0.62 : cls === 1 ? 0.17 : 0.03) * (0.7 + 0.4 * mag);
-  const maxT = 0.99 + rnd() * 0.01;
-  const amp = cls === 0 ? 0.0012 + rnd() * 0.0016 : 0.0022 + rnd() * 0.004;
-  const amp2 = cls === 2 ? 0.002 + rnd() * 0.0025 : 0.001 + rnd() * 0.0015;
+  // LONG flared mouth (varied hold distance per strand → irregular, not a wireframe)
+  const c1x = 0.17 + rnd() * 0.08;
+  const c1y = wallY - rel * (0.02 + rnd() * 0.08);
+  // concave bend to the NECK at Submit — does NOT fully collapse (residual spread behind the card)
+  const c2x = SUBMIT_X + (rnd() - 0.5) * 0.025;
+  const c2y = 0.5 + rel * (0.05 + rnd() * 0.07) + (rnd() - 0.5) * 0.022;
+  // TUBE: a tight, slightly irregular bundle running through Submit into Govern
+  const ex = GOVERN_X + (rnd() - 0.5) * 0.022;
+  const ey = 0.5 + rel * (0.01 + rnd() * 0.025) + (rnd() - 0.5) * 0.013;
+  // strong hierarchy: dominant institutions are brighter, thicker, denser
+  const width = (cls === 0 ? 1.0 : cls === 1 ? 0.5 : 0.26) * (0.65 + 0.7 * mag) + rnd() * 0.25;
+  const bright = (cls === 0 ? 0.55 : cls === 1 ? 0.16 : 0.035) * (0.35 + 0.95 * mag);
+  const maxT = cls === 2 ? 0.62 + rnd() * 0.38 : 0.94 + rnd() * 0.06;  // some fall short → organic edges
+  const amp = (cls === 0 ? 0.0025 : 0.006) * (0.5 + rnd());   // more meander → alive, not cabled
+  const amp2 = (cls === 2 ? 0.005 : 0.0025) * (0.4 + rnd());
   return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls,
-    amp, freq: 0.6 + rnd() * 0.9, ph: rnd() * 6.28, amp2, freq2: 2.5 + rnd() * 2.5, ph2: rnd() * 6.28 };
+    amp, freq: 0.5 + rnd() * 1.3, ph: rnd() * 6.28, amp2, freq2: 2 + rnd() * 3.5, ph2: rnd() * 6.28 };
 };
 for (let i = 0; i < INST_Y.length; i++) {
-  const m = MAG[i];                                           // larger wall → slightly denser
-  const nP = Math.round(m * 7) + 2, nS = Math.round(m * 9) + 2, nT = Math.round(m * 12) + 3;
-  for (let k = 0; k < nP; k++) STRANDS.push(mkStrand(i, 0, k / (nP - 1)));
-  for (let k = 0; k < nS; k++) STRANDS.push(mkStrand(i, 1, k / (nS - 1)));
-  for (let k = 0; k < nT; k++) STRANDS.push(mkStrand(i, 2, k / (nT - 1)));
+  const m = MAG[i];                                           // dominance scales with m² → Ministries lead
+  const nP = Math.round(2 + m * m * 8), nS = Math.round(3 + m * m * 13), nT = Math.round(6 + m * m * 42);
+  for (let k = 0; k < nP; k++) STRANDS.push(mkStrand(i, 0));
+  for (let k = 0; k < nS; k++) STRANDS.push(mkStrand(i, 1));
+  for (let k = 0; k < nT; k++) STRANDS.push(mkStrand(i, 2));
 }
 
 // Lower arcs: continuation of the SAME governance field — they originate from the lower
 // institutions, sweep beneath the pipeline and rise into the record (not random decoration).
 interface Arc { sx: number; sy: number; cx: number; cy: number; ex: number; ey: number; w: number; a: number }
 const ARCS: Arc[] = [];
-for (let k = 0; k < 14; k++) {
+// orbital paths — varied radius, elevation, length and brightness (not parallel rails)
+for (let k = 0; k < 16; k++) {
+  const elev = rnd();                                         // how low the arc dips
+  const len = 0.35 + rnd() * 0.55;                            // varied length toward the record
   ARCS.push({
-    sx: INSTX + (rnd() - 0.5) * 0.05, sy: 0.6 + rnd() * 0.28,
-    cx: 0.42 + rnd() * 0.2, cy: 0.78 + rnd() * 0.16,
-    ex: SEALX - 0.04 + rnd() * 0.08, ey: 0.5 + (rnd() - 0.3) * 0.1,
-    w: 0.5 + rnd() * 1.3, a: k < 4 ? 0.05 + rnd() * 0.04 : 0.018 + rnd() * 0.025,
+    sx: INSTX - 0.02 + (rnd() - 0.5) * 0.08, sy: 0.58 + rnd() * 0.34,
+    cx: 0.3 + rnd() * 0.34, cy: 0.7 + elev * 0.26,
+    ex: SEALX - 0.12 + len * 0.24, ey: 0.46 + (rnd() - 0.3) * 0.16,
+    w: 0.4 + rnd() * 1.7, a: (k < 5 ? 0.045 + rnd() * 0.05 : 0.014 + rnd() * 0.022) * (0.6 + rnd() * 0.8),
   });
 }
 const sPoint = (s: Strand, t: number, tm = 0): [number, number] => {
@@ -146,6 +152,7 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let W = 0, H = 0, raf = 0;
     let dots: { x: number; y: number; a: number }[] = [], pps: Pp[] = [], noise: Noise[] = [];
+    let sparks: { s: number; t: number; ph: number; sz: number }[] = [];   // micro-points of light along the field
     // offscreen layer for the governance field: drawn sharp, composited back BLURRED so the
     // hundreds of trajectories fuse into one continuous luminous fabric (not countable wires)
     const off = document.createElement("canvas");
@@ -155,7 +162,7 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       // world map: a subtle, uniform dotted stage behind the whole process (10–15% feel)
       const mk = (d: { nx: number; ny: number }, base: number) =>
         ({ x: (0.04 + d.nx * 0.92) * W, y: (0.07 + d.ny * 0.72) * H, a: base });
-      dots = [...MAP_DOTS.map((d) => mk(d, 0.028)), ...CLUSTER_DOTS.map((d) => mk(d, 0.05))];
+      dots = [...MAP_DOTS.map((d) => mk(d, 0.019)), ...CLUSTER_DOTS.map((d) => mk(d, 0.034))];
       pps = [];
       for (let g = 0; g < CARD_FX.length - 1; g++) for (let k = 0; k < 4; k++) pps.push({ g, t: rnd(), sp: 0.004 + rnd() * 0.004, size: 0.8 + rnd() * 1.1 });
       // ambient particle noise — micro-particles everywhere so the whole canvas is quietly active
@@ -163,6 +170,9 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       for (let i = 0; i < 150; i++) noise.push({ x: rnd() * W, y: rnd() * H, vx: (rnd() - 0.5) * 0.08, vy: (rnd() - 0.5) * 0.06, size: rnd() * 0.85 + 0.25, a: 0.03 + rnd() * 0.1 });
       // gold dust drifting in the upper-left fabric region
       for (let i = 0; i < 60; i++) noise.push({ x: (0.04 + rnd() * 0.18) * W, y: (0.06 + rnd() * 0.4) * H, vx: 0.04 + rnd() * 0.1, vy: 0.01 + rnd() * 0.03, size: rnd() * 0.7 + 0.2, a: 0.03 + rnd() * 0.1 });
+      // micro-points of light riding the strands — subtle perceived complexity (not streaks)
+      sparks = [];
+      for (let i = 0; i < 75; i++) { const s = Math.floor(rnd() * STRANDS.length); sparks.push({ s, t: 0.2 + rnd() * 0.78, ph: rnd() * 6.28, sz: 0.5 + rnd() * 1.1 }); }
     };
     const resize = () => {
       const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
@@ -232,11 +242,21 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
             prev = [x, y];
           }
         }
-        // composite: a soft blurred glow + a stronger SHARP pass so the funnel walls read
+        // composite with DEPTH: a far atmospheric layer (heavy blur), a soft mid glow, and a
+        // sharp near pass so the field reads as layered, not flat
         ctx.save();
-        ctx.filter = "blur(0.9px)"; ctx.drawImage(off, 0, 0, W, H);
-        ctx.filter = "none"; ctx.globalAlpha = 0.85; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "blur(4px)"; ctx.globalAlpha = 0.5; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "blur(0.9px)"; ctx.globalAlpha = 1; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "none"; ctx.globalAlpha = 0.82; ctx.drawImage(off, 0, 0, W, H);
         ctx.globalAlpha = 1; ctx.restore();
+
+        // micro-points of light riding the strands (subtle twinkle, never streaks)
+        for (const sp of sparks) {
+          const st = STRANDS[sp.s]; const [x, y] = sPoint(st, sp.t * st.maxT, tm);
+          const tw = 0.5 + 0.5 * Math.sin(tm * 6 + sp.ph);
+          ctx.fillStyle = `rgba(255,240,205,${(0.06 + 0.16 * tw).toFixed(3)})`;
+          ctx.beginPath(); ctx.arc(x * W, y * H, sp.sz, 0, 6.283); ctx.fill();
+        }
       }
 
       // map weaves with the field: a few dots sit IN FRONT of the fabric so it reads as flowing
