@@ -116,7 +116,7 @@ const Landing: React.FC = () => {
             the official record.
           </p>
         </div>
-        <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mx-auto mt-16 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-5">
           {[
             ["Enforce governance before publication", "Nothing is published until it clears its approval policy."],
             ["Eliminate unofficial records", "One governed path — no shadow copies or unverified files."],
@@ -124,7 +124,7 @@ const Landing: React.FC = () => {
             ["Preserve institutional memory", "Every version retained and retrievable, by policy."],
             ["Reduce publication risk", "Classification, clearance and review enforced by the system."],
           ].map(([t, b]) => (
-            <div key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-5">
+            <div key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
               <div className="text-[14px] font-bold leading-snug text-white">{t}</div>
               <p className="mt-2 text-[12.5px] leading-snug text-white/50">{b}</p>
             </div>
@@ -179,7 +179,7 @@ const Landing: React.FC = () => {
             created it have moved on. The institution doesn't ask you to trust the record. The record proves itself.
           </p>
         </div>
-        <div className="mx-auto mt-14 grid max-w-4xl gap-5 sm:grid-cols-3">
+        <div className="mx-auto mt-16 grid max-w-4xl gap-6 sm:grid-cols-3">
           {[
             ["Sealed provenance", "Who issued it, under what authority, and when — bound into the record itself."],
             ["Append-only history", "Every action preserved in order. Nothing is quietly edited or removed."],
@@ -220,7 +220,7 @@ const Landing: React.FC = () => {
       {/* ── Institutions — outcome-driven narratives ───────────────── */}
       <section id="institutions" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
         <SectionHead kicker="Built for institutions that cannot fail" title="What each institution turns into a record." />
-        <div className="mx-auto mt-14 grid max-w-5xl gap-6 sm:grid-cols-2">
+        <div className="mx-auto mt-16 grid max-w-5xl gap-6 sm:grid-cols-2">
           {[
             ["Government", "Ministries · Regulators · Authorities", "Publish policy, legislation and official notices as sealed records — full provenance, and no shadow copies circulating outside the system."],
             ["Healthcare", "Hospitals · Health authorities", "Issue clinical, safety and regulatory records that withstand audit and time — every version preserved, every release attributable."],
