@@ -21,12 +21,14 @@ const Tick: React.FC<{ x: number; y: number; dx: number; dy: number }> = ({ x, y
 
 export const RecordArtifact: React.FC<{ className?: string }> = ({ className }) => {
   const [shown, setShown] = useState(false);
-  useEffect(() => { const t = requestAnimationFrame(() => setShown(true)); return () => cancelAnimationFrame(t); }, []);
+  // Honour reduced-motion: skip the mount reveal entirely for those users.
+  const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  useEffect(() => { if (reduce) { setShown(true); return; } const t = requestAnimationFrame(() => setShown(true)); return () => cancelAnimationFrame(t); }, [reduce]);
 
   return (
     <div
       className={className}
-      style={{
+      style={reduce ? undefined : {
         transition: "opacity 1100ms cubic-bezier(.16,1,.3,1), transform 1100ms cubic-bezier(.16,1,.3,1)",
         opacity: shown ? 1 : 0,
         transform: shown ? "none" : "translateY(18px) scale(.985)",

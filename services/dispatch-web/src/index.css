@@ -87,6 +87,11 @@ p { text-wrap: pretty; }
 /* engineered ledger numerals — even-width, lining figures for indices & hashes */
 .tnum { font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum", "lnum"; }
 
+/* honour an explicit request for more contrast — drop the soft-light grain wash */
+@media (prefers-contrast: more) {
+  .mix-blend-soft-light { display: none; }
+}
+
 /* keyboard focus — a single restrained gold ring everywhere (accessible + premium) */
 a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   outline: 2px solid rgba(212, 175, 82, 0.65);
