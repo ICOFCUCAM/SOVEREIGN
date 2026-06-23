@@ -304,6 +304,13 @@ const Landing: React.FC = () => {
 
       </main>
 
+      {/* closing seal — the page opens with the record and is closed under the mark */}
+      <div className="flex items-center justify-center gap-4 pb-2 pt-4" aria-hidden>
+        <span className="h-px w-16 bg-gradient-to-r from-transparent to-gold-500/30 sm:w-24" />
+        <DispatchMark className="h-5 w-5 text-gold-400/55" />
+        <span className="h-px w-16 bg-gradient-to-l from-transparent to-gold-500/30 sm:w-24" />
+      </div>
+
       {/* ── trust strip + footer ───────────────────────────────────── */}
       <TrustStrip />
       <PublicFooter />
