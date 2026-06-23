@@ -68,7 +68,7 @@ const Landing: React.FC = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
         <div className="relative z-10 mx-auto grid min-h-0 max-w-[1540px] grid-cols-1 items-center gap-12 px-5 py-16 sm:min-h-[760px] sm:gap-14 sm:px-8 sm:py-20 lg:px-12 xl:min-h-[980px] xl:grid-cols-[38fr_62fr] xl:gap-12">
           {/* narrative + charter */}
-          <div className="max-w-xl">
+          <div className="hero-stagger max-w-xl">
             <div className="mb-8 flex items-center gap-3">
               <span className="h-px w-7 bg-gold-500/55" aria-hidden />
               <p className="text-[12.5px] font-semibold uppercase tracking-[0.34em] text-gold-400">Institutional Publication Infrastructure</p>
