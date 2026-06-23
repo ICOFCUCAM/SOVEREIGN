@@ -52,7 +52,7 @@ const Evidence: React.FC = () => {
                     <p className="mt-1.5 text-[13px] text-white/50">Cloud · Private · Sovereign · On-Premise · Air-Gapped. Print-ready for procurement.</p>
                   </div>
                   <button onClick={() => nav(ARCHITECTURE_ROUTE)}
-                    className="group inline-flex shrink-0 items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition hover:from-gold-200 hover:to-gold-500">
+                    className="group inline-flex shrink-0 items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
                     View Architecture <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
                   </button>
                 </div>
