@@ -58,7 +58,7 @@ export const PublicFooter: React.FC = () => (
         <span className="font-semibold tracking-tight text-white/75">Sovereign Dispatch</span>
         <span className="text-white/25">·</span> Institutional Publication Infrastructure
       </div>
-      <div className="flex items-center gap-4 text-[11px] uppercase tracking-[0.18em] text-white/35">
+      <div className="flex items-center gap-4 text-[11px] uppercase tracking-[0.18em] text-white/45">
         <span>Sovereign by design</span>
         <span className="text-gold-400/30">·</span>
         <span>Auditable always</span>

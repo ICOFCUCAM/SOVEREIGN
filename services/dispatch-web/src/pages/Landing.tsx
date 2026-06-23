@@ -102,7 +102,7 @@ const Landing: React.FC = () => {
             </div>
             {/* the charter — quieted so the instrument dominates */}
             <div className="mt-11 border-t border-white/[0.08] pt-6">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/30">The Governed Lifecycle</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/45">The Governed Lifecycle</p>
               <dl className="mt-4 grid max-w-md grid-cols-2 gap-x-8 gap-y-0">
                 {ARTICLES.map(([num, label]) => (
                   <div key={num} className="flex items-baseline gap-2.5 border-b border-white/[0.06] py-2">
@@ -170,8 +170,8 @@ const Landing: React.FC = () => {
       {/* ── Record Lifecycle — quieted to a compact inline strip (−30%) ── */}
       <section id="lifecycle" className="scroll-mt-24 border-t border-white/[0.06] bg-white/[0.015] px-8 py-16 lg:px-12">
         <div className="mx-auto max-w-5xl text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/35">The Record Lifecycle</p>
-          <p className="mx-auto mt-3 max-w-xl text-[14px] leading-relaxed text-white/45">One governed path — every official document travels the same controlled route.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50">The Record Lifecycle</p>
+          <p className="mx-auto mt-3 max-w-xl text-[14px] leading-relaxed text-white/55">One governed path — every official document travels the same controlled route.</p>
         </div>
         <div className="mx-auto mt-9 flex max-w-3xl flex-wrap items-center justify-center gap-y-4">
           {["Submit", "Govern", "Approve", "Render", "Publish", "Preserve"].map((n, i, a) => (
@@ -254,7 +254,7 @@ const Landing: React.FC = () => {
             <div key={cat} className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-gold-500/25 p-7">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                 <div className="text-[13px] font-bold uppercase tracking-[0.16em] text-gold-400/90">{cat}</div>
-                <div className="text-[11px] uppercase tracking-[0.1em] text-white/35">{who}</div>
+                <div className="text-[11px] uppercase tracking-[0.1em] text-white/50">{who}</div>
               </div>
               <p className="mt-4 text-[14px] leading-relaxed text-white/60">{story}</p>
             </div>
