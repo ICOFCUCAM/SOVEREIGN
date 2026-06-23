@@ -2,9 +2,14 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { DeploymentMatrix } from "../components/DeploymentMatrix";
 import { LastPublishedCard, LifecycleTrail, PublicAuditTimeline, CapabilitiesDashboard } from "../components/operations";
-import { HeroVisual } from "../components/HeroVisual";
-import { HeroCanvas } from "../components/HeroCanvas";
+import { RecordArtifact } from "../components/RecordArtifact";
 import { PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE } from "../lib/routes";
+
+// The governed lifecycle, presented as a formal charter of articles (Concept B).
+const ARTICLES: [string, string][] = [
+  ["I", "Submission"], ["II", "Governance"], ["III", "Authorization"],
+  ["IV", "Rendering"], ["V", "Publication"], ["VI", "Preservation"],
+];
 
 // Public marketing landing — the front door to Dispatch. A cinematic hero over
 // the institutional product story, with a sticky top nav that scrolls to the
@@ -72,26 +77,21 @@ const Landing: React.FC = () => {
         </div>
       </header>
 
-      {/* ── hero ───────────────────────────────────────────────────── */}
+      {/* ── hero — THE RECORD: a sealed official instrument beside a formal charter ── */}
       <div id="top" className="relative overflow-hidden">
-        {/* layered hero: canvas atmosphere (cords/map/bloom) + crisp SVG overlay */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[76%] xl:block" aria-hidden>
-          <HeroCanvas className="absolute inset-0 h-full w-full" />
-          <HeroVisual className="absolute inset-0 h-full w-full" />
-        </div>
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/80 to-transparent xl:from-[#070707] xl:via-[#070707]/12 xl:via-22% xl:to-transparent xl:to-44%" aria-hidden />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
-        <div className="relative z-10 mx-auto grid min-h-[920px] max-w-[1640px] grid-cols-1 items-center gap-10 px-8 py-20 lg:px-12 xl:min-h-[960px] xl:grid-cols-[27fr_73fr] xl:gap-6">
-          <div className="max-w-lg xl:max-w-[26rem]">
+        <div className="relative z-10 mx-auto grid min-h-[780px] max-w-[1500px] grid-cols-1 items-center gap-14 px-8 py-20 lg:px-12 xl:min-h-[900px] xl:grid-cols-[45fr_55fr] xl:gap-10">
+          {/* narrative + charter */}
+          <div className="max-w-xl">
             <p className="mb-8 text-[12.5px] font-semibold uppercase tracking-[0.34em] text-gold-400">Institutional Publication Infrastructure</p>
-            <h1 className="font-serif text-4xl font-bold leading-[1.07] tracking-[-0.01em] sm:text-5xl xl:text-[2.5rem] 2xl:text-[2.75rem]">
+            <h1 className="font-serif text-4xl font-bold leading-[1.06] tracking-[-0.01em] sm:text-[3.25rem] 2xl:text-[3.6rem]">
               From Information<br />to <span className="text-gold-400">Official Record.</span>
             </h1>
-            <p className="mt-8 max-w-md text-[17px] leading-relaxed text-white/60">
-              Sovereign Dispatch is the operating system for institutional publication — purpose-built to submit, govern,
-              approve, render, publish and archive with sovereignty, auditability and trust.
+            <p className="mt-7 max-w-md text-[17px] leading-relaxed text-white/60">
+              Sovereign Dispatch is the operating system for institutional publication — the authority that turns
+              information into a sealed, governed and permanent record.
             </p>
-            <div className="mt-12 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <button onClick={() => nav("/console")}
                 className="group inline-flex items-center justify-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
                 Launch Dispatch
@@ -102,16 +102,23 @@ const Landing: React.FC = () => {
                 View Architecture
               </a>
             </div>
-            <div className="mt-12 flex flex-wrap items-center gap-x-7 gap-y-3 text-[13px] font-medium text-white/55">
-              <span className="inline-flex items-center gap-2"><ShieldCheck /> Sovereign by Design</span>
-              <span className="text-gold-400/30">·</span>
-              <span className="inline-flex items-center gap-2"><Lock /> Auditable by Default</span>
-              <span className="text-gold-400/30">·</span>
-              <span className="inline-flex items-center gap-2"><Bank /> Institution Ready</span>
+            {/* the charter — the governed lifecycle as numbered articles */}
+            <div className="mt-12 border-t border-white/10 pt-7">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/35">The Governed Lifecycle</p>
+              <dl className="mt-5 grid max-w-lg grid-cols-2 gap-x-10 gap-y-0.5">
+                {ARTICLES.map(([num, label]) => (
+                  <div key={num} className="flex items-baseline gap-3 border-b border-white/[0.07] py-2.5">
+                    <dt className="w-7 font-serif text-[13px] text-gold-400/80">{num}</dt>
+                    <dd className="text-[13px] font-medium uppercase tracking-[0.12em] text-white/75">{label}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           </div>
-          {/* right column is the layered visual, rendered absolutely above */}
-          <div className="hidden xl:block" aria-hidden />
+          {/* the instrument */}
+          <div className="relative flex justify-center xl:justify-end">
+            <RecordArtifact className="w-full max-w-[380px] xl:max-w-[620px]" />
+          </div>
         </div>
       </div>
 
@@ -488,7 +495,6 @@ const Chevron: React.FC<{ className?: string }> = ({ className }) => (
 );
 const ShieldCheck = () => (<svg width="17" height="17" viewBox="0 0 24 24" fill="none" className="text-gold-400"><path d="M12 3l7 2.5V11c0 4.6-3 8-7 9.5C8 19 5 15.6 5 11V5.5L12 3z" stroke="currentColor" strokeWidth="1.5" /><path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>);
 const Lock = () => (<svg width="17" height="17" viewBox="0 0 24 24" fill="none" className="text-gold-400"><rect x="5" y="10" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" /><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" strokeWidth="1.5" /></svg>);
-const Bank = () => (<svg width="17" height="17" viewBox="0 0 24 24" fill="none" className="text-gold-400"><path d="M4 9l8-5 8 5M5 9v8m4-8v8m6-8v8m4-8v8M3 20h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>);
 const Database = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-gold-400"><ellipse cx="12" cy="6" rx="7" ry="3" stroke="currentColor" strokeWidth="1.5" /><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3" stroke="currentColor" strokeWidth="1.5" /></svg>);
 const Nodes = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-gold-400"><circle cx="6" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5" /><circle cx="17" cy="6" r="2.5" stroke="currentColor" strokeWidth="1.5" /><circle cx="17" cy="18" r="2.5" stroke="currentColor" strokeWidth="1.5" /><path d="M8.2 10.8l6.6-3.6M8.2 13.2l6.6 3.6" stroke="currentColor" strokeWidth="1.5" /></svg>);
 const Tower = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-gold-400"><path d="M7 21V8l5-3 5 3v13M5 21h14M10 21v-4h4v4M10 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /></svg>);
