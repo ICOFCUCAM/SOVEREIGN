@@ -75,12 +75,13 @@ const mkStrand = (laneY: number, cls: number, lanePos: number): Strand => {
   const rel = laneY - 0.5;                                     // signed offset from centre — preserved order
   const x0 = INSTX + 0.008 + rnd() * 0.016;
   const y0 = laneY + lanePos * 0.05 + (rnd() - 0.5) * 0.006;
-  // c1 — lanes travel mostly in their own band first (identity preserved, river-like)
-  const c1x = 0.135 + rnd() * 0.04;
-  const c1y = 0.5 + rel * (0.82 + (rnd() - 0.5) * 0.08) + lanePos * 0.022;
-  // c2 — entering the SHARED FIELD: ordered compression to a common band, no crossing
-  const c2x = COMPRESS_X + 0.01 + rnd() * 0.02;
-  const c2y = 0.5 + rel * (0.26 + (rnd() - 0.5) * 0.05);
+  // c1 — lanes travel in their own band first (identity preserved, river-like)
+  const c1x = 0.125 + rnd() * 0.035;
+  const c1y = 0.5 + rel * (0.86 + (rnd() - 0.5) * 0.08) + lanePos * 0.022;
+  // c2 — the SHARED FIELD breathes: lines run near-parallel through a long, ordered band
+  //      (this x is pushed right so the field occupies more width before narrowing)
+  const c2x = COMPRESS_X + 0.03 + rnd() * 0.02;
+  const c2y = 0.5 + rel * (0.40 + (rnd() - 0.5) * 0.06);
   // mouth — controlled narrowing INTO the Submit gate, order preserved, no visible gap
   const ex = FOCAL.x + (rnd() - 0.5) * 0.004;
   const ey = FOCAL.y + rel * 0.03 + (rnd() - 0.5) * 0.005;
