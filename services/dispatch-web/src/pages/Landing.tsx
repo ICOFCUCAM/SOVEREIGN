@@ -221,7 +221,10 @@ const Landing: React.FC = () => {
           ))}
         </div>
         <div className="relative z-10 mt-12 text-center">
-          <a href={EVIDENCE_ROUTE} className="text-[13px] font-semibold uppercase tracking-wide text-gold-400 transition hover:text-gold-300">See the evidence →</a>
+          <a href={EVIDENCE_ROUTE} className="group inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-gold-400 transition hover:text-gold-300">
+            See the evidence
+            <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+          </a>
         </div>
       </section>
 

@@ -66,7 +66,7 @@ const FooterCol: React.FC<{ title: string; links: [string, string][] }> = ({ tit
     <ul className="mt-4 space-y-2.5">
       {links.map(([label, href]) => (
         <li key={label}>
-          <a href={href} className="text-[13px] text-white/60 transition hover:text-gold-300">{label}</a>
+          <a href={href} className="relative inline-block text-[13px] text-white/60 transition hover:text-gold-300 after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-0 after:bg-gold-400/55 after:transition-all after:duration-300 hover:after:w-full">{label}</a>
         </li>
       ))}
     </ul>
