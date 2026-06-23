@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 // the institutional product story, with a sticky top nav that scrolls to the
 // six real sections (Overview, Capabilities, Workflow, Security, Integrations,
 // Resources). "Launch Dispatch" / "Log in" route into the gated console.
-const NAV = ["Overview", "Capabilities", "Workflow", "Security", "Deployment", "Compliance", "Institutions", "Integrations"];
+const NAV = ["Overview", "Capabilities", "Workflow", "Security", "Deployment", "Compliance", "Institutions", "Procurement", "Integrations", "Resources"];
 
 const Feature: React.FC<{ icon: React.ReactNode; title: string; sub: string }> = ({ icon, title, sub }) => (
   <div className="flex items-start gap-3">
@@ -45,9 +45,9 @@ const Landing: React.FC = () => {
             <DispatchMark className="h-8 w-8 text-gold-400" />
             <span className="text-lg font-bold tracking-tight">SOVEREIGN <span className="text-gold-400">DISPATCH</span></span>
           </a>
-          <nav className="hidden items-center gap-7 lg:flex">
+          <nav className="hidden items-center gap-x-5 xl:flex">
             {NAV.map((n) => (
-              <a key={n} href={`#${n.toLowerCase()}`} className="text-[13px] font-medium uppercase tracking-wide text-white/70 transition hover:text-white">{n}</a>
+              <a key={n} href={`#${n.toLowerCase()}`} className="text-[12px] font-medium uppercase tracking-wide text-white/70 transition hover:text-white">{n}</a>
             ))}
           </nav>
           <div className="flex items-center gap-4">
@@ -157,88 +157,114 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ── Deployment ─────────────────────────────────────────────── */}
+      {/* ── Deployment & Architecture ──────────────────────────────── */}
       <section id="deployment" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
-        <SectionHead kicker="Deployment" title="Deploy on your terms."
-          sub="The same governed pipeline, delivered into the operating model your mandate requires — from managed cloud to a fully air-gapped enclave." />
-        <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <SectionHead kicker="Deployment" title="Deploy where sovereignty requires."
+          sub="Sovereign Dispatch is architected to support cloud, private-cloud, sovereign-hosted, and institutional deployment models." />
+        <div className="mx-auto mt-14 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {[
-            ["Cloud", "Managed, single-tenant database in your chosen region.", "Available"],
-            ["Private Cloud", "Your cloud account and VPC; we operate, you own the tenancy.", "Per engagement"],
-            ["On-Premise", "Inside your data centre, under your operational control.", "Per engagement"],
-            ["Air-Gapped", "Disconnected enclave for the most sensitive estates.", "Per engagement"],
-          ].map(([t, b, tag]) => (
-            <div key={t} className="flex flex-col rounded-lg border border-white/10 bg-white/[0.02] p-6">
-              <div className="text-base font-bold text-white">{t}</div>
+            ["Cloud", "Managed deployment for rapid adoption.", ""],
+            ["Private Cloud", "Dedicated institutional environment.", ""],
+            ["Sovereign Hosting", "Hosted within approved national or regional boundaries.", ""],
+            ["On-Premise", "Available for institutions requiring local control.", ""],
+            ["Air-Gapped", "Architecture designed to support isolated deployments.", "Availability subject to engagement scope."],
+          ].map(([t, b, note]) => (
+            <div key={t} className="flex flex-col rounded-lg border border-white/10 bg-white/[0.02] p-5">
+              <div className="text-[15px] font-bold text-white">{t}</div>
               <p className="mt-2 flex-1 text-[13px] leading-relaxed text-white/55">{b}</p>
-              <span className={`mt-4 inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tag === "Available" ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30" : "bg-white/5 text-white/45 ring-1 ring-white/10"}`}>{tag}</span>
+              {note && <p className="mt-3 text-[11px] italic leading-snug text-white/35">{note}</p>}
             </div>
           ))}
         </div>
 
-        {/* architecture diagram */}
-        <div className="mx-auto mt-16 max-w-5xl">
-          <p className="mb-5 text-center text-[12px] font-semibold uppercase tracking-[0.25em] text-white/35">Reference architecture</p>
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            {["Institution", "Dispatch API", "Governance Engine", "Render Cluster", "Immutable Record Store", "Publication Archive"].map((n, i, a) => (
+        {/* system flow */}
+        <div className="mx-auto mt-16 max-w-sm">
+          <p className="mb-6 text-center text-[12px] font-semibold uppercase tracking-[0.25em] text-white/35">System flow</p>
+          <div className="flex flex-col items-stretch">
+            {["Institution", "Submit", "Govern", "Approve", "Render", "Publish", "Archive"].map((n, i, a) => (
               <React.Fragment key={n}>
-                <div className="rounded-md border border-white/10 bg-white/[0.03] px-4 py-2.5 text-center text-[12px] font-semibold text-white/80">{n}</div>
-                {i < a.length - 1 && <Chevron className="h-3.5 w-3.5 text-gold-400/60" />}
+                <div className={`rounded-md border px-5 py-3 text-center text-sm font-semibold ${i === 0 ? "border-gold-500/30 bg-gold-500/[0.06] text-white" : "border-white/10 bg-white/[0.03] text-white/85"}`}>{n}</div>
+                {i < a.length - 1 && <div className="flex justify-center py-1.5"><Chevron className="h-4 w-4 rotate-90 text-gold-400/60" /></div>}
               </React.Fragment>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Compliance / Institutional readiness ───────────────────── */}
+      {/* ── Compliance & Security ──────────────────────────────────── */}
       <section id="compliance" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-24 lg:px-12">
-        <SectionHead kicker="Institutional Readiness" title="Built around the controls you answer to."
-          sub="Dispatch is engineered to the control frameworks institutions are assessed against. We state what is architected versus certified — and provide the evidence dossier on request." />
+        <SectionHead kicker="Compliance & Security" title="Built around modern governance frameworks."
+          sub="Sovereign Dispatch is engineered around the control frameworks institutions are assessed against — described in honest terms, with evidence available during evaluation." />
         <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            ["ISO 27001", "Architected around the Annex A control families — access, cryptography, operations, supplier and incident management."],
-            ["SOC 2", "Designed around the security, availability and confidentiality trust-service principles."],
-            ["GDPR", "Data-minimising by construction; residency, retention and processing terms set per institution."],
-            ["NIS2", "An operational model aligned to the directive's risk-management and reporting expectations."],
-            ["WCAG 2.1 AA", "The operator console is built to the AA accessibility standard as a design target."],
-            ["Audit evidence", "An append-only, SHA-256-hashed trail of every submission, decision and publish — exportable for assessors."],
+            ["ISO 27001", "Architecture aligned with widely adopted information-security controls."],
+            ["SOC 2", "Designed using audited operational-security principles."],
+            ["NIS2", "Supports governance and risk-management workflows."],
+            ["GDPR", "Supports data-management and residency practices."],
+            ["Auditability", "Every publication event can be recorded, tracked, and reviewed."],
+            ["Retention Policies", "Institution-defined retention controls."],
           ].map(([t, b]) => (
             <div key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
-              <div className="flex items-center gap-2">
-                <span className="text-base font-bold text-white">{t}</span>
-                <span className="rounded-full bg-gold-500/15 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-gold-300 ring-1 ring-gold-500/30">Architected for</span>
-              </div>
+              <div className="text-base font-bold text-white">{t}</div>
               <p className="mt-2 text-[13px] leading-relaxed text-white/55">{b}</p>
             </div>
           ))}
         </div>
         <p className="mx-auto mt-8 max-w-3xl text-center text-[12px] leading-relaxed text-white/35">
-          "Architected for" denotes control-aligned design, not an independent certification. Certification scope, data
-          residency and retention are defined per deployment. Request the assurance dossier for evidence and auditor reports.
+          Framework names describe the controls the architecture is aligned to, not independent certifications.
+          Certification scope, data residency and retention are defined per deployment.
         </p>
       </section>
 
       {/* ── Institutions ───────────────────────────────────────────── */}
       <section id="institutions" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
-        <SectionHead kicker="Built for Every Institution" title="One platform, the whole public estate."
+        <SectionHead kicker="Institutions" title="Built for institutions that cannot fail."
           sub="The same governed pipeline serves any institution that turns information into an official record — each isolated in its own tenancy." />
-        <div className="mx-auto mt-14 grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {["Ministries", "Government Agencies", "Municipalities", "Regulators", "Central Banks", "Parliaments", "Universities", "Research Institutions", "State-Owned Enterprises", "NGOs", "Defence & Security", "Intergovernmental Bodies"].map((t) => (
-            <div key={t} className="flex items-center gap-2.5 rounded-md border border-white/10 bg-white/[0.02] px-4 py-3 text-[13px] font-medium text-white/75">
-              <Dot /> {t}
+        <div className="mx-auto mt-14 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            ["Government", ["Ministries", "Departments", "Agencies", "Authorities"]],
+            ["Education", ["Universities", "Schools", "Research bodies"]],
+            ["Healthcare", ["Hospitals", "Health agencies"]],
+            ["NGOs", ["International organizations", "Foundations", "Programs"]],
+            ["Enterprise", ["Regulated industries", "Critical infrastructure"]],
+          ].map(([cat, items]) => (
+            <div key={cat as string} className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+              <div className="text-base font-bold text-white">{cat as string}</div>
+              <ul className="mt-3 space-y-1.5">
+                {(items as string[]).map((it) => (
+                  <li key={it} className="flex items-center gap-2.5 text-[13.5px] text-white/65"><Dot /> {it}</li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
+      </section>
 
-        {/* procurement */}
-        <div className="mx-auto mt-16 max-w-5xl rounded-xl border border-white/10 bg-white/[0.02] p-8">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement</p>
-          <h3 className="mt-2 font-serif text-2xl font-bold text-white">Ready for how institutions buy.</h3>
-          <div className="mt-6 grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
-            {["Annual & multi-year licensing", "Enterprise framework agreements", "Data Processing Agreements", "Dedicated institutional support", "Guided onboarding & migration", "Multi-institution deployment"].map((t) => (
-              <div key={t} className="flex items-center gap-2.5 text-[13.5px] text-white/70"><Dot /> {t}</div>
-            ))}
-          </div>
+      {/* ── Procurement ────────────────────────────────────────────── */}
+      <section id="procurement" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-24 lg:px-12">
+        <SectionHead kicker="Procurement" title="Ready for institutional procurement."
+          sub="The materials and engagement model an evaluation team needs — available the moment a qualified institution asks." />
+        <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            ["Security Documentation", "Available during evaluation."],
+            ["Architecture Review", "Technical review materials available."],
+            ["Data Residency Discussion", "Deployment options reviewed per institution."],
+            ["Enterprise Agreements", "Custom institutional contracts supported."],
+            ["Support Models", "Commercial support options available."],
+            ["Deployment Planning", "Implementation planning available for qualified engagements."],
+          ].map(([t, b]) => (
+            <div key={t} className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+              <div className="text-base font-bold text-white">{t}</div>
+              <p className="mt-2 text-[13px] leading-relaxed text-white/55">{b}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mx-auto mt-12 flex max-w-3xl justify-center">
+          <a href="mailto:icofcucam@gmail.com?subject=Sovereign%20Dispatch%20%E2%80%94%20Procurement%20Package%20Request"
+            className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-8 py-4 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
+            Request Procurement Package
+            <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
+          </a>
         </div>
       </section>
 
@@ -271,7 +297,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ── Resources / CTA ────────────────────────────────────────── */}
-      <section id="resources" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-24 lg:px-12">
+      <section id="resources" className="scroll-mt-24 border-t border-white/5 px-8 py-24 lg:px-12">
         <SectionHead kicker="Resources" title="Open the console." sub="Sign in with your service credentials to submit, govern and retrieve official records." />
         <div className="mx-auto mt-12 flex max-w-3xl flex-wrap items-center justify-center gap-4">
           <button onClick={() => nav("/console")}
@@ -285,6 +311,17 @@ const Landing: React.FC = () => {
           </button>
         </div>
       </section>
+
+      {/* ── trust strip ────────────────────────────────────────────── */}
+      <div className="border-t border-white/10 bg-white/[0.02] px-8 py-6 lg:px-12">
+        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-x-10 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-white/45">
+          <span>Sovereign by Design</span>
+          <span className="hidden text-gold-400/40 sm:inline">·</span>
+          <span>Auditable by Default</span>
+          <span className="hidden text-gold-400/40 sm:inline">·</span>
+          <span>Institution Ready</span>
+        </div>
+      </div>
 
       <footer className="border-t border-white/5 px-8 py-10 lg:px-12">
         <div className="mx-auto flex max-w-[1500px] flex-col items-center justify-between gap-4 text-[12px] text-white/40 sm:flex-row">
