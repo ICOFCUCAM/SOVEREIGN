@@ -1,15 +1,21 @@
 import React, { useEffect, useRef } from "react";
 
-// Hero as a NETWORK visualization, not a workflow diagram. A wide gold dotted
-// world map (with lat/long lines + node clusters) is the substrate; 50+ tapered
-// strands enter off-screen-left, emerge from the map field, curve and MERGE
-// (many dissipate) as they compress into a luminous SUBMIT nexus, then the SVG
-// pipeline carries the flow to a dominant Official Record under a large bloom.
-// Gold intensity rises left→right. Brand gold only.
+// Hero atmosphere: many information SOURCES becoming one governed PROCESS.
+// A faint gold dotted world map is the substrate. Each of the 5 institution
+// nodes (visible, on-screen, left) is the origin of a RIBBON — 8–15 strands
+// that emerge from around the node, interweave organically, and COMPRESS
+// toward Submit. Strands vary in curvature, thickness, brightness and length;
+// particles travel inside them. A bright convergence field sits immediately
+// before Submit, where every ribbon merges into one controlled stream that the
+// SVG pipeline carries to a dominant Official Record. Gold rises left→right.
 
-const SUBMIT = { x: 0.264, y: 0.5 };                 // nexus (aligns with SVG Submit)
-const SEALX = 0.83;                                  // Official Record (bloom centre)
+const SEALX = 0.832;                                 // Official Record = light source on the right
 const CARD_FX = [0.264, 0.339, 0.414, 0.500, 0.586, 0.672, SEALX]; // 6 cards + seal
+const MERGEX = 0.232;                                // convergence field — just left of Submit
+
+// institution origins (match HeroVisual circles): x≈0.082, 5 lanes
+const INSTX = 0.082;
+const INST_Y = [0.275, 0.388, 0.5, 0.613, 0.725];
 
 // continents → map sample
 const CONTS = [
@@ -45,27 +51,48 @@ const CLUSTER_DOTS: { nx: number; ny: number }[] = [];
 for (const [cx, cy] of CLUSTERS) for (let i = 0; i < 18; i++)
   CLUSTER_DOTS.push({ nx: (cx + (rnd() - 0.5) * 34 - 120) / 780, ny: (cy + (rnd() - 0.5) * 34 - 70) / 380 });
 
-// ── strands: off-screen-left → curved/merging → SUBMIT nexus ────────────────
-interface Strand { x0: number; y0: number; ex: number; ey: number; cx: number; cy: number; maxT: number; reach: boolean }
+// ── ribbons: each institution → 8–15 interweaving strands → Submit merge ─────
+interface Strand {
+  x0: number; y0: number;       // origin around the institution node
+  c1x: number; c1y: number;     // control 1 — fan out around the node
+  c2x: number; c2y: number;     // control 2 — interweave + start compressing
+  ex: number; ey: number;       // end inside the merge field before Submit
+  maxT: number;                 // length (some strands fall short → dissipate)
+  width: number;                // thickness
+  bright: number;               // brightness multiplier
+  reach: boolean;               // reaches the merge field
+}
 const STRANDS: Strand[] = [];
-const NEXUSX = 0.238;                                                 // nexus band = Submit's left face
-const NS = 60;
-for (let k = 0; k < NS; k++) {
-  const upper = k % 2 === 0;
-  const x0 = -0.14 + rnd() * 0.20;                                    // off-screen-left
-  const y0 = upper ? rnd() * 0.42 : 0.58 + rnd() * 0.42;
-  const ey = 0.5 + (y0 - 0.5) * 0.14 + (rnd() - 0.5) * 0.03;          // compressed into a nexus BAND (nested, not a point)
-  const ex = NEXUSX + rnd() * 0.02;
-  const mx = x0 + (ex - x0) * (0.42 + rnd() * 0.16);
-  const my = y0 + (ey - y0) * 0.5 + (rnd() - 0.5) * 0.04;
-  const cx = mx - (0.05 + rnd() * 0.10);                              // bow LEFT → each strand a ")" arc convex toward the pipeline
-  const r = rnd();
-  const maxT = 0.42 + r * r * 0.58;                                   // skewed: many dissipate early (compression)
-  STRANDS.push({ x0, y0, ex, ey, cx, cy: my, maxT, reach: maxT > 0.86 });
+for (let inst = 0; inst < INST_Y.length; inst++) {
+  const oy = INST_Y[inst];
+  const n = 8 + Math.floor(rnd() * 8);                         // 8–15 strands per ribbon
+  for (let k = 0; k < n; k++) {
+    const spread = (k / (n - 1) - 0.5);                        // -0.5..0.5 across the ribbon
+    // origin: emerges from AROUND the node, not a single point
+    const x0 = INSTX + (rnd() - 0.5) * 0.018;
+    const y0 = oy + spread * 0.052 + (rnd() - 0.5) * 0.012;
+    // control 1: bloom outward from the node (curvature varies per strand)
+    const c1x = INSTX + 0.045 + rnd() * 0.07;
+    const c1y = oy + spread * (0.10 + rnd() * 0.10);
+    // control 2: interweave and begin compressing toward the lane centre
+    const c2x = 0.155 + rnd() * 0.045;
+    const c2y = 0.5 + (oy - 0.5) * (0.32 + rnd() * 0.22) + (rnd() - 0.5) * 0.075;
+    // end: nested band inside the merge field (not a single point)
+    const ex = MERGEX + (rnd() - 0.5) * 0.018;
+    const ey = 0.5 + (oy - 0.5) * 0.07 + (rnd() - 0.5) * 0.035;
+    const r = rnd();
+    const maxT = 0.55 + r * r * 0.45;                          // varied length, skewed long
+    STRANDS.push({
+      x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT,
+      width: 0.4 + rnd() * 1.5,                                // varied thickness
+      bright: 0.6 + rnd() * 0.9,                               // varied brightness
+      reach: maxT > 0.9,
+    });
+  }
 }
 const sPoint = (s: Strand, t: number): [number, number] => {
-  const mt = 1 - t;
-  return [mt * mt * s.x0 + 2 * mt * t * s.cx + t * t * s.ex, mt * mt * s.y0 + 2 * mt * t * s.cy + t * t * s.ey];
+  const mt = 1 - t, a = mt * mt * mt, b = 3 * mt * mt * t, c = 3 * mt * t * t, d = t * t * t;
+  return [a * s.x0 + b * s.c1x + c * s.c2x + d * s.ex, a * s.y0 + b * s.c1y + c * s.c2y + d * s.ey];
 };
 
 interface Code { s: number; t: number; sp: number; size: number; br: boolean }
@@ -84,7 +111,7 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       const mk = (d: { nx: number; ny: number }, a: number) => ({ x: (0.02 + d.nx * 0.94) * W, y: (0.07 + d.ny * 0.72) * H, a });
       dots = [...MAP_DOTS.map((d) => mk(d, 0.085)), ...CLUSTER_DOTS.map((d) => mk(d, 0.16))];
       codes = [];
-      for (let s = 0; s < STRANDS.length; s++) { const n = 2 + Math.floor(STRANDS[s].maxT * 7); for (let k = 0; k < n; k++) codes.push({ s, t: rnd() * STRANDS[s].maxT, sp: 0.0016 + rnd() * 0.0026, size: 0.6 + rnd() * 1.2, br: rnd() < 0.3 }); }
+      for (let s = 0; s < STRANDS.length; s++) { const n = 2 + Math.floor(STRANDS[s].maxT * 6); for (let k = 0; k < n; k++) codes.push({ s, t: rnd() * STRANDS[s].maxT, sp: 0.0018 + rnd() * 0.003, size: 0.6 + rnd() * 1.2, br: rnd() < 0.3 }); }
       pps = [];
       for (let g = 0; g < CARD_FX.length - 1; g++) for (let k = 0; k < 4; k++) pps.push({ g, t: rnd(), sp: 0.004 + rnd() * 0.004, size: 0.8 + rnd() * 1.1 });
     };
@@ -111,33 +138,48 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       bloom.addColorStop(0, "rgba(233,200,120,0.20)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.05)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = bloom; ctx.fillRect(0, 0, W, H);
 
-      // strands: curved, tapered, merging into the Submit nexus; brighter left→right
+      // soft glow at each institution node (the ribbon's source)
+      for (const oy of INST_Y) {
+        const gx = INSTX * W, gy = oy * H;
+        const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, 0.06 * W);
+        g.addColorStop(0, "rgba(233,200,120,0.10)"); g.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g; ctx.fillRect(gx - 0.07 * W, gy - 0.07 * W, 0.14 * W, 0.14 * W);
+      }
+
+      // ribbons: interweaving strands, compressing institution→merge; brighter as they converge
       for (const s of STRANDS) {
-        const N = 20; let prev = sPoint(s, 0);
+        const N = 26; let prev = sPoint(s, 0);
         for (let i = 1; i <= N; i++) {
           const tp = i / N, t = tp * s.maxT;
           const [x, y] = sPoint(s, t);
-          const tipFade = (!s.reach && tp > 0.7) ? 1 - (tp - 0.7) / 0.3 : 1;   // short strands dissipate
-          ctx.strokeStyle = `rgba(233,200,120,${((0.03 + 0.2 * t) * tipFade).toFixed(3)})`;
-          ctx.lineWidth = 0.4 + 1.2 * t;
+          const tipFade = (!s.reach && tp > 0.72) ? 1 - (tp - 0.72) / 0.28 : 1;  // short strands dissipate
+          const a = (0.025 + 0.22 * t) * s.bright * tipFade;
+          ctx.strokeStyle = `rgba(233,200,120,${a.toFixed(3)})`;
+          ctx.lineWidth = s.width * (0.55 + 0.9 * t);                            // taper: thin at source, full at merge
           ctx.beginPath(); ctx.moveTo(prev[0] * W, prev[1] * H); ctx.lineTo(x * W, y * H); ctx.stroke();
           prev = [x, y];
         }
       }
 
-      // Submit nexus bloom (energy router)
-      const nx = SUBMIT.x * W, ny = SUBMIT.y * H;
-      const nexus = ctx.createRadialGradient(nx, ny, 0, nx, ny, 0.1 * W);
-      nexus.addColorStop(0, "rgba(255,231,173,0.3)"); nexus.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = nexus; ctx.fillRect(nx - 0.13 * W, ny - 0.13 * W, 0.26 * W, 0.26 * W);
+      // bright convergence field — where all ribbons merge into one governed stream
+      const mx = MERGEX * W, my = 0.5 * H;
+      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.11 * W);
+      merge.addColorStop(0, "rgba(255,231,173,0.42)"); merge.addColorStop(0.35, "rgba(233,200,120,0.16)"); merge.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = merge; ctx.fillRect(mx - 0.16 * W, my - 0.16 * W, 0.32 * W, 0.32 * W);
+      // hot core pulsing into Submit
+      const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 520);
+      const core = ctx.createRadialGradient((MERGEX + 0.012) * W, my, 0, (MERGEX + 0.012) * W, my, 0.045 * W);
+      core.addColorStop(0, `rgba(255,240,200,${(0.35 + 0.25 * pulse).toFixed(3)})`); core.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = core; ctx.fillRect((MERGEX - 0.04) * W, my - 0.06 * W, 0.12 * W, 0.12 * W);
 
-      // code particles flowing inward to the nexus (brighter as they arrive)
+      // particles travelling INSIDE the strands toward the merge (brighter on arrival)
       for (const p of codes) {
         const s = STRANDS[p.s];
         p.t += p.sp; if (p.t > s.maxT) p.t -= s.maxT;
         const [x, y] = sPoint(s, p.t);
         const col = p.br ? "255,231,173" : "233,200,120";
-        ctx.fillStyle = `rgba(${col},${(0.12 + 0.5 * p.t).toFixed(3)})`;
+        const norm = p.t / s.maxT;
+        ctx.fillStyle = `rgba(${col},${(0.1 + 0.55 * norm).toFixed(3)})`;
         ctx.beginPath(); ctx.arc(x * W, y * H, p.size, 0, 6.283); ctx.fill();
       }
 
