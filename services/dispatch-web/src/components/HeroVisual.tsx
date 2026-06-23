@@ -79,8 +79,8 @@ export const HeroVisual: React.FC<{ className?: string }> = ({ className }) => (
       const T = submit ? 96 : TILE;
       return (
         <g key={i}>
-          {submit && <rect x={x - T / 2 - 8} y={CY - T / 2 - 8} width={T + 16} height={T + 16} rx="22" fill={BRIGHT} opacity="0.32" filter="url(#hv-bloom)" />}
-          <rect x={x - T / 2} y={CY - T / 2} width={T} height={T} rx={submit ? 18 : 16} fill={GOLD} opacity={submit ? 0.18 : 0.04 + i * 0.015} filter="url(#hv-bloom)" />
+          {submit && <rect x={x - T / 2 - 8} y={CY - T / 2 - 8} width={T + 16} height={T + 16} rx="22" fill={BRIGHT} opacity="0.16" filter="url(#hv-bloom)" />}
+          <rect x={x - T / 2} y={CY - T / 2} width={T} height={T} rx={submit ? 18 : 16} fill={GOLD} opacity={submit ? 0.1 : 0.04 + i * 0.015} filter="url(#hv-bloom)" />
           <rect x={x - T / 2} y={CY - T / 2} width={T} height={T} rx={submit ? 18 : 16} fill="#0c0c0c" fillOpacity={submit ? 0.66 : 0.82} stroke={submit ? BRIGHT : `rgba(233,200,120,${0.32 + i * 0.1})`} strokeWidth={submit ? 2 : 1.2} />
           <Glyph name={STAGES[i]} x={x} y={CY - 3} s={submit ? 2.1 : 1.7} color={submit ? "#ffffff" : `rgba(255,255,255,${(0.7 + i * 0.045).toFixed(2)})`} sw={1.5} />
           <text x={x} y={CY + T / 2 + 24} textAnchor="middle" fontSize={submit ? 13.5 : 12.5} fontWeight="700" letterSpacing="1.2" fill={submit ? BRIGHT : WHITE_DIM} style={{ fontFamily: "inherit" }}>{STAGES[i]}</text>

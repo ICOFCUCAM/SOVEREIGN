@@ -121,6 +121,10 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let W = 0, H = 0, raf = 0;
     let dots: { x: number; y: number; a: number }[] = [], pps: Pp[] = [], noise: Noise[] = [];
+    // offscreen layer for the governance field: drawn sharp, composited back BLURRED so the
+    // hundreds of trajectories fuse into one continuous luminous fabric (not countable wires)
+    const off = document.createElement("canvas");
+    const mctx = off.getContext("2d");
 
     const init = () => {
       // map is part of the flow field: dots brighten inside the travel band (x<0.34, mid-height)
@@ -141,7 +145,10 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     const resize = () => {
       const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
       cv.width = Math.max(1, W * dpr); cv.height = Math.max(1, H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); init();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      off.width = cv.width; off.height = cv.height;
+      if (mctx) mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      init();
     };
 
     const tick = () => {
@@ -171,8 +178,8 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
 
       // destination bloom behind the Official Record — a quiet presence, never a floodlight
       const bx = SEALX * W, by = 0.5 * H;
-      const bloom = ctx.createRadialGradient(bx, by, 0, bx, by, 0.28 * W);
-      bloom.addColorStop(0, "rgba(233,200,120,0.08)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.025)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
+      const bloom = ctx.createRadialGradient(bx, by, 0, bx, by, 0.26 * W);
+      bloom.addColorStop(0, "rgba(233,200,120,0.056)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.018)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = bloom; ctx.fillRect(0, 0, W, H);
 
       // soft glow at each institution node + Layer 1: the five institution lanes
@@ -196,22 +203,31 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       ctx.save(); ctx.translate(0.17 * W, FOCAL.y * H); ctx.scale(1, 0.5); ctx.translate(-0.17 * W, -FOCAL.y * H);
       ctx.fillStyle = vg; ctx.fillRect(0.02 * W, FOCAL.y * H - 0.22 * W, 0.36 * W, 0.44 * W); ctx.restore();
 
-      // the governance field: stable, ordered contour lines that compress through the shared
-      // field and narrow into Submit. Motion is slow and inevitable; white→gold toward Submit.
+      // the governance field: hundreds of ordered contour lines drawn SHARP on an offscreen
+      // layer, then composited back BLURRED → a continuous luminous fabric. Slow, inevitable.
       const tm = Date.now() / 6000;
-      for (const s of STRANDS) {
-        const N = 32; let prev = sPoint(s, 0, tm);
-        for (let i = 1; i <= N; i++) {
-          const tp = i / N, t = tp * s.maxT;
-          const [x, y] = sPoint(s, t, tm);
-          const tipFade = (s.cls === 2 && tp > 0.7) ? 1 - (tp - 0.7) / 0.3 : 1;  // tertiary threads fade out
-          const a = (0.04 + 0.28 * t + 0.2 * t * t) * s.bright * tipFade;        // energy rises toward governance
-          const g = (255 - 55 * t) | 0, b = (255 - 135 * t) | 0;                 // white at source → warm gold near Submit
-          ctx.strokeStyle = `rgba(255,${g},${b},${a.toFixed(3)})`;
-          ctx.lineWidth = s.width * (0.5 + 0.7 * t);
-          ctx.beginPath(); ctx.moveTo(prev[0] * W, prev[1] * H); ctx.lineTo(x * W, y * H); ctx.stroke();
-          prev = [x, y];
+      if (mctx) {
+        mctx.clearRect(0, 0, W, H);
+        mctx.globalCompositeOperation = "lighter";
+        for (const s of STRANDS) {
+          const N = 30; let prev = sPoint(s, 0, tm);
+          for (let i = 1; i <= N; i++) {
+            const tp = i / N, t = tp * s.maxT;
+            const [x, y] = sPoint(s, t, tm);
+            const tipFade = (s.cls === 2 && tp > 0.7) ? 1 - (tp - 0.7) / 0.3 : 1;
+            const a = (0.04 + 0.28 * t + 0.2 * t * t) * s.bright * tipFade;
+            const g = (255 - 55 * t) | 0, b = (255 - 135 * t) | 0;
+            mctx.strokeStyle = `rgba(255,${g},${b},${a.toFixed(3)})`;
+            mctx.lineWidth = s.width * (0.5 + 0.7 * t);
+            mctx.beginPath(); mctx.moveTo(prev[0] * W, prev[1] * H); mctx.lineTo(x * W, y * H); mctx.stroke();
+            prev = [x, y];
+          }
         }
+        // composite: a soft blurred glow (fabric) + a faint sharp pass (structure beneath)
+        ctx.save();
+        ctx.filter = "blur(1.6px)"; ctx.drawImage(off, 0, 0, W, H);
+        ctx.filter = "none"; ctx.globalAlpha = 0.45; ctx.drawImage(off, 0, 0, W, H);
+        ctx.globalAlpha = 1; ctx.restore();
       }
 
       // map participates in the flow field: flow-band dots sit IN FRONT of the mesh,
