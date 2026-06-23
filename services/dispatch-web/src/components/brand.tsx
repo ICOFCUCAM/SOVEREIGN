@@ -52,9 +52,19 @@ export const TrustStrip: React.FC = () => (
 // Shared public footer — DispatchMark + institutional wordmark.
 export const PublicFooter: React.FC = () => (
   <footer className="border-t border-white/[0.06] px-8 py-12 lg:px-12">
-    <div className="mx-auto flex max-w-[1500px] flex-col items-center justify-between gap-4 text-[12px] text-white/40 sm:flex-row">
-      <div className="flex items-center gap-2"><DispatchMark className="h-5 w-5 text-gold-400" /> Sovereign Dispatch · Institutional Publication Infrastructure</div>
-      <div>Sovereign by design · Auditable always</div>
+    <div className="mx-auto flex max-w-[1500px] flex-col items-center justify-between gap-5 sm:flex-row">
+      <div className="flex items-center gap-2.5 text-[12.5px] text-white/45">
+        <DispatchMark className="h-5 w-5 text-gold-400" />
+        <span className="font-semibold tracking-tight text-white/75">Sovereign Dispatch</span>
+        <span className="text-white/25">·</span> Institutional Publication Infrastructure
+      </div>
+      <div className="flex items-center gap-4 text-[11px] uppercase tracking-[0.18em] text-white/35">
+        <span>Sovereign by design</span>
+        <span className="text-gold-400/30">·</span>
+        <span>Auditable always</span>
+        <span className="text-gold-400/30">·</span>
+        <span className="font-mono tracking-[0.1em]">© MMXXXVI</span>
+      </div>
     </div>
   </footer>
 );
