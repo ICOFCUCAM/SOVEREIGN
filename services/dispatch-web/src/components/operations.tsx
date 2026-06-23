@@ -51,6 +51,7 @@ export const HeroFlow: React.FC = () => {
           ))}
         </div>
         <Converge />
+        <Arrow lit />
         {/* governed pipeline */}
         <div className="flex items-center gap-2 2xl:gap-2.5">
           {STAGES.map(([label, icon], i) => {
@@ -59,15 +60,15 @@ export const HeroFlow: React.FC = () => {
             return (
               <React.Fragment key={label}>
                 <div className="flex flex-col items-center gap-2">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-lg border transition-all duration-500 2xl:h-16 2xl:w-16 ${active ? "border-gold-400/70 bg-gold-500/[0.12] text-gold-300 shadow-lg shadow-gold-700/20" : done ? "border-emerald-400/30 bg-white/[0.03] text-white/70" : "border-white/12 bg-white/[0.02] text-white/45"}`}>{icon("h-5 w-5 2xl:h-6 2xl:w-6")}</div>
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-lg border bg-gradient-to-b transition-all duration-500 2xl:h-16 2xl:w-16 ${active ? "border-gold-400/70 from-gold-500/[0.16] to-gold-500/[0.04] text-gold-300 shadow-lg shadow-gold-700/30" : done ? "border-emerald-400/30 from-white/[0.05] to-transparent text-white/70" : "border-white/12 from-white/[0.04] to-transparent text-white/45"}`}>{icon("h-5 w-5 2xl:h-6 2xl:w-6")}</div>
                   <span className={`text-[9.5px] font-bold uppercase tracking-wide 2xl:text-[10.5px] ${active ? "text-gold-300" : "text-white/45"}`}>{label}</span>
                 </div>
-                {i < STAGES.length - 1 && <span className={`mb-5 h-px w-4 transition-colors duration-500 2xl:w-7 ${done ? "bg-gold-400/50" : "bg-white/12"}`} />}
+                {i < STAGES.length - 1 && <Arrow lit={done} />}
               </React.Fragment>
             );
           })}
         </div>
-        <span className={`mb-5 h-px w-4 2xl:w-7 ${stage === STAGES.length ? "bg-gold-400/60" : "bg-white/12"}`} />
+        <Arrow lit={stage === STAGES.length} />
         {/* official record */}
         <div className="flex flex-col items-center gap-2">
           <div className="relative flex h-16 w-16 items-center justify-center 2xl:h-20 2xl:w-20">
@@ -82,6 +83,13 @@ export const HeroFlow: React.FC = () => {
     </div>
   );
 };
+
+const Arrow: React.FC<{ lit?: boolean }> = ({ lit }) => (
+  <span className={`mb-5 flex items-center transition-colors duration-500 ${lit ? "text-gold-400/70" : "text-white/15"}`}>
+    <span className={`h-px w-3 2xl:w-5 ${lit ? "bg-gold-400/50" : "bg-white/12"}`} />
+    <svg viewBox="0 0 8 12" className="h-2.5 w-2" fill="none"><path d="M1 1l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+  </span>
+);
 
 const Converge: React.FC = () => (
   <svg viewBox="0 0 40 200" className="hidden h-40 w-9 text-gold-400/30 2xl:block" fill="none" preserveAspectRatio="none">

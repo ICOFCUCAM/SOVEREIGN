@@ -2,13 +2,14 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { DeploymentMatrix } from "../components/DeploymentMatrix";
 import { HeroFlow, LastPublishedCard, LifecycleTrail, PublicAuditTimeline, CapabilitiesDashboard } from "../components/operations";
+import { HeroBackdrop } from "../components/HeroBackdrop";
 import { PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE } from "../lib/routes";
 
 // Public marketing landing — the front door to Dispatch. A cinematic hero over
 // the institutional product story, with a sticky top nav that scrolls to the
 // six real sections (Overview, Capabilities, Workflow, Security, Integrations,
 // Resources). "Launch Dispatch" / "Log in" route into the gated console.
-const NAV = ["Overview", "Capabilities", "Workflow", "Evidence", "Security", "Sovereignty", "Deployment", "Compliance", "Institutions", "Procurement", "Integrations", "Resources"];
+const NAV = ["Overview", "Capabilities", "Workflow", "Security", "Deployment", "Compliance", "Institutions", "Procurement", "Integrations", "Resources"];
 
 const SectionHead: React.FC<{ kicker: string; title: string; sub?: string }> = ({ kicker, title, sub }) => (
   <div className="mx-auto max-w-3xl text-center">
@@ -72,10 +73,11 @@ const Landing: React.FC = () => {
 
       {/* ── hero ───────────────────────────────────────────────────── */}
       <div id="top" className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-cover bg-right bg-no-repeat" style={{ backgroundImage: "url(/Dispatchhero.png)" }} aria-hidden />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/85 to-transparent" aria-hidden />
+        {/* cinematic backdrop — dotted world map, converging light streams, bloom */}
+        <HeroBackdrop className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[72%] sm:block" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/80 to-transparent" aria-hidden />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
-        <div className="relative z-10 mx-auto grid min-h-[88vh] max-w-[1500px] grid-cols-1 items-center gap-10 px-8 py-16 lg:px-12 xl:grid-cols-[40fr_60fr] xl:gap-8">
+        <div className="relative z-10 mx-auto grid min-h-[88vh] max-w-[1500px] grid-cols-1 items-center gap-10 px-8 py-16 lg:px-12 xl:grid-cols-[42fr_58fr] xl:gap-8">
           <div className="max-w-xl">
             <p className="mb-6 text-sm font-semibold uppercase tracking-[0.25em] text-gold-400">Institutional Publication Infrastructure</p>
             <h1 className="font-serif text-6xl font-bold leading-[1.02] tracking-tight sm:text-7xl xl:text-6xl 2xl:text-7xl">
@@ -85,14 +87,14 @@ const Landing: React.FC = () => {
               Sovereign Dispatch is the operating system for institutional publication — purpose-built to submit, govern,
               approve, render, publish and archive with sovereignty, auditability and trust.
             </p>
-            <div className="mt-11 flex flex-wrap items-center gap-4">
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <button onClick={() => nav("/console")}
-                className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
+                className="group inline-flex items-center justify-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
                 Launch Dispatch
                 <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
               </button>
               <a href={ARCHITECTURE_ROUTE}
-                className="inline-flex items-center rounded border border-white/20 px-7 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/40 hover:bg-white/5">
+                className="inline-flex items-center justify-center rounded border border-white/20 px-6 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/40 hover:bg-white/5">
                 View Architecture
               </a>
             </div>
