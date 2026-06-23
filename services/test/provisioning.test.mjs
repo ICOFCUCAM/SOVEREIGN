@@ -69,6 +69,15 @@ async function main() {
   const list = await adminApi("/v1/admin/clients", tenant.id, "tenant_admin");
   ok(list.status === 200 && Array.isArray(list.json.clients) && list.json.clients.length >= 2 && !("secret_hash" in (list.json.clients[0] || {})), "list returns credentials without secret material");
 
+  // 6b. The console path: the console signs in with a service credential, so an
+  // admin-SCOPED service credential must also be able to self-service via the API.
+  const adminCred = await withClaims(admin, {}, (c) => issueClientTx(c, { tenantId: tenant.id, name: "Console Admin", scopes: ["dispatch:admin", "dispatch:read"], actor: "operator:test", actorType: "system", allowAdmin: true }));
+  const at = await token(adminCred.clientId, adminCred.secret);
+  const adminToken = at.json?.access_token || at.json?.token;
+  const viaSvc = await fetch(API + "/v1/admin/clients", { method: "POST", headers: { authorization: "Bearer " + adminToken, "content-type": "application/json" }, body: JSON.stringify({ name: "Issued via console", scopes: ["dispatch:read"] }) });
+  const viaSvcJson = await viaSvc.json().catch(() => null);
+  ok(viaSvc.status === 201 && viaSvcJson?.secret?.startsWith("sdk_"), "admin-scoped service credential can issue via the API (console path)");
+
   // 7. Security negatives.
   const esc = await adminApi("/v1/admin/clients", tenant.id, "tenant_admin", { name: "Escalation", scopes: ["dispatch:admin"] });
   ok(esc.status === 400 && esc.json.error?.code === "SCOPE_NOT_ISSUABLE", "self-service cannot issue dispatch:admin (no privilege escalation)");

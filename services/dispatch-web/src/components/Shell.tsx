@@ -18,6 +18,7 @@ const NAV: NavItem[] = [
   { to: "/console/review", label: "Governance", scope: "dispatch:approve" },
   { to: "/console/audit", label: "Audit", scope: "dispatch:audit" },
   { to: "/console/sovereignty", label: "Sovereignty" },
+  { to: "/console/access", label: "Access", scope: "dispatch:admin" },
   { to: "/console/integrations", label: "Integrations" },
 ];
 
