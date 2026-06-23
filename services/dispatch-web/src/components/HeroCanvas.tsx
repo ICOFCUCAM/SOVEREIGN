@@ -39,27 +39,26 @@ const MAP_DOTS: { nx: number; ny: number }[] = [];
 for (let x = 120; x < 900; x += 8.5) for (let y = 70; y < 450; y += 8.5)
   if (POLYS.some((p) => inPoly(x, y, p))) MAP_DOTS.push({ nx: (x - 120) / 780, ny: (y - 70) / 380 });
 
-interface Cord { y0: number; y1: number; ease: number; amp: number; freq: number; phase: number }
+const smooth = (t: number) => t * t * (3 - 2 * t);
+interface Cord { y0: number; y1: number; amp: number; freq: number; phase: number }
 const CORDS: Cord[] = [];
 let seed = 7;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) & 0x7fffffff; return seed / 0x7fffffff; };
-// Benchmark mesh = TWO sweeping silk bands of near-parallel contour lines: an
-// UPPER band flowing from the top-left down into the pipeline, and a LOWER band
-// from the bottom-left up. Each line eases (concave) toward the centreline and
-// stretches through cards 1→3.
-const NB = 22;
+// Benchmark mesh = TWO dense silk bands of near-parallel contour lines: an UPPER
+// band sweeping from the top-left down and a LOWER band from the bottom-left up,
+// each an S-swoosh (smoothstep) that flattens as it meets the pipeline.
+const NB = 26;
 for (let k = 0; k < NB; k++) {
   const u = k / (NB - 1);
-  const ease = 1.55 + rnd() * 0.5;
-  const amp = 0.007 + rnd() * 0.014;
-  const freq = 0.8 + rnd() * 1.3;
-  CORDS.push({ y0: 0.03 + u * 0.35, y1: 0.40 + u * 0.10, ease, amp, freq, phase: rnd() * 6.28 }); // upper band
-  CORDS.push({ y0: 0.97 - u * 0.35, y1: 0.60 - u * 0.10, ease, amp, freq, phase: rnd() * 6.28 }); // lower band
+  const amp = 0.006 + rnd() * 0.012;
+  const freq = 0.8 + rnd() * 1.2;
+  CORDS.push({ y0: 0.05 + u * 0.30, y1: 0.425 + u * 0.07, amp, freq, phase: rnd() * 6.28 }); // upper band
+  CORDS.push({ y0: 0.95 - u * 0.30, y1: 0.575 - u * 0.07, amp, freq, phase: rnd() * 6.28 }); // lower band
 }
 const pointOn = (c: Cord, t: number, W: number, H: number): [number, number] => {
   const x = SX0 + (XEND - SX0) * t;
-  const e = Math.pow(t, c.ease);                 // concave swoosh toward the centreline
-  const wave = Math.sin(t * c.freq * 6.283 + c.phase) * c.amp * (1 - t * 0.55);
+  const e = smooth(t);                           // S-swoosh: flat at source and at the pipeline
+  const wave = Math.sin(t * c.freq * 6.283 + c.phase) * c.amp * (1 - t * 0.5);
   return [x * W, (c.y0 + (c.y1 - c.y0) * e + wave) * H];
 };
 
@@ -104,11 +103,11 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       // the cords — S-waves converging at Submit then stretching through cards 1→3
       ctx.lineWidth = 1;
       for (const c of CORDS) {
-        ctx.strokeStyle = "rgba(233,200,120,0.13)";          // phase 1: institution → Submit
+        ctx.strokeStyle = "rgba(233,200,120,0.16)";          // phase 1: source → Submit
         ctx.beginPath();
         for (let i = 0; i <= 20; i++) { const [x, y] = pointOn(c, (i / 20) * TC, W, H); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
         ctx.stroke();
-        ctx.strokeStyle = "rgba(233,200,120,0.055)";         // phase 2: Submit → Approve, fading
+        ctx.strokeStyle = "rgba(233,200,120,0.08)";          // phase 2: Submit → Approve, fading
         ctx.beginPath();
         for (let i = 0; i <= 14; i++) { const [x, y] = pointOn(c, TC + (i / 14) * (1 - TC), W, H); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
         ctx.stroke();
