@@ -21,6 +21,7 @@ export const Dot: React.FC = () => <span className="inline-block h-1.5 w-1.5 shr
 // public pages so positioning copy reads consistently.
 export const SectionHead: React.FC<{ kicker: string; title: string; sub?: string }> = ({ kicker, title, sub }) => (
   <div className="mx-auto max-w-3xl text-center">
+    <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
     <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">{kicker}</p>
     <h2 className="mx-auto mt-5 max-w-[20ch] font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">{title}</h2>
     {sub && <p className="mx-auto mt-6 max-w-[42rem] text-lg leading-[1.7] text-white/55">{sub}</p>}

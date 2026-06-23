@@ -105,6 +105,7 @@ const Landing: React.FC = () => {
       {/* ── Why Dispatch Exists — strategic context + outcomes ─────── */}
       <section id="why" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
+          <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Why Dispatch Exists</p>
           <h2 className="mt-5 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">
             Most systems manage documents.<br />Dispatch governs the path to official record.
@@ -170,6 +171,7 @@ const Landing: React.FC = () => {
       {/* ── A Record That Proves Itself — provenance positioning ─────── */}
       <section id="proof" className="scroll-mt-24 border-t border-white/5 px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
+          <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Provenance</p>
           <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">A Record That Proves Itself.</h2>
           <p className="mx-auto mt-6 max-w-[44rem] text-lg leading-[1.7] text-white/55">
@@ -197,6 +199,7 @@ const Landing: React.FC = () => {
       {/* ── Procurement CTA (above institutions) ───────────────────── */}
       <section id="procurement" className="scroll-mt-24 border-t border-white/5 bg-white/[0.015] px-8 py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
+          <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
           <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement</p>
           <h2 className="mt-4 font-serif text-4xl font-bold leading-[1.08] text-white sm:text-5xl">Ready for institutional evaluation.</h2>
           <p className="mt-5 mx-auto max-w-[42rem] text-lg leading-[1.7] text-white/55">The architecture, security and procurement materials your evaluation team needs — self-serve, before any human contact.</p>
