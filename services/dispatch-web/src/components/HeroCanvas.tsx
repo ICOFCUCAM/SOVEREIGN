@@ -67,40 +67,36 @@ interface Strand {
 const STRANDS: Strand[] = [];
 // Per-lane BUNDLES travel as distinct rivers, keeping institutional identity through
 // the travel zone, then compress late. Plus a few inter-lane threads weave the mesh.
-// A governance FABRIC, not a funnel. Each lane owns a few bright primary strands that
-// keep their identity; dimmer secondary strands weave toward neighbours (cross/merge/
-// rejoin); a wash of near-invisible tertiary strands is the atmosphere. All travel a
-// long, mostly-flat distance, then bend LATE into Submit — the mesh is the visual of
-// governance gradually collapsing into a controlled submission point.
-const mkStrand = (laneY: number, cls: number, lanePos: number, crossTarget: number, drift: number): Strand => {
-  const x0 = INSTX + 0.01 + rnd() * 0.02;
-  const y0 = laneY + lanePos * 0.05 + (rnd() - 0.5) * 0.01;
-  const travelY = laneY + (crossTarget - laneY) * drift;       // weaving: drift toward a neighbour lane
-  // keep the curve mostly FLAT through the travel zone (c1 sits late, near lane height),
-  // so convergence is delayed — the mesh occupies most of the width before bending
-  const c1x = 0.15 + rnd() * 0.06;
-  const c1y = travelY + lanePos * 0.018;
-  const c2x = COMPRESS_X + 0.02 + rnd() * 0.02;
-  const c2y = FOCAL.y + (travelY - FOCAL.y) * (0.3 + rnd() * 0.12);
-  // mouth: strands run INTO the Submit card, no visible gap
-  const ex = FOCAL.x + (rnd() - 0.5) * 0.006;
-  const ey = FOCAL.y + (laneY - FOCAL.y) * 0.02 + (rnd() - 0.5) * 0.008;
-  const width = cls === 0 ? 1.4 + rnd() * 0.5 : cls === 1 ? 0.7 + rnd() * 0.2 : 0.36 + rnd() * 0.16;
-  const bright = cls === 0 ? 0.6 : cls === 1 ? 0.14 : 0.04;    // few bright primaries, atmospheric rest
-  const maxT = cls === 2 ? 0.8 + rnd() * 0.2 : 0.97 + rnd() * 0.03;
-  // weaving meander: large lateral wander for secondary (cross/rejoin), tiny for primary
-  const amp = cls === 0 ? 0.003 + rnd() * 0.003 : cls === 1 ? 0.01 + rnd() * 0.016 : 0.008 + rnd() * 0.013;
-  return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls, amp, freq: 0.8 + rnd() * 1.3, ph: rnd() * 6.28 };
+// FIELD TOPOLOGY, not particles. The strands are stable, coherent CONTOUR LINES of a
+// flow field — they keep their order (no scattering), compress through a shared field
+// and narrow into Submit. Three zones: lane identity → shared governance field (ordered
+// compression) → controlled narrowing. The motion is slow and inevitable, never fast.
+const mkStrand = (laneY: number, cls: number, lanePos: number): Strand => {
+  const rel = laneY - 0.5;                                     // signed offset from centre — preserved order
+  const x0 = INSTX + 0.008 + rnd() * 0.016;
+  const y0 = laneY + lanePos * 0.05 + (rnd() - 0.5) * 0.006;
+  // c1 — lanes travel mostly in their own band first (identity preserved, river-like)
+  const c1x = 0.135 + rnd() * 0.04;
+  const c1y = 0.5 + rel * (0.82 + (rnd() - 0.5) * 0.08) + lanePos * 0.022;
+  // c2 — entering the SHARED FIELD: ordered compression to a common band, no crossing
+  const c2x = COMPRESS_X + 0.01 + rnd() * 0.02;
+  const c2y = 0.5 + rel * (0.26 + (rnd() - 0.5) * 0.05);
+  // mouth — controlled narrowing INTO the Submit gate, order preserved, no visible gap
+  const ex = FOCAL.x + (rnd() - 0.5) * 0.004;
+  const ey = FOCAL.y + rel * 0.03 + (rnd() - 0.5) * 0.005;
+  const width = cls === 0 ? 1.3 + rnd() * 0.4 : cls === 1 ? 0.7 + rnd() * 0.18 : 0.34 + rnd() * 0.14;
+  const bright = cls === 0 ? 0.52 : cls === 1 ? 0.14 : 0.04;   // few bright contours over an atmospheric wash
+  const maxT = cls === 2 ? 0.82 + rnd() * 0.18 : 0.98 + rnd() * 0.02;
+  // very small, slow flow-field wander — coherent, never a streak
+  const amp = cls === 0 ? 0.002 + rnd() * 0.002 : 0.004 + rnd() * 0.006;
+  return { x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls, amp, freq: 0.6 + rnd() * 0.9, ph: rnd() * 6.28 };
 };
 for (let li = 0; li < INST_Y.length; li++) {
   const laneY = INST_Y[li];
-  const above = INST_Y[Math.max(0, li - 1)], below = INST_Y[Math.min(INST_Y.length - 1, li + 1)];
-  // primary: own the lane, stay in it (identity preserved), few & bright
-  for (let k = 0; k < 4; k++) STRANDS.push(mkStrand(laneY, 0, (k / 3 - 0.5) * 1.2, laneY, 0));
-  // secondary: weave toward neighbours (cross / merge / rejoin), dim support fabric
-  for (let k = 0; k < 7; k++) STRANDS.push(mkStrand(laneY, 1, (k / 6 - 0.5) * 2, rnd() < 0.5 ? above : below, 0.25 + rnd() * 0.4));
-  // tertiary: near-invisible atmospheric fabric
-  for (let k = 0; k < 13; k++) STRANDS.push(mkStrand(laneY, 2, (k / 12 - 0.5) * 2, rnd() < 0.5 ? above : below, rnd() * 0.5));
+  // ordered contour layers per lane: primary (few, read as lines) over atmospheric fabric
+  for (let k = 0; k < 4; k++) STRANDS.push(mkStrand(laneY, 0, (k / 3 - 0.5) * 1.2));
+  for (let k = 0; k < 7; k++) STRANDS.push(mkStrand(laneY, 1, (k / 6 - 0.5) * 2));
+  for (let k = 0; k < 13; k++) STRANDS.push(mkStrand(laneY, 2, (k / 12 - 0.5) * 2));
 }
 const sPoint = (s: Strand, t: number, tm = 0): [number, number] => {
   const mt = 1 - t, a = mt * mt * mt, b = 3 * mt * mt * t, c = 3 * mt * t * t, d = t * t * t;
@@ -112,7 +108,6 @@ const sPoint = (s: Strand, t: number, tm = 0): [number, number] => {
   return [x, y];
 };
 
-interface Code { s: number; t: number; sp: number; size: number; br: boolean }
 interface Pp { g: number; t: number; sp: number; size: number }
 interface Noise { x: number; y: number; vx: number; vy: number; size: number; a: number }
 
@@ -123,7 +118,7 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     const ctx = cv.getContext("2d"); if (!ctx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let W = 0, H = 0, raf = 0;
-    let dots: { x: number; y: number; a: number }[] = [], codes: Code[] = [], pps: Pp[] = [], noise: Noise[] = [];
+    let dots: { x: number; y: number; a: number }[] = [], pps: Pp[] = [], noise: Noise[] = [];
 
     const init = () => {
       // map is part of the flow field: dots brighten inside the travel band (x<0.34, mid-height)
@@ -133,15 +128,6 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         return { x, y, a: base * (inFlow ? 1.9 : 1) };
       };
       dots = [...MAP_DOTS.map((d) => mk(d, 0.1)), ...CLUSTER_DOTS.map((d) => mk(d, 0.18))];
-      codes = [];
-      for (let s = 0; s < STRANDS.length; s++) {
-        const n = 2 + Math.floor(STRANDS[s].maxT * 5);
-        for (let k = 0; k < n; k++) {
-          const vel = rnd();                                   // layered velocity: slow / medium / fast
-          const sp = vel < 0.45 ? 0.0012 + rnd() * 0.0008 : vel < 0.8 ? 0.0024 + rnd() * 0.0012 : 0.004 + rnd() * 0.0022;
-          codes.push({ s, t: rnd() * STRANDS[s].maxT, sp, size: 0.6 + rnd() * 1.2, br: rnd() < 0.3 });
-        }
-      }
       pps = [];
       for (let g = 0; g < CARD_FX.length - 1; g++) for (let k = 0; k < 4; k++) pps.push({ g, t: rnd(), sp: 0.004 + rnd() * 0.004, size: 0.8 + rnd() * 1.1 });
       // ambient particle noise — micro-particles everywhere so the whole canvas is quietly active
@@ -208,9 +194,9 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       ctx.save(); ctx.translate(0.17 * W, FOCAL.y * H); ctx.scale(1, 0.5); ctx.translate(-0.17 * W, -FOCAL.y * H);
       ctx.fillStyle = vg; ctx.fillRect(0.02 * W, FOCAL.y * H - 0.22 * W, 0.36 * W, 0.44 * W); ctx.restore();
 
-      // the river mesh: lane bundles travel (identity preserved) then compress; meander makes
-      // them read as rivers, not beams; white→gold as they approach governance
-      const tm = Date.now() / 2600;
+      // the governance field: stable, ordered contour lines that compress through the shared
+      // field and narrow into Submit. Motion is slow and inevitable; white→gold toward Submit.
+      const tm = Date.now() / 6000;
       for (const s of STRANDS) {
         const N = 32; let prev = sPoint(s, 0, tm);
         for (let i = 1; i <= N; i++) {
@@ -245,19 +231,8 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       core.addColorStop(0, `rgba(255,246,222,${(0.08 + 0.06 * pulse).toFixed(3)})`); core.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = core; ctx.fillRect(mx - 0.03 * W, my - 0.03 * W, 0.06 * W, 0.06 * W);
 
-      // particles travelling INSIDE the rivers toward governance — ACCELERATING as they near
-      // Submit (creates anticipation); white→gold, brighter on arrival
-      for (const p of codes) {
-        const s = STRANDS[p.s];
-        const norm0 = p.t / s.maxT;
-        p.t += p.sp * (0.45 + 1.7 * norm0);                 // visual acceleration toward the convergence
-        if (p.t > s.maxT) p.t -= s.maxT;
-        const [x, y] = sPoint(s, p.t, tm);
-        const norm = p.t / s.maxT;
-        const g = (255 - 50 * norm) | 0, b = (255 - 130 * norm) | 0;
-        ctx.fillStyle = `rgba(255,${g},${b},${(0.12 + 0.5 * norm).toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(x * W, y * H, p.size * (p.br ? 1.3 : 1), 0, 6.283); ctx.fill();
-      }
+      // (no in-mesh particles: the mesh is a stable field, not a meteor shower. The only
+      //  flowing particles live in the governed pipeline, to the right of Submit.)
 
       // governance pipeline = continuous transmission system: micro-nodes along every
       // connector + particles that accelerate stage→stage toward the Official Record
