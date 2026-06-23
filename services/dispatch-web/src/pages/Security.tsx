@@ -15,7 +15,7 @@ const Security: React.FC = () => {
       <main>
         {/* ── Security ───────────────────────────────────────────────── */}
         <section id="security" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">
-          <SectionHead kicker="Security" title="Sovereign by design."
+          <SectionHead index="01" kicker="Security" title="Sovereign by design."
             sub="Built for classified and regulated material — isolation, clearance and an immutable record at the core, not bolted on." />
           <div className="mx-auto mt-14 grid stagger max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <Card title="Tenant isolation (RLS)" body="Row-level security on every table; a missing tenant claim denies by default — never allow-all." />
@@ -30,7 +30,7 @@ const Security: React.FC = () => {
 
         {/* ── Sovereignty dashboard ──────────────────────────────────── */}
         <section id="sovereignty" className="scroll-mt-24 border-t border-white/[0.06] bg-white/[0.015] px-8 py-24 lg:px-12">
-          <SectionHead kicker="Sovereignty" title="Capabilities, not badges."
+          <SectionHead index="02" kicker="Sovereignty" title="Capabilities, not badges."
             sub="What the platform actually does — across deployment, security and governance. Each capability is available by deployment model and verifiable during evaluation." />
           <div className="mx-auto mt-14 max-w-5xl">
             <CapabilitiesDashboard />
@@ -39,7 +39,7 @@ const Security: React.FC = () => {
 
         {/* ── Deployment & Architecture ──────────────────────────────── */}
         <section id="deployment" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">
-          <SectionHead kicker="Deployment" title="Deploy where sovereignty requires."
+          <SectionHead index="03" kicker="Deployment" title="Deploy where sovereignty requires."
             sub="Sovereign Dispatch is architected to support cloud, private-cloud, sovereign-hosted, and institutional deployment models." />
           <div className="mx-auto mt-14 grid stagger max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {[

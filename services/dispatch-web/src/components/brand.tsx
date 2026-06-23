@@ -22,13 +22,17 @@ export const Chevron: React.FC<{ className?: string }> = ({ className }) => (
 export const Dot: React.FC = () => <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-gold-400" />;
 
 // Centered section heading — kicker, serif title, optional sub. Shared across the
-// public pages so positioning copy reads consistently.
-export const SectionHead: React.FC<{ kicker: string; title: string; sub?: string }> = ({ kicker, title, sub }) => (
+// public pages so positioning copy reads consistently. Pass `index` (e.g. "01")
+// to render the homepage's numbered dossier eyebrow.
+export const SectionHead: React.FC<{ kicker: string; title: string; sub?: string; index?: string }> = ({ kicker, title, sub, index }) => (
   <div className="mx-auto max-w-3xl text-center">
     <div className="mx-auto mb-6 h-px w-10 bg-gold-500/45" aria-hidden />
-    <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">{kicker}</p>
+    <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">
+      {index && <><span className="tnum font-mono tracking-normal text-gold-400/55">{index}</span><span className="mx-2 font-normal text-gold-400/30">·</span></>}
+      {kicker}
+    </p>
     <h2 className="mx-auto mt-5 max-w-[20ch] font-serif text-4xl font-bold leading-[1.08] text-[#f4efe3] sm:text-5xl">{title}</h2>
-    {sub && <p className="mx-auto mt-6 max-w-[42rem] text-lg leading-[1.7] text-white/55">{sub}</p>}
+    {sub && <p className="lead-balance mx-auto mt-6 max-w-[42rem] text-lg leading-[1.7] text-white/55">{sub}</p>}
   </div>
 );
 
