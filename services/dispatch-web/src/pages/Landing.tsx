@@ -49,7 +49,7 @@ const Landing: React.FC = () => {
           <div className="flex items-center gap-4">
             <button onClick={() => nav("/console")} className="text-[13px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-white">Log in</button>
             <button onClick={() => nav("/console")}
-              className="group inline-flex items-center gap-2 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-lg shadow-gold-700/20 transition hover:from-gold-200 hover:to-gold-500">
+              className="group inline-flex items-center gap-2 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-lg shadow-gold-700/20 transition hover:from-gold-200 hover:to-gold-500">
               Launch Dispatch
               <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
             </button>
@@ -73,12 +73,12 @@ const Landing: React.FC = () => {
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <button onClick={() => nav("/console")}
-                className="group inline-flex items-center justify-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
+                className="group inline-flex items-center justify-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3.5 text-sm font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
                 Launch Dispatch
                 <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
               </button>
               <a href={ARCHITECTURE_ROUTE}
-                className="inline-flex items-center justify-center rounded border border-white/20 px-6 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/40 hover:bg-white/5">
+                className="inline-flex items-center justify-center rounded border border-white/20 px-6 py-3.5 text-sm font-semibold uppercase tracking-[0.08em] text-white/85 transition hover:border-white/40 hover:bg-white/5">
                 View Architecture
               </a>
             </div>
@@ -202,12 +202,12 @@ const Landing: React.FC = () => {
           <p className="mt-5 text-lg leading-relaxed text-white/55">The architecture, security and procurement materials your evaluation team needs — self-serve, before any human contact.</p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button onClick={() => nav(PROCUREMENT_ROUTE)}
-              className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-8 py-4 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
+              className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-8 py-4 text-sm font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-xl shadow-gold-700/25 transition hover:from-gold-200 hover:to-gold-500">
               Request Procurement Package
               <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </button>
             <a href={ARCHITECTURE_ROUTE}
-              className="inline-flex items-center rounded border border-white/20 px-8 py-4 text-sm font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/40 hover:bg-white/5">
+              className="inline-flex items-center rounded border border-white/20 px-8 py-4 text-sm font-semibold uppercase tracking-[0.08em] text-white/85 transition hover:border-white/40 hover:bg-white/5">
               View Architecture
             </a>
           </div>

@@ -30,8 +30,8 @@ export const SectionHead: React.FC<{ kicker: string; title: string; sub?: string
 // Bordered capability card — title + body, with a subtle hover lift.
 export const Card: React.FC<{ title: string; body: string }> = ({ title, body }) => (
   <div className="rounded-lg border border-white/10 bg-white/[0.02] p-6 transition hover:border-gold-500/30 hover:bg-white/[0.04]">
-    <div className="text-base font-bold text-white">{title}</div>
-    <p className="mt-2 text-[13.5px] leading-relaxed text-white/55">{body}</p>
+    <div className="text-[15px] font-bold tracking-[-0.005em] text-white">{title}</div>
+    <p className="mt-2.5 text-[13.5px] leading-[1.65] text-white/55">{body}</p>
   </div>
 );
 
@@ -73,7 +73,7 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
           <button onClick={() => nav("/")} className="text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white">Home</button>
           {actions}
           <button onClick={() => nav("/console")}
-            className="group inline-flex items-center gap-2 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-lg shadow-gold-700/20 transition hover:from-gold-200 hover:to-gold-500">
+            className="group inline-flex items-center gap-2 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-lg shadow-gold-700/20 transition hover:from-gold-200 hover:to-gold-500">
             Launch Dispatch
             <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
           </button>
