@@ -11,7 +11,6 @@ import React, { useEffect, useRef } from "react";
 
 const SEALX = 0.832;                                 // Official Record = light source on the right
 const CARD_FX = [0.264, 0.339, 0.414, 0.500, 0.586, 0.672, SEALX]; // 6 cards + seal
-const MERGEX = 0.232;                                // convergence field — just left of Submit
 
 // institution origins (match HeroVisual circles): x≈0.082, 5 lanes
 const INSTX = 0.082;
@@ -51,44 +50,49 @@ const CLUSTER_DOTS: { nx: number; ny: number }[] = [];
 for (const [cx, cy] of CLUSTERS) for (let i = 0; i < 18; i++)
   CLUSTER_DOTS.push({ nx: (cx + (rnd() - 0.5) * 34 - 120) / 780, ny: (cy + (rnd() - 0.5) * 34 - 70) / 380 });
 
-// ── ribbons: each institution → 8–15 interweaving strands → Submit merge ─────
+// ── reverse river delta: a layered thread mesh born BETWEEN institution lanes,
+// compressing through a funnel into one bright convergence node at Submit ──────
+const FOCAL = { x: 0.236, y: 0.5 };                  // convergence node — touches the Submit card
+// Layer 1 — five institution lanes (the only true source paths). Each lane runs
+// from its node toward the focal; threads are generated in the space BETWEEN them.
+const LANES = INST_Y.map((oy) => ({ sx: 0.10, sy: oy }));
+
 interface Strand {
-  x0: number; y0: number;       // origin around the institution node
-  c1x: number; c1y: number;     // control 1 — fan out around the node
-  c2x: number; c2y: number;     // control 2 — interweave + start compressing
-  ex: number; ey: number;       // end inside the merge field before Submit
-  maxT: number;                 // length (some strands fall short → dissipate)
-  width: number;                // thickness
-  bright: number;               // brightness multiplier
-  reach: boolean;               // reaches the merge field
+  x0: number; y0: number;       // birth point between two adjacent lanes
+  c1x: number; c1y: number;     // control 1 — long large-radius curve, weaving between lanes
+  c2x: number; c2y: number;     // control 2 — funnel compression toward the focal
+  ex: number; ey: number;       // mouth of the funnel at the convergence node
+  maxT: number;                 // length (tertiary threads fall short)
+  width: number;                // thickness by class
+  bright: number;               // base opacity by class (stacked 10/20/35/60/100%)
+  cls: number;                  // 0 primary · 1 secondary · 2 tertiary
 }
 const STRANDS: Strand[] = [];
-for (let inst = 0; inst < INST_Y.length; inst++) {
-  const oy = INST_Y[inst];
-  const n = 9 + Math.floor(rnd() * 7);                         // 9–15 strands per ribbon
-  for (let k = 0; k < n; k++) {
-    const spread = (k / (n - 1) - 0.5);                        // -0.5..0.5 across the ribbon
-    // origin: a FOCUSED point just right of the node that spreads into many fine lines
-    const x0 = INSTX + 0.016 + (rnd() - 0.5) * 0.006;
-    const y0 = oy + spread * 0.020 + (rnd() - 0.5) * 0.006;
-    // control 1: water-like spread mid-flight (flows rightward, gentle wave — not a high fan)
-    const c1x = INSTX + 0.08 + rnd() * 0.07;
-    const c1y = oy + spread * (0.05 + rnd() * 0.08) + (rnd() - 0.5) * 0.03;
-    // control 2: interweave and compress toward the lane centre
-    const c2x = 0.158 + rnd() * 0.045;
-    const c2y = 0.5 + (oy - 0.5) * (0.28 + rnd() * 0.2) + (rnd() - 0.5) * 0.05;
-    // end: nested band inside the merge field (not a single point)
-    const ex = MERGEX + (rnd() - 0.5) * 0.016;
-    const ey = 0.5 + (oy - 0.5) * 0.06 + (rnd() - 0.5) * 0.03;
-    const r = rnd();
-    const maxT = 0.6 + r * r * 0.4;                            // varied length, skewed long
-    STRANDS.push({
-      x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT,
-      width: 0.3 + rnd() * 0.9,                                // fine strands
-      bright: 0.55 + rnd() * 0.85,                             // varied brightness
-      reach: maxT > 0.92,
-    });
-  }
+const NS = 80;
+for (let k = 0; k < NS; k++) {
+  // birth BETWEEN adjacent lanes: pick a lane pair and a position between them
+  const li = Math.min(LANES.length - 2, Math.floor(rnd() * (LANES.length - 1)));
+  const f = rnd();                                            // 0..1 between lane li and li+1
+  const baseY = LANES[li].sy + (LANES[li + 1].sy - LANES[li].sy) * f;
+  const x0 = 0.06 + rnd() * 0.06;                             // around/right of the icons → long horizontal run
+  const y0 = baseY + (rnd() - 0.5) * 0.02;
+  // control 1: long horizontal lead-out, weaving toward a neighbouring lane (stays near birth height)
+  const weave = (rnd() < 0.5 ? -1 : 1) * (0.01 + rnd() * 0.028);
+  const c1x = x0 + 0.05 + rnd() * 0.05;
+  const c1y = baseY + weave;
+  // control 2: y-compression is mostly DONE here (large-radius S), so the final approach
+  // into the focal is nearly horizontal — a long flat delta, not a radial burst
+  const c2x = 0.205 + rnd() * 0.022;
+  const c2y = FOCAL.y + (baseY - FOCAL.y) * (0.06 + rnd() * 0.06) + (rnd() - 0.5) * 0.014;
+  // mouth: very tight nested band at the convergence node (the narrow end of the funnel)
+  const ex = FOCAL.x + (rnd() - 0.5) * 0.006;
+  const ey = FOCAL.y + (baseY - FOCAL.y) * 0.03 + (rnd() - 0.5) * 0.01;
+  const r = rnd();
+  const cls = r < 0.15 ? 0 : r < 0.5 ? 1 : 2;                 // primary / secondary / tertiary
+  const width = cls === 0 ? 1.4 + rnd() * 0.5 : cls === 1 ? 0.8 + rnd() * 0.25 : 0.4 + rnd() * 0.2;
+  const bright = cls === 0 ? 0.4 : cls === 1 ? 0.2 : 0.08;    // stacked opacity hierarchy (soft, not spiky)
+  const maxT = cls === 2 ? 0.7 + rnd() * 0.3 : 0.94 + rnd() * 0.06;
+  STRANDS.push({ x0, y0, c1x, c1y, c2x, c2y, ex, ey, maxT, width, bright, cls });
 }
 const sPoint = (s: Strand, t: number): [number, number] => {
   const mt = 1 - t, a = mt * mt * mt, b = 3 * mt * mt * t, c = 3 * mt * t * t, d = t * t * t;
@@ -117,7 +121,9 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       for (let g = 0; g < CARD_FX.length - 1; g++) for (let k = 0; k < 4; k++) pps.push({ g, t: rnd(), sp: 0.004 + rnd() * 0.004, size: 0.8 + rnd() * 1.1 });
       // ambient particle noise — tiny floating motes drifting throughout, makes the field alive
       noise = [];
-      for (let i = 0; i < 90; i++) noise.push({ x: rnd() * W, y: rnd() * H, vx: (rnd() - 0.5) * 0.08, vy: (rnd() - 0.5) * 0.06, size: rnd() * 0.9 + 0.3, a: 0.04 + rnd() * 0.12 });
+      for (let i = 0; i < 80; i++) noise.push({ x: rnd() * W, y: rnd() * H, vx: (rnd() - 0.5) * 0.08, vy: (rnd() - 0.5) * 0.06, size: rnd() * 0.9 + 0.3, a: 0.04 + rnd() * 0.12 });
+      // gold dust concentrated around the funnel, drifting rightward into the convergence node
+      for (let i = 0; i < 55; i++) noise.push({ x: (0.10 + rnd() * 0.14) * W, y: (FOCAL.y + (rnd() - 0.5) * 0.34) * H, vx: 0.05 + rnd() * 0.14, vy: (rnd() - 0.5) * 0.05, size: rnd() * 0.8 + 0.25, a: 0.05 + rnd() * 0.14 });
     };
     const resize = () => {
       const r = cv.getBoundingClientRect(); W = r.width; H = r.height;
@@ -151,41 +157,54 @@ export const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       bloom.addColorStop(0, "rgba(233,200,120,0.20)"); bloom.addColorStop(0.4, "rgba(233,200,120,0.05)"); bloom.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = bloom; ctx.fillRect(0, 0, W, H);
 
-      // soft glow at each institution node (the ribbon's source)
+      // soft glow at each institution node + Layer 1: the five institution lanes
       for (const oy of INST_Y) {
         const gx = INSTX * W, gy = oy * H;
-        const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, 0.06 * W);
+        const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, 0.055 * W);
         g.addColorStop(0, "rgba(233,200,120,0.10)"); g.addColorStop(1, "rgba(0,0,0,0)");
         ctx.fillStyle = g; ctx.fillRect(gx - 0.07 * W, gy - 0.07 * W, 0.14 * W, 0.14 * W);
       }
+      ctx.strokeStyle = "rgba(233,200,120,0.07)"; ctx.lineWidth = 1;
+      for (const ln of LANES) {
+        ctx.beginPath();
+        ctx.moveTo(ln.sx * W, ln.sy * H);
+        ctx.bezierCurveTo(0.17 * W, ln.sy * H, 0.20 * W, FOCAL.y * H, FOCAL.x * W, FOCAL.y * H);
+        ctx.stroke();
+      }
 
-      // ribbons: fine WHITE strands from each institution that flow like water, interweave
-      // and compress into the merge; colour shifts white→gold as they converge (govern)
+      // volumetric funnel bloom — luminous atmosphere collapsing toward the focal
+      const vg = ctx.createRadialGradient(0.185 * W, FOCAL.y * H, 0, 0.185 * W, FOCAL.y * H, 0.17 * W);
+      vg.addColorStop(0, "rgba(233,200,120,0.07)"); vg.addColorStop(0.5, "rgba(233,200,120,0.025)"); vg.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.save(); ctx.translate(0.185 * W, FOCAL.y * H); ctx.scale(1, 0.42); ctx.translate(-0.185 * W, -FOCAL.y * H);
+      ctx.fillStyle = vg; ctx.fillRect(0.02 * W, FOCAL.y * H - 0.2 * W, 0.34 * W, 0.4 * W); ctx.restore();
+
+      // the delta mesh: layered Bézier threads (primary/secondary/tertiary), white→gold,
+      // brightness ramping toward the focal so density/energy rises into governance
       for (const s of STRANDS) {
-        const N = 28; let prev = sPoint(s, 0);
+        const N = 30; let prev = sPoint(s, 0);
         for (let i = 1; i <= N; i++) {
           const tp = i / N, t = tp * s.maxT;
           const [x, y] = sPoint(s, t);
-          const tipFade = (!s.reach && tp > 0.74) ? 1 - (tp - 0.74) / 0.26 : 1;  // short strands dissipate
-          const a = (0.03 + 0.17 * t) * s.bright * tipFade;
-          const g = (255 - 55 * t) | 0, b = (255 - 135 * t) | 0;                 // white at source → warm gold at merge
+          const tipFade = (s.cls === 2 && tp > 0.7) ? 1 - (tp - 0.7) / 0.3 : 1;  // tertiary threads fade out
+          const a = (0.04 + 0.3 * t + 0.22 * t * t) * s.bright * tipFade;        // visible along length, energy rises toward focal
+          const g = (255 - 55 * t) | 0, b = (255 - 135 * t) | 0;                 // white at source → warm gold at the mouth
           ctx.strokeStyle = `rgba(255,${g},${b},${a.toFixed(3)})`;
-          ctx.lineWidth = s.width * (0.5 + 0.8 * t);                             // taper: thin at source, full at merge
+          ctx.lineWidth = s.width * (0.5 + 0.7 * t);
           ctx.beginPath(); ctx.moveTo(prev[0] * W, prev[1] * H); ctx.lineTo(x * W, y * H); ctx.stroke();
           prev = [x, y];
         }
       }
 
-      // bright convergence field — where all ribbons merge into one governed stream
-      const mx = MERGEX * W, my = 0.5 * H;
-      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.11 * W);
-      merge.addColorStop(0, "rgba(255,231,173,0.42)"); merge.addColorStop(0.35, "rgba(233,200,120,0.16)"); merge.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = merge; ctx.fillRect(mx - 0.16 * W, my - 0.16 * W, 0.32 * W, 0.32 * W);
-      // hot core pulsing into Submit
+      // convergence node — the single brightest object on the left half, touching Submit
+      const mx = FOCAL.x * W, my = FOCAL.y * H;
       const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 520);
-      const core = ctx.createRadialGradient((MERGEX + 0.012) * W, my, 0, (MERGEX + 0.012) * W, my, 0.045 * W);
-      core.addColorStop(0, `rgba(255,240,200,${(0.35 + 0.25 * pulse).toFixed(3)})`); core.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = core; ctx.fillRect((MERGEX - 0.04) * W, my - 0.06 * W, 0.12 * W, 0.12 * W);
+      const merge = ctx.createRadialGradient(mx, my, 0, mx, my, 0.12 * W);
+      merge.addColorStop(0, "rgba(255,242,205,0.5)"); merge.addColorStop(0.22, "rgba(255,224,150,0.22)");
+      merge.addColorStop(0.55, "rgba(233,200,120,0.07)"); merge.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = merge; ctx.fillRect(mx - 0.17 * W, my - 0.17 * W, 0.34 * W, 0.34 * W);
+      const core = ctx.createRadialGradient(mx, my, 0, mx, my, 0.042 * W);
+      core.addColorStop(0, `rgba(255,250,232,${(0.4 + 0.2 * pulse).toFixed(3)})`); core.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = core; ctx.fillRect(mx - 0.06 * W, my - 0.06 * W, 0.12 * W, 0.12 * W);
 
       // particles travelling INSIDE the strands toward the merge (white→gold, brighter on arrival)
       for (const p of codes) {
