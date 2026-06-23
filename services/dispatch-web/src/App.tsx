@@ -10,6 +10,7 @@ import Security from "./pages/Security";
 import Compliance from "./pages/Compliance";
 import Evidence from "./pages/Evidence";
 import SignIn from "./pages/SignIn";
+import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Create from "./pages/Create";
 import Submit from "./pages/Submit";
@@ -18,6 +19,7 @@ import Library from "./pages/Library";
 import DocumentView from "./pages/DocumentView";
 import Audit from "./pages/Audit";
 import Sovereignty from "./pages/Sovereignty";
+import Access from "./pages/Access";
 import Integrations from "./pages/Integrations";
 import Polished from "./pages/polished/Polished";
 
@@ -37,6 +39,7 @@ const Console: React.FC = () => {
         <Route path="documents/:id" element={<DocumentView />} />
         <Route path="audit" element={<Audit />} />
         <Route path="sovereignty" element={<Sovereignty />} />
+        <Route path="access" element={<Access />} />
         <Route path="integrations" element={<Integrations />} />
         <Route path="polished" element={<Polished />} />
         <Route path="*" element={<Navigate to="/console" replace />} />
@@ -56,6 +59,8 @@ const App: React.FC = () => (
     <Route path="/security" element={<Security />} />
     <Route path="/compliance" element={<Compliance />} />
     <Route path="/evidence" element={<Evidence />} />
+    {/* public self-serve signup (free plan) */}
+    <Route path="/signup" element={<Signup />} />
     {/* gated console */}
     <Route path="/console/*" element={<Console />} />
     <Route path="*" element={<Navigate to="/" replace />} />

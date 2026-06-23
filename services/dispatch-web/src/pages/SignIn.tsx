@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { Button, Field, inputCls } from "../lib/ui";
 
@@ -32,7 +33,10 @@ const SignIn: React.FC = () => {
             {loading ? "Authenticating…" : "Sign in"}
           </Button>
         </form>
-        <p className="mt-4 text-center text-[11px] text-white/30">Sessions are held in memory and expire automatically.</p>
+        <p className="mt-4 text-center text-[12px] text-white/40">
+          New institution? <Link to="/signup" className="font-semibold text-seal-light hover:text-white">Create a free account</Link>
+        </p>
+        <p className="mt-2 text-center text-[11px] text-white/30">Sessions are held in memory and expire automatically.</p>
       </div>
     </div>
   );

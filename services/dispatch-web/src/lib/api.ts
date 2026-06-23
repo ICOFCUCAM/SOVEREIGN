@@ -36,6 +36,30 @@ export interface TokenResponse { access_token: string; token: string; tokenType:
 export const exchangeToken = (client_id: string, secret: string) =>
   request<TokenResponse>("POST", "/v1/token", { body: { client_id, secret } });
 
+// ---- admin: service-client credentials (tenant self-service; dispatch:admin) ----
+export interface ServiceClient {
+  client_id: string; name: string; scopes: string[]; clearance: string; active: boolean;
+  created_by?: string | null; created_at: string; last_used_at?: string | null; last_rotated_at?: string | null;
+}
+// The raw secret is present ONLY in the issue/rotate responses, and shown once.
+export interface IssuedCredential { client_id: string; secret: string; name?: string; scopes?: string[]; note?: string }
+
+export const listClients = () => request<{ clients: ServiceClient[] }>("GET", "/v1/admin/clients");
+export const issueClient = (name: string, scopes: string[], clearance?: string) =>
+  request<IssuedCredential>("POST", "/v1/admin/clients", { body: { name, scopes, clearance } });
+export const rotateClient = (clientId: string) =>
+  request<IssuedCredential>("POST", `/v1/admin/clients/${encodeURIComponent(clientId)}/rotate`, { body: {} });
+export const revokeClient = (clientId: string) =>
+  request<{ client_id: string; revoked: boolean }>("POST", `/v1/admin/clients/${encodeURIComponent(clientId)}/revoke`, { body: {} });
+
+// ---- self-serve signup + billing (plans / subscribe-to-download) ----
+export interface SignupResponse { tenantId: string; client_id: string; secret: string; plan: string; scopes: string[]; note?: string }
+export const signup = (name: string) => request<SignupResponse>("POST", "/v1/signup", { body: { name } });
+
+export interface Billing { plan: string; subscriptionStatus: string; documentsUsed: number; documentQuota: number; quotaRemaining: number; canDownload: boolean; activated?: boolean }
+export const getBilling = () => request<Billing>("GET", "/v1/billing");
+export const subscribe = () => request<Billing>("POST", "/v1/billing/subscribe", { body: {} });
+
 // ---- documents / lifecycle ----
 export type Lifecycle = "draft" | "submitted" | "in_review" | "approved" | "rejected" | "rendered" | "published" | "withdrawn" | "archived";
 export interface DocListItem {
