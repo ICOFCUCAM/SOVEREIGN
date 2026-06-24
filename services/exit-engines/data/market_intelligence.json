@@ -1,6 +1,6 @@
 {
- "as_of": "2026-06-23T09:00:09.835Z",
- "totalEvents": 3837,
+ "as_of": "2026-06-24T08:59:47.129Z",
+ "totalEvents": 3836,
  "disclosedEvents": 1142,
  "totalDisclosedUsd": 1413812842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1537,
+   "deals": 1536,
    "disclosedUsd": 383676561050
   },
   {
@@ -298,7 +298,7 @@
   {
    "buyer_id": "ibm",
    "name": "IBM",
-   "deals": 199,
+   "deals": 198,
    "recentDeals": 11,
    "lastDate": "2025-12-08"
   },
