@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { track } from "../lib/analytics";
 import { submitDocument, validateDocument, getGovernancePolicies, DispatchError, type ApiError, type GovernancePolicy, humanError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useBilling, UsageBanner, UpgradeModal } from "../lib/upsell";
@@ -215,6 +216,13 @@ const Create: React.FC = () => {
   const [upgrade, setUpgrade] = useState(false);
   const [policies, setPolicies] = useState<GovernancePolicy[]>([]);
   useEffect(() => { getGovernancePolicies().then((r) => setPolicies(r.policies)).catch(() => { /* non-fatal */ }); }, []);
+  // Record-creation funnel: started on arrival, created on submit, abandoned if
+  // the operator leaves the page before submitting their first record.
+  const created = useRef(false);
+  useEffect(() => {
+    track("record.create.started");
+    return () => { if (!created.current) track("record.create.abandoned"); };
+  }, []);
   // The governance the record will inherit: the policy bound to this type whose
   // classification matches (a level-specific policy beats a type-wide one).
   const policy = useMemo(() => {
@@ -258,7 +266,13 @@ const Create: React.FC = () => {
   };
   const onSubmit = async (): Promise<void> => {
     setErr(null); setBusy(true);
-    try { const req = buildRequest(); const r = await submitDocument(req, req.idempotencyKey); nav(`/console/documents/${r.documentId}`); }
+    try {
+      const req = buildRequest();
+      const r = await submitDocument(req, req.idempotencyKey);
+      created.current = true;
+      track("record.created");
+      nav(`/console/documents/${r.documentId}`);
+    }
     catch (e) {
       if (e instanceof DispatchError && e.status === 402) { setUpgrade(true); return; }
       setErr(humanError(e, "submit failed"));

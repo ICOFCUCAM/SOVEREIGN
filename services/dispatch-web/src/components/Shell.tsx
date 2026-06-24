@@ -41,6 +41,7 @@ const ADMIN_NAV: NavItem[] = [
   { to: "/admin/resilience", label: "Operational Resilience", group: "Sovereignty" },
   { to: "/admin/evidence", label: "Evaluation Package", scope: "dispatch:read", group: "Sovereignty" },
   { to: "/evaluate", label: "Executive Evaluation ↗", scope: "dispatch:read", group: "Sovereignty" },
+  { to: "/admin/executive", label: "Executive Overview", scope: "dispatch:admin", group: "Platform" },
   { to: "/admin/intake", label: "Direct DDM Intake", scope: "dispatch:render", group: "Platform" },
 ];
 

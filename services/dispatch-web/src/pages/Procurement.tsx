@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { PublicHeader, Chevron, Dot, FilmGrain, useReveal, SURFACE } from "../components/brand";
 import { DeploymentMatrix } from "../components/DeploymentMatrix";
 import { ARCHITECTURE_ROUTE } from "../lib/routes";
+import { track } from "../lib/analytics";
 
 // Procurement Package — a self-serve dossier so technical and procurement
 // reviewers can assess Sovereign Dispatch before any human contact. Every claim
@@ -23,6 +24,7 @@ const CONTENTS = [
 const Procurement: React.FC = () => {
   const nav = useNavigate();
   useReveal();
+  React.useEffect(() => track("page.procurement"), []);
   return (
     <div className="relative min-h-full bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getDocument, getJob, artifactGrant, publish, withdraw, archiveDocument, getCertificate, getGovernanceCertificate, audit, DispatchError,
   type DocumentDetail, type JobView, type ArtifactRef, type AuditEvent, type PreservationCertificate, type GovernanceCertificate, humanError } from "../lib/api";
+import { track } from "../lib/analytics";
 import { Button, Card, ClassBadge, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { UpgradeModal, useBilling } from "../lib/upsell";
@@ -72,7 +73,14 @@ const DocumentView: React.FC = () => {
 
   const lifecycleAction = async (fn: (id: string) => Promise<unknown>) => {
     if (!id) return; setBusy(true); setErr(null);
-    try { await fn(id); await load(); } catch (e) { setErr(humanError(e, "action failed")); }
+    try { await fn(id); await load(); }
+    catch (e) {
+      // A governance enforcement refusal (incomplete policy, wrong publisher,
+      // separation-of-duties) is a friction signal worth measuring distinctly.
+      if (e instanceof DispatchError && /POLICY|PUBLICATION_AUTHORITY|SOD|STEP_NOT_OPEN|SELF_APPROVAL/.test(e.code))
+        track("governance.failed", { code: e.code });
+      setErr(humanError(e, "action failed"));
+    }
     finally { setBusy(false); }
   };
 

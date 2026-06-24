@@ -147,6 +147,19 @@ export interface EvaluationAssessment {
 }
 export const getEvaluationAssessment = () => request<EvaluationAssessment>("GET", "/v1/evaluation/assessment");
 
+// ---- platform executive overview (Launch Phase 1; operator-only, cross-tenant
+// counts). 403 NOT_PLATFORM_OPERATOR for any non-operator credential. ----
+export interface PlatformOverview {
+  institutions: number;
+  activeSubscriptions: number;
+  records: number;
+  governed: number;
+  published: number;
+  archived: number;
+  events: Record<string, number>;
+}
+export const getPlatformExecutive = () => request<PlatformOverview>("GET", "/v1/analytics/executive");
+
 // ---- governance (compliance) certificate ----
 export interface GovernanceCertificate {
   recordId: string; policyName: string; policyVersion: number;

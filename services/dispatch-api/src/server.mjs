@@ -1143,6 +1143,77 @@ async function handleGetArtifact(req, res, principal, artifactId, query) {
   res.end(bytes);
 }
 
+// ---- Launch Phase 1: adoption & friction instrumentation ------------------
+// Behavioural signals that have no home in the authoritative tables (public
+// page visits, the signup funnel, paywall views, abandonment). This is signal,
+// not a record of authority — deliberately separate from the audit trail.
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Allowlist: arbitrary client-supplied event names are dropped, never stored.
+const ANALYTICS_EVENTS = new Set([
+  "page.home", "page.trust", "page.procurement", "page.evidence", "page.standard",
+  "signup.started", "signup.completed", "signup.abandoned",
+  "record.create.started", "record.create.abandoned", "record.created",
+  "paywall.viewed", "paywall.exit", "governance.failed", "publish.completed",
+]);
+const clip = (v, n) => (typeof v === "string" && v ? v.slice(0, n) : null);
+// Keep props a small, bounded, scalar-only bag — no nested payloads, no PII vectors.
+function clampProps(p) {
+  if (!p || typeof p !== "object" || Array.isArray(p)) return {};
+  const out = {};
+  for (const k of Object.keys(p).slice(0, 12)) {
+    const v = p[k];
+    if (v == null) continue;
+    if (typeof v === "string") out[String(k).slice(0, 40)] = v.slice(0, 120);
+    else if (typeof v === "number" || typeof v === "boolean") out[String(k).slice(0, 40)] = v;
+  }
+  return out;
+}
+
+// Public, unauthenticated beacon. ALWAYS returns 202 — a dropped or malformed
+// beacon must never surface to a visitor, and the endpoint must not be probeable
+// for validation differences. Unknown event names are silently ignored.
+async function handleAnalyticsIngest(req, res) {
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 202, { ok: true, accepted: 0 }); }
+  const list = Array.isArray(body?.events) ? body.events : [body];
+  const rows = list.filter((e) => e && typeof e.event === "string" && ANALYTICS_EVENTS.has(e.event)).slice(0, 50);
+  if (rows.length === 0) return send(res, 202, { ok: true, accepted: 0 });
+  try {
+    await withClaims(pool, { principal_type: "system" }, async (client) => {
+      for (const e of rows) {
+        const tenantId = UUID_RE.test(e.tenantId || "") ? e.tenantId : null;
+        await client.query(
+          "insert into dispatch.analytics_events (event, tenant_id, anon_id, session_id, props) values ($1,$2,$3,$4,$5)",
+          [e.event, tenantId, clip(e.anonId, 64), clip(e.sessionId, 64), JSON.stringify(clampProps(e.props))]
+        );
+      }
+    });
+  } catch (err) { console.error("analytics ingest:", err); /* swallow — never fail a beacon */ }
+  return send(res, 202, { ok: true, accepted: rows.length });
+}
+
+// Platform operators are designated SERVER-SIDE only (an allowlist of client_ids
+// in DISPATCH_PLATFORM_OPERATORS). No tenant can self-grant this; it is "for the
+// operator, not for customers." The cross-tenant function additionally requires
+// a platform_operator claim (set just below) — defence in depth.
+const PLATFORM_OPERATORS = new Set((process.env.DISPATCH_PLATFORM_OPERATORS || "").split(",").map((s) => s.trim()).filter(Boolean));
+function isPlatformOperator(principal) {
+  const clientId = (principal.actor || "").replace(/^svc:/, "");
+  return clientId !== "" && PLATFORM_OPERATORS.has(clientId);
+}
+
+async function handlePlatformExecutive(res, principal) {
+  if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+  if (!isPlatformOperator(principal)) return send(res, 403, errEnvelope(null, 403, "NOT_PLATFORM_OPERATOR", "platform operator credentials are required for the executive overview"));
+  const overview = await withClaims(pool, { principal_type: "system", platform_operator: "true" }, async (client) => {
+    const r = await client.query("select dispatch.platform_overview() as o");
+    return r.rows[0].o;
+  });
+  return send(res, 200, overview);
+}
+
 const server = http.createServer(async (req, res) => {
   const t0 = Date.now();
   const reqId = crypto.randomUUID();
@@ -1246,6 +1317,14 @@ const server = http.createServer(async (req, res) => {
       return await handleEvaluationAssessment(res, auth.principal);
     }
 
+    // Executive (platform-operator) overview — cross-tenant counts, gated by a
+    // server-side operator allowlist AND a defence-in-depth claim (see handler).
+    if (req.method === "GET" && path === "/v1/analytics/executive") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handlePlatformExecutive(res, auth.principal);
+    }
+
     // Governance roles / grants / delegations (read for any principal).
     const govAdminMatch = (path === "/v1/governance/roles" || path === "/v1/governance/grants" || path === "/v1/governance/delegations") && (req.method === "GET" || req.method === "POST");
     if (govAdminMatch) {
@@ -1288,6 +1367,11 @@ const server = http.createServer(async (req, res) => {
 
     // Public self-serve signup — create a FREE tenant + owner credential (no auth).
     if (path === "/v1/signup") return await handleSignup(req, res);
+
+    // Public, unauthenticated behavioural beacon (Launch Phase 1). Never fails
+    // the caller (a dropped beacon must not surface to a visitor); allowlisted
+    // event names only; no PII. See handleAnalyticsIngest.
+    if (path === "/v1/analytics/events") return await handleAnalyticsIngest(req, res);
 
     const auth = await resolvePrincipal(pool, req.headers["authorization"], withAdmin);
     if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));

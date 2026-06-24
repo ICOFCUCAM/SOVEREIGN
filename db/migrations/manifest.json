@@ -16,6 +16,7 @@
     "M13__preservation.sql",
     "M14__governance_roles.sql",
     "M15__policy_executable.sql",
-    "M16__approval_steps.sql"
+    "M16__approval_steps.sql",
+    "M17__analytics.sql"
   ]
 }

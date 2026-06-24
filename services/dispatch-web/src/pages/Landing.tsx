@@ -8,6 +8,7 @@ import {
   PLATFORM_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE,
   OUTCOMES_ROUTE, STANDARD_ROUTE,
 } from "../lib/routes";
+import { track } from "../lib/analytics";
 
 // The governed lifecycle, presented as a formal charter of articles (Concept B).
 const ARTICLES: [string, string][] = [
@@ -33,6 +34,7 @@ const NAV: { label: string; href: string }[] = [
 
 const Landing: React.FC = () => {
   const nav = useNavigate();
+  React.useEffect(() => track("page.home"), []);
   // Restrained reveal — content sections rise gently into view once, then settle.
   useReveal();
   // Whisper-subtle pointer parallax on the instrument — a few degrees of physical

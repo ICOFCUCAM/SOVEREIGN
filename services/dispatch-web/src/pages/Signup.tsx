@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { signup, type SignupResponse, humanError } from "../lib/api";
 import { Button, Field, inputCls } from "../lib/ui";
+import { track } from "../lib/analytics";
 
 // Public self-serve signup — an institution creates a FREE account and receives
 // its first credential (client_id + secret, shown once). It can then sign into
@@ -17,10 +18,22 @@ const Signup: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [entering, setEntering] = useState(false);
 
+  // Signup funnel: started on arrival, completed on account creation, abandoned
+  // if the visitor leaves before creating one. `done` distinguishes the two exits.
+  const done = useRef(false);
+  useEffect(() => {
+    track("signup.started");
+    return () => { if (!done.current) track("signup.abandoned"); };
+  }, []);
+
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true); setErr(null);
-    try { setCred(await signup(name.trim())); }
+    try {
+      setCred(await signup(name.trim()));
+      done.current = true;
+      track("signup.completed");
+    }
     catch (e2) { setErr(humanError(e2, "We couldn't create your account. Please try again.")); }
     finally { setBusy(false); }
   };

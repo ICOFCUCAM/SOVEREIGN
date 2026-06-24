@@ -37,6 +37,7 @@ import IntegrationControlCenter from "./pages/IntegrationControlCenter";
 import EvidencePackage from "./pages/EvidencePackage";
 import TrustCenter from "./pages/TrustCenter";
 import EvaluationWorkspace from "./pages/EvaluationWorkspace";
+import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import Polished from "./pages/polished/Polished";
 import { BillingProvider } from "./lib/upsell";
 
@@ -90,6 +91,7 @@ const Administration: React.FC = () => {
           <Route path="evidence" element={<EvidencePackage />} />
           <Route path="integrations" element={<IntegrationControlCenter />} />
           <Route path="intake" element={<Submit />} />
+          <Route path="executive" element={<ExecutiveDashboard />} />
           <Route path="sovereignty" element={<Sovereignty />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>

@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { bindTokenGetter, exchangeToken , humanError} from "./api";
+import { bindAnalyticsTenant } from "./analytics";
 
 // Session model: a Dispatch service token (client-credentials) held in memory.
 // We decode the JWT payload (unverified, client-side, display-only) to surface
@@ -38,7 +39,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Authorization". A ref read during render is current before any child effect runs.
   const sessionRef = useRef<Session | null>(null);
   sessionRef.current = session;
-  useEffect(() => { bindTokenGetter(() => sessionRef.current?.token ?? null); }, []);
+  useEffect(() => {
+    bindTokenGetter(() => sessionRef.current?.token ?? null);
+    bindAnalyticsTenant(() => sessionRef.current?.tenantId ?? null);
+  }, []);
 
   const signIn = useCallback(async (clientId: string, secret: string) => {
     setLoading(true); setError(null);

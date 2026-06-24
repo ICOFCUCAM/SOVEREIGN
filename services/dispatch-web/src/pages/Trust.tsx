@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { SectionHead, Card, Chevron, PublicHeader, PublicFooter, TrustStrip, FilmGrain, useReveal } from "../components/brand";
 import { PROCUREMENT_ROUTE, EVIDENCE_ROUTE } from "../lib/routes";
+import { track } from "../lib/analytics";
 
 // Trust — the public adoption-confidence page. The console's Trust Center, made
 // reachable to the people who actually decide whether to adopt: procurement,
@@ -11,6 +12,7 @@ import { PROCUREMENT_ROUTE, EVIDENCE_ROUTE } from "../lib/routes";
 const Trust: React.FC = () => {
   const nav = useNavigate();
   useReveal();
+  React.useEffect(() => track("page.trust"), []);
   return (
     <div className="relative min-h-full bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
