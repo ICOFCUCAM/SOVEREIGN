@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getBilling, subscribe, type Billing , humanError} from "./api";
 import { Button } from "./ui";
+import { track } from "./analytics";
 
 // The commercial conversion layer. The frame throughout is OUTCOMES, not plans:
 // "official records", "evaluation", "Professional" — never "free tier / paid".
@@ -72,6 +73,8 @@ const UNLOCKS = ["Unlimited official records", "PDF downloads", "DOCX exports", 
 export const UpgradeModal: React.FC<{ open: boolean; reason: "quota" | "download"; onClose: () => void; onSubscribed: (b: Billing) => void }> = ({ open, reason, onClose, onSubscribed }) => {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // The conversion moment reached — the single most important friction signal.
+  useEffect(() => { if (open) track("paywall.viewed", { reason }); }, [open, reason]);
   if (!open) return null;
   const head = reason === "download"
     ? { t: "This record has been generated.", s: "Publication artifacts are available on the Professional plan." }

@@ -92,17 +92,85 @@ export const subscribe = () => request<Billing>("POST", "/v1/billing/subscribe",
 export interface Stats { officialRecords: number; artifactsGenerated: number; approvalDecisions: number; auditEvents: number; published: number }
 export const getStats = () => request<Stats>("GET", "/v1/stats");
 
-// ---- governance policies (first-class, institution-defined) ----
-export interface ReviewStep { label: string; clearance?: string }
+// ---- governance policies (first-class, institution-defined, executable) ----
+export interface ReviewStep { role?: string; label: string; quorum?: number; clearance?: string }
 export interface GovernancePolicy {
   id?: string; name: string; docType: string; classificationLevel?: string | null;
   requiredApprovals: number; reviewChain: ReviewStep[];
   approvalAuthority?: string | null; publicationAuthority?: string | null;
   retentionDays?: number | null; autoApproveService?: boolean; autoApproveUser?: boolean; active?: boolean;
-  updatedAt?: string;
+  sequential?: boolean; approvalTtlDays?: number | null; policyVersion?: number; updatedAt?: string;
 }
 export const getGovernancePolicies = () => request<{ policies: GovernancePolicy[] }>("GET", "/v1/governance/policies");
 export const upsertGovernancePolicy = (p: GovernancePolicy) => request<{ id: string }>("POST", "/v1/governance/policies", { body: p });
+
+// ---- governance roles / grants / delegations (authority directory) ----
+export interface GovRole { key: string; label: string }
+export interface GovGrant { subject: string; role_key: string }
+export interface GovDelegation { role_key: string; delegate_subject: string; grantor_subject?: string | null; reason?: string | null; starts_at?: string; ends_at: string; expired?: boolean }
+export const getGovernance = () => request<{ roles: GovRole[]; grants: GovGrant[]; delegations: GovDelegation[] }>("GET", "/v1/governance/roles");
+export const createGovRole = (key: string, label: string) => request<{ key: string }>("POST", "/v1/governance/roles", { body: { key, label } });
+export const grantGovRole = (subject: string, roleKey: string) => request<{ subject: string }>("POST", "/v1/governance/grants", { body: { subject, roleKey } });
+export const createDelegation = (d: { roleKey: string; delegateSubject: string; grantorSubject?: string; reason?: string; endsAt: string }) =>
+  request<{ delegated: boolean }>("POST", "/v1/governance/delegations", { body: d });
+
+// ---- governance overview (monitor + compliance) ----
+export interface GovPending { documentId: string; title: string; docType: string; classification: { level?: string }; submittedAt?: string; awaiting: string; policyName?: string | null }
+export interface GovOverview {
+  pending: GovPending[];
+  awaitingPublication: { documentId: string; title: string; docType: string; classification: { level?: string } }[];
+  delegations: GovDelegation[];
+  compliance: { published: number; preserved: number; governed: number; compliant: number; complianceRate: number; exceptions: number; expiredAuthorities: number };
+}
+export const getGovernanceOverview = () => request<GovOverview>("GET", "/v1/governance/overview");
+
+// ---- governance intelligence (analytics) ----
+export interface GovIntelligence {
+  cycleHours: { submitToApprove: number | null; approveToPublish: number | null; publishToArchive: number | null };
+  oldestInFlight: { documentId: string; title: string; docType: string; classification: { level?: string }; hoursWaiting: number | null; awaiting?: string }[];
+  policyPerformance: { policy: string; volume: number; avgDays: number | null; complianceRate: number }[];
+  throughput: { day: string; count: number }[];
+  authorityPerformance: { role: string; avgResponseHours: number | null; decisions: number }[];
+  workloadByAuthority: { role: string; count: number }[];
+  aging: { bucket: string; count: number }[];
+  atRisk: { documentId: string; title: string; docType: string; classification: { level?: string }; role: string; hoursLeft: number | null }[];
+}
+export const getGovernanceIntelligence = () => request<GovIntelligence>("GET", "/v1/governance/intelligence");
+
+// ---- evaluation assessment (platform-generated evidence) ----
+export type MaturityStatus = "active" | "configurable" | "architected";
+export interface EvaluationAssessment {
+  summary: { published: number; preserved: number; governed: number; compliant: number; complianceRate: number; policies: number; chainedPolicies: number; authorities: number; apiConsumers: number };
+  maturity: { capability: string; status: MaturityStatus; evidence: string }[];
+  dimensions: { name: string; score: number }[];
+  overall: number;
+}
+export const getEvaluationAssessment = () => request<EvaluationAssessment>("GET", "/v1/evaluation/assessment");
+
+// ---- platform executive overview (Launch Phase 1; operator-only, cross-tenant
+// counts). 403 NOT_PLATFORM_OPERATOR for any non-operator credential. ----
+export interface PlatformOverview {
+  institutions: number;
+  activeSubscriptions: number;
+  records: number;
+  governed: number;
+  published: number;
+  archived: number;
+  events: Record<string, number>;
+}
+export const getPlatformExecutive = () => request<PlatformOverview>("GET", "/v1/analytics/executive");
+
+// ---- governance (compliance) certificate ----
+export interface GovernanceCertificate {
+  recordId: string; policyName: string; policyVersion: number;
+  requiredRoles: { step: number; role: string; label: string; quorum: number }[];
+  actualRoles: { step: number; role: string; label: string; satisfiedBy: string[] }[];
+  approvalSequence: { role: string; actor: string; onBehalfOf?: string | null; decidedAt: string }[];
+  delegations: { role: string; actor: string; onBehalfOf: string }[];
+  separationOfDuties: string; publishedBy: string; publicationAuthority?: string | null;
+  complianceResult: string; integrityProof: string;
+}
+export const getGovernanceCertificate = (id: string) => request<{ certificate: GovernanceCertificate }>("GET", `/v1/documents/${id}/governance-certificate`);
 
 // ---- documents / lifecycle ----
 export type Lifecycle = "draft" | "submitted" | "in_review" | "approved" | "rejected" | "rendered" | "published" | "withdrawn" | "archived";

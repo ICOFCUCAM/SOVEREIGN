@@ -34,7 +34,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
     <div>
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-white">{title ?? "Official Records"}</h1>
-        <p className="text-sm text-white/50">{blurb ?? "The institutional record — every document, version, classification and retention horizon you are cleared to see."}</p>
+        <p className="text-sm text-white/50">{blurb ?? "The institutional record — every official record, version, classification and retention horizon you are cleared to see."}</p>
       </header>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -52,7 +52,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
 
       <Card>
         {loading ? <p className="px-4 py-6 text-sm text-white/40">Loading…</p>
-          : items.length === 0 ? <p className="px-4 py-10 text-center text-sm text-white/30">No documents match.</p>
+          : items.length === 0 ? <p className="px-4 py-10 text-center text-sm text-white/30">No records match.</p>
           : (
             <table className="w-full text-sm">
               <thead>

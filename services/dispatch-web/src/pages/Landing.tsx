@@ -6,7 +6,9 @@ import { DispatchMark, Chevron, PublicFooter, TrustStrip, FilmGrain, useReveal }
 import {
   PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE,
   PLATFORM_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE,
+  OUTCOMES_ROUTE, STANDARD_ROUTE,
 } from "../lib/routes";
+import { track } from "../lib/analytics";
 
 // The governed lifecycle, presented as a formal charter of articles (Concept B).
 const ARTICLES: [string, string][] = [
@@ -20,7 +22,8 @@ const ARTICLES: [string, string][] = [
 // relocated section pages (Platform, Security, Compliance, Procurement).
 const NAV: { label: string; href: string }[] = [
   { label: "Why", href: "#why" },
-  { label: "Pillars", href: "#pillars" },
+  { label: "Outcomes", href: OUTCOMES_ROUTE },
+  { label: "Standard", href: STANDARD_ROUTE },
   { label: "Lifecycle", href: "#lifecycle" },
   { label: "Institutions", href: "#institutions" },
   { label: "Platform", href: PLATFORM_ROUTE },
@@ -31,6 +34,7 @@ const NAV: { label: string; href: string }[] = [
 
 const Landing: React.FC = () => {
   const nav = useNavigate();
+  React.useEffect(() => track("page.home"), []);
   // Restrained reveal — content sections rise gently into view once, then settle.
   useReveal();
   // Whisper-subtle pointer parallax on the instrument — a few degrees of physical

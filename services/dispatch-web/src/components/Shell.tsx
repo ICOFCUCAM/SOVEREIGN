@@ -12,7 +12,7 @@ import { useBilling, QuotaMeter, UpgradeModal } from "../lib/upsell";
 // route guards (App.tsx) keep operators out of /admin and vice-versa.
 export type ConsoleVariant = "operations" | "administration";
 
-type NavItem = { to: string; label: string; scope?: string; end?: boolean };
+type NavItem = { to: string; label: string; scope?: string; end?: boolean; group?: string };
 
 const OPERATIONS_NAV: NavItem[] = [
   { to: "/console", label: "Dashboard", end: true },
@@ -23,13 +23,26 @@ const OPERATIONS_NAV: NavItem[] = [
   { to: "/console/audit", label: "Evidence", scope: "dispatch:audit" },
 ];
 
+// Administration is an institutional governance product organised by operational
+// domain — Identity (who holds authority), Governance (how records are governed),
+// Compliance (can we prove it) — not a flat list of database tables.
 const ADMIN_NAV: NavItem[] = [
   { to: "/admin", label: "Overview", end: true },
-  { to: "/admin/access", label: "Identity & Access", scope: "dispatch:admin" },
-  { to: "/admin/governance", label: "Governance Policies", scope: "dispatch:admin" },
-  { to: "/admin/integrations", label: "Integrations" },
-  { to: "/admin/intake", label: "Direct DDM Intake", scope: "dispatch:render" },
-  { to: "/admin/sovereignty", label: "Data Sovereignty" },
+  { to: "/admin/authority", label: "Authority Directory", scope: "dispatch:admin", group: "Identity" },
+  { to: "/admin/access", label: "Credentials & Access", scope: "dispatch:admin", group: "Identity" },
+  { to: "/admin/governance", label: "Policy Studio", scope: "dispatch:admin", group: "Governance" },
+  { to: "/admin/monitor", label: "Governance Monitor", scope: "dispatch:read", group: "Governance" },
+  { to: "/admin/compliance", label: "Audit & Compliance", scope: "dispatch:read", group: "Compliance" },
+  { to: "/admin/intelligence", label: "Intelligence", scope: "dispatch:read", group: "Compliance" },
+  { to: "/admin/trust", label: "Trust Center", scope: "dispatch:read", group: "Sovereignty" },
+  { to: "/admin/deployment", label: "Deployment", group: "Sovereignty" },
+  { to: "/admin/sovereignty", label: "Data Sovereignty", group: "Sovereignty" },
+  { to: "/admin/integrations", label: "Integrations", group: "Sovereignty" },
+  { to: "/admin/resilience", label: "Operational Resilience", group: "Sovereignty" },
+  { to: "/admin/evidence", label: "Evaluation Package", scope: "dispatch:read", group: "Sovereignty" },
+  { to: "/evaluate", label: "Executive Evaluation ↗", scope: "dispatch:read", group: "Sovereignty" },
+  { to: "/admin/executive", label: "Executive Overview", scope: "dispatch:admin", group: "Platform" },
+  { to: "/admin/intake", label: "Direct DDM Intake", scope: "dispatch:render", group: "Platform" },
 ];
 
 const PRODUCT: Record<ConsoleVariant, { label: string; tag: string; nav: NavItem[]; home: string }> = {
@@ -68,13 +81,18 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
               <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-seal-light">{product.label}</div>
             </div>
           </div>
-          <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-            {items.map((n) => (
-              <NavLink key={n.to} to={n.to} end={n.end}
-                className={({ isActive }) =>
-                  `block rounded-md px-3 py-2 text-sm font-semibold uppercase tracking-wide transition ${isActive ? "bg-seal/30 text-white ring-1 ring-seal-light/40" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>
-                {n.label}
-              </NavLink>
+          <nav className="flex-1 overflow-y-auto px-3 py-4">
+            {items.map((n, i) => (
+              <React.Fragment key={n.to}>
+                {n.group && n.group !== items[i - 1]?.group && (
+                  <div className="px-3 pb-1 pt-4 text-[10px] font-bold uppercase tracking-[0.22em] text-white/30">{n.group}</div>
+                )}
+                <NavLink to={n.to} end={n.end}
+                  className={({ isActive }) =>
+                    `block rounded-md px-3 py-2 text-sm font-semibold uppercase tracking-wide transition ${isActive ? "bg-seal/30 text-white ring-1 ring-seal-light/40" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>
+                  {n.label}
+                </NavLink>
+              </React.Fragment>
             ))}
           </nav>
           {/* product switcher — only for principals with access to the other product */}

@@ -1,134 +1,157 @@
 import React, { useEffect, useState } from "react";
-import { getGovernancePolicies, upsertGovernancePolicy, type GovernancePolicy, humanError } from "../lib/api";
+import { getGovernancePolicies, upsertGovernancePolicy, getGovernance, type GovernancePolicy, type GovRole, humanError } from "../lib/api";
 import { Button, Card, Field, inputCls } from "../lib/ui";
 import { RECORD_TYPES, recordTypeLabel } from "../lib/recordTypes";
 
-// Governance Policies — the real product. Institutions do not buy record
-// creation; they buy CONTROL over how records are created. An admin defines a
-// named policy bound to a record type: who reviews (an ordered chain), who
-// approves, who publishes, how long it is retained. Records inherit governance
-// from the policy — humans do not assemble a workflow each time.
-
+// Governance Policy Studio — institutions DESIGN how records are governed, with a
+// visual chain builder. No JSON, no schema: pick a record type, build the ordered
+// review chain from named authorities with quorums, choose who may publish, set
+// the machine lane and retention. The policy becomes the executable control.
 const LEVELS = ["", "UNCLASSIFIED", "OFFICIAL", "OFFICIAL-SENSITIVE", "CONFIDENTIAL"];
 
 const blank: GovernancePolicy = {
   name: "", docType: RECORD_TYPES[0].docType, classificationLevel: "",
-  requiredApprovals: 1, reviewChain: [{ label: "" }],
-  approvalAuthority: "", publicationAuthority: "", retentionDays: undefined, active: true,
+  requiredApprovals: 1, reviewChain: [{ role: "", label: "", quorum: 1 }],
+  approvalAuthority: "", publicationAuthority: "", retentionDays: undefined,
+  autoApproveService: false, sequential: true, approvalTtlDays: undefined, active: true,
 };
 
 const GovernancePolicies: React.FC = () => {
   const [policies, setPolicies] = useState<GovernancePolicy[] | null>(null);
+  const [roles, setRoles] = useState<GovRole[]>([]);
   const [form, setForm] = useState<GovernancePolicy>(blank);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  const load = () => getGovernancePolicies().then((r) => setPolicies(r.policies)).catch((e) => setErr(humanError(e, "Could not load policies.")));
+  const load = () => Promise.all([getGovernancePolicies(), getGovernance()])
+    .then(([p, g]) => { setPolicies(p.policies); setRoles(g.roles); })
+    .catch((e) => setErr(humanError(e, "Could not load the policy studio.")));
   useEffect(() => { load(); }, []);
 
-  const setChain = (i: number, label: string) => setForm((f) => ({ ...f, reviewChain: f.reviewChain.map((s, j) => (j === i ? { label } : s)) }));
-  const addStep = () => setForm((f) => ({ ...f, reviewChain: [...f.reviewChain, { label: "" }] }));
+  const roleLabel = (key?: string) => roles.find((r) => r.key === key)?.label || key || "—";
+  const setStep = (i: number, patch: Partial<{ role: string; quorum: number }>) =>
+    setForm((f) => ({ ...f, reviewChain: f.reviewChain.map((s, j) => (j === i ? { ...s, ...patch, label: patch.role ? roleLabel(patch.role) : s.label } : s)) }));
+  const addStep = () => setForm((f) => ({ ...f, reviewChain: [...f.reviewChain, { role: "", label: "", quorum: 1 }] }));
   const removeStep = (i: number) => setForm((f) => ({ ...f, reviewChain: f.reviewChain.filter((_, j) => j !== i) }));
 
-  const edit = (p: GovernancePolicy) => { setForm({ ...p, classificationLevel: p.classificationLevel ?? "", reviewChain: p.reviewChain.length ? p.reviewChain : [{ label: "" }] }); setSaved(false); setErr(null); };
+  const edit = (p: GovernancePolicy) => { setForm({ ...p, classificationLevel: p.classificationLevel ?? "", reviewChain: p.reviewChain.length ? p.reviewChain : [{ role: "", label: "", quorum: 1 }] }); setSaved(false); setErr(null); };
   const reset = () => { setForm(blank); setSaved(false); setErr(null); };
 
   const save = async () => {
     setBusy(true); setErr(null); setSaved(false);
     try {
+      const chain = form.reviewChain.filter((s) => s.role).map((s) => ({ role: s.role, label: roleLabel(s.role), quorum: Math.max(1, Number(s.quorum) || 1) }));
       await upsertGovernancePolicy({
-        ...form,
-        classificationLevel: form.classificationLevel || null,
-        reviewChain: form.reviewChain.filter((s) => s.label.trim()).map((s) => ({ label: s.label.trim() })),
+        ...form, classificationLevel: form.classificationLevel || null, reviewChain: chain,
+        requiredApprovals: chain.length || form.requiredApprovals,
         retentionDays: form.retentionDays ? Number(form.retentionDays) : null,
+        approvalTtlDays: form.approvalTtlDays ? Number(form.approvalTtlDays) : null,
       });
       setSaved(true); reset(); load();
     } catch (e) { setErr(humanError(e, "Could not save the policy.")); }
     finally { setBusy(false); }
   };
 
+  const noRoles = roles.length === 0;
+
   return (
     <div>
       <header className="mb-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Administration</div>
-        <h1 className="mt-1 text-2xl font-bold text-white">Governance Policies</h1>
-        <p className="text-sm text-white/50">Define how official records are reviewed, approved, published and retained. Records inherit governance from the policy that matches their type.</p>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Governance</div>
+        <h1 className="mt-1 text-2xl font-bold text-white">Policy Studio</h1>
+        <p className="text-sm text-white/50">Design how official records are governed — an ordered chain of authorities, quorums, the publication authority, and retention. Records inherit and are controlled by the policy.</p>
       </header>
-
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
-      {saved && <div className="mb-4 rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">Policy saved. Records of this type now inherit it.</div>}
+      {saved && <div className="mb-4 rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">Policy saved. Records of this type are now controlled by it.</div>}
+      {noRoles && <div className="mb-4 rounded border border-amber-500/30 bg-amber-500/[0.06] px-3 py-2 text-sm text-amber-200">Define authorities in the <span className="font-semibold">Authority Directory</span> first — a chain step references a named authority (e.g. Director).</div>}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         {/* existing policies */}
         <div className="space-y-3">
           {policies === null ? <p className="text-sm text-white/40">Loading…</p>
             : policies.length === 0 ? (
-              <Card className="p-8 text-center">
-                <p className="text-sm text-white/50">No governance policies yet.</p>
-                <p className="mt-1 text-[12px] text-white/35">Define one on the right. Until then, records follow the platform default (single approval; machine lane auto-approves).</p>
-              </Card>
+              <Card className="p-8 text-center"><p className="text-sm text-white/50">No governance policies yet.</p><p className="mt-1 text-[12px] text-white/35">Records follow the platform default until a policy is defined.</p></Card>
             ) : policies.map((p) => (
               <Card key={p.id} className="p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="text-sm font-bold text-white">{p.name || "(unnamed policy)"}</div>
-                    <div className="mt-0.5 text-[12px] text-white/45">{recordTypeLabel(p.docType)}{p.classificationLevel ? ` · ${p.classificationLevel}` : ""}</div>
+                    <div className="flex items-center gap-2"><span className="text-sm font-bold text-white">{p.name || "(unnamed)"}</span>
+                      <span className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[10px] text-white/45">v{p.policyVersion ?? 1}</span></div>
+                    <div className="mt-0.5 text-[12px] text-white/45">{recordTypeLabel(p.docType)}{p.classificationLevel ? ` · ${p.classificationLevel}` : ""} · {p.sequential === false ? "parallel" : "ordered"}</div>
                   </div>
                   <button onClick={() => edit(p)} className="shrink-0 text-[12px] font-semibold text-seal-light hover:text-white">Edit</button>
                 </div>
+                {/* visual chain */}
                 <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[12px]">
-                  <span className="text-white/40">Review:</span>
-                  {(p.reviewChain ?? []).length === 0 ? <span className="text-white/35">—</span> : p.reviewChain.map((s, i) => (
-                    <React.Fragment key={i}>
-                      <span className="rounded bg-white/5 px-2 py-0.5 text-white/75">{s.label}</span>
-                      {i < p.reviewChain.length - 1 && <span className="text-white/25" aria-hidden>→</span>}
-                    </React.Fragment>
-                  ))}
+                  {(p.reviewChain ?? []).filter((s) => s.role || s.label).length === 0 ? <span className="text-white/35">No enforced chain (display-only)</span> :
+                    p.reviewChain.map((s, i) => (
+                      <React.Fragment key={i}>
+                        <span className="rounded bg-seal/20 px-2 py-0.5 text-white/85 ring-1 ring-seal-light/25">{roleLabel(s.role) }{s.quorum && s.quorum > 1 ? ` ×${s.quorum}` : ""}</span>
+                        {i < p.reviewChain.length - 1 && <span className="text-white/25" aria-hidden>→</span>}
+                      </React.Fragment>
+                    ))}
+                  {p.publicationAuthority && <><span className="text-white/25" aria-hidden>⇒</span><span className="rounded bg-emerald-500/15 px-2 py-0.5 text-emerald-300">{roleLabel(p.publicationAuthority)}</span></>}
                 </div>
-                <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-[12px]">
-                  <div><dt className="inline text-white/40">Approval authority: </dt><dd className="inline text-white/70">{p.approvalAuthority || "—"}</dd></div>
-                  <div><dt className="inline text-white/40">Publication: </dt><dd className="inline text-white/70">{p.publicationAuthority || "—"}</dd></div>
-                  <div><dt className="inline text-white/40">Approvals required: </dt><dd className="inline text-white/70">{p.requiredApprovals}</dd></div>
-                  <div><dt className="inline text-white/40">Retention: </dt><dd className="inline text-white/70">{p.retentionDays ? `${p.retentionDays} days` : "—"}</dd></div>
-                </dl>
+                <div className="mt-2 flex flex-wrap gap-x-4 text-[11px] text-white/40">
+                  {p.autoApproveService && <span>machine lane: on</span>}
+                  {p.approvalTtlDays ? <span>approval expires: {p.approvalTtlDays}d</span> : null}
+                  {p.retentionDays ? <span>retention: {p.retentionDays}d</span> : null}
+                </div>
               </Card>
             ))}
         </div>
 
-        {/* policy editor */}
+        {/* the studio editor */}
         <Card className="space-y-4 self-start p-5">
           <div className="text-sm font-bold text-white">{form.id ? "Edit policy" : "New policy"}</div>
           <Field label="Policy name"><input className={inputCls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ministerial Briefing Policy" /></Field>
-          <Field label="Applies to record type">
-            <select className={inputCls} value={form.docType} onChange={(e) => setForm({ ...form, docType: e.target.value })}>
-              {RECORD_TYPES.map((t) => <option key={t.docType} value={t.docType}>{t.label}</option>)}
-            </select>
-          </Field>
-          <Field label="Classification (optional)" hint="Leave blank to apply to all classifications of this type.">
-            <select className={inputCls} value={form.classificationLevel ?? ""} onChange={(e) => setForm({ ...form, classificationLevel: e.target.value })}>
-              {LEVELS.map((l) => <option key={l} value={l}>{l === "" ? "Any classification" : l}</option>)}
-            </select>
-          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Record type">
+              <select className={inputCls} value={form.docType} onChange={(e) => setForm({ ...form, docType: e.target.value })}>
+                {RECORD_TYPES.map((t) => <option key={t.docType} value={t.docType}>{t.label}</option>)}
+              </select>
+            </Field>
+            <Field label="Classification">
+              <select className={inputCls} value={form.classificationLevel ?? ""} onChange={(e) => setForm({ ...form, classificationLevel: e.target.value })}>
+                {LEVELS.map((l) => <option key={l} value={l}>{l === "" ? "Any" : l}</option>)}
+              </select>
+            </Field>
+          </div>
 
+          {/* visual chain builder */}
           <div>
-            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/50">Review chain</span>
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wide text-white/50">Approval chain</span>
+              <label className="flex items-center gap-1.5 text-[11px] text-white/55"><input type="checkbox" checked={form.sequential !== false} onChange={(e) => setForm({ ...form, sequential: e.target.checked })} />ordered</label>
+            </div>
             <div className="space-y-2">
               {form.reviewChain.map((s, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <span className="w-5 shrink-0 text-center text-[11px] text-white/35">{i + 1}</span>
-                  <input className={inputCls} value={s.label} onChange={(e) => setChain(i, e.target.value)} placeholder={i === 0 ? "Director" : "Secretary General"} />
-                  {form.reviewChain.length > 1 && <button onClick={() => removeStep(i)} className="shrink-0 text-white/30 hover:text-red-300" aria-label="Remove step">✕</button>}
+                  <span className="w-4 shrink-0 text-center text-[11px] text-white/35">{i + 1}</span>
+                  <select className={`${inputCls} flex-1`} value={s.role ?? ""} onChange={(e) => setStep(i, { role: e.target.value })}>
+                    <option value="">Select authority…</option>
+                    {roles.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
+                  </select>
+                  <div className="flex items-center gap-1 text-[11px] text-white/40">×<input type="number" min={1} max={9} className={`${inputCls} w-12 px-2`} value={s.quorum ?? 1} onChange={(e) => setStep(i, { quorum: Number(e.target.value) })} /></div>
+                  {form.reviewChain.length > 1 && <button onClick={() => removeStep(i)} className="shrink-0 text-white/30 hover:text-red-300" aria-label="Remove">✕</button>}
                 </div>
               ))}
             </div>
-            <button onClick={addStep} className="mt-2 text-[12px] font-semibold text-seal-light hover:text-white">+ Add reviewer</button>
+            <button onClick={addStep} className="mt-2 text-[12px] font-semibold text-seal-light hover:text-white">+ Add approval step</button>
           </div>
 
-          <Field label="Approval authority"><input className={inputCls} value={form.approvalAuthority ?? ""} onChange={(e) => setForm({ ...form, approvalAuthority: e.target.value })} placeholder="Chief Secretary" /></Field>
-          <Field label="Publication authority"><input className={inputCls} value={form.publicationAuthority ?? ""} onChange={(e) => setForm({ ...form, publicationAuthority: e.target.value })} placeholder="Ministry Communications Office" /></Field>
+          <Field label="Publication authority">
+            <select className={inputCls} value={form.publicationAuthority ?? ""} onChange={(e) => setForm({ ...form, publicationAuthority: e.target.value })}>
+              <option value="">Anyone with publish permission</option>
+              {roles.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
+            </select>
+          </Field>
+
+          <label className="flex items-center gap-2 text-sm text-white/80"><input type="checkbox" checked={!!form.autoApproveService} onChange={(e) => setForm({ ...form, autoApproveService: e.target.checked })} />Machine lane — service integrations auto-satisfy</label>
+
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Approvals required"><input type="number" min={0} max={5} className={inputCls} value={form.requiredApprovals} onChange={(e) => setForm({ ...form, requiredApprovals: Number(e.target.value) })} /></Field>
+            <Field label="Approval expires (days)"><input type="number" min={0} className={inputCls} value={form.approvalTtlDays ?? ""} onChange={(e) => setForm({ ...form, approvalTtlDays: e.target.value ? Number(e.target.value) : undefined })} placeholder="30" /></Field>
             <Field label="Retention (days)"><input type="number" min={0} className={inputCls} value={form.retentionDays ?? ""} onChange={(e) => setForm({ ...form, retentionDays: e.target.value ? Number(e.target.value) : undefined })} placeholder="3650" /></Field>
           </div>
 

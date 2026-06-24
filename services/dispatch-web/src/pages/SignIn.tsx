@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { Button, Field, inputCls } from "../lib/ui";
+import { DispatchMark } from "../components/brand";
 
 // Client-credentials sign-in. The console authenticates with a Dispatch service
 // client_id + secret (exchanged for a short-lived JWT). Human SSO (Supabase
@@ -15,9 +16,11 @@ const SignIn: React.FC = () => {
     <div className="flex min-h-full items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-seal text-lg font-black text-white">SD</div>
-          <h1 className="text-xl font-bold text-white">Sovereign Dispatch</h1>
-          <p className="mt-1 text-sm text-white/50">Institutional publication infrastructure</p>
+          <div className="mb-4 flex items-center justify-center gap-2.5">
+            <DispatchMark className="h-8 w-8 text-seal-light" />
+            <span className="text-lg font-bold tracking-tight text-white">SOVEREIGN <span className="text-seal-light">DISPATCH</span></span>
+          </div>
+          <p className="mt-1 text-sm text-white/50">From information to official record.</p>
         </div>
         <form
           onSubmit={(e) => { e.preventDefault(); signIn(clientId.trim(), secret).catch(() => {}); }}

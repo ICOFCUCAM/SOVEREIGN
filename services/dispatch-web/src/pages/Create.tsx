@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { track } from "../lib/analytics";
 import { submitDocument, validateDocument, getGovernancePolicies, DispatchError, type ApiError, type GovernancePolicy, humanError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useBilling, UsageBanner, UpgradeModal } from "../lib/upsell";
@@ -215,6 +216,13 @@ const Create: React.FC = () => {
   const [upgrade, setUpgrade] = useState(false);
   const [policies, setPolicies] = useState<GovernancePolicy[]>([]);
   useEffect(() => { getGovernancePolicies().then((r) => setPolicies(r.policies)).catch(() => { /* non-fatal */ }); }, []);
+  // Record-creation funnel: started on arrival, created on submit, abandoned if
+  // the operator leaves the page before submitting their first record.
+  const created = useRef(false);
+  useEffect(() => {
+    track("record.create.started");
+    return () => { if (!created.current) track("record.create.abandoned"); };
+  }, []);
   // The governance the record will inherit: the policy bound to this type whose
   // classification matches (a level-specific policy beats a type-wide one).
   const policy = useMemo(() => {
@@ -258,7 +266,13 @@ const Create: React.FC = () => {
   };
   const onSubmit = async (): Promise<void> => {
     setErr(null); setBusy(true);
-    try { const req = buildRequest(); const r = await submitDocument(req, req.idempotencyKey); nav(`/console/documents/${r.documentId}`); }
+    try {
+      const req = buildRequest();
+      const r = await submitDocument(req, req.idempotencyKey);
+      created.current = true;
+      track("record.created");
+      nav(`/console/documents/${r.documentId}`);
+    }
     catch (e) {
       if (e instanceof DispatchError && e.status === 402) { setUpgrade(true); return; }
       setErr(humanError(e, "submit failed"));
@@ -272,7 +286,7 @@ const Create: React.FC = () => {
       <header className="mb-6">
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Official Record</div>
         <h1 className="mt-1 text-2xl font-bold text-white">Create Official Record</h1>
-        <p className="text-sm text-white/50">Choose a record type and author its content. It enters the governance chain for review and approval before publication — no formatting, markup, or technical knowledge required.</p>
+        <p className="text-sm text-white/50">Choose a record type and author its content. It enters the approval chain for review and approval before publication — no formatting, markup, or technical knowledge required.</p>
       </header>
       {billing && <UsageBanner b={billing} onUpgrade={() => setUpgrade(true)} className="mb-6" />}
 
@@ -318,7 +332,7 @@ const Create: React.FC = () => {
                   <div className="text-sm font-semibold text-seal-light">{policy.name}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] uppercase tracking-wide text-white/35">Review chain</div>
+                  <div className="text-[11px] uppercase tracking-wide text-white/35">Approval chain</div>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {(policy.reviewChain ?? []).length === 0 ? <span className="text-[12px] text-white/40">—</span> : policy.reviewChain.map((s, i) => (
                       <React.Fragment key={i}>
@@ -332,7 +346,7 @@ const Create: React.FC = () => {
                 {policy.publicationAuthority && <div className="text-[12px]"><span className="text-white/35">Publication: </span><span className="text-white/80">{policy.publicationAuthority}</span></div>}
               </div>
             ) : (
-              <p className="text-[12px] leading-snug text-white/40">Platform default — a single approval governs this record. Define a governance policy for this record type in Administration to set a review chain and publication authority.</p>
+              <p className="text-[12px] leading-snug text-white/40">Platform default — a single approval governs this record. Define a governance policy for this record type in Administration to set an approval chain and publication authority.</p>
             )}
           </Card>
           <Card className="p-4">
