@@ -32,6 +32,7 @@ import OperationalResilience from "./pages/OperationalResilience";
 import IntegrationControlCenter from "./pages/IntegrationControlCenter";
 import EvidencePackage from "./pages/EvidencePackage";
 import TrustCenter from "./pages/TrustCenter";
+import EvaluationWorkspace from "./pages/EvaluationWorkspace";
 import Polished from "./pages/polished/Polished";
 import { BillingProvider } from "./lib/upsell";
 
@@ -93,6 +94,15 @@ const Administration: React.FC = () => {
   );
 };
 
+// Product 3 — the Executive Evaluation Workspace (procurement / board audience).
+// Requires a session (the assessment derives from the tenant's live posture);
+// its own focused chrome, not the operations or administration shell.
+const Evaluation: React.FC = () => {
+  const { session } = useAuth();
+  if (!session) return <SignIn />;
+  return <EvaluationWorkspace />;
+};
+
 const App: React.FC = () => (
   <Routes>
     {/* public marketing landing — the front door */}
@@ -111,6 +121,8 @@ const App: React.FC = () => (
     <Route path="/console/*" element={<Operations />} />
     {/* product 2 — platform administration */}
     <Route path="/admin/*" element={<Administration />} />
+    {/* product 3 — executive evaluation (procurement / board) */}
+    <Route path="/evaluate" element={<Evaluation />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );

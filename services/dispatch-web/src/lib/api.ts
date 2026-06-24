@@ -137,6 +137,16 @@ export interface GovIntelligence {
 }
 export const getGovernanceIntelligence = () => request<GovIntelligence>("GET", "/v1/governance/intelligence");
 
+// ---- evaluation assessment (platform-generated evidence) ----
+export type MaturityStatus = "active" | "configurable" | "architected";
+export interface EvaluationAssessment {
+  summary: { published: number; preserved: number; governed: number; compliant: number; complianceRate: number; policies: number; chainedPolicies: number; authorities: number; apiConsumers: number };
+  maturity: { capability: string; status: MaturityStatus; evidence: string }[];
+  dimensions: { name: string; score: number }[];
+  overall: number;
+}
+export const getEvaluationAssessment = () => request<EvaluationAssessment>("GET", "/v1/evaluation/assessment");
+
 // ---- governance (compliance) certificate ----
 export interface GovernanceCertificate {
   recordId: string; policyName: string; policyVersion: number;
