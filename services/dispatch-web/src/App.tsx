@@ -20,13 +20,16 @@ import DocumentView from "./pages/DocumentView";
 import Audit from "./pages/Audit";
 import Sovereignty from "./pages/Sovereignty";
 import Access from "./pages/Access";
-import Integrations from "./pages/Integrations";
 import AdminHome from "./pages/AdminHome";
 import GovernancePolicies from "./pages/GovernancePolicies";
 import AuthorityDirectory from "./pages/AuthorityDirectory";
 import GovernanceMonitor from "./pages/GovernanceMonitor";
 import ComplianceDashboard from "./pages/ComplianceDashboard";
 import GovernanceIntelligence from "./pages/GovernanceIntelligence";
+import DeploymentArchitecture from "./pages/DeploymentArchitecture";
+import OperationalResilience from "./pages/OperationalResilience";
+import IntegrationControlCenter from "./pages/IntegrationControlCenter";
+import EvidencePackage from "./pages/EvidencePackage";
 import Polished from "./pages/polished/Polished";
 import { BillingProvider } from "./lib/upsell";
 
@@ -74,7 +77,10 @@ const Administration: React.FC = () => {
           <Route path="monitor" element={<GovernanceMonitor />} />
           <Route path="compliance" element={<ComplianceDashboard />} />
           <Route path="intelligence" element={<GovernanceIntelligence />} />
-          <Route path="integrations" element={<Integrations />} />
+          <Route path="deployment" element={<DeploymentArchitecture />} />
+          <Route path="resilience" element={<OperationalResilience />} />
+          <Route path="evidence" element={<EvidencePackage />} />
+          <Route path="integrations" element={<IntegrationControlCenter />} />
           <Route path="intake" element={<Submit />} />
           <Route path="sovereignty" element={<Sovereignty />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />

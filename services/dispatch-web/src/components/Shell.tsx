@@ -34,9 +34,12 @@ const ADMIN_NAV: NavItem[] = [
   { to: "/admin/monitor", label: "Governance Monitor", scope: "dispatch:read", group: "Governance" },
   { to: "/admin/compliance", label: "Audit & Compliance", scope: "dispatch:read", group: "Compliance" },
   { to: "/admin/intelligence", label: "Intelligence", scope: "dispatch:read", group: "Compliance" },
-  { to: "/admin/integrations", label: "Integrations", group: "Platform" },
+  { to: "/admin/deployment", label: "Deployment", group: "Sovereignty" },
+  { to: "/admin/sovereignty", label: "Data Sovereignty", group: "Sovereignty" },
+  { to: "/admin/integrations", label: "Integrations", group: "Sovereignty" },
+  { to: "/admin/resilience", label: "Operational Resilience", group: "Sovereignty" },
+  { to: "/admin/evidence", label: "Evaluation Package", scope: "dispatch:read", group: "Sovereignty" },
   { to: "/admin/intake", label: "Direct DDM Intake", scope: "dispatch:render", group: "Platform" },
-  { to: "/admin/sovereignty", label: "Data Sovereignty", group: "Platform" },
 ];
 
 const PRODUCT: Record<ConsoleVariant, { label: string; tag: string; nav: NavItem[]; home: string }> = {
