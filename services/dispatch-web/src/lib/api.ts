@@ -14,6 +14,35 @@ export class DispatchError extends Error {
 let getToken: () => string | null = () => null;
 export function bindTokenGetter(fn: () => string | null) { getToken = fn; }
 
+// Institutional error language. An enterprise console never shows raw backend
+// strings ("missing Authorization", "bad secret"); it explains, in the user's
+// terms, what happened and what to do. Map known codes/statuses to human copy;
+// for anything unmapped fall back to the caller's plain-language default —
+// never the wire message.
+const ERROR_COPY: Record<string, string> = {
+  UNAUTHENTICATED: "Your session has ended. Please sign in again.",
+  INVALID_TOKEN: "Your session is no longer valid. Please sign in again.",
+  TOKEN_EXPIRED: "Your session has expired. Please sign in again.",
+  INVALID_CLIENT: "Those credentials weren't recognized. Check your Client ID and secret, or create a free evaluation account.",
+  FORBIDDEN_SCOPE: "Your credentials don't carry permission for this action.",
+  SCOPE_NOT_ISSUABLE: "That permission can't be self-issued.",
+  QUOTA_EXCEEDED: "You've reached your free evaluation limit. Subscribe to create more official records.",
+  PAYMENT_REQUIRED: "Retrieving publication artifacts requires a Professional subscription.",
+  VALIDATION_FAILED: "Some fields need attention before this can be submitted.",
+};
+export function humanError(e: unknown, fallback = "Something went wrong. Please try again."): string {
+  if (e instanceof DispatchError) {
+    if (ERROR_COPY[e.code]) return ERROR_COPY[e.code];
+    if (e.status === 401) return ERROR_COPY.UNAUTHENTICATED;
+    if (e.status === 403) return ERROR_COPY.FORBIDDEN_SCOPE;
+    if (e.status >= 500) return "The service is temporarily unavailable. Please try again shortly.";
+    // 4xx carrying a server-authored, user-safe message (e.g. field validation): show it.
+    if (e.status >= 400 && e.message) return e.message;
+  }
+  if (e instanceof TypeError) return "Couldn't reach the service. Check your connection and try again.";
+  return fallback;
+}
+
 async function request<T>(method: string, path: string, opts: { body?: unknown; idem?: string; token?: string } = {}): Promise<T> {
   const headers: Record<string, string> = {};
   const tok = opts.token ?? getToken();
@@ -36,6 +65,45 @@ export interface TokenResponse { access_token: string; token: string; tokenType:
 export const exchangeToken = (client_id: string, secret: string) =>
   request<TokenResponse>("POST", "/v1/token", { body: { client_id, secret } });
 
+// ---- admin: service-client credentials (tenant self-service; dispatch:admin) ----
+export interface ServiceClient {
+  client_id: string; name: string; scopes: string[]; clearance: string; active: boolean;
+  created_by?: string | null; created_at: string; last_used_at?: string | null; last_rotated_at?: string | null;
+}
+// The raw secret is present ONLY in the issue/rotate responses, and shown once.
+export interface IssuedCredential { client_id: string; secret: string; name?: string; scopes?: string[]; note?: string }
+
+export const listClients = () => request<{ clients: ServiceClient[] }>("GET", "/v1/admin/clients");
+export const issueClient = (name: string, scopes: string[], clearance?: string) =>
+  request<IssuedCredential>("POST", "/v1/admin/clients", { body: { name, scopes, clearance } });
+export const rotateClient = (clientId: string) =>
+  request<IssuedCredential>("POST", `/v1/admin/clients/${encodeURIComponent(clientId)}/rotate`, { body: {} });
+export const revokeClient = (clientId: string) =>
+  request<{ client_id: string; revoked: boolean }>("POST", `/v1/admin/clients/${encodeURIComponent(clientId)}/revoke`, { body: {} });
+
+// ---- self-serve signup + billing (plans / subscribe-to-download) ----
+export interface SignupResponse { tenantId: string; client_id: string; secret: string; plan: string; scopes: string[]; note?: string }
+export const signup = (name: string) => request<SignupResponse>("POST", "/v1/signup", { body: { name } });
+
+export interface Billing { plan: string; subscriptionStatus: string; documentsUsed: number; documentQuota: number; quotaRemaining: number; canDownload: boolean; activated?: boolean }
+export const getBilling = () => request<Billing>("GET", "/v1/billing");
+export const subscribe = () => request<Billing>("POST", "/v1/billing/subscribe", { body: {} });
+
+export interface Stats { officialRecords: number; artifactsGenerated: number; approvalDecisions: number; auditEvents: number; published: number }
+export const getStats = () => request<Stats>("GET", "/v1/stats");
+
+// ---- governance policies (first-class, institution-defined) ----
+export interface ReviewStep { label: string; clearance?: string }
+export interface GovernancePolicy {
+  id?: string; name: string; docType: string; classificationLevel?: string | null;
+  requiredApprovals: number; reviewChain: ReviewStep[];
+  approvalAuthority?: string | null; publicationAuthority?: string | null;
+  retentionDays?: number | null; autoApproveService?: boolean; autoApproveUser?: boolean; active?: boolean;
+  updatedAt?: string;
+}
+export const getGovernancePolicies = () => request<{ policies: GovernancePolicy[] }>("GET", "/v1/governance/policies");
+export const upsertGovernancePolicy = (p: GovernancePolicy) => request<{ id: string }>("POST", "/v1/governance/policies", { body: p });
+
 // ---- documents / lifecycle ----
 export type Lifecycle = "draft" | "submitted" | "in_review" | "approved" | "rejected" | "rendered" | "published" | "withdrawn" | "archived";
 export interface DocListItem {
@@ -53,7 +121,8 @@ export const listDocuments = (params: { state?: string; docType?: string; q?: st
 export const getDocument = (id: string) => request<DocumentDetail>("GET", `/v1/documents/${id}`);
 
 export interface DocumentDetail {
-  id: string; docType: string; title: string; status: string; currentVersion: number; correlationId?: string;
+  id: string; docType: string; title: string; status: string; lifecycle?: Lifecycle; currentVersion: number; correlationId?: string;
+  publishedAt?: string; archivedAt?: string; preservationSha256?: string;
   versions: { versionNo: number; ddmVersion: string; template?: string; templateVersion?: number; engineVersion?: string; createdAt: string }[];
   latestResult: JobResult | null; createdAt: string; updatedAt: string;
 }
@@ -72,9 +141,19 @@ export const decide = (id: string, decision: "approve" | "reject" | "return", co
   request<{ documentId: string; decision: string; lifecycle: Lifecycle; approvals: number; required: number; jobId?: string; statusUrl?: string }>(
     "POST", `/v1/documents/${id}/decision`, { body: { decision, comment, outputs } });
 
-// ---- publish / withdraw ----
+// ---- publish / withdraw / archive (preservation) ----
 export const publish = (id: string) => request<{ documentId: string; lifecycle: Lifecycle }>("POST", `/v1/documents/${id}/publish`, { body: {} });
 export const withdraw = (id: string) => request<{ documentId: string; lifecycle: Lifecycle }>("POST", `/v1/documents/${id}/withdraw`, { body: {} });
+export const archiveDocument = (id: string) => request<{ documentId: string; lifecycle: Lifecycle; preservationSha256: string }>("POST", `/v1/documents/${id}/archive`, { body: {} });
+
+export interface PreservationCertificate {
+  recordId: string; docType: string; title: string; classification: { scheme?: string; level?: string };
+  lifecycle: string; version: number; publishedAt?: string; archivedAt?: string;
+  recordHash: string; integrityProof: string;
+  governancePolicy: { name: string; reviewChain: { label: string }[]; approvalAuthority?: string | null; publicationAuthority?: string | null };
+  approvalChain: { actor: string; decision: string; clearance?: string | null; ts: string }[];
+}
+export const getCertificate = (id: string) => request<{ certificate: PreservationCertificate }>("GET", `/v1/documents/${id}/certificate`);
 
 // ---- jobs / artifacts ----
 export interface ArtifactRef { artifactId: string; role: string; format: string; sizeBytes: number; pages?: number | null; sha256: string; classification?: string | null }

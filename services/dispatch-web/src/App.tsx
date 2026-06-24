@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./lib/auth";
-import Shell from "./components/Shell";
+import ConsoleShell from "./components/Shell";
 import Landing from "./pages/Landing";
 import Procurement from "./pages/Procurement";
 import Architecture from "./pages/Architecture";
@@ -10,6 +10,7 @@ import Security from "./pages/Security";
 import Compliance from "./pages/Compliance";
 import Evidence from "./pages/Evidence";
 import SignIn from "./pages/SignIn";
+import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Create from "./pages/Create";
 import Submit from "./pages/Submit";
@@ -18,30 +19,60 @@ import Library from "./pages/Library";
 import DocumentView from "./pages/DocumentView";
 import Audit from "./pages/Audit";
 import Sovereignty from "./pages/Sovereignty";
+import Access from "./pages/Access";
 import Integrations from "./pages/Integrations";
+import AdminHome from "./pages/AdminHome";
+import GovernancePolicies from "./pages/GovernancePolicies";
 import Polished from "./pages/polished/Polished";
+import { BillingProvider } from "./lib/upsell";
 
-// The gated operator/governance console. Everything here requires a session;
-// unauthenticated visitors get the sign-in gate.
-const Console: React.FC = () => {
+// TWO PRODUCTS on one platform. Operations (/console) is for the institutional
+// publication officer — records and governance, no implementation detail.
+// Administration (/admin) is for the systems/security administrator — identity,
+// access, integrations, policy, data sovereignty. Each requires a session; the
+// Administration product additionally requires dispatch:admin, so an operator
+// is bounced back to Operations and never lands in an administrative surface.
+
+const Operations: React.FC = () => {
   const { session } = useAuth();
   if (!session) return <SignIn />;
   return (
-    <Shell>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="create" element={<Create />} />
-        <Route path="submit" element={<Submit />} />
-        <Route path="review" element={<Review />} />
-        <Route path="library" element={<Library />} />
-        <Route path="documents/:id" element={<DocumentView />} />
-        <Route path="audit" element={<Audit />} />
-        <Route path="sovereignty" element={<Sovereignty />} />
-        <Route path="integrations" element={<Integrations />} />
-        <Route path="polished" element={<Polished />} />
-        <Route path="*" element={<Navigate to="/console" replace />} />
-      </Routes>
-    </Shell>
+    <BillingProvider>
+      <ConsoleShell variant="operations">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="create" element={<Create />} />
+          <Route path="review" element={<Review />} />
+          <Route path="library" element={<Library />} />
+          <Route path="archives" element={<Library fixedState="archived" title="Archives" blurb="Records that have completed their lifecycle — archived for preservation under your retention rules." />} />
+          <Route path="documents/:id" element={<DocumentView />} />
+          <Route path="audit" element={<Audit />} />
+          <Route path="polished" element={<Polished />} />
+          <Route path="*" element={<Navigate to="/console" replace />} />
+        </Routes>
+      </ConsoleShell>
+    </BillingProvider>
+  );
+};
+
+const Administration: React.FC = () => {
+  const { session, has } = useAuth();
+  if (!session) return <SignIn />;
+  if (!has("dispatch:admin")) return <Navigate to="/console" replace />; // operators never see Administration
+  return (
+    <BillingProvider>
+      <ConsoleShell variant="administration">
+        <Routes>
+          <Route path="/" element={<AdminHome />} />
+          <Route path="access" element={<Access />} />
+          <Route path="governance" element={<GovernancePolicies />} />
+          <Route path="integrations" element={<Integrations />} />
+          <Route path="intake" element={<Submit />} />
+          <Route path="sovereignty" element={<Sovereignty />} />
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Routes>
+      </ConsoleShell>
+    </BillingProvider>
   );
 };
 
@@ -56,8 +87,12 @@ const App: React.FC = () => (
     <Route path="/security" element={<Security />} />
     <Route path="/compliance" element={<Compliance />} />
     <Route path="/evidence" element={<Evidence />} />
-    {/* gated console */}
-    <Route path="/console/*" element={<Console />} />
+    {/* public self-serve signup (free plan) */}
+    <Route path="/signup" element={<Signup />} />
+    {/* product 1 — institutional operations */}
+    <Route path="/console/*" element={<Operations />} />
+    {/* product 2 — platform administration */}
+    <Route path="/admin/*" element={<Administration />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );

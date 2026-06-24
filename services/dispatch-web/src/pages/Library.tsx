@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { listDocuments, type DocListItem, type Lifecycle } from "../lib/api";
+import { listDocuments, type DocListItem, type Lifecycle , humanError} from "../lib/api";
 import { Card, ClassBadge, LifecycleBadge, inputCls, timeAgo } from "../lib/ui";
 
 const STATES: (Lifecycle | "")[] = ["", "in_review", "approved", "rendered", "published", "withdrawn", "archived", "rejected"];
@@ -12,9 +12,11 @@ const fmtDate = (iso?: string): string => (iso ? new Date(iso).toLocaleDateStrin
 // The library / archive: every document the viewer is cleared to see, filtered
 // by lifecycle state, type and title. Clearance scoping happens server-side —
 // under-cleared documents simply don't appear (no existence leak).
-const Library: React.FC = () => {
+// `fixedState` locks the lifecycle filter and reframes the page (the Archives
+// surface is just the records library pinned to archived/withdrawn records).
+const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string }> = ({ fixedState, title, blurb }) => {
   const [items, setItems] = useState<DocListItem[]>([]);
-  const [state, setState] = useState<Lifecycle | "">("");
+  const [state, setState] = useState<Lifecycle | "">(fixedState ?? "");
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -22,7 +24,7 @@ const Library: React.FC = () => {
   const load = useCallback(async (search: string) => {
     setLoading(true); setErr(null);
     try { setItems((await listDocuments({ state: state || undefined, q: search || undefined, limit: 200 })).items); }
-    catch (e) { setErr(e instanceof Error ? e.message : "load failed"); }
+    catch (e) { setErr(humanError(e, "load failed")); }
     finally { setLoading(false); }
   }, [state]);
   // Reload when the state filter changes; the search box submits explicitly.
@@ -31,14 +33,16 @@ const Library: React.FC = () => {
   return (
     <div>
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Official Records</h1>
-        <p className="text-sm text-white/50">The institutional record — every document, version, classification and retention horizon you are cleared to see.</p>
+        <h1 className="text-2xl font-bold text-white">{title ?? "Official Records"}</h1>
+        <p className="text-sm text-white/50">{blurb ?? "The institutional record — every document, version, classification and retention horizon you are cleared to see."}</p>
       </header>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <select className={`${inputCls} w-44`} value={state} onChange={(e) => setState(e.target.value as Lifecycle | "")}>
-          {STATES.map((s) => <option key={s} value={s}>{s === "" ? "All states" : s.replace(/_/g, " ")}</option>)}
-        </select>
+        {!fixedState && (
+          <select className={`${inputCls} w-44`} value={state} onChange={(e) => setState(e.target.value as Lifecycle | "")}>
+            {STATES.map((s) => <option key={s} value={s}>{s === "" ? "All states" : s.replace(/_/g, " ")}</option>)}
+          </select>
+        )}
         <form onSubmit={(e) => { e.preventDefault(); load(q); }} className="flex flex-1 gap-2">
           <input className={inputCls} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title…" />
         </form>

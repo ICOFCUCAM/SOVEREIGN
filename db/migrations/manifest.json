@@ -8,6 +8,14 @@
     "M5__roles_grants.sql",
     "M6__clearance.sql",
     "M7__governance.sql",
-    "M8__governance_job_insert.sql"
+    "M8__governance_job_insert.sql",
+    "M9__provisioning.sql",
+    "M10__plans_billing.sql",
+    "M11__stats.sql",
+    "M12__governance_policies.sql",
+    "M13__preservation.sql",
+    "M14__governance_roles.sql",
+    "M15__policy_executable.sql",
+    "M16__approval_steps.sql"
   ]
 }

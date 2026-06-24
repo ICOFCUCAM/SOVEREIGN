@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { submitDocument, validateDocument, type ApiError } from "../lib/api";
+import { submitDocument, validateDocument, getGovernancePolicies, DispatchError, type ApiError, type GovernancePolicy, humanError } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { useBilling, UsageBanner, UpgradeModal } from "../lib/upsell";
 import { Button, Card, Field, inputCls } from "../lib/ui";
 
 // CREATE — the institutional authoring department. Unlike Submit (raw DDM JSON),
@@ -210,6 +211,18 @@ const Create: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [showJson, setShowJson] = useState(false);
+  const { billing, refresh, setBilling } = useBilling();
+  const [upgrade, setUpgrade] = useState(false);
+  const [policies, setPolicies] = useState<GovernancePolicy[]>([]);
+  useEffect(() => { getGovernancePolicies().then((r) => setPolicies(r.policies)).catch(() => { /* non-fatal */ }); }, []);
+  // The governance the record will inherit: the policy bound to this type whose
+  // classification matches (a level-specific policy beats a type-wide one).
+  const policy = useMemo(() => {
+    const lvl = level.toLowerCase();
+    return policies
+      .filter((p) => p.docType === docTypeId && (!p.classificationLevel || p.classificationLevel.toLowerCase() === lvl))
+      .sort((a, b) => (b.classificationLevel ? 1 : 0) - (a.classificationLevel ? 1 : 0))[0] ?? null;
+  }, [policies, docTypeId, level]);
 
   const set = (role: string, v: string): void => { setValues((p) => ({ ...p, [role]: v })); setValidation(null); };
 
@@ -240,22 +253,28 @@ const Create: React.FC = () => {
   const onValidate = async (): Promise<void> => {
     setErr(null); setValidation(null); setBusy(true);
     try { setValidation(await validateDocument(buildRequest())); }
-    catch (e) { setErr(e instanceof Error ? e.message : "validation failed"); }
+    catch (e) { setErr(humanError(e, "validation failed")); }
     finally { setBusy(false); }
   };
   const onSubmit = async (): Promise<void> => {
     setErr(null); setBusy(true);
     try { const req = buildRequest(); const r = await submitDocument(req, req.idempotencyKey); nav(`/console/documents/${r.documentId}`); }
-    catch (e) { setErr(e instanceof Error ? e.message : "submit failed"); }
+    catch (e) {
+      if (e instanceof DispatchError && e.status === 402) { setUpgrade(true); return; }
+      setErr(humanError(e, "submit failed"));
+    }
     finally { setBusy(false); }
   };
 
   return (
     <div>
+      {upgrade && <UpgradeModal open reason="quota" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); refresh(); setUpgrade(false); }} />}
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Create a document</h1>
-        <p className="text-sm text-white/50">Author an institutional document from a structured form — it composes a valid DDM and submits into the approval pipeline.</p>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Official Record</div>
+        <h1 className="mt-1 text-2xl font-bold text-white">Create Official Record</h1>
+        <p className="text-sm text-white/50">Choose a record type and author its content. It enters the governance chain for review and approval before publication — no formatting, markup, or technical knowledge required.</p>
       </header>
+      {billing && <UsageBanner b={billing} onUpgrade={() => setUpgrade(true)} className="mb-6" />}
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 
@@ -291,6 +310,32 @@ const Create: React.FC = () => {
             </select>
           </Card>
           <Card className="p-4">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/50">Governance</h3>
+            {policy ? (
+              <div className="space-y-2.5">
+                <div>
+                  <div className="text-[11px] uppercase tracking-wide text-white/35">This record follows</div>
+                  <div className="text-sm font-semibold text-seal-light">{policy.name}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wide text-white/35">Review chain</div>
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                    {(policy.reviewChain ?? []).length === 0 ? <span className="text-[12px] text-white/40">—</span> : policy.reviewChain.map((s, i) => (
+                      <React.Fragment key={i}>
+                        <span className="rounded bg-white/5 px-2 py-0.5 text-[12px] text-white/80">{s.label}</span>
+                        {i < policy.reviewChain.length - 1 && <span className="text-white/25" aria-hidden>→</span>}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+                {policy.approvalAuthority && <div className="text-[12px]"><span className="text-white/35">Approval: </span><span className="text-white/80">{policy.approvalAuthority}</span></div>}
+                {policy.publicationAuthority && <div className="text-[12px]"><span className="text-white/35">Publication: </span><span className="text-white/80">{policy.publicationAuthority}</span></div>}
+              </div>
+            ) : (
+              <p className="text-[12px] leading-snug text-white/40">Platform default — a single approval governs this record. Define a governance policy for this record type in Administration to set a review chain and publication authority.</p>
+            )}
+          </Card>
+          <Card className="p-4">
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/50">Outputs</h3>
             <div className="space-y-2">
               {["pdf", "docx", "md"].map((o) => (
@@ -317,7 +362,7 @@ const Create: React.FC = () => {
               <Button variant="ghost" onClick={onValidate} disabled={busy}>{busy ? "…" : "Validate"}</Button>
               <Button onClick={onSubmit} disabled={busy || missing.length > 0}>{busy ? "Submitting…" : "Create & submit →"}</Button>
             </div>
-            <button onClick={() => setShowJson((s) => !s)} className="text-[11px] uppercase tracking-wide text-white/40 hover:text-white/70">{showJson ? "Hide" : "Show"} composed DDM</button>
+            <button onClick={() => setShowJson((s) => !s)} className="text-[11px] uppercase tracking-wide text-white/30 hover:text-white/60">{showJson ? "Hide" : "Show"} technical payload (advanced)</button>
           </div>
         </div>
       </div>

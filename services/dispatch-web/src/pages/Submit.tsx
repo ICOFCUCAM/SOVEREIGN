@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { submitDocument, validateDocument, type ApiError } from "../lib/api";
+import { useNavigate, Link } from "react-router-dom";
+import { submitDocument, validateDocument, type ApiError , humanError} from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { Button, Card, Field, inputCls } from "../lib/ui";
 
@@ -48,7 +48,7 @@ const Submit: React.FC = () => {
     if (parsed.error) { setErr("Invalid JSON: " + parsed.error); return; }
     setBusy(true);
     try { setValidation(await validateDocument(buildRequest())); }
-    catch (e) { setErr(e instanceof Error ? e.message : "validation failed"); }
+    catch (e) { setErr(humanError(e, "validation failed")); }
     finally { setBusy(false); }
   };
 
@@ -60,16 +60,22 @@ const Submit: React.FC = () => {
       const req = buildRequest();
       const r = await submitDocument(req, req.idempotencyKey);
       nav(`/console/documents/${r.documentId}`);
-    } catch (e) { setErr(e instanceof Error ? e.message : "submit failed"); }
+    } catch (e) { setErr(humanError(e, "submit failed")); }
     finally { setBusy(false); }
   };
 
   return (
     <div>
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Submit a document</h1>
-        <p className="text-sm text-white/50">Classify, choose outputs, validate, and submit into the approval pipeline.</p>
+      <header className="mb-4">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300/80">Administration · Advanced</div>
+        <h1 className="mt-1 text-2xl font-bold text-white">Direct DDM Submission</h1>
+        <p className="text-sm text-white/50">A technical intake for integrators and automated systems: submit a pre-built DDM payload directly. This is the same pipeline as Create Record, without the guided form.</p>
       </header>
+
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-ink-800/60 px-4 py-3">
+        <p className="text-sm text-white/60">Creating a record by hand? Use the guided workflow — no JSON required.</p>
+        <Link to="/console/create" className="shrink-0 rounded-md bg-seal px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-seal-light">Go to Create Record →</Link>
+      </div>
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 

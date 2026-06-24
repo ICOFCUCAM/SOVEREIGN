@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { listDocuments, audit, type DocListItem, type AuditEvent, type Lifecycle } from "../lib/api";
+import { listDocuments, audit, getStats, type DocListItem, type AuditEvent, type Lifecycle, type Stats , humanError} from "../lib/api";
 import { Card, ClassBadge, LifecycleBadge, timeAgo } from "../lib/ui";
+import { useBilling, UsageBanner, UpgradeModal } from "../lib/upsell";
 import { useAuth } from "../lib/auth";
 
 // Operations Command Center. The console's landing surface is operational, not a
@@ -29,16 +30,20 @@ const Dashboard: React.FC = () => {
   const [activity, setActivity] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const { billing, setBilling } = useBilling();
+  const [upgrade, setUpgrade] = useState(false);
 
   useEffect(() => {
     let live = true;
+    getStats().then((s) => { if (live) setStats(s); }).catch(() => {});
     (async () => {
       try {
         const entries = await Promise.all(
           ALL.map(async (s) => [s.state, (await listDocuments({ state: s.state, limit: 100 })).items] as const),
         );
         if (live) setCounts(Object.fromEntries(entries));
-      } catch (e) { if (live) setErr(e instanceof Error ? e.message : "load failed"); }
+      } catch (e) { if (live) setErr(humanError(e, "load failed")); }
       finally { if (live) setLoading(false); }
     })();
     // Recent activity feed — only for principals with the audit scope.
@@ -50,6 +55,11 @@ const Dashboard: React.FC = () => {
 
   const n = (s: string) => counts[s]?.length ?? 0;
   const inPipeline = PIPELINE.reduce((a, s) => a + n(s.state), 0);
+  const totalDocs = ALL.reduce((a, s) => a + n(s.state), 0);
+  // A first-run institution lands on an empty store. Rather than a wall of
+  // zeros and "nothing here" queues, give them a guided path to their first
+  // official record — onboarding, not an empty database view.
+  const firstRun = !loading && !err && totalDocs === 0;
 
   return (
     <div>
@@ -66,6 +76,25 @@ const Dashboard: React.FC = () => {
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 
+      {upgrade && <UpgradeModal open reason="quota" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); setUpgrade(false); }} />}
+      {billing && <UsageBanner b={billing} onUpgrade={() => setUpgrade(true)} className="mb-6" />}
+
+      {/* ── institutional outcomes ───────────────────────────────── */}
+      <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {[
+          ["Official records created", stats?.officialRecords],
+          ["Artifacts generated", stats?.artifactsGenerated],
+          ["Approval decisions", stats?.approvalDecisions],
+          ["Audit events", stats?.auditEvents],
+        ].map(([label, val]) => (
+          <Card key={label as string} className="p-5">
+            <div className="text-3xl font-bold tabular-nums text-white">{val === undefined ? "·" : (val as number)}</div>
+            <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">{label}</div>
+          </Card>
+        ))}
+      </div>
+
+      {firstRun ? <FirstRun canAuthor={has("dispatch:render")} /> : <>
       {/* ── pipeline visualization ──────────────────────────────── */}
       <Card className="mb-8 p-6">
         <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Publication pipeline</div>
@@ -105,7 +134,40 @@ const Dashboard: React.FC = () => {
         </div>
         {has("dispatch:audit") && <ActivityTimeline events={activity} />}
       </div>
+      </>}
     </div>
+  );
+};
+
+// Guided first-run: the institution has signed up but produced nothing yet.
+// Three governance steps and a single clear call to action.
+const FirstRun: React.FC<{ canAuthor: boolean }> = ({ canAuthor }) => {
+  const steps = [
+    { n: 1, t: "Compose a document", d: "Author an executive briefing, board report, or policy paper from a structured template." },
+    { n: 2, t: "Submit for governance", d: "It enters the approval chain — reviewed and approved before anything is produced." },
+    { n: 3, t: "Approve & publish", d: "On approval it is rendered to an official record you can preserve and retrieve." },
+  ];
+  return (
+    <Card className="mb-8 p-8">
+      <div className="max-w-xl">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Welcome to Dispatch</div>
+        <h2 className="mt-2 text-xl font-bold text-white">Create your first official record</h2>
+        <p className="mt-1 text-sm text-white/55">Your evaluation includes three official records. Here is how the governed pipeline works.</p>
+      </div>
+      <ol className="mt-6 grid gap-4 sm:grid-cols-3">
+        {steps.map((s) => (
+          <li key={s.n} className="rounded-lg border border-white/10 bg-ink-900/50 p-4">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-seal/30 text-sm font-bold text-seal-light ring-1 ring-seal-light/40">{s.n}</div>
+            <div className="mt-3 text-sm font-semibold text-white">{s.t}</div>
+            <div className="mt-1 text-[12.5px] leading-snug text-white/50">{s.d}</div>
+          </li>
+        ))}
+      </ol>
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        {canAuthor && <Link to="/console/create" className="inline-flex items-center justify-center gap-2 rounded-md bg-seal px-4 py-2 text-sm font-semibold text-white transition hover:bg-seal-light">Create your first record →</Link>}
+        <Link to="/console/library" className="text-sm font-semibold text-white/50 hover:text-white">Browse records</Link>
+      </div>
+    </Card>
   );
 };
 

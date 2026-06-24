@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { audit, type AuditEvent } from "../lib/api";
+import { audit, type AuditEvent , humanError} from "../lib/api";
 import { Card, inputCls } from "../lib/ui";
 
 // Append-only audit trail (auditor scope). Filter by action or target; the
@@ -14,7 +14,7 @@ const Audit: React.FC = () => {
   const load = useCallback(async () => {
     setLoading(true); setErr(null);
     try { setEvents((await audit({ action: action || undefined, target: target || undefined, limit: 300 })).events); }
-    catch (e) { setErr(e instanceof Error ? e.message : "load failed"); }
+    catch (e) { setErr(humanError(e, "load failed")); }
     finally { setLoading(false); }
   }, [action, target]);
   // Initial load only; subsequent loads are triggered by the filter form.
