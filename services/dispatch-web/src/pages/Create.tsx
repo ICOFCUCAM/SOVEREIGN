@@ -4,7 +4,8 @@ import { track } from "../lib/analytics";
 import { submitDocument, validateDocument, getGovernancePolicies, DispatchError, type ApiError, type GovernancePolicy, humanError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useBilling, UsageBanner, UpgradeModal } from "../lib/upsell";
-import { Button, Card, Field, inputCls } from "../lib/ui";
+import { Button, Card, Field, inputCls, ClassBadge } from "../lib/ui";
+import { GovernanceInstrument } from "../components/GovernanceInstrument";
 
 // CREATE — the institutional authoring department. Unlike Submit (raw DDM JSON),
 // this composes a valid DDM document from structured forms per document type, so
@@ -281,30 +282,61 @@ const Create: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="mx-auto max-w-5xl">
       {upgrade && <UpgradeModal open reason="quota" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); refresh(); setUpgrade(false); }} />}
-      <header className="mb-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Official Record</div>
-        <h1 className="mt-1 text-2xl font-bold text-white">Create Official Record</h1>
-        <p className="text-sm text-white/50">Choose a record type and author its content. It enters the approval chain for review and approval before publication — no formatting, markup, or technical knowledge required.</p>
+      <header className="mb-7">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">Official Record</div>
+        <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Create Official Record</h1>
+        <p className="mt-2 max-w-2xl text-[14.5px] leading-relaxed text-white/55">
+          The front door to a governed publication system — not a document editor. Choose the record and see exactly how it
+          will be governed, who must approve it, who may publish it, and the proof it produces, before you submit.
+        </p>
       </header>
       {billing && <UsageBanner b={billing} onUpgrade={() => setUpgrade(true)} className="mb-6" />}
-
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 
-      {/* doc-type picker */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        {DOC_TYPES.map((d) => (
-          <button key={d.docType} onClick={() => { setDocTypeId(d.docType); setValues({}); setValidation(null); }}
-            className={`rounded-lg border p-4 text-left transition ${d.docType === docTypeId ? "border-seal-light/60 bg-white/[0.04]" : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}>
-            <div className="text-sm font-bold text-white">{d.label}</div>
-            <div className="mt-1 text-[12px] leading-snug text-white/45">{d.blurb}</div>
-          </button>
-        ))}
+      {/* STEP 1 — define the record (type + classification drive its governance) */}
+      <Step n="1" title="Define the record" sub="Type and classification determine the policy that will govern it." />
+      <div className="mb-7 grid gap-5 lg:grid-cols-[1fr_260px]">
+        <div>
+          <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">Record type</div>
+          <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+            {DOC_TYPES.map((d) => {
+              const on = d.docType === docTypeId;
+              return (
+                <button key={d.docType} onClick={() => { setDocTypeId(d.docType); setValues({}); setValidation(null); }}
+                  className={`group rounded-xl border p-3.5 text-left transition ${on ? "border-seal-light/60 bg-gradient-to-b from-seal/20 to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]" : "border-white/10 bg-white/[0.015] hover:border-white/25 hover:bg-white/[0.03]"}`}>
+                  <div className="flex items-center justify-between">
+                    <div className={`text-[13.5px] font-bold tracking-tight ${on ? "text-white" : "text-white/85"}`}>{d.label}</div>
+                    {on && <span className="h-1.5 w-1.5 rounded-full bg-seal-light" aria-hidden />}
+                  </div>
+                  <div className="mt-1 text-[11.5px] leading-snug text-white/45">{d.blurb}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div>
+          <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">Classification</div>
+          <select className={inputCls} value={level} onChange={(e) => { setLevel(e.target.value); setValidation(null); }}>
+            {LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+          </select>
+          <div className="mt-3 flex items-center gap-2 rounded-lg border border-white/10 bg-ink-900/50 px-3 py-2.5">
+            <ClassBadge level={level} />
+            <span className="text-[11px] leading-snug text-white/40">Marked on the record; gates who may read and approve it.</span>
+          </div>
+        </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        {/* the form */}
+      {/* STEP 2 — the governance instrument: make the invisible visible */}
+      <Step n="2" title="Understand the governance" sub="Derived from the policy bound to this record — nothing here is fabricated." />
+      <div className="mb-8">
+        <GovernanceInstrument docTypeLabel={spec.label} classification={level} policy={policy} />
+      </div>
+
+      {/* STEP 3 — author + submit */}
+      <Step n="3" title="Author the content" sub="Structured authoring — no formatting, markup, or technical knowledge required." />
+      <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <Card className="space-y-4 p-5">
           <Field label="Title"><input className={inputCls} value={title} onChange={(e) => { setTitle(e.target.value); setValidation(null); }} placeholder={`${spec.label} title`} /></Field>
           {spec.fields.map((f) => (
@@ -315,49 +347,20 @@ const Create: React.FC = () => {
           ))}
         </Card>
 
-        {/* controls */}
-        <div className="space-y-5">
-          <Card className="p-4">
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/50">Classification</h3>
-            <select className={inputCls} value={level} onChange={(e) => { setLevel(e.target.value); setValidation(null); }}>
-              {LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
-          </Card>
-          <Card className="p-4">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/50">Governance</h3>
-            {policy ? (
-              <div className="space-y-2.5">
-                <div>
-                  <div className="text-[11px] uppercase tracking-wide text-white/35">This record follows</div>
-                  <div className="text-sm font-semibold text-seal-light">{policy.name}</div>
-                </div>
-                <div>
-                  <div className="text-[11px] uppercase tracking-wide text-white/35">Approval chain</div>
-                  <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                    {(policy.reviewChain ?? []).length === 0 ? <span className="text-[12px] text-white/40">—</span> : policy.reviewChain.map((s, i) => (
-                      <React.Fragment key={i}>
-                        <span className="rounded bg-white/5 px-2 py-0.5 text-[12px] text-white/80">{s.label}</span>
-                        {i < policy.reviewChain.length - 1 && <span className="text-white/25" aria-hidden>→</span>}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                </div>
-                {policy.approvalAuthority && <div className="text-[12px]"><span className="text-white/35">Approval: </span><span className="text-white/80">{policy.approvalAuthority}</span></div>}
-                {policy.publicationAuthority && <div className="text-[12px]"><span className="text-white/35">Publication: </span><span className="text-white/80">{policy.publicationAuthority}</span></div>}
-              </div>
-            ) : (
-              <p className="text-[12px] leading-snug text-white/40">Platform default — a single approval governs this record. Define a governance policy for this record type in Administration to set an approval chain and publication authority.</p>
-            )}
-          </Card>
+        {/* submit rail */}
+        <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
           <Card className="p-4">
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/50">Outputs</h3>
-            <div className="space-y-2">
-              {["pdf", "docx", "md"].map((o) => (
-                <label key={o} className="flex items-center gap-2 text-sm text-white/80">
-                  <input type="checkbox" checked={outputs.includes(o)} onChange={(e) => setOutputs((prev) => e.target.checked ? [...prev, o] : prev.filter((x) => x !== o))} />
-                  {o.toUpperCase()}
-                </label>
-              ))}
+            <div className="flex flex-wrap gap-2">
+              {["pdf", "docx", "md"].map((o) => {
+                const on = outputs.includes(o);
+                return (
+                  <button key={o} onClick={() => setOutputs((prev) => on ? prev.filter((x) => x !== o) : [...prev, o])}
+                    className={`rounded-md border px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wide transition ${on ? "border-seal-light/50 bg-seal/25 text-white" : "border-white/12 bg-white/[0.02] text-white/45 hover:text-white/70"}`}>
+                    {o}
+                  </button>
+                );
+              })}
             </div>
           </Card>
 
@@ -370,14 +373,15 @@ const Create: React.FC = () => {
             </Card>
           )}
 
-          <div className="space-y-2">
-            {missing.length > 0 && <p className="text-[12px] text-amber-300/90">Fill in: {missing.join(", ")}</p>}
+          <Card className="p-4">
+            {missing.length > 0 && <p className="mb-2.5 text-[12px] leading-snug text-amber-300/90">Still needed: {missing.join(", ")}</p>}
             <div className="flex gap-2">
               <Button variant="ghost" onClick={onValidate} disabled={busy}>{busy ? "…" : "Validate"}</Button>
-              <Button onClick={onSubmit} disabled={busy || missing.length > 0}>{busy ? "Submitting…" : "Create & submit →"}</Button>
+              <Button className="flex-1" onClick={onSubmit} disabled={busy || missing.length > 0}>{busy ? "Submitting…" : "Submit for governance →"}</Button>
             </div>
-            <button onClick={() => setShowJson((s) => !s)} className="text-[11px] uppercase tracking-wide text-white/30 hover:text-white/60">{showJson ? "Hide" : "Show"} technical payload (advanced)</button>
-          </div>
+            <p className="mt-2.5 text-[11px] leading-snug text-white/35">Submitting enters the approval chain above. Nothing is published until the policy is satisfied.</p>
+            <button onClick={() => setShowJson((s) => !s)} className="mt-2 text-[11px] uppercase tracking-wide text-white/25 hover:text-white/55">{showJson ? "Hide" : "Show"} technical payload</button>
+          </Card>
         </div>
       </div>
 
@@ -389,5 +393,17 @@ const Create: React.FC = () => {
     </div>
   );
 };
+
+// A numbered institutional step header — gives the page the cadence of a governed
+// procedure rather than a single flat form.
+const Step: React.FC<{ n: string; title: string; sub: string }> = ({ n, title, sub }) => (
+  <div className="mb-3 flex items-baseline gap-3">
+    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-seal/25 font-mono text-[12px] font-bold text-seal-light ring-1 ring-seal-light/30">{n}</span>
+    <div>
+      <h2 className="text-[15px] font-bold tracking-tight text-white">{title}</h2>
+      <p className="text-[12px] text-white/45">{sub}</p>
+    </div>
+  </div>
+);
 
 export default Create;
