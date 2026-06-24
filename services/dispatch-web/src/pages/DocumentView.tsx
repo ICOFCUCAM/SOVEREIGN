@@ -107,7 +107,7 @@ const DocumentView: React.FC = () => {
             <span className="font-mono text-[11px] text-white/45">{recordNo(id!, doc.createdAt)}</span>
             <ClassBadge level={cls?.level} />
           </div>
-          <h1 className="text-2xl font-bold text-white">{doc.title || "(untitled)"}</h1>
+          <h1 className="font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">{doc.title || "(untitled)"}</h1>
           <p className="text-sm text-white/50">{doc.docType}</p>
           <div className="mt-3 flex flex-wrap gap-1.5">
             {STAGES.map(([label, on]) => (

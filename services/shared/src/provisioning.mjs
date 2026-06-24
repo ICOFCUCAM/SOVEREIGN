@@ -21,11 +21,19 @@ import { writeAudit } from "./db.mjs";
 // The full scope vocabulary (mirrors auth.mjs). `dispatch:admin` is intentionally
 // NOT self-service-issuable: a tenant_admin must not be able to mint a machine
 // credential that can itself manage credentials. Operators may override.
+//
+// `dispatch:platform` is the privileged Platform Operator scope (content-blind,
+// cross-tenant AGGREGATES only). It is NEVER issuable through any tenant or admin
+// API — not self-service, not even by a tenant_admin/operator override — so no
+// tenant can mint a platform credential or escalate into the platform domain. A
+// platform operator credential is minted only out-of-band (db/seed/make-platform-operator).
 export const KNOWN_SCOPES = [
   "dispatch:validate", "dispatch:render", "dispatch:read",
   "dispatch:approve", "dispatch:publish", "dispatch:audit", "dispatch:admin",
+  "dispatch:platform",
 ];
-const SELF_ISSUABLE = KNOWN_SCOPES.filter((s) => s !== "dispatch:admin");
+const NEVER_ISSUABLE = ["dispatch:platform"];
+const SELF_ISSUABLE = KNOWN_SCOPES.filter((s) => s !== "dispatch:admin" && !NEVER_ISSUABLE.includes(s));
 
 export class ProvisioningError extends Error {
   constructor(code, message) { super(message); this.code = code; }
@@ -36,7 +44,8 @@ export function validateScopes(scopes, { allowAdmin = false } = {}) {
   if (!Array.isArray(scopes) || scopes.length === 0) {
     throw new ProvisioningError("INVALID_SCOPES", "at least one scope is required");
   }
-  const allowed = allowAdmin ? KNOWN_SCOPES : SELF_ISSUABLE;
+  // Even an operator override (allowAdmin) cannot issue a NEVER_ISSUABLE scope.
+  const allowed = allowAdmin ? KNOWN_SCOPES.filter((s) => !NEVER_ISSUABLE.includes(s)) : SELF_ISSUABLE;
   const clean = [...new Set(scopes.map((s) => String(s).trim()).filter(Boolean))];
   for (const s of clean) {
     if (!KNOWN_SCOPES.includes(s)) throw new ProvisioningError("INVALID_SCOPES", `unknown scope: ${s}`);

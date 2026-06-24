@@ -33,8 +33,9 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
   return (
     <div>
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white">{title ?? "Official Records"}</h1>
-        <p className="text-sm text-white/50">{blurb ?? "The institutional record — every official record, version, classification and retention horizon you are cleared to see."}</p>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">{fixedState ? "Preservation" : "The Register"}</div>
+        <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">{title ?? "Official Records"}</h1>
+        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-white/50">{blurb ?? "The institutional record — every official record, version, classification and retention horizon you are cleared to see."}</p>
       </header>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">

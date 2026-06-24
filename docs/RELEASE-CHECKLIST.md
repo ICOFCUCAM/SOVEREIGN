@@ -77,12 +77,26 @@ Legend: ✅ verified here · ⏳ re-verify in production · ⬜ not yet done
 ## 8. Adoption analytics live (Launch Phase 1)
 - ✅ **Beacon ingest** (`POST /v1/analytics/events`) accepts allowlisted events,
   drops unknown ones, never fails a visitor (always 202), stores no PII.
-- ✅ **Executive Overview** (`GET /v1/analytics/executive`, `/admin/executive`):
-  operator-only, cross-tenant **counts only**, double-gated (server-side
-  `DISPATCH_PLATFORM_OPERATORS` allowlist **and** a `platform_operator` claim the
-  SECURITY DEFINER function requires). 403 for any non-operator, 401 unauthenticated.
-- ⏳ **Set `DISPATCH_PLATFORM_OPERATORS`** in production to the operator's client_id
-  (and nothing else). Confirm a normal tenant_admin gets the locked state.
+
+## 8a. Platform Operator domain (`dispatch:platform`)
+- ✅ **Separate product** at `/operator` (Platform Operations) with its own chrome
+  — NOT an `/admin` screen. Gated solely on the `dispatch:platform` scope; any
+  other credential (incl. tenant_admin) gets the locked state.
+- ✅ **Content-blind by construction.** `GET /v1/platform/overview` and
+  `/v1/platform/trends` return cross-tenant **counts / rates / distributions /
+  trends** only, via SECURITY DEFINER aggregate functions. The functions refuse
+  unless a `platform` claim is present; the table that backs the platform audit
+  trail is locked (no app SELECT). Verified: operator hitting tenant content
+  (`/v1/documents`) → **403** — it carries the platform scope alone and cannot
+  pivot into content.
+- ✅ **Non-issuable scope.** `dispatch:platform` is rejected by the provisioning
+  API for both self-service **and** admin-override (`SCOPE_NOT_ISSUABLE`). No
+  tenant can mint or escalate into the platform domain.
+- ✅ **Every platform query is audited** (`platform_audit`, write-only via a
+  definer function): `platform.overview.read` / `platform.trends.read` rows confirmed.
+- ⏳ **Mint the operator credential in production**, out-of-band only:
+  `DATABASE_URL=… node db/seed/make-platform-operator.mjs`. Store the secret once.
+  Confirm a normal tenant_admin credential gets the locked `/operator` state.
 - ⏳ **Confirm the funnel populates**: after a real visit + signup, the operator sees
   `page.home`, `signup.completed`, etc. increment.
 

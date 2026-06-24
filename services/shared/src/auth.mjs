@@ -208,6 +208,14 @@ export function verifyDownloadGrant(token, artifactId) {
 //   dispatch:publish   release approved+rendered docs / withdraw
 //   dispatch:audit     read the audit trail (auditor)
 //   dispatch:admin     manage clients, users, roles, clearance, policy, retention
+//   dispatch:platform  PLATFORM OPERATOR — content-blind, cross-tenant AGGREGATES
+//                      only (counts/rates/distributions). Granted to NO role; not
+//                      issuable via any API (provisioning NEVER_ISSUABLE); reads
+//                      tenant data ONLY through SECURITY DEFINER aggregate
+//                      functions, never tenant tables. A platform operator can
+//                      answer "how is the platform performing?" but never "what is
+//                      institution X publishing?". Carry it ALONE on a credential
+//                      (no read/render/etc.) so it cannot pivot into any content.
 const READ = "dispatch:read", VALIDATE = "dispatch:validate", RENDER = "dispatch:render";
 const APPROVE = "dispatch:approve", PUBLISH = "dispatch:publish", AUDIT = "dispatch:audit", ADMIN = "dispatch:admin";
 

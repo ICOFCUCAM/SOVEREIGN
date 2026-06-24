@@ -37,7 +37,7 @@ import IntegrationControlCenter from "./pages/IntegrationControlCenter";
 import EvidencePackage from "./pages/EvidencePackage";
 import TrustCenter from "./pages/TrustCenter";
 import EvaluationWorkspace from "./pages/EvaluationWorkspace";
-import ExecutiveDashboard from "./pages/ExecutiveDashboard";
+import PlatformOps from "./pages/PlatformOps";
 import Polished from "./pages/polished/Polished";
 import { BillingProvider } from "./lib/upsell";
 
@@ -91,7 +91,6 @@ const Administration: React.FC = () => {
           <Route path="evidence" element={<EvidencePackage />} />
           <Route path="integrations" element={<IntegrationControlCenter />} />
           <Route path="intake" element={<Submit />} />
-          <Route path="executive" element={<ExecutiveDashboard />} />
           <Route path="sovereignty" element={<Sovereignty />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
@@ -107,6 +106,17 @@ const Evaluation: React.FC = () => {
   const { session } = useAuth();
   if (!session) return <SignIn />;
   return <EvaluationWorkspace />;
+};
+
+// Product 4 — Platform Operations (the platform OPERATOR, not a tenant). A wholly
+// separate product on its own surface and chrome — never an /admin screen. Gated
+// SOLELY on the privileged dispatch:platform scope; a normal tenant credential
+// (even a tenant_admin) lacks it and lands in PlatformOps' own locked state.
+// Content-blind by construction: it can only read cross-tenant aggregates.
+const PlatformOperations: React.FC = () => {
+  const { session } = useAuth();
+  if (!session) return <SignIn />;
+  return <PlatformOps />;
 };
 
 const App: React.FC = () => (
@@ -134,6 +144,8 @@ const App: React.FC = () => (
     <Route path="/admin/*" element={<Administration />} />
     {/* product 3 — executive evaluation (procurement / board) */}
     <Route path="/evaluate" element={<Evaluation />} />
+    {/* product 4 — platform operations (platform operator; dispatch:platform) */}
+    <Route path="/operator" element={<PlatformOperations />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );

@@ -63,12 +63,13 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
-      <header className="mb-6 flex items-end justify-between">
+      <header className="mb-7 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Operations</h1>
-          <p className="text-sm text-white/50">Submit → Govern → Approve → Render → Publish → Retrieve</p>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">Operations Command</div>
+          <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Operations</h1>
+          <p className="mt-1 text-sm text-white/50">Submit → Govern → Approve → Render → Publish → Preserve</p>
         </div>
-        <div className="text-right">
+        <div className="rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent px-5 py-3 text-right shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
           <div className="text-3xl font-bold tabular-nums text-white">{loading ? "·" : inPipeline}</div>
           <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">In pipeline</div>
         </div>
@@ -101,8 +102,8 @@ const Dashboard: React.FC = () => {
         <div className="flex items-stretch gap-2 overflow-x-auto">
           {PIPELINE.map((s, i) => (
             <React.Fragment key={s.state}>
-              <div className="min-w-[110px] flex-1 rounded-lg border border-white/10 bg-ink-900/50 px-4 py-3">
-                <div className="text-2xl font-bold tabular-nums text-white">{loading ? "·" : n(s.state)}</div>
+              <div className="min-w-[110px] flex-1 rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.045] to-transparent px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                <div className="text-2xl font-bold tabular-nums text-seal-light">{loading ? "·" : n(s.state)}</div>
                 <div className="mt-1 text-[11px] font-medium uppercase tracking-wide text-white/45">{s.label}</div>
               </div>
               {i < PIPELINE.length - 1 && (

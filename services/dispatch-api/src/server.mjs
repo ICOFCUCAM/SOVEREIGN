@@ -1194,24 +1194,31 @@ async function handleAnalyticsIngest(req, res) {
   return send(res, 202, { ok: true, accepted: rows.length });
 }
 
-// Platform operators are designated SERVER-SIDE only (an allowlist of client_ids
-// in DISPATCH_PLATFORM_OPERATORS). No tenant can self-grant this; it is "for the
-// operator, not for customers." The cross-tenant function additionally requires
-// a platform_operator claim (set just below) — defence in depth.
-const PLATFORM_OPERATORS = new Set((process.env.DISPATCH_PLATFORM_OPERATORS || "").split(",").map((s) => s.trim()).filter(Boolean));
-function isPlatformOperator(principal) {
-  const clientId = (principal.actor || "").replace(/^svc:/, "");
-  return clientId !== "" && PLATFORM_OPERATORS.has(clientId);
-}
-
-async function handlePlatformExecutive(res, principal) {
-  if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
-  if (!isPlatformOperator(principal)) return send(res, 403, errEnvelope(null, 403, "NOT_PLATFORM_OPERATOR", "platform operator credentials are required for the executive overview"));
-  const overview = await withClaims(pool, { principal_type: "system", platform_operator: "true" }, async (client) => {
+// ---- Platform Operator domain (dispatch:platform) -------------------------
+// A separate, privileged, CONTENT-BLIND domain. The ONLY gate is the
+// dispatch:platform scope — there is no tenant role that carries it and it cannot
+// be issued through any tenant/admin API (provisioning NEVER_ISSUABLE). The
+// handler runs the SECURITY DEFINER aggregate functions inside a transaction
+// stamped with a `platform` claim (which the functions also require), and it
+// writes a platform-audit row for EVERY query (rule 5). It returns only the
+// aggregate JSON the functions produce — counts, rates, distributions, trends —
+// and touches no tenant table directly, so platform data can never be pivoted
+// into tenant content.
+async function handlePlatform(res, principal, kind, query) {
+  if (!hasScope(principal, "dispatch:platform"))
+    return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "dispatch:platform scope required"));
+  const out = await withClaims(pool, { principal_type: "system", platform: "true", actor: principal.actor }, async (client) => {
+    await client.query("select dispatch.platform_audit_log($1, $2, $3)",
+      [principal.actor, `platform.${kind}.read`, JSON.stringify(kind === "trends" ? { days: Number(query.get("days")) || 30 } : {})]);
+    if (kind === "trends") {
+      const days = Math.min(90, Math.max(1, Number(query.get("days")) || 30));
+      const r = await client.query("select dispatch.platform_trends($1) as o", [days]);
+      return r.rows[0].o;
+    }
     const r = await client.query("select dispatch.platform_overview() as o");
     return r.rows[0].o;
   });
-  return send(res, 200, overview);
+  return send(res, 200, out);
 }
 
 const server = http.createServer(async (req, res) => {
@@ -1317,12 +1324,12 @@ const server = http.createServer(async (req, res) => {
       return await handleEvaluationAssessment(res, auth.principal);
     }
 
-    // Executive (platform-operator) overview — cross-tenant counts, gated by a
-    // server-side operator allowlist AND a defence-in-depth claim (see handler).
-    if (req.method === "GET" && path === "/v1/analytics/executive") {
+    // Platform Operator domain — content-blind cross-tenant aggregates/trends,
+    // gated SOLELY by the dispatch:platform scope; every query is audited.
+    if (req.method === "GET" && (path === "/v1/platform/overview" || path === "/v1/platform/trends")) {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
-      return await handlePlatformExecutive(res, auth.principal);
+      return await handlePlatform(res, auth.principal, path.endsWith("trends") ? "trends" : "overview", url.searchParams);
     }
 
     // Governance roles / grants / delegations (read for any principal).
