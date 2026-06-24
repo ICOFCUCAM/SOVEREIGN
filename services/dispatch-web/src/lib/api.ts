@@ -147,18 +147,27 @@ export interface EvaluationAssessment {
 }
 export const getEvaluationAssessment = () => request<EvaluationAssessment>("GET", "/v1/evaluation/assessment");
 
-// ---- platform executive overview (Launch Phase 1; operator-only, cross-tenant
-// counts). 403 NOT_PLATFORM_OPERATOR for any non-operator credential. ----
+// ---- Platform Operator domain (dispatch:platform; content-blind aggregates) --
+// Cross-tenant COUNTS / RATES / DISTRIBUTIONS only — never tenant content. 403
+// FORBIDDEN_SCOPE for any credential lacking the dispatch:platform scope.
 export interface PlatformOverview {
   institutions: number;
+  activeInstitutions: number;
   activeSubscriptions: number;
   records: number;
-  governed: number;
   published: number;
-  archived: number;
+  preserved: number;
+  policyInstitutions: number;
+  editionDistribution: Record<string, number>;
   events: Record<string, number>;
 }
-export const getPlatformExecutive = () => request<PlatformOverview>("GET", "/v1/analytics/executive");
+export interface PlatformTrends {
+  days: number;
+  institutions: { day: string; n: number }[];
+  records: { day: string; n: number }[];
+}
+export const getPlatformOverview = () => request<PlatformOverview>("GET", "/v1/platform/overview");
+export const getPlatformTrends = (days = 30) => request<PlatformTrends>("GET", `/v1/platform/trends?days=${days}`);
 
 // ---- governance (compliance) certificate ----
 export interface GovernanceCertificate {

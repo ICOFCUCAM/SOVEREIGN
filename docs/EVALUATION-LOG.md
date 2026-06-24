@@ -55,7 +55,7 @@ Direct quotes (verbatim — do not paraphrase the objection away):
 ---
 
 ## Cross-check against the numbers
-The Executive Overview (`/admin/executive`, operator-only) shows the same funnel
+Platform Operations (`/operator`, platform-operator-only) shows the same funnel
 in aggregate — homepage → trust/procurement → account → first record → published
 → preserved → upgrade, plus friction (abandoned signups, abandoned creation,
 paywall reached, governance refusals). Read the qualitative log **and** the funnel
