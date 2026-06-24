@@ -166,6 +166,10 @@ export interface PlatformTrends {
   institutions: { day: string; n: number }[];
   records: { day: string; n: number }[];
 }
+// ---- authoring assist (pre-governance drafting aid; the author chooses to apply) ----
+export interface AssistRequest { docType: string; fieldHeading: string; kind: string; intent: "develop" | "polish" | "restructure" | "shorten"; text: string; classification: string }
+export const assistField = (b: AssistRequest) => request<{ suggestion: string }>("POST", "/v1/authoring/assist", { body: b });
+
 export const getPlatformOverview = () => request<PlatformOverview>("GET", "/v1/platform/overview");
 export const getPlatformTrends = (days = 30) => request<PlatformTrends>("GET", `/v1/platform/trends?days=${days}`);
 

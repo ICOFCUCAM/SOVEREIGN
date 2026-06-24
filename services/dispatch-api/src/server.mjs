@@ -1221,6 +1221,56 @@ async function handlePlatform(res, principal, kind, query) {
   return send(res, 200, out);
 }
 
+// ---- Authoring assist (pre-governance drafting aid; dispatch:render) --------
+// Refines a SINGLE draft field with a model, returning a suggestion the author
+// chooses to apply or discard. It governs NOTHING — it touches only the draft
+// before submission; the governance chain, certificates and evidence are
+// untouched. Hard, SERVER-SIDE classification guard: a draft marked
+// OFFICIAL-SENSITIVE or above is never sent to the model (sovereignty default).
+// Drafts are not persisted here.
+const ASSIST_BLOCKED_CLASS = /SENSITIVE|CONFIDENTIAL|SECRET|COSMIC|RESTRICTED/i;
+const ASSIST_INTENTS = {
+  develop: "Develop this into a complete, well-formed field — expand a brief note into full, substantive institutional prose. Do not pad.",
+  polish: "Polish this for clarity, concision and a formal institutional register. Fix grammar and flow; keep the substance.",
+  restructure: "Restructure this into the clearest logical order and the form expected for this field. Improve flow; do not change the meaning.",
+  shorten: "Shorten this to its essential content while preserving every material point.",
+};
+
+async function handleAuthoringAssist(req, res, principal) {
+  if (!hasScope(principal, "dispatch:render")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "render scope required"));
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  const { docType = "", fieldHeading = "", kind = "paragraph", intent, text, classification = "" } = body || {};
+  if (typeof text !== "string" || !text.trim()) return send(res, 400, errEnvelope(null, 400, "EMPTY_TEXT", "write a line first, then refine"));
+  if (text.length > 8000) return send(res, 400, errEnvelope(null, 400, "TEXT_TOO_LONG", "field is too long to refine"));
+  if (!ASSIST_INTENTS[intent]) return send(res, 400, errEnvelope(null, 400, "BAD_INTENT", "unknown intent"));
+  // Authoritative classification guard — never trust the client alone.
+  if (ASSIST_BLOCKED_CLASS.test(String(classification))) return send(res, 403, errEnvelope(null, 403, "ASSIST_CLASSIFICATION_BLOCKED", "AI assist is disabled for OFFICIAL-SENSITIVE and above; sensitive drafts are not sent to a model"));
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) return send(res, 503, errEnvelope(null, 503, "ASSIST_NOT_CONFIGURED", "authoring assist is not configured on this deployment"));
+
+  const formatNote = kind === "bullets" ? " Output ONE item per line, with no bullet characters or numbering."
+    : kind === "timeline" ? " Output one event per line in the form: time | label | optional detail."
+    : kind === "callout" ? " Output a single tight paragraph suitable for a highlighted callout."
+    : "";
+  const system = "You are an institutional drafting assistant for official records (briefings, reports, policy papers). You improve ONLY the single field of text provided. Preserve the author's meaning and every fact. NEVER invent facts, figures, names, dates or citations — if a needed detail is absent, leave a clearly marked [placeholder] rather than fabricating. Use a formal, neutral, institutional register. Return ONLY the revised field text — no preamble, no quotation marks, no commentary.";
+  const user = `Record type: ${docType}\nField: ${fieldHeading} (${kind})\nTask: ${ASSIST_INTENTS[intent]}${formatNote}\n\nField text:\n${text}`;
+
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify({ model: process.env.ASSIST_MODEL || "claude-sonnet-4-6", max_tokens: 900, system, messages: [{ role: "user", content: user }] }),
+    });
+    if (!r.ok) { const t = await r.text().catch(() => ""); console.error("assist upstream", r.status, t.slice(0, 300)); return send(res, 502, errEnvelope(null, 502, "ASSIST_UPSTREAM", "the assist model is temporarily unavailable")); }
+    const data = await r.json();
+    const suggestion = (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("").trim();
+    if (!suggestion) return send(res, 502, errEnvelope(null, 502, "ASSIST_EMPTY", "no suggestion was produced"));
+    return send(res, 200, { suggestion });
+  } catch (e) { console.error("assist error", e); return send(res, 502, errEnvelope(null, 502, "ASSIST_UPSTREAM", "could not reach the assist model")); }
+}
+
 const server = http.createServer(async (req, res) => {
   const t0 = Date.now();
   const reqId = crypto.randomUUID();
@@ -1386,6 +1436,7 @@ const server = http.createServer(async (req, res) => {
 
     if (path === "/v1/validate") return await handleValidate(req, res, principal);
     if (path === "/v1/documents") return await handleDocuments(req, res, principal);
+    if (path === "/v1/authoring/assist") return await handleAuthoringAssist(req, res, principal);
 
     // Billing: subscribe (stub) — flips the tenant to paid and unlocks downloads.
     if (path === "/v1/billing/subscribe") return await handleBilling(req, res, principal, "subscribe");
