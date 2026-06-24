@@ -5,6 +5,10 @@ import ConsoleShell from "./components/Shell";
 import Landing from "./pages/Landing";
 import Procurement from "./pages/Procurement";
 import Trust from "./pages/Trust";
+import Outcomes from "./pages/Outcomes";
+import RecordGallery from "./pages/RecordGallery";
+import Standard from "./pages/Standard";
+import ReadinessJourney from "./pages/ReadinessJourney";
 import Architecture from "./pages/Architecture";
 import Platform from "./pages/Platform";
 import Security from "./pages/Security";
@@ -110,6 +114,11 @@ const App: React.FC = () => (
     {/* public procurement + architecture dossier (no auth) */}
     <Route path="/procurement" element={<Procurement />} />
     <Route path="/trust" element={<Trust />} />
+    {/* category / institutional-transformation surface (public) */}
+    <Route path="/outcomes" element={<Outcomes />} />
+    <Route path="/records" element={<RecordGallery />} />
+    <Route path="/standard" element={<Standard />} />
+    <Route path="/journey" element={<ReadinessJourney />} />
     <Route path="/architecture" element={<Architecture />} />
     <Route path="/platform" element={<Platform />} />
     <Route path="/security" element={<Security />} />

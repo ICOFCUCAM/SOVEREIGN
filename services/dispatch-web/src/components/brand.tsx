@@ -150,6 +150,8 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
         </button>
         <div className="flex shrink-0 items-center gap-3 sm:gap-4">
           <button onClick={() => nav("/")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white sm:inline-block">Home</button>
+          <button onClick={() => nav("/outcomes")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">Outcomes</button>
+          <button onClick={() => nav("/standard")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">Standard</button>
           <button onClick={() => nav("/trust")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white sm:inline-block">Trust</button>
           {actions}
           <button onClick={() => nav("/console")}
