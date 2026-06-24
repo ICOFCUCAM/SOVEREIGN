@@ -92,6 +92,18 @@ export const subscribe = () => request<Billing>("POST", "/v1/billing/subscribe",
 export interface Stats { officialRecords: number; artifactsGenerated: number; approvalDecisions: number; auditEvents: number; published: number }
 export const getStats = () => request<Stats>("GET", "/v1/stats");
 
+// ---- governance policies (first-class, institution-defined) ----
+export interface ReviewStep { label: string; clearance?: string }
+export interface GovernancePolicy {
+  id?: string; name: string; docType: string; classificationLevel?: string | null;
+  requiredApprovals: number; reviewChain: ReviewStep[];
+  approvalAuthority?: string | null; publicationAuthority?: string | null;
+  retentionDays?: number | null; autoApproveService?: boolean; autoApproveUser?: boolean; active?: boolean;
+  updatedAt?: string;
+}
+export const getGovernancePolicies = () => request<{ policies: GovernancePolicy[] }>("GET", "/v1/governance/policies");
+export const upsertGovernancePolicy = (p: GovernancePolicy) => request<{ id: string }>("POST", "/v1/governance/policies", { body: p });
+
 // ---- documents / lifecycle ----
 export type Lifecycle = "draft" | "submitted" | "in_review" | "approved" | "rejected" | "rendered" | "published" | "withdrawn" | "archived";
 export interface DocListItem {

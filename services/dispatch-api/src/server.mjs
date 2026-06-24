@@ -14,7 +14,7 @@ import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verify
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
-import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition } from "../../shared/src/governance.mjs";
+import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition, listPolicies, upsertPolicy } from "../../shared/src/governance.mjs";
 import { issueClientTx, rotateSecretTx, revokeClientTx, listClientsTx, signupTenantTx, ProvisioningError } from "../../shared/src/provisioning.mjs";
 
 const ENGINE_VERSION = "dispatch-api@1.0.0";
@@ -457,6 +457,43 @@ async function handleStats(req, res, principal) {
   });
 }
 
+// ── Governance policies: first-class, institution-defined ────────────────────
+// Reading is for any operating principal (so Create Record can show the policy a
+// record will inherit); writing requires dispatch:admin and is expressed to the
+// DB as tenant_admin so the M12 RLS authorises it (confined to the caller's
+// tenant). A policy bound to (doc_type, level) is what a record inherits.
+function policyView(p) {
+  return {
+    id: p.id, name: p.name, docType: p.doc_type, classificationLevel: p.classification_level,
+    requiredApprovals: p.required_approvals, minApproverClearance: p.min_approver_clearance,
+    autoApproveService: p.auto_approve_service, autoApproveUser: p.auto_approve_user,
+    reviewChain: p.review_chain ?? [], approvalAuthority: p.approval_authority,
+    publicationAuthority: p.publication_authority, retentionDays: p.retention_days, active: p.active,
+    updatedAt: p.updated_at,
+  };
+}
+async function handleGovernance(req, res, principal, method) {
+  if (method === "GET") {
+    if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+    const rows = await withClaims(pool, claimsFor(principal), (c) => listPolicies(c));
+    return send(res, 200, { policies: rows.map(policyView) });
+  }
+  // POST — upsert a policy (admin authority, expressed as tenant_admin for RLS).
+  if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
+  let body; try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  if (!body.name || !String(body.name).trim()) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "policy name is required"));
+  if (!body.docType) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "docType (record type) is required"));
+  const claims = { ...claimsFor(principal), dispatch_role: "tenant_admin" };
+  try {
+    const id = await withClaims(pool, claims, (c) => upsertPolicy(c, principal.tenantId, body));
+    return send(res, 201, { id });
+  } catch (e) {
+    console.error("governance upsert error:", e);
+    return send(res, 400, errEnvelope(null, 400, "POLICY_INVALID", String(e.message)));
+  }
+}
+
 // ── Admin: tenant self-service for service-client credentials ────────────────
 // Gated on dispatch:admin (a tenant_admin's JWT carries it). All writes run
 // under the caller's claims, so RLS (M9) confines them to the caller's tenant.
@@ -668,6 +705,13 @@ const server = http.createServer(async (req, res) => {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       return await handleStats(req, res, auth.principal);
+    }
+
+    // Governance policies — list (read) / upsert (admin).
+    if (path === "/v1/governance/policies" && (req.method === "GET" || req.method === "POST")) {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleGovernance(req, res, auth.principal, req.method);
     }
 
     // Dispatch console (Epic 9) — static page; no auth (it authenticates client-side).

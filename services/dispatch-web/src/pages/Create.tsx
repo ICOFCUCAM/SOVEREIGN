@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { submitDocument, validateDocument, DispatchError, type ApiError , humanError} from "../lib/api";
+import { submitDocument, validateDocument, getGovernancePolicies, DispatchError, type ApiError, type GovernancePolicy, humanError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useBilling, UsageBanner, UpgradeModal } from "../lib/upsell";
 import { Button, Card, Field, inputCls } from "../lib/ui";
@@ -213,6 +213,16 @@ const Create: React.FC = () => {
   const [showJson, setShowJson] = useState(false);
   const { billing, refresh, setBilling } = useBilling();
   const [upgrade, setUpgrade] = useState(false);
+  const [policies, setPolicies] = useState<GovernancePolicy[]>([]);
+  useEffect(() => { getGovernancePolicies().then((r) => setPolicies(r.policies)).catch(() => { /* non-fatal */ }); }, []);
+  // The governance the record will inherit: the policy bound to this type whose
+  // classification matches (a level-specific policy beats a type-wide one).
+  const policy = useMemo(() => {
+    const lvl = level.toLowerCase();
+    return policies
+      .filter((p) => p.docType === docTypeId && (!p.classificationLevel || p.classificationLevel.toLowerCase() === lvl))
+      .sort((a, b) => (b.classificationLevel ? 1 : 0) - (a.classificationLevel ? 1 : 0))[0] ?? null;
+  }, [policies, docTypeId, level]);
 
   const set = (role: string, v: string): void => { setValues((p) => ({ ...p, [role]: v })); setValidation(null); };
 
@@ -298,6 +308,32 @@ const Create: React.FC = () => {
             <select className={inputCls} value={level} onChange={(e) => { setLevel(e.target.value); setValidation(null); }}>
               {LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
+          </Card>
+          <Card className="p-4">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/50">Governance</h3>
+            {policy ? (
+              <div className="space-y-2.5">
+                <div>
+                  <div className="text-[11px] uppercase tracking-wide text-white/35">This record follows</div>
+                  <div className="text-sm font-semibold text-seal-light">{policy.name}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wide text-white/35">Review chain</div>
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                    {(policy.reviewChain ?? []).length === 0 ? <span className="text-[12px] text-white/40">—</span> : policy.reviewChain.map((s, i) => (
+                      <React.Fragment key={i}>
+                        <span className="rounded bg-white/5 px-2 py-0.5 text-[12px] text-white/80">{s.label}</span>
+                        {i < policy.reviewChain.length - 1 && <span className="text-white/25" aria-hidden>→</span>}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+                {policy.approvalAuthority && <div className="text-[12px]"><span className="text-white/35">Approval: </span><span className="text-white/80">{policy.approvalAuthority}</span></div>}
+                {policy.publicationAuthority && <div className="text-[12px]"><span className="text-white/35">Publication: </span><span className="text-white/80">{policy.publicationAuthority}</span></div>}
+              </div>
+            ) : (
+              <p className="text-[12px] leading-snug text-white/40">Platform default — a single approval governs this record. Define a governance policy for this record type in Administration to set a review chain and publication authority.</p>
+            )}
           </Card>
           <Card className="p-4">
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/50">Outputs</h3>

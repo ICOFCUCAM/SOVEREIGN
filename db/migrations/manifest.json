@@ -11,6 +11,7 @@
     "M8__governance_job_insert.sql",
     "M9__provisioning.sql",
     "M10__plans_billing.sql",
-    "M11__stats.sql"
+    "M11__stats.sql",
+    "M12__governance_policies.sql"
   ]
 }

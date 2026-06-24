@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { listDocuments, audit, getStats, type DocListItem, type AuditEvent, type Lifecycle, type Stats , humanError} from "../lib/api";
 import { Card, ClassBadge, LifecycleBadge, timeAgo } from "../lib/ui";
-import { useBilling, UsageBanner } from "../lib/upsell";
+import { useBilling, UsageBanner, UpgradeModal } from "../lib/upsell";
 import { useAuth } from "../lib/auth";
 
 // Operations Command Center. The console's landing surface is operational, not a
@@ -26,13 +26,13 @@ const ALL = [...PIPELINE, ...ASIDE];
 
 const Dashboard: React.FC = () => {
   const { has } = useAuth();
-  const nav = useNavigate();
   const [counts, setCounts] = useState<Record<string, DocListItem[]>>({});
   const [activity, setActivity] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
-  const { billing } = useBilling();
+  const { billing, setBilling } = useBilling();
+  const [upgrade, setUpgrade] = useState(false);
 
   useEffect(() => {
     let live = true;
@@ -76,7 +76,8 @@ const Dashboard: React.FC = () => {
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 
-      {billing && <UsageBanner b={billing} onUpgrade={() => nav("/console/access")} className="mb-6" />}
+      {upgrade && <UpgradeModal open reason="quota" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); setUpgrade(false); }} />}
+      {billing && <UsageBanner b={billing} onUpgrade={() => setUpgrade(true)} className="mb-6" />}
 
       {/* ── institutional outcomes ───────────────────────────────── */}
       <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -163,8 +164,8 @@ const FirstRun: React.FC<{ canAuthor: boolean }> = ({ canAuthor }) => {
         ))}
       </ol>
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        {canAuthor && <Link to="/console/create" className="inline-flex items-center justify-center gap-2 rounded-md bg-seal px-4 py-2 text-sm font-semibold text-white transition hover:bg-seal-light">Compose a document →</Link>}
-        <Link to="/console/access" className="text-sm font-semibold text-white/50 hover:text-white">Manage credentials</Link>
+        {canAuthor && <Link to="/console/create" className="inline-flex items-center justify-center gap-2 rounded-md bg-seal px-4 py-2 text-sm font-semibold text-white transition hover:bg-seal-light">Create your first record →</Link>}
+        <Link to="/console/library" className="text-sm font-semibold text-white/50 hover:text-white">Browse records</Link>
       </div>
     </Card>
   );
