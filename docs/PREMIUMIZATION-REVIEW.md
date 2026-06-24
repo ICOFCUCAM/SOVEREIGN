@@ -17,25 +17,40 @@ The fix makes five things legible on every operator surface:
 
 ---
 
-## Centerpiece — the Governance Instrument
-A new reusable component (`components/GovernanceInstrument.tsx`) renders, from the
-**real resolved policy** for the chosen record type + classification, a five-stage
-instrument:
+## Centerpiece — the Governed Publication Procedure
+A new reusable component (`components/GovernanceInstrument.tsx`). The first cut was
+a five-stage *reference strip* (policy · authority · publication · certificate ·
+evidence) — informative, but it failed the test: it showed actors and proofs, not
+the **procedure**, so "what happens after I submit?" stayed invisible. That is
+exactly the premiumization-theater trap (a prettier sidebar, not a new mental model).
 
-1. **Governing policy** — the named, versioned policy that governs this record.
-2. **Approval authority** — the ordered authorities, with per-step quorum and
-   sequential/parallel semantics (the chips an evaluator immediately understands).
-3. **Publication authority** — the single named role that may release it, with the
-   separation-of-duties rule stated.
-4. **Certificate produced** — the Governance Certificate sealed at publication
-   (required-vs-actual chain, integrity proof, COMPLIANT verdict) + the
-   Preservation Certificate on archive.
-5. **Evidence chain** — the append-only, hash-stamped trail end to end.
+The rebuilt instrument is the procedure itself, read from the **real resolved
+policy** for the chosen type + classification:
 
-Nothing is fabricated: every authority, quorum, and name is read from the policy
-bound to the record. When no named policy exists it states the honest
-platform-default path. This is the single highest-leverage change — it turns
-"author a form" into "commission a governed Official Record."
+- **Header** — "Official institutional publication" + **"Governed by [Policy] v.N ·
+  enforced, not advisory"**, foregrounded.
+- **A lifecycle spine titled "After you submit"** — a numbered timeline:
+  1 Submitted → 2 Reviewed & approved → 3 Rendered → 4 Published → 5 Preserved.
+  The **approval authorities sit ON step 2** (ordered chips, quorum, "must approve
+  in this order"); the **publication authority sits ON step 4**; the **Governance
+  Certificate** and **Preservation Certificate** appear as concrete outputs on the
+  steps that seal them.
+- **"What the institution will hold"** — the four artifacts named concretely
+  (Official Record, Governance Certificate, Preservation Certificate, Evidence Chain).
+
+It passes the four-question test in under three seconds, nothing hidden or collapsed:
+
+| Question | Answered by |
+|----------|-------------|
+| What governs this record? | the foregrounded "Governed by [Policy] v.N" line |
+| Who must approve it? | the authority chips on the "Reviewed & approved" step |
+| What happens after I submit? | the "After you submit" timeline IS the answer |
+| What artifact is produced? | certificates on their sealing steps + "what you will hold" |
+
+Nothing is fabricated; when no named policy exists it states the honest
+platform-default path. The intended shift: a Secretary General reads this and
+thinks "I am initiating an official institutional publication process," not "I am
+filling a form."
 
 ---
 

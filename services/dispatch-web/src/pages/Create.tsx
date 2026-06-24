@@ -328,10 +328,10 @@ const Create: React.FC = () => {
         </div>
       </div>
 
-      {/* STEP 2 — the governance instrument: make the invisible visible */}
-      <Step n="2" title="Understand the governance" sub="Derived from the policy bound to this record — nothing here is fabricated." />
+      {/* STEP 2 — the governed publication procedure: the spine of the page */}
+      <Step n="2" title="The publication procedure" sub="What happens after you submit — read from the policy bound to this record, not fabricated." />
       <div className="mb-8">
-        <GovernanceInstrument docTypeLabel={spec.label} classification={level} policy={policy} />
+        <GovernanceInstrument docTypeLabel={spec.label} classification={level} policy={policy} outputs={outputs} />
       </div>
 
       {/* STEP 3 — author + submit */}
