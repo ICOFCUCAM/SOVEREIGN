@@ -127,10 +127,13 @@ export const getGovernanceOverview = () => request<GovOverview>("GET", "/v1/gove
 // ---- governance intelligence (analytics) ----
 export interface GovIntelligence {
   cycleHours: { submitToApprove: number | null; approveToPublish: number | null; publishToArchive: number | null };
-  oldestInFlight: { documentId: string; title: string; docType: string; classification: { level?: string }; hoursWaiting: number | null }[];
+  oldestInFlight: { documentId: string; title: string; docType: string; classification: { level?: string }; hoursWaiting: number | null; awaiting?: string }[];
   policyPerformance: { policy: string; volume: number; avgDays: number | null; complianceRate: number }[];
   throughput: { day: string; count: number }[];
-  approvalsByRole: { role: string; count: number }[];
+  authorityPerformance: { role: string; avgResponseHours: number | null; decisions: number }[];
+  workloadByAuthority: { role: string; count: number }[];
+  aging: { bucket: string; count: number }[];
+  atRisk: { documentId: string; title: string; docType: string; classification: { level?: string }; role: string; hoursLeft: number | null }[];
 }
 export const getGovernanceIntelligence = () => request<GovIntelligence>("GET", "/v1/governance/intelligence");
 

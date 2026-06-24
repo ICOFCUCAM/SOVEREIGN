@@ -814,15 +814,14 @@ async function handleGovernanceOverview(res, principal) {
 // the engine already records — no new instrumentation.
 async function handleGovernanceIntelligence(res, principal) {
   if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+  const roleLabels = {};
   const d = await withClaims(pool, govClaims(principal), async (c) => {
+    (await c.query("select key, label from dispatch.governance_roles")).rows.forEach((r) => { roleLabels[r.key] = r.label; });
     const cyc = (await c.query(
       `select avg(extract(epoch from (decided_at - submitted_at))/3600)  filter (where decided_at is not null and submitted_at is not null)  as submit_to_approve,
               avg(extract(epoch from (published_at - decided_at))/3600)  filter (where published_at is not null and decided_at is not null) as approve_to_publish,
               avg(extract(epoch from (archived_at - published_at))/3600) filter (where archived_at is not null and published_at is not null) as publish_to_archive
          from dispatch.documents where deleted_at is null`)).rows[0];
-    const oldest = (await c.query(
-      `select id, title, doc_type, classification, submitted_at, extract(epoch from (now()-submitted_at))/3600 as hours_waiting
-         from dispatch.documents where lifecycle_state in ('submitted','in_review') and deleted_at is null order by submitted_at asc limit 8`)).rows;
     const policyPerf = (await c.query(
       `select governance_certificate->>'policyName' as policy, count(*) as volume,
               avg(extract(epoch from (published_at - submitted_at))/86400) as avg_days,
@@ -831,17 +830,63 @@ async function handleGovernanceIntelligence(res, principal) {
     const tput = (await c.query(
       `select to_char(published_at::date,'Mon DD') as day, count(*) n from dispatch.documents
         where published_at >= now() - interval '14 days' and deleted_at is null group by published_at::date order by published_at::date`)).rows;
-    const byRole = (await c.query(
-      `select coalesce(role_key,'(ungoverned)') as role, count(*) n from dispatch.approvals where decision='approve' group by 1 order by n desc limit 12`)).rows;
-    return { cyc, oldest, policyPerf, tput, byRole };
+    // Authority RESPONSE TIME: how long each role takes once it is their turn —
+    // the gap between this approval and the previous step (or submission for step 0).
+    const perf = (await c.query(
+      `with ca as (
+         select a.role_key, a.created_at,
+                lag(a.created_at) over (partition by a.document_id order by a.created_at) as prev_at,
+                d.submitted_at
+           from dispatch.approvals a join dispatch.documents d on d.id = a.document_id
+          where a.decision='approve' and a.role_key is not null)
+       select role_key,
+              avg(extract(epoch from (created_at - coalesce(prev_at, submitted_at)))/3600) as avg_hours,
+              count(*) as decisions
+         from ca group by role_key order by avg_hours desc nulls last`)).rows;
+    // Approvals NEARING EXPIRY on records not yet published — about to breach.
+    const atRisk = (await c.query(
+      `select d.id, d.title, d.doc_type, d.classification, a.role_key,
+              extract(epoch from (a.expires_at - now()))/3600 as hours_left
+         from dispatch.approvals a join dispatch.documents d on d.id = a.document_id
+        where a.decision='approve' and a.expires_at is not null and a.expires_at > now()
+          and a.expires_at <= now() + interval '7 days'
+          and d.lifecycle_state in ('in_review','approved','rendered') and d.deleted_at is null
+        order by a.expires_at asc limit 12`)).rows;
+    // Pending records — resolve whose turn + age for workload + aging + bottlenecks.
+    const pendingDocs = (await c.query(
+      `select id, title, doc_type, classification, submitted_at, current_version,
+              extract(epoch from (now()-submitted_at))/3600 as hours_waiting
+         from dispatch.documents where lifecycle_state in ('submitted','in_review') and deleted_at is null order by submitted_at asc limit 200`)).rows;
+    const workload = {}; const aging = { "0–1d": 0, "1–3d": 0, "3–7d": 0, ">7d": 0 };
+    const pending = [];
+    for (const p of pendingDocs) {
+      const policy = await resolvePolicy(c, { docType: p.doc_type, classificationLevel: p.classification?.level });
+      const chain = chainOf(policy);
+      let awaiting = "Review";
+      if (chain.length) {
+        const appr = (await c.query("select decision, actor, role_key, expires_at from dispatch.approvals where document_id=$1 and version_no=$2", [p.id, p.current_version])).rows
+          .map((r) => ({ ...r, expired: !!r.expires_at && new Date(r.expires_at) < new Date() }));
+        const ev = evaluateChain(appr, chain, { submitter: null, sequential: policy.sequential });
+        awaiting = ev.openStep != null ? chain[ev.openStep].label : "Ready";
+      }
+      workload[awaiting] = (workload[awaiting] || 0) + 1;
+      const hrs = Number(p.hours_waiting);
+      aging[hrs < 24 ? "0–1d" : hrs < 72 ? "1–3d" : hrs < 168 ? "3–7d" : ">7d"]++;
+      pending.push({ id: p.id, title: p.title, doc_type: p.doc_type, classification: p.classification, hours_waiting: hrs, awaiting });
+    }
+    return { cyc, policyPerf, tput, perf, atRisk, workload, aging, pending };
   });
   const h = (x) => (x == null ? null : Math.round(Number(x) * 10) / 10);
+  const lbl = (k) => roleLabels[k] || k;
   return send(res, 200, {
     cycleHours: { submitToApprove: h(d.cyc.submit_to_approve), approveToPublish: h(d.cyc.approve_to_publish), publishToArchive: h(d.cyc.publish_to_archive) },
-    oldestInFlight: d.oldest.map((r) => ({ documentId: r.id, title: r.title, docType: r.doc_type, classification: r.classification, hoursWaiting: h(r.hours_waiting) })),
+    oldestInFlight: d.pending.slice(0, 8).map((r) => ({ documentId: r.id, title: r.title, docType: r.doc_type, classification: r.classification, hoursWaiting: h(r.hours_waiting), awaiting: r.awaiting })),
     policyPerformance: d.policyPerf.map((r) => ({ policy: r.policy, volume: Number(r.volume), avgDays: h(r.avg_days), complianceRate: Number(r.volume) ? Math.round((Number(r.compliant) / Number(r.volume)) * 100) : 100 })),
     throughput: d.tput.map((r) => ({ day: r.day, count: Number(r.n) })),
-    approvalsByRole: d.byRole.map((r) => ({ role: r.role, count: Number(r.n) })),
+    authorityPerformance: d.perf.map((r) => ({ role: lbl(r.role_key), avgResponseHours: h(r.avg_hours), decisions: Number(r.decisions) })),
+    workloadByAuthority: Object.entries(d.workload).map(([role, count]) => ({ role, count })).sort((a, b) => b.count - a.count),
+    aging: Object.entries(d.aging).map(([bucket, count]) => ({ bucket, count })),
+    atRisk: d.atRisk.map((r) => ({ documentId: r.id, title: r.title, docType: r.doc_type, classification: r.classification, role: lbl(r.role_key), hoursLeft: h(r.hours_left) })),
   });
 }
 
