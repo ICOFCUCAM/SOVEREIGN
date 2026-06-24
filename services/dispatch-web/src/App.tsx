@@ -26,6 +26,7 @@ import GovernancePolicies from "./pages/GovernancePolicies";
 import AuthorityDirectory from "./pages/AuthorityDirectory";
 import GovernanceMonitor from "./pages/GovernanceMonitor";
 import ComplianceDashboard from "./pages/ComplianceDashboard";
+import GovernanceIntelligence from "./pages/GovernanceIntelligence";
 import Polished from "./pages/polished/Polished";
 import { BillingProvider } from "./lib/upsell";
 
@@ -72,6 +73,7 @@ const Administration: React.FC = () => {
           <Route path="governance" element={<GovernancePolicies />} />
           <Route path="monitor" element={<GovernanceMonitor />} />
           <Route path="compliance" element={<ComplianceDashboard />} />
+          <Route path="intelligence" element={<GovernanceIntelligence />} />
           <Route path="integrations" element={<Integrations />} />
           <Route path="intake" element={<Submit />} />
           <Route path="sovereignty" element={<Sovereignty />} />

@@ -808,6 +808,43 @@ async function handleGovernanceOverview(res, principal) {
   });
 }
 
+// GET /v1/governance/intelligence — institutional governance analytics: cycle
+// times, bottlenecks (where records pile up), per-policy performance, publication
+// throughput, and approval activity by authority. All derived from the timestamps
+// the engine already records — no new instrumentation.
+async function handleGovernanceIntelligence(res, principal) {
+  if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+  const d = await withClaims(pool, govClaims(principal), async (c) => {
+    const cyc = (await c.query(
+      `select avg(extract(epoch from (decided_at - submitted_at))/3600)  filter (where decided_at is not null and submitted_at is not null)  as submit_to_approve,
+              avg(extract(epoch from (published_at - decided_at))/3600)  filter (where published_at is not null and decided_at is not null) as approve_to_publish,
+              avg(extract(epoch from (archived_at - published_at))/3600) filter (where archived_at is not null and published_at is not null) as publish_to_archive
+         from dispatch.documents where deleted_at is null`)).rows[0];
+    const oldest = (await c.query(
+      `select id, title, doc_type, classification, submitted_at, extract(epoch from (now()-submitted_at))/3600 as hours_waiting
+         from dispatch.documents where lifecycle_state in ('submitted','in_review') and deleted_at is null order by submitted_at asc limit 8`)).rows;
+    const policyPerf = (await c.query(
+      `select governance_certificate->>'policyName' as policy, count(*) as volume,
+              avg(extract(epoch from (published_at - submitted_at))/86400) as avg_days,
+              count(*) filter (where governance_certificate->>'complianceResult'='COMPLIANT') as compliant
+         from dispatch.documents where governance_certificate is not null and deleted_at is null group by 1 order by volume desc`)).rows;
+    const tput = (await c.query(
+      `select to_char(published_at::date,'Mon DD') as day, count(*) n from dispatch.documents
+        where published_at >= now() - interval '14 days' and deleted_at is null group by published_at::date order by published_at::date`)).rows;
+    const byRole = (await c.query(
+      `select coalesce(role_key,'(ungoverned)') as role, count(*) n from dispatch.approvals where decision='approve' group by 1 order by n desc limit 12`)).rows;
+    return { cyc, oldest, policyPerf, tput, byRole };
+  });
+  const h = (x) => (x == null ? null : Math.round(Number(x) * 10) / 10);
+  return send(res, 200, {
+    cycleHours: { submitToApprove: h(d.cyc.submit_to_approve), approveToPublish: h(d.cyc.approve_to_publish), publishToArchive: h(d.cyc.publish_to_archive) },
+    oldestInFlight: d.oldest.map((r) => ({ documentId: r.id, title: r.title, docType: r.doc_type, classification: r.classification, hoursWaiting: h(r.hours_waiting) })),
+    policyPerformance: d.policyPerf.map((r) => ({ policy: r.policy, volume: Number(r.volume), avgDays: h(r.avg_days), complianceRate: Number(r.volume) ? Math.round((Number(r.compliant) / Number(r.volume)) * 100) : 100 })),
+    throughput: d.tput.map((r) => ({ day: r.day, count: Number(r.n) })),
+    approvalsByRole: d.byRole.map((r) => ({ role: r.role, count: Number(r.n) })),
+  });
+}
+
 // POST /v1/admin/governance/expire-sweep — flag records whose governance chain
 // has an expired approval (those approvals no longer count toward satisfaction,
 // so publication is already blocked by the publication lock). Emits an auditable
@@ -1079,6 +1116,13 @@ const server = http.createServer(async (req, res) => {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       return await handleGovernanceOverview(res, auth.principal);
+    }
+
+    // Governance intelligence — analytics (bottlenecks, cycle times, performance).
+    if (req.method === "GET" && path === "/v1/governance/intelligence") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleGovernanceIntelligence(res, auth.principal);
     }
 
     // Governance roles / grants / delegations (read for any principal).

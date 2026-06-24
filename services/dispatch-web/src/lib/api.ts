@@ -124,6 +124,16 @@ export interface GovOverview {
 }
 export const getGovernanceOverview = () => request<GovOverview>("GET", "/v1/governance/overview");
 
+// ---- governance intelligence (analytics) ----
+export interface GovIntelligence {
+  cycleHours: { submitToApprove: number | null; approveToPublish: number | null; publishToArchive: number | null };
+  oldestInFlight: { documentId: string; title: string; docType: string; classification: { level?: string }; hoursWaiting: number | null }[];
+  policyPerformance: { policy: string; volume: number; avgDays: number | null; complianceRate: number }[];
+  throughput: { day: string; count: number }[];
+  approvalsByRole: { role: string; count: number }[];
+}
+export const getGovernanceIntelligence = () => request<GovIntelligence>("GET", "/v1/governance/intelligence");
+
 // ---- governance (compliance) certificate ----
 export interface GovernanceCertificate {
   recordId: string; policyName: string; policyVersion: number;

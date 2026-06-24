@@ -33,6 +33,7 @@ const ADMIN_NAV: NavItem[] = [
   { to: "/admin/governance", label: "Policy Studio", scope: "dispatch:admin", group: "Governance" },
   { to: "/admin/monitor", label: "Governance Monitor", scope: "dispatch:read", group: "Governance" },
   { to: "/admin/compliance", label: "Audit & Compliance", scope: "dispatch:read", group: "Compliance" },
+  { to: "/admin/intelligence", label: "Intelligence", scope: "dispatch:read", group: "Compliance" },
   { to: "/admin/integrations", label: "Integrations", group: "Platform" },
   { to: "/admin/intake", label: "Direct DDM Intake", scope: "dispatch:render", group: "Platform" },
   { to: "/admin/sovereignty", label: "Data Sovereignty", group: "Platform" },
