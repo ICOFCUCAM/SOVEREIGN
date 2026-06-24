@@ -3,6 +3,7 @@
 // component — the CTA reads this constant. No human contact is required to reach
 // the procurement dossier today; a role-based address can be added later.
 export const PROCUREMENT_ROUTE = "/procurement";
+export const TRUST_ROUTE = "/trust";
 export const ARCHITECTURE_ROUTE = "/architecture";
 export const PLATFORM_ROUTE = "/platform";
 export const SECURITY_ROUTE = "/security";
