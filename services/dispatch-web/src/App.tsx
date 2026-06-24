@@ -30,6 +30,7 @@ import DeploymentArchitecture from "./pages/DeploymentArchitecture";
 import OperationalResilience from "./pages/OperationalResilience";
 import IntegrationControlCenter from "./pages/IntegrationControlCenter";
 import EvidencePackage from "./pages/EvidencePackage";
+import TrustCenter from "./pages/TrustCenter";
 import Polished from "./pages/polished/Polished";
 import { BillingProvider } from "./lib/upsell";
 
@@ -77,6 +78,7 @@ const Administration: React.FC = () => {
           <Route path="monitor" element={<GovernanceMonitor />} />
           <Route path="compliance" element={<ComplianceDashboard />} />
           <Route path="intelligence" element={<GovernanceIntelligence />} />
+          <Route path="trust" element={<TrustCenter />} />
           <Route path="deployment" element={<DeploymentArchitecture />} />
           <Route path="resilience" element={<OperationalResilience />} />
           <Route path="evidence" element={<EvidencePackage />} />

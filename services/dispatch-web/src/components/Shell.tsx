@@ -34,6 +34,7 @@ const ADMIN_NAV: NavItem[] = [
   { to: "/admin/monitor", label: "Governance Monitor", scope: "dispatch:read", group: "Governance" },
   { to: "/admin/compliance", label: "Audit & Compliance", scope: "dispatch:read", group: "Compliance" },
   { to: "/admin/intelligence", label: "Intelligence", scope: "dispatch:read", group: "Compliance" },
+  { to: "/admin/trust", label: "Trust Center", scope: "dispatch:read", group: "Sovereignty" },
   { to: "/admin/deployment", label: "Deployment", group: "Sovereignty" },
   { to: "/admin/sovereignty", label: "Data Sovereignty", group: "Sovereignty" },
   { to: "/admin/integrations", label: "Integrations", group: "Sovereignty" },
