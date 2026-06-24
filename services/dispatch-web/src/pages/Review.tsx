@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { approvalsInbox, decide, type InboxItem } from "../lib/api";
+import { approvalsInbox, decide, type InboxItem , humanError} from "../lib/api";
 import { Button, Card, ClassBadge, Field, inputCls, timeAgo } from "../lib/ui";
 
 // The approver inbox + decision panel. Each item shows classification,
@@ -19,7 +19,7 @@ const Review: React.FC = () => {
   const load = async () => {
     setLoading(true);
     try { setItems((await approvalsInbox()).items); }
-    catch (e) { setErr(e instanceof Error ? e.message : "load failed"); }
+    catch (e) { setErr(humanError(e, "load failed")); }
     finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
@@ -32,7 +32,7 @@ const Review: React.FC = () => {
       setMsg(`Decision recorded: ${decision} → ${r.lifecycle} (${r.approvals}/${r.required} approvals)`);
       setSel(null); setComment("");
       await load();
-    } catch (e) { setErr(e instanceof Error ? e.message : "decision failed"); }
+    } catch (e) { setErr(humanError(e, "decision failed")); }
     finally { setBusy(false); }
   };
 

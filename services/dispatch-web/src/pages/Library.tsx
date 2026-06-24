@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { listDocuments, type DocListItem, type Lifecycle } from "../lib/api";
+import { listDocuments, type DocListItem, type Lifecycle , humanError} from "../lib/api";
 import { Card, ClassBadge, LifecycleBadge, inputCls, timeAgo } from "../lib/ui";
 
 const STATES: (Lifecycle | "")[] = ["", "in_review", "approved", "rendered", "published", "withdrawn", "archived", "rejected"];
@@ -22,7 +22,7 @@ const Library: React.FC = () => {
   const load = useCallback(async (search: string) => {
     setLoading(true); setErr(null);
     try { setItems((await listDocuments({ state: state || undefined, q: search || undefined, limit: 200 })).items); }
-    catch (e) { setErr(e instanceof Error ? e.message : "load failed"); }
+    catch (e) { setErr(humanError(e, "load failed")); }
     finally { setLoading(false); }
   }, [state]);
   // Reload when the state filter changes; the search box submits explicitly.

@@ -14,6 +14,35 @@ export class DispatchError extends Error {
 let getToken: () => string | null = () => null;
 export function bindTokenGetter(fn: () => string | null) { getToken = fn; }
 
+// Institutional error language. An enterprise console never shows raw backend
+// strings ("missing Authorization", "bad secret"); it explains, in the user's
+// terms, what happened and what to do. Map known codes/statuses to human copy;
+// for anything unmapped fall back to the caller's plain-language default —
+// never the wire message.
+const ERROR_COPY: Record<string, string> = {
+  UNAUTHENTICATED: "Your session has ended. Please sign in again.",
+  INVALID_TOKEN: "Your session is no longer valid. Please sign in again.",
+  TOKEN_EXPIRED: "Your session has expired. Please sign in again.",
+  INVALID_CLIENT: "Those credentials weren't recognized. Check your Client ID and secret, or create a free evaluation account.",
+  FORBIDDEN_SCOPE: "Your credentials don't carry permission for this action.",
+  SCOPE_NOT_ISSUABLE: "That permission can't be self-issued.",
+  QUOTA_EXCEEDED: "You've reached your free evaluation limit. Subscribe to create more official records.",
+  PAYMENT_REQUIRED: "Retrieving publication artifacts requires a Professional subscription.",
+  VALIDATION_FAILED: "Some fields need attention before this can be submitted.",
+};
+export function humanError(e: unknown, fallback = "Something went wrong. Please try again."): string {
+  if (e instanceof DispatchError) {
+    if (ERROR_COPY[e.code]) return ERROR_COPY[e.code];
+    if (e.status === 401) return ERROR_COPY.UNAUTHENTICATED;
+    if (e.status === 403) return ERROR_COPY.FORBIDDEN_SCOPE;
+    if (e.status >= 500) return "The service is temporarily unavailable. Please try again shortly.";
+    // 4xx carrying a server-authored, user-safe message (e.g. field validation): show it.
+    if (e.status >= 400 && e.message) return e.message;
+  }
+  if (e instanceof TypeError) return "Couldn't reach the service. Check your connection and try again.";
+  return fallback;
+}
+
 async function request<T>(method: string, path: string, opts: { body?: unknown; idem?: string; token?: string } = {}): Promise<T> {
   const headers: Record<string, string> = {};
   const tok = opts.token ?? getToken();

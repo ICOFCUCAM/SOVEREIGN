@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
-import { signup, type SignupResponse, DispatchError } from "../lib/api";
+import { signup, type SignupResponse, humanError } from "../lib/api";
 import { Button, Field, inputCls } from "../lib/ui";
 
 // Public self-serve signup — an institution creates a FREE account and receives
@@ -21,7 +21,7 @@ const Signup: React.FC = () => {
     e.preventDefault();
     setBusy(true); setErr(null);
     try { setCred(await signup(name.trim())); }
-    catch (e2) { setErr(e2 instanceof DispatchError ? e2.message : "signup failed"); }
+    catch (e2) { setErr(humanError(e2, "We couldn't create your account. Please try again.")); }
     finally { setBusy(false); }
   };
   const enter = async () => {

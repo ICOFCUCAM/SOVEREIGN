@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { submitDocument, validateDocument, DispatchError, type ApiError } from "../lib/api";
+import { submitDocument, validateDocument, DispatchError, type ApiError , humanError} from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useBilling, UsageBanner, UpgradeModal } from "../lib/upsell";
 import { Button, Card, Field, inputCls } from "../lib/ui";
@@ -243,7 +243,7 @@ const Create: React.FC = () => {
   const onValidate = async (): Promise<void> => {
     setErr(null); setValidation(null); setBusy(true);
     try { setValidation(await validateDocument(buildRequest())); }
-    catch (e) { setErr(e instanceof Error ? e.message : "validation failed"); }
+    catch (e) { setErr(humanError(e, "validation failed")); }
     finally { setBusy(false); }
   };
   const onSubmit = async (): Promise<void> => {
@@ -251,7 +251,7 @@ const Create: React.FC = () => {
     try { const req = buildRequest(); const r = await submitDocument(req, req.idempotencyKey); nav(`/console/documents/${r.documentId}`); }
     catch (e) {
       if (e instanceof DispatchError && e.status === 402) { setUpgrade(true); return; }
-      setErr(e instanceof Error ? e.message : "submit failed");
+      setErr(humanError(e, "submit failed"));
     }
     finally { setBusy(false); }
   };
@@ -260,8 +260,9 @@ const Create: React.FC = () => {
     <div>
       {upgrade && <UpgradeModal open reason="quota" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); refresh(); setUpgrade(false); }} />}
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Create a document</h1>
-        <p className="text-sm text-white/50">Author an institutional document from a structured form — it composes a valid DDM and submits into the approval pipeline.</p>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Official Record</div>
+        <h1 className="mt-1 text-2xl font-bold text-white">Create Official Record</h1>
+        <p className="text-sm text-white/50">Choose a record type and author its content. It enters the governance chain for review and approval before publication — no formatting, markup, or technical knowledge required.</p>
       </header>
       {billing && <UsageBanner b={billing} onUpgrade={() => setUpgrade(true)} className="mb-6" />}
 
@@ -325,7 +326,7 @@ const Create: React.FC = () => {
               <Button variant="ghost" onClick={onValidate} disabled={busy}>{busy ? "…" : "Validate"}</Button>
               <Button onClick={onSubmit} disabled={busy || missing.length > 0}>{busy ? "Submitting…" : "Create & submit →"}</Button>
             </div>
-            <button onClick={() => setShowJson((s) => !s)} className="text-[11px] uppercase tracking-wide text-white/40 hover:text-white/70">{showJson ? "Hide" : "Show"} composed DDM</button>
+            <button onClick={() => setShowJson((s) => !s)} className="text-[11px] uppercase tracking-wide text-white/30 hover:text-white/60">{showJson ? "Hide" : "Show"} technical payload (advanced)</button>
           </div>
         </div>
       </div>

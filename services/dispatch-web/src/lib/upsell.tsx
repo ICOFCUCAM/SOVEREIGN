@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { getBilling, subscribe, type Billing } from "./api";
+import { getBilling, subscribe, type Billing , humanError} from "./api";
 import { Button } from "./ui";
 
 // The commercial conversion layer. The frame throughout is OUTCOMES, not plans:
@@ -79,7 +79,7 @@ export const UpgradeModal: React.FC<{ open: boolean; reason: "quota" | "download
   const go = async () => {
     setBusy(true); setErr(null);
     try { onSubscribed(await subscribe()); }
-    catch (e) { setErr(e instanceof Error ? e.message : "subscribe failed"); setBusy(false); }
+    catch (e) { setErr(humanError(e, "subscribe failed")); setBusy(false); }
   };
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4" onClick={onClose}>

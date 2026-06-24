@@ -3,30 +3,36 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useBilling, QuotaMeter } from "../lib/upsell";
 
-// Role-filtered, top-level navigation — institutional command surfaces, not a
-// file menu. Flat by design (Operations · Pipeline · Records · Governance ·
-// Audit · Sovereignty · Integrations), in lifecycle order. Items are gated by
-// scope, so an auditor sees Governance/Audit and an author sees the Pipeline.
-// A few surfaces expose children (the Pipeline's two intake modes).
-type NavItem = { to: string; label: string; scope?: string; end?: boolean; children?: { to: string; label: string }[] };
-const NAV: NavItem[] = [
-  { to: "/console", label: "Operations", end: true },
-  { to: "/console/submit", label: "Pipeline", scope: "dispatch:render", children: [
-    { to: "/console/create", label: "Compose" },
-    { to: "/console/submit", label: "Submit DDM" },
+// The console is organised in two LAYERS, not one flat menu. Institutional
+// operators live entirely in OPERATIONS and never need to see implementation
+// detail; the technical machinery (credentials, integrations, raw DDM intake)
+// is quarantined under ADMINISTRATION. An operator creates and governs records;
+// they never "submit a JSON payload". Each item is scope-gated, and a section
+// with no visible items is hidden entirely.
+type NavItem = { to: string; label: string; scope?: string; end?: boolean };
+type NavSection = { section: string; items: NavItem[] };
+const NAV: NavSection[] = [
+  { section: "Operations", items: [
+    { to: "/console", label: "Operations", end: true },
+    { to: "/console/create", label: "Create Record", scope: "dispatch:render" },
+    { to: "/console/review", label: "Governance", scope: "dispatch:approve" },
+    { to: "/console/library", label: "Records", scope: "dispatch:read" },
+    { to: "/console/audit", label: "Audit", scope: "dispatch:audit" },
+    { to: "/console/sovereignty", label: "Data Sovereignty" },
   ] },
-  { to: "/console/library", label: "Records", scope: "dispatch:read" },
-  { to: "/console/review", label: "Governance", scope: "dispatch:approve" },
-  { to: "/console/audit", label: "Audit", scope: "dispatch:audit" },
-  { to: "/console/sovereignty", label: "Sovereignty" },
-  { to: "/console/access", label: "Access", scope: "dispatch:admin" },
-  { to: "/console/integrations", label: "Integrations" },
+  { section: "Administration", items: [
+    { to: "/console/access", label: "Credentials & Access", scope: "dispatch:admin" },
+    { to: "/console/integrations", label: "Integrations" },
+    { to: "/console/submit", label: "Advanced · Direct DDM", scope: "dispatch:render" },
+  ] },
 ];
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session, signOut, has } = useAuth();
   const nav = useNavigate();
-  const items = NAV.filter((n) => !n.scope || has(n.scope));
+  const sections = NAV
+    .map((s) => ({ ...s, items: s.items.filter((n) => !n.scope || has(n.scope)) }))
+    .filter((s) => s.items.length > 0);
   const { billing } = useBilling();
 
   return (
@@ -43,25 +49,17 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">Publication Infra</div>
             </div>
           </div>
-          <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-            {items.map((n) => (
-              <div key={n.to}>
-                <NavLink to={n.to} end={n.end}
-                  className={({ isActive }) =>
-                    `block rounded-md px-3 py-2 text-sm font-semibold uppercase tracking-wide transition ${isActive ? "bg-seal/30 text-white ring-1 ring-seal-light/40" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>
-                  {n.label}
-                </NavLink>
-                {n.children && (
-                  <div className="ml-3 mt-0.5 space-y-0.5 border-l border-white/8 pl-2">
-                    {n.children.map((c) => (
-                      <NavLink key={c.to + c.label} to={c.to} end
-                        className={({ isActive }) =>
-                          `block rounded px-3 py-1.5 text-[12.5px] font-medium transition ${isActive ? "text-white" : "text-white/45 hover:text-white/80"}`}>
-                        {c.label}
-                      </NavLink>
-                    ))}
-                  </div>
-                )}
+          <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+            {sections.map((s) => (
+              <div key={s.section} className="space-y-1">
+                <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/30">{s.section}</div>
+                {s.items.map((n) => (
+                  <NavLink key={n.to} to={n.to} end={n.end}
+                    className={({ isActive }) =>
+                      `block rounded-md px-3 py-2 text-sm font-semibold uppercase tracking-wide transition ${isActive ? "bg-seal/30 text-white ring-1 ring-seal-light/40" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>
+                    {n.label}
+                  </NavLink>
+                ))}
               </div>
             ))}
           </nav>

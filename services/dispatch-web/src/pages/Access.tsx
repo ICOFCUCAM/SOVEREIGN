@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../lib/auth";
 import { Button, Card, Field, inputCls, timeAgo } from "../lib/ui";
-import { listClients, issueClient, rotateClient, revokeClient, getBilling, subscribe, type ServiceClient, type IssuedCredential, DispatchError } from "../lib/api";
+import { listClients, issueClient, rotateClient, revokeClient, getBilling, subscribe, type ServiceClient, type IssuedCredential, humanError } from "../lib/api";
 import { QuotaMeter, planLabel, useBilling } from "../lib/upsell";
 
 // ACCESS — tenant self-service for API credentials. A tenant_admin issues a
@@ -66,7 +66,7 @@ const Access: React.FC = () => {
   const load = useCallback(async () => {
     setErr(null);
     try { const r = await listClients(); setClients(r.clients); }
-    catch (e) { setErr(e instanceof DispatchError ? e.message : "failed to load credentials"); setClients([]); }
+    catch (e) { setErr(humanError(e, "failed to load credentials")); setClients([]); }
     try { setBilling(await getBilling()); } catch { /* non-fatal */ }
   }, []);
   useEffect(() => { if (admin) load(); }, [admin, load]);
@@ -74,7 +74,7 @@ const Access: React.FC = () => {
   const doSubscribe = async () => {
     setSubBusy(true); setErr(null);
     try { setBilling(await subscribe()); }
-    catch (e) { setErr(e instanceof DispatchError ? e.message : "failed to subscribe"); }
+    catch (e) { setErr(humanError(e, "failed to subscribe")); }
     finally { setSubBusy(false); }
   };
 
@@ -88,21 +88,21 @@ const Access: React.FC = () => {
       setReveal({ cred, label: "Credential issued" });
       setName(""); setScopes(new Set(DEFAULT_SCOPES));
       await load();
-    } catch (e) { setErr(e instanceof DispatchError ? e.message : "failed to issue credential"); }
+    } catch (e) { setErr(humanError(e, "failed to issue credential")); }
     finally { setIssuing(false); }
   };
 
   const rotate = async (cid: string) => {
     setBusy(cid); setErr(null);
     try { const cred = await rotateClient(cid); setReveal({ cred, label: "Secret rotated" }); await load(); }
-    catch (e) { setErr(e instanceof DispatchError ? e.message : "failed to rotate secret"); }
+    catch (e) { setErr(humanError(e, "failed to rotate secret")); }
     finally { setBusy(null); }
   };
 
   const revoke = async (cid: string) => {
     setBusy(cid); setErr(null); setConfirmRevoke(null);
     try { await revokeClient(cid); await load(); }
-    catch (e) { setErr(e instanceof DispatchError ? e.message : "failed to revoke credential"); }
+    catch (e) { setErr(humanError(e, "failed to revoke credential")); }
     finally { setBusy(null); }
   };
 

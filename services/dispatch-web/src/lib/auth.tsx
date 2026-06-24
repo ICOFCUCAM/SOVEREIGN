@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { bindTokenGetter, exchangeToken } from "./api";
+import { bindTokenGetter, exchangeToken , humanError} from "./api";
 
 // Session model: a Dispatch service token (client-credentials) held in memory.
 // We decode the JWT payload (unverified, client-side, display-only) to surface
@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession({ token: r.access_token, tenantId: r.tenantId, scopes: r.scopes?.length ? r.scopes : scopes,
         expiresAt: Date.now() + r.expiresIn * 1000, subject });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "sign-in failed");
+      setError(humanError(e, "sign-in failed"));
       throw e;
     } finally { setLoading(false); }
   }, []);

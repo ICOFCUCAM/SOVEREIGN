@@ -33,9 +33,23 @@ const LIFECYCLE_STYLE: Record<Lifecycle, string> = {
   archived: "bg-zinc-700/40 text-zinc-400",
 };
 
+// Governance-forward labels. The platform sells governance, so the lifecycle
+// reads in that language — never raw engine states ("rendered", "in_review").
+const LIFECYCLE_LABEL: Record<Lifecycle, string> = {
+  draft: "Draft",
+  submitted: "Submitted",
+  in_review: "In Review",
+  approved: "Approved",
+  rejected: "Returned",
+  rendered: "Ready",
+  published: "Published",
+  withdrawn: "Withdrawn",
+  archived: "Archived",
+};
+
 export const LifecycleBadge: React.FC<{ state: Lifecycle }> = ({ state }) => (
   <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${LIFECYCLE_STYLE[state] ?? "bg-ink-600 text-white/70"}`}>
-    {state.replace(/_/g, " ")}
+    {LIFECYCLE_LABEL[state] ?? state.replace(/_/g, " ")}
   </span>
 );
 

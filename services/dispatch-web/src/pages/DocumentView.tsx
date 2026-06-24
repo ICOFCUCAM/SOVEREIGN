@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getDocument, getJob, artifactGrant, publish, withdraw, audit, DispatchError,
-  type DocumentDetail, type JobView, type ArtifactRef, type AuditEvent } from "../lib/api";
+  type DocumentDetail, type JobView, type ArtifactRef, type AuditEvent , humanError} from "../lib/api";
 import { Button, Card, ClassBadge, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { UpgradeModal, useBilling } from "../lib/upsell";
@@ -35,7 +35,7 @@ const DocumentView: React.FC = () => {
       const jobId = d.latestResult?.jobId;
       if (jobId) setJob(await getJob(jobId).catch(() => null));
       if (has("dispatch:audit")) setEvents((await audit({ target: id, limit: 100 }).catch(() => ({ events: [] }))).events);
-    } catch (e) { setErr(e instanceof Error ? e.message : "load failed"); }
+    } catch (e) { setErr(humanError(e, "load failed")); }
   }, [id, has]);
 
   useEffect(() => { load(); }, [load]);
@@ -51,13 +51,13 @@ const DocumentView: React.FC = () => {
     try { const g = await artifactGrant(a.artifactId); window.open(g.downloadUrl, "_blank"); }
     catch (e) {
       if (e instanceof DispatchError && e.status === 402) { setUpgrade(true); return; }
-      setErr(e instanceof Error ? e.message : "grant failed");
+      setErr(humanError(e, "grant failed"));
     }
   };
 
   const lifecycleAction = async (fn: (id: string) => Promise<unknown>) => {
     if (!id) return; setBusy(true); setErr(null);
-    try { await fn(id); await load(); } catch (e) { setErr(e instanceof Error ? e.message : "action failed"); }
+    try { await fn(id); await load(); } catch (e) { setErr(humanError(e, "action failed")); }
     finally { setBusy(false); }
   };
 
