@@ -2,7 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   PLATFORM_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE,
-  PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE, EVIDENCE_ROUTE,
+  PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE, EVIDENCE_ROUTE, TRUST_ROUTE,
+  OUTCOMES_ROUTE, STANDARD_ROUTE, RECORDS_ROUTE, JOURNEY_ROUTE,
 } from "../lib/routes";
 
 // Shared marketing chrome for the public pages (Landing keeps its own copies for
@@ -83,7 +84,7 @@ const FooterCol: React.FC<{ title: string; links: [string, string][] }> = ({ tit
 export const PublicFooter: React.FC = () => (
   <footer className="border-t border-white/[0.06] px-5 py-14 sm:px-8 lg:px-12">
     <div className="mx-auto max-w-[1500px]">
-      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
         <div className="max-w-xs">
           <div className="flex items-center gap-2.5">
             <DispatchMark className="h-6 w-6 text-gold-400" />
@@ -93,8 +94,9 @@ export const PublicFooter: React.FC = () => (
             The operating system for institutional publication — where information becomes a sealed, governed, permanent record.
           </p>
         </div>
+        <FooterCol title="The Standard" links={[["Outcomes", OUTCOMES_ROUTE], ["The Standard", STANDARD_ROUTE], ["Records", RECORDS_ROUTE], ["Readiness Journey", JOURNEY_ROUTE]]} />
         <FooterCol title="Platform" links={[["Overview", PLATFORM_ROUTE], ["Security", SECURITY_ROUTE], ["Compliance", COMPLIANCE_ROUTE]]} />
-        <FooterCol title="Evaluate" links={[["Procurement", PROCUREMENT_ROUTE], ["Architecture", ARCHITECTURE_ROUTE], ["Evidence", EVIDENCE_ROUTE]]} />
+        <FooterCol title="Evaluate" links={[["Procurement", PROCUREMENT_ROUTE], ["Architecture", ARCHITECTURE_ROUTE], ["Evidence", EVIDENCE_ROUTE], ["Trust", TRUST_ROUTE]]} />
         <FooterCol title="Access" links={[["Launch Dispatch", "/console"], ["Log in", "/console"]]} />
       </div>
       <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/[0.05] pt-7 sm:flex-row sm:items-center">

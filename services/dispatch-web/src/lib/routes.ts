@@ -9,3 +9,11 @@ export const PLATFORM_ROUTE = "/platform";
 export const SECURITY_ROUTE = "/security";
 export const COMPLIANCE_ROUTE = "/compliance";
 export const EVIDENCE_ROUTE = "/evidence";
+
+// Category-narrative surfaces — the "why adopt" story (outcomes, the standard,
+// the artifacts, the readiness path). Named here so every header and footer
+// links them consistently instead of leaving them reachable only via in-body CTAs.
+export const OUTCOMES_ROUTE = "/outcomes";
+export const STANDARD_ROUTE = "/standard";
+export const RECORDS_ROUTE = "/records";
+export const JOURNEY_ROUTE = "/journey";

@@ -318,7 +318,7 @@ const Create: React.FC = () => {
                   <div className="text-sm font-semibold text-seal-light">{policy.name}</div>
                 </div>
                 <div>
-                  <div className="text-[11px] uppercase tracking-wide text-white/35">Review chain</div>
+                  <div className="text-[11px] uppercase tracking-wide text-white/35">Approval chain</div>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {(policy.reviewChain ?? []).length === 0 ? <span className="text-[12px] text-white/40">—</span> : policy.reviewChain.map((s, i) => (
                       <React.Fragment key={i}>
@@ -332,7 +332,7 @@ const Create: React.FC = () => {
                 {policy.publicationAuthority && <div className="text-[12px]"><span className="text-white/35">Publication: </span><span className="text-white/80">{policy.publicationAuthority}</span></div>}
               </div>
             ) : (
-              <p className="text-[12px] leading-snug text-white/40">Platform default — a single approval governs this record. Define a governance policy for this record type in Administration to set a review chain and publication authority.</p>
+              <p className="text-[12px] leading-snug text-white/40">Platform default — a single approval governs this record. Define a governance policy for this record type in Administration to set an approval chain and publication authority.</p>
             )}
           </Card>
           <Card className="p-4">

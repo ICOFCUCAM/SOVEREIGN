@@ -179,6 +179,14 @@ const DocumentView: React.FC = () => {
           )}
 
           <div><div className="text-[11px] uppercase tracking-wide text-white/40">Integrity proof (SHA-256)</div><div className="break-all font-mono text-[11px] text-seal-light/90">{govCert.integrityProof}</div></div>
+
+          {/* certifying statement — this panel is an instrument, not a dashboard */}
+          <div className="mt-5 border-t border-white/10 pt-4">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">Issued by Sovereign Dispatch</div>
+            <p className="mt-1.5 text-[12px] leading-relaxed text-white/55">
+              Sovereign Dispatch certifies that this publication {govCert.complianceResult === "COMPLIANT" ? "satisfied" : "did not satisfy"} governance policy <span className="font-semibold text-white/75">{govCert.policyName}</span> (v{govCert.policyVersion}): the required approval chain was {govCert.complianceResult === "COMPLIANT" ? "satisfied in order" : "not satisfied in order"}, with separation of duties {govCert.separationOfDuties}. This certificate can be verified independently against the SHA-256 integrity proof above.
+            </p>
+          </div>
         </Card>
       )}
 
@@ -198,7 +206,7 @@ const DocumentView: React.FC = () => {
           </dl>
           {cert.governancePolicy?.reviewChain?.length > 0 && (
             <div className="mt-4">
-              <div className="text-[11px] uppercase tracking-wide text-white/40">Review chain</div>
+              <div className="text-[11px] uppercase tracking-wide text-white/40">Approval chain</div>
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
                 {cert.governancePolicy.reviewChain.map((s, i) => (
                   <React.Fragment key={i}>
@@ -220,6 +228,14 @@ const DocumentView: React.FC = () => {
               </ul>
             </div>
           )}
+
+          {/* certifying statement — the seal, in words */}
+          <div className="mt-5 border-t border-white/10 pt-4">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">Issued by Sovereign Dispatch</div>
+            <p className="mt-1.5 text-[12px] leading-relaxed text-white/55">
+              Sovereign Dispatch certifies that this record was sealed{cert.archivedAt ? ` on ${new Date(cert.archivedAt).toLocaleString()}` : ""} and is terminal — no edit, withdrawal or republication is possible. The sealed form is provable against the SHA-256 integrity proof above.
+            </p>
+          </div>
         </Card>
       )}
 
