@@ -293,11 +293,27 @@ async function handleLifecycleAction(req, res, principal, documentId, action) {
     return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "publish scope required"));
   try {
     const out = await withClaims(pool, govClaims(principal), async (client) => {
-      const d = await client.query("select id, classification, lifecycle_state, status, correlation_id from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
+      const d = await client.query("select id, doc_type, title, classification, lifecycle_state, status, current_version, published_at, correlation_id from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
       const docRow = d.rows[0];
       if (!docRow) return { http: 404, body: errEnvelope(null, 404, "NOT_FOUND", "document not found") };
       const cl = clearanceAllows(principal.clearance, docRow.classification || {});
       if (!cl.allowed) { inc("clearance_denied_total"); return { http: 403, body: errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", cl.reason) }; }
+
+      if (action === "archive") {
+        // Preservation. A published (or withdrawn) record is sealed into the
+        // archive: a preservation timestamp and a tamper-evident integrity proof
+        // over the canonical record. `archived` is terminal in the state machine,
+        // so no further approve/publish/withdraw is possible (all 409).
+        if (!["published", "withdrawn"].includes(docRow.lifecycle_state))
+          return { http: 409, body: errEnvelope(null, 409, "NOT_ARCHIVABLE", `document is '${docRow.lifecycle_state}'; must be 'published' or 'withdrawn' to archive`) };
+        assertTransition(docRow.lifecycle_state, "archived");
+        const cert = await recordCertificate(client, documentId);
+        const proof = preservationProof(cert);
+        await client.query("update dispatch.documents set lifecycle_state='archived', archived_at=now(), preservation_sha256=$2 where id=$1", [documentId, proof]);
+        await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+          action: "document.preserved", targetType: "document", targetId: documentId, sha256: proof, correlationId: docRow.correlation_id });
+        return { http: 200, body: { documentId, lifecycle: "archived", preservationSha256: proof } };
+      }
 
       if (action === "publish") {
         // A document is publishable once approved AND the render completed.
@@ -326,6 +342,90 @@ async function handleLifecycleAction(req, res, principal, documentId, action) {
     console.error("lifecycle error:", e);
     return send(res, 500, errEnvelope(null, 500, "ENGINE_ERROR", "internal error"));
   }
+}
+
+// ── Preservation certificate ────────────────────────────────────────────────
+// Deterministic stringify (sorted keys) so the integrity proof is reproducible.
+function canon(o) {
+  if (o === null || typeof o !== "object") return JSON.stringify(o);
+  if (Array.isArray(o)) return "[" + o.map(canon).join(",") + "]";
+  return "{" + Object.keys(o).sort().map((k) => JSON.stringify(k) + ":" + canon(o[k])).join(",") + "}";
+}
+const sha256hex = (s) => crypto.createHash("sha256").update(s).digest("hex");
+
+// Assemble a record's preservation certificate from its immutable parts: the
+// DDM version, the publication facts, the governing policy and the recorded
+// approval chain. Runs inside an open client (tenant RLS).
+async function recordCertificate(client, documentId) {
+  const dr = await client.query(
+    `select id, doc_type, title, classification, lifecycle_state, current_version,
+            published_at, archived_at, preservation_sha256, correlation_id
+       from dispatch.documents where id=$1 and deleted_at is null`, [documentId]);
+  const doc = dr.rows[0];
+  if (!doc) return null;
+  const vr = await client.query("select ddm from dispatch.document_versions where document_id=$1 and version_no=$2", [documentId, doc.current_version]);
+  const ddm = vr.rows[0]?.ddm ?? null;
+  const ar = await client.query(
+    "select decision, actor, actor_clearance, created_at from dispatch.approvals where document_id=$1 order by created_at asc", [documentId]);
+  const policy = await resolvePolicy(client, { docType: doc.doc_type, classificationLevel: doc.classification?.level });
+  const recordHash = ddm ? sha256hex(canon(ddm)) : null;
+  return {
+    recordId: doc.id,
+    docType: doc.doc_type,
+    title: doc.title,
+    classification: doc.classification || {},
+    lifecycle: doc.lifecycle_state,
+    version: doc.current_version,
+    publishedAt: doc.published_at,
+    archivedAt: doc.archived_at,
+    recordHash,
+    integrityProof: doc.preservation_sha256,
+    governancePolicy: policy?._source === "policy"
+      ? { name: policy.name, reviewChain: policy.review_chain ?? [], approvalAuthority: policy.approval_authority, publicationAuthority: policy.publication_authority }
+      : { name: "Platform default", reviewChain: [], approvalAuthority: null, publicationAuthority: null },
+    approvalChain: ar.rows.map((a) => ({ actor: a.actor, decision: a.decision, clearance: a.actor_clearance, ts: a.created_at })),
+  };
+}
+// The integrity proof sealed at archive time: a hash over the canonical record.
+function preservationProof(cert) {
+  return sha256hex(canon({
+    recordId: cert.recordId, recordHash: cert.recordHash, publishedAt: cert.publishedAt,
+    governancePolicy: cert.governancePolicy, approvalChain: cert.approvalChain,
+  }));
+}
+
+// GET /v1/documents/:id/certificate — the preservation certificate (archived only).
+async function handleCertificate(res, principal, documentId) {
+  if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+  const cert = await withClaims(pool, govClaims(principal), (c) => recordCertificate(c, documentId));
+  if (!cert) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "document not found"));
+  if (!clearanceAllows(principal.clearance, cert.classification).allowed)
+    return send(res, 403, errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", "not cleared for this record"));
+  if (cert.lifecycle !== "archived")
+    return send(res, 409, errEnvelope(null, 409, "NOT_PRESERVED", "a preservation certificate exists only for archived records"));
+  return send(res, 200, { certificate: cert });
+}
+
+// POST /v1/admin/retention/sweep — the retention execution path. Archives every
+// published record whose retention horizon has passed. Operator-triggered here;
+// a scheduler/worker can invoke the same path periodically.
+async function handleRetentionSweep(res, principal) {
+  if (!hasScope(principal, "dispatch:publish")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "publish scope required"));
+  const preserved = await withClaims(pool, govClaims(principal), async (client) => {
+    const due = await client.query(
+      "select id from dispatch.documents where lifecycle_state='published' and retention_until is not null and retention_until <= now() and deleted_at is null limit 500");
+    const out = [];
+    for (const row of due.rows) {
+      const cert = await recordCertificate(client, row.id);
+      const proof = preservationProof(cert);
+      await client.query("update dispatch.documents set lifecycle_state='archived', archived_at=now(), preservation_sha256=$2 where id=$1", [row.id, proof]);
+      await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
+        action: "document.preserved", targetType: "document", targetId: row.id, sha256: proof });
+      out.push({ documentId: row.id, preservationSha256: proof });
+    }
+    return out;
+  });
+  return send(res, 200, { preserved, count: preserved.length });
 }
 
 // GET /v1/approvals?state=pending  the approver inbox (documents awaiting review)
@@ -569,7 +669,7 @@ async function handleGetJob(res, principal, jobId) {
 async function handleGetDocument(res, principal, documentId) {
   if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
   const data = await withClaims(pool, claimsFor(principal), async (c) => {
-    const d = await c.query("select id, doc_type, title, classification, status, current_version, correlation_id, created_at, updated_at from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
+    const d = await c.query("select id, doc_type, title, classification, status, lifecycle_state, current_version, correlation_id, published_at, archived_at, preservation_sha256, created_at, updated_at from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
     if (!d.rows[0]) return null;
     const vs = await c.query("select version_no, ddm_version, template_id, template_version, engine_version, created_at from dispatch.document_versions where document_id=$1 order by version_no", [documentId]);
     const latest = await c.query("select result from dispatch.jobs where document_id=$1 and result is not null order by updated_at desc limit 1", [documentId]);
@@ -580,8 +680,9 @@ async function handleGetDocument(res, principal, documentId) {
   const dcl = clearanceAllows(principal.clearance, doc.classification || {});
   if (!dcl.allowed) { inc("clearance_denied_total"); return send(res, 403, errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", dcl.reason)); }
   return send(res, 200, {
-    id: doc.id, docType: doc.doc_type, title: doc.title, status: doc.status,
+    id: doc.id, docType: doc.doc_type, title: doc.title, status: doc.status, lifecycle: doc.lifecycle_state,
     currentVersion: doc.current_version, correlationId: doc.correlation_id,
+    publishedAt: doc.published_at, archivedAt: doc.archived_at, preservationSha256: doc.preservation_sha256,
     versions: versions.map((v) => ({ versionNo: v.version_no, ddmVersion: v.ddm_version,
       template: v.template_id, templateVersion: v.template_version, engineVersion: v.engine_version, createdAt: v.created_at })),
     latestResult, createdAt: doc.created_at, updatedAt: doc.updated_at,
@@ -722,6 +823,14 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === "GET" && path === "/favicon.ico") { res.writeHead(204); return res.end(); }
 
+    // Preservation certificate for an archived record — auth required, tenant-scoped.
+    const certMatch = req.method === "GET" && /^\/v1\/documents\/([A-Za-z0-9-]+)\/certificate$/.exec(path);
+    if (certMatch) {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleCertificate(res, auth.principal, certMatch[1]);
+    }
+
     // GET retrieve surface (Epic 8) — auth required, tenant-scoped.
     const getMatch = req.method === "GET" && /^\/v1\/(jobs|artifacts|documents)\/([A-Za-z0-9-]+)$/.exec(path);
     if (getMatch) {
@@ -774,12 +883,15 @@ const server = http.createServer(async (req, res) => {
 
     // Governance actions on a document: decision (approve/reject/return),
     // publish, withdraw.
-    const govMatch = /^\/v1\/documents\/([A-Za-z0-9-]+)\/(decision|publish|withdraw)$/.exec(path);
+    const govMatch = /^\/v1\/documents\/([A-Za-z0-9-]+)\/(decision|publish|withdraw|archive)$/.exec(path);
     if (govMatch) {
       const [, id, action] = govMatch;
       if (action === "decision") return await handleDecision(req, res, principal, id);
       return await handleLifecycleAction(req, res, principal, id, action);
     }
+
+    // Retention execution path — archive every record past its retention horizon.
+    if (path === "/v1/admin/retention/sweep") return await handleRetentionSweep(res, principal);
 
     // Mint a single-artifact download grant (Epic-10 hardening): the artifact must
     // belong to the principal's tenant (RLS-checked) and the principal needs read.

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getDocument, getJob, artifactGrant, publish, withdraw, audit, DispatchError,
-  type DocumentDetail, type JobView, type ArtifactRef, type AuditEvent , humanError} from "../lib/api";
+import { getDocument, getJob, artifactGrant, publish, withdraw, archiveDocument, getCertificate, audit, DispatchError,
+  type DocumentDetail, type JobView, type ArtifactRef, type AuditEvent, type PreservationCertificate, humanError } from "../lib/api";
 import { Button, Card, ClassBadge, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { UpgradeModal, useBilling } from "../lib/upsell";
@@ -25,6 +25,7 @@ const DocumentView: React.FC = () => {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [upgrade, setUpgrade] = useState(false);
+  const [cert, setCert] = useState<PreservationCertificate | null>(null);
   const { setBilling } = useBilling();
 
   const load = useCallback(async () => {
@@ -39,6 +40,12 @@ const DocumentView: React.FC = () => {
   }, [id, has]);
 
   useEffect(() => { load(); }, [load]);
+
+  // An archived record is a preserved artifact — pull its preservation certificate.
+  useEffect(() => {
+    if (id && doc?.lifecycle === "archived") getCertificate(id).then((r) => setCert(r.certificate)).catch(() => {});
+    else setCert(null);
+  }, [id, doc?.lifecycle]);
 
   // Poll the render job while it's in flight.
   useEffect(() => {
@@ -67,9 +74,11 @@ const DocumentView: React.FC = () => {
   const artifacts = job?.result?.artifacts ?? doc.latestResult?.artifacts ?? [];
   const cls = (doc.versions[0] as unknown as { classification?: { level?: string } })?.classification;
 
-  const rendered = artifacts.length > 0 || doc.status === "complete" || doc.status === "published";
-  const preserved = doc.status === "published";
-  const STAGES: [string, boolean][] = [["Governed", true], ["Approved", rendered], ["Rendered", rendered], ["Preserved", preserved]];
+  const lc = doc.lifecycle;
+  const published = lc === "published" || lc === "archived";
+  const preserved = lc === "archived";
+  const rendered = artifacts.length > 0 || doc.status === "complete" || ["rendered", "published", "archived"].includes(lc ?? "");
+  const STAGES: [string, boolean][] = [["Governed", true], ["Approved", rendered], ["Rendered", rendered], ["Published", published], ["Preserved", preserved]];
 
   return (
     <div>
@@ -93,16 +102,66 @@ const DocumentView: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          {has("dispatch:publish") && doc.status === "complete" && (
-            <Button variant="ok" onClick={() => lifecycleAction(publish)} disabled={busy}>Publish</Button>
-          )}
-          {has("dispatch:publish") && (
-            <Button variant="ghost" onClick={() => lifecycleAction(withdraw)} disabled={busy}>Withdraw</Button>
+          {preserved ? (
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-300">🛡 Preserved</span>
+          ) : (
+            <>
+              {has("dispatch:publish") && lc === "rendered" && (
+                <Button variant="ok" onClick={() => lifecycleAction(publish)} disabled={busy}>Publish</Button>
+              )}
+              {has("dispatch:publish") && lc === "published" && (
+                <Button variant="ok" onClick={() => lifecycleAction(archiveDocument)} disabled={busy}>Preserve (Archive)</Button>
+              )}
+              {has("dispatch:publish") && (lc === "published" || lc === "rendered") && (
+                <Button variant="ghost" onClick={() => lifecycleAction(withdraw)} disabled={busy}>Withdraw</Button>
+              )}
+            </>
           )}
         </div>
       </header>
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
+
+      {cert && (
+        <Card className="mb-6 border-emerald-500/25 p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-300/80">Preservation Certificate</div>
+            <span className="text-[11px] text-white/35">Sealed {cert.archivedAt ? new Date(cert.archivedAt).toLocaleString() : "—"}</span>
+          </div>
+          <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
+            <div><dt className="text-[11px] uppercase tracking-wide text-white/40">Record</dt><dd className="font-mono text-sm text-white/85">{recordNo(cert.recordId, cert.publishedAt)}</dd></div>
+            <div><dt className="text-[11px] uppercase tracking-wide text-white/40">Governing policy</dt><dd className="text-sm text-white/85">{cert.governancePolicy?.name || "—"}</dd></div>
+            <div className="sm:col-span-2"><dt className="text-[11px] uppercase tracking-wide text-white/40">Record hash (SHA-256)</dt><dd className="break-all font-mono text-[11px] text-white/70">{cert.recordHash}</dd></div>
+            <div className="sm:col-span-2"><dt className="text-[11px] uppercase tracking-wide text-white/40">Integrity proof (SHA-256)</dt><dd className="break-all font-mono text-[11px] text-emerald-200/90">{cert.integrityProof}</dd></div>
+            <div><dt className="text-[11px] uppercase tracking-wide text-white/40">Published</dt><dd className="text-sm text-white/75">{cert.publishedAt ? new Date(cert.publishedAt).toLocaleString() : "—"}</dd></div>
+            <div><dt className="text-[11px] uppercase tracking-wide text-white/40">Archived</dt><dd className="text-sm text-white/75">{cert.archivedAt ? new Date(cert.archivedAt).toLocaleString() : "—"}</dd></div>
+          </dl>
+          {cert.governancePolicy?.reviewChain?.length > 0 && (
+            <div className="mt-4">
+              <div className="text-[11px] uppercase tracking-wide text-white/40">Review chain</div>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                {cert.governancePolicy.reviewChain.map((s, i) => (
+                  <React.Fragment key={i}>
+                    <span className="rounded bg-white/5 px-2 py-0.5 text-[12px] text-white/80">{s.label}</span>
+                    {i < cert.governancePolicy.reviewChain.length - 1 && <span className="text-white/25" aria-hidden>→</span>}
+                  </React.Fragment>
+                ))}
+                {cert.governancePolicy.approvalAuthority && <span className="ml-1 text-[12px] text-white/45">· approval: {cert.governancePolicy.approvalAuthority}</span>}
+              </div>
+            </div>
+          )}
+          {cert.approvalChain?.length > 0 && (
+            <div className="mt-4">
+              <div className="text-[11px] uppercase tracking-wide text-white/40">Recorded approvals</div>
+              <ul className="mt-1 space-y-1">
+                {cert.approvalChain.map((a, i) => (
+                  <li key={i} className="text-[12px] text-white/70"><span className="font-mono text-white/85">{a.actor}</span> · {a.decision} · {new Date(a.ts).toLocaleString()}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* render job */}

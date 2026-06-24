@@ -121,7 +121,8 @@ export const listDocuments = (params: { state?: string; docType?: string; q?: st
 export const getDocument = (id: string) => request<DocumentDetail>("GET", `/v1/documents/${id}`);
 
 export interface DocumentDetail {
-  id: string; docType: string; title: string; status: string; currentVersion: number; correlationId?: string;
+  id: string; docType: string; title: string; status: string; lifecycle?: Lifecycle; currentVersion: number; correlationId?: string;
+  publishedAt?: string; archivedAt?: string; preservationSha256?: string;
   versions: { versionNo: number; ddmVersion: string; template?: string; templateVersion?: number; engineVersion?: string; createdAt: string }[];
   latestResult: JobResult | null; createdAt: string; updatedAt: string;
 }
@@ -140,9 +141,19 @@ export const decide = (id: string, decision: "approve" | "reject" | "return", co
   request<{ documentId: string; decision: string; lifecycle: Lifecycle; approvals: number; required: number; jobId?: string; statusUrl?: string }>(
     "POST", `/v1/documents/${id}/decision`, { body: { decision, comment, outputs } });
 
-// ---- publish / withdraw ----
+// ---- publish / withdraw / archive (preservation) ----
 export const publish = (id: string) => request<{ documentId: string; lifecycle: Lifecycle }>("POST", `/v1/documents/${id}/publish`, { body: {} });
 export const withdraw = (id: string) => request<{ documentId: string; lifecycle: Lifecycle }>("POST", `/v1/documents/${id}/withdraw`, { body: {} });
+export const archiveDocument = (id: string) => request<{ documentId: string; lifecycle: Lifecycle; preservationSha256: string }>("POST", `/v1/documents/${id}/archive`, { body: {} });
+
+export interface PreservationCertificate {
+  recordId: string; docType: string; title: string; classification: { scheme?: string; level?: string };
+  lifecycle: string; version: number; publishedAt?: string; archivedAt?: string;
+  recordHash: string; integrityProof: string;
+  governancePolicy: { name: string; reviewChain: { label: string }[]; approvalAuthority?: string | null; publicationAuthority?: string | null };
+  approvalChain: { actor: string; decision: string; clearance?: string | null; ts: string }[];
+}
+export const getCertificate = (id: string) => request<{ certificate: PreservationCertificate }>("GET", `/v1/documents/${id}/certificate`);
 
 // ---- jobs / artifacts ----
 export interface ArtifactRef { artifactId: string; role: string; format: string; sizeBytes: number; pages?: number | null; sha256: string; classification?: string | null }

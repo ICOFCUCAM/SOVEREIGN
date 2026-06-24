@@ -138,3 +138,33 @@ items before building further: (a) implement the **archive** transition so the
 lifecycle is genuinely complete; (b) the planned **governance enforcement**
 (CIRCLE 2). The flaky-suite and quota-seed items are test-infrastructure
 hygiene, not platform defects.
+
+---
+
+## 9. Archive as Preservation — IMPLEMENTED & VALIDATED (gap #1 closed)
+
+`M13` adds preservation (`archived_at`, `preservation_sha256`, retention index).
+The archive transition, certificate, immutability and retention path were built
+and validated on a fresh M1→M13 database (0 pending, seeded):
+
+| Check | Result |
+|---|---|
+| Full lifecycle reaches `published` | ✅ |
+| `POST /v1/documents/:id/archive` → `archived` + integrity proof | ✅ |
+| Preservation certificate: record hash + matching integrity proof | ✅ |
+| Certificate: publication + archive timestamps, policy, approval chain | ✅ |
+| Immutable after archive: re-archive / withdraw / republish all **409** | ✅ |
+| Certificate refused for a non-archived record (**409**) | ✅ |
+| Retention sweep (`POST /v1/admin/retention/sweep`) auto-preserves due records | ✅ |
+| Swept record is `archived` + preserved | ✅ |
+| Preservation Certificate surfaced in the Archives product area (UI) | ✅ |
+
+**Lifecycle test result: 12 / 12.** No CI regression from M13 (sprint1-e2e
+14/14, retry 3/3, provisioning 15/15, billing 14/14 re-run on the M13 database).
+
+**Updated exit criteria:** Submit → Govern → Approve → Render → Publish →
+**Archive** is now **fully executable and validated in a clean environment**.
+Archive is treated as preservation — an archived record is a terminal, immutable
+institutional artifact with a tamper-evident certificate, not a status flag.
+
+**Next:** CIRCLE 2 — Governance Enforcement (policy becomes a control system).
