@@ -14,7 +14,7 @@ import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verify
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
-import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition, listPolicies, upsertPolicy } from "../../shared/src/governance.mjs";
+import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition, listPolicies, upsertPolicy, chainOf, evaluateChain } from "../../shared/src/governance.mjs";
 import { issueClientTx, rotateSecretTx, revokeClientTx, listClientsTx, signupTenantTx, ProvisioningError } from "../../shared/src/provisioning.mjs";
 
 const ENGINE_VERSION = "dispatch-api@1.0.0";
@@ -151,7 +151,10 @@ async function handleDocuments(req, res, principal) {
       // auto-approves by default so existing integrations render immediately;
       // the human lane goes to review unless policy says otherwise.
       const policy = await resolvePolicy(client, { docType: doc.docType, classificationLevel: doc.classification?.level });
-      if (autoApproves(policy, principal.principalType)) {
+      // A policy with an enforceable chain is ALWAYS walked — the chain is the
+      // governance, so the machine auto-approve lane cannot bypass it. Empty-chain
+      // policies keep the legacy auto-approve behaviour (backward compatible).
+      if (chainOf(policy).length === 0 && autoApproves(policy, principal.principalType)) {
         assertTransition("submitted", "approved");
         await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now() where id=$1", [documentId]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
@@ -215,7 +218,12 @@ async function handleDecision(req, res, principal, documentId) {
     return send(res, 400, errEnvelope(null, 400, "BAD_DECISION", "decision must be approve|reject|return"));
 
   try {
-    const out = await withClaims(pool, govClaims(principal), async (client) => {
+    // The dispatch:approve gate above is the authority; express it to the DB as
+    // the 'approver' role so the approvals-insert RLS authorises the decision.
+    // This lets a service-credential reviewer (governance-role model) record
+    // approvals identically to a human reviewer principal.
+    const decisionClaims = { ...govClaims(principal), dispatch_role: "approver" };
+    const out = await withClaims(pool, decisionClaims, async (client) => {
       const d = await client.query(
         "select id, doc_type, title, classification, lifecycle_state, current_version, submitted_by, correlation_id from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
       const docRow = d.rows[0];
@@ -233,12 +241,42 @@ async function handleDecision(req, res, principal, documentId) {
         return { http: 403, body: errEnvelope(null, 403, "SELF_APPROVAL_FORBIDDEN", "submitter cannot approve their own document") };
 
       const versionNo = docRow.current_version;
-      // Record the decision (immutable; unique per actor+version).
+      const policy = await resolvePolicy(client, { docType: docRow.doc_type, classificationLevel: docRow.classification?.level });
+      const chain = chainOf(policy);
+      const sequential = policy.sequential !== false;
+      const loadDecisions = async () => (await client.query(
+        "select decision, actor, role_key, expires_at from dispatch.approvals where document_id=$1 and version_no=$2", [documentId, versionNo])).rows
+        .map((r) => ({ ...r, expired: !!r.expires_at && new Date(r.expires_at) < new Date() }));
+
+      let stepIndex = null, roleKey = null, onBehalfOf = null, expiresAt = null;
+
+      // ── ENFORCED LANE: role-bound, ordered, quorate chain ──────────────────
+      if (chain.length > 0 && decision === "approve") {
+        const subject = principal.actor;
+        const grants = (await client.query("select role_key from dispatch.governance_role_grants where subject=$1 and active", [subject])).rows.map((r) => r.role_key);
+        const delegs = (await client.query("select role_key, grantor_subject from dispatch.delegations where delegate_subject=$1 and active and now() between starts_at and ends_at", [subject])).rows;
+        const delegByRole = new Map(delegs.map((d) => [d.role_key, d.grantor_subject]));
+        const chainRoles = new Set(chain.map((s) => s.role));
+        const myChainRoles = new Set([...grants, ...delegByRole.keys()].filter((r) => chainRoles.has(r)));
+        if (myChainRoles.size === 0)
+          return { http: 403, body: errEnvelope(null, 403, "ROLE_NOT_GRANTED", "you do not hold a governance role required by this policy") };
+        const ev = evaluateChain(await loadDecisions(), chain, { submitter: docRow.submitted_by, sequential });
+        if (ev.openStep === null)
+          return { http: 409, body: errEnvelope(null, 409, "POLICY_ALREADY_SATISFIED", "the governance chain is already satisfied") };
+        const open = chain[ev.openStep];
+        if (!myChainRoles.has(open.role))
+          return { http: 409, body: errEnvelope(null, 409, "STEP_NOT_OPEN", `the next required approval is '${open.label}'`) };
+        stepIndex = open.index; roleKey = open.role;
+        if (!grants.includes(open.role) && delegByRole.has(open.role)) onBehalfOf = delegByRole.get(open.role);
+        if (policy.approval_ttl_days) expiresAt = new Date(Date.now() + policy.approval_ttl_days * 86400000).toISOString();
+      }
+
+      // Record the decision (immutable; unique per actor+version → one step each).
       try {
         await client.query(
-          `insert into dispatch.approvals (tenant_id, document_id, version_no, decision, actor, actor_clearance, comment)
-           values ($1,$2,$3,$4,$5,$6,$7)`,
-          [principal.tenantId, documentId, versionNo, decision, principal.actor, principal.clearance || null, body.comment || null]);
+          `insert into dispatch.approvals (tenant_id, document_id, version_no, decision, actor, actor_clearance, comment, step_index, role_key, on_behalf_of, expires_at)
+           values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+          [principal.tenantId, documentId, versionNo, decision, principal.actor, principal.clearance || null, body.comment || null, stepIndex, roleKey, onBehalfOf, expiresAt]);
       } catch (e) {
         if (String(e.message).includes("duplicate key"))
           return { http: 409, body: errEnvelope(null, 409, "ALREADY_DECIDED", "this approver already recorded a decision for this version") };
@@ -247,36 +285,43 @@ async function handleDecision(req, res, principal, documentId) {
       await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
         action: `approval.${decision}`, targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
 
-      // Re-evaluate quorum over all decisions for this version.
-      const policy = await resolvePolicy(client, { docType: docRow.doc_type, classificationLevel: docRow.classification?.level });
-      const all = await client.query("select decision, actor from dispatch.approvals where document_id=$1 and version_no=$2", [documentId, versionNo]);
-      const q = evaluateQuorum(all.rows, policy, { submitter: docRow.submitted_by });
+      // Re-evaluate: chained policies use the executable evaluator; empty chains
+      // fall back to legacy count-quorum (backward compatible).
+      let outcome, steps = null, approvals = 0, required = 0;
+      if (chain.length > 0) {
+        const v = evaluateChain(await loadDecisions(), chain, { submitter: docRow.submitted_by, sequential });
+        outcome = v.outcome; steps = v.steps;
+        if (roleKey && v.steps.find((s) => s.index === stepIndex)?.satisfied)
+          await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
+            action: "governance.step_satisfied", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
+      } else {
+        const all = await client.query("select decision, actor from dispatch.approvals where document_id=$1 and version_no=$2", [documentId, versionNo]);
+        const q = evaluateQuorum(all.rows, policy, { submitter: docRow.submitted_by });
+        outcome = q.outcome === "approved" ? "satisfied" : q.outcome; approvals = q.approvals; required = q.required;
+      }
 
-      if (q.outcome === "rejected") {
+      if (outcome === "rejected") {
         assertTransition(docRow.lifecycle_state, "rejected");
         await client.query("update dispatch.documents set lifecycle_state='rejected', decided_at=now() where id=$1", [documentId]);
-        return { http: 200, body: { documentId, decision, lifecycle: "rejected", approvals: q.approvals, required: q.required } };
+        return { http: 200, body: { documentId, decision, lifecycle: "rejected", steps } };
       }
-      if (q.outcome === "returned") {
-        // back to draft for re-work (a new version on re-submit)
+      if (outcome === "returned") {
         await client.query("update dispatch.documents set lifecycle_state='draft' where id=$1", [documentId]);
-        return { http: 200, body: { documentId, decision, lifecycle: "draft", approvals: q.approvals, required: q.required } };
+        return { http: 200, body: { documentId, decision, lifecycle: "draft", steps } };
       }
-      if (q.outcome === "approved") {
+      if (outcome === "satisfied") {
         assertTransition(docRow.lifecycle_state === "submitted" ? "submitted" : "in_review", "approved");
         await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now() where id=$1", [documentId]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
-          action: "document.approved", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
-        // Create the render job now that quorum is met.
+          action: chain.length ? "governance.policy_satisfied" : "document.approved", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
         const versionId = (await client.query("select id from dispatch.document_versions where document_id=$1 and version_no=$2", [documentId, versionNo])).rows[0]?.id;
         const jobId = await createRenderJob(client, { principal, documentId, versionId, requestId: crypto.randomUUID(),
           idem: crypto.randomUUID(), outputs: body.outputs || ["pdf"], correlationId: docRow.correlation_id, callbackUrl: null });
-        return { http: 200, body: { documentId, decision, lifecycle: "approved", approvals: q.approvals, required: q.required, jobId, statusUrl: `/v1/jobs/${jobId}` } };
+        return { http: 200, body: { documentId, decision, lifecycle: "approved", steps, jobId, statusUrl: `/v1/jobs/${jobId}` } };
       }
-      // still pending more approvals
       if (docRow.lifecycle_state === "submitted")
         await client.query("update dispatch.documents set lifecycle_state='in_review' where id=$1", [documentId]);
-      return { http: 200, body: { documentId, decision, lifecycle: "in_review", approvals: q.approvals, required: q.required } };
+      return { http: 200, body: { documentId, decision, lifecycle: "in_review", steps, approvals, required } };
     });
     return send(res, out.http, out.body);
   } catch (e) {
@@ -319,13 +364,44 @@ async function handleLifecycleAction(req, res, principal, documentId, action) {
         // A document is publishable once approved AND the render completed.
         if (docRow.lifecycle_state !== "rendered")
           return { http: 409, body: errEnvelope(null, 409, "NOT_RENDERED", `document is '${docRow.lifecycle_state}'; must be 'rendered' to publish`) };
+
+        // ── PUBLICATION LOCK ─────────────────────────────────────────────────
+        // Under a chained policy publication is impossible unless the policy is
+        // satisfied, the publisher holds the publication authority, SoD holds,
+        // and a COMPLIANT Governance Certificate can be sealed.
+        const policy = await resolvePolicy(client, { docType: docRow.doc_type, classificationLevel: docRow.classification?.level });
+        const chain = chainOf(policy);
+        const approvals = (await client.query(
+          "select decision, actor, role_key, on_behalf_of, created_at, expires_at from dispatch.approvals where document_id=$1 and version_no=$2 order by created_at asc", [documentId, docRow.current_version])).rows;
+        let govCert = null;
+        if (chain.length > 0) {
+          const live = approvals.map((a) => ({ ...a, expired: !!a.expires_at && new Date(a.expires_at) < new Date() }));
+          const ev = evaluateChain(live, chain, { submitter: null, sequential: policy.sequential });
+          if (ev.outcome !== "satisfied") {
+            await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+              action: "governance.publication_blocked", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
+            return { http: 409, body: { ...errEnvelope(null, 409, "POLICY_INCOMPLETE", "the governing policy is not satisfied"), missing: ev.steps.filter((s) => !s.satisfied).map((s) => s.label) } };
+          }
+          if (policy.publication_authority) {
+            const holds = await client.query("select 1 from dispatch.governance_role_grants where subject=$1 and role_key=$2 and active", [principal.actor, policy.publication_authority]);
+            if (!holds.rows.length)
+              return { http: 403, body: errEnvelope(null, 403, "PUBLICATION_AUTHORITY_REQUIRED", "publisher does not hold the policy's publication authority") };
+          }
+          if (approvals.some((a) => a.decision === "approve" && a.actor === principal.actor))
+            return { http: 403, body: errEnvelope(null, 403, "SOD_VIOLATION", "an approver of this record may not publish it") };
+          govCert = buildGovernanceCert(docRow, policy, chain, ev, approvals, principal);
+        }
+
         assertTransition("rendered", "published");
         const ret = await client.query("select retention_days from dispatch.tenants where id=$1", [principal.tenantId]);
         const days = ret.rows[0]?.retention_days || 365;
-        await client.query("update dispatch.documents set lifecycle_state='published', published_at=now(), retention_until=now() + ($2 || ' days')::interval where id=$1", [documentId, String(days)]);
+        await client.query("update dispatch.documents set lifecycle_state='published', published_at=now(), retention_until=now() + ($2 || ' days')::interval, governance_sha256=$3, governance_certificate=$4 where id=$1",
+          [documentId, String(days), govCert?.integrityProof || null, govCert ? JSON.stringify(govCert) : null]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
           action: "document.published", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
-        return { http: 200, body: { documentId, lifecycle: "published" } };
+        if (govCert) await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
+          action: "governance.certificate_issued", targetType: "document", targetId: documentId, sha256: govCert.integrityProof, correlationId: docRow.correlation_id });
+        return { http: 200, body: { documentId, lifecycle: "published", governanceCompliance: govCert?.complianceResult || "UNGOVERNED" } };
       }
       // withdraw
       if (!["published", "rendered"].includes(docRow.lifecycle_state))
@@ -386,6 +462,31 @@ async function recordCertificate(client, documentId) {
     approvalChain: ar.rows.map((a) => ({ actor: a.actor, decision: a.decision, clearance: a.actor_clearance, ts: a.created_at })),
   };
 }
+// The Governance Certificate sealed at publication — the compliance proof that
+// the policy's chain was satisfied in order by eligible, distinct principals.
+// Pure: built from data already loaded in the publish handler.
+function buildGovernanceCert(docRow, policy, chain, ev, approvals, publisher) {
+  const approveRows = approvals.filter((a) => a.decision === "approve");
+  const cert = {
+    recordId: docRow.id,
+    policyName: policy.name || "Governance policy",
+    policyVersion: policy.policy_version || 1,
+    requiredRoles: chain.map((s) => ({ step: s.index, role: s.role, label: s.label, quorum: s.quorum })),
+    actualRoles: ev.steps.map((s) => ({ step: s.index, role: s.role, label: s.label, satisfiedBy: s.satisfiedBy })),
+    approvalSequence: approveRows.map((a) => ({ role: a.role_key, actor: a.actor, onBehalfOf: a.on_behalf_of || null, decidedAt: a.created_at })),
+    delegations: approveRows.filter((a) => a.on_behalf_of).map((a) => ({ role: a.role_key, actor: a.actor, onBehalfOf: a.on_behalf_of })),
+    separationOfDuties: "enforced",
+    publishedBy: publisher.actor,
+    publicationAuthority: policy.publication_authority || null,
+    complianceResult: "COMPLIANT",
+  };
+  cert.integrityProof = sha256hex(canon({
+    recordId: cert.recordId, policyName: cert.policyName, policyVersion: cert.policyVersion,
+    requiredRoles: cert.requiredRoles, approvalSequence: cert.approvalSequence, publishedBy: cert.publishedBy,
+  }));
+  return cert;
+}
+
 // The integrity proof sealed at archive time: a hash over the canonical record.
 function preservationProof(cert) {
   return sha256hex(canon({
@@ -592,6 +693,89 @@ async function handleGovernance(req, res, principal, method) {
     console.error("governance upsert error:", e);
     return send(res, 400, errEnvelope(null, 400, "POLICY_INVALID", String(e.message)));
   }
+}
+
+// GET /v1/documents/:id/governance-certificate — the compliance proof sealed at
+// publication (409 until a record is published under a governed policy).
+async function handleGovernanceCertificate(res, principal, documentId) {
+  if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+  const row = await withClaims(pool, govClaims(principal), async (c) => {
+    const r = await c.query("select classification, governance_certificate from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
+    return r.rows[0] || null;
+  });
+  if (!row) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "document not found"));
+  if (!clearanceAllows(principal.clearance, row.classification || {}).allowed)
+    return send(res, 403, errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", "not cleared for this record"));
+  if (!row.governance_certificate)
+    return send(res, 409, errEnvelope(null, 409, "NO_GOVERNANCE_CERTIFICATE", "this record was not published under a governed policy"));
+  return send(res, 200, { certificate: row.governance_certificate });
+}
+
+// Governance roles, grants, and delegations. Read for any principal (the queue
+// UI shows whose turn); writes require dispatch:admin, expressed as tenant_admin
+// for the M14/M16 RLS (confined to the caller's tenant).
+async function handleGovernanceAdmin(req, res, principal, kind, method) {
+  if (method === "GET") {
+    if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+    const data = await withClaims(pool, govClaims(principal), async (c) => ({
+      roles: (await c.query("select key, label from dispatch.governance_roles order by label")).rows,
+      grants: (await c.query("select subject, role_key from dispatch.governance_role_grants where active order by role_key")).rows,
+      delegations: (await c.query("select role_key, delegate_subject, grantor_subject, reason, ends_at from dispatch.delegations where active and now() between starts_at and ends_at")).rows,
+    }));
+    return send(res, 200, data);
+  }
+  if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
+  let body; try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  const claims = { ...govClaims(principal), dispatch_role: "tenant_admin" };
+  try {
+    if (kind === "roles") {
+      if (!body.key || !body.label) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "key and label are required"));
+      await withClaims(pool, claims, (c) => c.query(
+        `insert into dispatch.governance_roles (tenant_id, key, label) values ($1,$2,$3)
+         on conflict (tenant_id, key) do update set label=excluded.label`, [principal.tenantId, body.key, body.label]));
+      return send(res, 201, { key: body.key, label: body.label });
+    }
+    if (kind === "grants") {
+      if (!body.subject || !body.roleKey) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "subject and roleKey are required"));
+      await withClaims(pool, claims, (c) => c.query(
+        `insert into dispatch.governance_role_grants (tenant_id, subject, role_key, granted_by, active) values ($1,$2,$3,$4,true)
+         on conflict (tenant_id, subject, role_key) do update set active=true`, [principal.tenantId, body.subject, body.roleKey, principal.actor]));
+      return send(res, 201, { subject: body.subject, roleKey: body.roleKey });
+    }
+    if (kind === "delegations") {
+      if (!body.roleKey || !body.delegateSubject || !body.endsAt) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "roleKey, delegateSubject, endsAt required"));
+      await withClaims(pool, claims, (c) => c.query(
+        `insert into dispatch.delegations (tenant_id, role_key, delegate_subject, grantor_subject, reason, ends_at)
+         values ($1,$2,$3,$4,$5,$6)`, [principal.tenantId, body.roleKey, body.delegateSubject, body.grantorSubject || null, body.reason || null, body.endsAt]));
+      return send(res, 201, { delegated: true });
+    }
+    return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "unknown governance resource"));
+  } catch (e) {
+    console.error("governance admin error:", e);
+    return send(res, 400, errEnvelope(null, 400, "GOVERNANCE_WRITE_FAILED", String(e.message)));
+  }
+}
+
+// POST /v1/admin/governance/expire-sweep — flag records whose governance chain
+// has an expired approval (those approvals no longer count toward satisfaction,
+// so publication is already blocked by the publication lock). Emits an auditable
+// expiry event per affected record.
+async function handleGovernanceExpireSweep(res, principal) {
+  if (!hasScope(principal, "dispatch:approve")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "approve scope required"));
+  const expired = await withClaims(pool, govClaims(principal), async (client) => {
+    const rows = (await client.query(
+      `select distinct a.document_id from dispatch.approvals a
+         join dispatch.documents d on d.id = a.document_id
+        where a.decision='approve' and a.expires_at is not null and a.expires_at <= now()
+          and d.lifecycle_state in ('in_review','approved','rendered')`)).rows;
+    for (const r of rows) {
+      await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
+        action: "governance.approval_expired", targetType: "document", targetId: r.document_id });
+    }
+    return rows.map((r) => r.document_id);
+  });
+  return send(res, 200, { expired, count: expired.length });
 }
 
 // ── Admin: tenant self-service for service-client credentials ────────────────
@@ -831,6 +1015,22 @@ const server = http.createServer(async (req, res) => {
       return await handleCertificate(res, auth.principal, certMatch[1]);
     }
 
+    // Governance (compliance) certificate for a record published under a policy.
+    const govCertMatch = req.method === "GET" && /^\/v1\/documents\/([A-Za-z0-9-]+)\/governance-certificate$/.exec(path);
+    if (govCertMatch) {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleGovernanceCertificate(res, auth.principal, govCertMatch[1]);
+    }
+
+    // Governance roles / grants / delegations (read for any principal).
+    const govAdminMatch = (path === "/v1/governance/roles" || path === "/v1/governance/grants" || path === "/v1/governance/delegations") && (req.method === "GET" || req.method === "POST");
+    if (govAdminMatch) {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleGovernanceAdmin(req, res, auth.principal, path.split("/").pop(), req.method);
+    }
+
     // GET retrieve surface (Epic 8) — auth required, tenant-scoped.
     const getMatch = req.method === "GET" && /^\/v1\/(jobs|artifacts|documents)\/([A-Za-z0-9-]+)$/.exec(path);
     if (getMatch) {
@@ -892,6 +1092,8 @@ const server = http.createServer(async (req, res) => {
 
     // Retention execution path — archive every record past its retention horizon.
     if (path === "/v1/admin/retention/sweep") return await handleRetentionSweep(res, principal);
+    // Expiration execution path — flag records whose governance approvals expired.
+    if (path === "/v1/admin/governance/expire-sweep") return await handleGovernanceExpireSweep(res, principal);
 
     // Mint a single-artifact download grant (Epic-10 hardening): the artifact must
     // belong to the principal's tenant (RLS-checked) and the principal needs read.

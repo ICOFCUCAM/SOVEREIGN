@@ -13,6 +13,9 @@
     "M10__plans_billing.sql",
     "M11__stats.sql",
     "M12__governance_policies.sql",
-    "M13__preservation.sql"
+    "M13__preservation.sql",
+    "M14__governance_roles.sql",
+    "M15__policy_executable.sql",
+    "M16__approval_steps.sql"
   ]
 }

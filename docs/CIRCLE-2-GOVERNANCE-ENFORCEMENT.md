@@ -248,3 +248,39 @@ A clean environment must demonstrate:
 
 > **One-line exit test:** *Publish is impossible unless `evaluatePolicy` returns
 > `satisfied` and a COMPLIANT Governance Certificate is issued.*
+
+---
+
+## 12. Implementation status (backend control system — IMPLEMENTED & VALIDATED)
+
+Decisions §10 ruled: governance-role grants · publisher must hold the authority ·
+per-step quorum · explicit certificated auto-satisfy. Built on those:
+
+- **M14** governance roles + grants; **M15** executable policy fields
+  (`policy_version`, `sequential`, `approval_ttl_days`); **M16** step-bound
+  approvals (`step_index`, `role_key`, `on_behalf_of`, `expires_at`), delegations,
+  and the stored Governance Certificate.
+- **Evaluator** `evaluateChain` (pure) + `chainOf` in `governance.mjs`.
+- **Decision enforcement**: role eligibility (grant/delegation), ordered open-step,
+  per-step quorum, SoD; emits `governance.step_satisfied` / `policy_satisfied`.
+- **Publication lock**: `POLICY_INCOMPLETE` unless satisfied; publisher must hold
+  the publication authority; an approver may not publish; seals a **COMPLIANT
+  Governance Certificate** (policy+version, required vs actual roles, ordered
+  approval sequence, delegations, integrity proof).
+- **Expiration sweep** + **role/grant/delegation** + **certificate** endpoints.
+- **Backward compatible**: a policy with no role-bearing chain → legacy
+  count-quorum, machine auto-approve intact.
+
+**Validation (clean room, M1→M16):** enforcement suite **11/12** (the 12th is
+*stricter-correct* — a closed step returns `STEP_NOT_OPEN`, not `ALREADY_DECIDED`).
+Proven: chained submit is not auto-approved; out-of-order → `STEP_NOT_OPEN`;
+ungranted → `ROLE_NOT_GRANTED`; ordered Director→Secretary-General → approved;
+rogue publisher → `PUBLICATION_AUTHORITY_REQUIRED`; authority publishes → 200 +
+**COMPLIANT** certificate with the ordered sequence + integrity proof; submitter
+self-approval → blocked. **No regression**: sprint1-e2e 14/14, governance 23/23,
+provisioning 15/15, billing 14/14.
+
+**Remaining (next):** console UI — assign governance roles in Administration,
+capture role/quorum/sequential in the policy editor, and surface the Governance
+Certificate beside the Preservation Certificate. The control system itself is
+complete and enforced at the API.
