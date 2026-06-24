@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getDocument, getJob, artifactGrant, publish, withdraw, archiveDocument, getCertificate, audit, DispatchError,
-  type DocumentDetail, type JobView, type ArtifactRef, type AuditEvent, type PreservationCertificate, humanError } from "../lib/api";
+import { getDocument, getJob, artifactGrant, publish, withdraw, archiveDocument, getCertificate, getGovernanceCertificate, audit, DispatchError,
+  type DocumentDetail, type JobView, type ArtifactRef, type AuditEvent, type PreservationCertificate, type GovernanceCertificate, humanError } from "../lib/api";
 import { Button, Card, ClassBadge, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { UpgradeModal, useBilling } from "../lib/upsell";
@@ -26,6 +26,7 @@ const DocumentView: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [upgrade, setUpgrade] = useState(false);
   const [cert, setCert] = useState<PreservationCertificate | null>(null);
+  const [govCert, setGovCert] = useState<GovernanceCertificate | null>(null);
   const { setBilling } = useBilling();
 
   const load = useCallback(async () => {
@@ -45,6 +46,13 @@ const DocumentView: React.FC = () => {
   useEffect(() => {
     if (id && doc?.lifecycle === "archived") getCertificate(id).then((r) => setCert(r.certificate)).catch(() => {});
     else setCert(null);
+  }, [id, doc?.lifecycle]);
+
+  // A record published under an enforced policy carries a Governance Certificate.
+  useEffect(() => {
+    if (id && (doc?.lifecycle === "published" || doc?.lifecycle === "archived"))
+      getGovernanceCertificate(id).then((r) => setGovCert(r.certificate)).catch(() => setGovCert(null));
+    else setGovCert(null);
   }, [id, doc?.lifecycle]);
 
   // Poll the render job while it's in flight.
@@ -121,6 +129,58 @@ const DocumentView: React.FC = () => {
       </header>
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
+
+      {govCert && (
+        <Card className="mb-6 border-seal-light/30 p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Governance Certificate</div>
+            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${govCert.complianceResult === "COMPLIANT" ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"}`}>{govCert.complianceResult}</span>
+          </div>
+          <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-1 text-[12.5px]">
+            <div><span className="text-white/40">Policy: </span><span className="font-semibold text-white">{govCert.policyName}</span> <span className="font-mono text-[11px] text-white/40">v{govCert.policyVersion}</span></div>
+            {govCert.publicationAuthority && <div><span className="text-white/40">Publication authority: </span><span className="text-white/80">{govCert.publicationAuthority}</span></div>}
+            <div><span className="text-white/40">Separation of duties: </span><span className="text-emerald-300">{govCert.separationOfDuties}</span></div>
+          </div>
+
+          {/* required chain vs actual */}
+          <div className="mb-4">
+            <div className="mb-1.5 text-[11px] uppercase tracking-wide text-white/40">Required chain — and who satisfied it</div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {govCert.requiredRoles.map((r, i) => {
+                const actual = govCert.actualRoles.find((a) => a.step === r.step);
+                return (
+                  <React.Fragment key={i}>
+                    <span className="inline-flex flex-col rounded border border-white/10 bg-ink-900/50 px-2.5 py-1">
+                      <span className="text-[12px] font-semibold text-white">{r.label}{r.quorum > 1 ? ` ×${r.quorum}` : ""}</span>
+                      <span className="font-mono text-[10px] text-emerald-300/80">{(actual?.satisfiedBy ?? []).map((s) => s.replace(/^svc:|^user:/, "")).join(", ") || "—"}</span>
+                    </span>
+                    {i < govCert.requiredRoles.length - 1 && <span className="text-white/25" aria-hidden>→</span>}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <div className="mb-1 text-[11px] uppercase tracking-wide text-white/40">Approval sequence</div>
+            <ol className="space-y-1">
+              {govCert.approvalSequence.map((a, i) => (
+                <li key={i} className="text-[12px] text-white/75">
+                  <span className="text-white/40">{i + 1}.</span> <span className="font-semibold text-white">{a.role}</span> · <span className="font-mono text-white/70">{a.actor.replace(/^svc:|^user:/, "")}</span>
+                  {a.onBehalfOf && <span className="text-amber-300/80"> (on behalf of {a.onBehalfOf.replace(/^svc:|^user:/, "")})</span>}
+                  <span className="text-white/35"> · {new Date(a.decidedAt).toLocaleString()}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          {govCert.delegations?.length > 0 && (
+            <div className="mb-4 text-[12px]"><span className="text-white/40">Delegations used: </span>{govCert.delegations.map((d, i) => <span key={i} className="text-amber-300/80">{d.actor.replace(/^svc:|^user:/, "")} for {d.role}{i < govCert.delegations.length - 1 ? ", " : ""}</span>)}</div>
+          )}
+
+          <div><div className="text-[11px] uppercase tracking-wide text-white/40">Integrity proof (SHA-256)</div><div className="break-all font-mono text-[11px] text-seal-light/90">{govCert.integrityProof}</div></div>
+        </Card>
+      )}
 
       {cert && (
         <Card className="mb-6 border-emerald-500/25 p-6">

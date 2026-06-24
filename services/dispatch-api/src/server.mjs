@@ -757,6 +757,57 @@ async function handleGovernanceAdmin(req, res, principal, kind, method) {
   }
 }
 
+// GET /v1/governance/overview — the operational + compliance picture an admin or
+// compliance officer needs at a glance: who's awaiting whom, what's awaiting
+// publication, active/expired delegations, and the compliance posture. Derived
+// from documents/approvals/delegations (no audit_events dependency).
+async function handleGovernanceOverview(res, principal) {
+  if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+  const data = await withClaims(pool, govClaims(principal), async (c) => {
+    const pendingDocs = (await c.query(
+      `select id, doc_type, title, classification, submitted_at, current_version from dispatch.documents
+        where lifecycle_state in ('submitted','in_review') and deleted_at is null order by submitted_at asc limit 100`)).rows;
+    const pending = [];
+    for (const d of pendingDocs) {
+      const policy = await resolvePolicy(c, { docType: d.doc_type, classificationLevel: d.classification?.level });
+      const chain = chainOf(policy);
+      let awaiting = "Review"; const policyName = policy._source === "policy" ? policy.name : null;
+      if (chain.length) {
+        const appr = (await c.query("select decision, actor, role_key, expires_at from dispatch.approvals where document_id=$1 and version_no=$2", [d.id, d.current_version])).rows
+          .map((r) => ({ ...r, expired: !!r.expires_at && new Date(r.expires_at) < new Date() }));
+        const ev = evaluateChain(appr, chain, { submitter: null, sequential: policy.sequential });
+        awaiting = ev.openStep != null ? chain[ev.openStep].label : "Ready";
+      }
+      pending.push({ documentId: d.id, title: d.title, docType: d.doc_type, classification: d.classification, submittedAt: d.submitted_at, awaiting, policyName });
+    }
+    const awaitingPublication = (await c.query(
+      `select id, doc_type, title, classification from dispatch.documents where lifecycle_state='rendered' and deleted_at is null limit 100`)).rows
+      .map((r) => ({ documentId: r.id, title: r.title, docType: r.doc_type, classification: r.classification }));
+    const delegations = (await c.query(
+      `select role_key, delegate_subject, grantor_subject, reason, starts_at, ends_at, (ends_at < now()) as expired
+         from dispatch.delegations order by ends_at desc limit 100`)).rows;
+    const counts = (await c.query(
+      `select count(*) filter (where lifecycle_state in ('published','archived')) as published,
+              count(*) filter (where lifecycle_state='archived') as preserved,
+              count(*) filter (where governance_certificate is not null) as governed,
+              count(*) filter (where governance_certificate->>'complianceResult'='COMPLIANT') as compliant
+         from dispatch.documents where deleted_at is null`)).rows[0];
+    const exceptions = Number((await c.query("select count(*) n from dispatch.approvals where on_behalf_of is not null")).rows[0].n);
+    return { pending, awaitingPublication, delegations, counts, exceptions };
+  });
+  const governed = Number(data.counts.governed), compliant = Number(data.counts.compliant);
+  return send(res, 200, {
+    pending: data.pending,
+    awaitingPublication: data.awaitingPublication,
+    delegations: data.delegations,
+    compliance: {
+      published: Number(data.counts.published), preserved: Number(data.counts.preserved),
+      governed, compliant, complianceRate: governed ? Math.round((compliant / governed) * 100) : 100,
+      exceptions: data.exceptions, expiredAuthorities: data.delegations.filter((d) => d.expired).length,
+    },
+  });
+}
+
 // POST /v1/admin/governance/expire-sweep — flag records whose governance chain
 // has an expired approval (those approvals no longer count toward satisfaction,
 // so publication is already blocked by the publication lock). Emits an auditable
@@ -1021,6 +1072,13 @@ const server = http.createServer(async (req, res) => {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       return await handleGovernanceCertificate(res, auth.principal, govCertMatch[1]);
+    }
+
+    // Governance operational + compliance overview.
+    if (req.method === "GET" && path === "/v1/governance/overview") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleGovernanceOverview(res, auth.principal);
     }
 
     // Governance roles / grants / delegations (read for any principal).

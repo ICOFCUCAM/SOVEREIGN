@@ -23,6 +23,9 @@ import Access from "./pages/Access";
 import Integrations from "./pages/Integrations";
 import AdminHome from "./pages/AdminHome";
 import GovernancePolicies from "./pages/GovernancePolicies";
+import AuthorityDirectory from "./pages/AuthorityDirectory";
+import GovernanceMonitor from "./pages/GovernanceMonitor";
+import ComplianceDashboard from "./pages/ComplianceDashboard";
 import Polished from "./pages/polished/Polished";
 import { BillingProvider } from "./lib/upsell";
 
@@ -64,8 +67,11 @@ const Administration: React.FC = () => {
       <ConsoleShell variant="administration">
         <Routes>
           <Route path="/" element={<AdminHome />} />
+          <Route path="authority" element={<AuthorityDirectory />} />
           <Route path="access" element={<Access />} />
           <Route path="governance" element={<GovernancePolicies />} />
+          <Route path="monitor" element={<GovernanceMonitor />} />
+          <Route path="compliance" element={<ComplianceDashboard />} />
           <Route path="integrations" element={<Integrations />} />
           <Route path="intake" element={<Submit />} />
           <Route path="sovereignty" element={<Sovereignty />} />
