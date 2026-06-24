@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { track } from "../lib/analytics";
-import { submitDocument, validateDocument, getGovernancePolicies, DispatchError, type ApiError, type GovernancePolicy, humanError } from "../lib/api";
+import { submitDocument, validateDocument, getGovernancePolicies, assistField, DispatchError, type ApiError, type GovernancePolicy, humanError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useBilling, UsageBanner, UpgradeModal } from "../lib/upsell";
 import { Button, Card, Field, inputCls, ClassBadge } from "../lib/ui";
@@ -258,6 +258,10 @@ const Create: React.FC = () => {
   });
 
   const missing = spec.fields.filter((f) => !(values[f.role] ?? "").trim()).map((f) => f.heading);
+  // AI authoring assist is a pre-governance drafting aid. It is disabled for
+  // OFFICIAL-SENSITIVE and above so sensitive drafts are never sent to a model
+  // (the server enforces the same guard authoritatively).
+  const assistAllowed = !/SENSITIVE|CONFIDENTIAL|SECRET|RESTRICTED|COSMIC/i.test(level);
 
   const onValidate = async (): Promise<void> => {
     setErr(null); setValidation(null); setBusy(true);
@@ -343,6 +347,11 @@ const Create: React.FC = () => {
             <Field key={f.role} label={f.heading} hint={f.kind === "bullets" ? "One item per line." : f.kind === "timeline" ? "One event per line: time | label | detail" : f.kind === "callout" ? "Shown as a highlighted callout." : undefined}>
               <textarea className={`${inputCls} ${f.kind === "bullets" || f.kind === "timeline" ? "h-24" : "h-20"} leading-relaxed`}
                 value={values[f.role] ?? ""} onChange={(e) => set(f.role, e.target.value)} placeholder={f.placeholder} />
+              <FieldAssist
+                docType={spec.docType} heading={f.heading} kind={f.kind} value={values[f.role] ?? ""} classification={level} allowed={assistAllowed}
+                onApply={(t) => set(f.role, t)}
+                onInsert={(t) => set(f.role, (values[f.role] ? values[f.role] + "\n" : "") + t)}
+              />
             </Field>
           ))}
         </Card>
@@ -411,5 +420,64 @@ const Step: React.FC<{ n: string; title: string; sub: string }> = ({ n, title, s
     </div>
   </div>
 );
+
+// AI authoring assist — a drafting aid the author GOVERNS: it refines one field
+// and returns a suggestion the author chooses to Replace, Insert, or Discard. It
+// never overwrites silently and touches only the pre-governance draft. Disabled
+// for sensitive classifications (drafts never leave the tenant; server enforces).
+const INTENTS: { intent: "develop" | "polish" | "restructure" | "shorten"; label: string }[] = [
+  { intent: "develop", label: "Develop" },
+  { intent: "polish", label: "Polish" },
+  { intent: "restructure", label: "Restructure" },
+  { intent: "shorten", label: "Shorten" },
+];
+const FieldAssist: React.FC<{
+  docType: string; heading: string; kind: string; value: string; classification: string; allowed: boolean;
+  onApply: (text: string) => void; onInsert: (text: string) => void;
+}> = ({ docType, heading, kind, value, classification, allowed, onApply, onInsert }) => {
+  const [busy, setBusy] = useState<string | null>(null);
+  const [suggestion, setSuggestion] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  if (!allowed) {
+    return <p className="mt-1.5 text-[11px] text-white/30">AI assist is off for {classification} — sensitive drafts never leave your tenant.</p>;
+  }
+
+  const run = async (intent: "develop" | "polish" | "restructure" | "shorten") => {
+    if (!value.trim()) { setErr("Write a line first, then refine it."); setSuggestion(null); return; }
+    setBusy(intent); setErr(null); setSuggestion(null);
+    try {
+      const r = await assistField({ docType, fieldHeading: heading, kind, intent, text: value, classification });
+      setSuggestion(r.suggestion);
+    } catch (e) { setErr(humanError(e, "AI assist is unavailable right now.")); }
+    finally { setBusy(null); }
+  };
+
+  return (
+    <div className="mt-2">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/30">AI assist</span>
+        {INTENTS.map(({ intent, label }) => (
+          <button key={intent} type="button" onClick={() => run(intent)} disabled={!!busy}
+            className="rounded border border-white/12 bg-white/[0.02] px-2 py-0.5 text-[11px] font-medium text-white/55 transition hover:border-seal-light/40 hover:text-white disabled:opacity-40">
+            {busy === intent ? "…" : label}
+          </button>
+        ))}
+      </div>
+      {err && <p className="mt-1.5 text-[11px] text-amber-300/90">{err}</p>}
+      {suggestion !== null && (
+        <div className="mt-2 rounded-lg border border-seal-light/30 bg-seal/10 p-3">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-seal-light/80">Suggestion · you decide whether to use it</div>
+          <p className="mt-1.5 whitespace-pre-wrap text-[12.5px] leading-relaxed text-white/85">{suggestion}</p>
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            <button type="button" onClick={() => { onApply(suggestion); setSuggestion(null); }} className="rounded bg-seal px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-seal-light">Replace</button>
+            <button type="button" onClick={() => { onInsert(suggestion); setSuggestion(null); }} className="rounded border border-white/15 px-2.5 py-1 text-[11px] font-semibold text-white/70 transition hover:text-white">Insert below</button>
+            <button type="button" onClick={() => setSuggestion(null)} className="rounded px-2.5 py-1 text-[11px] text-white/40 transition hover:text-white/70">Discard</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default Create;
