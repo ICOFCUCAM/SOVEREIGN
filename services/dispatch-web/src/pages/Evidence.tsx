@@ -39,7 +39,7 @@ const Evidence: React.FC = () => {
             <EvidenceStep n="01" label="How it works" lead="A submission becomes an official record through a single governed path.">
               <LifecycleTrail />
             </EvidenceStep>
-            <EvidenceStep n="02" label="How it is governed" lead="Every action is recorded to an append-only, hash-verified audit trail.">
+            <EvidenceStep n="02" label="How it is governed" lead="Every action is recorded to an append-only, hash-stamped audit trail.">
               <PublicAuditTimeline />
             </EvidenceStep>
             <EvidenceStep n="03" label="What gets produced" lead="A faithful, classified, hash-stamped record — PDF and DOCX.">

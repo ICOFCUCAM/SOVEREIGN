@@ -272,7 +272,7 @@ const Create: React.FC = () => {
       <header className="mb-6">
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Official Record</div>
         <h1 className="mt-1 text-2xl font-bold text-white">Create Official Record</h1>
-        <p className="text-sm text-white/50">Choose a record type and author its content. It enters the governance chain for review and approval before publication — no formatting, markup, or technical knowledge required.</p>
+        <p className="text-sm text-white/50">Choose a record type and author its content. It enters the approval chain for review and approval before publication — no formatting, markup, or technical knowledge required.</p>
       </header>
       {billing && <UsageBanner b={billing} onUpgrade={() => setUpgrade(true)} className="mb-6" />}
 

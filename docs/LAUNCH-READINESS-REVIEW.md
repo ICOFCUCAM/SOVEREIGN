@@ -151,3 +151,49 @@ No Critical findings. All High findings (H1, H2, H3) resolved. Low-cost Medium
 findings (M1, M2, M3) resolved. M4, M5, L1 documented as accepted or deferred
 with rationale and recorded as the post-launch backlog. The platform presents as
 a coherent institutional operating standard — the gate to push is met.
+
+---
+
+## Second pass — adversarial re-audit
+
+The review was re-run with three independent, deliberately uncharitable audits
+(procurement journey, duplicated-concepts sweep, navigation coherence). Their raw
+output over-rated severity heavily; every claim was verified against the source
+before disposition. Verified, in-scope findings were resolved; false positives are
+recorded here so the downgrade is auditable, not silent.
+
+### Verified and resolved
+
+| ID | Audit | Finding | Severity | Resolution |
+|----|-------|---------|----------|------------|
+| H4 | Procurement Journey | The procurement hero's **primary** CTA read *"Download Evaluation Package (PDF)"* but linked to the Architecture **web page** — no download, opened in a new tab. A primary CTA that misrepresents itself, on the page a buyer scrutinizes most. | **High** | ✅ Fixed — the real self-serve action (**Start a free evaluation**) is now the primary CTA; the architecture link is secondary and honestly labelled **"View the Architecture Overview."** |
+| M6 | Category | Residual approval-chain drift — Create intake said *"governance chain"* | Medium | ✅ Fixed → **approval chain** |
+| M7 | Category | Audit-trail wording drift — Evidence page said *"hash-verified"* where the Standard and Trust say **hash-stamped** (different cryptographic operations) | Medium | ✅ Fixed → **hash-stamped** |
+
+### False positives rejected (with reason)
+
+- **"`#lifecycle` anchor typo (`#lifestyle`)"** — *hallucinated.* `Landing.tsx`
+  has `id="lifecycle"` (line 208) exactly matching `href="#lifecycle"`. No bug.
+- **"Two incompatible navigation systems — CRITICAL"** — *over-rated to Medium,
+  accepted.* The homepage's richer in-page-anchor nav vs. the simpler sub-page
+  `PublicHeader` is a deliberate, common pattern; the global footer (added in the
+  first pass) makes all eleven routes reachable from every public page. Full nav
+  unification is a redesign, out of the freeze scope.
+- **"Mobile loses Outcomes/Standard — CRITICAL"** — *Medium, accepted.* Footer
+  coverage exists on every page; a sticky-header redesign is out of scope.
+- **"`hash-stamped` vs `hash-verified` — CRITICAL"** — *real but Medium, fixed.*
+  One word on one page; resolved (M7), not category-defining.
+- **"Custodian vs does-not-own — HIGH legal incoherence"** — *rejected.* "We are
+  the custodian" and "we do not own your records" are complementary, not
+  contradictory; this is the correct ownership framing, left as written.
+- **"`/evaluate` orphaned from public marketing — CRITICAL"** — *accepted, by
+  design.* `/evaluate` derives its assessment from a tenant's live posture and so
+  requires a session; it cannot be a no-auth public destination. The public funnel
+  correctly routes to the dossier and signup. Recorded under M4 (post-launch IA).
+
+### Re-audit decision
+
+The one verified High (H4) is resolved; the two verified Mediums (M6, M7) are
+resolved. No Critical surfaced. The remaining agent findings were verified as
+false positives or correctly-rated Medium/Low and are documented above. The push
+gate remains met.

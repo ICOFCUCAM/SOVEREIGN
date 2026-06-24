@@ -39,14 +39,14 @@ const Procurement: React.FC = () => {
             path — so technical reviewers and procurement officers can assess Sovereign Dispatch before any call.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <a href={ARCHITECTURE_ROUTE} target="_blank" rel="noopener"
-              className="group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
-              Download Evaluation Package (PDF) <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-            </a>
             <button onClick={() => nav("/signup")}
-              className="inline-flex items-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
-              Start a free evaluation
+              className="group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
+              Start a free evaluation <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
             </button>
+            <a href={ARCHITECTURE_ROUTE} target="_blank" rel="noopener"
+              className="inline-flex items-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
+              View the Architecture Overview
+            </a>
             <span className="text-[12px] text-white/40">Instant · no email required</span>
           </div>
           {/* package contents — every section is instantly readable below, no gate */}
