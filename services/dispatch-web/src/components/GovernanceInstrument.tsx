@@ -52,7 +52,7 @@ export const GovernanceInstrument: React.FC<{
   const chain = policy?.reviewChain ?? [];
   const sequential = policy?.sequential !== false; // default sequential
   const publisher = policy?.publicationAuthority;
-  const formats = outputs.length ? outputs.map((o) => o.toUpperCase()).join(" · ") : "PDF";
+  const formats = outputs.length ? outputs.map((o) => o.toUpperCase()).join(" · ") : "select a format below";
 
   return (
     <section className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">

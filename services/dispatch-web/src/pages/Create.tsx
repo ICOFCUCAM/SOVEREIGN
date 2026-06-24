@@ -350,18 +350,20 @@ const Create: React.FC = () => {
         {/* submit rail */}
         <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
           <Card className="p-4">
-            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/50">Outputs</h3>
+            <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-white/50">Outputs</h3>
+            <p className="mb-3 text-[11px] text-white/35">At least one format is required.</p>
             <div className="flex flex-wrap gap-2">
               {["pdf", "docx", "md"].map((o) => {
                 const on = outputs.includes(o);
                 return (
                   <button key={o} onClick={() => setOutputs((prev) => on ? prev.filter((x) => x !== o) : [...prev, o])}
-                    className={`rounded-md border px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wide transition ${on ? "border-seal-light/50 bg-seal/25 text-white" : "border-white/12 bg-white/[0.02] text-white/45 hover:text-white/70"}`}>
-                    {o}
+                    className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wide transition ${on ? "border-seal-light bg-seal/40 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]" : "border-white/12 bg-white/[0.02] text-white/45 hover:text-white/70"}`}>
+                    {on && <span className="text-emerald-300" aria-hidden>✓</span>}{o}
                   </button>
                 );
               })}
             </div>
+            {outputs.length === 0 && <p className="mt-2.5 text-[11px] text-amber-300/90">Select at least one output format to continue.</p>}
           </Card>
 
           {validation && (
@@ -374,10 +376,14 @@ const Create: React.FC = () => {
           )}
 
           <Card className="p-4">
-            {missing.length > 0 && <p className="mb-2.5 text-[12px] leading-snug text-amber-300/90">Still needed: {missing.join(", ")}</p>}
+            {(missing.length > 0 || outputs.length === 0) && (
+              <p className="mb-2.5 text-[12px] leading-snug text-amber-300/90">
+                Still needed: {[...missing, ...(outputs.length === 0 ? ["an output format"] : [])].join(", ")}
+              </p>
+            )}
             <div className="flex gap-2">
               <Button variant="ghost" onClick={onValidate} disabled={busy}>{busy ? "…" : "Validate"}</Button>
-              <Button className="flex-1" onClick={onSubmit} disabled={busy || missing.length > 0}>{busy ? "Submitting…" : "Submit for governance →"}</Button>
+              <Button className="flex-1" onClick={onSubmit} disabled={busy || missing.length > 0 || outputs.length === 0}>{busy ? "Submitting…" : "Submit for governance →"}</Button>
             </div>
             <p className="mt-2.5 text-[11px] leading-snug text-white/35">Submitting enters the approval chain above. Nothing is published until the policy is satisfied.</p>
             <button onClick={() => setShowJson((s) => !s)} className="mt-2 text-[11px] uppercase tracking-wide text-white/25 hover:text-white/55">{showJson ? "Hide" : "Show"} technical payload</button>
