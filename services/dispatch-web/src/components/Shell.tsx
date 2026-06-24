@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { useBilling, QuotaMeter } from "../lib/upsell";
 
 // Role-filtered, top-level navigation — institutional command surfaces, not a
 // file menu. Flat by design (Operations · Pipeline · Records · Governance ·
@@ -26,6 +27,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session, signOut, has } = useAuth();
   const nav = useNavigate();
   const items = NAV.filter((n) => !n.scope || has(n.scope));
+  const { billing } = useBilling();
 
   return (
     <div className="flex h-full flex-col">
@@ -63,6 +65,14 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </div>
             ))}
           </nav>
+          {billing && (
+            <div className="border-t border-white/10 px-4 py-3">
+              <QuotaMeter b={billing} />
+              {!billing.canDownload && (
+                <button onClick={() => nav("/console/access")} className="mt-2 w-full rounded-md bg-seal px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-seal-light">Upgrade</button>
+              )}
+            </div>
+          )}
           <div className="border-t border-white/10 px-4 py-3">
             <div className="truncate text-xs font-medium text-white/80">{session?.subject}</div>
             <div className="mb-2 truncate text-[10px] text-white/40">tenant {session?.tenantId?.slice(0, 8)}…</div>

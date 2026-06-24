@@ -264,7 +264,7 @@ const Landing: React.FC = () => {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button onClick={() => nav(PROCUREMENT_ROUTE)}
               className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-8 py-4 text-sm font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_26px_-10px_rgba(0,0,0,0.65)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
-              Request Procurement Package
+              Download Evaluation Package
               <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </button>
             <a href={ARCHITECTURE_ROUTE}

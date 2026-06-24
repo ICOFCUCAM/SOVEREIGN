@@ -32,27 +32,31 @@ const Procurement: React.FC = () => {
       {/* hero */}
       <section className="border-b border-white/5 px-8 py-20 lg:px-12">
         <div className="mx-auto max-w-[1100px]">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Procurement Package</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Evaluation Package</p>
           <h1 className="mt-4 max-w-3xl font-serif text-5xl font-bold leading-[1.05] tracking-tight text-[#f4efe3] sm:text-6xl">Everything your evaluation team needs.</h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/60">
-            A self-serve procurement dossier — architecture, governance, security, residency and the evaluation path — so
-            technical reviewers and procurement officers can assess Sovereign Dispatch before any call.
+            A complete self-serve evaluation dossier — architecture, governance, security, residency and the evaluation
+            path — so technical reviewers and procurement officers can assess Sovereign Dispatch before any call.
           </p>
-          <div className="mt-9 flex flex-wrap gap-4">
-            <a href={ARCHITECTURE_ROUTE}
+          <div className="mt-9 flex flex-wrap items-center gap-4">
+            <a href={ARCHITECTURE_ROUTE} target="_blank" rel="noopener"
               className="group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
-              Architecture Overview <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+              Download Evaluation Package (PDF) <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
             </a>
-            <button onClick={() => nav("/console")}
+            <button onClick={() => nav("/signup")}
               className="inline-flex items-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
-              Begin Evaluation
+              Start a free evaluation
             </button>
+            <span className="text-[12px] text-white/40">Instant · no email required</span>
           </div>
-          {/* contents */}
-          <div className="mt-12 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/5 pt-6">
-            {CONTENTS.map(([id, label]) => (
-              <a key={id} href={`#${id}`} className="text-[12px] font-medium uppercase tracking-wide text-white/45 transition hover:text-gold-400">{label}</a>
-            ))}
+          {/* package contents — every section is instantly readable below, no gate */}
+          <div className="mt-12 border-t border-white/5 pt-6">
+            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/35">In this package</div>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              {CONTENTS.map(([id, label]) => (
+                <a key={id} href={`#${id}`} className="text-[12px] font-medium uppercase tracking-wide text-white/55 transition hover:text-gold-400">{label}</a>
+              ))}
+            </div>
           </div>
         </div>
       </section>

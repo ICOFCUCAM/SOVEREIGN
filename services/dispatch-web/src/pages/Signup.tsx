@@ -37,7 +37,7 @@ const Signup: React.FC = () => {
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-seal text-lg font-black text-white">SD</div>
           <h1 className="text-xl font-bold text-white">Create your institution account</h1>
-          <p className="mt-1 text-sm text-white/50">Free to start — create up to 3 records, then subscribe to download.</p>
+          <p className="mt-1 text-sm text-white/50">Issue official records under your institution's seal. <span className="text-white/70">3 official records included</span> to evaluate.</p>
         </div>
 
         {!cred ? (
@@ -52,7 +52,7 @@ const Signup: React.FC = () => {
         ) : (
           <div className="space-y-4 rounded-lg border border-emerald-500/40 bg-ink-800/60 p-6">
             <div>
-              <div className="text-sm font-bold text-emerald-300">Account created — on the free plan</div>
+              <div className="text-sm font-bold text-emerald-300">Account created — 3 official records included</div>
               <div className="mt-0.5 text-xs text-white/50">Save this secret now. It is shown only once and cannot be retrieved again.</div>
             </div>
             <div className="space-y-2">

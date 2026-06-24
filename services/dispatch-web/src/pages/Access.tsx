@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../lib/auth";
 import { Button, Card, Field, inputCls, timeAgo } from "../lib/ui";
-import { listClients, issueClient, rotateClient, revokeClient, getBilling, subscribe, type ServiceClient, type IssuedCredential, type Billing, DispatchError } from "../lib/api";
+import { listClients, issueClient, rotateClient, revokeClient, getBilling, subscribe, type ServiceClient, type IssuedCredential, DispatchError } from "../lib/api";
+import { QuotaMeter, planLabel, useBilling } from "../lib/upsell";
 
 // ACCESS — tenant self-service for API credentials. A tenant_admin issues a
 // service client (client_id + secret), rotates its secret, or revokes it. The
@@ -59,7 +60,7 @@ const Access: React.FC = () => {
   const [busy, setBusy] = useState<string | null>(null);
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
   const [reveal, setReveal] = useState<{ cred: IssuedCredential; label: string } | null>(null);
-  const [billing, setBilling] = useState<Billing | null>(null);
+  const { billing, setBilling } = useBilling();
   const [subBusy, setSubBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -130,15 +131,13 @@ const Access: React.FC = () => {
       {billing && (
         <Card className={`mb-6 p-5 ${billing.canDownload ? "border-emerald-500/30" : "border-amber-500/30"}`}>
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
+            <div className="min-w-[260px] flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white">{billing.plan === "paid" ? "Paid plan" : "Free plan"}</span>
+                <span className="text-sm font-bold text-white">{planLabel(billing.plan)} plan</span>
                 <span className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${billing.canDownload ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"}`}>{billing.canDownload ? "Downloads unlocked" : "Downloads locked"}</span>
               </div>
-              <div className="mt-1 text-[13px] text-white/55">
-                {billing.documentsUsed} of {billing.plan === "paid" ? "∞" : billing.documentQuota} records used
-                {!billing.canDownload && " · subscribe to download your records"}
-              </div>
+              <QuotaMeter b={billing} className="mt-2 max-w-xs" />
+              {!billing.canDownload && <div className="mt-1.5 text-[12px] text-white/45">Subscribe for unlimited records, PDF/DOCX downloads, preservation and audit retention.</div>}
             </div>
             {!billing.canDownload && (
               <Button variant="primary" disabled={subBusy} onClick={doSubscribe}>{subBusy ? "Subscribing…" : "Subscribe"}</Button>

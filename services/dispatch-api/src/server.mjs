@@ -446,6 +446,17 @@ async function handleBilling(req, res, principal, action) {
   return send(res, 200, billingView(await tenantBilling(principal.tenantId)));
 }
 
+// Institutional outcome counters for the console dashboard (real, tenant-scoped).
+async function handleStats(req, res, principal) {
+  const r = await withClaims(pool, claimsFor(principal), (c) => c.query("select * from dispatch.tenant_stats()"));
+  const s = r.rows[0] || {};
+  return send(res, 200, {
+    officialRecords: Number(s.records || 0), artifactsGenerated: Number(s.artifacts || 0),
+    approvalDecisions: Number(s.approvals || 0), auditEvents: Number(s.audit_events || 0),
+    published: Number(s.published || 0),
+  });
+}
+
 // ── Admin: tenant self-service for service-client credentials ────────────────
 // Gated on dispatch:admin (a tenant_admin's JWT carries it). All writes run
 // under the caller's claims, so RLS (M9) confines them to the caller's tenant.
@@ -650,6 +661,13 @@ const server = http.createServer(async (req, res) => {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       return await handleBilling(req, res, auth.principal, "status");
+    }
+
+    // Institutional outcome counters for the dashboard.
+    if (req.method === "GET" && path === "/v1/stats") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleStats(req, res, auth.principal);
     }
 
     // Dispatch console (Epic 9) — static page; no auth (it authenticates client-side).

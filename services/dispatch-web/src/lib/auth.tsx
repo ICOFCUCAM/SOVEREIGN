@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { bindTokenGetter, exchangeToken } from "./api";
 
 // Session model: a Dispatch service token (client-credentials) held in memory.
@@ -30,7 +30,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [error, setError] = useState<string | null>(null);
 
   // The api client pulls the current token through this getter on every request.
-  useEffect(() => { bindTokenGetter(() => session?.token ?? null); }, [session]);
+  // We bind ONCE to a ref that is updated synchronously during render (below),
+  // not via an effect keyed on `session`. React flushes child effects before
+  // parent effects, so an effect-bound getter would still be the stale (null)
+  // closure when a freshly-mounted page (e.g. the Dashboard a user lands on
+  // right after signup) fires its first requests — yielding "missing
+  // Authorization". A ref read during render is current before any child effect runs.
+  const sessionRef = useRef<Session | null>(null);
+  sessionRef.current = session;
+  useEffect(() => { bindTokenGetter(() => sessionRef.current?.token ?? null); }, []);
 
   const signIn = useCallback(async (clientId: string, secret: string) => {
     setLoading(true); setError(null);

@@ -60,6 +60,9 @@ export interface Billing { plan: string; subscriptionStatus: string; documentsUs
 export const getBilling = () => request<Billing>("GET", "/v1/billing");
 export const subscribe = () => request<Billing>("POST", "/v1/billing/subscribe", { body: {} });
 
+export interface Stats { officialRecords: number; artifactsGenerated: number; approvalDecisions: number; auditEvents: number; published: number }
+export const getStats = () => request<Stats>("GET", "/v1/stats");
+
 // ---- documents / lifecycle ----
 export type Lifecycle = "draft" | "submitted" | "in_review" | "approved" | "rejected" | "rendered" | "published" | "withdrawn" | "archived";
 export interface DocListItem {

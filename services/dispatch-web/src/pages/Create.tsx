@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { submitDocument, validateDocument, type ApiError } from "../lib/api";
+import { submitDocument, validateDocument, DispatchError, type ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
+import { useBilling, UsageBanner, UpgradeModal } from "../lib/upsell";
 import { Button, Card, Field, inputCls } from "../lib/ui";
 
 // CREATE — the institutional authoring department. Unlike Submit (raw DDM JSON),
@@ -210,6 +211,8 @@ const Create: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [showJson, setShowJson] = useState(false);
+  const { billing, refresh, setBilling } = useBilling();
+  const [upgrade, setUpgrade] = useState(false);
 
   const set = (role: string, v: string): void => { setValues((p) => ({ ...p, [role]: v })); setValidation(null); };
 
@@ -246,16 +249,21 @@ const Create: React.FC = () => {
   const onSubmit = async (): Promise<void> => {
     setErr(null); setBusy(true);
     try { const req = buildRequest(); const r = await submitDocument(req, req.idempotencyKey); nav(`/console/documents/${r.documentId}`); }
-    catch (e) { setErr(e instanceof Error ? e.message : "submit failed"); }
+    catch (e) {
+      if (e instanceof DispatchError && e.status === 402) { setUpgrade(true); return; }
+      setErr(e instanceof Error ? e.message : "submit failed");
+    }
     finally { setBusy(false); }
   };
 
   return (
     <div>
+      {upgrade && <UpgradeModal open reason="quota" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); refresh(); setUpgrade(false); }} />}
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-white">Create a document</h1>
         <p className="text-sm text-white/50">Author an institutional document from a structured form — it composes a valid DDM and submits into the approval pipeline.</p>
       </header>
+      {billing && <UsageBanner b={billing} onUpgrade={() => setUpgrade(true)} className="mb-6" />}
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 

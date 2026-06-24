@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { listDocuments, audit, type DocListItem, type AuditEvent, type Lifecycle } from "../lib/api";
+import { Link, useNavigate } from "react-router-dom";
+import { listDocuments, audit, getStats, type DocListItem, type AuditEvent, type Lifecycle, type Stats } from "../lib/api";
 import { Card, ClassBadge, LifecycleBadge, timeAgo } from "../lib/ui";
+import { useBilling, UsageBanner } from "../lib/upsell";
 import { useAuth } from "../lib/auth";
 
 // Operations Command Center. The console's landing surface is operational, not a
@@ -25,13 +26,17 @@ const ALL = [...PIPELINE, ...ASIDE];
 
 const Dashboard: React.FC = () => {
   const { has } = useAuth();
+  const nav = useNavigate();
   const [counts, setCounts] = useState<Record<string, DocListItem[]>>({});
   const [activity, setActivity] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const { billing } = useBilling();
 
   useEffect(() => {
     let live = true;
+    getStats().then((s) => { if (live) setStats(s); }).catch(() => {});
     (async () => {
       try {
         const entries = await Promise.all(
@@ -65,6 +70,23 @@ const Dashboard: React.FC = () => {
       </header>
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
+
+      {billing && <UsageBanner b={billing} onUpgrade={() => nav("/console/access")} className="mb-6" />}
+
+      {/* ── institutional outcomes ───────────────────────────────── */}
+      <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {[
+          ["Official records created", stats?.officialRecords],
+          ["Artifacts generated", stats?.artifactsGenerated],
+          ["Approval decisions", stats?.approvalDecisions],
+          ["Audit events", stats?.auditEvents],
+        ].map(([label, val]) => (
+          <Card key={label as string} className="p-5">
+            <div className="text-3xl font-bold tabular-nums text-white">{val === undefined ? "·" : (val as number)}</div>
+            <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">{label}</div>
+          </Card>
+        ))}
+      </div>
 
       {/* ── pipeline visualization ──────────────────────────────── */}
       <Card className="mb-8 p-6">

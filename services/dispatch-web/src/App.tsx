@@ -22,6 +22,7 @@ import Sovereignty from "./pages/Sovereignty";
 import Access from "./pages/Access";
 import Integrations from "./pages/Integrations";
 import Polished from "./pages/polished/Polished";
+import { BillingProvider } from "./lib/upsell";
 
 // The gated operator/governance console. Everything here requires a session;
 // unauthenticated visitors get the sign-in gate.
@@ -29,6 +30,7 @@ const Console: React.FC = () => {
   const { session } = useAuth();
   if (!session) return <SignIn />;
   return (
+    <BillingProvider>
     <Shell>
       <Routes>
         <Route path="/" element={<Dashboard />} />
@@ -45,6 +47,7 @@ const Console: React.FC = () => {
         <Route path="*" element={<Navigate to="/console" replace />} />
       </Routes>
     </Shell>
+    </BillingProvider>
   );
 };
 

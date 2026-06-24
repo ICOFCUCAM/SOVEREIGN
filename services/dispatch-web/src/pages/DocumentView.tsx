@@ -1,9 +1,17 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getDocument, getJob, artifactGrant, publish, withdraw, audit,
+import { getDocument, getJob, artifactGrant, publish, withdraw, audit, DispatchError,
   type DocumentDetail, type JobView, type ArtifactRef, type AuditEvent } from "../lib/api";
 import { Button, Card, ClassBadge, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
+import { UpgradeModal, useBilling } from "../lib/upsell";
+
+// A stable, official-looking record number derived from the document id.
+const recordNo = (id: string, createdAt?: string) => {
+  const n = parseInt(id.replace(/[^0-9a-f]/gi, "").slice(0, 8), 16) % 1_000_000;
+  const yr = createdAt ? new Date(createdAt).getFullYear() : new Date().getFullYear();
+  return `SD-${yr}-${String(n).padStart(6, "0")}`;
+};
 
 // One document end-to-end: metadata, versions, produced artifacts (download via
 // short-lived grants), the live render job, the publish/withdraw controls, and
@@ -16,6 +24,8 @@ const DocumentView: React.FC = () => {
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [upgrade, setUpgrade] = useState(false);
+  const { setBilling } = useBilling();
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -39,7 +49,10 @@ const DocumentView: React.FC = () => {
 
   const download = async (a: ArtifactRef) => {
     try { const g = await artifactGrant(a.artifactId); window.open(g.downloadUrl, "_blank"); }
-    catch (e) { setErr(e instanceof Error ? e.message : "grant failed"); }
+    catch (e) {
+      if (e instanceof DispatchError && e.status === 402) { setUpgrade(true); return; }
+      setErr(e instanceof Error ? e.message : "grant failed");
+    }
   };
 
   const lifecycleAction = async (fn: (id: string) => Promise<unknown>) => {
@@ -54,14 +67,30 @@ const DocumentView: React.FC = () => {
   const artifacts = job?.result?.artifacts ?? doc.latestResult?.artifacts ?? [];
   const cls = (doc.versions[0] as unknown as { classification?: { level?: string } })?.classification;
 
+  const rendered = artifacts.length > 0 || doc.status === "complete" || doc.status === "published";
+  const preserved = doc.status === "published";
+  const STAGES: [string, boolean][] = [["Governed", true], ["Approved", rendered], ["Rendered", rendered], ["Preserved", preserved]];
+
   return (
     <div>
+      {upgrade && <UpgradeModal open reason="download" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); setUpgrade(false); }} />}
       <Link to="/console/library" className="mb-4 inline-block text-xs font-semibold text-white/40 hover:text-white">← Library</Link>
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <div className="mb-2"><ClassBadge level={cls?.level} /></div>
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Official Record</span>
+            <span className="font-mono text-[11px] text-white/45">{recordNo(id!, doc.createdAt)}</span>
+            <ClassBadge level={cls?.level} />
+          </div>
           <h1 className="text-2xl font-bold text-white">{doc.title || "(untitled)"}</h1>
-          <p className="text-sm text-white/50">{doc.docType} · render status <span className="text-white/70">{doc.status}</span></p>
+          <p className="text-sm text-white/50">{doc.docType}</p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {STAGES.map(([label, on]) => (
+              <span key={label} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${on ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30" : "bg-white/5 text-white/35"}`}>
+                {on && <span className="text-emerald-400">✓</span>}{label}
+              </span>
+            ))}
+          </div>
         </div>
         <div className="flex gap-2">
           {has("dispatch:publish") && doc.status === "complete" && (
