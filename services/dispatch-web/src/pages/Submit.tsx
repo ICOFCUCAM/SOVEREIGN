@@ -68,7 +68,7 @@ const Submit: React.FC = () => {
     <div>
       <header className="mb-4">
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300/80">Administration · Advanced</div>
-        <h1 className="mt-1 text-2xl font-bold text-white">Direct DDM Submission</h1>
+        <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Direct DDM Submission</h1>
         <p className="text-sm text-white/50">A technical intake for integrators and automated systems: submit a pre-built DDM payload directly. This is the same pipeline as Create Record, without the guided form.</p>
       </header>
 

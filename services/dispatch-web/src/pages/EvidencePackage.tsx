@@ -85,7 +85,7 @@ const EvidencePackage: React.FC = () => {
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Sovereignty</div>
-          <h1 className="mt-1 text-2xl font-bold text-white">Evaluation Package</h1>
+          <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Evaluation Package</h1>
           <p className="text-sm text-white/50">One bundle for a procurement team — architecture, governance, compliance, security, deployment, and sovereignty — assembled from this institution's live posture.</p>
         </div>
         <Button className="shrink-0" disabled={!b} onClick={download}>Download Evaluation Package</Button>
