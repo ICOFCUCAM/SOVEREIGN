@@ -735,10 +735,44 @@ async function handleGovernanceAdmin(req, res, principal, kind, method) {
     return send(res, 200, data);
   }
   if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
-  let body; try { body = JSON.parse(await readBody(req)); }
+  let body; try { const raw = await readBody(req); body = raw ? JSON.parse(raw) : {}; }
   catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
   const claims = { ...govClaims(principal), dispatch_role: "tenant_admin" };
   try {
+    // ── Lifecycle (DELETE) — remove or revoke. Org objects cascade safely:
+    // deleting a department un-assigns its offices (never orphans them); deleting
+    // an office revokes its grants first; a grant DELETE is a revocation.
+    if (method === "DELETE") {
+      if (kind === "departments") {
+        if (!body.key) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "key is required"));
+        await withClaims(pool, claims, async (c) => {
+          await c.query("update dispatch.governance_roles set department_key=null where tenant_id=$1 and department_key=$2", [principal.tenantId, body.key]);
+          await c.query("delete from dispatch.departments where tenant_id=$1 and key=$2", [principal.tenantId, body.key]);
+        });
+        return send(res, 200, { deleted: body.key });
+      }
+      if (kind === "roles") {
+        if (!body.key) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "key is required"));
+        await withClaims(pool, claims, async (c) => {
+          await c.query("delete from dispatch.governance_role_grants where tenant_id=$1 and role_key=$2", [principal.tenantId, body.key]);
+          await c.query("delete from dispatch.governance_roles where tenant_id=$1 and key=$2", [principal.tenantId, body.key]);
+        });
+        return send(res, 200, { deleted: body.key });
+      }
+      if (kind === "grants") {
+        if (!body.subject || !body.roleKey) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "subject and roleKey are required"));
+        await withClaims(pool, claims, (c) => c.query(
+          "update dispatch.governance_role_grants set active=false where tenant_id=$1 and subject=$2 and role_key=$3", [principal.tenantId, body.subject, body.roleKey]));
+        return send(res, 200, { revoked: { subject: body.subject, roleKey: body.roleKey } });
+      }
+      if (kind === "delegations") {
+        if (!body.roleKey || !body.delegateSubject) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "roleKey and delegateSubject are required"));
+        await withClaims(pool, claims, (c) => c.query(
+          "update dispatch.delegations set active=false where tenant_id=$1 and role_key=$2 and delegate_subject=$3 and active", [principal.tenantId, body.roleKey, body.delegateSubject]));
+        return send(res, 200, { ended: { roleKey: body.roleKey, delegateSubject: body.delegateSubject } });
+      }
+      return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "unknown governance resource"));
+    }
     if (kind === "departments") {
       // A department is the institution's organisational grouping for its offices.
       if (!body.key || !body.name) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "key and name are required"));
@@ -754,8 +788,7 @@ async function handleGovernanceAdmin(req, res, principal, kind, method) {
       await withClaims(pool, claims, (c) => c.query(
         `insert into dispatch.governance_roles (tenant_id, key, label, department_key, display_order) values ($1,$2,$3,$4,$5)
          on conflict (tenant_id, key) do update set label=excluded.label,
-           department_key=coalesce(excluded.department_key, dispatch.governance_roles.department_key),
-           display_order=excluded.display_order`,
+           department_key=excluded.department_key, display_order=excluded.display_order`,
         [principal.tenantId, body.key, body.label, body.departmentKey ?? null, Number.isInteger(body.displayOrder) ? body.displayOrder : 100]));
       return send(res, 201, { key: body.key, label: body.label });
     }
@@ -793,10 +826,20 @@ async function handlePeople(req, res, principal, method) {
       fullName: u.full_name, departmentKey: u.department_key, systemAdmin: u.system_admin, status: u.status })) });
   }
   if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
-  let body; try { body = JSON.parse(await readBody(req)); }
+  let body; try { const raw = await readBody(req); body = raw ? JSON.parse(raw) : {}; }
   catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
-  if (!body.email || !body.fullName) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "email and fullName are required"));
   const claims = { ...govClaims(principal), dispatch_role: "tenant_admin" };
+  // Remove a person: soft-delete (status) AND revoke their office grants, so a
+  // departed person never silently retains authority.
+  if (method === "DELETE") {
+    if (!body.id) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "id is required"));
+    await withClaims(pool, claims, async (c) => {
+      await c.query("update dispatch.users set status='deleted' where tenant_id=$1 and id=$2", [principal.tenantId, body.id]);
+      await c.query("update dispatch.governance_role_grants set active=false where tenant_id=$1 and subject=$2", [principal.tenantId, `user:${body.id}`]);
+    });
+    return send(res, 200, { deleted: body.id });
+  }
+  if (!body.email || !body.fullName) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "email and fullName are required"));
   try {
     const r = await withClaims(pool, claims, (c) => c.query(
       `insert into dispatch.users (tenant_id, email, full_name, department_key, system_admin) values ($1,$2,$3,$4,$5)
@@ -1605,15 +1648,15 @@ const server = http.createServer(async (req, res) => {
       return await handleSsoConnection(req, res, auth.principal, req.method);
     }
 
-    // People — the human directory (read for any principal; create requires admin).
-    if (path === "/v1/users" && (req.method === "GET" || req.method === "POST")) {
+    // People — the human directory (read for any principal; create/remove require admin).
+    if (path === "/v1/users" && (req.method === "GET" || req.method === "POST" || req.method === "DELETE")) {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       return await handlePeople(req, res, auth.principal, req.method);
     }
 
     // Governance roles / grants / delegations (read for any principal).
-    const govAdminMatch = (path === "/v1/governance/roles" || path === "/v1/governance/grants" || path === "/v1/governance/delegations" || path === "/v1/governance/departments") && (req.method === "GET" || req.method === "POST");
+    const govAdminMatch = (path === "/v1/governance/roles" || path === "/v1/governance/grants" || path === "/v1/governance/delegations" || path === "/v1/governance/departments") && (req.method === "GET" || req.method === "POST" || req.method === "DELETE");
     if (govAdminMatch) {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));

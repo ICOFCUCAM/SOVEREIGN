@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { listClients, getGovernance, getUsers, createUser, createGovRole, createDepartment, grantGovRole, createDelegation,
+import { listClients, getGovernance, getUsers, createUser, deleteUser, createGovRole, createDepartment,
+  deleteDepartment, deleteGovRole, grantGovRole, revokeGovRole, createDelegation,
   type ServiceClient, type GovRole, type GovGrant, type GovDelegation, type Department, type Person, humanError } from "../lib/api";
 import { Button, Card, Field, inputCls } from "../lib/ui";
 
@@ -41,7 +42,7 @@ const AuthorityDirectory: React.FC = () => {
   const rolesFor = (subject: string) => grants.filter((x) => x.subject === subject).map((x) => x.role_key);
   // Offices are meant to be held by PEOPLE; a service credential holding one is a
   // bootstrap exception, so each holder carries whether it is a machine.
-  const holdersOf = (roleKey: string) => grants.filter((x) => x.role_key === roleKey).map((x) => ({ name: nameOf(x.subject), service: x.subject.startsWith("svc:") }));
+  const holdersOf = (roleKey: string) => grants.filter((x) => x.role_key === roleKey).map((x) => ({ subject: x.subject, name: nameOf(x.subject), service: x.subject.startsWith("svc:") }));
   const addPerson = async () => {
     if (!newPerson.fullName.trim() || !newPerson.email.trim()) return;
     try { await createUser({ fullName: newPerson.fullName.trim(), email: newPerson.email.trim(), departmentKey: newPerson.departmentKey || undefined, systemAdmin: newPerson.systemAdmin }); setNewPerson({ fullName: "", email: "", departmentKey: "", systemAdmin: false }); load(); }
@@ -64,6 +65,25 @@ const AuthorityDirectory: React.FC = () => {
   const grant = async (subject: string, roleKey: string) => {
     if (!roleKey) return;
     try { await grantGovRole(subject, roleKey); load(); } catch (e) { setErr(humanError(e, "Could not grant the role.")); }
+  };
+  const revoke = async (subject: string, roleKey: string) => {
+    try { await revokeGovRole(subject, roleKey); load(); } catch (e) { setErr(humanError(e, "Could not revoke.")); }
+  };
+  const moveOffice = async (o: GovRole, departmentKey: string) => {
+    try { await createGovRole(o.key, o.label, departmentKey || undefined, o.display_order); load(); }
+    catch (e) { setErr(humanError(e, "Could not move the office.")); }
+  };
+  const removeOffice = async (o: GovRole) => {
+    if (!window.confirm(`Remove the office “${o.label}”? Any current holder is unassigned and any governance policy step that references it stops resolving.`)) return;
+    try { await deleteGovRole(o.key); load(); } catch (e) { setErr(humanError(e, "Could not remove the office.")); }
+  };
+  const removeDepartment = async (d: Department) => {
+    if (!window.confirm(`Remove the department “${d.name}”? Its offices become unassigned (they are not deleted).`)) return;
+    try { await deleteDepartment(d.key); load(); } catch (e) { setErr(humanError(e, "Could not remove the department.")); }
+  };
+  const removePerson = async (p: Person) => {
+    if (!window.confirm(`Remove ${p.fullName}? They are deactivated and every office they hold is vacated.`)) return;
+    try { await deleteUser(p.id); load(); } catch (e) { setErr(humanError(e, "Could not remove the person.")); }
   };
   const addDelegation = async () => {
     if (!del.roleKey || !del.delegateSubject || !del.endsAt) return;
@@ -90,25 +110,36 @@ const AuthorityDirectory: React.FC = () => {
           <p className="py-3 text-sm text-white/40">No departments or offices defined yet.</p>
         ) : (
           <div className="space-y-5">
-            {[...departments.map((d) => ({ key: d.key, name: d.name })), { key: null as string | null, name: "Unassigned offices" }]
-              .map((dept) => {
-                const offices = roles.filter((r) => (r.department_key ?? null) === dept.key)
-                  .sort((a, b) => (a.display_order ?? 100) - (b.display_order ?? 100));
-                if (offices.length === 0) return null;
-                return (
-                  <div key={dept.key ?? "_unassigned"}>
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="text-[12.5px] font-bold uppercase tracking-[0.12em] text-white/70">{dept.name}</span>
-                      <span className="h-px flex-1 bg-white/[0.07]" />
-                    </div>
+            {[...departments, null as Department | null].map((deptObj) => {
+              const deptKey = deptObj?.key ?? null;
+              const offices = roles.filter((r) => (r.department_key ?? null) === deptKey)
+                .sort((a, b) => (a.display_order ?? 100) - (b.display_order ?? 100));
+              if (offices.length === 0 && !deptObj) return null; // hide the empty "Unassigned" group
+              return (
+                <div key={deptKey ?? "_unassigned"}>
+                  <div className="group mb-2 flex items-center gap-2">
+                    <span className="text-[12.5px] font-bold uppercase tracking-[0.12em] text-white/70">{deptObj?.name ?? "Unassigned offices"}</span>
+                    <span className="h-px flex-1 bg-white/[0.07]" />
+                    {deptObj && <button onClick={() => removeDepartment(deptObj)} className="text-[10px] font-semibold uppercase tracking-wide text-white/25 opacity-0 transition hover:text-red-300 group-hover:opacity-100">Remove</button>}
+                  </div>
+                  {offices.length === 0 ? (
+                    <p className="px-1 pb-1 text-[11px] text-white/30">No offices in this department yet — add one on the right.</p>
+                  ) : (
                     <div className="grid gap-2.5 sm:grid-cols-2">
                       {offices.map((o) => {
                         const holders = holdersOf(o.key);
                         return (
-                          <div key={o.key} className="rounded-lg border border-white/10 bg-ink-900/40 px-4 py-3">
+                          <div key={o.key} className="group rounded-lg border border-white/10 bg-ink-900/40 px-4 py-3">
                             <div className="flex items-center justify-between gap-2">
                               <span className="text-sm font-semibold text-white">{o.label}</span>
-                              <span className="font-mono text-[10px] uppercase tracking-wide text-white/30">Office</span>
+                              <div className="flex items-center gap-1.5 opacity-0 transition group-hover:opacity-100">
+                                <select value={o.department_key ?? ""} onChange={(e) => moveOffice(o, e.target.value)} title="Move to department"
+                                  className="rounded border border-white/10 bg-ink-900/70 px-1 py-0.5 text-[10px] text-white/60">
+                                  <option value="">Unassigned</option>
+                                  {departments.map((d) => <option key={d.key} value={d.key}>{d.name}</option>)}
+                                </select>
+                                <button onClick={() => removeOffice(o)} title="Remove office" className="text-white/30 hover:text-red-300">✕</button>
+                              </div>
                             </div>
                             <div className="mt-1.5 text-[11px] text-white/45">
                               {holders.length === 0
@@ -117,6 +148,7 @@ const AuthorityDirectory: React.FC = () => {
                                     <span key={i} className="inline-flex items-center gap-1">
                                       <span className="text-white/75">{h.name}</span>
                                       {h.service && <span className="rounded bg-amber-500/15 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-amber-300/90" title="A service credential temporarily holding this office (bootstrap). Reserve offices for people.">bootstrap</span>}
+                                      <button onClick={() => revoke(h.subject, o.key)} title="Revoke this holder" className="text-white/25 hover:text-red-300">✕</button>
                                       {i < holders.length - 1 ? <span className="text-white/30">·</span> : null}
                                     </span>
                                   ))}</span>}
@@ -125,9 +157,10 @@ const AuthorityDirectory: React.FC = () => {
                         );
                       })}
                     </div>
-                  </div>
-                );
-              })}
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </Card>
@@ -170,13 +203,21 @@ const AuthorityDirectory: React.FC = () => {
                     <div className="truncate text-[11px] text-white/35">{p.email}{dept ? ` · ${dept}` : ""}</div>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {held.length === 0 ? <span className="text-[11px] text-white/30">holds no office</span> :
-                        held.map((r) => <span key={r} className="rounded bg-seal/25 px-1.5 py-0.5 text-[10px] font-semibold text-seal-light ring-1 ring-seal-light/30">{roles.find((x) => x.key === r)?.label || r}</span>)}
+                        held.map((r) => (
+                          <span key={r} className="inline-flex items-center gap-1 rounded bg-seal/25 px-1.5 py-0.5 text-[10px] font-semibold text-seal-light ring-1 ring-seal-light/30">
+                            {roles.find((x) => x.key === r)?.label || r}
+                            <button onClick={() => revoke(p.subject, r)} title="Vacate this office" className="text-seal-light/60 hover:text-red-300">✕</button>
+                          </span>
+                        ))}
                     </div>
                   </div>
-                  <select className={`${inputCls} w-44 shrink-0`} value="" onChange={(e) => grant(p.subject, e.target.value)}>
-                    <option value="">+ Assign office…</option>
-                    {roles.filter((r) => !held.includes(r.key)).map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
-                  </select>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <select className={`${inputCls} w-40`} value="" onChange={(e) => grant(p.subject, e.target.value)}>
+                      <option value="">+ Assign office…</option>
+                      {roles.filter((r) => !held.includes(r.key)).map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
+                    </select>
+                    <button onClick={() => removePerson(p)} title="Remove person" className="rounded px-1.5 py-1 text-[11px] font-semibold text-white/30 hover:text-red-300">Remove</button>
+                  </div>
                 </div>
               );
             })}
