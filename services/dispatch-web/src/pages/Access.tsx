@@ -3,6 +3,7 @@ import { useAuth } from "../lib/auth";
 import { Button, Card, Field, inputCls, timeAgo } from "../lib/ui";
 import { listClients, issueClient, rotateClient, revokeClient, getBilling, subscribe, type ServiceClient, type IssuedCredential, humanError } from "../lib/api";
 import { QuotaMeter, planLabel, useBilling } from "../lib/upsell";
+import SsoConnectionCard from "../components/SsoConnectionCard";
 
 // ACCESS — tenant self-service for API credentials. A tenant_admin issues a
 // service client (client_id + secret), rotates its secret, or revokes it. The
@@ -127,6 +128,9 @@ const Access: React.FC = () => {
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
       {reveal && <Reveal cred={reveal.cred} label={reveal.label} onClose={() => setReveal(null)} />}
+
+      {/* How people sign in — the institution's identity provider (item 2). */}
+      <SsoConnectionCard />
 
       {billing && (
         <Card className={`mb-6 p-5 ${billing.canDownload ? "border-emerald-500/30" : "border-amber-500/30"}`}>

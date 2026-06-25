@@ -20,6 +20,7 @@
     "M17__analytics.sql",
     "M18__platform_operator.sql",
     "M19__departments.sql",
-    "M20__people.sql"
+    "M20__people.sql",
+    "M21__sso_connections.sql"
   ]
 }
