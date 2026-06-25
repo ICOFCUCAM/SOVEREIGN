@@ -15,11 +15,11 @@ export type ConsoleVariant = "operations" | "administration";
 type NavItem = { to: string; label: string; scope?: string; end?: boolean; group?: string };
 
 const OPERATIONS_NAV: NavItem[] = [
-  { to: "/console", label: "Dashboard", end: true },
-  { to: "/console/create", label: "Create Record", scope: "dispatch:render" },
+  { to: "/console", label: "Command", end: true },
+  { to: "/console/create", label: "Create Official Record", scope: "dispatch:render" },
   { to: "/console/review", label: "Governance", scope: "dispatch:approve" },
-  { to: "/console/library", label: "Records", scope: "dispatch:read" },
-  { to: "/console/archives", label: "Archives", scope: "dispatch:read" },
+  { to: "/console/library", label: "Official Records", scope: "dispatch:read" },
+  { to: "/console/archives", label: "Preservation", scope: "dispatch:read" },
   { to: "/console/audit", label: "Evidence", scope: "dispatch:audit" },
 ];
 
