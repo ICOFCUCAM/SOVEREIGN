@@ -40,7 +40,7 @@ const Review: React.FC = () => {
     <div>
       <header className="mb-6">
         <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">Governance</div>
-        <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Review &amp; Approve</h1>
+        <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Governance Proceedings</h1>
         <p className="mt-1 max-w-2xl text-sm leading-relaxed text-white/50">Each decision is bound to the record's approval chain and sealed into its evidence. Separation of duties is enforced — you cannot approve a record you submitted, and an approver is never its publisher.</p>
       </header>
 

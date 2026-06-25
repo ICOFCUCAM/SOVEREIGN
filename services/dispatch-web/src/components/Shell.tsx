@@ -27,7 +27,7 @@ const OPERATIONS_NAV: NavItem[] = [
 // domain — Identity (who holds authority), Governance (how records are governed),
 // Compliance (can we prove it) — not a flat list of database tables.
 const ADMIN_NAV: NavItem[] = [
-  { to: "/admin", label: "Overview", end: true },
+  { to: "/admin", label: "Posture", end: true },
   { to: "/admin/authority", label: "Authority Directory", scope: "dispatch:admin", group: "Identity" },
   { to: "/admin/access", label: "Credentials & Access", scope: "dispatch:admin", group: "Identity" },
   { to: "/admin/governance", label: "Policy Studio", scope: "dispatch:admin", group: "Governance" },

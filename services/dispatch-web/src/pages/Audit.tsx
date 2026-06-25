@@ -24,10 +24,11 @@ const Audit: React.FC = () => {
     <div>
       <header className="mb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Audit Center</h1>
-          <p className="text-sm text-white/50">Append-only event trail. Read-only, tenant-scoped, SHA-256 hashed.</p>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">Evidence</div>
+          <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Evidence Chain</h1>
+          <p className="mt-1 text-sm text-white/50">An append-only, hash-stamped chain of proceedings — read-only, tenant-scoped, evidentiary by design.</p>
         </div>
-        {!loading && <div className="text-right"><div className="text-2xl font-bold tabular-nums text-white">{events.length}</div><div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Events</div></div>}
+        {!loading && <div className="text-right"><div className="font-mono text-2xl font-bold tabular-nums text-white">{events.length}</div><div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Proceedings</div></div>}
       </header>
 
       <form onSubmit={(e) => { e.preventDefault(); load(); }} className="mb-4 flex flex-wrap gap-2">
@@ -49,7 +50,7 @@ const Audit: React.FC = () => {
                   <th className="px-4 py-2 font-semibold">Actor</th>
                   <th className="px-4 py-2 font-semibold">Action</th>
                   <th className="px-4 py-2 font-semibold">Document</th>
-                  <th className="px-4 py-2 font-semibold">Audit ID</th>
+                  <th className="px-4 py-2 font-semibold">Evidence ID</th>
                   <th className="px-4 py-2 font-semibold">Integrity</th>
                 </tr>
               </thead>
