@@ -43,8 +43,9 @@ const OfficeHome: React.FC<{ subject?: string }> = ({ subject }) => {
       <div className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
         <div className="min-w-0">
           <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-seal-light">Your Authority{person ? <span className="text-white/35"> · {greeting()}, {person}</span> : null}</div>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-baseline gap-2.5">
             <span className="font-serif text-[1.5rem] font-bold leading-none tracking-tight text-white">Office of the {a.offices[0].label}</span>
+            {a.offices[0].department && <span className="text-[12px] text-white/40">{a.offices[0].department}</span>}
           </div>
           {a.offices.length > 1 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
