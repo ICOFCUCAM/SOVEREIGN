@@ -831,14 +831,17 @@ const ssoFail = (res, ret, reason) => {
 async function handleSsoStart(req, res, query) {
   const email = String(query.get("email") || "").trim().toLowerCase();
   const ret = query.get("redirect") || process.env.DISPATCH_WEB_URL || "";
-  if (!email.includes("@")) return send(res, 400, errEnvelope(null, 400, "BAD_EMAIL", "a work email is required"));
+  // This endpoint is reached by a full browser navigation, so every failure must
+  // redirect BACK to the sign-in page with a notice — never strand the person on
+  // a raw JSON error at the API domain.
+  if (!email.includes("@")) return ssoFail(res, ret, "bad_email");
   const secret = process.env.DISPATCH_TOKEN_SECRET;
-  if (!secret) return send(res, 500, errEnvelope(null, 500, "AUTH_NOT_CONFIGURED", "DISPATCH_TOKEN_SECRET not set"));
+  if (!secret) return ssoFail(res, ret, "not_configured");
   const domain = email.split("@")[1];
   const conn = (await withAdmin((c) => c.query("select * from dispatch.lookup_sso_connection($1)", [domain]))).rows[0];
-  if (!conn) return send(res, 404, errEnvelope(null, 404, "NO_SSO", "no institutional sign-in is configured for this domain"));
+  if (!conn) return ssoFail(res, ret, "NO_SSO");
   let disco; try { disco = await discover(conn.issuer); }
-  catch (e) { return send(res, 502, errEnvelope(null, 502, "IDP_DISCOVERY_FAILED", String(e.message))); }
+  catch { return ssoFail(res, ret, "idp_discovery_failed"); }
   const nonce = crypto.randomUUID();
   const state = signJwt({ kind: "sso", domain, nonce, ret }, secret, { expiresIn: 600, issuer: process.env.DISPATCH_TOKEN_ISSUER || "sovereign-dispatch" });
   const url = buildAuthUrl({ authorization_endpoint: disco.authorization_endpoint, clientId: conn.client_id,
