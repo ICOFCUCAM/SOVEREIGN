@@ -85,6 +85,20 @@ const AuthorityDirectory: React.FC = () => {
     if (!window.confirm(`Remove ${p.fullName}? They are deactivated and every office they hold is vacated.`)) return;
     try { await deleteUser(p.id); load(); } catch (e) { setErr(humanError(e, "Could not remove the person.")); }
   };
+  // In-place rename — the KEY (what policies reference) is stable; only the
+  // display name changes, so renaming an office never disturbs governance.
+  const [editing, setEditing] = useState<{ kind: "dept" | "office"; key: string } | null>(null);
+  const [editVal, setEditVal] = useState("");
+  const startEdit = (kind: "dept" | "office", key: string, current: string) => { setEditing({ kind, key }); setEditVal(current); };
+  const saveEdit = async () => {
+    if (!editing || !editVal.trim()) { setEditing(null); return; }
+    try {
+      if (editing.kind === "dept") { const d = departments.find((x) => x.key === editing.key); await createDepartment(editing.key, editVal.trim(), d?.display_order); }
+      else { const o = roles.find((x) => x.key === editing.key); await createGovRole(editing.key, editVal.trim(), o?.department_key ?? undefined, o?.display_order); }
+      setEditing(null); load();
+    } catch (e) { setEditing(null); setErr(humanError(e, "Could not rename.")); }
+  };
+  const editKeyDown = (e: React.KeyboardEvent) => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditing(null); };
   const actingFor = (roleKey: string) => delegations.filter((d) => d.role_key === roleKey && !d.expired);
   const endActing = async (roleKey: string, delegateSubject: string) => {
     try { await endDelegation(roleKey, delegateSubject); load(); } catch (e) { setErr(humanError(e, "Could not end the acting appointment.")); }
@@ -128,7 +142,11 @@ const AuthorityDirectory: React.FC = () => {
               return (
                 <div key={deptKey ?? "_unassigned"}>
                   <div className="group mb-2 flex items-center gap-2">
-                    <span className="text-[12.5px] font-bold uppercase tracking-[0.12em] text-white/70">{deptObj?.name ?? "Unassigned offices"}</span>
+                    {deptObj && editing?.kind === "dept" && editing.key === deptObj.key
+                      ? <input autoFocus value={editVal} onChange={(e) => setEditVal(e.target.value)} onKeyDown={editKeyDown} onBlur={saveEdit}
+                          className="rounded border border-seal-light/40 bg-ink-900/70 px-1.5 py-0.5 text-[12.5px] font-bold uppercase tracking-[0.12em] text-white" />
+                      : <button onClick={() => deptObj && startEdit("dept", deptObj.key, deptObj.name)} disabled={!deptObj} title={deptObj ? "Rename department" : undefined}
+                          className="text-[12.5px] font-bold uppercase tracking-[0.12em] text-white/70 hover:text-white disabled:cursor-default">{deptObj?.name ?? "Unassigned offices"}</button>}
                     <span className="h-px flex-1 bg-white/[0.07]" />
                     {deptObj && <button onClick={() => removeDepartment(deptObj)} className="text-[10px] font-semibold uppercase tracking-wide text-white/25 opacity-0 transition hover:text-red-300 group-hover:opacity-100">Remove</button>}
                   </div>
@@ -141,7 +159,10 @@ const AuthorityDirectory: React.FC = () => {
                         return (
                           <div key={o.key} className="group rounded-lg border border-white/10 bg-ink-900/40 px-4 py-3">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="text-sm font-semibold text-white">{o.label}</span>
+                              {editing?.kind === "office" && editing.key === o.key
+                                ? <input autoFocus value={editVal} onChange={(e) => setEditVal(e.target.value)} onKeyDown={editKeyDown} onBlur={saveEdit}
+                                    className="w-full rounded border border-seal-light/40 bg-ink-900/70 px-1.5 py-0.5 text-sm font-semibold text-white" />
+                                : <button onClick={() => startEdit("office", o.key, o.label)} title="Rename office" className="text-sm font-semibold text-white hover:text-seal-light">{o.label}</button>}
                               <div className="flex items-center gap-1.5 opacity-0 transition group-hover:opacity-100">
                                 <select value={o.department_key ?? ""} onChange={(e) => moveOffice(o, e.target.value)} title="Move to department"
                                   className="rounded border border-white/10 bg-ink-900/70 px-1 py-0.5 text-[10px] text-white/60">
