@@ -4,6 +4,7 @@ import { getDocument, getJob, artifactGrant, publish, withdraw, archiveDocument,
   type DocumentDetail, type JobView, type ArtifactRef, type AuditEvent, type PreservationCertificate, type GovernanceCertificate, humanError } from "../lib/api";
 import { track } from "../lib/analytics";
 import { Button, Card, ClassBadge, timeAgo } from "../lib/ui";
+import { recordTypeLabel } from "../lib/recordTypes";
 import { useAuth } from "../lib/auth";
 import { UpgradeModal, useBilling } from "../lib/upsell";
 
@@ -95,31 +96,57 @@ const DocumentView: React.FC = () => {
   const preserved = lc === "archived";
   const rendered = artifacts.length > 0 || doc.status === "complete" || ["rendered", "published", "archived"].includes(lc ?? "");
   const STAGES: [string, boolean][] = [["Governed", true], ["Approved", rendered], ["Rendered", rendered], ["Published", published], ["Preserved", preserved]];
+  // The procession frontier — the furthest stage this record has reached. Reached
+  // stages read white/authoritative; the frontier carries the seal-blue accent;
+  // only the terminal Preserved seal earns colour (permanence, the institution's
+  // green). Consistent with the Command dashboard's colour discipline.
+  const frontier = STAGES.reduce((m, [, on], i) => (on ? i : m), 0);
 
   return (
     <div>
       {upgrade && <UpgradeModal open reason="download" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); setUpgrade(false); }} />}
       <Link to="/console/library" className="mb-4 inline-block text-xs font-semibold text-white/40 hover:text-white">← Library</Link>
-      <header className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <div className="mb-2 flex items-center gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Official Record</span>
-            <span className="font-mono text-[11px] text-white/45">{recordNo(id!, doc.createdAt)}</span>
+      <header className="mb-6 flex items-start justify-between gap-4 border-b border-white/10 pb-6">
+        <div className="min-w-0">
+          <div className="mb-2 flex items-center gap-2.5">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Official Record</span>
+            <span className="font-mono text-[11px] tabular-nums text-white/45">{recordNo(id!, doc.createdAt)}</span>
             <ClassBadge level={cls?.level} />
           </div>
           <h1 className="font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">{doc.title || "(untitled)"}</h1>
-          <p className="text-sm text-white/50">{doc.docType}</p>
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {STAGES.map(([label, on]) => (
-              <span key={label} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${on ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30" : "bg-white/5 text-white/35"}`}>
-                {on && <span className="text-emerald-400">✓</span>}{label}
-              </span>
-            ))}
+          <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">{recordTypeLabel(doc.docType)}</p>
+          {/* lifecycle as a procession — reached white, frontier seal-accented, the terminal seal earns green */}
+          <div className="mt-3.5 flex flex-wrap items-center gap-1">
+            {STAGES.map(([label, on], i) => {
+              const isPreservedSeal = label === "Preserved" && on;
+              const isFrontier = on && i === frontier && !isPreservedSeal;
+              const pill = isPreservedSeal
+                ? "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/30"
+                : isFrontier
+                  ? "bg-seal/25 text-white ring-1 ring-seal-light/40"
+                  : on
+                    ? "bg-white/[0.06] text-white/85 ring-1 ring-white/12"
+                    : "bg-white/[0.02] text-white/30";
+              return (
+                <React.Fragment key={label}>
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${pill}`}>
+                    {on && <span className={isPreservedSeal ? "text-emerald-300" : "text-seal-light"} aria-hidden>✓</span>}{label}
+                  </span>
+                  {i < STAGES.length - 1 && <span className="px-0.5 text-white/15" aria-hidden>→</span>}
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-2">
           {preserved ? (
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-300">🛡 Preserved</span>
+            <span className="inline-flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-200">
+              <span aria-hidden className="relative flex h-3.5 w-3.5 items-center justify-center">
+                <span className="absolute inset-0 rounded-full border border-emerald-400/60" />
+                <span className="h-1 w-1 rounded-full bg-emerald-400/80" />
+              </span>
+              Preserved
+            </span>
           ) : (
             <>
               {has("dispatch:publish") && lc === "rendered" && (
@@ -250,7 +277,7 @@ const DocumentView: React.FC = () => {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* render job */}
         <Card className="p-5">
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/50">Render</h3>
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">Render</h3>
           {!job ? <p className="text-sm text-white/40">No render job yet — gated on approval.</p> : (
             <>
               <div className="mb-2 flex items-center justify-between text-sm">
@@ -262,7 +289,7 @@ const DocumentView: React.FC = () => {
               </div>
             </>
           )}
-          <h4 className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-white/40">Artifacts</h4>
+          <h4 className="mb-2 mt-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">Artifacts</h4>
           {artifacts.length === 0 ? <p className="text-sm text-white/30">None produced yet.</p> : (
             <ul className="space-y-2">
               {artifacts.map((a) => (
@@ -281,7 +308,7 @@ const DocumentView: React.FC = () => {
 
         {/* versions */}
         <Card className="p-5">
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/50">Versions</h3>
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">Versions</h3>
           <ul className="space-y-2">
             {doc.versions.map((v) => (
               <li key={v.versionNo} className="flex items-center justify-between text-sm">
@@ -301,7 +328,7 @@ const DocumentView: React.FC = () => {
       {/* provenance trail (auditor) */}
       {has("dispatch:audit") && (
         <Card className="mt-6 p-5">
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/50">Provenance trail</h3>
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">Provenance trail</h3>
           {events.length === 0 ? <p className="text-sm text-white/30">No events.</p> : (
             <ol className="space-y-1.5">
               {events.map((e) => (

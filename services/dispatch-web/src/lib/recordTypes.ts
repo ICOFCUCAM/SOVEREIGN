@@ -22,4 +22,5 @@ export const RECORD_TYPES: { docType: string; label: string }[] = [
 ];
 
 export const recordTypeLabel = (docType?: string): string =>
-  RECORD_TYPES.find((t) => t.docType === docType)?.label ?? (docType ?? "—");
+  RECORD_TYPES.find((t) => t.docType === docType)?.label
+    ?? (docType ? docType.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "—");
