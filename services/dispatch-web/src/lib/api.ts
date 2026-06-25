@@ -60,6 +60,17 @@ async function request<T>(method: string, path: string, opts: { body?: unknown; 
   return json as T;
 }
 
+// ---- institutional SSO (item 2) ----
+// The browser is sent to the API's SSO-start endpoint, which 302-redirects to the
+// institution's IdP. On success the API redirects back to `redirect` with the
+// session token in the URL fragment (#sso_token=…), consumed by the auth provider.
+export const ssoStartUrl = (email: string, redirect: string) =>
+  `${BASE}/v1/auth/sso/start?email=${encodeURIComponent(email)}&redirect=${encodeURIComponent(redirect)}`;
+export interface SsoConnection { provider: string; issuer: string; clientId: string; emailDomain: string; enabled: boolean; secretSet?: boolean }
+export const getSsoConnection = () => request<{ connection: SsoConnection | null }>("GET", "/v1/auth/sso/connection");
+export const saveSsoConnection = (c: { issuer: string; clientId: string; clientSecret?: string; emailDomain: string; enabled?: boolean }) =>
+  request<{ connected: boolean }>("POST", "/v1/auth/sso/connection", { body: c });
+
 // ---- token exchange (client credentials) ----
 export interface TokenResponse { access_token: string; token: string; tokenType: string; expiresIn: number; tenantId: string; scopes: string[] }
 export const exchangeToken = (client_id: string, secret: string) =>

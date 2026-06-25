@@ -125,10 +125,15 @@ function resolveJwt(token) {
   } catch {
     return { error: { status: 401, code: "UNAUTHENTICATED", message: "malformed bearer token" } };
   }
-  const isService = header.principal_type === "service";
-  const secret = isService ? process.env.DISPATCH_TOKEN_SECRET : process.env.SUPABASE_JWT_SECRET;
+  // Dispatch ISSUES two token kinds (both HS256 with DISPATCH_TOKEN_SECRET):
+  //   · service — client-credentials machine token (POST /v1/token)
+  //   · person  — human session minted after institutional SSO (item 2)
+  // An EXTERNAL Supabase user JWT is verified with SUPABASE_JWT_SECRET instead.
+  const ptype = header.principal_type;
+  const dispatchIssued = ptype === "service" || ptype === "person";
+  const secret = dispatchIssued ? process.env.DISPATCH_TOKEN_SECRET : process.env.SUPABASE_JWT_SECRET;
   if (!secret) {
-    return { error: { status: 401, code: "AUTH_NOT_CONFIGURED", message: `${isService ? "DISPATCH_TOKEN_SECRET" : "SUPABASE_JWT_SECRET"} not set` } };
+    return { error: { status: 401, code: "AUTH_NOT_CONFIGURED", message: `${dispatchIssued ? "DISPATCH_TOKEN_SECRET" : "SUPABASE_JWT_SECRET"} not set` } };
   }
   let claims;
   try {
@@ -141,11 +146,38 @@ function resolveJwt(token) {
   if (!TENANT_RE.test(tenantId ?? "")) {
     return { error: { status: 401, code: "UNAUTHENTICATED", message: "token has no valid tenant_id" } };
   }
-  if (isService) {
+  if (ptype === "service") {
     return { principal: { tenantId, principalType: "service", role: "service", scopes: claims.scopes ?? [], clearance: claims.clearance || "none", actor: `svc:${claims.client_id || claims.sub || "service"}` } };
   }
+  if (ptype === "person") {
+    // A human session. The actor is the person's id ("user:<id>"), which is the
+    // subject the office grants bind to — so a person's authority flows entirely
+    // from the offices they occupy, not from anything baked into the token.
+    const role = claims.dispatch_role || "author";
+    const userId = claims.sub || claims.user_id;
+    if (!userId) return { error: { status: 401, code: "INVALID_TOKEN", message: "person token has no subject" } };
+    return { principal: { tenantId, principalType: "user", role, scopes: claims.scopes ?? roleScopes(role), clearance: claims.clearance || "none", actor: `user:${userId}` } };
+  }
+  // External (Supabase) user JWT.
   const role = claims.dispatch_role || claims.role || "viewer";
-  return { principal: { tenantId, principalType: "user", role, scopes: claims.scopes ?? roleScopes(role), clearance: claims.clearance || "none", actor: `user:${role}` } };
+  return { principal: { tenantId, principalType: "user", role, scopes: claims.scopes ?? roleScopes(role), clearance: claims.clearance || "none", actor: `user:${claims.sub || role}` } };
+}
+
+/**
+ * Mint a short-lived Dispatch HUMAN session token (principal_type "person") after
+ * institutional SSO has authenticated and mapped the person to a dispatch.users
+ * row. The actor is "user:<id>" so authority flows from office grants.
+ */
+export function mintUserToken({ tenantId, userId, scopes, clearance, role, email }) {
+  const secret = process.env.DISPATCH_TOKEN_SECRET;
+  if (!secret) return { error: { status: 500, code: "AUTH_NOT_CONFIGURED", message: "DISPATCH_TOKEN_SECRET not set" } };
+  const ttl = Number(process.env.DISPATCH_USER_TOKEN_TTL_SEC || 3600);
+  const token = signJwt(
+    { principal_type: "person", sub: userId, tenant_id: tenantId, scopes: scopes ?? [], clearance: clearance || "none", dispatch_role: role || "author", ...(email ? { email } : {}) },
+    secret,
+    { expiresIn: ttl, issuer: process.env.DISPATCH_TOKEN_ISSUER || "sovereign-dispatch" },
+  );
+  return { token, tokenType: "Bearer", expiresIn: ttl };
 }
 
 /**

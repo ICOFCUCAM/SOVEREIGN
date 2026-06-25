@@ -10,7 +10,9 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { validateRequest } from "@dispatch/ddm-schema/validator";
 import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
-import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verifyDownloadGrant } from "../../shared/src/auth.mjs";
+import { resolvePrincipal, hasScope, mintServiceToken, mintUserToken, mintDownloadGrant, verifyDownloadGrant } from "../../shared/src/auth.mjs";
+import { signJwt, verifyJwt } from "../../shared/src/jwt.mjs";
+import { discover, buildAuthUrl, exchangeCode, verifyIdToken } from "../../shared/src/oidc.mjs";
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
@@ -808,6 +810,113 @@ async function handlePeople(req, res, principal, method) {
   }
 }
 
+// ── Institutional SSO (item 2, stage 2) — Dispatch as OIDC relying party ──────
+// A person signs in through their institution's identity provider. Dispatch
+// redirects to the IdP, verifies the returned ID token (oidc.mjs — RS256/JWKS,
+// proven in test/sso-flow.test.mjs), maps the email to a dispatch.users PERSON,
+// and mints a human session ("person" token). It never sees a password. Authority
+// is NOT in the token — it flows from the offices the person occupies.
+const apiOrigin = (req) => {
+  if (process.env.DISPATCH_PUBLIC_API_URL) return process.env.DISPATCH_PUBLIC_API_URL.replace(/\/$/, "");
+  const proto = String(req.headers["x-forwarded-proto"] || "https").split(",")[0];
+  return `${proto}://${req.headers["x-forwarded-host"] || req.headers["host"]}`;
+};
+const ssoFail = (res, ret, reason) => {
+  const back = ret || process.env.DISPATCH_WEB_URL;
+  if (back) { const sep = back.includes("#") ? "&" : "#"; res.writeHead(302, { location: `${back}${sep}sso_error=${encodeURIComponent(reason)}` }); return res.end(); }
+  return send(res, 401, errEnvelope(null, 401, "SSO_FAILED", reason));
+};
+
+// GET /v1/auth/sso/start?email=&redirect=  — begin the institutional handshake.
+async function handleSsoStart(req, res, query) {
+  const email = String(query.get("email") || "").trim().toLowerCase();
+  const ret = query.get("redirect") || process.env.DISPATCH_WEB_URL || "";
+  if (!email.includes("@")) return send(res, 400, errEnvelope(null, 400, "BAD_EMAIL", "a work email is required"));
+  const secret = process.env.DISPATCH_TOKEN_SECRET;
+  if (!secret) return send(res, 500, errEnvelope(null, 500, "AUTH_NOT_CONFIGURED", "DISPATCH_TOKEN_SECRET not set"));
+  const domain = email.split("@")[1];
+  const conn = (await withAdmin((c) => c.query("select * from dispatch.lookup_sso_connection($1)", [domain]))).rows[0];
+  if (!conn) return send(res, 404, errEnvelope(null, 404, "NO_SSO", "no institutional sign-in is configured for this domain"));
+  let disco; try { disco = await discover(conn.issuer); }
+  catch (e) { return send(res, 502, errEnvelope(null, 502, "IDP_DISCOVERY_FAILED", String(e.message))); }
+  const nonce = crypto.randomUUID();
+  const state = signJwt({ kind: "sso", domain, nonce, ret }, secret, { expiresIn: 600, issuer: process.env.DISPATCH_TOKEN_ISSUER || "sovereign-dispatch" });
+  const url = buildAuthUrl({ authorization_endpoint: disco.authorization_endpoint, clientId: conn.client_id,
+    redirectUri: `${apiOrigin(req)}/v1/auth/sso/callback`, scope: "openid email profile", state, nonce, loginHint: email });
+  res.writeHead(302, { location: url }); return res.end();
+}
+
+// GET /v1/auth/sso/callback?code=&state=  — verify the IdP, mint a human session.
+async function handleSsoCallback(req, res, query) {
+  const code = query.get("code"), stateTok = query.get("state");
+  const secret = process.env.DISPATCH_TOKEN_SECRET;
+  if (!code || !stateTok || !secret) return ssoFail(res, null, "missing_code_or_state");
+  let st; try { st = verifyJwt(stateTok, secret, { issuer: process.env.DISPATCH_TOKEN_ISSUER || undefined }); }
+  catch { return ssoFail(res, null, "bad_state"); }
+  if (st.kind !== "sso") return ssoFail(res, st.ret, "bad_state");
+  const conn = (await withAdmin((c) => c.query("select * from dispatch.lookup_sso_connection($1)", [st.domain]))).rows[0];
+  if (!conn) return ssoFail(res, st.ret, "no_connection");
+  let claims;
+  try {
+    const disco = await discover(conn.issuer);
+    const tokens = await exchangeCode({ token_endpoint: disco.token_endpoint, code, clientId: conn.client_id, clientSecret: conn.client_secret, redirectUri: `${apiOrigin(req)}/v1/auth/sso/callback` });
+    claims = await verifyIdToken(tokens.id_token, { jwks_uri: disco.jwks_uri, issuer: conn.issuer, audience: conn.client_id, nonce: st.nonce });
+  } catch (e) { return ssoFail(res, st.ret, `idp_${e.code || "error"}`); }
+  const email = String(claims.email || "").toLowerCase();
+  if (!email) return ssoFail(res, st.ret, "idp_no_email");
+  const tenantId = conn.tenant_id;
+  // Map to a KNOWN person — the institution must have added them. No auto-provision.
+  const person = await withClaims(pool, { tenant_id: tenantId, principal_type: "service", dispatch_role: "service", actor: "sso" }, async (c) => {
+    const u = (await c.query("select id, system_admin from dispatch.users where email=$1 and status <> 'deleted'", [email])).rows[0];
+    if (!u) return null;
+    const offices = (await c.query("select 1 from dispatch.governance_role_grants where subject=$1 and active limit 1", [`user:${u.id}`])).rows.length > 0;
+    return { id: u.id, systemAdmin: u.system_admin, offices };
+  });
+  if (!person) return ssoFail(res, st.ret, "not_provisioned");
+  // Two dimensions: office-holders can operate the governance surfaces; system
+  // admins also get dispatch:admin. WHO can act on a record is still gated by the
+  // office grant at request time — the token only opens the surfaces.
+  const scopes = ["dispatch:read", "dispatch:render"];
+  if (person.offices) scopes.push("dispatch:approve", "dispatch:publish", "dispatch:audit");
+  if (person.systemAdmin) scopes.push("dispatch:admin");
+  const minted = mintUserToken({ tenantId, userId: person.id, scopes, clearance: "none", role: person.systemAdmin ? "tenant_admin" : "author", email });
+  if (minted.error) return ssoFail(res, st.ret, "mint_failed");
+  const back = st.ret || process.env.DISPATCH_WEB_URL || "/";
+  const sep = back.includes("#") ? "&" : "#";
+  res.writeHead(302, { location: `${back}${sep}sso_token=${encodeURIComponent(minted.token)}&tenant=${tenantId}` });
+  return res.end();
+}
+
+// GET/POST /v1/auth/sso/connection — the institution registers/views its IdP.
+async function handleSsoConnection(req, res, principal, method) {
+  if (method === "GET") {
+    if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+    const row = (await withClaims(pool, govClaims(principal), (c) => c.query(
+      "select provider, issuer, client_id, email_domain, enabled from dispatch.tenant_sso_connections where tenant_id=$1", [principal.tenantId]))).rows[0];
+    return send(res, 200, { connection: row ? { provider: row.provider, issuer: row.issuer, clientId: row.client_id, emailDomain: row.email_domain, enabled: row.enabled, secretSet: true } : null });
+  }
+  if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
+  let body; try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  if (!body.issuer || !body.clientId || !body.emailDomain)
+    return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "issuer, clientId and emailDomain are required"));
+  const claims = { ...govClaims(principal), dispatch_role: "tenant_admin" };
+  try {
+    await withClaims(pool, claims, (c) => c.query(
+      `insert into dispatch.tenant_sso_connections (tenant_id, provider, issuer, client_id, client_secret, email_domain, enabled, updated_at)
+       values ($1,'oidc',$2,$3,$4,$5,$6, now())
+       on conflict (tenant_id) do update set issuer=excluded.issuer, client_id=excluded.client_id,
+         client_secret=coalesce(excluded.client_secret, dispatch.tenant_sso_connections.client_secret),
+         email_domain=excluded.email_domain, enabled=excluded.enabled, updated_at=now()`,
+      [principal.tenantId, body.issuer, body.clientId, body.clientSecret ?? null, String(body.emailDomain).toLowerCase(), body.enabled !== false]));
+    return send(res, 201, { connected: true });
+  } catch (e) {
+    if (String(e.message).includes("email_domain")) return send(res, 409, errEnvelope(null, 409, "DOMAIN_TAKEN", "that email domain is already connected to another institution"));
+    console.error("sso connection write error:", e);
+    return send(res, 400, errEnvelope(null, 400, "SSO_WRITE_FAILED", String(e.message)));
+  }
+}
+
 // GET /v1/governance/overview — the operational + compliance picture an admin or
 // compliance officer needs at a glance: who's awaiting whom, what's awaiting
 // publication, active/expired delegations, and the compliance posture. Derived
@@ -1479,6 +1588,18 @@ const server = http.createServer(async (req, res) => {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       return await handlePlatform(res, auth.principal, path.endsWith("trends") ? "trends" : "overview", url.searchParams);
+    }
+
+    // Institutional SSO — PRE-AUTH handshake (no session yet). start → IdP; the
+    // IdP → callback. Both fail closed (no connection = no effect on other login).
+    if (req.method === "GET" && path === "/v1/auth/sso/start") return await handleSsoStart(req, res, url.searchParams);
+    if (req.method === "GET" && path === "/v1/auth/sso/callback") return await handleSsoCallback(req, res, url.searchParams);
+
+    // SSO connection management — the institution registers/views its IdP (admin).
+    if (path === "/v1/auth/sso/connection" && (req.method === "GET" || req.method === "POST")) {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleSsoConnection(req, res, auth.principal, req.method);
     }
 
     // People — the human directory (read for any principal; create requires admin).
