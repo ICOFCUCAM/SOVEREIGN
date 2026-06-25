@@ -78,7 +78,6 @@ const Platform: React.FC = () => {
               <div className="text-base font-bold text-[#f4efe3]">Built for the estate</div>
               <p className="mt-2 text-[13.5px] leading-relaxed text-white/55">Consumers submit their data and Dispatch returns the official record — with webhook callbacks on render and publish.</p>
               <ul className="mt-5 space-y-2.5 text-[13.5px] text-white/70">
-                <li className="flex items-center gap-2"><Dot /> Emergency AI — intelligence briefings &amp; reports</li>
                 <li className="flex items-center gap-2"><Dot /> Veritas — operational &amp; financial packages</li>
                 <li className="flex items-center gap-2"><Dot /> ExitOS — board memoranda &amp; transaction documents</li>
                 <li className="flex items-center gap-2"><Dot /> Your institution — over the same REST surface</li>

@@ -47,8 +47,8 @@ export function assertTransition(from, to) {
 
 // ---- Approval policy resolution ---------------------------------------------
 // Application defaults when no DB policy row matches: machine (service) lane
-// auto-approves so existing integrations (e.g. Emergency AI) are unchanged;
-// human lane requires one approval. A matching dispatch.approval_policies row
+// auto-approves so existing system-to-system integrations are unchanged; human
+// lane requires one approval. A matching dispatch.approval_policies row
 // (most-specific wins) overrides these.
 export const DEFAULT_POLICY = Object.freeze({
   required_approvals: 1,
