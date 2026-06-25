@@ -163,6 +163,8 @@ const DocumentView: React.FC = () => {
         </div>
       </header>
 
+      {doc.posture && <GovernanceStanding p={doc.posture} lifecycle={lc} submittedAt={doc.posture.waitingSince} />}
+
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 
       {govCert && (
@@ -343,6 +345,66 @@ const DocumentView: React.FC = () => {
         </Card>
       )}
     </div>
+  );
+};
+
+// ── Governance Standing — the answer to "who holds my document right now?" ────
+// Reads the record's institutional posture as plain fact: the verdict sentence,
+// the authority that holds it, who is next, who may publish, under what policy,
+// and for how long. Every value is server-computed from real governance state.
+const STANDING_DOT: Record<string, string> = {
+  draft: "bg-white/30", submitted: "bg-amber-400", in_review: "bg-amber-400",
+  approved: "bg-seal-light", rendered: "bg-seal-light", published: "bg-white",
+  withdrawn: "bg-white/30", archived: "bg-emerald-400", rejected: "bg-red-400",
+};
+const waitedFor = (iso?: string | null): string => {
+  if (!iso) return "—";
+  const ms = Date.now() - new Date(iso).getTime();
+  if (ms < 0) return "just now";
+  const m = Math.floor(ms / 60000), h = Math.floor(m / 60), d = Math.floor(h / 24);
+  if (d > 0) return `${d}d ${h % 24}h`;
+  if (h > 0) return `${h}h ${m % 60}m`;
+  if (m > 0) return `${m}m`;
+  return "just now";
+};
+
+const StandFact: React.FC<{ label: string; value?: React.ReactNode }> = ({ label, value }) =>
+  value == null || value === "" ? null : (
+    <div>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">{label}</div>
+      <div className="mt-1 text-sm font-medium text-white/90">{value}</div>
+    </div>
+  );
+
+const GovernanceStanding: React.FC<{ p: NonNullable<DocumentDetail["posture"]>; lifecycle?: string; submittedAt?: string | null }> = ({ p, lifecycle = "", submittedAt }) => {
+  const inReview = lifecycle === "in_review" || lifecycle === "submitted";
+  const dot = STANDING_DOT[lifecycle] ?? "bg-white/40";
+  return (
+    <section className="mb-6 overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.05] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+      <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/35">Governance Standing</div>
+          <div className="mt-2 flex items-center gap-2.5">
+            <span className={`h-2 w-2 rounded-full ${dot}`} />
+            <span className="font-serif text-[1.4rem] font-bold leading-none tracking-tight text-white">{p.status || "—"}</span>
+          </div>
+        </div>
+        {p.policyName && (
+          <div className="shrink-0 sm:text-right">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">Governing policy</div>
+            <div className="mt-1 text-sm font-semibold text-white/90">{p.policyName}{p.policyVersion ? <span className="font-mono text-white/45"> v{p.policyVersion}</span> : null}</div>
+          </div>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-x-8 gap-y-4 border-t border-white/[0.07] px-6 py-5 sm:grid-cols-4">
+        {inReview && <StandFact label="Current authority" value={p.currentAuthority ?? <span className="text-white/45">Under review</span>} />}
+        {inReview && <StandFact label="Next authority" value={p.nextAuthority} />}
+        <StandFact label="Publication authority" value={p.publicationAuthority} />
+        {inReview
+          ? <StandFact label="Waiting" value={waitedFor(submittedAt)} />
+          : <StandFact label="Submitted" value={submittedAt ? timeAgo(submittedAt) : undefined} />}
+      </div>
+    </section>
   );
 };
 
