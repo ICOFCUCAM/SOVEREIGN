@@ -38,7 +38,9 @@ const AuthorityDirectory: React.FC = () => {
     return subjectLabel(subject);
   };
   const rolesFor = (subject: string) => grants.filter((x) => x.subject === subject).map((x) => x.role_key);
-  const holdersOf = (roleKey: string) => grants.filter((x) => x.role_key === roleKey).map((x) => nameOf(x.subject));
+  // Offices are meant to be held by PEOPLE; a service credential holding one is a
+  // bootstrap exception, so each holder carries whether it is a machine.
+  const holdersOf = (roleKey: string) => grants.filter((x) => x.role_key === roleKey).map((x) => ({ name: nameOf(x.subject), service: x.subject.startsWith("svc:") }));
   const addPerson = async () => {
     if (!newPerson.fullName.trim() || !newPerson.email.trim()) return;
     try { await createUser({ fullName: newPerson.fullName.trim(), email: newPerson.email.trim(), departmentKey: newPerson.departmentKey || undefined, systemAdmin: newPerson.systemAdmin }); setNewPerson({ fullName: "", email: "", departmentKey: "", systemAdmin: false }); load(); }
@@ -101,7 +103,13 @@ const AuthorityDirectory: React.FC = () => {
                             <div className="mt-1.5 text-[11px] text-white/45">
                               {holders.length === 0
                                 ? <span className="text-amber-300/70">Vacant — no holder assigned</span>
-                                : <>Held by <span className="text-white/75">{holders.join(", ")}</span></>}
+                                : <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-1">Held by {holders.map((h, i) => (
+                                    <span key={i} className="inline-flex items-center gap-1">
+                                      <span className="text-white/75">{h.name}</span>
+                                      {h.service && <span className="rounded bg-amber-500/15 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-amber-300/90" title="A service credential temporarily holding this office (bootstrap). Reserve offices for people.">bootstrap</span>}
+                                      {i < holders.length - 1 ? <span className="text-white/30">·</span> : null}
+                                    </span>
+                                  ))}</span>}
                             </div>
                           </div>
                         );
@@ -171,7 +179,7 @@ const AuthorityDirectory: React.FC = () => {
           {/* service credentials — machines & integrations (not people) */}
           <Card className="p-5">
             <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Service credentials</div>
-            <p className="mb-3 text-[11px] text-white/35">Machines &amp; integrations (the Emergency AI, system-to-system). People sign in through the institution, above.</p>
+            <p className="mb-3 text-[11px] text-white/35">Machines, integrations &amp; bootstrap — system-to-system callers and automated ingestion. They carry capabilities, not authority. People sign in through the institution, above.</p>
             <div className="divide-y divide-white/5">
               {clients.length === 0 ? <p className="py-4 text-sm text-white/40">No credentials issued yet.</p> : clients.map((c) => {
                 const subject = `svc:${c.client_id}`;

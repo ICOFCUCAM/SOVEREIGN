@@ -63,7 +63,8 @@ const SignIn: React.FC = () => {
           <form
             onSubmit={(e) => { e.preventDefault(); signIn(clientId.trim(), secret).catch(() => {}); }}
             className="mt-3 space-y-4 rounded-lg border border-white/10 bg-ink-800/40 p-6">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Service credential · machines &amp; integrations</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Service credential · machines, integrations &amp; bootstrap</div>
+            <p className="-mt-1 text-[11px] leading-snug text-white/35">For system-to-system callers and for the first administrator standing up the institution before sign-in is connected.</p>
             <Field label="Client ID"><input className={inputCls} value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder="svc-…" /></Field>
             <Field label="Secret"><input className={inputCls} type="password" value={secret} onChange={(e) => setSecret(e.target.value)} placeholder="••••••••" /></Field>
             {error && <div className="rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</div>}
