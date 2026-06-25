@@ -87,15 +87,24 @@ const AuthorityDirectory: React.FC = () => {
   };
   // In-place rename — the KEY (what policies reference) is stable; only the
   // display name changes, so renaming an office never disturbs governance.
-  const [editing, setEditing] = useState<{ kind: "dept" | "office"; key: string } | null>(null);
+  const [editing, setEditing] = useState<{ kind: "dept" | "office" | "person"; key: string } | null>(null);
   const [editVal, setEditVal] = useState("");
-  const startEdit = (kind: "dept" | "office", key: string, current: string) => { setEditing({ kind, key }); setEditVal(current); };
+  const startEdit = (kind: "dept" | "office" | "person", key: string, current: string) => { setEditing({ kind, key }); setEditVal(current); };
+  // A person edit re-upserts by their (stable) email; office/department by key.
+  const savePerson = async (p: Person, patch: { fullName?: string; departmentKey?: string | null; systemAdmin?: boolean }) => {
+    try {
+      await createUser({ email: p.email, fullName: patch.fullName ?? p.fullName,
+        departmentKey: (patch.departmentKey ?? p.departmentKey) || undefined, systemAdmin: patch.systemAdmin ?? p.systemAdmin });
+      load();
+    } catch (e) { setErr(humanError(e, "Could not update the person.")); }
+  };
   const saveEdit = async () => {
     if (!editing || !editVal.trim()) { setEditing(null); return; }
     try {
-      if (editing.kind === "dept") { const d = departments.find((x) => x.key === editing.key); await createDepartment(editing.key, editVal.trim(), d?.display_order); }
-      else { const o = roles.find((x) => x.key === editing.key); await createGovRole(editing.key, editVal.trim(), o?.department_key ?? undefined, o?.display_order); }
-      setEditing(null); load();
+      if (editing.kind === "dept") { const d = departments.find((x) => x.key === editing.key); await createDepartment(editing.key, editVal.trim(), d?.display_order); load(); }
+      else if (editing.kind === "office") { const o = roles.find((x) => x.key === editing.key); await createGovRole(editing.key, editVal.trim(), o?.department_key ?? undefined, o?.display_order); load(); }
+      else { const p = people.find((x) => x.id === editing.key); if (p) await savePerson(p, { fullName: editVal.trim() }); }
+      setEditing(null);
     } catch (e) { setEditing(null); setErr(humanError(e, "Could not rename.")); }
   };
   const editKeyDown = (e: React.KeyboardEvent) => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditing(null); };
@@ -231,15 +240,26 @@ const AuthorityDirectory: React.FC = () => {
           <div className="divide-y divide-white/5">
             {people.map((p) => {
               const held = rolesFor(p.subject);
-              const dept = departments.find((d) => d.key === p.departmentKey)?.name;
               return (
                 <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-white">{p.fullName}</span>
-                      {p.systemAdmin && <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/60">System Admin</span>}
+                      {editing?.kind === "person" && editing.key === p.id
+                        ? <input autoFocus value={editVal} onChange={(e) => setEditVal(e.target.value)} onKeyDown={editKeyDown} onBlur={saveEdit}
+                            className="rounded border border-seal-light/40 bg-ink-900/70 px-1.5 py-0.5 text-sm font-semibold text-white" />
+                        : <button onClick={() => startEdit("person", p.id, p.fullName)} title="Rename person" className="text-sm font-semibold text-white hover:text-seal-light">{p.fullName}</button>}
+                      <button onClick={() => savePerson(p, { systemAdmin: !p.systemAdmin })}
+                        title={p.systemAdmin ? "Revoke system-administrator (IT) rights" : "Grant system-administrator (IT) rights"}
+                        className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide transition ${p.systemAdmin ? "bg-white/10 text-white/60 hover:bg-red-500/15 hover:text-red-300" : "text-white/25 hover:bg-white/10 hover:text-white/60"}`}>System Admin</button>
                     </div>
-                    <div className="truncate text-[11px] text-white/35">{p.email}{dept ? ` · ${dept}` : ""}</div>
+                    <div className="mt-0.5 flex items-center gap-2">
+                      <span className="truncate text-[11px] text-white/35">{p.email}</span>
+                      <select value={p.departmentKey ?? ""} onChange={(e) => savePerson(p, { departmentKey: e.target.value || null })} title="Move to department"
+                        className="rounded border border-white/10 bg-ink-900/60 px-1 py-0.5 text-[10px] text-white/50">
+                        <option value="">No department</option>
+                        {departments.map((d) => <option key={d.key} value={d.key}>{d.name}</option>)}
+                      </select>
+                    </div>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {held.length === 0 ? <span className="text-[11px] text-white/30">holds no office</span> :
                         held.map((r) => (
