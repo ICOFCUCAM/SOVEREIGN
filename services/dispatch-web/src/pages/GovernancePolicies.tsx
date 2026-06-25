@@ -57,14 +57,14 @@ const GovernancePolicies: React.FC = () => {
 
   return (
     <div>
-      <header className="mb-6">
+      <header className="mb-6 border-b border-white/10 pb-5">
         <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Governance</div>
-        <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Governance Policy</h1>
-        <p className="text-sm text-white/50">Design how official records are governed — an ordered chain of authorities, quorums, the publication authority, and retention. Records inherit and are controlled by the policy.</p>
+        <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Governance Policy</h1>
+        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-white/50">Design how official records are governed — an ordered chain of <span className="text-white/70">offices</span>, quorums, the publication authority, and retention. Policies reference offices, never people, so they never change when a post-holder does.</p>
       </header>
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
       {saved && <div className="mb-4 rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">Policy saved. Records of this type are now controlled by it.</div>}
-      {noRoles && <div className="mb-4 rounded border border-amber-500/30 bg-amber-500/[0.06] px-3 py-2 text-sm text-amber-200">Define authorities in the <span className="font-semibold">Authority Directory</span> first — a chain step references a named authority (e.g. Director).</div>}
+      {noRoles && <div className="mb-4 rounded border border-amber-500/30 bg-amber-500/[0.06] px-3 py-2 text-sm text-amber-200">Create offices in the <span className="font-semibold">Authority Directory</span> first — a chain step references a named office (e.g. Director of Policy).</div>}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         {/* existing policies */}
@@ -122,7 +122,7 @@ const GovernancePolicies: React.FC = () => {
           {/* visual chain builder */}
           <div>
             <div className="mb-1 flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-white/50">Approval chain</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-white/50">Review chain — the offices that approve</span>
               <label className="flex items-center gap-1.5 text-[11px] text-white/55"><input type="checkbox" checked={form.sequential !== false} onChange={(e) => setForm({ ...form, sequential: e.target.checked })} />ordered</label>
             </div>
             <div className="space-y-2">
@@ -130,7 +130,7 @@ const GovernancePolicies: React.FC = () => {
                 <div key={i} className="flex items-center gap-2">
                   <span className="w-4 shrink-0 text-center text-[11px] text-white/35">{i + 1}</span>
                   <select className={`${inputCls} flex-1`} value={s.role ?? ""} onChange={(e) => setStep(i, { role: e.target.value })}>
-                    <option value="">Select authority…</option>
+                    <option value="">Select office…</option>
                     {roles.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
                   </select>
                   <div className="flex items-center gap-1 text-[11px] text-white/40">×<input type="number" min={1} max={9} className={`${inputCls} w-12 px-2`} value={s.quorum ?? 1} onChange={(e) => setStep(i, { quorum: Number(e.target.value) })} /></div>
