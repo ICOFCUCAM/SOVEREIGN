@@ -143,6 +143,8 @@ export const createUser = (p: { email: string; fullName: string; departmentKey?:
 export const deleteUser = (id: string) => request<{ deleted: string }>("DELETE", "/v1/users", { body: { id } });
 export const createDelegation = (d: { roleKey: string; delegateSubject: string; grantorSubject?: string; reason?: string; endsAt: string }) =>
   request<{ delegated: boolean }>("POST", "/v1/governance/delegations", { body: d });
+export const endDelegation = (roleKey: string, delegateSubject: string) =>
+  request<{ ended: unknown }>("DELETE", "/v1/governance/delegations", { body: { roleKey, delegateSubject } });
 
 // ---- governance overview (monitor + compliance) ----
 export interface GovPending { documentId: string; title: string; docType: string; classification: { level?: string }; submittedAt?: string; awaiting: string; policyName?: string | null }

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { listClients, getGovernance, getUsers, createUser, deleteUser, createGovRole, createDepartment,
-  deleteDepartment, deleteGovRole, grantGovRole, revokeGovRole, createDelegation,
+  deleteDepartment, deleteGovRole, grantGovRole, revokeGovRole, createDelegation, endDelegation,
   type ServiceClient, type GovRole, type GovGrant, type GovDelegation, type Department, type Person, humanError } from "../lib/api";
 import { Button, Card, Field, inputCls } from "../lib/ui";
 
@@ -85,6 +85,16 @@ const AuthorityDirectory: React.FC = () => {
     if (!window.confirm(`Remove ${p.fullName}? They are deactivated and every office they hold is vacated.`)) return;
     try { await deleteUser(p.id); load(); } catch (e) { setErr(humanError(e, "Could not remove the person.")); }
   };
+  const actingFor = (roleKey: string) => delegations.filter((d) => d.role_key === roleKey && !d.expired);
+  const endActing = async (roleKey: string, delegateSubject: string) => {
+    try { await endDelegation(roleKey, delegateSubject); load(); } catch (e) { setErr(humanError(e, "Could not end the acting appointment.")); }
+  };
+  // Everyone who can hold an office: people first (offices are for people), then
+  // service credentials (bootstrap). Used for assignment and acting appointments.
+  const principals = [
+    ...people.map((p) => ({ subject: p.subject, label: p.fullName })),
+    ...clients.map((c) => ({ subject: `svc:${c.client_id}`, label: `${c.name || c.client_id} (service)` })),
+  ];
   const addDelegation = async () => {
     if (!del.roleKey || !del.delegateSubject || !del.endsAt) return;
     try { await createDelegation({ roleKey: del.roleKey, delegateSubject: del.delegateSubject, reason: del.reason || undefined, endsAt: new Date(del.endsAt).toISOString() }); setDel({ roleKey: "", delegateSubject: "", reason: "", endsAt: "" }); load(); }
@@ -153,6 +163,14 @@ const AuthorityDirectory: React.FC = () => {
                                     </span>
                                   ))}</span>}
                             </div>
+                            {actingFor(o.key).map((d, i) => (
+                              <div key={i} className="mt-1 inline-flex items-center gap-1.5 rounded bg-amber-500/10 px-1.5 py-0.5 text-[11px] text-amber-200/90">
+                                <span className="font-semibold uppercase tracking-wide text-amber-300/80 text-[9px]">Acting</span>
+                                <span className="text-white/80">{nameOf(d.delegate_subject)}</span>
+                                <span className="text-white/40">until {d.ends_at ? new Date(d.ends_at).toLocaleDateString() : "—"}</span>
+                                <button onClick={() => endActing(o.key, d.delegate_subject)} title="End acting appointment" className="text-amber-300/50 hover:text-red-300">✕</button>
+                              </div>
+                            ))}
                           </div>
                         );
                       })}
@@ -255,20 +273,24 @@ const AuthorityDirectory: React.FC = () => {
             </div>
           </Card>
 
-          {/* delegations */}
+          {/* acting appointments */}
           <Card className="p-5">
-            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Delegations</div>
-            {delegations.length === 0 ? <p className="text-sm text-white/40">No delegations recorded.</p> : (
+            <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Acting appointments</div>
+            <p className="mb-3 text-[11px] text-white/35">A person temporarily acting in an office — when the holder is on leave. The office and its governance never change; only who occupies it, for a window.</p>
+            {delegations.length === 0 ? <p className="text-sm text-white/40">No acting appointments in force.</p> : (
               <ul className="space-y-2">
                 {delegations.map((d, i) => (
-                  <li key={i} className="flex items-center justify-between rounded border border-white/10 px-3 py-2 text-[12.5px]">
-                    <div>
-                      <span className="font-semibold text-white">{subjectLabel(d.delegate_subject)}</span>
-                      <span className="text-white/45"> acts as </span>
+                  <li key={i} className="flex items-center justify-between gap-2 rounded border border-white/10 px-3 py-2 text-[12.5px]">
+                    <div className="min-w-0">
+                      <span className="font-semibold text-white">{nameOf(d.delegate_subject)}</span>
+                      <span className="text-white/45"> acting as </span>
                       <span className="text-seal-light">{roles.find((x) => x.key === d.role_key)?.label || d.role_key}</span>
                       {d.reason && <span className="text-white/35"> · {d.reason}</span>}
                     </div>
-                    <span className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold ${d.expired ? "bg-zinc-500/20 text-zinc-400" : "bg-emerald-500/15 text-emerald-300"}`}>{d.expired ? "Expired" : "Active"} · until {d.ends_at ? new Date(d.ends_at).toLocaleDateString() : "—"}</span>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className={`rounded px-2 py-0.5 text-[10px] font-semibold ${d.expired ? "bg-zinc-500/20 text-zinc-400" : "bg-amber-500/15 text-amber-300"}`}>{d.expired ? "Expired" : "Acting"} · until {d.ends_at ? new Date(d.ends_at).toLocaleDateString() : "—"}</span>
+                      {!d.expired && <button onClick={() => endActing(d.role_key, d.delegate_subject)} title="End acting appointment" className="text-white/30 hover:text-red-300">✕</button>}
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -300,22 +322,23 @@ const AuthorityDirectory: React.FC = () => {
           </Card>
 
           <Card className="space-y-3 p-5">
-            <div className="text-sm font-bold text-white">Delegate an authority</div>
-            <Field label="Role">
+            <div className="text-sm font-bold text-white">Appoint an acting holder</div>
+            <p className="text-[11px] text-white/40">Place a person in an office for a window — when the substantive holder is on leave. Governance is unchanged.</p>
+            <Field label="Office">
               <select className={inputCls} value={del.roleKey} onChange={(e) => setDel({ ...del, roleKey: e.target.value })}>
-                <option value="">Select role…</option>
+                <option value="">Select office…</option>
                 {roles.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
               </select>
             </Field>
-            <Field label="Delegate (principal)">
+            <Field label="Acting holder">
               <select className={inputCls} value={del.delegateSubject} onChange={(e) => setDel({ ...del, delegateSubject: e.target.value })}>
-                <option value="">Select principal…</option>
-                {clients.map((c) => <option key={c.client_id} value={`svc:${c.client_id}`}>{c.name || c.client_id}</option>)}
+                <option value="">Select a person…</option>
+                {principals.map((pr) => <option key={pr.subject} value={pr.subject}>{pr.label}</option>)}
               </select>
             </Field>
             <Field label="Reason"><input className={inputCls} value={del.reason} onChange={(e) => setDel({ ...del, reason: e.target.value })} placeholder="Director on leave" /></Field>
             <Field label="Until"><input type="date" className={inputCls} value={del.endsAt} onChange={(e) => setDel({ ...del, endsAt: e.target.value })} /></Field>
-            <Button className="w-full" disabled={!del.roleKey || !del.delegateSubject || !del.endsAt} onClick={addDelegation}>Record delegation</Button>
+            <Button className="w-full" disabled={!del.roleKey || !del.delegateSubject || !del.endsAt} onClick={addDelegation}>Appoint acting holder</Button>
           </Card>
         </div>
       </div>
