@@ -8,14 +8,25 @@ import { useAuth } from "../lib/auth";
 // with a governance-health verdict, not a record count. Every signal is derived
 // from LIVE state (the governance overview + the document store); where there is
 // no data to assert a problem it says so honestly. Order of authority:
+//   0. Masthead (letterhead — identity, official date, liveness)
 //   1. Governance Status (the verdict + the few numbers that matter)
 //   2. Official Record Lifecycle (the centerpiece)
-//   3. Requires action  ·  4. Recent records  ·  5. Statistics  ·  6. Activity
+//   3. Requires action  ·  4. The record  ·  5. Ledger  ·  6. Activity
+//
+// COLOR DISCIPLINE — monochrome by default, color reserved for meaning:
+//   · white/ink ...... settled state, the authoritative baseline
+//   · seal (blue) .... wayfinding & the one actionable accent (links, "for you")
+//   · emerald dot .... a single live-health point of light, nothing more
+//   · amber / red .... EXCEPTIONS only (attention required, off-path)
+// A healthy institution reads calm and monochrome; the surface only lights up
+// where something is genuinely owed. Numerals are tabular mono throughout.
 
 const ALL: Lifecycle[] = ["in_review", "approved", "rendered", "published", "rejected", "archived"];
+const fmtDate = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
+const fmtTime = (d: Date) => d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
 const Dashboard: React.FC = () => {
-  const { has } = useAuth();
+  const { has, session } = useAuth();
   const [counts, setCounts] = useState<Record<string, DocListItem[]>>({});
   const [activity, setActivity] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,14 +71,14 @@ const Dashboard: React.FC = () => {
     <div>
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 
-      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">Operations Command</div>
+      <Masthead instRef={session?.tenantId?.slice(0, 8) ?? null} evaluatedAt={evaluatedAt} loading={loading} />
 
       {firstRun ? <FirstRun canAuthor={has("dispatch:render")} /> : (
         <>
           {/* ── 1 · GOVERNANCE STATUS — the verdict ── */}
           <GovernanceStatus loading={loading} hasGov={!!c} violations={violations} expired={expired}
             governed={c?.governed ?? 0} compliant={c?.compliant ?? 0} awaitingPublication={rendered}
-            canPublish={has("dispatch:publish")} evaluatedAt={evaluatedAt} />
+            canPublish={has("dispatch:publish")} />
 
           {/* ── 2 · OFFICIAL RECORD LIFECYCLE — the centerpiece ── */}
           <Lifecycle loading={loading} inReview={inReview} approved={approved} rendered={rendered}
@@ -129,18 +140,47 @@ const Dashboard: React.FC = () => {
   );
 };
 
+// ── 0 · MASTHEAD — letterhead: identity, official date, liveness ──────────────
+// A quiet band, not a headline — the dominant voice stays the governance verdict
+// below. This is the "issued by / as of" rule that makes the surface read as an
+// official instrument rather than a web page.
+const Masthead: React.FC<{ instRef: string | null; evaluatedAt: Date | null; loading: boolean }> = ({ instRef, evaluatedAt, loading }) => {
+  const today = new Date();
+  return (
+    <header className="mb-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-white/10 pb-4">
+      <div className="flex items-center gap-3">
+        {/* institutional seal mark — concentric ring, the platform's quiet sigil */}
+        <span aria-hidden className="relative flex h-5 w-5 items-center justify-center">
+          <span className="absolute inset-0 rounded-full border border-seal-light/50" />
+          <span className="h-1.5 w-1.5 rounded-full bg-seal-light/70" />
+        </span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">Operations Command</span>
+      </div>
+      <div className="flex items-center gap-x-5 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/30">
+        <span className="tabular-nums text-white/55">{fmtDate(today)}</span>
+        <span className="flex items-center gap-1.5">
+          {!loading && evaluatedAt && <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/80" />}
+          {loading || !evaluatedAt ? "Evaluating…" : <>Evaluated {fmtTime(evaluatedAt)} · live</>}
+        </span>
+        {instRef && <span className="text-white/25">Inst. {instRef}</span>}
+      </div>
+    </header>
+  );
+};
+
 // ── 1 · GOVERNANCE STATUS ─────────────────────────────────────────────────────
 const GovernanceStatus: React.FC<{
   loading: boolean; hasGov: boolean; violations: number; expired: number;
   governed: number; compliant: number; awaitingPublication: number; canPublish: boolean;
-  evaluatedAt: Date | null;
-}> = ({ loading, hasGov, violations, expired, governed, compliant, awaitingPublication, canPublish, evaluatedAt }) => {
+}> = ({ loading, hasGov, violations, expired, governed, compliant, awaitingPublication, canPublish }) => {
   const healthy = hasGov && violations === 0 && expired === 0;
   const tone = loading || !hasGov ? "unknown" : healthy ? "healthy" : "attention";
+  // Healthy is MONOCHROME — a calm neutral panel with a single emerald live-dot.
+  // Only the exception state (attention) earns colour across the panel.
   const STY = {
-    healthy:   { ring: "border-emerald-500/30 from-emerald-500/[0.09]", dot: "bg-emerald-400", chip: "bg-emerald-500/15 text-emerald-300", label: "Healthy" },
-    attention: { ring: "border-amber-500/30 from-amber-500/[0.09]",     dot: "bg-amber-400",   chip: "bg-amber-500/15 text-amber-300",     label: "Attention" },
-    unknown:   { ring: "border-white/12 from-white/[0.04]",             dot: "bg-white/40",    chip: "bg-white/10 text-white/55",          label: "—" },
+    healthy:   { ring: "border-white/12 from-white/[0.04]",         dot: "bg-emerald-400", chip: "bg-white/[0.06] text-white/70",   label: "Healthy" },
+    attention: { ring: "border-amber-500/40 from-amber-500/[0.10]", dot: "bg-amber-400",   chip: "bg-amber-500/15 text-amber-300",  label: "Attention" },
+    unknown:   { ring: "border-white/12 from-white/[0.04]",         dot: "bg-white/40",    chip: "bg-white/10 text-white/55",       label: "—" },
   }[tone];
 
   const headline = loading ? "Assessing governance…"
@@ -173,11 +213,6 @@ const GovernanceStatus: React.FC<{
           </div>
           <h1 className="mt-3 font-serif text-[2rem] font-bold leading-[1.1] tracking-tight text-white sm:text-[2.3rem]">{headline}</h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/55">{sub}</p>
-          {evaluatedAt && !loading && (
-            <div className="mt-3 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/30">
-              Last evaluated {evaluatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · {evaluatedAt.toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" })}
-            </div>
-          )}
         </div>
 
         {/* the few numbers that matter — governance signals, not engineering metrics */}
@@ -197,7 +232,8 @@ const GovernanceStatus: React.FC<{
 };
 
 const Signal: React.FC<{ label: string; value: React.ReactNode; tone: "ok" | "info" | "warn" | "bad" }> = ({ label, value, tone }) => {
-  const color = { ok: "text-emerald-300", info: "text-seal-light", warn: "text-amber-300", bad: "text-red-300" }[tone];
+  // ok = settled (white) · info = actionable (seal) · warn/bad = exception (amber/red).
+  const color = { ok: "text-white", info: "text-seal-light", warn: "text-amber-300", bad: "text-red-300" }[tone];
   return (
     <div className="rounded-xl border border-white/10 bg-ink-900/40 px-3 py-3 text-center">
       <div className={`font-mono text-2xl font-bold tabular-nums ${color}`}>{value}</div>
@@ -226,7 +262,7 @@ const Lifecycle: React.FC<{ loading: boolean; inReview: number; approved: number
           {stages.map((st, i) => (
             <React.Fragment key={st.label}>
               <div className="min-w-[140px] flex-1 rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-                <div className={`font-mono text-4xl font-bold tabular-nums ${st.n > 0 ? "text-seal-light" : "text-white/25"}`}>{loading ? "·" : st.n}</div>
+                <div className={`font-mono text-4xl font-bold tabular-nums ${st.n > 0 ? "text-white" : "text-white/20"}`}>{loading ? "·" : st.n}</div>
                 <div className="mt-2 text-[12.5px] font-bold uppercase tracking-wide text-white/70">{st.label}</div>
                 <div className="text-[11px] text-white/35">{st.sub}</div>
               </div>
@@ -249,13 +285,13 @@ const Lifecycle: React.FC<{ loading: boolean; inReview: number; approved: number
 };
 
 const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <h2 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-white/45">{children}</h2>
+  <h2 className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/45">{children}</h2>
 );
 
 const Stat: React.FC<{ label: string; value?: number; sub: string }> = ({ label, value, sub }) => (
   <Card className="p-5">
     <div className="font-mono text-3xl font-bold tabular-nums text-white">{value === undefined ? "·" : value}</div>
-    <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">{label}</div>
+    <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">{label}</div>
     <div className="text-[11px] text-white/35">{sub}</div>
   </Card>
 );
