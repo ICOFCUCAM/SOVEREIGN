@@ -66,7 +66,7 @@ const Dashboard: React.FC = () => {
             {returned > 0 && <CaseFiles items={counts["rejected"] ?? []} caption="Returned for revision" empty="" tone="warn" />}
           </Section>
 
-          <Section title="Recently Published">
+          <Section title="Published">
             <CaseFiles items={counts["published"] ?? []} empty="No records have completed publication yet — they appear here as the lifecycle advances." cta={{ to: "/console/library", label: "Official Records" }} />
           </Section>
 
@@ -74,7 +74,7 @@ const Dashboard: React.FC = () => {
             <CaseFiles items={counts["archived"] ?? []} empty="No records are sealed for preservation yet — preserved records are permanent and tamper-evident." cta={{ to: "/console/archives", label: "Preservation" }} />
           </Section>
 
-          <Section title="Institution Statistics">
+          <Section title="Institution Ledger">
             <div className="grid grid-cols-2 gap-x-12 gap-y-8 sm:grid-cols-4">
               <Stat label="Official records" value={stats?.officialRecords} />
               <Stat label="Governance certificates" value={c?.compliant} />

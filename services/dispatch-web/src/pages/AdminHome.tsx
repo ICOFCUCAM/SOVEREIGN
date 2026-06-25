@@ -31,9 +31,9 @@ const AdminHome: React.FC = () => {
   return (
     <div>
       <header className="mb-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Administration</div>
-        <h1 className="mt-1 text-2xl font-bold text-white">Platform Overview</h1>
-        <p className="text-sm text-white/50">Identity, access, integrations and data sovereignty for your institution's tenant.</p>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">Administration</div>
+        <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Institutional Posture</h1>
+        <p className="mt-1 text-sm text-white/50">Identity, access, integrations and data sovereignty for your institution's tenant.</p>
       </header>
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
