@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { listClients, getGovernance, getUsers, createUser, createGovRole, grantGovRole, createDelegation,
+import { listClients, getGovernance, getUsers, createUser, createGovRole, createDepartment, grantGovRole, createDelegation,
   type ServiceClient, type GovRole, type GovGrant, type GovDelegation, type Department, type Person, humanError } from "../lib/api";
 import { Button, Card, Field, inputCls } from "../lib/ui";
 
@@ -17,7 +17,8 @@ const AuthorityDirectory: React.FC = () => {
   const [grants, setGrants] = useState<GovGrant[]>([]);
   const [delegations, setDelegations] = useState<GovDelegation[]>([]);
   const [err, setErr] = useState<string | null>(null);
-  const [newRole, setNewRole] = useState({ key: "", label: "" });
+  const [newDept, setNewDept] = useState("");
+  const [newRole, setNewRole] = useState({ label: "", departmentKey: "", displayOrder: "" });
   const [newPerson, setNewPerson] = useState({ fullName: "", email: "", departmentKey: "", systemAdmin: false });
   const [del, setDel] = useState({ roleKey: "", delegateSubject: "", reason: "", endsAt: "" });
 
@@ -46,10 +47,19 @@ const AuthorityDirectory: React.FC = () => {
     try { await createUser({ fullName: newPerson.fullName.trim(), email: newPerson.email.trim(), departmentKey: newPerson.departmentKey || undefined, systemAdmin: newPerson.systemAdmin }); setNewPerson({ fullName: "", email: "", departmentKey: "", systemAdmin: false }); load(); }
     catch (e) { setErr(humanError(e, "Could not add the person.")); }
   };
+  const keyFrom = (s: string) => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  const addDepartment = async () => {
+    if (!newDept.trim()) return;
+    try { await createDepartment(keyFrom(newDept), newDept.trim(), (departments.length + 1) * 10); setNewDept(""); load(); }
+    catch (e) { setErr(humanError(e, "Could not add the department.")); }
+  };
   const addRole = async () => {
-    if (!newRole.key.trim() || !newRole.label.trim()) return;
-    try { await createGovRole(newRole.key.trim().toLowerCase().replace(/\s+/g, "_"), newRole.label.trim()); setNewRole({ key: "", label: "" }); load(); }
-    catch (e) { setErr(humanError(e, "Could not add the role.")); }
+    if (!newRole.label.trim()) return;
+    try {
+      await createGovRole(keyFrom(newRole.label), newRole.label.trim(), newRole.departmentKey || undefined,
+        newRole.displayOrder ? Number(newRole.displayOrder) : undefined);
+      setNewRole({ label: "", departmentKey: "", displayOrder: "" }); load();
+    } catch (e) { setErr(humanError(e, "Could not add the office.")); }
   };
   const grant = async (subject: string, roleKey: string) => {
     if (!roleKey) return;
@@ -225,16 +235,27 @@ const AuthorityDirectory: React.FC = () => {
           </Card>
         </div>
 
-        {/* right rail: define a role + delegate */}
+        {/* right rail: build the organisation (departments + offices) + delegate */}
         <div className="space-y-6">
           <Card className="space-y-3 self-start p-5">
-            <div className="text-sm font-bold text-white">Authorities (roles)</div>
-            <div className="flex flex-wrap gap-1.5">
-              {roles.length === 0 ? <span className="text-[12px] text-white/40">No roles defined.</span> :
-                roles.map((r) => <span key={r.key} className="rounded bg-white/5 px-2 py-0.5 text-[12px] text-white/75">{r.label}</span>)}
-            </div>
-            <Field label="New role label"><input className={inputCls} value={newRole.label} onChange={(e) => setNewRole({ label: e.target.value, key: e.target.value })} placeholder="Secretary General" /></Field>
-            <Button className="w-full" disabled={!newRole.label.trim()} onClick={addRole}>Add authority</Button>
+            <div className="text-sm font-bold text-white">Add a department</div>
+            <p className="text-[11px] text-white/40">The institution's organisational divisions — Policy, Legal, Communications, Archives.</p>
+            <Field label="Department name"><input className={inputCls} value={newDept} onChange={(e) => setNewDept(e.target.value)} placeholder="Policy Division" onKeyDown={(e) => e.key === "Enter" && addDepartment()} /></Field>
+            <Button className="w-full" disabled={!newDept.trim()} onClick={addDepartment}>Add department</Button>
+          </Card>
+
+          <Card className="space-y-3 p-5">
+            <div className="text-sm font-bold text-white">Add an office</div>
+            <p className="text-[11px] text-white/40">An office holds authority. Place it in a department and order it in protocol rank.</p>
+            <Field label="Office title"><input className={inputCls} value={newRole.label} onChange={(e) => setNewRole({ ...newRole, label: e.target.value })} placeholder="Permanent Secretary" /></Field>
+            <Field label="Department">
+              <select className={inputCls} value={newRole.departmentKey} onChange={(e) => setNewRole({ ...newRole, departmentKey: e.target.value })}>
+                <option value="">Unassigned</option>
+                {departments.map((d) => <option key={d.key} value={d.key}>{d.name}</option>)}
+              </select>
+            </Field>
+            <Field label="Protocol order (lower = higher rank)"><input className={inputCls} type="number" value={newRole.displayOrder} onChange={(e) => setNewRole({ ...newRole, displayOrder: e.target.value })} placeholder="10" /></Field>
+            <Button className="w-full" disabled={!newRole.label.trim()} onClick={addRole}>Add office</Button>
           </Card>
 
           <Card className="space-y-3 p-5">
