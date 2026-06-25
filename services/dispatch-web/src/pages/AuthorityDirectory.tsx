@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { listClients, getGovernance, createGovRole, grantGovRole, createDelegation,
-  type ServiceClient, type GovRole, type GovGrant, type GovDelegation, humanError } from "../lib/api";
+  type ServiceClient, type GovRole, type GovGrant, type GovDelegation, type Department, humanError } from "../lib/api";
 import { Button, Card, Field, inputCls } from "../lib/ui";
 
 // Authority Directory — the Identity domain. Answers, in five seconds: who holds
@@ -11,6 +11,7 @@ const subjectLabel = (s: string) => s.replace(/^svc:/, "").replace(/^user:/, "")
 
 const AuthorityDirectory: React.FC = () => {
   const [clients, setClients] = useState<ServiceClient[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [roles, setRoles] = useState<GovRole[]>([]);
   const [grants, setGrants] = useState<GovGrant[]>([]);
   const [delegations, setDelegations] = useState<GovDelegation[]>([]);
@@ -21,12 +22,13 @@ const AuthorityDirectory: React.FC = () => {
   const load = useCallback(async () => {
     try {
       const [c, g] = await Promise.all([listClients(), getGovernance()]);
-      setClients(c.clients); setRoles(g.roles); setGrants(g.grants); setDelegations(g.delegations);
+      setClients(c.clients); setDepartments(g.departments ?? []); setRoles(g.roles); setGrants(g.grants); setDelegations(g.delegations);
     } catch (e) { setErr(humanError(e, "Could not load the authority directory.")); }
   }, []);
   useEffect(() => { load(); }, [load]);
 
   const rolesFor = (subject: string) => grants.filter((x) => x.subject === subject).map((x) => x.role_key);
+  const holdersOf = (roleKey: string) => grants.filter((x) => x.role_key === roleKey).map((x) => subjectLabel(x.subject));
   const addRole = async () => {
     if (!newRole.key.trim() || !newRole.label.trim()) return;
     try { await createGovRole(newRole.key.trim().toLowerCase().replace(/\s+/g, "_"), newRole.label.trim()); setNewRole({ key: "", label: "" }); load(); }
@@ -47,9 +49,55 @@ const AuthorityDirectory: React.FC = () => {
       <header className="mb-6">
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Identity</div>
         <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Authority Directory</h1>
-        <p className="text-sm text-white/50">Who holds authority to govern records — roles, the principals that hold them, and active delegations.</p>
+        <p className="text-sm text-white/50">The institution as it is organised — departments, the offices within them, and the people who occupy those offices. Authority belongs to the office; people are assigned to it over time.</p>
       </header>
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
+
+      {/* ── INSTITUTIONAL STRUCTURE — Departments → Offices → Holders ── */}
+      <Card className="mb-6 p-5">
+        <div className="mb-4 flex items-baseline justify-between">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Institutional structure</div>
+          <div className="font-mono text-[11px] tabular-nums text-white/30">{departments.length} department{departments.length === 1 ? "" : "s"} · {roles.length} office{roles.length === 1 ? "" : "s"}</div>
+        </div>
+        {departments.length === 0 && roles.length === 0 ? (
+          <p className="py-3 text-sm text-white/40">No departments or offices defined yet.</p>
+        ) : (
+          <div className="space-y-5">
+            {[...departments.map((d) => ({ key: d.key, name: d.name })), { key: null as string | null, name: "Unassigned offices" }]
+              .map((dept) => {
+                const offices = roles.filter((r) => (r.department_key ?? null) === dept.key)
+                  .sort((a, b) => (a.display_order ?? 100) - (b.display_order ?? 100));
+                if (offices.length === 0) return null;
+                return (
+                  <div key={dept.key ?? "_unassigned"}>
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="text-[12.5px] font-bold uppercase tracking-[0.12em] text-white/70">{dept.name}</span>
+                      <span className="h-px flex-1 bg-white/[0.07]" />
+                    </div>
+                    <div className="grid gap-2.5 sm:grid-cols-2">
+                      {offices.map((o) => {
+                        const holders = holdersOf(o.key);
+                        return (
+                          <div key={o.key} className="rounded-lg border border-white/10 bg-ink-900/40 px-4 py-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-sm font-semibold text-white">{o.label}</span>
+                              <span className="font-mono text-[10px] uppercase tracking-wide text-white/30">Office</span>
+                            </div>
+                            <div className="mt-1.5 text-[11px] text-white/45">
+                              {holders.length === 0
+                                ? <span className="text-amber-300/70">Vacant — no holder assigned</span>
+                                : <>Held by <span className="text-white/75">{holders.join(", ")}</span></>}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        )}
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">

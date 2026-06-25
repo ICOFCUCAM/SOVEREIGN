@@ -18,6 +18,7 @@
     "M15__policy_executable.sql",
     "M16__approval_steps.sql",
     "M17__analytics.sql",
-    "M18__platform_operator.sql"
+    "M18__platform_operator.sql",
+    "M19__departments.sql"
   ]
 }

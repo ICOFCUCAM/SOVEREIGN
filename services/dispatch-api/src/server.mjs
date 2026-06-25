@@ -725,7 +725,8 @@ async function handleGovernanceAdmin(req, res, principal, kind, method) {
   if (method === "GET") {
     if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
     const data = await withClaims(pool, govClaims(principal), async (c) => ({
-      roles: (await c.query("select key, label from dispatch.governance_roles order by label")).rows,
+      departments: (await c.query("select key, name, display_order from dispatch.departments order by display_order, name")).rows,
+      roles: (await c.query("select key, label, department_key, display_order from dispatch.governance_roles order by display_order, label")).rows,
       grants: (await c.query("select subject, role_key from dispatch.governance_role_grants where active order by role_key")).rows,
       delegations: (await c.query("select role_key, delegate_subject, grantor_subject, reason, ends_at from dispatch.delegations where active and now() between starts_at and ends_at")).rows,
     }));
@@ -736,11 +737,24 @@ async function handleGovernanceAdmin(req, res, principal, kind, method) {
   catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
   const claims = { ...govClaims(principal), dispatch_role: "tenant_admin" };
   try {
+    if (kind === "departments") {
+      // A department is the institution's organisational grouping for its offices.
+      if (!body.key || !body.name) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "key and name are required"));
+      await withClaims(pool, claims, (c) => c.query(
+        `insert into dispatch.departments (tenant_id, key, name, display_order) values ($1,$2,$3,$4)
+         on conflict (tenant_id, key) do update set name=excluded.name, display_order=excluded.display_order`,
+        [principal.tenantId, body.key, body.name, Number.isInteger(body.displayOrder) ? body.displayOrder : 100]));
+      return send(res, 201, { key: body.key, name: body.name });
+    }
     if (kind === "roles") {
+      // An office. Optionally placed in a department and ordered in protocol rank.
       if (!body.key || !body.label) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "key and label are required"));
       await withClaims(pool, claims, (c) => c.query(
-        `insert into dispatch.governance_roles (tenant_id, key, label) values ($1,$2,$3)
-         on conflict (tenant_id, key) do update set label=excluded.label`, [principal.tenantId, body.key, body.label]));
+        `insert into dispatch.governance_roles (tenant_id, key, label, department_key, display_order) values ($1,$2,$3,$4,$5)
+         on conflict (tenant_id, key) do update set label=excluded.label,
+           department_key=coalesce(excluded.department_key, dispatch.governance_roles.department_key),
+           display_order=excluded.display_order`,
+        [principal.tenantId, body.key, body.label, body.departmentKey ?? null, Number.isInteger(body.displayOrder) ? body.displayOrder : 100]));
       return send(res, 201, { key: body.key, label: body.label });
     }
     if (kind === "grants") {
@@ -825,13 +839,16 @@ async function handleMyAuthority(res, principal) {
   if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
   const subject = principal.actor;
   const data = await withClaims(pool, govClaims(principal), async (c) => {
-    const labels = {};
-    (await c.query("select key, label from dispatch.governance_roles")).rows.forEach((r) => { labels[r.key] = r.label; });
+    const labels = {}, depts = {}, deptName = {};
+    (await c.query("select key, name from dispatch.departments")).rows.forEach((r) => { deptName[r.key] = r.name; });
+    (await c.query("select key, label, department_key, display_order from dispatch.governance_roles")).rows.forEach((r) => {
+      labels[r.key] = r.label; depts[r.key] = { dept: r.department_key ? (deptName[r.department_key] || null) : null, order: r.display_order ?? 100 };
+    });
     const held = (await c.query("select role_key from dispatch.governance_role_grants where subject=$1 and active", [subject])).rows.map((r) => r.role_key);
     const delegated = (await c.query("select role_key from dispatch.delegations where delegate_subject=$1 and active and now() between starts_at and ends_at", [subject])).rows.map((r) => r.role_key);
     const myRoles = new Set([...held, ...delegated]);
-    const offices = [...myRoles].map((k) => ({ key: k, label: labels[k] || k, delegated: !held.includes(k) }))
-      .sort((a, b) => a.label.localeCompare(b.label));
+    const offices = [...myRoles].map((k) => ({ key: k, label: labels[k] || k, department: depts[k]?.dept ?? null, delegated: !held.includes(k), order: depts[k]?.order ?? 100 }))
+      .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
 
     const pendingDocs = (await c.query(
       `select id, doc_type, title, classification, submitted_at, submitted_by, current_version, lifecycle_state
@@ -1435,7 +1452,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     // Governance roles / grants / delegations (read for any principal).
-    const govAdminMatch = (path === "/v1/governance/roles" || path === "/v1/governance/grants" || path === "/v1/governance/delegations") && (req.method === "GET" || req.method === "POST");
+    const govAdminMatch = (path === "/v1/governance/roles" || path === "/v1/governance/grants" || path === "/v1/governance/delegations" || path === "/v1/governance/departments") && (req.method === "GET" || req.method === "POST");
     if (govAdminMatch) {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));

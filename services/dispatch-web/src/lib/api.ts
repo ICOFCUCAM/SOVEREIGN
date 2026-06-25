@@ -104,12 +104,18 @@ export interface GovernancePolicy {
 export const getGovernancePolicies = () => request<{ policies: GovernancePolicy[] }>("GET", "/v1/governance/policies");
 export const upsertGovernancePolicy = (p: GovernancePolicy) => request<{ id: string }>("POST", "/v1/governance/policies", { body: p });
 
-// ---- governance roles / grants / delegations (authority directory) ----
-export interface GovRole { key: string; label: string }
+// ---- departments / offices / holders (the institutional org tree) ----
+// Tenant → Departments → Offices (roles) → Holders (grants). A department groups
+// offices; an office is the unit of authority; a holder occupies an office.
+export interface Department { key: string; name: string; display_order?: number }
+export interface GovRole { key: string; label: string; department_key?: string | null; display_order?: number }
 export interface GovGrant { subject: string; role_key: string }
 export interface GovDelegation { role_key: string; delegate_subject: string; grantor_subject?: string | null; reason?: string | null; starts_at?: string; ends_at: string; expired?: boolean }
-export const getGovernance = () => request<{ roles: GovRole[]; grants: GovGrant[]; delegations: GovDelegation[] }>("GET", "/v1/governance/roles");
-export const createGovRole = (key: string, label: string) => request<{ key: string }>("POST", "/v1/governance/roles", { body: { key, label } });
+export const getGovernance = () => request<{ departments?: Department[]; roles: GovRole[]; grants: GovGrant[]; delegations: GovDelegation[] }>("GET", "/v1/governance/roles");
+export const createGovRole = (key: string, label: string, departmentKey?: string, displayOrder?: number) =>
+  request<{ key: string }>("POST", "/v1/governance/roles", { body: { key, label, departmentKey, displayOrder } });
+export const createDepartment = (key: string, name: string, displayOrder?: number) =>
+  request<{ key: string }>("POST", "/v1/governance/departments", { body: { key, name, displayOrder } });
 export const grantGovRole = (subject: string, roleKey: string) => request<{ subject: string }>("POST", "/v1/governance/grants", { body: { subject, roleKey } });
 export const createDelegation = (d: { roleKey: string; delegateSubject: string; grantorSubject?: string; reason?: string; endsAt: string }) =>
   request<{ delegated: boolean }>("POST", "/v1/governance/delegations", { body: d });
@@ -202,7 +208,7 @@ export interface Posture {
 // ---- the office home (institutional operations) ----
 // Authority belongs to an OFFICE; a person OCCUPIES it. This is what an operator
 // sees on login: the offices they hold and the records under their authority.
-export interface Office { key: string; label: string; delegated?: boolean }
+export interface Office { key: string; label: string; department?: string | null; delegated?: boolean }
 export interface AuthorityRecord extends Posture {
   documentId: string; title: string; docType: string;
   classification?: { scheme?: string; level?: string }; submittedBy?: string | null; viaDelegation?: boolean;
