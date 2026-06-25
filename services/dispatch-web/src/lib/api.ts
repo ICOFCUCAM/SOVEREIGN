@@ -187,7 +187,34 @@ export const getGovernanceCertificate = (id: string) => request<{ certificate: G
 
 // ---- documents / lifecycle ----
 export type Lifecycle = "draft" | "submitted" | "in_review" | "approved" | "rejected" | "rendered" | "published" | "withdrawn" | "archived";
-export interface DocListItem {
+
+// Institutional posture — the engine's state spoken as institutional fact. Every
+// field is null when governance can't prove it (an unnamed/quorum policy); the UI
+// falls back honestly rather than inventing an authority. Computed server-side.
+export interface Posture {
+  policyName?: string | null; policyVersion?: number | null;
+  currentAuthority?: string | null; nextAuthority?: string | null;
+  currentRole?: string | null; nextRole?: string | null;
+  approvalAuthority?: string | null; publicationAuthority?: string | null;
+  waitingSince?: string | null; status?: string | null;
+}
+
+// ---- the office home (institutional operations) ----
+// Authority belongs to an OFFICE; a person OCCUPIES it. This is what an operator
+// sees on login: the offices they hold and the records under their authority.
+export interface Office { key: string; label: string; delegated?: boolean }
+export interface AuthorityRecord extends Posture {
+  documentId: string; title: string; docType: string;
+  classification?: { scheme?: string; level?: string }; submittedBy?: string | null; viaDelegation?: boolean;
+}
+export interface MyAuthority {
+  offices: Office[];
+  underYourAuthority: AuthorityRecord[];
+  counts: { offices: number; awaitingYou: number };
+}
+export const getMyAuthority = () => request<MyAuthority>("GET", "/v1/governance/my-authority");
+
+export interface DocListItem extends Posture {
   documentId: string; docType: string; title: string; classification: { scheme?: string; level?: string };
   renderStatus?: string; lifecycle: Lifecycle; version: number;
   submittedAt?: string; publishedAt?: string; retentionUntil?: string; createdAt?: string; updatedAt?: string;
@@ -205,7 +232,7 @@ export interface DocumentDetail {
   id: string; docType: string; title: string; status: string; lifecycle?: Lifecycle; currentVersion: number; correlationId?: string;
   publishedAt?: string; archivedAt?: string; preservationSha256?: string;
   versions: { versionNo: number; ddmVersion: string; template?: string; templateVersion?: number; engineVersion?: string; createdAt: string }[];
-  latestResult: JobResult | null; createdAt: string; updatedAt: string;
+  latestResult: JobResult | null; createdAt: string; updatedAt: string; posture?: Posture;
 }
 
 export interface SubmitResponse {

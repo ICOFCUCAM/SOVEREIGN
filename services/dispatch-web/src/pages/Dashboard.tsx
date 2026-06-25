@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { listDocuments, audit, getStats, getGovernanceOverview, type DocListItem, type AuditEvent, type Lifecycle, type Stats, type GovOverview, humanError } from "../lib/api";
 import { Card, ClassBadge, LifecycleBadge, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
+import OfficeHome from "../components/OfficeHome";
 
 // Operations COMMAND — the platform is about GOVERNANCE, so the surface leads
 // with a governance-health verdict, not a record count. Every signal is derived
@@ -72,6 +73,9 @@ const Dashboard: React.FC = () => {
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 
       <Masthead instRef={session?.tenantId?.slice(0, 8) ?? null} evaluatedAt={evaluatedAt} loading={loading} />
+
+      {/* ── 0 · OFFICE HOME — the operator's own authority + queue (institutional operations) ── */}
+      <OfficeHome subject={session?.subject} />
 
       {firstRun ? <FirstRun canAuthor={has("dispatch:render")} /> : (
         <>

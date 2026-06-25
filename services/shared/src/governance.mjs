@@ -230,6 +230,80 @@ export function evaluateChain(decisions, chain, { submitter, sequential = true }
   return { outcome: satisfied ? "satisfied" : "pending", steps, openStep };
 }
 
+// ---- Institutional posture (the engine, spoken as an institution) -----------
+// The UI must never invent an authority the engine can't prove. This is the
+// single translator from governance STATE → institutional FACT: who holds the
+// record now, who is next, who may publish it, under what policy — derived only
+// from the resolved policy + recorded decisions. Every field is null when the
+// engine has nothing true to assert (an unnamed/quorum policy), so the surface
+// can fall back honestly rather than fabricate a title.
+
+/** Lifecycle + posture → the operator's sentence ("Awaiting Director of Policy"). */
+export function institutionalStatus(lifecycleState, { currentAuthority, publicationAuthority } = {}) {
+  switch (lifecycleState) {
+    case "draft":      return "Draft";
+    case "submitted":
+    case "in_review":  return currentAuthority ? `Awaiting ${currentAuthority}` : "Awaiting review";
+    case "approved":   return "Approved · clearing render";
+    case "rendered":   return publicationAuthority ? `Awaiting ${publicationAuthority}` : "Awaiting publication";
+    case "published":  return "Published";
+    case "archived":   return "Preserved";
+    case "withdrawn":  return "Withdrawn";
+    case "rejected":   return "Returned for revision";
+    default:           return lifecycleState;
+  }
+}
+
+/**
+ * Compute a record's institutional posture from live governance state.
+ * @param client  open pg client (within withClaims / tenant RLS)
+ * @param doc     { id, doc_type, classification, lifecycle_state, current_version, submitted_at }
+ * @param cache   optional Map to memoize policy resolution across a list
+ * @returns { policyName, policyVersion, currentAuthority, nextAuthority,
+ *            approvalAuthority, publicationAuthority, waitingSince, status }
+ */
+export async function documentPosture(client, doc, cache) {
+  const level = doc.classification?.level ?? null;
+  const key = `${doc.doc_type ?? ""}|${level ?? ""}`;
+  let policy = cache?.get(key);
+  if (!policy) { policy = await resolvePolicy(client, { docType: doc.doc_type, classificationLevel: level }); cache?.set(key, policy); }
+  const chain = chainOf(policy);
+  const lc = doc.lifecycle_state;
+  const named = policy._source === "policy";
+  const publicationAuthority = policy.publication_authority || null;
+  const approvalAuthority = policy.approval_authority || null;
+
+  let currentAuthority = null, nextAuthority = null, currentRole = null, nextRole = null;
+  if (lc === "in_review" || lc === "submitted") {
+    if (chain.length) {
+      const appr = (await client.query(
+        "select decision, actor, role_key, expires_at from dispatch.approvals where document_id=$1 and version_no=$2",
+        [doc.id, doc.current_version])).rows
+        .map((r) => ({ ...r, expired: !!r.expires_at && new Date(r.expires_at) < new Date() }));
+      const ev = evaluateChain(appr, chain, { submitter: null, sequential: policy.sequential });
+      if (ev.openStep != null) {
+        currentAuthority = chain[ev.openStep].label; currentRole = chain[ev.openStep].role;
+        const nxt = ev.openStep + 1 < chain.length ? chain[ev.openStep + 1] : null;
+        currentAuthority = chain[ev.openStep].label;
+        nextAuthority = nxt ? nxt.label : publicationAuthority;
+        nextRole = nxt ? nxt.role : null;
+      }
+    } else {
+      // Unnamed/quorum policy — the only named authorities are the policy's own
+      // approval/publication offices, if it declares them.
+      currentAuthority = approvalAuthority;
+      nextAuthority = publicationAuthority;
+    }
+  }
+  return {
+    policyName: named ? (policy.name || null) : null,
+    policyVersion: named ? (policy.policy_version ?? 1) : null,
+    currentAuthority, nextAuthority, currentRole, nextRole, approvalAuthority, publicationAuthority,
+    waitingSince: doc.submitted_at || null,
+    status: institutionalStatus(lc, { currentAuthority, publicationAuthority }),
+  };
+}
+
 // ---- Render gating ----------------------------------------------------------
 /** A render job may only be created when the document is approved. */
 export function renderAllowed(lifecycleState) {

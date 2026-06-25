@@ -14,7 +14,7 @@ import { resolvePrincipal, hasScope, mintServiceToken, mintDownloadGrant, verify
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
 import { inc, observe, snapshot, log } from "../../shared/src/metrics.mjs";
 import { clearanceAllows } from "../../shared/src/clearance.mjs";
-import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition, listPolicies, upsertPolicy, chainOf, evaluateChain } from "../../shared/src/governance.mjs";
+import { resolvePolicy, autoApproves, evaluateQuorum, renderAllowed, assertTransition, listPolicies, upsertPolicy, chainOf, evaluateChain, documentPosture } from "../../shared/src/governance.mjs";
 import { issueClientTx, rotateSecretTx, revokeClientTx, listClientsTx, signupTenantTx, ProvisioningError } from "../../shared/src/provisioning.mjs";
 
 const ENGINE_VERSION = "dispatch-api@1.0.0";
@@ -556,7 +556,7 @@ async function handleListDocuments(res, principal, query) {
   const docType = query.get("docType");
   const q = query.get("q");
   const limit = Math.min(Number(query.get("limit") || 100), 500);
-  const rows = await withClaims(pool, govClaims(principal), async (c) => {
+  const items = await withClaims(pool, govClaims(principal), async (c) => {
     const where = ["deleted_at is null"]; const params = []; let i = 1;
     if (state) { where.push(`lifecycle_state = $${i++}`); params.push(state); }
     if (docType) { where.push(`doc_type = $${i++}`); params.push(docType); }
@@ -567,13 +567,20 @@ async function handleListDocuments(res, principal, query) {
               submitted_at, published_at, retention_until, correlation_id, created_at, updated_at
          from dispatch.documents where ${where.join(" and ")}
         order by updated_at desc limit $${i}`, params);
-    return r.rows;
+    const cleared = r.rows.filter((row) => clearanceAllows(principal.clearance, row.classification || {}).allowed);
+    // Per-record institutional posture (current/next/publication authority +
+    // status), memoizing policy resolution across the page.
+    const cache = new Map();
+    const out = [];
+    for (const row of cleared) {
+      const posture = await documentPosture(c, row, cache);
+      out.push({ documentId: row.id, docType: row.doc_type, title: row.title, classification: row.classification,
+        renderStatus: row.status, lifecycle: row.lifecycle_state, version: row.current_version,
+        submittedAt: row.submitted_at, publishedAt: row.published_at, retentionUntil: row.retention_until,
+        createdAt: row.created_at, updatedAt: row.updated_at, ...posture });
+    }
+    return out;
   });
-  const items = rows.filter((r) => clearanceAllows(principal.clearance, r.classification || {}).allowed)
-    .map((r) => ({ documentId: r.id, docType: r.doc_type, title: r.title, classification: r.classification,
-      renderStatus: r.status, lifecycle: r.lifecycle_state, version: r.current_version,
-      submittedAt: r.submitted_at, publishedAt: r.published_at, retentionUntil: r.retention_until,
-      createdAt: r.created_at, updatedAt: r.updated_at }));
   return send(res, 200, { items, count: items.length });
 }
 
@@ -806,6 +813,43 @@ async function handleGovernanceOverview(res, principal) {
       exceptions: data.exceptions, expiredAuthorities: data.delegations.filter((d) => d.expired).length,
     },
   });
+}
+
+// GET /v1/governance/my-authority — THE OFFICE HOME. In an institution, authority
+// belongs to an OFFICE (a governance role), and a person OCCUPIES that office (a
+// grant). This answers the operator's real questions: which offices do I hold,
+// and which official records are under my authority right now (awaiting my
+// decision)? Records are matched by the OPEN STEP's office, never by raw scope —
+// the surface speaks offices and people, never "dispatch:approve".
+async function handleMyAuthority(res, principal) {
+  if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+  const subject = principal.actor;
+  const data = await withClaims(pool, govClaims(principal), async (c) => {
+    const labels = {};
+    (await c.query("select key, label from dispatch.governance_roles")).rows.forEach((r) => { labels[r.key] = r.label; });
+    const held = (await c.query("select role_key from dispatch.governance_role_grants where subject=$1 and active", [subject])).rows.map((r) => r.role_key);
+    const delegated = (await c.query("select role_key from dispatch.delegations where delegate_subject=$1 and active and now() between starts_at and ends_at", [subject])).rows.map((r) => r.role_key);
+    const myRoles = new Set([...held, ...delegated]);
+    const offices = [...myRoles].map((k) => ({ key: k, label: labels[k] || k, delegated: !held.includes(k) }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+
+    const pendingDocs = (await c.query(
+      `select id, doc_type, title, classification, submitted_at, submitted_by, current_version, lifecycle_state
+         from dispatch.documents where lifecycle_state in ('submitted','in_review') and deleted_at is null
+        order by submitted_at asc nulls last limit 200`)).rows;
+    const cache = new Map();
+    const underYourAuthority = [];
+    for (const d of pendingDocs) {
+      if (!clearanceAllows(principal.clearance, d.classification || {}).allowed) continue;
+      const posture = await documentPosture(c, d, cache);
+      if (!posture.currentRole || !myRoles.has(posture.currentRole)) continue;
+      if (d.submitted_by === subject) continue; // separation of duties — never your own record
+      underYourAuthority.push({ documentId: d.id, title: d.title, docType: d.doc_type, classification: d.classification,
+        submittedBy: d.submitted_by, viaDelegation: !held.includes(posture.currentRole), ...posture });
+    }
+    return { offices, underYourAuthority };
+  });
+  return send(res, 200, { ...data, counts: { offices: data.offices.length, awaitingYou: data.underYourAuthority.length } });
 }
 
 // GET /v1/evaluation/assessment — the platform generates its OWN evaluation
@@ -1055,14 +1099,15 @@ async function handleGetJob(res, principal, jobId) {
 async function handleGetDocument(res, principal, documentId) {
   if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
   const data = await withClaims(pool, claimsFor(principal), async (c) => {
-    const d = await c.query("select id, doc_type, title, classification, status, lifecycle_state, current_version, correlation_id, published_at, archived_at, preservation_sha256, created_at, updated_at from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
+    const d = await c.query("select id, doc_type, title, classification, status, lifecycle_state, current_version, correlation_id, submitted_at, published_at, archived_at, preservation_sha256, created_at, updated_at from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
     if (!d.rows[0]) return null;
     const vs = await c.query("select version_no, ddm_version, template_id, template_version, engine_version, created_at from dispatch.document_versions where document_id=$1 order by version_no", [documentId]);
     const latest = await c.query("select result from dispatch.jobs where document_id=$1 and result is not null order by updated_at desc limit 1", [documentId]);
-    return { doc: d.rows[0], versions: vs.rows, latestResult: latest.rows[0]?.result || null };
+    const posture = await documentPosture(c, d.rows[0]);
+    return { doc: d.rows[0], versions: vs.rows, latestResult: latest.rows[0]?.result || null, posture };
   });
   if (!data) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "document not found"));
-  const { doc, versions, latestResult } = data;
+  const { doc, versions, latestResult, posture } = data;
   const dcl = clearanceAllows(principal.clearance, doc.classification || {});
   if (!dcl.allowed) { inc("clearance_denied_total"); return send(res, 403, errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", dcl.reason)); }
   return send(res, 200, {
@@ -1071,7 +1116,7 @@ async function handleGetDocument(res, principal, documentId) {
     publishedAt: doc.published_at, archivedAt: doc.archived_at, preservationSha256: doc.preservation_sha256,
     versions: versions.map((v) => ({ versionNo: v.version_no, ddmVersion: v.ddm_version,
       template: v.template_id, templateVersion: v.template_version, engineVersion: v.engine_version, createdAt: v.created_at })),
-    latestResult, createdAt: doc.created_at, updatedAt: doc.updated_at,
+    latestResult, createdAt: doc.created_at, updatedAt: doc.updated_at, posture,
   });
 }
 
@@ -1358,6 +1403,13 @@ const server = http.createServer(async (req, res) => {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       return await handleGovernanceOverview(res, auth.principal);
+    }
+
+    // The office home — the offices a principal holds + records under their authority.
+    if (req.method === "GET" && path === "/v1/governance/my-authority") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleMyAuthority(res, auth.principal);
     }
 
     // Governance intelligence — analytics (bottlenecks, cycle times, performance).
