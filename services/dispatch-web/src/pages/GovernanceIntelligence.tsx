@@ -26,7 +26,7 @@ const GovernanceIntelligence: React.FC = () => {
   return (
     <div>
       <header className="mb-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Compliance</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Compliance</div>
         <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Governance Intelligence</h1>
         <p className="text-sm text-white/50">Where governance slows, which authority is the constraint, who is overloaded, and what is about to breach.</p>
       </header>

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { listClients, getGovernance, getUsers, createUser, createGovRole, createDepartment, grantGovRole, createDelegation,
+import { listClients, getGovernance, getUsers, createUser, deleteUser, createGovRole, createDepartment,
+  deleteDepartment, deleteGovRole, grantGovRole, revokeGovRole, createDelegation, endDelegation,
   type ServiceClient, type GovRole, type GovGrant, type GovDelegation, type Department, type Person, humanError } from "../lib/api";
 import { Button, Card, Field, inputCls } from "../lib/ui";
 
@@ -41,7 +42,7 @@ const AuthorityDirectory: React.FC = () => {
   const rolesFor = (subject: string) => grants.filter((x) => x.subject === subject).map((x) => x.role_key);
   // Offices are meant to be held by PEOPLE; a service credential holding one is a
   // bootstrap exception, so each holder carries whether it is a machine.
-  const holdersOf = (roleKey: string) => grants.filter((x) => x.role_key === roleKey).map((x) => ({ name: nameOf(x.subject), service: x.subject.startsWith("svc:") }));
+  const holdersOf = (roleKey: string) => grants.filter((x) => x.role_key === roleKey).map((x) => ({ subject: x.subject, name: nameOf(x.subject), service: x.subject.startsWith("svc:") }));
   const addPerson = async () => {
     if (!newPerson.fullName.trim() || !newPerson.email.trim()) return;
     try { await createUser({ fullName: newPerson.fullName.trim(), email: newPerson.email.trim(), departmentKey: newPerson.departmentKey || undefined, systemAdmin: newPerson.systemAdmin }); setNewPerson({ fullName: "", email: "", departmentKey: "", systemAdmin: false }); load(); }
@@ -65,6 +66,35 @@ const AuthorityDirectory: React.FC = () => {
     if (!roleKey) return;
     try { await grantGovRole(subject, roleKey); load(); } catch (e) { setErr(humanError(e, "Could not grant the role.")); }
   };
+  const revoke = async (subject: string, roleKey: string) => {
+    try { await revokeGovRole(subject, roleKey); load(); } catch (e) { setErr(humanError(e, "Could not revoke.")); }
+  };
+  const moveOffice = async (o: GovRole, departmentKey: string) => {
+    try { await createGovRole(o.key, o.label, departmentKey || undefined, o.display_order); load(); }
+    catch (e) { setErr(humanError(e, "Could not move the office.")); }
+  };
+  const removeOffice = async (o: GovRole) => {
+    if (!window.confirm(`Remove the office “${o.label}”? Any current holder is unassigned and any governance policy step that references it stops resolving.`)) return;
+    try { await deleteGovRole(o.key); load(); } catch (e) { setErr(humanError(e, "Could not remove the office.")); }
+  };
+  const removeDepartment = async (d: Department) => {
+    if (!window.confirm(`Remove the department “${d.name}”? Its offices become unassigned (they are not deleted).`)) return;
+    try { await deleteDepartment(d.key); load(); } catch (e) { setErr(humanError(e, "Could not remove the department.")); }
+  };
+  const removePerson = async (p: Person) => {
+    if (!window.confirm(`Remove ${p.fullName}? They are deactivated and every office they hold is vacated.`)) return;
+    try { await deleteUser(p.id); load(); } catch (e) { setErr(humanError(e, "Could not remove the person.")); }
+  };
+  const actingFor = (roleKey: string) => delegations.filter((d) => d.role_key === roleKey && !d.expired);
+  const endActing = async (roleKey: string, delegateSubject: string) => {
+    try { await endDelegation(roleKey, delegateSubject); load(); } catch (e) { setErr(humanError(e, "Could not end the acting appointment.")); }
+  };
+  // Everyone who can hold an office: people first (offices are for people), then
+  // service credentials (bootstrap). Used for assignment and acting appointments.
+  const principals = [
+    ...people.map((p) => ({ subject: p.subject, label: p.fullName })),
+    ...clients.map((c) => ({ subject: `svc:${c.client_id}`, label: `${c.name || c.client_id} (service)` })),
+  ];
   const addDelegation = async () => {
     if (!del.roleKey || !del.delegateSubject || !del.endsAt) return;
     try { await createDelegation({ roleKey: del.roleKey, delegateSubject: del.delegateSubject, reason: del.reason || undefined, endsAt: new Date(del.endsAt).toISOString() }); setDel({ roleKey: "", delegateSubject: "", reason: "", endsAt: "" }); load(); }
@@ -73,10 +103,10 @@ const AuthorityDirectory: React.FC = () => {
 
   return (
     <div>
-      <header className="mb-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Identity</div>
-        <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Authority Directory</h1>
-        <p className="text-sm text-white/50">The institution as it is organised — departments, the offices within them, and the people who occupy those offices. Authority belongs to the office; people are assigned to it over time.</p>
+      <header className="mb-6 border-b border-white/10 pb-5">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">Identity</div>
+        <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Authority Directory</h1>
+        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-white/50">The institution as it is organised — departments, the offices within them, and the people who occupy those offices. Authority belongs to the office; people are assigned to it over time.</p>
       </header>
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 
@@ -90,25 +120,36 @@ const AuthorityDirectory: React.FC = () => {
           <p className="py-3 text-sm text-white/40">No departments or offices defined yet.</p>
         ) : (
           <div className="space-y-5">
-            {[...departments.map((d) => ({ key: d.key, name: d.name })), { key: null as string | null, name: "Unassigned offices" }]
-              .map((dept) => {
-                const offices = roles.filter((r) => (r.department_key ?? null) === dept.key)
-                  .sort((a, b) => (a.display_order ?? 100) - (b.display_order ?? 100));
-                if (offices.length === 0) return null;
-                return (
-                  <div key={dept.key ?? "_unassigned"}>
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="text-[12.5px] font-bold uppercase tracking-[0.12em] text-white/70">{dept.name}</span>
-                      <span className="h-px flex-1 bg-white/[0.07]" />
-                    </div>
+            {[...departments, null as Department | null].map((deptObj) => {
+              const deptKey = deptObj?.key ?? null;
+              const offices = roles.filter((r) => (r.department_key ?? null) === deptKey)
+                .sort((a, b) => (a.display_order ?? 100) - (b.display_order ?? 100));
+              if (offices.length === 0 && !deptObj) return null; // hide the empty "Unassigned" group
+              return (
+                <div key={deptKey ?? "_unassigned"}>
+                  <div className="group mb-2 flex items-center gap-2">
+                    <span className="text-[12.5px] font-bold uppercase tracking-[0.12em] text-white/70">{deptObj?.name ?? "Unassigned offices"}</span>
+                    <span className="h-px flex-1 bg-white/[0.07]" />
+                    {deptObj && <button onClick={() => removeDepartment(deptObj)} className="text-[10px] font-semibold uppercase tracking-wide text-white/25 opacity-0 transition hover:text-red-300 group-hover:opacity-100">Remove</button>}
+                  </div>
+                  {offices.length === 0 ? (
+                    <p className="px-1 pb-1 text-[11px] text-white/30">No offices in this department yet — add one on the right.</p>
+                  ) : (
                     <div className="grid gap-2.5 sm:grid-cols-2">
                       {offices.map((o) => {
                         const holders = holdersOf(o.key);
                         return (
-                          <div key={o.key} className="rounded-lg border border-white/10 bg-ink-900/40 px-4 py-3">
+                          <div key={o.key} className="group rounded-lg border border-white/10 bg-ink-900/40 px-4 py-3">
                             <div className="flex items-center justify-between gap-2">
                               <span className="text-sm font-semibold text-white">{o.label}</span>
-                              <span className="font-mono text-[10px] uppercase tracking-wide text-white/30">Office</span>
+                              <div className="flex items-center gap-1.5 opacity-0 transition group-hover:opacity-100">
+                                <select value={o.department_key ?? ""} onChange={(e) => moveOffice(o, e.target.value)} title="Move to department"
+                                  className="rounded border border-white/10 bg-ink-900/70 px-1 py-0.5 text-[10px] text-white/60">
+                                  <option value="">Unassigned</option>
+                                  {departments.map((d) => <option key={d.key} value={d.key}>{d.name}</option>)}
+                                </select>
+                                <button onClick={() => removeOffice(o)} title="Remove office" className="text-white/30 hover:text-red-300">✕</button>
+                              </div>
                             </div>
                             <div className="mt-1.5 text-[11px] text-white/45">
                               {holders.length === 0
@@ -117,17 +158,27 @@ const AuthorityDirectory: React.FC = () => {
                                     <span key={i} className="inline-flex items-center gap-1">
                                       <span className="text-white/75">{h.name}</span>
                                       {h.service && <span className="rounded bg-amber-500/15 px-1 py-px text-[9px] font-bold uppercase tracking-wide text-amber-300/90" title="A service credential temporarily holding this office (bootstrap). Reserve offices for people.">bootstrap</span>}
+                                      <button onClick={() => revoke(h.subject, o.key)} title="Revoke this holder" className="text-white/25 hover:text-red-300">✕</button>
                                       {i < holders.length - 1 ? <span className="text-white/30">·</span> : null}
                                     </span>
                                   ))}</span>}
                             </div>
+                            {actingFor(o.key).map((d, i) => (
+                              <div key={i} className="mt-1 inline-flex items-center gap-1.5 rounded bg-amber-500/10 px-1.5 py-0.5 text-[11px] text-amber-200/90">
+                                <span className="font-semibold uppercase tracking-wide text-amber-300/80 text-[9px]">Acting</span>
+                                <span className="text-white/80">{nameOf(d.delegate_subject)}</span>
+                                <span className="text-white/40">until {d.ends_at ? new Date(d.ends_at).toLocaleDateString() : "—"}</span>
+                                <button onClick={() => endActing(o.key, d.delegate_subject)} title="End acting appointment" className="text-amber-300/50 hover:text-red-300">✕</button>
+                              </div>
+                            ))}
                           </div>
                         );
                       })}
                     </div>
-                  </div>
-                );
-              })}
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </Card>
@@ -170,13 +221,21 @@ const AuthorityDirectory: React.FC = () => {
                     <div className="truncate text-[11px] text-white/35">{p.email}{dept ? ` · ${dept}` : ""}</div>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {held.length === 0 ? <span className="text-[11px] text-white/30">holds no office</span> :
-                        held.map((r) => <span key={r} className="rounded bg-seal/25 px-1.5 py-0.5 text-[10px] font-semibold text-seal-light ring-1 ring-seal-light/30">{roles.find((x) => x.key === r)?.label || r}</span>)}
+                        held.map((r) => (
+                          <span key={r} className="inline-flex items-center gap-1 rounded bg-seal/25 px-1.5 py-0.5 text-[10px] font-semibold text-seal-light ring-1 ring-seal-light/30">
+                            {roles.find((x) => x.key === r)?.label || r}
+                            <button onClick={() => revoke(p.subject, r)} title="Vacate this office" className="text-seal-light/60 hover:text-red-300">✕</button>
+                          </span>
+                        ))}
                     </div>
                   </div>
-                  <select className={`${inputCls} w-44 shrink-0`} value="" onChange={(e) => grant(p.subject, e.target.value)}>
-                    <option value="">+ Assign office…</option>
-                    {roles.filter((r) => !held.includes(r.key)).map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
-                  </select>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <select className={`${inputCls} w-40`} value="" onChange={(e) => grant(p.subject, e.target.value)}>
+                      <option value="">+ Assign office…</option>
+                      {roles.filter((r) => !held.includes(r.key)).map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
+                    </select>
+                    <button onClick={() => removePerson(p)} title="Remove person" className="rounded px-1.5 py-1 text-[11px] font-semibold text-white/30 hover:text-red-300">Remove</button>
+                  </div>
                 </div>
               );
             })}
@@ -214,20 +273,24 @@ const AuthorityDirectory: React.FC = () => {
             </div>
           </Card>
 
-          {/* delegations */}
+          {/* acting appointments */}
           <Card className="p-5">
-            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Delegations</div>
-            {delegations.length === 0 ? <p className="text-sm text-white/40">No delegations recorded.</p> : (
+            <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Acting appointments</div>
+            <p className="mb-3 text-[11px] text-white/35">A person temporarily acting in an office — when the holder is on leave. The office and its governance never change; only who occupies it, for a window.</p>
+            {delegations.length === 0 ? <p className="text-sm text-white/40">No acting appointments in force.</p> : (
               <ul className="space-y-2">
                 {delegations.map((d, i) => (
-                  <li key={i} className="flex items-center justify-between rounded border border-white/10 px-3 py-2 text-[12.5px]">
-                    <div>
-                      <span className="font-semibold text-white">{subjectLabel(d.delegate_subject)}</span>
-                      <span className="text-white/45"> acts as </span>
+                  <li key={i} className="flex items-center justify-between gap-2 rounded border border-white/10 px-3 py-2 text-[12.5px]">
+                    <div className="min-w-0">
+                      <span className="font-semibold text-white">{nameOf(d.delegate_subject)}</span>
+                      <span className="text-white/45"> acting as </span>
                       <span className="text-seal-light">{roles.find((x) => x.key === d.role_key)?.label || d.role_key}</span>
                       {d.reason && <span className="text-white/35"> · {d.reason}</span>}
                     </div>
-                    <span className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold ${d.expired ? "bg-zinc-500/20 text-zinc-400" : "bg-emerald-500/15 text-emerald-300"}`}>{d.expired ? "Expired" : "Active"} · until {d.ends_at ? new Date(d.ends_at).toLocaleDateString() : "—"}</span>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className={`rounded px-2 py-0.5 text-[10px] font-semibold ${d.expired ? "bg-zinc-500/20 text-zinc-400" : "bg-amber-500/15 text-amber-300"}`}>{d.expired ? "Expired" : "Acting"} · until {d.ends_at ? new Date(d.ends_at).toLocaleDateString() : "—"}</span>
+                      {!d.expired && <button onClick={() => endActing(d.role_key, d.delegate_subject)} title="End acting appointment" className="text-white/30 hover:text-red-300">✕</button>}
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -259,22 +322,23 @@ const AuthorityDirectory: React.FC = () => {
           </Card>
 
           <Card className="space-y-3 p-5">
-            <div className="text-sm font-bold text-white">Delegate an authority</div>
-            <Field label="Role">
+            <div className="text-sm font-bold text-white">Appoint an acting holder</div>
+            <p className="text-[11px] text-white/40">Place a person in an office for a window — when the substantive holder is on leave. Governance is unchanged.</p>
+            <Field label="Office">
               <select className={inputCls} value={del.roleKey} onChange={(e) => setDel({ ...del, roleKey: e.target.value })}>
-                <option value="">Select role…</option>
+                <option value="">Select office…</option>
                 {roles.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
               </select>
             </Field>
-            <Field label="Delegate (principal)">
+            <Field label="Acting holder">
               <select className={inputCls} value={del.delegateSubject} onChange={(e) => setDel({ ...del, delegateSubject: e.target.value })}>
-                <option value="">Select principal…</option>
-                {clients.map((c) => <option key={c.client_id} value={`svc:${c.client_id}`}>{c.name || c.client_id}</option>)}
+                <option value="">Select a person…</option>
+                {principals.map((pr) => <option key={pr.subject} value={pr.subject}>{pr.label}</option>)}
               </select>
             </Field>
             <Field label="Reason"><input className={inputCls} value={del.reason} onChange={(e) => setDel({ ...del, reason: e.target.value })} placeholder="Director on leave" /></Field>
             <Field label="Until"><input type="date" className={inputCls} value={del.endsAt} onChange={(e) => setDel({ ...del, endsAt: e.target.value })} /></Field>
-            <Button className="w-full" disabled={!del.roleKey || !del.delegateSubject || !del.endsAt} onClick={addDelegation}>Record delegation</Button>
+            <Button className="w-full" disabled={!del.roleKey || !del.delegateSubject || !del.endsAt} onClick={addDelegation}>Appoint acting holder</Button>
           </Card>
         </div>
       </div>

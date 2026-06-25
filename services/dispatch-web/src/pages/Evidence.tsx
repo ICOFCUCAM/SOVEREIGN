@@ -12,7 +12,7 @@ const EvidenceStep: React.FC<{ n: string; label: string; lead: string; children:
     <div className="lg:pt-1">
       <div className="flex items-center gap-3">
         <span className="font-mono text-[13px] font-bold text-gold-400">{n}</span>
-        <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-white/80">{label}</span>
+        <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-white/80">{label}</span>
       </div>
       <p className="mt-2 max-w-[230px] text-[13px] leading-relaxed text-white/55">{lead}</p>
     </div>

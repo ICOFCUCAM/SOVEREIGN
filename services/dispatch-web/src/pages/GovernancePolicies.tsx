@@ -58,7 +58,7 @@ const GovernancePolicies: React.FC = () => {
   return (
     <div>
       <header className="mb-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Governance</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Governance</div>
         <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Governance Policy</h1>
         <p className="text-sm text-white/50">Design how official records are governed — an ordered chain of authorities, quorums, the publication authority, and retention. Records inherit and are controlled by the policy.</p>
       </header>
