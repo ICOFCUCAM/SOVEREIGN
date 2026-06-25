@@ -31,7 +31,7 @@ const IntegrationControlCenter: React.FC = () => {
   return (
     <div>
       <header className="mb-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Sovereignty</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Sovereignty</div>
         <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Integration Control</h1>
         <p className="text-sm text-white/50">The systems Sovereign Dispatch connects to — identity, directories, document and archival systems — and the API consumers operating against this tenant.</p>
       </header>

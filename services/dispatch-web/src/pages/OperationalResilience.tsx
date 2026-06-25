@@ -45,7 +45,7 @@ const OperationalResilience: React.FC = () => {
   return (
     <div>
       <header className="mb-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Sovereignty</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Sovereignty</div>
         <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Operational Resilience</h1>
         <p className="text-sm text-white/50">Availability, recovery, and the integrity of preserved records — what an institution relies on when it commits to a platform.</p>
       </header>

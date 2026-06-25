@@ -103,10 +103,10 @@ const AuthorityDirectory: React.FC = () => {
 
   return (
     <div>
-      <header className="mb-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Identity</div>
-        <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Authority Directory</h1>
-        <p className="text-sm text-white/50">The institution as it is organised — departments, the offices within them, and the people who occupy those offices. Authority belongs to the office; people are assigned to it over time.</p>
+      <header className="mb-6 border-b border-white/10 pb-5">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">Identity</div>
+        <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Authority Directory</h1>
+        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-white/50">The institution as it is organised — departments, the offices within them, and the people who occupy those offices. Authority belongs to the office; people are assigned to it over time.</p>
       </header>
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 

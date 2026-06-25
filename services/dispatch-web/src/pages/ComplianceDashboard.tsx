@@ -20,7 +20,7 @@ const ComplianceDashboard: React.FC = () => {
   return (
     <div>
       <header className="mb-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Compliance</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Compliance</div>
         <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Audit &amp; Compliance</h1>
         <p className="text-sm text-white/50">Proof of governance — how records were published, preserved, and whether every publication was compliant with its policy.</p>
       </header>

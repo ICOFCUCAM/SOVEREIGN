@@ -28,7 +28,7 @@ const Audit: React.FC = () => {
           <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Evidence Chain</h1>
           <p className="mt-1 text-sm text-white/50">An append-only, hash-stamped chain of proceedings — read-only, tenant-scoped, evidentiary by design.</p>
         </div>
-        {!loading && <div className="text-right"><div className="font-mono text-2xl font-bold tabular-nums text-white">{events.length}</div><div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Proceedings</div></div>}
+        {!loading && <div className="text-right"><div className="font-mono text-2xl font-bold tabular-nums text-white">{events.length}</div><div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Proceedings</div></div>}
       </header>
 
       <form onSubmit={(e) => { e.preventDefault(); load(); }} className="mb-4 flex flex-wrap gap-2">

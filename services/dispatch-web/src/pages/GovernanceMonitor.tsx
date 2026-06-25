@@ -18,7 +18,7 @@ const GovernanceMonitor: React.FC = () => {
   return (
     <div>
       <header className="mb-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Governance</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Governance</div>
         <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Governance Oversight</h1>
         <p className="text-sm text-white/50">What is in flight, who must act next, and what is blocked — across every governed record.</p>
       </header>

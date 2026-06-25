@@ -219,7 +219,7 @@ const DocumentView: React.FC = () => {
 
           {/* certifying statement — this panel is an instrument, not a dashboard */}
           <div className="mt-5 border-t border-white/10 pt-4">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">Issued by Sovereign Dispatch</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">Issued by Sovereign Dispatch</div>
             <p className="mt-1.5 text-[12px] leading-relaxed text-white/55">
               Sovereign Dispatch certifies that this publication {govCert.complianceResult === "COMPLIANT" ? "satisfied" : "did not satisfy"} governance policy <span className="font-semibold text-white/75">{govCert.policyName}</span> (v{govCert.policyVersion}): the required approval chain was {govCert.complianceResult === "COMPLIANT" ? "satisfied in order" : "not satisfied in order"}, with separation of duties {govCert.separationOfDuties}. This certificate can be verified independently against the SHA-256 integrity proof above.
             </p>
@@ -268,7 +268,7 @@ const DocumentView: React.FC = () => {
 
           {/* certifying statement — the seal, in words */}
           <div className="mt-5 border-t border-white/10 pt-4">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">Issued by Sovereign Dispatch</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">Issued by Sovereign Dispatch</div>
             <p className="mt-1.5 text-[12px] leading-relaxed text-white/55">
               Sovereign Dispatch certifies that this record was sealed{cert.archivedAt ? ` on ${new Date(cert.archivedAt).toLocaleString()}` : ""} and is terminal — no edit, withdrawal or republication is possible. The sealed form is provable against the SHA-256 integrity proof above.
             </p>
@@ -371,7 +371,7 @@ const waitedFor = (iso?: string | null): string => {
 const StandFact: React.FC<{ label: string; value?: React.ReactNode }> = ({ label, value }) =>
   value == null || value === "" ? null : (
     <div>
-      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">{label}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">{label}</div>
       <div className="mt-1 text-sm font-medium text-white/90">{value}</div>
     </div>
   );
@@ -391,7 +391,7 @@ const GovernanceStanding: React.FC<{ p: NonNullable<DocumentDetail["posture"]>; 
         </div>
         {p.policyName && (
           <div className="shrink-0 sm:text-right">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">Governing policy</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">Governing policy</div>
             <div className="mt-1 text-sm font-semibold text-white/90">{p.policyName}{p.policyVersion ? <span className="font-mono text-white/45"> v{p.policyVersion}</span> : null}</div>
           </div>
         )}

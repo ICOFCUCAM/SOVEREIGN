@@ -74,7 +74,7 @@ const Sovereignty: React.FC = () => {
 
 const Stat: React.FC<{ label: string; value: string; mono?: boolean }> = ({ label, value, mono }) => (
   <div>
-    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">{label}</div>
+    <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">{label}</div>
     <div className={`text-sm font-bold text-white ${mono ? "font-mono" : ""}`}>{value}</div>
   </div>
 );
