@@ -117,6 +117,14 @@ export const createGovRole = (key: string, label: string, departmentKey?: string
 export const createDepartment = (key: string, name: string, displayOrder?: number) =>
   request<{ key: string }>("POST", "/v1/governance/departments", { body: { key, name, displayOrder } });
 export const grantGovRole = (subject: string, roleKey: string) => request<{ subject: string }>("POST", "/v1/governance/grants", { body: { subject, roleKey } });
+
+// ---- people (human directory) ----
+// A person belongs to the tenant and occupies offices (a grant with subject
+// "user:<id>"). Identity only; institutional SSO federates onto this next.
+export interface Person { id: string; subject: string; email: string; fullName: string; departmentKey?: string | null; systemAdmin: boolean; status: string }
+export const getUsers = () => request<{ users: Person[] }>("GET", "/v1/users");
+export const createUser = (p: { email: string; fullName: string; departmentKey?: string; systemAdmin?: boolean }) =>
+  request<{ id: string; subject: string }>("POST", "/v1/users", { body: p });
 export const createDelegation = (d: { roleKey: string; delegateSubject: string; grantorSubject?: string; reason?: string; endsAt: string }) =>
   request<{ delegated: boolean }>("POST", "/v1/governance/delegations", { body: d });
 
