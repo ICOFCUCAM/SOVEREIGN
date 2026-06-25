@@ -29,7 +29,7 @@ const TrustCenter: React.FC = () => {
     <div>
       <header className="mb-6">
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Sovereignty</div>
-        <h1 className="mt-1 text-2xl font-bold text-white">Trust Center</h1>
+        <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Institutional Trust</h1>
         <p className="text-sm text-white/50">Everything an institution needs to adopt with confidence — what you own, how you leave, who is accountable, and what is provable today.</p>
       </header>
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}

@@ -26,7 +26,7 @@ const Sovereignty: React.FC = () => {
   return (
     <div>
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Sovereignty</h1>
+        <h1 className="font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Sovereignty</h1>
         <p className="text-sm text-white/50">
           The data, cryptographic, identity and governance posture of this deployment. Configuration-backed — nothing here is decorative.
         </p>

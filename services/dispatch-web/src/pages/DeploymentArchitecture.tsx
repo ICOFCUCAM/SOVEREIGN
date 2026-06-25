@@ -33,7 +33,7 @@ const DeploymentArchitecture: React.FC = () => {
     <div>
       <header className="mb-6">
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-seal-light">Sovereignty</div>
-        <h1 className="mt-1 text-2xl font-bold text-white">Deployment Architecture</h1>
+        <h1 className="mt-1.5 font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Deployment Architecture</h1>
         <p className="text-sm text-white/50">Where Sovereign Dispatch runs — and what each topology means for residency, control, and connectivity. The current engagement is marked; the rest are selectable per your sovereignty requirements.</p>
       </header>
 

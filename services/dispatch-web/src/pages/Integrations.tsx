@@ -37,7 +37,7 @@ const Integrations: React.FC = () => {
   return (
     <div>
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Integrations</h1>
+        <h1 className="font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Integrations</h1>
         <p className="text-sm text-white/50">
           Connect an institutional system to Dispatch over a stable REST surface. Each consumer authenticates with its own
           scoped service client.
