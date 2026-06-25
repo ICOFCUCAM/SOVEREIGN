@@ -128,6 +128,17 @@ const InstitutionSetup: React.FC = () => {
           </li>
         ))}
       </ol>
+
+      {/* Operating more than one institution — each is its own isolated tenant. */}
+      <Card className="mt-6 p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">More than one institution?</div>
+            <p className="mt-1 text-[13px] text-white/55">A nation's ministries, or a group's agencies, are each their own <span className="text-white/75">isolated institution</span> — separate records, people and governance, sealed from one another. Establish each as its own institution.</p>
+          </div>
+          <a href="/signup" className="shrink-0 rounded-md border border-white/15 px-3 py-1.5 text-[12.5px] font-semibold text-white/75 transition hover:border-seal-light/40 hover:text-white">Establish a new institution →</a>
+        </div>
+      </Card>
     </div>
   );
 };
