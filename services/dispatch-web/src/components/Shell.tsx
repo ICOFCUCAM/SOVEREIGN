@@ -28,6 +28,7 @@ const OPERATIONS_NAV: NavItem[] = [
 // Compliance (can we prove it) — not a flat list of database tables.
 const ADMIN_NAV: NavItem[] = [
   { to: "/admin", label: "Posture", end: true },
+  { to: "/admin/setup", label: "Establish Institution", scope: "dispatch:admin", group: "Identity" },
   { to: "/admin/authority", label: "Authority Directory", scope: "dispatch:admin", group: "Identity" },
   { to: "/admin/access", label: "Credentials & Access", scope: "dispatch:admin", group: "Identity" },
   { to: "/admin/governance", label: "Policy", scope: "dispatch:admin", group: "Governance" },

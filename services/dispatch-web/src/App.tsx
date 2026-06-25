@@ -26,6 +26,7 @@ import Audit from "./pages/Audit";
 import Sovereignty from "./pages/Sovereignty";
 import Access from "./pages/Access";
 import AdminHome from "./pages/AdminHome";
+import InstitutionSetup from "./pages/InstitutionSetup";
 import GovernancePolicies from "./pages/GovernancePolicies";
 import AuthorityDirectory from "./pages/AuthorityDirectory";
 import GovernanceMonitor from "./pages/GovernanceMonitor";
@@ -79,6 +80,7 @@ const Administration: React.FC = () => {
       <ConsoleShell variant="administration">
         <Routes>
           <Route path="/" element={<AdminHome />} />
+          <Route path="setup" element={<InstitutionSetup />} />
           <Route path="authority" element={<AuthorityDirectory />} />
           <Route path="access" element={<Access />} />
           <Route path="governance" element={<GovernancePolicies />} />
