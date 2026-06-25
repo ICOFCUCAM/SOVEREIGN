@@ -778,6 +778,36 @@ async function handleGovernanceAdmin(req, res, principal, kind, method) {
   }
 }
 
+// GET /v1/users · POST /v1/users — the human directory. A PERSON belongs to the
+// tenant and occupies offices (a grant whose subject is "user:<id>"). This is
+// identity only; authentication (institutional SSO) federates onto it later. The
+// two privilege dimensions stay separate: system_admin (IT) vs offices (authority).
+async function handlePeople(req, res, principal, method) {
+  if (method === "GET") {
+    if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+    const rows = await withClaims(pool, govClaims(principal), (c) => c.query(
+      "select id, email, full_name, department_key, system_admin, status from dispatch.users where status <> 'deleted' order by full_name"));
+    return send(res, 200, { users: rows.rows.map((u) => ({ id: u.id, subject: `user:${u.id}`, email: u.email,
+      fullName: u.full_name, departmentKey: u.department_key, systemAdmin: u.system_admin, status: u.status })) });
+  }
+  if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
+  let body; try { body = JSON.parse(await readBody(req)); }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  if (!body.email || !body.fullName) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "email and fullName are required"));
+  const claims = { ...govClaims(principal), dispatch_role: "tenant_admin" };
+  try {
+    const r = await withClaims(pool, claims, (c) => c.query(
+      `insert into dispatch.users (tenant_id, email, full_name, department_key, system_admin) values ($1,$2,$3,$4,$5)
+       on conflict (tenant_id, email) do update set full_name=excluded.full_name,
+         department_key=excluded.department_key, system_admin=excluded.system_admin
+       returning id`, [principal.tenantId, String(body.email).toLowerCase(), body.fullName, body.departmentKey ?? null, !!body.systemAdmin]));
+    return send(res, 201, { id: r.rows[0].id, subject: `user:${r.rows[0].id}`, email: String(body.email).toLowerCase(), fullName: body.fullName });
+  } catch (e) {
+    console.error("people write error:", e);
+    return send(res, 400, errEnvelope(null, 400, "PEOPLE_WRITE_FAILED", String(e.message)));
+  }
+}
+
 // GET /v1/governance/overview — the operational + compliance picture an admin or
 // compliance officer needs at a glance: who's awaiting whom, what's awaiting
 // publication, active/expired delegations, and the compliance posture. Derived
@@ -1449,6 +1479,13 @@ const server = http.createServer(async (req, res) => {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       return await handlePlatform(res, auth.principal, path.endsWith("trends") ? "trends" : "overview", url.searchParams);
+    }
+
+    // People — the human directory (read for any principal; create requires admin).
+    if (path === "/v1/users" && (req.method === "GET" || req.method === "POST")) {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handlePeople(req, res, auth.principal, req.method);
     }
 
     // Governance roles / grants / delegations (read for any principal).

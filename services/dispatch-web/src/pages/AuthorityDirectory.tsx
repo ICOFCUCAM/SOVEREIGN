@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { listClients, getGovernance, createGovRole, grantGovRole, createDelegation,
-  type ServiceClient, type GovRole, type GovGrant, type GovDelegation, type Department, humanError } from "../lib/api";
+import { listClients, getGovernance, getUsers, createUser, createGovRole, grantGovRole, createDelegation,
+  type ServiceClient, type GovRole, type GovGrant, type GovDelegation, type Department, type Person, humanError } from "../lib/api";
 import { Button, Card, Field, inputCls } from "../lib/ui";
 
 // Authority Directory — the Identity domain. Answers, in five seconds: who holds
@@ -11,24 +11,39 @@ const subjectLabel = (s: string) => s.replace(/^svc:/, "").replace(/^user:/, "")
 
 const AuthorityDirectory: React.FC = () => {
   const [clients, setClients] = useState<ServiceClient[]>([]);
+  const [people, setPeople] = useState<Person[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [roles, setRoles] = useState<GovRole[]>([]);
   const [grants, setGrants] = useState<GovGrant[]>([]);
   const [delegations, setDelegations] = useState<GovDelegation[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [newRole, setNewRole] = useState({ key: "", label: "" });
+  const [newPerson, setNewPerson] = useState({ fullName: "", email: "", departmentKey: "", systemAdmin: false });
   const [del, setDel] = useState({ roleKey: "", delegateSubject: "", reason: "", endsAt: "" });
 
   const load = useCallback(async () => {
     try {
-      const [c, g] = await Promise.all([listClients(), getGovernance()]);
+      const [c, g, u] = await Promise.all([listClients(), getGovernance(), getUsers().catch(() => ({ users: [] }))]);
       setClients(c.clients); setDepartments(g.departments ?? []); setRoles(g.roles); setGrants(g.grants); setDelegations(g.delegations);
+      setPeople(u.users);
     } catch (e) { setErr(humanError(e, "Could not load the authority directory.")); }
   }, []);
   useEffect(() => { load(); }, [load]);
 
+  // Resolve a grant subject to a human name (a person) or a service name (a
+  // machine), so the directory speaks of people and integrations, not "svc:…".
+  const nameOf = (subject: string): string => {
+    if (subject.startsWith("user:")) return people.find((p) => p.subject === subject)?.fullName ?? subjectLabel(subject);
+    if (subject.startsWith("svc:")) return clients.find((c) => `svc:${c.client_id}` === subject)?.name ?? subjectLabel(subject);
+    return subjectLabel(subject);
+  };
   const rolesFor = (subject: string) => grants.filter((x) => x.subject === subject).map((x) => x.role_key);
-  const holdersOf = (roleKey: string) => grants.filter((x) => x.role_key === roleKey).map((x) => subjectLabel(x.subject));
+  const holdersOf = (roleKey: string) => grants.filter((x) => x.role_key === roleKey).map((x) => nameOf(x.subject));
+  const addPerson = async () => {
+    if (!newPerson.fullName.trim() || !newPerson.email.trim()) return;
+    try { await createUser({ fullName: newPerson.fullName.trim(), email: newPerson.email.trim(), departmentKey: newPerson.departmentKey || undefined, systemAdmin: newPerson.systemAdmin }); setNewPerson({ fullName: "", email: "", departmentKey: "", systemAdmin: false }); load(); }
+    catch (e) { setErr(humanError(e, "Could not add the person.")); }
+  };
   const addRole = async () => {
     if (!newRole.key.trim() || !newRole.label.trim()) return;
     try { await createGovRole(newRole.key.trim().toLowerCase().replace(/\s+/g, "_"), newRole.label.trim()); setNewRole({ key: "", label: "" }); load(); }
@@ -99,11 +114,64 @@ const AuthorityDirectory: React.FC = () => {
         )}
       </Card>
 
+      {/* ── PEOPLE — the human directory; a person occupies offices ── */}
+      <Card className="mb-6 p-5">
+        <div className="mb-3 flex items-baseline justify-between">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">People</div>
+          <div className="font-mono text-[11px] tabular-nums text-white/30">{people.length} {people.length === 1 ? "person" : "people"}</div>
+        </div>
+        <p className="mb-3 text-[12px] text-white/40">People are added by the institution and assigned to offices. Authentication (institutional sign-in) federates onto these identities — Dispatch never stores their passwords.</p>
+
+        {/* add a person */}
+        <div className="mb-4 grid gap-2 sm:grid-cols-[1.2fr_1.4fr_1fr_auto]">
+          <input className={inputCls} value={newPerson.fullName} onChange={(e) => setNewPerson({ ...newPerson, fullName: e.target.value })} placeholder="Full name" />
+          <input className={inputCls} value={newPerson.email} onChange={(e) => setNewPerson({ ...newPerson, email: e.target.value })} placeholder="name@ministry.gov" />
+          <select className={inputCls} value={newPerson.departmentKey} onChange={(e) => setNewPerson({ ...newPerson, departmentKey: e.target.value })}>
+            <option value="">Department…</option>
+            {departments.map((d) => <option key={d.key} value={d.key}>{d.name}</option>)}
+          </select>
+          <Button disabled={!newPerson.fullName.trim() || !newPerson.email.trim()} onClick={addPerson}>Add person</Button>
+        </div>
+        <label className="mb-4 flex items-center gap-2 text-[12px] text-white/55">
+          <input type="checkbox" checked={newPerson.systemAdmin} onChange={(e) => setNewPerson({ ...newPerson, systemAdmin: e.target.checked })} />
+          System administrator (IT permissions) — separate from institutional authority
+        </label>
+
+        {people.length === 0 ? <p className="py-2 text-sm text-white/40">No people added yet.</p> : (
+          <div className="divide-y divide-white/5">
+            {people.map((p) => {
+              const held = rolesFor(p.subject);
+              const dept = departments.find((d) => d.key === p.departmentKey)?.name;
+              return (
+                <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-white">{p.fullName}</span>
+                      {p.systemAdmin && <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/60">System Admin</span>}
+                    </div>
+                    <div className="truncate text-[11px] text-white/35">{p.email}{dept ? ` · ${dept}` : ""}</div>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {held.length === 0 ? <span className="text-[11px] text-white/30">holds no office</span> :
+                        held.map((r) => <span key={r} className="rounded bg-seal/25 px-1.5 py-0.5 text-[10px] font-semibold text-seal-light ring-1 ring-seal-light/30">{roles.find((x) => x.key === r)?.label || r}</span>)}
+                    </div>
+                  </div>
+                  <select className={`${inputCls} w-44 shrink-0`} value="" onChange={(e) => grant(p.subject, e.target.value)}>
+                    <option value="">+ Assign office…</option>
+                    {roles.filter((r) => !held.includes(r.key)).map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
+                  </select>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
-          {/* principals × held authorities */}
+          {/* service credentials — machines & integrations (not people) */}
           <Card className="p-5">
-            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Principals &amp; held authorities</div>
+            <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Service credentials</div>
+            <p className="mb-3 text-[11px] text-white/35">Machines &amp; integrations (the Emergency AI, system-to-system). People sign in through the institution, above.</p>
             <div className="divide-y divide-white/5">
               {clients.length === 0 ? <p className="py-4 text-sm text-white/40">No credentials issued yet.</p> : clients.map((c) => {
                 const subject = `svc:${c.client_id}`;
