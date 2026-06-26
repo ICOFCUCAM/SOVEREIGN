@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { SectionHead, Card, Chevron, PublicHeader, PublicFooter, TrustStrip, FilmGrain, useReveal } from "../components/brand";
+import { SectionHead, Card, Chevron, PublicHeader, PageBanner, PublicFooter, TrustStrip, FilmGrain, useReveal } from "../components/brand";
 import { PROCUREMENT_ROUTE, EVIDENCE_ROUTE } from "../lib/routes";
 import { track } from "../lib/analytics";
 
@@ -18,6 +18,7 @@ const Trust: React.FC = () => {
       <style>{`html{scroll-behavior:smooth}`}</style>
       <FilmGrain />
       <PublicHeader />
+      <PageBanner slug="trust" alt="An institutional seal press" />
       <main>
         {/* hero */}
         <section className="border-t border-white/[0.06] px-8 py-24 lg:px-12">

@@ -1,5 +1,5 @@
 import React from "react";
-import { SectionHead, PublicHeader, PublicFooter, TrustStrip, FilmGrain, useReveal, SURFACE } from "../components/brand";
+import { SectionHead, PublicHeader, PageBanner, PublicFooter, TrustStrip, FilmGrain, useReveal, SURFACE } from "../components/brand";
 
 // Compliance — the governance-framework alignment relocated from the homepage.
 const Compliance: React.FC = () => {
@@ -9,6 +9,7 @@ const Compliance: React.FC = () => {
       <style>{`html{scroll-behavior:smooth}`}</style>
       <FilmGrain />
       <PublicHeader />
+      <PageBanner slug="compliance" alt="An institutional records archive" />
       <main>
         {/* ── Compliance & Security ──────────────────────────────────── */}
         <section id="compliance" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">

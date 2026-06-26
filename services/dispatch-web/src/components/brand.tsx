@@ -170,3 +170,25 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
     </header>
   );
 };
+
+// A cinematic institutional banner strip for the top of a marketing page. The
+// wide image is faded into the page on every edge so it reads as part of the
+// dark field, never a pasted-in photo. `slug` maps to /banners/<slug>.webp; if
+// the file is absent the band renders nothing (never a broken image).
+export const PageBanner: React.FC<{ slug: string; alt?: string }> = ({ slug, alt = "" }) => {
+  const [failed, setFailed] = React.useState(false);
+  if (failed) return null;
+  return (
+    <div className="relative h-[clamp(150px,22vw,300px)] w-full overflow-hidden border-b border-white/[0.06] bg-[#070707]">
+      <img
+        src={`/banners/${slug}.webp`}
+        alt={alt}
+        loading="lazy"
+        onError={() => setFailed(true)}
+        className="h-full w-full object-cover"
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#070707]/55 via-[#070707]/10 to-[#070707]" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#070707]/70 via-transparent to-[#070707]/45" />
+    </div>
+  );
+};

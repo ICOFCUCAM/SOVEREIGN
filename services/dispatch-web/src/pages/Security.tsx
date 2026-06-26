@@ -1,5 +1,5 @@
 import React from "react";
-import { SectionHead, Card, Chevron, PublicHeader, PublicFooter, TrustStrip, FilmGrain, useReveal, SURFACE } from "../components/brand";
+import { SectionHead, Card, Chevron, PublicHeader, PageBanner, PublicFooter, TrustStrip, FilmGrain, useReveal, SURFACE } from "../components/brand";
 import { CapabilitiesDashboard } from "../components/operations";
 import { DeploymentMatrix } from "../components/DeploymentMatrix";
 
@@ -12,6 +12,7 @@ const Security: React.FC = () => {
       <style>{`html{scroll-behavior:smooth}`}</style>
       <FilmGrain />
       <PublicHeader />
+      <PageBanner slug="security" alt="A secure institutional vault" />
       <main>
         {/* ── Security ───────────────────────────────────────────────── */}
         <section id="security" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">

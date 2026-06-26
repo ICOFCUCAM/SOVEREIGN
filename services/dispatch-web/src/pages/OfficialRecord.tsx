@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { PublicHeader, PublicFooter, FilmGrain, SectionHead, useReveal } from "../components/brand";
+import { PublicHeader, PageBanner, PublicFooter, FilmGrain, SectionHead, useReveal } from "../components/brand";
 
 // "What is an Official Record?" — the page that makes Dispatch's core distinction
 // unmissable: an Official Record is not a file, it is the institution's
@@ -25,6 +25,7 @@ const OfficialRecord: React.FC = () => {
     <div className="relative min-h-full bg-[#070707] text-white">
       <FilmGrain />
       <PublicHeader />
+      <PageBanner slug="officialrecord" alt="A sealed official record" />
       <main>
         {/* ── Definition ── */}
         <section className="border-t border-white/[0.06] px-8 py-24 lg:px-12">

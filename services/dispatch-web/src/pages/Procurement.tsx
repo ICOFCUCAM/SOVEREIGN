@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { PublicHeader, Chevron, Dot, FilmGrain, useReveal, SURFACE } from "../components/brand";
+import { PublicHeader, PageBanner, Chevron, Dot, FilmGrain, useReveal, SURFACE } from "../components/brand";
 import { DeploymentMatrix } from "../components/DeploymentMatrix";
 import { ARCHITECTURE_ROUTE } from "../lib/routes";
 import { track } from "../lib/analytics";
@@ -30,6 +30,7 @@ const Procurement: React.FC = () => {
       <style>{`html{scroll-behavior:smooth}`}</style>
       <FilmGrain />
       <PublicHeader />
+      <PageBanner slug="procurement" alt="An evaluation meeting" />
 
       {/* hero */}
       <section className="border-b border-white/5 px-8 py-20 lg:px-12">
