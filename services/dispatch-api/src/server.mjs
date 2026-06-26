@@ -516,14 +516,21 @@ async function handleLifecycleAction(req, res, principal, documentId, action) {
         assertTransition("rendered", "published");
         const ret = await client.query("select retention_days from dispatch.tenants where id=$1", [principal.tenantId]);
         const days = ret.rows[0]?.retention_days || 365;
-        await client.query("update dispatch.documents set lifecycle_state='published', published_at=now(), retention_until=now() + ($2 || ' days')::interval, governance_sha256=$3, governance_certificate=$4 where id=$1",
+        // On publication the record receives its permanent, never-reused public
+        // identifier and becomes verifiable at /verify/<recordId>.
+        const pubRow = await client.query(
+          `update dispatch.documents set lifecycle_state='published', published_at=now(),
+             retention_until=now() + ($2 || ' days')::interval, governance_sha256=$3, governance_certificate=$4,
+             public_id = coalesce(public_id, dispatch.next_record_id())
+           where id=$1 returning public_id`,
           [documentId, String(days), govCert?.integrityProof || null, govCert ? JSON.stringify(govCert) : null]);
+        const recordId = pubRow.rows[0]?.public_id || null;
         await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
           action: "document.published", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
         if (govCert) await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
           action: "governance.certificate_issued", targetType: "document", targetId: documentId, sha256: govCert.integrityProof, correlationId: docRow.correlation_id });
-        await queueWebhooks(client, principal.tenantId, "record.published", { documentId, docType: docRow.doc_type, title: docRow.title, lifecycle: "published", governanceCompliance: govCert?.complianceResult || "UNGOVERNED" });
-        return { http: 200, body: { documentId, lifecycle: "published", governanceCompliance: govCert?.complianceResult || "UNGOVERNED" } };
+        await queueWebhooks(client, principal.tenantId, "record.published", { documentId, recordId, docType: docRow.doc_type, title: docRow.title, lifecycle: "published", governanceCompliance: govCert?.complianceResult || "UNGOVERNED" });
+        return { http: 200, body: { documentId, recordId, lifecycle: "published", governanceCompliance: govCert?.complianceResult || "UNGOVERNED" } };
       }
       // withdraw
       if (!["published", "rendered"].includes(docRow.lifecycle_state))
@@ -1506,10 +1513,45 @@ async function buildGovernanceChain(c, doc) {
   return { submittedBy: { name: nm(doc.submitted_by), office }, steps, rejected: lc === "rejected" };
 }
 
+// GET /v1/verify/:id — PUBLIC, no auth. The institutional proof a copied file can
+// never carry: confirm a record is genuine, which institution issued it, its
+// certificates, integrity hash, and whether it is current or revoked. The document
+// body is never returned; the title is withheld for classified records.
+async function handleVerify(res, id) {
+  let row;
+  try { row = (await withAdmin((c) => c.query("select * from dispatch.verify_record($1)", [id]))).rows[0]; }
+  catch (e) { console.error("verify error:", e); return send(res, 500, { verified: false, status: "ERROR" }); }
+  if (!row) return send(res, 404, { verified: false, status: "NOT_FOUND", recordId: id,
+    message: "No official record with this identifier was found. A genuine Official Record always resolves here." });
+  const lvl = String(row.classification?.level || "").toLowerCase();
+  const open = !lvl || lvl === "none" || lvl === "unclassified" || lvl === "official";
+  const status = row.lifecycle_state === "withdrawn" ? "REVOKED" : row.lifecycle_state === "archived" ? "PRESERVED" : "OFFICIAL";
+  const cert = row.governance_certificate || null;
+  return send(res, 200, {
+    verified: true,
+    recordId: row.public_id || id,
+    status,
+    institution: row.institution,
+    title: open ? row.title : null,
+    titleWithheld: !open,
+    classification: row.classification || null,
+    docType: row.doc_type,
+    governanceCompliance: cert?.complianceResult || null,
+    publicationAuthority: cert?.publicationAuthority || null,
+    approvalChain: Array.isArray(cert?.requiredRoles) ? cert.requiredRoles.map((r) => r.label) : null,
+    integrityHash: row.preservation_sha256 || row.governance_sha256 || null,
+    hasGovernanceCertificate: !!row.governance_sha256,
+    hasPreservationCertificate: !!row.preservation_sha256,
+    publishedAt: row.published_at, preservedAt: row.archived_at, revokedAt: row.withdrawn_at,
+    retentionUntil: row.retention_until,
+    verifiedAt: new Date().toISOString(),
+  });
+}
+
 async function handleGetDocument(res, principal, documentId) {
   if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
   const data = await withClaims(pool, claimsFor(principal), async (c) => {
-    const d = await c.query("select id, doc_type, title, classification, status, lifecycle_state, current_version, correlation_id, submitted_at, submitted_by, published_at, archived_at, preservation_sha256, created_at, updated_at from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
+    const d = await c.query("select id, doc_type, title, classification, status, lifecycle_state, current_version, correlation_id, submitted_at, submitted_by, published_at, archived_at, preservation_sha256, public_id, created_at, updated_at from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
     if (!d.rows[0]) return null;
     const vs = await c.query("select version_no, ddm_version, template_id, template_version, engine_version, created_at from dispatch.document_versions where document_id=$1 order by version_no", [documentId]);
     const latest = await c.query("select result from dispatch.jobs where document_id=$1 and result is not null order by updated_at desc limit 1", [documentId]);
@@ -1529,6 +1571,7 @@ async function handleGetDocument(res, principal, documentId) {
       template: v.template_id, templateVersion: v.template_version, engineVersion: v.engine_version, createdAt: v.created_at })),
     latestResult, createdAt: doc.created_at, updatedAt: doc.updated_at, posture,
     submittedBy: governance.submittedBy, governanceChain: governance.steps, governanceRejected: governance.rejected,
+    publicId: doc.public_id || null,
   });
 }
 
@@ -1748,6 +1791,11 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && path === "/v1/health") return send(res, 200, { ok: true, engineVersion: ENGINE_VERSION });
     if (req.method === "GET" && path === "/v1/version") return send(res, 200, { engineVersion: ENGINE_VERSION, schemaVersion: "1.0" });
     if (req.method === "GET" && path === "/v1/metrics") return send(res, 200, snapshot());
+
+    // PUBLIC record verification — no auth. Anyone holding a copy can confirm the
+    // authoritative record behind it (genuine, issuer, certificates, current/revoked).
+    const verifyMatch = req.method === "GET" && /^\/v1\/verify\/(.+)$/.exec(path);
+    if (verifyMatch) return await handleVerify(res, decodeURIComponent(verifyMatch[1]));
 
     // Governance GET surface (auth required, tenant-scoped).
     if (req.method === "GET" && (path === "/v1/approvals" || path === "/v1/documents" || path === "/v1/audit")) {

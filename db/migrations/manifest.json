@@ -22,6 +22,7 @@
     "M19__departments.sql",
     "M20__people.sql",
     "M21__sso_connections.sql",
-    "M22__webhooks.sql"
+    "M22__webhooks.sql",
+    "M23__record_verification.sql"
   ]
 }

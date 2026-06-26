@@ -286,7 +286,24 @@ export interface DocumentDetail {
   latestResult: JobResult | null; createdAt: string; updatedAt: string; posture?: Posture;
   submittedBy?: { name?: string | null; office?: string | null };
   governanceChain?: ChainStep[]; governanceRejected?: boolean;
+  publicId?: string | null;
 }
+
+// ---- public record verification (the institutional proof a copy can't carry) ----
+export interface VerifyResult {
+  verified: boolean; status: string; recordId: string;
+  institution?: string | null; title?: string | null; titleWithheld?: boolean;
+  classification?: { scheme?: string; level?: string } | null; docType?: string;
+  governanceCompliance?: string | null; publicationAuthority?: string | null; approvalChain?: string[] | null;
+  integrityHash?: string | null; hasGovernanceCertificate?: boolean; hasPreservationCertificate?: boolean;
+  publishedAt?: string | null; preservedAt?: string | null; revokedAt?: string | null;
+  retentionUntil?: string | null; verifiedAt?: string; message?: string;
+}
+// Public, unauthenticated — anyone holding a copy can verify the record behind it.
+export const verifyRecord = async (id: string): Promise<VerifyResult> => {
+  const r = await fetch(`${API_BASE()}/v1/verify/${encodeURIComponent(id)}`);
+  return r.json().catch(() => ({ verified: false, status: "ERROR", recordId: id }));
+};
 
 export interface SubmitResponse {
   requestId: string; documentId: string; status: string; lifecycle?: Lifecycle;

@@ -309,6 +309,38 @@ paths:
         "200": { description: Certificate, content: { application/json: { schema: { type: object } } } }
         "409": { $ref: "#/components/responses/Error" }
 
+  /v1/verify/{id}:
+    get:
+      tags: [Evidence]
+      summary: Publicly verify an Official Record by its permanent id (no auth)
+      security: []
+      description: |
+        Public, unauthenticated. Given a record's permanent id (`SD-YYYY-NNNNNNNN`)
+        or document UUID, returns the institutional proof — genuine, issuing
+        institution, governance/preservation certificates, integrity hash, and
+        whether the record is current (`OFFICIAL`/`PRESERVED`) or `REVOKED`. The
+        document body is never returned; the title is withheld for classified
+        records. Unknown ids return `404` with `verified: false`.
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verified: { type: boolean }
+                  status: { type: string, enum: [OFFICIAL, PRESERVED, REVOKED] }
+                  recordId: { type: string }
+                  institution: { type: string }
+                  title: { type: string, nullable: true, description: Withheld (null) for classified records }
+                  governanceCompliance: { type: string, nullable: true }
+                  integrityHash: { type: string, nullable: true, description: SHA-256 }
+                  approvalChain: { type: array, items: { type: string }, nullable: true }
+                  publishedAt: { type: string, format: date-time, nullable: true }
+        "404": { description: Not a verified record, content: { application/json: { schema: { type: object, properties: { verified: { type: boolean }, status: { type: string } } } } } }
+
   /v1/approvals:
     get:
       tags: [Lifecycle]

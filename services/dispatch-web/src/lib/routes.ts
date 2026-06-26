@@ -21,3 +21,8 @@ export const JOURNEY_ROUTE = "/journey";
 // Developer Platform — the public docs surface for the Dispatch Platform API
 // (the engine): quickstart, SDKs, webhooks, and the live endpoint reference.
 export const DEVELOPERS_ROUTE = "/developers";
+
+// The institutional distinction, made public: what an Official Record IS, and the
+// portal where anyone can verify one is genuine.
+export const OFFICIAL_RECORD_ROUTE = "/official-record";
+export const VERIFY_ROUTE = "/verify";

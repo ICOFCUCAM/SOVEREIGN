@@ -155,6 +155,35 @@ const Landing: React.FC = () => {
         </a>
       </div>
 
+      {/* ── What is an Official Record? — the core distinction, up front ─── */}
+      <section className="edge-rule scroll-mt-24 px-5 py-16 sm:px-8 sm:py-20 lg:px-12">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">What is an Official Record?</div>
+            <h2 className="mx-auto mt-3 max-w-3xl font-serif text-[1.8rem] font-bold leading-tight tracking-tight text-white sm:text-[2.2rem]">More than a document — the institution's authoritative version.</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-[14px] leading-relaxed text-white/55">A PDF can always be copied. The institutional proof cannot. An Official Record is governed, certified, preserved against tampering, and verifiable by anyone — forever.</p>
+          </div>
+          <div className="mx-auto mt-9 grid max-w-3xl gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">An ordinary document</div>
+              <div className="mt-3 flex flex-wrap gap-2 text-[12.5px] text-white/45">
+                {["Edited", "Copied", "Renamed", "Replaced", "Deleted"].map((t) => <span key={t} className="rounded-full bg-white/[0.05] px-2.5 py-0.5">○ {t}</span>)}
+              </div>
+            </div>
+            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/[0.04] p-5">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300/80">An Official Record</div>
+              <div className="mt-3 flex flex-wrap gap-2 text-[12.5px] text-white/80">
+                {["Approval chain", "Permanent identity", "Governance Certificate", "Integrity proof", "Publicly verifiable"].map((t) => <span key={t} className="rounded-full bg-emerald-500/12 px-2.5 py-0.5 text-emerald-200">✓ {t}</span>)}
+              </div>
+            </div>
+          </div>
+          <div className="mt-7 flex flex-wrap justify-center gap-3">
+            <a href="/official-record" className="rounded-md border border-white/20 px-4 py-2 text-[13px] font-semibold text-white/80 transition hover:border-white/40">See the difference →</a>
+            <a href="/verify" className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-[13px] font-semibold text-emerald-300 transition hover:bg-emerald-500/20">Verify a record →</a>
+          </div>
+        </div>
+      </section>
+
       {/* ── Why Dispatch Exists — strategic context + outcomes ─────── */}
       <section id="why" className="edge-rule scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
