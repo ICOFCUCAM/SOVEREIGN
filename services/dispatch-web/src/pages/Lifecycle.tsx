@@ -6,100 +6,100 @@ import { track } from "../lib/analytics";
 
 // Phase 2 of the Institutional Value & Procurement Experience — the interactive
 // lifecycle. Eight governed stages; clicking one reveals exactly who participates,
-// what decisions are made, what evidence is generated and what risks are
-// prevented. This is the page that lets a procurement team understand precisely
-// what they are buying — not a demo (that is /walkthrough), but a reference.
+// what governs the stage, what it produces and what evidence it leaves behind.
+// This is the page that lets a procurement team understand precisely what they
+// are buying — not a demo (that is /walkthrough), but a reference.
 
 interface Stage {
   key: string;
   n: string;
   title: string;
   summary: string;
-  who: string[];
-  decisions: string[];
+  participants: string[];
+  governance: string[];
+  outputs: string[];
   evidence: string[];
-  risks: string[];
 }
 
 const STAGES: Stage[] = [
   {
     key: "create", n: "01", title: "Create",
     summary: "An author drafts the document inside the institution's governed workspace — it carries institutional context from the first keystroke.",
-    who: ["Author / document owner", "Contributing subject-matter units"],
-    decisions: ["What kind of record this is (document type)", "Its classification and intended audience"],
-    evidence: ["The draft is captured with its author and timestamp", "Document type and classification are recorded"],
-    risks: ["Work scattered across personal drives and inboxes", "A document with no institutional identity or owner"],
+    participants: ["Author / document owner", "Contributing subject-matter units"],
+    governance: ["Created inside the governed workspace, not a personal drive", "Document type and classification set the policy that will apply"],
+    outputs: ["A draft with institutional identity — owner, type and classification attached"],
+    evidence: ["The draft is captured with its author and a timestamp"],
   },
   {
     key: "review", n: "02", title: "Review",
     summary: "The document enters its resolved approval policy. The required offices review in order — legal, compliance and subject-matter — each recording their position.",
-    who: ["Legal office", "Compliance & risk", "Reviewing departments"],
-    decisions: ["Whether the content is legally and procedurally sound", "Whether it meets the institution's frameworks", "Return for revision, or advance"],
-    evidence: ["Each review is recorded against the office that performed it", "Comments and outcomes are retained with the version reviewed"],
-    risks: ["Reviews that happen in email and leave no durable record", "Approving a version nobody can later identify"],
+    participants: ["Legal office", "Compliance & risk", "Reviewing departments"],
+    governance: ["The resolved approval policy requires these offices to review, in order", "Separation of duties — a submitter cannot later approve their own work"],
+    outputs: ["A reviewed version — advanced, or returned for revision with comments"],
+    evidence: ["Each review is recorded against the office that performed it, bound to the version reviewed"],
   },
   {
     key: "approve", n: "03", title: "Approve",
     summary: "The approving authority signs off. Approval is an explicit, attributable act — and the platform enforces that the approver is not the author.",
-    who: ["Approving authority for the document type", "Delegated (acting) approvers, where appointed"],
-    decisions: ["Whether to approve the reviewed version", "On the record, attributable to a named office"],
-    evidence: ["The approval is bound to the office and the exact version", "Separation of duties is enforced and logged"],
-    risks: ["Approvals that cannot be proven years later", "A submitter approving their own work"],
+    participants: ["Approving authority for the document type", "Delegated (acting) approvers, where appointed"],
+    governance: ["Approval is an explicit, attributable act by a named office", "Separation of duties is enforced and logged"],
+    outputs: ["An approval bound to a named office and the exact version"],
+    evidence: ["The approval, the office and the version are recorded together"],
   },
   {
     key: "authorize", n: "04", title: "Authorize",
     summary: "A senior authority authorizes the record for publication — the final institutional gate before anything becomes official.",
-    who: ["Permanent secretary / executive authority", "Publication authority"],
-    decisions: ["Whether the institution will publish this as its official position", "When it takes effect"],
-    evidence: ["The authorization to publish is recorded as a distinct act", "The authorizing office is captured"],
-    risks: ["Publication without a clear, accountable authority", "Ambiguity over who committed the institution"],
+    participants: ["Permanent secretary / executive authority", "Publication authority"],
+    governance: ["A final senior gate: the institution decides it will publish this as its official position", "When it takes effect is set here"],
+    outputs: ["Authorization to publish, recorded as a distinct act"],
+    evidence: ["The authorizing office and the effective decision are captured"],
   },
   {
     key: "publish", n: "05", title: "Publish",
     summary: "The record is published and allocated a permanent Record ID — never reused. From this point every copy points back to one authoritative record.",
-    who: ["Publication authority", "The platform's record service"],
-    decisions: ["Release the authorized record as the official version"],
-    evidence: ["A permanent Record ID (SD-YYYY-NNNNNNNN) is allocated", "The published artefact is hash-stamped"],
-    risks: ["Re-saved files that fork into many uncontrolled copies", "No durable identity for the official version"],
+    participants: ["Publication authority", "The platform's record service"],
+    governance: ["Only an authorized record may publish", "A permanent identifier is allocated and never reused"],
+    outputs: ["An Official Record with a permanent Record ID (SD-YYYY-NNNNNNNN) and a hash-stamped artefact"],
+    evidence: ["The Record ID and the artefact hash are bound to the record"],
   },
   {
-    key: "certificate", n: "06", title: "Certificate",
+    key: "certify", n: "06", title: "Certify",
     summary: "Governance and Preservation certificates are sealed — the institutional proof of how the record came to be and that it is preserved intact.",
-    who: ["The platform's certification service"],
-    decisions: ["Seal the governance and preservation proofs to the record"],
-    evidence: ["Governance Certificate — the approval chain that was satisfied", "Preservation Certificate — the retention horizon and integrity hash"],
-    risks: ["A publication with no provable provenance", "Authenticity that rests on reputation, not proof"],
+    participants: ["The platform's certification service"],
+    governance: ["Certificates are sealed to the record at publication, not added later"],
+    outputs: ["A Governance Certificate (the approval chain satisfied)", "A Preservation Certificate (retention horizon + integrity hash)"],
+    evidence: ["Both certificates and their hashes are attached to the record"],
   },
   {
     key: "verify", n: "07", title: "Verify",
     summary: "Anyone holding a copy can independently confirm the record is genuine, unrevoked and untampered — by its Record ID, with no account.",
-    who: ["Any recipient — citizen, auditor, counterparty", "No login required"],
-    decisions: ["Is this copy the authentic, current official record?"],
-    evidence: ["A verification result: institution, status, integrity hash", "Confirmation the file matches the issued artefact"],
-    risks: ["Forged or altered copies passing as genuine", "Superseded versions circulating as current"],
+    participants: ["Any recipient — citizen, auditor, counterparty", "No login required"],
+    governance: ["Verification is public and read-only", "Status is disclosed honestly — including revoked or evaluation records"],
+    outputs: ["A verification result: institution, status, integrity hash", "A file-level match check against the issued artefact"],
+    evidence: ["The institution's own certificates and hashes, checked live against the copy presented"],
   },
   {
     key: "preserve", n: "08", title: "Preserve",
     summary: "The record is sealed for its retention horizon with a tamper-evident hash, on infrastructure the institution controls — and remains verifiable for its full life.",
-    who: ["The institution's archive", "The platform's preservation service"],
-    decisions: ["Retain the sealed record for its retention period"],
-    evidence: ["Tamper-evident integrity hash over the sealed record", "Retention horizon recorded and enforced"],
-    risks: ["Archived copies altered or lost without detection", "Records that cannot be proven decades later"],
+    participants: ["The institution's archive", "The platform's preservation service"],
+    governance: ["Sealed for its retention horizon on infrastructure the institution controls", "Integrity is tamper-evident"],
+    outputs: ["A preserved record that remains verifiable for its full retention life"],
+    evidence: ["A tamper-evident integrity hash and the enforced retention horizon"],
   },
 ];
 
-const Facet: React.FC<{ label: string; tone: "who" | "decision" | "evidence" | "risk"; items: string[] }> = ({ label, tone, items }) => {
+const Facet: React.FC<{ label: string; tone: "participants" | "governance" | "outputs" | "evidence"; items: string[] }> = ({ label, tone, items }) => {
   const ring = {
-    who: "border-white/10",
-    decision: "border-white/10",
+    participants: "border-white/10",
+    governance: "border-gold-400/25",
+    outputs: "border-sky-500/25",
     evidence: "border-emerald-500/25",
-    risk: "border-amber-500/20",
   }[tone];
   const dot = {
-    who: "bg-white/40",
-    decision: "bg-gold-400/70",
+    participants: "bg-white/40",
+    governance: "bg-gold-400/70",
+    outputs: "bg-sky-400/70",
     evidence: "bg-emerald-400/70",
-    risk: "bg-amber-400/70",
   }[tone];
   return (
     <div className={`rounded-xl border ${ring} bg-white/[0.02] p-5`}>
@@ -135,8 +135,8 @@ const Lifecycle: React.FC = () => {
               Exactly what you are buying, stage by stage.
             </h1>
             <p className="mt-5 max-w-2xl text-[16px] leading-relaxed text-white/60">
-              Every Dispatch publication follows the same eight governed stages. Select any stage to see who
-              participates, the decisions made, the evidence generated, and the institutional risks it prevents.
+              Every Dispatch publication follows the same eight governed stages. Select any stage to see the
+              participants, what governs it, the outputs it produces, and the evidence it leaves behind.
             </p>
 
             {/* stage selector — horizontal rail */}
@@ -159,10 +159,10 @@ const Lifecycle: React.FC = () => {
               </div>
               <p className="mt-3 max-w-3xl text-[15.5px] leading-relaxed text-white/65">{s.summary}</p>
               <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Facet label="Who participates" tone="who" items={s.who} />
-                <Facet label="Decisions made" tone="decision" items={s.decisions} />
-                <Facet label="Evidence generated" tone="evidence" items={s.evidence} />
-                <Facet label="Risks prevented" tone="risk" items={s.risks} />
+                <Facet label="Participants" tone="participants" items={s.participants} />
+                <Facet label="Governance" tone="governance" items={s.governance} />
+                <Facet label="Outputs" tone="outputs" items={s.outputs} />
+                <Facet label="Evidence" tone="evidence" items={s.evidence} />
               </div>
               <div className="mt-7 flex items-center gap-3">
                 <button onClick={() => setI((v) => Math.max(0, v - 1))} disabled={i === 0}

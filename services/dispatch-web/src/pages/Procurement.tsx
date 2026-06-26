@@ -24,6 +24,16 @@ const CONTENTS = [
   ["evaluation", "Evaluation Process"],
   ["support", "Support Models"],
   ["faq", "Procurement FAQ"],
+  ["roi", "ROI & Operational Model"],
+  ["downloads", "Downloadable Documents"],
+];
+
+// Downloadable procurement documents — real, self-contained PDFs (generated from
+// the same source as this dossier), served from /public. No gate, no NDA.
+const DOCS: { file: string; title: string; blurb: string; pages: string }[] = [
+  { file: "sovereign-dispatch-procurement-overview.pdf", title: "Procurement Overview", blurb: "What it is, deployment models, security, pricing and the full procurement FAQ — in one pack.", pages: "PDF" },
+  { file: "sovereign-dispatch-evaluation-guide.pdf", title: "Evaluation Guide", blurb: "The evaluation path, what to test in a pilot, and a procurement checklist.", pages: "PDF" },
+  { file: "sovereign-dispatch-security-architecture-summary.pdf", title: "Security & Architecture Summary", blurb: "The governed pipeline, security controls, deployment topology and residency posture.", pages: "PDF" },
 ];
 
 // The evaluator's index — one destination from which a procurement team reaches
@@ -31,7 +41,8 @@ const CONTENTS = [
 const INDEX: { to: string; label: string; blurb: string; ext?: boolean }[] = [
   { to: COST_ROUTE, label: "Cost of Publication", blurb: "Why Dispatch exists — the institutional process it governs.", ext: true },
   { to: LIFECYCLE_ROUTE, label: "The Governed Lifecycle", blurb: "Stage by stage: who acts, what is decided, what is proven.", ext: true },
-  { to: ROI_ROUTE, label: "Operational Model", blurb: "Model the scale of governed publication from your own figures.", ext: true },
+  { to: "#roi", label: "ROI & Operational Model", blurb: "Model the scale of governed publication from your own figures." },
+  { to: "#downloads", label: "Downloadable Documents", blurb: "Ready-made procurement PDFs — overview, evaluation, security." },
   { to: ARCHITECTURE_ROUTE, label: "Architecture", blurb: "System context, pipeline, security and deployment topology.", ext: true },
   { to: SECURITY_ROUTE, label: "Security", blurb: "Isolation, encryption, least privilege and immutable audit.", ext: true },
   { to: COMPLIANCE_ROUTE, label: "Compliance", blurb: "The governance frameworks the platform is built around.", ext: true },
@@ -54,7 +65,7 @@ const FAQ: { q: string; a: React.ReactNode }[] = [
   { q: "How do users authenticate?", a: <>Authentication uses OAuth2 client-credentials issuing short-lived, scoped tokens. Identity and SSO integration is arranged during deployment planning.</> },
   { q: "Can it integrate with our existing systems?", a: <>Yes — ERP, case-management and document systems integrate through the Dispatch API. See the <a href={DEVELOPERS_ROUTE} className="text-gold-300 hover:underline">developer platform</a>.</> },
   { q: "What can we verify independently?", a: <>Any published record can be confirmed genuine, unrevoked and untampered through the public <a href={VERIFY_ROUTE} className="text-gold-300 hover:underline">verification portal</a> — no account required.</> },
-  { q: "Can we keep these materials as a PDF?", a: <>Yes — use <em>Print → Save as PDF</em> (the print button in the header). Every section here is print-ready; no gated downloads.</> },
+  { q: "Can we keep these materials as a PDF?", a: <>Yes. Download the ready-made procurement documents from the <a href="#downloads" className="text-gold-300 hover:underline">Downloadable Documents</a> section below, or use <em>Print → Save as PDF</em> for this page. No gated downloads.</> },
 ];
 
 const Procurement: React.FC = () => {
@@ -282,6 +293,63 @@ const Procurement: React.FC = () => {
               </div>
             ))}
           </div>
+        </Block>
+
+        {/* ROI & Operational Model — part of the Procurement Center */}
+        <Block id="roi" n="10" title="ROI & Operational Model"
+          lead="Model the scale of governed publication from your institution's own figures — an illustrative operational model, never a promise of savings.">
+          <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr] lg:items-center">
+            <div>
+              <p className="text-[14px] leading-relaxed text-white/60">
+                The operational-model estimator takes your own inputs — publications per year, reviewing offices,
+                departments involved, audit frequency and your cost assumptions — and reflects the scale of activity they
+                imply. It separates the judgement an official publication will always require from the coordination and
+                reconstruction effort a governed platform targets.
+              </p>
+              <ul className="mt-4 space-y-2 text-[13.5px] text-white/65">
+                <li className="flex gap-2.5"><Dot /> Driven entirely by institution-supplied assumptions.</li>
+                <li className="flex gap-2.5"><Dot /> Illustrative estimates only — no guaranteed savings, ROI or payback is asserted.</li>
+                <li className="flex gap-2.5"><Dot /> Results depend on your own processes, volumes and rates.</li>
+              </ul>
+              <a href={ROI_ROUTE} target="_blank" rel="noopener"
+                className="mt-6 inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-5 py-2.5 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
+                Open the estimator <Chevron className="h-3.5 w-3.5" />
+              </a>
+            </div>
+            <div className={`${SURFACE} p-6`}>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">What it reflects</div>
+              <div className="mt-4 space-y-3">
+                {[["Records / year", "Each with a permanent ID and integrity hash"], ["Review touches / year", "Office-level reviews governed in order"], ["Evidence chains / year", "Generated automatically, not by hand"], ["Effort it targets", "Coordination & reconstruction, not judgement"]].map(([t, b]) => (
+                  <div key={t} className="border-b border-white/[0.06] pb-2.5 last:border-0">
+                    <div className="text-[13.5px] font-semibold text-white">{t}</div>
+                    <div className="text-[12px] text-white/45">{b}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Block>
+
+        {/* Downloadable procurement documents — real PDFs from /public */}
+        <Block id="downloads" n="11" title="Downloadable Documents"
+          lead="Ready-made procurement documents you can take into your own process. Real PDFs, no gate, no NDA.">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {DOCS.map((d) => (
+              <a key={d.file} href={`/procurement/${d.file}`} download
+                className={`${SURFACE} group flex flex-col p-6`}>
+                <div className="flex items-center justify-between">
+                  <span className="rounded border border-white/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide text-gold-400/80">{d.pages}</span>
+                  <svg viewBox="0 0 24 24" className="h-5 w-5 text-gold-400/60 transition group-hover:text-gold-400" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+                  </svg>
+                </div>
+                <div className="mt-4 font-serif text-[1.15rem] font-bold leading-tight text-white">{d.title}</div>
+                <p className="mt-2 text-[13px] leading-relaxed text-white/55">{d.blurb}</p>
+                <span className="mt-4 text-[12px] font-semibold uppercase tracking-wide text-gold-400/80 group-hover:text-gold-300">Download</span>
+              </a>
+            ))}
+          </div>
+          <p className="mt-4 text-[12px] leading-relaxed text-white/35">Documents use verifiable language; they assert no certifications, SLAs or guarantees. Security and architecture-review materials are available to qualified institutions during evaluation.</p>
         </Block>
       </div>
 

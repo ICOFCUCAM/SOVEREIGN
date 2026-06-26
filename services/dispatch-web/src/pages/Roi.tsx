@@ -97,7 +97,9 @@ const Roi: React.FC = () => {
       <main>
         <section className="border-t border-white/[0.06] px-6 py-16 lg:px-12">
           <div className="mx-auto max-w-[1100px]">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Operational model</p>
+            <button onClick={() => nav(PROCUREMENT_ROUTE)} className="group inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400 transition hover:text-gold-300">
+              <Chevron className="h-3 w-3 rotate-180" /> Procurement Center · Operational Model
+            </button>
             <h1 className="mt-4 max-w-3xl font-serif text-[2.4rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3rem]">
               Model the scale of governed publication.
             </h1>
