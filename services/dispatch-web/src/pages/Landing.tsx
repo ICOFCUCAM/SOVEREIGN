@@ -3,30 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { DispatchMark, Chevron, SectionHead, PublicHeader, PublicFooter, FilmGrain, useReveal } from "../components/brand";
 import {
   ARCHITECTURE_ROUTE, DEVELOPERS_ROUTE, PROCUREMENT_ROUTE,
-  OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE,
+  OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE, SECURITY_ROUTE, TRUST_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE,
 } from "../lib/routes";
 
-// The front door — Sovereign Dispatch, the Vanguard of Institutional Governance.
-// One governed path from information to a Trusted Institutional Publication. Every
-// claim here is something the platform actually does (governance, certificates,
-// integrity, verification, preservation); the CTAs reach the real surfaces.
+// The front door. Narrative order for procurement teams and executives:
+//   Who is it for? → Why does it exist? → How does it work? → Why can I trust it?
+//   → How do I evaluate it? The hero is fixed (approved); all design lives below it.
 
 const VERBS = ["Create", "Review", "Approve", "Authorize", "Publish", "Certify", "Verify", "Preserve"];
 
 const GUARANTEES = [
-  "A permanent institutional identity",
-  "A governed approval process",
-  "Named institutional authority",
-  "A Governance Certificate",
-  "A Preservation Certificate",
-  "Cryptographic integrity verification",
-  "A complete evidence chain",
-  "Permanent authenticity verification",
-];
-
-const TRANSFORM = [
-  "Information", "Draft", "Governance", "Review", "Approval", "Authorization",
-  "Publication", "Certification", "Verification", "Preservation",
+  "A permanent institutional identity", "A governed approval process", "Named institutional authority",
+  "A Governance Certificate", "A Preservation Certificate", "Cryptographic integrity verification",
+  "A complete evidence chain", "Permanent authenticity verification",
 ];
 
 const LIFECYCLE: [string, string][] = [
@@ -34,11 +23,6 @@ const LIFECYCLE: [string, string][] = [
   ["06", "Publication"], ["07", "Certification"], ["08", "Verification"], ["09", "Preservation"],
 ];
 
-// WHO USES DISPATCH — the people who hold office inside institutions worldwide.
-// Each card's photograph drops into /public/people/<slug>.webp (see the manifest
-// in that folder). Until a real image is supplied, a dignified portrait
-// placeholder shows — never a broken image. Region tags signal international
-// representation; the roster spans men and women in equal measure.
 // Institution-type cards — large editorial photography of leadership at work.
 // `scene` documents the photograph to supply (see public/people/README.md); the
 // card shows a per-sector editorial placeholder until the image is dropped in.
@@ -73,8 +57,7 @@ const ROSTER: [string, string[]][] = [
 ];
 
 // A large editorial image that prefers a real photograph (the scene of leadership
-// at work) and falls back to a per-sector glyph treatment — never a broken image —
-// so the section is premium and institutional with or without supplied photography.
+// at work) and falls back to a per-sector glyph treatment — never a broken image.
 const SectorImage: React.FC<{ slug: string; alt: string }> = ({ slug, alt }) => {
   const [failed, setFailed] = useState(false);
   return (
@@ -93,13 +76,6 @@ const SectorImage: React.FC<{ slug: string; alt: string }> = ({ slug, alt }) => 
   );
 };
 
-const SECTORS: [string, string][] = [
-  ["Government", "Issue legislation, policies, directives and official notices with permanent authenticity."],
-  ["Healthcare", "Publish clinical guidance, safety directives and regulatory publications with complete traceability."],
-  ["Education", "Publish senate resolutions, research outputs, credentials and institutional publications."],
-  ["Enterprise", "Govern board resolutions, compliance publications and corporate authority through one trusted platform."],
-];
-
 const Landing: React.FC = () => {
   useReveal();
   const nav = useNavigate();
@@ -109,7 +85,7 @@ const Landing: React.FC = () => {
       <FilmGrain />
       <PublicHeader />
       <main>
-        {/* ── Hero ─────────────────────────────────────────────────── */}
+        {/* ── Hero (approved — unchanged) ──────────────────────────── */}
         <section className="relative overflow-hidden border-t border-white/[0.06] px-6 pb-24 pt-24 lg:px-12">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(202,164,90,0.10),transparent_70%)]" />
           <div className="relative mx-auto max-w-5xl text-center">
@@ -137,31 +113,25 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* ── Trusted by institutions worldwide — the big visual section ── */}
+        {/* ── 1 · WHO IS IT FOR — Built for the world's leading institutions ── */}
         <section className="border-t border-white/[0.06] px-6 py-24 lg:px-12">
           <div className="mx-auto max-w-6xl">
             <div className="text-center">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Who leads with Dispatch</div>
-              <h2 className="mx-auto mt-3 max-w-3xl font-serif text-[2.1rem] font-bold leading-tight tracking-tight sm:text-[2.7rem]">Trusted by institutions worldwide.</h2>
-              <p className="mx-auto mt-3 max-w-2xl text-[14.5px] leading-relaxed text-white/55">Governments, universities, hospitals, courts, enterprises and regulators turn their decisions into governed, certified, permanently verifiable publications. Find your institution.</p>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Designed for institutions that cannot fail</div>
+              <h2 className="mx-auto mt-3 max-w-3xl font-serif text-[2.1rem] font-bold leading-tight tracking-tight sm:text-[2.7rem]">Built for the world's leading institutions.</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-[14.5px] leading-relaxed text-white/55">For governments, regulators, universities, healthcare, courts and enterprise — every institution that governs information. Find where yours fits.</p>
             </div>
-
-            {/* institution-type cards — large editorial imagery of leadership at work */}
             <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {INSTITUTIONS.map((it) => (
                 <article key={it.slug} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-gold-400/30 hover:bg-white/[0.03]">
                   <div className="relative">
                     <SectorImage slug={it.slug} alt={`${it.name} — ${it.scene}`} />
-                    <div className="absolute inset-x-0 bottom-0 p-5">
-                      <div className="font-serif text-[1.55rem] font-bold leading-none text-white">{it.name}</div>
-                    </div>
+                    <div className="absolute inset-x-0 bottom-0 p-5"><div className="font-serif text-[1.55rem] font-bold leading-none text-white">{it.name}</div></div>
                   </div>
                   <p className="px-5 pb-5 pt-4 text-[14px] leading-relaxed text-white/65">{it.copy}</p>
                 </article>
               ))}
             </div>
-
-            {/* the full roster — every office within each institution */}
             <div className="mt-16">
               <div className="text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">Across every institution</div>
               <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -169,25 +139,34 @@ const Landing: React.FC = () => {
                   <div key={sector} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
                     <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-gold-400/80">{sector}</div>
                     <ul className="mt-3 space-y-1.5">
-                      {roles.map((r) => (
-                        <li key={r} className="flex items-center gap-2.5 text-[13.5px] text-white/70">
-                          <span className="h-1 w-1 shrink-0 rounded-full bg-gold-400/60" />{r}
-                        </li>
-                      ))}
+                      {roles.map((r) => <li key={r} className="flex items-center gap-2.5 text-[13.5px] text-white/70"><span className="h-1 w-1 shrink-0 rounded-full bg-gold-400/60" />{r}</li>)}
                     </ul>
                   </div>
                 ))}
               </div>
-              <p className="mt-8 text-center text-[12px] text-white/35">International representation across Africa, Europe, Asia, the Middle East and the Americas — every office, every institution that cannot fail.</p>
             </div>
           </div>
         </section>
 
-        {/* ── What makes Dispatch different ────────────────────────── */}
+        {/* ── 2 · WHY DOES IT EXIST — the problem ──────────────────── */}
         <section className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-transparent px-6 py-24 lg:px-12">
+          <div className="mx-auto max-w-4xl">
+            <SectionHead index="01" kicker="Why Dispatch exists" title="The challenge is not writing documents."
+              sub="Governments, universities, hospitals, regulators and enterprises make decisions every day. The challenge is proving that those documents became the institution's official publication — governed, authorized and permanent. Information is not authority. Authority must be earned." />
+            <div className="mx-auto mt-12 grid max-w-3xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {["Governance before publication", "Institutional authority", "Complete provenance", "Cryptographic integrity", "Permanent preservation", "Independent verification"].map((t) => (
+                <div key={t} className="rounded-xl border border-white/10 bg-white/[0.02] px-4 py-4 text-[14px] font-medium text-white/80">{t}</div>
+              ))}
+            </div>
+            <p className="mt-8 text-center text-[14px] text-white/45">Every publication proves itself.</p>
+          </div>
+        </section>
+
+        {/* ── 3 · WHAT MAKES IT DIFFERENT — the value ──────────────── */}
+        <section className="border-t border-white/[0.06] px-6 py-24 lg:px-12">
           <div className="mx-auto max-w-5xl">
-            <SectionHead index="01" kicker="The distinction" title="Most platforms create documents. Dispatch creates trusted institutional publications."
-              sub="An ordinary document can be copied, edited, renamed, replaced or questioned. A Dispatch publication is fundamentally different — a copied PDF is still only a copy; a Dispatch publication can always prove its authenticity." />
+            <SectionHead index="02" kicker="The distinction" title="What makes an official publication different."
+              sub="An ordinary document can be copied, edited, renamed, replaced or questioned. A Dispatch publication is the institution's authoritative version of a decision — and a copied PDF is still only a copy, while a Dispatch publication can always prove its authenticity." />
             <div className="mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-2.5 sm:grid-cols-2">
               {GUARANTEES.map((g) => (
                 <div key={g} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[14px] text-white/85">
@@ -202,60 +181,12 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* ── The Dispatch transformation ──────────────────────────── */}
-        <section className="border-t border-white/[0.06] px-6 py-24 lg:px-12">
-          <div className="mx-auto max-w-4xl">
-            <SectionHead index="02" kicker="The transformation" title="Information is not authority. Authority must be earned."
-              sub="Dispatch transforms institutional information through one governed path." />
-            <ol className="mx-auto mt-12 max-w-md">
-              {TRANSFORM.map((t, i) => (
-                <li key={t} className="relative flex items-center gap-4 pb-4 last:pb-0">
-                  {i < TRANSFORM.length && <span aria-hidden className="absolute left-[15px] top-7 h-[calc(100%-1.25rem)] w-px bg-white/10 last:hidden" />}
-                  <span className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-[#0c0c0c] font-mono text-[11px] text-white/45">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="text-[15px] font-medium text-white/80">{t}</span>
-                </li>
-              ))}
-              <li className="relative flex items-center gap-4 pt-1">
-                <span className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-500/20 text-gold-300 ring-1 ring-gold-400/40">★</span>
-                <span className="font-serif text-[1.15rem] font-bold text-white">Trusted Institutional Publication</span>
-              </li>
-            </ol>
-          </div>
-        </section>
-
-        {/* ── Why institutions choose Dispatch ─────────────────────── */}
-        <section className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-transparent px-6 py-24 lg:px-12">
-          <div className="mx-auto max-w-4xl">
-            <SectionHead index="03" kicker="Why institutions choose Dispatch" title="The challenge is not writing documents."
-              sub="Governments, universities, hospitals, regulators and enterprises make decisions every day. The challenge is proving that those documents became the institution's official publication." />
-            <div className="mx-auto mt-12 grid max-w-3xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {["Governance before publication", "Institutional authority", "Complete provenance", "Cryptographic integrity", "Permanent preservation", "Independent verification"].map((t) => (
-                <div key={t} className="rounded-xl border border-white/10 bg-white/[0.02] px-4 py-4 text-[14px] font-medium text-white/80">{t}</div>
-              ))}
-            </div>
-            <p className="mt-8 text-center text-[14px] text-white/45">Every publication proves itself.</p>
-          </div>
-        </section>
-
-        {/* ── What is a trusted institutional publication ──────────── */}
-        <section className="border-t border-white/[0.06] px-6 py-24 lg:px-12">
-          <div className="mx-auto max-w-4xl">
-            <SectionHead index="04" kicker="Definition" title="What is a trusted institutional publication?"
-              sub="The institution's authoritative version of a decision. Unlike an ordinary document, it carries the proof that it was governed, authorized and issued — and, years later, anyone with permission can verify it is genuine, complete and officially issued." />
-            <div className="mx-auto mt-10 flex max-w-2xl flex-wrap justify-center gap-2">
-              {["institutional authority", "approval history", "publication authority", "governance certificate", "preservation certificate", "integrity proof", "permanent evidence"].map((t) => (
-                <span key={t} className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1 text-[12.5px] text-white/70">{t}</span>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── The governed lifecycle ───────────────────────────────── */}
+        {/* ── 4 · HOW IT WORKS — the governed lifecycle ────────────── */}
         <section className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-transparent px-6 py-24 lg:px-12">
           <div className="mx-auto max-w-5xl">
-            <SectionHead index="05" kicker="The governed lifecycle" title="Every publication follows the same institutional path."
+            <SectionHead index="03" kicker="The governed lifecycle" title="Every publication follows the same institutional path."
               sub="Nothing bypasses governance. Nothing reaches publication without institutional authority." />
-            <div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3">
+            <div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3">
               {LIFECYCLE.map(([n, t]) => (
                 <div key={n} className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
                   <div className="font-mono text-[12px] text-gold-400/70">{n}</div>
@@ -266,39 +197,65 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* ── Built for institutions that cannot fail ──────────────── */}
+        {/* ── 5 · WHY CAN I TRUST IT — certificates & evidence ─────── */}
         <section className="border-t border-white/[0.06] px-6 py-24 lg:px-12">
           <div className="mx-auto max-w-5xl">
-            <SectionHead index="06" kicker="Built for institutions that cannot fail" title="One platform for the institutions decisions depend on." />
-            <div className="mx-auto mt-12 grid max-w-4xl gap-5 sm:grid-cols-2">
-              {SECTORS.map(([k, v]) => (
-                <div key={k} className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="font-serif text-[1.3rem] font-bold text-white">{k}</div>
-                  <p className="mt-2 text-[13.5px] leading-relaxed text-white/55">{v}</p>
+            <SectionHead index="04" kicker="Governance certificates & evidence chain" title="The proof a copy can never carry."
+              sub="Every published record carries the institutional proof of how it came to be — independently verifiable, years later, by anyone with permission." />
+            <div className="mx-auto mt-12 grid max-w-4xl gap-5 lg:grid-cols-3">
+              {[
+                ["Governance Certificate", "Proof the approval chain was satisfied — the offices, in order, that reviewed and authorized the publication."],
+                ["Preservation Certificate", "Proof the record was sealed for permanence, with its retention horizon and a tamper-evident integrity hash."],
+                ["Evidence Chain", "Every action — submitted, reviewed, returned, approved, rendered, published, preserved — timestamped and append-only."],
+              ].map(([t, d]) => (
+                <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+                  <div className="font-serif text-[1.25rem] font-bold text-white">{t}</div>
+                  <p className="mt-2 text-[13.5px] leading-relaxed text-white/55">{d}</p>
                 </div>
               ))}
+            </div>
+            <div className="mx-auto mt-8 max-w-4xl rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] px-5 py-4 text-center text-[13.5px] text-white/60">
+              Each record receives a permanent identifier and a SHA-256 integrity proof. <span className="text-white/85">Anyone can confirm a file is exactly the one the institution issued.</span>
+              <button onClick={() => nav(VERIFY_ROUTE)} className="ml-3 font-semibold text-emerald-300 hover:text-emerald-200">Verify a record →</button>
             </div>
           </div>
         </section>
 
-        {/* ── One platform, three ways ─────────────────────────────── */}
+        {/* ── 6 · SECURITY & SOVEREIGNTY ───────────────────────────── */}
         <section className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-transparent px-6 py-24 lg:px-12">
           <div className="mx-auto max-w-5xl">
-            <SectionHead index="07" kicker="One platform" title="Three ways to use Dispatch." />
-            <div className="mx-auto mt-12 grid max-w-4xl gap-5 lg:grid-cols-3">
-              {[
-                { t: "Operations", d: "Daily institutional work through the Dispatch console.", cta: "Launch the console", to: "/console" },
-                { t: "Integration", d: "Connect existing ERP, SharePoint, case management, HR or document systems through the Dispatch API.", cta: "For developers", to: DEVELOPERS_ROUTE },
-                { t: "Evaluation", d: "Security, procurement, compliance, trust and deployment resources — available before adoption.", cta: "Evaluate Dispatch", to: PROCUREMENT_ROUTE },
-              ].map((c) => (
-                <div key={c.t} className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.02] p-6">
-                  <div className="font-serif text-[1.3rem] font-bold text-white">{c.t}</div>
-                  <p className="mt-2 flex-1 text-[13.5px] leading-relaxed text-white/55">{c.d}</p>
-                  <button onClick={() => nav(c.to)} className="mt-4 self-start text-[13px] font-semibold text-gold-400 transition hover:text-gold-300">{c.cta} →</button>
-                </div>
+            <SectionHead index="05" kicker="Security & sovereignty" title="Sovereign by construction."
+              sub="Tenant-isolated, residency-aware, append-only. Built for institutions whose information cannot leak, cannot be lost, and cannot be repudiated." />
+            <div className="mx-auto mt-12 grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {["Tenant isolation", "Data residency", "Append-only audit", "Classification handling"].map((t) => (
+                <div key={t} className="rounded-xl border border-white/10 bg-white/[0.02] px-4 py-4 text-center text-[13.5px] font-medium text-white/80">{t}</div>
               ))}
             </div>
-            <div className="mt-14 flex flex-col items-center gap-1 border-t border-white/[0.06] pt-10 text-center">
+            <div className="mt-9 flex flex-wrap justify-center gap-3">
+              <button onClick={() => nav(SECURITY_ROUTE)} className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold text-white/80 transition hover:border-white/40">Security →</button>
+              <button onClick={() => nav(TRUST_ROUTE)} className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold text-white/80 transition hover:border-white/40">Trust Centre →</button>
+              <button onClick={() => nav(COMPLIANCE_ROUTE)} className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold text-white/80 transition hover:border-white/40">Compliance →</button>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 7 · HOW DO I EVALUATE — procurement + launch ─────────── */}
+        <section className="border-t border-white/[0.06] px-6 py-24 lg:px-12">
+          <div className="mx-auto max-w-4xl text-center">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Evaluate Dispatch</div>
+            <h2 className="mx-auto mt-3 max-w-2xl font-serif text-[2rem] font-bold leading-tight tracking-tight sm:text-[2.5rem]">Evaluate in your own environment. No sales call required.</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-[14.5px] leading-relaxed text-white/55">Security, procurement, compliance, trust and deployment resources are available before adoption — and your existing ERP, case-management or document systems can integrate through the Dispatch API.</p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <button onClick={() => nav(PROCUREMENT_ROUTE)} className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold text-white/80 transition hover:border-white/40">Procurement dossier</button>
+              <button onClick={() => nav(EVIDENCE_ROUTE)} className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold text-white/80 transition hover:border-white/40">Evidence package</button>
+              <button onClick={() => nav(DEVELOPERS_ROUTE)} className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold text-white/80 transition hover:border-white/40">For developers</button>
+            </div>
+            <div className="mt-10">
+              <button onClick={() => nav("/console")} className="group inline-flex items-center gap-2 rounded-md bg-gradient-to-b from-gold-300 to-gold-600 px-7 py-3.5 text-sm font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_8px_20px_-8px_rgba(0,0,0,0.6)] transition hover:from-gold-200 hover:to-gold-500">
+                Launch Dispatch <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+              </button>
+            </div>
+            <div className="mt-14 flex flex-col items-center gap-1 border-t border-white/[0.06] pt-10">
               <div className="flex items-center gap-2.5"><DispatchMark className="h-6 w-6 text-gold-400" /><span className="font-semibold tracking-tight text-white/85">Sovereign Dispatch</span></div>
               <div className="mt-2 text-[11px] uppercase tracking-[0.2em] text-white/40">Sovereign by design · Auditable by default · Institution ready</div>
               <div className="mt-1 text-[13px] text-white/30">The Vanguard of Institutional Governance.</div>
