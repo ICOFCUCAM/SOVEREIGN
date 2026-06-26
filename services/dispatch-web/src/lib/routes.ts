@@ -3,6 +3,9 @@
 // component — the CTA reads this constant. No human contact is required to reach
 // the procurement dossier today; a role-based address can be added later.
 export const PROCUREMENT_ROUTE = "/procurement";
+// Public pricing — packaged by institution and capability, never by seat.
+// Concrete prices for the self-serve tiers; the top two route to evaluation/contact.
+export const PRICING_ROUTE = "/pricing";
 export const TRUST_ROUTE = "/trust";
 export const ARCHITECTURE_ROUTE = "/architecture";
 export const PLATFORM_ROUTE = "/platform";

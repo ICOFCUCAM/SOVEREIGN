@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   PLATFORM_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE, DEVELOPERS_ROUTE,
-  PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE, EVIDENCE_ROUTE, TRUST_ROUTE,
+  PROCUREMENT_ROUTE, PRICING_ROUTE, ARCHITECTURE_ROUTE, EVIDENCE_ROUTE, TRUST_ROUTE,
   OUTCOMES_ROUTE, STANDARD_ROUTE, RECORDS_ROUTE, JOURNEY_ROUTE,
   OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE,
 } from "../lib/routes";
@@ -97,7 +97,7 @@ export const PublicFooter: React.FC = () => (
         </div>
         <FooterCol title="The Standard" links={[["What is an Official Record?", OFFICIAL_RECORD_ROUTE], ["Verify a record", VERIFY_ROUTE], ["Outcomes", OUTCOMES_ROUTE], ["The Standard", STANDARD_ROUTE], ["Records", RECORDS_ROUTE], ["Readiness Journey", JOURNEY_ROUTE]]} />
         <FooterCol title="Platform" links={[["Overview", PLATFORM_ROUTE], ["Developers", DEVELOPERS_ROUTE], ["Security", SECURITY_ROUTE], ["Compliance", COMPLIANCE_ROUTE]]} />
-        <FooterCol title="Evaluate" links={[["Procurement", PROCUREMENT_ROUTE], ["Architecture", ARCHITECTURE_ROUTE], ["Evidence", EVIDENCE_ROUTE], ["Trust", TRUST_ROUTE]]} />
+        <FooterCol title="Evaluate" links={[["Pricing", PRICING_ROUTE], ["Procurement", PROCUREMENT_ROUTE], ["Architecture", ARCHITECTURE_ROUTE], ["Evidence", EVIDENCE_ROUTE], ["Trust", TRUST_ROUTE]]} />
         <FooterCol title="Access" links={[["Launch Dispatch", "/console"], ["Log in", "/console"]]} />
       </div>
       <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/[0.05] pt-7 sm:flex-row sm:items-center">
@@ -158,6 +158,7 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
           <button onClick={() => nav("/trust")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white sm:inline-block">Trust</button>
           <button onClick={() => nav(DEVELOPERS_ROUTE)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">Developers</button>
           <button onClick={() => nav(VERIFY_ROUTE)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white sm:inline-block">Verify</button>
+          <button onClick={() => nav(PRICING_ROUTE)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white sm:inline-block">Pricing</button>
           {actions}
           <button onClick={() => nav("/console")}
             className="group inline-flex items-center gap-2 whitespace-nowrap rounded bg-gradient-to-b from-gold-300 to-gold-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500 sm:px-5">

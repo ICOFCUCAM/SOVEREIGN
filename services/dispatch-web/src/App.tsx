@@ -4,6 +4,7 @@ import { useAuth } from "./lib/auth";
 import ConsoleShell from "./components/Shell";
 import Landing from "./pages/Landing";
 import Procurement from "./pages/Procurement";
+import Pricing from "./pages/Pricing";
 import Trust from "./pages/Trust";
 import Outcomes from "./pages/Outcomes";
 import RecordGallery from "./pages/RecordGallery";
@@ -130,6 +131,7 @@ const App: React.FC = () => (
     <Route path="/" element={<Landing />} />
     {/* public procurement + architecture dossier (no auth) */}
     <Route path="/procurement" element={<Procurement />} />
+    <Route path="/pricing" element={<Pricing />} />
     <Route path="/trust" element={<Trust />} />
     {/* category / institutional-transformation surface (public) */}
     <Route path="/outcomes" element={<Outcomes />} />
