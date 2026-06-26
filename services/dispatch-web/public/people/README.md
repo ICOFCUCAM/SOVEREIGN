@@ -23,28 +23,51 @@ fund or a central bank would put in its yearly report:
   not flat office fluorescent.
 - **Realistic institutional environments** — actual chambers, benches,
   boardrooms, council floors; not generic glass-and-laptop stock sets.
-- **Diverse international representation** — across Africa, Europe, Asia, the
-  Middle East and the Americas, with equal representation of men and women.
 - **No obvious stock-photo poses** — no smiling-at-camera, no handshake-over-a-
-  contract clichés. People presiding, signing, deliberating, at work.
+  contract clichés. Presiding, signing, deliberating, at work.
+
+### Prefer compositions with no identifiable faces
+
+A free-license image grants the photographer's copyright but **not** a model
+release. Right-of-publicity means we cannot imply a recognizable person endorses
+Dispatch. So favour frames where **no face is identifiable** — and it reads more
+institutional anyway:
+
+- hands signing, a pen on a document, a gavel, a seal or mace
+- a wide council chamber, a bench, an empty boardroom mid-session
+- figures from behind, in silhouette, or against a window
+- detail and architecture over portraits
+
+Where a face does appear, only use the frame if a model release is on record,
+and aim for diverse international representation across Africa, Europe, Asia, the
+Middle East and the Americas.
 
 ### Sourcing plan
 
-- **Phase 1 (now):** License premium editorial frames that meet the standard
-  above from a quality editorial library, graded to match. Drop them in here.
-- **Phase 2 (later):** Replace them with commissioned originals shot to this
-  art direction so the imagery is unique to Dispatch.
+- **Phase 1 (now) — free-license, no recognizable faces:** Pull dark, cinematic,
+  face-free frames from **Unsplash, Pexels or Pixabay** (all permit commercial
+  use, no attribution). Curate hard — only the top few percent meet the standard.
+  Grade to match the page and log each in `CREDITS.md`. Zero cost, zero release
+  risk.
+- **Phase 1b (optional):** License from Magnum (commercial), Gallery Stock or
+  Stocksy **only** when you specifically need a recognizable, released
+  institutional figure that free, face-free frames cannot give.
+- **Phase 2 (later):** Replace with commissioned originals shot to this art
+  direction so the imagery is unique to Dispatch.
 
 ## Required files (institution cards)
 
-| File | Institution | Scene to photograph |
-|------|-------------|---------------------|
-| `government.webp` | Government | A minister signing legislation |
-| `universities.webp` | Universities | A vice chancellor with senate members |
-| `healthcare.webp` | Healthcare | A hospital executive board |
-| `justice.webp` | Justice | A judge or court administrator |
-| `enterprise.webp` | Enterprise | A corporate boardroom |
-| `regulators.webp` | Regulators | A financial regulator |
+Scenes are written face-free by default — hands, architecture, room — so a
+free-license frame carries no model-release risk.
+
+| File | Institution | Scene (no identifiable face) |
+|------|-------------|------------------------------|
+| `government.webp` | Government | Hands signing legislation; a seal or flag soft behind |
+| `universities.webp` | Universities | A senate hall or great library, low light, from the floor |
+| `healthcare.webp` | Healthcare | An empty hospital board room mid-session, papers on the table |
+| `justice.webp` | Justice | A gavel, a bench, or court columns in shadow |
+| `enterprise.webp` | Enterprise | A boardroom table and skyline at dusk, no faces |
+| `regulators.webp` | Regulators | A central-bank façade or trading-floor architecture |
 
 > To change the cards (order, copy, scenes), edit `INSTITUTIONS` in
 > `src/pages/Landing.tsx`. Each entry's `slug` maps to `<slug>.webp` here.

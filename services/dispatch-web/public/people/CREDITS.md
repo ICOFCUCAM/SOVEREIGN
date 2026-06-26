@@ -7,25 +7,34 @@ of rights with the asset.
 
 ## Rules
 
-- **License type must be commercial** (royalty-free or rights-managed *commercial*).
-  Editorial-use-only is NOT permitted for the homepage.
-- **Model release** required for any recognizable person → must say `yes`.
-- **Property release** required for any recognizable private building/interior →
-  `yes` or `n/a`.
-- **No AI-generated imagery.** Source must be a real licensed or commissioned frame.
-- Keep the license PDF/receipt off the repo; store the `License ref` (order or
-  contract number) so it can be retrieved.
+- **License must permit commercial use.** Accepted: a free commercial license
+  (**Unsplash / Pexels / Pixabay**) or a paid royalty-free / rights-managed
+  *commercial* license. **Editorial-use-only is NOT permitted** for the homepage.
+- **No identifiable faces is the default path.** A free license grants the
+  photographer's copyright but **not** a model release, so prefer frames with no
+  recognizable person — then `Recognizable person` = `none` and no release is
+  needed.
+- **If a recognizable person appears**, a **model release** is required →
+  `Release` must say `yes` (with a paid library that carries one). Otherwise the
+  frame cannot ship.
+- **Property release** for a recognizable private building/interior → `yes` or
+  `n/a`. Public buildings and architecture shot from public space are fine.
+- **No AI-generated imagery.** Source must be a real licensed or free-license frame.
+- Keep any paid receipt off the repo; store the `License ref` (order/contract no.,
+  or the source image URL for free-license frames) so it can be retrieved.
 
 ## Register
 
-| File | Source / library | Photographer | License type | Model release | Property release | License ref | Acquired |
-|------|------------------|--------------|--------------|---------------|------------------|-------------|----------|
-| `government.webp`   | _pending_ | _pending_ | _commercial_ | — | — | — | — |
-| `universities.webp` | _pending_ | _pending_ | _commercial_ | — | — | — | — |
-| `healthcare.webp`   | _pending_ | _pending_ | _commercial_ | — | — | — | — |
-| `justice.webp`      | _pending_ | _pending_ | _commercial_ | — | — | — | — |
-| `enterprise.webp`   | _pending_ | _pending_ | _commercial_ | — | — | — | — |
-| `regulators.webp`   | _pending_ | _pending_ | _commercial_ | — | — | — | — |
+| File | Source | License | Recognizable person | Release | License ref / URL | Acquired |
+|------|--------|---------|---------------------|---------|-------------------|----------|
+| `government.webp`   | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
+| `universities.webp` | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
+| `healthcare.webp`   | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
+| `justice.webp`      | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
+| `enterprise.webp`   | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
+| `regulators.webp`   | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
 
-> Replace a row's `_pending_` cells as each image is licensed or commissioned.
-> See `README.md` for the art direction and the scene per file.
+> Replace a row's `_pending_` cells as each image is sourced. For a free-license,
+> face-free frame: `Source` = Unsplash/Pexels/Pixabay, `License` = that license,
+> `Recognizable person` = none, `Release` = n/a, `License ref / URL` = the image
+> page URL. See `README.md` for the art direction and the scene per file.
