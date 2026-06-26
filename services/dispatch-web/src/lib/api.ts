@@ -5,6 +5,11 @@
 
 const BASE = import.meta.env.VITE_DISPATCH_API_URL ?? "";
 
+// The externally-reachable API origin, for credential handoff / integration docs.
+// Same-origin in production (empty BASE → the page origin); an explicit host in dev.
+export const API_BASE = (): string =>
+  BASE || (typeof window !== "undefined" ? window.location.origin : "");
+
 export interface ApiError { code: string; message: string; field?: string | null; requestId?: string | null }
 export class DispatchError extends Error {
   code: string; status: number; field?: string | null;
