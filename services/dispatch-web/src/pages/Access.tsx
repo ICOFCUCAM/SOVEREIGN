@@ -110,7 +110,7 @@ const Access: React.FC = () => {
   if (!admin) {
     return (
       <div>
-        <h1 className="font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Access</h1>
+        <h1 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Access</h1>
         <Card className="mt-5 p-5">
           <div className="text-sm text-white/70">Managing API credentials requires the <code className="font-mono text-white/90">dispatch:admin</code> scope.</div>
           <div className="mt-1 text-[13px] text-white/45">Sign in with a tenant administrator credential, or ask your Dispatch operator to provision one.</div>
@@ -122,7 +122,7 @@ const Access: React.FC = () => {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">Access</h1>
+        <h1 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Access</h1>
         <p className="text-sm text-white/50">Issue and manage the API credentials your systems use to reach Dispatch. A credential is a <span className="text-white/75">client_id</span> and a one-time <span className="text-white/75">secret</span>, exchanged at <code className="font-mono text-white/70">/v1/token</code> for a short-lived bearer token.</p>
       </div>
 
