@@ -27,13 +27,13 @@ of rights with the asset.
 
 | File | Source | License | Recognizable person | Release | License ref / URL | Acquired |
 |------|--------|---------|---------------------|---------|-------------------|----------|
-| `government.webp`   | **AI-generated (interim)** | owned render | none (synthetic, not real people) | n/a | uploaded 2026-06-26 | 2026-06-26 |
+| `government.webp`   | **AI-generated (interim)** — Art Direction Engine → gpt-image-1 | owned render | none (figures from behind only) | n/a | image-engine, via Sovereign Supabase | 2026-06-26 |
 | `officialpublication.webp` | **AI-generated (interim)** | owned render | none (brand still life, no people) | n/a | uploaded 2026-06-26 | 2026-06-26 |
-| `universities.webp` | **AI-generated (interim)** — Art Direction Engine → gpt-image-1 | owned render | none (no people to camera) | n/a | image-engine, via Sovereign Supabase | 2026-06-26 |
-| `healthcare.webp`   | **AI-generated (interim)** — Art Direction Engine → gpt-image-1 | owned render | none (no people) | n/a | image-engine, via Sovereign Supabase | 2026-06-26 |
-| `justice.webp`      | **AI-generated (interim)** — Art Direction Engine → gpt-image-1 | owned render | none (no people) | n/a | image-engine, via Sovereign Supabase | 2026-06-26 |
-| `enterprise.webp`   | **AI-generated (interim)** — Art Direction Engine → gpt-image-1 | owned render | none (no people) | n/a | image-engine, via Sovereign Supabase | 2026-06-26 |
-| `regulators.webp`   | **AI-generated (interim)** — Art Direction Engine → gpt-image-1 | owned render | none (distant silhouettes only) | n/a | image-engine, via Sovereign Supabase | 2026-06-26 |
+| `universities.webp` | **AI-generated (interim)** — Art Direction Engine → gpt-image-1 | owned render | none — exterior campus, distant synthetic figures | n/a | image-engine, via Sovereign Supabase | 2026-06-26 |
+| `healthcare.webp`   | **AI-generated (interim)** — Art Direction Engine → gpt-image-1 | owned render | none — board in session, synthetic people (no real individuals) | n/a | image-engine, via Sovereign Supabase | 2026-06-26 |
+| `justice.webp`      | **AI-generated (interim)** — Art Direction Engine → gpt-image-1 | owned render | none — exterior courthouse, distant synthetic figures | n/a | image-engine, via Sovereign Supabase | 2026-06-26 |
+| `enterprise.webp`   | **AI-generated (interim)** — Art Direction Engine → gpt-image-1 | owned render | none — exterior towers, distant synthetic figures | n/a | image-engine, via Sovereign Supabase | 2026-06-26 |
+| `regulators.webp`   | **AI-generated (interim)** — Art Direction Engine → gpt-image-1 | owned render | none — chamber in session, synthetic people (no real individuals) | n/a | image-engine, via Sovereign Supabase | 2026-06-26 |
 
 > **Interim exception (recorded honestly).** All seven homepage images above are
 > **AI-generated** renders, accepted by explicit decision on 2026-06-26 (see
