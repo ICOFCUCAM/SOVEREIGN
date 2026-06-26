@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { PublicHeader, PublicFooter, FilmGrain } from "../components/brand";
+import { PublicHeader, PublicFooter, PageBanner, FilmGrain } from "../components/brand";
 import { verifyRecord, type VerifyResult } from "../lib/api";
 
 // PUBLIC VERIFICATION PORTAL — the institutional proof a copied PDF can never
@@ -19,6 +19,17 @@ const VERDICT: Record<string, { ring: string; chip: string; mark: string; title:
   NOT_FOUND: { ring: "border-red-500/40 from-red-500/[0.08]", chip: "bg-red-500/15 text-red-300", mark: "✕", title: "Not a verified record", note: "No Official Record resolves to this identifier. Treat the document you hold as unverified." },
   ERROR: { ring: "border-red-500/40 from-red-500/[0.08]", chip: "bg-red-500/15 text-red-300", mark: "✕", title: "Verification unavailable", note: "The verification service could not be reached. Please try again." },
 };
+
+// The five institutional proofs a verification result rests on — what each one
+// attests, and what it defends against. This is the substance behind the verdict:
+// it explains *why* a verified record can be trusted and a copy cannot.
+const PROOFS: { n: string; title: string; proves: string; defends: string }[] = [
+  { n: "01", title: "Governance Certificate", proves: "That the document cleared its full approval policy — the required offices reviewed and authorized it, in order, with separation of duties enforced.", defends: "Against a document that was never properly approved being passed off as an institutional decision." },
+  { n: "02", title: "Publication Authority", proves: "The named institutional authority that released the record as the institution's official position, captured as a distinct, attributable act.", defends: "Against ambiguity over who committed the institution — and against unauthorized publication." },
+  { n: "03", title: "Evidence Chain", proves: "An append-only, timestamped trail of every action — submitted, reviewed, approved, authorized, published, certified, preserved.", defends: "Against a quietly edited history. The chain is recorded as the record is made, not reconstructed afterward." },
+  { n: "04", title: "Integrity Hash", proves: "A SHA-256 fingerprint of the sealed record and each official artifact. The file you hold can be hashed and matched, byte for byte.", defends: "Against tampering and forgery — if a single byte differs, the hash will not match." },
+  { n: "05", title: "Preservation Status", proves: "Whether the record is sealed for its retention horizon, and whether it is still current or has been revoked by the institution.", defends: "Against a superseded or withdrawn version circulating as if it were still authoritative." },
+];
 
 const Fact: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) =>
   children == null || children === "" ? null : (
@@ -87,7 +98,8 @@ const Verify: React.FC = () => {
     <div className="relative min-h-full bg-[#070707] text-white">
       <FilmGrain />
       <PublicHeader />
-      <main className="px-6 py-20 lg:px-12">
+      <PageBanner slug="officialrecord" alt="A sealed, verifiable official record" />
+      <main className="px-6 py-16 lg:px-12">
         <div className="mx-auto max-w-3xl">
           <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Verification Portal</div>
           <h1 className="mt-3 font-serif text-[2.4rem] font-bold leading-[1.05] tracking-tight">Verify an Official Record.</h1>
@@ -175,6 +187,53 @@ const Verify: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* How verification works — the five proofs behind every verdict */}
+      <section className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.022] to-transparent px-6 py-20 lg:px-12">
+        <div className="mx-auto max-w-[1100px]">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">How an Official Record is authenticated</div>
+          <h2 className="mt-3 max-w-3xl font-serif text-[2rem] font-bold leading-tight tracking-tight sm:text-[2.4rem]">
+            A verdict you can trust, because it rests on five proofs.
+          </h2>
+          <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-white/55">
+            Verification is not a logo or a claim — it is the institution's own evidence, checked live. Every result above
+            is built from these five proofs, each attesting something specific and each defending against a specific way a
+            document can be faked, altered or misrepresented.
+          </p>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {PROOFS.map((p) => (
+              <div key={p.n} className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+                <div className="flex items-baseline gap-2.5">
+                  <span className="font-mono text-[12px] font-bold text-gold-400/70">{p.n}</span>
+                  <span className="font-serif text-[1.2rem] font-bold text-white">{p.title}</span>
+                </div>
+                <div className="mt-3">
+                  <div className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-emerald-300/70">What it proves</div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-white/60">{p.proves}</p>
+                </div>
+                <div className="mt-3">
+                  <div className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-amber-300/60">What it defends against</div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-white/50">{p.defends}</p>
+                </div>
+              </div>
+            ))}
+            <div className="rounded-2xl border border-gold-400/25 bg-gradient-to-b from-gold-400/[0.05] to-transparent p-6">
+              <div className="font-serif text-[1.2rem] font-bold text-gold-200">Why a copy can never do this</div>
+              <p className="mt-3 text-[13px] leading-relaxed text-white/60">
+                A copied PDF can be edited, renamed or forged, and it carries none of these proofs with it. It can only
+                <span className="text-white/85"> point back</span> to the one authoritative record — which is exactly what
+                verification confirms. The proof lives with the institution, not in the file.
+              </p>
+            </div>
+          </div>
+          <div className="mt-9 flex flex-wrap gap-3">
+            <button onClick={() => nav("/walkthrough")} className="inline-flex items-center rounded border border-white/15 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/35 hover:bg-white/[0.06]">See a record become official</button>
+            <button onClick={() => nav("/lifecycle")} className="inline-flex items-center rounded border border-white/15 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/35 hover:bg-white/[0.06]">The governed lifecycle</button>
+            <button onClick={() => nav("/official-record")} className="inline-flex items-center rounded border border-white/15 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/35 hover:bg-white/[0.06]">What is an Official Record?</button>
+          </div>
+        </div>
+      </section>
+
       <PublicFooter />
     </div>
   );

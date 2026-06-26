@@ -2,7 +2,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { PublicHeader, PageBanner, Chevron, Dot, FilmGrain, useReveal, SURFACE } from "../components/brand";
 import { DeploymentMatrix } from "../components/DeploymentMatrix";
-import { ARCHITECTURE_ROUTE } from "../lib/routes";
+import {
+  ARCHITECTURE_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE, PRICING_ROUTE,
+  DEVELOPERS_ROUTE, EVIDENCE_ROUTE, TRUST_ROUTE, VERIFY_ROUTE,
+  COST_ROUTE, LIFECYCLE_ROUTE, ROI_ROUTE,
+} from "../lib/routes";
 import { track } from "../lib/analytics";
 
 // Procurement Package — a self-serve dossier so technical and procurement
@@ -19,6 +23,38 @@ const CONTENTS = [
   ["readiness", "Procurement Readiness"],
   ["evaluation", "Evaluation Process"],
   ["support", "Support Models"],
+  ["faq", "Procurement FAQ"],
+];
+
+// The evaluator's index — one destination from which a procurement team reaches
+// every assessment surface. `to` is a route (new tab) or an in-page #anchor.
+const INDEX: { to: string; label: string; blurb: string; ext?: boolean }[] = [
+  { to: COST_ROUTE, label: "Cost of Publication", blurb: "Why Dispatch exists — the institutional process it governs.", ext: true },
+  { to: LIFECYCLE_ROUTE, label: "The Governed Lifecycle", blurb: "Stage by stage: who acts, what is decided, what is proven.", ext: true },
+  { to: ROI_ROUTE, label: "Operational Model", blurb: "Model the scale of governed publication from your own figures.", ext: true },
+  { to: ARCHITECTURE_ROUTE, label: "Architecture", blurb: "System context, pipeline, security and deployment topology.", ext: true },
+  { to: SECURITY_ROUTE, label: "Security", blurb: "Isolation, encryption, least privilege and immutable audit.", ext: true },
+  { to: COMPLIANCE_ROUTE, label: "Compliance", blurb: "The governance frameworks the platform is built around.", ext: true },
+  { to: "#deployment", label: "Deployment", blurb: "Cloud, private, sovereign, on-premise and air-gapped." },
+  { to: "#security", label: "Identity & SSO", blurb: "OAuth2 tokens; identity integration during deployment." },
+  { to: DEVELOPERS_ROUTE, label: "API", blurb: "REST API, webhooks and SDKs — governance as a service.", ext: true },
+  { to: PRICING_ROUTE, label: "Pricing", blurb: "Priced by institution and capability, never per seat.", ext: true },
+  { to: EVIDENCE_ROUTE, label: "Evidence", blurb: "The certificates and evidence chain every record carries.", ext: true },
+  { to: VERIFY_ROUTE, label: "Verify a Record", blurb: "Independently confirm any published record is genuine.", ext: true },
+  { to: TRUST_ROUTE, label: "Trust", blurb: "Your records, your jurisdiction, your exit — data control.", ext: true },
+];
+
+// Procurement FAQ — the questions evaluation teams actually ask, answered with
+// the same verifiable language as the rest of the dossier (no SLAs/guarantees).
+const FAQ: { q: string; a: React.ReactNode }[] = [
+  { q: "Do we need a sales call to evaluate?", a: <>No. This dossier is fully self-serve and you can start a free evaluation in your own environment without contacting anyone.</> },
+  { q: "Can we evaluate in our own environment?", a: <>Yes. Dispatch supports managed cloud, private cloud, sovereign hosting, on-premise and air-gapped deployments — see <a href="#deployment" className="text-gold-300 hover:underline">Deployment Models</a>.</> },
+  { q: "How is it priced?", a: <>By institution and capability, never per seat. Concrete figures for the self-serve tiers are public on the <a href={PRICING_ROUTE} className="text-gold-300 hover:underline">pricing page</a>.</> },
+  { q: "Where does our data live?", a: <>Residency is a deployment decision, agreed per institution — see <a href="#residency" className="text-gold-300 hover:underline">Data Residency Options</a>. Dispatch runs against its own dedicated database.</> },
+  { q: "How do users authenticate?", a: <>Authentication uses OAuth2 client-credentials issuing short-lived, scoped tokens. Identity and SSO integration is arranged during deployment planning.</> },
+  { q: "Can it integrate with our existing systems?", a: <>Yes — ERP, case-management and document systems integrate through the Dispatch API. See the <a href={DEVELOPERS_ROUTE} className="text-gold-300 hover:underline">developer platform</a>.</> },
+  { q: "What can we verify independently?", a: <>Any published record can be confirmed genuine, unrevoked and untampered through the public <a href={VERIFY_ROUTE} className="text-gold-300 hover:underline">verification portal</a> — no account required.</> },
+  { q: "Can we keep these materials as a PDF?", a: <>Yes — use <em>Print → Save as PDF</em> (the print button in the header). Every section here is print-ready; no gated downloads.</> },
 ];
 
 const Procurement: React.FC = () => {
@@ -29,7 +65,12 @@ const Procurement: React.FC = () => {
     <div className="relative min-h-full bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
       <FilmGrain />
-      <PublicHeader />
+      <PublicHeader actions={
+        <button onClick={() => window.print()}
+          className="no-print hidden items-center gap-2 rounded border border-white/15 px-3.5 py-2 text-[12px] font-semibold uppercase tracking-wide text-white/75 transition hover:border-white/35 hover:text-white sm:inline-flex">
+          Print / PDF
+        </button>
+      } />
       <PageBanner slug="procurement" alt="An evaluation meeting" />
 
       {/* hero */}
@@ -60,6 +101,27 @@ const Procurement: React.FC = () => {
                 <a key={id} href={`#${id}`} className="text-[12px] font-medium uppercase tracking-wide text-white/55 transition hover:text-gold-400">{label}</a>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Evaluator's index — the single destination linking every assessment surface */}
+      <section className="border-b border-white/5 px-8 py-16 lg:px-12">
+        <div className="mx-auto max-w-[1100px]">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">The evaluator's index</div>
+          <h2 className="mt-3 max-w-2xl font-serif text-3xl font-bold tracking-tight text-white sm:text-4xl">Everything an evaluation needs, in one place.</h2>
+          <p className="mt-3 max-w-2xl text-[14.5px] leading-relaxed text-white/55">Each surface is reachable directly — the value case, the technical dossier, pricing and independent verification. Nothing is gated.</p>
+          <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {INDEX.map((it) => (
+              <a key={it.label} href={it.to} {...(it.ext ? { target: "_blank", rel: "noopener" } : {})}
+                className={`${SURFACE} group flex items-start justify-between gap-3 p-5`}>
+                <span>
+                  <span className="text-[14.5px] font-bold text-white">{it.label}</span>
+                  <span className="mt-1 block text-[12.5px] leading-snug text-white/50">{it.blurb}</span>
+                </span>
+                <Chevron className="mt-1 h-3.5 w-3.5 shrink-0 text-gold-400/50 transition group-hover:translate-x-0.5 group-hover:text-gold-400" />
+              </a>
+            ))}
           </div>
         </div>
       </section>
@@ -207,6 +269,19 @@ const Procurement: React.FC = () => {
             ))}
           </div>
           <p className="mt-4 text-[12px] leading-relaxed text-white/35">Support tiers and response targets are defined per agreement; no uptime or response figures are asserted here.</p>
+        </Block>
+
+        {/* Procurement FAQ */}
+        <Block id="faq" n="09" title="Procurement FAQ"
+          lead="The questions evaluation teams ask most — answered with the same verifiable language as the rest of this dossier.">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {FAQ.map((f) => (
+              <div key={f.q} className={`${SURFACE} p-5`}>
+                <div className="text-[14.5px] font-bold text-white">{f.q}</div>
+                <p className="mt-2 text-[13px] leading-relaxed text-white/60">{f.a}</p>
+              </div>
+            ))}
+          </div>
         </Block>
       </div>
 
