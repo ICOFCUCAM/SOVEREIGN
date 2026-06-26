@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DispatchMark, Chevron, SectionHead, PublicHeader, PublicFooter, FilmGrain, useReveal } from "../components/brand";
+import { RecordArtifact } from "../components/RecordArtifact";
 import {
   ARCHITECTURE_ROUTE, DEVELOPERS_ROUTE, PROCUREMENT_ROUTE,
   OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE, SECURITY_ROUTE, TRUST_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE,
@@ -8,7 +9,8 @@ import {
 
 // The front door. Narrative order for procurement teams and executives:
 //   Who is it for? → Why does it exist? → How does it work? → Why can I trust it?
-//   → How do I evaluate it? The hero is fixed (approved); all design lives below it.
+//   → How do I evaluate it? The hero is the approved two-column instrument — the
+//   narrative on the left, the Record artifact dominant on the right; design below.
 
 const VERBS = ["Create", "Review", "Approve", "Authorize", "Publish", "Certify", "Verify", "Preserve"];
 
@@ -79,39 +81,87 @@ const SectorImage: React.FC<{ slug: string; alt: string }> = ({ slug, alt }) => 
 const Landing: React.FC = () => {
   useReveal();
   const nav = useNavigate();
+  // Whisper-subtle pointer parallax on the instrument — a few degrees of physical
+  // presence on fine pointers only, fully disabled under reduced-motion.
+  const heroRef = React.useRef<HTMLDivElement>(null);
+  const artRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const hero = heroRef.current, art = artRef.current;
+    if (!hero || !art) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const onMove = (e: PointerEvent) => {
+      const r = hero.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        art.style.transform = `perspective(1600px) rotateY(${px * 3}deg) rotateX(${-py * 2.4}deg) translate3d(${px * 8}px, ${py * 6}px, 0)`;
+      });
+    };
+    const onLeave = () => { cancelAnimationFrame(raf); art.style.transform = ""; };
+    hero.addEventListener("pointermove", onMove);
+    hero.addEventListener("pointerleave", onLeave);
+    return () => { hero.removeEventListener("pointermove", onMove); hero.removeEventListener("pointerleave", onLeave); cancelAnimationFrame(raf); };
+  }, []);
   return (
     <div className="relative min-h-full bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
       <FilmGrain />
       <PublicHeader />
       <main>
-        {/* ── Hero (approved — unchanged) ──────────────────────────── */}
-        <section className="relative overflow-hidden border-t border-white/[0.06] px-6 pb-24 pt-24 lg:px-12">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(202,164,90,0.10),transparent_70%)]" />
-          <div className="relative mx-auto max-w-5xl text-center">
-            <div className="mx-auto mb-7 flex h-12 w-12 items-center justify-center"><DispatchMark className="h-12 w-12 text-gold-400" /></div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.34em] text-gold-400">Sovereign Dispatch</div>
-            <h1 className="mx-auto mt-4 max-w-4xl font-serif text-[2.7rem] font-bold leading-[1.04] tracking-tight sm:text-[3.6rem]">The Vanguard of Institutional Governance.</h1>
-            <div className="mx-auto mt-6 flex max-w-3xl flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[12.5px] font-semibold uppercase tracking-[0.16em] text-white/45">
-              {VERBS.map((v, i) => (
-                <React.Fragment key={v}>
-                  <span className="text-white/70">{v}</span>
-                  {i < VERBS.length - 1 && <span className="text-gold-400/40" aria-hidden>·</span>}
-                </React.Fragment>
-              ))}
+        {/* ── Hero — the approved two-column instrument: narrative left, Record right ── */}
+        <div id="top" className="relative overflow-hidden border-t border-white/[0.06]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_45%_at_72%_32%,rgba(233,200,120,0.055),transparent_72%)]" aria-hidden />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
+          <div ref={heroRef} className="relative z-10 mx-auto grid min-h-0 max-w-[1540px] grid-cols-1 items-center gap-12 px-5 py-16 sm:min-h-[760px] sm:gap-14 sm:px-8 sm:py-20 lg:px-12 xl:min-h-[900px] xl:grid-cols-[40fr_60fr] xl:gap-12">
+            {/* narrative — the Vanguard positioning */}
+            <div className="hero-stagger max-w-xl">
+              <div className="mb-8 flex items-center gap-3">
+                <span className="h-px w-7 bg-gold-500/55" aria-hidden />
+                <p className="text-[12.5px] font-semibold uppercase tracking-[0.34em] text-gold-400">Institutional Publication Infrastructure</p>
+              </div>
+              <h1 className="font-serif text-[2.55rem] font-bold leading-[1.04] tracking-[-0.022em] text-[#f4efe3] sm:text-[3.1rem] 2xl:text-[3.5rem]">
+                The Vanguard of <span className="text-gold-400">Institutional Governance.</span>
+              </h1>
+              <div className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/45">
+                {VERBS.map((v, i) => (
+                  <React.Fragment key={v}>
+                    <span className="text-white/70">{v}</span>
+                    {i < VERBS.length - 1 && <span className="text-gold-400/40" aria-hidden>·</span>}
+                  </React.Fragment>
+                ))}
+              </div>
+              <p className="lead-balance mt-7 max-w-[30rem] text-[16.5px] leading-[1.7] text-white/60">
+                Sovereign Dispatch governs every stage of publication — from creation to permanent preservation. Every
+                publication carries institutional authority, cryptographic integrity, a complete evidence chain, and
+                permanent verification.
+              </p>
+              <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                <button onClick={() => nav("/console")}
+                  className="group inline-flex items-center justify-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3.5 text-sm font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_26px_-10px_rgba(0,0,0,0.65)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
+                  Launch Dispatch
+                  <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                </button>
+                <button onClick={() => nav(ARCHITECTURE_ROUTE)}
+                  className="inline-flex items-center justify-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-6 py-3.5 text-sm font-semibold uppercase tracking-[0.08em] text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
+                  View Architecture
+                </button>
+              </div>
+              <p className="mt-5 flex items-center gap-2.5 text-[12.5px] text-white/45">
+                <span className="inline-block h-1 w-1 shrink-0 rounded-full bg-gold-400/80" aria-hidden />
+                Evaluate in your own environment — no sales call required.
+              </p>
             </div>
-            <p className="mx-auto mt-7 max-w-2xl text-[16px] leading-relaxed text-white/60">
-              Sovereign Dispatch governs every stage of publication — from creation to permanent preservation. Every publication carries institutional authority, cryptographic integrity, a complete evidence chain, and permanent verification.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <button onClick={() => nav("/console")} className="group inline-flex items-center gap-2 rounded-md bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-sm font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_8px_20px_-8px_rgba(0,0,0,0.6)] transition hover:from-gold-200 hover:to-gold-500">
-                Launch Dispatch <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-              </button>
-              <button onClick={() => nav(ARCHITECTURE_ROUTE)} className="rounded-md border border-white/20 px-6 py-3 text-sm font-semibold text-white/85 transition hover:border-white/40">View Architecture</button>
+            {/* the instrument — the dominant visual object */}
+            <div className="relative flex justify-center xl:justify-end">
+              <div ref={artRef} className="w-full max-w-[420px] transition-transform duration-200 ease-out [transform-style:preserve-3d] will-change-transform xl:max-w-[680px]">
+                <RecordArtifact className="w-full" />
+              </div>
             </div>
-            <p className="mt-5 text-[12.5px] italic text-white/35">Evaluate in your own environment. No sales call required.</p>
           </div>
-        </section>
+        </div>
 
         {/* ── 1 · WHO IS IT FOR — Built for the world's leading institutions ── */}
         <section className="border-t border-white/[0.06] px-6 py-24 lg:px-12">
