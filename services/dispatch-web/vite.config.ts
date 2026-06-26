@@ -16,5 +16,22 @@ export default defineConfig({
       },
     },
   },
-  build: { outDir: "dist", sourcemap: false },
+  build: {
+    outDir: "dist",
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        // Split the framework (react, react-dom, router) into its own long-lived
+        // vendor chunk. It changes far less often than app code, so a returning
+        // visitor keeps it cached across deploys while route chunks invalidate.
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (/[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(id)) {
+              return "vendor-react";
+            }
+          }
+        },
+      },
+    },
+  },
 });

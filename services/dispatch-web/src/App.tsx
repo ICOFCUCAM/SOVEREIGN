@@ -1,53 +1,60 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./lib/auth";
 import { metaForPath } from "./lib/seo";
-import ConsoleShell from "./components/Shell";
+import { FilmGrain } from "./components/brand";
+import { BillingProvider } from "./lib/upsell";
+
+// Eager — the homepage is the front door (no loading flash), and the auth pages
+// are the immediate fallback for every product guard.
 import Landing from "./pages/Landing";
-import Procurement from "./pages/Procurement";
-import Pricing from "./pages/Pricing";
-import Trust from "./pages/Trust";
-import Outcomes from "./pages/Outcomes";
-import RecordGallery from "./pages/RecordGallery";
-import Standard from "./pages/Standard";
-import ReadinessJourney from "./pages/ReadinessJourney";
-import Architecture from "./pages/Architecture";
-import Platform from "./pages/Platform";
-import Security from "./pages/Security";
-import Compliance from "./pages/Compliance";
-import Evidence from "./pages/Evidence";
-import Developers from "./pages/Developers";
-import OfficialRecord from "./pages/OfficialRecord";
-import Walkthrough from "./pages/Walkthrough";
-import ValuePage from "./pages/ValuePage";
-import Verify from "./pages/Verify";
 import SignIn from "./pages/SignIn";
 import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
-import Create from "./pages/Create";
-import Submit from "./pages/Submit";
-import Review from "./pages/Review";
-import Library from "./pages/Library";
-import DocumentView from "./pages/DocumentView";
-import Audit from "./pages/Audit";
-import Sovereignty from "./pages/Sovereignty";
-import Access from "./pages/Access";
-import AdminHome from "./pages/AdminHome";
-import InstitutionSetup from "./pages/InstitutionSetup";
-import GovernancePolicies from "./pages/GovernancePolicies";
-import AuthorityDirectory from "./pages/AuthorityDirectory";
-import GovernanceMonitor from "./pages/GovernanceMonitor";
-import ComplianceDashboard from "./pages/ComplianceDashboard";
-import GovernanceIntelligence from "./pages/GovernanceIntelligence";
-import DeploymentArchitecture from "./pages/DeploymentArchitecture";
-import OperationalResilience from "./pages/OperationalResilience";
-import IntegrationControlCenter from "./pages/IntegrationControlCenter";
-import EvidencePackage from "./pages/EvidencePackage";
-import TrustCenter from "./pages/TrustCenter";
-import EvaluationWorkspace from "./pages/EvaluationWorkspace";
-import PlatformOps from "./pages/PlatformOps";
-import Polished from "./pages/polished/Polished";
-import { BillingProvider } from "./lib/upsell";
+
+// Lazy — every other route is its own chunk. A marketing visitor never downloads
+// the console/admin product; an operator never downloads the marketing pages.
+const ConsoleShell = lazy(() => import("./components/Shell"));
+const Procurement = lazy(() => import("./pages/Procurement"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Trust = lazy(() => import("./pages/Trust"));
+const Outcomes = lazy(() => import("./pages/Outcomes"));
+const RecordGallery = lazy(() => import("./pages/RecordGallery"));
+const Standard = lazy(() => import("./pages/Standard"));
+const ReadinessJourney = lazy(() => import("./pages/ReadinessJourney"));
+const Architecture = lazy(() => import("./pages/Architecture"));
+const Platform = lazy(() => import("./pages/Platform"));
+const Security = lazy(() => import("./pages/Security"));
+const Compliance = lazy(() => import("./pages/Compliance"));
+const Evidence = lazy(() => import("./pages/Evidence"));
+const Developers = lazy(() => import("./pages/Developers"));
+const OfficialRecord = lazy(() => import("./pages/OfficialRecord"));
+const Walkthrough = lazy(() => import("./pages/Walkthrough"));
+const ValuePage = lazy(() => import("./pages/ValuePage"));
+const Verify = lazy(() => import("./pages/Verify"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Create = lazy(() => import("./pages/Create"));
+const Submit = lazy(() => import("./pages/Submit"));
+const Review = lazy(() => import("./pages/Review"));
+const Library = lazy(() => import("./pages/Library"));
+const DocumentView = lazy(() => import("./pages/DocumentView"));
+const Audit = lazy(() => import("./pages/Audit"));
+const Sovereignty = lazy(() => import("./pages/Sovereignty"));
+const Access = lazy(() => import("./pages/Access"));
+const AdminHome = lazy(() => import("./pages/AdminHome"));
+const InstitutionSetup = lazy(() => import("./pages/InstitutionSetup"));
+const GovernancePolicies = lazy(() => import("./pages/GovernancePolicies"));
+const AuthorityDirectory = lazy(() => import("./pages/AuthorityDirectory"));
+const GovernanceMonitor = lazy(() => import("./pages/GovernanceMonitor"));
+const ComplianceDashboard = lazy(() => import("./pages/ComplianceDashboard"));
+const GovernanceIntelligence = lazy(() => import("./pages/GovernanceIntelligence"));
+const DeploymentArchitecture = lazy(() => import("./pages/DeploymentArchitecture"));
+const OperationalResilience = lazy(() => import("./pages/OperationalResilience"));
+const IntegrationControlCenter = lazy(() => import("./pages/IntegrationControlCenter"));
+const EvidencePackage = lazy(() => import("./pages/EvidencePackage"));
+const TrustCenter = lazy(() => import("./pages/TrustCenter"));
+const EvaluationWorkspace = lazy(() => import("./pages/EvaluationWorkspace"));
+const PlatformOps = lazy(() => import("./pages/PlatformOps"));
+const Polished = lazy(() => import("./pages/polished/Polished"));
 
 // TWO PRODUCTS on one platform. Operations (/console) is for the institutional
 // publication officer — records and governance, no implementation detail.
@@ -148,9 +155,20 @@ const RouteMeta: React.FC = () => {
   return null;
 };
 
+// The fallback shown while a route chunk loads. Deliberately minimal — the brand
+// ground (#070707 + film grain) so a split never flashes white, with no spinner
+// or skeleton that would imply the destination's layout before it arrives.
+const PageLoader: React.FC = () => (
+  <div className="min-h-screen bg-[#070707]" aria-busy="true" aria-live="polite">
+    <FilmGrain />
+    <span className="sr-only">Loading…</span>
+  </div>
+);
+
 const App: React.FC = () => (
   <>
   <RouteMeta />
+  <Suspense fallback={<PageLoader />}>
   <Routes>
     {/* public marketing landing — the front door */}
     <Route path="/" element={<Landing />} />
@@ -190,6 +208,7 @@ const App: React.FC = () => (
     <Route path="/operator" element={<PlatformOperations />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
+  </Suspense>
   </>
 );
 
