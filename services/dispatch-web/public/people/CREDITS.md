@@ -27,12 +27,22 @@ of rights with the asset.
 
 | File | Source | License | Recognizable person | Release | License ref / URL | Acquired |
 |------|--------|---------|---------------------|---------|-------------------|----------|
-| `government.webp`   | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
+| `government.webp`   | **AI-generated (interim)** | owned render | none (synthetic, not real people) | n/a | uploaded 2026-06-26 | 2026-06-26 |
+| `officialpublication.webp` | **AI-generated (interim)** | owned render | none (brand still life, no people) | n/a | uploaded 2026-06-26 | 2026-06-26 |
 | `universities.webp` | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
 | `healthcare.webp`   | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
 | `justice.webp`      | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
 | `enterprise.webp`   | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
 | `regulators.webp`   | _pending_ | _free or commercial_ | _none_ | n/a | — | — |
+
+> **Interim exception (recorded honestly).** `government.webp` (Government card) and
+> `officialpublication.webp` (the "official publication" section) are AI-generated
+> renders, accepted by explicit decision on 2026-06-26 to get the homepage moving.
+> They were chosen because they carry **no baked-in marketing text and no
+> recognizable real people**, and were cropped to 16:10 + optimized. The no-AI
+> standard below remains the target: replace both with real licensed/commissioned
+> photography when available. The other five sector cards stay on the dignified
+> gold glyph placeholders until real photography lands.
 
 > Replace a row's `_pending_` cells as each image is sourced. For a free-license,
 > face-free frame: `Source` = Unsplash/Pexels/Pixabay, `License` = that license,

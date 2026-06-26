@@ -217,6 +217,13 @@ const Landing: React.FC = () => {
           <div className="mx-auto max-w-5xl">
             <SectionHead index="02" kicker="The distinction" title="What makes an official publication different."
               sub="An ordinary document can be copied, edited, renamed, replaced or questioned. A Dispatch publication is the institution's authoritative version of a decision — and a copied PDF is still only a copy, while a Dispatch publication can always prove its authenticity." />
+            <figure className="mx-auto mt-12 max-w-2xl">
+              <div className="overflow-hidden rounded-2xl border border-white/10 shadow-[0_40px_100px_-50px_rgba(0,0,0,0.9)] ring-1 ring-gold-400/10">
+                <img src="/people/officialpublication.webp" alt="An Official Publication — the sealed, branded institutional record"
+                  loading="lazy" className="aspect-[16/10] w-full object-cover" />
+              </div>
+              <figcaption className="mt-3 text-center text-[11.5px] uppercase tracking-[0.18em] text-white/40">The Official Publication — sealed, certified, verifiable</figcaption>
+            </figure>
             <div className="mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-2.5 sm:grid-cols-2">
               {GUARANTEES.map((g) => (
                 <div key={g} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[14px] text-white/85">
