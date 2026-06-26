@@ -38,16 +38,37 @@ above are unlimited.
 ### Tiers
 
 Tier **names reinforce positioning** (institution, not SaaS): Evaluation /
-Institutional / Organization / Enterprise / Sovereign. Every paid card shows
-**unlimited institutional users** and a visible **Deployment** line — answering the
-procurement officer's first question ("can we own this ourselves?") on the card,
-not buried in documentation.
+Institutional / Institutional Plus / Enterprise / Sovereign — an obvious ladder
+where "Institutional Plus" reads as a step up from Institutional without colliding
+with the Enterprise tier (rejected: "Organization", too broad; "Enterprise
+Organization", collides with Enterprise).
+
+Each tier carries a **one-line purpose** so the upgrade path is legible in seconds,
+and each step **inherits everything below it** ("Everything in X, plus"):
+
+- Evaluation — *Evaluate Dispatch end to end.*
+- Institutional — *Run one institution with production governance.*
+- Institutional Plus — *Operate multiple departments with enterprise oversight and advanced governance.*
+- Enterprise — *Connect Dispatch to your identity, infrastructure and compliance environment.*
+- Sovereign — *Own the entire platform under your jurisdiction.*
+
+Every paid card shows **unlimited institutional users** and a **visual Deployment
+stack** (glyph + label per option: Managed → Private → On-Prem → Sovereign /
+Air-Gapped) — answering the procurement officer's first question ("can we own this
+ourselves?") on the card, because procurement filters on deployment *before* it
+compares features. "Unlimited institutional users" is not merely listed but
+**explained** (licensed to institutions, not employees — the explicit contrast with
+M365 / Workspace / Atlassian). A **"Every paid plan includes"** reassurance grid
+states the governance floor (enforcement, evidence chain, certificates, integrity,
+audit, API, docs) so the core platform never reads as an add-on. The page **closes
+on evaluation confidence, not price** (Launch Evaluation + Download Procurement
+Package + architecture/security/deployment links).
 
 | Plan | Price (public) | Deployment | Target | Core inclusions |
 |------|----------------|------------|--------|-----------------|
 | **Evaluation** | Free | Managed Cloud (eval) | Product evaluation | Up to 5 users, 10 governed publications, full governance engine, certificates, preservation, limited API — **watermarked, not an official record** |
 | **Institutional** | US$299/mo | Managed Cloud | NGOs, municipalities, schools, small companies | Unlimited institutional users, 500 governed publications/mo, governance, preservation, API, SSO-ready, email support |
-| **Organization** | US$999/mo | Managed or Private Cloud | Universities, hospitals, mid-market, agencies | Unlimited institutional users + publications, multiple departments, office hierarchy, governance policies, evidence chain, analytics, executive dashboard, full API throughput, priority support |
+| **Institutional Plus** | US$999/mo | Managed or Private Cloud | Universities, hospitals, mid-market, agencies | Unlimited governed publications, multiple departments, office hierarchy, advanced governance policies, analytics, executive dashboard, priority support |
 | **Enterprise** | **From US$3,500/mo** (Contact) | Managed, Private, or On-Premises | Ministries, national agencies, large enterprises | Everything unlimited, SSO (Azure AD / Okta), advanced governance, audit exports, HA + SLA, enterprise support, dedicated onboarding |
 | **Sovereign** | **Custom engagement** (Contact) | Sovereign / Air-Gapped / On-Premises | National governments, central banks, defence, supreme courts, election commissions | Sovereign hosting / private cloud, source escrow (if negotiated), custom integrations, migration & training, dedicated support, white-glove deployment |
 
@@ -69,11 +90,15 @@ tiers stand alone:
 This avoids a Business customer seeing two prices for "API": the console plan's API
 is included up to fair use; the standalone tiers are for integration-only buyers.
 
-### Professional services (a real revenue line)
+### Professional services (a real revenue line — but off the pricing grid)
 
 Deployment, migration, policy design, governance consulting, identity integration,
 training, custom record templates. Indicative: US$2,000–5,000/day consulting;
-fixed-price implementations from US$20,000.
+fixed-price implementations from US$20,000. **Not shown as priced tiers on the
+public page** — services must not visually compete with the subscription plans.
+The page instead carries a single "Need deployment, migration or governance
+consulting?" band with a *Talk to our implementation team* CTA, signalling that
+enterprise help exists while keeping the pricing page focused on software.
 
 ## How prices are displayed publicly
 

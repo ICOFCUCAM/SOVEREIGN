@@ -1,26 +1,41 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { PublicHeader, PublicFooter, Chevron, Dot, FilmGrain, useReveal, SURFACE } from "../components/brand";
-import { PROCUREMENT_ROUTE, DEVELOPERS_ROUTE } from "../lib/routes";
+import { PROCUREMENT_ROUTE, DEVELOPERS_ROUTE, ARCHITECTURE_ROUTE, SECURITY_ROUTE } from "../lib/routes";
 import { track } from "../lib/analytics";
 
 // Public pricing — the artefact of ADR-012. Dispatch is priced like institutional
-// infrastructure, not like a collaboration tool: never per seat, never per file.
-// The tier differentiator is institution size + capability (departments, policies,
-// deployment, support, integrations). Concrete prices for the self-serve tiers;
-// "From / Custom + Contact" for the two qualified ones, to protect the high end.
+// infrastructure, not a collaboration tool: never per seat, never per file. Each
+// tier tells a one-line story of who it is for; deployment is a visible selling
+// point (procurement filters on it first); and the page ends on evaluation
+// confidence, not on a price.
+
+type DeployKind = "cloud" | "private" | "onprem" | "sovereign" | "airgap";
+
+const DeployGlyph: React.FC<{ kind: DeployKind; className?: string }> = ({ kind, className = "h-3.5 w-3.5" }) => {
+  const p: Record<DeployKind, React.ReactNode> = {
+    cloud: <path d="M6.5 13.5a3 3 0 0 1 .4-5.96A4 4 0 0 1 14.5 8.2a2.75 2.75 0 0 1-.2 5.3H6.5z" />,
+    private: <><rect x="4" y="3.5" width="8" height="11" rx="0.5" /><path d="M6 6h1.5M6 8.5h1.5M6 11h1.5M9 6h1.5M9 8.5h1.5M9 11h1.5" /></>,
+    onprem: <><rect x="3.5" y="4" width="9" height="3.2" rx="0.6" /><rect x="3.5" y="8.8" width="9" height="3.2" rx="0.6" /><path d="M5.4 5.6h.01M5.4 10.4h.01" /></>,
+    sovereign: <path d="M8 2.2l5 1.8v4c0 3.2-2.1 5.6-5 6.8-2.9-1.2-5-3.6-5-6.8v-4l5-1.8z" />,
+    airgap: <><rect x="4" y="7.2" width="8" height="6.3" rx="1" /><path d="M5.8 7.2V5.6a2.2 2.2 0 0 1 4.4 0v1.6" /></>,
+  };
+  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>{p[kind]}</svg>;
+};
 
 type Cta = { label: string; to: string; kind: "primary" | "ghost" };
+type Deploy = { kind: DeployKind; label: string };
 
 type Tier = {
   name: string;
   price: string;
   cadence?: string;
-  tagline: string;
+  purpose: string;          // the one-line "who it is for" story
+  carry?: string;           // "Everything in X, plus" — the upgrade ladder
   audience: string;
-  deployment: string;
+  deployment: Deploy[];
   featured?: boolean;
-  includes: string[];
+  includes: string[];       // differentiators only — the universal floor lives in INCLUDED_EVERYWHERE
   cta: Cta;
 };
 
@@ -28,113 +43,73 @@ const TIERS: Tier[] = [
   {
     name: "Evaluation",
     price: "Free",
-    tagline: "Prove the governance for yourself.",
+    purpose: "Evaluate Dispatch end to end.",
     audience: "Product evaluation",
-    deployment: "Managed Cloud · evaluation environment",
-    includes: [
-      "Up to 5 users",
-      "10 governed publications",
-      "Full governance engine",
-      "Certificates & preservation",
-      "Limited API access",
-      "Watermarked — not an official record",
-    ],
+    deployment: [{ kind: "cloud", label: "Managed Cloud" }],
+    includes: ["Up to 5 users", "10 governed publications", "Watermarked — not an official record"],
     cta: { label: "Start free", to: "/signup", kind: "ghost" },
   },
   {
     name: "Institutional",
     price: "US$299",
     cadence: "/month",
-    tagline: "Govern publication for a small institution.",
+    purpose: "Run one institution with production governance.",
     audience: "NGOs · municipalities · schools · small companies",
-    deployment: "Managed Cloud",
-    includes: [
-      "Unlimited institutional users",
-      "500 governed publications / month",
-      "Governance & preservation",
-      "API access",
-      "SSO-ready",
-      "Email support",
-    ],
+    deployment: [{ kind: "cloud", label: "Managed Cloud" }],
+    includes: ["Unlimited institutional users", "500 governed publications / month", "Single institution", "SSO-ready", "Email support"],
     cta: { label: "Start free", to: "/signup", kind: "ghost" },
   },
   {
-    name: "Organization",
+    name: "Institutional Plus",
     price: "US$999",
     cadence: "/month",
-    tagline: "The full governance estate, unlimited.",
+    purpose: "Operate multiple departments with enterprise oversight and advanced governance.",
+    carry: "Everything in Institutional, plus",
     audience: "Universities · hospitals · mid-market · agencies",
-    deployment: "Managed Cloud or Private Cloud",
+    deployment: [{ kind: "cloud", label: "Managed Cloud" }, { kind: "private", label: "Private Cloud" }],
     featured: true,
-    includes: [
-      "Unlimited institutional users & publications",
-      "Multiple departments · office hierarchy",
-      "Governance policies & evidence chain",
-      "Analytics & executive dashboard",
-      "Full API throughput",
-      "Priority support",
-    ],
+    includes: ["Unlimited governed publications", "Multiple departments · office hierarchy", "Advanced governance policies", "Analytics & executive dashboard", "Priority support"],
     cta: { label: "Start free", to: "/signup", kind: "primary" },
   },
   {
     name: "Enterprise",
     price: "From US$3,500",
     cadence: "/month",
-    tagline: "Identity, deployment and assurance at scale.",
+    purpose: "Connect Dispatch to your identity, infrastructure and compliance environment.",
+    carry: "Everything in Institutional Plus, plus",
     audience: "Ministries · national agencies · large enterprises",
-    deployment: "Managed, Private, or On-Premises",
-    includes: [
-      "Everything unlimited",
-      "SSO — Azure AD · Okta",
-      "Advanced governance & audit exports",
-      "High availability & SLA",
-      "Enterprise support",
-      "Dedicated onboarding",
-    ],
+    deployment: [{ kind: "cloud", label: "Managed" }, { kind: "private", label: "Private" }, { kind: "onprem", label: "On-Premises" }],
+    includes: ["SSO — Azure AD · Okta", "Audit exports", "High availability & SLA", "Enterprise support", "Dedicated onboarding"],
     cta: { label: "Talk to us", to: PROCUREMENT_ROUTE, kind: "ghost" },
   },
   {
     name: "Sovereign",
     price: "Custom",
     cadence: "engagement",
-    tagline: "Run it inside your own sovereignty.",
+    purpose: "Own the entire platform under your jurisdiction.",
+    carry: "Everything in Enterprise, plus",
     audience: "Governments · central banks · defence · supreme courts · election commissions",
-    deployment: "Sovereign / Air-Gapped / On-Premises",
-    includes: [
-      "Sovereign hosting & private cloud",
-      "Source escrow (if negotiated)",
-      "Custom integrations",
-      "Migration & training",
-      "Dedicated support",
-      "White-glove deployment",
-    ],
+    deployment: [{ kind: "sovereign", label: "Sovereign Hosting" }, { kind: "airgap", label: "Air-Gapped" }, { kind: "onprem", label: "On-Premises" }],
+    includes: ["Source escrow (if negotiated)", "Custom integrations", "Migration & training", "Dedicated support", "White-glove deployment"],
     cta: { label: "Talk to us", to: PROCUREMENT_ROUTE, kind: "ghost" },
   },
 ];
 
-const CHARGE_FOR = [
-  "Governance",
-  "Institutional authority",
-  "Compliance",
-  "Sovereignty",
-  "Deployment model",
-  "Support level",
-  "API integration",
-];
-
+const CHARGE_FOR = ["Governance", "Institutional authority", "Compliance", "Sovereignty", "Deployment model", "Support level", "API integration"];
 const NEVER_FOR = ["Per seat", "Per user", "Storage", "PDFs", "Documents as files"];
+
+// The universal governance floor — included in every paid plan. Listing it once,
+// loudly, reassures procurement that the core platform is never an add-on.
+const INCLUDED_EVERYWHERE = [
+  "Governance enforcement", "Evidence chain", "Governance certificates",
+  "Preservation certificates", "Cryptographic integrity", "Complete audit history",
+  "Unlimited institutional users", "REST API", "Documentation",
+];
 
 const API_TIERS: { name: string; price: string; cadence?: string; lines: string[]; to: string }[] = [
   { name: "Developer", price: "Free", lines: ["Sandbox", "500 API calls / month"], to: DEVELOPERS_ROUTE },
   { name: "API Professional", price: "US$199", cadence: "/month", lines: ["50,000 API calls", "OAuth · webhooks", "Support"], to: DEVELOPERS_ROUTE },
   { name: "API Enterprise", price: "Custom", lines: ["Unlimited calls", "Custom rate & terms"], to: PROCUREMENT_ROUTE },
-];
-
-const SERVICES = [
-  ["Deployment & migration", "Stand up the institution and move existing records under governance."],
-  ["Policy & governance design", "Approval policies, office hierarchy and separation-of-duties to your mandate."],
-  ["Identity integration", "Azure AD, Okta and SSO wired to your offices and clearances."],
-  ["Training & record templates", "Onboarding for staff and custom record types for your publications."],
 ];
 
 const Pricing: React.FC = () => {
@@ -193,12 +168,20 @@ const Pricing: React.FC = () => {
                 <span key={c} className="rounded-md border border-white/10 bg-white/[0.02] px-3 py-1.5 text-[13px] font-medium text-white/45 line-through decoration-white/25">{c}</span>
               ))}
             </div>
-            <p className="mt-5 text-[13px] leading-relaxed text-white/50">
-              A ministry of 8,000 should never be billed for 8,000 accounts that rarely log in. Where volume is
-              metered it is the <span className="text-white/75">governed publication</span> — the act of placing
-              authority, an evidence chain and a permanent Record ID behind a document — never the file or the seat.
-            </p>
           </div>
+        </div>
+      </section>
+
+      {/* unlimited institutional users — explained, not just listed */}
+      <section id="institutional-users" className="scroll-mt-24 border-b border-white/5 px-8 py-14 lg:px-12">
+        <div className="mx-auto max-w-[1180px] rounded-2xl border border-gold-400/25 bg-gradient-to-b from-gold-400/[0.07] to-white/[0.01] p-9 text-center shadow-[0_30px_80px_-44px_rgba(202,164,90,0.5)]">
+          <h2 className="font-serif text-3xl font-bold tracking-tight text-[#f4efe3] sm:text-4xl">Unlimited institutional users.</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-[15.5px] leading-relaxed text-white/65">
+            Dispatch is licensed to <span className="text-white/90">institutions — not individual employees</span>.
+            Add every official, reviewer, publisher and administrator without seat-based pricing. A ministry of
+            8,000 is never billed for 8,000 accounts that rarely log in. That is what sets Dispatch apart from
+            Microsoft 365, Google Workspace and Atlassian: you are not taxed for letting people do their work.
+          </p>
         </div>
       </section>
 
@@ -210,8 +193,8 @@ const Pricing: React.FC = () => {
             <div>
               <h2 className="font-serif text-3xl font-bold tracking-tight text-white">Plans</h2>
               <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-white/55">
-                The tier scales with the institution and its governance estate — departments, policies, deployment and
-                support — not with the number of people who sign in.
+                The path is the story: evaluate, run one institution, scale to many departments, integrate the
+                enterprise, then own the platform under your own jurisdiction. Each step inherits everything below it.
               </p>
             </div>
           </div>
@@ -227,14 +210,24 @@ const Pricing: React.FC = () => {
                   <span className="font-serif text-3xl font-bold text-[#f4efe3]">{t.price}</span>
                   {t.cadence && <span className="text-[12px] text-white/45">{t.cadence}</span>}
                 </div>
-                <p className="mt-2 min-h-[2.5rem] text-[13px] leading-snug text-white/60">{t.tagline}</p>
-                {/* deployment answers the procurement officer's first question: can we own this ourselves? */}
-                <div className="mt-3 rounded-md border border-gold-400/20 bg-gold-400/[0.05] px-3 py-2">
+                <p className="mt-2 min-h-[3.75rem] text-[13px] leading-snug text-white/60">{t.purpose}</p>
+
+                {/* deployment — a visible selling point; procurement filters on it first */}
+                <div className="mt-3 rounded-md border border-gold-400/20 bg-gold-400/[0.05] px-3 py-2.5">
                   <div className="text-[9.5px] font-bold uppercase tracking-[0.18em] text-gold-400/80">Deployment</div>
-                  <div className="mt-0.5 text-[12px] font-medium leading-snug text-gold-100/85">{t.deployment}</div>
+                  <div className="mt-1.5 space-y-1">
+                    {t.deployment.map((d) => (
+                      <div key={d.label} className="flex items-center gap-2 text-[12px] font-medium text-gold-100/85">
+                        <DeployGlyph kind={d.kind} className="h-3.5 w-3.5 shrink-0 text-gold-400/80" /> {d.label}
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
                 <div className="mt-3 border-t border-white/5 pt-3 text-[11.5px] font-medium uppercase tracking-wide text-white/35">{t.audience}</div>
-                <ul className="mt-4 flex-1 space-y-2 text-[13px] text-white/65">
+
+                {t.carry && <div className="mt-4 text-[10.5px] font-bold uppercase tracking-[0.12em] text-gold-400/75">{t.carry}</div>}
+                <ul className={`${t.carry ? "mt-2" : "mt-4"} flex-1 space-y-2 text-[13px] text-white/65`}>
                   {t.includes.map((line) => (
                     <li key={line} className="flex gap-2"><Dot /> <span>{line}</span></li>
                   ))}
@@ -257,11 +250,35 @@ const Pricing: React.FC = () => {
         </div>
       </section>
 
+      {/* procurement reassurance — the governance floor is in every paid plan */}
+      <section id="included" className="scroll-mt-24 border-b border-white/5 px-8 py-16 lg:px-12">
+        <div className="mx-auto max-w-[1180px]">
+          <div className="mb-7 flex items-baseline gap-4">
+            <span className="font-mono text-[13px] font-bold text-gold-400">02</span>
+            <div>
+              <h2 className="font-serif text-3xl font-bold tracking-tight text-white">Every paid plan includes</h2>
+              <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-white/55">
+                The full governance platform is never an add-on. Every production plan carries the complete
+                chain of trust — enforcement, evidence, certificates, integrity and audit.
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+            {INCLUDED_EVERYWHERE.map((f) => (
+              <div key={f} className="flex items-center gap-3 border-b border-white/5 py-2.5">
+                <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4 shrink-0 text-gold-400"><path d="M4 10.5l4 4 8-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <span className="text-[14px] text-white/75">{f}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* API as its own product */}
       <section id="api" className="scroll-mt-24 border-b border-white/5 px-8 py-16 lg:px-12">
         <div className="mx-auto max-w-[1180px]">
           <div className="mb-9 flex items-baseline gap-4">
-            <span className="font-mono text-[13px] font-bold text-gold-400">02</span>
+            <span className="font-mono text-[13px] font-bold text-gold-400">03</span>
             <div>
               <h2 className="font-serif text-3xl font-bold tracking-tight text-white">The API is its own product.</h2>
               <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-white/55">
@@ -290,51 +307,52 @@ const Pricing: React.FC = () => {
         </div>
       </section>
 
-      {/* professional services */}
-      <section id="services" className="scroll-mt-24 border-b border-white/5 px-8 py-16 lg:px-12">
-        <div className="mx-auto max-w-[1180px]">
-          <div className="mb-9 flex items-baseline gap-4">
-            <span className="font-mono text-[13px] font-bold text-gold-400">03</span>
+      {/* implementation team — services exist, but never compete with the subscription plans */}
+      <section id="implementation" className="scroll-mt-24 border-b border-white/5 px-8 py-16 lg:px-12">
+        <div className="mx-auto max-w-[1180px] rounded-2xl border border-white/10 bg-white/[0.02] p-9 sm:p-11">
+          <div className="grid items-center gap-8 lg:grid-cols-[1.6fr_1fr]">
             <div>
-              <h2 className="font-serif text-3xl font-bold tracking-tight text-white">Professional services.</h2>
-              <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-white/55">
-                Standing up institutional governance is an engagement, not a download. We deploy, migrate and design the
-                governance to your mandate.
+              <h2 className="font-serif text-3xl font-bold tracking-tight text-white">Need deployment, migration or governance consulting?</h2>
+              <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-white/60">
+                Our implementation team helps institutions design governance models, migrate existing publication
+                workflows, integrate identity providers, and deploy Dispatch in managed, private, on-premises or
+                sovereign environments.
               </p>
             </div>
+            <div className="lg:justify-self-end">
+              <a href={PROCUREMENT_ROUTE}
+                className="group inline-flex items-center gap-2.5 rounded border border-gold-400/40 bg-gold-400/[0.08] px-6 py-3.5 text-[13px] font-bold uppercase tracking-wide text-gold-200 transition active:translate-y-px hover:bg-gold-400/[0.14]">
+                Talk to our implementation team <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+              </a>
+            </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {SERVICES.map(([t, b]) => (
-              <div key={t} className={`${SURFACE} p-6`}>
-                <div className="text-[14.5px] font-bold text-white">{t}</div>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-white/55">{b}</p>
-              </div>
-            ))}
-          </div>
-          <p className="mt-5 text-[12px] leading-relaxed text-white/35">
-            Indicative rates: consulting US$2,000–5,000/day; fixed-price implementations from US$20,000. Scoped per
-            engagement.
-          </p>
         </div>
       </section>
 
-      {/* closing */}
+      {/* close on confidence, not on price */}
       <section className="border-t border-white/5 bg-gradient-to-b from-white/[0.025] to-white/[0.008] px-8 py-20 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="font-serif text-3xl font-bold text-white">Add everyone. Pay for the governance.</h2>
+          <h2 className="font-serif text-3xl font-bold text-white sm:text-4xl">Ready to evaluate Dispatch?</h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-white/55">
-            Start free, prove the governed pipeline against your own documents, and move to a plan when you deploy.
-            No per-seat surprise — ever.
+            Download the complete procurement package, review the security architecture, explore deployment options,
+            or launch an evaluation environment in minutes.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <a href={PROCUREMENT_ROUTE}
-              className="inline-flex items-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-7 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
-              Evaluation package
-            </a>
             <button onClick={() => nav("/signup")}
               className="group inline-flex items-center gap-3 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_26px_-10px_rgba(0,0,0,0.65)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
-              Start free <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
+              Launch Evaluation <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </button>
+            <a href={PROCUREMENT_ROUTE}
+              className="inline-flex items-center rounded border border-white/15 bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] px-7 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/85 transition active:translate-y-px hover:border-white/35 hover:bg-white/[0.06]">
+              Download Procurement Package
+            </a>
+          </div>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[12px] font-semibold uppercase tracking-wide text-white/45">
+            <a href={ARCHITECTURE_ROUTE} className="transition hover:text-gold-400">Architecture</a>
+            <span className="text-white/15">·</span>
+            <a href={SECURITY_ROUTE} className="transition hover:text-gold-400">Security</a>
+            <span className="text-white/15">·</span>
+            <a href="#plans" className="transition hover:text-gold-400">Deployment options</a>
           </div>
         </div>
       </section>
