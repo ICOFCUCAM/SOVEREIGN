@@ -17,6 +17,7 @@ older one (never an edit of history).
 | [006](ADR-006-docx-rendering-strategy.md) | DOCX Rendering Strategy | Accepted |
 | [007](ADR-007-sprint1-implementation-decisions.md) | Sprint 1 Implementation Decisions | Accepted |
 | [009](ADR-009-dispatch-autonomy.md) | Dispatch Autonomy | Accepted |
+| [010](ADR-010-multi-institution-and-interaction.md) | Multi-Institution Scope & Inter-Institutional Interaction | Accepted (deferred) |
 
 > ADR-008 is intentionally unused (reserved during planning); the autonomy
 > decision is recorded as ADR-009.
