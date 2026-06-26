@@ -4,6 +4,7 @@
 process.env.DISPATCH_TOKEN_SECRET ||= "dev-dispatch-token-secret";
 process.env.DISPATCH_TOKEN_ISSUER = "sovereign-dispatch";
 const { mintUserToken } = await import("../shared/src/auth.mjs");
+import crypto from "node:crypto";
 const API = "http://127.0.0.1:8787";
 let pass = 0; const gaps = [];
 const ok = (n) => { pass++; console.log(`  ✓ ${n}`); };
@@ -49,6 +50,19 @@ const verify = async (rid) => call("GET", `/v1/verify/${encodeURIComponent(rid)}
   (v.body.integrityHash && /^[a-f0-9]{32,}$/i.test(v.body.integrityHash)) ? ok(`Carries a cryptographic integrity hash: ${v.body.integrityHash.slice(0, 12)}…`) : bad("integrity", JSON.stringify(v.body.integrityHash));
   (v.body.hasGovernanceCertificate && v.body.governanceCompliance === "COMPLIANT") ? ok("Governance Certificate present & COMPLIANT, approval chain listed") : bad("gov cert", JSON.stringify({ g: v.body.hasGovernanceCertificate, c: v.body.governanceCompliance }));
   (Array.isArray(v.body.approvalChain) && v.body.approvalChain.includes("Director of Policy")) ? ok(`Approval chain visible: ${v.body.approvalChain.join(" → ")}`) : bad("chain", JSON.stringify(v.body.approvalChain));
+
+  console.log("\n── Artifact-level integrity: the exposed hash IS the file's hash ──");
+  (Array.isArray(v.body.artifacts) && v.body.artifacts.find((a) => a.format === "pdf")?.sha256) ? ok("Verification exposes the official artifact SHA-256(s)") : bad("artifact hashes", JSON.stringify(v.body.artifacts));
+  // Download the genuine PDF and hash it locally — it must equal the exposed hash.
+  const det = (await call("GET", `/v1/documents/${id}`, { token: cyrus })).body;
+  const art = (det.latestResult?.artifacts || []).find((a) => a.format === "pdf");
+  const grant = (await call("POST", `/v1/artifacts/${art.artifactId}/grant`, { token: cyrus, body: {} })).body;
+  const bytes = Buffer.from(await (await fetch(API + grant.downloadUrl)).arrayBuffer());
+  const localHash = crypto.createHash("sha256").update(bytes).digest("hex");
+  const official = v.body.artifacts.find((a) => a.format === "pdf").sha256;
+  (localHash === official) ? ok("A hash of the downloaded file matches the official hash → the file is authentic & unaltered") : bad("file hash compare", `${localHash.slice(0, 12)} vs ${official.slice(0, 12)}`);
+  const tampered = crypto.createHash("sha256").update(Buffer.concat([bytes, Buffer.from([0])])).digest("hex");
+  (tampered !== official) ? ok("A single altered byte produces a different hash → tampering is detected") : bad("tamper undetected", "hashes collided");
 
   console.log("\n── Verify also resolves by the document UUID ──");
   v = await verify(id);

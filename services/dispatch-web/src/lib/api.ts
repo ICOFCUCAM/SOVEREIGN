@@ -296,6 +296,7 @@ export interface VerifyResult {
   classification?: { scheme?: string; level?: string } | null; docType?: string;
   governanceCompliance?: string | null; publicationAuthority?: string | null; approvalChain?: string[] | null;
   integrityHash?: string | null; hasGovernanceCertificate?: boolean; hasPreservationCertificate?: boolean;
+  artifacts?: { format: string; sha256: string; sizeBytes?: number; pages?: number | null }[];
   publishedAt?: string | null; preservedAt?: string | null; revokedAt?: string | null;
   retentionUntil?: string | null; verifiedAt?: string; message?: string;
 }

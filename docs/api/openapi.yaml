@@ -338,6 +338,10 @@ paths:
                   governanceCompliance: { type: string, nullable: true }
                   integrityHash: { type: string, nullable: true, description: SHA-256 }
                   approvalChain: { type: array, items: { type: string }, nullable: true }
+                  artifacts:
+                    type: array
+                    description: SHA-256 of each produced file — hash your own copy and compare for byte-level integrity.
+                    items: { type: object, properties: { format: { type: string }, sha256: { type: string }, sizeBytes: { type: integer }, pages: { type: integer, nullable: true } } }
                   publishedAt: { type: string, format: date-time, nullable: true }
         "404": { description: Not a verified record, content: { application/json: { schema: { type: object, properties: { verified: { type: boolean }, status: { type: string } } } } } }
 

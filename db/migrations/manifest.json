@@ -23,6 +23,7 @@
     "M20__people.sql",
     "M21__sso_connections.sql",
     "M22__webhooks.sql",
-    "M23__record_verification.sql"
+    "M23__record_verification.sql",
+    "M24__verify_artifacts.sql"
   ]
 }

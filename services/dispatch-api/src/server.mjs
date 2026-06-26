@@ -1542,6 +1542,9 @@ async function handleVerify(res, id) {
     integrityHash: row.preservation_sha256 || row.governance_sha256 || null,
     hasGovernanceCertificate: !!row.governance_sha256,
     hasPreservationCertificate: !!row.preservation_sha256,
+    // The SHA-256 of each produced file. A recipient hashes their own copy and
+    // compares — byte-level proof the file is exactly what the institution issued.
+    artifacts: Array.isArray(row.artifacts) ? row.artifacts : [],
     publishedAt: row.published_at, preservedAt: row.archived_at, revokedAt: row.withdrawn_at,
     retentionUntil: row.retention_until,
     verifiedAt: new Date().toISOString(),

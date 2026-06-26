@@ -27,6 +27,44 @@ const Fact: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children 
     </div>
   );
 
+// Hash a chosen file locally (Web Crypto) and tell the holder whether it is, byte
+// for byte, an official artifact of this record. The file never leaves the browser.
+const FileCheck: React.FC<{ artifacts: NonNullable<VerifyResult["artifacts"]> }> = ({ artifacts }) => {
+  const [state, setState] = useState<{ kind: "idle" | "hashing" | "match" | "nomatch"; format?: string; name?: string }>({ kind: "idle" });
+  const onFile = async (file?: File) => {
+    if (!file) return;
+    setState({ kind: "hashing", name: file.name });
+    const buf = await file.arrayBuffer();
+    const digest = await crypto.subtle.digest("SHA-256", buf);
+    const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    const hit = artifacts.find((a) => a.sha256.toLowerCase() === hex);
+    setState(hit ? { kind: "match", format: hit.format, name: file.name } : { kind: "nomatch", name: file.name });
+  };
+  return (
+    <div className="border-t border-white/[0.08] p-6 sm:p-7">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">Check your own copy</div>
+      <p className="mt-1.5 max-w-xl text-[12.5px] leading-relaxed text-white/50">
+        Select the file you received. It is hashed in your browser (it never leaves your device) and compared against the official artifact{artifacts.length > 1 ? "s" : ""}. If a single byte differs, it will not match.
+      </p>
+      <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-md border border-white/20 px-4 py-2 text-[13px] font-semibold text-white/80 transition hover:border-white/40">
+        Choose a file to check
+        <input type="file" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
+      </label>
+      {state.kind === "hashing" && <div className="mt-3 text-[13px] text-white/40">Hashing {state.name}…</div>}
+      {state.kind === "match" && (
+        <div className="mt-3 flex items-center gap-2.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-[13.5px] text-emerald-200">
+          <span className="text-lg">✓</span><span><span className="font-semibold">{state.name}</span> is an authentic, unaltered official {state.format?.toUpperCase()} of this record.</span>
+        </div>
+      )}
+      {state.kind === "nomatch" && (
+        <div className="mt-3 flex items-center gap-2.5 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-[13.5px] text-red-200">
+          <span className="text-lg">✕</span><span><span className="font-semibold">{state.name}</span> does NOT match the official artifact. It has been altered, or it is not the file the institution issued.</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Verify: React.FC = () => {
   const { recordId } = useParams<{ recordId: string }>();
   const nav = useNavigate();
@@ -111,8 +149,22 @@ const Verify: React.FC = () => {
                     <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">Cryptographic integrity proof (SHA-256)</div>
                     <div className="mt-1 break-all font-mono text-[12px] text-emerald-200/90">{v.integrityHash || "—"}</div>
                   </div>
+                  {v.artifacts && v.artifacts.length > 0 && (
+                    <div className="col-span-2 sm:col-span-3">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">Official artifact hashes</div>
+                      <ul className="mt-1.5 space-y-1">
+                        {v.artifacts.map((a) => (
+                          <li key={a.format} className="flex flex-wrap items-baseline gap-2 text-[12px]">
+                            <span className="w-12 shrink-0 font-semibold uppercase text-white/70">{a.format}</span>
+                            <span className="break-all font-mono text-white/45">{a.sha256}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
+              {v.verified && v.artifacts && v.artifacts.length > 0 && <FileCheck artifacts={v.artifacts} />}
               <div className="border-t border-white/[0.06] px-6 py-2.5 text-[11px] text-white/35 sm:px-7">Verified by Sovereign Dispatch{v.verifiedAt ? ` · ${fmtDate(v.verifiedAt)}` : ""}</div>
             </div>
           )}
