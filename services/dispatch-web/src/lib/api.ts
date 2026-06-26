@@ -227,7 +227,7 @@ export interface Posture {
   policyName?: string | null; policyVersion?: number | null;
   currentAuthority?: string | null; nextAuthority?: string | null;
   currentRole?: string | null; nextRole?: string | null;
-  approvalAuthority?: string | null; publicationAuthority?: string | null;
+  approvalAuthority?: string | null; publicationAuthority?: string | null; publicationRole?: string | null;
   waitingSince?: string | null; status?: string | null;
 }
 
@@ -238,6 +238,7 @@ export interface Office { key: string; label: string; department?: string | null
 export interface AuthorityRecord extends Posture {
   documentId: string; title: string; docType: string;
   classification?: { scheme?: string; level?: string }; submittedBy?: string | null; viaDelegation?: boolean;
+  lifecycle?: string; action?: "decide" | "publish";
 }
 export interface MyAuthority {
   offices: Office[];

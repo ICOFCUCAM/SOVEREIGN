@@ -1045,9 +1045,12 @@ async function handleMyAuthority(res, principal) {
     const offices = [...myRoles].map((k) => ({ key: k, label: labels[k] || k, department: depts[k]?.dept ?? null, delegated: !held.includes(k), order: depts[k]?.order ?? 100 }))
       .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
 
+    // Records under your authority = open review steps you hold AND rendered records
+    // awaiting publication by an office you hold. The publisher is an office-holder
+    // too: their work is the rendered queue, not the review queue.
     const pendingDocs = (await c.query(
       `select id, doc_type, title, classification, submitted_at, submitted_by, current_version, lifecycle_state
-         from dispatch.documents where lifecycle_state in ('submitted','in_review') and deleted_at is null
+         from dispatch.documents where lifecycle_state in ('submitted','in_review','rendered') and deleted_at is null
         order by submitted_at asc nulls last limit 200`)).rows;
     const cache = new Map();
     const underYourAuthority = [];
@@ -1055,9 +1058,13 @@ async function handleMyAuthority(res, principal) {
       if (!clearanceAllows(principal.clearance, d.classification || {}).allowed) continue;
       const posture = await documentPosture(c, d, cache);
       if (!posture.currentRole || !myRoles.has(posture.currentRole)) continue;
-      if (d.submitted_by === subject) continue; // separation of duties — never your own record
+      const isPublish = d.lifecycle_state === "rendered";
+      // Separation of duties bars you from DECIDING your own record; publication is a
+      // distinct office act, so a publisher's own submission still appears to publish.
+      if (!isPublish && d.submitted_by === subject) continue;
       underYourAuthority.push({ documentId: d.id, title: d.title, docType: d.doc_type, classification: d.classification,
-        submittedBy: d.submitted_by, viaDelegation: !held.includes(posture.currentRole), ...posture });
+        submittedBy: d.submitted_by, lifecycle: d.lifecycle_state, action: isPublish ? "publish" : "decide",
+        viaDelegation: !held.includes(posture.currentRole), ...posture });
     }
     return { offices, underYourAuthority };
   });
