@@ -1,0 +1,6 @@
+node_modules/
+dist/
+output/
+export/
+library/records.json
+library/report.html

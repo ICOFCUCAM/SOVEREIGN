@@ -1,0 +1,18 @@
+{
+  "id": "scene-22-committee-room",
+  "index": 22,
+  "title": "Committee Hearing Room",
+  "purpose": "Oversight and hearings surfaces; accountability messaging.",
+  "story": "A committee hearing room before the hearing — a raised bench above a lone witness table, the asymmetry of scrutiny made plain.",
+  "environment": "A formal hearing room, a curved raised bench facing a single table across an open floor, panelling fading into shadow.",
+  "architecture": "Institutional interior — a tiered presiding bench, a panelled dado, a high cornice receding into gloom.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The raised bench dominant on the upper axis, the small witness table below and forward, warm light pooling between them, darkness beyond.",
+  "materials": ["dark oak bench", "brass desk lamps", "green leather chairs", "panelled walls"],
+  "objects": ["a curved raised bench", "a lone witness table", "high-backed chairs", "a single brass lamp"],
+  "negativeExtra": ["any nameplates or writing", "microphones with branding", "national flags", "screens with visible content"],
+  "continuityNotes": "Holds the set's near-black grade with one warm source and brass-on-black palette consistent with scene-01.",
+  "aspectRatio": "16:10"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "scene-02-parliament-chamber",
+  "index": 2,
+  "title": "Parliament Chamber",
+  "purpose": "Legislatures sector card and parliamentary-vertical surfaces.",
+  "story": "A legislative chamber between sessions — tiered benches curving toward an empty speaker's dais, the hush before debate.",
+  "environment": "A grand semicircular debating chamber, tiered seating rising in concentric arcs around a central well.",
+  "architecture": "Neoclassical parliament interior — a high coffered ceiling, ranked stone galleries, a raised presiding chair under a carved canopy.",
+  "people": { "prominence": "distant", "notes": "A handful of figures scattered in the lower benches, seen from behind and in shadow; no face toward the camera." },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The empty presiding dais on the central axis, curved benches sweeping outward, deep negative space rising into the dim galleries.",
+  "materials": ["carved oak benches", "aged brass rails", "green leather upholstery", "stone balustrade"],
+  "objects": ["tiered curved benches", "presiding chair under a canopy", "brass dispatch rails", "a single hanging lamp"],
+  "negativeExtra": ["national flags", "coats of arms with lettering", "any writing on benches or walls", "screens with visible content"],
+  "continuityNotes": "Holds the set's near-black grade with one warm source and brass-on-black palette; chamber darkness must match scene-01.",
+  "aspectRatio": "16:10"
+}

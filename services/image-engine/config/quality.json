@@ -1,0 +1,21 @@
+{
+  "threshold": 92,
+  "maxAttempts": 5,
+  "candidatesPerScene": 6,
+  "continuityFloor": 80,
+  "criteria": [
+    { "key": "architecturalQuality", "label": "Architectural quality & believability", "weight": 12 },
+    { "key": "institutionalAtmosphere", "label": "Institutional atmosphere & gravitas", "weight": 12 },
+    { "key": "lightingConsistency", "label": "Cinematic lighting & grade consistency", "weight": 10 },
+    { "key": "composition", "label": "Composition & framing discipline", "weight": 10 },
+    { "key": "brandConsistency", "label": "Consistency with Brand DNA", "weight": 10 },
+    { "key": "luxuryFeel", "label": "Quiet-luxury, editorial feel", "weight": 8 },
+    { "key": "editorialQuality", "label": "Annual-report editorial quality", "weight": 8 },
+    { "key": "humanRealism", "label": "Human realism (when people present)", "weight": 7 },
+    { "key": "handQuality", "label": "Hand anatomy correctness", "weight": 7 },
+    { "key": "facialQuality", "label": "Facial correctness (no distortion)", "weight": 6 },
+    { "key": "artisticExcellence", "label": "Overall artistic excellence", "weight": 8 },
+    { "key": "artifactAbsence", "label": "Absence of AI artifacts", "weight": 8, "critical": true },
+    { "key": "prohibitedAbsence", "label": "Absence of prohibited elements (text, logos, UI…)", "weight": 12, "critical": true }
+  ]
+}

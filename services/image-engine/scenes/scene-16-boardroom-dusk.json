@@ -1,0 +1,18 @@
+{
+  "id": "scene-16-boardroom-dusk",
+  "index": 16,
+  "title": "Corporate Boardroom at Dusk",
+  "purpose": "Enterprise sector card and corporate-governance surfaces.",
+  "story": "A corporate boardroom at dusk above a darkening skyline — the height of private authority, calm before the night's decisions.",
+  "environment": "A high-floor boardroom, a long table set against floor-to-ceiling glass overlooking a city at blue hour.",
+  "architecture": "Restrained modern interior — a clean coffered ceiling, full-height glazing, stone-clad end walls receding into shadow.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The table on the central axis silhouetted against the blue-hour skyline, one warm lamp anchoring the foreground, deep negative space at the glass.",
+  "materials": ["dark stone table", "brushed brass fittings", "charcoal leather chairs", "floor-to-ceiling glass"],
+  "objects": ["a long boardroom table", "executive chairs", "a brass desk lamp", "a city skyline beyond the glass"],
+  "negativeExtra": ["building signage on the skyline", "any writing on documents", "screens with visible content", "corporate logos"],
+  "continuityNotes": "Matches the set's near-black grade and brass-on-black palette of scene-01; the skyline reads cool while one warm lamp holds the accent.",
+  "aspectRatio": "16:10"
+}

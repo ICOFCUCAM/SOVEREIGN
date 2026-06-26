@@ -1,0 +1,18 @@
+{
+  "id": "scene-05-university-senate",
+  "index": 5,
+  "title": "University Senate Hall",
+  "purpose": "Universities sector card and academic-governance surfaces.",
+  "story": "A university senate hall set for convocation — the governing body of a learned institution, its seats awaiting the assembly.",
+  "environment": "A panelled academic hall, a long table beneath portraits dissolving into shadow, high windows along one side.",
+  "architecture": "Collegiate gothic interior — a hammer-beam ceiling, carved oak panelling, pointed-arch windows receding into gloom.",
+  "people": { "prominence": "distant", "notes": "Two or three robed figures near the far end, seen from behind; no face addressing the camera." },
+  "camera": "architectural-wide",
+  "lighting": "window-shaft",
+  "composition": "The long table on a strong axis under a falling shaft of light, the carved ceiling rising into deep negative space.",
+  "materials": ["carved oak panelling", "aged brass sconces", "green baize table", "stone tracery"],
+  "objects": ["long senate table", "high-backed oak chairs", "a ceremonial mace on a stand", "a single brass lamp"],
+  "negativeExtra": ["readable portrait nameplates", "any writing in books or scrolls", "academic crests with lettering", "national flags"],
+  "continuityNotes": "Holds the set's near-black grade, single warm source, and brass-on-black palette from scene-01.",
+  "aspectRatio": "16:10"
+}

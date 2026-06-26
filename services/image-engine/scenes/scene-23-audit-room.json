@@ -1,0 +1,18 @@
+{
+  "id": "scene-23-audit-room",
+  "index": 23,
+  "title": "Audit and Review Room",
+  "purpose": "Audit and assurance surfaces; diligence messaging.",
+  "story": "An austere audit room at the end of a long review — documents stacked in disciplined order, the quiet weight of scrutiny.",
+  "environment": "A spare windowless room, a plain table bearing neat stacks of blank documents, bare walls receding into shadow.",
+  "architecture": "Stripped institutional interior — a low flat ceiling, unadorned plaster walls, a single recessed light over the table.",
+  "people": { "prominence": "none" },
+  "camera": "object-still-life",
+  "lighting": "overhead-austere",
+  "composition": "The table centred under a hard overhead pool, orderly stacks casting long shadows, the bare room falling into negative space.",
+  "materials": ["a plain steel table", "stacked paper", "manila folders", "a brass paperweight"],
+  "objects": ["neat stacks of blank documents", "closed folders", "a brass paperweight", "a single overhead light"],
+  "negativeExtra": ["any writing or figures on the documents", "charts or tables", "stamps with text", "screens with visible content"],
+  "continuityNotes": "Matches the set's near-black grade; the austere overhead stays cool while a brass paperweight holds the warm accent from scene-01.",
+  "aspectRatio": "16:10"
+}

@@ -1,0 +1,41 @@
+{
+  "default": "architectural-wide",
+  "presets": [
+    {
+      "id": "architectural-wide",
+      "angle": "straight-on, gently symmetrical",
+      "lens": "35mm",
+      "height": "eye-level, slightly low",
+      "distance": "wide establishing",
+      "framing": "the room and its architecture dominate the frame",
+      "composition": "strong central axis, generous negative space above"
+    },
+    {
+      "id": "object-still-life",
+      "angle": "three-quarter, slightly above",
+      "lens": "85mm macro",
+      "height": "tabletop",
+      "distance": "close",
+      "framing": "a single institutional object isolated against shadow",
+      "composition": "rule-of-thirds, deep negative space, one specular highlight"
+    },
+    {
+      "id": "hands-detail",
+      "angle": "over-the-shoulder, looking down",
+      "lens": "85mm",
+      "height": "above the desk",
+      "distance": "intimate",
+      "framing": "hands at work — signing, sealing — no faces",
+      "composition": "tight, documentary, off-centre subject"
+    },
+    {
+      "id": "figures-distant",
+      "angle": "straight-on",
+      "lens": "50mm",
+      "height": "eye-level",
+      "distance": "wide",
+      "framing": "figures small within a grand interior, seen from behind or in silhouette",
+      "composition": "people subordinate to the architecture; no face toward camera"
+    }
+  ]
+}

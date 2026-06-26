@@ -1,0 +1,33 @@
+{
+  "palette": [
+    "near-black charcoal base (#070707)",
+    "deep oxblood and midnight navy in shadow",
+    "warm antique gold accents",
+    "aged brass and bronze",
+    "ivory and parchment as the lightest note"
+  ],
+  "materials": [
+    "polished dark hardwood",
+    "aged brass and patinated bronze",
+    "marble and carved stone",
+    "leather and bound volumes",
+    "brushed metal and bevelled glass"
+  ],
+  "textures": [
+    "fine film grain",
+    "soft material specular falloff",
+    "subtle dust in light shafts",
+    "tactile surface micro-detail"
+  ],
+  "renderingQuality": [
+    "photorealistic editorial photography",
+    "medium-format clarity",
+    "high dynamic range held in the shadows",
+    "natural lens character, no over-sharpening"
+  ],
+  "lens": "50mm or 85mm prime, full-frame, shallow but controlled",
+  "depthOfField": "shallow-to-medium; subject crisp, background falling gently into shadow",
+  "perspective": "eye-level to slightly low, architectural and dignified",
+  "mood": "austere, authoritative, composed, permanent",
+  "atmosphere": "still air, low ambient light, one considered source, a sense of consequence"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "scene-20-colonnade-exterior",
+  "index": 20,
+  "title": "Institutional Colonnade at Blue Hour",
+  "purpose": "Establishing exterior; section dividers and hero banners.",
+  "story": "An institutional colonnade at blue hour — the imposing face of a public building, columns standing watch over the empty steps.",
+  "environment": "A monumental portico exterior, a long colonnade above a broad flight of steps, the plaza beyond in deep dusk.",
+  "architecture": "Neoclassical exterior — a row of fluted columns, a deep pedimented entablature, recessed bronze doors in shadow.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The colonnade running across the frame in raking light, the steps leading up on a strong diagonal, blue-hour sky as negative space above.",
+  "materials": ["pale stone columns", "bronze doors", "granite steps", "a brass lantern"],
+  "objects": ["a row of stone columns", "a broad flight of steps", "recessed bronze doors", "a single brass lantern"],
+  "negativeExtra": ["any inscriptions on the pediment", "building signage", "national flags", "a clock face with numerals"],
+  "continuityNotes": "Holds the set's near-black grade; blue-hour sky stays cool while one warm lantern carries the brass-on-black accent from scene-01.",
+  "aspectRatio": "16:10"
+}

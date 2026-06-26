@@ -1,0 +1,18 @@
+{
+  "id": "scene-12-election-commission",
+  "index": 12,
+  "title": "Election Commission Hall",
+  "purpose": "Election-commissions sector card and electoral-integrity surfaces.",
+  "story": "An election commission hall holding sealed ballot containers — the custody of a nation's choice, guarded and unmarked.",
+  "environment": "A high committee hall, sealed containers ranged on long tables under a tall ceiling, the room beyond in shadow.",
+  "architecture": "Formal institutional interior — pilastered walls, a deep cornice, tall shuttered windows receding into gloom.",
+  "people": { "prominence": "distant", "notes": "A single steward at the far table, seen from behind in silhouette; no face toward the camera." },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "Tables of sealed containers leading the eye down the hall, a pool of warm light over the nearest, deep negative space toward the cornice.",
+  "materials": ["sealed metal containers", "brass clasps", "oak trestle tables", "stone pilasters"],
+  "objects": ["rows of sealed ballot containers", "brass tamper seals", "long tables", "a single hanging lamp"],
+  "negativeExtra": ["any markings on the containers", "numbers, labels, or party symbols", "national flags", "screens with visible content"],
+  "continuityNotes": "Matches the set's near-black grade, single warm source, and brass-on-black palette of scene-01; containers carry no markings.",
+  "aspectRatio": "16:10"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "scene-04-central-bank-hall",
+  "index": 4,
+  "title": "Central Bank Great Hall",
+  "purpose": "Regulators sector card and monetary-authority surfaces.",
+  "story": "The great hall of a central bank after hours — the quiet machinery of sovereign money, vast and unattended.",
+  "environment": "A monumental banking hall, a long marble concourse beneath a vaulted ceiling, tellers' counters receding in shadow.",
+  "architecture": "Beaux-arts institutional interior — paired stone columns, a deep barrel vault, a grand staircase ascending into darkness.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "window-shaft",
+  "composition": "A single shaft of warm light crossing the marble concourse, columns marching toward a dim vanishing point, vast negative space overhead.",
+  "materials": ["polished marble floor", "bronze counter screens", "stone columns", "brass balustrade"],
+  "objects": ["long banking counters", "bronze teller screens", "a grand staircase", "a single brass lamp"],
+  "negativeExtra": ["currency symbols", "any signage or numerals", "national flags", "screens with visible content"],
+  "continuityNotes": "Keeps the set's near-black grade with one warm shaft and brass-on-black palette consistent with scene-01.",
+  "aspectRatio": "16:10"
+}

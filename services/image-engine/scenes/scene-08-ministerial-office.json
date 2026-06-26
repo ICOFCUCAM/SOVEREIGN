@@ -1,0 +1,18 @@
+{
+  "id": "scene-08-ministerial-office",
+  "index": 8,
+  "title": "Minister's Private Office",
+  "purpose": "Government sector card and executive-signing surfaces.",
+  "story": "A minister's hands at the desk, pen poised over a blank document — the private instant in which authority is exercised.",
+  "environment": "A minister's panelled private office, a heavy desk lit by a single lamp, the room beyond folded into shadow.",
+  "architecture": "Implied only — dark wood panelling and a tall window suggested at the edge of the light.",
+  "people": { "prominence": "present", "notes": "Only the hands and cuffs of a seated figure are visible at the desk; no face, no body above the wrists." },
+  "camera": "hands-detail",
+  "lighting": "single-source-cinematic",
+  "composition": "Tight on the hands and pen over the desk blotter, warm light raking across the leather, the rest of the office in deep negative space.",
+  "materials": ["dark walnut desk", "green leather blotter", "aged brass lamp", "white linen cuffs"],
+  "objects": ["a fountain pen", "a blank document on a blotter", "a brass desk lamp", "a closed leather folder"],
+  "negativeExtra": ["any writing on the document", "letterhead or seals with text", "screens with visible content", "the figure's face"],
+  "continuityNotes": "Matches the set's near-black grade, single warm source, and brass-on-black palette of scene-01; the page must remain blank.",
+  "aspectRatio": "16:10"
+}

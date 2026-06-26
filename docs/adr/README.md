@@ -20,6 +20,7 @@ older one (never an edit of history).
 | [010](ADR-010-multi-institution-and-interaction.md) | Multi-Institution Scope & Inter-Institutional Interaction | Accepted (deferred) |
 | [011](ADR-011-platform-positioning-and-identities.md) | Platform Positioning: Three Interfaces, Three Identities, Two Products | Accepted (roadmap) |
 | [012](ADR-012-pricing-and-packaging.md) | Pricing & Packaging: Price the Institution, Never the Seat | Accepted |
+| [013](ADR-013-ai-illustration-engine.md) | AI Art-Direction Engine for the Institutional Illustration Library | Accepted |
 
 > ADR-008 is intentionally unused (reserved during planning); the autonomy
 > decision is recorded as ADR-009.

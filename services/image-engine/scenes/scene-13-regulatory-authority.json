@@ -1,0 +1,18 @@
+{
+  "id": "scene-13-regulatory-authority",
+  "index": 13,
+  "title": "Regulatory Authority Interior",
+  "purpose": "Regulators sector card and supervisory-authority surfaces.",
+  "story": "The interior of a regulatory authority at dusk — the measured stillness of oversight, ledgers closed and order kept.",
+  "environment": "A long galleried office hall, ranked desks beneath a high glazed ceiling, partitions dissolving into shadow.",
+  "architecture": "Edwardian institutional interior — cast-iron columns, a glazed roof lantern, a mezzanine balustrade above the floor.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "window-shaft",
+  "composition": "Ranks of desks marching toward a dim vanishing point, a warm shaft crossing the floor, the roof lantern lost in negative space above.",
+  "materials": ["cast-iron columns", "brass desk lamps", "oak roll-top desks", "a glazed roof"],
+  "objects": ["rows of clerks' desks", "closed ledgers (blank)", "brass lamps", "a mezzanine gallery"],
+  "negativeExtra": ["any writing in the ledgers", "regulatory signage or text", "national flags", "screens with visible content"],
+  "continuityNotes": "Keeps the set's near-black grade with one warm shaft and brass-on-black palette consistent with scene-01.",
+  "aspectRatio": "16:10"
+}

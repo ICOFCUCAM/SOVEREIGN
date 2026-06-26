@@ -1,0 +1,21 @@
+{
+  "default": "single-source-cinematic",
+  "presets": [
+    {
+      "id": "single-source-cinematic",
+      "description": "One directional warm source raking across the scene; deep falloff into near-black; controlled highlights on metal and stone; no fill flatness."
+    },
+    {
+      "id": "window-shaft",
+      "description": "A single tall window casting a defined shaft of cool daylight into an otherwise dark interior; dust visible in the beam; warm practicals far in the background."
+    },
+    {
+      "id": "candle-warm",
+      "description": "Low warm key as if from a single lamp or candle; intimate pooled light on the subject; the surroundings dissolving into shadow."
+    },
+    {
+      "id": "overhead-austere",
+      "description": "A restrained overhead pool of light on a table or floor; the upper architecture in shadow; solemn and ceremonial."
+    }
+  ]
+}

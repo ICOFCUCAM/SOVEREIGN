@@ -1,0 +1,18 @@
+{
+  "id": "scene-07-hospital-board",
+  "index": 7,
+  "title": "Hospital Executive Board Room",
+  "purpose": "Healthcare sector card and clinical-governance surfaces.",
+  "story": "A hospital executive board room empty mid-session — chairs pushed back, the gravity of a decision still hanging in the air.",
+  "environment": "A restrained board room, a long table before a wall of dark panelling, blinds drawn against the night.",
+  "architecture": "Austere modern-institutional interior — a low coffered ceiling, recessed panelling, a glazed wall dissolving into shadow.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The long table on the central axis, one chair turned aside as if just vacated, a pool of warm light over the table edge with darkness beyond.",
+  "materials": ["dark walnut table", "brushed brass fittings", "charcoal leather chairs", "matte panelled walls"],
+  "objects": ["long board table", "executive chairs", "water carafes", "closed folders (blank)", "a single brass lamp"],
+  "negativeExtra": ["medical charts", "any writing on documents", "screens with visible content", "hospital signage"],
+  "continuityNotes": "Holds the set's near-black grade with one warm source and brass-on-black palette consistent with scene-01.",
+  "aspectRatio": "16:10"
+}

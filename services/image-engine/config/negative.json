@@ -1,0 +1,16 @@
+{
+  "global": [
+    "text", "letters", "numbers", "words", "typography", "captions", "titles",
+    "headlines", "slogans", "signage", "plaques with writing", "book covers with text",
+    "logos", "emblems with text", "flags", "watermarks",
+    "UI", "user interface", "charts", "graphs", "dashboards", "data visualisations",
+    "certificates with visible writing", "fake interfaces", "screens with text",
+    "holograms", "glowing overlays", "neon", "cyberpunk", "sci-fi",
+    "cartoon", "anime", "illustration", "vector art", "3d-render look", "CGI plastic look",
+    "low resolution", "jpeg artifacts", "blur", "noise artifacts",
+    "deformed anatomy", "extra fingers", "missing fingers", "malformed hands",
+    "distorted faces", "asymmetrical eyes", "uncanny faces",
+    "people smiling at camera", "stock-photo poses", "thumbs up", "handshake cliché",
+    "oversaturated", "HDR halos", "lens flare overload", "watermark signatures"
+  ]
+}

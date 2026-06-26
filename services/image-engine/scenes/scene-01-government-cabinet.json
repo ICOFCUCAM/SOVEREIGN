@@ -1,0 +1,18 @@
+{
+  "id": "scene-01-government-cabinet",
+  "index": 1,
+  "title": "Government Cabinet Room",
+  "purpose": "Homepage 'Government' sector card and government-vertical surfaces.",
+  "story": "A cabinet mid-deliberation around a great round table — the weight of collective decision, no single speaker dominating.",
+  "environment": "A formal government cabinet room, panelled in dark wood, tall arched windows along one wall.",
+  "architecture": "Classical statecraft interior — coffered ceiling, fluted pilasters, a carved cornice receding into shadow.",
+  "people": { "prominence": "distant", "notes": "A dozen figures seated, several seen from behind; no face dominant, no one addressing the camera." },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The round table on a strong central axis; figures subordinate to the room; deep negative space toward the ceiling.",
+  "materials": ["polished mahogany table", "aged brass fittings", "leather chairs", "stone cornice"],
+  "objects": ["round deliberation table", "water carafes", "closed leather folders", "a single brass lamp"],
+  "negativeExtra": ["world map on the wall", "national flags", "visible documents with writing", "laptops with visible screens"],
+  "continuityNotes": "Establishes the set's grade: near-black walls, one warm source, gold brass accents. All other interiors must match this darkness and warmth.",
+  "aspectRatio": "16:10"
+}

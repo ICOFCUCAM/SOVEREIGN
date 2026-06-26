@@ -1,0 +1,18 @@
+{
+  "id": "scene-03-supreme-court",
+  "index": 3,
+  "title": "Supreme Court Bench",
+  "purpose": "Justice sector card and judiciary-vertical surfaces.",
+  "story": "The high bench of a supreme court at rest — the seat of final judgement, empty and waiting beneath its columns.",
+  "environment": "A solemn courtroom, a long raised bench facing rows of counsel tables across a marble floor.",
+  "architecture": "Classical justice interior — fluted columns flanking the bench, a deep entablature, a recessed apse dissolving into shadow.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The raised bench centred and symmetrical, columns framing the void above it, the polished floor leading the eye inward.",
+  "materials": ["veined marble columns", "dark mahogany bench", "aged brass lamp fittings", "burgundy leather chairs"],
+  "objects": ["long raised judicial bench", "counsel tables", "high-backed leather chairs", "a single brass desk lamp"],
+  "negativeExtra": ["scales-of-justice statue", "any inscriptions on the bench or walls", "national flags", "books with visible titles"],
+  "continuityNotes": "Matches the set's near-black grade, single warm source, and brass-on-black palette established in scene-01.",
+  "aspectRatio": "16:10"
+}

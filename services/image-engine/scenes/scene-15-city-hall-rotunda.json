@@ -1,0 +1,18 @@
+{
+  "id": "scene-15-city-hall-rotunda",
+  "index": 15,
+  "title": "City Hall Rotunda",
+  "purpose": "Civic sector card and municipal-identity surfaces.",
+  "story": "The rotunda of a city hall at night — the symbolic heart of civic life, its marble silent under a single light.",
+  "environment": "A circular rotunda interior, a mosaic floor beneath a ringed gallery, arched openings leading off into shadow.",
+  "architecture": "Civic baroque interior — paired columns ringing the drum, a balustraded gallery, arched portals beneath a dim cupola.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The circular floor centred and symmetrical, a warm light falling across the mosaic, the ringed gallery rising into negative space.",
+  "materials": ["marble mosaic floor", "stone columns", "brass gallery rail", "a coffered drum"],
+  "objects": ["a circular rotunda floor", "ringed columns", "a balustraded gallery", "a single floor lamp"],
+  "negativeExtra": ["civic crests with lettering", "any inscriptions in the mosaic", "national flags", "screens with visible content"],
+  "continuityNotes": "Holds the set's near-black grade with one warm source and brass-on-black palette consistent with scene-01.",
+  "aspectRatio": "16:10"
+}

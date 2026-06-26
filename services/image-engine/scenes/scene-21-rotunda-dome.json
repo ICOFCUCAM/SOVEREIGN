@@ -1,0 +1,18 @@
+{
+  "id": "scene-21-rotunda-dome",
+  "index": 21,
+  "title": "Coffered Domed Rotunda",
+  "purpose": "Vertical hero and section-break imagery; aspiration motif.",
+  "story": "Looking straight up into a coffered dome — the upward pull of institutional aspiration, geometry receding toward a faint oculus.",
+  "environment": "The interior of a great dome seen from directly below, coffers diminishing toward a dim central oculus.",
+  "architecture": "Classical dome interior — concentric rings of recessed coffers, a ringed cornice, an oculus glowing faintly at the apex.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "window-shaft",
+  "composition": "Perfectly symmetrical from below, coffers spiralling inward to the oculus, the faint warm glow at centre against deep shadow at the rim.",
+  "materials": ["carved stone coffers", "a gilt cornice ring", "pale plaster", "a glazed oculus"],
+  "objects": ["concentric coffered rings", "a central oculus", "a ringed cornice", "a faint shaft of light"],
+  "negativeExtra": ["any painted figures or text in the dome", "inscriptions on the cornice", "national emblems", "screens with visible content"],
+  "continuityNotes": "Matches the set's near-black grade and brass-on-black palette of scene-01; only the oculus carries the single warm source.",
+  "aspectRatio": "16:10"
+}

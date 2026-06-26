@@ -1,0 +1,18 @@
+{
+  "id": "scene-29-institutional-crest-relief",
+  "index": 29,
+  "title": "Carved Heraldic Relief",
+  "purpose": "Identity and provenance surfaces; brand crest accent.",
+  "story": "A carved stone crest in deep relief — the wordless emblem of an institution, hewn into permanence and grazed by one light.",
+  "environment": "A close view of a carved stone panel, the heraldic relief lit raking from one side, the wall beyond in shadow.",
+  "architecture": "Implied only — a monumental wall face suggested behind the carved panel.",
+  "people": { "prominence": "none" },
+  "camera": "object-still-life",
+  "lighting": "single-source-cinematic",
+  "composition": "The relief filling the frame slightly off-centre, raking light deepening every cut shadow, the surround falling into negative space.",
+  "materials": ["carved pale stone", "weathered relief", "a faint brass patina in the hollows", "a dark stone surround"],
+  "objects": ["a carved heraldic relief", "scrollwork and laurel forms", "a deep-cut central device", "a single raking light"],
+  "negativeExtra": ["any letters or words in the carving", "mottoes or scrolls with text", "numerals or dates", "national flags"],
+  "continuityNotes": "Echoes scene-30's brass-on-black palette with one warm raking source; the crest carries purely abstract forms, no letters or words.",
+  "aspectRatio": "16:10"
+}

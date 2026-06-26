@@ -1,0 +1,18 @@
+{
+  "id": "scene-10-council-chamber",
+  "index": 10,
+  "title": "Municipal Council Chamber",
+  "purpose": "City and local-government sector card and civic surfaces.",
+  "story": "A municipal council chamber readied for a sitting — the modest seat of local authority, dignified and still.",
+  "environment": "A horseshoe council chamber, members' desks curving toward a raised chair, a public gallery dim at the rear.",
+  "architecture": "Civic-institutional interior — a panelled dado, a shallow domed ceiling, a presiding dais beneath a carved canopy.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The horseshoe of desks framing the empty chair on the central axis, warm light pooling on the dais, the gallery in negative space behind.",
+  "materials": ["oak members' desks", "brass desk lamps", "blue baize tops", "a carved canopy"],
+  "objects": ["curved members' desks", "a presiding chair", "a ceremonial mace on a rest", "a single brass lamp"],
+  "negativeExtra": ["civic coats of arms with lettering", "any writing on desks or walls", "national flags", "screens with visible content"],
+  "continuityNotes": "Matches the set's near-black grade, single warm source, and brass-on-black palette of scene-01.",
+  "aspectRatio": "16:10"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "scene-28-marble-staircase",
+  "index": 28,
+  "title": "Grand Marble Staircase",
+  "purpose": "Transition and section-break imagery; ascent and gravitas motif.",
+  "story": "A grand marble staircase rising under a single light — the ceremonial climb toward authority, empty and absolute.",
+  "environment": "A monumental stair hall, a broad marble flight sweeping upward beneath a balustrade, the landing above in shadow.",
+  "architecture": "Baroque stair-hall interior — a balustraded sweep, carved newel posts, an arched landing dissolving into gloom.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The staircase ascending on a strong diagonal, a single warm light raking the treads, the upper landing held in deep negative space.",
+  "materials": ["veined marble treads", "a brass handrail", "carved stone balusters", "a stone newel"],
+  "objects": ["a broad marble staircase", "a brass handrail", "carved balusters", "a single wall lamp"],
+  "negativeExtra": ["any inscriptions on the walls", "statues with nameplates", "national flags", "a clock face with numerals"],
+  "continuityNotes": "Holds the set's near-black grade with one warm source and brass-on-black palette consistent with scene-01.",
+  "aspectRatio": "16:10"
+}

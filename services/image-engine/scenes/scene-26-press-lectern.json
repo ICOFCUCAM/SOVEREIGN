@@ -1,0 +1,18 @@
+{
+  "id": "scene-26-press-lectern",
+  "index": 26,
+  "title": "Empty Press Lectern",
+  "purpose": "Announcement and communication surfaces; statement moments.",
+  "story": "An empty press lectern alone in a grand hall — the unoccupied podium of public address, the words not yet spoken.",
+  "environment": "A formal briefing hall, a single lectern on a low dais before draped panelling, the room beyond dim and empty.",
+  "architecture": "State-room interior — a panelled backdrop, a shallow stepped dais, pilasters receding into shadow.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The lone lectern off-centre under a falling warm light, the draped backdrop filling the frame, deep negative space to either side.",
+  "materials": ["a dark wood lectern", "a brass reading lamp", "draped panelling", "a stone dais"],
+  "objects": ["a single lectern", "a brass lamp on the lectern", "a low dais", "draped backdrop panels"],
+  "negativeExtra": ["any markings on the lectern", "a seal or crest with text", "microphone branding", "national flags"],
+  "continuityNotes": "Holds the set's near-black grade with one warm source and brass-on-black palette consistent with scene-01; the lectern bears no markings.",
+  "aspectRatio": "16:10"
+}

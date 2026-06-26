@@ -1,0 +1,18 @@
+{
+  "id": "scene-24-law-library",
+  "index": 24,
+  "title": "Law Library",
+  "purpose": "Legal-knowledge surfaces; authority and precedent messaging.",
+  "story": "A law library walled floor to ceiling in bound volumes — the accumulated weight of precedent, kept in ordered silence.",
+  "environment": "A narrow library room, matching bound volumes filling every wall to the ceiling, a reading table at the centre.",
+  "architecture": "Panelled chambers interior — fitted bookcases to the cornice, a small gallery rail, a coffered ceiling lost in shadow.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "Walls of uniform spines framing a central reading table, a brass lamp pooling warm light, the upper shelves dissolving into negative space.",
+  "materials": ["uniform leather spines", "fitted oak bookcases", "a brass reading lamp", "a leather-topped table"],
+  "objects": ["floor-to-ceiling bound volumes", "a reading table", "a brass lamp", "a rolling ladder"],
+  "negativeExtra": ["any titles on the spines", "writing on the books", "library signage", "screens with visible content"],
+  "continuityNotes": "Holds the set's near-black grade, single warm source, and brass-on-black palette of scene-01; no legible titles on any volume.",
+  "aspectRatio": "16:10"
+}

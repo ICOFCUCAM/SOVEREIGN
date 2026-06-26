@@ -1,0 +1,18 @@
+{
+  "id": "scene-09-records-archive",
+  "index": 9,
+  "title": "National Archive — Sealed Boxes",
+  "purpose": "Preservation sector card and records-custody surfaces.",
+  "story": "A national archive after hours — rows of sealed boxes holding the memory of a state, kept safe in the dark.",
+  "environment": "A long archival storeroom, steel shelving stacked with uniform boxes, an aisle running into shadow.",
+  "architecture": "Utilitarian vault interior — a low concrete ceiling, ranked metal stacks, a single service light above the aisle.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "Shelving receding symmetrically down the aisle, a lone overhead light catching the nearest boxes, the depths falling into negative space.",
+  "materials": ["grey steel shelving", "kraft archival boxes", "brass shelf catches", "a concrete floor"],
+  "objects": ["rows of sealed archive boxes", "steel shelving units", "a brass-handled box", "a single hanging light"],
+  "negativeExtra": ["any labels or writing on the boxes", "barcodes or numbers", "shelving signage", "screens with visible content"],
+  "continuityNotes": "Keeps the set's near-black grade with one warm source and brass-on-black accents consistent with scene-01.",
+  "aspectRatio": "16:10"
+}

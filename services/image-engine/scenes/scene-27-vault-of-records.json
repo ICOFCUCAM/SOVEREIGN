@@ -1,0 +1,18 @@
+{
+  "id": "scene-27-vault-of-records",
+  "index": 27,
+  "title": "Vault of Records",
+  "purpose": "Preservation sector card and long-term-custody surfaces.",
+  "story": "Rows of archival shelving receding into shadow — the deep memory of an institution, ordered, sealed, and enduring.",
+  "environment": "A vast records vault, mobile shelving ranges marching away into darkness, a single aisle lit from above.",
+  "architecture": "Industrial archive interior — a high concrete vault, ranked rolling stacks, a service gantry lost in the gloom above.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "Shelving ranges converging hard toward a distant vanishing point, one aisle light catching the nearest boxes, depth swallowed by negative space.",
+  "materials": ["grey rolling shelving", "kraft archival boxes", "a brass aisle handle", "a concrete floor"],
+  "objects": ["rows of mobile archival shelving", "stacked record boxes", "a brass control wheel", "a single aisle light"],
+  "negativeExtra": ["any labels or writing on boxes or shelves", "numbers or barcodes", "shelving signage", "screens with visible content"],
+  "continuityNotes": "Matches the set's near-black grade, single warm source, and brass-on-black accents of scene-01; all boxes remain unmarked.",
+  "aspectRatio": "16:10"
+}

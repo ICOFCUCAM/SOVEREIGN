@@ -1,0 +1,18 @@
+{
+  "id": "scene-19-ledger-and-quill",
+  "index": 19,
+  "title": "Ledger and Quill",
+  "purpose": "Record-keeping and accountability surfaces; brand still-life accent.",
+  "story": "A heavy ledger lying open with a quill across its blank pages — the act of recording, paused and waiting.",
+  "environment": "A dark study desk, the open ledger lit by a single warm source, shelves dissolving into shadow behind.",
+  "architecture": "Implied only — a panelled room suggested beyond the pool of light.",
+  "people": { "prominence": "none" },
+  "camera": "object-still-life",
+  "lighting": "candle-warm",
+  "composition": "The open ledger angled in the foreground, the quill resting across blank pages, one warm highlight on the gilt edge, deep negative space around.",
+  "materials": ["aged leather binding", "cream blank pages", "a feather quill", "a dark walnut desk"],
+  "objects": ["a heavy open ledger (blank pages)", "a quill pen", "a brass inkwell", "a single candle out of frame"],
+  "negativeExtra": ["any writing or columns on the pages", "page numbers", "a title on the spine", "screens with visible content"],
+  "continuityNotes": "Matches scene-30's warm pooled light and brass-on-black palette; the ledger pages must be entirely blank.",
+  "aspectRatio": "16:10"
+}

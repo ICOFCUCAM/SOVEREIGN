@@ -1,0 +1,18 @@
+{
+  "id": "scene-06-great-library",
+  "index": 6,
+  "title": "University Great Library",
+  "purpose": "Universities sector card and scholarly-archive surfaces.",
+  "story": "A great library of bound volumes in the late evening — centuries of knowledge held in shadow, a single lamp keeping vigil.",
+  "environment": "A long galleried library, tiers of bookcases rising two storeys, a reading aisle running into darkness.",
+  "architecture": "Baroque library interior — a vaulted ceiling, a wrought-iron gallery balcony, carved bookcase pediments above the stacks.",
+  "people": { "prominence": "none" },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "Bookcases receding symmetrically down the aisle, a lone reading lamp anchoring the foreground, the gallery lost in negative space above.",
+  "materials": ["walnut bookcases", "aged leather spines", "brass gallery rail", "a wrought-iron spiral stair"],
+  "objects": ["tiers of bound volumes", "a reading desk", "a brass library lamp", "a rolling ladder"],
+  "negativeExtra": ["any writing on the books", "readable spine titles", "library signage", "screens with visible content"],
+  "continuityNotes": "Matches the set's near-black grade, single warm source, and brass-on-black palette of scene-01; no legible titles on any spine.",
+  "aspectRatio": "16:10"
+}

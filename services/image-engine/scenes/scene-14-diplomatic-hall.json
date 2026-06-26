@@ -1,0 +1,18 @@
+{
+  "id": "scene-14-diplomatic-hall",
+  "index": 14,
+  "title": "Diplomatic Reception Hall",
+  "purpose": "Foreign-affairs sector card and statecraft surfaces.",
+  "story": "A diplomatic reception hall before the guests arrive — the stage of nations meeting, gilded and expectant.",
+  "environment": "A grand reception hall, a parquet floor stretching beneath chandeliers, tall mirrored doors along the walls.",
+  "architecture": "Palatial state interior — gilt pilasters, a painted ceiling cove, a colonnade of mirrored portals receding into shadow.",
+  "people": { "prominence": "distant", "notes": "Two figures near a far doorway, seen from behind in formal dress; no face toward the camera." },
+  "camera": "architectural-wide",
+  "lighting": "single-source-cinematic",
+  "composition": "The parquet leading down the hall's central axis, one chandelier catching warm light, mirrored doors marching into deep negative space.",
+  "materials": ["gilt-bronze pilasters", "parquet flooring", "crystal chandelier", "mirrored doors"],
+  "objects": ["a long reception hall", "a crystal chandelier", "console tables", "a single warm lamp"],
+  "negativeExtra": ["national flags", "coats of arms with lettering", "any writing on walls or panels", "screens with visible content"],
+  "continuityNotes": "Matches the set's near-black grade, single warm source, and brass-on-black palette of scene-01; gilt reads as warm brass, never bright.",
+  "aspectRatio": "16:10"
+}

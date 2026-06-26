@@ -1,0 +1,18 @@
+{
+  "id": "scene-30-institutional-seal",
+  "index": 30,
+  "title": "Institutional Seal — Still Life",
+  "purpose": "Brand still-life accent (the 'Official Publication' object / closing seal device).",
+  "story": "The instrument of authority at rest — a heavy seal press and a sealed dark volume, the moment a record becomes official.",
+  "environment": "A dark study desk, bookshelves dissolving into shadow behind.",
+  "architecture": "Implied only — a quiet panelled room beyond the pool of light.",
+  "people": { "prominence": "none" },
+  "camera": "object-still-life",
+  "lighting": "candle-warm",
+  "composition": "A single brass seal press and a sealed leather volume isolated against deep shadow; one specular highlight on the brass; deep negative space.",
+  "materials": ["aged brass seal press", "black leather binding", "dark walnut desk", "a bronze nib pen"],
+  "objects": ["brass seal press", "sealed dark leather volume", "wax seal (blank, no writing)", "fountain pen"],
+  "negativeExtra": ["any text on the book", "any engraved words on the seal", "visible monogram letters", "paper with writing"],
+  "continuityNotes": "Same warm pooled light and brass-on-black palette as scene-01; the seal's blank face must carry no letters or numbers.",
+  "aspectRatio": "16:10"
+}

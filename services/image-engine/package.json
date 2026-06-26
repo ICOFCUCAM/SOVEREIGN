@@ -1,0 +1,23 @@
+{
+  "name": "@dispatch/image-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Sovereign Dispatch — Art Direction Engine. Layered prompt composition, multi-candidate generation, automated quality evaluation, continuity-checked best-candidate selection, and a JSON-driven scene library for one elite institutional illustration set.",
+  "bin": {
+    "dispatch-art": "dist/src/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test \"dist/test/*.test.js\"",
+    "cli": "node dist/src/cli.js",
+    "report": "node dist/src/cli.js report"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.4"
+  }
+}

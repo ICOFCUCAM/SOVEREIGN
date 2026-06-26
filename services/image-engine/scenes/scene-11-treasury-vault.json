@@ -1,0 +1,18 @@
+{
+  "id": "scene-11-treasury-vault",
+  "index": 11,
+  "title": "Treasury Vault Door",
+  "purpose": "Security and sovereignty surfaces; trust and custody messaging.",
+  "story": "The great vault door of a treasury, half-swung on its hinge — the threshold of the sovereign reserve, brass and steel at rest.",
+  "environment": "A vault antechamber, the massive circular door dominating a narrow stone passage lit from one side.",
+  "architecture": "Heavy security interior — a thick reinforced portal set in a granite surround, a low vaulted ceiling beyond the door.",
+  "people": { "prominence": "none" },
+  "camera": "object-still-life",
+  "lighting": "single-source-cinematic",
+  "composition": "The circular vault door off-centre and three-quarter, warm light raking the brass bolt-work, the passage falling into deep negative space.",
+  "materials": ["polished steel door", "brass locking bolts", "a brass wheel handle", "granite surround"],
+  "objects": ["a circular vault door", "a brass spoked wheel", "rows of locking bolts", "a single wall lamp"],
+  "negativeExtra": ["any dials with numbers", "maker's marks or text", "currency symbols", "screens with visible content"],
+  "continuityNotes": "Holds the set's near-black grade with one warm source and brass-on-black palette established in scene-01.",
+  "aspectRatio": "16:10"
+}

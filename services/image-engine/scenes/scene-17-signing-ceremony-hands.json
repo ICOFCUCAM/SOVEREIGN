@@ -1,0 +1,18 @@
+{
+  "id": "scene-17-signing-ceremony-hands",
+  "index": 17,
+  "title": "Signing Ceremony — Hands",
+  "purpose": "Agreement and ratification surfaces; ceremony moments.",
+  "story": "Hands at a formal signing, pen meeting a blank page across the ceremonial table — the instant agreement becomes binding.",
+  "environment": "A ceremonial table dressed in dark cloth, lit by a single warm source, the hall beyond folded into shadow.",
+  "architecture": "Implied only — a grand panelled room suggested at the edge of the pooled light.",
+  "people": { "prominence": "present", "notes": "Only two pairs of hands and cuffs are visible across the table; no faces, no bodies above the wrists." },
+  "camera": "hands-detail",
+  "lighting": "single-source-cinematic",
+  "composition": "Tight across the table on the hands and pen over a blank folio, warm light raking the cloth, the room dissolving into negative space.",
+  "materials": ["dark table cloth", "a leather portfolio", "an aged brass pen", "white linen cuffs"],
+  "objects": ["a fountain pen", "a blank ceremonial document", "a leather portfolio", "a single brass lamp"],
+  "negativeExtra": ["any writing on the document", "seals or letterhead with text", "national flags", "the figures' faces"],
+  "continuityNotes": "Matches the set's near-black grade, single warm source, and brass-on-black palette of scene-01; the folio page stays blank.",
+  "aspectRatio": "16:10"
+}
