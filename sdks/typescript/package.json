@@ -1,0 +1,12 @@
+{
+  "name": "@dispatch/sdk",
+  "version": "1.0.0",
+  "description": "Official TypeScript/JavaScript client for the Dispatch Platform API",
+  "type": "module",
+  "main": "dispatch.ts",
+  "types": "dispatch.ts",
+  "engines": { "node": ">=18" },
+  "files": ["dispatch.ts", "README.md"],
+  "keywords": ["dispatch", "governance", "official-records", "api"],
+  "license": "UNLICENSED"
+}
