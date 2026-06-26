@@ -124,7 +124,7 @@ function sectionParagraphs(s, warnings) {
 }
 
 /** Render a Layout Model to a .docx Buffer. */
-export async function renderDocx(lm) {
+export async function renderDocx(lm, ctx = {}) {
   const warnings = [];
   const c = lm.cover;
   const lvl = lm.classification?.level || "";
@@ -171,10 +171,18 @@ export async function renderDocx(lm) {
 
   const header = new Header({ children: [new Paragraph({ alignment: AlignmentType.CENTER,
     children: runs(banner || c.title || "", { size: 16, color: banner ? "7A0000" : "555555" }) })] });
-  const footer = new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER,
+  const pageNumPara = new Paragraph({ alignment: AlignmentType.CENTER,
     children: [new TextRun({ text: (banner ? banner + " — " : "") + "Page ", size: 16, color: "7A0000" }),
       new TextRun({ children: [PageNumber.CURRENT], size: 16 }), new TextRun({ text: " of ", size: 16 }),
-      new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 16 })] })] });
+      new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 16 })] });
+  // The in-document verification stamp — the file self-advertises its Official
+  // Record id and where to verify it, on every page (mirrors the PDF footer).
+  const verifyBase = String(ctx.verifyBase || "dispatch.sovereigndo.com").replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  const stampPara = ctx.publicId ? new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 40 },
+    children: [new TextRun({ text: "OFFICIAL RECORD · ", size: 14, color: "777777" }),
+      new TextRun({ text: String(ctx.publicId), bold: true, size: 14, color: "555555" }),
+      new TextRun({ text: `  ·  Verify at ${verifyBase}/verify/${ctx.publicId}`, size: 14, color: "777777" })] }) : null;
+  const footer = new Footer({ children: stampPara ? [pageNumPara, stampPara] : [pageNumPara] });
 
   const doc = new Document({
     creator: "Sovereign Dispatch",

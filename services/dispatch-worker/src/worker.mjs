@@ -64,7 +64,7 @@ const RENDERERS = {
       return { ext: "pdf", bytes: buf, warnings, pages: pdfPageCount(buf) };
     } catch (e) { pdfBreakerRecord(false); throw e; }
   },
-  docx: async (lm) => { const { bytes, warnings } = await renderDocx(lm); return { ext: "docx", bytes, warnings }; },
+  docx: async (lm, ctx) => { const { bytes, warnings } = await renderDocx(lm, ctx); return { ext: "docx", bytes, warnings }; },
 };
 const sys = (tenantId, fn) => withClaims(pool, { tenant_id: tenantId, dispatch_role: "service", principal_type: "service", actor: WORKER_ID }, fn);
 
