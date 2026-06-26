@@ -1,56 +1,94 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../lib/auth";
 import { Button, Card, Field, inputCls, timeAgo } from "../lib/ui";
-import { listClients, issueClient, rotateClient, revokeClient, getBilling, subscribe, type ServiceClient, type IssuedCredential, humanError } from "../lib/api";
+import { listClients, issueClient, rotateClient, revokeClient, getBilling, subscribe, API_BASE, type ServiceClient, type IssuedCredential, type Billing, humanError } from "../lib/api";
 import { QuotaMeter, planLabel, useBilling } from "../lib/upsell";
 import SsoConnectionCard from "../components/SsoConnectionCard";
 
-// ACCESS — tenant self-service for API credentials. A tenant_admin issues a
-// service client (client_id + secret), rotates its secret, or revokes it. The
-// raw secret is shown exactly once, here, at issue and rotation — the server
-// only ever stores its scrypt hash. Backed by /v1/admin/clients (dispatch:admin).
+// API ACCESS — how external systems (an ERP, a parliament system, SharePoint, a
+// hospital platform) connect to Dispatch. A tenant_admin issues an API client
+// (client_id + secret) scoped to exactly what that system may do, hands the
+// credential to the integrating team, and can rotate or revoke it. The raw secret
+// is shown exactly once, here — the server only ever stores its scrypt hash.
+// Backed by /v1/admin/clients (dispatch:admin). This is the platform/integration
+// surface; the Operations Console is for people, this is for software.
 
 // Self-issuable scopes (dispatch:admin is deliberately excluded server-side — no
-// privilege-escalation chains — so it isn't offered here).
+// privilege-escalation chains — so it isn't offered here). Labels speak the
+// institution's language ("Create records"), not the raw scope token.
 const SCOPES: { id: string; label: string; blurb: string }[] = [
   { id: "dispatch:validate", label: "Validate", blurb: "dry-run document validation" },
-  { id: "dispatch:render", label: "Submit & render", blurb: "submit documents into the pipeline" },
-  { id: "dispatch:read", label: "Read", blurb: "retrieve jobs, documents, artifacts" },
-  { id: "dispatch:approve", label: "Approve", blurb: "act on the approval queue" },
-  { id: "dispatch:publish", label: "Publish", blurb: "release / withdraw records" },
-  { id: "dispatch:audit", label: "Audit", blurb: "read the audit trail" },
+  { id: "dispatch:render", label: "Create & submit records", blurb: "lodge documents into the governed pipeline" },
+  { id: "dispatch:read", label: "Read records", blurb: "retrieve records, status, artifacts, certificates" },
+  { id: "dispatch:approve", label: "Approve", blurb: "act on the approval chain for an office it holds" },
+  { id: "dispatch:publish", label: "Publish", blurb: "release / withdraw official records" },
+  { id: "dispatch:audit", label: "Audit & evidence", blurb: "read the evidence trail" },
 ];
-const DEFAULT_SCOPES = new Set(["dispatch:validate", "dispatch:render", "dispatch:read"]);
+const SCOPE_LABEL: Record<string, string> = Object.fromEntries(SCOPES.map((s) => [s.id, s.label]));
+const scopeLabel = (id: string) => SCOPE_LABEL[id] || id.replace("dispatch:", "");
+const DEFAULT_SCOPES = new Set(["dispatch:render", "dispatch:read"]);
 
-const Reveal: React.FC<{ cred: IssuedCredential; label: string; onClose: () => void }> = ({ cred, label, onClose }) => {
-  const [copied, setCopied] = useState(false);
-  const copy = () => { navigator.clipboard?.writeText(cred.secret).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); };
+const Line: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="flex items-start gap-2">
+    <span className="w-24 shrink-0 pt-1 text-[11px] font-semibold uppercase tracking-wide text-white/40">{k}</span>
+    <span className="min-w-0 flex-1">{children}</span>
+  </div>
+);
+
+// The credential handoff — everything the integrating team needs to install it in
+// their software, shown once at issue/rotation: identity, what it may do, where to
+// reach the API, and a copy-paste first call. No fabricated fields.
+const Reveal: React.FC<{ cred: IssuedCredential; label: string; scopes: string[]; tenantId?: string; billing: Billing | null; onClose: () => void }> = ({ cred, label, scopes, tenantId, billing, onClose }) => {
+  const [copied, setCopied] = useState<string | null>(null);
+  const base = API_BASE();
+  const copy = (what: string, text: string) => { navigator.clipboard?.writeText(text).then(() => { setCopied(what); setTimeout(() => setCopied(null), 1500); }); };
+  const example = `# 1 · exchange the credential for a short-lived bearer token
+curl -s ${base}/v1/token \\
+  -H 'content-type: application/json' \\
+  -d '{"client_id":"${cred.client_id}","secret":"<the secret above>"}'
+# → { "access_token": "…", "expiresIn": 3600 }
+
+# 2 · call Dispatch with that token (e.g. read your records)
+curl -s ${base}/v1/documents -H 'authorization: Bearer <access_token>'`;
   return (
     <Card className="mb-6 border-emerald-500/40 p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-sm font-bold text-emerald-300">{label}</div>
-          <div className="mt-0.5 text-xs text-white/50">Store this secret now — it is shown only once and cannot be retrieved again.</div>
+          <div className="mt-0.5 text-xs text-white/50">Store the secret now — it is shown only once and cannot be retrieved again. Hand it to the integrating system over a secure channel.</div>
         </div>
         <button onClick={onClose} className="text-xs font-semibold text-white/40 hover:text-white">Dismiss</button>
       </div>
-      <div className="mt-4 space-y-2">
-        <div className="flex items-center gap-2">
-          <span className="w-20 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-white/40">Client ID</span>
-          <code className="select-all rounded bg-ink-900/70 px-2 py-1 font-mono text-[12.5px] text-white/85">{cred.client_id}</code>
+      <div className="mt-4 space-y-2.5">
+        <Line k="Client ID"><code className="select-all rounded bg-ink-900/70 px-2 py-1 font-mono text-[12.5px] text-white/85">{cred.client_id}</code></Line>
+        <Line k="Secret">
+          <span className="flex flex-wrap items-center gap-2">
+            <code className="select-all break-all rounded bg-ink-900/70 px-2 py-1 font-mono text-[12.5px] text-emerald-200">{cred.secret}</code>
+            <Button variant="ghost" className="shrink-0 px-2.5 py-1 text-[12px]" onClick={() => copy("secret", cred.secret)}>{copied === "secret" ? "Copied" : "Copy"}</Button>
+          </span>
+        </Line>
+        <Line k="Scopes">
+          <span className="flex flex-wrap gap-1">
+            {(scopes.length ? scopes : cred.scopes || []).map((s) => <span key={s} className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[11px] text-white/70 ring-1 ring-white/10">{scopeLabel(s)}</span>)}
+          </span>
+        </Line>
+        {tenantId && <Line k="Tenant"><code className="select-all rounded bg-ink-900/70 px-2 py-1 font-mono text-[12.5px] text-white/70">{tenantId}</code></Line>}
+        <Line k="API base"><code className="select-all rounded bg-ink-900/70 px-2 py-1 font-mono text-[12.5px] text-white/70">{base || "(same origin as this console)"}</code></Line>
+        {billing && <Line k="Usage"><span className="text-[12.5px] text-white/55">{planLabel(billing.plan)} plan · {billing.quotaRemaining}/{billing.documentQuota} records remaining this period. API calls draw on the institution's quota.</span></Line>}
+      </div>
+      <div className="mt-4">
+        <div className="mb-1 flex items-center justify-between">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-white/40">First call</span>
+          <Button variant="ghost" className="px-2.5 py-1 text-[12px]" onClick={() => copy("ex", example)}>{copied === "ex" ? "Copied" : "Copy"}</Button>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-20 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-white/40">Secret</span>
-          <code className="select-all break-all rounded bg-ink-900/70 px-2 py-1 font-mono text-[12.5px] text-emerald-200">{cred.secret}</code>
-          <Button variant="ghost" className="shrink-0 px-2.5 py-1 text-[12px]" onClick={copy}>{copied ? "Copied" : "Copy"}</Button>
-        </div>
+        <pre className="overflow-x-auto rounded-lg bg-ink-900/70 p-3 font-mono text-[11.5px] leading-relaxed text-white/70">{example}</pre>
       </div>
     </Card>
   );
 };
 
 const Access: React.FC = () => {
-  const { has } = useAuth();
+  const { has, session } = useAuth();
   const admin = has("dispatch:admin");
 
   const [clients, setClients] = useState<ServiceClient[] | null>(null);
@@ -60,7 +98,7 @@ const Access: React.FC = () => {
   const [issuing, setIssuing] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
-  const [reveal, setReveal] = useState<{ cred: IssuedCredential; label: string } | null>(null);
+  const [reveal, setReveal] = useState<{ cred: IssuedCredential; label: string; scopes: string[] } | null>(null);
   const { billing, setBilling } = useBilling();
   const [subBusy, setSubBusy] = useState(false);
 
@@ -85,18 +123,23 @@ const Access: React.FC = () => {
     if (!name.trim() || scopes.size === 0) return;
     setIssuing(true); setErr(null);
     try {
-      const cred = await issueClient(name.trim(), [...scopes]);
-      setReveal({ cred, label: "Credential issued" });
+      const requested = [...scopes];
+      const cred = await issueClient(name.trim(), requested);
+      setReveal({ cred, label: "API client created", scopes: cred.scopes?.length ? cred.scopes : requested });
       setName(""); setScopes(new Set(DEFAULT_SCOPES));
       await load();
-    } catch (e) { setErr(humanError(e, "failed to issue credential")); }
+    } catch (e) { setErr(humanError(e, "failed to create API client")); }
     finally { setIssuing(false); }
   };
 
   const rotate = async (cid: string) => {
     setBusy(cid); setErr(null);
-    try { const cred = await rotateClient(cid); setReveal({ cred, label: "Secret rotated" }); await load(); }
-    catch (e) { setErr(humanError(e, "failed to rotate secret")); }
+    try {
+      const cred = await rotateClient(cid);
+      const existing = clients?.find((c) => c.client_id === cid)?.scopes || cred.scopes || [];
+      setReveal({ cred, label: "Secret rotated", scopes: existing });
+      await load();
+    } catch (e) { setErr(humanError(e, "failed to rotate secret")); }
     finally { setBusy(null); }
   };
 
@@ -122,14 +165,16 @@ const Access: React.FC = () => {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Access</h1>
-        <p className="text-sm text-white/50">Issue and manage the API credentials your systems use to reach Dispatch. A credential is a <span className="text-white/75">client_id</span> and a one-time <span className="text-white/75">secret</span>, exchanged at <code className="font-mono text-white/70">/v1/token</code> for a short-lived bearer token.</p>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-seal-light">Integrations</div>
+        <h1 className="mt-1 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">API Access</h1>
+        <p className="mt-1 max-w-3xl text-sm text-white/50">Let your own systems — an ERP, a parliament or case-management system, SharePoint, a hospital platform — use Dispatch's governance, publication, certification and preservation as services. Each integration gets its own <span className="text-white/75">API client</span> (a <span className="text-white/75">client_id</span> + one-time <span className="text-white/75">secret</span>), scoped to exactly what it may do, exchanged at <code className="font-mono text-white/70">/v1/token</code> for a short-lived bearer token. Issue one per system so each has its own permissions, audit trail and revocation.</p>
       </div>
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
-      {reveal && <Reveal cred={reveal.cred} label={reveal.label} onClose={() => setReveal(null)} />}
+      {reveal && <Reveal cred={reveal.cred} label={reveal.label} scopes={reveal.scopes} tenantId={session?.tenantId} billing={billing} onClose={() => setReveal(null)} />}
 
-      {/* How people sign in — the institution's identity provider (item 2). */}
+      {/* How people sign in — the institution's identity provider (a separate
+          integration concern from how SYSTEMS connect, below). */}
       <SsoConnectionCard />
 
       {billing && (
@@ -153,11 +198,11 @@ const Access: React.FC = () => {
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         {/* existing credentials */}
         <Card className="p-5">
-          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-white/50">Credentials</h2>
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-white/50">API clients</h2>
           {clients === null ? (
             <div className="text-sm text-white/40">Loading…</div>
           ) : clients.length === 0 ? (
-            <div className="text-sm text-white/40">No credentials yet. Issue one on the right.</div>
+            <div className="text-sm text-white/40">No API clients yet. Create one on the right to connect a system.</div>
           ) : (
             <ul className="divide-y divide-white/[0.06]">
               {clients.map((c) => (
@@ -171,7 +216,7 @@ const Access: React.FC = () => {
                       </div>
                       <code className="mt-1 block truncate font-mono text-[12px] text-white/55">{c.client_id}</code>
                       <div className="mt-1.5 flex flex-wrap gap-1">
-                        {(c.scopes || []).map((s) => <span key={s} className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] font-mono text-white/45">{s.replace("dispatch:", "")}</span>)}
+                        {(c.scopes || []).map((s) => <span key={s} className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-white/50">{scopeLabel(s)}</span>)}
                       </div>
                       <div className="mt-1.5 text-[11px] text-white/35">
                         issued {timeAgo(c.created_at)}{c.last_used_at ? ` · last used ${timeAgo(c.last_used_at)}` : " · never used"}{c.last_rotated_at ? ` · rotated ${timeAgo(c.last_rotated_at)}` : ""}
@@ -200,9 +245,9 @@ const Access: React.FC = () => {
         {/* issue a new credential */}
         <div className="space-y-5">
           <Card className="space-y-4 p-5">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-white/50">Issue a credential</h2>
-            <Field label="Name" hint="What system will use it? e.g. “Core API”, “Reporting Pipeline”.">
-              <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Core API" />
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-white/50">Create an API client</h2>
+            <Field label="Client name" hint="The system that will use it — e.g. “Parliament System”, “Ministry ERP”, “SharePoint”.">
+              <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Parliament System" />
             </Field>
             <div>
               <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-white/50">Scopes</span>
@@ -219,9 +264,9 @@ const Access: React.FC = () => {
               </div>
             </div>
             <Button variant="primary" className="w-full" disabled={issuing || !name.trim() || scopes.size === 0} onClick={issue}>
-              {issuing ? "Issuing…" : "Issue credential"}
+              {issuing ? "Creating…" : "Create API client"}
             </Button>
-            <p className="text-[11px] leading-relaxed text-white/35">The secret is generated by the server, stored only as a scrypt hash, and shown once. Hand it to the consuming system over a secure channel.</p>
+            <p className="text-[11px] leading-relaxed text-white/35">The secret is generated by the server, stored only as a scrypt hash, and shown once. Hand it to the integrating system over a secure channel. Revoke it here at any time to cut that system off.</p>
           </Card>
         </div>
       </div>

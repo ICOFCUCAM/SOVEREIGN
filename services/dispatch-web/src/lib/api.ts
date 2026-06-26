@@ -5,6 +5,11 @@
 
 const BASE = import.meta.env.VITE_DISPATCH_API_URL ?? "";
 
+// The externally-reachable API origin, for credential handoff / integration docs.
+// Same-origin in production (empty BASE → the page origin); an explicit host in dev.
+export const API_BASE = (): string =>
+  BASE || (typeof window !== "undefined" ? window.location.origin : "");
+
 export interface ApiError { code: string; message: string; field?: string | null; requestId?: string | null }
 export class DispatchError extends Error {
   code: string; status: number; field?: string | null;
@@ -227,7 +232,7 @@ export interface Posture {
   policyName?: string | null; policyVersion?: number | null;
   currentAuthority?: string | null; nextAuthority?: string | null;
   currentRole?: string | null; nextRole?: string | null;
-  approvalAuthority?: string | null; publicationAuthority?: string | null;
+  approvalAuthority?: string | null; publicationAuthority?: string | null; publicationRole?: string | null;
   waitingSince?: string | null; status?: string | null;
 }
 
@@ -238,6 +243,7 @@ export interface Office { key: string; label: string; department?: string | null
 export interface AuthorityRecord extends Posture {
   documentId: string; title: string; docType: string;
   classification?: { scheme?: string; level?: string }; submittedBy?: string | null; viaDelegation?: boolean;
+  lifecycle?: string; action?: "decide" | "publish";
 }
 export interface MyAuthority {
   offices: Office[];
@@ -260,11 +266,15 @@ export const listDocuments = (params: { state?: string; docType?: string; q?: st
 };
 export const getDocument = (id: string) => request<DocumentDetail>("GET", `/v1/documents/${id}`);
 
+// One step in a record's institutional approval chain, with its live standing.
+export interface ChainStep { label: string; quorum: number; by: string[]; state: "done" | "current" | "pending"; publication?: boolean }
 export interface DocumentDetail {
   id: string; docType: string; title: string; status: string; lifecycle?: Lifecycle; currentVersion: number; correlationId?: string;
   publishedAt?: string; archivedAt?: string; preservationSha256?: string;
   versions: { versionNo: number; ddmVersion: string; template?: string; templateVersion?: number; engineVersion?: string; createdAt: string }[];
   latestResult: JobResult | null; createdAt: string; updatedAt: string; posture?: Posture;
+  submittedBy?: { name?: string | null; office?: string | null };
+  governanceChain?: ChainStep[]; governanceRejected?: boolean;
 }
 
 export interface SubmitResponse {
@@ -275,7 +285,7 @@ export const submitDocument = (req: unknown, idem: string) => request<SubmitResp
 export const validateDocument = (req: unknown) => request<{ valid: boolean; errors: ApiError[]; warnings: unknown[]; resolved?: unknown }>("POST", "/v1/validate", { body: req });
 
 // ---- approvals ----
-export interface InboxItem { documentId: string; docType: string; title: string; classification: { scheme?: string; level?: string }; lifecycle: Lifecycle; version: number; submittedAt?: string; submittedBy?: string }
+export interface InboxItem { documentId: string; docType: string; title: string; classification: { scheme?: string; level?: string }; lifecycle: Lifecycle; version: number; submittedAt?: string; submittedBy?: string; submittedByName?: string | null; currentAuthority?: string | null; currentRole?: string | null }
 export const approvalsInbox = () => request<{ items: InboxItem[]; count: number }>("GET", "/v1/approvals?state=pending");
 export const decide = (id: string, decision: "approve" | "reject" | "return", comment?: string, outputs?: string[]) =>
   request<{ documentId: string; decision: string; lifecycle: Lifecycle; approvals: number; required: number; jobId?: string; statusUrl?: string }>(

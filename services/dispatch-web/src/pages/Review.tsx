@@ -58,7 +58,10 @@ const Review: React.FC = () => {
                     <button onClick={() => { setSel(d); setMsg(null); setErr(null); }}
                       className={`flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-white/5 ${sel?.documentId === d.documentId ? "bg-seal/20" : ""}`}>
                       <ClassBadge level={d.classification?.level} scheme={d.classification?.scheme} />
-                      <span className="flex-1 truncate text-sm font-medium text-white">{d.title || "(untitled)"}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium text-white">{d.title || "(untitled)"}</span>
+                        {d.currentAuthority && <span className="block truncate text-[11.5px] text-white/40">awaiting <span className="text-white/65">{d.currentAuthority}</span></span>}
+                      </span>
                       <span className="hidden text-xs text-white/40 sm:inline">{d.docType}</span>
                       <span className="w-16 text-right text-xs text-white/30">{timeAgo(d.submittedAt)}</span>
                     </button>
@@ -77,10 +80,15 @@ const Review: React.FC = () => {
                 <ClassBadge level={sel.classification?.level} scheme={sel.classification?.scheme} />
                 <span className="text-xs text-white/40">v{sel.version}</span>
               </div>
+              {sel.currentAuthority && (
+                <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-seal/15 px-2.5 py-0.5 text-[11px] font-semibold text-seal-light ring-1 ring-seal-light/25">
+                  Deciding as {sel.currentAuthority}
+                </div>
+              )}
               <h3 className="text-base font-bold text-white">{sel.title || "(untitled)"}</h3>
               <dl className="mt-3 space-y-1 text-xs text-white/50">
                 <div className="flex justify-between"><dt>Type</dt><dd className="text-white/70">{sel.docType}</dd></div>
-                <div className="flex justify-between"><dt>Submitted by</dt><dd className="text-white/70">{sel.submittedBy ?? "—"}</dd></div>
+                <div className="flex justify-between"><dt>Submitted by</dt><dd className="text-white/70">{sel.submittedByName ?? sel.submittedBy ?? "—"}</dd></div>
                 <div className="flex justify-between"><dt>Submitted</dt><dd className="text-white/70">{timeAgo(sel.submittedAt)}</dd></div>
               </dl>
               <Link to={`/console/documents/${sel.documentId}`} className="mt-3 inline-block text-xs font-semibold text-seal-light hover:underline">Open full document →</Link>
@@ -104,12 +112,16 @@ const Review: React.FC = () => {
                   <textarea className={`${inputCls} h-20`} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Rationale for the record…" />
                 </Field>
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                <Button variant="ok" onClick={() => act("approve")} disabled={busy}>Approve</Button>
-                <Button variant="ghost" onClick={() => act("return")} disabled={busy}>Return</Button>
-                <Button variant="danger" onClick={() => act("reject")} disabled={busy}>Reject</Button>
+              <div className="mt-4 space-y-2">
+                <Button variant="ok" className="w-full" onClick={() => act("approve")} disabled={busy}>
+                  {sel.currentAuthority ? `Approve as ${sel.currentAuthority}` : "Approve"}
+                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="ghost" onClick={() => act("return")} disabled={busy}>Return for revision</Button>
+                  <Button variant="danger" onClick={() => act("reject")} disabled={busy}>Reject</Button>
+                </div>
               </div>
-              <p className="mt-3 text-[11px] text-white/30">Approving releases the document into rendering. You cannot approve a document you submitted.</p>
+              <p className="mt-3 text-[11px] text-white/30">Approving advances the record to the next office in the chain. You cannot approve a record you submitted.</p>
             </Card>
           )}
         </div>

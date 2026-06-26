@@ -26,6 +26,12 @@ const greeting = (): string => {
   return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
 };
 
+// An office label often already names itself an Office/Secretariat/Bureau; only
+// prefix "Office of the" when it reads naturally (e.g. a person-titled office).
+const officeHeading = (label: string): string =>
+  /\b(office|secretariat|bureau|division|directorate|registry|chancery)\b/i.test(label)
+    ? label : `Office of the ${label}`;
+
 const OfficeHome: React.FC<{ subject?: string }> = ({ subject }) => {
   const [a, setA] = useState<MyAuthority | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -44,7 +50,10 @@ const OfficeHome: React.FC<{ subject?: string }> = ({ subject }) => {
         <div className="min-w-0">
           <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-seal-light">Your Authority{person ? <span className="text-white/35"> · {greeting()}, {person}</span> : null}</div>
           <div className="mt-2 flex flex-wrap items-baseline gap-2.5">
-            <span className="font-serif text-[1.5rem] font-bold leading-none tracking-tight text-white">Office of the {a.offices[0].label}</span>
+            {/* Read naturally: "Office of the Director of Policy" but never the
+                redundant "Office of the Communications Office" — many offices already
+                carry "Office"/"Secretariat" in their name. */}
+            <span className="font-serif text-[1.5rem] font-bold leading-none tracking-tight text-white">{officeHeading(a.offices[0].label)}</span>
             {a.offices[0].department && <span className="text-[12px] text-white/40">{a.offices[0].department}</span>}
           </div>
           {a.offices.length > 1 && (
@@ -59,7 +68,7 @@ const OfficeHome: React.FC<{ subject?: string }> = ({ subject }) => {
         </div>
         <div className="shrink-0 text-left sm:text-right">
           <div className={`font-mono text-3xl font-bold tabular-nums ${queue.length > 0 ? "text-white" : "text-white/30"}`}>{queue.length}</div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">Awaiting your decision</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">Under your authority</div>
         </div>
       </div>
 
@@ -72,8 +81,12 @@ const OfficeHome: React.FC<{ subject?: string }> = ({ subject }) => {
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-semibold text-white">{r.title || "(untitled)"}</div>
                   <div className="mt-0.5 truncate text-[11.5px] text-white/45">
-                    Awaiting you as <span className="text-white/70">{r.currentAuthority}</span>
-                    {r.nextAuthority && <> · then <span className="text-white/55">{r.nextAuthority}</span></>}
+                    {r.action === "publish" ? (
+                      <>Rendered · ready for your publication as <span className="text-white/70">{r.currentAuthority}</span></>
+                    ) : (
+                      <>Awaiting you as <span className="text-white/70">{r.currentAuthority}</span>
+                        {r.nextAuthority && <> · then <span className="text-white/55">{r.nextAuthority}</span></>}</>
+                    )}
                     {r.viaDelegation && <span className="text-amber-300/80"> · by delegation</span>}
                   </div>
                 </div>
@@ -81,7 +94,7 @@ const OfficeHome: React.FC<{ subject?: string }> = ({ subject }) => {
                   <div className="font-mono text-[12px] tabular-nums text-white/60">{waited(r.waitingSince)}</div>
                   <div className="text-[10px] uppercase tracking-wide text-white/30">waiting</div>
                 </div>
-                <span className="rounded-md bg-seal px-3 py-1.5 text-[12px] font-semibold text-white">Decide →</span>
+                <span className="rounded-md bg-seal px-3 py-1.5 text-[12px] font-semibold text-white">{r.action === "publish" ? "Publish →" : "Decide →"}</span>
               </Link>
             </li>
           ))}

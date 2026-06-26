@@ -267,11 +267,28 @@ export async function documentPosture(client, doc, cache) {
   const key = `${doc.doc_type ?? ""}|${level ?? ""}`;
   let policy = cache?.get(key);
   if (!policy) { policy = await resolvePolicy(client, { docType: doc.doc_type, classificationLevel: level }); cache?.set(key, policy); }
+
+  // Humanize office KEYS → office LABELS once per request (memoized on the cache).
+  // Governance stores and matches on the office key ('communications_office'); the
+  // operator must only ever read the office name ('Communications Office'). This is
+  // the single place that translation happens, so no surface leaks a raw key.
+  let roleLabels = cache?.get("__roleLabels__");
+  if (roleLabels === undefined) {
+    roleLabels = {};
+    try {
+      (await client.query("select key, label from dispatch.governance_roles")).rows
+        .forEach((r) => { roleLabels[r.key] = r.label; });
+    } catch { /* roles unavailable under some claims — fall back to keys */ }
+    cache?.set("__roleLabels__", roleLabels);
+  }
+  const human = (k) => (k ? (roleLabels[k] || k) : null);
+
   const chain = chainOf(policy);
   const lc = doc.lifecycle_state;
   const named = policy._source === "policy";
-  const publicationAuthority = policy.publication_authority || null;
-  const approvalAuthority = policy.approval_authority || null;
+  const publicationRole = policy.publication_authority || null;   // office KEY (matching/enforcement)
+  const publicationAuthority = human(publicationRole);            // office LABEL (display)
+  const approvalAuthority = human(policy.approval_authority || null);
 
   let currentAuthority = null, nextAuthority = null, currentRole = null, nextRole = null;
   if (lc === "in_review" || lc === "submitted") {
@@ -282,11 +299,11 @@ export async function documentPosture(client, doc, cache) {
         .map((r) => ({ ...r, expired: !!r.expires_at && new Date(r.expires_at) < new Date() }));
       const ev = evaluateChain(appr, chain, { submitter: null, sequential: policy.sequential });
       if (ev.openStep != null) {
-        currentAuthority = chain[ev.openStep].label; currentRole = chain[ev.openStep].role;
-        const nxt = ev.openStep + 1 < chain.length ? chain[ev.openStep + 1] : null;
+        currentRole = chain[ev.openStep].role;
         currentAuthority = chain[ev.openStep].label;
+        const nxt = ev.openStep + 1 < chain.length ? chain[ev.openStep + 1] : null;
         nextAuthority = nxt ? nxt.label : publicationAuthority;
-        nextRole = nxt ? nxt.role : null;
+        nextRole = nxt ? nxt.role : publicationRole;
       }
     } else {
       // Unnamed/quorum policy — the only named authorities are the policy's own
@@ -294,11 +311,18 @@ export async function documentPosture(client, doc, cache) {
       currentAuthority = approvalAuthority;
       nextAuthority = publicationAuthority;
     }
+  } else if (lc === "rendered") {
+    // The record is produced and now awaits PUBLICATION — the publishing office is
+    // the current authority. This is what makes the publisher's "My Work" populate
+    // (previously a publisher saw nothing while records sat rendered, awaiting them).
+    currentRole = publicationRole;
+    currentAuthority = publicationAuthority;
   }
   return {
     policyName: named ? (policy.name || null) : null,
     policyVersion: named ? (policy.policy_version ?? 1) : null,
-    currentAuthority, nextAuthority, currentRole, nextRole, approvalAuthority, publicationAuthority,
+    currentAuthority, nextAuthority, currentRole, nextRole,
+    approvalAuthority, publicationAuthority, publicationRole,
     waitingSince: doc.submitted_at || null,
     status: institutionalStatus(lc, { currentAuthority, publicationAuthority }),
   };
