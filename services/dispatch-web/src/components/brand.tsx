@@ -142,33 +142,84 @@ export const useReveal = (): void => {
   }, []);
 };
 
+// The shared marketing navigation, in one place so the desktop bar and the mobile
+// sheet stay identical. Order = institutional reading order.
+const NAV: [string, string][] = [
+  ["Home", "/"],
+  ["Outcomes", OUTCOMES_ROUTE],
+  ["Standard", STANDARD_ROUTE],
+  ["Trust", TRUST_ROUTE],
+  ["Developers", DEVELOPERS_ROUTE],
+  ["Verify", VERIFY_ROUTE],
+  ["Pricing", PRICING_ROUTE],
+];
+
 // Sticky public header shared by the procurement + architecture pages. `actions`
 // renders on the right (e.g. a print button). `.no-print` keeps it out of PDFs.
+// Below `lg` the inline bar collapses into an accessible mobile sheet so every
+// destination is reachable on a phone — not just Launch.
 export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions }) => {
   const nav = useNavigate();
+  const [open, setOpen] = React.useState(false);
+  const go = (to: string) => { setOpen(false); nav(to); };
+  // Close the sheet on Escape and lock body scroll while it is open.
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [open]);
   return (
     <header className="no-print sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/80 backdrop-blur-md shadow-[0_10px_30px_-22px_rgba(0,0,0,0.85)]">
       <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3 px-5 py-4 sm:px-8 lg:px-12">
-        <button onClick={() => nav("/")} className="flex shrink-0 items-center gap-3">
+        <button onClick={() => go("/")} className="flex shrink-0 items-center gap-3">
           <DispatchMark className="h-8 w-8 text-gold-400" />
           <span className="whitespace-nowrap text-base font-bold tracking-tight sm:text-lg">SOVEREIGN <span className="text-gold-400">DISPATCH</span></span>
         </button>
         <div className="flex shrink-0 items-center gap-3 sm:gap-4">
-          <button onClick={() => nav("/")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white sm:inline-block">Home</button>
-          <button onClick={() => nav("/outcomes")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">Outcomes</button>
-          <button onClick={() => nav("/standard")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">Standard</button>
-          <button onClick={() => nav("/trust")} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white sm:inline-block">Trust</button>
-          <button onClick={() => nav(DEVELOPERS_ROUTE)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">Developers</button>
-          <button onClick={() => nav(VERIFY_ROUTE)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white sm:inline-block">Verify</button>
-          <button onClick={() => nav(PRICING_ROUTE)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white sm:inline-block">Pricing</button>
+          {/* full inline navigation — desktop only */}
+          {NAV.map(([label, to]) => (
+            <button key={to} onClick={() => go(to)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">{label}</button>
+          ))}
           {actions}
-          <button onClick={() => nav("/console")}
-            className="group inline-flex items-center gap-2 whitespace-nowrap rounded bg-gradient-to-b from-gold-300 to-gold-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500 sm:px-5">
+          {/* standalone Launch CTA — hidden on the narrowest phones (where it would
+              crowd the bar); on those it leads the mobile sheet instead. */}
+          <button onClick={() => go("/console")}
+            className="group hidden items-center gap-2 whitespace-nowrap rounded bg-gradient-to-b from-gold-300 to-gold-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500 sm:inline-flex sm:px-5">
             <span className="sm:hidden">Launch</span><span className="hidden sm:inline">Launch Dispatch</span>
             <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
           </button>
+          {/* hamburger — tablet & phone */}
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            className="inline-flex h-10 w-10 items-center justify-center rounded border border-white/15 text-white/80 transition hover:border-white/35 hover:text-white lg:hidden">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" focusable="false">
+              {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
+          </button>
         </div>
       </div>
+      {/* mobile sheet — full navigation, every destination reachable on a phone */}
+      {open && (
+        <div className="lg:hidden">
+          <div className="fixed inset-0 top-[68px] z-40 bg-black/40 backdrop-blur-sm" onClick={() => setOpen(false)} aria-hidden />
+          <nav id="mobile-nav" className="relative z-50 border-t border-white/[0.06] bg-[#0a0a0a] px-5 py-3 shadow-[0_24px_50px_-20px_rgba(0,0,0,0.9)] sm:px-8">
+            {/* primary action first — on the narrowest phones this is the only Launch entry */}
+            <button onClick={() => go("/console")} className="mb-2 mt-1 flex w-full items-center justify-center gap-2 rounded bg-gradient-to-b from-gold-300 to-gold-600 py-3 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition hover:from-gold-200 hover:to-gold-500 sm:hidden">
+              Launch Dispatch <Chevron className="h-3.5 w-3.5" />
+            </button>
+            {NAV.map(([label, to]) => (
+              <button key={to} onClick={() => go(to)} className="block w-full border-b border-white/[0.05] py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">{label}</button>
+            ))}
+            <button onClick={() => go(PROCUREMENT_ROUTE)} className="block w-full py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">Procurement</button>
+          </nav>
+        </div>
+      )}
     </header>
   );
 };
