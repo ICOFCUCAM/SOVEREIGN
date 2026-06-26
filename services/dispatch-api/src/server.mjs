@@ -1315,18 +1315,75 @@ async function handleGetJob(res, principal, jobId) {
   });
 }
 
+// Resolve actor subjects → real identities: people to their names, machines to
+// their client names. The detail view must read "Sarah Ahmed", never "user:<uuid>".
+async function humanizePrincipals(c, subjects) {
+  const map = {};
+  const arr = [...subjects].filter(Boolean);
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const userIds = arr.filter((s) => s.startsWith("user:")).map((s) => s.slice(5)).filter((x) => UUID.test(x));
+  const cliIds = arr.filter((s) => s.startsWith("svc:")).map((s) => s.slice(4));
+  if (userIds.length) (await c.query("select id, full_name, email from dispatch.users where id = any($1::uuid[])", [userIds])).rows
+    .forEach((r) => { map["user:" + r.id] = r.full_name || r.email || ("user:" + r.id); });
+  if (cliIds.length) (await c.query("select client_id, name from dispatch.service_clients where client_id = any($1)", [cliIds])).rows
+    .forEach((r) => { map["svc:" + r.client_id] = r.name || ("svc:" + r.client_id); });
+  return map;
+}
+
+// The institutional approval chain for ONE record, humanized for the detail view:
+// every office step with its standing (done / awaiting now / pending) and who
+// satisfied it, then the publication step. This is what makes a record explain
+// itself — whose turn it is, who has acted — at every stage, not only after the fact.
+async function buildGovernanceChain(c, doc) {
+  const level = doc.classification?.level ?? null;
+  const policy = await resolvePolicy(c, { docType: doc.doc_type, classificationLevel: level });
+  const chain = chainOf(policy);
+  const lc = doc.lifecycle_state;
+  const roleLabels = {};
+  (await c.query("select key, label from dispatch.governance_roles")).rows.forEach((r) => { roleLabels[r.key] = r.label; });
+  const human = (k) => (k ? (roleLabels[k] || k) : null);
+  const appr = (await c.query(
+    "select decision, actor, role_key, expires_at from dispatch.approvals where document_id=$1 and version_no=$2",
+    [doc.id, doc.current_version])).rows.map((r) => ({ ...r, expired: !!r.expires_at && new Date(r.expires_at) < new Date() }));
+  const ev = evaluateChain(appr, chain, { submitter: doc.submitted_by, sequential: policy.sequential });
+  const subjects = new Set(); if (doc.submitted_by) subjects.add(doc.submitted_by); appr.forEach((a) => a.actor && subjects.add(a.actor));
+  const names = await humanizePrincipals(c, subjects);
+  const nm = (s) => (s ? (names[s] || s.replace(/^svc:|^user:/, "")) : null);
+
+  const reviewSettled = !["draft", "submitted", "in_review", "rejected"].includes(lc); // approved onward
+  const evSteps = ev.steps.length ? ev.steps : chain.map((s, i) => ({ index: i, role: s.role, label: s.label, quorum: s.quorum, satisfied: false, satisfiedBy: [] }));
+  const steps = evSteps.map((s) => {
+    const done = s.satisfied || reviewSettled;
+    const current = !done && (lc === "in_review" || lc === "submitted") && ev.openStep === s.index;
+    return { label: s.label || human(s.role) || `Step ${s.index + 1}`, quorum: s.quorum,
+      by: (s.satisfiedBy || []).map(nm), state: done ? "done" : current ? "current" : "pending" };
+  });
+  const pubRole = policy.publication_authority || null;
+  if (pubRole) {
+    const pubDone = lc === "published" || lc === "archived";
+    steps.push({ label: human(pubRole), quorum: 1, by: [], publication: true,
+      state: pubDone ? "done" : lc === "rendered" ? "current" : "pending" });
+  }
+  let office = null;
+  if (doc.submitted_by) office = (await c.query(
+    "select gr.label from dispatch.governance_role_grants g join dispatch.governance_roles gr on gr.key=g.role_key where g.subject=$1 and g.active order by gr.display_order nulls last limit 1",
+    [doc.submitted_by])).rows[0]?.label || null;
+  return { submittedBy: { name: nm(doc.submitted_by), office }, steps, rejected: lc === "rejected" };
+}
+
 async function handleGetDocument(res, principal, documentId) {
   if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
   const data = await withClaims(pool, claimsFor(principal), async (c) => {
-    const d = await c.query("select id, doc_type, title, classification, status, lifecycle_state, current_version, correlation_id, submitted_at, published_at, archived_at, preservation_sha256, created_at, updated_at from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
+    const d = await c.query("select id, doc_type, title, classification, status, lifecycle_state, current_version, correlation_id, submitted_at, submitted_by, published_at, archived_at, preservation_sha256, created_at, updated_at from dispatch.documents where id=$1 and deleted_at is null", [documentId]);
     if (!d.rows[0]) return null;
     const vs = await c.query("select version_no, ddm_version, template_id, template_version, engine_version, created_at from dispatch.document_versions where document_id=$1 order by version_no", [documentId]);
     const latest = await c.query("select result from dispatch.jobs where document_id=$1 and result is not null order by updated_at desc limit 1", [documentId]);
     const posture = await documentPosture(c, d.rows[0]);
-    return { doc: d.rows[0], versions: vs.rows, latestResult: latest.rows[0]?.result || null, posture };
+    const governance = await buildGovernanceChain(c, d.rows[0]);
+    return { doc: d.rows[0], versions: vs.rows, latestResult: latest.rows[0]?.result || null, posture, governance };
   });
   if (!data) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "document not found"));
-  const { doc, versions, latestResult, posture } = data;
+  const { doc, versions, latestResult, posture, governance } = data;
   const dcl = clearanceAllows(principal.clearance, doc.classification || {});
   if (!dcl.allowed) { inc("clearance_denied_total"); return send(res, 403, errEnvelope(null, 403, "INSUFFICIENT_CLEARANCE", dcl.reason)); }
   return send(res, 200, {
@@ -1336,6 +1393,7 @@ async function handleGetDocument(res, principal, documentId) {
     versions: versions.map((v) => ({ versionNo: v.version_no, ddmVersion: v.ddm_version,
       template: v.template_id, templateVersion: v.template_version, engineVersion: v.engine_version, createdAt: v.created_at })),
     latestResult, createdAt: doc.created_at, updatedAt: doc.updated_at, posture,
+    submittedBy: governance.submittedBy, governanceChain: governance.steps, governanceRejected: governance.rejected,
   });
 }
 

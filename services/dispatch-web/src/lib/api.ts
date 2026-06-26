@@ -266,11 +266,15 @@ export const listDocuments = (params: { state?: string; docType?: string; q?: st
 };
 export const getDocument = (id: string) => request<DocumentDetail>("GET", `/v1/documents/${id}`);
 
+// One step in a record's institutional approval chain, with its live standing.
+export interface ChainStep { label: string; quorum: number; by: string[]; state: "done" | "current" | "pending"; publication?: boolean }
 export interface DocumentDetail {
   id: string; docType: string; title: string; status: string; lifecycle?: Lifecycle; currentVersion: number; correlationId?: string;
   publishedAt?: string; archivedAt?: string; preservationSha256?: string;
   versions: { versionNo: number; ddmVersion: string; template?: string; templateVersion?: number; engineVersion?: string; createdAt: string }[];
   latestResult: JobResult | null; createdAt: string; updatedAt: string; posture?: Posture;
+  submittedBy?: { name?: string | null; office?: string | null };
+  governanceChain?: ChainStep[]; governanceRejected?: boolean;
 }
 
 export interface SubmitResponse {

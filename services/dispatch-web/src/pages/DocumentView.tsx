@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getDocument, getJob, artifactGrant, publish, withdraw, archiveDocument, getCertificate, getGovernanceCertificate, audit, DispatchError,
-  type DocumentDetail, type JobView, type ArtifactRef, type AuditEvent, type PreservationCertificate, type GovernanceCertificate, humanError } from "../lib/api";
+  type DocumentDetail, type JobView, type ArtifactRef, type AuditEvent, type PreservationCertificate, type GovernanceCertificate, type ChainStep, humanError } from "../lib/api";
 import { track } from "../lib/analytics";
 import { Button, Card, ClassBadge, timeAgo } from "../lib/ui";
 import { recordTypeLabel } from "../lib/recordTypes";
@@ -115,6 +115,9 @@ const DocumentView: React.FC = () => {
           </div>
           <h1 className="font-serif text-[1.9rem] font-bold leading-tight tracking-tight text-white">{doc.title || "(untitled)"}</h1>
           <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">{recordTypeLabel(doc.docType)}</p>
+          {doc.submittedBy?.name && (
+            <p className="mt-2 text-[12.5px] text-white/50">Created by <span className="font-semibold text-white/85">{doc.submittedBy.name}</span>{doc.submittedBy.office && <span className="text-white/45"> · {doc.submittedBy.office}</span>}</p>
+          )}
           {/* lifecycle as a procession — reached white, frontier seal-accented, the terminal seal earns green */}
           <div className="mt-3.5 flex flex-wrap items-center gap-1">
             {STAGES.map(([label, on], i) => {
@@ -164,6 +167,10 @@ const DocumentView: React.FC = () => {
       </header>
 
       {doc.posture && <GovernanceStanding p={doc.posture} lifecycle={lc} submittedAt={doc.posture.waitingSince} />}
+
+      {doc.governanceChain && doc.governanceChain.length > 0 && (
+        <ChainOfAuthority steps={doc.governanceChain} rejected={doc.governanceRejected} />
+      )}
 
       {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
 
@@ -375,6 +382,53 @@ const StandFact: React.FC<{ label: string; value?: React.ReactNode }> = ({ label
       <div className="mt-1 text-sm font-medium text-white/90">{value}</div>
     </div>
   );
+
+// ── Chain of Authority — the record's approval chain as a live procession ──────
+// Every office the record must pass, in order, with its standing: cleared (and by
+// whom), awaiting now, or still to come — then the publishing office. This is the
+// screen's answer to "whose turn is it?", visible at every stage, not only after
+// the fact on the certificate. Colour discipline: emerald for cleared (settled),
+// amber for the office that holds it now (the one exception that earns colour),
+// monochrome for what is still pending.
+const ChainOfAuthority: React.FC<{ steps: ChainStep[]; rejected?: boolean }> = ({ steps, rejected }) => (
+  <section className="mb-6 overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-br from-white/[0.04] to-transparent">
+    <div className="border-b border-white/[0.07] px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.28em] text-white/35">Chain of authority</div>
+    <ol className="px-6 py-5">
+      {steps.map((s, i) => {
+        const last = i === steps.length - 1;
+        const mark = s.state === "done"
+          ? { ring: "border-emerald-400/60 bg-emerald-400/15 text-emerald-300", sym: "✓" }
+          : s.state === "current"
+            ? { ring: "border-amber-400/70 bg-amber-400/15 text-amber-300", sym: "●" }
+            : { ring: "border-white/20 bg-transparent text-white/30", sym: "" };
+        const sub = s.state === "done"
+          ? (s.by.length ? <>Cleared by <span className="text-white/75">{s.by.join(", ")}</span></> : "Cleared")
+          : s.state === "current"
+            ? <span className="text-amber-300/90">{s.publication ? "Ready for publication by this office" : "Awaiting this office now"}</span>
+            : <span className="text-white/35">{s.publication ? "Publication — after approval" : "Pending"}</span>;
+        return (
+          <li key={i} className="relative flex gap-3.5 pb-5 last:pb-0">
+            {!last && <span aria-hidden className={`absolute left-[13px] top-7 h-[calc(100%-1rem)] w-px ${s.state === "done" ? "bg-emerald-400/25" : "bg-white/10"}`} />}
+            <span className={`relative z-10 mt-0.5 flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full border text-[12px] font-bold ${mark.ring}`}>
+              {mark.sym || i + 1}
+            </span>
+            <div className="min-w-0 flex-1 pt-0.5">
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className={`text-sm font-semibold ${s.state === "pending" ? "text-white/55" : "text-white"}`}>{s.label}</span>
+                {s.quorum > 1 && <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-semibold text-white/50">needs {s.quorum}</span>}
+                {s.publication && <span className="text-[10px] font-semibold uppercase tracking-wide text-white/30">publication</span>}
+              </div>
+              <div className="mt-0.5 text-[12px]">{sub}</div>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+    {rejected && (
+      <div className="border-t border-amber-500/20 bg-amber-500/[0.06] px-6 py-2.5 text-[12px] text-amber-300/90">Returned for revision — off the publication path until re-submitted.</div>
+    )}
+  </section>
+);
 
 const GovernanceStanding: React.FC<{ p: NonNullable<DocumentDetail["posture"]>; lifecycle?: string; submittedAt?: string | null }> = ({ p, lifecycle = "", submittedAt }) => {
   const inReview = lifecycle === "in_review" || lifecycle === "submitted";
