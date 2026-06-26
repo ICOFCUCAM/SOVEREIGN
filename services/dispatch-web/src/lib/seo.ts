@@ -29,6 +29,9 @@ const STATIC: Record<string, Meta> = {
   "/official-record": { title: "What is an Official Record?" + SUF, description: "An Official Record is more than a document — the institution's authoritative, governed, certified and permanently verifiable version of a decision." },
   "/verify": { title: "Verify a Record" + SUF, description: "Verify an Official Record. Confirm any Sovereign Dispatch publication is genuine, unrevoked and untampered — by its permanent Record ID." },
   "/walkthrough": { title: "See a Governed Record" + SUF, description: "Watch a document become an Official Record — draft, governed approval chain, certificates, evidence chain and public verification. An interactive walkthrough." },
+  "/cost-of-publication": { title: "The Cost of an Official Publication" + SUF, description: "Why Dispatch exists — an official publication is the output of a long, fragmented, costly institutional process. See it honestly, then unified into one governed record." },
+  "/lifecycle": { title: "The Governed Lifecycle" + SUF, description: "Exactly what you are buying — eight governed stages, each showing who participates, the decisions made, the evidence generated and the risks prevented." },
+  "/roi": { title: "Operational Model Estimator" + SUF, description: "Model the scale of governed publication from your own figures. Illustrative only — Dispatch governs the process; it never promises savings." },
 };
 
 const DEFAULT = STATIC["/"];

@@ -31,3 +31,11 @@ export const OFFICIAL_RECORD_ROUTE = "/official-record";
 export const VERIFY_ROUTE = "/verify";
 // Interactive "see a governed record" walkthrough — draft → approval → certificates → verify.
 export const WALKTHROUGH_ROUTE = "/walkthrough";
+
+// Institutional Value & Procurement Experience — the surfaces that convince an
+// institution, in evaluator reading order: understand the problem (cost of an
+// official publication) → understand what they're buying (the governed lifecycle)
+// → model the operational case (ROI) → procure (the Procurement Center).
+export const COST_ROUTE = "/cost-of-publication";
+export const LIFECYCLE_ROUTE = "/lifecycle";
+export const ROI_ROUTE = "/roi";

@@ -29,6 +29,9 @@ const Evidence = lazy(() => import("./pages/Evidence"));
 const Developers = lazy(() => import("./pages/Developers"));
 const OfficialRecord = lazy(() => import("./pages/OfficialRecord"));
 const Walkthrough = lazy(() => import("./pages/Walkthrough"));
+const CostOfPublication = lazy(() => import("./pages/CostOfPublication"));
+const Lifecycle = lazy(() => import("./pages/Lifecycle"));
+const Roi = lazy(() => import("./pages/Roi"));
 const ValuePage = lazy(() => import("./pages/ValuePage"));
 const Verify = lazy(() => import("./pages/Verify"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -192,6 +195,10 @@ const App: React.FC = () => (
     <Route path="/official-record" element={<OfficialRecord />} />
     {/* interactive governed-record walkthrough */}
     <Route path="/walkthrough" element={<Walkthrough />} />
+    {/* institutional value & procurement experience */}
+    <Route path="/cost-of-publication" element={<CostOfPublication />} />
+    <Route path="/lifecycle" element={<Lifecycle />} />
+    <Route path="/roi" element={<Roi />} />
     {/* financial-value detail pages (7), introduced on the homepage */}
     <Route path="/value/:slug" element={<ValuePage />} />
     <Route path="/verify" element={<Verify />} />

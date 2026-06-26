@@ -5,6 +5,7 @@ import {
   PROCUREMENT_ROUTE, PRICING_ROUTE, ARCHITECTURE_ROUTE, EVIDENCE_ROUTE, TRUST_ROUTE,
   OUTCOMES_ROUTE, STANDARD_ROUTE, RECORDS_ROUTE, JOURNEY_ROUTE,
   OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE, WALKTHROUGH_ROUTE,
+  COST_ROUTE, LIFECYCLE_ROUTE, ROI_ROUTE,
 } from "../lib/routes";
 import { VALUE, VALUE_BASE } from "../lib/value";
 
@@ -98,7 +99,7 @@ export const PublicFooter: React.FC = () => (
         </div>
         <FooterCol title="The Standard" links={[["What is an Official Record?", OFFICIAL_RECORD_ROUTE], ["See a governed record", WALKTHROUGH_ROUTE], ["Verify a record", VERIFY_ROUTE], ["Outcomes", OUTCOMES_ROUTE], ["The Standard", STANDARD_ROUTE], ["Records", RECORDS_ROUTE], ["Readiness Journey", JOURNEY_ROUTE]]} />
         <FooterCol title="Platform" links={[["Overview", PLATFORM_ROUTE], ["Developers", DEVELOPERS_ROUTE], ["Security", SECURITY_ROUTE], ["Compliance", COMPLIANCE_ROUTE]]} />
-        <FooterCol title="Evaluate" links={[["Pricing", PRICING_ROUTE], ["Procurement", PROCUREMENT_ROUTE], ["Architecture", ARCHITECTURE_ROUTE], ["Evidence", EVIDENCE_ROUTE], ["Trust", TRUST_ROUTE]]} />
+        <FooterCol title="Evaluate" links={[["Cost of Publication", COST_ROUTE], ["The Governed Lifecycle", LIFECYCLE_ROUTE], ["ROI Estimator", ROI_ROUTE], ["Pricing", PRICING_ROUTE], ["Procurement", PROCUREMENT_ROUTE], ["Architecture", ARCHITECTURE_ROUTE], ["Evidence", EVIDENCE_ROUTE], ["Trust", TRUST_ROUTE]]} />
         <FooterCol title="The Case" links={VALUE.map((v) => [v.title, `${VALUE_BASE}/${v.slug}`] as [string, string])} />
         <FooterCol title="Access" links={[["Launch Dispatch", "/console"], ["Log in", "/console"]]} />
       </div>

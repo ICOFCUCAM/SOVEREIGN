@@ -4,6 +4,9 @@
   <url><loc>https://dispatch.sovereigndo.com/official-record</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/verify</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/walkthrough</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/cost-of-publication</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/lifecycle</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/roi</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/pricing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/procurement</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/trust</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
