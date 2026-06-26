@@ -1196,7 +1196,12 @@ async function handleMyAuthority(res, principal) {
         submittedBy: d.submitted_by, lifecycle: d.lifecycle_state, action: isPublish ? "publish" : "decide",
         viaDelegation: !held.includes(posture.currentRole), ...posture });
     }
-    return { offices, underYourAuthority };
+    // The operator's identity, for the institutional crest on login: who they are,
+    // and which institution they serve. The office(s) carry the department already.
+    const institution = (await c.query("select name from dispatch.tenants where id=$1", [principal.tenantId])).rows[0]?.name || null;
+    const names = await humanizePrincipals(c, new Set([subject]));
+    const name = names[subject] || (subject ? subject.replace(/^svc:|^user:/, "").split("@")[0] : null);
+    return { offices, underYourAuthority, identity: { name, institution, isMachine: principal.principalType === "service" } };
   });
   return send(res, 200, { ...data, counts: { offices: data.offices.length, awaitingYou: data.underYourAuthority.length } });
 }

@@ -71,6 +71,13 @@ const titles = (mw) => (mw?.underYourAuthority || []).map((r) => `${r.title} [${
     publicationAuthority: "communications_office", retentionDays: 3650, autoApproveService: false, sequential: true } });
 
   // Each persona logs in. Does "My Work" read in office language (labels, not keys)?
+  // The institutional crest: my-authority returns WHO the operator is + their institution.
+  {
+    const mw = await myWork(people.grace.token);
+    (mw.identity && mw.identity.name === "Grace Bello" && mw.identity.institution === "Ministry of Health")
+      ? ok(`Identity crest: ${mw.identity.name} · ${mw.offices[0].label} · ${mw.identity.institution}`)
+      : bad("identity crest", JSON.stringify(mw.identity));
+  }
   console.log("\n── Each persona arrives at their office ──");
   for (const [k, p] of Object.entries(people)) {
     const mw = await myWork(p.token);

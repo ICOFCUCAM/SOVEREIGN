@@ -258,6 +258,7 @@ export interface AuthorityRecord extends Posture {
 export interface MyAuthority {
   offices: Office[];
   underYourAuthority: AuthorityRecord[];
+  identity?: { name?: string | null; institution?: string | null; isMachine?: boolean };
   counts: { offices: number; awaitingYou: number };
 }
 export const getMyAuthority = () => request<MyAuthority>("GET", "/v1/governance/my-authority");
