@@ -37,10 +37,19 @@ function pdfBreakerRecord(okResult) {
 function verifyStamp(publicId, verifyBase) {
   const id = String(publicId).replace(/[<>&"]/g, "");
   const base = String(verifyBase || "dispatch.sovereigndo.com").replace(/^https?:\/\//, "").replace(/\/+$/, "");
-  return `<div class="ds-verify-stamp">OFFICIAL RECORD &middot; <strong>${id}</strong> &nbsp;&middot;&nbsp; Verify at ${base}/verify/${id}</div>`
+  // Evaluation (free-tier) artifacts carry an EVAL- id and must be unmistakable:
+  // the stamp says NOT AN OFFICIAL RECORD, in a warning tone, on every page.
+  const evalRec = /^EVAL-/i.test(id);
+  const label = evalRec
+    ? `EVALUATION COPY &middot; NOT AN OFFICIAL RECORD &middot; <strong>${id}</strong>`
+    : `OFFICIAL RECORD &middot; <strong>${id}</strong> &nbsp;&middot;&nbsp; Verify at ${base}/verify/${id}`;
+  const color = evalRec ? "#9a3412" : "#555";
+  const border = evalRec ? "#f0c9a8" : "#d4d4d4";
+  const bg = evalRec ? "#fff7ed" : "#fff";
+  return `<div class="ds-verify-stamp">${label}</div>`
     + `<style>.ds-verify-stamp{position:fixed;left:0;right:0;bottom:0;text-align:center;`
     + `font:8.5px/1.4 -apple-system,'Segoe UI',Helvetica,Arial,sans-serif;letter-spacing:.02em;`
-    + `color:#555;padding:4px 10px;border-top:.5pt solid #d4d4d4;background:#fff;}`
+    + `color:${color};padding:4px 10px;border-top:.5pt solid ${border};background:${bg};}`
     + `@media print{@page{margin-bottom:13mm}}</style>`;
 }
 function stampHtml(html, ctx) {

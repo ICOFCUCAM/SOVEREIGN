@@ -178,10 +178,16 @@ export async function renderDocx(lm, ctx = {}) {
   // The in-document verification stamp — the file self-advertises its Official
   // Record id and where to verify it, on every page (mirrors the PDF footer).
   const verifyBase = String(ctx.verifyBase || "dispatch.sovereigndo.com").replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  // Evaluation (free-tier) records carry an EVAL- id and must be marked NOT an
+  // official record, in a warning tone, on every page (mirrors the PDF stamp).
+  const isEval = /^EVAL-/i.test(String(ctx.publicId || ""));
   const stampPara = ctx.publicId ? new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 40 },
-    children: [new TextRun({ text: "OFFICIAL RECORD · ", size: 14, color: "777777" }),
-      new TextRun({ text: String(ctx.publicId), bold: true, size: 14, color: "555555" }),
-      new TextRun({ text: `  ·  Verify at ${verifyBase}/verify/${ctx.publicId}`, size: 14, color: "777777" })] }) : null;
+    children: isEval
+      ? [new TextRun({ text: "EVALUATION COPY · NOT AN OFFICIAL RECORD · ", bold: true, size: 14, color: "9A3412" }),
+         new TextRun({ text: String(ctx.publicId), bold: true, size: 14, color: "9A3412" })]
+      : [new TextRun({ text: "OFFICIAL RECORD · ", size: 14, color: "777777" }),
+         new TextRun({ text: String(ctx.publicId), bold: true, size: 14, color: "555555" }),
+         new TextRun({ text: `  ·  Verify at ${verifyBase}/verify/${ctx.publicId}`, size: 14, color: "777777" })] }) : null;
   const footer = new Footer({ children: stampPara ? [pageNumPara, stampPara] : [pageNumPara] });
 
   const doc = new Document({

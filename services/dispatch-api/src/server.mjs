@@ -161,7 +161,7 @@ async function handleDocuments(req, res, principal) {
         assertTransition("submitted", "approved");
         // Allocate the permanent record id now (before render) so the renderer can
         // stamp it onto the artifact. coalesce keeps any id already assigned.
-        await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now(), public_id = coalesce(public_id, dispatch.next_record_id()) where id=$1", [documentId]);
+        await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now(), public_id = coalesce(public_id, dispatch.next_record_id(tenant_id)) where id=$1", [documentId]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
           action: "document.approved", targetType: "document", targetId: documentId, requestId, correlationId: body.source?.correlationId });
         await queueWebhooks(client, principal.tenantId, "record.approved", { documentId, docType: doc.docType, title: doc.metadata?.title || null, lifecycle: "approved" });
@@ -434,7 +434,7 @@ async function handleDecision(req, res, principal, documentId) {
         assertTransition(docRow.lifecycle_state === "submitted" ? "submitted" : "in_review", "approved");
         // Allocate the permanent record id now (before render) so the renderer can
         // stamp it onto the artifact. coalesce keeps any id already assigned.
-        await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now(), public_id = coalesce(public_id, dispatch.next_record_id()) where id=$1", [documentId]);
+        await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now(), public_id = coalesce(public_id, dispatch.next_record_id(tenant_id)) where id=$1", [documentId]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
           action: chain.length ? "governance.policy_satisfied" : "document.approved", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
         await queueWebhooks(client, principal.tenantId, "record.approved", { documentId, docType: docRow.doc_type, title: docRow.title, lifecycle: "approved" });
@@ -525,7 +525,7 @@ async function handleLifecycleAction(req, res, principal, documentId, action) {
         const pubRow = await client.query(
           `update dispatch.documents set lifecycle_state='published', published_at=now(),
              retention_until=now() + ($2 || ' days')::interval, governance_sha256=$3, governance_certificate=$4,
-             public_id = coalesce(public_id, dispatch.next_record_id())
+             public_id = coalesce(public_id, dispatch.next_record_id(tenant_id))
            where id=$1 returning public_id`,
           [documentId, String(days), govCert?.integrityProof || null, govCert ? JSON.stringify(govCert) : null]);
         const recordId = pubRow.rows[0]?.public_id || null;
@@ -1529,10 +1529,18 @@ async function handleVerify(res, id) {
     message: "No official record with this identifier was found. A genuine Official Record always resolves here." });
   const lvl = String(row.classification?.level || "").toLowerCase();
   const open = !lvl || lvl === "none" || lvl === "unclassified" || lvl === "official";
-  const status = row.lifecycle_state === "withdrawn" ? "REVOKED" : row.lifecycle_state === "archived" ? "PRESERVED" : "OFFICIAL";
+  // Evaluation (free-tier) records carry an EVAL- id and are NOT official — they
+  // resolve here (honest transparency) but are clearly flagged so nobody mistakes
+  // a free trial publication for a genuine Official Record.
+  const official = row.official !== false;
+  const status = !official ? "EVALUATION"
+    : row.lifecycle_state === "withdrawn" ? "REVOKED"
+    : row.lifecycle_state === "archived" ? "PRESERVED" : "OFFICIAL";
   const cert = row.governance_certificate || null;
   return send(res, 200, {
     verified: true,
+    official,
+    isEvaluation: !official,
     recordId: row.public_id || id,
     status,
     institution: row.institution,

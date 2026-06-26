@@ -15,6 +15,7 @@ const VERDICT: Record<string, { ring: string; chip: string; mark: string; title:
   OFFICIAL: { ring: "border-emerald-500/40 from-emerald-500/[0.10]", chip: "bg-emerald-500/15 text-emerald-300", mark: "✓", title: "Verified — Official Record", note: "This is a genuine, current Official Record issued by the institution named below." },
   PRESERVED: { ring: "border-emerald-500/40 from-emerald-500/[0.10]", chip: "bg-emerald-500/15 text-emerald-300", mark: "✓", title: "Verified — Preserved Record", note: "This record is genuine and has been sealed into permanent preservation." },
   REVOKED: { ring: "border-amber-500/50 from-amber-500/[0.10]", chip: "bg-amber-500/15 text-amber-300", mark: "!", title: "Verified — but REVOKED", note: "This record was genuine but has been withdrawn by the institution. Any copy you hold is no longer the authoritative version." },
+  EVALUATION: { ring: "border-amber-500/50 from-amber-500/[0.10]", chip: "bg-amber-500/20 text-amber-300", mark: "!", title: "Not an Official Record — Evaluation only", note: "This identifier belongs to a free evaluation environment. It is NOT an official record and carries no institutional authority. Genuine Official Records use the SD- identifier." },
   NOT_FOUND: { ring: "border-red-500/40 from-red-500/[0.08]", chip: "bg-red-500/15 text-red-300", mark: "✕", title: "Not a verified record", note: "No Official Record resolves to this identifier. Treat the document you hold as unverified." },
   ERROR: { ring: "border-red-500/40 from-red-500/[0.08]", chip: "bg-red-500/15 text-red-300", mark: "✕", title: "Verification unavailable", note: "The verification service could not be reached. Please try again." },
 };
@@ -116,7 +117,7 @@ const Verify: React.FC = () => {
               {v.verified && (
                 <div className="grid grid-cols-2 gap-x-8 gap-y-5 border-t border-white/[0.08] p-6 sm:grid-cols-3 sm:p-7">
                   <Fact k="Issuing institution">{v.institution}</Fact>
-                  <Fact k="Official Record ID"><span className="font-mono text-[13px]">{v.recordId}</span></Fact>
+                  <Fact k={v.status === "EVALUATION" ? "Evaluation Record ID" : "Official Record ID"}><span className="font-mono text-[13px]">{v.recordId}</span></Fact>
                   <Fact k="Record type">{v.docType?.replace(/_/g, " ")}</Fact>
                   <Fact k="Title">{v.titleWithheld ? <span className="text-white/40">Withheld — classified</span> : v.title}</Fact>
                   <Fact k="Classification">{v.classification?.level || "Unclassified"}</Fact>

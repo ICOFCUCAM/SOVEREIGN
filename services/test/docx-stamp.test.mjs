@@ -42,6 +42,13 @@ const footerText = async (bytes) => {
   text.includes(`verify/${RID}`) ? ok("Footer carries the verification URL") : bad("verify url missing", text.slice(0, 200));
   text.includes("OFFICIAL RECORD") ? ok("Footer labels it an OFFICIAL RECORD") : bad("label missing", text.slice(0, 120));
 
+  console.log("\n── Evaluation DOCX (EVAL- id) is marked NOT an official record ──");
+  const evalDoc = await renderDocx(lm, { publicId: "EVAL-2026-00000001", verifyBase: "dispatch.sovereigndo.com" });
+  const evalFooter = await footerText(evalDoc.bytes);
+  evalFooter.text.includes("EVALUATION COPY") ? ok("Eval footer labels it an EVALUATION COPY") : bad("eval label missing", evalFooter.text.slice(0, 160));
+  evalFooter.text.includes("NOT AN OFFICIAL RECORD") ? ok("Eval footer says NOT AN OFFICIAL RECORD") : bad("not-official label missing", evalFooter.text.slice(0, 160));
+  evalFooter.text.includes("EVAL-2026-00000001") ? ok("Eval footer carries the EVAL- id") : bad("eval id missing", evalFooter.text.slice(0, 160));
+
   console.log("\n── Unstamped DOCX (no id) is unchanged / valid ──");
   const plain = await renderDocx(lm, {});
   const plainFooter = await footerText(plain.bytes);

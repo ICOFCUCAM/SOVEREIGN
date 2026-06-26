@@ -292,6 +292,7 @@ export interface DocumentDetail {
 // ---- public record verification (the institutional proof a copy can't carry) ----
 export interface VerifyResult {
   verified: boolean; status: string; recordId: string;
+  official?: boolean; isEvaluation?: boolean;
   institution?: string | null; title?: string | null; titleWithheld?: boolean;
   classification?: { scheme?: string; level?: string } | null; docType?: string;
   governanceCompliance?: string | null; publicationAuthority?: string | null; approvalChain?: string[] | null;
