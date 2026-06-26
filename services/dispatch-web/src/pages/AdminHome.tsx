@@ -30,7 +30,7 @@ const AdminHome: React.FC = () => {
 
   return (
     <div>
-      <header className="mb-6">
+      <header className="mb-6 border-b border-white/10 pb-5">
         <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">Administration</div>
         <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Institutional Posture</h1>
         <p className="mt-1 text-sm text-white/50">Identity, access, integrations and data sovereignty for your institution's tenant.</p>
