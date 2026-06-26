@@ -17,3 +17,7 @@ export const OUTCOMES_ROUTE = "/outcomes";
 export const STANDARD_ROUTE = "/standard";
 export const RECORDS_ROUTE = "/records";
 export const JOURNEY_ROUTE = "/journey";
+
+// Developer Platform — the public docs surface for the Dispatch Platform API
+// (the engine): quickstart, SDKs, webhooks, and the live endpoint reference.
+export const DEVELOPERS_ROUTE = "/developers";

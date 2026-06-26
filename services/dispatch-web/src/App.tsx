@@ -14,6 +14,7 @@ import Platform from "./pages/Platform";
 import Security from "./pages/Security";
 import Compliance from "./pages/Compliance";
 import Evidence from "./pages/Evidence";
+import Developers from "./pages/Developers";
 import SignIn from "./pages/SignIn";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
@@ -138,6 +139,8 @@ const App: React.FC = () => (
     <Route path="/security" element={<Security />} />
     <Route path="/compliance" element={<Compliance />} />
     <Route path="/evidence" element={<Evidence />} />
+    {/* public developer platform — API docs, SDKs, webhooks, endpoint reference */}
+    <Route path="/developers" element={<Developers />} />
     {/* public self-serve signup (free plan) */}
     <Route path="/signup" element={<Signup />} />
     {/* product 1 — institutional operations */}
