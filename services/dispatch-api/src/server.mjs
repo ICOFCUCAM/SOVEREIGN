@@ -159,7 +159,9 @@ async function handleDocuments(req, res, principal) {
       // policies keep the legacy auto-approve behaviour (backward compatible).
       if (chainOf(policy).length === 0 && autoApproves(policy, principal.principalType)) {
         assertTransition("submitted", "approved");
-        await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now() where id=$1", [documentId]);
+        // Allocate the permanent record id now (before render) so the renderer can
+        // stamp it onto the artifact. coalesce keeps any id already assigned.
+        await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now(), public_id = coalesce(public_id, dispatch.next_record_id()) where id=$1", [documentId]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
           action: "document.approved", targetType: "document", targetId: documentId, requestId, correlationId: body.source?.correlationId });
         await queueWebhooks(client, principal.tenantId, "record.approved", { documentId, docType: doc.docType, title: doc.metadata?.title || null, lifecycle: "approved" });
@@ -430,7 +432,9 @@ async function handleDecision(req, res, principal, documentId) {
       }
       if (outcome === "satisfied") {
         assertTransition(docRow.lifecycle_state === "submitted" ? "submitted" : "in_review", "approved");
-        await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now() where id=$1", [documentId]);
+        // Allocate the permanent record id now (before render) so the renderer can
+        // stamp it onto the artifact. coalesce keeps any id already assigned.
+        await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now(), public_id = coalesce(public_id, dispatch.next_record_id()) where id=$1", [documentId]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
           action: chain.length ? "governance.policy_satisfied" : "document.approved", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
         await queueWebhooks(client, principal.tenantId, "record.approved", { documentId, docType: docRow.doc_type, title: docRow.title, lifecycle: "approved" });

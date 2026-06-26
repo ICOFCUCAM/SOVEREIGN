@@ -29,17 +29,37 @@ function pdfBreakerRecord(okResult) {
   if (CB.fails >= CB.threshold) { CB.openUntil = Date.now() + CB.cooloffMs; CB.fails = 0; inc("pdf_circuit_open_total"); log.warn({ service: "worker", workerId: WORKER_ID, stage: "pdf_circuit", outcome: "open" }); }
 }
 
-// Per-output renderers (LM → { ext, bytes, warnings, pages? }) or throw.
+// The in-document verification stamp — printed on every page of an Official
+// Record so the file self-advertises its identity and where to verify it. A fixed
+// footer (Chromium print-to-pdf repeats fixed elements per page); @page reserves
+// the bottom margin so it never overlaps content. Stamped only once the record has
+// a permanent id (allocated at approval); unstamped artifacts are unchanged.
+function verifyStamp(publicId, verifyBase) {
+  const id = String(publicId).replace(/[<>&"]/g, "");
+  const base = String(verifyBase || "dispatch.sovereigndo.com").replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  return `<div class="ds-verify-stamp">OFFICIAL RECORD &middot; <strong>${id}</strong> &nbsp;&middot;&nbsp; Verify at ${base}/verify/${id}</div>`
+    + `<style>.ds-verify-stamp{position:fixed;left:0;right:0;bottom:0;text-align:center;`
+    + `font:8.5px/1.4 -apple-system,'Segoe UI',Helvetica,Arial,sans-serif;letter-spacing:.02em;`
+    + `color:#555;padding:4px 10px;border-top:.5pt solid #d4d4d4;background:#fff;}`
+    + `@media print{@page{margin-bottom:13mm}}</style>`;
+}
+function stampHtml(html, ctx) {
+  if (!ctx || !ctx.publicId) return html;
+  const stamp = verifyStamp(ctx.publicId, ctx.verifyBase);
+  return html.includes("</body>") ? html.replace("</body>", stamp + "</body>") : html + stamp;
+}
+
+// Per-output renderers (LM, ctx → { ext, bytes, warnings, pages? }) or throw.
 // docx is Epic 7 — declared not-yet-implemented so it isolates to a per-output
 // failure rather than failing the whole job.
 const RENDERERS = {
   md: (lm) => { const { text, warnings } = renderMarkdown(lm); return { ext: "md", bytes: Buffer.from(text, "utf8"), warnings }; },
-  pdf: (lm) => {
+  pdf: (lm, ctx) => {
     if (pdfBreakerOpen()) { const e = new Error("pdf temporarily unavailable (circuit open)"); e.deterministic = false; throw e; }
     const { html, warnings } = renderHtml(lm);
     const t0 = Date.now();
     try {
-      const buf = normalizePdf(htmlToPdf(html));      // deterministic-after-timestamp-normalization
+      const buf = normalizePdf(htmlToPdf(stampHtml(html, ctx)));   // stamp the verification footer
       observe("pdf_render_ms", Date.now() - t0); pdfBreakerRecord(true);
       return { ext: "pdf", bytes: buf, warnings, pages: pdfPageCount(buf) };
     } catch (e) { pdfBreakerRecord(false); throw e; }
@@ -140,7 +160,7 @@ async function deliverCallback(job, result) {
 async function loadVersion(job) {
   return sys(job.tenant_id, async (client) => {
     const r = await client.query(
-      "select dv.ddm, d.id as document_id from dispatch.document_versions dv join dispatch.documents d on d.id = dv.document_id where dv.id = $1",
+      "select dv.ddm, d.id as document_id, d.public_id from dispatch.document_versions dv join dispatch.documents d on d.id = dv.document_id where dv.id = $1",
       [job.version_id]);
     return r.rows[0] || null;
   });
@@ -183,6 +203,8 @@ async function processJob(job) {
   await setProgress(job, 30);
 
   const classification = lm.classification?.level || null;
+  // Context for the in-document verification stamp (PDF). Absent id → no stamp.
+  const ctx = { publicId: ver.public_id || null, verifyBase: process.env.DISPATCH_VERIFY_BASE || "dispatch.sovereigndo.com" };
   const outputs = job.outputs || [];
   const artifacts = [];
   const warnings = [...(lm.warnings || [])];
@@ -194,7 +216,7 @@ async function processJob(job) {
     const renderer = RENDERERS[fmt];
     try {
       if (!renderer) { const e = new Error(`unsupported output '${fmt}'`); e.deterministic = true; throw e; }
-      const out = await renderer(lm);   // renderers may be async (docx)
+      const out = await renderer(lm, ctx);   // renderers may be async (docx); pdf stamps the verify footer
       for (const w of out.warnings || []) warnings.push(w);
       const artifactId = crypto.randomUUID();
       const key = artifactKey({ tenantId: job.tenant_id, documentId: ver.document_id, versionId: job.version_id, artifactId, ext: out.ext });
