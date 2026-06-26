@@ -1,5 +1,5 @@
 import React from "react";
-import { SectionHead, Card, Dot, PublicHeader, PublicFooter, TrustStrip, FilmGrain, useReveal, SURFACE } from "../components/brand";
+import { SectionHead, Card, Dot, PublicHeader, PageBanner, PublicFooter, TrustStrip, FilmGrain, useReveal, SURFACE } from "../components/brand";
 
 // Platform — the product story relocated from the homepage: what Dispatch is
 // (Overview), what it does (Capabilities), the lifecycle (Workflow), and how
@@ -11,6 +11,7 @@ const Platform: React.FC = () => {
       <style>{`html{scroll-behavior:smooth}`}</style>
       <FilmGrain />
       <PublicHeader />
+      <PageBanner slug="default" alt="" />
       <main>
         {/* ── Overview ───────────────────────────────────────────────── */}
         <section id="overview" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">

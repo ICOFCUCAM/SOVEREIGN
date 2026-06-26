@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { SectionHead, Chevron, PublicHeader, PublicFooter, FilmGrain, useReveal } from "../components/brand";
+import { SectionHead, Chevron, PublicHeader, PageBanner, PublicFooter, FilmGrain, useReveal } from "../components/brand";
 
 // The Dispatch Standard — the most strategic asset in a category. When a category
 // emerges, the standard matters more than the features. This defines the canonical
@@ -35,6 +35,7 @@ const Standard: React.FC = () => {
       <style>{`html{scroll-behavior:smooth}`}</style>
       <FilmGrain />
       <PublicHeader />
+      <PageBanner slug="default" alt="" />
       <main>
         <section className="border-t border-white/[0.06] px-8 py-24 lg:px-12">
           <div className="mx-auto max-w-4xl">

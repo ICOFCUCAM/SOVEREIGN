@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { PublicHeader, PublicFooter, Chevron, Dot, FilmGrain, useReveal, SURFACE } from "../components/brand";
+import { PublicHeader, PageBanner, PublicFooter, Chevron, Dot, FilmGrain, useReveal, SURFACE } from "../components/brand";
 import { PROCUREMENT_ROUTE, DEVELOPERS_ROUTE, ARCHITECTURE_ROUTE, SECURITY_ROUTE } from "../lib/routes";
 import { track } from "../lib/analytics";
 
@@ -122,6 +122,7 @@ const Pricing: React.FC = () => {
       <style>{`html{scroll-behavior:smooth}`}</style>
       <FilmGrain />
       <PublicHeader />
+      <PageBanner slug="default" alt="" />
 
       {/* hero */}
       <section className="border-b border-white/5 px-8 py-20 lg:px-12">

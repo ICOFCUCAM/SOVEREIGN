@@ -6,6 +6,7 @@ import {
   ARCHITECTURE_ROUTE, DEVELOPERS_ROUTE, PROCUREMENT_ROUTE,
   OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE, SECURITY_ROUTE, TRUST_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE,
 } from "../lib/routes";
+import { VALUE, VALUE_BASE } from "../lib/value";
 
 // The front door. Narrative order for procurement teams and executives:
 //   Who is it for? → Why does it exist? → How does it work? → Why can I trust it?
@@ -13,6 +14,19 @@ import {
 //   narrative on the left, the Record artifact dominant on the right; design below.
 
 const VERBS = ["Create", "Review", "Approve", "Authorize", "Publish", "Certify", "Verify", "Preserve"];
+
+// The institutional reality behind every official publication.
+const HIDDEN_LAYERS = ["Departments", "Committees", "Reviewers", "Legal offices", "Approving authorities", "Publishing offices", "Records management", "Archives", "Compliance teams"];
+const PUB_FLOW = ["Policy Draft", "Policy Team", "Legal Review", "Compliance", "Executive Approval", "Publishing Office", "Official Publication", "Evidence Chain", "Permanent Preservation"];
+// The experts an institution already employs — connected, not replaced.
+const EXPERTS: { slug: string; name: string }[] = [
+  { slug: "role-analyst", name: "Policy Analyst" },
+  { slug: "role-legal", name: "Legal Counsel" },
+  { slug: "role-director", name: "Department Director" },
+  { slug: "role-secretary", name: "Permanent Secretary" },
+  { slug: "role-publishing", name: "Publishing Authority" },
+  { slug: "role-archive", name: "National Archive" },
+];
 
 const GUARANTEES = [
   "A permanent institutional identity", "A governed approval process", "Named institutional authority",
@@ -133,10 +147,11 @@ const Landing: React.FC = () => {
                   </React.Fragment>
                 ))}
               </div>
-              <p className="lead-balance mt-7 max-w-[30rem] text-[16.5px] leading-[1.7] text-white/60">
-                Sovereign Dispatch governs every stage of publication — from creation to permanent preservation. Every
-                publication carries institutional authority, cryptographic integrity, a complete evidence chain, and
-                permanent verification.
+              <p className="lead-balance mt-7 max-w-[32rem] text-[16.5px] leading-[1.7] text-white/60">
+                Institutions don't pay millions to create documents. They invest millions in the people, governance,
+                approvals and authority that make those documents <span className="text-white/85">official</span>.
+                Sovereign Dispatch is the infrastructure that unifies, governs, certifies and preserves that entire
+                process.
               </p>
               <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <button onClick={() => nav("/console")}
@@ -162,6 +177,93 @@ const Landing: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* ── The Hidden Cost of Institutional Publication ── */}
+        <section className="border-t border-white/[0.06] px-6 py-24 lg:px-12">
+          <div className="mx-auto max-w-5xl">
+            <div className="text-center">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Begin with reality</div>
+              <h2 className="mx-auto mt-3 max-w-3xl font-serif text-[2.1rem] font-bold leading-tight tracking-tight sm:text-[2.7rem]">The hidden cost of institutional publication.</h2>
+              <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-relaxed text-white/55">
+                Every official publication represents hundreds of hours of institutional work. Before a policy, regulation, executive order, board resolution, healthcare directive, senate decision or regulatory notice becomes official, it passes through layer upon layer of governance.
+              </p>
+            </div>
+            <div className="mx-auto mt-12 flex max-w-4xl flex-wrap justify-center gap-2.5">
+              {HIDDEN_LAYERS.map((l) => (
+                <span key={l} className="rounded-full border border-white/10 bg-white/[0.02] px-4 py-2 text-[13px] font-medium text-white/70">{l}</span>
+              ))}
+            </div>
+            <p className="mx-auto mt-11 max-w-xl text-center font-serif text-[1.35rem] leading-snug text-white/80">
+              Those people already exist. Dispatch doesn't replace them — <span className="text-gold-300">Dispatch governs how they work together.</span>
+            </p>
+            <div className="mx-auto mt-14 max-w-sm">
+              {PUB_FLOW.map((step, i) => (
+                <React.Fragment key={step}>
+                  <div className={`rounded-lg border px-5 py-3 text-center text-[14px] font-semibold ${step === "Official Publication" || i === PUB_FLOW.length - 1 ? "border-gold-400/40 bg-gold-400/[0.07] text-gold-200" : "border-white/10 bg-white/[0.02] text-white/80"}`}>{step}</div>
+                  {i < PUB_FLOW.length - 1 && <div className="mx-auto h-5 w-px bg-gradient-to-b from-gold-400/45 to-white/10" />}
+                </React.Fragment>
+              ))}
+            </div>
+            <div className="mx-auto mt-14 grid max-w-3xl gap-4 text-center sm:grid-cols-3">
+              {[["Every step", "becomes governed."], ["Every approval", "becomes attributable."], ["Every publication", "becomes verifiable."]].map(([a, b]) => (
+                <div key={a} className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+                  <div className="text-[12px] uppercase tracking-wide text-white/40">{a}</div>
+                  <div className="mt-1 font-serif text-[1.15rem] font-bold text-white">{b}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Your Institution Already Has the Experts ── */}
+        <section className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.02] to-transparent px-6 py-24 lg:px-12">
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Connect, don't replace</div>
+              <h2 className="mx-auto mt-3 max-w-3xl font-serif text-[2.1rem] font-bold leading-tight tracking-tight sm:text-[2.7rem]">Your institution already has the experts. Dispatch connects them.</h2>
+              <p className="mx-auto mt-4 max-w-2xl text-[14.5px] leading-relaxed text-white/55">
+                Not another document-management team. Not another approval platform. Not another compliance system. Not another archive. Dispatch connects the people you already employ into one governed publication workflow.
+              </p>
+            </div>
+            <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {EXPERTS.map((e, i) => (
+                <article key={e.slug} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-gold-400/30">
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-[linear-gradient(160deg,#16140e,#090909)]">
+                    <img src={`/people/${e.slug}.webp`} alt={e.name} loading="lazy" className="h-full w-full object-cover" />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#0b0b0b] to-transparent" />
+                    <div className="absolute bottom-0 left-0 p-4">
+                      <div className="font-mono text-[11px] text-gold-400/80">{String(i + 1).padStart(2, "0")}</div>
+                      <div className="font-serif text-[1.2rem] font-bold leading-tight text-white">{e.name}</div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <p className="mx-auto mt-11 max-w-md text-center font-serif text-[1.25rem] text-white/75">Instead of showing software — <span className="text-gold-300">show the institution.</span></p>
+          </div>
+        </section>
+
+        {/* ── Dispatch creates financial value (1–7) → detail pages ── */}
+        <section className="border-t border-white/[0.06] px-6 py-24 lg:px-12">
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">The case for adoption</div>
+              <h2 className="mx-auto mt-3 max-w-3xl font-serif text-[2.1rem] font-bold leading-tight tracking-tight sm:text-[2.7rem]">Dispatch creates financial value in multiple ways.</h2>
+              <p className="mx-auto mt-4 max-w-2xl text-[14.5px] leading-relaxed text-white/55">Seven ways governed publication pays for itself — explore each in detail.</p>
+            </div>
+            <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {VALUE.map((v) => (
+                <button key={v.slug} onClick={() => nav(`${VALUE_BASE}/${v.slug}`)}
+                  className="group rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-left transition hover:border-gold-400/30 hover:bg-white/[0.03]">
+                  <div className="font-mono text-[12px] font-bold text-gold-400/70">{String(v.n).padStart(2, "0")}</div>
+                  <div className="mt-2 font-serif text-[1.25rem] font-bold leading-tight text-white">{v.title}</div>
+                  <p className="mt-2 text-[13.5px] leading-relaxed text-white/55">{v.teaser}</p>
+                  <div className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-gold-400 opacity-60 transition group-hover:opacity-100">Read more <Chevron className="h-3 w-3 transition group-hover:translate-x-0.5" /></div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* ── 1 · WHO IS IT FOR — Built for the world's leading institutions ── */}
         <section className="border-t border-white/[0.06] px-6 py-24 lg:px-12">

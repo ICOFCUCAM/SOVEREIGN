@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { SectionHead, Chevron, PublicHeader, PublicFooter, FilmGrain, useReveal } from "../components/brand";
+import { SectionHead, Chevron, PublicHeader, PageBanner, PublicFooter, FilmGrain, useReveal } from "../components/brand";
 
 // Record Gallery — the product made tangible. Specimens of the four artifacts an
 // institution actually holds after using Sovereign Dispatch. These are honest
@@ -27,6 +27,7 @@ const RecordGallery: React.FC = () => {
       <style>{`html{scroll-behavior:smooth}`}</style>
       <FilmGrain />
       <PublicHeader />
+      <PageBanner slug="default" alt="" />
       <main>
         <section className="border-t border-white/[0.06] px-8 py-24 lg:px-12">
           <div className="mx-auto max-w-4xl">

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Chevron, PublicHeader, PublicFooter, FilmGrain, useReveal } from "../components/brand";
+import { Chevron, PublicHeader, PageBanner, PublicFooter, FilmGrain, useReveal } from "../components/brand";
 import { TRUST_ROUTE, PROCUREMENT_ROUTE } from "../lib/routes";
 
 // Institution Readiness Journey — an adoption accelerator. An evaluator names
@@ -36,6 +36,7 @@ const ReadinessJourney: React.FC = () => {
     <div className="relative min-h-full bg-[#070707] text-white">
       <FilmGrain />
       <PublicHeader />
+      <PageBanner slug="default" alt="" />
       <main>
         <section className="border-t border-white/[0.06] px-8 py-24 lg:px-12">
           <div className="mx-auto max-w-4xl">
