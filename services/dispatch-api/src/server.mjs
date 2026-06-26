@@ -696,6 +696,16 @@ async function handleGovernance(req, res, principal, method) {
   if (!body.docType) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "docType (record type) is required"));
   const claims = { ...claimsFor(principal), dispatch_role: "tenant_admin" };
   try {
+    // Guard: a chain step or publication authority must reference a REAL office.
+    // Otherwise enforcement silently blocks publishing (PUBLICATION_AUTHORITY_REQUIRED)
+    // or never advances — the failure mode dogfooding exposed. Fail loud at save.
+    const validKeys = new Set((await withClaims(pool, claimsFor(principal), (c) =>
+      c.query("select key from dispatch.governance_roles where tenant_id=$1", [principal.tenantId]))).rows.map((r) => r.key));
+    const badChain = (body.reviewChain || []).filter((s) => s && s.role && !validKeys.has(s.role)).map((s) => s.role);
+    if (badChain.length)
+      return send(res, 400, errEnvelope(null, 400, "UNKNOWN_OFFICE", `the review chain references offices that do not exist (${badChain.join(", ")}). Create them in the Authority Directory first.`));
+    if (body.publicationAuthority && !validKeys.has(body.publicationAuthority))
+      return send(res, 400, errEnvelope(null, 400, "UNKNOWN_OFFICE", `the publication authority is not a real office. Choose an office (and grant it to a publisher), or leave it blank for "anyone with publish permission".`));
     const id = await withClaims(pool, claims, (c) => upsertPolicy(c, principal.tenantId, body));
     return send(res, 201, { id });
   } catch (e) {
