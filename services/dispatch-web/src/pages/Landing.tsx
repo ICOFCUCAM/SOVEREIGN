@@ -5,6 +5,7 @@ import { RecordArtifact } from "../components/RecordArtifact";
 import {
   ARCHITECTURE_ROUTE, DEVELOPERS_ROUTE, PROCUREMENT_ROUTE,
   OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE, WALKTHROUGH_ROUTE, SECURITY_ROUTE, TRUST_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE,
+  COST_ROUTE, LIFECYCLE_ROUTE, ROI_ROUTE,
 } from "../lib/routes";
 import { VALUE, VALUE_BASE } from "../lib/value";
 
@@ -212,6 +213,11 @@ const Landing: React.FC = () => {
                 </div>
               ))}
             </div>
+            <div className="mt-10 text-center">
+              <button onClick={() => nav(COST_ROUTE)} className="group inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-gold-400 transition hover:text-gold-300">
+                Read the full cost breakdown <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+              </button>
+            </div>
           </div>
         </section>
 
@@ -353,6 +359,14 @@ const Landing: React.FC = () => {
                   <div className="mt-1 text-[15px] font-semibold text-white/85">{t}</div>
                 </div>
               ))}
+            </div>
+            <div className="mt-10 flex flex-wrap justify-center gap-3">
+              <button onClick={() => nav(LIFECYCLE_ROUTE)} className="group inline-flex items-center gap-2 rounded border border-white/15 px-5 py-2.5 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/35 hover:bg-white/[0.06]">
+                Explore each stage <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+              </button>
+              <button onClick={() => nav(ROI_ROUTE)} className="inline-flex items-center rounded border border-white/15 px-5 py-2.5 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/35 hover:bg-white/[0.06]">
+                Model the operational case
+              </button>
             </div>
           </div>
         </section>
