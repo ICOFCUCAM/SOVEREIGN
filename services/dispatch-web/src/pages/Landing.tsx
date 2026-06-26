@@ -39,14 +39,28 @@ const LIFECYCLE: [string, string][] = [
 // in that folder). Until a real image is supplied, a dignified portrait
 // placeholder shows — never a broken image. Region tags signal international
 // representation; the roster spans men and women in equal measure.
-const FEATURED: { slug: string; inst: string; role: string; use: string; region: string }[] = [
-  { slug: "minister-health", inst: "Government", role: "Minister of Health", use: "Approves national policies and authorizes official publications.", region: "Africa" },
-  { slug: "university-registrar", inst: "University", role: "University Registrar", use: "Publishes senate resolutions and preserves institutional authority.", region: "Europe" },
-  { slug: "corporate-secretary", inst: "Enterprise", role: "Corporate Secretary", use: "Governs board resolutions and compliance publications.", region: "Asia" },
-  { slug: "hospital-director", inst: "Healthcare", role: "Hospital Director", use: "Authorizes clinical directives and permanent institutional publications.", region: "Middle East" },
-  { slug: "regulatory-commissioner", inst: "Regulator", role: "Regulatory Commissioner", use: "Issues official determinations with complete governance evidence.", region: "Americas" },
-  { slug: "national-archivist", inst: "Archives", role: "National Archivist", use: "Preserves authenticated publications for decades.", region: "Africa" },
+// Institution-type cards — large editorial photography of leadership at work.
+// `scene` documents the photograph to supply (see public/people/README.md); the
+// card shows a per-sector editorial placeholder until the image is dropped in.
+const INSTITUTIONS: { slug: string; name: string; scene: string; copy: string }[] = [
+  { slug: "government", name: "Government", scene: "A minister signing legislation", copy: "Publish policies, executive orders, regulations and official notices with complete governance and permanent verification." },
+  { slug: "universities", name: "Universities", scene: "A vice chancellor with senate members", copy: "Govern academic resolutions, research publications and institutional records." },
+  { slug: "healthcare", name: "Healthcare", scene: "A hospital executive board", copy: "Issue clinical directives, safety notices and health authority publications." },
+  { slug: "justice", name: "Justice", scene: "A judge or court administrator", copy: "Create authenticated judicial publications with permanent evidence." },
+  { slug: "enterprise", name: "Enterprise", scene: "A corporate boardroom", copy: "Transform board resolutions into certified institutional publications." },
+  { slug: "regulators", name: "Regulators", scene: "A financial regulator", copy: "Publish enforceable regulatory decisions with cryptographic integrity." },
 ];
+
+// Elegant line glyphs per sector — used in the editorial placeholder so each card
+// is visually distinct and institutional even before its photograph is supplied.
+const SECTOR_GLYPH: Record<string, React.ReactNode> = {
+  government: <><path d="M32 8 L56 20 H8 Z" /><path d="M16 20 V46 M26 20 V46 M38 20 V46 M48 20 V46" /><path d="M8 50 H56 M12 46 H52" /></>,
+  universities: <><path d="M6 24 L32 14 L58 24 L32 34 Z" /><path d="M18 29 V42 c0 4 28 4 28 0 V29" /><path d="M58 24 V38" /></>,
+  healthcare: <><circle cx="32" cy="32" r="22" /><path d="M32 20 V44 M20 32 H44" /></>,
+  justice: <><path d="M32 10 V52 M18 52 H46 M10 22 H54" /><path d="M10 22 L4 36 a8 8 0 0 0 12 0 Z M54 22 L48 36 a8 8 0 0 0 12 0 Z" /></>,
+  enterprise: <><rect x="18" y="8" width="28" height="48" /><path d="M25 16h4 M35 16h4 M25 24h4 M35 24h4 M25 32h4 M35 32h4 M25 40h4 M35 40h4" /></>,
+  regulators: <><path d="M32 8 L52 16 V32 c0 13 -10 20 -20 24 c-10 -4 -20 -11 -20 -24 V16 Z" /><path d="M23 32 l6 6 l12 -13" /></>,
+};
 
 const ROSTER: [string, string[]][] = [
   ["Government", ["Minister", "Permanent Secretary", "Director General", "Policy Officer", "Communications Officer", "Records Manager"]],
@@ -58,23 +72,23 @@ const ROSTER: [string, string[]][] = [
   ["Archives", ["National Archivist", "Records Preservation Officer"]],
 ];
 
-// A portrait that prefers a real photograph and falls back to a dignified
-// editorial silhouette (no gradient ids → safe to repeat) rather than a broken
-// image, so the section is premium with or without supplied photography.
-const Portrait: React.FC<{ slug: string; alt: string }> = ({ slug, alt }) => {
+// A large editorial image that prefers a real photograph (the scene of leadership
+// at work) and falls back to a per-sector glyph treatment — never a broken image —
+// so the section is premium and institutional with or without supplied photography.
+const SectorImage: React.FC<{ slug: string; alt: string }> = ({ slug, alt }) => {
   const [failed, setFailed] = useState(false);
   return (
-    <div className="relative aspect-[4/5] w-full overflow-hidden bg-[radial-gradient(70%_60%_at_50%_28%,rgba(202,164,90,0.16),transparent),linear-gradient(160deg,#15130d,#0a0a0a)]">
+    <div className="relative aspect-[16/10] w-full overflow-hidden bg-[radial-gradient(75%_70%_at_50%_22%,rgba(202,164,90,0.14),transparent),linear-gradient(160deg,#16140e,#090909)]">
       {!failed ? (
         <img src={`/people/${slug}.webp`} alt={alt} loading="lazy" onError={() => setFailed(true)}
-          className="h-full w-full object-cover object-top grayscale-[0.15] contrast-[1.03]" />
+          className="h-full w-full object-cover grayscale-[0.12] contrast-[1.04]" />
       ) : (
-        <svg viewBox="0 0 120 150" className="absolute inset-0 m-auto h-[78%] w-auto" aria-hidden>
-          <circle cx="60" cy="50" r="26" fill="rgba(255,255,255,0.09)" stroke="rgba(202,164,90,0.30)" strokeWidth="1" />
-          <path d="M16 150 c0-32 20-54 44-54 s44 22 44 54 z" fill="rgba(255,255,255,0.09)" stroke="rgba(202,164,90,0.18)" strokeWidth="1" />
+        <svg viewBox="0 0 64 64" className="absolute inset-0 m-auto h-[44%] w-auto" fill="none"
+          stroke="rgba(202,164,90,0.45)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          {SECTOR_GLYPH[slug]}
         </svg>
       )}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#070707] via-[#070707]/55 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#070707] via-[#070707]/55 to-transparent" />
     </div>
   );
 };
@@ -123,33 +137,31 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* ── Who uses Sovereign Dispatch — the people, across institutions ── */}
+        {/* ── Trusted by institutions worldwide — the big visual section ── */}
         <section className="border-t border-white/[0.06] px-6 py-24 lg:px-12">
           <div className="mx-auto max-w-6xl">
             <div className="text-center">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Who uses Sovereign Dispatch</div>
-              <h2 className="mx-auto mt-3 max-w-3xl font-serif text-[2rem] font-bold leading-tight tracking-tight sm:text-[2.6rem]">Operated by the people who hold office.</h2>
-              <p className="mx-auto mt-3 max-w-2xl text-[14.5px] leading-relaxed text-white/55">Dispatch governs the work of institutions worldwide — governments, universities, hospitals, regulators, courts and enterprises. People, not software, operate it. Find where your institution fits.</p>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Who leads with Dispatch</div>
+              <h2 className="mx-auto mt-3 max-w-3xl font-serif text-[2.1rem] font-bold leading-tight tracking-tight sm:text-[2.7rem]">Trusted by institutions worldwide.</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-[14.5px] leading-relaxed text-white/55">Governments, universities, hospitals, courts, enterprises and regulators turn their decisions into governed, certified, permanently verifiable publications. Find your institution.</p>
             </div>
 
-            {/* featured roles, with portraits */}
+            {/* institution-type cards — large editorial imagery of leadership at work */}
             <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {FEATURED.map((p) => (
-                <article key={p.slug} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-gold-400/30">
+              {INSTITUTIONS.map((it) => (
+                <article key={it.slug} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-gold-400/30 hover:bg-white/[0.03]">
                   <div className="relative">
-                    <Portrait slug={p.slug} alt={`${p.role}, ${p.inst}`} />
-                    <span className="absolute right-3 top-3 rounded-full bg-black/45 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/75 backdrop-blur">{p.region}</span>
+                    <SectorImage slug={it.slug} alt={`${it.name} — ${it.scene}`} />
                     <div className="absolute inset-x-0 bottom-0 p-5">
-                      <div className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-400/90">{p.inst}</div>
-                      <div className="mt-0.5 font-serif text-[1.3rem] font-bold leading-tight text-white">{p.role}</div>
+                      <div className="font-serif text-[1.55rem] font-bold leading-none text-white">{it.name}</div>
                     </div>
                   </div>
-                  <p className="px-5 pb-5 pt-4 text-[13.5px] leading-relaxed text-white/60">{p.use}</p>
+                  <p className="px-5 pb-5 pt-4 text-[14px] leading-relaxed text-white/65">{it.copy}</p>
                 </article>
               ))}
             </div>
 
-            {/* the full roster — every role, every institution type */}
+            {/* the full roster — every office within each institution */}
             <div className="mt-16">
               <div className="text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">Across every institution</div>
               <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
