@@ -18,6 +18,7 @@ older one (never an edit of history).
 | [007](ADR-007-sprint1-implementation-decisions.md) | Sprint 1 Implementation Decisions | Accepted |
 | [009](ADR-009-dispatch-autonomy.md) | Dispatch Autonomy | Accepted |
 | [010](ADR-010-multi-institution-and-interaction.md) | Multi-Institution Scope & Inter-Institutional Interaction | Accepted (deferred) |
+| [011](ADR-011-platform-positioning-and-identities.md) | Platform Positioning: Three Interfaces, Three Identities, Two Products | Accepted (roadmap) |
 
 > ADR-008 is intentionally unused (reserved during planning); the autonomy
 > decision is recorded as ADR-009.
