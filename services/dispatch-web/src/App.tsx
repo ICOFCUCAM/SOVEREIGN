@@ -18,6 +18,7 @@ import Compliance from "./pages/Compliance";
 import Evidence from "./pages/Evidence";
 import Developers from "./pages/Developers";
 import OfficialRecord from "./pages/OfficialRecord";
+import Walkthrough from "./pages/Walkthrough";
 import ValuePage from "./pages/ValuePage";
 import Verify from "./pages/Verify";
 import SignIn from "./pages/SignIn";
@@ -171,6 +172,8 @@ const App: React.FC = () => (
     <Route path="/developers" element={<Developers />} />
     {/* the institutional distinction + public verification portal */}
     <Route path="/official-record" element={<OfficialRecord />} />
+    {/* interactive governed-record walkthrough */}
+    <Route path="/walkthrough" element={<Walkthrough />} />
     {/* financial-value detail pages (7), introduced on the homepage */}
     <Route path="/value/:slug" element={<ValuePage />} />
     <Route path="/verify" element={<Verify />} />

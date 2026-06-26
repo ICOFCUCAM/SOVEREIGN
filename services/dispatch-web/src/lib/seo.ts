@@ -28,6 +28,7 @@ const STATIC: Record<string, Meta> = {
   "/developers": { title: "Developers" + SUF, description: "The Sovereign Dispatch developer platform — REST API, webhooks, SDKs and a live endpoint reference. Governance as a service." },
   "/official-record": { title: "What is an Official Record?" + SUF, description: "An Official Record is more than a document — the institution's authoritative, governed, certified and permanently verifiable version of a decision." },
   "/verify": { title: "Verify a Record" + SUF, description: "Verify an Official Record. Confirm any Sovereign Dispatch publication is genuine, unrevoked and untampered — by its permanent Record ID." },
+  "/walkthrough": { title: "See a Governed Record" + SUF, description: "Watch a document become an Official Record — draft, governed approval chain, certificates, evidence chain and public verification. An interactive walkthrough." },
 };
 
 const DEFAULT = STATIC["/"];

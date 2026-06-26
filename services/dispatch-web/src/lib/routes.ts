@@ -29,3 +29,5 @@ export const DEVELOPERS_ROUTE = "/developers";
 // portal where anyone can verify one is genuine.
 export const OFFICIAL_RECORD_ROUTE = "/official-record";
 export const VERIFY_ROUTE = "/verify";
+// Interactive "see a governed record" walkthrough — draft → approval → certificates → verify.
+export const WALKTHROUGH_ROUTE = "/walkthrough";

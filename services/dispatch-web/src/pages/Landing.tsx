@@ -4,7 +4,7 @@ import { DispatchMark, Chevron, SectionHead, PublicHeader, PublicFooter, FilmGra
 import { RecordArtifact } from "../components/RecordArtifact";
 import {
   ARCHITECTURE_ROUTE, DEVELOPERS_ROUTE, PROCUREMENT_ROUTE,
-  OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE, SECURITY_ROUTE, TRUST_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE,
+  OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE, WALKTHROUGH_ROUTE, SECURITY_ROUTE, TRUST_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE,
 } from "../lib/routes";
 import { VALUE, VALUE_BASE } from "../lib/value";
 
@@ -334,6 +334,7 @@ const Landing: React.FC = () => {
               ))}
             </div>
             <div className="mt-9 flex flex-wrap justify-center gap-3">
+              <button onClick={() => nav(WALKTHROUGH_ROUTE)} className="rounded-md bg-gradient-to-b from-gold-300 to-gold-600 px-5 py-2.5 text-[13px] font-bold text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition hover:from-gold-200 hover:to-gold-500">Watch a record become official →</button>
               <button onClick={() => nav(OFFICIAL_RECORD_ROUTE)} className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold text-white/80 transition hover:border-white/40">See the difference →</button>
               <button onClick={() => nav(VERIFY_ROUTE)} className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-5 py-2.5 text-[13px] font-semibold text-emerald-300 transition hover:bg-emerald-500/20">Verify a record →</button>
             </div>
