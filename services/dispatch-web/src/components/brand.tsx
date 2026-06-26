@@ -6,6 +6,7 @@ import {
   OUTCOMES_ROUTE, STANDARD_ROUTE, RECORDS_ROUTE, JOURNEY_ROUTE,
   OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE,
 } from "../lib/routes";
+import { VALUE, VALUE_BASE } from "../lib/value";
 
 // Shared marketing chrome for the public pages (Landing keeps its own copies for
 // historical reasons; Procurement + Architecture use these). No dependency on an
@@ -85,7 +86,7 @@ const FooterCol: React.FC<{ title: string; links: [string, string][] }> = ({ tit
 export const PublicFooter: React.FC = () => (
   <footer className="border-t border-white/[0.06] px-5 py-14 sm:px-8 lg:px-12">
     <div className="mx-auto max-w-[1500px]">
-      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
+      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_1fr]">
         <div className="max-w-xs">
           <div className="flex items-center gap-2.5">
             <DispatchMark className="h-6 w-6 text-gold-400" />
@@ -98,6 +99,7 @@ export const PublicFooter: React.FC = () => (
         <FooterCol title="The Standard" links={[["What is an Official Record?", OFFICIAL_RECORD_ROUTE], ["Verify a record", VERIFY_ROUTE], ["Outcomes", OUTCOMES_ROUTE], ["The Standard", STANDARD_ROUTE], ["Records", RECORDS_ROUTE], ["Readiness Journey", JOURNEY_ROUTE]]} />
         <FooterCol title="Platform" links={[["Overview", PLATFORM_ROUTE], ["Developers", DEVELOPERS_ROUTE], ["Security", SECURITY_ROUTE], ["Compliance", COMPLIANCE_ROUTE]]} />
         <FooterCol title="Evaluate" links={[["Pricing", PRICING_ROUTE], ["Procurement", PROCUREMENT_ROUTE], ["Architecture", ARCHITECTURE_ROUTE], ["Evidence", EVIDENCE_ROUTE], ["Trust", TRUST_ROUTE]]} />
+        <FooterCol title="The Case" links={VALUE.map((v) => [v.title, `${VALUE_BASE}/${v.slug}`] as [string, string])} />
         <FooterCol title="Access" links={[["Launch Dispatch", "/console"], ["Log in", "/console"]]} />
       </div>
       <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/[0.05] pt-7 sm:flex-row sm:items-center">

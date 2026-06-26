@@ -1,6 +1,7 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./lib/auth";
+import { metaForPath } from "./lib/seo";
 import ConsoleShell from "./components/Shell";
 import Landing from "./pages/Landing";
 import Procurement from "./pages/Procurement";
@@ -126,7 +127,29 @@ const PlatformOperations: React.FC = () => {
   return <PlatformOps />;
 };
 
+// Per-route document title + meta description, driven by lib/seo. Sets real tab /
+// bookmark titles and helps JS-rendering crawlers index each surface distinctly.
+function setMeta(key: string, content: string, property = false): void {
+  const attr = property ? "property" : "name";
+  let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+  if (!el) { el = document.createElement("meta"); el.setAttribute(attr, key); document.head.appendChild(el); }
+  el.setAttribute("content", content);
+}
+const RouteMeta: React.FC = () => {
+  const { pathname } = useLocation();
+  React.useEffect(() => {
+    const { title, description } = metaForPath(pathname);
+    document.title = title;
+    setMeta("description", description);
+    setMeta("og:title", title, true);
+    setMeta("og:description", description, true);
+  }, [pathname]);
+  return null;
+};
+
 const App: React.FC = () => (
+  <>
+  <RouteMeta />
   <Routes>
     {/* public marketing landing — the front door */}
     <Route path="/" element={<Landing />} />
@@ -164,6 +187,7 @@ const App: React.FC = () => (
     <Route path="/operator" element={<PlatformOperations />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
+  </>
 );
 
 export default App;
