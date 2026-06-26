@@ -285,7 +285,7 @@ export const submitDocument = (req: unknown, idem: string) => request<SubmitResp
 export const validateDocument = (req: unknown) => request<{ valid: boolean; errors: ApiError[]; warnings: unknown[]; resolved?: unknown }>("POST", "/v1/validate", { body: req });
 
 // ---- approvals ----
-export interface InboxItem { documentId: string; docType: string; title: string; classification: { scheme?: string; level?: string }; lifecycle: Lifecycle; version: number; submittedAt?: string; submittedBy?: string }
+export interface InboxItem { documentId: string; docType: string; title: string; classification: { scheme?: string; level?: string }; lifecycle: Lifecycle; version: number; submittedAt?: string; submittedBy?: string; submittedByName?: string | null; currentAuthority?: string | null; currentRole?: string | null }
 export const approvalsInbox = () => request<{ items: InboxItem[]; count: number }>("GET", "/v1/approvals?state=pending");
 export const decide = (id: string, decision: "approve" | "reject" | "return", comment?: string, outputs?: string[]) =>
   request<{ documentId: string; decision: string; lifecycle: Lifecycle; approvals: number; required: number; jobId?: string; statusUrl?: string }>(

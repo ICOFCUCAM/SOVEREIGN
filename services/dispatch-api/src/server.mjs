@@ -535,18 +535,28 @@ async function handleRetentionSweep(res, principal) {
 async function handleApprovalsInbox(res, principal, query) {
   if (!hasScope(principal, "dispatch:approve"))
     return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "approve scope required"));
-  const rows = await withClaims(pool, govClaims(principal), async (c) => {
+  const items = await withClaims(pool, govClaims(principal), async (c) => {
     const r = await c.query(
       `select id, doc_type, title, classification, lifecycle_state, current_version, submitted_at, submitted_by, correlation_id
          from dispatch.documents
         where deleted_at is null and lifecycle_state in ('submitted','in_review')
         order by submitted_at asc nulls last limit 200`);
-    return r.rows;
+    // Attach the institutional posture so the inbox can name the OFFICE that holds
+    // each record now ("awaiting Director of Policy"), not a bare "in review", and
+    // resolve the submitter to a real name rather than a raw subject id.
+    const cache = new Map();
+    const names = await humanizePrincipals(c, new Set(r.rows.map((row) => row.submitted_by)));
+    const out = [];
+    for (const row of r.rows) {
+      if (!clearanceAllows(principal.clearance, row.classification || {}).allowed) continue;
+      const posture = await documentPosture(c, row, cache);
+      out.push({ documentId: row.id, docType: row.doc_type, title: row.title, classification: row.classification,
+        lifecycle: row.lifecycle_state, version: row.current_version, submittedAt: row.submitted_at, submittedBy: row.submitted_by,
+        submittedByName: row.submitted_by ? (names[row.submitted_by] || row.submitted_by.replace(/^svc:|^user:/, "")) : null,
+        currentAuthority: posture.currentAuthority, currentRole: posture.currentRole });
+    }
+    return out;
   });
-  // Filter out items the principal isn't cleared to see (no existence leak).
-  const items = rows.filter((r) => clearanceAllows(principal.clearance, r.classification || {}).allowed)
-    .map((r) => ({ documentId: r.id, docType: r.doc_type, title: r.title, classification: r.classification,
-      lifecycle: r.lifecycle_state, version: r.current_version, submittedAt: r.submitted_at, submittedBy: r.submitted_by }));
   return send(res, 200, { items, count: items.length });
 }
 

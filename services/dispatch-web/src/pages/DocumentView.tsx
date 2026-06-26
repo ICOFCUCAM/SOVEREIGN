@@ -153,10 +153,12 @@ const DocumentView: React.FC = () => {
           ) : (
             <>
               {has("dispatch:publish") && lc === "rendered" && (
-                <Button variant="ok" onClick={() => lifecycleAction(publish)} disabled={busy}>Publish</Button>
+                <Button variant="ok" onClick={() => lifecycleAction(publish)} disabled={busy}>
+                  {doc.posture?.publicationAuthority ? `Publish as ${doc.posture.publicationAuthority}` : "Publish"}
+                </Button>
               )}
               {has("dispatch:publish") && lc === "published" && (
-                <Button variant="ok" onClick={() => lifecycleAction(archiveDocument)} disabled={busy}>Preserve (Archive)</Button>
+                <Button variant="ok" onClick={() => lifecycleAction(archiveDocument)} disabled={busy}>Preserve for the record</Button>
               )}
               {has("dispatch:publish") && (lc === "published" || lc === "rendered") && (
                 <Button variant="ghost" onClick={() => lifecycleAction(withdraw)} disabled={busy}>Withdraw</Button>
