@@ -1,28 +1,28 @@
 {
- "as_of": "2026-06-24T08:59:47.129Z",
+ "as_of": "2026-06-26T09:00:42.306Z",
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)",
  "indexes": [
   {
    "sector": "Software",
-   "volume": 631,
-   "volume12m": 4,
+   "volume": 632,
+   "volume12m": 5,
    "volumePrior12m": 3,
-   "trendPct": 0.3333333333333333,
+   "trendPct": 0.6666666666666666,
    "activeBuyers": 23,
-   "disclosedDeals": 239,
-   "medianDealUsd": 95849000,
-   "totalDisclosedUsd": 224225344016
+   "disclosedDeals": 240,
+   "medianDealUsd": 97924500,
+   "totalDisclosedUsd": 224325344016
   },
   {
    "sector": "Media",
-   "volume": 236,
+   "volume": 237,
    "volume12m": 11,
-   "volumePrior12m": 7,
-   "trendPct": 0.5714285714285714,
+   "volumePrior12m": 8,
+   "trendPct": 0.375,
    "activeBuyers": 20,
-   "disclosedDeals": 99,
+   "disclosedDeals": 100,
    "medianDealUsd": 198000000,
-   "totalDisclosedUsd": 235272710050
+   "totalDisclosedUsd": 235372710050
   },
   {
    "sector": "Cloud Infrastructure",
@@ -38,9 +38,9 @@
   {
    "sector": "Gaming",
    "volume": 110,
-   "volume12m": 2,
-   "volumePrior12m": 0,
-   "trendPct": null,
+   "volume12m": 1,
+   "volumePrior12m": 1,
+   "trendPct": 0,
    "activeBuyers": 10,
    "disclosedDeals": 27,
    "medianDealUsd": 375000000,
@@ -60,9 +60,9 @@
   {
    "sector": "AI",
    "volume": 68,
-   "volume12m": 8,
-   "volumePrior12m": 6,
-   "trendPct": 0.3333333333333333,
+   "volume12m": 7,
+   "volumePrior12m": 7,
+   "trendPct": 0,
    "activeBuyers": 14,
    "disclosedDeals": 18,
    "medianDealUsd": 300000000,

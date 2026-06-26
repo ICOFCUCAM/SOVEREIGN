@@ -1,8 +1,8 @@
 {
- "as_of": "2026-06-24T08:59:47.129Z",
- "totalEvents": 3836,
- "disclosedEvents": 1142,
- "totalDisclosedUsd": 1413812842501,
+ "as_of": "2026-06-26T09:00:42.306Z",
+ "totalEvents": 3839,
+ "disclosedEvents": 1143,
+ "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
   {
    "token": "software",
@@ -208,12 +208,12 @@
  "geoDensity": [
   {
    "region": "North America",
-   "deals": 1684,
-   "disclosedUsd": 898100939708
+   "deals": 1685,
+   "disclosedUsd": 898200939708
   },
   {
    "region": "Other",
-   "deals": 1536,
+   "deals": 1538,
    "disclosedUsd": 383676561050
   },
   {
@@ -270,9 +270,9 @@
   {
    "buyer_id": "sony",
    "name": "Sony",
-   "deals": 274,
-   "recentDeals": 47,
-   "lastDate": "2026-05-18"
+   "deals": 275,
+   "recentDeals": 48,
+   "lastDate": "2026-06-24"
   },
   {
    "buyer_id": "alphabet",
@@ -298,7 +298,7 @@
   {
    "buyer_id": "ibm",
    "name": "IBM",
-   "deals": 198,
+   "deals": 199,
    "recentDeals": 11,
    "lastDate": "2025-12-08"
   },

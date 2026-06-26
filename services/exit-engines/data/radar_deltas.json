@@ -1,24 +1,60 @@
 {
- "detected_at": "2026-06-24T08:59:48.485Z",
- "count": 2,
+ "detected_at": "2026-06-26T09:00:43.706Z",
+ "count": 6,
  "deltas": [
   {
-   "buyer_id": "fundus-heritage",
-   "name": "Fundus Heritage",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-06-24T08:59:48.484Z"
+   "buyer_id": "hilton-worldwide",
+   "name": "Hilton Worldwide",
+   "kind": "new_acquisition",
+   "before": "588",
+   "after": "589",
+   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-06-26T09:00:43.705Z"
   },
   {
-   "buyer_id": "magnific",
-   "name": "Magnific",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-06-24T08:59:48.484Z"
+   "buyer_id": "sony",
+   "name": "Sony",
+   "kind": "new_acquisition",
+   "before": "307",
+   "after": "308",
+   "detail": "+1 indexed event(s) · latest: Cosm",
+   "detected_at": "2026-06-26T09:00:43.705Z"
+  },
+  {
+   "buyer_id": "sony",
+   "name": "Sony",
+   "kind": "cadence_shift",
+   "before": "15/12m",
+   "after": "16/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-06-26T09:00:43.705Z"
+  },
+  {
+   "buyer_id": "ibm",
+   "name": "IBM",
+   "kind": "new_acquisition",
+   "before": "198",
+   "after": "206",
+   "detail": "+8 indexed event(s) · latest: Confluent",
+   "detected_at": "2026-06-26T09:00:43.705Z"
+  },
+  {
+   "buyer_id": "staples-inc",
+   "name": "Staples Inc.",
+   "kind": "new_acquisition",
+   "before": "1",
+   "after": "2",
+   "detail": "+1 indexed event(s) · latest: Mondoffice",
+   "detected_at": "2026-06-26T09:00:43.705Z"
+  },
+  {
+   "buyer_id": "salesforce",
+   "name": "Salesforce",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-06-26T09:00:43.705Z"
   }
  ]
 }
