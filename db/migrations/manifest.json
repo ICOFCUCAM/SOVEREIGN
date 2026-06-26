@@ -21,6 +21,7 @@
     "M18__platform_operator.sql",
     "M19__departments.sql",
     "M20__people.sql",
-    "M21__sso_connections.sql"
+    "M21__sso_connections.sql",
+    "M22__webhooks.sql"
   ]
 }

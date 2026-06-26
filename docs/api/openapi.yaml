@@ -61,6 +61,8 @@ tags:
     description: Produced files and download grants
   - name: API clients
     description: Issue / rotate / revoke integration credentials (admin)
+  - name: Webhooks
+    description: Event subscriptions — Dispatch → your systems (the reverse API)
   - name: Governance config
     description: Departments, offices, policies, people (admin)
   - name: Account
@@ -420,6 +422,66 @@ paths:
       responses:
         "200": { description: Revoked, content: { application/json: { schema: { type: object, properties: { client_id: { type: string }, revoked: { type: boolean } } } } } }
 
+  /v1/admin/webhooks:
+    get:
+      tags: [Webhooks]
+      summary: List registered webhook endpoints and delivery stats
+      description: Requires scope `dispatch:read`. Secrets are never returned.
+      responses:
+        "200":
+          description: Endpoints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  endpoints: { type: array, items: { $ref: "#/components/schemas/WebhookEndpoint" } }
+                  deliveries: { type: object, description: "Counts by status (delivered/pending/failed)" }
+                  availableEvents: { type: array, items: { type: string } }
+    post:
+      tags: [Webhooks]
+      summary: Register an endpoint Dispatch will POST events to
+      description: |
+        Requires scope `dispatch:admin`. Returns a **signing secret once**. Each
+        delivery is signed `X-Dispatch-Signature: sha256=HMAC-SHA256(secret, rawBody)`.
+        Events: `record.submitted`, `record.approved`, `record.rejected`,
+        `record.returned`, `record.published`, `record.preserved`. An empty `events`
+        array subscribes to all. Delivery is durable and at-least-once.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url: { type: string, example: "https://erp.ministry.gov/hooks/dispatch" }
+                events: { type: array, items: { type: string } }
+                description: { type: string }
+      responses:
+        "201":
+          description: Endpoint created (secret shown once)
+          content: { application/json: { schema: { $ref: "#/components/schemas/CreatedWebhook" } } }
+        "400": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [Webhooks]
+      summary: Remove a webhook endpoint
+      description: Requires scope `dispatch:admin`.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string } } } } }
+      responses:
+        "200": { description: Removed, content: { application/json: { schema: { type: object, properties: { deleted: { type: string } } } } } }
+
+  /v1/admin/webhooks/{id}/test:
+    post:
+      tags: [Webhooks]
+      summary: Send a test delivery to an endpoint
+      description: Requires scope `dispatch:admin`. Enqueues and delivers a `webhook.test` event.
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: Test attempted, content: { application/json: { schema: { type: object, properties: { tested: { type: string }, attempted: { type: integer } } } } } }
+
   /v1/billing:
     get:
       tags: [Account]
@@ -626,6 +688,24 @@ components:
         secret: { type: string, description: Shown only once }
         name: { type: string }
         scopes: { type: array, items: { type: string } }
+    WebhookEndpoint:
+      type: object
+      properties:
+        id: { type: string }
+        url: { type: string }
+        events: { type: array, items: { type: string } }
+        description: { type: string, nullable: true }
+        active: { type: boolean }
+        last_status: { type: string, nullable: true }
+        last_delivery_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+    CreatedWebhook:
+      type: object
+      properties:
+        id: { type: string }
+        url: { type: string }
+        events: { type: array, items: { type: string } }
+        secret: { type: string, description: Signing secret — shown only once }
     Person:
       type: object
       properties:

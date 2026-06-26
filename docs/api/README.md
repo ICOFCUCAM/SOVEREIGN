@@ -68,6 +68,25 @@ is ready.
 - `POST /v1/documents/{id}/publish` — only by the publication-authority office.
 - `GET /v1/documents/{id}/governance-certificate` — proof the chain was satisfied.
 
+## Webhooks — the reverse direction (Dispatch → your system)
+
+So your systems can **react** instead of poll, an admin registers endpoints under
+**Administration → API Access → Event webhooks** (or `POST /v1/admin/webhooks`).
+When a record crosses a lifecycle boundary, Dispatch POSTs a signed event.
+
+- **Events:** `record.submitted`, `record.approved`, `record.rejected`,
+  `record.returned`, `record.published`, `record.preserved` (empty subscription = all).
+- **Payload:** `{ "event", "occurredAt", "tenantId", "data": { "documentId", "docType", "title", "lifecycle", … } }`
+- **Signature:** every delivery carries `X-Dispatch-Signature: sha256=<hmac>` — verify it:
+
+```js
+const expected = "sha256=" + crypto.createHmac("sha256", endpointSecret).update(rawBody).digest("hex");
+if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) reject();
+```
+
+- **Delivery** is durable and **at-least-once** (failed deliveries are retried), so
+  make your handler **idempotent** on `X-Dispatch-Delivery`. Respond `2xx` to ack.
+
 ## Authority vs. capability
 
 A token's **scopes** are *system capability* (read / create / approve / publish).

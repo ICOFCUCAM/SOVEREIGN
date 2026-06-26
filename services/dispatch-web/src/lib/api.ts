@@ -97,6 +97,16 @@ export const rotateClient = (clientId: string) =>
 export const revokeClient = (clientId: string) =>
   request<{ client_id: string; revoked: boolean }>("POST", `/v1/admin/clients/${encodeURIComponent(clientId)}/revoke`, { body: {} });
 
+// ---- event webhooks (the reverse API: Dispatch → the customer's systems) ----
+export interface WebhookEndpoint { id: string; url: string; events: string[]; description?: string | null; active: boolean; last_status?: string | null; last_delivery_at?: string | null; created_at: string }
+export interface WebhookOverview { endpoints: WebhookEndpoint[]; deliveries: Record<string, number>; availableEvents: string[] }
+export interface CreatedWebhook { id: string; url: string; events: string[]; secret: string; note?: string }
+export const getWebhooks = () => request<WebhookOverview>("GET", "/v1/admin/webhooks");
+export const createWebhook = (url: string, events: string[], description?: string) =>
+  request<CreatedWebhook>("POST", "/v1/admin/webhooks", { body: { url, events, description } });
+export const deleteWebhook = (id: string) => request<{ deleted: string }>("DELETE", "/v1/admin/webhooks", { body: { id } });
+export const testWebhook = (id: string) => request<{ tested: string; attempted: number }>("POST", `/v1/admin/webhooks/${encodeURIComponent(id)}/test`, { body: {} });
+
 // ---- self-serve signup + billing (plans / subscribe-to-download) ----
 export interface SignupResponse { tenantId: string; client_id: string; secret: string; plan: string; scopes: string[]; note?: string }
 export const signup = (name: string) => request<SignupResponse>("POST", "/v1/signup", { body: { name } });

@@ -148,6 +148,7 @@ async function handleDocuments(req, res, principal) {
       await client.query("update dispatch.documents set current_version=1 where id=$1", [documentId]);
       await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
         action: "document.submitted", targetType: "document", targetId: documentId, requestId, correlationId: body.source?.correlationId });
+      await queueWebhooks(client, principal.tenantId, "record.submitted", { documentId, docType: doc.docType, title: doc.metadata?.title || null, lifecycle: "submitted" });
 
       // Govern: resolve the approval policy. The machine (service) lane
       // auto-approves by default so existing integrations render immediately;
@@ -161,6 +162,7 @@ async function handleDocuments(req, res, principal) {
         await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now() where id=$1", [documentId]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
           action: "document.approved", targetType: "document", targetId: documentId, requestId, correlationId: body.source?.correlationId });
+        await queueWebhooks(client, principal.tenantId, "record.approved", { documentId, docType: doc.docType, title: doc.metadata?.title || null, lifecycle: "approved" });
         const jobId = await createRenderJob(client, { principal, documentId, versionId, requestId, idem, outputs,
           correlationId: body.source?.correlationId || null, callbackUrl: body.delivery?.callbackUrl || null });
         return { replay: false, governed: false, jobId, requestId, documentId, versionId, lifecycle: "approved" };
@@ -205,6 +207,119 @@ async function createRenderJob(client, { principal, documentId, versionId, reque
 
 // ---- Governance surface (approvals, publish, library, audit) ---------------
 const govClaims = (p) => ({ tenant_id: p.tenantId, dispatch_role: p.role, principal_type: p.principalType, actor: p.actor });
+
+// ---- Event webhooks (the reverse API): Dispatch → the customer's systems -----
+// External systems normally CALL Dispatch; webhooks invert that — when a governed
+// record crosses a lifecycle boundary, Dispatch POSTs a SIGNED event to the
+// endpoints an institution registered, so their ERP/SharePoint/case system can
+// REACT without polling. Delivery is durable (a queue row per endpoint) and
+// at-least-once (pending rows retried by a sweep), and never blocks governance.
+const WEBHOOK_EVENTS = ["record.submitted", "record.approved", "record.rejected", "record.returned", "record.published", "record.preserved"];
+
+// A tenant-scoped delivery sweeper. Enqueue happens INSIDE the caller's
+// transaction; delivery must happen AFTER it commits, or a fresh connection won't
+// see the just-inserted rows (read-committed). So queueWebhooks never delivers
+// inline — it flags the tenant and a short interval drains it (and retries
+// failures until attempts are exhausted). This is what makes delivery durable and
+// at-least-once rather than racing the commit.
+const _pendingTenants = new Set();
+let _sweeper = null;
+function ensureSweeper() {
+  if (_sweeper) return;
+  _sweeper = setInterval(async () => {
+    for (const tid of [..._pendingTenants]) {
+      try { if ((await deliverPendingWebhooks(tid)) === 0) _pendingTenants.delete(tid); }
+      catch (e) { console.error("webhook sweep error:", e); }
+    }
+  }, 500);
+  _sweeper.unref?.();
+}
+
+// Enqueue an event for every active endpoint that subscribes to it (in the
+// caller's transaction — fast, no network). Wrapped so a webhook problem can never
+// fail the governance action.
+async function queueWebhooks(client, tenantId, event, data) {
+  try {
+    const eps = (await client.query(
+      "select id from dispatch.webhook_endpoints where tenant_id=$1 and active and (cardinality(events)=0 or $2 = any(events))",
+      [tenantId, event])).rows;
+    if (!eps.length) return;
+    const body = { event, occurredAt: new Date().toISOString(), tenantId, data };
+    for (const ep of eps)
+      await client.query("insert into dispatch.webhook_deliveries (tenant_id, endpoint_id, event, payload) values ($1,$2,$3,$4)",
+        [tenantId, ep.id, event, JSON.stringify(body)]);
+    _pendingTenants.add(tenantId); ensureSweeper();
+  } catch (e) { console.error("queueWebhooks error:", e); }
+}
+
+// Deliver pending/failed deliveries for a tenant (at-least-once, attempts capped).
+// Each is signed with the endpoint secret (HMAC-SHA256) so the receiver verifies
+// authenticity. Runs under a tenant-system claim, outside any request transaction.
+async function deliverPendingWebhooks(tenantId, { max = 50 } = {}) {
+  const claims = { tenant_id: tenantId, dispatch_role: "tenant_admin", principal_type: "service", actor: "system:webhooks" };
+  const rows = (await withClaims(pool, claims, (c) => c.query(
+    `select d.id, d.event, d.payload, e.url, e.secret, e.id as endpoint_id
+       from dispatch.webhook_deliveries d join dispatch.webhook_endpoints e on e.id=d.endpoint_id
+      where d.tenant_id=$1 and d.status<>'delivered' and d.attempts < 6 and e.active
+      order by d.created_at asc limit $2`, [tenantId, max]))).rows;
+  for (const d of rows) {
+    const body = JSON.stringify(d.payload);
+    const sig = crypto.createHmac("sha256", d.secret).update(body).digest("hex");
+    let ok = false, errText = null;
+    try {
+      const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), 6000);
+      const r = await fetch(d.url, { method: "POST", signal: ctrl.signal, body,
+        headers: { "content-type": "application/json", "x-dispatch-event": d.event, "x-dispatch-delivery": d.id, "x-dispatch-signature": `sha256=${sig}` } });
+      clearTimeout(timer);
+      ok = r.status >= 200 && r.status < 300; if (!ok) errText = `HTTP ${r.status}`;
+    } catch (e) { errText = e.name === "AbortError" ? "timeout" : String(e.message); }
+    await withClaims(pool, claims, async (c) => {
+      await c.query("update dispatch.webhook_deliveries set status=$2, attempts=attempts+1, last_error=$3, delivered_at=case when $2='delivered' then now() else delivered_at end where id=$1",
+        [d.id, ok ? "delivered" : "failed", errText]);
+      await c.query("update dispatch.webhook_endpoints set last_status=$2, last_delivery_at=now() where id=$1",
+        [d.endpoint_id, ok ? "delivered" : (errText || "failed")]);
+    });
+  }
+  return rows.length;
+}
+
+// GET/POST/DELETE /v1/admin/webhooks  — register / list / remove endpoints; the
+// signing secret is shown once at creation. POST .../{id}/test sends a test event.
+async function handleWebhooks(req, res, principal, method, sub, action) {
+  if (method === "GET") {
+    if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
+    const data = await withClaims(pool, govClaims(principal), async (c) => ({
+      endpoints: (await c.query("select id, url, events, description, active, last_status, last_delivery_at, created_at from dispatch.webhook_endpoints order by created_at desc")).rows,
+      deliveries: Object.fromEntries((await c.query("select status, count(*)::int n from dispatch.webhook_deliveries group by status")).rows.map((r) => [r.status, r.n])),
+    }));
+    return send(res, 200, { ...data, availableEvents: WEBHOOK_EVENTS });
+  }
+  if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
+  const claims = { ...govClaims(principal), dispatch_role: "tenant_admin" };
+  if (method === "POST" && sub && action === "test") {
+    const payload = { event: "webhook.test", occurredAt: new Date().toISOString(), tenantId: principal.tenantId, data: { message: "Test delivery from Sovereign Dispatch." } };
+    await withClaims(pool, claims, (c) => c.query(
+      "insert into dispatch.webhook_deliveries (tenant_id, endpoint_id, event, payload) select tenant_id, id, 'webhook.test', $2 from dispatch.webhook_endpoints where id=$1 and tenant_id=$3",
+      [sub, JSON.stringify(payload), principal.tenantId]));
+    const delivered = await deliverPendingWebhooks(principal.tenantId);
+    return send(res, 200, { tested: sub, attempted: delivered });
+  }
+  let body; try { const raw = await readBody(req); body = raw ? JSON.parse(raw) : {}; }
+  catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+  if (method === "DELETE") {
+    if (!body.id) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "id is required"));
+    await withClaims(pool, claims, (c) => c.query("delete from dispatch.webhook_endpoints where tenant_id=$1 and id=$2", [principal.tenantId, body.id]));
+    return send(res, 200, { deleted: body.id });
+  }
+  const url = String(body.url || "").trim();
+  if (!/^https?:\/\/.+/i.test(url)) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "a valid http(s) url is required"));
+  const events = Array.isArray(body.events) ? body.events.filter((e) => WEBHOOK_EVENTS.includes(e)) : [];
+  const secret = "whsec_" + crypto.randomBytes(24).toString("base64url");
+  const row = await withClaims(pool, claims, (c) => c.query(
+    "insert into dispatch.webhook_endpoints (tenant_id, url, secret, events, description) values ($1,$2,$3,$4,$5) returning id",
+    [principal.tenantId, url, secret, events, body.description || null]));
+  return send(res, 201, { id: row.rows[0].id, url, events, secret, note: "store the signing secret now — it is shown only once" });
+}
 
 // POST /v1/documents/{id}/decision  { decision: approve|reject|return, comment? }
 // Records an immutable approval decision, evaluates quorum against policy, and
@@ -305,10 +420,12 @@ async function handleDecision(req, res, principal, documentId) {
       if (outcome === "rejected") {
         assertTransition(docRow.lifecycle_state, "rejected");
         await client.query("update dispatch.documents set lifecycle_state='rejected', decided_at=now() where id=$1", [documentId]);
+        await queueWebhooks(client, principal.tenantId, "record.rejected", { documentId, docType: docRow.doc_type, title: docRow.title, lifecycle: "rejected" });
         return { http: 200, body: { documentId, decision, lifecycle: "rejected", steps } };
       }
       if (outcome === "returned") {
         await client.query("update dispatch.documents set lifecycle_state='draft' where id=$1", [documentId]);
+        await queueWebhooks(client, principal.tenantId, "record.returned", { documentId, docType: docRow.doc_type, title: docRow.title, lifecycle: "draft" });
         return { http: 200, body: { documentId, decision, lifecycle: "draft", steps } };
       }
       if (outcome === "satisfied") {
@@ -316,6 +433,7 @@ async function handleDecision(req, res, principal, documentId) {
         await client.query("update dispatch.documents set lifecycle_state='approved', decided_at=now() where id=$1", [documentId]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: "system", actorType: "system",
           action: chain.length ? "governance.policy_satisfied" : "document.approved", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
+        await queueWebhooks(client, principal.tenantId, "record.approved", { documentId, docType: docRow.doc_type, title: docRow.title, lifecycle: "approved" });
         const versionId = (await client.query("select id from dispatch.document_versions where document_id=$1 and version_no=$2", [documentId, versionNo])).rows[0]?.id;
         const jobId = await createRenderJob(client, { principal, documentId, versionId, requestId: crypto.randomUUID(),
           idem: crypto.randomUUID(), outputs: body.outputs || ["pdf"], correlationId: docRow.correlation_id, callbackUrl: null });
@@ -359,6 +477,7 @@ async function handleLifecycleAction(req, res, principal, documentId, action) {
         await client.query("update dispatch.documents set lifecycle_state='archived', archived_at=now(), preservation_sha256=$2 where id=$1", [documentId, proof]);
         await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
           action: "document.preserved", targetType: "document", targetId: documentId, sha256: proof, correlationId: docRow.correlation_id });
+        await queueWebhooks(client, principal.tenantId, "record.preserved", { documentId, docType: docRow.doc_type, title: docRow.title, lifecycle: "archived", preservationSha256: proof });
         return { http: 200, body: { documentId, lifecycle: "archived", preservationSha256: proof } };
       }
 
@@ -403,6 +522,7 @@ async function handleLifecycleAction(req, res, principal, documentId, action) {
           action: "document.published", targetType: "document", targetId: documentId, correlationId: docRow.correlation_id });
         if (govCert) await writeAudit(client, { tenantId: principal.tenantId, actor: principal.actor, actorType: principal.principalType,
           action: "governance.certificate_issued", targetType: "document", targetId: documentId, sha256: govCert.integrityProof, correlationId: docRow.correlation_id });
+        await queueWebhooks(client, principal.tenantId, "record.published", { documentId, docType: docRow.doc_type, title: docRow.title, lifecycle: "published", governanceCompliance: govCert?.complianceResult || "UNGOVERNED" });
         return { http: 200, body: { documentId, lifecycle: "published", governanceCompliance: govCert?.complianceResult || "UNGOVERNED" } };
       }
       // withdraw
@@ -1638,6 +1758,14 @@ const server = http.createServer(async (req, res) => {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
       if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
       return await handleAdminClients(req, res, auth.principal, "GET");
+    }
+
+    // Event webhooks — list (read) / register / remove (admin) / test delivery.
+    const webhookMatch = /^\/v1\/admin\/webhooks(?:\/([A-Za-z0-9-]+)\/(test))?$/.exec(path);
+    if (webhookMatch && (req.method === "GET" || req.method === "POST" || req.method === "DELETE")) {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleWebhooks(req, res, auth.principal, req.method, webhookMatch[1], webhookMatch[2]);
     }
 
     // Billing status — the caller tenant's plan, usage and download eligibility.

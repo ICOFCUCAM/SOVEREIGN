@@ -4,6 +4,7 @@ import { Button, Card, Field, inputCls, timeAgo } from "../lib/ui";
 import { listClients, issueClient, rotateClient, revokeClient, getBilling, subscribe, API_BASE, type ServiceClient, type IssuedCredential, type Billing, humanError } from "../lib/api";
 import { QuotaMeter, planLabel, useBilling } from "../lib/upsell";
 import SsoConnectionCard from "../components/SsoConnectionCard";
+import WebhooksCard from "../components/WebhooksCard";
 
 // API ACCESS — how external systems (an ERP, a parliament system, SharePoint, a
 // hospital platform) connect to Dispatch. A tenant_admin issues an API client
@@ -270,6 +271,9 @@ const Access: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* The reverse API — Dispatch calls the institution's systems on events. */}
+      <WebhooksCard />
     </div>
   );
 };
