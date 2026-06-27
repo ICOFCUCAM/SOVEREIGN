@@ -158,3 +158,29 @@ const MARKETING4: Record<string, Marketing4Copy> = {
 };
 export const useMarketing4Copy = (): Marketing4Copy => MARKETING4[useUiLocale()] || MARKETING4_EN;
 export type { Marketing4Copy };
+
+// ── Marketing batch 5 (Procurement Center) ───────────────────────────────────
+import { MARKETING5_EN, type ProcurementCopy } from "./marketing5";
+import { MARKETING5_FR } from "./marketing5.fr";
+import { MARKETING5_ES } from "./marketing5.es";
+import { MARKETING5_DE } from "./marketing5.de";
+import { MARKETING5_NO } from "./marketing5.no";
+import { MARKETING5_PT } from "./marketing5.pt";
+import { MARKETING5_IT } from "./marketing5.it";
+import { MARKETING5_NL } from "./marketing5.nl";
+import { MARKETING5_AR } from "./marketing5.ar";
+import { MARKETING5_JA } from "./marketing5.ja";
+import { MARKETING5_ZH } from "./marketing5.zh";
+import { MARKETING5_PL } from "./marketing5.pl";
+import { MARKETING5_SV } from "./marketing5.sv";
+import { MARKETING5_DA } from "./marketing5.da";
+import { MARKETING5_FI } from "./marketing5.fi";
+import { MARKETING5_EL } from "./marketing5.el";
+
+const MARKETING5: Record<string, ProcurementCopy> = {
+  en: MARKETING5_EN, fr: MARKETING5_FR, es: MARKETING5_ES, de: MARKETING5_DE, no: MARKETING5_NO,
+  pt: MARKETING5_PT, it: MARKETING5_IT, nl: MARKETING5_NL, ar: MARKETING5_AR, ja: MARKETING5_JA, zh: MARKETING5_ZH,
+  pl: MARKETING5_PL, sv: MARKETING5_SV, da: MARKETING5_DA, fi: MARKETING5_FI, el: MARKETING5_EL,
+};
+export const useProcurementCopy = (): ProcurementCopy => MARKETING5[useUiLocale()] || MARKETING5_EN;
+export type { ProcurementCopy };
