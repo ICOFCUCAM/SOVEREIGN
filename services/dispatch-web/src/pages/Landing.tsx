@@ -40,6 +40,15 @@ const Ico: React.FC<{ name: string; className?: string }> = ({ name, className =
   <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{ICONS[name]}</svg>
 );
 
+// A unified section eyebrow — a short gold rule before the label, so every
+// section opens the same considered way.
+const Kicker: React.FC<{ children: React.ReactNode; center?: boolean }> = ({ children, center }) => (
+  <div className={`flex items-center gap-3 ${center ? "justify-center" : ""}`}>
+    <span className="h-px w-7 bg-gold-500/55" aria-hidden />
+    <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">{children}</span>
+  </div>
+);
+
 // Hero proof statements — three words of evidence, not paragraphs.
 const PROOF_BADGES: { icon: string; lead: string; sub: string }[] = [
   { icon: "branch", lead: "Governed Workflows", sub: "Policy-enforced, end to end" },
@@ -220,7 +229,7 @@ const Landing: React.FC = () => {
           <div className="mx-auto grid max-w-[1180px] items-center gap-12 lg:grid-cols-[1.04fr_0.96fr] lg:gap-16">
             {/* the argument — left, asymmetric */}
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">The hidden cost</div>
+              <Kicker>The hidden cost</Kicker>
               <h2 className="mt-6 font-serif font-bold tracking-tight text-[#f4efe3]">
                 <span className="block text-[2.1rem] leading-[1.08] sm:text-[2.9rem]">Institutions don't pay to create documents.</span>
                 <span className="mt-4 block text-[1.9rem] leading-[1.1] text-white/65 sm:text-[2.4rem]">They pay to make them</span>
@@ -328,7 +337,7 @@ const Landing: React.FC = () => {
         <section id="governance" className="border-b border-white/[0.06] px-6 py-20 lg:px-12">
           <div className="mx-auto max-w-[1100px]">
             <div className="mx-auto max-w-3xl text-center">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Why governance matters</div>
+              <Kicker center>Why governance matters</Kicker>
               <h2 className="mx-auto mt-5 font-serif text-[2.2rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[2.9rem]">
                 Institutions don't become trusted by publishing.<br className="hidden sm:block" /> They become trusted by governing publication.
               </h2>
@@ -349,7 +358,7 @@ const Landing: React.FC = () => {
         <section id="outcomes" className="border-b border-white/[0.06] bg-gradient-to-b from-white/[0.02] to-transparent px-6 py-20 lg:px-12">
           <div className="mx-auto max-w-[1100px]">
             <div className="max-w-2xl">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Business value</div>
+              <Kicker>Business value</Kicker>
               <h2 className="mt-5 font-serif text-[2.3rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3rem]">What your institution gains.</h2>
             </div>
             <button onClick={() => nav(`${VALUE_BASE}/${OUTCOMES[0].slug}`)}
@@ -385,7 +394,7 @@ const Landing: React.FC = () => {
         <section id="industries" className="border-b border-white/[0.06] px-6 py-20 lg:px-12">
           <div className="mx-auto max-w-[1100px]">
             <div className="max-w-2xl">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Who uses it</div>
+              <Kicker>Who uses it</Kicker>
               <h2 className="mt-5 font-serif text-[2.3rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3rem]">Trusted every day, across every institution.</h2>
               <p className="mt-4 text-[15px] leading-relaxed text-white/55">Dispatch governs the publications your institution actually produces.</p>
             </div>
@@ -421,7 +430,7 @@ const Landing: React.FC = () => {
         <section id="sovereignty" className="relative overflow-hidden border-b border-white/[0.06] bg-black px-6 py-20 lg:px-12">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_50%_0%,rgba(233,200,120,0.05),transparent_70%)]" aria-hidden />
           <div className="relative mx-auto max-w-[1000px] text-center">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Sovereign architecture</div>
+            <Kicker center>Sovereign architecture</Kicker>
             <h2 className="mx-auto mt-5 max-w-3xl font-serif text-[2.3rem] font-bold leading-[1.06] tracking-tight text-[#f4efe3] sm:text-[3rem]">
               Sovereign by design. Verifiable by default.
             </h2>
@@ -443,7 +452,7 @@ const Landing: React.FC = () => {
         <section id="proof" className="border-b border-white/[0.06] px-6 py-20 lg:px-12">
           <div className="mx-auto max-w-[1100px]">
             <div className="text-center">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Proof &amp; procurement</div>
+              <Kicker center>Proof &amp; procurement</Kicker>
               <h2 className="mx-auto mt-4 max-w-2xl font-serif text-[2.2rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[2.9rem]">
                 Built to be believed — not taken on trust.
               </h2>
