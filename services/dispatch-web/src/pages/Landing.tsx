@@ -5,14 +5,16 @@ import { RecordArtifact } from "../components/RecordArtifact";
 import { GovernedJourney } from "../components/GovernedJourney";
 import {
   ARCHITECTURE_ROUTE, PROCUREMENT_ROUTE, OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE,
-  SECURITY_ROUTE, TRUST_ROUTE, COMPLIANCE_ROUTE, COST_ROUTE, ROI_ROUTE,
+  SECURITY_ROUTE, TRUST_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE, DEVELOPERS_ROUTE,
+  COST_ROUTE, ROI_ROUTE,
 } from "../lib/routes";
 import { VALUE_BASE } from "../lib/value";
 
-// The front door. Cut for rhythm and PROOF, not completeness. Each section has a
-// different shape and weight; detail lives on dedicated pages. The homepage exists
-// to make the value land, feel monumental, and answer a CIO's silent question —
-// "why should I believe you?" — with evidence, not paragraphs.
+// The front door, ordered as an executive reads — each section answers the next
+// question (see docs/homepage-narrative.md): what is this → why does it matter →
+// why can't we continue → how does it work → why is it different → can I trust it
+// → can it work for us → how do I evaluate. A white-paper / keynote, not a SaaS
+// product page. Detail lives on dedicated pages.
 
 const VERBS = ["Create", "Review", "Approve", "Authorize", "Publish", "Certify", "Verify", "Preserve"];
 
@@ -29,22 +31,27 @@ const ICONS: Record<string, React.ReactNode> = {
   coins: <><ellipse cx="12" cy="7" rx="7" ry="3" /><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7" /><path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5" /></>,
   network: <><circle cx="12" cy="12" r="2" /><circle cx="12" cy="4" r="1.6" /><circle cx="5" cy="18" r="1.6" /><circle cx="19" cy="18" r="1.6" /><path d="M12 5.6v4.4M10.5 13.3 6.2 16.6M13.5 13.3l4.3 3.3" /></>,
   globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" /></>,
+  scale: <><path d="M12 4v16M7 20h10M5 7h14" /><path d="M5 7l-2.5 5a2.5 2.5 0 0 0 5 0zM19 7l-2.5 5a2.5 2.5 0 0 0 5 0z" /></>,
 };
 const Ico: React.FC<{ name: string; className?: string }> = ({ name, className = "h-6 w-6" }) => (
   <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{ICONS[name]}</svg>
 );
 
-// Proof badges under the cinematic statement — evidence, not navigation.
+// Hero proof statements — three words of evidence, not paragraphs.
 const PROOF_BADGES: { icon: string; lead: string; sub: string }[] = [
-  { icon: "branch", lead: "Permanent evidence chains", sub: "Recorded as the record is made" },
-  { icon: "lock", lead: "Cryptographic integrity", sub: "SHA-256 sealed · tamper-evident" },
-  { icon: "shieldcheck", lead: "Independent verification", sub: "By anyone, with no account" },
+  { icon: "branch", lead: "Governed Workflows", sub: "Policy-enforced, end to end" },
+  { icon: "seal", lead: "Permanent Records", sub: "A Record ID, never reused" },
+  { icon: "shieldcheck", lead: "Independent Verification", sub: "Confirmed by anyone, no account" },
 ];
 
-const SPINE = ["Policy Draft", "Legal Review", "Compliance", "Executive Approval", "Publishing Office", "Official Publication", "Evidence Chain", "Permanent Preservation"];
+// 5 · Why governance matters — premium panels, the conceptual argument.
+const GOVERNANCE: { icon: string; t: string; d: string }[] = [
+  { icon: "scale", t: "Authority must be earned.", d: "Information is not authority. Governance is what turns a document into the institution's official position — reviewed, approved and owned." },
+  { icon: "seal", t: "Proof must be built in.", d: "Certificates and a complete evidence chain are produced as the record is made — never bolted on afterwards, never assumed." },
+  { icon: "archive", t: "Provenance must outlive people.", d: "Who decided, on what version, in what order — preserved and provable long after the people who decided have moved on." },
+];
 
-// Risk-/outcome-led value — visual story blocks, not an accordion. A featured
-// block leads; the rest follow in a two-column spread.
+// 6 · Business value — what the institution gains. A featured block + spread.
 const OUTCOMES: { slug: string; icon: string; lead: string; sub: string }[] = [
   { slug: "reduce-fragmentation", icon: "grid", lead: "One governed platform — not seven disconnected systems.", sub: "Drafting, review, approval, publication, evidence and archive stop living in separate tools." },
   { slug: "reduce-audit", icon: "shieldcheck", lead: "Every audit already has its evidence.", sub: "The proof is produced as the record is made, not reconstructed when someone asks." },
@@ -55,20 +62,17 @@ const OUTCOMES: { slug: string; icon: string; lead: string; sub: string }[] = [
   { slug: "enable-services", icon: "network", lead: "Govern publication for others — as a service.", sub: "Become the authority that issues and verifies records for the institutions you serve." },
 ];
 
-// The proof section — answer "why should I believe you?" with figures and a spec
-// sheet, not adjectives.
-const PROOF_STATS: [string, string][] = [
-  ["9", "Governed stages"],
-  ["3", "Permanent certificates"],
-  ["1", "Authoritative publication"],
-  ["∞", "Independent verifications"],
-];
-const PROOF_COLUMNS: { title: string; items: string[] }[] = [
-  { title: "Technical proof", items: ["SHA-256 sealing", "Append-only architecture", "Immutable audit chain", "Tamper-evident integrity"] },
-  { title: "Governance proof", items: ["Every action attributable", "Every approval recorded", "Every version preserved", "Separation of duties enforced"] },
-  { title: "Operational proof", items: ["One governed pipeline", "End-to-end provenance", "Permanent preservation", "Unlimited verification"] },
+// 7 · Trusted every day — the publications each institution actually produces.
+const INDUSTRIES: { slug: string; name: string; types: string[] }[] = [
+  { slug: "government", name: "Government", types: ["Executive Orders", "Regulations", "Gazettes"] },
+  { slug: "justice", name: "Justice", types: ["Judgments", "Court Rules", "Legal Notices"] },
+  { slug: "healthcare", name: "Healthcare", types: ["Clinical Directives", "Safety Bulletins", "Treatment Protocols"] },
+  { slug: "universities", name: "Universities", types: ["Senate Decisions", "Degree Regulations", "Academic Policies"] },
+  { slug: "enterprise", name: "Enterprise", types: ["Board Resolutions", "Compliance Policies", "Corporate Governance"] },
+  { slug: "regulators", name: "Regulators", types: ["Licenses", "Enforcement Decisions", "Public Notices"] },
 ];
 
+// 8 · Sovereign architecture — six specific controls.
 const SECURITY: { icon: string; label: string }[] = [
   { icon: "lock", label: "Cryptographic sealing" },
   { icon: "shieldcheck", label: "Immutable audit evidence" },
@@ -78,10 +82,30 @@ const SECURITY: { icon: string; label: string }[] = [
   { icon: "archive", label: "Long-term preservation" },
 ];
 
+// 9 · Proof / procurement — figures over a spec sheet, plus the evaluator links.
+const PROOF_STATS: [string, string][] = [
+  ["9", "Governed stages"], ["3", "Permanent certificates"], ["1", "Authoritative publication"], ["∞", "Independent verifications"],
+];
+const PROOF_COLUMNS: { title: string; items: string[] }[] = [
+  { title: "Technical proof", items: ["SHA-256 sealing", "Append-only architecture", "Immutable audit chain", "Tamper-evident integrity"] },
+  { title: "Governance proof", items: ["Every action attributable", "Every approval recorded", "Every version preserved", "Separation of duties enforced"] },
+  { title: "Operational proof", items: ["One governed pipeline", "End-to-end provenance", "Permanent preservation", "Unlimited verification"] },
+];
+
+const SectorImage: React.FC<{ slug: string; name: string }> = ({ slug, name }) => {
+  const [failed, setFailed] = React.useState(false);
+  return (
+    <div className="relative aspect-[16/10] w-full overflow-hidden bg-[linear-gradient(160deg,#16140e,#090909)]">
+      {!failed && <img src={`/people/${slug}.webp`} alt={name} loading="lazy" onError={() => setFailed(true)} className="h-full w-full object-cover" />}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#0b0b0b] to-transparent" />
+      <div className="absolute bottom-0 left-0 p-4 font-serif text-[1.45rem] font-bold leading-none text-white">{name}</div>
+    </div>
+  );
+};
+
 const Landing: React.FC = () => {
   useReveal();
   const nav = useNavigate();
-  // Whisper-subtle pointer parallax on the instrument — fine pointers only, off under reduced-motion.
   const heroRef = React.useRef<HTMLDivElement>(null);
   const artRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -111,7 +135,7 @@ const Landing: React.FC = () => {
       <FilmGrain />
       <PublicHeader />
       <main>
-        {/* ── Hero — the approved two-column instrument (unchanged) ── */}
+        {/* ── HERO — the approved two-column instrument ── */}
         <div id="top" className="relative overflow-hidden border-t border-white/[0.06]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_45%_at_72%_32%,rgba(233,200,120,0.055),transparent_72%)]" aria-hidden />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
@@ -162,10 +186,9 @@ const Landing: React.FC = () => {
           </div>
         </div>
 
-        {/* ── Monumental cinematic statement + proof badges ── */}
+        {/* ── HERO continued — cinematic statement + three proof statements ── */}
         <section className="relative flex min-h-[80vh] items-center overflow-hidden border-y border-white/[0.06]">
-          <img src="/people/government.webp" alt="" aria-hidden loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover object-center" />
+          <img src="/people/government.webp" alt="" aria-hidden loading="lazy" className="absolute inset-0 h-full w-full object-cover object-center" />
           <div className="absolute inset-0 bg-[#070707]/55" aria-hidden />
           <div className="absolute inset-0 bg-gradient-to-t from-[#070707] via-[#070707]/35 to-[#070707]/70" aria-hidden />
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
@@ -177,7 +200,6 @@ const Landing: React.FC = () => {
             <p className="mt-7 max-w-xl text-[19px] leading-relaxed text-white/70">
               Documents inform. Institutions govern. Official publications <span className="text-gold-300">prove it</span>.
             </p>
-            {/* proof badges — premium, not navigation */}
             <div className="mt-12 grid max-w-3xl gap-3 sm:grid-cols-3">
               {PROOF_BADGES.map((b) => (
                 <div key={b.lead} className="rounded-xl border border-white/12 bg-white/[0.04] px-5 py-4 backdrop-blur-sm">
@@ -190,48 +212,31 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* ── The hidden cost — tightened ── */}
-        <section id="cost" className="border-b border-white/[0.06] px-6 py-20 lg:px-12">
-          <div className="mx-auto grid max-w-[1200px] gap-14 lg:grid-cols-[1fr_0.9fr] lg:items-center">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">The hidden cost</div>
-              <h2 className="mt-5 max-w-xl font-serif text-[2.3rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3rem]">
-                Institutions don't pay to create documents.<br className="hidden sm:block" /> They pay to make them official.
-              </h2>
-              <p className="mt-6 max-w-lg text-[16.5px] leading-relaxed text-white/60">
-                Every official publication passes through legal review, executive approval, publication and preservation.
-                The cost is never writing the document. <span className="text-white/85">It is governing every decision around it.</span>
-              </p>
-              <button onClick={() => nav(COST_ROUTE)} className="group mt-8 inline-flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-wide text-gold-400 transition hover:text-gold-300">
-                Read the full cost breakdown <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-              </button>
-            </div>
-            <div className="mx-auto w-full max-w-sm">
-              {SPINE.map((step, i) => {
-                const last = i === SPINE.length - 1;
-                const official = step === "Official Publication";
-                return (
-                  <React.Fragment key={step}>
-                    <div className={`flex items-center gap-3.5 ${official || last ? "text-gold-200" : "text-white/70"}`}>
-                      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] ${official || last ? "border-gold-400/45 bg-gold-400/[0.08] text-gold-300" : "border-white/12 text-white/40"}`}>{i + 1}</span>
-                      <span className={`text-[15px] ${official ? "font-bold" : "font-medium"}`}>{step}</span>
-                    </div>
-                    {!last && <div className="ml-[13px] h-4 w-px bg-gradient-to-b from-white/15 to-white/5" aria-hidden />}
-                  </React.Fragment>
-                );
-              })}
-            </div>
+        {/* ── 2 · THE PROBLEM — a keynote statement, no list ── */}
+        <section id="cost" className="border-b border-white/[0.06] px-6 py-24 lg:px-12">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">The problem</div>
+            <h2 className="mx-auto mt-5 font-serif text-[2.4rem] font-bold leading-[1.06] tracking-tight text-[#f4efe3] sm:text-[3.3rem]">
+              Institutions don't pay to create documents.<br className="hidden sm:block" /> They pay to make them <span className="text-gold-300">official</span>.
+            </h2>
+            <p className="mx-auto mt-7 max-w-2xl text-[17px] leading-relaxed text-white/60">
+              Every official publication passes through legal review, executive approval, publication and preservation.
+              The cost is never writing the document. <span className="text-white/85">It is governing every decision around it.</span>
+            </p>
+            <button onClick={() => nav(COST_ROUTE)} className="group mt-9 inline-flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-wide text-gold-400 transition hover:text-gold-300">
+              Read the full cost breakdown <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+            </button>
           </div>
         </section>
 
-        {/* ── THE SIGNATURE MOMENT — the governed journey ── */}
+        {/* ── 3 · THE JOURNEY — the signature animated experience ── */}
         <GovernedJourney />
 
-        {/* ── LIGHT counterpoint — the distinction, as icon blocks ── */}
+        {/* ── 4 · THE RESULT — what makes an Official Record (light) ── */}
         <section id="difference" className="bg-[#f3eee3] px-6 py-20 text-[#11140f] lg:px-12">
           <div className="mx-auto grid max-w-[1200px] gap-14 lg:grid-cols-2 lg:items-center">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#9a7b27]">The distinction</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#9a7b27]">The result</div>
               <h2 className="mt-5 font-serif text-[2.4rem] font-bold leading-[1.06] tracking-tight text-[#171712] sm:text-[3.1rem]">
                 A copy informs.<br /> An official record governs.
               </h2>
@@ -268,53 +273,34 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* ── PROOF — answer "why should I believe you?" with figures, not adjectives ── */}
-        <section id="proof" className="relative overflow-hidden border-b border-white/[0.06] bg-black px-6 py-20 lg:px-12">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(55%_55%_at_50%_0%,rgba(233,200,120,0.06),transparent_70%)]" aria-hidden />
-          <div className="relative mx-auto max-w-[1100px]">
-            <div className="text-center">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">The proof</div>
-              <h2 className="mx-auto mt-4 max-w-2xl font-serif text-[2.2rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[2.9rem]">
-                Built to be believed — not taken on trust.
+        {/* ── 5 · WHY GOVERNANCE MATTERS — premium panels ── */}
+        <section id="governance" className="border-b border-white/[0.06] px-6 py-20 lg:px-12">
+          <div className="mx-auto max-w-[1100px]">
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Why governance matters</div>
+              <h2 className="mx-auto mt-5 font-serif text-[2.2rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[2.9rem]">
+                Institutions don't become trusted by publishing.<br className="hidden sm:block" /> They become trusted by governing publication.
               </h2>
             </div>
-            {/* the figures */}
-            <div className="mt-14 grid grid-cols-2 gap-y-10 border-y border-white/[0.08] py-12 sm:grid-cols-4">
-              {PROOF_STATS.map(([n, label]) => (
-                <div key={label} className="text-center">
-                  <div className="tnum font-serif text-[3.4rem] font-bold leading-none text-gold-300 sm:text-[4rem]">{n}</div>
-                  <div className="mt-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/50">{label}</div>
-                </div>
-              ))}
-            </div>
-            {/* the spec sheet */}
-            <div className="mt-14 grid gap-10 sm:grid-cols-3">
-              {PROOF_COLUMNS.map((col) => (
-                <div key={col.title}>
-                  <div className="text-[12px] font-semibold uppercase tracking-[0.2em] text-gold-400/80">{col.title}</div>
-                  <ul className="mt-4 space-y-2.5">
-                    {col.items.map((it) => (
-                      <li key={it} className="flex items-center gap-2.5 font-mono text-[13px] text-white/70">
-                        <span className="text-gold-400/70">▹</span>{it}
-                      </li>
-                    ))}
-                  </ul>
+            <div className="mt-14 grid gap-5 lg:grid-cols-3">
+              {GOVERNANCE.map((g) => (
+                <div key={g.t} className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-7">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/[0.07] text-gold-300"><Ico name={g.icon} className="h-6 w-6" /></span>
+                  <div className="mt-5 font-serif text-[1.4rem] font-bold leading-snug text-white">{g.t}</div>
+                  <p className="mt-3 text-[14px] leading-relaxed text-white/55">{g.d}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── Outcomes — visual story blocks ── */}
-        <section id="outcomes" className="border-b border-white/[0.06] px-6 py-20 lg:px-12">
+        {/* ── 6 · BUSINESS VALUE — what your institution gains ── */}
+        <section id="outcomes" className="border-b border-white/[0.06] bg-gradient-to-b from-white/[0.02] to-transparent px-6 py-20 lg:px-12">
           <div className="mx-auto max-w-[1100px]">
             <div className="max-w-2xl">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Why institutions adopt it</div>
-              <h2 className="mt-5 font-serif text-[2.3rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3rem]">
-                Institutions don't become trusted by publishing.<br className="hidden sm:block" /> They become trusted by governing publication.
-              </h2>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Business value</div>
+              <h2 className="mt-5 font-serif text-[2.3rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3rem]">What your institution gains.</h2>
             </div>
-            {/* featured block */}
             <button onClick={() => nav(`${VALUE_BASE}/${OUTCOMES[0].slug}`)}
               className="group mt-12 flex w-full flex-col items-start gap-5 rounded-2xl border border-gold-400/20 bg-gradient-to-br from-gold-400/[0.06] to-transparent p-8 text-left transition hover:border-gold-400/40 sm:flex-row sm:items-center sm:gap-8">
               <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-gold-400/30 bg-gold-400/[0.08] text-gold-300"><Ico name={OUTCOMES[0].icon} className="h-7 w-7" /></span>
@@ -324,7 +310,6 @@ const Landing: React.FC = () => {
               </span>
               <Chevron className="hidden h-5 w-5 shrink-0 text-gold-400/60 transition group-hover:translate-x-1 sm:block" />
             </button>
-            {/* the rest */}
             <div className="mt-5 grid gap-5 sm:grid-cols-2">
               {OUTCOMES.slice(1).map((o) => (
                 <button key={o.slug} onClick={() => nav(`${VALUE_BASE}/${o.slug}`)}
@@ -345,11 +330,34 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* ── Security & sovereignty — specifics, not adjectives ── */}
+        {/* ── 7 · TRUSTED EVERY DAY — the publications each institution produces ── */}
+        <section id="industries" className="border-b border-white/[0.06] px-6 py-20 lg:px-12">
+          <div className="mx-auto max-w-[1100px]">
+            <div className="max-w-2xl">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Who uses it</div>
+              <h2 className="mt-5 font-serif text-[2.3rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3rem]">Trusted every day, across every institution.</h2>
+              <p className="mt-4 text-[15px] leading-relaxed text-white/55">Dispatch governs the publications your institution actually produces.</p>
+            </div>
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {INDUSTRIES.map((it) => (
+                <article key={it.slug} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-gold-400/30">
+                  <SectorImage slug={it.slug} name={it.name} />
+                  <ul className="space-y-1.5 px-5 py-5">
+                    {it.types.map((t) => (
+                      <li key={t} className="flex items-center gap-2.5 text-[13.5px] text-white/70"><span className="h-1 w-1 shrink-0 rounded-full bg-gold-400/70" />{t}</li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 8 · SOVEREIGN ARCHITECTURE — six specific controls ── */}
         <section id="sovereignty" className="relative overflow-hidden border-b border-white/[0.06] bg-black px-6 py-20 lg:px-12">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_50%_0%,rgba(233,200,120,0.05),transparent_70%)]" aria-hidden />
           <div className="relative mx-auto max-w-[1000px] text-center">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Security & sovereignty</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Sovereign architecture</div>
             <h2 className="mx-auto mt-5 max-w-3xl font-serif text-[2.3rem] font-bold leading-[1.06] tracking-tight text-[#f4efe3] sm:text-[3rem]">
               Sovereign by design. Verifiable by default.
             </h2>
@@ -364,15 +372,48 @@ const Landing: React.FC = () => {
                 </div>
               ))}
             </div>
-            <div className="mt-10 flex flex-wrap justify-center gap-3">
-              <button onClick={() => nav(SECURITY_ROUTE)} className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold uppercase tracking-wide text-white/80 transition hover:border-white/40">Security</button>
-              <button onClick={() => nav(TRUST_ROUTE)} className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold uppercase tracking-wide text-white/80 transition hover:border-white/40">Trust Centre</button>
-              <button onClick={() => nav(COMPLIANCE_ROUTE)} className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold uppercase tracking-wide text-white/80 transition hover:border-white/40">Compliance</button>
+          </div>
+        </section>
+
+        {/* ── 9 · PROOF & PROCUREMENT — figures, spec sheet, evaluator links ── */}
+        <section id="proof" className="border-b border-white/[0.06] px-6 py-20 lg:px-12">
+          <div className="mx-auto max-w-[1100px]">
+            <div className="text-center">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Proof &amp; procurement</div>
+              <h2 className="mx-auto mt-4 max-w-2xl font-serif text-[2.2rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[2.9rem]">
+                Built to be believed — not taken on trust.
+              </h2>
+            </div>
+            <div className="mt-14 grid grid-cols-2 gap-y-10 border-y border-white/[0.08] py-12 sm:grid-cols-4">
+              {PROOF_STATS.map(([n, label]) => (
+                <div key={label} className="text-center">
+                  <div className="tnum font-serif text-[3.4rem] font-bold leading-none text-gold-300 sm:text-[4rem]">{n}</div>
+                  <div className="mt-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/50">{label}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-14 grid gap-10 sm:grid-cols-3">
+              {PROOF_COLUMNS.map((col) => (
+                <div key={col.title}>
+                  <div className="text-[12px] font-semibold uppercase tracking-[0.2em] text-gold-400/80">{col.title}</div>
+                  <ul className="mt-4 space-y-2.5">
+                    {col.items.map((it) => (
+                      <li key={it} className="flex items-center gap-2.5 font-mono text-[13px] text-white/70"><span className="text-gold-400/70">▹</span>{it}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            {/* the evaluator's links */}
+            <div className="mt-14 flex flex-wrap justify-center gap-2.5">
+              {[["Architecture", ARCHITECTURE_ROUTE], ["Security", SECURITY_ROUTE], ["Compliance", COMPLIANCE_ROUTE], ["Evidence", EVIDENCE_ROUTE], ["API", DEVELOPERS_ROUTE], ["Trust Centre", TRUST_ROUTE], ["Procurement Center", PROCUREMENT_ROUTE]].map(([label, to]) => (
+                <button key={label} onClick={() => nav(to)} className="rounded-md border border-white/15 px-4 py-2 text-[12.5px] font-semibold uppercase tracking-wide text-white/75 transition hover:border-white/35 hover:text-white">{label}</button>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ── Final CTA — one dominant action, Apple-scale ── */}
+        {/* ── 10 · EVALUATE — one dominant action ── */}
         <section id="evaluate" className="relative overflow-hidden px-6 py-28 lg:px-12">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_70%_at_50%_40%,rgba(233,200,120,0.07),transparent_72%)]" aria-hidden />
           <div className="relative mx-auto max-w-2xl text-center">
