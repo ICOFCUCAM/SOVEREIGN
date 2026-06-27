@@ -32,6 +32,8 @@ const ICONS: Record<string, React.ReactNode> = {
   network: <><circle cx="12" cy="12" r="2" /><circle cx="12" cy="4" r="1.6" /><circle cx="5" cy="18" r="1.6" /><circle cx="19" cy="18" r="1.6" /><path d="M12 5.6v4.4M10.5 13.3 6.2 16.6M13.5 13.3l4.3 3.3" /></>,
   globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" /></>,
   scale: <><path d="M12 4v16M7 20h10M5 7h14" /><path d="M5 7l-2.5 5a2.5 2.5 0 0 0 5 0zM19 7l-2.5 5a2.5 2.5 0 0 0 5 0z" /></>,
+  users: <><circle cx="9" cy="8" r="3" /><path d="M3.5 19a5.5 5.5 0 0 1 11 0" /><path d="M16 5.5a3 3 0 0 1 0 5.5M16.5 19a5.5 5.5 0 0 0-3-4.9" /></>,
+  clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
 };
 const Ico: React.FC<{ name: string; className?: string }> = ({ name, className = "h-6 w-6" }) => (
   <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{ICONS[name]}</svg>
@@ -212,20 +214,68 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
-        {/* ── 2 · THE PROBLEM — a keynote statement, no list ── */}
+        {/* ── 2 · THE PROBLEM — an executive cost-ledger, not a centred poster ── */}
         <section id="cost" className="border-b border-white/[0.06] px-6 py-24 lg:px-12">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">The problem</div>
-            <h2 className="mx-auto mt-5 font-serif text-[2.4rem] font-bold leading-[1.06] tracking-tight text-[#f4efe3] sm:text-[3.3rem]">
-              Institutions don't pay to create documents.<br className="hidden sm:block" /> They pay to make them <span className="text-gold-300">official</span>.
-            </h2>
-            <p className="mx-auto mt-7 max-w-2xl text-[17px] leading-relaxed text-white/60">
-              Every official publication passes through legal review, executive approval, publication and preservation.
-              The cost is never writing the document. <span className="text-white/85">It is governing every decision around it.</span>
-            </p>
-            <button onClick={() => nav(COST_ROUTE)} className="group mt-9 inline-flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-wide text-gold-400 transition hover:text-gold-300">
-              Read the full cost breakdown <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-            </button>
+          <div className="mx-auto grid max-w-[1180px] items-center gap-12 lg:grid-cols-[1.04fr_0.96fr] lg:gap-16">
+            {/* the argument — left, asymmetric */}
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">The hidden cost</div>
+              <h2 className="mt-6 font-serif font-bold tracking-tight text-[#f4efe3]">
+                <span className="block text-[2.1rem] leading-[1.08] sm:text-[2.9rem]">Institutions don't pay to create documents.</span>
+                <span className="mt-4 block text-[1.9rem] leading-[1.1] text-white/65 sm:text-[2.4rem]">They pay to make them</span>
+                <span className="mt-1 block font-serif text-[3.6rem] leading-[0.95] text-gold-300 sm:text-[5rem]">official.</span>
+              </h2>
+              <p className="mt-8 max-w-md text-[17px] leading-relaxed text-white/65">
+                The document costs almost nothing to write.{" "}
+                <span className="text-white/90">Institutional authority costs everything</span> — the people, the
+                approvals, the proof and the preservation that make it the institution's word.
+              </p>
+              <button onClick={() => nav(COST_ROUTE)}
+                className="group mt-9 inline-flex items-center gap-2.5 rounded-md border border-gold-400/40 bg-gold-400/[0.06] px-6 py-3.5 text-[13px] font-bold uppercase tracking-[0.06em] text-gold-200 transition hover:bg-gold-400/[0.12] hover:text-gold-100">
+                Explore the cost of publication <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
+              </button>
+            </div>
+
+            {/* the proof — right, a cost ledger */}
+            <div className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-white/[0.012] p-6 shadow-[0_40px_100px_-50px_rgba(0,0,0,0.9)] sm:p-7">
+              <div className="absolute -inset-px -z-10 rounded-2xl bg-[radial-gradient(60%_60%_at_70%_0%,rgba(233,200,120,0.10),transparent_70%)]" aria-hidden />
+              {/* the cheap thing */}
+              <div className="flex items-end justify-between border-b border-white/[0.08] pb-4">
+                <div>
+                  <div className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-white/40">A document</div>
+                  <div className="mt-1 text-[14.5px] font-medium text-white/65">Drafted in an afternoon</div>
+                </div>
+                <div className="font-serif text-[1.5rem] font-bold leading-none text-white/45">≈ $0</div>
+              </div>
+              {/* the expensive thing */}
+              <div className="pt-5">
+                <div className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-gold-400">An official publication</div>
+                <ul className="mt-3.5 grid grid-cols-2 gap-x-5 gap-y-2">
+                  {["Legal review", "Compliance", "Executive approval", "Publication", "Certification", "Preservation"].map((s) => (
+                    <li key={s} className="flex items-center gap-2.5 text-[13.5px] text-white/80">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-gold-400/15 text-[9px] text-gold-300">✓</span>{s}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-5 grid grid-cols-3 gap-3 border-t border-white/[0.08] pt-5">
+                  {[["users", "6", "Departments"], ["pen", "8", "Approvals"], ["clock", "120+", "Staff hours"]].map(([icon, n, label]) => (
+                    <div key={label} className="text-center">
+                      <span className="mx-auto flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-gold-400/80"><Ico name={icon} className="h-4 w-4" /></span>
+                      <div className="mt-2 font-serif text-[1.5rem] font-bold leading-none text-white">{n}</div>
+                      <div className="mt-1 text-[10.5px] uppercase tracking-wide text-white/40">{label}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 flex items-center justify-between rounded-lg border border-gold-400/25 bg-gold-400/[0.06] px-4 py-3">
+                  <span className="text-[13px] font-semibold text-gold-100">1 official record</span>
+                  <span className="font-serif text-[1.05rem] font-bold text-gold-200">where the cost goes</span>
+                </div>
+                <div className="mt-3 text-[11px] text-white/35">
+                  Illustrative figures.{" "}
+                  <button onClick={() => nav(ROI_ROUTE)} className="font-semibold text-gold-300 hover:underline">Model your institution's own →</button>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
