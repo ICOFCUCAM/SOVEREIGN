@@ -108,7 +108,7 @@ const SectorImage: React.FC<{ slug: string; name: string }> = ({ slug, name }) =
   const [failed, setFailed] = React.useState(false);
   return (
     <div className="relative aspect-[16/10] w-full overflow-hidden bg-[linear-gradient(160deg,#16140e,#090909)]">
-      {!failed && <img src={`/people/${slug}.webp`} alt={name} loading="lazy" onError={() => setFailed(true)} className="h-full w-full object-cover" />}
+      {!failed && <img src={`/people/${slug}.webp`} alt={name} loading="lazy" decoding="async" onError={() => setFailed(true)} className="h-full w-full object-cover" />}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#0b0b0b] to-transparent" />
       <div className="absolute bottom-0 left-0 p-4 font-serif text-[1.45rem] font-bold leading-none text-white">{name}</div>
     </div>
@@ -206,7 +206,7 @@ const Landing: React.FC = () => {
 
         {/* ── HERO continued — cinematic statement + three proof statements ── */}
         <section id="stakes" className="relative flex min-h-[80vh] items-center overflow-hidden border-y border-white/[0.06]">
-          <img src="/people/government.webp" alt="" aria-hidden loading="lazy" className="sd-kenburns absolute inset-0 h-full w-full object-cover object-center" />
+          <img src="/people/government.webp" alt="" aria-hidden loading="lazy" decoding="async" className="sd-kenburns absolute inset-0 h-full w-full object-cover object-center" />
           <div className="absolute inset-0 bg-[#070707]/55" aria-hidden />
           <div className="absolute inset-0 bg-gradient-to-t from-[#070707] via-[#070707]/35 to-[#070707]/70" aria-hidden />
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
@@ -332,7 +332,7 @@ const Landing: React.FC = () => {
             <figure className="group relative">
               <div className="overflow-hidden rounded-2xl shadow-[0_50px_120px_-50px_rgba(0,0,0,0.55)] ring-1 ring-[#171712]/10">
                 <img src="/people/officialpublication.webp" alt="An Official Publication — sealed, certified, verifiable"
-                  loading="lazy" className="aspect-[4/5] w-full object-cover transition duration-[1200ms] ease-out group-hover:scale-[1.04] sm:aspect-[5/6]" />
+                  loading="lazy" decoding="async" className="aspect-[4/5] w-full object-cover transition duration-[1200ms] ease-out group-hover:scale-[1.04] sm:aspect-[5/6]" />
               </div>
               <figcaption className="mt-3 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9a7b27]">Sealed · Certified · Permanently verifiable</figcaption>
             </figure>

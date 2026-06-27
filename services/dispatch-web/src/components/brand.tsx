@@ -273,7 +273,7 @@ export const PageBanner: React.FC<{ slug: string; alt?: string }> = ({ slug, alt
       <img
         src={`/banners/${slug}.webp`}
         alt={alt}
-        loading="lazy"
+        loading="lazy" decoding="async"
         onError={() => setFailed(true)}
         className="h-full w-full object-cover"
       />
