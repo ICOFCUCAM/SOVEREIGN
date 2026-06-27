@@ -84,6 +84,9 @@ p { text-wrap: pretty; }
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.09) 16%, rgba(212,175,82,0.26) 50%, rgba(255,255,255,0.09) 84%, transparent);
 }
 
+/* anchor jumps (#cost, scroll cue, procurement TOC) land below the sticky header */
+[id] { scroll-margin-top: 5.25rem; }
+
 /* engineered ledger numerals — even-width, lining figures for indices & hashes */
 .tnum { font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum", "lnum"; }
 
