@@ -172,6 +172,23 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
   const nav = useNavigate();
   const [open, setOpen] = React.useState(false);
   const go = (to: string) => { setOpen(false); nav(to); };
+  // A thin gold reading-progress bar under the header — a quiet premium cue of
+  // how far through the page the visitor is. rAF-throttled, passive listener.
+  const barRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const h = document.documentElement.scrollHeight - window.innerHeight;
+        const p = h > 0 ? Math.min(1, window.scrollY / h) : 0;
+        if (barRef.current) barRef.current.style.transform = `scaleX(${p})`;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
+  }, []);
   // Close the sheet on Escape and lock body scroll while it is open.
   React.useEffect(() => {
     if (!open) return;
@@ -183,6 +200,7 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
   }, [open]);
   return (
     <header className="no-print sticky top-0 z-50 border-b border-white/[0.06] bg-[#070707]/80 backdrop-blur-md shadow-[0_10px_30px_-22px_rgba(0,0,0,0.85)]">
+      <div ref={barRef} className="absolute inset-x-0 bottom-0 h-px origin-left bg-gradient-to-r from-gold-500/50 via-gold-400 to-gold-300" style={{ transform: "scaleX(0)" }} aria-hidden />
       <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3 px-5 py-4 sm:px-8 lg:px-12">
         <button onClick={() => go("/")} className="flex shrink-0 items-center gap-3">
           <DispatchMark className="h-8 w-8 text-gold-400" />
