@@ -1,5 +1,6 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { localeFromPath, t as tr } from "../lib/i18n";
 import {
   PLATFORM_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE, DEVELOPERS_ROUTE,
   PROCUREMENT_ROUTE, PRICING_ROUTE, ARCHITECTURE_ROUTE, EVIDENCE_ROUTE, TRUST_ROUTE,
@@ -164,20 +165,21 @@ export const useReveal = (): void => {
 // the four destinations an evaluator reaches for; everything else lives in the
 // footer sitemap and the full mobile sheet. The mobile sheet stays comprehensive
 // (a phone has no footer in view), minus Home, which the wordmark already is.
+// [i18n key, route] — labels resolve to the active locale at render time.
 const DESKTOP_NAV: [string, string][] = [
-  ["Platform", PLATFORM_ROUTE],
-  ["Standard", STANDARD_ROUTE],
-  ["Trust", TRUST_ROUTE],
-  ["Developers", DEVELOPERS_ROUTE],
-  ["Pricing", PRICING_ROUTE],
+  ["nav.platform", PLATFORM_ROUTE],
+  ["nav.standard", STANDARD_ROUTE],
+  ["nav.trust", TRUST_ROUTE],
+  ["nav.developers", DEVELOPERS_ROUTE],
+  ["nav.pricing", PRICING_ROUTE],
 ];
 const NAV: [string, string][] = [
-  ["Standard", STANDARD_ROUTE],
-  ["Outcomes", OUTCOMES_ROUTE],
-  ["Trust", TRUST_ROUTE],
-  ["Developers", DEVELOPERS_ROUTE],
-  ["Verify", VERIFY_ROUTE],
-  ["Pricing", PRICING_ROUTE],
+  ["nav.standard", STANDARD_ROUTE],
+  ["nav.outcomes", OUTCOMES_ROUTE],
+  ["nav.trust", TRUST_ROUTE],
+  ["nav.developers", DEVELOPERS_ROUTE],
+  ["nav.verify", VERIFY_ROUTE],
+  ["nav.pricing", PRICING_ROUTE],
 ];
 
 // Sticky public header shared by the procurement + architecture pages. `actions`
@@ -186,6 +188,7 @@ const NAV: [string, string][] = [
 // destination is reachable on a phone — not just Launch.
 export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions }) => {
   const nav = useNavigate();
+  const locale = localeFromPath(useLocation().pathname);
   const [open, setOpen] = React.useState(false);
   const go = (to: string) => { setOpen(false); nav(to); };
   // A thin gold reading-progress bar under the header — a quiet premium cue of
@@ -225,14 +228,14 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
         <div className="flex shrink-0 items-center gap-3 sm:gap-4">
           {/* lean inline navigation — desktop only */}
           {DESKTOP_NAV.map(([label, to]) => (
-            <button key={to} onClick={() => go(to)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">{label}</button>
+            <button key={to} onClick={() => go(to)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">{tr(locale, label)}</button>
           ))}
           {actions}
           {/* standalone Launch CTA — hidden on the narrowest phones (where it would
               crowd the bar); on those it leads the mobile sheet instead. */}
           <button onClick={() => go("/console")}
             className="btn-sheen group hidden items-center gap-2 whitespace-nowrap rounded bg-gradient-to-b from-gold-300 to-gold-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500 sm:inline-flex sm:px-5">
-            <span className="sm:hidden">Launch</span><span className="hidden sm:inline">Launch Dispatch</span>
+            <span className="sm:hidden">{tr(locale, "cta.launchShort")}</span><span className="hidden sm:inline">{tr(locale, "cta.launch")}</span>
             <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
           </button>
           {/* hamburger — tablet & phone */}
@@ -255,12 +258,12 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
           <nav id="mobile-nav" className="relative z-50 border-t border-white/[0.06] bg-[#0a0a0a] px-5 py-3 shadow-[0_24px_50px_-20px_rgba(0,0,0,0.9)] sm:px-8">
             {/* primary action first — on the narrowest phones this is the only Launch entry */}
             <button onClick={() => go("/console")} className="mb-2 mt-1 flex w-full items-center justify-center gap-2 rounded bg-gradient-to-b from-gold-300 to-gold-600 py-3 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition hover:from-gold-200 hover:to-gold-500 sm:hidden">
-              Launch Dispatch <Chevron className="h-3.5 w-3.5" />
+              {tr(locale, "cta.launch")} <Chevron className="h-3.5 w-3.5" />
             </button>
             {NAV.map(([label, to]) => (
-              <button key={to} onClick={() => go(to)} className="block w-full border-b border-white/[0.05] py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">{label}</button>
+              <button key={to} onClick={() => go(to)} className="block w-full border-b border-white/[0.05] py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">{tr(locale, label)}</button>
             ))}
-            <button onClick={() => go(PROCUREMENT_ROUTE)} className="block w-full py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">Procurement</button>
+            <button onClick={() => go(PROCUREMENT_ROUTE)} className="block w-full py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">{tr(locale, "nav.procurement")}</button>
           </nav>
         </div>
       )}

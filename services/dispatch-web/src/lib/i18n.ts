@@ -30,6 +30,12 @@ export const DEFAULT_LOCALE = "en";
 // derive from it, so nothing is advertised before it exists.
 export const ACTIVE_LOCALES = ["en", "fr"];
 
+// Derive the active locale from a path's first segment (en if none/inactive).
+export const localeFromPath = (pathname: string): string => {
+  const seg = pathname.split("/").filter(Boolean)[0];
+  return seg && ACTIVE_LOCALES.includes(seg) && seg !== DEFAULT_LOCALE ? seg : DEFAULT_LOCALE;
+};
+
 export const isLocale = (c?: string): boolean => !!c && LOCALES.some((l) => l.code === c);
 export const isActiveLocale = (c?: string): boolean => !!c && ACTIVE_LOCALES.includes(c);
 export const localeOf = (code: string): Locale => LOCALES.find((l) => l.code === code) || LOCALES[0];
@@ -56,12 +62,18 @@ const CHROME: Record<string, Dict> = {
     "concept.definition": "Definition", "concept.why": "Why it matters", "concept.how": "How Sovereign Dispatch handles it",
     "concept.faq": "Common questions", "concept.related": "Related concepts", "concept.applies": "Where this applies",
     "nav.learn": "Learn", "lang.label": "Language", "lang.readIn": "Read this in",
+    "nav.platform": "Platform", "nav.standard": "Standard", "nav.trust": "Trust",
+    "nav.developers": "Developers", "nav.pricing": "Pricing", "nav.verify": "Verify",
+    "nav.outcomes": "Outcomes", "cta.launch": "Launch Dispatch", "cta.launchShort": "Launch", "nav.menu": "Menu", "nav.procurement": "Procurement",
   },
   fr: {
     "cta.evaluate": "Commencer votre évaluation", "cta.verify": "Vérifier un acte", "cta.procurement": "Documents d'achat", "cta.seeInAction": "Voir en action",
     "concept.definition": "Définition", "concept.why": "Pourquoi c'est important", "concept.how": "Comment Sovereign Dispatch le gère",
     "concept.faq": "Questions fréquentes", "concept.related": "Concepts liés", "concept.applies": "Où cela s'applique",
     "nav.learn": "Comprendre", "lang.label": "Langue", "lang.readIn": "Lire ceci en",
+    "nav.platform": "Plateforme", "nav.standard": "Norme", "nav.trust": "Confiance",
+    "nav.developers": "Développeurs", "nav.pricing": "Tarifs", "nav.verify": "Vérifier",
+    "nav.outcomes": "Résultats", "cta.launch": "Lancer Dispatch", "cta.launchShort": "Lancer", "nav.menu": "Menu", "nav.procurement": "Achats",
   },
 };
 export const t = (locale: string, key: string): string => (CHROME[locale] && CHROME[locale][key]) || CHROME.en[key] || key;
