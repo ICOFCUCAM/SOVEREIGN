@@ -85,8 +85,11 @@ const FooterCol: React.FC<{ title: string; links: [string, string][] }> = ({ tit
 // three navigation columns) above a legal/assurance baseline. Substantial, the way
 // infrastructure footers are — not a single thin credit line.
 export const PublicFooter: React.FC = () => (
-  <footer className="border-t border-white/[0.06] px-5 py-14 sm:px-8 lg:px-12">
-    <div className="mx-auto max-w-[1500px]">
+  <footer className="relative overflow-hidden border-t border-white/[0.06] px-5 py-14 sm:px-8 lg:px-12">
+    <div className="pointer-events-none absolute -right-20 -top-24 opacity-[0.025]" aria-hidden>
+      <DispatchMark className="h-80 w-80 text-gold-400" />
+    </div>
+    <div className="relative mx-auto max-w-[1500px]">
       <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_1fr]">
         <div className="max-w-xs">
           <div className="flex items-center gap-2.5">
@@ -108,10 +111,16 @@ export const PublicFooter: React.FC = () => (
           © <span className="font-mono tracking-[0.1em]">MMXXXVI</span> Sovereign Dispatch
           <span className="text-white/25"> · </span>Institutional Publication Infrastructure
         </div>
-        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/45">
-          <span>Sovereign by design</span>
-          <span className="text-gold-400/30">·</span>
-          <span>Auditable always</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/45">
+            <span>Sovereign by design</span>
+            <span className="text-gold-400/30">·</span>
+            <span>Auditable always</span>
+          </div>
+          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="group inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 text-white/55 transition hover:border-gold-400/40 hover:text-gold-300" aria-label="Back to top">
+            <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 13V3M3 8l5-5 5 5" /></svg>
+          </button>
         </div>
       </div>
     </div>
