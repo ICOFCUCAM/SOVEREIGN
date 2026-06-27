@@ -497,6 +497,7 @@ const Landing: React.FC = () => {
         {/* ── 10 · EVALUATE — one dominant action ── */}
         <section id="evaluate" className="relative overflow-hidden px-6 py-28 lg:px-12">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_70%_at_50%_40%,rgba(233,200,120,0.07),transparent_72%)]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.03]" aria-hidden><DispatchMark className="h-[30rem] w-[30rem] text-gold-400" /></div>
           <div className="relative mx-auto max-w-2xl text-center">
             <h2 className="font-serif text-[2.7rem] font-bold leading-[1.04] tracking-tight text-[#f4efe3] sm:text-[3.8rem]">
               Prove it using your own documents.
