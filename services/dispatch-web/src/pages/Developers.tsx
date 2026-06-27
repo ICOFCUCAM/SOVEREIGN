@@ -60,8 +60,8 @@ const Developers: React.FC = () => {
         {/* ── Hero ──────────────────────────────────────────────────── */}
         <section className="border-t border-white/[0.06] px-8 py-24 lg:px-12">
           <div className="mx-auto max-w-5xl">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Developer Platform</div>
-            <h1 className="mt-4 max-w-3xl font-serif text-[2.6rem] font-bold leading-[1.05] tracking-tight sm:text-[3.2rem]">Build governance into your own systems.</h1>
+            <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Developer Platform</span></div>
+            <h1 className="mt-4 max-w-3xl font-serif text-[2.6rem] font-bold leading-[1.05] tracking-tight text-[#f4efe3] sm:text-[3.2rem]">Build governance into your own systems.</h1>
             <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-white/55">
               The <span className="text-white/80">Dispatch Platform API</span> is the governance engine behind Sovereign Dispatch. Your ERP, parliament system, SharePoint or case platform can submit a document and have it governed, certified, published and preserved as an Official Record — without anyone opening the console.
             </p>
