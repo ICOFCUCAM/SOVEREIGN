@@ -60,14 +60,14 @@ export const GovernedJourney: React.FC = () => {
   const node = NODES[active];
 
   return (
-    <section ref={ref} className="relative overflow-hidden border-y border-white/[0.06] bg-[#070707] px-6 py-24 lg:px-12">
+    <section ref={ref} className="relative overflow-hidden border-y border-white/[0.06] bg-[#070707] px-6 py-20 lg:px-12">
       {/* a soft gold horizon, brighter as the record nears the end */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_18%,rgba(233,200,120,0.07),transparent_70%)]" aria-hidden />
       <div className="relative mx-auto max-w-[1180px]">
         <div className="text-center">
           <div className="text-[11px] font-semibold uppercase tracking-[0.32em] text-gold-400">The governed journey</div>
           <h2 className="mx-auto mt-4 max-w-3xl font-serif text-[2.3rem] font-bold leading-[1.06] tracking-tight text-[#f4efe3] sm:text-[3.1rem]">
-            Watch a document<br className="hidden sm:block" /> become an institution's word.
+            Watch a draft become<br className="hidden sm:block" /> institutional authority.
           </h2>
         </div>
 
@@ -101,9 +101,13 @@ export const GovernedJourney: React.FC = () => {
         <div className="relative mx-auto mt-12 max-w-[1000px] px-2">
           <div className="relative h-px w-full bg-white/12">
             <div className="absolute left-0 top-0 h-px bg-gradient-to-r from-gold-500/40 via-gold-400 to-gold-300 transition-[width] duration-700 ease-out" style={{ width: `${pct}%` }} />
-            {/* travelling token */}
+            {/* travelling token — a document gliding the governed path */}
             <div className="absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 transition-[left] duration-700 ease-out" style={{ left: `${pct}%` }}>
-              <span className="block h-3.5 w-3.5 rounded-full bg-gold-300 shadow-[0_0_0_4px_rgba(233,200,120,0.18),0_0_22px_4px_rgba(233,200,120,0.45)]" />
+              <span className="flex h-8 w-6 items-center justify-center rounded-[3px] bg-gradient-to-b from-gold-200 to-gold-500 shadow-[0_0_0_4px_rgba(233,200,120,0.16),0_0_30px_7px_rgba(233,200,120,0.5)]">
+                <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 text-[#1c1407]" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
+                  <path d="M4 2.5h5L12 5.5V13.5H4z" /><path d="M9 2.5V6h3M6 8.5h4M6 11h4" />
+                </svg>
+              </span>
             </div>
             {/* nodes */}
             {NODES.map((n, i) => (

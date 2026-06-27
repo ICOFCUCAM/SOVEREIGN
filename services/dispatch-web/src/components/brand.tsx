@@ -149,10 +149,11 @@ export const useReveal = (): void => {
 // footer sitemap and the full mobile sheet. The mobile sheet stays comprehensive
 // (a phone has no footer in view), minus Home, which the wordmark already is.
 const DESKTOP_NAV: [string, string][] = [
+  ["Platform", PLATFORM_ROUTE],
   ["Standard", STANDARD_ROUTE],
-  ["Verify", VERIFY_ROUTE],
-  ["Pricing", PRICING_ROUTE],
+  ["Trust", TRUST_ROUTE],
   ["Developers", DEVELOPERS_ROUTE],
+  ["Pricing", PRICING_ROUTE],
 ];
 const NAV: [string, string][] = [
   ["Standard", STANDARD_ROUTE],
