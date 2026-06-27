@@ -349,9 +349,10 @@ const Landing: React.FC = () => {
               </h2>
             </div>
             <div className="stagger mt-14 grid gap-5 lg:grid-cols-3">
-              {GOVERNANCE.map((g) => (
-                <div key={g.t} className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-7">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/[0.07] text-gold-300"><Ico name={g.icon} className="h-6 w-6" /></span>
+              {GOVERNANCE.map((g, i) => (
+                <div key={g.t} className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-7 transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/25">
+                  <span className="pointer-events-none absolute right-5 top-3 font-serif text-[3.4rem] font-bold leading-none text-white/[0.05]">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/[0.07] text-gold-300"><Ico name={g.icon} className="h-6 w-6" /></span>
                   <div className="mt-5 font-serif text-[1.4rem] font-bold leading-snug text-white">{g.t}</div>
                   <p className="mt-3 text-[14px] leading-relaxed text-white/55">{g.d}</p>
                 </div>
