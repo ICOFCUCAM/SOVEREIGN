@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-06-26T09:00:42.306Z",
+ "generated_at": "2026-06-27T08:28:16.191Z",
  "hosts_used": [
   "en.wikipedia.org",
   "www.wikidata.org",
@@ -10,8 +10,8 @@
  ],
  "counts": {
   "buyers": 1482,
-  "acquisition_events": 6591,
-  "rollups": 473,
+  "acquisition_events": 6596,
+  "rollups": 475,
   "graph_edges": 123
  },
  "targets": {

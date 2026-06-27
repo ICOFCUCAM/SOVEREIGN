@@ -1,6 +1,6 @@
 {
- "as_of": "2026-06-26T09:00:42.306Z",
- "totalEvents": 3839,
+ "as_of": "2026-06-27T08:28:16.191Z",
+ "totalEvents": 3840,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1538,
+   "deals": 1539,
    "disclosedUsd": 383676561050
   },
   {
@@ -251,7 +251,7 @@
   {
    "from": "North America",
    "to": "Other",
-   "deals": 147
+   "deals": 148
   },
   {
    "from": "Other",
