@@ -1,5 +1,6 @@
 import { VALUE } from "./value";
 import { industryBySlug } from "./industries";
+import { problemBySlug } from "./problems";
 
 // Per-route <title> + meta description. Centralised so one map drives every page
 // (set client-side by <RouteMeta>; helps search engines that render JS and gives
@@ -34,6 +35,7 @@ const STATIC: Record<string, Meta> = {
   "/lifecycle": { title: "The Governed Lifecycle" + SUF, description: "Exactly what you are buying — eight governed stages, each showing who participates, the decisions made, the evidence generated and the risks prevented." },
   "/roi": { title: "Operational Model Estimator" + SUF, description: "Model the scale of governed publication from your own figures. Illustrative only — Dispatch governs the process; it never promises savings." },
   "/industries": { title: "Industries — Built for Every Institution" + SUF, description: "Sovereign Dispatch governs official publication across government, healthcare, justice, regulators, finance, defence, archives and more. Find your institution." },
+  "/learn": { title: "Knowledge — Official Publication, Governance & Proof" + SUF, description: "Authoritative references on official publication, document governance, evidence chains, cryptographic sealing and verification — what they mean, why they matter, and how institutions prove them." },
 };
 
 const DEFAULT = STATIC["/"];
@@ -49,6 +51,11 @@ export function metaForPath(path: string): Meta {
   const ind = clean.match(/^\/industries\/(.+)$/);
   if (ind) {
     const x = industryBySlug(ind[1]);
+    if (x) return { title: x.metaTitle, description: x.metaDescription };
+  }
+  const lp = clean.match(/^\/learn\/(.+)$/);
+  if (lp) {
+    const x = problemBySlug(lp[1]);
     if (x) return { title: x.metaTitle, description: x.metaDescription };
   }
   if (clean.startsWith("/verify/")) return STATIC["/verify"];

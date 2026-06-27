@@ -35,6 +35,8 @@ const Roi = lazy(() => import("./pages/Roi"));
 const ValuePage = lazy(() => import("./pages/ValuePage"));
 const Industries = lazy(() => import("./pages/Industries"));
 const IndustryPage = lazy(() => import("./pages/IndustryPage"));
+const Problems = lazy(() => import("./pages/Problems"));
+const ProblemPage = lazy(() => import("./pages/ProblemPage"));
 const Verify = lazy(() => import("./pages/Verify"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Create = lazy(() => import("./pages/Create"));
@@ -206,6 +208,9 @@ const App: React.FC = () => (
     {/* Layer 2 — industry landing pages (SEO ecosystem) */}
     <Route path="/industries" element={<Industries />} />
     <Route path="/industries/:slug" element={<IndustryPage />} />
+    {/* Layer 3 — problem / concept pages (knowledge hub) */}
+    <Route path="/learn" element={<Problems />} />
+    <Route path="/learn/:slug" element={<ProblemPage />} />
     <Route path="/verify" element={<Verify />} />
     <Route path="/verify/:recordId" element={<Verify />} />
     {/* public self-serve signup (free plan) */}

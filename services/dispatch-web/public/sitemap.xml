@@ -98,4 +98,21 @@
   <url><loc>https://dispatch.sovereigndo.com/industries/civil-registration</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/industries/notarial-authorities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/industries/accounting-standards-boards</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/official-publication</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/document-governance</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/board-resolution-software</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/government-publication-workflow</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/regulatory-publication</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/legal-publication</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/evidence-chain</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/document-authenticity</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/institutional-records</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/digital-preservation</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/document-verification</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/tamper-proof-publication</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/cryptographic-sealing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/governance-certificate</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/publication-audit</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/learn/policy-approval-workflow</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
