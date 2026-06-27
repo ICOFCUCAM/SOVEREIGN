@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./lib/auth";
 import { metaForPath } from "./lib/seo";
-import { DEFAULT_LOCALE, isActiveLocale, hreflangAlternates, localeOf, localePath } from "./lib/i18n";
+import { DEFAULT_LOCALE, isActiveLocale, hreflangAlternates, localePath } from "./lib/i18n";
 import { conceptLocales } from "./lib/translations";
 import { LocaleProvider, detectPreferredLocale } from "./lib/locale";
 import { FilmGrain } from "./components/brand";
@@ -194,19 +194,15 @@ const RouteMeta: React.FC = () => {
     setMeta("twitter:description", description);
     setLink("canonical", canonical);
 
-    // hreflang + <html lang/dir> for localized pages (concepts today; the same
-    // hook lights up every layer as translations land).
+    // hreflang for localized pages (concepts today; the same hook lights up every
+    // layer as translations land). <html lang/dir> is owned by LocaleProvider,
+    // which follows the actually-rendered locale (incl. auto-detected).
     const m = pathname.match(/^(?:\/([a-z]{2}))?\/learn\/([a-z0-9-]+)$/);
     if (m && (!m[1] || isActiveLocale(m[1]))) {
-      const locale = m[1] && isActiveLocale(m[1]) ? m[1] : DEFAULT_LOCALE;
       const alts = hreflangAlternates(`/learn/${m[2]}`, conceptLocales(m[2]));
       setAlternates(alts.length > 1 ? alts : []);
-      document.documentElement.lang = locale;
-      document.documentElement.dir = localeOf(locale).dir;
     } else {
       setAlternates([]);
-      document.documentElement.lang = "en";
-      document.documentElement.dir = "ltr";
     }
   }, [pathname]);
   return null;

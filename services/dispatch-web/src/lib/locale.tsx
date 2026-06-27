@@ -11,7 +11,7 @@
 // where one exists; it never fabricates a localized URL for untranslated content.
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { ACTIVE_LOCALES, DEFAULT_LOCALE, localeFromPath } from "./i18n";
+import { ACTIVE_LOCALES, DEFAULT_LOCALE, localeFromPath, localeOf } from "./i18n";
 
 const STORAGE_KEY = "sd.locale";
 
@@ -84,6 +84,12 @@ export const LocaleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // and wins for the chrome too; otherwise the chrome follows the preference.
   const pathLocale = localeFromPath(pathname);
   const uiLocale = pathLocale !== DEFAULT_LOCALE ? pathLocale : preferred;
+  // The document language/direction follows the rendered locale, so screen
+  // readers and the layout (RTL for Arabic) match what the visitor actually sees.
+  React.useEffect(() => {
+    document.documentElement.lang = uiLocale;
+    document.documentElement.dir = localeOf(uiLocale).dir;
+  }, [uiLocale]);
   const value = React.useMemo(() => ({ uiLocale, preferred, setLocale }), [uiLocale, preferred, setLocale]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
