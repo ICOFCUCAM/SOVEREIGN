@@ -27,4 +27,21 @@
   <url><loc>https://dispatch.sovereigndo.com/value/accelerate-execution</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/value/reduce-fragmentation</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/value/enable-services</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/government</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/healthcare</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/universities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/justice</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/regulators</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/financial-institutions</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/insurance</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/energy-utilities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/defence</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/municipalities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/ngos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/religious-institutions</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/museums</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/archives</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/pharmaceuticals</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/manufacturing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>

@@ -410,16 +410,26 @@ const Landing: React.FC = () => {
               <p className="mt-4 text-[15px] leading-relaxed text-white/55">Dispatch governs the publications your institution actually produces.</p>
             </div>
             <div className="stagger mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {INDUSTRIES.map((it) => (
-                <article key={it.slug} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/30">
-                  <SectorImage slug={it.slug} name={it.name} />
-                  <ul className="space-y-1.5 px-5 py-5">
-                    {it.types.map((t) => (
-                      <li key={t} className="flex items-center gap-2.5 text-[13.5px] text-white/70"><span className="h-1 w-1 shrink-0 rounded-full bg-gold-400/70" />{t}</li>
-                    ))}
-                  </ul>
-                </article>
-              ))}
+              {INDUSTRIES.map((it) => {
+                const slug = ({ enterprise: "financial-institutions" } as Record<string, string>)[it.slug] || it.slug;
+                return (
+                  <button key={it.slug} onClick={() => nav(`/industries/${slug}`)}
+                    className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] text-left transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/30">
+                    <SectorImage slug={it.slug} name={it.name} />
+                    <ul className="space-y-1.5 px-5 py-5">
+                      {it.types.map((t) => (
+                        <li key={t} className="flex items-center gap-2.5 text-[13.5px] text-white/70"><span className="h-1 w-1 shrink-0 rounded-full bg-gold-400/70" />{t}</li>
+                      ))}
+                      <li className="flex items-center gap-1.5 pt-1 text-[12px] font-semibold uppercase tracking-wide text-gold-400/80 transition group-hover:text-gold-300">Dispatch for {it.name} <Chevron className="h-3 w-3 transition group-hover:translate-x-0.5" /></li>
+                    </ul>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-10">
+              <button onClick={() => nav("/industries")} className="group inline-flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-wide text-gold-400 transition hover:text-gold-300">
+                View all industries <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+              </button>
             </div>
           </div>
         </section>

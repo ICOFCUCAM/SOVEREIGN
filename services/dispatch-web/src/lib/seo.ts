@@ -1,4 +1,5 @@
 import { VALUE } from "./value";
+import { industryBySlug } from "./industries";
 
 // Per-route <title> + meta description. Centralised so one map drives every page
 // (set client-side by <RouteMeta>; helps search engines that render JS and gives
@@ -32,6 +33,7 @@ const STATIC: Record<string, Meta> = {
   "/cost-of-publication": { title: "The Cost of an Official Publication" + SUF, description: "Why Dispatch exists — an official publication is the output of a long, fragmented, costly institutional process. See it honestly, then unified into one governed record." },
   "/lifecycle": { title: "The Governed Lifecycle" + SUF, description: "Exactly what you are buying — eight governed stages, each showing who participates, the decisions made, the evidence generated and the risks prevented." },
   "/roi": { title: "Operational Model Estimator" + SUF, description: "Model the scale of governed publication from your own figures. Illustrative only — Dispatch governs the process; it never promises savings." },
+  "/industries": { title: "Industries — Built for Every Institution" + SUF, description: "Sovereign Dispatch governs official publication across government, healthcare, justice, regulators, finance, defence, archives and more. Find your institution." },
 };
 
 const DEFAULT = STATIC["/"];
@@ -43,6 +45,11 @@ export function metaForPath(path: string): Meta {
   if (m) {
     const v = VALUE.find((x) => x.slug === m[1]);
     if (v) return { title: v.title + SUF, description: v.teaser };
+  }
+  const ind = clean.match(/^\/industries\/(.+)$/);
+  if (ind) {
+    const x = industryBySlug(ind[1]);
+    if (x) return { title: x.metaTitle, description: x.metaDescription };
   }
   if (clean.startsWith("/verify/")) return STATIC["/verify"];
   return DEFAULT;

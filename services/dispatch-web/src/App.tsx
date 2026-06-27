@@ -33,6 +33,8 @@ const CostOfPublication = lazy(() => import("./pages/CostOfPublication"));
 const Lifecycle = lazy(() => import("./pages/Lifecycle"));
 const Roi = lazy(() => import("./pages/Roi"));
 const ValuePage = lazy(() => import("./pages/ValuePage"));
+const Industries = lazy(() => import("./pages/Industries"));
+const IndustryPage = lazy(() => import("./pages/IndustryPage"));
 const Verify = lazy(() => import("./pages/Verify"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Create = lazy(() => import("./pages/Create"));
@@ -201,6 +203,9 @@ const App: React.FC = () => (
     <Route path="/roi" element={<Roi />} />
     {/* financial-value detail pages (7), introduced on the homepage */}
     <Route path="/value/:slug" element={<ValuePage />} />
+    {/* Layer 2 — industry landing pages (SEO ecosystem) */}
+    <Route path="/industries" element={<Industries />} />
+    <Route path="/industries/:slug" element={<IndustryPage />} />
     <Route path="/verify" element={<Verify />} />
     <Route path="/verify/:recordId" element={<Verify />} />
     {/* public self-serve signup (free plan) */}
