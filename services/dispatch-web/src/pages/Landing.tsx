@@ -215,7 +215,7 @@ const Landing: React.FC = () => {
             <h2 className="mt-5 max-w-4xl font-serif text-[2.8rem] font-bold leading-[1.02] tracking-[-0.02em] text-[#f6f1e6] [text-shadow:0_2px_30px_rgba(0,0,0,0.55)] sm:text-[4.2rem] lg:text-[5rem]">
               Governing the world's most important decisions.
             </h2>
-            <p className="mt-7 max-w-xl text-[19px] leading-relaxed text-white/70">
+            <p className="mt-7 max-w-xl text-[19px] leading-relaxed text-white/75 [text-shadow:0_1px_16px_rgba(0,0,0,0.5)]">
               Documents inform. Institutions govern. Official publications <span className="text-gold-300">prove it</span>.
             </p>
             <div className="mt-12 grid max-w-3xl gap-3 sm:grid-cols-3">
