@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
-import { PublicHeader, PublicFooter, FilmGrain, Chevron, useReveal } from "../components/brand";
+import { PublicHeader, PublicFooter, FilmGrain, Chevron, useReveal, ReadingProgress, useScrollSpy } from "../components/brand";
 import { ARTICLES, LIBRARY_BASE, articleBySlug } from "../lib/library";
 import { problemBySlug, PROBLEMS_BASE } from "../lib/problems";
 import { industryBySlug, INDUSTRIES_BASE } from "../lib/industries";
@@ -20,6 +20,8 @@ const ArticlePage: React.FC = () => {
   useReveal();
   const a = articleBySlug(slug);
   React.useEffect(() => { if (a) track("page.library", { slug: a.slug }); }, [a]);
+  const tocIds = React.useMemo(() => a ? [...a.sections.map((s) => anchor(s.h)), "faq"] : [], [a]);
+  const activeId = useScrollSpy(tocIds);
   if (!a) return <Navigate to={LIBRARY_BASE} replace />;
 
   const url = `https://dispatch.sovereigndo.com${LIBRARY_BASE}/${a.slug}`;
@@ -57,6 +59,7 @@ const ArticlePage: React.FC = () => {
     <div className="relative min-h-full bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth} .prose-sd p{margin-top:1rem}`}</style>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <ReadingProgress />
       <FilmGrain />
       <PublicHeader />
       <main>
@@ -83,12 +86,16 @@ const ArticlePage: React.FC = () => {
             <div className="sticky top-24">
               <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">On this page</div>
               <ul className="mt-4 space-y-2.5 border-l border-white/10">
-                {a.sections.map((s) => (
-                  <li key={s.h}>
-                    <a href={`#${anchor(s.h)}`} className="block border-l border-transparent -ml-px pl-4 text-[13px] leading-snug text-white/50 transition hover:border-gold-400/60 hover:text-gold-200">{s.h}</a>
-                  </li>
-                ))}
-                <li><a href="#faq" className="block border-l border-transparent -ml-px pl-4 text-[13px] leading-snug text-white/50 transition hover:border-gold-400/60 hover:text-gold-200">Common questions</a></li>
+                {a.sections.map((s) => {
+                  const id = anchor(s.h);
+                  const on = activeId === id;
+                  return (
+                    <li key={s.h}>
+                      <a href={`#${id}`} aria-current={on ? "true" : undefined} className={`block border-l -ml-px pl-4 text-[13px] leading-snug transition hover:border-gold-400/60 hover:text-gold-200 ${on ? "border-gold-400 font-semibold text-gold-200" : "border-transparent text-white/50"}`}>{s.h}</a>
+                    </li>
+                  );
+                })}
+                <li><a href="#faq" aria-current={activeId === "faq" ? "true" : undefined} className={`block border-l -ml-px pl-4 text-[13px] leading-snug transition hover:border-gold-400/60 hover:text-gold-200 ${activeId === "faq" ? "border-gold-400 font-semibold text-gold-200" : "border-transparent text-white/50"}`}>Common questions</a></li>
               </ul>
             </div>
           </aside>

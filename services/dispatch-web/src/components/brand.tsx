@@ -160,6 +160,48 @@ export const useReveal = (): void => {
   }, []);
 };
 
+// A thin scroll-linked progress bar pinned under the header — the small,
+// expected cue that you are reading a substantial, finished document. Respects
+// reduced-motion by simply tracking position (no animation of its own).
+export const ReadingProgress: React.FC = () => {
+  const [pct, setPct] = React.useState(0);
+  React.useEffect(() => {
+    const onScroll = () => {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      setPct(max > 0 ? Math.min(100, (h.scrollTop / max) * 100) : 0);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
+  }, []);
+  return (
+    <div className="no-print fixed inset-x-0 top-0 z-[60] h-0.5 bg-transparent" aria-hidden>
+      <div className="h-full bg-gradient-to-r from-gold-500/70 to-gold-300 transition-[width] duration-100 ease-out" style={{ width: `${pct}%` }} />
+    </div>
+  );
+};
+
+// Scroll-spy: given an ordered list of element ids, return the id of the
+// section currently in view so a table of contents can highlight it. Used by
+// long-form pages (articles, docs) to keep the reader oriented.
+export const useScrollSpy = (ids: string[]): string => {
+  const [active, setActive] = React.useState(ids[0] || "");
+  React.useEffect(() => {
+    if (!ids.length) return;
+    const els = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+    if (!els.length) return;
+    const io = new IntersectionObserver((entries) => {
+      const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (visible[0]) setActive(visible[0].target.id);
+    }, { rootMargin: "-20% 0px -70% 0px", threshold: 0 });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [ids.join("|")]);
+  return active;
+};
+
 // Two navigations from one source. The desktop bar is deliberately lean — a
 // premium header guides toward the single action (Launch), so it carries only
 // the four destinations an evaluator reaches for; everything else lives in the
