@@ -42,3 +42,23 @@ const PRICING: Record<string, PricingCopy> = {
 };
 export const usePricingCopy = (): PricingCopy => PRICING[useUiLocale()] || PRICING_EN;
 export type { PricingCopy };
+
+// ── Marketing pages (Trust, Platform, Standard) ──────────────────────────────
+import { MARKETING_EN, type MarketingCopy } from "./marketing";
+import { MARKETING_FR } from "./marketing.fr";
+import { MARKETING_ES } from "./marketing.es";
+import { MARKETING_DE } from "./marketing.de";
+import { MARKETING_NO } from "./marketing.no";
+import { MARKETING_PT } from "./marketing.pt";
+import { MARKETING_IT } from "./marketing.it";
+import { MARKETING_NL } from "./marketing.nl";
+import { MARKETING_AR } from "./marketing.ar";
+import { MARKETING_JA } from "./marketing.ja";
+import { MARKETING_ZH } from "./marketing.zh";
+
+const MARKETING: Record<string, MarketingCopy> = {
+  en: MARKETING_EN, fr: MARKETING_FR, es: MARKETING_ES, de: MARKETING_DE, no: MARKETING_NO,
+  pt: MARKETING_PT, it: MARKETING_IT, nl: MARKETING_NL, ar: MARKETING_AR, ja: MARKETING_JA, zh: MARKETING_ZH,
+};
+export const useMarketingCopy = (): MarketingCopy => MARKETING[useUiLocale()] || MARKETING_EN;
+export type { MarketingCopy };
