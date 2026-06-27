@@ -372,7 +372,8 @@ const Landing: React.FC = () => {
               <h2 className="mt-5 font-serif text-[2.3rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3rem]">What your institution gains.</h2>
             </div>
             <button onClick={() => nav(`${VALUE_BASE}/${OUTCOMES[0].slug}`)}
-              className="group mt-12 flex w-full flex-col items-start gap-5 rounded-2xl border border-gold-400/20 bg-gradient-to-br from-gold-400/[0.06] to-transparent p-8 text-left transition hover:border-gold-400/40 sm:flex-row sm:items-center sm:gap-8">
+              className="group relative mt-12 flex w-full flex-col items-start gap-5 overflow-hidden rounded-2xl border border-gold-400/20 bg-gradient-to-br from-gold-400/[0.06] to-transparent p-8 text-left transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/40 sm:flex-row sm:items-center sm:gap-8">
+              <span className="pointer-events-none absolute inset-y-7 left-0 w-1 rounded-r bg-gradient-to-b from-gold-300 to-gold-500/30" aria-hidden />
               <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-gold-400/30 bg-gold-400/[0.08] text-gold-300"><Ico name={OUTCOMES[0].icon} className="h-7 w-7" /></span>
               <span className="flex-1">
                 <span className="font-serif text-[1.6rem] font-bold leading-snug text-white sm:text-[2rem]">{OUTCOMES[0].lead}</span>
