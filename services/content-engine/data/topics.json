@@ -65,5 +65,95 @@
     "createdAt": "2026-06-27",
     "updatedAt": "2026-06-27",
     "reviewEveryDays": 180
+  },
+  {
+    "status": "idea",
+    "locale": "en",
+    "type": "article",
+    "priority": 3,
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-06-27",
+    "reviewEveryDays": 180,
+    "id": "article-clinical-trial-master-file-integrity",
+    "title": "Clinical Trial Master File Integrity",
+    "keywords": [
+      "clinical trial master file integrity"
+    ],
+    "source": "seo-discovery"
+  },
+  {
+    "status": "idea",
+    "locale": "en",
+    "type": "article",
+    "priority": 3,
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-06-27",
+    "reviewEveryDays": 180,
+    "id": "article-public-tender-award-transparency",
+    "title": "Public Tender Award Transparency",
+    "keywords": [
+      "public tender award transparency"
+    ],
+    "source": "seo-discovery"
+  },
+  {
+    "status": "idea",
+    "locale": "en",
+    "type": "concept",
+    "priority": 2,
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-06-27",
+    "reviewEveryDays": 180,
+    "id": "concept-academic-transcript-verification",
+    "title": "Academic Transcript Verification",
+    "keywords": [
+      "academic transcript verification"
+    ],
+    "source": "seo-discovery"
+  },
+  {
+    "status": "idea",
+    "locale": "en",
+    "type": "concept",
+    "priority": 3,
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-06-27",
+    "reviewEveryDays": 180,
+    "id": "concept-freedom-of-information-publishing",
+    "title": "Freedom Of Information Publishing",
+    "keywords": [
+      "freedom of information publishing"
+    ],
+    "source": "seo-discovery"
+  },
+  {
+    "status": "idea",
+    "locale": "en",
+    "type": "concept",
+    "priority": 2,
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-06-27",
+    "reviewEveryDays": 180,
+    "id": "concept-notary-digital-seal",
+    "title": "Notary Digital Seal",
+    "keywords": [
+      "notary digital seal"
+    ],
+    "source": "seo-discovery"
+  },
+  {
+    "status": "idea",
+    "locale": "en",
+    "type": "concept",
+    "priority": 4,
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-06-27",
+    "reviewEveryDays": 180,
+    "id": "concept-regulatory-sandbox-documentation",
+    "title": "Regulatory Sandbox Documentation",
+    "keywords": [
+      "regulatory sandbox documentation"
+    ],
+    "source": "seo-discovery"
   }
 ]

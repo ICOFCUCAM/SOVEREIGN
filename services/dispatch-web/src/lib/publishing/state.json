@@ -9,7 +9,7 @@
     "total": 418
   },
   "topics": {
-    "count": 3,
+    "count": 9,
     "states": [
       "idea",
       "queued",
@@ -22,7 +22,7 @@
       "retired"
     ],
     "byState": {
-      "idea": 1,
+      "idea": 7,
       "queued": 0,
       "drafting": 0,
       "in_review": 1,
@@ -73,6 +73,90 @@
         "priority": 1,
         "keywords": [],
         "source": "manual",
+        "updatedAt": "2026-06-27",
+        "reviewEveryDays": 180
+      },
+      {
+        "id": "article-clinical-trial-master-file-integrity",
+        "title": "Clinical Trial Master File Integrity",
+        "type": "article",
+        "status": "idea",
+        "locale": "en",
+        "priority": 3,
+        "keywords": [
+          "clinical trial master file integrity"
+        ],
+        "source": "seo-discovery",
+        "updatedAt": "2026-06-27",
+        "reviewEveryDays": 180
+      },
+      {
+        "id": "article-public-tender-award-transparency",
+        "title": "Public Tender Award Transparency",
+        "type": "article",
+        "status": "idea",
+        "locale": "en",
+        "priority": 3,
+        "keywords": [
+          "public tender award transparency"
+        ],
+        "source": "seo-discovery",
+        "updatedAt": "2026-06-27",
+        "reviewEveryDays": 180
+      },
+      {
+        "id": "concept-academic-transcript-verification",
+        "title": "Academic Transcript Verification",
+        "type": "concept",
+        "status": "idea",
+        "locale": "en",
+        "priority": 2,
+        "keywords": [
+          "academic transcript verification"
+        ],
+        "source": "seo-discovery",
+        "updatedAt": "2026-06-27",
+        "reviewEveryDays": 180
+      },
+      {
+        "id": "concept-freedom-of-information-publishing",
+        "title": "Freedom Of Information Publishing",
+        "type": "concept",
+        "status": "idea",
+        "locale": "en",
+        "priority": 3,
+        "keywords": [
+          "freedom of information publishing"
+        ],
+        "source": "seo-discovery",
+        "updatedAt": "2026-06-27",
+        "reviewEveryDays": 180
+      },
+      {
+        "id": "concept-notary-digital-seal",
+        "title": "Notary Digital Seal",
+        "type": "concept",
+        "status": "idea",
+        "locale": "en",
+        "priority": 2,
+        "keywords": [
+          "notary digital seal"
+        ],
+        "source": "seo-discovery",
+        "updatedAt": "2026-06-27",
+        "reviewEveryDays": 180
+      },
+      {
+        "id": "concept-regulatory-sandbox-documentation",
+        "title": "Regulatory Sandbox Documentation",
+        "type": "concept",
+        "status": "idea",
+        "locale": "en",
+        "priority": 4,
+        "keywords": [
+          "regulatory sandbox documentation"
+        ],
+        "source": "seo-discovery",
         "updatedAt": "2026-06-27",
         "reviewEveryDays": 180
       }
