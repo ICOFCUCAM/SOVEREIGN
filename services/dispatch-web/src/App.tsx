@@ -1,9 +1,11 @@
 import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "./lib/auth";
 import { metaForPath } from "./lib/seo";
-import { DEFAULT_LOCALE, isActiveLocale, hreflangAlternates, localeOf } from "./lib/i18n";
+import { DEFAULT_LOCALE, isActiveLocale, hreflangAlternates, localeOf, localePath } from "./lib/i18n";
 import { conceptLocales } from "./lib/translations";
+import { LocaleProvider, detectPreferredLocale } from "./lib/locale";
 import { FilmGrain } from "./components/brand";
 import { BillingProvider } from "./lib/upsell";
 
@@ -220,9 +222,31 @@ const PageLoader: React.FC = () => (
   </div>
 );
 
+// One-time, on first load: if the visitor's detected locale (browser → country)
+// has a real translation of the page they landed on, serve it. Only fires for
+// pages that genuinely exist in that locale (concept pages today); never
+// fabricates a localized URL. Runs once so it never fights later navigation.
+const LocaleBootstrap: React.FC = () => {
+  const { pathname } = useLocation();
+  const nav = useNavigate();
+  const done = React.useRef(false);
+  React.useEffect(() => {
+    if (done.current) return;
+    done.current = true;
+    const m = pathname.match(/^\/learn\/([a-z0-9-]+)$/); // bare (English) concept URL
+    if (!m) return;
+    const pref = detectPreferredLocale();
+    if (pref !== DEFAULT_LOCALE && conceptLocales(m[1]).includes(pref)) {
+      nav(localePath(pref, `/learn/${m[1]}`), { replace: true });
+    }
+  }, [pathname, nav]);
+  return null;
+};
+
 const App: React.FC = () => (
-  <>
+  <LocaleProvider>
   <RouteMeta />
+  <LocaleBootstrap />
   <Suspense fallback={<PageLoader />}>
   <Routes>
     {/* public marketing landing — the front door */}
@@ -282,7 +306,7 @@ const App: React.FC = () => (
     <Route path="*" element={<NotFound />} />
   </Routes>
   </Suspense>
-  </>
+  </LocaleProvider>
 );
 
 export default App;

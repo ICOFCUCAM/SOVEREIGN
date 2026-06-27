@@ -1,7 +1,8 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { localeFromPath, t as tr, ACTIVE_LOCALES, DEFAULT_LOCALE, localeOf, localePath } from "../lib/i18n";
+import { t as tr, ACTIVE_LOCALES, DEFAULT_LOCALE, localeOf, localePath } from "../lib/i18n";
 import { conceptLocales } from "../lib/translations";
+import { useUiLocale, usePreferredLocale } from "../lib/locale";
 import {
   PLATFORM_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE, DEVELOPERS_ROUTE,
   PROCUREMENT_ROUTE, PRICING_ROUTE, ARCHITECTURE_ROUTE, EVIDENCE_ROUTE, TRUST_ROUTE,
@@ -215,7 +216,8 @@ const CONCEPT_RE = /^\/(?:([a-z]{2})\/)?learn\/([a-z0-9-]+)$/;
 export const LanguageMenu: React.FC<{ align?: "left" | "right" }> = ({ align = "right" }) => {
   const nav = useNavigate();
   const { pathname } = useLocation();
-  const locale = localeFromPath(pathname);
+  const locale = useUiLocale();
+  const { setLocale } = usePreferredLocale();
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -235,7 +237,7 @@ export const LanguageMenu: React.FC<{ align?: "left" | "right" }> = ({ align = "
     }
     return code === DEFAULT_LOCALE ? "/" : localePath(code, `${LEARN_ROUTE}/official-publication`);
   };
-  const go = (code: string) => { setOpen(false); nav(target(code)); };
+  const go = (code: string) => { setOpen(false); setLocale(code); nav(target(code)); };
   const current = localeOf(locale);
 
   return (
@@ -267,7 +269,7 @@ export const LanguageMenu: React.FC<{ align?: "left" | "right" }> = ({ align = "
 export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions }) => {
   const nav = useNavigate();
   const pathname = useLocation().pathname;
-  const locale = localeFromPath(pathname);
+  const locale = useUiLocale();
   const [open, setOpen] = React.useState(false);
   const go = (to: string) => { setOpen(false); nav(to); };
   // "You are here" — a nav item is active on its exact route or any child route
