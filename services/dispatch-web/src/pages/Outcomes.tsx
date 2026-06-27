@@ -57,7 +57,7 @@ const Outcomes: React.FC = () => {
             sub="A different official act in each — the same enforced path from drafting to permanent record." />
           <div className="mx-auto mt-14 max-w-5xl space-y-4">
             {SCENARIOS.map((s) => (
-              <div key={s.who} className="reveal rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+              <div key={s.who} className="reveal rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/25">
                 <div className="mb-4 flex items-baseline gap-3"><span className="text-[12px] font-semibold uppercase tracking-[0.2em] text-gold-400">{s.who}</span><span className="text-base font-semibold text-white">{s.what}</span></div>
                 <div className="flex flex-wrap items-center gap-2">
                   {s.flow.map((step, i) => (

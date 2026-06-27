@@ -10,7 +10,7 @@ const Field: React.FC<{ k: string; v: string; mono?: boolean }> = ({ k, v, mono 
   <div className="flex justify-between gap-4 border-b border-black/5 py-1.5 last:border-0"><span className="text-[11px] uppercase tracking-wide text-black/40">{k}</span><span className={`text-right text-[12px] font-medium text-black/80 ${mono ? "font-mono" : ""}`}>{v}</span></div>
 );
 const Specimen: React.FC<{ title: string; accent: string; children: React.ReactNode }> = ({ title, accent, children }) => (
-  <div className="reveal overflow-hidden rounded-xl bg-[#f7f6f2] text-black shadow-[0_20px_60px_-30px_rgba(0,0,0,0.7)] ring-1 ring-black/10">
+  <div className="reveal overflow-hidden rounded-xl bg-[#f7f6f2] text-black shadow-[0_20px_60px_-30px_rgba(0,0,0,0.7)] ring-1 ring-black/10 transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)]">
     <div className="flex items-center justify-between px-5 py-3" style={{ background: accent }}>
       <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">{title}</span>
       <span className="text-[10px] font-semibold uppercase tracking-wide text-white/70">Specimen</span>
