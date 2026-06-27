@@ -121,7 +121,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "financial-institutions",
     name: "Financial Institutions",
     forLabel: "for Banks & Financial Institutions",
-    banner: "enterprise",
+    banner: "financial-institutions",
     headline: "Govern board resolutions, policies and regulatory filings as Official Records.",
     intro:
       "Banks operate under constant scrutiny, where a board resolution or policy must be provably the version that was approved. Sovereign Dispatch governs every institutional decision through an enforced approval chain and seals it for audit and examination.",
@@ -140,7 +140,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "insurance",
     name: "Insurance",
     forLabel: "for Insurance",
-    banner: "enterprise",
+    banner: "insurance",
     headline: "Govern policy wordings, regulatory notices and board decisions with provable authority.",
     intro:
       "Insurance rests on the precise, authoritative version of a policy or determination. Sovereign Dispatch governs every wording, notice and decision and seals it as a verifiable Official Record — so the version relied upon is provably the version that was approved.",
@@ -159,7 +159,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "energy-utilities",
     name: "Energy & Utilities",
     forLabel: "for Energy & Utilities",
-    banner: "enterprise",
+    banner: "energy-utilities",
     headline: "Govern safety directives, tariff decisions and regulatory filings as Official Records.",
     intro:
       "Energy and utility operators issue safety-critical directives and regulated decisions that must be provably authorised. Sovereign Dispatch governs each one through its approval chain and preserves it as a verifiable, tamper-evident Official Record.",
@@ -178,7 +178,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "defence",
     name: "Defence",
     forLabel: "for Defence",
-    banner: "government",
+    banner: "defence",
     headline: "Govern directives, doctrine and orders with sovereign control and provable authority.",
     intro:
       "Defence institutions issue directives and doctrine where authenticity, classification and sovereignty are non-negotiable. Sovereign Dispatch governs each publication under classification and clearance controls and preserves it within sovereign boundaries.",
@@ -197,7 +197,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "municipalities",
     name: "Municipalities",
     forLabel: "for Municipalities & Local Government",
-    banner: "government",
+    banner: "municipalities",
     headline: "Govern by-laws, council resolutions and public notices as verifiable Official Records.",
     intro:
       "Local government issues by-laws, resolutions and notices that residents and courts must be able to trust. Sovereign Dispatch governs each one through its approval chain and makes it permanently verifiable by anyone.",
@@ -216,7 +216,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "ngos",
     name: "NGOs",
     forLabel: "for NGOs & Non-Profits",
-    banner: "enterprise",
+    banner: "ngos",
     headline: "Govern board resolutions, grant decisions and policies with donor-grade provenance.",
     intro:
       "NGOs answer to donors, regulators and the public, where governance and provenance build trust. Sovereign Dispatch governs every board decision, grant approval and policy as a certified, verifiable Official Record.",
@@ -235,7 +235,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "religious-institutions",
     name: "Religious Institutions",
     forLabel: "for Churches & Religious Institutions",
-    banner: "government",
+    banner: "religious-institutions",
     headline: "Govern doctrinal decisions, canonical records and official statements as Official Records.",
     intro:
       "Religious institutions hold records and decisions that must endure for generations and remain provably authentic. Sovereign Dispatch governs each canonical decision and official statement and preserves it as a permanent, verifiable Official Record.",
@@ -254,7 +254,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "museums",
     name: "Museums",
     forLabel: "for Museums & Cultural Institutions",
-    banner: "universities",
+    banner: "museums",
     headline: "Govern acquisition, provenance and deaccession decisions as Official Records.",
     intro:
       "Museums live and die by provenance. Sovereign Dispatch governs every acquisition, loan and deaccession decision through an approval chain and seals it as a permanent, verifiable record of institutional authority.",
@@ -273,7 +273,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "archives",
     name: "National Archives",
     forLabel: "for Archives & Records Authorities",
-    banner: "government",
+    banner: "archives",
     headline: "Preserve the nation's records with tamper-evident, permanently verifiable integrity.",
     intro:
       "An archive's mandate is to keep records that can be proven authentic indefinitely. Sovereign Dispatch seals every record with a preservation certificate and a SHA-256 integrity proof, and makes it independently verifiable for its full retention life.",
@@ -292,7 +292,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "pharmaceuticals",
     name: "Pharmaceuticals",
     forLabel: "for Pharmaceuticals",
-    banner: "healthcare",
+    banner: "pharmaceuticals",
     headline: "Govern regulatory submissions, SOPs and safety notices with audit-ready provenance.",
     intro:
       "Pharmaceutical governance is unforgiving: the version of an SOP, submission or safety notice that was approved must be provable. Sovereign Dispatch governs each one through an enforced approval chain and seals it for inspection.",
@@ -311,7 +311,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "manufacturing",
     name: "Manufacturing",
     forLabel: "for Manufacturing",
-    banner: "enterprise",
+    banner: "manufacturing",
     headline: "Govern quality standards, safety directives and board decisions as Official Records.",
     intro:
       "Manufacturers depend on the precise, authorised version of a standard or directive reaching the floor. Sovereign Dispatch governs every quality standard, safety directive and decision and seals it as a verifiable Official Record.",
