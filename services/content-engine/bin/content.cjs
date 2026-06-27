@@ -30,6 +30,7 @@ const graph = require("../lib/graph.cjs");
 const pipeline = require("../lib/pipeline.cjs");
 const discover = require("../lib/discover.cjs");
 const versioning = require("../lib/versioning.cjs");
+const snapshot = require("../lib/snapshot.cjs");
 
 const args = process.argv.slice(2);
 const flag = (n, d) => { const i = args.indexOf(`--${n}`); return i >= 0 ? (args[i + 1] && !args[i + 1].startsWith("--") ? args[i + 1] : true) : d; };
@@ -103,6 +104,17 @@ async function main() {
       const re = new RegExp(`^${glob}-\\d+\\.json$`); const files = fs.readdirSync(arg2).filter((f) => re.test(f)).sort();
       const raw = []; files.forEach((f) => { try { const a = JSON.parse(fs.readFileSync(`${arg2}/${f}`, "utf8")); if (Array.isArray(a)) { raw.push(...a); console.log(`${f}: ${a.length}`); } } catch (e) { console.error(`SKIP ${f}: ${e.message}`); } });
       J(stages.mergeEntries(sub, raw));
+      break;
+    }
+    case "export": {
+      // Assemble the full platform state and write it where the web CMS reads it.
+      const state = snapshot.build();
+      const out = D.path.join(D.WEB, "src/lib/publishing/state.json");
+      D.fs.mkdirSync(D.path.dirname(out), { recursive: true });
+      D.fs.writeFileSync(out, JSON.stringify(state, null, 2) + "\n");
+      console.log(`exported platform state → ${out}`);
+      console.log(`  ${state.totals.total} pages · ${state.topics.count} topics · ${state.graph.nodes} nodes / ${state.graph.edges} edges · ${state.graph.orphanCount} orphans`);
+      console.log(`  languages active: ${state.languages.active.join(", ")} · sitemap urls: ${state.distribution.sitemap.urls} · rss items: ${state.distribution.rss.items}`);
       break;
     }
     case "feeds": case "sitemap": J(seo.feeds()); break;

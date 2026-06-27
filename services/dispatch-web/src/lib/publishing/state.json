@@ -1,0 +1,321 @@
+{
+  "generatedAt": "2026-06-27",
+  "origin": "https://dispatch.sovereigndo.com",
+  "totals": {
+    "industries": 70,
+    "concepts": 300,
+    "articles": 39,
+    "docs": 9,
+    "total": 418
+  },
+  "topics": {
+    "count": 3,
+    "states": [
+      "idea",
+      "queued",
+      "drafting",
+      "in_review",
+      "approved",
+      "published",
+      "live",
+      "needs_refresh",
+      "retired"
+    ],
+    "byState": {
+      "idea": 1,
+      "queued": 0,
+      "drafting": 0,
+      "in_review": 1,
+      "approved": 0,
+      "published": 0,
+      "live": 1,
+      "needs_refresh": 0,
+      "retired": 0
+    },
+    "list": [
+      {
+        "id": "concept-proof-of-authorship",
+        "title": "Proof of Authorship",
+        "type": "concept",
+        "status": "in_review",
+        "locale": "en",
+        "priority": 2,
+        "keywords": [
+          "proof of authorship",
+          "who wrote a document",
+          "authorship verification"
+        ],
+        "source": "manual",
+        "updatedAt": "2026-06-27",
+        "reviewEveryDays": 180
+      },
+      {
+        "id": "article-wet-signature-vs-digital",
+        "title": "Wet Signature vs Digital Signature: A Practical Comparison",
+        "type": "article",
+        "status": "idea",
+        "locale": "en",
+        "priority": 3,
+        "keywords": [
+          "wet signature vs digital signature",
+          "is a digital signature legal"
+        ],
+        "source": "manual",
+        "updatedAt": "2026-06-27",
+        "reviewEveryDays": 365
+      },
+      {
+        "id": "concept-official-publication",
+        "title": "Official Publication",
+        "type": "concept",
+        "status": "live",
+        "locale": "en",
+        "priority": 1,
+        "keywords": [],
+        "source": "manual",
+        "updatedAt": "2026-06-27",
+        "reviewEveryDays": 180
+      }
+    ]
+  },
+  "review": {
+    "pending": [
+      {
+        "id": "concept-proof-of-authorship",
+        "title": "Proof of Authorship",
+        "type": "concept"
+      }
+    ]
+  },
+  "authoring": {
+    "parallel": true,
+    "providers": [
+      {
+        "name": "mock",
+        "live": true,
+        "kind": "deterministic"
+      },
+      {
+        "name": "harness",
+        "live": true,
+        "kind": "agent-protocol"
+      },
+      {
+        "name": "anthropic",
+        "live": false,
+        "kind": "api-adapter"
+      },
+      {
+        "name": "openai",
+        "live": false,
+        "kind": "api-adapter"
+      }
+    ]
+  },
+  "quality": {
+    "gate": 70,
+    "factVerification": true,
+    "scorer": "stages.qualityScore (length, structure, link density, fact flags)"
+  },
+  "graph": {
+    "nodes": 418,
+    "edges": 2927,
+    "byType": {
+      "industry": 70,
+      "concept": 300,
+      "article": 39,
+      "doc": 9
+    },
+    "orphanCount": 0,
+    "orphans": [],
+    "hubs": [
+      "industry:government (203 in)",
+      "industry:regulators (166 in)",
+      "industry:financial-institutions (138 in)",
+      "industry:justice (75 in)",
+      "industry:universities (62 in)",
+      "industry:archives (62 in)",
+      "industry:central-banks (62 in)",
+      "concept:document-authenticity (48 in)",
+      "concept:official-publication (47 in)",
+      "industry:national-libraries (45 in)"
+    ]
+  },
+  "schema": {
+    "types": [
+      "concept",
+      "article"
+    ],
+    "emits": {
+      "concept": [
+        "Article",
+        "DefinedTerm",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "article": [
+        "Article",
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "industry": [
+        "Service",
+        "BreadcrumbList"
+      ],
+      "doc": [
+        "TechArticle",
+        "BreadcrumbList"
+      ]
+    }
+  },
+  "versions": {
+    "records": 0,
+    "due": []
+  },
+  "languages": {
+    "totalConcepts": 300,
+    "active": [
+      "en",
+      "fr"
+    ],
+    "targets": [
+      {
+        "code": "en",
+        "name": "English",
+        "dir": "ltr",
+        "default": true
+      },
+      {
+        "code": "fr",
+        "name": "Français",
+        "dir": "ltr"
+      },
+      {
+        "code": "es",
+        "name": "Español",
+        "dir": "ltr"
+      },
+      {
+        "code": "de",
+        "name": "Deutsch",
+        "dir": "ltr"
+      },
+      {
+        "code": "ar",
+        "name": "العربية",
+        "dir": "rtl"
+      },
+      {
+        "code": "pt",
+        "name": "Português",
+        "dir": "ltr"
+      },
+      {
+        "code": "no",
+        "name": "Norsk",
+        "dir": "ltr"
+      },
+      {
+        "code": "nl",
+        "name": "Nederlands",
+        "dir": "ltr"
+      },
+      {
+        "code": "it",
+        "name": "Italiano",
+        "dir": "ltr"
+      },
+      {
+        "code": "ja",
+        "name": "日本語",
+        "dir": "ltr"
+      },
+      {
+        "code": "zh",
+        "name": "中文",
+        "dir": "ltr"
+      }
+    ],
+    "coverage": {
+      "fr": 4
+    },
+    "note": "A page exists in a locale only when a real translation exists; hreflang derives from this."
+  },
+  "pipeline": {
+    "stages": [
+      "author",
+      "factCheck",
+      "qualityScore",
+      "seoReview",
+      "link",
+      "schema",
+      "humanReview",
+      "publish"
+    ],
+    "gate": 70,
+    "humanGate": true
+  },
+  "searchConsole": {
+    "connected": false,
+    "source": "local-store",
+    "tracked": 0,
+    "top": []
+  },
+  "distribution": {
+    "sitemap": {
+      "exists": true,
+      "urls": 453
+    },
+    "imageSitemap": {
+      "exists": true,
+      "urls": 70
+    },
+    "videoSitemap": {
+      "exists": false
+    },
+    "rss": {
+      "exists": true,
+      "items": 39
+    },
+    "indexNow": {
+      "key": "a7f3c91e2b6d40f8a1c5e9b27d4f60a3",
+      "keyHosted": true,
+      "endpoint": "https://api.indexnow.org/indexnow"
+    }
+  },
+  "evergreen": {
+    "defaultCadenceDays": 180,
+    "dueCount": 0
+  },
+  "discovery": {
+    "missingTopics": 6,
+    "topGaps": [
+      {
+        "keyword": "clinical trial master file integrity",
+        "coverage": 0.2
+      },
+      {
+        "keyword": "public tender award transparency",
+        "coverage": 0.25
+      },
+      {
+        "keyword": "academic transcript verification",
+        "coverage": 0.33
+      },
+      {
+        "keyword": "freedom of information publishing",
+        "coverage": 0.33
+      },
+      {
+        "keyword": "notary digital seal",
+        "coverage": 0.33
+      },
+      {
+        "keyword": "regulatory sandbox documentation",
+        "coverage": 0.33
+      }
+    ],
+    "strikingDistance": 0,
+    "opportunities": []
+  }
+}

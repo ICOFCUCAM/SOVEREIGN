@@ -43,6 +43,7 @@ const KnowledgeLibrary = lazy(() => import("./pages/KnowledgeLibrary"));
 const ArticlePage = lazy(() => import("./pages/ArticlePage"));
 const Docs = lazy(() => import("./pages/Docs"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const PublishingConsole = lazy(() => import("./pages/PublishingConsole"));
 const Verify = lazy(() => import("./pages/Verify"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Create = lazy(() => import("./pages/Create"));
@@ -107,6 +108,7 @@ const Administration: React.FC = () => {
       <ConsoleShell variant="administration">
         <Routes>
           <Route path="/" element={<AdminHome />} />
+          <Route path="publishing" element={<PublishingConsole />} />
           <Route path="setup" element={<InstitutionSetup />} />
           <Route path="authority" element={<AuthorityDirectory />} />
           <Route path="access" element={<Access />} />

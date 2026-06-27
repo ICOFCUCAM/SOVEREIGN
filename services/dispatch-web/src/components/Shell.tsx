@@ -31,6 +31,7 @@ const ADMIN_NAV: NavItem[] = [
   { to: "/admin/setup", label: "Establish Institution", scope: "dispatch:admin", group: "Identity" },
   { to: "/admin/authority", label: "Authority Directory", scope: "dispatch:admin", group: "Identity" },
   { to: "/admin/access", label: "API Access", scope: "dispatch:admin", group: "Platform" },
+  { to: "/admin/publishing", label: "Publishing Platform", scope: "dispatch:admin", group: "Platform" },
   { to: "/admin/governance", label: "Policy", scope: "dispatch:admin", group: "Governance" },
   { to: "/admin/monitor", label: "Oversight", scope: "dispatch:read", group: "Governance" },
   { to: "/admin/compliance", label: "Audit & Compliance", scope: "dispatch:read", group: "Compliance" },
