@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { signup, type SignupResponse, humanError } from "../lib/api";
 import { Button, Field, inputCls } from "../lib/ui";
+import { FilmGrain } from "../components/brand";
 import { track } from "../lib/analytics";
 
 // Public self-serve signup — an institution creates a FREE account and receives
@@ -45,16 +46,18 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-full items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+    <div className="relative flex min-h-full items-center justify-center overflow-hidden px-4 py-12">
+      <FilmGrain />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(55%_45%_at_50%_0%,rgba(233,200,120,0.07),transparent_70%)]" aria-hidden />
+      <div className="relative w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-seal text-lg font-black text-white">SD</div>
-          <h1 className="text-xl font-bold text-white">Create your institution account</h1>
+          <a href="/" className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-seal text-lg font-black text-white">SD</a>
+          <h1 className="font-serif text-2xl font-bold text-white">Create your institution account</h1>
           <p className="mt-1 text-sm text-white/50">Issue official records under your institution's seal. <span className="text-white/70">3 official records included</span> to evaluate.</p>
         </div>
 
         {!cred ? (
-          <form onSubmit={create} className="space-y-4 rounded-lg border border-white/10 bg-ink-800/60 p-6">
+          <form onSubmit={create} className="space-y-4 rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.045] to-white/[0.012] p-7 shadow-[0_30px_80px_-44px_rgba(0,0,0,0.9)]">
             <Field label="Institution name" hint="e.g. “Ministry of Finance”, “Bank of X”.">
               <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Ministry of Finance" autoFocus />
             </Field>
