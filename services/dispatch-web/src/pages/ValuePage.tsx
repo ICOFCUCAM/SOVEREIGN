@@ -73,7 +73,7 @@ const ValuePage: React.FC = () => {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {others.map((v) => (
                 <button key={v.slug} onClick={() => nav(`${VALUE_BASE}/${v.slug}`)}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-left transition hover:border-gold-400/30 hover:bg-white/[0.03]">
+                  className="group rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-left transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/30 hover:bg-white/[0.03]">
                   <div className="font-mono text-[12px] text-gold-400/70">{String(v.n).padStart(2, "0")}</div>
                   <div className="mt-1.5 font-serif text-[1.15rem] font-bold text-white">{v.title}</div>
                   <p className="mt-1.5 text-[13px] leading-relaxed text-white/55">{v.teaser}</p>
