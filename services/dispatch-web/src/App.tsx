@@ -39,6 +39,7 @@ const Problems = lazy(() => import("./pages/Problems"));
 const ProblemPage = lazy(() => import("./pages/ProblemPage"));
 const KnowledgeLibrary = lazy(() => import("./pages/KnowledgeLibrary"));
 const ArticlePage = lazy(() => import("./pages/ArticlePage"));
+const Docs = lazy(() => import("./pages/Docs"));
 const Verify = lazy(() => import("./pages/Verify"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Create = lazy(() => import("./pages/Create"));
@@ -146,20 +147,34 @@ const PlatformOperations: React.FC = () => {
 
 // Per-route document title + meta description, driven by lib/seo. Sets real tab /
 // bookmark titles and helps JS-rendering crawlers index each surface distinctly.
+const SITE_ORIGIN = "https://dispatch.sovereigndo.com";
 function setMeta(key: string, content: string, property = false): void {
   const attr = property ? "property" : "name";
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
   if (!el) { el = document.createElement("meta"); el.setAttribute(attr, key); document.head.appendChild(el); }
   el.setAttribute("content", content);
 }
+function setLink(rel: string, href: string): void {
+  let el = document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+  if (!el) { el = document.createElement("link"); el.setAttribute("rel", rel); document.head.appendChild(el); }
+  el.setAttribute("href", href);
+}
+// Per-route head — title, description, canonical, OpenGraph and Twitter on EVERY
+// route, derived from lib/seo. No page sets these by hand; the ecosystem stays
+// crawlable and link-preview-correct automatically.
 const RouteMeta: React.FC = () => {
   const { pathname } = useLocation();
   React.useEffect(() => {
     const { title, description } = metaForPath(pathname);
+    const canonical = SITE_ORIGIN + (pathname === "/" ? "/" : pathname.replace(/\/+$/, ""));
     document.title = title;
     setMeta("description", description);
     setMeta("og:title", title, true);
     setMeta("og:description", description, true);
+    setMeta("og:url", canonical, true);
+    setMeta("twitter:title", title);
+    setMeta("twitter:description", description);
+    setLink("canonical", canonical);
   }, [pathname]);
   return null;
 };
@@ -216,6 +231,9 @@ const App: React.FC = () => (
     {/* Layer 4 — knowledge library (long-form articles) */}
     <Route path="/library" element={<KnowledgeLibrary />} />
     <Route path="/library/:slug" element={<ArticlePage />} />
+    {/* Layer 5 — developer documentation */}
+    <Route path="/docs" element={<Docs />} />
+    <Route path="/docs/:slug" element={<Docs />} />
     <Route path="/verify" element={<Verify />} />
     <Route path="/verify/:recordId" element={<Verify />} />
     {/* public self-serve signup (free plan) */}

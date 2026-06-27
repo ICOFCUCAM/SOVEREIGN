@@ -44,3 +44,4 @@ export const ROI_ROUTE = "/roi";
 export const INDUSTRIES_ROUTE = "/industries";
 export const LEARN_ROUTE = "/learn";
 export const LIBRARY_ROUTE = "/library";
+export const DOCS_ROUTE = "/docs";

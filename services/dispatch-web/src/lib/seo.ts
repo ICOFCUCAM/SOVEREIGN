@@ -2,6 +2,7 @@ import { VALUE } from "./value";
 import { industryBySlug } from "./industries";
 import { problemBySlug } from "./problems";
 import { articleBySlug } from "./library";
+import { docBySlug } from "./docs";
 
 // Per-route <title> + meta description. Centralised so one map drives every page
 // (set client-side by <RouteMeta>; helps search engines that render JS and gives
@@ -38,6 +39,7 @@ const STATIC: Record<string, Meta> = {
   "/industries": { title: "Industries — Built for Every Institution" + SUF, description: "Sovereign Dispatch governs official publication across government, healthcare, justice, regulators, finance, defence, archives and more. Find your institution." },
   "/learn": { title: "Knowledge — Official Publication, Governance & Proof" + SUF, description: "Authoritative references on official publication, document governance, evidence chains, cryptographic sealing and verification — what they mean, why they matter, and how institutions prove them." },
   "/library": { title: "Knowledge Library — Guides to Governed Publication" + SUF, description: "In-depth guides on official records, document governance, evidence, digital preservation and compliance — the authoritative reference for institutional publication." },
+  "/docs": { title: "Developer Documentation — Dispatch Platform API" + SUF, description: "Build governed, verifiable publication into your systems. Authentication, the documents API, verification, webhooks, SDKs, architecture and schemas for the Dispatch Platform API." },
 };
 
 const DEFAULT = STATIC["/"];
@@ -64,6 +66,11 @@ export function metaForPath(path: string): Meta {
   if (ar) {
     const x = articleBySlug(ar[1]);
     if (x) return { title: x.metaTitle + SUF, description: x.metaDescription };
+  }
+  const dc = clean.match(/^\/docs\/(.+)$/);
+  if (dc) {
+    const x = docBySlug(dc[1]);
+    if (x) return { title: x.metaTitle + SUF, description: x.summary };
   }
   if (clean.startsWith("/verify/")) return STATIC["/verify"];
   return DEFAULT;
