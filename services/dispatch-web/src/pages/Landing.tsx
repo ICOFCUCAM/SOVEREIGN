@@ -196,10 +196,16 @@ const Landing: React.FC = () => {
               </div>
             </div>
           </div>
+          {/* scroll cue — invites the eye into the narrative */}
+          <a href="#stakes" aria-label="Scroll to content"
+            className="group absolute inset-x-0 bottom-6 z-20 mx-auto hidden w-fit flex-col items-center gap-1 text-gold-400/45 transition hover:text-gold-300 sm:flex">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.3em]">Scroll</span>
+            <Chevron className="scroll-cue h-4 w-4 rotate-90" />
+          </a>
         </div>
 
         {/* ── HERO continued — cinematic statement + three proof statements ── */}
-        <section className="relative flex min-h-[80vh] items-center overflow-hidden border-y border-white/[0.06]">
+        <section id="stakes" className="relative flex min-h-[80vh] items-center overflow-hidden border-y border-white/[0.06]">
           <img src="/people/government.webp" alt="" aria-hidden loading="lazy" className="sd-kenburns absolute inset-0 h-full w-full object-cover object-center" />
           <div className="absolute inset-0 bg-[#070707]/55" aria-hidden />
           <div className="absolute inset-0 bg-gradient-to-t from-[#070707] via-[#070707]/35 to-[#070707]/70" aria-hidden />
