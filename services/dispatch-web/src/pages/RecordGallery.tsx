@@ -31,8 +31,8 @@ const RecordGallery: React.FC = () => {
       <main>
         <section className="border-t border-white/[0.06] px-8 py-24 lg:px-12">
           <div className="mx-auto max-w-4xl">
-            <div className="text-[12px] font-semibold uppercase tracking-[0.3em] text-gold-400">The artifacts</div>
-            <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">What an institution actually holds.</h1>
+            <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[12px] font-semibold uppercase tracking-[0.3em] text-gold-400">The artifacts</span></div>
+            <h1 className="mt-4 font-serif text-4xl font-bold leading-[1.05] tracking-tight text-[#f4efe3] sm:text-5xl">What an institution actually holds.</h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/60">After a record passes through Sovereign Dispatch, the institution holds four things — not a file, but proof. These are the real artifact types the platform produces.</p>
           </div>
         </section>
