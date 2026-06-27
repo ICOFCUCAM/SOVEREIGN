@@ -106,3 +106,29 @@ const MARKETING2: Record<string, Marketing2Copy> = {
 };
 export const useMarketing2Copy = (): Marketing2Copy => MARKETING2[useUiLocale()] || MARKETING2_EN;
 export type { Marketing2Copy };
+
+// ── Marketing batch 3 (Architecture, Developers, Official Record) ────────────
+import { MARKETING3_EN, type Marketing3Copy } from "./marketing3";
+import { MARKETING3_FR } from "./marketing3.fr";
+import { MARKETING3_ES } from "./marketing3.es";
+import { MARKETING3_DE } from "./marketing3.de";
+import { MARKETING3_NO } from "./marketing3.no";
+import { MARKETING3_PT } from "./marketing3.pt";
+import { MARKETING3_IT } from "./marketing3.it";
+import { MARKETING3_NL } from "./marketing3.nl";
+import { MARKETING3_AR } from "./marketing3.ar";
+import { MARKETING3_JA } from "./marketing3.ja";
+import { MARKETING3_ZH } from "./marketing3.zh";
+import { MARKETING3_PL } from "./marketing3.pl";
+import { MARKETING3_SV } from "./marketing3.sv";
+import { MARKETING3_DA } from "./marketing3.da";
+import { MARKETING3_FI } from "./marketing3.fi";
+import { MARKETING3_EL } from "./marketing3.el";
+
+const MARKETING3: Record<string, Marketing3Copy> = {
+  en: MARKETING3_EN, fr: MARKETING3_FR, es: MARKETING3_ES, de: MARKETING3_DE, no: MARKETING3_NO,
+  pt: MARKETING3_PT, it: MARKETING3_IT, nl: MARKETING3_NL, ar: MARKETING3_AR, ja: MARKETING3_JA, zh: MARKETING3_ZH,
+  pl: MARKETING3_PL, sv: MARKETING3_SV, da: MARKETING3_DA, fi: MARKETING3_FI, el: MARKETING3_EL,
+};
+export const useMarketing3Copy = (): Marketing3Copy => MARKETING3[useUiLocale()] || MARKETING3_EN;
+export type { Marketing3Copy };

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { PublicHeader, PageBanner, PublicFooter, SectionHead, FilmGrain, useReveal } from "../components/brand";
+import { useMarketing3Copy } from "../lib/messages";
 
 // Developer Platform — the public documentation surface for the Dispatch Platform
 // API (the governance engine). Quickstart, SDKs, webhooks, and a LIVE endpoint
@@ -32,6 +33,7 @@ const EVENTS = ["record.submitted", "record.approved", "record.rejected", "recor
 
 const Developers: React.FC = () => {
   useReveal();
+  const c = useMarketing3Copy().developers;
   const [spec, setSpec] = useState<Spec | null>(null);
   useEffect(() => { fetch("/openapi.json").then((r) => r.json()).then(setSpec).catch(() => {}); }, []);
 
@@ -60,35 +62,32 @@ const Developers: React.FC = () => {
         {/* ── Hero ──────────────────────────────────────────────────── */}
         <section className="border-t border-white/[0.06] px-8 py-24 lg:px-12">
           <div className="mx-auto max-w-5xl">
-            <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Developer Platform</span></div>
-            <h1 className="mt-4 max-w-3xl font-serif text-[2.6rem] font-bold leading-[1.05] tracking-tight text-[#f4efe3] sm:text-[3.2rem]">Build governance into your own systems.</h1>
-            <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-white/55">
-              The <span className="text-white/80">Dispatch Platform API</span> is the governance engine behind Sovereign Dispatch. Your ERP, parliament system, SharePoint or case platform can submit a document and have it governed, certified, published and preserved as an Official Record — without anyone opening the console.
-            </p>
+            <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">{c.eyebrow}</span></div>
+            <h1 className="mt-4 max-w-3xl font-serif text-[2.6rem] font-bold leading-[1.05] tracking-tight text-[#f4efe3] sm:text-[3.2rem]">{c.title}</h1>
+            <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-white/55">{c.lead}</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <a href="/openapi.json" download className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-white/85">Download OpenAPI spec ↓</a>
-              <a href="#reference" className="rounded-md border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-white/40">Endpoint reference →</a>
-              <a href="/signup" className="rounded-md border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-white/40">Get a credential</a>
+              <a href="/openapi.json" download className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-white/85">{c.ctaSpec}</a>
+              <a href="#reference" className="rounded-md border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-white/40">{c.ctaReference}</a>
+              <a href="/signup" className="rounded-md border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-white/40">{c.ctaCredential}</a>
             </div>
           </div>
         </section>
 
         {/* ── Quickstart ────────────────────────────────────────────── */}
         <section className="scroll-mt-24 border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-transparent px-8 py-24 lg:px-12">
-          <SectionHead index="01" kicker="Quickstart" title="Credential → token → governed record."
-            sub="An administrator issues an API client under Administration → API Access, scoped to exactly what the system may do. The system exchanges it for a short-lived bearer token, then calls the API." />
+          <SectionHead index="01" kicker={c.qsKicker} title={c.qsTitle} sub={c.qsSub} />
           <div className="mx-auto mt-12 max-w-3xl space-y-5">
-            <CodeBlock label="1 · Exchange the credential for a token" code={`curl -s https://api.dispatch.sovereigndo.com/v1/token \\
+            <CodeBlock label={c.step1} code={`curl -s https://api.dispatch.sovereigndo.com/v1/token \\
   -H 'content-type: application/json' \\
   -d '{"client_id":"svc_…","secret":"sdk_…"}'
 # → { "access_token": "…", "expiresIn": 3600 }`} />
-            <CodeBlock label="2 · Submit a document as an Official Record" code={`curl -s https://api.dispatch.sovereigndo.com/v1/documents \\
+            <CodeBlock label={c.step2} code={`curl -s https://api.dispatch.sovereigndo.com/v1/documents \\
   -H "authorization: Bearer $TOKEN" \\
   -H 'content-type: application/json' \\
   -H "idempotency-key: $(uuidgen)" \\
   -d @record.json
 # → { "documentId": "…", "lifecycle": "in_review" }`} />
-            <CodeBlock label="3 · Follow it through governance" code={`# whose turn is it? the posture + chain of authority
+            <CodeBlock label={c.step3} code={`# whose turn is it? the posture + chain of authority
 curl -s https://api.dispatch.sovereigndo.com/v1/documents/$ID \\
   -H "authorization: Bearer $TOKEN"
 # approve (only the office whose step is open may), then publish
@@ -98,11 +97,10 @@ curl -s https://api.dispatch.sovereigndo.com/v1/documents/$ID \\
 
         {/* ── SDKs ──────────────────────────────────────────────────── */}
         <section className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">
-          <SectionHead index="02" kicker="SDKs" title="Official clients, zero dependencies."
-            sub="Thin, hand-written clients for TypeScript and Python that wrap the auth flow, the record lifecycle, and webhook signature verification. The signature scheme is verified to match the server across both languages." />
+          <SectionHead index="02" kicker={c.sdkKicker} title={c.sdkTitle} sub={c.sdkSub} />
           <div className="mx-auto mt-12 grid max-w-5xl gap-5 lg:grid-cols-2">
             <div>
-              <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-white/45">TypeScript · Node ≥ 18</div>
+              <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-white/45">{c.tsLabel}</div>
               <CodeBlock code={`import { DispatchClient, verifyWebhook } from "@dispatch/sdk";
 
 const dispatch = new DispatchClient({ baseUrl, clientId, secret });
@@ -114,7 +112,7 @@ await dispatch.publish(documentId);
 if (!verifyWebhook(rawBody, sigHeader, secret)) reject();`} />
             </div>
             <div>
-              <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-white/45">Python ≥ 3.8 · stdlib only</div>
+              <div className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-white/45">{c.pyLabel}</div>
               <CodeBlock code={`from dispatch import DispatchClient, verify_webhook
 
 d = DispatchClient(base_url, client_id, secret)
@@ -130,13 +128,12 @@ if not verify_webhook(raw_body, sig_header, secret):
 
         {/* ── Webhooks ──────────────────────────────────────────────── */}
         <section className="scroll-mt-24 border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-transparent px-8 py-24 lg:px-12">
-          <SectionHead index="03" kicker="Webhooks" title="React to governance, don't poll for it."
-            sub="Register endpoints and Dispatch POSTs a signed event when a record crosses a lifecycle boundary. Delivery is durable and at-least-once; verify every delivery with the endpoint's signing secret." />
+          <SectionHead index="03" kicker={c.whKicker} title={c.whTitle} sub={c.whSub} />
           <div className="mx-auto mt-12 max-w-3xl">
             <div className="mb-5 flex flex-wrap gap-2">
               {EVENTS.map((e) => <span key={e} className="rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 font-mono text-[12px] text-white/70">{e}</span>)}
             </div>
-            <CodeBlock label="Verify the signature (Node)" code={`const expected = "sha256=" +
+            <CodeBlock label={c.verifyLabel} code={`const expected = "sha256=" +
   crypto.createHmac("sha256", endpointSecret).update(rawBody).digest("hex");
 if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) reject();
 // payload: { event, occurredAt, tenantId, data: { documentId, lifecycle, … } }
@@ -146,8 +143,8 @@ if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) reject();
 
         {/* ── Endpoint reference (live from the spec) ───────────────── */}
         <section id="reference" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">
-          <SectionHead index="04" kicker="Reference" title="Every endpoint, from the live spec."
-            sub={spec ? `${pathCount} operations across ${groups.length} groups — rendered from the shipped OpenAPI document, so it never drifts from the running API.` : "Loading the API specification…"} />
+          <SectionHead index="04" kicker={c.refKicker} title={c.refTitle}
+            sub={spec ? c.refSubTemplate.replace("{ops}", String(pathCount)).replace("{groups}", String(groups.length)) : c.refSubLoading} />
           <div className="mx-auto mt-12 max-w-4xl space-y-10">
             {groups.map(([tag, ops]) => (
               <div key={tag}>
@@ -164,7 +161,7 @@ if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) reject();
                 </ul>
               </div>
             ))}
-            {!spec && <div className="text-sm text-white/30">If this does not load, the spec is also downloadable above.</div>}
+            {!spec && <div className="text-sm text-white/30">{c.refFallback}</div>}
           </div>
         </section>
       </main>
