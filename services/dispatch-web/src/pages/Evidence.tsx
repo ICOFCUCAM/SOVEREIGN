@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SectionHead, Chevron, PublicHeader, PageBanner, PublicFooter, TrustStrip, FilmGrain, useReveal } from "../components/brand";
 import { LastPublishedCard, LifecycleTrail, PublicAuditTimeline } from "../components/operations";
 import { ARCHITECTURE_ROUTE } from "../lib/routes";
+import { useMarketing6Copy } from "../lib/messages";
 
 // Evidence step — a left rail (number + mental-model label + one line) beside the
 // proof component, so the section reads as a narrative: how it works → how it is
@@ -24,6 +25,7 @@ const EvidenceStep: React.FC<{ n: string; label: string; lead: string; children:
 // it is governed, what gets produced, and how it is deployed.
 const Evidence: React.FC = () => {
   const nav = useNavigate();
+  const c = useMarketing6Copy().evidence;
   useReveal();
   return (
     <div className="relative min-h-full bg-[#070707] text-white">
@@ -34,29 +36,29 @@ const Evidence: React.FC = () => {
       <main>
         {/* ── Evidence ───────────────────────────────────────────────── */}
         <section id="evidence" className="scroll-mt-24 border-t border-white/[0.06] px-8 py-24 lg:px-12">
-          <SectionHead kicker="Evidence" title="See the governance, not the promise."
-            sub="Every official record carries its own provenance — from how it works, to how it is governed, to what gets produced and how it is deployed." />
+          <SectionHead kicker={c.kicker} title={c.title}
+            sub={c.sub} />
           <div className="mx-auto mt-16 max-w-5xl space-y-12">
-            <EvidenceStep n="01" label="How it works" lead="A submission becomes an official record through a single governed path.">
+            <EvidenceStep n="01" label={c.steps[0].label} lead={c.steps[0].lead}>
               <LifecycleTrail />
             </EvidenceStep>
-            <EvidenceStep n="02" label="How it is governed" lead="Every action is recorded to an append-only, hash-stamped audit trail.">
+            <EvidenceStep n="02" label={c.steps[1].label} lead={c.steps[1].lead}>
               <PublicAuditTimeline />
             </EvidenceStep>
-            <EvidenceStep n="03" label="What gets produced" lead="A faithful, classified, hash-stamped record — PDF and DOCX.">
+            <EvidenceStep n="03" label={c.steps[2].label} lead={c.steps[2].lead}>
               <LastPublishedCard />
             </EvidenceStep>
-            <EvidenceStep n="04" label="How it is deployed" lead="Into the sovereignty model your mandate requires.">
+            <EvidenceStep n="04" label={c.steps[3].label} lead={c.steps[3].lead}>
               <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.045] to-white/[0.012] p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                 <div className="flex flex-wrap items-center justify-between gap-5">
                   <div>
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-400">Architecture Overview</span>
-                    <div className="mt-2 font-serif text-xl font-bold text-[#f4efe3]">System, governance, security &amp; deployment — one reference.</div>
-                    <p className="mt-1.5 text-[13px] text-white/50">Cloud · Private · Sovereign · On-Premise · Air-Gapped. Print-ready for procurement.</p>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-400">{c.archEyebrow}</span>
+                    <div className="mt-2 font-serif text-xl font-bold text-[#f4efe3]">{c.archTitle}</div>
+                    <p className="mt-1.5 text-[13px] text-white/50">{c.archSub}</p>
                   </div>
                   <button onClick={() => nav(ARCHITECTURE_ROUTE)}
                     className="group inline-flex shrink-0 items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
-                    View Architecture <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                    {c.archBtn} <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
                   </button>
                 </div>
               </div>

@@ -184,3 +184,29 @@ const MARKETING5: Record<string, ProcurementCopy> = {
 };
 export const useProcurementCopy = (): ProcurementCopy => MARKETING5[useUiLocale()] || MARKETING5_EN;
 export type { ProcurementCopy };
+
+// ── Marketing batch 6 (Lifecycle, ROI, Evidence) ─────────────────────────────
+import { MARKETING6_EN, type Marketing6Copy } from "./marketing6";
+import { MARKETING6_FR } from "./marketing6.fr";
+import { MARKETING6_ES } from "./marketing6.es";
+import { MARKETING6_DE } from "./marketing6.de";
+import { MARKETING6_NO } from "./marketing6.no";
+import { MARKETING6_PT } from "./marketing6.pt";
+import { MARKETING6_IT } from "./marketing6.it";
+import { MARKETING6_NL } from "./marketing6.nl";
+import { MARKETING6_AR } from "./marketing6.ar";
+import { MARKETING6_JA } from "./marketing6.ja";
+import { MARKETING6_ZH } from "./marketing6.zh";
+import { MARKETING6_PL } from "./marketing6.pl";
+import { MARKETING6_SV } from "./marketing6.sv";
+import { MARKETING6_DA } from "./marketing6.da";
+import { MARKETING6_FI } from "./marketing6.fi";
+import { MARKETING6_EL } from "./marketing6.el";
+
+const MARKETING6: Record<string, Marketing6Copy> = {
+  en: MARKETING6_EN, fr: MARKETING6_FR, es: MARKETING6_ES, de: MARKETING6_DE, no: MARKETING6_NO,
+  pt: MARKETING6_PT, it: MARKETING6_IT, nl: MARKETING6_NL, ar: MARKETING6_AR, ja: MARKETING6_JA, zh: MARKETING6_ZH,
+  pl: MARKETING6_PL, sv: MARKETING6_SV, da: MARKETING6_DA, fi: MARKETING6_FI, el: MARKETING6_EL,
+};
+export const useMarketing6Copy = (): Marketing6Copy => MARKETING6[useUiLocale()] || MARKETING6_EN;
+export type { Marketing6Copy };
