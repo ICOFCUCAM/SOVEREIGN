@@ -132,3 +132,29 @@ const MARKETING3: Record<string, Marketing3Copy> = {
 };
 export const useMarketing3Copy = (): Marketing3Copy => MARKETING3[useUiLocale()] || MARKETING3_EN;
 export type { Marketing3Copy };
+
+// ── Marketing batch 4 (Cost-of-Publication, Verify) ──────────────────────────
+import { MARKETING4_EN, type Marketing4Copy } from "./marketing4";
+import { MARKETING4_FR } from "./marketing4.fr";
+import { MARKETING4_ES } from "./marketing4.es";
+import { MARKETING4_DE } from "./marketing4.de";
+import { MARKETING4_NO } from "./marketing4.no";
+import { MARKETING4_PT } from "./marketing4.pt";
+import { MARKETING4_IT } from "./marketing4.it";
+import { MARKETING4_NL } from "./marketing4.nl";
+import { MARKETING4_AR } from "./marketing4.ar";
+import { MARKETING4_JA } from "./marketing4.ja";
+import { MARKETING4_ZH } from "./marketing4.zh";
+import { MARKETING4_PL } from "./marketing4.pl";
+import { MARKETING4_SV } from "./marketing4.sv";
+import { MARKETING4_DA } from "./marketing4.da";
+import { MARKETING4_FI } from "./marketing4.fi";
+import { MARKETING4_EL } from "./marketing4.el";
+
+const MARKETING4: Record<string, Marketing4Copy> = {
+  en: MARKETING4_EN, fr: MARKETING4_FR, es: MARKETING4_ES, de: MARKETING4_DE, no: MARKETING4_NO,
+  pt: MARKETING4_PT, it: MARKETING4_IT, nl: MARKETING4_NL, ar: MARKETING4_AR, ja: MARKETING4_JA, zh: MARKETING4_ZH,
+  pl: MARKETING4_PL, sv: MARKETING4_SV, da: MARKETING4_DA, fi: MARKETING4_FI, el: MARKETING4_EL,
+};
+export const useMarketing4Copy = (): Marketing4Copy => MARKETING4[useUiLocale()] || MARKETING4_EN;
+export type { Marketing4Copy };
