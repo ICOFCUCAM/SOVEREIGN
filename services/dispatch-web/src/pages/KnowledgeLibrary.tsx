@@ -11,7 +11,18 @@ import { track } from "../lib/analytics";
 const KnowledgeLibrary: React.FC = () => {
   const nav = useNavigate();
   useReveal();
+  const [q, setQ] = React.useState("");
   React.useEffect(() => { track("page.library_index", {}); }, []);
+  const query = q.trim().toLowerCase();
+  const matches = query ? ARTICLES.filter((a) => a.title.toLowerCase().includes(query) || a.dek.toLowerCase().includes(query) || a.category.toLowerCase().includes(query)) : [];
+
+  const ArticleCard: React.FC<{ a: typeof ARTICLES[number] }> = ({ a }) => (
+    <button onClick={() => nav(`${LIBRARY_BASE}/${a.slug}`)} className="reveal group flex flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 text-left transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/25">
+      <div className="font-serif text-[1.2rem] font-bold leading-snug text-white">{a.title}</div>
+      <p className="mt-2 flex-1 text-[13.5px] leading-relaxed text-white/55 line-clamp-3">{a.dek}</p>
+      <span className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-gold-300/80 transition group-hover:text-gold-200">{a.readingMinutes} min read <Chevron className="h-3 w-3 transition group-hover:translate-x-0.5" /></span>
+    </button>
+  );
 
   const featured = ARTICLES[0];
   const ld = {
@@ -33,8 +44,27 @@ const KnowledgeLibrary: React.FC = () => {
             <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[12px] font-semibold uppercase tracking-[0.3em] text-gold-400">Knowledge Library</span></div>
             <h1 className="mt-5 max-w-2xl font-serif text-[2.4rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3.1rem]">The reference for governed, verifiable institutional publication.</h1>
             <p className="mt-6 max-w-2xl text-[16.5px] leading-relaxed text-white/65">In-depth guides on official records, document governance, evidence, preservation and compliance — written to be the authoritative answer, for the people who have to get this right.</p>
+            <div className="relative mt-8 max-w-xl">
+              <svg viewBox="0 0 24 24" className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" strokeLinecap="round" /></svg>
+              <input value={q} onChange={(e) => setQ(e.target.value)} type="search" aria-label="Search the library"
+                placeholder={`Search ${ARTICLES.length} guides — records, evidence, retention…`}
+                className="w-full rounded-xl border border-white/12 bg-white/[0.03] py-3.5 pl-11 pr-4 text-[15px] text-white placeholder:text-white/35 outline-none transition focus:border-gold-400/40 focus:bg-white/[0.05]" />
+            </div>
           </div>
         </section>
+
+        {query ? (
+          <section className="border-t border-white/[0.06] px-6 py-12 lg:px-12">
+            <div className="mx-auto max-w-[1100px]">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">{matches.length} result{matches.length === 1 ? "" : "s"}</div>
+              {matches.length > 0 ? (
+                <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{matches.map((a) => <ArticleCard key={a.slug} a={a} />)}</div>
+              ) : (
+                <p className="mt-6 text-[15px] text-white/55">No guide matches “{q}”. Try a broader term — or <button onClick={() => setQ("")} className="text-gold-300 underline-offset-2 hover:underline">browse all</button>.</p>
+              )}
+            </div>
+          </section>
+        ) : (<>
 
         {featured && (
           <section className="border-t border-white/[0.06] px-6 py-12 lg:px-12">
@@ -54,17 +84,12 @@ const KnowledgeLibrary: React.FC = () => {
             <div className="mx-auto max-w-[1100px]">
               <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">{cat}</span></div>
               <div className="stagger mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {ARTICLES.filter((a) => a.category === cat).map((a) => (
-                  <button key={a.slug} onClick={() => nav(`${LIBRARY_BASE}/${a.slug}`)} className="reveal group flex flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 text-left transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/25">
-                    <div className="font-serif text-[1.2rem] font-bold leading-snug text-white">{a.title}</div>
-                    <p className="mt-2 flex-1 text-[13.5px] leading-relaxed text-white/55 line-clamp-3">{a.dek}</p>
-                    <span className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-gold-300/80 transition group-hover:text-gold-200">{a.readingMinutes} min read <Chevron className="h-3 w-3 transition group-hover:translate-x-0.5" /></span>
-                  </button>
-                ))}
+                {ARTICLES.filter((a) => a.category === cat).map((a) => <ArticleCard key={a.slug} a={a} />)}
               </div>
             </div>
           </section>
         ))}
+        </>)}
 
         <section className="border-t border-white/[0.06] px-6 py-16 lg:px-12">
           <div className="mx-auto flex max-w-[1000px] flex-wrap items-center justify-between gap-6">
