@@ -191,7 +191,7 @@ const Landing: React.FC = () => {
 
         {/* ── HERO continued — cinematic statement + three proof statements ── */}
         <section className="relative flex min-h-[80vh] items-center overflow-hidden border-y border-white/[0.06]">
-          <img src="/people/government.webp" alt="" aria-hidden loading="lazy" className="absolute inset-0 h-full w-full object-cover object-center" />
+          <img src="/people/government.webp" alt="" aria-hidden loading="lazy" className="sd-kenburns absolute inset-0 h-full w-full object-cover object-center" />
           <div className="absolute inset-0 bg-[#070707]/55" aria-hidden />
           <div className="absolute inset-0 bg-gradient-to-t from-[#070707] via-[#070707]/35 to-[#070707]/70" aria-hidden />
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
@@ -205,7 +205,7 @@ const Landing: React.FC = () => {
             </p>
             <div className="mt-12 grid max-w-3xl gap-3 sm:grid-cols-3">
               {PROOF_BADGES.map((b) => (
-                <div key={b.lead} className="rounded-xl border border-white/12 bg-white/[0.04] px-5 py-4 backdrop-blur-sm">
+                <div key={b.lead} className="rounded-xl border border-white/12 bg-white/[0.04] px-5 py-4 backdrop-blur-sm transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/35 hover:bg-white/[0.07]">
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-gold-400/30 bg-gold-400/[0.08] text-gold-300"><Ico name={b.icon} className="h-5 w-5" /></span>
                   <div className="mt-3 text-[14.5px] font-bold leading-snug text-white">{b.lead}</div>
                   <div className="mt-0.5 text-[12px] text-white/50">{b.sub}</div>

@@ -114,6 +114,9 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   /* the verified badge settling in */
   @keyframes sd-pop { 0% { opacity: 0; transform: translateY(6px) scale(.85); } 100% { opacity: 1; transform: none; } }
   .sd-pop { animation: sd-pop 0.4s cubic-bezier(.2,1.3,.4,1) both; }
+  /* slow cinematic drift on full-bleed institutional imagery */
+  @keyframes sd-kenburns { from { transform: scale(1.05); } to { transform: scale(1.13); } }
+  .sd-kenburns { animation: sd-kenburns 24s ease-in-out infinite alternate; will-change: transform; }
   /* the official record's gentle breathing glow once published */
   @keyframes sd-breathe { 0%,100% { box-shadow: 0 30px 80px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(201,162,75,.45), 0 0 40px -6px rgba(233,200,120,.35); } 50% { box-shadow: 0 30px 80px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(201,162,75,.6), 0 0 64px 0 rgba(233,200,120,.55); } }
   .sd-breathe { animation: sd-breathe 3.4s ease-in-out infinite; }
