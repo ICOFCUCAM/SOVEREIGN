@@ -176,7 +176,7 @@ const Landing: React.FC = () => {
               </p>
               <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <button onClick={() => nav("/console")}
-                  className="group inline-flex items-center justify-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3.5 text-sm font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_26px_-10px_rgba(0,0,0,0.65)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
+                  className="btn-sheen group inline-flex items-center justify-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3.5 text-sm font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_10px_26px_-10px_rgba(0,0,0,0.65)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
                   Launch Dispatch
                   <Chevron className="h-4 w-4 transition group-hover:translate-x-0.5" />
                 </button>
@@ -506,7 +506,7 @@ const Landing: React.FC = () => {
             </p>
             <div className="mt-11 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <button onClick={() => nav("/console")}
-                className="group inline-flex w-full items-center justify-center gap-3 rounded-lg bg-gradient-to-b from-gold-300 to-gold-600 px-10 py-5 text-base font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_16px_40px_-12px_rgba(233,200,120,0.5)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500 sm:w-auto">
+                className="btn-sheen group inline-flex w-full items-center justify-center gap-3 rounded-lg bg-gradient-to-b from-gold-300 to-gold-600 px-10 py-5 text-base font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_16px_40px_-12px_rgba(233,200,120,0.5)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500 sm:w-auto">
                 Begin your evaluation <Chevron className="h-5 w-5 transition group-hover:translate-x-0.5" />
               </button>
               <button onClick={() => nav(PROCUREMENT_ROUTE)}

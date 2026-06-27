@@ -114,6 +114,11 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   /* the verified badge settling in */
   @keyframes sd-pop { 0% { opacity: 0; transform: translateY(6px) scale(.85); } 100% { opacity: 1; transform: none; } }
   .sd-pop { animation: sd-pop 0.4s cubic-bezier(.2,1.3,.4,1) both; }
+  /* a single light sheen sweeping a primary action on hover */
+  .btn-sheen { position: relative; overflow: hidden; }
+  .btn-sheen::after { content: ""; position: absolute; top: 0; left: -160%; width: 55%; height: 100%; transform: skewX(-20deg); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.38), transparent); pointer-events: none; }
+  .btn-sheen:hover::after { animation: sd-sheen 0.8s ease; }
+  @keyframes sd-sheen { to { left: 160%; } }
   /* a barely-there idle float so the live document feels suspended, not pinned */
   @keyframes sd-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
   .sd-float { animation: sd-float 6.5s ease-in-out infinite; }

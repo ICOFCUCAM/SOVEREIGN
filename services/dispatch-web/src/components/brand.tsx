@@ -224,7 +224,7 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
           {/* standalone Launch CTA — hidden on the narrowest phones (where it would
               crowd the bar); on those it leads the mobile sheet instead. */}
           <button onClick={() => go("/console")}
-            className="group hidden items-center gap-2 whitespace-nowrap rounded bg-gradient-to-b from-gold-300 to-gold-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500 sm:inline-flex sm:px-5">
+            className="btn-sheen group hidden items-center gap-2 whitespace-nowrap rounded bg-gradient-to-b from-gold-300 to-gold-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500 sm:inline-flex sm:px-5">
             <span className="sm:hidden">Launch</span><span className="hidden sm:inline">Launch Dispatch</span>
             <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
           </button>
