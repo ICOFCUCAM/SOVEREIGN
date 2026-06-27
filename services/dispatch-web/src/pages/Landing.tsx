@@ -428,6 +428,7 @@ const Landing: React.FC = () => {
 
         {/* ── 8 · SOVEREIGN ARCHITECTURE — six specific controls ── */}
         <section id="sovereignty" className="relative overflow-hidden border-b border-white/[0.06] bg-black px-6 py-20 lg:px-12">
+          <div className="pointer-events-none absolute inset-0 opacity-[0.04] [background-image:linear-gradient(rgba(233,200,120,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(233,200,120,0.6)_1px,transparent_1px)] [background-size:44px_44px] [mask-image:radial-gradient(70%_70%_at_50%_30%,#000,transparent)]" aria-hidden />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_50%_0%,rgba(233,200,120,0.05),transparent_70%)]" aria-hidden />
           <div className="relative mx-auto max-w-[1000px] text-center">
             <Kicker center>Sovereign architecture</Kicker>
