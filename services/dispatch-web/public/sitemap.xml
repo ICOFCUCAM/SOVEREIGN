@@ -58,4 +58,24 @@
   <url><loc>https://dispatch.sovereigndo.com/industries/land-registries</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/industries/standards-bodies</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/industries/professional-bodies</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/foreign-affairs</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/social-security</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/labor-authorities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/food-safety</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/telecom-regulators</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/competition-authorities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/data-protection</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/public-procurement</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/stock-exchanges</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/development-banks</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/railway-authorities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/nuclear-regulators</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/space-agencies</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/national-libraries</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/broadcasting-authorities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/sports-federations</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/chambers-of-commerce</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/immigration-authorities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/consumer-protection</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/research-institutes</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>

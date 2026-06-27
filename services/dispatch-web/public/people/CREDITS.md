@@ -59,6 +59,26 @@ of rights with the asset.
 | `land-registries.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — registry vault, lone registrar from afar | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
 | `standards-bodies.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — calibration hall, distant engineers from behind | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
 | `professional-bodies.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — council chamber, distant members | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `foreign-affairs.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — diplomatic reception hall, distant figures from behind | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `social-security.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — public service hall, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `labor-authorities.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — ministry hall, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `food-safety.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — inspection atrium, distant inspectors from behind | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `telecom-regulators.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — operations hall, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `competition-authorities.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — hearing chamber, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `data-protection.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — agency atrium, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `public-procurement.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — tender hall, distant officials from behind | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `stock-exchanges.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — trading hall, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `development-banks.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — headquarters atrium, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `railway-authorities.webp` | **Interim reuse** — copy of `customs-border.webp` (awaiting dedicated render) | owned render | none | n/a | pending generation (OpenAI billing limit) | 2026-06-27 |
+| `nuclear-regulators.webp` | **Interim reuse** — copy of `energy-utilities.webp` (awaiting dedicated render) | owned render | none | n/a | pending generation (OpenAI billing limit) | 2026-06-27 |
+| `space-agencies.webp` | **Interim reuse** — copy of `aviation-authorities.webp` (awaiting dedicated render) | owned render | none | n/a | pending generation (OpenAI billing limit) | 2026-06-27 |
+| `national-libraries.webp` | **Interim reuse** — copy of `archives.webp` (awaiting dedicated render) | owned render | none | n/a | pending generation (OpenAI billing limit) | 2026-06-27 |
+| `broadcasting-authorities.webp` | **Interim reuse** — copy of `telecom-regulators.webp` (awaiting dedicated render) | owned render | none | n/a | pending generation (OpenAI billing limit) | 2026-06-27 |
+| `sports-federations.webp` | **Interim reuse** — copy of `professional-bodies.webp` (awaiting dedicated render) | owned render | none | n/a | pending generation (OpenAI billing limit) | 2026-06-27 |
+| `chambers-of-commerce.webp` | **Interim reuse** — copy of `stock-exchanges.webp` (awaiting dedicated render) | owned render | none | n/a | pending generation (OpenAI billing limit) | 2026-06-27 |
+| `immigration-authorities.webp` | **Interim reuse** — copy of `social-security.webp` (awaiting dedicated render) | owned render | none | n/a | pending generation (OpenAI billing limit) | 2026-06-27 |
+| `consumer-protection.webp` | **Interim reuse** — copy of `standards-bodies.webp` (awaiting dedicated render) | owned render | none | n/a | pending generation (OpenAI billing limit) | 2026-06-27 |
+| `research-institutes.webp` | **Interim reuse** — copy of `pharmaceuticals.webp` (awaiting dedicated render) | owned render | none | n/a | pending generation (OpenAI billing limit) | 2026-06-27 |
 
 > **Interim exception (recorded honestly).** All seven homepage images above are
 > **AI-generated** renders, accepted by explicit decision on 2026-06-26 (see
@@ -83,6 +103,17 @@ of rights with the asset.
 > text-free, has no recognizable real people (figures distant, silhouetted, or from
 > behind), was downscaled to 1280×800 (16:10) and optimized to webp, and is a
 > drop-in replacement target for real licensed/commissioned photography.
+
+> **Exposure pass (2026-06-27).** All Layer-2 sector frames were given a uniform
+> brightening grade (≈ +30% exposure, shadow lift) so they read clearly as
+> standalone cards on the industries index, while still sitting correctly under the
+> dark hero gradient. Ten further sectors (`railway-authorities`,
+> `nuclear-regulators`, `space-agencies`, `national-libraries`,
+> `broadcasting-authorities`, `sports-federations`, `chambers-of-commerce`,
+> `immigration-authorities`, `consumer-protection`, `research-institutes`) are
+> **interim reuses** of a thematically-close frame (see rows above) because the
+> OpenAI billing hard limit was reached mid-batch; each will be replaced by a
+> dedicated render — drop-in by filename — once generation capacity is restored.
 
 > Replace a row's `_pending_` cells as each image is sourced. For a free-license,
 > face-free frame: `Source` = Unsplash/Pexels/Pixabay, `License` = that license,
