@@ -100,7 +100,7 @@ export const ARTICLES: Article[] = [
     ],
     relatedConcepts: ["official-publication", "document-authenticity", "governance-certificate", "document-verification"],
     relatedIndustries: ["government", "regulators", "justice", "central-banks"],
-    relatedArticles: ["pdf-vs-official-publication", "the-publication-lifecycle", "what-is-document-governance"],
+    relatedArticles: ["pdf-vs-official-publication", "the-publication-lifecycle", "what-is-document-governance", "authority-to-publish-explained"],
     metaTitle: "What Is an Official Record? A Complete Guide",
     metaDescription: "An Official Record is a publication issued under an institution's authority, governed before release and permanently verifiable. Learn what makes a record official and why it matters.",
   },
@@ -165,7 +165,7 @@ export const ARTICLES: Article[] = [
     ],
     relatedConcepts: ["official-publication", "tamper-proof-publication", "document-verification", "document-authenticity"],
     relatedIndustries: ["government", "universities", "healthcare", "civil-registration"],
-    relatedArticles: ["what-is-an-official-record", "what-is-document-governance", "understanding-evidence-chains"],
+    relatedArticles: ["what-is-an-official-record", "what-is-document-governance", "understanding-evidence-chains", "authority-to-publish-explained"],
     metaTitle: "PDF vs Official Publication — What's the Difference?",
     metaDescription: "A PDF is a format; an Official Publication is a governed, verifiable act of an institution. Learn why a file's format says nothing about its authority — and what closes the gap.",
   },
@@ -241,7 +241,7 @@ export const ARTICLES: Article[] = [
     ],
     relatedConcepts: ["policy-approval-workflow", "document-governance", "governance-certificate", "digital-preservation"],
     relatedIndustries: ["government", "healthcare", "universities", "regulators"],
-    relatedArticles: ["what-is-an-official-record", "what-is-document-governance", "understanding-evidence-chains"],
+    relatedArticles: ["what-is-an-official-record", "what-is-document-governance", "understanding-evidence-chains", "authority-to-publish-explained"],
     metaTitle: "The Publication Lifecycle — From Draft to Permanent Record",
     metaDescription: "Official publication is a lifecycle: create, review, approve, authorise, publish, certify, verify, preserve. Walk each stage and see where authority and proof are won or lost.",
   },
@@ -2217,8 +2217,7 @@ export const ARTICLES: Article[] = [
     "relatedArticles": [
       "government-gazettes-explained",
       "what-is-an-official-record",
-      "the-publication-lifecycle"
-    ],
+      "the-publication-lifecycle", "regulatory-publication-guide", "electoral-result-publication"],
     "metaTitle": "Executive Orders: Issued and Verified",
     "metaDescription": "How executive orders acquire legal force, how they are published, and how governance keeps a directive verifiable long after it is signed."
   },
@@ -2319,8 +2318,7 @@ export const ARTICLES: Article[] = [
     "relatedArticles": [
       "public-notices-and-gazetting",
       "executive-orders-explained",
-      "what-is-an-official-record"
-    ],
+      "what-is-an-official-record", "regulatory-publication-guide", "clinical-directives-and-safety-bulletins"],
     "metaTitle": "Government Gazettes, Explained",
     "metaDescription": "What a government gazette is, how editions are compiled and issued, how a gazette notice is verified, and why its integrity underwrites the public record."
   },
@@ -2725,8 +2723,7 @@ export const ARTICLES: Article[] = [
     "relatedArticles": [
       "government-gazettes-explained",
       "what-is-an-official-record",
-      "the-publication-lifecycle"
-    ],
+      "the-publication-lifecycle", "court-judgment-publication", "clinical-directives-and-safety-bulletins"],
     "metaTitle": "Public Notices and the Gazetting Process",
     "metaDescription": "What public notices are, how gazetting confers legal notice, how a notice is verified after the fact, and how casual publication exposes the whole process."
   },
@@ -2827,8 +2824,7 @@ export const ARTICLES: Article[] = [
     "relatedArticles": [
       "what-is-an-official-record",
       "the-publication-lifecycle",
-      "central-bank-circulars"
-    ],
+      "central-bank-circulars", "regulatory-publication-guide", "clinical-directives-and-safety-bulletins"],
     "metaTitle": "Board Resolutions: Making Decisions Provable",
     "metaDescription": "How board resolutions are governed, issued, and verified as institutional records — covering authority, quorum, certification, and the failure modes that break reliance."
   },
@@ -2929,8 +2925,7 @@ export const ARTICLES: Article[] = [
     "relatedArticles": [
       "what-is-an-official-record",
       "certificate-and-credential-issuance",
-      "the-publication-lifecycle"
-    ],
+      "the-publication-lifecycle", "court-judgment-publication"],
     "metaTitle": "University Senate Publications, Governed",
     "metaDescription": "How university senate decisions — approvals, conferrals, regulations — are governed, issued, and verified, and why version drift is the dominant failure mode."
   },
@@ -3133,8 +3128,7 @@ export const ARTICLES: Article[] = [
     "relatedArticles": [
       "board-resolutions-guide",
       "the-publication-lifecycle",
-      "what-is-an-official-record"
-    ],
+      "what-is-an-official-record", "electoral-result-publication"],
     "metaTitle": "Central Bank Circulars and Prudential Rules",
     "metaDescription": "How central bank circulars and prudential rules are governed, issued, and verified — covering authority, binding force, current status, and the risk of stale reliance."
   },
@@ -3235,8 +3229,7 @@ export const ARTICLES: Article[] = [
     "relatedArticles": [
       "certificate-and-credential-issuance",
       "university-senate-publications",
-      "what-is-an-official-record"
-    ],
+      "what-is-an-official-record", "court-judgment-publication"],
     "metaTitle": "Professional Licensing Records and Registers",
     "metaDescription": "How professional licensing records and registers are governed, issued, and verified — and why current standing in the register, not the certificate, is what matters."
   },
@@ -3337,8 +3330,7 @@ export const ARTICLES: Article[] = [
     "relatedArticles": [
       "professional-licensing-records",
       "university-senate-publications",
-      "the-publication-lifecycle"
-    ],
+      "the-publication-lifecycle", "electoral-result-publication"],
     "metaTitle": "Issuing Certificates and Credentials That Verify",
     "metaDescription": "How certificates and credentials are governed, issued, and verified — why binding to issuer-controlled records, not security features, makes them trustworthy."
   },

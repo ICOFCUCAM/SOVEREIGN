@@ -87,6 +87,14 @@ async function main() {
       else console.log("discover gaps|opportunities|competitors|propose|cycle [--propose]");
       break;
     }
+    case "relink": {
+      const relink = require("../lib/relink.cjs");
+      const typeKey = relink.TYPES[sub] ? sub : "concept";
+      const p = relink.plan(typeKey, { perOrphan: Number(flag("per", 3)) });
+      if (has("apply")) { const r = relink.apply(p); console.log(`relink ${typeKey}: ${p.orphans.length} orphans, fixed ${p.fixed}, edited ${r.editedEntries} entries, unresolved ${p.unresolved.length}`); }
+      else { console.log(`relink ${typeKey} (dry-run): ${p.orphans.length} orphans, would fix ${p.fixed}, edit ${Object.keys(p.edits).length} entries, unresolved ${p.unresolved.length}`); J({ unresolved: p.unresolved, sampleEdits: Object.fromEntries(Object.entries(p.edits).slice(0, 5)) }); }
+      break;
+    }
     case "version": J(versioning.history(sub, flag("locale", "en"))); break;
     case "versions": { if (sub === "due") J(versioning.due()); else console.log("versions due"); break; }
     case "validate": { const arr = loadBatch(arg2); const t = D.TYPES[sub]; const bad = arr.filter((e) => !t.valid(e)); const slugs = arr.map((e) => D.slugify(e.slug)); const dups = slugs.filter((s, i) => slugs.indexOf(s) !== i); console.log(`${arg2}: ${arr.length} entries, ${bad.length} malformed, ${dups.length} dup slugs`); if (bad.length || dups.length) process.exit(1); break; }

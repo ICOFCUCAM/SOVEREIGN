@@ -57,7 +57,7 @@ export const PROBLEMS: Problem[] = [
       { q: "Does a signature or letterhead make a publication official?", a: "No. A signature or letterhead can be copied. Authority bound to an office plus a verifiable integrity proof is what makes a publication provably official." },
     ],
     relatedIndustries: ["government", "regulators", "justice", "central-banks"],
-    relatedProblems: ["document-governance", "document-authenticity", "governance-certificate", "document-verification"],
+    relatedProblems: ["document-governance", "document-authenticity", "governance-certificate", "document-verification", "policy-document", "standard-operating-procedure"],
     diagram: "shield",
     metaTitle: "What Is an Official Publication? Definition & How to Prove One",
     metaDescription: "An official publication is a document issued under an institution's authority through a governed process and made permanently verifiable. Learn what makes a publication official and how to prove it.",
@@ -87,7 +87,7 @@ export const PROBLEMS: Problem[] = [
       { q: "Why does document governance matter?", a: "It lets an institution prove its publications are genuine and authorised — essential for audits, legal challenges and public trust." },
     ],
     relatedIndustries: ["government", "healthcare", "financial-institutions", "universities"],
-    relatedProblems: ["policy-approval-workflow", "official-publication", "publication-audit", "evidence-chain"],
+    relatedProblems: ["policy-approval-workflow", "official-publication", "publication-audit", "evidence-chain", "policy-document", "directive"],
     diagram: "workflow",
     metaTitle: "What Is Document Governance? Definition, Controls & Why It Matters",
     metaDescription: "Document governance controls how a document is approved and issued — who authorises it, in what order, and how the record is preserved and verified. Learn the controls and why they matter.",
@@ -117,7 +117,7 @@ export const PROBLEMS: Problem[] = [
       { q: "Can a third party verify a board resolution?", a: "Yes — with Sovereign Dispatch each resolution has a permanent Record ID that a counterparty can verify independently, with no account." },
     ],
     relatedIndustries: ["financial-institutions", "development-banks", "insurance", "universities"],
-    relatedProblems: ["policy-approval-workflow", "governance-certificate", "document-authenticity", "institutional-records"],
+    relatedProblems: ["policy-approval-workflow", "governance-certificate", "document-authenticity", "institutional-records", "gazetting-process"],
     diagram: "workflow",
     metaTitle: "Board Resolution Software — Make Every Resolution Provable",
     metaDescription: "Board resolution software governs how a board's decisions are approved and recorded, making each resolution attributable, version-controlled and permanently verifiable by third parties.",
@@ -147,7 +147,7 @@ export const PROBLEMS: Problem[] = [
       { q: "How can the public verify a government publication?", a: "By checking its permanent Record ID against the issuing body's record — Sovereign Dispatch makes this possible for anyone, without an account." },
     ],
     relatedIndustries: ["government", "municipalities", "parliaments", "regulators"],
-    relatedProblems: ["official-publication", "policy-approval-workflow", "regulatory-publication", "evidence-chain"],
+    relatedProblems: ["official-publication", "policy-approval-workflow", "regulatory-publication", "evidence-chain", "gazetting-process"],
     diagram: "workflow",
     metaTitle: "Government Publication Workflow — From Draft to Verifiable Gazette",
     metaDescription: "A government publication workflow governs how a public body drafts, approves and issues orders, regulations and gazette notices as authoritative, permanently verifiable public records.",
@@ -177,7 +177,7 @@ export const PROBLEMS: Problem[] = [
       { q: "How does a regulated entity check a publication is current?", a: "By verifying its permanent Record ID against the regulator's record — Sovereign Dispatch makes this independent and account-free." },
     ],
     relatedIndustries: ["regulators", "central-banks", "securities-regulators", "telecom-regulators"],
-    relatedProblems: ["official-publication", "document-verification", "evidence-chain", "publication-audit"],
+    relatedProblems: ["official-publication", "document-verification", "evidence-chain", "publication-audit", "policy-document", "directive"],
     diagram: "shield",
     metaTitle: "Regulatory Publication — Rules & Decisions the Regulated Can Trust",
     metaDescription: "A regulatory publication is an authoritative rule, licence or decision that carries legal force. Learn what makes it reliable and how regulated parties verify the genuine, current version.",
@@ -207,7 +207,7 @@ export const PROBLEMS: Problem[] = [
       { q: "Why is the exact version so important?", a: "Because legal effect turns on precise wording. Relying on a superseded or altered version can change the outcome of a case." },
     ],
     relatedIndustries: ["justice", "parliaments", "law-enforcement", "notarial-authorities"],
-    relatedProblems: ["document-authenticity", "official-publication", "evidence-chain", "institutional-records"],
+    relatedProblems: ["document-authenticity", "official-publication", "evidence-chain", "institutional-records", "standard-operating-procedure", "directive"],
     diagram: "shield",
     metaTitle: "Legal Publication — Proving the Authentic Text of Judgments & Statutes",
     metaDescription: "A legal publication is an authoritative judgment, ruling or statute whose exact text and provenance must be verifiable. Learn how the authentic text is governed and proven.",
@@ -267,7 +267,7 @@ export const PROBLEMS: Problem[] = [
       { q: "How can I verify a document is authentic?", a: "Verify its permanent Record ID and integrity proof against the issuer's record. Sovereign Dispatch lets anyone do this without an account." },
     ],
     relatedIndustries: ["civil-registration", "intellectual-property", "notarial-authorities", "universities"],
-    relatedProblems: ["document-verification", "tamper-proof-publication", "cryptographic-sealing", "official-publication"],
+    relatedProblems: ["document-verification", "tamper-proof-publication", "cryptographic-sealing", "official-publication", "framework-document"],
     diagram: "seal",
     metaTitle: "Document Authenticity — How to Prove a Document Is Genuine",
     metaDescription: "Document authenticity is the verifiable property of being genuine and unaltered. Learn why signatures and seals aren't enough and how to prove a document is authentic.",
@@ -297,7 +297,7 @@ export const PROBLEMS: Problem[] = [
       { q: "How long must institutional records remain verifiable?", a: "Often for decades, depending on retention law. The integrity proof must hold for the full retention period." },
     ],
     relatedIndustries: ["archives", "national-libraries", "government", "universities"],
-    relatedProblems: ["digital-preservation", "official-publication", "document-governance", "evidence-chain"],
+    relatedProblems: ["digital-preservation", "official-publication", "document-governance", "evidence-chain", "standard-operating-procedure", "circular-letter"],
     diagram: "ledger",
     metaTitle: "Institutional Records — Durable, Verifiable Organisational Memory",
     metaDescription: "Institutional records are the authoritative documents an organisation preserves as durable proof of its decisions, bound to offices and kept verifiable for their full retention life.",
@@ -357,7 +357,7 @@ export const PROBLEMS: Problem[] = [
       { q: "What does verification actually check?", a: "That the document maps to a genuine issued record and that the exact file is unaltered since publication." },
     ],
     relatedIndustries: ["civil-registration", "universities", "customs-border", "chambers-of-commerce"],
-    relatedProblems: ["document-authenticity", "tamper-proof-publication", "official-publication", "cryptographic-sealing"],
+    relatedProblems: ["document-authenticity", "tamper-proof-publication", "official-publication", "cryptographic-sealing", "issuer-identity-verification", "source-verification"],
     diagram: "seal",
     metaTitle: "Document Verification — Confirm a Document Is Genuine, No Account",
     metaDescription: "Document verification confirms a document is genuine and unaltered by checking a permanent Record ID and integrity proof against the issuer — independently, with no account.",
@@ -447,7 +447,7 @@ export const PROBLEMS: Problem[] = [
       { q: "Can a third party check a governance certificate?", a: "Yes — it is tied to the permanent Record ID and can be verified by anyone without internal access." },
     ],
     relatedIndustries: ["financial-institutions", "regulators", "government", "supreme-audit-institutions"],
-    relatedProblems: ["evidence-chain", "policy-approval-workflow", "document-governance", "publication-audit"],
+    relatedProblems: ["evidence-chain", "policy-approval-workflow", "document-governance", "publication-audit", "certificate-validation"],
     diagram: "shield",
     metaTitle: "Governance Certificate — Portable Proof a Record Was Authorised",
     metaDescription: "A governance certificate records how a publication was authorised — the approving offices, the order and the exact version — so its governance can be proven by anyone, with no internal access.",
@@ -477,7 +477,7 @@ export const PROBLEMS: Problem[] = [
       { q: "How does continuous evidence reduce audit cost?", a: "It removes the scramble: the approval trail and integrity proofs already exist, complete and in order, ready to retrieve." },
     ],
     relatedIndustries: ["supreme-audit-institutions", "regulators", "financial-institutions", "healthcare"],
-    relatedProblems: ["evidence-chain", "document-governance", "governance-certificate", "institutional-records"],
+    relatedProblems: ["evidence-chain", "document-governance", "governance-certificate", "institutional-records", "gazetting-process"],
     diagram: "ledger",
     metaTitle: "Publication Audit — Make It Retrieval, Not Reconstruction",
     metaDescription: "A publication audit reviews how documents were approved and issued. When governance evidence is captured as records are made, the audit becomes retrieval, not a costly reconstruction.",
@@ -563,8 +563,7 @@ export const PROBLEMS: Problem[] = [
       "electronic-signature",
       "signature-verification",
       "cryptographic-sealing",
-      "document-authenticity"
-    ],
+      "document-authenticity", "wet-signature"],
     "diagram": "seal",
     "metaTitle": "Digital Signature | Sovereign Dispatch",
     "metaDescription": "A digital signature cryptographically binds a signer to exact document contents, making any later change tamper-evident and independently verifiable."
@@ -620,8 +619,7 @@ export const PROBLEMS: Problem[] = [
       "digital-signature",
       "advanced-electronic-signature",
       "signature-audit-trail",
-      "document-verification"
-    ],
+      "document-verification", "wet-signature", "electronic-seal"],
     "diagram": "workflow",
     "metaTitle": "Electronic Signature | Sovereign Dispatch",
     "metaDescription": "An electronic signature records a signer's intent in electronic form; its strength depends on identity, consent, and a locked record of what was signed."
@@ -733,8 +731,7 @@ export const PROBLEMS: Problem[] = [
       "advanced-electronic-signature",
       "digital-signing-certificate",
       "digital-signature",
-      "signature-verification"
-    ],
+      "signature-verification", "wet-signature", "electronic-seal"],
     "diagram": "shield",
     "metaTitle": "Qualified Electronic Signature | Sovereign Dispatch",
     "metaDescription": "A qualified electronic signature is the highest-assurance class, backed by a qualified certificate and secure device for the most sensitive instruments."
@@ -790,8 +787,7 @@ export const PROBLEMS: Problem[] = [
       "qualified-electronic-signature",
       "electronic-signature",
       "digital-signature",
-      "signature-verification"
-    ],
+      "signature-verification", "electronic-seal"],
     "diagram": "shield",
     "metaTitle": "Advanced Electronic Signature | Sovereign Dispatch",
     "metaDescription": "An advanced electronic signature is uniquely linked to its signer and reveals any post-signing change, giving regulated commitments stronger evidential weight."
@@ -904,8 +900,7 @@ export const PROBLEMS: Problem[] = [
       "digital-signature",
       "document-verification",
       "signature-timestamp",
-      "tamper-proof-publication"
-    ],
+      "tamper-proof-publication", "issuer-identity-verification", "instant-verification"],
     "diagram": "shield",
     "metaTitle": "Signature Verification | Sovereign Dispatch",
     "metaDescription": "Signature verification confirms a signature is authentic, matches the document, and that contents are unchanged since signing, independently of the issuer."
@@ -1303,8 +1298,7 @@ export const PROBLEMS: Problem[] = [
       "digital-signature",
       "qualified-electronic-signature",
       "signature-verification",
-      "cryptographic-sealing"
-    ],
+      "cryptographic-sealing", "certificate-validation"],
     "diagram": "shield",
     "metaTitle": "Digital Signing Certificate | Sovereign Dispatch",
     "metaDescription": "A digital signing certificate binds a signer's public key to their verified identity, letting recipients trust who actually produced a signature."
@@ -1531,8 +1525,7 @@ export const PROBLEMS: Problem[] = [
       "signature-workflow",
       "multi-party-signing",
       "counter-signature",
-      "signature-authority"
-    ],
+      "signature-authority", "order"],
     "diagram": "chain",
     "metaTitle": "Signing Order | Sovereign Dispatch",
     "metaDescription": "Signing order enforces the exact sequence in which parties must execute a document, so approvals and endorsements occur in their required order."
@@ -1645,8 +1638,7 @@ export const PROBLEMS: Problem[] = [
       "pki-digital-certificate",
       "certificate-authority",
       "root-of-trust",
-      "public-private-key-pair"
-    ],
+      "public-private-key-pair", "public-verification"],
     "diagram": "shield",
     "metaTitle": "Public Key Infrastructure (PKI) Explained",
     "metaDescription": "Public key infrastructure binds verified identities to keys so readers can confirm who signed a record and that it remains tamper-evident."
@@ -1702,8 +1694,7 @@ export const PROBLEMS: Problem[] = [
       "certificate-authority",
       "x509-certificate",
       "certificate-chain",
-      "public-key-infrastructure"
-    ],
+      "public-key-infrastructure", "certificate-of-origin"],
     "diagram": "seal",
     "metaTitle": "Digital Certificate: Binding Keys to Identity",
     "metaDescription": "A digital certificate links a public key to a verified identity, letting verifiers confirm who signed a record without contacting the signer."
@@ -1759,8 +1750,7 @@ export const PROBLEMS: Problem[] = [
       "pki-digital-certificate",
       "root-of-trust",
       "certificate-revocation",
-      "public-key-infrastructure"
-    ],
+      "public-key-infrastructure", "certificate-of-origin"],
     "diagram": "shield",
     "metaTitle": "Certificate Authority (CA) Explained",
     "metaDescription": "A certificate authority verifies identities and issues digital certificates, anchoring trust so verifiers can rely on signed records."
@@ -1815,8 +1805,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "public-private-key-pair",
       "root-of-trust",
-      "certificate-revocation"
-    ],
+      "certificate-revocation", "instant-verification"],
     "diagram": "lifecycle",
     "metaTitle": "Key Management: Securing Signing Keys",
     "metaDescription": "Key management governs how cryptographic keys are generated, stored, used, rotated, and retired so signatures stay trustworthy and accountable."
@@ -2328,8 +2317,7 @@ export const PROBLEMS: Problem[] = [
       "pki-digital-certificate",
       "certificate-chain",
       "certificate-authority",
-      "public-key-infrastructure"
-    ],
+      "public-key-infrastructure", "certificate-of-origin"],
     "diagram": "seal",
     "metaTitle": "X.509 Certificate Format Explained",
     "metaDescription": "An X.509 certificate is the standard structured format binding a public key to an identity with issuer, validity, and usage fields for validation."
@@ -2384,8 +2372,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "certificate-authority",
       "pki-digital-certificate",
-      "trusted-timestamp"
-    ],
+      "trusted-timestamp", "certificate-validation", "birth-certificate-issuance"],
     "diagram": "lifecycle",
     "metaTitle": "Certificate Revocation Explained",
     "metaDescription": "Certificate revocation lets an issuer declare a certificate invalid before expiry and publish that status so verifiers stop relying on it."
@@ -2554,8 +2541,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "signature-algorithm",
       "key-management",
-      "pki-digital-certificate"
-    ],
+      "pki-digital-certificate", "public-verification"],
     "diagram": "shield",
     "metaTitle": "Public-Private Key Pair Explained",
     "metaDescription": "A public-private key pair has a secret signing key and a shareable verification key, separating the power to sign from the ability to verify."
@@ -2611,8 +2597,7 @@ export const PROBLEMS: Problem[] = [
       "certificate-authority",
       "root-of-trust",
       "x509-certificate",
-      "certificate-revocation"
-    ],
+      "certificate-revocation", "birth-certificate-issuance"],
     "diagram": "chain",
     "metaTitle": "Certificate Chain Explained",
     "metaDescription": "A certificate chain links a signer's certificate through intermediate issuers to a trusted root, letting verifiers trace and validate trust."
@@ -2724,8 +2709,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "chain-of-custody",
       "non-repudiation",
-      "append-only-log"
-    ],
+      "append-only-log", "circular-letter"],
     "diagram": "ledger",
     "metaTitle": "Audit Trail: Reconstruct Who Did What and When",
     "metaDescription": "An audit trail is a tamper-evident, chronological record of every action, actor, and timestamp on a document, letting institutions reconstruct full history."
@@ -2780,8 +2764,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "evidence-preservation",
       "provenance",
-      "audit-trail"
-    ],
+      "audit-trail", "memorandum-of-decision"],
     "diagram": "chain",
     "metaTitle": "Chain of Custody: Prove Unbroken Control of Records",
     "metaDescription": "Chain of custody is the documented, unbroken sequence of who held and transferred a record, maintained so its integrity can be defended under challenge."
@@ -2836,8 +2819,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "integrity-proof",
       "trust-anchor",
-      "hash-verification"
-    ],
+      "hash-verification", "memorandum-of-decision"],
     "diagram": "seal",
     "metaTitle": "Non-Repudiation: Bind Actions to Identity",
     "metaDescription": "Non-repudiation ensures a party cannot plausibly deny an action, because cryptographic and procedural evidence ties it firmly to their identity."
@@ -2892,8 +2874,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "hash-verification",
       "fixity-check",
-      "data-integrity"
-    ],
+      "data-integrity", "determination"],
     "diagram": "shield",
     "metaTitle": "Checksum: Detect Any Change to a File",
     "metaDescription": "A checksum is a compact value derived from a file's contents so any alteration produces a different value, letting you detect corruption or tampering."
@@ -2948,8 +2929,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "checksum",
       "data-integrity",
-      "evidence-preservation"
-    ],
+      "evidence-preservation", "determination"],
     "diagram": "lifecycle",
     "metaTitle": "Fixity Check: Verify Stored Records Stay Unchanged",
     "metaDescription": "A fixity check reverifies a stored record's checksum against its baseline to confirm the file has not changed or degraded while in custody."
@@ -3004,8 +2984,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "write-once-record",
       "append-only-log",
-      "version-integrity"
-    ],
+      "version-integrity", "determination"],
     "diagram": "ledger",
     "metaTitle": "Immutable Record: Fixed Content After Commit",
     "metaDescription": "An immutable record's content is fixed when committed and cannot be changed; corrections are issued as new linked records, preserving the original."
@@ -3060,8 +3039,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "immutable-record",
       "append-only-log",
-      "sealed-record"
-    ],
+      "sealed-record", "ruling"],
     "diagram": "ledger",
     "metaTitle": "Write-Once Record: Write Once, Read Forever",
     "metaDescription": "A write-once record can be written exactly once and never modified or deleted, keeping the original permanently available for reading and verification."
@@ -3116,8 +3094,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "hash-verification",
       "proof-of-integrity",
-      "non-repudiation"
-    ],
+      "non-repudiation", "ruling"],
     "diagram": "shield",
     "metaTitle": "Integrity Proof: Verifiable Evidence a Record Is Unchanged",
     "metaDescription": "An integrity proof is self-contained cryptographic evidence that a record is unchanged since sealing, checkable by any party without trusting the holder."
@@ -3172,8 +3149,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "record-provenance",
       "chain-of-custody",
-      "data-integrity"
-    ],
+      "data-integrity", "ruling"],
     "diagram": "chain",
     "metaTitle": "Provenance: Trace a Record to Its Origin",
     "metaDescription": "Provenance is the documented origin and history of a record, capturing source, authorship, and changes so its lineage and authenticity can be established."
@@ -3228,8 +3204,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "checksum",
       "version-integrity",
-      "tamper-detection"
-    ],
+      "tamper-detection", "order"],
     "diagram": "shield",
     "metaTitle": "Data Integrity: Accurate, Unchanged Data End to End",
     "metaDescription": "Data integrity assures data stays accurate, complete, and consistent across its lifecycle, with unauthorized or accidental change prevented or detectable."
@@ -3284,8 +3259,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "immutable-record",
       "data-integrity",
-      "record-provenance"
-    ],
+      "record-provenance", "order"],
     "diagram": "lifecycle",
     "metaTitle": "Version Integrity: Know Which Version You Trust",
     "metaDescription": "Version integrity ensures every revision is uniquely identified, unaltered, and correctly ordered, so the precise version relied on can be confirmed."
@@ -3340,8 +3314,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "checksum",
       "integrity-proof",
-      "tamper-detection"
-    ],
+      "tamper-detection", "issuer-identity-verification", "source-verification", "instant-verification"],
     "diagram": "shield",
     "metaTitle": "Hash Verification: Confirm a File's Fingerprint",
     "metaDescription": "Hash verification recomputes a record's cryptographic hash and compares it to a trusted expected value, confirming the record is unaltered when they match."
@@ -3396,8 +3369,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "hash-verification",
       "sealed-record",
-      "data-integrity"
-    ],
+      "data-integrity", "by-law"],
     "diagram": "shield",
     "metaTitle": "Tamper Detection: Surface Unauthorized Changes",
     "metaDescription": "Tamper detection reliably reveals any unauthorized alteration to a record through seals, checksums, or linked logs, turning silent edits into evident events."
@@ -3452,8 +3424,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "audit-trail",
       "immutable-record",
-      "write-once-record"
-    ],
+      "write-once-record", "by-law"],
     "diagram": "ledger",
     "metaTitle": "Append-Only Log: Add Entries, Change None",
     "metaDescription": "An append-only log accepts new entries but never edits or deletes existing ones, keeping a complete history where any rewrite of the past is detectable."
@@ -3508,8 +3479,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "tamper-detection",
       "proof-of-integrity",
-      "integrity-proof"
-    ],
+      "integrity-proof", "by-law"],
     "diagram": "seal",
     "metaTitle": "Sealed Record: Lock State with a Verifiable Seal",
     "metaDescription": "A sealed record binds its committed content with a cryptographic seal, so the content verifies as unchanged and any alteration invalidates the seal."
@@ -3564,8 +3534,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "integrity-proof",
       "hash-verification",
-      "sealed-record"
-    ],
+      "sealed-record", "ordinance"],
     "diagram": "shield",
     "metaTitle": "Proof of Integrity: Demonstrate Records Are Unchanged",
     "metaDescription": "Proof of integrity is independently checkable evidence that a record is exactly as committed, presented on demand so any verifier can confirm it."
@@ -3620,8 +3589,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "provenance",
       "chain-of-custody",
-      "version-integrity"
-    ],
+      "version-integrity", "ordinance"],
     "diagram": "chain",
     "metaTitle": "Record Provenance: Bind Lineage to the Record",
     "metaDescription": "Record provenance binds verifiable lineage, origin, authorship, custody, and changes to each record, so it carries evidence of where it came from."
@@ -3676,8 +3644,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "non-repudiation",
       "integrity-proof",
-      "proof-of-integrity"
-    ],
+      "proof-of-integrity", "ordinance"],
     "diagram": "chain",
     "metaTitle": "Trust Anchor: Root Verification in One Reference",
     "metaDescription": "A trust anchor is an authoritative, independently trusted reference from which verification chains derive trust, rooting confidence in one protected source."
@@ -3732,8 +3699,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "chain-of-custody",
       "fixity-check",
-      "audit-trail"
-    ],
+      "audit-trail", "code-of-practice"],
     "diagram": "lifecycle",
     "metaTitle": "Evidence Preservation: Keep Records Admissible",
     "metaDescription": "Evidence preservation safeguards records' integrity, custody, and context from collection onward, so they stay intact, attributable, and admissible when needed."
@@ -4815,8 +4781,7 @@ export const PROBLEMS: Problem[] = [
       "retention-period",
       "records-retention",
       "retention-schedule",
-      "legal-hold"
-    ],
+      "legal-hold", "statutory-instrument"],
     "diagram": "shield",
     "metaTitle": "Statutory Retention | Sovereign Dispatch",
     "metaDescription": "Statutory retention is the legally mandated minimum period records must be kept, set by law. Learn how to map requirements and set the retention floor."
@@ -4871,8 +4836,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "archival-information-package",
       "trusted-digital-repository",
-      "preservation-planning"
-    ],
+      "preservation-planning", "code-of-practice", "terms-of-reference"],
     "diagram": "lifecycle",
     "metaTitle": "OAIS Reference Model | Sovereign Dispatch",
     "metaDescription": "The OAIS reference model (ISO 14721) defines the functions and packages an archive needs for trustworthy long-term digital preservation."
@@ -4927,8 +4891,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "oais-reference-model",
       "submission-information-package",
-      "preservation-metadata"
-    ],
+      "preservation-metadata", "code-of-practice"],
     "diagram": "ledger",
     "metaTitle": "Archival Information Package (AIP) | Sovereign Dispatch",
     "metaDescription": "An archival information package binds preserved content to the provenance and fixity metadata that keep it intelligible and authentic over time."
@@ -4983,8 +4946,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "file-format-obsolescence",
       "preservation-planning",
-      "normalization"
-    ],
+      "normalization", "guidance-note"],
     "diagram": "workflow",
     "metaTitle": "Format Migration in Digital Preservation | Sovereign Dispatch",
     "metaDescription": "Format migration converts at-risk file formats into sustainable ones while retaining significant properties and recording each change for authenticity."
@@ -5039,8 +5001,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "fixity-for-preservation",
       "archival-storage",
-      "digital-continuity"
-    ],
+      "digital-continuity", "guidance-note"],
     "diagram": "shield",
     "metaTitle": "Bit-Level Preservation | Sovereign Dispatch",
     "metaDescription": "Bit-level preservation keeps files byte-for-byte intact over time through redundancy, fixity monitoring, and repair from known-good copies."
@@ -5095,8 +5056,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "long-term-archiving",
       "file-format-obsolescence",
-      "preservation-planning"
-    ],
+      "preservation-planning", "guidance-note"],
     "diagram": "lifecycle",
     "metaTitle": "Digital Continuity Explained | Sovereign Dispatch",
     "metaDescription": "Digital continuity keeps information complete, available, and usable for as long as it is needed, despite changing technology and systems."
@@ -5151,8 +5111,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "digital-continuity",
       "archival-storage",
-      "preservation-planning"
-    ],
+      "preservation-planning", "position-statement"],
     "diagram": "ledger",
     "metaTitle": "Long-Term Archiving | Sovereign Dispatch",
     "metaDescription": "Long-term archiving manages digital records across changing technology and staff so they stay accessible, authentic, and trustworthy for decades."
@@ -5207,8 +5166,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "archival-information-package",
       "authenticity-in-preservation",
-      "fixity-for-preservation"
-    ],
+      "fixity-for-preservation", "position-statement"],
     "diagram": "ledger",
     "metaTitle": "Preservation Metadata (PREMIS) | Sovereign Dispatch",
     "metaDescription": "Preservation metadata documents a digital object's technical traits, provenance, fixity, and preservation actions to keep it usable and authentic."
@@ -5263,8 +5221,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "oais-reference-model",
       "digital-archiving-standard",
-      "preservation-planning"
-    ],
+      "preservation-planning", "charter"],
     "diagram": "shield",
     "metaTitle": "Trusted Digital Repository | Sovereign Dispatch",
     "metaDescription": "A trusted digital repository proves through audit and certification that it can reliably preserve and provide access to digital content over time."
@@ -5319,8 +5276,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "format-migration",
       "emulation",
-      "normalization"
-    ],
+      "normalization", "charter"],
     "diagram": "lifecycle",
     "metaTitle": "File Format Obsolescence | Sovereign Dispatch",
     "metaDescription": "File format obsolescence is the risk that intact files become unreadable as the software and specifications to interpret them disappear."
@@ -5375,8 +5331,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "file-format-obsolescence",
       "format-migration",
-      "authenticity-in-preservation"
-    ],
+      "authenticity-in-preservation", "charter"],
     "diagram": "workflow",
     "metaTitle": "Emulation in Digital Preservation | Sovereign Dispatch",
     "metaDescription": "Emulation preserves digital objects by recreating their original computing environment, rendering them natively without altering the files."
@@ -5431,8 +5386,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "bit-level-preservation",
       "authenticity-in-preservation",
-      "preservation-metadata"
-    ],
+      "preservation-metadata", "terms-of-reference"],
     "diagram": "seal",
     "metaTitle": "Fixity for Preservation | Sovereign Dispatch",
     "metaDescription": "Fixity for preservation uses periodic checksum verification to detect and document any change to stored digital objects over their retention period."
@@ -5487,8 +5441,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "submission-information-package",
       "normalization",
-      "archival-information-package"
-    ],
+      "archival-information-package", "terms-of-reference"],
     "diagram": "workflow",
     "metaTitle": "Ingest Workflow in Digital Preservation | Sovereign Dispatch",
     "metaDescription": "An ingest workflow validates, characterises, and packages deposited content into archival information packages ready for long-term preservation."
@@ -5543,8 +5496,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "ingest-workflow",
       "format-migration",
-      "file-format-obsolescence"
-    ],
+      "file-format-obsolescence", "decree"],
     "diagram": "workflow",
     "metaTitle": "Normalization at Ingest | Sovereign Dispatch",
     "metaDescription": "Normalization converts submitted files to preferred sustainable formats at ingest, reducing format diversity and future migration burden."
@@ -5599,8 +5551,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "ingest-workflow",
       "archival-information-package",
-      "dissemination-information-package"
-    ],
+      "dissemination-information-package", "decree"],
     "diagram": "ledger",
     "metaTitle": "Submission Information Package (SIP) | Sovereign Dispatch",
     "metaDescription": "A submission information package is the content and metadata a producer delivers into an archive's ingest process for long-term preservation."
@@ -5655,8 +5606,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "submission-information-package",
       "archival-information-package",
-      "oais-reference-model"
-    ],
+      "oais-reference-model", "decree"],
     "diagram": "workflow",
     "metaTitle": "Dissemination Information Package (DIP) | Sovereign Dispatch",
     "metaDescription": "A dissemination information package is what an archive assembles from archival packages to deliver preserved content to consumers on request."
@@ -5936,8 +5886,7 @@ export const PROBLEMS: Problem[] = [
       "government-gazette",
       "gazette-notice",
       "publication-of-record",
-      "proclamation"
-    ],
+      "proclamation", "official-letter"],
     "diagram": "ledger",
     "metaTitle": "Official Gazette: The Government's Record of Authority",
     "metaDescription": "An official gazette is the authoritative periodical where laws, appointments and statutory notices are published to take legal effect. Learn how it works."
@@ -6221,8 +6170,7 @@ export const PROBLEMS: Problem[] = [
       "legal-notice",
       "statutory-notice",
       "notice-period",
-      "publication-date-of-record"
-    ],
+      "publication-date-of-record", "public-verification"],
     "diagram": "shield",
     "metaTitle": "Public Notice: Formal, Dated Notification to the Public",
     "metaDescription": "A public notice formally informs the public of a decision or requirement on a verifiable date. Learn how to give and prove official notice."
@@ -6335,8 +6283,7 @@ export const PROBLEMS: Problem[] = [
       "legal-notice",
       "public-notice",
       "notice-period",
-      "commencement-notice"
-    ],
+      "commencement-notice", "statutory-instrument"],
     "diagram": "shield",
     "metaTitle": "Statutory Notice: Publication a Statute Demands",
     "metaDescription": "A statutory notice is publication a specific statute requires, with prescribed form and timing. Learn how to comply and keep verifiable records."
@@ -6392,8 +6339,7 @@ export const PROBLEMS: Problem[] = [
       "official-journal",
       "official-announcement",
       "notice-of-publication",
-      "publication-of-record"
-    ],
+      "publication-of-record", "official-letter"],
     "diagram": "ledger",
     "metaTitle": "Official Bulletin: A Dependable Record of Notices",
     "metaDescription": "An official bulletin is a periodical through which an authority publishes notices and decisions of record. Learn how issues are compiled and sealed."
@@ -6449,8 +6395,7 @@ export const PROBLEMS: Problem[] = [
       "official-bulletin",
       "official-gazette",
       "publication-of-record",
-      "publication-date-of-record"
-    ],
+      "publication-date-of-record", "official-letter"],
     "diagram": "ledger",
     "metaTitle": "Official Journal: The Primary Record of Binding Texts",
     "metaDescription": "An official journal is the authoritative series where binding texts are published to take effect. Learn how authenticity and citation are maintained."
@@ -7133,8 +7078,7 @@ export const PROBLEMS: Problem[] = [
       "delegation-of-authority-instrument",
       "authorization-matrix",
       "mandate-of-office",
-      "signing-authority"
-    ],
+      "signing-authority", "framework-document"],
     "diagram": "chain",
     "metaTitle": "Delegated Authority: Devolved Decision Power",
     "metaDescription": "Delegated authority grants specific decision powers to named roles within defined limits. Learn how to scope, condition and record delegation."
@@ -7190,8 +7134,7 @@ export const PROBLEMS: Problem[] = [
       "delegated-authority-framework",
       "mandate-of-office",
       "authorization-control",
-      "decision-record-keeping"
-    ],
+      "decision-record-keeping", "statutory-instrument"],
     "diagram": "chain",
     "metaTitle": "Delegation of Authority Instrument Explained",
     "metaDescription": "A delegation of authority instrument formally records the grant of decision powers, scope and limits. Learn how to draft and seal one as evidence."
@@ -7588,8 +7531,7 @@ export const PROBLEMS: Problem[] = [
     "relatedProblems": [
       "sign-off-process",
       "approval-audit-trail",
-      "mandate-of-office"
-    ],
+      "mandate-of-office", "memorandum-of-decision"],
     "diagram": "ledger",
     "metaTitle": "Decision Record: Preserving Governance Choices",
     "metaDescription": "A decision record captures what was decided, by whom and why. Learn how to attribute authority, capture rationale and seal the record as evidence."
@@ -7930,8 +7872,7 @@ export const PROBLEMS: Problem[] = [
       "authorization-matrix",
       "segregation-of-duties",
       "approval-audit-trail",
-      "mandate-of-office"
-    ],
+      "mandate-of-office", "framework-document"],
     "diagram": "shield",
     "metaTitle": "Governance Framework: Aligned Oversight",
     "metaDescription": "A governance framework defines the rules, roles and controls for authorizing decisions. Learn how to align approvals and evidence conformance."
@@ -8329,8 +8270,7 @@ export const PROBLEMS: Problem[] = [
       "register-of-directors-management",
       "register-of-members-management",
       "register-of-charges-management",
-      "company-register-management"
-    ],
+      "company-register-management", "register-of-secretaries"],
     "diagram": "ledger",
     "metaTitle": "Statutory Register: Mandatory Company Records",
     "metaDescription": "A statutory register is a record companies must keep by law. Learn how governed updates keep directors, members and charges provable."
@@ -8386,8 +8326,7 @@ export const PROBLEMS: Problem[] = [
       "statutory-register-management",
       "certificate-of-incumbency",
       "secretarys-certificate",
-      "company-register-management"
-    ],
+      "company-register-management", "register-of-secretaries"],
     "diagram": "ledger",
     "metaTitle": "Register of Directors: Proof of Who Governs",
     "metaDescription": "A register of directors records current and former directors. Learn how governed entries prove appointments, cessations and authority."
@@ -8443,8 +8382,7 @@ export const PROBLEMS: Problem[] = [
       "statutory-register-management",
       "beneficial-ownership-register",
       "shareholder-resolution-record",
-      "company-register-management"
-    ],
+      "company-register-management", "register-of-secretaries"],
     "diagram": "ledger",
     "metaTitle": "Register of Members: Proof of Share Ownership",
     "metaDescription": "A register of members records shareholders and their holdings. Learn how governed entries make ownership and rights provable."
@@ -8557,8 +8495,7 @@ export const PROBLEMS: Problem[] = [
       "certificate-of-incumbency",
       "board-resolution-software",
       "corporate-seal-controls",
-      "register-of-directors-management"
-    ],
+      "register-of-directors-management", "birth-certificate-issuance"],
     "diagram": "seal",
     "metaTitle": "Secretary's Certificate: Certifying Corporate Facts",
     "metaDescription": "A secretary's certificate attests to resolutions, authority and standing. Learn how to anchor and seal it so counterparties can rely on it."
@@ -8842,8 +8779,7 @@ export const PROBLEMS: Problem[] = [
       "written-resolution-workflow",
       "directors-written-consent",
       "board-resolution-software",
-      "board-minutes-management"
-    ],
+      "board-minutes-management", "circular-letter"],
     "diagram": "workflow",
     "metaTitle": "Circular Resolution: Board Decisions by Circulation",
     "metaDescription": "A circular resolution lets directors decide without meeting. Learn how to confirm authority, capture assent and seal the record."
@@ -10381,8 +10317,7 @@ export const PROBLEMS: Problem[] = [
       "document-verification",
       "document-authenticity",
       "governance-certificate",
-      "institutional-records"
-    ],
+      "institutional-records", "document-authentication", "qr-code-verification"],
     "diagram": "shield",
     "metaTitle": "Credential Verification: Validate a Holder's Credential",
     "metaDescription": "Credential verification confirms a licence, degree, or accreditation was genuinely issued to the named holder and remains valid."
@@ -11635,8 +11570,7 @@ export const PROBLEMS: Problem[] = [
       "true-copy",
       "attested-copy",
       "original-document",
-      "self-authenticating-document"
-    ],
+      "self-authenticating-document", "certified-true-copy"],
     "diagram": "seal",
     "metaTitle": "Certified Copy: Trusted Document Reproductions",
     "metaDescription": "A certified copy is attested as a true reproduction of an original. How certification can be bound and verified. Concept overview, not legal advice."
@@ -11692,8 +11626,7 @@ export const PROBLEMS: Problem[] = [
       "certified-copy",
       "attested-copy",
       "original-document",
-      "best-evidence-rule"
-    ],
+      "best-evidence-rule", "certified-true-copy"],
     "diagram": "seal",
     "metaTitle": "True Copy: Proving Exact Reproductions",
     "metaDescription": "A true copy exactly reproduces an original's content. How integrity fingerprints demonstrate exact correspondence. Concept overview, not legal advice."
@@ -11749,8 +11682,7 @@ export const PROBLEMS: Problem[] = [
       "certified-copy",
       "true-copy",
       "sworn-statement",
-      "self-authenticating-document"
-    ],
+      "self-authenticating-document", "certified-true-copy"],
     "diagram": "seal",
     "metaTitle": "Attested Copy: Witnessed Reproductions",
     "metaDescription": "An attested copy is confirmed by a witness as corresponding to the original. How witnessing can be recorded and verified. Concept overview only."
@@ -11806,8 +11738,7 @@ export const PROBLEMS: Problem[] = [
       "affidavit-record",
       "documentary-evidence",
       "enforceability",
-      "authentication-of-evidence"
-    ],
+      "authentication-of-evidence", "position-statement"],
     "diagram": "seal",
     "metaTitle": "Sworn Statement: Preserving Oath Records",
     "metaDescription": "A sworn statement is a declaration made under oath before an authorised officer. How to preserve what was sworn. Concept overview, not legal advice."
@@ -12604,8 +12535,7 @@ export const PROBLEMS: Problem[] = [
       "master-document",
       "version-control",
       "document-control",
-      "document-versioning"
-    ],
+      "document-versioning", "source-verification"],
     "diagram": "ledger",
     "metaTitle": "Single Source of Truth for Documents",
     "metaDescription": "A single source of truth designates one authoritative location for the governing document version so copies defer to it. Learn how institutions enforce it."
@@ -14542,8 +14472,7 @@ export const PROBLEMS: Problem[] = [
       "digital-credential",
       "issuance-workflow",
       "certificate-template",
-      "tamper-evident-certificate"
-    ],
+      "tamper-evident-certificate", "document-authentication", "verification-api"],
     "diagram": "seal",
     "metaTitle": "Certificate Issuance | Verifiable Official Certificates",
     "metaDescription": "Certificate issuance is the governed process of creating, authorising, and releasing certificates whose origin and validity can be independently verified."
@@ -14599,8 +14528,7 @@ export const PROBLEMS: Problem[] = [
       "verifiable-credential",
       "credential-revocation",
       "certificate-issuance",
-      "e-certificate"
-    ],
+      "e-certificate", "qr-code-verification", "online-document-verification"],
     "diagram": "shield",
     "metaTitle": "Digital Credential | Verifiable Electronic Attestation",
     "metaDescription": "A digital credential is an electronically issued attestation whose authenticity and validity can be confirmed without contacting the issuer."
@@ -14656,8 +14584,7 @@ export const PROBLEMS: Problem[] = [
       "digital-credential",
       "tamper-evident-certificate",
       "credential-revocation",
-      "certificate-issuance"
-    ],
+      "certificate-issuance", "qr-code-verification", "online-document-verification"],
     "diagram": "shield",
     "metaTitle": "Verifiable Credential | Tamper-Evident Attestation",
     "metaDescription": "A verifiable credential is a cryptographically signed attestation that lets any party confirm the issuer's identity and the claim's integrity."
@@ -14713,8 +14640,7 @@ export const PROBLEMS: Problem[] = [
       "permit-issuance",
       "registration-certificate",
       "credential-revocation",
-      "issuance-workflow"
-    ],
+      "issuance-workflow", "verification-portal", "online-document-verification"],
     "diagram": "workflow",
     "metaTitle": "Licence Issuance | Verifiable Grant of Authority",
     "metaDescription": "Licence issuance is the controlled process of granting a permission with recorded scope, conditions, and validity that holders and third parties can verify."
@@ -14770,8 +14696,7 @@ export const PROBLEMS: Problem[] = [
       "licence-issuance",
       "registration-certificate",
       "issuance-workflow",
-      "tamper-evident-certificate"
-    ],
+      "tamper-evident-certificate", "verification-portal", "document-validation"],
     "diagram": "workflow",
     "metaTitle": "Permit Issuance | Field-Verifiable Authorisation",
     "metaDescription": "Permit issuance grants and records time-bound authorisation for an activity so its authenticity, scope, and expiry can be confirmed during inspection."
@@ -14827,8 +14752,7 @@ export const PROBLEMS: Problem[] = [
       "academic-certificate",
       "certificate-issuance",
       "tamper-evident-certificate",
-      "e-certificate"
-    ],
+      "e-certificate", "verification-portal", "document-validation"],
     "diagram": "seal",
     "metaTitle": "Diploma Issuance | Verifiable Academic Awards",
     "metaDescription": "Diploma issuance is the formal awarding and recording of a qualification so the award, awarding body, and graduate can be verified after graduation."
@@ -14884,8 +14808,7 @@ export const PROBLEMS: Problem[] = [
       "diploma-issuance",
       "professional-certificate",
       "certificate-issuance",
-      "digital-credential"
-    ],
+      "digital-credential", "certificate-verification", "document-validation"],
     "diagram": "seal",
     "metaTitle": "Academic Certificate | Verifiable Study Records",
     "metaDescription": "An academic certificate is an institution-issued record of study whose authenticity and awarding body can be independently verified by employers and registries."
@@ -14941,8 +14864,7 @@ export const PROBLEMS: Problem[] = [
       "academic-certificate",
       "accreditation-certificate",
       "credential-revocation",
-      "digital-credential"
-    ],
+      "digital-credential", "certificate-verification", "authenticity-check"],
     "diagram": "shield",
     "metaTitle": "Professional Certificate | Verifiable Competency Proof",
     "metaDescription": "A professional certificate attests that its holder meets a defined standard, with authenticity and current standing that relying parties can verify."
@@ -15112,8 +15034,7 @@ export const PROBLEMS: Problem[] = [
       "registration-certificate",
       "certified-document-issuance",
       "tamper-evident-certificate",
-      "certificate-issuance"
-    ],
+      "certificate-issuance", "anti-forgery-controls", "authenticity-check"],
     "diagram": "ledger",
     "metaTitle": "Title Deed Issuance | Register-Verifiable Ownership",
     "metaDescription": "Title deed issuance records and issues proof of property ownership so the right it confers can be verified against the authoritative land register."
@@ -15169,8 +15090,7 @@ export const PROBLEMS: Problem[] = [
       "certificate-issuance",
       "title-deed-issuance",
       "licence-issuance",
-      "certified-document-issuance"
-    ],
+      "certified-document-issuance", "certificate-verification", "authenticity-check"],
     "diagram": "ledger",
     "metaTitle": "Registration Certificate | Verifiable Register Proof",
     "metaDescription": "A registration certificate confirms an entity or asset is recorded in an official register, with authenticity and status that third parties can verify."
@@ -15226,8 +15146,7 @@ export const PROBLEMS: Problem[] = [
       "professional-certificate",
       "certificate-issuance",
       "credential-revocation",
-      "digital-credential"
-    ],
+      "digital-credential", "anti-forgery-controls", "verification-record"],
     "diagram": "shield",
     "metaTitle": "Accreditation Certificate | Verifiable Standard Proof",
     "metaDescription": "An accreditation certificate attests an organisation meets a defined standard, with authenticity and validity that stakeholders can independently verify."
@@ -15283,8 +15202,7 @@ export const PROBLEMS: Problem[] = [
       "certificate-issuance",
       "verifiable-credential",
       "certified-document-issuance",
-      "digital-credential"
-    ],
+      "digital-credential", "anti-forgery-controls", "verification-record"],
     "diagram": "seal",
     "metaTitle": "Tamper-Evident Certificate | Detectable Alteration",
     "metaDescription": "A tamper-evident certificate is bound to its content so any later alteration of its data causes verification to fail, exposing forgery."
@@ -15340,8 +15258,7 @@ export const PROBLEMS: Problem[] = [
       "digital-credential",
       "verifiable-credential",
       "professional-certificate",
-      "issuance-workflow"
-    ],
+      "issuance-workflow", "document-fraud-prevention", "verification-record"],
     "diagram": "lifecycle",
     "metaTitle": "Credential Revocation | Withdrawing Trusted Credentials",
     "metaDescription": "Credential revocation marks a previously issued credential as withdrawn so verifiers treat it as no longer valid before its expiry."
@@ -15397,8 +15314,7 @@ export const PROBLEMS: Problem[] = [
       "digital-credential",
       "certificate-issuance",
       "certificate-template",
-      "tamper-evident-certificate"
-    ],
+      "tamper-evident-certificate", "document-fraud-prevention", "proof-of-authenticity"],
     "diagram": "seal",
     "metaTitle": "E-Certificate | Verifiable Electronic Certificates",
     "metaDescription": "An e-certificate is an electronically issued certificate carrying embedded evidence so its authenticity and issuer can be verified without paper."
@@ -15454,8 +15370,7 @@ export const PROBLEMS: Problem[] = [
       "certificate-issuance",
       "issuance-workflow",
       "e-certificate",
-      "certified-document-issuance"
-    ],
+      "certified-document-issuance", "verification-api", "proof-of-authenticity"],
     "diagram": "workflow",
     "metaTitle": "Certificate Template | Governed Issuance Consistency",
     "metaDescription": "A certificate template is a governed definition of a certificate's structure and fields, used to ensure every issued certificate is consistent and verifiable."
@@ -15511,8 +15426,7 @@ export const PROBLEMS: Problem[] = [
       "certificate-issuance",
       "certificate-template",
       "licence-issuance",
-      "credential-revocation"
-    ],
+      "credential-revocation", "verification-api", "proof-of-authenticity"],
     "diagram": "workflow",
     "metaTitle": "Issuance Workflow | Governed Certificate Release",
     "metaDescription": "An issuance workflow is the governed sequence of approval and control steps that moves a certificate request through to a sealed, verifiable release."
@@ -15568,8 +15482,7 @@ export const PROBLEMS: Problem[] = [
       "certificate-issuance",
       "tamper-evident-certificate",
       "registration-certificate",
-      "issuance-workflow"
-    ],
+      "issuance-workflow", "document-authentication", "document-fraud-prevention"],
     "diagram": "chain",
     "metaTitle": "Certified Document Issuance | Verifiable Attestation",
     "metaDescription": "Certified document issuance produces an officially attested document so its certification, issuer, and integrity can be independently verified."
