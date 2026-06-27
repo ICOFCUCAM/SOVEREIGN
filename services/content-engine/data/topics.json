@@ -1,0 +1,69 @@
+[
+  {
+    "id": "concept-proof-of-authorship",
+    "title": "Proof of Authorship",
+    "type": "concept",
+    "status": "in_review",
+    "locale": "en",
+    "priority": 2,
+    "keywords": [
+      "proof of authorship",
+      "who wrote a document",
+      "authorship verification"
+    ],
+    "category": "Integrity & proof",
+    "relatedIndustries": [
+      "intellectual-property",
+      "universities",
+      "research-institutes"
+    ],
+    "diagram": "seal",
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-06-27",
+    "reviewEveryDays": 180,
+    "history": [
+      {
+        "at": "2026-06-27",
+        "from": "queued",
+        "to": "drafting",
+        "note": ""
+      },
+      {
+        "at": "2026-06-27",
+        "from": "drafting",
+        "to": "in_review",
+        "note": "drafted by mock (score 79)"
+      }
+    ]
+  },
+  {
+    "id": "article-wet-signature-vs-digital",
+    "title": "Wet Signature vs Digital Signature: A Practical Comparison",
+    "type": "article",
+    "status": "idea",
+    "locale": "en",
+    "priority": 3,
+    "keywords": [
+      "wet signature vs digital signature",
+      "is a digital signature legal"
+    ],
+    "category": "Foundations",
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-06-27",
+    "reviewEveryDays": 365
+  },
+  {
+    "id": "concept-official-publication",
+    "title": "Official Publication",
+    "type": "concept",
+    "status": "live",
+    "locale": "en",
+    "priority": 1,
+    "slug": "official-publication",
+    "publishedSlug": "official-publication",
+    "lastReviewed": "2025-06-01",
+    "createdAt": "2026-06-27",
+    "updatedAt": "2026-06-27",
+    "reviewEveryDays": 180
+  }
+]
