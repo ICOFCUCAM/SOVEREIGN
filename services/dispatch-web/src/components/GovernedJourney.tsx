@@ -149,17 +149,32 @@ export const GovernedJourney: React.FC = () => {
   const [active, setActive] = useState(0);
   const [auto, setAuto] = useState(false);
   const [seen, setSeen] = useState(false);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setActive(LAST); return; }
     const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting && !seen) { setSeen(true); setAuto(true); } });
+      entries.forEach((e) => {
+        setInView(e.isIntersecting);
+        if (e.isIntersecting && !seen) { setSeen(true); setAuto(true); }
+      });
     }, { threshold: 0.4 });
     io.observe(el);
     return () => io.disconnect();
   }, [seen]);
+
+  // Left/Right arrow keys scrub the journey while it is on screen (pausing auto).
+  useEffect(() => {
+    if (!inView) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") { setAuto(false); setActive((x) => Math.min(LAST, x + 1)); }
+      else if (e.key === "ArrowLeft") { setAuto(false); setActive((x) => Math.max(0, x - 1)); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [inView]);
 
   useEffect(() => {
     if (!auto) return;
