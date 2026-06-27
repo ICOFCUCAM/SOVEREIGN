@@ -465,7 +465,7 @@ const Landing: React.FC = () => {
                 Built to be believed — not taken on trust.
               </h2>
             </div>
-            <div className="mt-14 grid grid-cols-2 gap-y-10 border-y border-white/[0.08] py-12 sm:grid-cols-4">
+            <div className="mt-14 grid grid-cols-2 gap-y-10 border-y border-white/[0.08] py-12 sm:grid-cols-4 sm:divide-x sm:divide-white/[0.08]">
               {PROOF_STATS.map(([n, label]) => (
                 <div key={label} className="text-center">
                   <CountUp value={n} className="tnum font-serif text-[3.4rem] font-bold leading-none text-gold-300 sm:text-[4rem]" />
