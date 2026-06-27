@@ -39,8 +39,8 @@ const Standard: React.FC = () => {
       <main>
         <section className="border-t border-white/[0.06] px-8 py-24 lg:px-12">
           <div className="mx-auto max-w-4xl">
-            <div className="text-[12px] font-semibold uppercase tracking-[0.3em] text-gold-400">Category definition</div>
-            <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">The Sovereign Dispatch Standard</h1>
+            <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[12px] font-semibold uppercase tracking-[0.3em] text-gold-400">Category definition</span></div>
+            <h1 className="mt-4 font-serif text-4xl font-bold leading-[1.05] tracking-tight text-[#f4efe3] sm:text-5xl">The Sovereign Dispatch Standard</h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/60">An institution does not adopt a publishing tool. It adopts a standard for how official records come to exist, are proven, and are preserved. These are the concepts that standard defines.</p>
           </div>
         </section>
@@ -49,7 +49,7 @@ const Standard: React.FC = () => {
           <SectionHead index="①" kicker="The Standard" title="Six institutional concepts." sub="Each is a building block of the operating standard for institutional records — not a feature, a definition." />
           <div className="mx-auto mt-14 max-w-5xl space-y-5">
             {DEFS.map((d, i) => (
-              <div key={d.term} className="reveal rounded-2xl border border-white/10 bg-white/[0.02] p-7 sm:p-8">
+              <div key={d.term} className="reveal rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-7 transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/25 sm:p-8">
                 <div className="flex items-baseline gap-3">
                   <span className="text-[12px] font-mono text-gold-400/70">{String(i + 1).padStart(2, "0")}</span>
                   <h3 className="text-xl font-semibold tracking-tight text-white">{d.term}</h3>
@@ -64,7 +64,7 @@ const Standard: React.FC = () => {
 
         <section className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-white/[0.008] px-8 py-20 lg:px-12">
           <div className="mx-auto max-w-4xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight">When a category emerges,<br /><span className="text-white/50">the standard matters more than the features.</span></h2>
+            <h2 className="font-serif text-3xl font-bold tracking-tight text-[#f4efe3] sm:text-4xl">When a category emerges,<br /><span className="text-white/50">the standard matters more than the features.</span></h2>
             <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-white/55">Sovereign Dispatch is not a better way to publish documents. It is the operating standard for institutional records — and an institution that adopts the standard adopts a way of governing that outlasts any one system.</p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <button onClick={() => nav("/records")} className="inline-flex items-center gap-2 rounded-full bg-gold-400 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-black transition hover:bg-gold-300">See the artifacts <Chevron className="h-3.5 w-3.5" /></button>
