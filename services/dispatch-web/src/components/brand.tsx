@@ -142,8 +142,15 @@ export const FilmGrain: React.FC = () => (
 // children. Honours prefers-reduced-motion via the CSS that styles `.reveal`.
 export const useReveal = (): void => {
   React.useEffect(() => {
-    const els = Array.from(document.querySelectorAll<HTMLElement>("section[id]"));
-    els.forEach((el) => el.classList.add("reveal"));
+    const sections = Array.from(document.querySelectorAll<HTMLElement>("section[id]"));
+    sections.forEach((el) => el.classList.add("reveal"));
+    // Observe id'd sections AND any element that already opted in with a bare
+    // `.reveal` class (cards on /standard, /outcomes, /records etc.) — otherwise
+    // those never receive `.in` and sit invisible under non-reduced motion.
+    const els = Array.from(new Set<HTMLElement>([
+      ...sections,
+      ...Array.from(document.querySelectorAll<HTMLElement>(".reveal:not(.in)")),
+    ]));
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
     }, { rootMargin: "0px 0px -12% 0px", threshold: 0.08 });
