@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { ssoStartUrl } from "../lib/api";
 import { Button, Field, inputCls } from "../lib/ui";
-import { DispatchMark } from "../components/brand";
+import { DispatchMark, FilmGrain } from "../components/brand";
 
 // Institutional sign-in. People authenticate through their institution's identity
 // provider (item 2) — they enter their work email and are routed to their own
@@ -31,20 +31,22 @@ const SignIn: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-full items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+    <div className="relative flex min-h-full items-center justify-center overflow-hidden px-4 py-12">
+      <FilmGrain />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(55%_45%_at_50%_0%,rgba(233,200,120,0.07),transparent_70%)]" aria-hidden />
+      <div className="relative w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="mb-4 flex items-center justify-center gap-2.5">
+          <a href="/" className="mb-4 inline-flex items-center justify-center gap-2.5">
             <DispatchMark className="h-8 w-8 text-seal-light" />
             <span className="text-lg font-bold tracking-tight text-white">SOVEREIGN <span className="text-seal-light">DISPATCH</span></span>
-          </div>
+          </a>
           <p className="mt-1 text-sm text-white/50">From information to official record.</p>
         </div>
 
         {ssoErr && <div className="mb-4 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{ssoErr}</div>}
 
         {/* primary — institutional sign-in (people) */}
-        <form onSubmit={startSso} className="space-y-4 rounded-lg border border-white/10 bg-ink-800/60 p-6">
+        <form onSubmit={startSso} className="space-y-4 rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.045] to-white/[0.012] p-7 shadow-[0_30px_80px_-44px_rgba(0,0,0,0.9)]">
           <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Sign in to your institution</div>
           <Field label="Work email">
             <input className={inputCls} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@ministry.gov" autoFocus />
