@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { localeFromPath, t as tr } from "../lib/i18n";
+import { t as tr, ACTIVE_LOCALES, DEFAULT_LOCALE, localeOf, localePath } from "../lib/i18n";
+import { conceptLocales } from "../lib/translations";
+import { useUiLocale, usePreferredLocale } from "../lib/locale";
 import {
   PLATFORM_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE, DEVELOPERS_ROUTE,
   PROCUREMENT_ROUTE, PRICING_ROUTE, ARCHITECTURE_ROUTE, EVIDENCE_ROUTE, TRUST_ROUTE,
@@ -205,10 +207,69 @@ const NAV: [string, string][] = [
 // renders on the right (e.g. a print button). `.no-print` keeps it out of PDFs.
 // Below `lg` the inline bar collapses into an accessible mobile sheet so every
 // destination is reachable on a phone — not just Launch.
+// Global language selector. Present in the header on every public page so a
+// visitor can choose a language anywhere — not only on concept pages. Honest by
+// design: it routes to the localized version of the current page when one
+// exists; otherwise to that language's flagship concept (every active locale
+// has it), so you always land on real localized content, never a fake locale URL.
+const CONCEPT_RE = /^\/(?:([a-z]{2})\/)?learn\/([a-z0-9-]+)$/;
+export const LanguageMenu: React.FC<{ align?: "left" | "right" }> = ({ align = "right" }) => {
+  const nav = useNavigate();
+  const { pathname } = useLocation();
+  const locale = useUiLocale();
+  const { setLocale } = usePreferredLocale();
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onClick); document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onClick); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+
+  const target = (code: string): string => {
+    const m = pathname.match(CONCEPT_RE);
+    if (m) {
+      const slug = m[2];
+      if (conceptLocales(slug).includes(code)) return localePath(code, `${LEARN_ROUTE}/${slug}`);
+      return localePath(code, `${LEARN_ROUTE}/official-publication`);
+    }
+    return code === DEFAULT_LOCALE ? "/" : localePath(code, `${LEARN_ROUTE}/official-publication`);
+  };
+  const go = (code: string) => { setOpen(false); setLocale(code); nav(target(code)); };
+  const current = localeOf(locale);
+
+  return (
+    <div ref={ref} className="relative">
+      <button onClick={() => setOpen((v) => !v)} aria-haspopup="listbox" aria-expanded={open} aria-label={tr(locale, "lang.label")}
+        className="inline-flex items-center gap-1.5 rounded border border-white/15 px-2.5 py-2 text-[12px] font-semibold uppercase tracking-wide text-white/75 transition hover:border-gold-400/35 hover:text-white">
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18" strokeLinecap="round" /></svg>
+        <span>{current.code}</span>
+        <svg viewBox="0 0 24 24" className={`h-3 w-3 transition ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden><path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button>
+      {open && (
+        <div role="listbox" className={`absolute z-[70] mt-2 max-h-[62vh] w-48 overflow-auto rounded-xl border border-white/12 bg-[#0c0c0c]/95 p-1.5 shadow-[0_24px_50px_-20px_rgba(0,0,0,0.9)] backdrop-blur ${align === "right" ? "right-0" : "left-0"}`}>
+          {ACTIVE_LOCALES.map((code) => {
+            const l = localeOf(code); const on = code === locale;
+            return (
+              <button key={code} role="option" aria-selected={on} onClick={() => go(code)}
+                className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-[13.5px] transition ${on ? "bg-gold-400/10 text-gold-200" : "text-white/75 hover:bg-white/[0.05] hover:text-white"}`}>
+                <span dir={l.dir}>{l.native}</span>
+                <span className="text-[10px] uppercase tracking-wide text-white/35">{l.code}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions }) => {
   const nav = useNavigate();
   const pathname = useLocation().pathname;
-  const locale = localeFromPath(pathname);
+  const locale = useUiLocale();
   const [open, setOpen] = React.useState(false);
   const go = (to: string) => { setOpen(false); nav(to); };
   // "You are here" — a nav item is active on its exact route or any child route
@@ -258,6 +319,9 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
             );
           })}
           {actions}
+          {/* global language selector — reachable on every page (the mobile sheet
+              carries its own list below the lg breakpoint) */}
+          <div className="hidden lg:block"><LanguageMenu /></div>
           {/* standalone Launch CTA — hidden on the narrowest phones (where it would
               crowd the bar); on those it leads the mobile sheet instead. */}
           <button onClick={() => go("/console")}
@@ -294,6 +358,11 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
               );
             })}
             <button onClick={() => go(PROCUREMENT_ROUTE)} className="block w-full py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">{tr(locale, "nav.procurement")}</button>
+            {/* language selector in the sheet */}
+            <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-4">
+              <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-white/40">{tr(locale, "lang.label")}</span>
+              <LanguageMenu align="right" />
+            </div>
           </nav>
         </div>
       )}

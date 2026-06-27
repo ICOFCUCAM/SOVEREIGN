@@ -12,11 +12,17 @@ import { CONCEPTS_NL } from "./concepts.nl";
 import { CONCEPTS_AR } from "./concepts.ar";
 import { CONCEPTS_JA } from "./concepts.ja";
 import { CONCEPTS_ZH } from "./concepts.zh";
+import { CONCEPTS_PL } from "./concepts.pl";
+import { CONCEPTS_SV } from "./concepts.sv";
+import { CONCEPTS_DA } from "./concepts.da";
+import { CONCEPTS_FI } from "./concepts.fi";
+import { CONCEPTS_EL } from "./concepts.el";
 
 const CONCEPTS: Record<string, Record<string, ConceptTranslation>> = {
   fr: CONCEPTS_FR, es: CONCEPTS_ES, de: CONCEPTS_DE, no: CONCEPTS_NO,
   pt: CONCEPTS_PT, it: CONCEPTS_IT, nl: CONCEPTS_NL, ar: CONCEPTS_AR,
-  ja: CONCEPTS_JA, zh: CONCEPTS_ZH,
+  ja: CONCEPTS_JA, zh: CONCEPTS_ZH, pl: CONCEPTS_PL, sv: CONCEPTS_SV,
+  da: CONCEPTS_DA, fi: CONCEPTS_FI, el: CONCEPTS_EL,
 };
 
 export const conceptTranslation = (locale: string, slug: string): ConceptTranslation | undefined =>

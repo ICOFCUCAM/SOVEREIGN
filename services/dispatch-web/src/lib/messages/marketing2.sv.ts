@@ -1,0 +1,68 @@
+// Svensk översättning av den andra marknadsföringsomgången: Outcomes, Security, Compliance.
+import type { Marketing2Copy } from "./marketing2";
+
+export const MARKETING2_SV: Marketing2Copy = {
+  outcomes: {
+    eyebrow: "Institutionell omvandling",
+    titleA: "Vad som förändras när en institution",
+    titleB: "inför Sovereign Dispatch.",
+    lead: "Inte nya funktioner. Ett nytt sätt för officiella poster att existera — skapade under styrning, bevisade med certifikat och bevarade bortom de människor som gjorde dem.",
+    baKicker: "Före och efter", baTitle: "Samma beslut — omvandlat.",
+    baSub: "Hur en officiell handling rör sig från en fil på en enhet till en styrd institutionell post.",
+    beforeLabel: "Före Dispatch",
+    before: ["En policy-PDF på en delad enhet", "En e-postkedja av godkännanden", "Versionsförvirring — vilken är slutlig?", "Godkännanden som inte kan bevisas", "Poster som tyst försvinner"],
+    afterLabel: "Efter Dispatch",
+    after: ["En styrd officiell post", "En framtvingad auktoritetskedja", "En kanonisk, oföränderlig version", "Ett kryptografiskt certifikat för godkännande", "Permanent, bevisbar hämtning"],
+    scKicker: "Scenariobibliotek", scTitle: "Samma styrda resa, varje institution.",
+    scSub: "En annan officiell handling i var och en — samma framtvingade väg från utkast till permanent post.",
+    scenarios: [
+      { who: "Departement", what: "Regeringsmemorandum", flow: ["Utkastat", "Styrt av policy", "Direktör → Statssekreterare-godkännande", "Publicerat av rang", "Bevarat med bevis"] },
+      { who: "Universitet", what: "Akademiskt senatsbeslut", flow: ["Föreslaget", "Senatsstyrning", "Registratorsauktoritet", "Officiell post", "Bevarat permanent"] },
+      { who: "Sjukhus", what: "Kliniskt direktiv", flow: ["Författat", "Klinisk styrning", "Medicinsk direktörs godkännande", "Publicerat till personal", "Fullständigt granskningsspår"] },
+      { who: "Tillsynsmyndighet", what: "Tillsynskungörelse", flow: ["Utfärdad", "Juridisk granskningskedja", "Kommissariens auktoritet", "Publicerad som bevis", "Bevarad enligt schema"] },
+    ],
+    closeLine: "Varje resa slutar på samma sätt: en post du kan bevisa och behålla.",
+    closeCta: "Varför det är tryggt att införa",
+  },
+  security: {
+    secKicker: "Säkerhet", secTitle: "Suverän i grunden.",
+    secSub: "Byggd för klassificerat och reglerat material — isolering, behörighet och en oföränderlig post i kärnan, inte påklistrade.",
+    cards: [
+      { title: "Tenantisolering (RLS)", body: "Radnivåsäkerhet på varje tabell; ett saknat tenant-anspråk nekar som standard — aldrig tillåt-allt." },
+      { title: "Klassificering och behörighet", body: "Dokument bär klassificering; läsningar och godkännanden grindas mot huvudmannens behörighet." },
+      { title: "Oföränderlig granskning", body: "Append-only-händelsespår — varje inlämning, beslut och publicering, med hash-kedjning. Inget kan redigeras i tysthet." },
+      { title: "Roller med minsta behörighet", body: "Författare, granskare, godkännare, publicerare, granskningsansvarig, tenant-administratör — var och en avgränsad till exakt det den får göra." },
+      { title: "Datahemvist", body: "Körs mot sin egen databas i den hemvist du väljer; oberoende av någon annan plattform." },
+      { title: "Autentisering med klientuppgifter", body: "Maskinkonsumenter autentiserar med ett client_id + en hemlighet för kortlivade, avgränsade JWT." },
+      { title: "Operativ kontinuitet", body: "Arkitekterad för krav på säkerhetskopiering, återställning, bevarande och kontinuitet — definierade per driftsättning." },
+    ],
+    sovKicker: "Suveränitet", sovTitle: "Förmågor, inte märken.",
+    sovSub: "Vad plattformen faktiskt gör — över driftsättning, säkerhet och styrning. Varje förmåga är tillgänglig per driftsättningsmodell och verifierbar under utvärderingen.",
+    depKicker: "Driftsättning", depTitle: "Driftsätt där suveräniteten kräver det.",
+    depSub: "Sovereign Dispatch är arkitekterad för att stödja moln, privatmoln, suveränt värdade och institutionella driftsättningsmodeller.",
+    models: [
+      { t: "Moln", b: "Hanterad driftsättning för snabbt införande.", note: "" },
+      { t: "Privatmoln", b: "Dedikerad institutionell miljö.", note: "" },
+      { t: "Suverän värd", b: "Värd inom godkända nationella eller regionala gränser.", note: "" },
+      { t: "Lokalt", b: "Tillgänglig för institutioner som kräver lokal kontroll.", note: "" },
+      { t: "Luftgapad", b: "Arkitektur utformad för att stödja isolerade driftsättningar.", note: "Tillgänglighet beror på engagemangets omfattning." },
+    ],
+    systemFlowLabel: "Systemflöde",
+    systemFlow: ["Institution", "Lämna in", "Styr", "Godkänn", "Rendera", "Publicera", "Arkivera"],
+    matrixLabel: "Förmåga per driftsättning",
+  },
+  compliance: {
+    kicker: "Efterlevnad och säkerhet", title: "Byggd kring moderna styrningsramverk.",
+    sub: "Sovereign Dispatch är konstruerad kring de kontrollramverk institutioner bedöms mot — beskrivna i ärliga ordalag, med bevis tillgängliga under utvärderingen.",
+    items: [
+      { name: "ISO 27001", body: "Arkitektur i linje med brett antagna informationssäkerhetskontroller." },
+      { name: "SOC 2", body: "Utformad enligt granskade principer för driftssäkerhet." },
+      { name: "NIS2", body: "Stödjer arbetsflöden för styrning och riskhantering." },
+      { name: "GDPR", body: "Stödjer praxis för datahantering och hemvist." },
+      { name: "Granskningsbarhet", body: "Varje publiceringshändelse kan registreras, spåras och granskas." },
+      { name: "Bevarandepolicyer", body: "Institutionsdefinierade bevarandekontroller." },
+    ],
+    disclaimer: "Ramverksnamnen beskriver de kontroller arkitekturen är i linje med, inte oberoende certifieringar. Certifieringsomfattning, datahemvist och bevarande definieras per driftsättning.",
+    ctaProcurement: "Upphandlingsmaterial", ctaEvidence: "Bevispaket", ctaTrust: "Trust centre",
+  },
+};

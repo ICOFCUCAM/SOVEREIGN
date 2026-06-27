@@ -269,7 +269,12 @@
       "nl",
       "ar",
       "ja",
-      "zh"
+      "zh",
+      "pl",
+      "sv",
+      "da",
+      "fi",
+      "el"
     ],
     "targets": [
       {
@@ -331,14 +336,19 @@
     ],
     "coverage": {
       "ar": 4,
+      "da": 4,
       "de": 4,
+      "el": 4,
       "es": 4,
+      "fi": 4,
       "fr": 4,
       "it": 4,
       "ja": 4,
       "nl": 4,
       "no": 4,
+      "pl": 4,
       "pt": 4,
+      "sv": 4,
       "zh": 4
     },
     "note": "A page exists in a locale only when a real translation exists; hreflang derives from this."
@@ -366,7 +376,7 @@
   "distribution": {
     "sitemap": {
       "exists": true,
-      "urls": 490
+      "urls": 510
     },
     "imageSitemap": {
       "exists": true,

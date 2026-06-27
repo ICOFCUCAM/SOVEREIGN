@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { PublicHeader, PageBanner, PublicFooter, FilmGrain, Chevron, useReveal } from "../components/brand";
 import { COST_ROUTE, LIFECYCLE_ROUTE, PROCUREMENT_ROUTE, PRICING_ROUTE } from "../lib/routes";
 import { track } from "../lib/analytics";
+import { useMarketing6Copy } from "../lib/messages";
 
 // Phase 4 of the Institutional Value & Procurement Experience — the operational
 // model estimator. It NEVER promises savings. It takes the institution's own
@@ -66,6 +67,7 @@ const Stat: React.FC<{ label: string; value: string; sub?: string; accent?: bool
 
 const Roi: React.FC = () => {
   const nav = useNavigate();
+  const c = useMarketing6Copy().roi;
   useReveal();
   const [v, setV] = useState<Inputs>(DEFAULTS);
   React.useEffect(() => track("page.roi"), []);
@@ -98,37 +100,34 @@ const Roi: React.FC = () => {
         <section className="border-t border-white/[0.06] px-6 py-16 lg:px-12">
           <div className="mx-auto max-w-[1100px]">
             <button onClick={() => nav(PROCUREMENT_ROUTE)} className="group inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400 transition hover:text-gold-300">
-              <Chevron className="h-3 w-3 rotate-180" /> Procurement Center · Operational Model
+              <Chevron className="h-3 w-3 rotate-180" /> {c.backLink}
             </button>
             <h1 className="mt-4 max-w-3xl font-serif text-[2.4rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3rem]">
-              Model the scale of governed publication.
+              {c.title}
             </h1>
             <p className="mt-5 max-w-2xl text-[16px] leading-relaxed text-white/60">
-              Enter your institution's own figures. This estimator reflects the scale of activity those figures imply —
-              it does <span className="text-white/85">not</span> promise savings. Dispatch does not reduce the judgement
-              an official publication requires; it governs that work and removes the coordination and reconstruction
-              effort around it. What you see below depends entirely on your own processes.
+              {c.lead.split("{em}")[0]}<span className="text-white/85">{c.leadEm}</span>{c.lead.split("{em}")[1]}
             </p>
 
             <div className="mt-12 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
               {/* inputs */}
               <div className="rounded-2xl border border-white/10 bg-white/[0.015] p-6 sm:p-7">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Your institution</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{c.yourInstitution}</div>
                 <div className="mt-5 space-y-6">
-                  <Field label="Official publications / year" value={v.publications} min={10} max={5000} step={10} onChange={set("publications")} />
-                  <Field label="Reviewing offices / publication" hint="Legal, compliance, subject-matter offices that review before approval." value={v.reviewers} min={1} max={12} onChange={set("reviewers")} />
-                  <Field label="Departments involved / publication" hint="Distinct departments a publication is handed between." value={v.departments} min={1} max={12} onChange={set("departments")} />
-                  <Field label="Audits / evidence requests / year" value={v.audits} min={0} max={24} onChange={set("audits")} />
+                  <Field label={c.fPublications} value={v.publications} min={10} max={5000} step={10} onChange={set("publications")} />
+                  <Field label={c.fReviewers} hint={c.fReviewersHint} value={v.reviewers} min={1} max={12} onChange={set("reviewers")} />
+                  <Field label={c.fDepartments} hint={c.fDepartmentsHint} value={v.departments} min={1} max={12} onChange={set("departments")} />
+                  <Field label={c.fAudits} value={v.audits} min={0} max={24} onChange={set("audits")} />
                   <div className="border-t border-white/[0.06] pt-6">
-                    <div className="mb-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Your assumptions</div>
+                    <div className="mb-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{c.yourAssumptions}</div>
                     <div className="space-y-6">
-                      <Field label="Hours per review touch" value={v.hoursPerReview} min={0.5} max={8} step={0.5} onChange={set("hoursPerReview")} suffix="h" />
-                      <Field label="Coordination hours per hand-off" hint="Chasing, re-sending, reconciling versions between departments." value={v.coordPerHandoff} min={0} max={4} step={0.25} onChange={set("coordPerHandoff")} suffix="h" />
-                      <Field label="Audit-assembly hours per publication" hint="Reconstructing the evidence trail for one publication, per audit." value={v.auditHoursPerPub} min={0} max={4} step={0.1} onChange={set("auditHoursPerPub")} suffix="h" />
-                      <Field label="Blended staff cost / hour" value={v.hourlyCost} min={20} max={300} step={5} onChange={set("hourlyCost")} suffix={` ${v.currency}/h`} />
+                      <Field label={c.fHoursPerReview} value={v.hoursPerReview} min={0.5} max={8} step={0.5} onChange={set("hoursPerReview")} suffix="h" />
+                      <Field label={c.fCoordPerHandoff} hint={c.fCoordPerHandoffHint} value={v.coordPerHandoff} min={0} max={4} step={0.25} onChange={set("coordPerHandoff")} suffix="h" />
+                      <Field label={c.fAuditHoursPerPub} hint={c.fAuditHoursPerPubHint} value={v.auditHoursPerPub} min={0} max={4} step={0.1} onChange={set("auditHoursPerPub")} suffix="h" />
+                      <Field label={c.fHourlyCost} value={v.hourlyCost} min={20} max={300} step={5} onChange={set("hourlyCost")} suffix={` ${v.currency}/h`} />
                     </div>
                     <div className="mt-5 flex items-center gap-2">
-                      <span className="text-[12px] text-white/45">Currency</span>
+                      <span className="text-[12px] text-white/45">{c.currencyLabel}</span>
                       {["$", "€", "£"].map((c) => (
                         <button key={c} onClick={() => setV((s) => ({ ...s, currency: c }))}
                           className={`h-8 w-9 rounded border text-[14px] font-semibold transition ${v.currency === c ? "border-gold-400/50 bg-gold-400/10 text-gold-200" : "border-white/15 text-white/60 hover:border-white/30"}`}>{c}</button>
@@ -136,49 +135,48 @@ const Roi: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <button onClick={() => setV(DEFAULTS)} className="mt-6 text-[12px] font-semibold uppercase tracking-wide text-white/45 transition hover:text-white/70">Reset to example figures</button>
+                <button onClick={() => setV(DEFAULTS)} className="mt-6 text-[12px] font-semibold uppercase tracking-wide text-white/45 transition hover:text-white/70">{c.resetBtn}</button>
               </div>
 
               {/* outputs */}
               <div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Stat label="Permanent records / year" value={fmt(m.records)} sub="Each receives a permanent Record ID and integrity hash." />
-                  <Stat label="Review touches / year" value={fmt(m.reviewTouches)} sub="Office-level reviews governed in policy order." />
-                  <Stat label="Evidence chains / year" value={fmt(m.evidenceChains)} sub="Generated automatically — not assembled by hand." />
-                  <Stat label="Governed effort / year" value={`${fmt(m.totalHours)} h`} sub={`≈ ${m.totalCost} at your blended rate.`} />
+                  <Stat label={c.statRecords} value={fmt(m.records)} sub={c.statRecordsSub} />
+                  <Stat label={c.statReviewTouches} value={fmt(m.reviewTouches)} sub={c.statReviewTouchesSub} />
+                  <Stat label={c.statEvidenceChains} value={fmt(m.evidenceChains)} sub={c.statEvidenceChainsSub} />
+                  <Stat label={c.statGovernedEffort} value={`${fmt(m.totalHours)} h`} sub={c.statGovernedEffortSub.replace("{cost}", m.totalCost)} />
                 </div>
 
                 {/* the model split — judgement vs targeted waste */}
                 <div className="mt-6 rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Where the effort goes</div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{c.whereEffortGoes}</div>
                   <div className="mt-4 space-y-3">
                     {[
-                      ["Review & approval (judgement)", m.reviewHours, m.reviewCost, "Irreducible — Dispatch governs it, it does not remove it.", "bg-white/30"],
-                      ["Coordination between departments", m.coordinationHours, `${v.currency}${fmt(m.coordinationHours * v.hourlyCost)}`, "Hand-off waste a governed workflow targets.", "bg-gold-400/70"],
-                      ["Audit & evidence assembly", m.auditHours, `${v.currency}${fmt(m.auditHours * v.hourlyCost)}`, "Reconstruction a standing evidence chain targets.", "bg-gold-400/70"],
-                    ].map(([label, hours, cost, note, bar]) => {
-                      const pct = m.totalHours > 0 ? ((hours as number) / m.totalHours) * 100 : 0;
+                      { hours: m.reviewHours, cost: m.reviewCost, bar: "bg-white/30" },
+                      { hours: m.coordinationHours, cost: `${v.currency}${fmt(m.coordinationHours * v.hourlyCost)}`, bar: "bg-gold-400/70" },
+                      { hours: m.auditHours, cost: `${v.currency}${fmt(m.auditHours * v.hourlyCost)}`, bar: "bg-gold-400/70" },
+                    ].map((row, idx) => {
+                      const r = c.effortRows[idx];
+                      const pct = m.totalHours > 0 ? (row.hours / m.totalHours) * 100 : 0;
                       return (
-                        <div key={label as string}>
+                        <div key={r.label}>
                           <div className="flex items-baseline justify-between gap-3">
-                            <span className="text-[13.5px] font-semibold text-white/85">{label as string}</span>
-                            <span className="font-mono text-[12.5px] text-white/55">{fmt(hours as number)} h · {cost as string}</span>
+                            <span className="text-[13.5px] font-semibold text-white/85">{r.label}</span>
+                            <span className="font-mono text-[12.5px] text-white/55">{fmt(row.hours)} h · {row.cost}</span>
                           </div>
                           <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/[0.06]">
-                            <div className={`h-full rounded-full ${bar as string}`} style={{ width: `${pct}%` }} />
+                            <div className={`h-full rounded-full ${row.bar}`} style={{ width: `${pct}%` }} />
                           </div>
-                          <div className="mt-1 text-[11.5px] text-white/40">{note as string}</div>
+                          <div className="mt-1 text-[11.5px] text-white/40">{r.note}</div>
                         </div>
                       );
                     })}
                   </div>
                   <div className="mt-6 rounded-xl border border-gold-400/25 bg-gold-400/[0.05] p-4">
-                    <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-gold-300/80">Effort Dispatch targets</div>
-                    <div className="mt-1 font-serif text-[1.6rem] font-bold text-gold-200">{fmt(m.targetedHours)} h <span className="text-[1rem] font-semibold text-white/55">/ year · ≈ {m.targetedCost}</span></div>
+                    <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-gold-300/80">{c.targetedLabel}</div>
+                    <div className="mt-1 font-serif text-[1.6rem] font-bold text-gold-200">{fmt(m.targetedHours)} h <span className="text-[1rem] font-semibold text-white/55">{c.perYear} {m.targetedCost}</span></div>
                     <div className="mt-1.5 text-[12.5px] leading-snug text-white/55">
-                      About {m.targetedPct}% of governed effort in this model is coordination and reconstruction — the part a
-                      single governed platform is designed to reduce. This is an illustrative reflection of your inputs, not a
-                      committed saving.
+                      {c.targetedNote.replace("{pct}", String(m.targetedPct))}
                     </div>
                   </div>
                 </div>
@@ -187,17 +185,14 @@ const Roi: React.FC = () => {
 
             {/* honest disclaimer */}
             <div className="mt-10 rounded-xl border border-white/10 bg-white/[0.015] p-5 text-[12.5px] leading-relaxed text-white/45">
-              <span className="font-semibold text-white/65">This is an illustrative operational model, not a quotation or a guarantee.</span>{" "}
-              Every figure is derived only from the inputs and assumptions you provide, and real outcomes depend entirely on
-              your institution's own processes, volumes and rates. Dispatch does not reduce the review or approval an official
-              publication requires. No savings, ROI, payback or financial outcome is promised. Pricing is published separately
-              on the <button onClick={() => nav(PRICING_ROUTE)} className="font-semibold text-gold-300 hover:underline">pricing page</button>.
+              <span className="font-semibold text-white/65">{c.disclaimerBold}</span>{" "}
+              {c.disclaimerBody.split("{link}")[0]}<button onClick={() => nav(PRICING_ROUTE)} className="font-semibold text-gold-300 hover:underline">{c.disclaimerLink}</button>{c.disclaimerBody.split("{link}")[1]}
             </div>
 
             <div className="mt-9 flex flex-wrap gap-3">
-              <button onClick={() => nav(COST_ROUTE)} className="inline-flex items-center rounded border border-white/15 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/35 hover:bg-white/[0.06]">The cost of publication</button>
-              <button onClick={() => nav(LIFECYCLE_ROUTE)} className="inline-flex items-center rounded border border-white/15 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/35 hover:bg-white/[0.06]">The governed lifecycle</button>
-              <button onClick={() => nav(PROCUREMENT_ROUTE)} className="group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">Procurement center <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" /></button>
+              <button onClick={() => nav(COST_ROUTE)} className="inline-flex items-center rounded border border-white/15 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/35 hover:bg-white/[0.06]">{c.ctaCost}</button>
+              <button onClick={() => nav(LIFECYCLE_ROUTE)} className="inline-flex items-center rounded border border-white/15 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/35 hover:bg-white/[0.06]">{c.ctaLifecycle}</button>
+              <button onClick={() => nav(PROCUREMENT_ROUTE)} className="group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">{c.ctaProcurement} <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" /></button>
             </div>
           </div>
         </section>
