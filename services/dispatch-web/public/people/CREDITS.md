@@ -45,6 +45,20 @@ of rights with the asset.
 | `manufacturing.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — manufacturing hall, distant engineers | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
 | `financial-institutions.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — banking hall, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
 | `insurance.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — corporate atrium, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `central-banks.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — vault colonnade, distant figures from behind | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `tax-authorities.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — records hall, distant clerks | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `electoral-commissions.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — counting hall, distant officials from behind | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `parliaments.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — empty debating chamber | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `law-enforcement.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — operations hall, distant figures (no weapons) | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `customs-border.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — customs house over port, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `aviation-authorities.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — briefing hall over apron, distant figures from behind | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `maritime-authorities.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — harbour-master hall, lone figure from behind | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `environmental-agencies.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — agency atrium, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `intellectual-property.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — reading room, lone clerk from afar | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `national-statistics.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — data hall, distant figures | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `land-registries.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — registry vault, lone registrar from afar | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `standards-bodies.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — calibration hall, distant engineers from behind | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
+| `professional-bodies.webp` | **AI-generated (interim)** — `dispatch-img` → gpt-image-1 | owned render | none — council chamber, distant members | n/a | dispatch-img edge fn, via Sovereign Supabase | 2026-06-27 |
 
 > **Interim exception (recorded honestly).** All seven homepage images above are
 > **AI-generated** renders, accepted by explicit decision on 2026-06-26 (see
@@ -56,15 +70,19 @@ of rights with the asset.
 > standard remains the long-term target: replace any of these with real
 > licensed/commissioned photography when available — they are drop-in by filename.
 
-> **Layer 2 industry imagery (2026-06-27).** The eleven sector frames added for the
-> industry landing pages (`energy-utilities`, `defence`, `municipalities`, `ngos`,
-> `religious-institutions`, `museums`, `archives`, `pharmaceuticals`,
-> `manufacturing`, `financial-institutions`, `insurance`) are **AI-generated**
-> renders produced by the temporary `dispatch-img` edge function → `gpt-image-1`,
-> on explicit request. Same interim terms as above: each is text-free, has no
-> recognizable real people (figures distant, silhouetted, or from behind), was
-> downscaled to 1280×800 (16:10) and optimized to webp, and is a drop-in
-> replacement target for real licensed/commissioned photography.
+> **Layer 2 industry imagery (2026-06-27).** The dedicated sector frames added for
+> the industry landing pages — `energy-utilities`, `defence`, `municipalities`,
+> `ngos`, `religious-institutions`, `museums`, `archives`, `pharmaceuticals`,
+> `manufacturing`, `financial-institutions`, `insurance`, `central-banks`,
+> `tax-authorities`, `electoral-commissions`, `parliaments`, `law-enforcement`,
+> `customs-border`, `aviation-authorities`, `maritime-authorities`,
+> `environmental-agencies`, `intellectual-property`, `national-statistics`,
+> `land-registries`, `standards-bodies`, `professional-bodies` — are
+> **AI-generated** renders produced by the `dispatch-img` edge function →
+> `gpt-image-1`, on explicit request. Same interim terms as above: each is
+> text-free, has no recognizable real people (figures distant, silhouetted, or from
+> behind), was downscaled to 1280×800 (16:10) and optimized to webp, and is a
+> drop-in replacement target for real licensed/commissioned photography.
 
 > Replace a row's `_pending_` cells as each image is sourced. For a free-license,
 > face-free frame: `Source` = Unsplash/Pexels/Pixabay, `License` = that license,

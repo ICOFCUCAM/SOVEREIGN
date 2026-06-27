@@ -44,4 +44,18 @@
   <url><loc>https://dispatch.sovereigndo.com/industries/archives</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/industries/pharmaceuticals</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/industries/manufacturing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/central-banks</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/tax-authorities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/electoral-commissions</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/parliaments</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/law-enforcement</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/customs-border</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/aviation-authorities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/maritime-authorities</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/environmental-agencies</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/intellectual-property</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/national-statistics</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/land-registries</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/standards-bodies</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/industries/professional-bodies</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
