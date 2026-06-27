@@ -333,7 +333,7 @@ const Landing: React.FC = () => {
                 Institutions don't become trusted by publishing.<br className="hidden sm:block" /> They become trusted by governing publication.
               </h2>
             </div>
-            <div className="mt-14 grid gap-5 lg:grid-cols-3">
+            <div className="stagger mt-14 grid gap-5 lg:grid-cols-3">
               {GOVERNANCE.map((g) => (
                 <div key={g.t} className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-7">
                   <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/[0.07] text-gold-300"><Ico name={g.icon} className="h-6 w-6" /></span>
@@ -361,7 +361,7 @@ const Landing: React.FC = () => {
               </span>
               <Chevron className="hidden h-5 w-5 shrink-0 text-gold-400/60 transition group-hover:translate-x-1 sm:block" />
             </button>
-            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+            <div className="stagger mt-5 grid gap-5 sm:grid-cols-2">
               {OUTCOMES.slice(1).map((o) => (
                 <button key={o.slug} onClick={() => nav(`${VALUE_BASE}/${o.slug}`)}
                   className="group flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.015] p-6 text-left transition hover:border-gold-400/30 hover:bg-white/[0.03]">
@@ -389,7 +389,7 @@ const Landing: React.FC = () => {
               <h2 className="mt-5 font-serif text-[2.3rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3rem]">Trusted every day, across every institution.</h2>
               <p className="mt-4 text-[15px] leading-relaxed text-white/55">Dispatch governs the publications your institution actually produces.</p>
             </div>
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="stagger mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {INDUSTRIES.map((it) => (
                 <article key={it.slug} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-gold-400/30">
                   <SectorImage slug={it.slug} name={it.name} />
@@ -415,7 +415,7 @@ const Landing: React.FC = () => {
             <p className="mx-auto mt-6 max-w-xl text-[16px] leading-relaxed text-white/55">
               Built for institutions whose information cannot leak, cannot be lost, and cannot be repudiated.
             </p>
-            <div className="mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-3">
+            <div className="stagger mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-3">
               {SECURITY.map((s) => (
                 <div key={s.label} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3.5 text-left">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gold-400/25 bg-gold-400/[0.06] text-gold-300"><Ico name={s.icon} className="h-5 w-5" /></span>
@@ -443,7 +443,7 @@ const Landing: React.FC = () => {
                 </div>
               ))}
             </div>
-            <div className="mt-14 grid gap-10 sm:grid-cols-3">
+            <div className="stagger mt-14 grid gap-10 sm:grid-cols-3">
               {PROOF_COLUMNS.map((col) => (
                 <div key={col.title}>
                   <div className="text-[12px] font-semibold uppercase tracking-[0.2em] text-gold-400/80">{col.title}</div>
