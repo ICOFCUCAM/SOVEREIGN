@@ -22,3 +22,23 @@ const HOME: Record<string, HomeCopy> = {
 
 export const useHomeCopy = (): HomeCopy => HOME[useUiLocale()] || HOME_EN;
 export type { HomeCopy };
+
+// ── Pricing page ─────────────────────────────────────────────────────────────
+import { PRICING_EN, type PricingCopy } from "./pricing";
+import { PRICING_FR } from "./pricing.fr";
+import { PRICING_ES } from "./pricing.es";
+import { PRICING_DE } from "./pricing.de";
+import { PRICING_NO } from "./pricing.no";
+import { PRICING_PT } from "./pricing.pt";
+import { PRICING_IT } from "./pricing.it";
+import { PRICING_NL } from "./pricing.nl";
+import { PRICING_AR } from "./pricing.ar";
+import { PRICING_JA } from "./pricing.ja";
+import { PRICING_ZH } from "./pricing.zh";
+
+const PRICING: Record<string, PricingCopy> = {
+  en: PRICING_EN, fr: PRICING_FR, es: PRICING_ES, de: PRICING_DE, no: PRICING_NO,
+  pt: PRICING_PT, it: PRICING_IT, nl: PRICING_NL, ar: PRICING_AR, ja: PRICING_JA, zh: PRICING_ZH,
+};
+export const usePricingCopy = (): PricingCopy => PRICING[useUiLocale()] || PRICING_EN;
+export type { PricingCopy };
