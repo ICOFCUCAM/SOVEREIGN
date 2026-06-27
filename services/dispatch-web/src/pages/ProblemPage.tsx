@@ -6,7 +6,7 @@ import { industryBySlug, INDUSTRIES_BASE } from "../lib/industries";
 import { WALKTHROUGH_ROUTE, VERIFY_ROUTE, STANDARD_ROUTE } from "../lib/routes";
 import { track } from "../lib/analytics";
 import { DEFAULT_LOCALE, isActiveLocale, localePath, t } from "../lib/i18n";
-import { conceptTranslation } from "../lib/translations";
+import { conceptTranslation, conceptLocales } from "../lib/translations";
 
 // Layer 3 — a single Problem / Concept page. Typographic hero (no photo) plus a
 // reusable inline-SVG concept diagram. Rich definitional content + DefinedTerm,
@@ -157,10 +157,12 @@ const ProblemPage: React.FC = () => {
                   <button onClick={() => nav(PROBLEMS_BASE)} className="transition hover:text-gold-300">{L("nav.learn")}</button>
                   <Chevron className="h-3 w-3" /><span className="text-gold-400/70">{p.term}</span>
                 </nav>
-                {conceptTranslation("fr", base.slug) && (
+                {conceptLocales(base.slug).length > 1 && (
                   <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] p-0.5 text-[11px] font-semibold" aria-label={t(locale, "lang.label")}>
-                    <button onClick={() => nav(`${PROBLEMS_BASE}/${base.slug}`)} className={`rounded-full px-2.5 py-1 transition ${locale === "en" ? "bg-gold-400/15 text-gold-200" : "text-white/50 hover:text-white"}`}>EN</button>
-                    <button onClick={() => nav(localePath("fr", `${PROBLEMS_BASE}/${base.slug}`))} className={`rounded-full px-2.5 py-1 transition ${locale === "fr" ? "bg-gold-400/15 text-gold-200" : "text-white/50 hover:text-white"}`}>FR</button>
+                    {conceptLocales(base.slug).map((loc) => (
+                      <button key={loc} onClick={() => nav(localePath(loc, `${PROBLEMS_BASE}/${base.slug}`))}
+                        className={`rounded-full px-2.5 py-1 uppercase transition ${locale === loc ? "bg-gold-400/15 text-gold-200" : "text-white/50 hover:text-white"}`}>{loc}</button>
+                    ))}
                   </div>
                 )}
               </div>

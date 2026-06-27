@@ -176,7 +176,9 @@
     "totalConcepts": 300,
     "active": [
       "en",
-      "fr"
+      "fr",
+      "es",
+      "de"
     ],
     "targets": [
       {
@@ -237,6 +239,8 @@
       }
     ],
     "coverage": {
+      "de": 4,
+      "es": 4,
       "fr": 4
     },
     "note": "A page exists in a locale only when a real translation exists; hreflang derives from this."
@@ -264,7 +268,7 @@
   "distribution": {
     "sitemap": {
       "exists": true,
-      "urls": 453
+      "urls": 461
     },
     "imageSitemap": {
       "exists": true,

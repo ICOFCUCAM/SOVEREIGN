@@ -28,7 +28,7 @@ export const DEFAULT_LOCALE = "en";
 // Locales that are actually live (have real content). Activated as translations
 // land — this is the only switch that exposes a language. hreflang & sitemaps
 // derive from it, so nothing is advertised before it exists.
-export const ACTIVE_LOCALES = ["en", "fr"];
+export const ACTIVE_LOCALES = ["en", "fr", "es", "de"];
 
 // Derive the active locale from a path's first segment (en if none/inactive).
 export const localeFromPath = (pathname: string): string => {
@@ -74,6 +74,24 @@ const CHROME: Record<string, Dict> = {
     "nav.platform": "Plateforme", "nav.standard": "Norme", "nav.trust": "Confiance",
     "nav.developers": "Développeurs", "nav.pricing": "Tarifs", "nav.verify": "Vérifier",
     "nav.outcomes": "Résultats", "cta.launch": "Lancer Dispatch", "cta.launchShort": "Lancer", "nav.menu": "Menu", "nav.procurement": "Achats",
+  },
+  es: {
+    "cta.evaluate": "Comience su evaluación", "cta.verify": "Verificar un registro", "cta.procurement": "Documentación de adquisición", "cta.seeInAction": "Véalo en acción",
+    "concept.definition": "Definición", "concept.why": "Por qué es importante", "concept.how": "Cómo lo gestiona Sovereign Dispatch",
+    "concept.faq": "Preguntas frecuentes", "concept.related": "Conceptos relacionados", "concept.applies": "Dónde se aplica",
+    "nav.learn": "Aprender", "lang.label": "Idioma", "lang.readIn": "Leer esto en",
+    "nav.platform": "Plataforma", "nav.standard": "Norma", "nav.trust": "Confianza",
+    "nav.developers": "Desarrolladores", "nav.pricing": "Precios", "nav.verify": "Verificar",
+    "nav.outcomes": "Resultados", "cta.launch": "Iniciar Dispatch", "cta.launchShort": "Iniciar", "nav.menu": "Menú", "nav.procurement": "Adquisición",
+  },
+  de: {
+    "cta.evaluate": "Bewertung beginnen", "cta.verify": "Datensatz prüfen", "cta.procurement": "Beschaffungsunterlagen", "cta.seeInAction": "In Aktion sehen",
+    "concept.definition": "Definition", "concept.why": "Warum es wichtig ist", "concept.how": "Wie Sovereign Dispatch dies handhabt",
+    "concept.faq": "Häufige Fragen", "concept.related": "Verwandte Begriffe", "concept.applies": "Wo dies gilt",
+    "nav.learn": "Wissen", "lang.label": "Sprache", "lang.readIn": "Lesen Sie dies auf",
+    "nav.platform": "Plattform", "nav.standard": "Standard", "nav.trust": "Vertrauen",
+    "nav.developers": "Entwickler", "nav.pricing": "Preise", "nav.verify": "Verifizieren",
+    "nav.outcomes": "Ergebnisse", "cta.launch": "Dispatch starten", "cta.launchShort": "Starten", "nav.menu": "Menü", "nav.procurement": "Beschaffung",
   },
 };
 export const t = (locale: string, key: string): string => (CHROME[locale] && CHROME[locale][key]) || CHROME.en[key] || key;
