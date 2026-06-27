@@ -323,10 +323,10 @@ const Landing: React.FC = () => {
                 <button onClick={() => nav(VERIFY_ROUTE)} className="rounded-md border border-[#171712]/20 px-5 py-2.5 text-[13px] font-semibold uppercase tracking-wide text-[#171712] transition hover:border-[#171712]/45">Verify a record</button>
               </div>
             </div>
-            <figure className="relative">
+            <figure className="group relative">
               <div className="overflow-hidden rounded-2xl shadow-[0_50px_120px_-50px_rgba(0,0,0,0.55)] ring-1 ring-[#171712]/10">
                 <img src="/people/officialpublication.webp" alt="An Official Publication — sealed, certified, verifiable"
-                  loading="lazy" className="aspect-[4/5] w-full object-cover sm:aspect-[5/6]" />
+                  loading="lazy" className="aspect-[4/5] w-full object-cover transition duration-[1200ms] ease-out group-hover:scale-[1.04] sm:aspect-[5/6]" />
               </div>
               <figcaption className="mt-3 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9a7b27]">Sealed · Certified · Permanently verifiable</figcaption>
             </figure>
