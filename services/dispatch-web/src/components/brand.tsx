@@ -160,29 +160,6 @@ export const useReveal = (): void => {
   }, []);
 };
 
-// A thin scroll-linked progress bar pinned under the header — the small,
-// expected cue that you are reading a substantial, finished document. Respects
-// reduced-motion by simply tracking position (no animation of its own).
-export const ReadingProgress: React.FC = () => {
-  const [pct, setPct] = React.useState(0);
-  React.useEffect(() => {
-    const onScroll = () => {
-      const h = document.documentElement;
-      const max = h.scrollHeight - h.clientHeight;
-      setPct(max > 0 ? Math.min(100, (h.scrollTop / max) * 100) : 0);
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
-  }, []);
-  return (
-    <div className="no-print fixed inset-x-0 top-0 z-[60] h-0.5 bg-transparent" aria-hidden>
-      <div className="h-full bg-gradient-to-r from-gold-500/70 to-gold-300 transition-[width] duration-100 ease-out" style={{ width: `${pct}%` }} />
-    </div>
-  );
-};
-
 // Scroll-spy: given an ordered list of element ids, return the id of the
 // section currently in view so a table of contents can highlight it. Used by
 // long-form pages (articles, docs) to keep the reader oriented.

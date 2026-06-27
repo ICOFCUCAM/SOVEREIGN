@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
-import { PublicHeader, PublicFooter, FilmGrain, Chevron, useReveal, ReadingProgress } from "../components/brand";
+import { PublicHeader, PublicFooter, FilmGrain, Chevron, useReveal } from "../components/brand";
 import { DOCS, DOCS_BASE, DOC_GROUPS, docBySlug, type DocBlock } from "../lib/docs";
 import { track } from "../lib/analytics";
 
@@ -97,7 +97,6 @@ const Docs: React.FC = () => {
     <div className="relative min-h-full bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-      <ReadingProgress />
       <FilmGrain />
       <PublicHeader />
       <main className="mx-auto grid max-w-[1240px] gap-10 px-6 py-12 lg:grid-cols-[240px_1fr] lg:px-12">

@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
-import { PublicHeader, PublicFooter, FilmGrain, Chevron, useReveal, ReadingProgress, useScrollSpy } from "../components/brand";
+import { PublicHeader, PublicFooter, FilmGrain, Chevron, useReveal, useScrollSpy } from "../components/brand";
 import { ARTICLES, LIBRARY_BASE, articleBySlug } from "../lib/library";
 import { problemBySlug, PROBLEMS_BASE } from "../lib/problems";
 import { industryBySlug, INDUSTRIES_BASE } from "../lib/industries";
@@ -59,7 +59,6 @@ const ArticlePage: React.FC = () => {
     <div className="relative min-h-full bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth} .prose-sd p{margin-top:1rem}`}</style>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-      <ReadingProgress />
       <FilmGrain />
       <PublicHeader />
       <main>

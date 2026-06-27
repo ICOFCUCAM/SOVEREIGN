@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
-import { PublicHeader, PublicFooter, FilmGrain, Chevron, useReveal, ReadingProgress } from "../components/brand";
+import { PublicHeader, PublicFooter, FilmGrain, Chevron, useReveal } from "../components/brand";
 import { PROBLEMS, PROBLEMS_BASE, problemBySlug, type ProblemDiagram } from "../lib/problems";
 import { industryBySlug, INDUSTRIES_BASE } from "../lib/industries";
 import { WALKTHROUGH_ROUTE, VERIFY_ROUTE, STANDARD_ROUTE } from "../lib/routes";
@@ -144,7 +144,6 @@ const ProblemPage: React.FC = () => {
     <div className="relative min-h-full bg-[#070707] text-white">
       <style>{`html{scroll-behavior:smooth}`}</style>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-      <ReadingProgress />
       <FilmGrain />
       <PublicHeader />
       <main>
