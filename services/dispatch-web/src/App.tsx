@@ -2,6 +2,8 @@ import React, { Suspense, lazy } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./lib/auth";
 import { metaForPath } from "./lib/seo";
+import { DEFAULT_LOCALE, isActiveLocale, hreflangAlternates, localeOf } from "./lib/i18n";
+import { conceptLocales } from "./lib/translations";
 import { FilmGrain } from "./components/brand";
 import { BillingProvider } from "./lib/upsell";
 
@@ -33,6 +35,15 @@ const CostOfPublication = lazy(() => import("./pages/CostOfPublication"));
 const Lifecycle = lazy(() => import("./pages/Lifecycle"));
 const Roi = lazy(() => import("./pages/Roi"));
 const ValuePage = lazy(() => import("./pages/ValuePage"));
+const Industries = lazy(() => import("./pages/Industries"));
+const IndustryPage = lazy(() => import("./pages/IndustryPage"));
+const Problems = lazy(() => import("./pages/Problems"));
+const ProblemPage = lazy(() => import("./pages/ProblemPage"));
+const KnowledgeLibrary = lazy(() => import("./pages/KnowledgeLibrary"));
+const ArticlePage = lazy(() => import("./pages/ArticlePage"));
+const Docs = lazy(() => import("./pages/Docs"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const PublishingConsole = lazy(() => import("./pages/PublishingConsole"));
 const Verify = lazy(() => import("./pages/Verify"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Create = lazy(() => import("./pages/Create"));
@@ -97,6 +108,7 @@ const Administration: React.FC = () => {
       <ConsoleShell variant="administration">
         <Routes>
           <Route path="/" element={<AdminHome />} />
+          <Route path="publishing" element={<PublishingConsole />} />
           <Route path="setup" element={<InstitutionSetup />} />
           <Route path="authority" element={<AuthorityDirectory />} />
           <Route path="access" element={<Access />} />
@@ -140,20 +152,60 @@ const PlatformOperations: React.FC = () => {
 
 // Per-route document title + meta description, driven by lib/seo. Sets real tab /
 // bookmark titles and helps JS-rendering crawlers index each surface distinctly.
+const SITE_ORIGIN = "https://dispatch.sovereigndo.com";
 function setMeta(key: string, content: string, property = false): void {
   const attr = property ? "property" : "name";
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
   if (!el) { el = document.createElement("meta"); el.setAttribute(attr, key); document.head.appendChild(el); }
   el.setAttribute("content", content);
 }
+function setLink(rel: string, href: string): void {
+  let el = document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+  if (!el) { el = document.createElement("link"); el.setAttribute("rel", rel); document.head.appendChild(el); }
+  el.setAttribute("href", href);
+}
+// hreflang alternates — replace the set on every navigation so it always reflects
+// the locales the current page actually exists in (truthful, never advertised early).
+function setAlternates(alts: { hreflang: string; href: string }[]): void {
+  document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((e) => e.remove());
+  for (const a of alts) { const el = document.createElement("link"); el.setAttribute("rel", "alternate"); el.setAttribute("hreflang", a.hreflang); el.setAttribute("href", a.href); document.head.appendChild(el); }
+}
+// Per-route head — title, description, canonical, OpenGraph and Twitter on EVERY
+// route, derived from lib/seo. No page sets these by hand; the ecosystem stays
+// crawlable and link-preview-correct automatically.
 const RouteMeta: React.FC = () => {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
+  // Reset scroll on every route change so a new page never opens mid-content —
+  // but honour in-page anchors (#faq, #section), which the browser handles.
+  React.useEffect(() => {
+    if (!hash) window.scrollTo(0, 0);
+  }, [pathname, hash]);
   React.useEffect(() => {
     const { title, description } = metaForPath(pathname);
+    const canonical = SITE_ORIGIN + (pathname === "/" ? "/" : pathname.replace(/\/+$/, ""));
     document.title = title;
     setMeta("description", description);
     setMeta("og:title", title, true);
     setMeta("og:description", description, true);
+    setMeta("og:url", canonical, true);
+    setMeta("twitter:title", title);
+    setMeta("twitter:description", description);
+    setLink("canonical", canonical);
+
+    // hreflang + <html lang/dir> for localized pages (concepts today; the same
+    // hook lights up every layer as translations land).
+    const m = pathname.match(/^(?:\/([a-z]{2}))?\/learn\/([a-z0-9-]+)$/);
+    if (m && (!m[1] || isActiveLocale(m[1]))) {
+      const locale = m[1] && isActiveLocale(m[1]) ? m[1] : DEFAULT_LOCALE;
+      const alts = hreflangAlternates(`/learn/${m[2]}`, conceptLocales(m[2]));
+      setAlternates(alts.length > 1 ? alts : []);
+      document.documentElement.lang = locale;
+      document.documentElement.dir = localeOf(locale).dir;
+    } else {
+      setAlternates([]);
+      document.documentElement.lang = "en";
+      document.documentElement.dir = "ltr";
+    }
   }, [pathname]);
   return null;
 };
@@ -201,6 +253,20 @@ const App: React.FC = () => (
     <Route path="/roi" element={<Roi />} />
     {/* financial-value detail pages (7), introduced on the homepage */}
     <Route path="/value/:slug" element={<ValuePage />} />
+    {/* Layer 2 — industry landing pages (SEO ecosystem) */}
+    <Route path="/industries" element={<Industries />} />
+    <Route path="/industries/:slug" element={<IndustryPage />} />
+    {/* Layer 3 — problem / concept pages (knowledge hub) */}
+    <Route path="/learn" element={<Problems />} />
+    <Route path="/learn/:slug" element={<ProblemPage />} />
+    {/* localized concept pages — /fr/learn/:slug etc. (real translations only) */}
+    <Route path="/:lang/learn/:slug" element={<ProblemPage />} />
+    {/* Layer 4 — knowledge library (long-form articles) */}
+    <Route path="/library" element={<KnowledgeLibrary />} />
+    <Route path="/library/:slug" element={<ArticlePage />} />
+    {/* Layer 5 — developer documentation */}
+    <Route path="/docs" element={<Docs />} />
+    <Route path="/docs/:slug" element={<Docs />} />
     <Route path="/verify" element={<Verify />} />
     <Route path="/verify/:recordId" element={<Verify />} />
     {/* public self-serve signup (free plan) */}
@@ -213,7 +279,7 @@ const App: React.FC = () => (
     <Route path="/evaluate" element={<Evaluation />} />
     {/* product 4 — platform operations (platform operator; dispatch:platform) */}
     <Route path="/operator" element={<PlatformOperations />} />
-    <Route path="*" element={<Navigate to="/" replace />} />
+    <Route path="*" element={<NotFound />} />
   </Routes>
   </Suspense>
   </>

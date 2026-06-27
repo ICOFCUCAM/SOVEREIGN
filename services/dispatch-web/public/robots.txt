@@ -6,3 +6,4 @@ Disallow: /operator
 Disallow: /evaluate
 
 Sitemap: https://dispatch.sovereigndo.com/sitemap.xml
+Sitemap: https://dispatch.sovereigndo.com/sitemap-images.xml

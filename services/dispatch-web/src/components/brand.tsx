@@ -1,11 +1,12 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { localeFromPath, t as tr } from "../lib/i18n";
 import {
   PLATFORM_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE, DEVELOPERS_ROUTE,
   PROCUREMENT_ROUTE, PRICING_ROUTE, ARCHITECTURE_ROUTE, EVIDENCE_ROUTE, TRUST_ROUTE,
   OUTCOMES_ROUTE, STANDARD_ROUTE, RECORDS_ROUTE, JOURNEY_ROUTE,
   OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE, WALKTHROUGH_ROUTE,
-  COST_ROUTE, LIFECYCLE_ROUTE, ROI_ROUTE,
+  COST_ROUTE, LIFECYCLE_ROUTE, ROI_ROUTE, INDUSTRIES_ROUTE, LEARN_ROUTE, LIBRARY_ROUTE, DOCS_ROUTE,
 } from "../lib/routes";
 import { VALUE, VALUE_BASE } from "../lib/value";
 
@@ -101,7 +102,7 @@ export const PublicFooter: React.FC = () => (
           </p>
         </div>
         <FooterCol title="The Standard" links={[["What is an Official Record?", OFFICIAL_RECORD_ROUTE], ["See a governed record", WALKTHROUGH_ROUTE], ["Verify a record", VERIFY_ROUTE], ["Outcomes", OUTCOMES_ROUTE], ["The Standard", STANDARD_ROUTE], ["Records", RECORDS_ROUTE], ["Readiness Journey", JOURNEY_ROUTE]]} />
-        <FooterCol title="Platform" links={[["Overview", PLATFORM_ROUTE], ["Developers", DEVELOPERS_ROUTE], ["Security", SECURITY_ROUTE], ["Compliance", COMPLIANCE_ROUTE]]} />
+        <FooterCol title="Platform" links={[["Overview", PLATFORM_ROUTE], ["Industries", INDUSTRIES_ROUTE], ["Library", LIBRARY_ROUTE], ["Concepts", LEARN_ROUTE], ["Developers", DEVELOPERS_ROUTE], ["Documentation", DOCS_ROUTE], ["Security", SECURITY_ROUTE], ["Compliance", COMPLIANCE_ROUTE]]} />
         <FooterCol title="Evaluate" links={[["Cost of Publication", COST_ROUTE], ["The Governed Lifecycle", LIFECYCLE_ROUTE], ["ROI Estimator", ROI_ROUTE], ["Pricing", PRICING_ROUTE], ["Procurement", PROCUREMENT_ROUTE], ["Architecture", ARCHITECTURE_ROUTE], ["Evidence", EVIDENCE_ROUTE], ["Trust", TRUST_ROUTE]]} />
         <FooterCol title="The Case" links={VALUE.map((v) => [v.title, `${VALUE_BASE}/${v.slug}`] as [string, string])} />
         <FooterCol title="Access" links={[["Launch Dispatch", "/console"], ["Log in", "/console"]]} />
@@ -159,25 +160,45 @@ export const useReveal = (): void => {
   }, []);
 };
 
+// Scroll-spy: given an ordered list of element ids, return the id of the
+// section currently in view so a table of contents can highlight it. Used by
+// long-form pages (articles, docs) to keep the reader oriented.
+export const useScrollSpy = (ids: string[]): string => {
+  const [active, setActive] = React.useState(ids[0] || "");
+  React.useEffect(() => {
+    if (!ids.length) return;
+    const els = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+    if (!els.length) return;
+    const io = new IntersectionObserver((entries) => {
+      const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (visible[0]) setActive(visible[0].target.id);
+    }, { rootMargin: "-20% 0px -70% 0px", threshold: 0 });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [ids.join("|")]);
+  return active;
+};
+
 // Two navigations from one source. The desktop bar is deliberately lean — a
 // premium header guides toward the single action (Launch), so it carries only
 // the four destinations an evaluator reaches for; everything else lives in the
 // footer sitemap and the full mobile sheet. The mobile sheet stays comprehensive
 // (a phone has no footer in view), minus Home, which the wordmark already is.
+// [i18n key, route] — labels resolve to the active locale at render time.
 const DESKTOP_NAV: [string, string][] = [
-  ["Platform", PLATFORM_ROUTE],
-  ["Standard", STANDARD_ROUTE],
-  ["Trust", TRUST_ROUTE],
-  ["Developers", DEVELOPERS_ROUTE],
-  ["Pricing", PRICING_ROUTE],
+  ["nav.platform", PLATFORM_ROUTE],
+  ["nav.standard", STANDARD_ROUTE],
+  ["nav.trust", TRUST_ROUTE],
+  ["nav.developers", DEVELOPERS_ROUTE],
+  ["nav.pricing", PRICING_ROUTE],
 ];
 const NAV: [string, string][] = [
-  ["Standard", STANDARD_ROUTE],
-  ["Outcomes", OUTCOMES_ROUTE],
-  ["Trust", TRUST_ROUTE],
-  ["Developers", DEVELOPERS_ROUTE],
-  ["Verify", VERIFY_ROUTE],
-  ["Pricing", PRICING_ROUTE],
+  ["nav.standard", STANDARD_ROUTE],
+  ["nav.outcomes", OUTCOMES_ROUTE],
+  ["nav.trust", TRUST_ROUTE],
+  ["nav.developers", DEVELOPERS_ROUTE],
+  ["nav.verify", VERIFY_ROUTE],
+  ["nav.pricing", PRICING_ROUTE],
 ];
 
 // Sticky public header shared by the procurement + architecture pages. `actions`
@@ -186,8 +207,13 @@ const NAV: [string, string][] = [
 // destination is reachable on a phone — not just Launch.
 export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions }) => {
   const nav = useNavigate();
+  const pathname = useLocation().pathname;
+  const locale = localeFromPath(pathname);
   const [open, setOpen] = React.useState(false);
   const go = (to: string) => { setOpen(false); nav(to); };
+  // "You are here" — a nav item is active on its exact route or any child route
+  // (so /learn/<concept> still lights Learn). "/" only matches the homepage.
+  const isActive = (to: string) => to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(to + "/");
   // A thin gold reading-progress bar under the header — a quiet premium cue of
   // how far through the page the visitor is. rAF-throttled, passive listener.
   const barRef = React.useRef<HTMLDivElement>(null);
@@ -224,15 +250,19 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
         </button>
         <div className="flex shrink-0 items-center gap-3 sm:gap-4">
           {/* lean inline navigation — desktop only */}
-          {DESKTOP_NAV.map(([label, to]) => (
-            <button key={to} onClick={() => go(to)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">{label}</button>
-          ))}
+          {DESKTOP_NAV.map(([label, to]) => {
+            const on = isActive(to);
+            return (
+              <button key={to} onClick={() => go(to)} aria-current={on ? "page" : undefined}
+                className={`relative hidden text-[13px] font-semibold uppercase tracking-wide transition lg:inline-block ${on ? "text-white after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:bg-gold-400/70" : "text-white/70 hover:text-white"}`}>{tr(locale, label)}</button>
+            );
+          })}
           {actions}
           {/* standalone Launch CTA — hidden on the narrowest phones (where it would
               crowd the bar); on those it leads the mobile sheet instead. */}
           <button onClick={() => go("/console")}
             className="btn-sheen group hidden items-center gap-2 whitespace-nowrap rounded bg-gradient-to-b from-gold-300 to-gold-600 px-4 py-2.5 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500 sm:inline-flex sm:px-5">
-            <span className="sm:hidden">Launch</span><span className="hidden sm:inline">Launch Dispatch</span>
+            <span className="sm:hidden">{tr(locale, "cta.launchShort")}</span><span className="hidden sm:inline">{tr(locale, "cta.launch")}</span>
             <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
           </button>
           {/* hamburger — tablet & phone */}
@@ -255,12 +285,15 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
           <nav id="mobile-nav" className="relative z-50 border-t border-white/[0.06] bg-[#0a0a0a] px-5 py-3 shadow-[0_24px_50px_-20px_rgba(0,0,0,0.9)] sm:px-8">
             {/* primary action first — on the narrowest phones this is the only Launch entry */}
             <button onClick={() => go("/console")} className="mb-2 mt-1 flex w-full items-center justify-center gap-2 rounded bg-gradient-to-b from-gold-300 to-gold-600 py-3 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition hover:from-gold-200 hover:to-gold-500 sm:hidden">
-              Launch Dispatch <Chevron className="h-3.5 w-3.5" />
+              {tr(locale, "cta.launch")} <Chevron className="h-3.5 w-3.5" />
             </button>
-            {NAV.map(([label, to]) => (
-              <button key={to} onClick={() => go(to)} className="block w-full border-b border-white/[0.05] py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">{label}</button>
-            ))}
-            <button onClick={() => go(PROCUREMENT_ROUTE)} className="block w-full py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">Procurement</button>
+            {NAV.map(([label, to]) => {
+              const on = isActive(to);
+              return (
+                <button key={to} onClick={() => go(to)} aria-current={on ? "page" : undefined} className={`block w-full border-b border-white/[0.05] py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide transition ${on ? "text-gold-300" : "text-white/80 hover:text-gold-300"}`}>{tr(locale, label)}</button>
+              );
+            })}
+            <button onClick={() => go(PROCUREMENT_ROUTE)} className="block w-full py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">{tr(locale, "nav.procurement")}</button>
           </nav>
         </div>
       )}

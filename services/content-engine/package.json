@@ -1,0 +1,14 @@
+{
+  "name": "@sovereign-dispatch/content-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deterministic backbone of the AI publishing pipeline for the SEO ecosystem (Layers 2-5): validate, merge, feeds, stats.",
+  "bin": {
+    "dispatch-content": "bin/content.cjs"
+  },
+  "scripts": {
+    "stats": "node bin/content.cjs stats",
+    "feeds": "node bin/content.cjs feeds"
+  },
+  "license": "UNLICENSED"
+}

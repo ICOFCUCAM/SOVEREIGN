@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Sovereign Dispatch — Knowledge Library</title>
+    <link>https://dispatch.sovereigndo.com/library</link>
+    <description>Guides on official records, document governance, evidence, preservation and compliance.</description>
+    <language>en</language>
+    <item>
+      <title>What Is an Official Record?</title>
+      <link>https://dispatch.sovereigndo.com/library/what-is-an-official-record</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/what-is-an-official-record</guid>
+      <description>An Official Record is more than a document — it is a publication an institution can prove is genuine, authorised and unaltered for as long as it matters. This guide explains what that means and why it is different from an ordinary file.</description>
+    </item>
+    <item>
+      <title>The Difference Between a PDF and an Official Publication</title>
+      <link>https://dispatch.sovereigndo.com/library/pdf-vs-official-publication</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/pdf-vs-official-publication</guid>
+      <description>A PDF carries content. An Official Publication carries proof. This guide explains why the format of a file says nothing about its authority — and what closes the gap.</description>
+    </item>
+    <item>
+      <title>The Publication Lifecycle: From Draft to Permanent Record</title>
+      <link>https://dispatch.sovereigndo.com/library/the-publication-lifecycle</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/the-publication-lifecycle</guid>
+      <description>Every official document travels the same path — create, review, approve, authorise, publish, certify, verify, preserve. This guide walks each stage and shows where authority and proof are won or lost.</description>
+    </item>
+    <item>
+      <title>What Is Document Governance? A Practical Guide</title>
+      <link>https://dispatch.sovereigndo.com/library/what-is-document-governance</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/what-is-document-governance</guid>
+      <description>Document governance is the discipline that decides who may create, approve, publish, and retire an institution's authoritative documents — and proves it later.</description>
+    </item>
+    <item>
+      <title>Information Governance, Explained</title>
+      <link>https://dispatch.sovereigndo.com/library/information-governance</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/information-governance</guid>
+      <description>Information governance is the institutional framework that decides how information is created, classified, protected, retained, and disposed of across its entire life.</description>
+    </item>
+    <item>
+      <title>The Hidden Cost of Ungoverned Publication</title>
+      <link>https://dispatch.sovereigndo.com/library/the-cost-of-ungoverned-publication</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/the-cost-of-ungoverned-publication</guid>
+      <description>When institutions publish without governance, the costs are real but invisible — paid in verification friction, disputed authenticity, and slow erosion of trust.</description>
+    </item>
+    <item>
+      <title>Who Can Issue an Official Record?</title>
+      <link>https://dispatch.sovereigndo.com/library/authority-to-publish-explained</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/authority-to-publish-explained</guid>
+      <description>Authority to publish is the mandate that makes a document official — the institutional permission, vested in a named role, to issue records the institution will stand behind.</description>
+    </item>
+    <item>
+      <title>Building a Single Source of Truth for Records</title>
+      <link>https://dispatch.sovereigndo.com/library/single-source-of-truth-for-records</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/single-source-of-truth-for-records</guid>
+      <description>A single source of truth is the one authoritative place an institution and everyone who relies on it can turn to know which version of a record is genuine and current.</description>
+    </item>
+    <item>
+      <title>Why Institutional Documents Lose Trust</title>
+      <link>https://dispatch.sovereigndo.com/library/why-documents-lose-trust</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/why-documents-lose-trust</guid>
+      <description>Documents lose trust not in one dramatic failure but through accumulated small gaps — broken provenance, undetectable change, and the inability to prove what is true.</description>
+    </item>
+    <item>
+      <title>Understanding Evidence Chains</title>
+      <link>https://dispatch.sovereigndo.com/library/understanding-evidence-chains</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/understanding-evidence-chains</guid>
+      <description>An evidence chain links a published record to the proofs that explain how it came to exist, who acted on it, and whether it has changed since. This guide explains what a chain is, why institutions need one, and how to read it.</description>
+    </item>
+    <item>
+      <title>Record Authenticity: Proving a Document Is Genuine</title>
+      <link>https://dispatch.sovereigndo.com/library/record-authenticity</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/record-authenticity</guid>
+      <description>Authenticity is the claim that a document is what it purports to be, issued by who it claims, and unchanged since. This guide explains how institutions establish authenticity and how anyone can check it.</description>
+    </item>
+    <item>
+      <title>How Document Verification Works</title>
+      <link>https://dispatch.sovereigndo.com/library/how-document-verification-works</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/how-document-verification-works</guid>
+      <description>Verification is the act of checking, independently, whether a document is genuine and unchanged. This guide walks through what a verification check does, what it can and cannot tell you, and how to trust the result.</description>
+    </item>
+    <item>
+      <title>Tamper-Evident vs Tamper-Proof</title>
+      <link>https://dispatch.sovereigndo.com/library/tamper-evident-vs-tamper-proof</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/tamper-evident-vs-tamper-proof</guid>
+      <description>These two terms are often used interchangeably, but they make very different promises. This guide explains the distinction, why it matters for institutional records, and why honest systems claim only the one they can deliver.</description>
+    </item>
+    <item>
+      <title>Cryptographic Sealing, Explained Simply</title>
+      <link>https://dispatch.sovereigndo.com/library/cryptographic-sealing-explained</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/cryptographic-sealing-explained</guid>
+      <description>Cryptographic sealing binds a record to a fingerprint, a time, and an issuer so that any later change is detectable. This guide explains the idea in plain language, without assuming a background in cryptography.</description>
+    </item>
+    <item>
+      <title>Chain of Custody for Digital Records</title>
+      <link>https://dispatch.sovereigndo.com/library/chain-of-custody-for-records</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/chain-of-custody-for-records</guid>
+      <description>Chain of custody documents who held, handled, or changed a record and when. This guide explains how the concept transfers from physical evidence to digital records and how a sound custody trail is built and read.</description>
+    </item>
+    <item>
+      <title>A Guide to Digital Preservation</title>
+      <link>https://dispatch.sovereigndo.com/library/digital-preservation-guide</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/digital-preservation-guide</guid>
+      <description>Why keeping a file is not the same as preserving it, and what institutions actually need to do to keep digital records usable across decades.</description>
+    </item>
+    <item>
+      <title>Archives in the Digital Age</title>
+      <link>https://dispatch.sovereigndo.com/library/archives-in-the-digital-age</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/archives-in-the-digital-age</guid>
+      <description>How the archival mission of preserving authentic records over time translates into a world of files, formats, and systems that change faster than memory.</description>
+    </item>
+    <item>
+      <title>Records Retention and the Law</title>
+      <link>https://dispatch.sovereigndo.com/library/records-retention-and-the-law</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/records-retention-and-the-law</guid>
+      <description>Why institutions must keep some records and destroy others on a defined schedule, and how a retention programme turns legal obligation into defensible practice.</description>
+    </item>
+    <item>
+      <title>Preserving Authenticity Over Decades</title>
+      <link>https://dispatch.sovereigndo.com/library/preserving-authenticity-over-decades</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/preserving-authenticity-over-decades</guid>
+      <description>Keeping a record readable is only half the task. The harder half is being able to prove, years later, that the record is genuine and unaltered.</description>
+    </item>
+    <item>
+      <title>Information Lifecycle Management</title>
+      <link>https://dispatch.sovereigndo.com/library/information-lifecycle-management</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/information-lifecycle-management</guid>
+      <description>Records have a life: they are created, used, kept, and eventually disposed of or preserved. Managing that arc deliberately is what keeps institutions in control of what they hold.</description>
+    </item>
+    <item>
+      <title>What Archives Need From Digital Records</title>
+      <link>https://dispatch.sovereigndo.com/library/what-archives-need-from-digital-records</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/what-archives-need-from-digital-records</guid>
+      <description>Records that will one day enter an archive must arrive with more than their content. This is what makes a digital record archive-ready — and why it has to be planned for upstream.</description>
+    </item>
+    <item>
+      <title>Executive Orders: Issued and Verified</title>
+      <link>https://dispatch.sovereigndo.com/library/executive-orders-explained</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/executive-orders-explained</guid>
+      <description>How executive orders acquire legal force, how they are published, and what governance keeps a directive verifiable long after it is signed.</description>
+    </item>
+    <item>
+      <title>Government Gazettes, Explained</title>
+      <link>https://dispatch.sovereigndo.com/library/government-gazettes-explained</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/government-gazettes-explained</guid>
+      <description>The official gazette is where a state speaks on the record. Here is what a gazette is, how it is published and governed, and why its integrity underwrites so much else.</description>
+    </item>
+    <item>
+      <title>A Guide to Regulatory Publication</title>
+      <link>https://dispatch.sovereigndo.com/library/regulatory-publication-guide</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/regulatory-publication-guide</guid>
+      <description>Regulators bind the public through what they publish. This guide covers what a regulatory publication is, how it is approved and issued, how it is verified, and how it fails without governance.</description>
+    </item>
+    <item>
+      <title>Publishing Court Judgments as Official Records</title>
+      <link>https://dispatch.sovereigndo.com/library/court-judgment-publication</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/court-judgment-publication</guid>
+      <description>A judgment is binding the moment it is delivered, but its public life depends on publication. Here is how judgments are issued, verified, and governed as official records.</description>
+    </item>
+    <item>
+      <title>Publishing Electoral Results People Can Trust</title>
+      <link>https://dispatch.sovereigndo.com/library/electoral-result-publication</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/electoral-result-publication</guid>
+      <description>Few publications carry higher stakes than an election result. Here is how results are issued, verified, and governed so the published outcome can withstand scrutiny.</description>
+    </item>
+    <item>
+      <title>Public Notices and the Gazetting Process</title>
+      <link>https://dispatch.sovereigndo.com/library/public-notices-and-gazetting</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/public-notices-and-gazetting</guid>
+      <description>Public notices put the public on formal notice and start legal clocks. This guide covers what they are, how gazetting works, how they are verified, and how they fail ungoverned.</description>
+    </item>
+    <item>
+      <title>Board Resolutions: Making Decisions Provable</title>
+      <link>https://dispatch.sovereigndo.com/library/board-resolutions-guide</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/board-resolutions-guide</guid>
+      <description>A board resolution is the formal record that a governing body decided something. This guide explains how resolutions are governed, issued, and verified — and where the record fails.</description>
+    </item>
+    <item>
+      <title>University Senate Publications, Governed</title>
+      <link>https://dispatch.sovereigndo.com/library/university-senate-publications</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/university-senate-publications</guid>
+      <description>Senates and academic councils issue the decisions that define degrees, programs, and standards. This guide explains how those publications are governed, issued, and verified.</description>
+    </item>
+    <item>
+      <title>Clinical Directives and Safety Bulletins</title>
+      <link>https://dispatch.sovereigndo.com/library/clinical-directives-and-safety-bulletins</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/clinical-directives-and-safety-bulletins</guid>
+      <description>When a health institution tells clinicians how to act, the instruction becomes a governed publication. This guide explains how clinical directives are issued, verified, and how they fail.</description>
+    </item>
+    <item>
+      <title>Central Bank Circulars and Prudential Rules</title>
+      <link>https://dispatch.sovereigndo.com/library/central-bank-circulars</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/central-bank-circulars</guid>
+      <description>Central banks govern through circulars and prudential rules that the financial system must follow. This guide explains how they are issued, verified, and how the record fails.</description>
+    </item>
+    <item>
+      <title>Professional Licensing Records and Registers</title>
+      <link>https://dispatch.sovereigndo.com/library/professional-licensing-records</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/professional-licensing-records</guid>
+      <description>A professional license is only as good as the register behind it. This guide explains how licensing records are governed, issued, and verified, and how the register fails.</description>
+    </item>
+    <item>
+      <title>Issuing Certificates and Credentials That Verify</title>
+      <link>https://dispatch.sovereigndo.com/library/certificate-and-credential-issuance</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/certificate-and-credential-issuance</guid>
+      <description>A certificate is worthless if it cannot be checked against its issuer. This guide explains how credentials are governed, issued, and verified, and how issuance fails.</description>
+    </item>
+    <item>
+      <title>ISO 27001 and Document Integrity</title>
+      <link>https://dispatch.sovereigndo.com/library/iso-27001-and-document-integrity</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/iso-27001-and-document-integrity</guid>
+      <description>How an information security management system relates to the integrity of published institutional records, and how governed publication aligns to ISO/IEC 27001 controls.</description>
+    </item>
+    <item>
+      <title>NIST Frameworks and Records Integrity</title>
+      <link>https://dispatch.sovereigndo.com/library/nist-and-records-integrity</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/nist-and-records-integrity</guid>
+      <description>A plain explanation of the NIST Cybersecurity Framework and SP 800-series guidance, and how governed publication supports the integrity of institutional records.</description>
+    </item>
+    <item>
+      <title>ISO Compliance for Institutional Publication</title>
+      <link>https://dispatch.sovereigndo.com/library/iso-compliance-for-publication</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/iso-compliance-for-publication</guid>
+      <description>Which ISO standards bear on how institutions publish official records, and how governed publication aligns to their controls without overstating what a platform can deliver.</description>
+    </item>
+    <item>
+      <title>Records Management Standards: ISO 15489</title>
+      <link>https://dispatch.sovereigndo.com/library/records-management-standards</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/records-management-standards</guid>
+      <description>What ISO 15489 requires of authoritative records, and how governed publication aligns to its characteristics of authenticity, reliability, integrity, and usability.</description>
+    </item>
+    <item>
+      <title>A Guide to Audit Readiness</title>
+      <link>https://dispatch.sovereigndo.com/library/audit-readiness-guide</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/audit-readiness-guide</guid>
+      <description>What it means to be ready for an audit of published records, and how governed publication produces the contemporaneous evidence that makes audits efficient and credible.</description>
+    </item>
+    <item>
+      <title>Compliance Evidence, Explained</title>
+      <link>https://dispatch.sovereigndo.com/library/compliance-evidence-explained</link>
+      <guid isPermaLink="true">https://dispatch.sovereigndo.com/library/compliance-evidence-explained</guid>
+      <description>What compliance evidence is, why its quality matters, and how governed publication produces record-bound proof that controls over published records actually operate.</description>
+    </item>
+  </channel>
+</rss>

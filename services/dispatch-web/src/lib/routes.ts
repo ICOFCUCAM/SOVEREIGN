@@ -39,3 +39,9 @@ export const WALKTHROUGH_ROUTE = "/walkthrough";
 export const COST_ROUTE = "/cost-of-publication";
 export const LIFECYCLE_ROUTE = "/lifecycle";
 export const ROI_ROUTE = "/roi";
+
+// Layer 2 SEO ecosystem — one landing page per institution type.
+export const INDUSTRIES_ROUTE = "/industries";
+export const LEARN_ROUTE = "/learn";
+export const LIBRARY_ROUTE = "/library";
+export const DOCS_ROUTE = "/docs";
