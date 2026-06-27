@@ -62,3 +62,23 @@ const MARKETING: Record<string, MarketingCopy> = {
 };
 export const useMarketingCopy = (): MarketingCopy => MARKETING[useUiLocale()] || MARKETING_EN;
 export type { MarketingCopy };
+
+// ── Marketing batch 2 (Outcomes, Security, Compliance) ───────────────────────
+import { MARKETING2_EN, type Marketing2Copy } from "./marketing2";
+import { MARKETING2_FR } from "./marketing2.fr";
+import { MARKETING2_ES } from "./marketing2.es";
+import { MARKETING2_DE } from "./marketing2.de";
+import { MARKETING2_NO } from "./marketing2.no";
+import { MARKETING2_PT } from "./marketing2.pt";
+import { MARKETING2_IT } from "./marketing2.it";
+import { MARKETING2_NL } from "./marketing2.nl";
+import { MARKETING2_AR } from "./marketing2.ar";
+import { MARKETING2_JA } from "./marketing2.ja";
+import { MARKETING2_ZH } from "./marketing2.zh";
+
+const MARKETING2: Record<string, Marketing2Copy> = {
+  en: MARKETING2_EN, fr: MARKETING2_FR, es: MARKETING2_ES, de: MARKETING2_DE, no: MARKETING2_NO,
+  pt: MARKETING2_PT, it: MARKETING2_IT, nl: MARKETING2_NL, ar: MARKETING2_AR, ja: MARKETING2_JA, zh: MARKETING2_ZH,
+};
+export const useMarketing2Copy = (): Marketing2Copy => MARKETING2[useUiLocale()] || MARKETING2_EN;
+export type { Marketing2Copy };
