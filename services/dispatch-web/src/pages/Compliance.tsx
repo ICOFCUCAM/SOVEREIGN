@@ -34,6 +34,11 @@ const Compliance: React.FC = () => {
             Framework names describe the controls the architecture is aligned to, not independent certifications.
             Certification scope, data residency and retention are defined per deployment.
           </p>
+          <div className="mx-auto mt-10 flex max-w-3xl flex-wrap justify-center gap-3">
+            <a href="/procurement" className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold uppercase tracking-wide text-white/80 transition hover:border-white/40 hover:text-white">Procurement materials</a>
+            <a href="/evidence" className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold uppercase tracking-wide text-white/80 transition hover:border-white/40 hover:text-white">Evidence package</a>
+            <a href="/trust" className="rounded-md border border-white/20 px-5 py-2.5 text-[13px] font-semibold uppercase tracking-wide text-white/80 transition hover:border-white/40 hover:text-white">Trust centre</a>
+          </div>
         </section>
       </main>
       <TrustStrip />
