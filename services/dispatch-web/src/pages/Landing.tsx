@@ -212,7 +212,7 @@ const Landing: React.FC = () => {
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070707] to-transparent" aria-hidden />
           <div className="relative mx-auto w-full max-w-[1300px] px-6 py-24 lg:px-12">
             <p className="text-[12px] font-semibold uppercase tracking-[0.34em] text-gold-400">The stakes</p>
-            <h2 className="mt-5 max-w-4xl font-serif text-[2.8rem] font-bold leading-[1.02] tracking-[-0.02em] text-[#f6f1e6] sm:text-[4.2rem] lg:text-[5rem]">
+            <h2 className="mt-5 max-w-4xl font-serif text-[2.8rem] font-bold leading-[1.02] tracking-[-0.02em] text-[#f6f1e6] [text-shadow:0_2px_30px_rgba(0,0,0,0.55)] sm:text-[4.2rem] lg:text-[5rem]">
               Governing the world's most important decisions.
             </h2>
             <p className="mt-7 max-w-xl text-[19px] leading-relaxed text-white/70">
