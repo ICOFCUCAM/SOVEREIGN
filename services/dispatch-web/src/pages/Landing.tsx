@@ -373,8 +373,8 @@ const Landing: React.FC = () => {
             <div className="stagger mt-5 grid gap-5 sm:grid-cols-2">
               {OUTCOMES.slice(1).map((o) => (
                 <button key={o.slug} onClick={() => nav(`${VALUE_BASE}/${o.slug}`)}
-                  className="group flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.015] p-6 text-left transition hover:border-gold-400/30 hover:bg-white/[0.03]">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-gold-400/80 transition group-hover:text-gold-300"><Ico name={o.icon} className="h-6 w-6" /></span>
+                  className="group flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.015] p-6 text-left transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/30 hover:bg-white/[0.03]">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-gold-400/80 transition group-hover:scale-105 group-hover:text-gold-300"><Ico name={o.icon} className="h-6 w-6" /></span>
                   <span>
                     <span className="font-serif text-[1.2rem] font-bold leading-snug text-white">{o.lead}</span>
                     <span className="mt-1.5 block text-[13.5px] leading-relaxed text-white/50">{o.sub}</span>
@@ -400,7 +400,7 @@ const Landing: React.FC = () => {
             </div>
             <div className="stagger mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {INDUSTRIES.map((it) => (
-                <article key={it.slug} className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition hover:border-gold-400/30">
+                <article key={it.slug} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/30">
                   <SectorImage slug={it.slug} name={it.name} />
                   <ul className="space-y-1.5 px-5 py-5">
                     {it.types.map((t) => (
