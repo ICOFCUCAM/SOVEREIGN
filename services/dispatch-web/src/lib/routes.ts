@@ -43,3 +43,4 @@ export const ROI_ROUTE = "/roi";
 // Layer 2 SEO ecosystem — one landing page per institution type.
 export const INDUSTRIES_ROUTE = "/industries";
 export const LEARN_ROUTE = "/learn";
+export const LIBRARY_ROUTE = "/library";

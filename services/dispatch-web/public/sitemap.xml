@@ -399,4 +399,8 @@
   <url><loc>https://dispatch.sovereigndo.com/learn/record-falsification</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/learn/document-loss</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dispatch.sovereigndo.com/learn/unverifiable-document</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/library</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/library/what-is-an-official-record</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/library/pdf-vs-official-publication</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://dispatch.sovereigndo.com/library/the-publication-lifecycle</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>
