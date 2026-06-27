@@ -202,7 +202,7 @@ const Pricing: React.FC = () => {
           <div className="grid gap-4 lg:grid-cols-5 sm:grid-cols-2">
             {TIERS.map((t) => (
               <div key={t.name}
-                className={`relative flex flex-col rounded-xl border p-6 ${t.featured ? "border-gold-400/40 bg-gradient-to-b from-gold-400/[0.07] to-white/[0.01] shadow-[0_24px_60px_-30px_rgba(202,164,90,0.45)]" : "border-white/8 bg-white/[0.015]"}`}>
+                className={`relative flex flex-col rounded-xl border p-6 transition duration-300 hover:-translate-y-1 ${t.featured ? "border-gold-400/40 bg-gradient-to-b from-gold-400/[0.07] to-white/[0.01] shadow-[0_24px_60px_-30px_rgba(202,164,90,0.45)]" : "border-white/8 bg-white/[0.015] hover:border-white/20"}`}>
                 {t.featured && (
                   <div className="absolute -top-2.5 left-6 rounded-full border border-gold-400/40 bg-[#1c1407] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.15em] text-gold-300">Most chosen</div>
                 )}
