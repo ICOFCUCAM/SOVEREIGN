@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { DispatchMark, Chevron, PublicHeader, PublicFooter, FilmGrain, useReveal } from "../components/brand";
 import { RecordArtifact } from "../components/RecordArtifact";
 import { GovernedJourney } from "../components/GovernedJourney";
+import { CountUp } from "../components/CountUp";
 import {
   ARCHITECTURE_ROUTE, PROCUREMENT_ROUTE, OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE,
   SECURITY_ROUTE, TRUST_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE, DEVELOPERS_ROUTE,
@@ -437,7 +438,7 @@ const Landing: React.FC = () => {
             <div className="mt-14 grid grid-cols-2 gap-y-10 border-y border-white/[0.08] py-12 sm:grid-cols-4">
               {PROOF_STATS.map(([n, label]) => (
                 <div key={label} className="text-center">
-                  <div className="tnum font-serif text-[3.4rem] font-bold leading-none text-gold-300 sm:text-[4rem]">{n}</div>
+                  <CountUp value={n} className="tnum font-serif text-[3.4rem] font-bold leading-none text-gold-300 sm:text-[4rem]" />
                   <div className="mt-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/50">{label}</div>
                 </div>
               ))}
