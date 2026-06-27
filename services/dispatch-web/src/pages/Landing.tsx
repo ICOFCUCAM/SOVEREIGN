@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { DispatchMark, Chevron, PublicHeader, PublicFooter, FilmGrain, useReveal } from "../components/brand";
+import { DispatchMark, Chevron, PublicHeader, PublicFooter, FilmGrain, useReveal, TrustStrip } from "../components/brand";
 import { RecordArtifact } from "../components/RecordArtifact";
 import { GovernedJourney } from "../components/GovernedJourney";
 import { CountUp } from "../components/CountUp";
@@ -229,6 +229,9 @@ const Landing: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {/* the three pillars — a quiet institutional signal between hero and problem */}
+        <TrustStrip />
 
         {/* ── 2 · THE PROBLEM — an executive cost-ledger, not a centred poster ── */}
         <section id="cost" className="border-b border-white/[0.06] px-6 py-24 lg:px-12">
