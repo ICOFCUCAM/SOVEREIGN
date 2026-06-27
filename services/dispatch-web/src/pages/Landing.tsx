@@ -317,8 +317,8 @@ const Landing: React.FC = () => {
                   ["seal", "Provable provenance", "Certificates sealed at publication."],
                   ["shieldcheck", "Independent verification", "Confirmed genuine by anyone."],
                 ].map(([icon, t, d]) => (
-                  <div key={t}>
-                    <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#171712]/12 bg-white/60 text-[#9a7b27]"><Ico name={icon} className="h-6 w-6" /></span>
+                  <div key={t} className="group">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#171712]/12 bg-white/60 text-[#9a7b27] transition duration-300 group-hover:-translate-y-0.5 group-hover:border-[#9a7b27]/40 group-hover:bg-white"><Ico name={icon} className="h-6 w-6" /></span>
                     <div className="mt-3 text-[15px] font-bold text-[#171712]">{t}</div>
                     <div className="mt-1 text-[13px] leading-relaxed text-[#4a473d]">{d}</div>
                   </div>
