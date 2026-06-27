@@ -171,7 +171,12 @@ function setAlternates(alts: { hreflang: string; href: string }[]): void {
 // route, derived from lib/seo. No page sets these by hand; the ecosystem stays
 // crawlable and link-preview-correct automatically.
 const RouteMeta: React.FC = () => {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
+  // Reset scroll on every route change so a new page never opens mid-content —
+  // but honour in-page anchors (#faq, #section), which the browser handles.
+  React.useEffect(() => {
+    if (!hash) window.scrollTo(0, 0);
+  }, [pathname, hash]);
   React.useEffect(() => {
     const { title, description } = metaForPath(pathname);
     const canonical = SITE_ORIGIN + (pathname === "/" ? "/" : pathname.replace(/\/+$/, ""));
