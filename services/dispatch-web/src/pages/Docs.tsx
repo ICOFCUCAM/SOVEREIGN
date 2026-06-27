@@ -15,13 +15,36 @@ const methodColor: Record<string, string> = {
   PUT: "text-sky-300 border-sky-400/30 bg-sky-400/10",
 };
 
+const anchorize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+// A code block with a copy-to-clipboard affordance — the small premium cue
+// developers expect from first-class API docs.
+const CodeBlock: React.FC<{ lang: string; code: string }> = ({ lang, code }) => {
+  const [copied, setCopied] = React.useState(false);
+  const copy = () => { navigator.clipboard?.writeText(code).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1600); }).catch(() => {}); };
+  return (
+    <div className="group relative mt-5">
+      <pre className="overflow-x-auto rounded-xl border border-white/10 bg-black/40 p-5 pr-14 text-[13px] leading-relaxed text-white/85"><code className={`language-${lang}`}>{code}</code></pre>
+      <button onClick={copy} aria-label="Copy code"
+        className={`absolute right-3 top-3 rounded-md border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${copied ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300" : "border-white/15 bg-white/[0.04] text-white/55 opacity-0 hover:border-gold-400/40 hover:text-gold-200 group-hover:opacity-100"}`}>
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </div>
+  );
+};
+
 const Block: React.FC<{ b: DocBlock }> = ({ b }) => {
   switch (b.t) {
     case "p": return <p className="mt-4 text-[15.5px] leading-relaxed text-white/72">{b.s}</p>;
-    case "h": return <h2 className="mt-10 font-serif text-[1.5rem] font-bold leading-tight text-[#f4efe3]">{b.s}</h2>;
-    case "code": return (
-      <pre className="mt-5 overflow-x-auto rounded-xl border border-white/10 bg-black/40 p-5 text-[13px] leading-relaxed text-white/85"><code className={`language-${b.lang}`}>{b.s}</code></pre>
-    );
+    case "h": {
+      const id = anchorize(b.s);
+      return (
+        <h2 id={id} className="group mt-10 scroll-mt-24 font-serif text-[1.5rem] font-bold leading-tight text-[#f4efe3]">
+          <a href={`#${id}`} className="no-underline">{b.s}<span className="ml-2 text-gold-400/0 transition group-hover:text-gold-400/60" aria-hidden>#</span></a>
+        </h2>
+      );
+    }
+    case "code": return <CodeBlock lang={b.lang} code={b.s} />;
     case "list": return (
       <ul className="mt-4 space-y-2.5">{b.items.map((i) => (<li key={i} className="flex gap-3 text-[15px] leading-relaxed text-white/72"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-400/70" />{i}</li>))}</ul>
     );
