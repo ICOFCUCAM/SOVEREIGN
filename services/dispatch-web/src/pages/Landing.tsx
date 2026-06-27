@@ -404,6 +404,19 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
+        {/* ── A quiet, monumental beat between "who uses it" and "can I trust it" ── */}
+        <section className="relative overflow-hidden border-b border-white/[0.06] bg-black px-6 py-28 lg:px-12">
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.035]" aria-hidden>
+            <DispatchMark className="h-[26rem] w-[26rem] text-gold-400" />
+          </div>
+          <blockquote className="relative mx-auto max-w-3xl text-center">
+            <p className="font-serif text-[1.9rem] font-bold leading-[1.32] tracking-tight text-[#f4efe3] sm:text-[2.7rem]">
+              The test of an institution is not what it says — but whether, years later,{" "}
+              <span className="text-gold-300">it can prove it said it.</span>
+            </p>
+          </blockquote>
+        </section>
+
         {/* ── 8 · SOVEREIGN ARCHITECTURE — six specific controls ── */}
         <section id="sovereignty" className="relative overflow-hidden border-b border-white/[0.06] bg-black px-6 py-20 lg:px-12">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_50%_0%,rgba(233,200,120,0.05),transparent_70%)]" aria-hidden />
