@@ -56,4 +56,18 @@ const searchConsole = {
   },
 };
 
-module.exports = { feeds, indexNow, searchConsole, INDEXNOW_KEY };
+// Video sitemap — generated only when there is video content (a data/videos.json
+// manifest of { page, title, description, thumbnail, contentUrl }). Wired now so
+// "every page" coverage is automatic the moment video ships; no empty file is
+// emitted (an empty video sitemap is an SEO smell), keeping the architecture honest.
+function videoSitemap() {
+  const fsx = require("fs"); const px = require("path");
+  const f = px.resolve(__dirname, "../data/videos.json");
+  if (!fsx.existsSync(f)) return { emitted: false, note: "no data/videos.json — video sitemap generated automatically once video content exists" };
+  const vids = JSON.parse(fsx.readFileSync(f, "utf8"));
+  const urls = vids.map((v) => `  <url>\n    <loc>${ORIGIN}${v.page}</loc>\n    <video:video>\n      <video:title>${esc(v.title)}</video:title>\n      <video:description>${esc(v.description)}</video:description>\n      <video:thumbnail_loc>${ORIGIN}${v.thumbnail}</video:thumbnail_loc>\n      <video:content_loc>${ORIGIN}${v.contentUrl}</video:content_loc>\n    </video:video>\n  </url>`);
+  fsx.writeFileSync(P("public/sitemap-video.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">\n${urls.join("\n")}\n</urlset>\n`);
+  return { emitted: true, videos: urls.length };
+}
+
+module.exports = { feeds, videoSitemap, indexNow, searchConsole, INDEXNOW_KEY };

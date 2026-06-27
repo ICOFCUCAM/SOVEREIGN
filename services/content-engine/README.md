@@ -34,14 +34,49 @@ a repeatable, auditable subsystem.
 ## The pipeline
 
 ```
-topic ─▶ AI author (parallel models) ─▶ fact verify ─▶ quality score ─▶ select best
-      ─▶ internal linking ─▶ schema ─▶ version history ─▶ [HUMAN REVIEW]
-      ─▶ publish (splice + sitemap) ─▶ feeds/RSS ─▶ IndexNow ─▶ rank monitor ─▶ refresh
+topic ─▶ author (model A) ─▶ refine (model B) ─▶ fact verify ─▶ quality score
+      ─▶ SEO review ─▶ internal linking ─▶ schema ─▶ translation plan
+      ─▶ version snapshot ─▶ [HUMAN REVIEW] ─▶ publish (splice + sitemap)
+      ─▶ feeds/RSS ─▶ IndexNow ─▶ rank monitor ─▶ refresh
 ```
 
 `node bin/content.cjs pipeline <topicId>` runs all of it. Without `--autopublish`
-it stops at the human-review gate (status → `in_review`); with `--autopublish`
-it publishes only if fact-check passes and quality ≥ the gate (default 70).
+it stops at the human-review gate (status → `in_review`); with `--autopublish` it
+publishes only if **fact-check passes AND quality ≥ gate (70) AND SEO ≥ gate
+(72)**, then snapshots a version with the next-review date set.
+
+## Autonomous SEO engine
+
+The loop most companies never build — discovery feeds the topic database:
+
+```
+Search Console ─▶ keyword discovery ─▶ competitor monitoring ─▶ missing topics
+              ─▶ propose topics ─▶ pipeline ─▶ publish ─▶ track ranking ─▶ improve ─▶ repeat
+```
+
+- `discover gaps` — keywords whose best coverage across all 418 pages is below
+  threshold (real gap analysis; returns the closest existing page).
+- `discover opportunities` — striking-distance queries (position 8–25 with
+  impressions) from the ranking store: *improve*, don't duplicate.
+- `discover competitors` — gap-vs-competitor (reads `data/competitors.json`).
+- `discover cycle [--propose]` — the whole loop; `--propose` seeds the top gaps
+  into the topic database as `idea`s. **Discovery is autonomous; publishing keeps
+  the human-review gate.**
+
+## Versioning (first-class, not V1/V2)
+
+Every published page is a versioned record — Knowledge / Publication / Policy /
+Standard / API / Documentation / Language version — with **Current, Archive, full
+history, Last reviewed and Next review**. Publishing snapshots the content and
+computes the next review date from the topic's `reviewEveryDays`.
+
+```bash
+node bin/content.cjs version <slug>     # current + archive + timeline
+node bin/content.cjs versions due       # pages past their next-review date
+```
+
+This matters most for standards and documentation, where "which version was in
+force, and when" is the entire question.
 
 ## How the AI + external stages plug in
 
@@ -69,6 +104,10 @@ node bin/content.cjs review my-id --approve
 node bin/content.cjs merge concept <dir>   # splice an authored batch into the site
 node bin/content.cjs quality concept batch.json
 node bin/content.cjs graph                 # hubs + orphan pages
+node bin/content.cjs discover cycle        # autonomous SEO loop (gaps + opportunities)
+node bin/content.cjs discover propose      # seed top gaps into the topic database
+node bin/content.cjs version <slug>        # current + archive + version history
+node bin/content.cjs versions due          # pages past their next-review date
 node bin/content.cjs feeds                 # rss + image sitemap + index
 node bin/content.cjs indexnow [--submit]
 node bin/content.cjs rankings report

@@ -70,6 +70,27 @@ ship yet; only the architecture.
 - Localization becomes a configuration + a per-locale authoring pass rather than
   a rebuild.
 
+## Addendum — autonomous SEO loop, refine pass, first-class versioning
+
+Extending the platform to match the full vision:
+
+- **Autonomous SEO engine** (`lib/discover.cjs`): keyword-universe gap analysis
+  against all 418 pages, striking-distance opportunities from the ranking store,
+  competitor gap analysis, and `discover cycle --propose` which seeds the top
+  gaps into the topic database. Discovery is autonomous; **publishing keeps the
+  human-review gate** — the loop proposes, humans approve.
+- **Two-model pipeline**: author with model A → `refine` with model B (Claude →
+  GPT), plus a dedicated **SEO-review gate** distinct from quality. Publication
+  now requires fact-check AND quality≥70 AND SEO≥72.
+- **First-class versioning** (`lib/versioning.cjs`): every publish snapshots a
+  versioned record with Current / Archive / history / Last reviewed / Next
+  review. `versions due` feeds expired reviews back into the editorial queue —
+  closing the evergreen loop, especially for standards and documentation.
+- **Video sitemap** generator wired (emits when video content exists), completing
+  the automatic per-page discovery family (title, meta, OG, Twitter, JSON-LD,
+  FAQ/Breadcrumb/Article schema, canonical, hreflang-ready, sitemap, image
+  sitemap, RSS, video sitemap, last-modified).
+
 ## Alternatives considered
 
 - **Keep the scratch scripts** — rejected; not auditable, not scalable, no topic

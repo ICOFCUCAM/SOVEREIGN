@@ -5,12 +5,13 @@
 const providers = require("./providers.cjs");
 const stages = require("./stages.cjs");
 const store = require("./store.cjs");
+const versioning = require("./versioning.cjs");
 
-async function run(topic, { providerNames = ["mock"], autopublish = false, qualityGate = 70 } = {}) {
+async function run(topic, { providerNames = ["mock"], autopublish = false, qualityGate = 70, seoGate = 72 } = {}) {
   const type = topic.type || "concept";
   const report = { topic: topic.id, type, stages: {} };
 
-  // 1. AI authoring — parallel models
+  // 1. AI authoring — parallel models (Claude / GPT / …)
   const candidates = await providers.authorParallel(topic, providerNames);
   const usable = candidates.filter((c) => c.ok && c.value && !c.value.__protocol);
   report.stages.author = { providers: candidates.map((c) => ({ provider: c.provider, ok: c.ok, error: c.error })) };
@@ -20,43 +21,52 @@ async function run(topic, { providerNames = ["mock"], autopublish = false, quali
     return report;
   }
 
-  // 2-4. score every candidate, select the best
-  const scored = usable.map((c) => ({ provider: c.provider, candidate: c.value, ...stages.qualityScore(c.value, type) }));
-  scored.sort((a, b) => b.score - a.score);
-  const best = scored[0];
+  // select best of the first pass by quality
+  const scored = usable.map((c) => ({ provider: c.provider, candidate: c.value, ...stages.qualityScore(c.value, type) })).sort((a, b) => b.score - a.score);
+  let best = scored[0];
   report.stages.select = { winner: best.provider, scores: scored.map((s) => ({ provider: s.provider, score: s.score })) };
 
-  // 2. fact verification (gate)
+  // 2. refine — a second model improves the winning draft (Claude → GPT)
+  const refineProvider = providerNames.find((p) => p !== best.provider) || best.provider;
+  const refined = await stages.refine(best.candidate, type, refineProvider);
+  report.stages.refine = { applied: refined.applied, provider: refined.provider, note: refined.note || refined.error };
+  best = { ...best, candidate: refined.candidate, ...stages.qualityScore(refined.candidate, type) };
+
+  // 3. fact verification (gate)
   const fact = stages.factCheck(best.candidate);
   report.stages.factCheck = fact;
 
-  // 5. internal linking — fill/repair related links from the graph
-  const links = stages.linkSuggest(best.candidate, type);
-  report.stages.linking = links;
-
-  // 6. schema
-  report.stages.schema = { types: stages.schemaFor(best.candidate, type)["@graph"].map((g) => g["@type"]) };
-
-  // 8/9. translation architecture
-  report.stages.translate = stages.translatePlan(best.candidate, type);
-
-  // 7. quality
+  // 4. quality
   report.stages.quality = { score: best.score, breakdown: best.breakdown };
 
-  // version history
-  store.versions.append({ slug: best.candidate.slug, topic: topic.id, stage: "drafted", provider: best.provider, score: best.score, factPassed: fact.passed });
+  // 5. SEO review (gate distinct from quality)
+  const seo = stages.seoReview(best.candidate, type);
+  report.stages.seoReview = seo;
 
-  // publish gate
-  const ready = fact.passed && best.score >= qualityGate;
+  // 6. internal linking
+  report.stages.linking = stages.linkSuggest(best.candidate, type);
+
+  // 7. schema
+  report.stages.schema = { types: stages.schemaFor(best.candidate, type)["@graph"].map((g) => g["@type"]) };
+
+  // 8. translation architecture
+  report.stages.translate = stages.translatePlan(best.candidate, type);
+
+  // draft version record
+  store.versions.append({ slug: best.candidate.slug, topic: topic.id, stage: "drafted", provider: best.provider, score: best.score, factPassed: fact.passed, seoScore: seo.score });
+
+  // publish gate — quality AND seo AND fact must pass
+  const ready = fact.passed && best.score >= qualityGate && seo.score >= seoGate;
   report.ready = ready;
   if (autopublish && ready) {
     const merged = stages.mergeEntries(type, [best.candidate]);
-    store.versions.append({ slug: best.candidate.slug, topic: topic.id, stage: "published", provider: best.provider, score: best.score });
-    store.topics.transition(topic.id, "published", `auto-published by ${best.provider} (score ${best.score})`);
-    report.stages.publish = merged;
+    const ver = versioning.snapshot({ slug: best.candidate.slug, type, topic: topic.id, payload: best.candidate, provider: best.provider, score: best.score, reviewEveryDays: topic.reviewEveryDays || 180 });
+    store.topics.transition(topic.id, "published", `auto-published by ${best.provider} (q${best.score}/seo${seo.score}) — v${ver.version}, next review ${ver.nextReview}`);
+    report.stages.publish = { ...merged, version: ver.version, nextReview: ver.nextReview };
   } else {
-    report.stages.publish = { skipped: true, reason: autopublish ? `quality ${best.score} < gate ${qualityGate} or fact flags` : "human review required" };
-    if (topic.status === "drafting") store.topics.transition(topic.id, "in_review", `drafted by ${best.provider} (score ${best.score})`);
+    const why = !fact.passed ? "fact-check flags" : best.score < qualityGate ? `quality ${best.score}<${qualityGate}` : seo.score < seoGate ? `seo ${seo.score}<${seoGate}` : "human review required";
+    report.stages.publish = { skipped: true, reason: why };
+    if (topic.status === "drafting") store.topics.transition(topic.id, "in_review", `drafted by ${best.provider} (q${best.score}/seo${seo.score})`);
   }
   return report;
 }

@@ -28,6 +28,8 @@ const providers = require("../lib/providers.cjs");
 const seo = require("../lib/seo.cjs");
 const graph = require("../lib/graph.cjs");
 const pipeline = require("../lib/pipeline.cjs");
+const discover = require("../lib/discover.cjs");
+const versioning = require("../lib/versioning.cjs");
 
 const args = process.argv.slice(2);
 const flag = (n, d) => { const i = args.indexOf(`--${n}`); return i >= 0 ? (args[i + 1] && !args[i + 1].startsWith("--") ? args[i + 1] : true) : d; };
@@ -76,6 +78,17 @@ async function main() {
     case "schema": J(stages.schemaFor(loadBatch(arg2)[0], sub)); break;
     case "translate": J(stages.translatePlan(loadBatch(arg2)[0], sub)); break;
     case "graph": J(graph.report()); break;
+    case "discover": {
+      if (sub === "gaps") J(discover.gaps());
+      else if (sub === "opportunities") J(discover.opportunities());
+      else if (sub === "competitors") J(discover.competitors());
+      else if (sub === "cycle") J(discover.cycle({ propose: has("propose") }));
+      else if (sub === "propose") J(discover.propose({ limit: Number(flag("limit", 10)) }));
+      else console.log("discover gaps|opportunities|competitors|propose|cycle [--propose]");
+      break;
+    }
+    case "version": J(versioning.history(sub, flag("locale", "en"))); break;
+    case "versions": { if (sub === "due") J(versioning.due()); else console.log("versions due"); break; }
     case "validate": { const arr = loadBatch(arg2); const t = D.TYPES[sub]; const bad = arr.filter((e) => !t.valid(e)); const slugs = arr.map((e) => D.slugify(e.slug)); const dups = slugs.filter((s, i) => slugs.indexOf(s) !== i); console.log(`${arg2}: ${arr.length} entries, ${bad.length} malformed, ${dups.length} dup slugs`); if (bad.length || dups.length) process.exit(1); break; }
     case "merge": {
       const glob = flag("glob", sub === "article" ? "l4-batch" : "l3-batch");

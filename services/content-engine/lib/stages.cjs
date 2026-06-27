@@ -109,4 +109,32 @@ function mergeEntries(typeKey, rawEntries) {
   return { inserted: out.length, total: existing.size + out.length, slugs: out.map((e) => e.slug) };
 }
 
-module.exports = { factCheck, qualityScore, linkSuggest, schemaFor, translatePlan, mergeEntries, LOCALES };
+// --- SEO review (gate distinct from quality: on-page SEO correctness) ---------
+function seoReview(candidate, typeKey) {
+  const issues = [];
+  const title = candidate.metaTitle || "";
+  const desc = candidate.metaDescription || "";
+  const head = (candidate.headline || candidate.title || "").toLowerCase();
+  const key = (candidate.term || candidate.title || "").toLowerCase().split(" ")[0];
+  const body = (candidate.definition || candidate.dek || "").toLowerCase();
+  if (title.length < 28 || title.length > 62) issues.push(`metaTitle length ${title.length} (want 28-62)`);
+  if (desc.length < 70 || desc.length > 160) issues.push(`metaDescription length ${desc.length} (want 70-160)`);
+  if (key && !head.includes(key)) issues.push("primary keyword not in headline/title");
+  if (key && !body.includes(key)) issues.push("primary keyword not in opening definition");
+  if ((candidate.slug || "").length > 60) issues.push("slug too long (>60)");
+  const links = typeKey === "concept" ? (candidate.relatedProblems || []).length + (candidate.relatedIndustries || []).length : (candidate.relatedArticles || []).length + (candidate.relatedConcepts || []).length;
+  if (links < 3) issues.push(`only ${links} internal links (want >=3)`);
+  if ((candidate.faqs || []).length < 3) issues.push("fewer than 3 FAQs (no FAQ rich-result)");
+  return { passed: issues.length === 0, score: Math.max(0, 100 - issues.length * 14), issues };
+}
+
+// --- refine: a second model improves the first model's draft (Claude -> GPT) ---
+// Adapter: a provider may expose .refine(candidate); otherwise the draft stands.
+async function refine(candidate, typeKey, providerName) {
+  const providers = require("./providers.cjs");
+  const p = providers.PROVIDERS[providerName];
+  if (p && typeof p.refine === "function") { try { const improved = await p.refine(candidate, typeKey); return { applied: true, provider: providerName, candidate: improved || candidate }; } catch (e) { return { applied: false, provider: providerName, error: e.message, candidate }; } }
+  return { applied: false, provider: providerName, note: "refine adapter not available in this environment; first-model draft retained", candidate };
+}
+
+module.exports = { factCheck, qualityScore, seoReview, refine, linkSuggest, schemaFor, translatePlan, mergeEntries, LOCALES };

@@ -1,0 +1,22 @@
+[
+  { "keyword": "official publication", "type": "concept", "intent": "informational", "priority": 1 },
+  { "keyword": "minute book software", "type": "concept", "intent": "commercial", "priority": 2 },
+  { "keyword": "apostille verification online", "type": "concept", "intent": "transactional", "priority": 2 },
+  { "keyword": "academic transcript verification", "type": "concept", "intent": "transactional", "priority": 2 },
+  { "keyword": "land title fraud prevention", "type": "article", "intent": "informational", "priority": 2 },
+  { "keyword": "gazette notice publishing", "type": "concept", "intent": "commercial", "priority": 2 },
+  { "keyword": "clinical trial master file integrity", "type": "article", "intent": "informational", "priority": 3 },
+  { "keyword": "iso 15489 records management", "type": "article", "intent": "informational", "priority": 2 },
+  { "keyword": "freedom of information publishing", "type": "concept", "intent": "informational", "priority": 3 },
+  { "keyword": "court e-filing record authenticity", "type": "article", "intent": "informational", "priority": 2 },
+  { "keyword": "notary digital seal", "type": "concept", "intent": "commercial", "priority": 2 },
+  { "keyword": "supply chain document authenticity", "type": "article", "intent": "informational", "priority": 3 },
+  { "keyword": "beneficial ownership register integrity", "type": "concept", "intent": "informational", "priority": 3 },
+  { "keyword": "esg report assurance", "type": "article", "intent": "informational", "priority": 3 },
+  { "keyword": "regulatory sandbox documentation", "type": "concept", "intent": "informational", "priority": 4 },
+  { "keyword": "diploma certificate verification", "type": "concept", "intent": "transactional", "priority": 2 },
+  { "keyword": "tamper evident audit log", "type": "concept", "intent": "informational", "priority": 2 },
+  { "keyword": "public tender award transparency", "type": "article", "intent": "informational", "priority": 3 },
+  { "keyword": "central bank circular distribution", "type": "article", "intent": "informational", "priority": 3 },
+  { "keyword": "digital signature legal validity", "type": "article", "intent": "informational", "priority": 1 }
+]
