@@ -127,7 +127,7 @@ const Pricing: React.FC = () => {
       {/* hero */}
       <section className="border-b border-white/5 px-8 py-20 lg:px-12">
         <div className="mx-auto max-w-[1180px]">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Pricing</p>
+          <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">Pricing</span></div>
           <h1 className="mt-4 max-w-4xl font-serif text-5xl font-bold leading-[1.05] tracking-tight text-[#f4efe3] sm:text-6xl">
             Priced like institutional infrastructure — never per seat.
           </h1>
