@@ -207,9 +207,13 @@ const NAV: [string, string][] = [
 // destination is reachable on a phone — not just Launch.
 export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions }) => {
   const nav = useNavigate();
-  const locale = localeFromPath(useLocation().pathname);
+  const pathname = useLocation().pathname;
+  const locale = localeFromPath(pathname);
   const [open, setOpen] = React.useState(false);
   const go = (to: string) => { setOpen(false); nav(to); };
+  // "You are here" — a nav item is active on its exact route or any child route
+  // (so /learn/<concept> still lights Learn). "/" only matches the homepage.
+  const isActive = (to: string) => to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(to + "/");
   // A thin gold reading-progress bar under the header — a quiet premium cue of
   // how far through the page the visitor is. rAF-throttled, passive listener.
   const barRef = React.useRef<HTMLDivElement>(null);
@@ -246,9 +250,13 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
         </button>
         <div className="flex shrink-0 items-center gap-3 sm:gap-4">
           {/* lean inline navigation — desktop only */}
-          {DESKTOP_NAV.map(([label, to]) => (
-            <button key={to} onClick={() => go(to)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">{tr(locale, label)}</button>
-          ))}
+          {DESKTOP_NAV.map(([label, to]) => {
+            const on = isActive(to);
+            return (
+              <button key={to} onClick={() => go(to)} aria-current={on ? "page" : undefined}
+                className={`relative hidden text-[13px] font-semibold uppercase tracking-wide transition lg:inline-block ${on ? "text-white after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:bg-gold-400/70" : "text-white/70 hover:text-white"}`}>{tr(locale, label)}</button>
+            );
+          })}
           {actions}
           {/* standalone Launch CTA — hidden on the narrowest phones (where it would
               crowd the bar); on those it leads the mobile sheet instead. */}
@@ -279,9 +287,12 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
             <button onClick={() => go("/console")} className="mb-2 mt-1 flex w-full items-center justify-center gap-2 rounded bg-gradient-to-b from-gold-300 to-gold-600 py-3 text-[13px] font-bold uppercase tracking-[0.08em] text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition hover:from-gold-200 hover:to-gold-500 sm:hidden">
               {tr(locale, "cta.launch")} <Chevron className="h-3.5 w-3.5" />
             </button>
-            {NAV.map(([label, to]) => (
-              <button key={to} onClick={() => go(to)} className="block w-full border-b border-white/[0.05] py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">{tr(locale, label)}</button>
-            ))}
+            {NAV.map(([label, to]) => {
+              const on = isActive(to);
+              return (
+                <button key={to} onClick={() => go(to)} aria-current={on ? "page" : undefined} className={`block w-full border-b border-white/[0.05] py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide transition ${on ? "text-gold-300" : "text-white/80 hover:text-gold-300"}`}>{tr(locale, label)}</button>
+              );
+            })}
             <button onClick={() => go(PROCUREMENT_ROUTE)} className="block w-full py-3.5 text-left text-[14px] font-semibold uppercase tracking-wide text-white/80 transition hover:text-gold-300">{tr(locale, "nav.procurement")}</button>
           </nav>
         </div>
