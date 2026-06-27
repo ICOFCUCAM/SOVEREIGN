@@ -23,6 +23,11 @@ const REC: Record<string, RecCopy> = {
   ar: { no: "السجل رقم", title: "سجل رسمي", instrument: "أداة النشر", sealed: "مختوم", integrity: "السلامة (SHA-256)", rows: [["الجهة", "المؤسسة المُصدِرة"], ["الاختصاص", "سيادي · داخلي"], ["الحالة", "محوكم · معتمد"], ["السلامة", "غير قابل للتغيير"]] },
   ja: { no: "記録番号", title: "公式記録", instrument: "発行文書", sealed: "封印済み", integrity: "完全性 (SHA-256)", rows: [["発行主体", "発行機関"], ["管轄", "主権 · オンプレミス"], ["状態", "統制済み · 承認済み"], ["完全性", "改変不可 · 封印済み"]] },
   zh: { no: "记录编号", title: "正式记录", instrument: "发布文书", sealed: "已封存", integrity: "完整性 (SHA-256)", rows: [["签发机关", "签发机构"], ["管辖", "主权 · 本地部署"], ["状态", "受治理 · 已批准"], ["完整性", "不可篡改 · 已封存"]] },
+  pl: { no: "REKORD nr", title: "Akt urzędowy", instrument: "INSTRUMENT PUBLIKACJI", sealed: "OPIECZĘTOWANO", integrity: "INTEGRALNOŚĆ (SHA-256)", rows: [["ORGAN", "Instytucja wydająca"], ["JURYSDYKCJA", "Suwerenny · lokalnie"], ["STATUS", "Zarządzany · zatwierdzony"], ["INTEGRALNOŚĆ", "Niezmienny · opieczętowany"]] },
+  sv: { no: "POST nr", title: "Officiell post", instrument: "PUBLICERINGSINSTRUMENT", sealed: "FÖRSEGLAD", integrity: "INTEGRITET (SHA-256)", rows: [["MYNDIGHET", "Utfärdande institution"], ["JURISDIKTION", "Suverän · lokal"], ["STATUS", "Styrd · godkänd"], ["INTEGRITET", "Oföränderlig · förseglad"]] },
+  da: { no: "POST nr.", title: "Officiel post", instrument: "PUBLIKATIONSINSTRUMENT", sealed: "FORSEGLET", integrity: "INTEGRITET (SHA-256)", rows: [["MYNDIGHED", "Udstedende institution"], ["JURISDIKTION", "Suveræn · lokal"], ["STATUS", "Styret · godkendt"], ["INTEGRITET", "Uforanderlig · forseglet"]] },
+  fi: { no: "TIETUE nro", title: "Virallinen tietue", instrument: "JULKAISUASIAKIRJA", sealed: "SINETÖITY", integrity: "EHEYS (SHA-256)", rows: [["VIRANOMAINEN", "Myöntävä laitos"], ["TOIMIVALTA", "Suvereeni · paikallinen"], ["TILA", "Hallinnoitu · hyväksytty"], ["EHEYS", "Muuttumaton · sinetöity"]] },
+  el: { no: "ΕΓΓΡΑΦΗ αρ.", title: "Επίσημο αρχείο", instrument: "ΜΕΣΟ ΔΗΜΟΣΙΕΥΣΗΣ", sealed: "ΣΦΡΑΓΙΣΜΕΝΟ", integrity: "ΑΚΕΡΑΙΟΤΗΤΑ (SHA-256)", rows: [["ΑΡΧΗ", "Εκδίδων οργανισμός"], ["ΔΙΚΑΙΟΔΟΣΙΑ", "Κυρίαρχη · τοπική"], ["ΚΑΤΑΣΤΑΣΗ", "Διακυβερνημένο · εγκεκριμένο"], ["ΑΚΕΡΑΙΟΤΗΤΑ", "Αμετάβλητο · σφραγισμένο"]] },
 };
 
 const INK = "#1d1810";

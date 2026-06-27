@@ -22,13 +22,18 @@ export const LOCALES: Locale[] = [
   { code: "it", name: "Italian", native: "Italiano", dir: "ltr" },
   { code: "ja", name: "Japanese", native: "日本語", dir: "ltr" },
   { code: "zh", name: "Chinese", native: "中文", dir: "ltr" },
+  { code: "pl", name: "Polish", native: "Polski", dir: "ltr" },
+  { code: "sv", name: "Swedish", native: "Svenska", dir: "ltr" },
+  { code: "da", name: "Danish", native: "Dansk", dir: "ltr" },
+  { code: "fi", name: "Finnish", native: "Suomi", dir: "ltr" },
+  { code: "el", name: "Greek", native: "Ελληνικά", dir: "ltr" },
 ];
 
 export const DEFAULT_LOCALE = "en";
 // Locales that are actually live (have real content). Activated as translations
 // land — this is the only switch that exposes a language. hreflang & sitemaps
 // derive from it, so nothing is advertised before it exists.
-export const ACTIVE_LOCALES = ["en", "fr", "es", "de", "no", "pt", "it", "nl", "ar", "ja", "zh"];
+export const ACTIVE_LOCALES = ["en", "fr", "es", "de", "no", "pt", "it", "nl", "ar", "ja", "zh", "pl", "sv", "da", "fi", "el"];
 
 // Derive the active locale from a path's first segment (en if none/inactive).
 export const localeFromPath = (pathname: string): string => {
@@ -155,6 +160,51 @@ const CHROME: Record<string, Dict> = {
     "nav.platform": "平台", "nav.standard": "标准", "nav.trust": "信任",
     "nav.developers": "开发者", "nav.pricing": "价格", "nav.verify": "验证",
     "nav.outcomes": "成果", "cta.launch": "启动 Dispatch", "cta.launchShort": "启动", "nav.menu": "菜单", "nav.procurement": "采购",
+  },
+  pl: {
+    "cta.evaluate": "Rozpocznij ocenę", "cta.verify": "Zweryfikuj rekord", "cta.procurement": "Materiały przetargowe", "cta.seeInAction": "Zobacz w działaniu",
+    "concept.definition": "Definicja", "concept.why": "Dlaczego to ważne", "concept.how": "Jak obsługuje to Sovereign Dispatch",
+    "concept.faq": "Najczęstsze pytania", "concept.related": "Powiązane pojęcia", "concept.applies": "Gdzie ma zastosowanie",
+    "nav.learn": "Wiedza", "lang.label": "Język", "lang.readIn": "Przeczytaj to w",
+    "nav.platform": "Platforma", "nav.standard": "Standard", "nav.trust": "Zaufanie",
+    "nav.developers": "Deweloperzy", "nav.pricing": "Cennik", "nav.verify": "Weryfikuj",
+    "nav.outcomes": "Rezultaty", "cta.launch": "Uruchom Dispatch", "cta.launchShort": "Uruchom", "nav.menu": "Menu", "nav.procurement": "Zakupy",
+  },
+  sv: {
+    "cta.evaluate": "Påbörja din utvärdering", "cta.verify": "Verifiera en post", "cta.procurement": "Upphandlingsmaterial", "cta.seeInAction": "Se det i praktiken",
+    "concept.definition": "Definition", "concept.why": "Varför det är viktigt", "concept.how": "Så hanterar Sovereign Dispatch det",
+    "concept.faq": "Vanliga frågor", "concept.related": "Relaterade begrepp", "concept.applies": "Var det gäller",
+    "nav.learn": "Kunskap", "lang.label": "Språk", "lang.readIn": "Läs detta på",
+    "nav.platform": "Plattform", "nav.standard": "Standard", "nav.trust": "Förtroende",
+    "nav.developers": "Utvecklare", "nav.pricing": "Priser", "nav.verify": "Verifiera",
+    "nav.outcomes": "Resultat", "cta.launch": "Starta Dispatch", "cta.launchShort": "Starta", "nav.menu": "Meny", "nav.procurement": "Upphandling",
+  },
+  da: {
+    "cta.evaluate": "Start din evaluering", "cta.verify": "Verificér en post", "cta.procurement": "Udbudsmateriale", "cta.seeInAction": "Se det i praksis",
+    "concept.definition": "Definition", "concept.why": "Hvorfor det er vigtigt", "concept.how": "Sådan håndterer Sovereign Dispatch det",
+    "concept.faq": "Hyppige spørgsmål", "concept.related": "Relaterede begreber", "concept.applies": "Hvor det gælder",
+    "nav.learn": "Viden", "lang.label": "Sprog", "lang.readIn": "Læs dette på",
+    "nav.platform": "Platform", "nav.standard": "Standard", "nav.trust": "Tillid",
+    "nav.developers": "Udviklere", "nav.pricing": "Priser", "nav.verify": "Verificér",
+    "nav.outcomes": "Resultater", "cta.launch": "Start Dispatch", "cta.launchShort": "Start", "nav.menu": "Menu", "nav.procurement": "Indkøb",
+  },
+  fi: {
+    "cta.evaluate": "Aloita arviointi", "cta.verify": "Vahvista tietue", "cta.procurement": "Hankinta-aineisto", "cta.seeInAction": "Katso käytännössä",
+    "concept.definition": "Määritelmä", "concept.why": "Miksi sillä on merkitystä", "concept.how": "Näin Sovereign Dispatch hoitaa sen",
+    "concept.faq": "Usein kysytyt kysymykset", "concept.related": "Liittyvät käsitteet", "concept.applies": "Missä tätä sovelletaan",
+    "nav.learn": "Tietämys", "lang.label": "Kieli", "lang.readIn": "Lue tämä kielellä",
+    "nav.platform": "Alusta", "nav.standard": "Standardi", "nav.trust": "Luottamus",
+    "nav.developers": "Kehittäjät", "nav.pricing": "Hinnoittelu", "nav.verify": "Vahvista",
+    "nav.outcomes": "Tulokset", "cta.launch": "Käynnistä Dispatch", "cta.launchShort": "Käynnistä", "nav.menu": "Valikko", "nav.procurement": "Hankinta",
+  },
+  el: {
+    "cta.evaluate": "Ξεκινήστε την αξιολόγηση", "cta.verify": "Επαληθεύστε μια εγγραφή", "cta.procurement": "Υλικό προμηθειών", "cta.seeInAction": "Δείτε το σε εφαρμογή",
+    "concept.definition": "Ορισμός", "concept.why": "Γιατί έχει σημασία", "concept.how": "Πώς το διαχειρίζεται το Sovereign Dispatch",
+    "concept.faq": "Συχνές ερωτήσεις", "concept.related": "Σχετικές έννοιες", "concept.applies": "Πού εφαρμόζεται",
+    "nav.learn": "Γνώση", "lang.label": "Γλώσσα", "lang.readIn": "Διαβάστε το στα",
+    "nav.platform": "Πλατφόρμα", "nav.standard": "Πρότυπο", "nav.trust": "Εμπιστοσύνη",
+    "nav.developers": "Προγραμματιστές", "nav.pricing": "Τιμολόγηση", "nav.verify": "Επαλήθευση",
+    "nav.outcomes": "Αποτελέσματα", "cta.launch": "Εκκίνηση Dispatch", "cta.launchShort": "Εκκίνηση", "nav.menu": "Μενού", "nav.procurement": "Προμήθειες",
   },
 };
 export const t = (locale: string, key: string): string => (CHROME[locale] && CHROME[locale][key]) || CHROME.en[key] || key;

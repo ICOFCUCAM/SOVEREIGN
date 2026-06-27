@@ -1,0 +1,123 @@
+// Etusivun tekstiluettelo (suomi). Etusivu (Landing) lukee jokaisen näkyvän
+// merkkijonon täältä aktiiviselle kielelle, joten etuovi on täysin
+// käännettävissä. Englanti on totuuden lähde; jokainen kieli tarjoaa saman
+// muotoisen täydellisen käännöksen.
+
+import type { HomeCopy } from "./home";
+
+export const HOME_FI: HomeCopy = {
+  hero: {
+    eyebrow: "Institutionaalinen julkaisuinfrastruktuuri",
+    titleLead: "Institutionaalisen hallinnon ",
+    titleAccent: "eturintama.",
+    verbs: ["Luo", "Tarkasta", "Hyväksy", "Valtuuta", "Julkaise", "Sertifioi", "Todenna", "Säilytä"],
+    lead: "Instituutiot eivät maksa miljoonia asiakirjojen luomisesta. Ne investoivat miljoonia ihmisiin, hallintoon, hyväksyntöihin ja valtaan, jotka tekevät noista asiakirjoista virallisia. Sovereign Dispatch on infrastruktuuri, joka yhdistää, hallitsee, sertifioi ja säilyttää koko tuon prosessin.",
+    ctaLaunch: "Käynnistä Dispatch",
+    ctaArchitecture: "Katso arkkitehtuuri",
+    evalNote: "Arvioi omassa ympäristössäsi — myyntipuhelua ei tarvita.",
+  },
+  stakes: {
+    eyebrow: "Panokset",
+    title: "Maailman tärkeimpien päätösten hallintaa.",
+    lead: "Asiakirjat tiedottavat. Instituutiot hallitsevat. Viralliset julkaisut todistavat sen.",
+    badges: [
+      { lead: "Hallitut työnkulut", sub: "Käytäntöjen valvomia, alusta loppuun" },
+      { lead: "Pysyvät tietueet", sub: "Tietuetunnus, jota ei käytetä uudelleen" },
+      { lead: "Riippumaton todennus", sub: "Kenen tahansa vahvistettavissa, ilman tiliä" },
+    ],
+  },
+  cost: {
+    eyebrow: "Piilokustannus",
+    titleA: "Instituutiot eivät maksa asiakirjojen luomisesta.",
+    titleB: "Ne maksavat siitä, että niistä tulee",
+    titleAccent: "virallisia.",
+    body: "Asiakirjan kirjoittaminen ei maksa juuri mitään. Institutionaalinen valta maksaa kaiken — ihmiset, hyväksynnät, todisteen ja säilytyksen, jotka tekevät siitä instituution sanan.",
+    cta: "Tutustu julkaisun kustannukseen",
+    docLabel: "Asiakirja",
+    docSub: "Laadittu iltapäivässä",
+    officialLabel: "Virallinen julkaisu",
+    items: ["Oikeudellinen tarkastus", "Vaatimustenmukaisuus", "Johdon hyväksyntä", "Julkaisu", "Sertifiointi", "Säilytys"],
+    stats: [{ n: "6", label: "Osastoa" }, { n: "8", label: "Hyväksyntää" }, { n: "120+", label: "Henkilötyötuntia" }],
+    recordLabel: "1 virallinen tietue",
+    recordValue: "minne kustannus menee",
+    illustrative: "Havainnollistavat luvut.",
+    modelLink: "Mallinna oman instituutiosi luvut →",
+  },
+  result: {
+    eyebrow: "Tulos",
+    title: "Kopio tiedottaa. Virallinen tietue hallitsee.",
+    body: "Tavallinen asiakirja voidaan kopioida, muokata tai kyseenalaistaa. Virallinen tietue on instituution sitova versio päätöksestä — ja se voi aina todistaa sen. Institutionaalinen valta on pysyvää.",
+    features: [
+      { t: "Pysyvä identiteetti", d: "Tietuetunnus, jota ei käytetä uudelleen." },
+      { t: "Todistettava alkuperä", d: "Julkaisuhetkellä sinetöidyt sertifikaatit." },
+      { t: "Riippumaton todennus", d: "Kenen tahansa aidoksi vahvistama." },
+    ],
+    ctaWhat: "Mikä on virallinen tietue?",
+    ctaVerify: "Todenna tietue",
+    caption: "Sinetöity · Sertifioitu · Pysyvästi todennettavissa",
+  },
+  governance: {
+    eyebrow: "Miksi hallinnolla on merkitystä",
+    title: "Instituutiot eivät ansaitse luottamusta julkaisemalla. Ne ansaitsevat sen hallitsemalla julkaisua.",
+    cards: [
+      { t: "Valta on ansaittava.", d: "Tieto ei ole valtaa. Hallinto on se, mikä muuttaa asiakirjan instituution viralliseksi kannaksi — tarkastettuna, hyväksyttynä ja omistettuna." },
+      { t: "Todisteen on oltava sisäänrakennettu.", d: "Sertifikaatit ja täydellinen todisteketju tuotetaan tietueen syntyessä — ei koskaan jälkikäteen kiinnitettyinä, ei koskaan oletettuina." },
+      { t: "Alkuperän on elettävä ihmisiä pidempään.", d: "Kuka päätti, missä versiossa, missä järjestyksessä — säilytettynä ja todistettavissa kauan sen jälkeen, kun päättäjät ovat siirtyneet pois." },
+    ],
+  },
+  outcomes: {
+    eyebrow: "Liiketoiminta-arvo",
+    title: "Mitä instituutiosi saa.",
+    items: [
+      { lead: "Yksi hallittu alusta — ei seitsemää toisistaan irrallista järjestelmää.", sub: "Laatiminen, tarkastus, hyväksyntä, julkaisu, todiste ja arkisto lakkaavat elämästä erillisissä työkaluissa." },
+      { lead: "Jokaisella tarkastuksella on jo todisteensa.", sub: "Todiste tuotetaan tietueen syntyessä, ei rekonstruoida kun joku kysyy." },
+      { lead: "Jokainen hyväksyntä on jo kohdennettavissa.", sub: "Kuka päätti, missä versiossa, missä järjestyksessä — ratkaistuna sillä hetkellä, kun se tapahtuu." },
+      { lead: "Väärä versio ei voi koskaan lähteä ulos.", sub: "Yksi sitova tietue; korvatut ja hyväksymättömät kopiot eivät voi käydä virallisesta." },
+      { lead: "Institutionaalinen muisti, joka ei kävele ulos ovesta.", sub: "Alkuperä ja valta säilyvät pidempään kuin niitä luoneet ihmiset." },
+      { lead: "Lakkaa maksamasta samasta julkaisusta kahdesti.", sub: "Toimistojen välinen päällekkäinen käsittely tiivistyy yhdeksi hallituksi virraksi." },
+      { lead: "Hallitse julkaisua muiden puolesta — palveluna.", sub: "Ryhdy auktoriteetiksi, joka antaa ja todentaa tietueita palvelemillesi instituutioille." },
+    ],
+    modelLink: "Mallinna instituutiosi toiminnallinen tapaus",
+  },
+  industries: {
+    eyebrow: "Kuka sitä käyttää",
+    title: "Luotettu joka päivä, jokaisessa instituutiossa.",
+    sub: "Dispatch hallitsee julkaisut, joita instituutiosi todella tuottaa.",
+    names: ["Valtionhallinto", "Oikeuslaitos", "Terveydenhuolto", "Yliopistot", "Yritykset", "Sääntelyviranomaiset"],
+    types: [
+      ["Toimeenpanomääräykset", "Asetukset", "Virallislehdet"],
+      ["Tuomiot", "Oikeudenkäyntisäännöt", "Oikeudelliset tiedonannot"],
+      ["Kliiniset ohjeet", "Turvallisuustiedotteet", "Hoitoprotokollat"],
+      ["Senaatin päätökset", "Tutkintosäännöt", "Akateemiset käytännöt"],
+      ["Hallituksen päätökset", "Vaatimustenmukaisuuskäytännöt", "Yrityshallinto"],
+      ["Luvat", "Täytäntöönpanopäätökset", "Julkiset tiedonannot"],
+    ],
+    forLabel: "Dispatch alalle",
+    viewAll: "Katso kaikki toimialat",
+  },
+  quote: { text: "Instituution koetinkivi ei ole se, mitä se sanoo — vaan se, voiko se vuosia myöhemmin todistaa sanoneensa sen." },
+  security: {
+    eyebrow: "Suvereeni arkkitehtuuri",
+    title: "Suvereeni suunnittelultaan. Todennettava oletuksena.",
+    sub: "Rakennettu instituutioille, joiden tieto ei saa vuotaa, kadota eikä tulla kiistetyksi.",
+    labels: ["Kryptografinen sinetöinti", "Muuttumaton tarkastustodiste", "Sijaintihallinta", "Vuokralaisen eristys", "Riippumaton todennus", "Pitkäaikaissäilytys"],
+  },
+  proof: {
+    eyebrow: "Todiste ja hankinta",
+    title: "Rakennettu uskottavaksi — ei luotolla otettavaksi.",
+    statLabels: ["Hallittua vaihetta", "Pysyvää sertifikaattia", "Sitova julkaisu", "Riippumatonta todennusta"],
+    columns: [
+      { title: "Tekninen todiste", items: ["SHA-256-sinetöinti", "Vain liittävä arkkitehtuuri", "Muuttumaton tarkastusketju", "Peukalointi paljastava eheys"] },
+      { title: "Hallinnon todiste", items: ["Jokainen toimi kohdennettavissa", "Jokainen hyväksyntä kirjattu", "Jokainen versio säilytetty", "Vastuiden eriyttäminen valvottu"] },
+      { title: "Toiminnan todiste", items: ["Yksi hallittu putki", "Alkuperä alusta loppuun", "Pysyvä säilytys", "Rajaton todennus"] },
+    ],
+    links: ["Arkkitehtuuri", "Tietoturva", "Vaatimustenmukaisuus", "Todisteet", "API", "Luottamuskeskus", "Hankintakeskus"],
+  },
+  evaluate: {
+    title: "Todista se omilla asiakirjoillasi.",
+    body: "Ei myyntipuhelua. Ei estettä. Vie todellinen asiakirja hallitun putken läpi — tai ota hankinta-aineistot omaan prosessiisi.",
+    ctaBegin: "Aloita arviointisi",
+    ctaProcurement: "Hankintakeskus",
+    tagline: "Suvereeni suunnittelultaan · Todennettava oletuksena · Instituutiovalmis",
+  },
+};
