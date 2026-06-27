@@ -205,7 +205,7 @@ export const GovernedJourney: React.FC = () => {
               {STAGES.map((s, i) => (
                 <button key={s.k} onClick={() => { setAuto(false); setActive(i); }} aria-label={s.k} aria-current={i === active}
                   className="group absolute top-0 -translate-x-1/2 -translate-y-1/2" style={{ left: `${(i / LAST) * 100}%` }}>
-                  <span className={`block rounded-full transition-all duration-500 ${i <= active ? "h-2.5 w-2.5 bg-gold-300" : "h-2 w-2 bg-white/25 group-hover:bg-white/50"}`} />
+                  <span className={`block rounded-full transition-all duration-500 ${i === active ? "h-2.5 w-2.5 bg-gold-300 ring-4 ring-gold-400/20" : i < active ? "h-2.5 w-2.5 bg-gold-300" : "h-2 w-2 bg-white/25 group-hover:bg-white/50"}`} />
                 </button>
               ))}
             </div>
