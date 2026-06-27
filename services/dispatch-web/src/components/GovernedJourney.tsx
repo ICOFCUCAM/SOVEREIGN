@@ -41,7 +41,7 @@ const LiveDocument: React.FC<{ a: number }> = ({ a }) => {
   const inGov = a >= 1, approved = a >= 2, authorized = a >= 3, published = a >= 4,
     certified = a >= 5, verified = a >= 6, preserved = a >= 7;
   return (
-    <div className="relative mx-auto w-full max-w-[330px] [perspective:1400px]">
+    <div className="sd-float relative mx-auto w-full max-w-[330px] [perspective:1400px]">
       {/* verified badge — floats above the page */}
       <div className={`absolute -top-3 left-1/2 z-30 -translate-x-1/2 transition-all duration-500 ${verified ? "sd-pop" : "pointer-events-none opacity-0"}`}>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/50 bg-[#0c1a12] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-300 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.8)]">
