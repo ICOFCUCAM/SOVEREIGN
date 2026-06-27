@@ -143,12 +143,20 @@ export const useReveal = (): void => {
   }, []);
 };
 
-// The shared marketing navigation, in one place so the desktop bar and the mobile
-// sheet stay identical. Order = institutional reading order.
-const NAV: [string, string][] = [
-  ["Home", "/"],
-  ["Outcomes", OUTCOMES_ROUTE],
+// Two navigations from one source. The desktop bar is deliberately lean — a
+// premium header guides toward the single action (Launch), so it carries only
+// the four destinations an evaluator reaches for; everything else lives in the
+// footer sitemap and the full mobile sheet. The mobile sheet stays comprehensive
+// (a phone has no footer in view), minus Home, which the wordmark already is.
+const DESKTOP_NAV: [string, string][] = [
   ["Standard", STANDARD_ROUTE],
+  ["Verify", VERIFY_ROUTE],
+  ["Pricing", PRICING_ROUTE],
+  ["Developers", DEVELOPERS_ROUTE],
+];
+const NAV: [string, string][] = [
+  ["Standard", STANDARD_ROUTE],
+  ["Outcomes", OUTCOMES_ROUTE],
   ["Trust", TRUST_ROUTE],
   ["Developers", DEVELOPERS_ROUTE],
   ["Verify", VERIFY_ROUTE],
@@ -180,8 +188,8 @@ export const PublicHeader: React.FC<{ actions?: React.ReactNode }> = ({ actions 
           <span className="whitespace-nowrap text-base font-bold tracking-tight sm:text-lg">SOVEREIGN <span className="text-gold-400">DISPATCH</span></span>
         </button>
         <div className="flex shrink-0 items-center gap-3 sm:gap-4">
-          {/* full inline navigation — desktop only */}
-          {NAV.map(([label, to]) => (
+          {/* lean inline navigation — desktop only */}
+          {DESKTOP_NAV.map(([label, to]) => (
             <button key={to} onClick={() => go(to)} className="hidden text-[13px] font-semibold uppercase tracking-wide text-white/70 transition hover:text-white lg:inline-block">{label}</button>
           ))}
           {actions}
