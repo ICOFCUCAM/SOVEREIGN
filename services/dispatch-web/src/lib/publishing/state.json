@@ -3,10 +3,10 @@
   "origin": "https://dispatch.sovereigndo.com",
   "totals": {
     "industries": 70,
-    "concepts": 300,
+    "concepts": 301,
     "articles": 39,
     "docs": 9,
-    "total": 418
+    "total": 419
   },
   "topics": {
     "count": 9,
@@ -22,13 +22,13 @@
       "retired"
     ],
     "byState": {
-      "idea": 7,
+      "idea": 6,
       "queued": 0,
       "drafting": 0,
       "in_review": 1,
       "approved": 0,
       "published": 0,
-      "live": 1,
+      "live": 2,
       "needs_refresh": 0,
       "retired": 0
     },
@@ -108,7 +108,7 @@
         "id": "concept-academic-transcript-verification",
         "title": "Academic Transcript Verification",
         "type": "concept",
-        "status": "idea",
+        "status": "live",
         "locale": "en",
         "priority": 2,
         "keywords": [
@@ -202,26 +202,26 @@
     "scorer": "stages.qualityScore (length, structure, link density, fact flags)"
   },
   "graph": {
-    "nodes": 418,
-    "edges": 2927,
+    "nodes": 419,
+    "edges": 2938,
     "byType": {
       "industry": 70,
-      "concept": 300,
+      "concept": 301,
       "article": 39,
       "doc": 9
     },
     "orphanCount": 0,
     "orphans": [],
     "hubs": [
-      "industry:government (203 in)",
-      "industry:regulators (166 in)",
+      "industry:government (204 in)",
+      "industry:regulators (167 in)",
       "industry:financial-institutions (138 in)",
       "industry:justice (75 in)",
-      "industry:universities (62 in)",
+      "industry:universities (63 in)",
       "industry:archives (62 in)",
       "industry:central-banks (62 in)",
-      "concept:document-authenticity (48 in)",
-      "concept:official-publication (47 in)",
+      "concept:document-authenticity (49 in)",
+      "concept:official-publication (48 in)",
       "industry:national-libraries (45 in)"
     ]
   },
@@ -253,11 +253,11 @@
     }
   },
   "versions": {
-    "records": 0,
+    "records": 1,
     "due": []
   },
   "languages": {
-    "totalConcepts": 300,
+    "totalConcepts": 301,
     "active": [
       "en",
       "fr",
@@ -352,7 +352,7 @@
   "distribution": {
     "sitemap": {
       "exists": true,
-      "urls": 461
+      "urls": 462
     },
     "imageSitemap": {
       "exists": true,
@@ -376,7 +376,7 @@
     "dueCount": 0
   },
   "discovery": {
-    "missingTopics": 6,
+    "missingTopics": 5,
     "topGaps": [
       {
         "keyword": "clinical trial master file integrity",
@@ -385,10 +385,6 @@
       {
         "keyword": "public tender award transparency",
         "coverage": 0.25
-      },
-      {
-        "keyword": "academic transcript verification",
-        "coverage": 0.33
       },
       {
         "keyword": "freedom of information publishing",

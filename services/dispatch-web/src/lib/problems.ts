@@ -10260,8 +10260,7 @@ export const PROBLEMS: Problem[] = [
       "document-verification",
       "governance-certificate",
       "document-authenticity",
-      "institutional-records"
-    ],
+      "institutional-records", "academic-transcript-verification"],
     "diagram": "shield",
     "metaTitle": "Certificate Verification: Confirm a Certificate Is Real",
     "metaDescription": "Certificate verification confirms a certificate came from the named issuer, matches its record, and is not revoked or altered."
@@ -10373,8 +10372,7 @@ export const PROBLEMS: Problem[] = [
       "document-verification",
       "document-authenticity",
       "tamper-proof-publication",
-      "official-publication"
-    ],
+      "official-publication", "academic-transcript-verification"],
     "diagram": "shield",
     "metaTitle": "QR-Code Verification: Scan to Confirm Authenticity",
     "metaDescription": "QR-code verification authenticates a document by scanning an embedded code that resolves to the issuer's verification record."
@@ -10430,8 +10428,7 @@ export const PROBLEMS: Problem[] = [
       "document-verification",
       "official-publication",
       "document-authenticity",
-      "publication-audit"
-    ],
+      "publication-audit", "academic-transcript-verification"],
     "diagram": "shield",
     "metaTitle": "Verification Portal: One Public Place to Verify",
     "metaDescription": "A verification portal is an issuer-hosted service where anyone can confirm a document is genuine against the authoritative record."
@@ -16569,6 +16566,63 @@ export const PROBLEMS: Problem[] = [
     "diagram": "shield",
     "metaTitle": "Unverifiable Document: Give Records a Way to Check",
     "metaDescription": "An unverifiable document can't confirm its authenticity. Learn how sealed proof of origin and integrity makes records independently verifiable."
+  },
+  {
+    "slug": "academic-transcript-verification",
+    "term": "Academic transcript verification",
+    "category": "Verification & proof",
+    "kicker": "Verification",
+    "headline": "Let any employer confirm a transcript is genuine.",
+    "lead": "When a graduate hands a transcript to an employer, another university or an immigration office, the recipient has to know it is the real, unaltered record the institution issued. Academic transcript verification is how that confidence is established — not by trusting a PDF, but by checking it against the issuing institution's authoritative record.",
+    "definition": "Academic transcript verification is the process of confirming that a student's transcript or degree record is genuine, unaltered and issued by the named institution — ideally by checking a permanent record identifier and integrity proof against the registrar's authoritative record, independently and without privileged access.",
+    "why": [
+      "A transcript is one of the most consequential documents a person carries: it gates jobs, postgraduate admission, professional licensing and visas. That value is exactly what makes it a target for forgery, and a circulating PDF or photocopy carries no evidence of its own authenticity — a recipient cannot tell a genuine record from a convincing alteration by looking at it.",
+      "The institution that conferred the qualification is the only authoritative source of truth about what a student studied and achieved. Verification therefore has to resolve back to the registrar's own record, not to a self-described copy. A copy can be reproduced, edited and reissued by anyone; a verifiable official record is bound to the issuing office and carries proof that the specific file has not been changed since it was issued.",
+      "Manual verification — phoning the registrar, emailing for confirmation, waiting on a clearinghouse — is slow, expensive and fails precisely the parties who most need certainty, often across borders and time zones. When verification is hard, it quietly does not happen, and altered records pass unchallenged. Verification that anyone can perform in seconds, against the institution's record, is what lets trust scale beyond the people who already know the registrar."
+    ],
+    "how": [
+      {
+        "t": "Issued under the registrar's authority",
+        "d": "The transcript is published as an official record under the authority of the registrar's office, not an individual, so its authority is durable and does not depend on a person who may have left the institution."
+      },
+      {
+        "t": "Permanent record identifier",
+        "d": "Each transcript carries a permanent Record ID that resolves to its authoritative entry at the issuing institution, so a recipient can confirm what the institution actually issued rather than trusting the document in hand."
+      },
+      {
+        "t": "Tamper-evident integrity check",
+        "d": "Verification compares the specific file against a cryptographic integrity proof, so any change — even a single altered grade or date — fails the check and is detected. This makes the record tamper-evident; it is not a claim that a document can be made impossible to alter."
+      }
+    ],
+    "faqs": [
+      {
+        "q": "What is academic transcript verification?",
+        "a": "Academic transcript verification is the process of confirming that a transcript or degree record is genuine, unaltered and issued by the named institution — typically by checking a permanent record identifier and integrity proof against the registrar's authoritative record, without needing privileged access."
+      },
+      {
+        "q": "How is a verifiable transcript different from a PDF or photocopy?",
+        "a": "A PDF or photocopy is a copy: it can be reproduced and edited by anyone, and it carries no independent evidence of its own authenticity. A verifiable official record is bound to the issuing registrar's authoritative entry and carries a tamper-evident integrity proof, so a third party can confirm both who issued it and that it has not been altered."
+      },
+      {
+        "q": "Who needs to verify academic transcripts, and can they do it without an account?",
+        "a": "Employers, other universities, professional and licensing bodies, and immigration and credential-assessment authorities all need to confirm transcripts are genuine. Verification is designed to be performed by anyone holding the record, against the institution's source of truth, without a special account or privileged access — though the institution remains the authority on what was conferred."
+      }
+    ],
+    "relatedIndustries": [
+      "universities",
+      "professional-bodies",
+      "government",
+      "regulators"
+    ],
+    "relatedProblems": [
+      "document-verification",
+      "document-authenticity",
+      "evidence-chain",
+      "official-publication"
+    ],
+    "diagram": "shield",
+    "metaTitle": "Academic Transcript Verification",
+    "metaDescription": "Confirm a transcript is genuine, unaltered and issued by the named institution — checked against the registrar's authoritative record by anyone, no account."
   },
 ];
 

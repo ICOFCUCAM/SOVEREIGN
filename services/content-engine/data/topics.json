@@ -97,7 +97,7 @@
     "source": "seo-discovery"
   },
   {
-    "status": "idea",
+    "status": "live",
     "locale": "en",
     "type": "concept",
     "priority": 2,
@@ -109,7 +109,27 @@
     "keywords": [
       "academic transcript verification"
     ],
-    "source": "seo-discovery"
+    "source": "seo-discovery",
+    "history": [
+      {
+        "at": "2026-06-27",
+        "from": "idea",
+        "to": "approved",
+        "note": "human-reviewed: quality 100, validated"
+      },
+      {
+        "at": "2026-06-27",
+        "from": "approved",
+        "to": "published",
+        "note": "merged into problems.ts"
+      },
+      {
+        "at": "2026-06-27",
+        "from": "published",
+        "to": "live",
+        "note": "v1, next review 2026-12-24"
+      }
+    ]
   },
   {
     "status": "idea",
