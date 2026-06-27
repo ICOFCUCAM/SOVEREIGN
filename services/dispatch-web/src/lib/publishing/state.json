@@ -262,7 +262,14 @@
       "en",
       "fr",
       "es",
-      "de"
+      "de",
+      "no",
+      "pt",
+      "it",
+      "nl",
+      "ar",
+      "ja",
+      "zh"
     ],
     "targets": [
       {
@@ -323,9 +330,16 @@
       }
     ],
     "coverage": {
+      "ar": 4,
       "de": 4,
       "es": 4,
-      "fr": 4
+      "fr": 4,
+      "it": 4,
+      "ja": 4,
+      "nl": 4,
+      "no": 4,
+      "pt": 4,
+      "zh": 4
     },
     "note": "A page exists in a locale only when a real translation exists; hreflang derives from this."
   },
@@ -352,7 +366,7 @@
   "distribution": {
     "sitemap": {
       "exists": true,
-      "urls": 462
+      "urls": 490
     },
     "imageSitemap": {
       "exists": true,

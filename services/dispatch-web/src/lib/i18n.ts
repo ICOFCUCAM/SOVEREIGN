@@ -28,7 +28,7 @@ export const DEFAULT_LOCALE = "en";
 // Locales that are actually live (have real content). Activated as translations
 // land — this is the only switch that exposes a language. hreflang & sitemaps
 // derive from it, so nothing is advertised before it exists.
-export const ACTIVE_LOCALES = ["en", "fr", "es", "de"];
+export const ACTIVE_LOCALES = ["en", "fr", "es", "de", "no", "pt", "it", "nl", "ar", "ja", "zh"];
 
 // Derive the active locale from a path's first segment (en if none/inactive).
 export const localeFromPath = (pathname: string): string => {
@@ -92,6 +92,69 @@ const CHROME: Record<string, Dict> = {
     "nav.platform": "Plattform", "nav.standard": "Standard", "nav.trust": "Vertrauen",
     "nav.developers": "Entwickler", "nav.pricing": "Preise", "nav.verify": "Verifizieren",
     "nav.outcomes": "Ergebnisse", "cta.launch": "Dispatch starten", "cta.launchShort": "Starten", "nav.menu": "Menü", "nav.procurement": "Beschaffung",
+  },
+  no: {
+    "cta.evaluate": "Start evalueringen", "cta.verify": "Verifiser en oppføring", "cta.procurement": "Anskaffelsesdokumenter", "cta.seeInAction": "Se det i bruk",
+    "concept.definition": "Definisjon", "concept.why": "Hvorfor det er viktig", "concept.how": "Hvordan Sovereign Dispatch håndterer det",
+    "concept.faq": "Vanlige spørsmål", "concept.related": "Relaterte begreper", "concept.applies": "Hvor dette gjelder",
+    "nav.learn": "Kunnskap", "lang.label": "Språk", "lang.readIn": "Les dette på",
+    "nav.platform": "Plattform", "nav.standard": "Standard", "nav.trust": "Tillit",
+    "nav.developers": "Utviklere", "nav.pricing": "Priser", "nav.verify": "Verifiser",
+    "nav.outcomes": "Resultater", "cta.launch": "Start Dispatch", "cta.launchShort": "Start", "nav.menu": "Meny", "nav.procurement": "Anskaffelse",
+  },
+  pt: {
+    "cta.evaluate": "Comece a sua avaliação", "cta.verify": "Verificar um registo", "cta.procurement": "Documentos de aquisição", "cta.seeInAction": "Veja em ação",
+    "concept.definition": "Definição", "concept.why": "Porque é importante", "concept.how": "Como o Sovereign Dispatch trata disto",
+    "concept.faq": "Perguntas frequentes", "concept.related": "Conceitos relacionados", "concept.applies": "Onde se aplica",
+    "nav.learn": "Aprender", "lang.label": "Idioma", "lang.readIn": "Ler isto em",
+    "nav.platform": "Plataforma", "nav.standard": "Norma", "nav.trust": "Confiança",
+    "nav.developers": "Programadores", "nav.pricing": "Preços", "nav.verify": "Verificar",
+    "nav.outcomes": "Resultados", "cta.launch": "Iniciar o Dispatch", "cta.launchShort": "Iniciar", "nav.menu": "Menu", "nav.procurement": "Aquisição",
+  },
+  it: {
+    "cta.evaluate": "Inizia la tua valutazione", "cta.verify": "Verifica un documento", "cta.procurement": "Documenti di approvvigionamento", "cta.seeInAction": "Guardalo in azione",
+    "concept.definition": "Definizione", "concept.why": "Perché è importante", "concept.how": "Come lo gestisce Sovereign Dispatch",
+    "concept.faq": "Domande frequenti", "concept.related": "Concetti correlati", "concept.applies": "Dove si applica",
+    "nav.learn": "Conoscenza", "lang.label": "Lingua", "lang.readIn": "Leggilo in",
+    "nav.platform": "Piattaforma", "nav.standard": "Standard", "nav.trust": "Fiducia",
+    "nav.developers": "Sviluppatori", "nav.pricing": "Prezzi", "nav.verify": "Verifica",
+    "nav.outcomes": "Risultati", "cta.launch": "Avvia Dispatch", "cta.launchShort": "Avvia", "nav.menu": "Menu", "nav.procurement": "Approvvigionamento",
+  },
+  nl: {
+    "cta.evaluate": "Begin uw evaluatie", "cta.verify": "Verifieer een document", "cta.procurement": "Inkoopdocumentatie", "cta.seeInAction": "Zie het in actie",
+    "concept.definition": "Definitie", "concept.why": "Waarom het belangrijk is", "concept.how": "Hoe Sovereign Dispatch dit aanpakt",
+    "concept.faq": "Veelgestelde vragen", "concept.related": "Verwante begrippen", "concept.applies": "Waar dit van toepassing is",
+    "nav.learn": "Kennis", "lang.label": "Taal", "lang.readIn": "Lees dit in het",
+    "nav.platform": "Platform", "nav.standard": "Standaard", "nav.trust": "Vertrouwen",
+    "nav.developers": "Ontwikkelaars", "nav.pricing": "Prijzen", "nav.verify": "Verifiëren",
+    "nav.outcomes": "Resultaten", "cta.launch": "Dispatch starten", "cta.launchShort": "Starten", "nav.menu": "Menu", "nav.procurement": "Inkoop",
+  },
+  ar: {
+    "cta.evaluate": "ابدأ تقييمك", "cta.verify": "تحقّق من سجل", "cta.procurement": "مستندات الشراء", "cta.seeInAction": "شاهده عمليًا",
+    "concept.definition": "تعريف", "concept.why": "لماذا يهمّ", "concept.how": "كيف تتعامل Sovereign Dispatch مع ذلك",
+    "concept.faq": "أسئلة شائعة", "concept.related": "مفاهيم ذات صلة", "concept.applies": "أين ينطبق ذلك",
+    "nav.learn": "تعلَّم", "lang.label": "اللغة", "lang.readIn": "اقرأ هذا بـ",
+    "nav.platform": "المنصّة", "nav.standard": "المعيار", "nav.trust": "الثقة",
+    "nav.developers": "المطوّرون", "nav.pricing": "الأسعار", "nav.verify": "تحقّق",
+    "nav.outcomes": "النتائج", "cta.launch": "تشغيل Dispatch", "cta.launchShort": "تشغيل", "nav.menu": "القائمة", "nav.procurement": "الشراء",
+  },
+  ja: {
+    "cta.evaluate": "評価を始める", "cta.verify": "記録を検証する", "cta.procurement": "調達資料", "cta.seeInAction": "実際の動作を見る",
+    "concept.definition": "定義", "concept.why": "なぜ重要か", "concept.how": "Sovereign Dispatch での扱い方",
+    "concept.faq": "よくある質問", "concept.related": "関連する概念", "concept.applies": "適用される場面",
+    "nav.learn": "ナレッジ", "lang.label": "言語", "lang.readIn": "この言語で読む",
+    "nav.platform": "プラットフォーム", "nav.standard": "標準", "nav.trust": "信頼",
+    "nav.developers": "開発者", "nav.pricing": "料金", "nav.verify": "検証",
+    "nav.outcomes": "成果", "cta.launch": "Dispatch を起動", "cta.launchShort": "起動", "nav.menu": "メニュー", "nav.procurement": "調達",
+  },
+  zh: {
+    "cta.evaluate": "开始评估", "cta.verify": "验证记录", "cta.procurement": "采购资料", "cta.seeInAction": "查看实际效果",
+    "concept.definition": "定义", "concept.why": "为何重要", "concept.how": "Sovereign Dispatch 如何处理",
+    "concept.faq": "常见问题", "concept.related": "相关概念", "concept.applies": "适用场景",
+    "nav.learn": "知识", "lang.label": "语言", "lang.readIn": "以此语言阅读",
+    "nav.platform": "平台", "nav.standard": "标准", "nav.trust": "信任",
+    "nav.developers": "开发者", "nav.pricing": "价格", "nav.verify": "验证",
+    "nav.outcomes": "成果", "cta.launch": "启动 Dispatch", "cta.launchShort": "启动", "nav.menu": "菜单", "nav.procurement": "采购",
   },
 };
 export const t = (locale: string, key: string): string => (CHROME[locale] && CHROME[locale][key]) || CHROME.en[key] || key;
