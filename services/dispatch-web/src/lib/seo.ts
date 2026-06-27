@@ -3,6 +3,7 @@ import { industryBySlug } from "./industries";
 import { problemBySlug } from "./problems";
 import { articleBySlug } from "./library";
 import { docBySlug } from "./docs";
+import { conceptTranslation } from "./translations";
 
 // Per-route <title> + meta description. Centralised so one map drives every page
 // (set client-side by <RouteMeta>; helps search engines that render JS and gives
@@ -60,6 +61,14 @@ export function metaForPath(path: string): Meta {
   const lp = clean.match(/^\/learn\/(.+)$/);
   if (lp) {
     const x = problemBySlug(lp[1]);
+    if (x) return { title: x.metaTitle, description: x.metaDescription };
+  }
+  // localized concept page — /fr/learn/:slug → French meta when a translation exists
+  const llp = clean.match(/^\/([a-z]{2})\/learn\/(.+)$/);
+  if (llp) {
+    const tr = conceptTranslation(llp[1], llp[2]);
+    if (tr) return { title: tr.metaTitle + SUF, description: tr.metaDescription };
+    const x = problemBySlug(llp[2]);
     if (x) return { title: x.metaTitle, description: x.metaDescription };
   }
   const ar = clean.match(/^\/library\/(.+)$/);

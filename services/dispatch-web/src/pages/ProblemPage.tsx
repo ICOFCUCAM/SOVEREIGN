@@ -5,6 +5,8 @@ import { PROBLEMS, PROBLEMS_BASE, problemBySlug, type ProblemDiagram } from "../
 import { industryBySlug, INDUSTRIES_BASE } from "../lib/industries";
 import { WALKTHROUGH_ROUTE, VERIFY_ROUTE, STANDARD_ROUTE } from "../lib/routes";
 import { track } from "../lib/analytics";
+import { DEFAULT_LOCALE, isActiveLocale, localePath, t } from "../lib/i18n";
+import { conceptTranslation } from "../lib/translations";
 
 // Layer 3 — a single Problem / Concept page. Typographic hero (no photo) plus a
 // reusable inline-SVG concept diagram. Rich definitional content + DefinedTerm,
@@ -89,14 +91,24 @@ const ConceptDiagram: React.FC<{ kind: ProblemDiagram }> = ({ kind }) => {
 };
 
 const ProblemPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, lang } = useParams<{ slug: string; lang: string }>();
   const nav = useNavigate();
   useReveal();
-  const p = problemBySlug(slug);
-  React.useEffect(() => { if (p) track("page.learn", { slug: p.slug }); }, [p]);
-  if (!p) return <Navigate to={PROBLEMS_BASE} replace />;
+  const base = problemBySlug(slug);
+  React.useEffect(() => { if (base) track("page.learn", { slug: base.slug, locale: lang || DEFAULT_LOCALE }); }, [base, lang]);
+  if (!base) return <Navigate to={PROBLEMS_BASE} replace />;
 
-  const url = `https://dispatch.sovereigndo.com${PROBLEMS_BASE}/${p.slug}`;
+  // Locale resolution. /en/... canonicalises to root; an unknown locale, or one
+  // without a real translation, falls back to English (never fake content).
+  const tr = lang && isActiveLocale(lang) && lang !== DEFAULT_LOCALE ? conceptTranslation(lang, base.slug) : undefined;
+  if (lang === DEFAULT_LOCALE || (lang && !isActiveLocale(lang)) || (lang && lang !== DEFAULT_LOCALE && !tr)) return <Navigate to={`${PROBLEMS_BASE}/${base.slug}`} replace />;
+  const locale = tr ? lang! : DEFAULT_LOCALE;
+  const p = tr ? { ...base, ...tr } : base;
+  const L = (key: string) => t(locale, key);
+  // a concept link points at its localized URL when a translation exists
+  const conceptHref = (s: string) => (locale !== DEFAULT_LOCALE && conceptTranslation(locale, s) ? localePath(locale, `${PROBLEMS_BASE}/${s}`) : `${PROBLEMS_BASE}/${s}`);
+
+  const url = `https://dispatch.sovereigndo.com${localePath(locale, `${PROBLEMS_BASE}/${base.slug}`)}`;
   const related = p.relatedProblems.map(problemBySlug).filter(Boolean) as typeof PROBLEMS;
   const inds = p.relatedIndustries.map((s) => industryBySlug(s)).filter(Boolean) as NonNullable<ReturnType<typeof industryBySlug>>[];
 
@@ -140,16 +152,24 @@ const ProblemPage: React.FC = () => {
           <div className="pointer-events-none absolute inset-0 opacity-[0.5]" aria-hidden style={{ background: "radial-gradient(60% 60% at 78% 30%, rgba(212,178,90,0.10), transparent 70%)" }} />
           <div className="relative mx-auto grid max-w-[1080px] items-center gap-12 lg:grid-cols-[1.35fr_1fr]">
             <div>
-              <nav className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35" aria-label="Breadcrumb">
-                <button onClick={() => nav(PROBLEMS_BASE)} className="transition hover:text-gold-300">Learn</button>
-                <Chevron className="h-3 w-3" /><span className="text-gold-400/70">{p.term}</span>
-              </nav>
+              <div className="flex items-center justify-between gap-3">
+                <nav className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35" aria-label="Breadcrumb">
+                  <button onClick={() => nav(PROBLEMS_BASE)} className="transition hover:text-gold-300">{L("nav.learn")}</button>
+                  <Chevron className="h-3 w-3" /><span className="text-gold-400/70">{p.term}</span>
+                </nav>
+                {conceptTranslation("fr", base.slug) && (
+                  <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] p-0.5 text-[11px] font-semibold" aria-label={t(locale, "lang.label")}>
+                    <button onClick={() => nav(`${PROBLEMS_BASE}/${base.slug}`)} className={`rounded-full px-2.5 py-1 transition ${locale === "en" ? "bg-gold-400/15 text-gold-200" : "text-white/50 hover:text-white"}`}>EN</button>
+                    <button onClick={() => nav(localePath("fr", `${PROBLEMS_BASE}/${base.slug}`))} className={`rounded-full px-2.5 py-1 transition ${locale === "fr" ? "bg-gold-400/15 text-gold-200" : "text-white/50 hover:text-white"}`}>FR</button>
+                  </div>
+                )}
+              </div>
               <div className="mt-5 flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[12px] font-semibold uppercase tracking-[0.3em] text-gold-400">{p.kicker}</span></div>
               <h1 className="mt-5 font-serif text-[2.2rem] font-bold leading-[1.1] tracking-tight text-[#f4efe3] sm:text-[2.9rem]">{p.headline}</h1>
               <p className="mt-6 max-w-xl text-[16.5px] leading-relaxed text-white/65">{p.lead}</p>
               <div className="mt-9 flex flex-wrap gap-3">
-                <button onClick={() => nav(WALKTHROUGH_ROUTE)} className="btn-sheen group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">See it in action <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" /></button>
-                <button onClick={() => nav(VERIFY_ROUTE)} className="inline-flex items-center rounded border border-emerald-500/30 bg-emerald-500/10 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-emerald-300 transition hover:bg-emerald-500/20">Verify a record</button>
+                <button onClick={() => nav(WALKTHROUGH_ROUTE)} className="btn-sheen group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">{L("cta.seeInAction")} <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" /></button>
+                <button onClick={() => nav(VERIFY_ROUTE)} className="inline-flex items-center rounded border border-emerald-500/30 bg-emerald-500/10 px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-emerald-300 transition hover:bg-emerald-500/20">{L("cta.verify")}</button>
               </div>
             </div>
             <div className="relative aspect-[3/2] w-full rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-white/[0.01] p-6">
@@ -161,7 +181,7 @@ const ProblemPage: React.FC = () => {
         {/* definition — the snippet target */}
         <section className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.022] to-transparent px-6 py-16 lg:px-12">
           <div className="mx-auto max-w-[900px]">
-            <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">Definition</span></div>
+            <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">{L("concept.definition")}</span></div>
             <p className="mt-5 font-serif text-[1.5rem] leading-snug text-[#f4efe3] sm:text-[1.85rem]"><span className="font-bold">{p.term}</span> — {p.definition}</p>
           </div>
         </section>
@@ -169,7 +189,7 @@ const ProblemPage: React.FC = () => {
         {/* why it matters */}
         <section className="border-t border-white/[0.06] px-6 py-20 lg:px-12">
           <div className="mx-auto max-w-[900px]">
-            <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-[#f4efe3] sm:text-[2.4rem]">Why it matters</h2>
+            <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-[#f4efe3] sm:text-[2.4rem]">{L("concept.why")}</h2>
             <div className="mt-8 space-y-5">
               {p.why.map((w, i) => (
                 <div key={i} className="reveal flex gap-4">
@@ -184,7 +204,7 @@ const ProblemPage: React.FC = () => {
         {/* how Sovereign Dispatch handles it */}
         <section className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.022] to-transparent px-6 py-20 lg:px-12">
           <div className="mx-auto max-w-[1100px]">
-            <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">How Sovereign Dispatch handles it</span></div>
+            <div className="flex items-center gap-3"><span className="h-px w-7 bg-gold-500/55" aria-hidden /><span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">{L("concept.how")}</span></div>
             <div className="stagger mt-10 grid gap-5 lg:grid-cols-3">
               {p.how.map((h, i) => (
                 <div key={h.t} className="reveal relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-7 transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/25">
@@ -203,7 +223,7 @@ const ProblemPage: React.FC = () => {
         {/* FAQ */}
         <section className="border-t border-white/[0.06] px-6 py-20 lg:px-12">
           <div className="mx-auto max-w-[900px]">
-            <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-[#f4efe3] sm:text-[2.4rem]">Common questions</h2>
+            <h2 className="font-serif text-[2rem] font-bold leading-tight tracking-tight text-[#f4efe3] sm:text-[2.4rem]">{L("concept.faq")}</h2>
             <div className="mt-8 divide-y divide-white/[0.08] border-y border-white/[0.08]">
               {p.faqs.map((f) => (
                 <div key={f.q} className="py-6">
@@ -219,7 +239,7 @@ const ProblemPage: React.FC = () => {
         {inds.length > 0 && (
           <section className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.022] to-transparent px-6 py-16 lg:px-12">
             <div className="mx-auto max-w-[1100px]">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Where this applies</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{L("concept.applies")}</div>
               <div className="mt-6 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
                 {inds.map((o) => (
                   <button key={o.slug} onClick={() => nav(`${INDUSTRIES_BASE}/${o.slug}`)}
@@ -236,10 +256,10 @@ const ProblemPage: React.FC = () => {
         {related.length > 0 && (
           <section className="border-t border-white/[0.06] px-6 py-16 lg:px-12">
             <div className="mx-auto max-w-[1100px]">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Related concepts</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{L("concept.related")}</div>
               <div className="mt-6 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
                 {related.map((o) => (
-                  <button key={o.slug} onClick={() => nav(`${PROBLEMS_BASE}/${o.slug}`)}
+                  <button key={o.slug} onClick={() => nav(conceptHref(o.slug))}
                     className="group flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3 text-left text-[13.5px] font-medium text-white/70 transition hover:border-gold-400/30 hover:text-white">
                     {o.term}<Chevron className="h-3 w-3 shrink-0 text-white/20 transition group-hover:translate-x-0.5 group-hover:text-gold-400" />
                   </button>
