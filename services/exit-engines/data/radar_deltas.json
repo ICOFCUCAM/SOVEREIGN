@@ -1,42 +1,5 @@
 {
- "detected_at": "2026-06-27T08:28:17.554Z",
- "count": 4,
- "deltas": [
-  {
-   "buyer_id": "salesforce",
-   "name": "Salesforce",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-06-27T08:28:17.553Z"
-  },
-  {
-   "buyer_id": "salesforce",
-   "name": "Salesforce",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "4",
-   "detail": "+4 indexed event(s)",
-   "detected_at": "2026-06-27T08:28:17.553Z"
-  },
-  {
-   "buyer_id": "cadence-design-systems",
-   "name": "Cadence Design Systems",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-06-27T08:28:17.553Z"
-  },
-  {
-   "buyer_id": "cadence-design-systems",
-   "name": "Cadence Design Systems",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s) · latest: AWR Corporation",
-   "detected_at": "2026-06-27T08:28:17.553Z"
-  }
- ]
+ "detected_at": "2026-06-28T08:55:14.555Z",
+ "count": 0,
+ "deltas": []
 }
