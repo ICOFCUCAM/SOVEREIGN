@@ -1,5 +1,42 @@
 {
- "detected_at": "2026-06-28T08:55:14.555Z",
- "count": 0,
- "deltas": []
+ "detected_at": "2026-06-29T10:22:14.212Z",
+ "count": 4,
+ "deltas": [
+  {
+   "buyer_id": "hilton-worldwide",
+   "name": "Hilton Worldwide",
+   "kind": "new_acquisition",
+   "before": "589",
+   "after": "590",
+   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-06-29T10:22:14.211Z"
+  },
+  {
+   "buyer_id": "eqt-ab",
+   "name": "EQT AB",
+   "kind": "new_acquisition",
+   "before": "5",
+   "after": "6",
+   "detail": "+1 indexed event(s) · latest: Torghatten",
+   "detected_at": "2026-06-29T10:22:14.211Z"
+  },
+  {
+   "buyer_id": "church-dwight",
+   "name": "Church & Dwight",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-06-29T10:22:14.211Z"
+  },
+  {
+   "buyer_id": "church-dwight",
+   "name": "Church & Dwight",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-06-29T10:22:14.211Z"
+  }
+ ]
 }
