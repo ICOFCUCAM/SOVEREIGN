@@ -19,6 +19,29 @@ const FEATURED_SLUGS = [
   'sovereign-dispatch',
 ];
 
+// Mirror of the live `ecosystem_products` row for civicos-national-shell
+// (migration 0012). Used only when Supabase is unreachable/empty so the
+// flagship panel never blanks — kept in sync with the DB, not invented.
+const FALLBACK_FLAGSHIP: EcosystemProduct = {
+  id: 'fallback-civicos-national-shell',
+  slug: 'civicos-national-shell',
+  name: 'National Shell',
+  category: 'Sovereign Government Runtime',
+  tagline: 'The sovereign orchestration layer binding government into one runtime.',
+  description: 'Executive orchestration, institutional topology and cross-ministry propagation as a single national operating runtime.',
+  capabilities: ['Executive orchestration', 'Cross-ministry propagation', 'Runtime governance', 'National posture intelligence'],
+  status: 'deployable',
+  accent: '#6366F1',
+  source_project_ref: null,
+  is_featured: true,
+  sort_order: 51,
+  metrics: [
+    { label: 'Deployment value', value: '$300M–$500M' },
+    { label: 'Strategic value', value: 'Extreme' },
+    { label: 'Scope', value: 'Whole-of-gov' },
+  ],
+};
+
 const deployValueOf = (p: EcosystemProduct): string | null => {
   const m = (p.metrics || []).find((x) => /value|valuation|infrastructure|deployment|price|asking/i.test(x.label)) || p.metrics?.[0];
   return m?.value || null;
@@ -200,6 +223,8 @@ const EcosystemPanels: React.FC = () => {
     })();
   }, []);
 
+  const effective = assets.length > 0 ? assets : [FALLBACK_FLAGSHIP];
+
   return (
     <section className="relative px-4 sm:px-6 lg:px-8 py-28 sm:py-36 overflow-hidden">
       {/* subtle dark infrastructure grid */}
@@ -213,7 +238,7 @@ const EcosystemPanels: React.FC = () => {
           <span className="kicker text-white/30 hidden sm:inline" style={{ fontSize: '10px', letterSpacing: '0.2em' }}>Acquire · Operate · Deploy</span>
         </div>
         <div className="grid lg:grid-cols-[1.62fr_1fr] gap-7 items-stretch">
-          <AcquisitionTerminal assets={assets} />
+          <AcquisitionTerminal assets={effective} />
           <ArchitectureMatrix />
         </div>
       </div>
