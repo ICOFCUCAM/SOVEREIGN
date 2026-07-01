@@ -7,6 +7,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { resolveTenant, isRegistrarHost } from "@/lib/tenant";
+import ApprovalGate from "@/components/ApprovalGate";
 import DomainLanding from "@/components/DomainLanding";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
@@ -172,7 +173,9 @@ const App = () => (
             <ScrollToTop />
             <ErrorBoundary>
               <Suspense fallback={<PageFallback />}>
-                {isRegistrar ? <RegistrarRoutes /> : tenant.mode === "tenant" ? <TenantRoutes /> : <PlatformRoutes />}
+                <ApprovalGate>
+                  {isRegistrar ? <RegistrarRoutes /> : tenant.mode === "tenant" ? <TenantRoutes /> : <PlatformRoutes />}
+                </ApprovalGate>
               </Suspense>
             </ErrorBoundary>
           </BrowserRouter>

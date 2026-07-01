@@ -64,7 +64,24 @@ export interface UserRoleRow {
   email: string | null;
   role: string;
   full_name: string | null;
+  status: 'pending' | 'approved' | 'rejected' | 'suspended';
+  rejected_reason: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
   created_at: string;
+}
+
+export interface ContactSubmissionRow {
+  id: string;
+  user_id: string | null;
+  email: string;
+  full_name: string | null;
+  subject: string | null;
+  message: string;
+  status: 'open' | 'responded' | 'closed';
+  created_at: string;
+  responded_at: string | null;
+  responded_by: string | null;
 }
 
 export interface EcosystemProduct {

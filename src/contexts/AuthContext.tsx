@@ -2,12 +2,16 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 
+export type UserStatus = 'pending' | 'approved' | 'rejected' | 'suspended';
+
 export interface UserRole {
   id: string;
   user_id: string;
   email: string;
   role: 'admin' | 'operator' | 'viewer';
   full_name?: string;
+  status: UserStatus;
+  rejected_reason?: string | null;
 }
 
 interface AuthContextValue {
@@ -16,6 +20,10 @@ interface AuthContextValue {
   role: UserRole | null;
   loading: boolean;
   isAdmin: boolean;
+  isApproved: boolean;
+  isPending: boolean;
+  isRejected: boolean;
+  isSuspended: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -92,10 +100,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRole(null);
   };
 
+  const status = role?.status ?? null;
+  // An active admin must also be approved — server-side is_admin() now
+  // enforces this, but mirroring it client-side prevents flashes of
+  // admin UI during the round-trip.
+  const isApproved = status === 'approved';
+  const isAdmin    = role?.role === 'admin' && isApproved;
+
   return (
     <AuthContext.Provider value={{
       user, session, role, loading,
-      isAdmin: role?.role === 'admin',
+      isAdmin,
+      isApproved,
+      isPending:   status === 'pending',
+      isRejected:  status === 'rejected',
+      isSuspended: status === 'suspended',
       signIn, signUp, signOut, refresh
     }}>
       {children}

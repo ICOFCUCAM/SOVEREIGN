@@ -75,11 +75,23 @@ const SystemCard: React.FC<{ p: EcosystemProduct }> = ({ p }) => {
 
 const EcosystemAtlas: React.FC = () => {
   const [products, setProducts] = useState<EcosystemProduct[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error' | 'empty'>('loading');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from('ecosystem_products').select('*').order('sort_order', { ascending: true });
-      setProducts((data || []) as EcosystemProduct[]);
+      const { data, error: qErr } = await supabase
+        .from('ecosystem_products')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      if (qErr) {
+        setStatus('error');
+        setError(qErr.message);
+        return;
+      }
+      const rows = (data || []) as EcosystemProduct[];
+      setProducts(rows);
+      setStatus(rows.length === 0 ? 'empty' : 'ready');
     })();
   }, []);
 
@@ -93,18 +105,16 @@ const EcosystemAtlas: React.FC = () => {
   }, [products]);
 
   const stats = [
-    { value: products.length || '—', label: 'Deployable institutions' },
-    { value: grouped.length || 8, label: 'Active sectors' },
+    { value: status === 'ready' ? products.length : '—', label: 'Deployable institutions' },
+    { value: status === 'ready' ? grouped.length : '—', label: 'Active sectors' },
     { value: '23', label: 'Operational regions' },
     { value: '99.99%', label: 'Uptime SLA' },
   ];
 
-  if (products.length === 0) return null;
-
   return (
     <section className="px-4 sm:px-6 lg:px-8 pb-28">
       <div className="max-w-6xl mx-auto">
-        {/* live status strip */}
+        {/* live status strip — always visible so the page never blanks */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20 pb-10 border-b border-white/10">
           {stats.map((s) => (
             <div key={s.label}>
@@ -114,22 +124,51 @@ const EcosystemAtlas: React.FC = () => {
           ))}
         </div>
 
-        {/* system index, grouped by sector */}
-        <div className="space-y-20">
-          {grouped.map(({ sector, items }, i) => (
-            <div key={sector} id={sector.toLowerCase()} className="scroll-mt-28">
-              <div className="flex items-center gap-4 mb-7">
-                <span className="font-mono text-sm text-cyan-300/50 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-                <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic text-white">{SECTOR_LABEL[sector] || sector}</h2>
-                <div className="flex-1 hairline" />
-                <span className="kicker text-white/35" style={{ fontSize: '10px' }}>{items.length} system{items.length > 1 ? 's' : ''}</span>
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {items.map((p) => <SystemCard key={p.id} p={p} />)}
-              </div>
+        {status === 'loading' && (
+          <div className="text-center py-20 text-white/45 text-sm">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-node mr-2" />
+            Loading institutions…
+          </div>
+        )}
+
+        {status === 'error' && (
+          <div className="text-center py-20">
+            <div className="text-white/65 text-sm">Could not reach the institutional registry.</div>
+            {error && <div className="mt-2 text-[11px] font-mono text-white/35">{error}</div>}
+            <div className="mt-4 text-[11px] text-white/40">
+              The deployable institutions exist; the registry endpoint is momentarily unreachable.
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+
+        {status === 'empty' && (
+          <div className="text-center py-20">
+            <div className="text-white/65 text-sm">No institutions are currently indexed for this environment.</div>
+            <div className="mt-3 text-[11px] text-white/40 max-w-md mx-auto leading-relaxed">
+              The ecosystem registry is empty in this build's environment. Production lists 40+ deployable
+              institutions across governance, finance, mobility, intelligence, elections, education, commerce
+              and operations.
+            </div>
+          </div>
+        )}
+
+        {status === 'ready' && (
+          <div className="space-y-20">
+            {grouped.map(({ sector, items }, i) => (
+              <div key={sector} id={sector.toLowerCase()} className="scroll-mt-28">
+                <div className="flex items-center gap-4 mb-7">
+                  <span className="font-mono text-sm text-cyan-300/50 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                  <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-cinematic text-white">{SECTOR_LABEL[sector] || sector}</h2>
+                  <div className="flex-1 hairline" />
+                  <span className="kicker text-white/35" style={{ fontSize: '10px' }}>{items.length} system{items.length > 1 ? 's' : ''}</span>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {items.map((p) => <SystemCard key={p.id} p={p} />)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
