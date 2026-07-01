@@ -30,18 +30,14 @@ const AuthModal: React.FC<Props> = ({ onClose, initialMode = 'signin' }) => {
       if (res.error) {
         setError(res.error);
       } else {
+        toast.success(mode === 'signin' ? 'Authenticated' : 'Account provisioned');
+        // CRM subscribe on signup
         if (mode === 'signup') {
-          // CRM subscribe on signup (fire-and-forget).
           fetch('https://famous.ai/api/crm/6a122e7fba2cb2e96599de96/subscribe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, name: fullName || undefined, source: 'signup', tags: ['platform-user', 'sovereign-os'] })
           }).catch(() => {});
-          // New accounts land at status='pending'. Close the modal and let
-          // the PendingApprovalView render the next screen.
-          toast.success('Account registered — awaiting admin approval');
-        } else {
-          toast.success('Authenticated');
         }
         onClose();
       }
@@ -100,7 +96,7 @@ const AuthModal: React.FC<Props> = ({ onClose, initialMode = 'signin' }) => {
                 className="w-full pl-9 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-cyan-400/50 focus:outline-none" />
             </div>
             {mode === 'signup' && (
-              <div className="text-[11px] text-white/40 mt-1.5">Min 6 characters. New accounts are <span className="text-cyan-400">pending admin approval</span> before console access; you can message the admin after signup.</div>
+              <div className="text-[11px] text-white/40 mt-1.5">Min 6 characters. The first account becomes <span className="text-cyan-400">admin</span>.</div>
             )}
           </div>
 

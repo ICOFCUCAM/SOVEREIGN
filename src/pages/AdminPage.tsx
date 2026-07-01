@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { supabase } from '@/lib/supabase';
-import type { Domain, Lead, AnalyticsEvent, UserRoleRow, EcosystemProduct, ContactSubmissionRow } from '@/lib/types';
+import type { Domain, Lead, AnalyticsEvent, UserRoleRow, EcosystemProduct } from '@/lib/types';
 import PlatformNav from '@/components/PlatformNav';
 import PlatformFooter from '@/components/PlatformFooter';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -82,7 +82,6 @@ const AdminPage: React.FC = () => {
   const [sceneUploading, setSceneUploading] = useState<number | null>(null);
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [users, setUsers] = useState<UserRoleRow[]>([]);
-  const [contactInbox, setContactInbox] = useState<ContactSubmissionRow[]>([]);
   const [systems, setSystems] = useState<EcosystemProduct[]>([]);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [narratives, setNarratives] = useState<Narrative[]>([]);
@@ -129,61 +128,8 @@ const AdminPage: React.FC = () => {
     setEvents((ev.data || []) as AnalyticsEvent[]);
     setUsers((u.data || []) as UserRoleRow[]);
     setSystems((sys.data || []) as EcosystemProduct[]);
-    const cs = await supabase.from('contact_submissions').select('*').order('created_at', { ascending: false }).limit(200);
-    setContactInbox((cs.data || []) as ContactSubmissionRow[]);
     setAudit(a);
     setLoading(false);
-  };
-
-  // Approval handlers — set status + provenance, then refresh roster.
-  const approveUser = async (u: UserRoleRow): Promise<void> => {
-    const { error } = await supabase
-      .from('user_roles')
-      .update({ status: 'approved', approved_by: user?.id ?? null, approved_at: new Date().toISOString(), rejected_reason: null })
-      .eq('user_id', u.user_id);
-    if (error) { toast.error(error.message); return; }
-    await logAudit('user.approve', `Approved ${u.email}`, { user_id: u.user_id });
-    toast.success(`${u.email ?? u.user_id} approved`);
-    await load();
-  };
-  const rejectUser = async (u: UserRoleRow): Promise<void> => {
-    const reason = window.prompt(`Reason for rejecting ${u.email ?? u.user_id}? (optional)`) ?? '';
-    const { error } = await supabase
-      .from('user_roles')
-      .update({ status: 'rejected', rejected_reason: reason || null, approved_by: user?.id ?? null, approved_at: new Date().toISOString() })
-      .eq('user_id', u.user_id);
-    if (error) { toast.error(error.message); return; }
-    await logAudit('user.reject', `Rejected ${u.email}`, { user_id: u.user_id, reason });
-    toast.success(`${u.email ?? u.user_id} rejected`);
-    await load();
-  };
-  const suspendUser = async (u: UserRoleRow): Promise<void> => {
-    const { error } = await supabase
-      .from('user_roles')
-      .update({ status: 'suspended' })
-      .eq('user_id', u.user_id);
-    if (error) { toast.error(error.message); return; }
-    await logAudit('user.suspend', `Suspended ${u.email}`, { user_id: u.user_id });
-    toast.success(`${u.email ?? u.user_id} suspended`);
-    await load();
-  };
-  const reinstateUser = async (u: UserRoleRow): Promise<void> => {
-    const { error } = await supabase
-      .from('user_roles')
-      .update({ status: 'approved', rejected_reason: null })
-      .eq('user_id', u.user_id);
-    if (error) { toast.error(error.message); return; }
-    await logAudit('user.reinstate', `Reinstated ${u.email}`, { user_id: u.user_id });
-    toast.success(`${u.email ?? u.user_id} reinstated`);
-    await load();
-  };
-  const closeContact = async (c: ContactSubmissionRow): Promise<void> => {
-    const { error } = await supabase
-      .from('contact_submissions')
-      .update({ status: 'closed', responded_at: new Date().toISOString(), responded_by: user?.id ?? null })
-      .eq('id', c.id);
-    if (error) { toast.error(error.message); return; }
-    await load();
   };
 
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
@@ -1655,122 +1601,34 @@ const AdminPage: React.FC = () => {
           )}
 
           {/* Team / Access tab */}
-          {tab === 'team' && (() => {
-            const pendingUsers = users.filter((u) => u.status === 'pending');
-            const openContacts = contactInbox.filter((c) => c.status === 'open');
-            return (
-            <div className="space-y-6">
-
-              {/* ── Pending Approvals ─────────────────────────────────── */}
-              {pendingUsers.length > 0 && (
-                <div className="glass-strong rounded-2xl overflow-hidden border border-amber-500/30">
-                  <div className="px-5 py-4 border-b border-amber-500/20 flex items-center justify-between bg-amber-500/5">
-                    <div className="flex items-center gap-2">
-                      <ShieldAlert className="w-4 h-4 text-amber-300" />
-                      <div className="text-white font-semibold">Pending Approvals · awaiting your decision</div>
-                    </div>
-                    <span className="text-[10px] font-mono text-amber-300">{pendingUsers.length} pending</span>
-                  </div>
-                  <div className="divide-y divide-white/5">
-                    {pendingUsers.map((u) => (
-                      <div key={u.id} className="px-5 py-4 flex flex-wrap items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="text-white font-medium truncate">{u.full_name || u.email?.split('@')[0] || '—'}</div>
-                          <div className="text-xs text-white/45 truncate">{u.email}</div>
-                          <div className="text-[10px] text-white/30 font-mono mt-0.5">signed up {new Date(u.created_at).toLocaleString()}</div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => approveUser(u)}
-                            className="px-3 py-1.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 text-[11px] font-semibold uppercase tracking-wide hover:bg-emerald-500/25">
-                            Approve
-                          </button>
-                          <button onClick={() => rejectUser(u)}
-                            className="px-3 py-1.5 rounded-md bg-rose-500/10 text-rose-300 border border-rose-400/30 text-[11px] font-semibold uppercase tracking-wide hover:bg-rose-500/20">
-                            Reject
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+          {tab === 'team' && (
+            <div className="glass-strong rounded-2xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                  <div className="text-white font-semibold">Access Registry · RBAC</div>
                 </div>
-              )}
-
-              {/* ── Contact Inbox ─────────────────────────────────────── */}
-              <div className="glass-strong rounded-2xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-cyan-400" />
-                    <div className="text-white font-semibold">Contact Inbox · messages from pending users</div>
-                  </div>
-                  <span className="text-[10px] font-mono text-white/40">{openContacts.length} open · {contactInbox.length} total</span>
-                </div>
-                <div className="divide-y divide-white/5 max-h-[420px] overflow-y-auto">
-                  {contactInbox.length === 0 && (
-                    <div className="px-5 py-10 text-center text-white/40 text-sm">No contact messages yet.</div>
-                  )}
-                  {contactInbox.map((c) => (
-                    <div key={c.id} className="px-5 py-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-white font-medium">{c.full_name || c.email}</span>
-                            <span className="text-xs text-white/45">{c.email}</span>
-                            <span className={`text-[10px] font-mono uppercase tracking-wide rounded-full px-2 py-0.5 border ${
-                              c.status === 'open' ? 'bg-amber-500/10 text-amber-300 border-amber-400/30'
-                              : c.status === 'responded' ? 'bg-cyan-500/10 text-cyan-300 border-cyan-400/30'
-                              : 'bg-white/5 text-white/45 border-white/15'
-                            }`}>{c.status}</span>
-                          </div>
-                          {c.subject && <div className="text-sm text-white/85 mt-1">{c.subject}</div>}
-                          <div className="text-sm text-white/65 mt-1.5 whitespace-pre-wrap">{c.message}</div>
-                          <div className="text-[10px] font-mono text-white/30 mt-2">{new Date(c.created_at).toLocaleString()}</div>
-                        </div>
-                        {c.status === 'open' && (
-                          <button onClick={() => closeContact(c)}
-                            className="shrink-0 px-2.5 py-1 rounded-md border border-white/15 text-[10px] font-semibold uppercase tracking-wide text-white/65 hover:bg-white/5">
-                            Mark closed
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <span className="text-[10px] font-mono text-white/40">{users.length} identities</span>
               </div>
-
-              {/* ── Access Registry (existing, now with status column) ── */}
-              <div className="glass-strong rounded-2xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-cyan-400" />
-                    <div className="text-white font-semibold">Access Registry · RBAC</div>
-                  </div>
-                  <span className="text-[10px] font-mono text-white/40">{users.length} identities</span>
-                </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/10 text-left text-[10px] font-mono uppercase tracking-widest text-white/40">
                       <th className="px-5 py-3">Identity</th>
                       <th className="px-3 py-3">Role</th>
-                      <th className="px-3 py-3">Status</th>
+                      <th className="px-3 py-3">User ID</th>
                       <th className="px-3 py-3">Joined</th>
-                      <th className="px-3 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.map((u) => {
                       const isAdminRole = u.role === 'admin';
                       const RoleIcon = isAdminRole ? Crown : u.role === 'operator' ? Fingerprint : Users;
-                      const statusStyle = u.status === 'approved'  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-400/30'
-                                        : u.status === 'pending'   ? 'bg-amber-500/15 text-amber-300 border-amber-400/30'
-                                        : u.status === 'suspended' ? 'bg-white/5 text-white/55 border-white/15'
-                                        :                            'bg-rose-500/10 text-rose-300 border-rose-400/30';
                       return (
                         <tr key={u.id} className="border-b border-white/5 hover:bg-white/[0.02]">
                           <td className="px-5 py-3.5">
                             <div className="text-white">{u.full_name || u.email?.split('@')[0] || '—'}</div>
                             <div className="text-xs text-white/40">{u.email}</div>
-                            <div className="text-[10px] text-white/30 font-mono mt-0.5">{u.user_id.slice(0, 8)}…{u.user_id.slice(-4)}</div>
                           </td>
                           <td className="px-3 py-3.5">
                             {u.user_id === user.id ? (
@@ -1788,49 +1646,22 @@ const AdminPage: React.FC = () => {
                               </select>
                             )}
                           </td>
-                          <td className="px-3 py-3.5">
-                            <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono uppercase tracking-wide ${statusStyle}`}>
-                              {u.status}
-                            </span>
-                            {u.status === 'rejected' && u.rejected_reason && (
-                              <div className="text-[10px] text-rose-300/70 mt-1 max-w-[180px] truncate" title={u.rejected_reason}>{u.rejected_reason}</div>
-                            )}
-                          </td>
+                          <td className="px-3 py-3.5 text-white/40 text-xs font-mono">{u.user_id.slice(0, 8)}…{u.user_id.slice(-4)}</td>
                           <td className="px-3 py-3.5 text-white/40 text-xs font-mono">{new Date(u.created_at).toLocaleDateString()}</td>
-                          <td className="px-3 py-3.5 text-right">
-                            {u.user_id !== user.id && (
-                              <div className="inline-flex items-center gap-1.5">
-                                {u.status === 'pending' && (
-                                  <>
-                                    <button onClick={() => approveUser(u)} className="px-2 py-1 rounded border border-emerald-400/30 text-emerald-300 text-[10px] uppercase tracking-wide hover:bg-emerald-500/10">Approve</button>
-                                    <button onClick={() => rejectUser(u)}  className="px-2 py-1 rounded border border-rose-400/30 text-rose-300 text-[10px] uppercase tracking-wide hover:bg-rose-500/10">Reject</button>
-                                  </>
-                                )}
-                                {u.status === 'approved' && (
-                                  <button onClick={() => suspendUser(u)} className="px-2 py-1 rounded border border-white/15 text-white/65 text-[10px] uppercase tracking-wide hover:bg-white/5">Suspend</button>
-                                )}
-                                {(u.status === 'suspended' || u.status === 'rejected') && (
-                                  <button onClick={() => reinstateUser(u)} className="px-2 py-1 rounded border border-emerald-400/30 text-emerald-300 text-[10px] uppercase tracking-wide hover:bg-emerald-500/10">Reinstate</button>
-                                )}
-                              </div>
-                            )}
-                          </td>
                         </tr>
                       );
                     })}
                     {users.length === 0 && (
-                      <tr><td colSpan={5} className="text-center py-12 text-white/40">No identities provisioned</td></tr>
+                      <tr><td colSpan={4} className="text-center py-12 text-white/40">No identities provisioned</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
               <div className="px-5 py-3 border-t border-white/5 text-[11px] text-white/40 font-mono">
-                Role &amp; status changes are admin-only — enforced by row-level security + audit-logged. Your own role is locked to prevent admin lockout. Approved status is required to access the console.
+                Role changes are admin-only — enforced by row-level security + a BEFORE UPDATE trigger, and recorded to the immutable audit trail. Your own role is locked to prevent admin lockout.
               </div>
             </div>
-            </div>
-            );
-          })()}
+          )}
 
           {/* Activity tab */}
           {tab === 'activity' && (
