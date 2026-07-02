@@ -1,15 +1,42 @@
 {
- "detected_at": "2026-07-01T09:22:36.197Z",
- "count": 1,
+ "detected_at": "2026-07-02T09:10:13.278Z",
+ "count": 4,
  "deltas": [
   {
-   "buyer_id": "hilton-worldwide",
-   "name": "Hilton Worldwide",
-   "kind": "new_acquisition",
-   "before": "591",
-   "after": "592",
-   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-07-01T09:22:36.195Z"
+   "buyer_id": "sony",
+   "name": "Sony",
+   "kind": "cadence_shift",
+   "before": "16/12m",
+   "after": "15/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-07-02T09:10:13.278Z"
+  },
+  {
+   "buyer_id": "amazon",
+   "name": "Amazon",
+   "kind": "cadence_shift",
+   "before": "6/12m",
+   "after": "5/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-07-02T09:10:13.278Z"
+  },
+  {
+   "buyer_id": "salesforce",
+   "name": "Salesforce",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-02T09:10:13.278Z"
+  },
+  {
+   "buyer_id": "google",
+   "name": "Google",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-02T09:10:13.278Z"
   }
  ]
 }

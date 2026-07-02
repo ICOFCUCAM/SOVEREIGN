@@ -1,6 +1,6 @@
 {
- "as_of": "2026-07-01T09:22:34.804Z",
- "totalEvents": 3840,
+ "as_of": "2026-07-02T09:10:11.899Z",
+ "totalEvents": 3830,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1539,
+   "deals": 1529,
    "disclosedUsd": 383676561050
   },
   {
@@ -298,7 +298,7 @@
   {
    "buyer_id": "ibm",
    "name": "IBM",
-   "deals": 199,
+   "deals": 198,
    "recentDeals": 11,
    "lastDate": "2025-12-08"
   },
@@ -354,7 +354,7 @@
   {
    "buyer_id": "meta-platforms",
    "name": "Meta Platforms",
-   "deals": 112,
+   "deals": 109,
    "recentDeals": 7,
    "lastDate": "2026-05-01"
   },
@@ -505,13 +505,6 @@
    "lastDate": "2025-01-01"
   },
   {
-   "buyer_id": "google",
-   "name": "Google",
-   "deals": 6,
-   "recentDeals": 0,
-   "lastDate": "2014-08-01"
-  },
-  {
    "buyer_id": "advent-international",
    "name": "Advent International",
    "deals": 6,
@@ -538,6 +531,13 @@
    "deals": 4,
    "recentDeals": 1,
    "lastDate": "2025-01-01"
+  },
+  {
+   "buyer_id": "hasbro",
+   "name": "Hasbro",
+   "deals": 4,
+   "recentDeals": 0,
+   "lastDate": "1991-01-01"
   }
  ],
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)"
