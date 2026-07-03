@@ -1,5 +1,5 @@
 {
- "as_of": "2026-07-02T09:10:11.899Z",
+ "as_of": "2026-07-03T09:08:27.700Z",
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)",
  "indexes": [
   {
@@ -15,10 +15,10 @@
   },
   {
    "sector": "Media",
-   "volume": 237,
-   "volume12m": 11,
+   "volume": 238,
+   "volume12m": 12,
    "volumePrior12m": 8,
-   "trendPct": 0.375,
+   "trendPct": 0.5,
    "activeBuyers": 20,
    "disclosedDeals": 100,
    "medianDealUsd": 198000000,
