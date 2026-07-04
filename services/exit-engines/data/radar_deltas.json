@@ -1,96 +1,15 @@
 {
- "detected_at": "2026-07-03T09:08:29.074Z",
- "count": 10,
+ "detected_at": "2026-07-04T08:29:29.828Z",
+ "count": 1,
  "deltas": [
   {
    "buyer_id": "hilton-worldwide",
    "name": "Hilton Worldwide",
    "kind": "new_acquisition",
-   "before": "592",
-   "after": "593",
+   "before": "593",
+   "after": "594",
    "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-07-03T09:08:29.073Z"
-  },
-  {
-   "buyer_id": "alphabet",
-   "name": "Alphabet",
-   "kind": "new_acquisition",
-   "before": "285",
-   "after": "286",
-   "detail": "+1 indexed event(s) · latest: Prestige LLC",
-   "detected_at": "2026-07-03T09:08:29.073Z"
-  },
-  {
-   "buyer_id": "alphabet",
-   "name": "Alphabet",
-   "kind": "cadence_shift",
-   "before": "2/12m",
-   "after": "3/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-07-03T09:08:29.073Z"
-  },
-  {
-   "buyer_id": "ibm",
-   "name": "IBM",
-   "kind": "new_acquisition",
-   "before": "198",
-   "after": "206",
-   "detail": "+8 indexed event(s) · latest: Confluent",
-   "detected_at": "2026-07-03T09:08:29.073Z"
-  },
-  {
-   "buyer_id": "meta-platforms",
-   "name": "Meta Platforms",
-   "kind": "new_acquisition",
-   "before": "109",
-   "after": "116",
-   "detail": "+7 indexed event(s) · latest: Assured Robot Intelligence",
-   "detected_at": "2026-07-03T09:08:29.073Z"
-  },
-  {
-   "buyer_id": "sap",
-   "name": "SAP",
-   "kind": "new_acquisition",
-   "before": "71",
-   "after": "74",
-   "detail": "+3 indexed event(s) · latest: 78",
-   "detected_at": "2026-07-03T09:08:29.073Z"
-  },
-  {
-   "buyer_id": "google",
-   "name": "Google",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-07-03T09:08:29.073Z"
-  },
-  {
-   "buyer_id": "google",
-   "name": "Google",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "25",
-   "detail": "+25 indexed event(s) · latest: Terra Bella",
-   "detected_at": "2026-07-03T09:08:29.073Z"
-  },
-  {
-   "buyer_id": "salesforce",
-   "name": "Salesforce",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-07-03T09:08:29.073Z"
-  },
-  {
-   "buyer_id": "salesforce",
-   "name": "Salesforce",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "4",
-   "detail": "+4 indexed event(s)",
-   "detected_at": "2026-07-03T09:08:29.073Z"
+   "detected_at": "2026-07-04T08:29:29.827Z"
   }
  ]
 }
