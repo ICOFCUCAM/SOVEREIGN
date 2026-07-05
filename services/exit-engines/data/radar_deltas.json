@@ -1,15 +1,15 @@
 {
- "detected_at": "2026-07-04T08:29:29.828Z",
+ "detected_at": "2026-07-05T08:39:03.501Z",
  "count": 1,
  "deltas": [
   {
-   "buyer_id": "hilton-worldwide",
-   "name": "Hilton Worldwide",
-   "kind": "new_acquisition",
-   "before": "593",
-   "after": "594",
-   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-07-04T08:29:29.827Z"
+   "buyer_id": "welsh-carson-anderson-stowe",
+   "name": "Welsh, Carson, Anderson & Stowe",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-05T08:39:03.501Z"
   }
  ]
 }
