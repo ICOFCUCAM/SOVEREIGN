@@ -1,5 +1,5 @@
 {
- "as_of": "2026-07-05T08:39:02.051Z",
+ "as_of": "2026-07-06T09:32:33.892Z",
  "totalEvents": 3841,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
@@ -487,8 +487,8 @@
    "buyer_id": "gen-digital",
    "name": "Gen Digital",
    "deals": 7,
-   "recentDeals": 0,
-   "lastDate": "2022-01-01"
+   "recentDeals": 1,
+   "lastDate": "2024-01-01"
   },
   {
    "buyer_id": "blackrock",

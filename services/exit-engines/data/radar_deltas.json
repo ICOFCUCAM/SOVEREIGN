@@ -1,15 +1,15 @@
 {
- "detected_at": "2026-07-05T08:39:03.501Z",
+ "detected_at": "2026-07-06T09:32:35.267Z",
  "count": 1,
  "deltas": [
   {
-   "buyer_id": "welsh-carson-anderson-stowe",
-   "name": "Welsh, Carson, Anderson & Stowe",
+   "buyer_id": "gen-digital",
+   "name": "Gen Digital",
    "kind": "appetite_change",
    "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-07-05T08:39:03.501Z"
+   "after": "medium",
+   "detail": "appetite low → medium",
+   "detected_at": "2026-07-06T09:32:35.266Z"
   }
  ]
 }
