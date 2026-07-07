@@ -1,15 +1,33 @@
 {
- "detected_at": "2026-07-06T09:32:35.267Z",
- "count": 1,
+ "detected_at": "2026-07-07T09:03:58.145Z",
+ "count": 3,
  "deltas": [
   {
-   "buyer_id": "gen-digital",
-   "name": "Gen Digital",
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
+   "kind": "new_acquisition",
+   "before": "417",
+   "after": "418",
+   "detail": "+1 indexed event(s) · latest: Osmos",
+   "detected_at": "2026-07-07T09:03:58.145Z"
+  },
+  {
+   "buyer_id": "asda",
+   "name": "Asda",
    "kind": "appetite_change",
-   "before": "low",
-   "after": "medium",
-   "detail": "appetite low → medium",
-   "detected_at": "2026-07-06T09:32:35.266Z"
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-07-07T09:03:58.145Z"
+  },
+  {
+   "buyer_id": "asda",
+   "name": "Asda",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-07-07T09:03:58.145Z"
   }
  ]
 }
