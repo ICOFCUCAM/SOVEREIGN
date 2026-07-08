@@ -1,33 +1,42 @@
 {
- "detected_at": "2026-07-07T09:03:58.145Z",
- "count": 3,
+ "detected_at": "2026-07-08T08:04:21.810Z",
+ "count": 4,
  "deltas": [
   {
-   "buyer_id": "microsoft",
-   "name": "Microsoft",
+   "buyer_id": "google",
+   "name": "Google",
    "kind": "new_acquisition",
-   "before": "417",
-   "after": "418",
-   "detail": "+1 indexed event(s) · latest: Osmos",
-   "detected_at": "2026-07-07T09:03:58.145Z"
+   "before": "25",
+   "after": "26",
+   "detail": "+1 indexed event(s) · latest: Terra Bella",
+   "detected_at": "2026-07-08T08:04:21.809Z"
   },
   {
-   "buyer_id": "asda",
-   "name": "Asda",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-07-07T09:03:58.145Z"
+   "buyer_id": "union-square-ventures",
+   "name": "Union Square Ventures",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "1 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-07-08T08:04:21.809Z"
   },
   {
-   "buyer_id": "asda",
-   "name": "Asda",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s)",
-   "detected_at": "2026-07-07T09:03:58.145Z"
+   "buyer_id": "pequot-capital-management",
+   "name": "Pequot Capital Management",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-07-08T08:04:21.809Z"
+  },
+  {
+   "buyer_id": "general-catalyst",
+   "name": "General Catalyst",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-07-08T08:04:21.809Z"
   }
  ]
 }
