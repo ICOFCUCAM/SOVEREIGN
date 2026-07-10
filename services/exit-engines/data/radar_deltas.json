@@ -1,42 +1,42 @@
 {
- "detected_at": "2026-07-08T08:04:21.810Z",
+ "detected_at": "2026-07-10T09:03:00.098Z",
  "count": 4,
  "deltas": [
   {
-   "buyer_id": "google",
-   "name": "Google",
+   "buyer_id": "hilton-worldwide",
+   "name": "Hilton Worldwide",
    "kind": "new_acquisition",
-   "before": "25",
-   "after": "26",
-   "detail": "+1 indexed event(s) · latest: Terra Bella",
-   "detected_at": "2026-07-08T08:04:21.809Z"
+   "before": "594",
+   "after": "600",
+   "detail": "+6 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-07-10T09:03:00.097Z"
   },
   {
-   "buyer_id": "union-square-ventures",
-   "name": "Union Square Ventures",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "1 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-07-08T08:04:21.809Z"
+   "buyer_id": "blackrock",
+   "name": "BlackRock",
+   "kind": "new_acquisition",
+   "before": "154",
+   "after": "155",
+   "detail": "+1 indexed event(s) · latest: Global Infrastructure Partners",
+   "detected_at": "2026-07-10T09:03:00.097Z"
   },
   {
-   "buyer_id": "pequot-capital-management",
-   "name": "Pequot Capital Management",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-07-08T08:04:21.809Z"
+   "buyer_id": "accenture",
+   "name": "Accenture",
+   "kind": "new_acquisition",
+   "before": "52",
+   "after": "54",
+   "detail": "+2 indexed event(s) · latest: Faculty",
+   "detected_at": "2026-07-10T09:03:00.097Z"
   },
   {
-   "buyer_id": "general-catalyst",
-   "name": "General Catalyst",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-07-08T08:04:21.809Z"
+   "buyer_id": "warner-music-group",
+   "name": "Warner Music Group",
+   "kind": "new_acquisition",
+   "before": "26",
+   "after": "27",
+   "detail": "+1 indexed event(s) · latest: Uproxx",
+   "detected_at": "2026-07-10T09:03:00.097Z"
   }
  ]
 }
