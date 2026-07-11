@@ -1,6 +1,6 @@
 {
- "as_of": "2026-07-10T09:02:58.738Z",
- "totalEvents": 3844,
+ "as_of": "2026-07-11T07:40:06.469Z",
+ "totalEvents": 3848,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -208,7 +208,7 @@
  "geoDensity": [
   {
    "region": "North America",
-   "deals": 1685,
+   "deals": 1686,
    "disclosedUsd": 898200939708
   },
   {
@@ -228,7 +228,7 @@
   },
   {
    "region": "Asia",
-   "deals": 68,
+   "deals": 71,
    "disclosedUsd": 7057931001
   },
   {
@@ -263,9 +263,9 @@
   {
    "buyer_id": "microsoft",
    "name": "Microsoft",
-   "deals": 393,
-   "recentDeals": 5,
-   "lastDate": "2026-01-05"
+   "deals": 394,
+   "recentDeals": 6,
+   "lastDate": "2026-04-18"
   },
   {
    "buyer_id": "sony",
@@ -422,17 +422,17 @@
    "lastDate": "2025-02-04"
   },
   {
+   "buyer_id": "accenture",
+   "name": "Accenture",
+   "deals": 54,
+   "recentDeals": 21,
+   "lastDate": "2026-01-01"
+  },
+  {
    "buyer_id": "citrix",
    "name": "Citrix",
    "deals": 53,
    "recentDeals": 0
-  },
-  {
-   "buyer_id": "accenture",
-   "name": "Accenture",
-   "deals": 51,
-   "recentDeals": 20,
-   "lastDate": "2026-01-01"
   },
   {
    "buyer_id": "take-two-interactive",

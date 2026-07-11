@@ -1,42 +1,42 @@
 {
- "detected_at": "2026-07-10T09:03:00.098Z",
+ "detected_at": "2026-07-11T07:40:07.807Z",
  "count": 4,
  "deltas": [
   {
-   "buyer_id": "hilton-worldwide",
-   "name": "Hilton Worldwide",
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
    "kind": "new_acquisition",
-   "before": "594",
-   "after": "600",
-   "detail": "+6 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-07-10T09:03:00.097Z"
+   "before": "418",
+   "after": "419",
+   "detail": "+1 indexed event(s) · latest: Fintool",
+   "detected_at": "2026-07-11T07:40:07.806Z"
   },
   {
-   "buyer_id": "blackrock",
-   "name": "BlackRock",
-   "kind": "new_acquisition",
-   "before": "154",
-   "after": "155",
-   "detail": "+1 indexed event(s) · latest: Global Infrastructure Partners",
-   "detected_at": "2026-07-10T09:03:00.097Z"
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
+   "kind": "cadence_shift",
+   "before": "2/12m",
+   "after": "3/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-07-11T07:40:07.806Z"
+  },
+  {
+   "buyer_id": "meta-platforms",
+   "name": "Meta Platforms",
+   "kind": "cadence_shift",
+   "before": "7/12m",
+   "after": "6/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-07-11T07:40:07.806Z"
   },
   {
    "buyer_id": "accenture",
    "name": "Accenture",
    "kind": "new_acquisition",
-   "before": "52",
-   "after": "54",
-   "detail": "+2 indexed event(s) · latest: Faculty",
-   "detected_at": "2026-07-10T09:03:00.097Z"
-  },
-  {
-   "buyer_id": "warner-music-group",
-   "name": "Warner Music Group",
-   "kind": "new_acquisition",
-   "before": "26",
-   "after": "27",
-   "detail": "+1 indexed event(s) · latest: Uproxx",
-   "detected_at": "2026-07-10T09:03:00.097Z"
+   "before": "54",
+   "after": "57",
+   "detail": "+3 indexed event(s) · latest: Faculty",
+   "detected_at": "2026-07-11T07:40:07.806Z"
   }
  ]
 }
