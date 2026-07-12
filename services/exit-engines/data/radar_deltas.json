@@ -1,42 +1,5 @@
 {
- "detected_at": "2026-07-11T07:40:07.807Z",
- "count": 4,
- "deltas": [
-  {
-   "buyer_id": "microsoft",
-   "name": "Microsoft",
-   "kind": "new_acquisition",
-   "before": "418",
-   "after": "419",
-   "detail": "+1 indexed event(s) · latest: Fintool",
-   "detected_at": "2026-07-11T07:40:07.806Z"
-  },
-  {
-   "buyer_id": "microsoft",
-   "name": "Microsoft",
-   "kind": "cadence_shift",
-   "before": "2/12m",
-   "after": "3/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-07-11T07:40:07.806Z"
-  },
-  {
-   "buyer_id": "meta-platforms",
-   "name": "Meta Platforms",
-   "kind": "cadence_shift",
-   "before": "7/12m",
-   "after": "6/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-07-11T07:40:07.806Z"
-  },
-  {
-   "buyer_id": "accenture",
-   "name": "Accenture",
-   "kind": "new_acquisition",
-   "before": "54",
-   "after": "57",
-   "detail": "+3 indexed event(s) · latest: Faculty",
-   "detected_at": "2026-07-11T07:40:07.806Z"
-  }
- ]
+ "detected_at": "2026-07-12T07:59:24.028Z",
+ "count": 0,
+ "deltas": []
 }
