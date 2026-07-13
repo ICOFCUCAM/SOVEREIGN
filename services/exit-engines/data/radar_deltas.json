@@ -1,5 +1,24 @@
 {
- "detected_at": "2026-07-12T07:59:24.028Z",
- "count": 0,
- "deltas": []
+ "detected_at": "2026-07-13T08:46:24.825Z",
+ "count": 2,
+ "deltas": [
+  {
+   "buyer_id": "kkr",
+   "name": "KKR",
+   "kind": "new_acquisition",
+   "before": "29",
+   "after": "30",
+   "detail": "+1 indexed event(s) · latest: FiberCop",
+   "detected_at": "2026-07-13T08:46:24.824Z"
+  },
+  {
+   "buyer_id": "kkr-co",
+   "name": "KKR & Co.",
+   "kind": "new_acquisition",
+   "before": "29",
+   "after": "30",
+   "detail": "+1 indexed event(s) · latest: FiberCop",
+   "detected_at": "2026-07-13T08:46:24.824Z"
+  }
+ ]
 }
