@@ -1,24 +1,15 @@
 {
- "detected_at": "2026-07-13T08:46:24.825Z",
- "count": 2,
+ "detected_at": "2026-07-14T07:42:26.913Z",
+ "count": 1,
  "deltas": [
   {
-   "buyer_id": "kkr",
-   "name": "KKR",
+   "buyer_id": "blackrock",
+   "name": "BlackRock",
    "kind": "new_acquisition",
-   "before": "29",
-   "after": "30",
-   "detail": "+1 indexed event(s) · latest: FiberCop",
-   "detected_at": "2026-07-13T08:46:24.824Z"
-  },
-  {
-   "buyer_id": "kkr-co",
-   "name": "KKR & Co.",
-   "kind": "new_acquisition",
-   "before": "29",
-   "after": "30",
-   "detail": "+1 indexed event(s) · latest: FiberCop",
-   "detected_at": "2026-07-13T08:46:24.824Z"
+   "before": "155",
+   "after": "156",
+   "detail": "+1 indexed event(s) · latest: Global Infrastructure Partners",
+   "detected_at": "2026-07-14T07:42:26.913Z"
   }
  ]
 }
