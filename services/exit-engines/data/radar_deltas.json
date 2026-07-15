@@ -1,15 +1,5 @@
 {
- "detected_at": "2026-07-14T07:42:26.913Z",
- "count": 1,
- "deltas": [
-  {
-   "buyer_id": "blackrock",
-   "name": "BlackRock",
-   "kind": "new_acquisition",
-   "before": "155",
-   "after": "156",
-   "detail": "+1 indexed event(s) · latest: Global Infrastructure Partners",
-   "detected_at": "2026-07-14T07:42:26.913Z"
-  }
- ]
+ "detected_at": "2026-07-15T07:46:35.185Z",
+ "count": 0,
+ "deltas": []
 }
