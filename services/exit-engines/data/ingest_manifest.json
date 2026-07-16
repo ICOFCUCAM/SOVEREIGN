@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-15T07:46:34.051Z",
+ "generated_at": "2026-07-16T07:54:05.496Z",
  "hosts_used": [
   "en.wikipedia.org",
   "www.wikidata.org",
@@ -9,7 +9,7 @@
   "efts.sec.gov"
  ],
  "counts": {
-  "buyers": 1483,
+  "buyers": 1482,
   "acquisition_events": 6610,
   "rollups": 475,
   "graph_edges": 123

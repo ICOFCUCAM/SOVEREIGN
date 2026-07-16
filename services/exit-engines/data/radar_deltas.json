@@ -1,5 +1,33 @@
 {
- "detected_at": "2026-07-15T07:46:35.185Z",
- "count": 0,
- "deltas": []
+ "detected_at": "2026-07-16T07:54:06.840Z",
+ "count": 3,
+ "deltas": [
+  {
+   "buyer_id": "sony",
+   "name": "Sony",
+   "kind": "cadence_shift",
+   "before": "15/12m",
+   "after": "14/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-07-16T07:54:06.839Z"
+  },
+  {
+   "buyer_id": "hewlett-packard",
+   "name": "Hewlett-Packard",
+   "kind": "new_acquisition",
+   "before": "131",
+   "after": "141",
+   "detail": "+10 indexed event(s) · latest: Juniper Networks (by HPE)",
+   "detected_at": "2026-07-16T07:54:06.839Z"
+  },
+  {
+   "buyer_id": "hewlett-packard-enterprise",
+   "name": "Hewlett Packard Enterprise",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-16T07:54:06.839Z"
+  }
+ ]
 }
