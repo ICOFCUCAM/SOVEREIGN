@@ -1,33 +1,33 @@
 {
- "detected_at": "2026-07-16T07:54:06.840Z",
+ "detected_at": "2026-07-17T07:50:17.304Z",
  "count": 3,
  "deltas": [
   {
-   "buyer_id": "sony",
-   "name": "Sony",
-   "kind": "cadence_shift",
-   "before": "15/12m",
-   "after": "14/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-07-16T07:54:06.839Z"
-  },
-  {
-   "buyer_id": "hewlett-packard",
-   "name": "Hewlett-Packard",
+   "buyer_id": "advent-international",
+   "name": "Advent International",
    "kind": "new_acquisition",
-   "before": "131",
-   "after": "141",
-   "detail": "+10 indexed event(s) · latest: Juniper Networks (by HPE)",
-   "detected_at": "2026-07-16T07:54:06.839Z"
+   "before": "9",
+   "after": "10",
+   "detail": "+1 indexed event(s) · latest: Salt & Stone",
+   "detected_at": "2026-07-17T07:50:17.304Z"
   },
   {
-   "buyer_id": "hewlett-packard-enterprise",
-   "name": "Hewlett Packard Enterprise",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-07-16T07:54:06.839Z"
+   "buyer_id": "advent-international",
+   "name": "Advent International",
+   "kind": "cadence_shift",
+   "before": "2/12m",
+   "after": "3/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-07-17T07:50:17.304Z"
+  },
+  {
+   "buyer_id": "rosetta-stone",
+   "name": "Rosetta Stone",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-07-17T07:50:17.304Z"
   }
  ]
 }

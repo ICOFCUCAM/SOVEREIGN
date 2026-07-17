@@ -1,10 +1,10 @@
 {
- "as_of": "2026-07-16T07:54:05.496Z",
+ "as_of": "2026-07-17T07:50:16.432Z",
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)",
  "indexes": [
   {
    "sector": "Software",
-   "volume": 632,
+   "volume": 633,
    "volume12m": 5,
    "volumePrior12m": 3,
    "trendPct": 0.6666666666666666,
@@ -70,7 +70,7 @@
   },
   {
    "sector": "Developer Tools",
-   "volume": 55,
+   "volume": 56,
    "volume12m": 0,
    "volumePrior12m": 0,
    "trendPct": null,
@@ -113,17 +113,6 @@
    "totalDisclosedUsd": 3855000000
   },
   {
-   "sector": "Ecommerce",
-   "volume": 16,
-   "volume12m": 0,
-   "volumePrior12m": 0,
-   "trendPct": null,
-   "activeBuyers": 8,
-   "disclosedDeals": 6,
-   "medianDealUsd": 80000000,
-   "totalDisclosedUsd": 814900002
-  },
-  {
    "sector": "Payments",
    "volume": 16,
    "volume12m": 0,
@@ -133,6 +122,17 @@
    "disclosedDeals": 6,
    "medianDealUsd": 171500000,
    "totalDisclosedUsd": 2729000002
+  },
+  {
+   "sector": "Ecommerce",
+   "volume": 15,
+   "volume12m": 0,
+   "volumePrior12m": 0,
+   "trendPct": null,
+   "activeBuyers": 7,
+   "disclosedDeals": 6,
+   "medianDealUsd": 80000000,
+   "totalDisclosedUsd": 814900002
   },
   {
    "sector": "Manufacturing",

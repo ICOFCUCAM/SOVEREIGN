@@ -1,6 +1,6 @@
 {
- "as_of": "2026-07-16T07:54:05.496Z",
- "totalEvents": 3848,
+ "as_of": "2026-07-17T07:50:16.432Z",
+ "totalEvents": 3849,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1541,
+   "deals": 1542,
    "disclosedUsd": 383676561050
   },
   {
@@ -484,6 +484,13 @@
    "lastDate": "2024-01-01"
   },
   {
+   "buyer_id": "advent-international",
+   "name": "Advent International",
+   "deals": 7,
+   "recentDeals": 4,
+   "lastDate": "2026-04-01"
+  },
+  {
    "buyer_id": "gen-digital",
    "name": "Gen Digital",
    "deals": 7,
@@ -503,13 +510,6 @@
    "deals": 6,
    "recentDeals": 0,
    "lastDate": "2014-08-01"
-  },
-  {
-   "buyer_id": "advent-international",
-   "name": "Advent International",
-   "deals": 6,
-   "recentDeals": 3,
-   "lastDate": "2025-10-01"
   },
   {
    "buyer_id": "axel-springer-se",
