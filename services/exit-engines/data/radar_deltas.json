@@ -1,33 +1,33 @@
 {
- "detected_at": "2026-07-17T07:50:17.304Z",
+ "detected_at": "2026-07-18T07:32:08.083Z",
  "count": 3,
  "deltas": [
   {
-   "buyer_id": "advent-international",
-   "name": "Advent International",
+   "buyer_id": "hilton-worldwide",
+   "name": "Hilton Worldwide",
    "kind": "new_acquisition",
-   "before": "9",
-   "after": "10",
-   "detail": "+1 indexed event(s) · latest: Salt & Stone",
-   "detected_at": "2026-07-17T07:50:17.304Z"
+   "before": "600",
+   "after": "601",
+   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-07-18T07:32:08.083Z"
   },
   {
-   "buyer_id": "advent-international",
-   "name": "Advent International",
-   "kind": "cadence_shift",
-   "before": "2/12m",
-   "after": "3/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-07-17T07:50:17.304Z"
+   "buyer_id": "international-flavors-fragrances",
+   "name": "International Flavors & Fragrances",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-07-18T07:32:08.083Z"
   },
   {
-   "buyer_id": "rosetta-stone",
-   "name": "Rosetta Stone",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-07-17T07:50:17.304Z"
+   "buyer_id": "international-flavors-fragrances",
+   "name": "International Flavors & Fragrances",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s) · latest: Danisco",
+   "detected_at": "2026-07-18T07:32:08.083Z"
   }
  ]
 }
