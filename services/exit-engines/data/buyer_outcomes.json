@@ -1,5 +1,5 @@
 {
- "as_of": "2026-07-18T07:32:06.685Z",
+ "as_of": "2026-07-19T08:02:59.701Z",
  "buyers": [
   {
    "buyer_id": "microsoft",
@@ -24,7 +24,7 @@
    "events_indexed": 419,
    "disclosed_events": 130,
    "source_url": "https://www.wikidata.org/wiki/Q2283",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "sony",
@@ -46,7 +46,7 @@
    "events_indexed": 308,
    "disclosed_events": 88,
    "source_url": "https://www.wikidata.org/wiki/Q41187",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "alphabet",
@@ -68,7 +68,7 @@
    "events_indexed": 286,
    "disclosed_events": 66,
    "source_url": "https://www.wikidata.org/wiki/Q20800404",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "cisco",
@@ -90,7 +90,7 @@
    "events_indexed": 235,
    "disclosed_events": 146,
    "source_url": "https://www.wikidata.org/wiki/Q173395",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "ibm",
@@ -112,7 +112,7 @@
    "events_indexed": 206,
    "disclosed_events": 43,
    "source_url": "https://www.wikidata.org/wiki/Q37156",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "disney",
@@ -134,7 +134,7 @@
    "events_indexed": 190,
    "disclosed_events": 21,
    "source_url": "https://www.wikidata.org/wiki/Q7414",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "amazon",
@@ -159,7 +159,7 @@
    "events_indexed": 175,
    "disclosed_events": 10,
    "source_url": "https://www.wikidata.org/wiki/Q3884",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "apple",
@@ -181,7 +181,7 @@
    "events_indexed": 158,
    "disclosed_events": 42,
    "source_url": "https://www.wikidata.org/wiki/Q312",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "hewlett-packard",
@@ -203,7 +203,7 @@
    "events_indexed": 141,
    "disclosed_events": 36,
    "source_url": "https://www.wikidata.org/wiki/Q80978",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "aol",
@@ -225,7 +225,7 @@
    "events_indexed": 124,
    "disclosed_events": 30,
    "source_url": "https://www.wikidata.org/wiki/Q191715",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "nortonlifelock",
@@ -247,7 +247,7 @@
    "events_indexed": 121,
    "disclosed_events": 80,
    "source_url": "https://www.wikidata.org/wiki/Q677085",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "symantec",
@@ -269,7 +269,7 @@
    "events_indexed": 121,
    "disclosed_events": 80,
    "source_url": "https://www.wikidata.org/wiki/Q677085",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "yahoo",
@@ -291,7 +291,7 @@
    "events_indexed": 119,
    "disclosed_events": 49,
    "source_url": "https://www.wikidata.org/wiki/Q29231846",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "nokia",
@@ -313,7 +313,7 @@
    "events_indexed": 96,
    "disclosed_events": 20,
    "source_url": "https://www.wikidata.org/wiki/Q1418",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "electronic-arts",
@@ -335,7 +335,7 @@
    "events_indexed": 79,
    "disclosed_events": 13,
    "source_url": "https://www.wikidata.org/wiki/Q173941",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "adobe",
@@ -359,7 +359,7 @@
    "events_indexed": 74,
    "disclosed_events": 4,
    "source_url": "https://www.wikidata.org/wiki/Q11463",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "sap",
@@ -381,7 +381,7 @@
    "events_indexed": 74,
    "disclosed_events": 15,
    "source_url": "https://www.wikidata.org/wiki/Q552581",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "ebay",
@@ -403,7 +403,7 @@
    "events_indexed": 72,
    "disclosed_events": 34,
    "source_url": "https://www.wikidata.org/wiki/Q58024",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "embracer-group",
@@ -425,7 +425,7 @@
    "events_indexed": 71,
    "disclosed_events": 10,
    "source_url": "https://www.wikidata.org/wiki/Q65083539",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "twitter",
@@ -447,7 +447,7 @@
    "events_indexed": 71,
    "disclosed_events": 14,
    "source_url": "https://www.wikidata.org/wiki/Q1390577",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "take-two-interactive",
@@ -469,7 +469,7 @@
    "events_indexed": 67,
    "disclosed_events": 18,
    "source_url": "https://www.wikidata.org/wiki/Q94933",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "accenture",
@@ -487,7 +487,7 @@
    "events_indexed": 57,
    "disclosed_events": 2,
    "source_url": "https://www.wikidata.org/wiki/Q338825",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "dell",
@@ -509,7 +509,7 @@
    "events_indexed": 46,
    "disclosed_events": 16,
    "source_url": "https://www.wikidata.org/wiki/Q30873",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "blackberry",
@@ -531,7 +531,7 @@
    "events_indexed": 32,
    "disclosed_events": 8,
    "source_url": "https://www.wikidata.org/wiki/Q502121",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "juniper-networks",
@@ -553,7 +553,7 @@
    "events_indexed": 28,
    "disclosed_events": 22,
    "source_url": "https://www.wikidata.org/wiki/Q1049080",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "vista-equity-partners",
@@ -564,7 +564,7 @@
    "events_indexed": 8,
    "disclosed_events": 0,
    "source_url": "https://www.wikidata.org/wiki/Q7936440",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "salesforce",
@@ -575,7 +575,7 @@
    "events_indexed": 4,
    "disclosed_events": 0,
    "source_url": "https://www.wikidata.org/wiki/Q941127",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "thoma-bravo",
@@ -586,7 +586,7 @@
    "events_indexed": 4,
    "disclosed_events": 0,
    "source_url": "https://www.wikidata.org/wiki/Q7786759",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   },
   {
    "buyer_id": "uber",
@@ -597,7 +597,7 @@
    "events_indexed": 3,
    "disclosed_events": 0,
    "source_url": "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
-   "generated_at": "2026-07-18T07:32:07.805Z"
+   "generated_at": "2026-07-19T08:03:00.591Z"
   }
  ]
 }
