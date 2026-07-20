@@ -1,15 +1,60 @@
 {
- "detected_at": "2026-07-19T08:03:00.823Z",
- "count": 1,
+ "detected_at": "2026-07-20T08:57:39.277Z",
+ "count": 6,
  "deltas": [
   {
-   "buyer_id": "meta-platforms",
-   "name": "Meta Platforms",
-   "kind": "new_acquisition",
-   "before": "116",
-   "after": "117",
-   "detail": "+1 indexed event(s) · latest: Assured Robot Intelligence",
-   "detected_at": "2026-07-19T08:03:00.823Z"
+   "buyer_id": "walgreens",
+   "name": "Walgreens",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "3 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-07-20T08:57:39.276Z"
+  },
+  {
+   "buyer_id": "dennys",
+   "name": "Denny's",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "2 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-07-20T08:57:39.276Z"
+  },
+  {
+   "buyer_id": "walgreens-boots-alliance",
+   "name": "Walgreens Boots Alliance",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-20T08:57:39.276Z"
+  },
+  {
+   "buyer_id": "dayforce",
+   "name": "Dayforce",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-07-20T08:57:39.276Z"
+  },
+  {
+   "buyer_id": "jamf",
+   "name": "Jamf",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-07-20T08:57:39.276Z"
+  },
+  {
+   "buyer_id": "sealed-air",
+   "name": "Sealed Air",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-07-20T08:57:39.276Z"
   }
  ]
 }
