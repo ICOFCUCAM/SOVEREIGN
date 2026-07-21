@@ -1,6 +1,6 @@
 {
- "as_of": "2026-07-20T08:57:37.923Z",
- "totalEvents": 3842,
+ "as_of": "2026-07-21T08:04:46.622Z",
+ "totalEvents": 3850,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1535,
+   "deals": 1543,
    "disclosedUsd": 383676561050
   },
   {
@@ -263,7 +263,7 @@
   {
    "buyer_id": "microsoft",
    "name": "Microsoft",
-   "deals": 385,
+   "deals": 394,
    "recentDeals": 6,
    "lastDate": "2026-04-18"
   },
