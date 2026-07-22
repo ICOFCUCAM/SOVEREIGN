@@ -1,6 +1,6 @@
 {
- "as_of": "2026-07-21T08:04:46.622Z",
- "totalEvents": 3850,
+ "as_of": "2026-07-22T08:15:16.622Z",
+ "totalEvents": 3851,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1543,
+   "deals": 1544,
    "disclosedUsd": 383676561050
   },
   {
@@ -251,7 +251,7 @@
   {
    "from": "North America",
    "to": "Other",
-   "deals": 147
+   "deals": 148
   },
   {
    "from": "Other",
@@ -298,7 +298,7 @@
   {
    "buyer_id": "ibm",
    "name": "IBM",
-   "deals": 199,
+   "deals": 198,
    "recentDeals": 11,
    "lastDate": "2025-12-08"
   },
@@ -505,18 +505,18 @@
    "lastDate": "2024-01-01"
   },
   {
+   "buyer_id": "axel-springer-se",
+   "name": "Axel Springer SE",
+   "deals": 7,
+   "recentDeals": 2,
+   "lastDate": "2026-06-30"
+  },
+  {
    "buyer_id": "google",
    "name": "Google",
    "deals": 6,
    "recentDeals": 0,
    "lastDate": "2014-08-01"
-  },
-  {
-   "buyer_id": "axel-springer-se",
-   "name": "Axel Springer SE",
-   "deals": 6,
-   "recentDeals": 1,
-   "lastDate": "2025-01-01"
   },
   {
    "buyer_id": "apollo-global-management",

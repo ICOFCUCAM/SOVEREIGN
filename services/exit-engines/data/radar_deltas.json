@@ -1,24 +1,60 @@
 {
- "detected_at": "2026-07-21T08:04:48.012Z",
- "count": 2,
+ "detected_at": "2026-07-22T08:15:18.029Z",
+ "count": 6,
  "deltas": [
   {
-   "buyer_id": "microsoft",
-   "name": "Microsoft",
-   "kind": "new_acquisition",
-   "before": "385",
-   "after": "419",
-   "detail": "+34 indexed event(s) · latest: Fintool",
-   "detected_at": "2026-07-21T08:04:48.012Z"
+   "buyer_id": "amazon",
+   "name": "Amazon",
+   "kind": "cadence_shift",
+   "before": "5/12m",
+   "after": "4/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-07-22T08:15:18.029Z"
   },
   {
-   "buyer_id": "arconic",
-   "name": "Arconic",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-07-21T08:04:48.012Z"
+   "buyer_id": "axel-springer-se",
+   "name": "Axel Springer SE",
+   "kind": "new_acquisition",
+   "before": "10",
+   "after": "11",
+   "detail": "+1 indexed event(s) · latest: Telegraph Media Group",
+   "detected_at": "2026-07-22T08:15:18.029Z"
+  },
+  {
+   "buyer_id": "axel-springer-se",
+   "name": "Axel Springer SE",
+   "kind": "cadence_shift",
+   "before": "0/12m",
+   "after": "1/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-07-22T08:15:18.029Z"
+  },
+  {
+   "buyer_id": "costar-group",
+   "name": "CoStar Group",
+   "kind": "new_acquisition",
+   "before": "2",
+   "after": "3",
+   "detail": "+1 indexed event(s) · latest: Emporis",
+   "detected_at": "2026-07-22T08:15:18.029Z"
+  },
+  {
+   "buyer_id": "ge-healthcare",
+   "name": "GE HealthCare",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-07-22T08:15:18.029Z"
+  },
+  {
+   "buyer_id": "ge-healthcare",
+   "name": "GE HealthCare",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s) · latest: Caption Health",
+   "detected_at": "2026-07-22T08:15:18.029Z"
   }
  ]
 }
