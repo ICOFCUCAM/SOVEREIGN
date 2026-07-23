@@ -1,60 +1,42 @@
 {
- "detected_at": "2026-07-22T08:15:18.029Z",
- "count": 6,
+ "detected_at": "2026-07-23T08:04:39.382Z",
+ "count": 4,
  "deltas": [
   {
-   "buyer_id": "amazon",
-   "name": "Amazon",
+   "buyer_id": "hilton-worldwide",
+   "name": "Hilton Worldwide",
+   "kind": "new_acquisition",
+   "before": "601",
+   "after": "602",
+   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-07-23T08:04:39.381Z"
+  },
+  {
+   "buyer_id": "ibm",
+   "name": "IBM",
+   "kind": "new_acquisition",
+   "before": "198",
+   "after": "206",
+   "detail": "+8 indexed event(s) · latest: Confluent",
+   "detected_at": "2026-07-23T08:04:39.381Z"
+  },
+  {
+   "buyer_id": "marriott-international",
+   "name": "Marriott International",
    "kind": "cadence_shift",
-   "before": "5/12m",
-   "after": "4/12m",
+   "before": "1/12m",
+   "after": "0/12m",
    "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-07-22T08:15:18.029Z"
+   "detected_at": "2026-07-23T08:04:39.381Z"
   },
   {
-   "buyer_id": "axel-springer-se",
-   "name": "Axel Springer SE",
+   "buyer_id": "garmin",
+   "name": "Garmin",
    "kind": "new_acquisition",
-   "before": "10",
-   "after": "11",
-   "detail": "+1 indexed event(s) · latest: Telegraph Media Group",
-   "detected_at": "2026-07-22T08:15:18.029Z"
-  },
-  {
-   "buyer_id": "axel-springer-se",
-   "name": "Axel Springer SE",
-   "kind": "cadence_shift",
-   "before": "0/12m",
-   "after": "1/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-07-22T08:15:18.029Z"
-  },
-  {
-   "buyer_id": "costar-group",
-   "name": "CoStar Group",
-   "kind": "new_acquisition",
-   "before": "2",
-   "after": "3",
-   "detail": "+1 indexed event(s) · latest: Emporis",
-   "detected_at": "2026-07-22T08:15:18.029Z"
-  },
-  {
-   "buyer_id": "ge-healthcare",
-   "name": "GE HealthCare",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-07-22T08:15:18.029Z"
-  },
-  {
-   "buyer_id": "ge-healthcare",
-   "name": "GE HealthCare",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s) · latest: Caption Health",
-   "detected_at": "2026-07-22T08:15:18.029Z"
+   "before": "3",
+   "after": "4",
+   "detail": "+1 indexed event(s) · latest: AeroData",
+   "detected_at": "2026-07-23T08:04:39.381Z"
   }
  ]
 }
