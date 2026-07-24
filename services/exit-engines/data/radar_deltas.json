@@ -1,42 +1,15 @@
 {
- "detected_at": "2026-07-23T08:04:39.382Z",
- "count": 4,
+ "detected_at": "2026-07-24T08:02:01.300Z",
+ "count": 1,
  "deltas": [
   {
-   "buyer_id": "hilton-worldwide",
-   "name": "Hilton Worldwide",
-   "kind": "new_acquisition",
-   "before": "601",
-   "after": "602",
-   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-07-23T08:04:39.381Z"
-  },
-  {
-   "buyer_id": "ibm",
-   "name": "IBM",
-   "kind": "new_acquisition",
-   "before": "198",
-   "after": "206",
-   "detail": "+8 indexed event(s) · latest: Confluent",
-   "detected_at": "2026-07-23T08:04:39.381Z"
-  },
-  {
-   "buyer_id": "marriott-international",
-   "name": "Marriott International",
+   "buyer_id": "sony",
+   "name": "Sony",
    "kind": "cadence_shift",
-   "before": "1/12m",
-   "after": "0/12m",
+   "before": "14/12m",
+   "after": "13/12m",
    "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-07-23T08:04:39.381Z"
-  },
-  {
-   "buyer_id": "garmin",
-   "name": "Garmin",
-   "kind": "new_acquisition",
-   "before": "3",
-   "after": "4",
-   "detail": "+1 indexed event(s) · latest: AeroData",
-   "detected_at": "2026-07-23T08:04:39.381Z"
+   "detected_at": "2026-07-24T08:02:01.299Z"
   }
  ]
 }
