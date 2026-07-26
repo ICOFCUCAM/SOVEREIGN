@@ -1,6 +1,6 @@
 {
- "as_of": "2026-07-25T07:50:19.204Z",
- "totalEvents": 3851,
+ "as_of": "2026-07-26T08:21:24.698Z",
+ "totalEvents": 3849,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1544,
+   "deals": 1542,
    "disclosedUsd": 383676561050
   },
   {
@@ -251,12 +251,12 @@
   {
    "from": "North America",
    "to": "Other",
-   "deals": 147
+   "deals": 134
   },
   {
    "from": "Other",
    "to": "Other",
-   "deals": 14
+   "deals": 15
   }
  ],
  "topAcquirers": [
@@ -331,15 +331,15 @@
    "lastDate": "2024-01-10"
   },
   {
-   "buyer_id": "nortonlifelock",
-   "name": "NortonLifeLock",
-   "deals": 121,
-   "recentDeals": 0,
-   "lastDate": "2021-08-11"
-  },
-  {
    "buyer_id": "symantec",
    "name": "Symantec",
+   "deals": 128,
+   "recentDeals": 1,
+   "lastDate": "2024-01-01"
+  },
+  {
+   "buyer_id": "gen-digital",
+   "name": "Gen Digital",
    "deals": 121,
    "recentDeals": 0,
    "lastDate": "2021-08-11"
@@ -491,13 +491,6 @@
    "lastDate": "2026-04-01"
   },
   {
-   "buyer_id": "gen-digital",
-   "name": "Gen Digital",
-   "deals": 7,
-   "recentDeals": 1,
-   "lastDate": "2024-01-01"
-  },
-  {
    "buyer_id": "blackrock",
    "name": "BlackRock",
    "deals": 7,
@@ -538,6 +531,13 @@
    "deals": 4,
    "recentDeals": 1,
    "lastDate": "2025-01-01"
+  },
+  {
+   "buyer_id": "hasbro",
+   "name": "Hasbro",
+   "deals": 4,
+   "recentDeals": 0,
+   "lastDate": "1991-01-01"
   }
  ],
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)"

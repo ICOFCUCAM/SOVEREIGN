@@ -1,15 +1,150 @@
 {
- "detected_at": "2026-07-25T07:50:20.594Z",
- "count": 1,
+ "detected_at": "2026-07-26T08:21:26.069Z",
+ "count": 16,
  "deltas": [
   {
-   "buyer_id": "hilton-worldwide",
-   "name": "Hilton Worldwide",
+   "buyer_id": "symantec",
+   "name": "Symantec",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "medium",
+   "detail": "appetite low → medium",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "symantec",
+   "name": "Symantec",
    "kind": "new_acquisition",
-   "before": "602",
-   "after": "604",
-   "detail": "+2 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-07-25T07:50:20.593Z"
+   "before": "121",
+   "after": "129",
+   "detail": "+8 indexed event(s) · latest: Avast Limited",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "gen-digital",
+   "name": "Gen Digital",
+   "kind": "appetite_change",
+   "before": "medium",
+   "after": "low",
+   "detail": "appetite medium → low",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "gen-digital",
+   "name": "Gen Digital",
+   "kind": "new_acquisition",
+   "before": "8",
+   "after": "121",
+   "detail": "+113 indexed event(s) · latest: Avast",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "tpg-inc",
+   "name": "TPG Inc.",
+   "kind": "new_acquisition",
+   "before": "17",
+   "after": "18",
+   "detail": "+1 indexed event(s) · latest: New Relic",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "francisco-partners",
+   "name": "Francisco Partners",
+   "kind": "new_acquisition",
+   "before": "5",
+   "after": "6",
+   "detail": "+1 indexed event(s) · latest: New Relic",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "mid-europa-partners",
+   "name": "Mid Europa Partners",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "mid-europa-partners",
+   "name": "Mid Europa Partners",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s) · latest: Orange Austria",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "salesforce",
+   "name": "Salesforce",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "qualcomm",
+   "name": "Qualcomm",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "royal-caribbean-group",
+   "name": "Royal Caribbean Group",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "sp-global",
+   "name": "S&P Global",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "seagate-technology",
+   "name": "Seagate Technology",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "sherwin-williams",
+   "name": "Sherwin-Williams",
+   "kind": "appetite_change",
+   "before": "medium",
+   "after": "no_events",
+   "detail": "appetite medium → no_events",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "sherwin-williams",
+   "name": "Sherwin-Williams",
+   "kind": "cadence_shift",
+   "before": "1/12m",
+   "after": "0/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-07-26T08:21:26.068Z"
+  },
+  {
+   "buyer_id": "indian-motorcycle",
+   "name": "Indian Motorcycle",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-07-26T08:21:26.068Z"
   }
  ]
 }
