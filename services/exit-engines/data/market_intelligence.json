@@ -1,5 +1,5 @@
 {
- "as_of": "2026-07-26T08:21:24.698Z",
+ "as_of": "2026-07-27T09:23:52.320Z",
  "totalEvents": 3849,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
@@ -208,12 +208,12 @@
  "geoDensity": [
   {
    "region": "North America",
-   "deals": 1686,
+   "deals": 1687,
    "disclosedUsd": 898200939708
   },
   {
    "region": "Other",
-   "deals": 1542,
+   "deals": 1541,
    "disclosedUsd": 383676561050
   },
   {
@@ -305,9 +305,9 @@
   {
    "buyer_id": "amazon",
    "name": "Amazon",
-   "deals": 157,
-   "recentDeals": 13,
-   "lastDate": "2026-03-19"
+   "deals": 158,
+   "recentDeals": 14,
+   "lastDate": "2026-03-25"
   },
   {
    "buyer_id": "apple",
@@ -437,7 +437,7 @@
   {
    "buyer_id": "take-two-interactive",
    "name": "Take-Two Interactive",
-   "deals": 48,
+   "deals": 47,
    "recentDeals": 3,
    "lastDate": "2025-03-01"
   },
