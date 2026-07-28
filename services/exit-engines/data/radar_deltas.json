@@ -1,42 +1,15 @@
 {
- "detected_at": "2026-07-27T09:23:53.569Z",
- "count": 4,
+ "detected_at": "2026-07-28T08:16:09.971Z",
+ "count": 1,
  "deltas": [
   {
-   "buyer_id": "amazon",
-   "name": "Amazon",
+   "buyer_id": "thoma-bravo",
+   "name": "Thoma Bravo",
    "kind": "new_acquisition",
-   "before": "175",
-   "after": "176",
-   "detail": "+1 indexed event(s) · latest: Fauna Robotics",
-   "detected_at": "2026-07-27T09:23:53.568Z"
-  },
-  {
-   "buyer_id": "amazon",
-   "name": "Amazon",
-   "kind": "cadence_shift",
-   "before": "4/12m",
-   "after": "5/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-07-27T09:23:53.568Z"
-  },
-  {
-   "buyer_id": "salesforce",
-   "name": "Salesforce",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-07-27T09:23:53.568Z"
-  },
-  {
-   "buyer_id": "salesforce",
-   "name": "Salesforce",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "4",
-   "detail": "+4 indexed event(s)",
-   "detected_at": "2026-07-27T09:23:53.568Z"
+   "before": "4",
+   "after": "5",
+   "detail": "+1 indexed event(s) · latest: Ping Identity",
+   "detected_at": "2026-07-28T08:16:09.970Z"
   }
  ]
 }
