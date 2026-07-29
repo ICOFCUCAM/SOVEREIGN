@@ -1,15 +1,5 @@
 {
- "detected_at": "2026-07-28T08:16:09.971Z",
- "count": 1,
- "deltas": [
-  {
-   "buyer_id": "thoma-bravo",
-   "name": "Thoma Bravo",
-   "kind": "new_acquisition",
-   "before": "4",
-   "after": "5",
-   "detail": "+1 indexed event(s) · latest: Ping Identity",
-   "detected_at": "2026-07-28T08:16:09.970Z"
-  }
- ]
+ "detected_at": "2026-07-29T08:26:42.470Z",
+ "count": 0,
+ "deltas": []
 }
