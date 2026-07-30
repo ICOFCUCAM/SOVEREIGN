@@ -1,5 +1,33 @@
 {
- "detected_at": "2026-07-29T08:26:42.470Z",
- "count": 0,
- "deltas": []
+ "detected_at": "2026-07-30T08:30:11.522Z",
+ "count": 3,
+ "deltas": [
+  {
+   "buyer_id": "hilton-worldwide",
+   "name": "Hilton Worldwide",
+   "kind": "new_acquisition",
+   "before": "604",
+   "after": "609",
+   "detail": "+5 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-07-30T08:30:11.521Z"
+  },
+  {
+   "buyer_id": "salesforce",
+   "name": "Salesforce",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-30T08:30:11.521Z"
+  },
+  {
+   "buyer_id": "google",
+   "name": "Google",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-07-30T08:30:11.521Z"
+  }
+ ]
 }
