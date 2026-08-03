@@ -11,6 +11,7 @@ import {
   COST_ROUTE, LIFECYCLE_ROUTE, ROI_ROUTE, INDUSTRIES_ROUTE, LEARN_ROUTE, LIBRARY_ROUTE, DOCS_ROUTE,
 } from "../lib/routes";
 import { VALUE, VALUE_BASE } from "../lib/value";
+import { useFooterCopy } from "../lib/messages/footer";
 
 // Shared marketing chrome for the public pages (Landing keeps its own copies for
 // historical reasons; Procurement + Architecture use these). No dependency on an
@@ -58,17 +59,21 @@ export const Card: React.FC<{ title: string; body: string }> = ({ title, body })
 );
 
 // Shared trust strip — the three positioning pillars, full-bleed.
-export const TrustStrip: React.FC = () => (
-  <div className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.022] to-white/[0.006] px-5 py-7 sm:px-8 lg:px-12">
-    <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-x-10 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50">
-      <span>Sovereign by Design</span>
-      <span className="hidden text-gold-400/40 sm:inline">·</span>
-      <span>Auditable by Default</span>
-      <span className="hidden text-gold-400/40 sm:inline">·</span>
-      <span>Institution Ready</span>
+export const TrustStrip: React.FC = () => {
+  const f = useFooterCopy();
+  return (
+    <div className="border-t border-white/[0.06] bg-gradient-to-b from-white/[0.022] to-white/[0.006] px-5 py-7 sm:px-8 lg:px-12">
+      <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-x-10 gap-y-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50">
+        {f.trust.map((pillar, i) => (
+          <React.Fragment key={pillar}>
+            {i > 0 && <span className="hidden text-gold-400/40 sm:inline">·</span>}
+            <span>{pillar}</span>
+          </React.Fragment>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // One navigation column in the footer — a quiet uppercase label over restrained links.
 const FooterCol: React.FC<{ title: string; links: [string, string][] }> = ({ title, links }) => (
@@ -87,48 +92,54 @@ const FooterCol: React.FC<{ title: string; links: [string, string][] }> = ({ tit
 // Shared public footer — an institutional sitemap (wordmark + positioning over
 // three navigation columns) above a legal/assurance baseline. Substantial, the way
 // infrastructure footers are — not a single thin credit line.
-export const PublicFooter: React.FC = () => (
-  <footer className="relative overflow-hidden border-t border-white/[0.06] px-5 py-14 sm:px-8 lg:px-12">
-    <div className="pointer-events-none absolute -right-20 -top-24 opacity-[0.025]" aria-hidden>
-      <DispatchMark className="h-80 w-80 text-gold-400" />
-    </div>
-    <div className="relative mx-auto max-w-[1500px]">
-      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_1fr]">
-        <div className="max-w-xs">
-          <div className="flex items-center gap-2.5">
-            <DispatchMark className="h-6 w-6 text-gold-400" />
-            <span className="font-semibold tracking-tight text-white/85">Sovereign Dispatch</span>
-          </div>
-          <p className="mt-4 text-[12.5px] leading-relaxed text-white/45">
-            Institutional trust infrastructure — where institutional decisions become sealed, governed, permanent records.
-          </p>
-        </div>
-        <FooterCol title="The Standard" links={[["What is an Official Record?", OFFICIAL_RECORD_ROUTE], ["See a governed record", WALKTHROUGH_ROUTE], ["Verify a record", VERIFY_ROUTE], ["Outcomes", OUTCOMES_ROUTE], ["The Standard", STANDARD_ROUTE], ["Records", RECORDS_ROUTE], ["Readiness Journey", JOURNEY_ROUTE]]} />
-        <FooterCol title="Platform" links={[["Overview", PLATFORM_ROUTE], ["Industries", INDUSTRIES_ROUTE], ["Library", LIBRARY_ROUTE], ["Concepts", LEARN_ROUTE], ["Developers", DEVELOPERS_ROUTE], ["Documentation", DOCS_ROUTE], ["Security", SECURITY_ROUTE], ["Compliance", COMPLIANCE_ROUTE]]} />
-        <FooterCol title="Evaluate" links={[["Cost of Publication", COST_ROUTE], ["The Governed Lifecycle", LIFECYCLE_ROUTE], ["ROI Estimator", ROI_ROUTE], ["Pricing", PRICING_ROUTE], ["Procurement", PROCUREMENT_ROUTE], ["Architecture", ARCHITECTURE_ROUTE], ["Evidence", EVIDENCE_ROUTE], ["Trust", TRUST_ROUTE]]} />
-        <FooterCol title="The Case" links={VALUE.map((v) => [v.title, `${VALUE_BASE}/${v.slug}`] as [string, string])} />
-        <FooterCol title="Access" links={[["Launch Dispatch", "/console"], ["Log in", "/console"]]} />
+export const PublicFooter: React.FC = () => {
+  const f = useFooterCopy();
+  // Labels come from the footer catalog; routes stay here — zipped by index.
+  const STANDARD_ROUTES = [OFFICIAL_RECORD_ROUTE, WALKTHROUGH_ROUTE, VERIFY_ROUTE, OUTCOMES_ROUTE, STANDARD_ROUTE, RECORDS_ROUTE, JOURNEY_ROUTE];
+  const PLATFORM_ROUTES = [PLATFORM_ROUTE, INDUSTRIES_ROUTE, LIBRARY_ROUTE, LEARN_ROUTE, DEVELOPERS_ROUTE, DOCS_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE];
+  const EVALUATE_ROUTES = [COST_ROUTE, LIFECYCLE_ROUTE, ROI_ROUTE, PRICING_ROUTE, PROCUREMENT_ROUTE, ARCHITECTURE_ROUTE, EVIDENCE_ROUTE, TRUST_ROUTE];
+  const zip = (labels: string[], routes: string[]) => labels.map((l, i) => [l, routes[i]] as [string, string]);
+  return (
+    <footer className="relative overflow-hidden border-t border-white/[0.06] px-5 py-14 sm:px-8 lg:px-12">
+      <div className="pointer-events-none absolute -right-20 -top-24 opacity-[0.025]" aria-hidden>
+        <DispatchMark className="h-80 w-80 text-gold-400" />
       </div>
-      <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/[0.05] pt-7 sm:flex-row sm:items-center">
-        <div className="text-[12px] text-white/55">
-          © <span className="font-mono tracking-[0.1em]">MMXXXVI</span> Sovereign Dispatch
-          <span className="text-white/25"> · </span>Institutional Trust Infrastructure
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/45">
-            <span>Sovereign by design</span>
-            <span className="text-gold-400/30">·</span>
-            <span>Auditable always</span>
+      <div className="relative mx-auto max-w-[1500px]">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_1fr]">
+          <div className="max-w-xs">
+            <div className="flex items-center gap-2.5">
+              <DispatchMark className="h-6 w-6 text-gold-400" />
+              <span className="font-semibold tracking-tight text-white/85">Sovereign Dispatch</span>
+            </div>
+            <p className="mt-4 text-[12.5px] leading-relaxed text-white/45">{f.blurb}</p>
           </div>
-          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="group inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 text-white/55 transition hover:border-gold-400/40 hover:text-gold-300" aria-label="Back to top">
-            <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 13V3M3 8l5-5 5 5" /></svg>
-          </button>
+          <FooterCol title={f.cols.standard} links={zip(f.standard, STANDARD_ROUTES)} />
+          <FooterCol title={f.cols.platform} links={zip(f.platform, PLATFORM_ROUTES)} />
+          <FooterCol title={f.cols.evaluate} links={zip(f.evaluate, EVALUATE_ROUTES)} />
+          <FooterCol title={f.cols.caseCol} links={VALUE.map((v, i) => [f.caseTitles[i] ?? v.title, `${VALUE_BASE}/${v.slug}`] as [string, string])} />
+          <FooterCol title={f.cols.access} links={zip(f.access, ["/console", "/console"])} />
+        </div>
+        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/[0.05] pt-7 sm:flex-row sm:items-center">
+          <div className="text-[12px] text-white/55">
+            © <span className="font-mono tracking-[0.1em]">MMXXXVI</span> Sovereign Dispatch
+            <span className="text-white/25"> · </span>{f.byline}
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/45">
+              <span>{f.motto[0]}</span>
+              <span className="text-gold-400/30">·</span>
+              <span>{f.motto[1]}</span>
+            </div>
+            <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="group inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 text-white/55 transition hover:border-gold-400/40 hover:text-gold-300" aria-label={f.backToTop}>
+              <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 13V3M3 8l5-5 5 5" /></svg>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 // Fine tactile grain over the dark field — kills flat-black banding. Fixed,
 // decorative, identical to the homepage so every marketing surface reads alike.
