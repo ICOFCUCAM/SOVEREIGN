@@ -3,7 +3,7 @@ import type { Marketing3Copy } from "./marketing3";
 export const MARKETING3_EL: Marketing3Copy = {
   architecture: {
     docTitle: "Επισκόπηση Αρχιτεκτονικής",
-    docSub: "Θεσμική υποδομή δημοσίευσης · Τεχνική αναφορά",
+    docSub: "Θεσμική υποδομή εμπιστοσύνης · Τεχνική αναφορά",
     versionLine: "Έκδοση 1.0 · 2026",
     classificationLabel: "Διαβάθμιση:", classificationValue: "ΑΔΙΑΒΑΘΜΗΤΟ",
     distributionLabel: "Διανομή:", distributionValue: "Δημόσια",

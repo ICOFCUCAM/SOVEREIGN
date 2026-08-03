@@ -28,7 +28,7 @@ const IndustryPage: React.FC = () => {
       {
         "@type": "Service",
         name: `Sovereign Dispatch ${ind.forLabel}`,
-        serviceType: "Institutional publication infrastructure",
+        serviceType: "Institutional trust infrastructure",
         description: ind.metaDescription,
         areaServed: ind.name,
         provider: { "@type": "Organization", name: "Sovereign Dispatch", url: "https://dispatch.sovereigndo.com/" },

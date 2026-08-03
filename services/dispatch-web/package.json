@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Sovereign Dispatch console — institutional publication infrastructure UI (Submit → Govern → Approve → Render → Publish → Retrieve).",
+  "description": "Sovereign Dispatch console — institutional trust infrastructure UI (Submit → Govern → Approve → Render → Publish → Retrieve).",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

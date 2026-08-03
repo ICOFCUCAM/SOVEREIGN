@@ -5,7 +5,7 @@
 //                              │
 //                          (rejected)            (withdrawn from published)
 //
-// Dispatch is institutional publication infrastructure, not a word processor:
+// Dispatch is institutional trust infrastructure, not a word processor:
 // the value is Submit → Govern → Approve → Render → Publish → Retrieve, with
 // provenance and clearance enforced at each gate. This module owns the state
 // machine, the approval policy resolution (N-eyes / clearance / auto-approve

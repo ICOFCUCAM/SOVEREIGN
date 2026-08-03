@@ -34,7 +34,7 @@ const EvidencePackage: React.FC = () => {
   // Build the seven evaluation sections from live data + honest posture.
   const sections = b ? [
     { id: "Architecture", rows: [
-      ["Platform", "Sovereign Dispatch — institutional publication infrastructure"],
+      ["Platform", "Sovereign Dispatch — institutional trust infrastructure"],
       ["Lifecycle", "Create → Govern → Approve → Render → Publish → Preserve"],
       ["Tenant model", "Multi-tenant, row-level-security isolated (deny-by-default)"],
       ["Audit", "Append-only, SHA-256 hashed event trail"],

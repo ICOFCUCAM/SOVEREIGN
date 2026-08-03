@@ -73,7 +73,7 @@ const card = (t, p) => `<div class="card"><div class="t">${t}</div><p>${p}</p></
 const overview = page({
   eyebrow: "Procurement Overview",
   title: "Sovereign Dispatch — Procurement Overview",
-  lede: "Sovereign Dispatch is institutional publication infrastructure: it turns documents into governed, certified and permanently verifiable Official Records. This overview gives a procurement and technical evaluation team what it needs to assess the platform without a sales call.",
+  lede: "Sovereign Dispatch is institutional trust infrastructure: it turns institutional decisions into governed, certified and permanently verifiable Official Records. This overview gives a procurement and technical evaluation team what it needs to assess the platform without a sales call.",
   version: "2026.06",
   body: `
     <h2>What it is</h2><div class="rule"></div>

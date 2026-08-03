@@ -3,7 +3,7 @@ import type { Marketing3Copy } from "./marketing3";
 export const MARKETING3_PL: Marketing3Copy = {
   architecture: {
     docTitle: "Przegląd architektury",
-    docSub: "Instytucjonalna infrastruktura publikacyjna · Dokumentacja techniczna",
+    docSub: "Instytucjonalna infrastruktura zaufania · Dokumentacja techniczna",
     versionLine: "Wersja 1.0 · 2026",
     classificationLabel: "Klauzula:", classificationValue: "JAWNE",
     distributionLabel: "Dystrybucja:", distributionValue: "Publiczna",

@@ -39,7 +39,7 @@ export const INDUSTRIES: Industry[] = [
     ],
     frameworks: ["ISO 27001-aligned controls", "National data-residency requirements", "Public-records retention law", "GDPR-aligned data handling"],
     metaTitle: "Sovereign Dispatch for Government — Govern Executive Orders, Regulations & Gazettes",
-    metaDescription: "Turn executive orders, regulations and official gazettes into governed, certified, permanently verifiable Official Records — issued under the authority of an office. Institutional publication infrastructure for government.",
+    metaDescription: "Turn executive orders, regulations and official gazettes into governed, certified, permanently verifiable Official Records — issued under the authority of an office. Institutional trust infrastructure for government.",
   },
   {
     slug: "healthcare",

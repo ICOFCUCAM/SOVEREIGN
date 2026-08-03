@@ -6,7 +6,7 @@ Tailwind SPA, **separate from the Sovereign marketing website** and from
 institutional identity (dense, classification-forward — not the cinematic
 Sovereign theme).
 
-Dispatch is **institutional publication infrastructure, not a word processor**.
+Dispatch is **institutional trust infrastructure, not a word processor**.
 The console is organised around the publication lifecycle, not file editing:
 
 ```
