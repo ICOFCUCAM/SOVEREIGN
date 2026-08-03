@@ -222,6 +222,126 @@
       "citationStyle": "footnote",
       "tocDepth": 3,
       "numbered": true
+    },
+    "legislative_instrument": {
+      "docType": "legislative_instrument",
+      "template": "legislative-instrument",
+      "version": 1,
+      "requiredRoles": ["summary", "preamble", "provisions", "commencement"],
+      "optionalRoles": ["definitions", "schedules", "appendices"],
+      "roleOrder": ["title_block", "summary", "preamble", "definitions", "provisions", "schedules", "commencement", "appendices"],
+      "blockPolicy": { "provisions": { "require": ["bullets"] }, "commencement": { "require": ["callout"] } },
+      "citationStyle": "endnote",
+      "tocDepth": 2,
+      "numbered": true
+    },
+    "gazette_notice": {
+      "docType": "gazette_notice",
+      "template": "gazette-notice",
+      "version": 1,
+      "requiredRoles": ["summary", "issuing_authority", "body", "effect"],
+      "optionalRoles": ["references", "appendices"],
+      "roleOrder": ["title_block", "summary", "issuing_authority", "body", "references", "effect", "appendices"],
+      "blockPolicy": { "effect": { "require": ["callout"] } },
+      "citationStyle": "none",
+      "tocDepth": 1,
+      "numbered": false
+    },
+    "tender_notice": {
+      "docType": "tender_notice",
+      "template": "tender-notice",
+      "version": 1,
+      "requiredRoles": ["summary", "scope", "eligibility", "submission"],
+      "optionalRoles": ["timeline", "evaluation_criteria", "appendices"],
+      "roleOrder": ["title_block", "summary", "scope", "eligibility", "evaluation_criteria", "timeline", "submission", "appendices"],
+      "blockPolicy": { "eligibility": { "require": ["bullets"] }, "submission": { "require": ["callout"] } },
+      "citationStyle": "none",
+      "tocDepth": 1,
+      "numbered": true
+    },
+    "contract_award": {
+      "docType": "contract_award",
+      "template": "contract-award",
+      "version": 1,
+      "requiredRoles": ["summary", "evaluation", "decision", "terms"],
+      "optionalRoles": ["bidders", "appendices"],
+      "roleOrder": ["title_block", "summary", "bidders", "evaluation", "decision", "terms", "appendices"],
+      "blockPolicy": { "decision": { "require": ["callout"] }, "terms": { "require": ["bullets"] } },
+      "citationStyle": "none",
+      "tocDepth": 1,
+      "numbered": true
+    },
+    "contract_record": {
+      "docType": "contract_record",
+      "template": "contract-record",
+      "version": 1,
+      "requiredRoles": ["summary", "parties", "obligations", "term"],
+      "optionalRoles": ["schedules", "signatures", "appendices"],
+      "roleOrder": ["title_block", "summary", "parties", "obligations", "schedules", "term", "signatures", "appendices"],
+      "blockPolicy": { "parties": { "require": ["bullets"] }, "term": { "require": ["callout"] } },
+      "citationStyle": "none",
+      "tocDepth": 2,
+      "numbered": true
+    },
+    "court_judgment": {
+      "docType": "court_judgment",
+      "template": "court-judgment",
+      "version": 1,
+      "requiredRoles": ["case_summary", "background", "reasoning", "ruling"],
+      "optionalRoles": ["issues", "citations", "appendices"],
+      "roleOrder": ["title_block", "case_summary", "background", "issues", "reasoning", "ruling", "citations", "appendices"],
+      "blockPolicy": { "ruling": { "require": ["callout"] } },
+      "citationStyle": "endnote",
+      "tocDepth": 2,
+      "numbered": true
+    },
+    "board_resolution": {
+      "docType": "board_resolution",
+      "template": "board-resolution",
+      "version": 1,
+      "requiredRoles": ["preamble", "resolutions", "voting", "effect"],
+      "optionalRoles": ["attendees", "appendices"],
+      "roleOrder": ["title_block", "preamble", "attendees", "resolutions", "voting", "effect", "appendices"],
+      "blockPolicy": { "resolutions": { "require": ["bullets"] }, "effect": { "require": ["callout"] } },
+      "citationStyle": "none",
+      "tocDepth": 1,
+      "numbered": true
+    },
+    "election_declaration": {
+      "docType": "election_declaration",
+      "template": "election-declaration",
+      "version": 1,
+      "requiredRoles": ["summary", "results", "declaration", "objections"],
+      "optionalRoles": ["turnout", "appendices"],
+      "roleOrder": ["title_block", "summary", "turnout", "results", "declaration", "objections", "appendices"],
+      "blockPolicy": { "results": { "require": ["bullets"] }, "declaration": { "require": ["callout"] } },
+      "citationStyle": "none",
+      "tocDepth": 1,
+      "numbered": false
+    },
+    "public_notice": {
+      "docType": "public_notice",
+      "template": "public-notice",
+      "version": 1,
+      "requiredRoles": ["summary", "body", "authority", "effective"],
+      "optionalRoles": ["references", "appendices"],
+      "roleOrder": ["title_block", "summary", "body", "authority", "references", "effective", "appendices"],
+      "blockPolicy": { "effective": { "require": ["callout"] } },
+      "citationStyle": "none",
+      "tocDepth": 1,
+      "numbered": false
+    },
+    "model_approval": {
+      "docType": "model_approval",
+      "template": "model-approval",
+      "version": 1,
+      "requiredRoles": ["summary", "intended_use", "risk_assessment", "decision"],
+      "optionalRoles": ["evaluation", "conditions", "appendices"],
+      "roleOrder": ["title_block", "summary", "intended_use", "evaluation", "risk_assessment", "conditions", "decision", "appendices"],
+      "blockPolicy": { "risk_assessment": { "require": ["bullets"] }, "decision": { "require": ["callout"] } },
+      "citationStyle": "none",
+      "tocDepth": 2,
+      "numbered": true
     }
   }
 }
