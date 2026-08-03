@@ -169,6 +169,15 @@ ul.timeline{list-style:none;padding:0;} ul.timeline li{margin:2mm 0;} .ts{font-w
 .chart svg{border:1px solid #eee;} .pb{page-break-after:always;}
 .sig{margin-top:8mm;} .sigline{display:inline-block;width:60mm;border-bottom:1px solid #333;margin-right:4mm;} .signame{font-family:Helvetica,Arial,sans-serif;font-size:9pt;color:#555;}
 section.sources h2{font-size:14pt;border-bottom:1px solid #ccc;} ol.refs{font-size:9.5pt;color:#333;}
+/* Formal-instrument cover treatment — official acts (legislation, gazette and
+   public notices, judgments, resolutions, declarations) present a centred,
+   ruled cover in the manner of a published instrument. Report-style templates
+   keep the default left-aligned cover. */
+body.tpl-legislative-instrument .cover, body.tpl-gazette-notice .cover, body.tpl-public-notice .cover,
+body.tpl-court-judgment .cover, body.tpl-board-resolution .cover, body.tpl-election-declaration .cover { text-align:center; }
+body.tpl-legislative-instrument .cover h1, body.tpl-gazette-notice .cover h1, body.tpl-public-notice .cover h1,
+body.tpl-court-judgment .cover h1, body.tpl-board-resolution .cover h1, body.tpl-election-declaration .cover h1 {
+  font-variant:small-caps; letter-spacing:.04em; border-top:3px double #0b1f3a; border-bottom:3px double #0b1f3a; padding:6mm 0; }
 `;
 
 /** Render a Layout Model to a complete print-ready HTML document. */
@@ -203,8 +212,11 @@ export function renderHtml(lm) {
       }).join("")}</ol></section>`
     : "";
 
+  // Template-aware body class (e.g. tpl-gazette-notice) — the styling seam for
+  // per-record-class print treatment. Restricted to a safe slug charset.
+  const tplClass = /^[a-z0-9-]+$/.test(lm.templateBinding?.template || "") ? ` class="tpl-${lm.templateBinding.template}"` : "";
   const html = `<!doctype html><html lang="${esc(lm.metadata?.language || "en-GB")}"><head><meta charset="utf-8"/>`
-    + `<title>${esc(c.title)}</title><style>:root{--banner:"${bannerText}";--ref:"${refCode}";}${CSS}</style></head><body>`
+    + `<title>${esc(c.title)}</title><style>:root{--banner:"${bannerText}";--ref:"${refCode}";}${CSS}</style></head><body${tplClass}>`
     + `<div class="cover">${bannerText ? `<div class="stamp">${esc(bannerText)}</div>` : ""}<h1>${esc(c.title)}</h1>`
     + `${c.subtitle ? `<div class="sub">${esc(c.subtitle)}</div>` : ""}<div class="meta">${metaLines.join("<br/>")}</div></div>`
     + `${toc}${bodyHtml}${appendixHtml}${sources}</body></html>`;

@@ -100,7 +100,7 @@ export const PublicFooter: React.FC = () => (
             <span className="font-semibold tracking-tight text-white/85">Sovereign Dispatch</span>
           </div>
           <p className="mt-4 text-[12.5px] leading-relaxed text-white/45">
-            The operating system for institutional publication — where information becomes a sealed, governed, permanent record.
+            Institutional trust infrastructure — where institutional decisions become sealed, governed, permanent records.
           </p>
         </div>
         <FooterCol title="The Standard" links={[["What is an Official Record?", OFFICIAL_RECORD_ROUTE], ["See a governed record", WALKTHROUGH_ROUTE], ["Verify a record", VERIFY_ROUTE], ["Outcomes", OUTCOMES_ROUTE], ["The Standard", STANDARD_ROUTE], ["Records", RECORDS_ROUTE], ["Readiness Journey", JOURNEY_ROUTE]]} />
