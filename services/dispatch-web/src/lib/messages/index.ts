@@ -213,7 +213,24 @@ export type { Marketing6Copy };
 
 // ── Marketing batch 7 (Readiness Journey, Record Gallery, Walkthrough, 404) ──
 import { MARKETING7_EN, type Marketing7Copy } from "./marketing7";
+import { MARKETING7_FR } from "./marketing7.fr";
+import { MARKETING7_ES } from "./marketing7.es";
+import { MARKETING7_DE } from "./marketing7.de";
+import { MARKETING7_NO } from "./marketing7.no";
+import { MARKETING7_PT } from "./marketing7.pt";
+import { MARKETING7_IT } from "./marketing7.it";
+import { MARKETING7_NL } from "./marketing7.nl";
+import { MARKETING7_AR } from "./marketing7.ar";
+import { MARKETING7_JA } from "./marketing7.ja";
+import { MARKETING7_ZH } from "./marketing7.zh";
+import { MARKETING7_PL } from "./marketing7.pl";
+import { MARKETING7_SV } from "./marketing7.sv";
+import { MARKETING7_DA } from "./marketing7.da";
+import { MARKETING7_FI } from "./marketing7.fi";
+import { MARKETING7_EL } from "./marketing7.el";
 
-const MARKETING7: Record<string, Marketing7Copy> = { en: MARKETING7_EN };
+const MARKETING7: Record<string, Marketing7Copy> = {
+  en: MARKETING7_EN, fr: MARKETING7_FR, es: MARKETING7_ES, de: MARKETING7_DE, no: MARKETING7_NO, pt: MARKETING7_PT, it: MARKETING7_IT, nl: MARKETING7_NL, ar: MARKETING7_AR, ja: MARKETING7_JA, zh: MARKETING7_ZH, pl: MARKETING7_PL, sv: MARKETING7_SV, da: MARKETING7_DA, fi: MARKETING7_FI, el: MARKETING7_EL,
+};
 export const useMarketing7Copy = (): Marketing7Copy => MARKETING7[useUiLocale()] || MARKETING7_EN;
 export type { Marketing7Copy };
