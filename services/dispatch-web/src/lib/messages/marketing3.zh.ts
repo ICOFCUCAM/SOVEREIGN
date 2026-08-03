@@ -3,7 +3,7 @@ import type { Marketing3Copy } from "./marketing3";
 export const MARKETING3_ZH: Marketing3Copy = {
   architecture: {
     docTitle: "架构概览",
-    docSub: "机构级发布基础设施 · 技术参考",
+    docSub: "机构级信任基础设施 · 技术参考",
     versionLine: "版本 1.0 · 2026",
     classificationLabel: "密级：", classificationValue: "非密",
     distributionLabel: "分发范围：", distributionValue: "公开",

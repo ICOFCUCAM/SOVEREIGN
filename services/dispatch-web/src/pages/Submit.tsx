@@ -81,7 +81,7 @@ const Submit: React.FC = () => {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <Card className="p-4">
-          <Field label="Document payload (DDM JSON)" hint="Dispatch is publication infrastructure — the body is a structured payload, not free-text editing.">
+          <Field label="Document payload (DDM JSON)" hint="Dispatch is trust infrastructure — the body is a structured payload, not free-text editing.">
             <textarea
               className={`${inputCls} h-[420px] font-mono text-xs leading-relaxed`}
               value={raw} onChange={(e) => { setRaw(e.target.value); setValidation(null); }} spellCheck={false} />

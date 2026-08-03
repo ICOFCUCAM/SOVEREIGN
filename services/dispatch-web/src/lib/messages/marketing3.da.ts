@@ -3,7 +3,7 @@ import type { Marketing3Copy } from "./marketing3";
 export const MARKETING3_DA: Marketing3Copy = {
   architecture: {
     docTitle: "Arkitekturoversigt",
-    docSub: "Institutionel publiceringsinfrastruktur · Teknisk reference",
+    docSub: "Institutionel tillidsinfrastruktur · Teknisk reference",
     versionLine: "Version 1.0 · 2026",
     classificationLabel: "Klassifikation:", classificationValue: "UKLASSIFICERET",
     distributionLabel: "Distribution:", distributionValue: "Offentlig",

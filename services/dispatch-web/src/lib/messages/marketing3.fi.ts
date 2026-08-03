@@ -3,7 +3,7 @@ import type { Marketing3Copy } from "./marketing3";
 export const MARKETING3_FI: Marketing3Copy = {
   architecture: {
     docTitle: "Arkkitehtuurikatsaus",
-    docSub: "Institutionaalinen julkaisuinfrastruktuuri · Tekninen viiteasiakirja",
+    docSub: "Institutionaalinen luottamusinfrastruktuuri · Tekninen viiteasiakirja",
     versionLine: "Versio 1.0 · 2026",
     classificationLabel: "Luokitus:", classificationValue: "EI LUOKITELTU",
     distributionLabel: "Jakelu:", distributionValue: "Julkinen",

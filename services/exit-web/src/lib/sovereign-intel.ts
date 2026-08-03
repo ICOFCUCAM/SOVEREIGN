@@ -101,7 +101,7 @@ const CORE: SovereignProduct[] = [
   // ── Operations ──
   { id: "exitos", name: "ExitOS", category: "Operations", label: "Founder Acquisition Infrastructure", description: "The operating system founders interact with to run an exit — from sourcing to closed deal, on one runtime.", sector: "enterprise_saas", valueLabel: "Deployment value", valueText: "$4M–$8M" },
   { id: "veritas-operations", name: "Veritas Operations", category: "Operations", label: "Autonomous Company Operations Infrastructure", description: "Operational management, workflow orchestration, accounting intelligence and autonomous company operations.", sector: "enterprise_saas", valueLabel: "Deployment value", valueText: "$25M–$80M" },
-  { id: "sovereign-dispatch", name: "Sovereign Dispatch", category: "Operations", label: "Institutional Publication Infrastructure", description: "Institutional publication infrastructure — PDF, DOCX, PPTX, briefing packages and board reports.", sector: "media_content", valueLabel: "Deployment value", valueText: "$6M–$15M" },
+  { id: "sovereign-dispatch", name: "Sovereign Dispatch", category: "Operations", label: "Institutional Trust Infrastructure", description: "Institutional trust infrastructure — governed, certified and permanently verifiable official records.", sector: "media_content", valueLabel: "Deployment value", valueText: "$6M–$15M" },
   { id: "deployment-engine", name: "Deployment Engine", category: "Operations", label: "Sovereign Deployment Infrastructure", description: "From acquisition to live, automatically.", sector: "developer_tools" },
 ];
 

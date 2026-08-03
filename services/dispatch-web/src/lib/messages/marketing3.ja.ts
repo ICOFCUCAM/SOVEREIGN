@@ -3,7 +3,7 @@ import type { Marketing3Copy } from "./marketing3";
 export const MARKETING3_JA: Marketing3Copy = {
   architecture: {
     docTitle: "アーキテクチャ概要",
-    docSub: "機関向け公文書発行基盤 · 技術リファレンス",
+    docSub: "機関向け信頼基盤 · 技術リファレンス",
     versionLine: "バージョン 1.0 · 2026",
     classificationLabel: "機密区分:", classificationValue: "非機密",
     distributionLabel: "配布範囲:", distributionValue: "一般公開",

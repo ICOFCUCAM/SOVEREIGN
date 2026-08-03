@@ -38,7 +38,7 @@ export interface Marketing3Copy { architecture: ArchitectureCopy; developers: De
 export const MARKETING3_EN: Marketing3Copy = {
   architecture: {
     docTitle: "Architecture Overview",
-    docSub: "Institutional publication infrastructure · Technical reference",
+    docSub: "Institutional trust infrastructure · Technical reference",
     versionLine: "Version 1.0 · 2026",
     classificationLabel: "Classification:", classificationValue: "UNCLASSIFIED",
     distributionLabel: "Distribution:", distributionValue: "Public",

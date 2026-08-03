@@ -16,7 +16,7 @@ const SUF = " · Sovereign Dispatch";
 const STATIC: Record<string, Meta> = {
   "/": {
     title: "Sovereign Dispatch — The Vanguard of Institutional Governance",
-    description: "Institutional publication infrastructure — turn documents into governed, certified and permanently verifiable Official Records. Priced by institution, never per seat.",
+    description: "Institutional trust infrastructure — turn documents into governed, certified and permanently verifiable Official Records. Priced by institution, never per seat.",
   },
   "/pricing": { title: "Pricing" + SUF, description: "Priced like institutional infrastructure — never per seat. Evaluation, Institutional, Enterprise and Sovereign deployment." },
   "/procurement": { title: "Evaluation Package" + SUF, description: "A self-serve evaluation dossier — architecture, governance, security, residency and the evaluation path. No sales call required." },
