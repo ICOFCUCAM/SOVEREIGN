@@ -1,18 +1,24 @@
 import React from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { PublicHeader, PageBanner, PublicFooter, FilmGrain, Chevron, useReveal } from "../components/brand";
-import { VALUE, VALUE_BASE, valueBySlug } from "../lib/value";
+import { VALUE_BASE } from "../lib/value";
+import { useLocalizedValue } from "../lib/messages/value";
+import { t as tr } from "../lib/i18n";
+import { useUiLocale } from "../lib/locale";
 
 // One template, seven pages. Each financial-value item (/value/:slug) gets its
-// own URL and content, introduced on the homepage and expanded here.
+// own URL and content, introduced on the homepage and expanded here. All copy
+// resolves through the value catalog for the active locale.
 const ValuePage: React.FC = () => {
   const { slug = "" } = useParams();
   const nav = useNavigate();
+  const locale = useUiLocale();
   useReveal();
-  const item = valueBySlug(slug);
+  const { chrome, items } = useLocalizedValue();
+  const item = items.find((v) => v.slug === slug);
   if (!item) return <Navigate to="/" replace />;
 
-  const others = VALUE.filter((v) => v.slug !== item.slug);
+  const others = items.filter((v) => v.slug !== item.slug);
 
   return (
     <div className="relative min-h-full bg-[#070707] text-white">
@@ -25,7 +31,7 @@ const ValuePage: React.FC = () => {
           <div className="mx-auto max-w-3xl">
             <div className="flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[0.25em] text-gold-400">
               <span className="font-mono text-gold-400/70">{String(item.n).padStart(2, "0")}</span>
-              <span>Financial value</span>
+              <span>{chrome.eyebrow}</span>
             </div>
             <h1 className="mt-4 font-serif text-[2.4rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[3rem]">{item.title}</h1>
             <p className="mt-5 max-w-2xl text-[17px] leading-relaxed text-white/65">{item.lead}</p>
@@ -56,11 +62,11 @@ const ValuePage: React.FC = () => {
             <div className="mt-10 flex flex-wrap items-center gap-4">
               <button onClick={() => nav("/console")}
                 className="group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
-                Launch Dispatch <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                {tr(locale, "cta.launch")} <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
               </button>
               <button onClick={() => nav("/")}
                 className="inline-flex items-center rounded border border-white/15 bg-white/[0.02] px-6 py-3 text-[13px] font-semibold uppercase tracking-wide text-white/85 transition hover:border-white/35 hover:bg-white/[0.06]">
-                Back to overview
+                {chrome.back}
               </button>
             </div>
           </div>
@@ -69,7 +75,7 @@ const ValuePage: React.FC = () => {
         {/* the other six */}
         <section className="border-t border-white/[0.06] px-8 py-16 lg:px-12">
           <div className="mx-auto max-w-5xl">
-            <div className="mb-7 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">The other ways Dispatch creates value</div>
+            <div className="mb-7 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{chrome.others}</div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {others.map((v) => (
                 <button key={v.slug} onClick={() => nav(`${VALUE_BASE}/${v.slug}`)}
