@@ -16,6 +16,24 @@ const blank: GovernancePolicy = {
   autoApproveService: false, sequential: true, approvalTtlDays: undefined, active: true,
 };
 
+// Blueprints — recommended starting points per record class. A blueprint
+// prefills the studio (chain depth, ordering, expiry, retention); the admin
+// still chooses the offices, because chains reference offices, never people.
+// Sensitive institutional acts default to deeper chains and longer retention.
+interface PolicyBlueprint { docType: string; name: string; steps: number; approvalTtlDays?: number; retentionDays: number; note: string }
+const BLUEPRINTS: PolicyBlueprint[] = [
+  { docType: "court_judgment", name: "Court Judgment Policy", steps: 2, approvalTtlDays: 14, retentionDays: 9125, note: "Two ordered approvals · 25-year retention" },
+  { docType: "election_declaration", name: "Election Declaration Policy", steps: 2, approvalTtlDays: 7, retentionDays: 3650, note: "Two ordered approvals · approvals expire in 7 days" },
+  { docType: "legislative_instrument", name: "Legislative Instrument Policy", steps: 2, retentionDays: 9125, note: "Two ordered approvals · 25-year retention" },
+  { docType: "board_resolution", name: "Board Resolution Policy", steps: 2, retentionDays: 3650, note: "Chair and secretary approve · 10-year retention" },
+  { docType: "contract_award", name: "Contract Award Policy", steps: 2, retentionDays: 2555, note: "Two ordered approvals · 7-year retention" },
+  { docType: "contract_record", name: "Contract Record Policy", steps: 2, retentionDays: 2555, note: "Two ordered approvals · 7-year retention" },
+  { docType: "tender_notice", name: "Tender Notice Policy", steps: 1, retentionDays: 2555, note: "One approval · 7-year retention" },
+  { docType: "gazette_notice", name: "Gazette Notice Policy", steps: 1, retentionDays: 3650, note: "One approval · 10-year retention" },
+  { docType: "public_notice", name: "Public Notice Policy", steps: 1, retentionDays: 1825, note: "One approval · 5-year retention" },
+  { docType: "model_approval", name: "AI Model Approval Policy", steps: 2, approvalTtlDays: 365, retentionDays: 3650, note: "Two ordered approvals · re-approve within a year" },
+];
+
 const GovernancePolicies: React.FC = () => {
   const [policies, setPolicies] = useState<GovernancePolicy[] | null>(null);
   const [roles, setRoles] = useState<GovRole[]>([]);
@@ -37,6 +55,14 @@ const GovernancePolicies: React.FC = () => {
 
   const edit = (p: GovernancePolicy) => { setForm({ ...p, classificationLevel: p.classificationLevel ?? "", reviewChain: p.reviewChain.length ? p.reviewChain : [{ role: "", label: "", quorum: 1 }] }); setSaved(false); setErr(null); };
   const reset = () => { setForm(blank); setSaved(false); setErr(null); };
+  const applyBlueprint = (b: PolicyBlueprint) => {
+    setForm({
+      ...blank, name: b.name, docType: b.docType, requiredApprovals: b.steps,
+      reviewChain: Array.from({ length: b.steps }, () => ({ role: "", label: "", quorum: 1 })),
+      approvalTtlDays: b.approvalTtlDays, retentionDays: b.retentionDays,
+    });
+    setSaved(false); setErr(null);
+  };
 
   const save = async () => {
     setBusy(true); setErr(null); setSaved(false);
@@ -105,6 +131,20 @@ const GovernancePolicies: React.FC = () => {
         {/* the studio editor */}
         <Card className="space-y-4 self-start p-5">
           <div className="text-sm font-bold text-white">{form.id ? "Edit policy" : "New policy"}</div>
+          {!form.id && (
+            <div>
+              <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-white/50">Start from a blueprint</div>
+              <div className="flex flex-wrap gap-1.5">
+                {BLUEPRINTS.filter((b) => !(policies ?? []).some((p) => p.docType === b.docType && !p.classificationLevel)).map((b) => (
+                  <button key={b.docType} onClick={() => applyBlueprint(b)} title={b.note}
+                    className="rounded border border-white/12 bg-white/[0.03] px-2 py-1 text-[11px] font-semibold text-white/65 transition hover:border-seal-light/40 hover:text-white">
+                    {recordTypeLabel(b.docType)}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-white/35">Prefills the recommended chain depth, expiry and retention for the record class — you choose the offices.</p>
+            </div>
+          )}
           <Field label="Policy name"><input className={inputCls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ministerial Briefing Policy" /></Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Record type">
