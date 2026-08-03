@@ -210,3 +210,10 @@ const MARKETING6: Record<string, Marketing6Copy> = {
 };
 export const useMarketing6Copy = (): Marketing6Copy => MARKETING6[useUiLocale()] || MARKETING6_EN;
 export type { Marketing6Copy };
+
+// ── Marketing batch 7 (Readiness Journey, Record Gallery, Walkthrough, 404) ──
+import { MARKETING7_EN, type Marketing7Copy } from "./marketing7";
+
+const MARKETING7: Record<string, Marketing7Copy> = { en: MARKETING7_EN };
+export const useMarketing7Copy = (): Marketing7Copy => MARKETING7[useUiLocale()] || MARKETING7_EN;
+export type { Marketing7Copy };
