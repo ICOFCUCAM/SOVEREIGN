@@ -1,6 +1,6 @@
 {
- "as_of": "2026-08-02T08:25:15.925Z",
- "totalEvents": 3840,
+ "as_of": "2026-08-03T09:30:01.859Z",
+ "totalEvents": 3845,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1532,
+   "deals": 1537,
    "disclosedUsd": 383676561050
   },
   {
@@ -263,7 +263,7 @@
   {
    "buyer_id": "microsoft",
    "name": "Microsoft",
-   "deals": 385,
+   "deals": 394,
    "recentDeals": 6,
    "lastDate": "2026-04-18"
   },
@@ -298,7 +298,7 @@
   {
    "buyer_id": "ibm",
    "name": "IBM",
-   "deals": 199,
+   "deals": 198,
    "recentDeals": 11,
    "lastDate": "2025-12-08"
   },
@@ -319,7 +319,7 @@
   {
    "buyer_id": "oracle",
    "name": "Oracle",
-   "deals": 143,
+   "deals": 140,
    "recentDeals": 0,
    "lastDate": "2022-05-06"
   },

@@ -1,15 +1,15 @@
 {
- "detected_at": "2026-08-02T08:25:17.307Z",
+ "detected_at": "2026-08-03T09:30:03.265Z",
  "count": 1,
  "deltas": [
   {
-   "buyer_id": "salesforce",
-   "name": "Salesforce",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-02T08:25:17.306Z"
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
+   "kind": "new_acquisition",
+   "before": "385",
+   "after": "419",
+   "detail": "+34 indexed event(s) · latest: Fintool",
+   "detected_at": "2026-08-03T09:30:03.264Z"
   }
  ]
 }
