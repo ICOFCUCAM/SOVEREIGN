@@ -71,7 +71,7 @@ export const MARKETING3_AR: Marketing3Copy = {
       ] },
       { title: "الـ API والتكاملات", blocks: [
         { p: "تتكامل الأنظمة المؤسسية عبر سطح REST مستقر؛ ويُصادِق كل مستهلك بعميل خدمته الخاص محدّد النطاق." },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "تغطي واجهة برمجة التطبيقات إصدار الرموز، وتقديم المستندات، وقرارات الحوكمة، وإطلاق النشر، واسترجاع سجل التدقيق، والوصول الموقّع إلى المخرجات. المرجع الكامل لنقاط النهاية منشور على منصة المطورين؛ أما مخططات تسلسل التكامل ومخططات الحمولة وطوبولوجيا البيئات فتُسلَّم لكل مؤسسة ضمن الملف التقني عبر مركز الشراء." },
         { p: "تُصدَر عملاء الخدمة وتُحدَّد نطاقاتهم وتُلغى لكل مستهلك. وتُخطِر استدعاءات Webhook عند الصياغة والنشر." },
       ] },
       { title: "النموذج التشغيلي", blocks: [

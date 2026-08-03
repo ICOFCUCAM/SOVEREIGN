@@ -10,7 +10,7 @@ export const MARKETING5_DE: ProcurementCopy = {
   inThisPackage: "In diesem Paket",
   indexKicker: "Das Verzeichnis für Prüfer",
   indexTitle: "Alles, was eine Evaluierung benötigt, an einem Ort.",
-  indexLead: "Jeder Bereich ist direkt erreichbar — der Wertbeitrag, das technische Dossier, die Preisgestaltung und die unabhängige Verifizierung. Nichts ist eingeschränkt.",
+  indexLead: "Jeder Bereich ist direkt erreichbar — der Wertbeitrag, die Architektur, die Preisgestaltung und die unabhängige Verifizierung. Nichts ist eingeschränkt.",
   index: [
     { label: "Kosten der Veröffentlichung", blurb: "Warum Dispatch existiert — der institutionelle Prozess, den es steuert." },
     { label: "Der gesteuerte Lebenszyklus", blurb: "Stufe für Stufe: wer handelt, was entschieden wird, was nachgewiesen wird." },
@@ -122,4 +122,20 @@ export const MARKETING5_DE: ProcurementCopy = {
   closeLead: "Prüfen Sie die Architektur und öffnen Sie anschließend die Konsole, um die gesteuerte Pipeline direkt zu bewerten. Ein rollenbasierter Beschaffungskontakt wird als sekundärer Kanal veröffentlicht.",
   ctaCloseArch: "Architekturüberblick", ctaBegin: "Evaluierung beginnen",
   footerTag: "Beschaffung", footerMotto: "Souverän von Grund auf · Stets auditierbar",
+  dossier: {
+    kicker: "Eingeschränkte Verteilung",
+    title: "Das Technische Dossier",
+    lead: "Dieses öffentliche Paket endet bewusst auf konzeptioneller Ebene — genug zum Bewerten, nicht genug zum Nachbauen. Die tiefere Engineering-Schicht wird nie veröffentlicht; sie wird als kontrolliertes Dokument ausgegeben.",
+    contents: [
+      "Integrations-Sequenzdiagramme und Payload-Schemata",
+      "Datenmodell und Mandantenisolations-Design",
+      "Bereitstellungs- und Umgebungstopologie",
+      "Disaster-Recovery-Runbooks und Wiederherstellungsziele",
+      "Zusammenfassungen zu Sicherheitstests und Härtung",
+      "Migrations- und Umstellungsleitfäden",
+    ],
+    issued: "Das Dossier wird je Institution während der Evaluierung ausgegeben — empfängergebunden, mit Wasserzeichen und als kontrollierter Dispatch-Datensatz mit eigener Verifizierungsidentität ausgeliefert. Der Beweis, dass die Plattform ihr eigenes sensibelstes Dokument selbst kontrolliert.",
+    note: "Kein Verkaufsgespräch nötig — fordern Sie es aus Ihrer Evaluierung heraus an.",
+    cta: "Evaluierung beginnen",
+  },
 };

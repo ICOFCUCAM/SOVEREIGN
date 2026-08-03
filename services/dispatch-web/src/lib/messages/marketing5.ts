@@ -32,6 +32,9 @@ export interface ProcurementCopy {
   roiReflectsLabel: string; roiReflects: { t: string; b: string }[]; // 4
   docs: { title: string; blurb: string }[]; // 3, file/badge stay in page
   downloadLabel: string; downloadsNote: string;
+  // The controlled deep-engineering document — described publicly, issued per
+  // institution during evaluation. Public materials stay at the conceptual level.
+  dossier: { kicker: string; title: string; lead: string; contents: string[]; issued: string; note: string; cta: string };
 
   closeTitle: string; closeLead: string; ctaCloseArch: string; ctaBegin: string;
   footerTag: string; footerMotto: string;
@@ -47,7 +50,7 @@ export const MARKETING5_EN: ProcurementCopy = {
   inThisPackage: "In this package",
   indexKicker: "The evaluator's index",
   indexTitle: "Everything an evaluation needs, in one place.",
-  indexLead: "Each surface is reachable directly — the value case, the technical dossier, pricing and independent verification. Nothing is gated.",
+  indexLead: "Each surface is reachable directly — the value case, the architecture, pricing and independent verification. Nothing is gated.",
   index: [
     { label: "Cost of Publication", blurb: "Why Dispatch exists — the institutional process it governs." },
     { label: "The Governed Lifecycle", blurb: "Stage by stage: who acts, what is decided, what is proven." },
@@ -155,6 +158,22 @@ export const MARKETING5_EN: ProcurementCopy = {
   ],
   downloadLabel: "Download",
   downloadsNote: "Documents use verifiable language; they assert no certifications, SLAs or guarantees. Security and architecture-review materials are available to qualified institutions during evaluation.",
+  dossier: {
+    kicker: "Restricted distribution",
+    title: "The Technical Dossier",
+    lead: "This public package deliberately stops at the conceptual level — enough to evaluate, not enough to replicate. The deeper engineering layer is never published; it is issued as a controlled document.",
+    contents: [
+      "Integration sequence diagrams and payload schemas",
+      "Data model and tenant-isolation design",
+      "Deployment and environment topology",
+      "Disaster-recovery runbooks and recovery objectives",
+      "Security testing and hardening summaries",
+      "Migration and cutover playbooks",
+    ],
+    issued: "The dossier is issued per institution during evaluation — recipient-bound, watermarked, and delivered as a governed Dispatch record with its own verification identity. Proof that the platform governs its own most sensitive document.",
+    note: "No sales call required — request it from inside your evaluation.",
+    cta: "Begin your evaluation",
+  },
   closeTitle: "Begin your evaluation.",
   closeLead: "Review the architecture, then open the console to assess the governed pipeline directly. A role-based procurement contact will be published as a secondary channel.",
   ctaCloseArch: "Architecture Overview", ctaBegin: "Begin Evaluation",

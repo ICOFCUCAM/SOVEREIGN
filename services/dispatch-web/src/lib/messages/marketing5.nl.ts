@@ -10,7 +10,7 @@ export const MARKETING5_NL: ProcurementCopy = {
   inThisPackage: "In dit pakket",
   indexKicker: "De index van de beoordelaar",
   indexTitle: "Alles wat een evaluatie nodig heeft, op één plek.",
-  indexLead: "Elk onderdeel is rechtstreeks bereikbaar — de waardepropositie, het technische dossier, prijsstelling en onafhankelijke verificatie. Niets is afgeschermd.",
+  indexLead: "Elk onderdeel is rechtstreeks bereikbaar — de waardepropositie, de architectuur, prijsstelling en onafhankelijke verificatie. Niets is afgeschermd.",
   index: [
     { label: "Kosten van publicatie", blurb: "Waarom Dispatch bestaat — het institutionele proces dat het beheert." },
     { label: "De bestuurde levenscyclus", blurb: "Stap voor stap: wie handelt, wat wordt besloten, wat wordt aangetoond." },
@@ -122,4 +122,20 @@ export const MARKETING5_NL: ProcurementCopy = {
   closeLead: "Beoordeel de architectuur en open vervolgens de console om de bestuurde pijplijn rechtstreeks te beoordelen. Een rolgebaseerd inkoopcontact wordt gepubliceerd als secundair kanaal.",
   ctaCloseArch: "Architectuuroverzicht", ctaBegin: "Begin evaluatie",
   footerTag: "Inkoop", footerMotto: "Soeverein van opzet · Altijd auditeerbaar",
+  dossier: {
+    kicker: "Beperkte verspreiding",
+    title: "Het Technisch dossier",
+    lead: "Dit publieke pakket stopt bewust op conceptueel niveau — genoeg om te evalueren, niet genoeg om na te bouwen. De diepere engineeringlaag wordt nooit gepubliceerd; die wordt verstrekt als gecontroleerd document.",
+    contents: [
+      "Integratiesequentiediagrammen en payloadschema's",
+      "Datamodel en ontwerp van tenant-isolatie",
+      "Implementatie- en omgevingstopologie",
+      "Disaster-recovery-runbooks en hersteldoelen",
+      "Samenvattingen van beveiligingstests en hardening",
+      "Migratie- en overgangsdraaiboeken",
+    ],
+    issued: "Het dossier wordt per instelling verstrekt tijdens de evaluatie — gebonden aan de ontvanger, van een watermerk voorzien en geleverd als een bestuurd Dispatch-record met een eigen verificatie-identiteit. Het bewijs dat het platform zijn eigen gevoeligste document bestuurt.",
+    note: "Geen verkoopgesprek nodig — vraag het aan vanuit uw evaluatie.",
+    cta: "Begin uw evaluatie",
+  },
 };

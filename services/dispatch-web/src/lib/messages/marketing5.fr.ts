@@ -10,7 +10,7 @@ export const MARKETING5_FR: ProcurementCopy = {
   inThisPackage: "Dans ce dossier",
   indexKicker: "L'index de l'évaluateur",
   indexTitle: "Tout ce qu'exige une évaluation, en un seul endroit.",
-  indexLead: "Chaque rubrique est accessible directement — l'argumentaire de valeur, le dossier technique, la tarification et la vérification indépendante. Rien n'est verrouillé.",
+  indexLead: "Chaque rubrique est accessible directement — l'argumentaire de valeur, l'architecture, la tarification et la vérification indépendante. Rien n'est verrouillé.",
   index: [
     { label: "Le coût de la publication", blurb: "La raison d'être de Dispatch — le processus institutionnel qu'il encadre." },
     { label: "Le cycle de vie gouverné", blurb: "Étape par étape : qui agit, ce qui est décidé, ce qui est prouvé." },
@@ -122,4 +122,20 @@ export const MARKETING5_FR: ProcurementCopy = {
   closeLead: "Examinez l'architecture, puis ouvrez la console pour apprécier directement le pipeline gouverné. Un contact d'acquisition fondé sur les rôles sera publié comme canal secondaire.",
   ctaCloseArch: "Présentation de l'architecture", ctaBegin: "Commencer l'évaluation",
   footerTag: "Acquisition", footerMotto: "Souverain par conception · Auditable à tout moment",
+  dossier: {
+    kicker: "Diffusion restreinte",
+    title: "Le Dossier technique",
+    lead: "Ce dossier public s'arrête délibérément au niveau conceptuel — assez pour évaluer, pas assez pour répliquer. La couche d'ingénierie plus profonde n'est jamais publiée ; elle est remise sous forme de document contrôlé.",
+    contents: [
+      "Diagrammes de séquence d'intégration et schémas de charge utile",
+      "Modèle de données et conception de l'isolation des locataires",
+      "Topologie de déploiement et des environnements",
+      "Procédures de reprise après sinistre et objectifs de reprise",
+      "Synthèses des tests de sécurité et du durcissement",
+      "Guides de migration et de bascule",
+    ],
+    issued: "Le dossier est remis à chaque institution pendant l'évaluation — nominatif, filigrané et délivré comme un registre gouverné par Dispatch, avec sa propre identité de vérification. La preuve que la plateforme gouverne son propre document le plus sensible.",
+    note: "Aucun rendez-vous commercial requis — demandez-le depuis votre évaluation.",
+    cta: "Commencer l'évaluation",
+  },
 };

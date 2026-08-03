@@ -71,7 +71,7 @@ export const MARKETING3_ES: Marketing3Copy = {
       ] },
       { title: "API e integraciones", blocks: [
         { p: "Los sistemas institucionales se integran a través de una superficie REST estable; cada consumidor se autentica con su propio cliente de servicio de alcance acotado." },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "La superficie de la API abarca la emisión de tokens, el envío de documentos, las decisiones de gobernanza, la publicación, la consulta de auditoría y el acceso firmado a los artefactos. La referencia completa de los puntos de conexión está publicada en la plataforma para desarrolladores; los diagramas de secuencia de integración, los esquemas de carga útil y la topología de entornos se entregan a cada institución en el Dossier técnico, a través del Centro de adquisiciones." },
         { p: "Los clientes de servicio se emiten, se acotan y se revocan por consumidor. Las devoluciones de llamada (webhook) notifican al renderizar y al publicar." },
       ] },
       { title: "Modelo operativo", blocks: [

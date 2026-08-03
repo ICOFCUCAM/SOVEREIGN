@@ -71,7 +71,7 @@ export const MARKETING3_FI: Marketing3Copy = {
       ] },
       { title: "API ja integraatiot", blocks: [
         { p: "Institutionaaliset järjestelmät integroituvat vakaan REST-pinnan kautta; jokainen kuluttaja todentuu omalla rajatulla palveluasiakkaallaan." },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "API-pinta kattaa tunnusten myöntämisen, asiakirjojen toimittamisen, hallintopäätökset, julkaisujen vapauttamisen, auditointitietojen haun ja allekirjoitetun artefaktien käytön. Täydellinen päätepisteviite on julkaistu kehittäjäalustalla; integraation sekvenssikaaviot, hyötykuormaskeemat ja ympäristötopologia toimitetaan instituutiokohtaisesti Teknisessä dossierissa hankintakeskuksen kautta." },
         { p: "Palveluasiakkaat myönnetään, rajataan ja peruutetaan kuluttajakohtaisesti. Webhook-takaisinkutsut ilmoittavat renderöinnistä ja julkaisusta." },
       ] },
       { title: "Operatiivinen malli", blocks: [

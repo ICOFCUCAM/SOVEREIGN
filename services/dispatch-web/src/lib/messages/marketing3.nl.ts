@@ -71,7 +71,7 @@ export const MARKETING3_NL: Marketing3Copy = {
       ] },
       { title: "API en integraties", blocks: [
         { p: "Institutionele systemen integreren via een stabiel REST-vlak; elke afnemer authenticeert met zijn eigen gescopete serviceclient." },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "Het API-oppervlak omvat tokenuitgifte, documentindiening, governancebeslissingen, publicatievrijgave, auditraadpleging en ondertekende artefacttoegang. De volledige endpointreferentie is gepubliceerd op het Developer Platform; integratiesequentiediagrammen, payloadschema's en omgevingstopologie worden per instelling verstrekt in het Technisch dossier, via het Aanbestedingscentrum." },
         { p: "Serviceclients worden per afnemer uitgegeven, gescopet en ingetrokken. Webhook-callbacks geven een melding bij render en publicatie." },
       ] },
       { title: "Operationeel model", blocks: [

@@ -10,7 +10,7 @@ export const MARKETING5_DA: ProcurementCopy = {
   inThisPackage: "I denne pakke",
   indexKicker: "Bedømmerens indeks",
   indexTitle: "Alt en evaluering kræver, samlet ét sted.",
-  indexLead: "Hver flade er direkte tilgængelig — værdiargumentet, det tekniske dossier, prisfastsættelse og uafhængig verifikation. Intet er spærret.",
+  indexLead: "Hver flade er direkte tilgængelig — værdiargumentet, arkitekturen, prisfastsættelse og uafhængig verifikation. Intet er spærret.",
   index: [
     { label: "Omkostningen ved publicering", blurb: "Hvorfor Dispatch findes — den institutionelle proces, det styrer." },
     { label: "Den styrede livscyklus", blurb: "Trin for trin: hvem handler, hvad besluttes, hvad bevises." },
@@ -122,4 +122,20 @@ export const MARKETING5_DA: ProcurementCopy = {
   closeLead: "Gennemgå arkitekturen, og åbn derefter konsollen for at vurdere den styrede pipeline direkte. En rollebaseret indkøbskontakt vil blive offentliggjort som en sekundær kanal.",
   ctaCloseArch: "Arkitekturoversigt", ctaBegin: "Begynd evaluering",
   footerTag: "Indkøb", footerMotto: "Suveræn af design · Altid reviderbar",
+  dossier: {
+    kicker: "Begrænset distribution",
+    title: "Det tekniske dossier",
+    lead: "Denne offentlige pakke stopper bevidst på konceptniveau — nok til at evaluere, ikke nok til at kopiere. Det dybere ingeniørlag offentliggøres aldrig; det udleveres som et kontrolleret dokument.",
+    contents: [
+      "Integrationssekvensdiagrammer og payloadskemaer",
+      "Datamodel og design af lejerisolation",
+      "Udrulnings- og miljøtopologi",
+      "Runbooks til katastrofegenopretning og genopretningsmål",
+      "Sammendrag af sikkerhedstest og hærdning",
+      "Migrerings- og overgangsdrejebøger",
+    ],
+    issued: "Dossieret udleveres pr. institution under evalueringen — modtagerbundet, vandmærket og leveret som et styret Dispatch-register med sin egen verifikationsidentitet. Bevis på, at platformen styrer sit eget mest følsomme dokument.",
+    note: "Ingen salgssamtale påkrævet — anmod om det inde fra jeres evaluering.",
+    cta: "Begynd jeres evaluering",
+  },
 };

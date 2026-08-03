@@ -71,7 +71,7 @@ export const MARKETING3_ZH: Marketing3Copy = {
       ] },
       { title: "API 与集成", blocks: [
         { p: "机构系统通过稳定的 REST 接口集成；每个使用方以其自有的、带作用域的服务客户端进行认证。" },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "API 覆盖令牌签发、文档提交、治理决策、发布放行、审计查询与签名工件访问。完整的端点参考已在开发者平台公开；集成时序图、载荷模式与环境拓扑则按机构通过采购中心以《技术档案》形式提供。" },
         { p: "服务客户端按使用方逐一签发、赋予作用域并吊销。Webhook 回调在渲染与发布时发出通知。" },
       ] },
       { title: "运营模式", blocks: [

@@ -10,7 +10,7 @@ export const MARKETING5_PT: ProcurementCopy = {
   inThisPackage: "Neste pacote",
   indexKicker: "O índice do avaliador",
   indexTitle: "Tudo o que uma avaliação precisa, num só lugar.",
-  indexLead: "Cada componente é acessível diretamente — o caso de valor, o dossiê técnico, os preços e a verificação independente. Nada está condicionado.",
+  indexLead: "Cada componente é acessível diretamente — o caso de valor, a arquitetura, os preços e a verificação independente. Nada está condicionado.",
   index: [
     { label: "Custo da Publicação", blurb: "Porque existe o Dispatch — o processo institucional que governa." },
     { label: "O Ciclo de Vida Governado", blurb: "Etapa a etapa: quem atua, o que é decidido, o que é comprovado." },
@@ -122,4 +122,20 @@ export const MARKETING5_PT: ProcurementCopy = {
   closeLead: "Reveja a arquitetura e abra depois a consola para avaliar o pipeline governado diretamente. Será publicado um contacto de aquisição baseado em funções como canal secundário.",
   ctaCloseArch: "Visão Geral da Arquitetura", ctaBegin: "Iniciar Avaliação",
   footerTag: "Aquisição", footerMotto: "Soberano por conceção · Auditável sempre",
+  dossier: {
+    kicker: "Distribuição restrita",
+    title: "O Dossiê técnico",
+    lead: "Este pacote público fica deliberadamente pelo nível conceptual — o suficiente para avaliar, não para replicar. A camada de engenharia mais profunda nunca é publicada; é entregue como documento controlado.",
+    contents: [
+      "Diagramas de sequência de integração e esquemas de payload",
+      "Modelo de dados e desenho do isolamento de inquilinos",
+      "Topologia de implementação e de ambientes",
+      "Guias de recuperação de desastres e objetivos de recuperação",
+      "Resumos de testes de segurança e endurecimento",
+      "Guias de migração e transição",
+    ],
+    issued: "O dossiê é entregue a cada instituição durante a avaliação — vinculado ao destinatário, com marca de água e emitido como um registo governado pelo Dispatch, com identidade de verificação própria. Prova de que a plataforma governa o seu próprio documento mais sensível.",
+    note: "Sem reunião comercial — solicite-o a partir da sua avaliação.",
+    cta: "Começar a avaliação",
+  },
 };

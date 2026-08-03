@@ -10,7 +10,7 @@ export const MARKETING5_ES: ProcurementCopy = {
   inThisPackage: "En este paquete",
   indexKicker: "El índice del evaluador",
   indexTitle: "Todo lo que una evaluación necesita, en un solo lugar.",
-  indexLead: "Cada apartado es accesible directamente — el caso de valor, el dossier técnico, los precios y la verificación independiente. Nada está restringido.",
+  indexLead: "Cada apartado es accesible directamente — el caso de valor, la arquitectura, los precios y la verificación independiente. Nada está restringido.",
   index: [
     { label: "Coste de la Publicación", blurb: "Por qué existe Dispatch — el proceso institucional que gobierna." },
     { label: "El Ciclo de Vida Gobernado", blurb: "Etapa por etapa: quién actúa, qué se decide, qué se demuestra." },
@@ -122,4 +122,20 @@ export const MARKETING5_ES: ProcurementCopy = {
   closeLead: "Revise la arquitectura y, a continuación, abra la consola para evaluar directamente la canalización gobernada. Se publicará un contacto de adquisición basado en roles como canal secundario.",
   ctaCloseArch: "Visión General de Arquitectura", ctaBegin: "Comenzar Evaluación",
   footerTag: "Adquisición", footerMotto: "Soberano por diseño · Auditable siempre",
+  dossier: {
+    kicker: "Distribución restringida",
+    title: "El Dossier técnico",
+    lead: "Este paquete público se detiene deliberadamente en el nivel conceptual: suficiente para evaluar, no para replicar. La capa de ingeniería más profunda nunca se publica; se entrega como documento controlado.",
+    contents: [
+      "Diagramas de secuencia de integración y esquemas de carga útil",
+      "Modelo de datos y diseño del aislamiento de inquilinos",
+      "Topología de despliegue y de entornos",
+      "Guías de recuperación ante desastres y objetivos de recuperación",
+      "Resúmenes de pruebas de seguridad y endurecimiento",
+      "Guías de migración y transición",
+    ],
+    issued: "El dossier se entrega a cada institución durante la evaluación: vinculado al destinatario, con marca de agua y emitido como un registro gobernado por Dispatch, con su propia identidad de verificación. Prueba de que la plataforma gobierna su propio documento más sensible.",
+    note: "Sin llamada comercial: solicítelo desde su evaluación.",
+    cta: "Comenzar la evaluación",
+  },
 };

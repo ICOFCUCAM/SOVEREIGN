@@ -10,7 +10,7 @@ export const MARKETING5_ZH: ProcurementCopy = {
   inThisPackage: "本资料包内容",
   indexKicker: "评估人员索引",
   indexTitle: "评估所需的一切，集于一处。",
-  indexLead: "每一部分均可直接访问——价值论证、技术档案、定价与独立验证。无任何内容设限。",
+  indexLead: "每一部分均可直接访问——价值论证、架构、定价与独立验证。无任何内容设限。",
   index: [
     { label: "发布的成本", blurb: "Dispatch 存在的意义——它所治理的机构流程。" },
     { label: "受治理的生命周期", blurb: "逐阶段呈现：谁来执行、决定什么、证明什么。" },
@@ -122,4 +122,20 @@ export const MARKETING5_ZH: ProcurementCopy = {
   closeLead: "先评审架构，再打开控制台直接评估受治理的流水线。我们将发布一个基于角色的采购联系渠道作为辅助通道。",
   ctaCloseArch: "架构概览", ctaBegin: "开始评估",
   footerTag: "采购", footerMotto: "主权天成 · 永可审计",
+  dossier: {
+    kicker: "限制分发",
+    title: "技术档案",
+    lead: "这份公开材料有意止步于概念层面——足以评估，不足以复制。更深层的工程资料从不公开，而是作为受控文件发放。",
+    contents: [
+      "集成时序图与载荷模式",
+      "数据模型与租户隔离设计",
+      "部署与环境拓扑",
+      "灾难恢复手册与恢复目标",
+      "安全测试与加固摘要",
+      "迁移与切换手册",
+    ],
+    issued: "技术档案在评估期间按机构发放——绑定接收方、带水印，并以受治理的 Dispatch 记录形式交付，拥有自己的核验身份。这本身就证明：平台以自己的方式治理着自己最敏感的文件。",
+    note: "无需销售联系——在评估中即可申请。",
+    cta: "开始评估",
+  },
 };

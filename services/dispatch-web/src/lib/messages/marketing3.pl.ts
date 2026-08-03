@@ -71,7 +71,7 @@ export const MARKETING3_PL: Marketing3Copy = {
       ] },
       { title: "API i integracje", blocks: [
         { p: "Systemy instytucjonalne integrują się przez stabilną powierzchnię REST; każdy konsument uwierzytelnia się własnym, zakresowym klientem usługi." },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "Powierzchnia API obejmuje wydawanie tokenów, składanie dokumentów, decyzje zarządcze, zwalnianie publikacji, odczyt audytu i podpisany dostęp do artefaktów. Pełna referencja punktów końcowych jest opublikowana na platformie deweloperskiej; diagramy sekwencji integracji, schematy ładunków i topologia środowisk są przekazywane każdej instytucji w Dossier technicznym, poprzez Centrum zamówień." },
         { p: "Klienci usług są wydawani, zakresowani i unieważniani dla każdego konsumenta. Wywołania zwrotne webhook powiadamiają o renderowaniu i publikacji." },
       ] },
       { title: "Model operacyjny", blocks: [
