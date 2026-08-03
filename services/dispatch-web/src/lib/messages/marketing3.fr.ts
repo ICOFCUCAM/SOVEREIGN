@@ -71,7 +71,7 @@ export const MARKETING3_FR: Marketing3Copy = {
       ] },
       { title: "API et intégrations", blocks: [
         { p: "Les systèmes institutionnels s'intègrent via une surface REST stable ; chaque consommateur s'authentifie avec son propre client de service à portée restreinte." },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "La surface d'API couvre l'émission de jetons, la soumission de documents, les décisions de gouvernance, la publication, la consultation d'audit et l'accès signé aux artefacts. La référence complète des points de terminaison est publiée sur la plateforme développeurs ; les diagrammes de séquence d'intégration, les schémas de charge utile et la topologie des environnements sont remis à chaque institution dans le Dossier technique, via le Centre d'approvisionnement." },
         { p: "Les clients de service sont délivrés, restreints en portée et révoqués par consommateur. Des rappels webhook notifient lors de la restitution et de la publication." },
       ] },
       { title: "Modèle opérationnel", blocks: [

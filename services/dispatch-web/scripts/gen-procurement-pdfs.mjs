@@ -64,7 +64,7 @@ const page = ({ eyebrow, title, lede, version, body }) => `<!doctype html><html>
     </div>
   </div>
   <div class="body">${body}</div>
-  <div class="foot"><span>Sovereign Dispatch — Institutional Publication Infrastructure</span><span>dispatch.sovereigndo.com</span></div>
+  <div class="foot"><span>Sovereign Dispatch — Institutional Trust Infrastructure</span><span>dispatch.sovereigndo.com</span></div>
 </div></body></html>`;
 
 const card = (t, p) => `<div class="card"><div class="t">${t}</div><p>${p}</p></div>`;

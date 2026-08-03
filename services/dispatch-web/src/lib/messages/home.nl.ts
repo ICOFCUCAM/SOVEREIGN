@@ -2,7 +2,7 @@ import type { HomeCopy } from "./home";
 
 export const HOME_NL: HomeCopy = {
   hero: {
-    eyebrow: "Institutionele Publicatie-infrastructuur",
+    eyebrow: "Institutionele Vertrouwensinfrastructuur",
     titleLead: "De voorhoede van ",
     titleAccent: "institutioneel bestuur.",
     verbs: ["Opstellen", "Beoordelen", "Goedkeuren", "Autoriseren", "Publiceren", "Certificeren", "Verifiëren", "Bewaren"],
@@ -114,5 +114,32 @@ export const HOME_NL: HomeCopy = {
     ctaBegin: "Begin uw evaluatie",
     ctaProcurement: "Aanbestedingscentrum",
     tagline: "Soeverein van ontwerp · Verifieerbaar als standaard · Klaar voor instellingen",
+  },
+  modules: {
+    eyebrow: "Het platform",
+    title: "Publicatie is slechts de eerste module.",
+    lead: "Sovereign Dispatch is geen documentsoftware. Het is vertrouwensinfrastructuur — één bestuurd weefsel waarop elke institutionele gezagshandeling wordt gecreëerd, verzegeld, gepubliceerd en bewezen. Publicatie is waar het begint; het weefsel is waar het toe leidt.",
+    rootLabel: "Vertrouwensinfrastructuur",
+    liveLabel: "Vandaag actief",
+    names: [
+      "Publicatie", "Beleid", "Wetgeving", "Aanbesteding", "Contracten", "Kabinet",
+      "Rechtbankdossiers", "Bestuursgovernance", "Verkiezingen", "Compliance", "Digitale archieven",
+      "Openbare registers", "AI-governance",
+    ],
+    footnote: "Elke module erft dezelfde ruggengraat: bestuurde werkstromen, verzegelde certificaten, permanente registers en onafhankelijke verificatie.",
+    closing: "U koopt geen documentsoftware. U adopteert institutionele infrastructuur.",
+  },
+  assurance: {
+    eyebrow: "Operationele zekerheid",
+    title: "Overtuiging voor het bestuur. Detail voor de beoordelaar.",
+    sub: "De concrete antwoorden waar inkoop- en beveiligingsteams naar zoeken — binnen handbereik, elk met een eigen verdieping.",
+    items: [
+      { t: "Identiteit & toegang", d: "Koppelt aan de identiteitsproviders die u al gebruikt — single sign-on via SAML 2.0 en OIDC, directory-gestuurde provisioning en roltoewijzing, met functiescheiding afgedwongen door beleid.", link: "Beveiligingsdetails" },
+      { t: "Implementatiemodellen", d: "Draai het waar uw mandaat het vereist: soevereine SaaS, private cloud, on-premises of een geïsoleerde soevereine cloud — dezelfde bestuurde pijplijn en bewijsketen in elk model.", link: "Architectuur" },
+      { t: "Beschikbaarheid & herstel", d: "Ontworpen voor hoge beschikbaarheid, met gedefinieerde hersteldoelen, redundante opslag van verzegelde registers en beproefde disaster-recovery-procedures — continuïteit behandeld als een institutionele plicht.", link: "Trustcentrum" },
+      { t: "Aansluiting op normen", d: "Ontworpen om aan te sluiten op de controlekaders ISO 27001 en SOC 2, op de AVG en eisen rond datalocatie, en op normen voor archiefbeheer en langetermijnbewaring.", link: "Compliance" },
+      { t: "Implementatie", d: "Een gefaseerd gereedheidstraject — inrichting van de instelling, toewijzing van bevoegdheden, governancebeleid en daarna uw eerste bestuurde publicatie — gemeten in weken, niet in jaren.", link: "Gereedheidstraject" },
+      { t: "Migratie", d: "Bestaande archieven en registers worden geïmporteerd, verzegeld en bewaard met hun herkomst intact — uw institutionele geheugen komt volledig aan, niets blijft achter.", link: "Aanbestedingscentrum" },
+    ],
   },
 };

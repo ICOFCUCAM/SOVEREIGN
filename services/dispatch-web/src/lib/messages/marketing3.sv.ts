@@ -71,7 +71,7 @@ export const MARKETING3_SV: Marketing3Copy = {
       ] },
       { title: "API och integrationer", blocks: [
         { p: "Institutionella system integrerar över en stabil REST-yta; varje konsument autentiserar med sin egen avgränsade tjänsteklient:" },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "API-ytan omfattar tokenutfärdande, dokumentinlämning, styrningsbeslut, publiceringsfrisläppning, revisionshämtning och signerad artefaktåtkomst. Den fullständiga endpointreferensen är publicerad på utvecklarplattformen; sekvensdiagram för integration, payloadscheman och miljötopologi lämnas ut per institution i Tekniska dossiern, via Upphandlingscentret." },
         { p: "Tjänsteklienter utfärdas, avgränsas och återkallas per konsument. Webhook-återanrop notifierar vid rendering och publicering." },
       ] },
       { title: "Driftmodell", blocks: [

@@ -195,6 +195,106 @@ const DOC_TYPES: DocTypeSpec[] = [
       { role: "conclusion", heading: "Conclusion", kind: "paragraph", placeholder: "What follows from the argument." },
     ],
   },
+  {
+    docType: "legislative_instrument", label: "Legislative Instrument",
+    blurb: "Summary, preamble, provisions, commencement.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "What this instrument does, in one paragraph." },
+      { role: "preamble", heading: "Preamble", kind: "paragraph", placeholder: "The enabling authority and the purpose for which it is exercised." },
+      { role: "provisions", heading: "Provisions", kind: "bullets", placeholder: "One provision per line, in order." },
+      { role: "commencement", heading: "Commencement", kind: "callout", calloutStyle: "info", placeholder: "When the instrument enters into force, and any transitional arrangements." },
+    ],
+  },
+  {
+    docType: "gazette_notice", label: "Gazette Notice",
+    blurb: "Summary, issuing authority, notice body, effect.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "What this notice announces, in one paragraph." },
+      { role: "issuing_authority", heading: "Issuing Authority", kind: "paragraph", placeholder: "The office under whose authority this notice is issued." },
+      { role: "body", heading: "Notice", kind: "paragraph", placeholder: "The full text of the notice." },
+      { role: "effect", heading: "Effect", kind: "callout", calloutStyle: "info", placeholder: "When and how the notice takes effect." },
+    ],
+  },
+  {
+    docType: "tender_notice", label: "Tender Notice",
+    blurb: "Summary, scope, eligibility, submission requirements.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "The procurement in one paragraph — what is being purchased and why." },
+      { role: "scope", heading: "Scope", kind: "paragraph", placeholder: "The scope of goods, works or services being procured." },
+      { role: "eligibility", heading: "Eligibility", kind: "bullets", placeholder: "One eligibility requirement per line." },
+      { role: "submission", heading: "Submission", kind: "callout", calloutStyle: "info", placeholder: "Deadline, channel and format for submissions." },
+    ],
+  },
+  {
+    docType: "contract_award", label: "Contract Award Decision",
+    blurb: "Summary, evaluation, award decision, key terms.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "The procurement and its outcome, in one paragraph." },
+      { role: "evaluation", heading: "Evaluation", kind: "paragraph", placeholder: "How submissions were evaluated against the published criteria." },
+      { role: "decision", heading: "Award Decision", kind: "callout", placeholder: "The awarded supplier, the value, and the deciding authority." },
+      { role: "terms", heading: "Key Terms", kind: "bullets", placeholder: "One key contractual term per line." },
+    ],
+  },
+  {
+    docType: "contract_record", label: "Contract Record",
+    blurb: "Summary, parties, obligations, term.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "The agreement in one paragraph." },
+      { role: "parties", heading: "Parties", kind: "bullets", placeholder: "One party per line, with its role in the agreement." },
+      { role: "obligations", heading: "Obligations", kind: "paragraph", placeholder: "The principal obligations of each party." },
+      { role: "term", heading: "Term", kind: "callout", calloutStyle: "info", placeholder: "Effective date, duration, renewal and termination terms." },
+    ],
+  },
+  {
+    docType: "court_judgment", label: "Court Judgment",
+    blurb: "Case summary, background, reasoning, ruling.",
+    fields: [
+      { role: "case_summary", heading: "Case Summary", kind: "paragraph", lead: true, placeholder: "The case, the parties and the outcome, in one paragraph." },
+      { role: "background", heading: "Background", kind: "paragraph", placeholder: "The facts and procedural history of the case." },
+      { role: "reasoning", heading: "Reasoning", kind: "paragraph", placeholder: "The court's reasoning on the issues." },
+      { role: "ruling", heading: "Ruling", kind: "callout", placeholder: "The operative ruling and orders of the court." },
+    ],
+  },
+  {
+    docType: "board_resolution", label: "Board Resolution",
+    blurb: "Preamble, resolutions, voting, effect.",
+    fields: [
+      { role: "preamble", heading: "Preamble", kind: "paragraph", lead: true, placeholder: "The context in which the board resolves." },
+      { role: "resolutions", heading: "Resolutions", kind: "bullets", placeholder: "One resolved item per line ('RESOLVED, that …')." },
+      { role: "voting", heading: "Voting", kind: "paragraph", placeholder: "Votes for, against and abstentions, and quorum." },
+      { role: "effect", heading: "Effect", kind: "callout", calloutStyle: "info", placeholder: "When the resolutions take effect and who executes them." },
+    ],
+  },
+  {
+    docType: "election_declaration", label: "Election Declaration",
+    blurb: "Summary, results, formal declaration, objections.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "The election and what is being declared, in one paragraph." },
+      { role: "results", heading: "Results", kind: "bullets", placeholder: "One candidate or option per line, with counts." },
+      { role: "declaration", heading: "Declaration", kind: "callout", placeholder: "The formal declaration of the result, under the declaring authority." },
+      { role: "objections", heading: "Objections", kind: "paragraph", placeholder: "The window and channel for objections or petitions." },
+    ],
+  },
+  {
+    docType: "public_notice", label: "Public Notice",
+    blurb: "Summary, notice body, issuing authority, effect.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "What this notice announces, in one paragraph." },
+      { role: "body", heading: "Notice", kind: "paragraph", placeholder: "The full text of the notice." },
+      { role: "authority", heading: "Issuing Authority", kind: "paragraph", placeholder: "The office issuing this notice." },
+      { role: "effective", heading: "Effect", kind: "callout", calloutStyle: "info", placeholder: "When the notice takes effect, and how to respond." },
+    ],
+  },
+  {
+    docType: "model_approval", label: "AI Model Approval",
+    blurb: "Summary, intended use, risk assessment, approval decision.",
+    fields: [
+      { role: "summary", heading: "Summary", kind: "paragraph", lead: true, placeholder: "The AI system, its purpose and the decision, in one paragraph." },
+      { role: "intended_use", heading: "Intended Use", kind: "paragraph", placeholder: "What the model or AI system may — and may not — be used for." },
+      { role: "risk_assessment", heading: "Risk Assessment", kind: "bullets", placeholder: "One identified risk per line, with its mitigation." },
+      { role: "decision", heading: "Approval Decision", kind: "callout", placeholder: "The approval decision, its conditions, and the review date." },
+    ],
+  },
 ];
 
 const LEVELS = ["UNCLASSIFIED", "OFFICIAL", "OFFICIAL-SENSITIVE", "CONFIDENTIAL"];

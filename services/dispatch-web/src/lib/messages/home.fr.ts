@@ -2,7 +2,7 @@ import type { HomeCopy } from "./home";
 
 export const HOME_FR: HomeCopy = {
   hero: {
-    eyebrow: "Infrastructure de publication institutionnelle",
+    eyebrow: "Infrastructure de confiance institutionnelle",
     titleLead: "L'avant-garde de la ",
     titleAccent: "gouvernance institutionnelle.",
     verbs: ["Créer", "Réviser", "Approuver", "Autoriser", "Publier", "Certifier", "Vérifier", "Préserver"],
@@ -114,5 +114,32 @@ export const HOME_FR: HomeCopy = {
     ctaBegin: "Commencer votre évaluation",
     ctaProcurement: "Centre d'approvisionnement",
     tagline: "Souverain par conception · Vérifiable par défaut · Prêt pour l'institution",
+  },
+  modules: {
+    eyebrow: "La plateforme",
+    title: "La publication n'est que le premier module.",
+    lead: "Sovereign Dispatch n'est pas un logiciel documentaire. C'est une infrastructure de confiance — un tissu gouverné unique sur lequel chaque acte d'autorité institutionnelle est créé, scellé, publié et prouvé. La publication en est le point de départ ; le tissu, la destination.",
+    rootLabel: "Infrastructure de confiance",
+    liveLabel: "En service",
+    names: [
+      "Publication", "Politiques", "Législation", "Marchés publics", "Contrats", "Conseil des ministres",
+      "Registres judiciaires", "Gouvernance des conseils", "Élections", "Conformité", "Archives numériques",
+      "Registres publics", "Gouvernance de l'IA",
+    ],
+    footnote: "Chaque module hérite de la même colonne vertébrale : flux gouvernés, certificats scellés, registres permanents et vérification indépendante.",
+    closing: "Vous n'achetez pas un logiciel documentaire. Vous adoptez une infrastructure institutionnelle.",
+  },
+  assurance: {
+    eyebrow: "Assurance opérationnelle",
+    title: "La conviction pour la direction. Le détail pour l'évaluateur.",
+    sub: "Les réponses concrètes qu'attendent les équipes d'approvisionnement et de sécurité — à portée de main, chacune avec son approfondissement.",
+    items: [
+      { t: "Identité et accès", d: "Se connecte aux fournisseurs d'identité que vous exploitez déjà — authentification unique via SAML 2.0 et OIDC, provisionnement gouverné par l'annuaire et mappage des rôles, avec séparation des tâches appliquée par politique.", link: "Détails sécurité" },
+      { t: "Modèles de déploiement", d: "Exploitez-le là où votre mandat l'exige : SaaS souverain, cloud privé, sur site ou cloud souverain isolé — le même pipeline gouverné et la même chaîne de preuve dans chaque modèle.", link: "Architecture" },
+      { t: "Disponibilité et reprise", d: "Conçu pour la haute disponibilité, avec des objectifs de reprise définis, un stockage redondant des registres scellés et des procédures de reprise après sinistre éprouvées — la continuité traitée comme un devoir institutionnel.", link: "Centre de confiance" },
+      { t: "Alignement sur les normes", d: "Conçu pour s'aligner sur les référentiels de contrôle ISO 27001 et SOC 2, sur le RGPD et les exigences de résidence des données, ainsi que sur les normes d'archivage et de préservation à long terme.", link: "Conformité" },
+      { t: "Mise en œuvre", d: "Un parcours de préparation par étapes — configuration de l'institution, cartographie des autorités, politiques de gouvernance, puis votre première publication gouvernée — mesuré en semaines, pas en années.", link: "Parcours de préparation" },
+      { t: "Migration", d: "Vos archives et registres existants sont importés, scellés et préservés avec leur provenance intacte — votre mémoire institutionnelle arrive entière, rien n'est laissé de côté.", link: "Centre d'approvisionnement" },
+    ],
   },
 };

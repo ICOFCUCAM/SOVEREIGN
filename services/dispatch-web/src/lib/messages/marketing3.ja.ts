@@ -71,7 +71,7 @@ export const MARKETING3_JA: Marketing3Copy = {
       ] },
       { title: "API と連携", blocks: [
         { p: "機関のシステムは、安定した REST 面を介して連携します。各利用者は、それぞれのスコープ付きサービスクライアントで認証します。" },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "APIサーフェスは、トークン発行、文書提出、ガバナンス決定、公開リリース、監査取得、署名付きアーティファクトアクセスに及びます。エンドポイントの完全なリファレンスは開発者プラットフォームで公開されています。統合シーケンス図、ペイロードスキーマ、環境トポロジーは、調達センターを通じて機関ごとに技術ドシエとして提供されます。" },
         { p: "サービスクライアントは、利用者ごとに発行・スコープ設定・失効されます。Webhook コールバックが、レンダリングおよび公布の際に通知します。" },
       ] },
       { title: "運用モデル", blocks: [

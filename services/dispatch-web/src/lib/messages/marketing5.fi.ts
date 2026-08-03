@@ -10,7 +10,7 @@ export const MARKETING5_FI: ProcurementCopy = {
   inThisPackage: "Tässä paketissa",
   indexKicker: "Arvioijan hakemisto",
   indexTitle: "Kaikki arviointiin tarvittava yhdessä paikassa.",
-  indexLead: "Jokainen osa-alue on suoraan saavutettavissa — arvolupaus, tekninen asiakirja, hinnoittelu ja riippumaton todentaminen. Mitään ei ole rajattu lukituksen taakse.",
+  indexLead: "Jokainen osa-alue on suoraan saavutettavissa — arvolupaus, arkkitehtuuri, hinnoittelu ja riippumaton todentaminen. Mitään ei ole rajattu lukituksen taakse.",
   index: [
     { label: "Julkaisemisen kustannus", blurb: "Miksi Dispatch on olemassa — institutionaalinen prosessi, jota se hallitsee." },
     { label: "Hallittu elinkaari", blurb: "Vaihe vaiheelta: kuka toimii, mitä päätetään, mikä todennetaan." },
@@ -122,4 +122,20 @@ export const MARKETING5_FI: ProcurementCopy = {
   closeLead: "Tarkastele arkkitehtuuria ja avaa sitten konsoli arvioidaksesi hallittua putkea suoraan. Roolipohjainen hankintayhteyshenkilö julkaistaan toissijaisena kanavana.",
   ctaCloseArch: "Arkkitehtuurikatsaus", ctaBegin: "Aloita arviointi",
   footerTag: "Hankinta", footerMotto: "Suvereeni rakenteeltaan · Aina auditoitavissa",
+  dossier: {
+    kicker: "Rajoitettu jakelu",
+    title: "Tekninen dossier",
+    lead: "Tämä julkinen paketti pysähtyy tarkoituksella käsitteelliselle tasolle — riittävästi arviointiin, ei riittävästi kopiointiin. Syvempää insinöörikerrosta ei koskaan julkaista; se luovutetaan valvottuna asiakirjana.",
+    contents: [
+      "Integraation sekvenssikaaviot ja hyötykuormaskeemat",
+      "Tietomalli ja vuokralaiseristyksen suunnittelu",
+      "Käyttöönotto- ja ympäristötopologia",
+      "Toipumisohjeistot ja palautumistavoitteet",
+      "Tietoturvatestauksen ja koventamisen yhteenvedot",
+      "Migraatio- ja siirtymäoppaat",
+    ],
+    issued: "Dossier luovutetaan instituutiokohtaisesti arvioinnin aikana — vastaanottajaan sidottuna, vesileimattuna ja hallinnoituna Dispatch-tietueena, jolla on oma todennusidentiteettinsä. Todiste siitä, että alusta hallinnoi itse arkaluonteisinta asiakirjaansa.",
+    note: "Myyntipuhelua ei tarvita — pyytäkää se arviointinne sisältä.",
+    cta: "Aloittakaa arviointi",
+  },
 };

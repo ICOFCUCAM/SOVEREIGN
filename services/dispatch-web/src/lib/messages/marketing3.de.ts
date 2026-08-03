@@ -71,7 +71,7 @@ export const MARKETING3_DE: Marketing3Copy = {
       ] },
       { title: "API & Integrationen", blocks: [
         { p: "Institutionelle Systeme integrieren sich über eine stabile REST-Fläche; jeder Konsument authentifiziert sich mit seinem eigenen scope-begrenzten Service-Client." },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "Die API-Oberfläche umfasst Token-Ausgabe, Dokumenteinreichung, Governance-Entscheidungen, Veröffentlichungsfreigabe, Audit-Abruf und signierten Artefaktzugriff. Die vollständige Endpunktreferenz ist auf der Entwicklerplattform veröffentlicht; Integrations-Sequenzdiagramme, Payload-Schemata und Umgebungstopologie werden je Institution im Technischen Dossier über das Beschaffungszentrum ausgegeben." },
         { p: "Service-Clients werden je Konsument ausgestellt, scope-begrenzt und widerrufen. Webhook-Callbacks benachrichtigen beim Rendern und Veröffentlichen." },
       ] },
       { title: "Betriebsmodell", blocks: [

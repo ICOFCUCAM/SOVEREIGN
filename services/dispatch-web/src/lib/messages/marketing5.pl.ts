@@ -10,7 +10,7 @@ export const MARKETING5_PL: ProcurementCopy = {
   inThisPackage: "W tym pakiecie",
   indexKicker: "Indeks dla osoby oceniającej",
   indexTitle: "Wszystko, czego wymaga ewaluacja, w jednym miejscu.",
-  indexLead: "Każdy obszar jest dostępny bezpośrednio — uzasadnienie wartości, dossier techniczne, cennik oraz niezależna weryfikacja. Nic nie jest zablokowane.",
+  indexLead: "Każdy obszar jest dostępny bezpośrednio — uzasadnienie wartości, architektura, cennik oraz niezależna weryfikacja. Nic nie jest zablokowane.",
   index: [
     { label: "Koszt publikacji", blurb: "Dlaczego istnieje Dispatch — proces instytucjonalny, którym zarządza." },
     { label: "Zarządzany cykl życia", blurb: "Etap po etapie: kto działa, co jest decydowane, co jest udowadniane." },
@@ -122,4 +122,20 @@ export const MARKETING5_PL: ProcurementCopy = {
   closeLead: "Przejrzyj architekturę, a następnie otwórz konsolę, aby bezpośrednio ocenić zarządzany potok. Oparty na rolach kontakt zakupowy zostanie opublikowany jako kanał uzupełniający.",
   ctaCloseArch: "Przegląd architektury", ctaBegin: "Rozpocznij ewaluację",
   footerTag: "Zakupy", footerMotto: "Suwerenny z założenia · Zawsze audytowalny",
+  dossier: {
+    kicker: "Dystrybucja ograniczona",
+    title: "Dossier techniczne",
+    lead: "Ten publiczny pakiet celowo zatrzymuje się na poziomie koncepcyjnym — wystarczy do oceny, nie wystarczy do skopiowania. Głębsza warstwa inżynierska nigdy nie jest publikowana; jest wydawana jako dokument kontrolowany.",
+    contents: [
+      "Diagramy sekwencji integracji i schematy ładunków",
+      "Model danych i projekt izolacji najemców",
+      "Topologia wdrożenia i środowisk",
+      "Procedury odtwarzania po awarii i cele odtworzenia",
+      "Podsumowania testów bezpieczeństwa i utwardzania",
+      "Podręczniki migracji i przełączenia",
+    ],
+    issued: "Dossier jest wydawane każdej instytucji podczas oceny — powiązane z odbiorcą, opatrzone znakiem wodnym i dostarczane jako zarządzany rekord Dispatch z własną tożsamością weryfikacyjną. Dowód, że platforma sama zarządza swoim najbardziej wrażliwym dokumentem.",
+    note: "Bez rozmowy handlowej — poproś o nie z poziomu swojej oceny.",
+    cta: "Rozpocznij ocenę",
+  },
 };

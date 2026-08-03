@@ -71,7 +71,7 @@ export const MARKETING3_DA: Marketing3Copy = {
       ] },
       { title: "API og integrationer", blocks: [
         { p: "Institutionelle systemer integrerer over en stabil REST-flade; hver forbruger autentificerer med sin egen scopede service-klient." },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "API-fladen dækker tokenudstedelse, dokumentindsendelse, governancebeslutninger, publiceringsfrigivelse, revisionsudtræk og signeret artefaktadgang. Den fulde endpointreference er offentliggjort på udviklerplatformen; integrationssekvensdiagrammer, payloadskemaer og miljøtopologi udleveres pr. institution i Det tekniske dossier, via Indkøbscentret." },
         { p: "Service-klienter udstedes, scopes og tilbagekaldes pr. forbruger. Webhook-callbacks giver besked ved render og publicering." },
       ] },
       { title: "Driftsmodel", blocks: [

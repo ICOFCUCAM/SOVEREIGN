@@ -106,7 +106,7 @@ export const MARKETING3_EN: Marketing3Copy = {
       ] },
       { title: "API & Integrations", blocks: [
         { p: "Institutional systems integrate over a stable REST surface; each consumer authenticates with its own scoped service client." },
-        { code: "POST /v1/token            → client-credentials → scoped JWT\nPOST /v1/documents        → submit (Idempotency-Key honoured)\nPOST /v1/.../decision     → governance decision (approve / return / reject)\nPOST /v1/.../publish      → release a rendered record\nGET  /v1/audit            → append-only, tenant-scoped events\nPOST /v1/artifacts/:id/grant → signed, expiring download URL" },
+        { p: "The API surface spans token issuance, document submission, governance decisions, publication release, audit retrieval and signed artefact access. The full endpoint reference is published on the Developer Platform; integration sequence diagrams, payload schemas and environment topology are issued per institution in the Technical Dossier, through the Procurement Center." },
         { p: "Service clients are issued, scoped and revoked per consumer. Webhook callbacks notify on render and publish." },
       ] },
       { title: "Operational Model", blocks: [

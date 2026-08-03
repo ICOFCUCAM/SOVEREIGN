@@ -10,7 +10,7 @@ export const MARKETING5_IT: ProcurementCopy = {
   inThisPackage: "In questo pacchetto",
   indexKicker: "L'indice del valutatore",
   indexTitle: "Tutto ciò che serve a una valutazione, in un unico luogo.",
-  indexLead: "Ogni sezione è raggiungibile direttamente — il caso di valore, il dossier tecnico, i prezzi e la verifica indipendente. Nulla è soggetto a restrizioni.",
+  indexLead: "Ogni sezione è raggiungibile direttamente — il caso di valore, l'architettura, i prezzi e la verifica indipendente. Nulla è soggetto a restrizioni.",
   index: [
     { label: "Il costo della pubblicazione", blurb: "Perché Dispatch esiste — il processo istituzionale che governa." },
     { label: "Il ciclo di vita governato", blurb: "Fase per fase: chi agisce, cosa viene deciso, cosa viene comprovato." },
@@ -122,4 +122,20 @@ export const MARKETING5_IT: ProcurementCopy = {
   closeLead: "Esaminate l'architettura, quindi aprite la console per valutare direttamente la pipeline governata. Un contatto di approvvigionamento basato sui ruoli sarà pubblicato come canale secondario.",
   ctaCloseArch: "Panoramica dell'architettura", ctaBegin: "Avvia la valutazione",
   footerTag: "Approvvigionamento", footerMotto: "Sovrano per progettazione · Sempre verificabile",
+  dossier: {
+    kicker: "Distribuzione riservata",
+    title: "Il Dossier tecnico",
+    lead: "Questo pacchetto pubblico si ferma deliberatamente al livello concettuale — abbastanza per valutare, non per replicare. Lo strato ingegneristico più profondo non viene mai pubblicato; è consegnato come documento controllato.",
+    contents: [
+      "Diagrammi di sequenza di integrazione e schemi dei payload",
+      "Modello dei dati e progettazione dell'isolamento dei tenant",
+      "Topologia di installazione e degli ambienti",
+      "Runbook di disaster recovery e obiettivi di ripristino",
+      "Sintesi dei test di sicurezza e dell'hardening",
+      "Guide di migrazione e transizione",
+    ],
+    issued: "Il dossier è consegnato a ciascuna istituzione durante la valutazione — vincolato al destinatario, filigranato ed emesso come registro governato da Dispatch, con una propria identità di verifica. La prova che la piattaforma governa il proprio documento più sensibile.",
+    note: "Nessun contatto commerciale richiesto — richiedetelo dalla vostra valutazione.",
+    cta: "Iniziare la valutazione",
+  },
 };

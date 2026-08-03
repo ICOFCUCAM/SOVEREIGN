@@ -2,7 +2,7 @@ import type { HomeCopy } from "./home";
 
 export const HOME_DE: HomeCopy = {
   hero: {
-    eyebrow: "Institutionelle Publikationsinfrastruktur",
+    eyebrow: "Institutionelle Vertrauensinfrastruktur",
     titleLead: "Die Avantgarde der ",
     titleAccent: "institutionellen Governance.",
     verbs: ["Erstellen", "Prüfen", "Genehmigen", "Autorisieren", "Veröffentlichen", "Zertifizieren", "Verifizieren", "Bewahren"],
@@ -114,5 +114,32 @@ export const HOME_DE: HomeCopy = {
     ctaBegin: "Ihre Evaluierung beginnen",
     ctaProcurement: "Beschaffungszentrum",
     tagline: "Souverän von Grund auf · Verifizierbar als Standard · Institutionsreif",
+  },
+  modules: {
+    eyebrow: "Die Plattform",
+    title: "Die Publikation ist nur das erste Modul.",
+    lead: "Sovereign Dispatch ist keine Dokumentensoftware. Es ist Vertrauensinfrastruktur — ein einziges, kontrolliertes Gewebe, auf dem jeder Akt institutioneller Autorität erstellt, versiegelt, veröffentlicht und nachgewiesen wird. Die Publikation ist der Anfang; das Gewebe ist das Ziel.",
+    rootLabel: "Vertrauensinfrastruktur",
+    liveLabel: "Heute im Einsatz",
+    names: [
+      "Publikation", "Richtlinien", "Gesetzgebung", "Beschaffung", "Verträge", "Kabinett",
+      "Gerichtsakten", "Gremien-Governance", "Wahlen", "Compliance", "Digitale Archive",
+      "Öffentliche Register", "KI-Governance",
+    ],
+    footnote: "Jedes Modul erbt dasselbe Rückgrat: kontrollierte Abläufe, versiegelte Zertifikate, permanente Aufzeichnungen und unabhängige Verifizierung.",
+    closing: "Sie kaufen keine Dokumentensoftware. Sie übernehmen institutionelle Infrastruktur.",
+  },
+  assurance: {
+    eyebrow: "Operative Zusicherung",
+    title: "Überzeugung für die Führung. Detail für die Prüfer.",
+    sub: "Die konkreten Antworten, nach denen Beschaffungs- und Sicherheitsteams suchen — griffbereit, jede mit eigener Vertiefung.",
+    items: [
+      { t: "Identität & Zugriff", d: "Verbindet sich mit den Identitätsanbietern, die Sie bereits betreiben — Single Sign-on über SAML 2.0 und OIDC, verzeichnisgesteuerte Bereitstellung und Rollenzuordnung, mit per Richtlinie erzwungener Funktionstrennung.", link: "Sicherheitsdetails" },
+      { t: "Bereitstellungsmodelle", d: "Betreiben Sie es dort, wo Ihr Mandat es verlangt: souveränes SaaS, Private Cloud, On-Premises oder eine isolierte souveräne Cloud — dieselbe kontrollierte Pipeline und Beweiskette in jedem Modell.", link: "Architektur" },
+      { t: "Verfügbarkeit & Wiederherstellung", d: "Ausgelegt auf Hochverfügbarkeit, mit definierten Wiederherstellungszielen, redundanter Speicherung versiegelter Aufzeichnungen und erprobten Disaster-Recovery-Verfahren — Kontinuität als institutionelle Pflicht.", link: "Trust Centre" },
+      { t: "Normenausrichtung", d: "Konzipiert zur Ausrichtung an den Kontrollrahmen ISO 27001 und SOC 2, an der DSGVO und Datenresidenz-Anforderungen sowie an Standards für Schriftgutverwaltung und Langzeitarchivierung.", link: "Compliance" },
+      { t: "Einführung", d: "Ein gestufter Bereitschaftspfad — Einrichtung der Institution, Zuordnung der Befugnisse, Governance-Richtlinien, dann Ihre erste kontrollierte Publikation — gemessen in Wochen, nicht in Jahren.", link: "Bereitschaftspfad" },
+      { t: "Migration", d: "Bestehende Archive und Register werden importiert, versiegelt und mit intakter Provenienz bewahrt — Ihr institutionelles Gedächtnis kommt vollständig an, nichts bleibt zurück.", link: "Beschaffungszentrum" },
+    ],
   },
 };

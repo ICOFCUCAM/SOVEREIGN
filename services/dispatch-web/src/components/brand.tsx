@@ -100,7 +100,7 @@ export const PublicFooter: React.FC = () => (
             <span className="font-semibold tracking-tight text-white/85">Sovereign Dispatch</span>
           </div>
           <p className="mt-4 text-[12.5px] leading-relaxed text-white/45">
-            The operating system for institutional publication — where information becomes a sealed, governed, permanent record.
+            Institutional trust infrastructure — where institutional decisions become sealed, governed, permanent records.
           </p>
         </div>
         <FooterCol title="The Standard" links={[["What is an Official Record?", OFFICIAL_RECORD_ROUTE], ["See a governed record", WALKTHROUGH_ROUTE], ["Verify a record", VERIFY_ROUTE], ["Outcomes", OUTCOMES_ROUTE], ["The Standard", STANDARD_ROUTE], ["Records", RECORDS_ROUTE], ["Readiness Journey", JOURNEY_ROUTE]]} />
@@ -112,7 +112,7 @@ export const PublicFooter: React.FC = () => (
       <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/[0.05] pt-7 sm:flex-row sm:items-center">
         <div className="text-[12px] text-white/55">
           © <span className="font-mono tracking-[0.1em]">MMXXXVI</span> Sovereign Dispatch
-          <span className="text-white/25"> · </span>Institutional Publication Infrastructure
+          <span className="text-white/25"> · </span>Institutional Trust Infrastructure
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/45">

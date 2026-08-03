@@ -7,7 +7,7 @@ import { CountUp } from "../components/CountUp";
 import {
   ARCHITECTURE_ROUTE, PROCUREMENT_ROUTE, OFFICIAL_RECORD_ROUTE, VERIFY_ROUTE,
   SECURITY_ROUTE, TRUST_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE, DEVELOPERS_ROUTE,
-  COST_ROUTE, ROI_ROUTE,
+  COST_ROUTE, ROI_ROUTE, JOURNEY_ROUTE,
 } from "../lib/routes";
 import { VALUE_BASE } from "../lib/value";
 import { useHomeCopy } from "../lib/messages";
@@ -64,6 +64,9 @@ const OUTCOME_META = [
 ];
 const INDUSTRY_SLUGS = ["government", "justice", "healthcare", "universities", "enterprise", "regulators"];
 const PROOF_LINK_ROUTES = [ARCHITECTURE_ROUTE, SECURITY_ROUTE, COMPLIANCE_ROUTE, EVIDENCE_ROUTE, DEVELOPERS_ROUTE, TRUST_ROUTE, PROCUREMENT_ROUTE];
+// Operational-assurance cards, zipped with c.assurance.items by index.
+const ASSURANCE_ICONS = ["fingerprint", "globe", "clock", "shieldcheck", "pen", "archive"];
+const ASSURANCE_ROUTES = [SECURITY_ROUTE, ARCHITECTURE_ROUTE, TRUST_ROUTE, COMPLIANCE_ROUTE, JOURNEY_ROUTE, PROCUREMENT_ROUTE];
 
 const SectorImage: React.FC<{ slug: string; name: string }> = ({ slug, name }) => {
   const [failed, setFailed] = React.useState(false);
@@ -294,6 +297,40 @@ const Landing: React.FC = () => {
           </div>
         </section>
 
+        {/* ── 5b · THE PLATFORM — trust infrastructure, module by module ── */}
+        <section id="modules" className="relative overflow-hidden border-b border-white/[0.06] bg-black px-6 py-24 lg:px-12">
+          <div className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(233,200,120,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(233,200,120,0.6)_1px,transparent_1px)] [background-size:44px_44px] [mask-image:radial-gradient(70%_60%_at_50%_35%,#000,transparent)]" aria-hidden />
+          <div className="relative mx-auto max-w-[1000px]">
+            <div className="mx-auto max-w-3xl text-center">
+              <Kicker center>{c.modules.eyebrow}</Kicker>
+              <h2 className="mx-auto mt-5 font-serif text-[2.3rem] font-bold leading-[1.06] tracking-tight text-[#f4efe3] sm:text-[3rem]">{c.modules.title}</h2>
+              <p className="mx-auto mt-6 max-w-2xl text-[16px] leading-relaxed text-white/55">{c.modules.lead}</p>
+            </div>
+            {/* the tree — one root, thirteen modules, the first one live */}
+            <div className="mt-14 flex flex-col items-center">
+              <div className="inline-flex items-center gap-3 rounded-lg border border-gold-400/40 bg-gold-400/[0.07] px-7 py-3.5 shadow-[0_0_60px_-20px_rgba(233,200,120,0.45)]">
+                <DispatchMark className="h-5 w-5 text-gold-300" />
+                <span className="font-serif text-[1.25rem] font-bold tracking-tight text-gold-200">{c.modules.rootLabel}</span>
+              </div>
+              <span className="h-10 w-px bg-gradient-to-b from-gold-400/50 to-white/10" aria-hidden />
+              <div className="flex max-w-3xl flex-wrap justify-center gap-2.5">
+                {c.modules.names.map((name, i) => (
+                  <span key={name}
+                    className={i === 0
+                      ? "inline-flex items-center gap-2.5 rounded-md border border-gold-400/45 bg-gold-400/[0.1] px-4 py-2.5 text-[13.5px] font-bold text-gold-100"
+                      : "inline-flex items-center rounded-md border border-white/12 bg-white/[0.02] px-4 py-2.5 text-[13.5px] font-semibold text-white/65 transition duration-300 hover:border-gold-400/25 hover:text-white/85"}>
+                    {i === 0 && <span className="relative flex h-1.5 w-1.5" aria-hidden><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold-300 opacity-60" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold-300" /></span>}
+                    {name}
+                    {i === 0 && <span className="rounded-sm border border-gold-400/40 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-gold-300">{c.modules.liveLabel}</span>}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-8 max-w-xl text-center text-[13px] leading-relaxed text-white/40">{c.modules.footnote}</p>
+              <p className="mt-10 max-w-2xl text-center font-serif text-[1.5rem] font-bold leading-[1.35] tracking-tight text-[#f4efe3] sm:text-[1.8rem]">{c.modules.closing}</p>
+            </div>
+          </div>
+        </section>
+
         {/* ── 6 · BUSINESS VALUE ── */}
         <section id="outcomes" className="border-b border-white/[0.06] bg-gradient-to-b from-white/[0.02] to-transparent px-6 py-20 lg:px-12">
           <div className="mx-auto max-w-[1100px]">
@@ -388,6 +425,30 @@ const Landing: React.FC = () => {
                 <div key={label} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3.5 text-left">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gold-400/25 bg-gold-400/[0.06] text-gold-300"><Ico name={SECURITY_ICONS[i]} className="h-5 w-5" /></span>
                   <span className="text-[13px] font-semibold text-white/80">{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 8b · OPERATIONAL ASSURANCE — the evaluator's six questions ── */}
+        <section id="assurance" className="border-b border-white/[0.06] px-6 py-20 lg:px-12">
+          <div className="mx-auto max-w-[1100px]">
+            <div className="max-w-2xl">
+              <Kicker>{c.assurance.eyebrow}</Kicker>
+              <h2 className="mt-5 font-serif text-[2.2rem] font-bold leading-[1.08] tracking-tight text-[#f4efe3] sm:text-[2.9rem]">{c.assurance.title}</h2>
+              <p className="mt-4 text-[15px] leading-relaxed text-white/55">{c.assurance.sub}</p>
+            </div>
+            <div className="stagger mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {c.assurance.items.map((item, i) => (
+                <div key={item.t} className="group flex flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.035] to-white/[0.01] p-6 transition duration-300 hover:-translate-y-0.5 hover:border-gold-400/25">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/[0.06] text-gold-300"><Ico name={ASSURANCE_ICONS[i]} className="h-6 w-6" /></span>
+                  <div className="mt-4 text-[15.5px] font-bold text-white">{item.t}</div>
+                  <p className="mt-2 flex-1 text-[13.5px] leading-relaxed text-white/55">{item.d}</p>
+                  <button onClick={() => nav(ASSURANCE_ROUTES[i])}
+                    className="mt-4 inline-flex items-center gap-1.5 self-start text-[12px] font-semibold uppercase tracking-wide text-gold-400/80 transition group-hover:text-gold-300">
+                    {item.link} <Chevron className="h-3 w-3 transition group-hover:translate-x-0.5" />
+                  </button>
                 </div>
               ))}
             </div>

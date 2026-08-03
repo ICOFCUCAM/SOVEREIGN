@@ -19,6 +19,16 @@ export const RECORD_TYPES: { docType: string; label: string }[] = [
   { docType: "audit_report", label: "Audit Report" },
   { docType: "due_diligence_report", label: "Due Diligence Report" },
   { docType: "white_paper", label: "White Paper" },
+  { docType: "legislative_instrument", label: "Legislative Instrument" },
+  { docType: "gazette_notice", label: "Gazette Notice" },
+  { docType: "tender_notice", label: "Tender Notice" },
+  { docType: "contract_award", label: "Contract Award Decision" },
+  { docType: "contract_record", label: "Contract Record" },
+  { docType: "court_judgment", label: "Court Judgment" },
+  { docType: "board_resolution", label: "Board Resolution" },
+  { docType: "election_declaration", label: "Election Declaration" },
+  { docType: "public_notice", label: "Public Notice" },
+  { docType: "model_approval", label: "AI Model Approval" },
 ];
 
 export const recordTypeLabel = (docType?: string): string =>

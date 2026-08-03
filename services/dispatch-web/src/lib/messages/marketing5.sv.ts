@@ -10,7 +10,7 @@ export const MARKETING5_SV: ProcurementCopy = {
   inThisPackage: "I detta paket",
   indexKicker: "Utvärderarens register",
   indexTitle: "Allt en utvärdering behöver, samlat på ett ställe.",
-  indexLead: "Varje yta är direkt åtkomlig — värdeargumentet, det tekniska dossiret, prissättning och oberoende verifiering. Ingenting är spärrat.",
+  indexLead: "Varje yta är direkt åtkomlig — värdeargumentet, arkitekturen, prissättning och oberoende verifiering. Ingenting är spärrat.",
   index: [
     { label: "Kostnaden för publicering", blurb: "Varför Dispatch finns — den institutionella process den styr." },
     { label: "Den styrda livscykeln", blurb: "Steg för steg: vem som agerar, vad som beslutas, vad som bevisas." },
@@ -122,4 +122,20 @@ export const MARKETING5_SV: ProcurementCopy = {
   closeLead: "Granska arkitekturen, öppna sedan konsolen för att bedöma den styrda pipelinen direkt. En rollbaserad upphandlingskontakt kommer att publiceras som en sekundär kanal.",
   ctaCloseArch: "Arkitekturöversikt", ctaBegin: "Inled utvärdering",
   footerTag: "Upphandling", footerMotto: "Suverän i design · Alltid granskningsbar",
+  dossier: {
+    kicker: "Begränsad spridning",
+    title: "Tekniska dossiern",
+    lead: "Det här offentliga paketet stannar medvetet på konceptnivå — tillräckligt för att utvärdera, inte tillräckligt för att kopiera. Det djupare ingenjörslagret publiceras aldrig; det lämnas ut som ett kontrollerat dokument.",
+    contents: [
+      "Sekvensdiagram för integration och payloadscheman",
+      "Datamodell och utformning av hyresgästisolering",
+      "Drift- och miljötopologi",
+      "Runbooks för katastrofåterställning och återställningsmål",
+      "Sammanfattningar av säkerhetstester och härdning",
+      "Migrations- och övergångshandböcker",
+    ],
+    issued: "Dossiern lämnas ut per institution under utvärderingen — mottagarbunden, vattenmärkt och levererad som ett styrt Dispatch-register med egen verifieringsidentitet. Ett bevis på att plattformen styr sitt eget känsligaste dokument.",
+    note: "Inget säljsamtal krävs — begär den inifrån er utvärdering.",
+    cta: "Börja er utvärdering",
+  },
 };

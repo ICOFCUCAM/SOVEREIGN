@@ -10,7 +10,7 @@ export const MARKETING5_NO: ProcurementCopy = {
   inThisPackage: "I denne pakken",
   indexKicker: "Evaluererens register",
   indexTitle: "Alt en evaluering trenger, på ett sted.",
-  indexLead: "Hver flate er direkte tilgjengelig — verdiargumentet, det tekniske dossieret, prising og uavhengig verifisering. Ingenting er låst bak en port.",
+  indexLead: "Hver flate er direkte tilgjengelig — verdiargumentet, arkitekturen, prising og uavhengig verifisering. Ingenting er låst bak en port.",
   index: [
     { label: "Kostnaden ved publisering", blurb: "Hvorfor Dispatch finnes — den institusjonelle prosessen det styrer." },
     { label: "Den styrte livssyklusen", blurb: "Trinn for trinn: hvem handler, hva besluttes, hva bevises." },
@@ -122,4 +122,20 @@ export const MARKETING5_NO: ProcurementCopy = {
   closeLead: "Gjennomgå arkitekturen, åpne deretter konsollen for å vurdere den styrte pipelinen direkte. En rollebasert innkjøpskontakt vil bli publisert som en sekundær kanal.",
   ctaCloseArch: "Arkitekturoversikt", ctaBegin: "Begynn evaluering",
   footerTag: "Innkjøp", footerMotto: "Suveren av design · Reviderbar alltid",
+  dossier: {
+    kicker: "Begrenset distribusjon",
+    title: "Det tekniske dossieret",
+    lead: "Denne offentlige pakken stopper bevisst på konseptnivå — nok til å evaluere, ikke nok til å kopiere. Det dypere ingeniørlaget publiseres aldri; det utleveres som et kontrollert dokument.",
+    contents: [
+      "Sekvensdiagrammer for integrasjon og nyttelastskjemaer",
+      "Datamodell og utforming av leietakerisolasjon",
+      "Distribusjons- og miljøtopologi",
+      "Runbooks for katastrofegjenoppretting og gjenopprettingsmål",
+      "Sammendrag av sikkerhetstesting og herding",
+      "Migrerings- og overgangsplaner",
+    ],
+    issued: "Dossieret utleveres per institusjon under evalueringen — mottakerbundet, vannmerket og levert som et styrt Dispatch-register med egen verifiseringsidentitet. Bevis på at plattformen styrer sitt eget mest sensitive dokument.",
+    note: "Ingen salgssamtale kreves — be om det fra evalueringen din.",
+    cta: "Start evalueringen",
+  },
 };

@@ -14,7 +14,10 @@
                "ministerial_report","strategic_memorandum","board_report","regulatory_response",
                "research_dossier","investor_update","proposal_package",
                "press_release","meeting_minutes","risk_report","audit_report",
-               "due_diligence_report","white_paper"]
+               "due_diligence_report","white_paper",
+               "legislative_instrument","gazette_notice","tender_notice","contract_award",
+               "contract_record","court_judgment","board_resolution","election_declaration",
+               "public_notice","model_approval"]
     },
     "locale": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$", "default": "en-GB" },
     "metadata": { "$ref": "#/$defs/Metadata" },

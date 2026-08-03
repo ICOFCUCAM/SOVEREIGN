@@ -301,6 +301,36 @@ const Procurement: React.FC = () => {
           </div>
           <p className="mt-4 text-[12px] leading-relaxed text-white/35">{c.downloadsNote}</p>
         </Block>
+
+        {/* Technical Dossier — the deep-engineering layer stays off the public
+            web; it is described here and issued per institution during
+            evaluation, itself delivered as a governed Dispatch record. */}
+        <section id="dossier" className="scroll-mt-24 py-14">
+          <div className="relative overflow-hidden rounded-2xl border border-gold-400/25 bg-gradient-to-b from-gold-400/[0.05] to-transparent p-8 sm:p-10">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-gold-400/[0.06] blur-3xl" aria-hidden />
+            <div className="flex items-baseline gap-4">
+              <span className="font-mono text-[13px] font-bold text-gold-400">12</span>
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold-400">{c.dossier.kicker}</div>
+                <h2 className="mt-2 font-serif text-3xl font-bold tracking-tight text-white">{c.dossier.title}</h2>
+                <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-white/55">{c.dossier.lead}</p>
+              </div>
+            </div>
+            <ul className="mt-7 grid gap-x-8 gap-y-2.5 sm:grid-cols-2">
+              {c.dossier.contents.map((item) => (
+                <li key={item} className="flex gap-2.5 text-[13.5px] text-white/70"><Dot /> {item}</li>
+              ))}
+            </ul>
+            <p className="mt-6 max-w-2xl text-[13.5px] leading-relaxed text-white/55">{c.dossier.issued}</p>
+            <div className="mt-7 flex flex-wrap items-center gap-4">
+              <button onClick={() => nav("/signup")}
+                className="group inline-flex items-center gap-2.5 rounded bg-gradient-to-b from-gold-300 to-gold-600 px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-[#1c1407] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_7px_18px_-8px_rgba(0,0,0,0.55)] transition active:translate-y-px hover:from-gold-200 hover:to-gold-500">
+                {c.dossier.cta} <Chevron className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+              </button>
+              <span className="text-[12px] text-white/40">{c.dossier.note}</span>
+            </div>
+          </div>
+        </section>
       </div>
 
       {/* closing CTA — no email; routes into the console / evaluation */}
