@@ -2,7 +2,7 @@ import type { HomeCopy } from "./home";
 
 export const HOME_PT: HomeCopy = {
   hero: {
-    eyebrow: "Infraestrutura de Publicação Institucional",
+    eyebrow: "Infraestrutura de Confiança Institucional",
     titleLead: "A Vanguarda da ",
     titleAccent: "Governação Institucional.",
     verbs: ["Criar", "Rever", "Aprovar", "Autorizar", "Publicar", "Certificar", "Verificar", "Preservar"],
@@ -114,5 +114,32 @@ export const HOME_PT: HomeCopy = {
     ctaBegin: "Iniciar a sua avaliação",
     ctaProcurement: "Centro de Aquisições",
     tagline: "Soberano por conceção · Verificável por definição · Pronto para instituições",
+  },
+  modules: {
+    eyebrow: "A plataforma",
+    title: "A publicação é apenas o primeiro módulo.",
+    lead: "O Sovereign Dispatch não é software de documentos. É infraestrutura de confiança — um único tecido governado sobre o qual cada ato de autoridade institucional é criado, selado, publicado e provado. A publicação é onde começa; o tecido é onde conduz.",
+    rootLabel: "Infraestrutura de confiança",
+    liveLabel: "Em funcionamento",
+    names: [
+      "Publicação", "Políticas", "Legislação", "Contratação pública", "Contratos", "Conselho de ministros",
+      "Registos judiciais", "Governação de conselhos", "Eleições", "Conformidade", "Arquivos digitais",
+      "Registos públicos", "Governação da IA",
+    ],
+    footnote: "Cada módulo herda a mesma espinha dorsal: fluxos governados, certificados selados, registos permanentes e verificação independente.",
+    closing: "Não está a comprar software de documentos. Está a adotar infraestrutura institucional.",
+  },
+  assurance: {
+    eyebrow: "Garantia operacional",
+    title: "Convicção para a direção. Detalhe para o avaliador.",
+    sub: "As respostas concretas que as equipas de aquisição e segurança procuram — à mão, cada uma com o seu aprofundamento.",
+    items: [
+      { t: "Identidade e acesso", d: "Liga-se aos fornecedores de identidade que já utiliza — início de sessão único via SAML 2.0 e OIDC, aprovisionamento governado pelo diretório e mapeamento de funções, com segregação de funções imposta por política.", link: "Detalhes de segurança" },
+      { t: "Modelos de implementação", d: "Execute-o onde o seu mandato exigir: SaaS soberano, nuvem privada, instalações próprias ou nuvem soberana isolada — o mesmo processo governado e a mesma cadeia de evidência em todos os modelos.", link: "Arquitetura" },
+      { t: "Disponibilidade e recuperação", d: "Concebido para alta disponibilidade, com objetivos de recuperação definidos, armazenamento redundante dos registos selados e procedimentos de recuperação de desastres ensaiados — a continuidade tratada como um dever institucional.", link: "Centro de confiança" },
+      { t: "Alinhamento com normas", d: "Concebido para se alinhar com os referenciais de controlo ISO 27001 e SOC 2, com o RGPD e requisitos de residência de dados, e com as normas de gestão documental e preservação a longo prazo.", link: "Conformidade" },
+      { t: "Implementação", d: "Um percurso de preparação por etapas — configuração da instituição, mapeamento de autoridade, políticas de governação e a sua primeira publicação governada — medido em semanas, não em anos.", link: "Percurso de preparação" },
+      { t: "Migração", d: "Os arquivos e registos existentes são importados, selados e preservados com a sua proveniência intacta — a memória institucional chega inteira, nada fica para trás.", link: "Centro de aquisição" },
+    ],
   },
 };

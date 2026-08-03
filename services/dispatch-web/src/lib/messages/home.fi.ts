@@ -7,7 +7,7 @@ import type { HomeCopy } from "./home";
 
 export const HOME_FI: HomeCopy = {
   hero: {
-    eyebrow: "Institutionaalinen julkaisuinfrastruktuuri",
+    eyebrow: "Institutionaalinen luottamusinfrastruktuuri",
     titleLead: "Institutionaalisen hallinnon ",
     titleAccent: "eturintama.",
     verbs: ["Luo", "Tarkasta", "Hyväksy", "Valtuuta", "Julkaise", "Sertifioi", "Todenna", "Säilytä"],
@@ -119,5 +119,32 @@ export const HOME_FI: HomeCopy = {
     ctaBegin: "Aloita arviointisi",
     ctaProcurement: "Hankintakeskus",
     tagline: "Suvereeni suunnittelultaan · Todennettava oletuksena · Instituutiovalmis",
+  },
+  modules: {
+    eyebrow: "Alusta",
+    title: "Julkaisu on vasta ensimmäinen moduuli.",
+    lead: "Sovereign Dispatch ei ole asiakirjaohjelmisto. Se on luottamusinfrastruktuuri — yksi hallinnoitu kudos, jolla jokainen institutionaalisen vallan teko luodaan, sinetöidään, julkaistaan ja todistetaan. Julkaisu on lähtöpiste; kudos on määränpää.",
+    rootLabel: "Luottamusinfrastruktuuri",
+    liveLabel: "Käytössä jo nyt",
+    names: [
+      "Julkaisu", "Politiikat", "Lainsäädäntö", "Hankinnat", "Sopimukset", "Valtioneuvosto",
+      "Oikeusasiakirjat", "Hallitustyön hallinta", "Vaalit", "Vaatimustenmukaisuus", "Digitaaliset arkistot",
+      "Julkiset rekisterit", "Tekoälyn hallinta",
+    ],
+    footnote: "Jokainen moduuli perii saman selkärangan: hallinnoidut työnkulut, sinetöidyt varmenteet, pysyvät rekisterit ja riippumattoman todentamisen.",
+    closing: "Ette osta asiakirjaohjelmistoa. Otatte käyttöön institutionaalisen infrastruktuurin.",
+  },
+  assurance: {
+    eyebrow: "Operatiivinen varmuus",
+    title: "Vakuuttavuutta johdolle. Yksityiskohtia arvioijalle.",
+    sub: "Konkreettiset vastaukset, joita hankinta- ja tietoturvatiimit etsivät — käden ulottuvilla, kukin omalla syventävällä sivullaan.",
+    items: [
+      { t: "Identiteetti ja pääsy", d: "Yhdistyy jo käyttämiinne identiteetintarjoajiin — kertakirjautuminen SAML 2.0:lla ja OIDC:llä, hakemisto-ohjattu provisiointi ja roolien kartoitus, tehtävien eriyttäminen politiikoin pakotettuna.", link: "Tietoturvan yksityiskohdat" },
+      { t: "Käyttöönottomallit", d: "Ajakaa sitä siellä, missä mandaattinne vaatii: suvereeni SaaS, yksityinen pilvi, omissa tiloissa tai eristetty suvereeni pilvi — sama hallinnoitu putki ja todisteketju jokaisessa mallissa.", link: "Arkkitehtuuri" },
+      { t: "Saatavuus ja palautuminen", d: "Suunniteltu korkeaan käytettävyyteen: määritellyt palautumistavoitteet, sinetöityjen rekisterien redundantti tallennus ja harjoitellut toipumismenettelyt — jatkuvuus institutionaalisena velvollisuutena.", link: "Luottamuskeskus" },
+      { t: "Standardien mukaisuus", d: "Suunniteltu linjaan ISO 27001- ja SOC 2 -viitekehysten, GDPR:n ja datan sijaintivaatimusten sekä asiakirjahallinnan ja pitkäaikaissäilytyksen standardien kanssa.", link: "Vaatimustenmukaisuus" },
+      { t: "Käyttöönotto", d: "Vaiheistettu valmiuspolku — instituution perustaminen, toimivaltuuksien kartoitus, hallintopolitiikat ja sitten ensimmäinen hallinnoitu julkaisu — mitattuna viikoissa, ei vuosissa.", link: "Valmiuspolku" },
+      { t: "Migraatio", d: "Olemassa olevat arkistot ja rekisterit tuodaan, sinetöidään ja säilytetään alkuperätietoineen — instituution muisti saapuu kokonaisena, mitään ei jätetä jälkeen.", link: "Hankintakeskus" },
+    ],
   },
 };

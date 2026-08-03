@@ -112,7 +112,7 @@ export const PublicFooter: React.FC = () => (
       <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/[0.05] pt-7 sm:flex-row sm:items-center">
         <div className="text-[12px] text-white/55">
           © <span className="font-mono tracking-[0.1em]">MMXXXVI</span> Sovereign Dispatch
-          <span className="text-white/25"> · </span>Institutional Publication Infrastructure
+          <span className="text-white/25"> · </span>Institutional Trust Infrastructure
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-white/45">

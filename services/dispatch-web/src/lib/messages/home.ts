@@ -16,6 +16,8 @@ export interface HomeCopy {
   };
   result: { eyebrow: string; title: string; body: string; features: { t: string; d: string }[]; ctaWhat: string; ctaVerify: string; caption: string };
   governance: { eyebrow: string; title: string; cards: { t: string; d: string }[] };
+  modules: { eyebrow: string; title: string; lead: string; rootLabel: string; liveLabel: string; names: string[]; footnote: string; closing: string };
+  assurance: { eyebrow: string; title: string; sub: string; items: { t: string; d: string; link: string }[] };
   outcomes: { eyebrow: string; title: string; items: { lead: string; sub: string }[]; modelLink: string };
   industries: { eyebrow: string; title: string; sub: string; names: string[]; types: string[][]; forLabel: string; viewAll: string };
   quote: { text: string };
@@ -26,7 +28,7 @@ export interface HomeCopy {
 
 export const HOME_EN: HomeCopy = {
   hero: {
-    eyebrow: "Institutional Publication Infrastructure",
+    eyebrow: "Institutional Trust Infrastructure",
     titleLead: "The Vanguard of ",
     titleAccent: "Institutional Governance.",
     verbs: ["Create", "Review", "Approve", "Authorize", "Publish", "Certify", "Verify", "Preserve"],
@@ -84,6 +86,20 @@ export const HOME_EN: HomeCopy = {
       { t: "Provenance must outlive people.", d: "Who decided, on what version, in what order — preserved and provable long after the people who decided have moved on." },
     ],
   },
+  modules: {
+    eyebrow: "The platform",
+    title: "Publication is only the first module.",
+    lead: "Sovereign Dispatch is not document software. It is trust infrastructure — one governed fabric on which every act of institutional authority is created, sealed, published and proven. Publication is where it begins; the fabric is where it leads.",
+    rootLabel: "Trust Infrastructure",
+    liveLabel: "Live today",
+    names: [
+      "Publication", "Policy", "Legislation", "Procurement", "Contracts", "Cabinet",
+      "Court Records", "Board Governance", "Elections", "Compliance", "Digital Archives",
+      "Public Registers", "AI Governance",
+    ],
+    footnote: "Every module inherits the same spine: governed workflows, sealed certificates, permanent records and independent verification.",
+    closing: "You are not buying document software. You are adopting institutional infrastructure.",
+  },
   outcomes: {
     eyebrow: "Business value",
     title: "What your institution gains.",
@@ -120,6 +136,19 @@ export const HOME_EN: HomeCopy = {
     title: "Sovereign by design. Verifiable by default.",
     sub: "Built for institutions whose information cannot leak, cannot be lost, and cannot be repudiated.",
     labels: ["Cryptographic sealing", "Immutable audit evidence", "Residency controls", "Tenant isolation", "Independent verification", "Long-term preservation"],
+  },
+  assurance: {
+    eyebrow: "Operational assurance",
+    title: "Conviction for the executive. Detail for the evaluator.",
+    sub: "The concrete answers procurement and security teams look for — close at hand, each with its own deep dive.",
+    items: [
+      { t: "Identity & access", d: "Connects to the identity providers you already run — single sign-on over SAML 2.0 and OIDC, directory-governed provisioning and role mapping, with separation of duties enforced by policy.", link: "Security details" },
+      { t: "Deployment models", d: "Run it where your mandate requires: sovereign SaaS, private cloud, on-premises or air-gapped sovereign cloud — the same governed pipeline and evidence chain in every model.", link: "Architecture" },
+      { t: "Availability & recovery", d: "Engineered for high availability with defined recovery objectives, redundant storage of sealed records, and rehearsed disaster-recovery procedures — continuity treated as an institutional duty.", link: "Trust Centre" },
+      { t: "Standards alignment", d: "Designed to align with ISO 27001 and SOC 2 control frameworks, GDPR and data-residency requirements, and long-term records-management and preservation standards.", link: "Compliance" },
+      { t: "Implementation", d: "A staged readiness journey — institution setup, authority mapping, governance policies, then your first governed publication — measured in weeks, not years.", link: "Readiness Journey" },
+      { t: "Migration", d: "Existing archives and registers are imported, sealed and preserved with their provenance intact — your institutional memory arrives whole, nothing is left behind.", link: "Procurement Center" },
+    ],
   },
   proof: {
     eyebrow: "Proof & procurement",

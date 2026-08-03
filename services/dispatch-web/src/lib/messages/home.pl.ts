@@ -2,7 +2,7 @@ import type { HomeCopy } from "./home";
 
 export const HOME_PL: HomeCopy = {
   hero: {
-    eyebrow: "Infrastruktura publikacji instytucjonalnych",
+    eyebrow: "Infrastruktura zaufania instytucjonalnego",
     titleLead: "Awangarda ",
     titleAccent: "zarządzania instytucjonalnego.",
     verbs: ["Twórz", "Recenzuj", "Zatwierdzaj", "Autoryzuj", "Publikuj", "Certyfikuj", "Weryfikuj", "Zachowuj"],
@@ -114,5 +114,32 @@ export const HOME_PL: HomeCopy = {
     ctaBegin: "Rozpocznij ocenę",
     ctaProcurement: "Centrum zamówień",
     tagline: "Suwerenna z założenia · Weryfikowalna domyślnie · Gotowa dla instytucji",
+  },
+  modules: {
+    eyebrow: "Platforma",
+    title: "Publikacja to dopiero pierwszy moduł.",
+    lead: "Sovereign Dispatch to nie oprogramowanie do dokumentów. To infrastruktura zaufania — jedna zarządzana tkanka, na której każdy akt instytucjonalnej władzy jest tworzony, pieczętowany, publikowany i dowodzony. Publikacja jest początkiem; tkanka — celem.",
+    rootLabel: "Infrastruktura zaufania",
+    liveLabel: "Działa już dziś",
+    names: [
+      "Publikacja", "Polityki", "Legislacja", "Zamówienia publiczne", "Umowy", "Rada ministrów",
+      "Akta sądowe", "Ład korporacyjny", "Wybory", "Zgodność", "Archiwa cyfrowe",
+      "Rejestry publiczne", "Zarządzanie AI",
+    ],
+    footnote: "Każdy moduł dziedziczy ten sam kręgosłup: zarządzane przepływy pracy, zapieczętowane certyfikaty, trwałe rejestry i niezależną weryfikację.",
+    closing: "Nie kupują Państwo oprogramowania do dokumentów. Przyjmują Państwo infrastrukturę instytucjonalną.",
+  },
+  assurance: {
+    eyebrow: "Pewność operacyjna",
+    title: "Przekonanie dla zarządu. Szczegóły dla oceniającego.",
+    sub: "Konkretne odpowiedzi, których szukają zespoły zamówień i bezpieczeństwa — pod ręką, każda z własnym pogłębieniem.",
+    items: [
+      { t: "Tożsamość i dostęp", d: "Łączy się z dostawcami tożsamości, z których już korzystacie — jednokrotne logowanie przez SAML 2.0 i OIDC, provisioning sterowany katalogiem i mapowanie ról, z rozdziałem obowiązków egzekwowanym przez polityki.", link: "Szczegóły bezpieczeństwa" },
+      { t: "Modele wdrożenia", d: "Uruchamiajcie tam, gdzie wymaga tego wasz mandat: suwerenny SaaS, chmura prywatna, on-premises lub odizolowana chmura suwerenna — ten sam zarządzany potok i łańcuch dowodowy w każdym modelu.", link: "Architektura" },
+      { t: "Dostępność i odtwarzanie", d: "Zaprojektowany pod wysoką dostępność, ze zdefiniowanymi celami odtworzenia, redundantnym przechowywaniem zapieczętowanych rejestrów i przećwiczonymi procedurami disaster recovery — ciągłość traktowana jako obowiązek instytucji.", link: "Centrum zaufania" },
+      { t: "Zgodność ze standardami", d: "Zaprojektowany w zgodzie z ramami kontroli ISO 27001 i SOC 2, RODO i wymogami rezydencji danych oraz standardami zarządzania dokumentacją i długoterminowej archiwizacji.", link: "Zgodność" },
+      { t: "Wdrożenie", d: "Etapowa ścieżka gotowości — konfiguracja instytucji, mapowanie uprawnień, polityki ładu, a następnie pierwsza zarządzana publikacja — mierzona w tygodniach, nie latach.", link: "Ścieżka gotowości" },
+      { t: "Migracja", d: "Istniejące archiwa i rejestry są importowane, pieczętowane i zachowywane z nienaruszoną proweniencją — pamięć instytucji dociera w całości, nic nie zostaje w tyle.", link: "Centrum zamówień" },
+    ],
   },
 };

@@ -6,7 +6,7 @@ import type { HomeCopy } from "./home";
 
 export const HOME_IT: HomeCopy = {
   hero: {
-    eyebrow: "Infrastruttura per la Pubblicazione Istituzionale",
+    eyebrow: "Infrastruttura di Fiducia Istituzionale",
     titleLead: "L'avanguardia della ",
     titleAccent: "governance istituzionale.",
     verbs: ["Creare", "Revisionare", "Approvare", "Autorizzare", "Pubblicare", "Certificare", "Verificare", "Conservare"],
@@ -118,5 +118,32 @@ export const HOME_IT: HomeCopy = {
     ctaBegin: "Avvia la tua valutazione",
     ctaProcurement: "Centro Procurement",
     tagline: "Sovrana fin dalla progettazione · Verificabile per impostazione predefinita · Pronta per le istituzioni",
+  },
+  modules: {
+    eyebrow: "La piattaforma",
+    title: "La pubblicazione è solo il primo modulo.",
+    lead: "Sovereign Dispatch non è un software documentale. È infrastruttura di fiducia — un unico tessuto governato su cui ogni atto di autorità istituzionale viene creato, sigillato, pubblicato e provato. La pubblicazione è il punto di partenza; il tessuto è la destinazione.",
+    rootLabel: "Infrastruttura di fiducia",
+    liveLabel: "Già operativo",
+    names: [
+      "Pubblicazione", "Politiche", "Legislazione", "Appalti", "Contratti", "Consiglio dei ministri",
+      "Atti giudiziari", "Governance dei consigli", "Elezioni", "Conformità", "Archivi digitali",
+      "Registri pubblici", "Governance dell'IA",
+    ],
+    footnote: "Ogni modulo eredita la stessa spina dorsale: flussi governati, certificati sigillati, registri permanenti e verifica indipendente.",
+    closing: "Non state acquistando un software documentale. State adottando un'infrastruttura istituzionale.",
+  },
+  assurance: {
+    eyebrow: "Garanzia operativa",
+    title: "Convinzione per la direzione. Dettaglio per il valutatore.",
+    sub: "Le risposte concrete che i team di procurement e sicurezza cercano — a portata di mano, ognuna con il proprio approfondimento.",
+    items: [
+      { t: "Identità e accessi", d: "Si collega ai provider di identità che già utilizzate — single sign-on via SAML 2.0 e OIDC, provisioning governato dalla directory e mappatura dei ruoli, con separazione dei compiti applicata da policy.", link: "Dettagli sicurezza" },
+      { t: "Modelli di installazione", d: "Eseguitelo dove il vostro mandato lo richiede: SaaS sovrano, cloud privato, on-premises o cloud sovrano isolato — la stessa pipeline governata e la stessa catena di evidenze in ogni modello.", link: "Architettura" },
+      { t: "Disponibilità e ripristino", d: "Progettato per l'alta disponibilità, con obiettivi di ripristino definiti, archiviazione ridondante dei registri sigillati e procedure di disaster recovery collaudate — la continuità trattata come un dovere istituzionale.", link: "Centro fiducia" },
+      { t: "Allineamento agli standard", d: "Progettato per allinearsi ai framework di controllo ISO 27001 e SOC 2, al GDPR e ai requisiti di residenza dei dati, e agli standard di gestione documentale e conservazione a lungo termine.", link: "Conformità" },
+      { t: "Implementazione", d: "Un percorso di preparazione a tappe — configurazione dell'istituzione, mappatura delle autorità, politiche di governance e la prima pubblicazione governata — misurato in settimane, non in anni.", link: "Percorso di preparazione" },
+      { t: "Migrazione", d: "Archivi e registri esistenti vengono importati, sigillati e conservati con la loro provenienza intatta — la memoria istituzionale arriva integra, nulla viene lasciato indietro.", link: "Centro procurement" },
+    ],
   },
 };

@@ -2,7 +2,7 @@ import type { HomeCopy } from "./home";
 
 export const HOME_NO: HomeCopy = {
   hero: {
-    eyebrow: "Infrastruktur for institusjonell publisering",
+    eyebrow: "Institusjonell tillitsinfrastruktur",
     titleLead: "Spydspissen for ",
     titleAccent: "institusjonell forvaltning.",
     verbs: ["Opprett", "Vurder", "Godkjenn", "Autoriser", "Publiser", "Sertifiser", "Verifiser", "Bevar"],
@@ -114,5 +114,32 @@ export const HOME_NO: HomeCopy = {
     ctaBegin: "Start evalueringen",
     ctaProcurement: "Anskaffelsessenter",
     tagline: "Suveren av design · Verifiserbar som standard · Klar for institusjoner",
+  },
+  modules: {
+    eyebrow: "Plattformen",
+    title: "Publisering er bare den første modulen.",
+    lead: "Sovereign Dispatch er ikke dokumentprogramvare. Det er tillitsinfrastruktur — én styrt vev der hver institusjonell myndighetshandling skapes, forsegles, publiseres og bevises. Publisering er der det begynner; veven er dit det fører.",
+    rootLabel: "Tillitsinfrastruktur",
+    liveLabel: "I drift i dag",
+    names: [
+      "Publisering", "Retningslinjer", "Lovgivning", "Anskaffelser", "Kontrakter", "Regjering",
+      "Rettsdokumenter", "Styrestyring", "Valg", "Etterlevelse", "Digitale arkiver",
+      "Offentlige registre", "KI-styring",
+    ],
+    footnote: "Hver modul arver den samme ryggraden: styrte arbeidsflyter, forseglede sertifikater, permanente registre og uavhengig verifisering.",
+    closing: "Du kjøper ikke dokumentprogramvare. Du tar i bruk institusjonell infrastruktur.",
+  },
+  assurance: {
+    eyebrow: "Operasjonell trygghet",
+    title: "Overbevisning for ledelsen. Detaljer for evaluatoren.",
+    sub: "De konkrete svarene anskaffelses- og sikkerhetsteam ser etter — lett tilgjengelig, hvert med sin egen fordypning.",
+    items: [
+      { t: "Identitet og tilgang", d: "Kobles til identitetsleverandørene du allerede bruker — engangspålogging via SAML 2.0 og OIDC, katalogstyrt provisjonering og rolletilordning, med arbeidsdeling håndhevet av policy.", link: "Sikkerhetsdetaljer" },
+      { t: "Distribusjonsmodeller", d: "Kjør det der mandatet ditt krever: suveren SaaS, privat sky, lokalt eller isolert suveren sky — samme styrte pipeline og beviskjede i alle modeller.", link: "Arkitektur" },
+      { t: "Tilgjengelighet og gjenoppretting", d: "Bygget for høy tilgjengelighet med definerte gjenopprettingsmål, redundant lagring av forseglede registre og innøvde katastrofeprosedyrer — kontinuitet behandlet som en institusjonell plikt.", link: "Tillitssenter" },
+      { t: "Standardtilpasning", d: "Utformet for å samsvare med kontrollrammene ISO 27001 og SOC 2, GDPR og krav til dataresidens, samt standarder for arkivforvaltning og langtidsbevaring.", link: "Etterlevelse" },
+      { t: "Implementering", d: "En trinnvis beredskapsreise — oppsett av institusjonen, kartlegging av myndighet, styringspolicyer og deretter din første styrte publisering — målt i uker, ikke år.", link: "Beredskapsreisen" },
+      { t: "Migrering", d: "Eksisterende arkiver og registre importeres, forsegles og bevares med proveniensen intakt — institusjonens hukommelse kommer helskinnet frem, ingenting etterlates.", link: "Anskaffelsessenter" },
+    ],
   },
 };

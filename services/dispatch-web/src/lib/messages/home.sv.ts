@@ -3,7 +3,7 @@ import type { HomeCopy } from "./home";
 
 export const HOME_SV: HomeCopy = {
   hero: {
-    eyebrow: "Infrastruktur för institutionell publicering",
+    eyebrow: "Institutionell förtroendeinfrastruktur",
     titleLead: "Spjutspetsen inom ",
     titleAccent: "institutionell styrning.",
     verbs: ["Skapa", "Granska", "Godkänn", "Bemyndiga", "Publicera", "Certifiera", "Verifiera", "Bevara"],
@@ -115,5 +115,32 @@ export const HOME_SV: HomeCopy = {
     ctaBegin: "Påbörja din utvärdering",
     ctaProcurement: "Upphandlingscenter",
     tagline: "Suverän i grunden · Verifierbar som standard · Redo för institutioner",
+  },
+  modules: {
+    eyebrow: "Plattformen",
+    title: "Publicering är bara den första modulen.",
+    lead: "Sovereign Dispatch är inte dokumentprogramvara. Det är förtroendeinfrastruktur — en enda styrd väv där varje institutionell myndighetshandling skapas, förseglas, publiceras och bevisas. Publiceringen är där det börjar; väven är dit det leder.",
+    rootLabel: "Förtroendeinfrastruktur",
+    liveLabel: "I drift i dag",
+    names: [
+      "Publicering", "Policyer", "Lagstiftning", "Upphandling", "Avtal", "Regering",
+      "Domstolshandlingar", "Styrelsestyrning", "Val", "Regelefterlevnad", "Digitala arkiv",
+      "Offentliga register", "AI-styrning",
+    ],
+    footnote: "Varje modul ärver samma ryggrad: styrda arbetsflöden, förseglade certifikat, permanenta register och oberoende verifiering.",
+    closing: "Ni köper inte dokumentprogramvara. Ni inför institutionell infrastruktur.",
+  },
+  assurance: {
+    eyebrow: "Operativ trygghet",
+    title: "Övertygelse för ledningen. Detaljer för utvärderaren.",
+    sub: "De konkreta svar som upphandlings- och säkerhetsteam letar efter — nära till hands, vart och ett med sin egen fördjupning.",
+    items: [
+      { t: "Identitet och åtkomst", d: "Ansluter till de identitetsleverantörer ni redan använder — enkel inloggning via SAML 2.0 och OIDC, katalogstyrd provisionering och rollmappning, med åtskillnad av arbetsuppgifter som upprätthålls av policyer.", link: "Säkerhetsdetaljer" },
+      { t: "Driftmodeller", d: "Kör det där ert mandat kräver: suverän SaaS, privat moln, lokalt eller ett isolerat suveränt moln — samma styrda pipeline och beviskedja i varje modell.", link: "Arkitektur" },
+      { t: "Tillgänglighet och återställning", d: "Byggd för hög tillgänglighet med definierade återställningsmål, redundant lagring av förseglade register och övade katastrofrutiner — kontinuitet behandlad som en institutionell plikt.", link: "Förtroendecenter" },
+      { t: "Standarder", d: "Utformad för att ligga i linje med kontrollramverken ISO 27001 och SOC 2, GDPR och krav på datalagringsplats, samt standarder för dokumenthantering och långsiktigt bevarande.", link: "Regelefterlevnad" },
+      { t: "Införande", d: "En stegvis beredskapsresa — uppsättning av institutionen, kartläggning av befogenheter, styrningspolicyer och därefter er första styrda publicering — mätt i veckor, inte år.", link: "Beredskapsresan" },
+      { t: "Migrering", d: "Befintliga arkiv och register importeras, förseglas och bevaras med sin proveniens intakt — institutionens minne kommer fram helt, inget lämnas kvar.", link: "Upphandlingscenter" },
+    ],
   },
 };
