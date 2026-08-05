@@ -1,69 +1,24 @@
 {
- "detected_at": "2026-08-04T08:11:21.581Z",
- "count": 7,
+ "detected_at": "2026-08-05T08:10:52.933Z",
+ "count": 2,
  "deltas": [
   {
-   "buyer_id": "hilton-worldwide",
-   "name": "Hilton Worldwide",
+   "buyer_id": "vista-equity-partners",
+   "name": "Vista Equity Partners",
    "kind": "new_acquisition",
-   "before": "609",
-   "after": "610",
-   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-08-04T08:11:21.580Z"
+   "before": "8",
+   "after": "9",
+   "detail": "+1 indexed event(s) · latest: Ping Identity",
+   "detected_at": "2026-08-05T08:10:52.932Z"
   },
   {
-   "buyer_id": "ibm",
-   "name": "IBM",
-   "kind": "new_acquisition",
-   "before": "198",
-   "after": "206",
-   "detail": "+8 indexed event(s) · latest: Confluent",
-   "detected_at": "2026-08-04T08:11:21.580Z"
-  },
-  {
-   "buyer_id": "adobe",
-   "name": "Adobe",
-   "kind": "new_acquisition",
-   "before": "72",
-   "after": "74",
-   "detail": "+2 indexed event(s) · latest: Semrush",
-   "detected_at": "2026-08-04T08:11:21.580Z"
-  },
-  {
-   "buyer_id": "sap",
-   "name": "SAP",
-   "kind": "new_acquisition",
-   "before": "71",
-   "after": "74",
-   "detail": "+3 indexed event(s) · latest: 78",
-   "detected_at": "2026-08-04T08:11:21.580Z"
-  },
-  {
-   "buyer_id": "salesforce",
-   "name": "Salesforce",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-08-04T08:11:21.580Z"
-  },
-  {
-   "buyer_id": "salesforce",
-   "name": "Salesforce",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "4",
-   "detail": "+4 indexed event(s)",
-   "detected_at": "2026-08-04T08:11:21.580Z"
-  },
-  {
-   "buyer_id": "pete-gerrys",
-   "name": "Pete & Gerry's",
+   "buyer_id": "leveraged-buyout-of-electronic-arts",
+   "name": "Leveraged buyout of Electronic Arts",
    "kind": "new_buyer",
    "before": "—",
    "after": "0 events",
    "detail": "buyer entered the index",
-   "detected_at": "2026-08-04T08:11:21.580Z"
+   "detected_at": "2026-08-05T08:10:52.932Z"
   }
  ]
 }
