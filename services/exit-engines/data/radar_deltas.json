@@ -1,24 +1,159 @@
 {
- "detected_at": "2026-08-05T08:10:52.933Z",
- "count": 2,
+ "detected_at": "2026-08-06T08:23:35.753Z",
+ "count": 17,
  "deltas": [
   {
-   "buyer_id": "vista-equity-partners",
-   "name": "Vista Equity Partners",
+   "buyer_id": "blackrock",
+   "name": "BlackRock",
    "kind": "new_acquisition",
-   "before": "8",
-   "after": "9",
-   "detail": "+1 indexed event(s) · latest: Ping Identity",
-   "detected_at": "2026-08-05T08:10:52.932Z"
+   "before": "156",
+   "after": "157",
+   "detail": "+1 indexed event(s) · latest: Global Infrastructure Partners",
+   "detected_at": "2026-08-06T08:23:35.753Z"
   },
   {
-   "buyer_id": "leveraged-buyout-of-electronic-arts",
-   "name": "Leveraged buyout of Electronic Arts",
+   "buyer_id": "royal-caribbean-group",
+   "name": "Royal Caribbean Group",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "royal-caribbean-group",
+   "name": "Royal Caribbean Group",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "12",
+   "detail": "+12 indexed event(s) · latest: Azamara Pursuit",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "qualcomm",
+   "name": "Qualcomm",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "qualcomm",
+   "name": "Qualcomm",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "5",
+   "detail": "+5 indexed event(s) · latest: Nuvia",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "sherwin-williams",
+   "name": "Sherwin-Williams",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "medium",
+   "detail": "appetite no_events → medium",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "sherwin-williams",
+   "name": "Sherwin-Williams",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "4",
+   "detail": "+4 indexed event(s) · latest: Suvinil",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "sherwin-williams",
+   "name": "Sherwin-Williams",
+   "kind": "cadence_shift",
+   "before": "0/12m",
+   "after": "1/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "godaddy",
+   "name": "GoDaddy",
+   "kind": "new_acquisition",
+   "before": "2",
+   "after": "3",
+   "detail": "+1 indexed event(s) · latest: ManageWP",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "seagate-technology",
+   "name": "Seagate Technology",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "seagate-technology",
+   "name": "Seagate Technology",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "3",
+   "detail": "+3 indexed event(s) · latest: Dot Hill Systems",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "sp-global",
+   "name": "S&P Global",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "sp-global",
+   "name": "S&P Global",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "citation-group",
+   "name": "Citation Group",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "medium",
+   "detail": "appetite no_events → medium",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "citation-group",
+   "name": "Citation Group",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s) · latest: Agendrix",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "salesforce",
+   "name": "Salesforce",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-08-06T08:23:35.753Z"
+  },
+  {
+   "buyer_id": "ferguson-enterprises",
+   "name": "Ferguson Enterprises",
    "kind": "new_buyer",
    "before": "—",
    "after": "0 events",
    "detail": "buyer entered the index",
-   "detected_at": "2026-08-05T08:10:52.932Z"
+   "detected_at": "2026-08-06T08:23:35.753Z"
   }
  ]
 }
