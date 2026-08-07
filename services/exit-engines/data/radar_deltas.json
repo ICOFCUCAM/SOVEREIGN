@@ -1,159 +1,105 @@
 {
- "detected_at": "2026-08-06T08:23:35.753Z",
- "count": 17,
+ "detected_at": "2026-08-07T06:41:05.955Z",
+ "count": 11,
  "deltas": [
   {
-   "buyer_id": "blackrock",
-   "name": "BlackRock",
+   "buyer_id": "hilton-worldwide",
+   "name": "Hilton Worldwide",
    "kind": "new_acquisition",
-   "before": "156",
-   "after": "157",
-   "detail": "+1 indexed event(s) · latest: Global Infrastructure Partners",
-   "detected_at": "2026-08-06T08:23:35.753Z"
+   "before": "610",
+   "after": "611",
+   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-08-07T06:41:05.954Z"
   },
   {
-   "buyer_id": "royal-caribbean-group",
-   "name": "Royal Caribbean Group",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-08-06T08:23:35.753Z"
-  },
-  {
-   "buyer_id": "royal-caribbean-group",
-   "name": "Royal Caribbean Group",
+   "buyer_id": "blackstone-inc",
+   "name": "Blackstone Inc.",
    "kind": "new_acquisition",
-   "before": "0",
-   "after": "12",
-   "detail": "+12 indexed event(s) · latest: Azamara Pursuit",
-   "detected_at": "2026-08-06T08:23:35.753Z"
+   "before": "22",
+   "after": "23",
+   "detail": "+1 indexed event(s) · latest: rover.com",
+   "detected_at": "2026-08-07T06:41:05.954Z"
   },
   {
-   "buyer_id": "qualcomm",
-   "name": "Qualcomm",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-08-06T08:23:35.753Z"
-  },
-  {
-   "buyer_id": "qualcomm",
-   "name": "Qualcomm",
+   "buyer_id": "carlyle-group",
+   "name": "Carlyle Group",
    "kind": "new_acquisition",
-   "before": "0",
-   "after": "5",
-   "detail": "+5 indexed event(s) · latest: Nuvia",
-   "detected_at": "2026-08-06T08:23:35.753Z"
+   "before": "12",
+   "after": "13",
+   "detail": "+1 indexed event(s) · latest: Memsource",
+   "detected_at": "2026-08-07T06:41:05.954Z"
   },
   {
-   "buyer_id": "sherwin-williams",
-   "name": "Sherwin-Williams",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "medium",
-   "detail": "appetite no_events → medium",
-   "detected_at": "2026-08-06T08:23:35.753Z"
-  },
-  {
-   "buyer_id": "sherwin-williams",
-   "name": "Sherwin-Williams",
+   "buyer_id": "the-carlyle-group",
+   "name": "The Carlyle Group",
    "kind": "new_acquisition",
-   "before": "0",
-   "after": "4",
-   "detail": "+4 indexed event(s) · latest: Suvinil",
-   "detected_at": "2026-08-06T08:23:35.753Z"
+   "before": "12",
+   "after": "13",
+   "detail": "+1 indexed event(s) · latest: Memsource",
+   "detected_at": "2026-08-07T06:41:05.954Z"
   },
   {
-   "buyer_id": "sherwin-williams",
-   "name": "Sherwin-Williams",
+   "buyer_id": "paramount-skydance-corporation",
+   "name": "Paramount Skydance Corporation",
    "kind": "cadence_shift",
-   "before": "0/12m",
-   "after": "1/12m",
+   "before": "1/12m",
+   "after": "0/12m",
    "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-08-06T08:23:35.753Z"
+   "detected_at": "2026-08-07T06:41:05.954Z"
   },
   {
-   "buyer_id": "godaddy",
-   "name": "GoDaddy",
+   "buyer_id": "goldman-sachs-group",
+   "name": "Goldman Sachs Group",
    "kind": "new_acquisition",
-   "before": "2",
-   "after": "3",
-   "detail": "+1 indexed event(s) · latest: ManageWP",
-   "detected_at": "2026-08-06T08:23:35.753Z"
-  },
-  {
-   "buyer_id": "seagate-technology",
-   "name": "Seagate Technology",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-08-06T08:23:35.753Z"
-  },
-  {
-   "buyer_id": "seagate-technology",
-   "name": "Seagate Technology",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "3",
-   "detail": "+3 indexed event(s) · latest: Dot Hill Systems",
-   "detected_at": "2026-08-06T08:23:35.753Z"
-  },
-  {
-   "buyer_id": "sp-global",
-   "name": "S&P Global",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-08-06T08:23:35.753Z"
-  },
-  {
-   "buyer_id": "sp-global",
-   "name": "S&P Global",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s)",
-   "detected_at": "2026-08-06T08:23:35.753Z"
-  },
-  {
-   "buyer_id": "citation-group",
-   "name": "Citation Group",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "medium",
-   "detail": "appetite no_events → medium",
-   "detected_at": "2026-08-06T08:23:35.753Z"
-  },
-  {
-   "buyer_id": "citation-group",
-   "name": "Citation Group",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s) · latest: Agendrix",
-   "detected_at": "2026-08-06T08:23:35.753Z"
+   "before": "9",
+   "after": "10",
+   "detail": "+1 indexed event(s) · latest: MONETA Bank",
+   "detected_at": "2026-08-07T06:41:05.954Z"
   },
   {
    "buyer_id": "salesforce",
    "name": "Salesforce",
    "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-06T08:23:35.753Z"
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-08-07T06:41:05.954Z"
   },
   {
-   "buyer_id": "ferguson-enterprises",
-   "name": "Ferguson Enterprises",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-08-06T08:23:35.753Z"
+   "buyer_id": "salesforce",
+   "name": "Salesforce",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "4",
+   "detail": "+4 indexed event(s)",
+   "detected_at": "2026-08-07T06:41:05.954Z"
+  },
+  {
+   "buyer_id": "dennys",
+   "name": "Denny's",
+   "kind": "new_acquisition",
+   "before": "2",
+   "after": "3",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-08-07T06:41:05.954Z"
+  },
+  {
+   "buyer_id": "butterfly-equity",
+   "name": "Butterfly Equity",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-08-07T06:41:05.954Z"
+  },
+  {
+   "buyer_id": "butterfly-equity",
+   "name": "Butterfly Equity",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-08-07T06:41:05.954Z"
   }
  ]
 }
