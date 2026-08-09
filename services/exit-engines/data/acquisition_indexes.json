@@ -1,5 +1,5 @@
 {
- "as_of": "2026-08-08T06:15:52.487Z",
+ "as_of": "2026-08-09T06:41:58.459Z",
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)",
  "indexes": [
   {
@@ -16,9 +16,9 @@
   {
    "sector": "Media",
    "volume": 238,
-   "volume12m": 12,
-   "volumePrior12m": 8,
-   "trendPct": 0.5,
+   "volume12m": 9,
+   "volumePrior12m": 11,
+   "trendPct": -0.18181818181818182,
    "activeBuyers": 20,
    "disclosedDeals": 100,
    "medianDealUsd": 198000000,
@@ -38,9 +38,9 @@
   {
    "sector": "Gaming",
    "volume": 110,
-   "volume12m": 1,
-   "volumePrior12m": 1,
-   "trendPct": 0,
+   "volume12m": 0,
+   "volumePrior12m": 2,
+   "trendPct": -1,
    "activeBuyers": 10,
    "disclosedDeals": 27,
    "medianDealUsd": 375000000,

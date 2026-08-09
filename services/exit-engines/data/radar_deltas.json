@@ -1,33 +1,24 @@
 {
- "detected_at": "2026-08-08T06:15:53.880Z",
- "count": 3,
+ "detected_at": "2026-08-09T06:41:59.554Z",
+ "count": 2,
  "deltas": [
   {
-   "buyer_id": "meta-platforms",
-   "name": "Meta Platforms",
-   "kind": "cadence_shift",
-   "before": "6/12m",
-   "after": "5/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-08-08T06:15:53.879Z"
-  },
-  {
-   "buyer_id": "dennys",
-   "name": "Denny's",
+   "buyer_id": "sap",
+   "name": "SAP",
    "kind": "new_acquisition",
-   "before": "3",
-   "after": "4",
-   "detail": "+1 indexed event(s)",
-   "detected_at": "2026-08-08T06:15:53.879Z"
+   "before": "74",
+   "after": "75",
+   "detail": "+1 indexed event(s) · latest: Prior Labs",
+   "detected_at": "2026-08-09T06:41:59.554Z"
   },
   {
-   "buyer_id": "strategic-investment-fund-of-the-democratic-republic-of-the-cong",
-   "name": "Strategic Investment Fund of the Democratic Republic of the Congo",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-08-08T06:15:53.879Z"
+   "buyer_id": "sap",
+   "name": "SAP",
+   "kind": "cadence_shift",
+   "before": "3/12m",
+   "after": "4/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-08-09T06:41:59.554Z"
   }
  ]
 }
