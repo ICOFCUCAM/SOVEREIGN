@@ -1,15 +1,87 @@
 {
- "detected_at": "2026-08-10T07:27:40.116Z",
- "count": 1,
+ "detected_at": "2026-08-11T06:29:29.310Z",
+ "count": 9,
  "deltas": [
   {
-   "buyer_id": "dell",
-   "name": "Dell",
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
+   "kind": "new_acquisition",
+   "before": "385",
+   "after": "418",
+   "detail": "+33 indexed event(s) · latest: Fintool",
+   "detected_at": "2026-08-11T06:29:29.309Z"
+  },
+  {
+   "buyer_id": "ibm",
+   "name": "IBM",
+   "kind": "new_acquisition",
+   "before": "198",
+   "after": "206",
+   "detail": "+8 indexed event(s) · latest: Confluent",
+   "detected_at": "2026-08-11T06:29:29.309Z"
+  },
+  {
+   "buyer_id": "symantec",
+   "name": "Symantec",
    "kind": "appetite_change",
    "before": "medium",
    "after": "low",
    "detail": "appetite medium → low",
-   "detected_at": "2026-08-10T07:27:40.115Z"
+   "detected_at": "2026-08-11T06:29:29.309Z"
+  },
+  {
+   "buyer_id": "adobe",
+   "name": "Adobe",
+   "kind": "new_acquisition",
+   "before": "72",
+   "after": "74",
+   "detail": "+2 indexed event(s) · latest: Semrush",
+   "detected_at": "2026-08-11T06:29:29.309Z"
+  },
+  {
+   "buyer_id": "block-inc",
+   "name": "Block, Inc.",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-08-11T06:29:29.309Z"
+  },
+  {
+   "buyer_id": "block-inc",
+   "name": "Block, Inc.",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-08-11T06:29:29.309Z"
+  },
+  {
+   "buyer_id": "ca-technologies",
+   "name": "CA Technologies",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-08-11T06:29:29.309Z"
+  },
+  {
+   "buyer_id": "3m",
+   "name": "3M",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-08-11T06:29:29.309Z"
+  },
+  {
+   "buyer_id": "abbvie",
+   "name": "AbbVie",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-08-11T06:29:29.309Z"
   }
  ]
 }
