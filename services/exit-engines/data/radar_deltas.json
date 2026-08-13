@@ -1,87 +1,186 @@
 {
- "detected_at": "2026-08-11T06:29:29.310Z",
- "count": 9,
+ "detected_at": "2026-08-13T07:06:06.195Z",
+ "count": 20,
  "deltas": [
   {
-   "buyer_id": "microsoft",
-   "name": "Microsoft",
+   "buyer_id": "sony",
+   "name": "Sony",
    "kind": "new_acquisition",
-   "before": "385",
-   "after": "418",
-   "detail": "+33 indexed event(s) · latest: Fintool",
-   "detected_at": "2026-08-11T06:29:29.309Z"
+   "before": "271",
+   "after": "305",
+   "detail": "+34 indexed event(s) · latest: Cosm",
+   "detected_at": "2026-08-13T07:06:06.195Z"
   },
   {
-   "buyer_id": "ibm",
-   "name": "IBM",
+   "buyer_id": "alphabet",
+   "name": "Alphabet",
    "kind": "new_acquisition",
-   "before": "198",
-   "after": "206",
-   "detail": "+8 indexed event(s) · latest: Confluent",
-   "detected_at": "2026-08-11T06:29:29.309Z"
+   "before": "271",
+   "after": "286",
+   "detail": "+15 indexed event(s) · latest: Prestige LLC",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "disney",
+   "name": "Disney",
+   "kind": "new_acquisition",
+   "before": "58",
+   "after": "189",
+   "detail": "+131 indexed event(s) · latest: NFL's Media assets",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "hewlett-packard",
+   "name": "Hewlett-Packard",
+   "kind": "new_acquisition",
+   "before": "131",
+   "after": "141",
+   "detail": "+10 indexed event(s) · latest: Juniper Networks (by HPE)",
+   "detected_at": "2026-08-13T07:06:06.195Z"
   },
   {
    "buyer_id": "symantec",
    "name": "Symantec",
    "kind": "appetite_change",
-   "before": "medium",
-   "after": "low",
-   "detail": "appetite medium → low",
-   "detected_at": "2026-08-11T06:29:29.309Z"
+   "before": "low",
+   "after": "medium",
+   "detail": "appetite low → medium",
+   "detected_at": "2026-08-13T07:06:06.195Z"
   },
   {
-   "buyer_id": "adobe",
-   "name": "Adobe",
+   "buyer_id": "symantec",
+   "name": "Symantec",
    "kind": "new_acquisition",
-   "before": "72",
-   "after": "74",
-   "detail": "+2 indexed event(s) · latest: Semrush",
-   "detected_at": "2026-08-11T06:29:29.309Z"
+   "before": "121",
+   "after": "129",
+   "detail": "+8 indexed event(s) · latest: Avast Limited",
+   "detected_at": "2026-08-13T07:06:06.195Z"
   },
   {
-   "buyer_id": "block-inc",
-   "name": "Block, Inc.",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-08-11T06:29:29.309Z"
-  },
-  {
-   "buyer_id": "block-inc",
-   "name": "Block, Inc.",
+   "buyer_id": "nokia",
+   "name": "Nokia",
    "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s)",
-   "detected_at": "2026-08-11T06:29:29.309Z"
+   "before": "90",
+   "after": "96",
+   "detail": "+6 indexed event(s) · latest: Infinera Corporation",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "electronic-arts",
+   "name": "Electronic Arts",
+   "kind": "new_acquisition",
+   "before": "54",
+   "after": "78",
+   "detail": "+24 indexed event(s) · latest: TRACAB Technologies",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "embracer-group",
+   "name": "Embracer Group",
+   "kind": "new_acquisition",
+   "before": "68",
+   "after": "71",
+   "detail": "+3 indexed event(s) · latest: Anime Limited",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "twitter",
+   "name": "Twitter",
+   "kind": "new_acquisition",
+   "before": "70",
+   "after": "71",
+   "detail": "+1 indexed event(s) · latest: Laskie",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "take-two-interactive",
+   "name": "Take-Two Interactive",
+   "kind": "new_acquisition",
+   "before": "44",
+   "after": "66",
+   "detail": "+22 indexed event(s) · latest: Video Games Deluxe",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "dell",
+   "name": "Dell",
+   "kind": "new_acquisition",
+   "before": "41",
+   "after": "46",
+   "detail": "+5 indexed event(s) · latest: Moogsoft",
+   "detected_at": "2026-08-13T07:06:06.195Z"
   },
   {
    "buyer_id": "ca-technologies",
    "name": "CA Technologies",
    "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-11T06:29:29.309Z"
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "ca-technologies",
+   "name": "CA Technologies",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "2",
+   "detail": "+2 indexed event(s) · latest: BlazeMeter",
+   "detected_at": "2026-08-13T07:06:06.195Z"
   },
   {
    "buyer_id": "3m",
    "name": "3M",
    "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-11T06:29:29.309Z"
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "3m",
+   "name": "3M",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s) · latest: Monta",
+   "detected_at": "2026-08-13T07:06:06.195Z"
   },
   {
    "buyer_id": "abbvie",
    "name": "AbbVie",
    "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-11T06:29:29.309Z"
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "abbvie",
+   "name": "AbbVie",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "msci",
+   "name": "MSCI",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-08-13T07:06:06.195Z"
+  },
+  {
+   "buyer_id": "infront",
+   "name": "Infront",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-08-13T07:06:06.195Z"
   }
  ]
 }

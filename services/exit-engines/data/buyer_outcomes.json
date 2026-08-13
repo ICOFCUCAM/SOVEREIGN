@@ -1,5 +1,5 @@
 {
- "as_of": "2026-08-11T06:29:27.945Z",
+ "as_of": "2026-08-13T07:06:04.821Z",
  "buyers": [
   {
    "buyer_id": "microsoft",
@@ -24,7 +24,7 @@
    "events_indexed": 418,
    "disclosed_events": 130,
    "source_url": "https://www.wikidata.org/wiki/Q2283",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "sony",
@@ -43,10 +43,10 @@
     "low_usd": 10000000,
     "high_usd": 2000000000
    },
-   "events_indexed": 271,
+   "events_indexed": 305,
    "disclosed_events": 88,
    "source_url": "https://www.wikidata.org/wiki/Q41187",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "alphabet",
@@ -65,10 +65,10 @@
     "low_usd": 20000000,
     "high_usd": 5000000000
    },
-   "events_indexed": 271,
+   "events_indexed": 286,
    "disclosed_events": 66,
    "source_url": "https://www.wikidata.org/wiki/Q20800404",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "cisco",
@@ -90,7 +90,7 @@
    "events_indexed": 235,
    "disclosed_events": 146,
    "source_url": "https://www.wikidata.org/wiki/Q173395",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "ibm",
@@ -112,7 +112,29 @@
    "events_indexed": 206,
    "disclosed_events": 43,
    "source_url": "https://www.wikidata.org/wiki/Q37156",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
+  },
+  {
+   "buyer_id": "disney",
+   "name": "Disney",
+   "median_deal_usd": 790000000,
+   "avg_deal_usd": 7084122024,
+   "largest": {
+    "usd": 71300000000,
+    "target": "21st Century Fox (entertainment assets, cable networks and international networks)"
+   },
+   "smallest": {
+    "usd": 562500,
+    "target": "Disneyland, Inc."
+   },
+   "check_size_band": {
+    "low_usd": 100000000,
+    "high_usd": 10000000000
+   },
+   "events_indexed": 189,
+   "disclosed_events": 21,
+   "source_url": "https://www.wikidata.org/wiki/Q7414",
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "amazon",
@@ -137,7 +159,7 @@
    "events_indexed": 176,
    "disclosed_events": 10,
    "source_url": "https://www.wikidata.org/wiki/Q3884",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "apple",
@@ -159,7 +181,7 @@
    "events_indexed": 158,
    "disclosed_events": 42,
    "source_url": "https://www.wikidata.org/wiki/Q312",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "hewlett-packard",
@@ -178,10 +200,32 @@
     "low_usd": 10000000,
     "high_usd": 20000000000
    },
-   "events_indexed": 131,
+   "events_indexed": 141,
    "disclosed_events": 36,
    "source_url": "https://www.wikidata.org/wiki/Q80978",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
+  },
+  {
+   "buyer_id": "symantec",
+   "name": "Symantec",
+   "median_deal_usd": 40875000,
+   "avg_deal_usd": 477997881,
+   "largest": {
+    "usd": 13520000000,
+    "target": "Veritas Software"
+   },
+   "smallest": {
+    "usd": 1,
+    "target": "Symantec"
+   },
+   "check_size_band": {
+    "low_usd": 2000000,
+    "high_usd": 1000000000
+   },
+   "events_indexed": 129,
+   "disclosed_events": 80,
+   "source_url": "https://www.wikidata.org/wiki/Q677085",
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "aol",
@@ -203,7 +247,7 @@
    "events_indexed": 123,
    "disclosed_events": 30,
    "source_url": "https://www.wikidata.org/wiki/Q191715",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "gen-digital",
@@ -225,29 +269,7 @@
    "events_indexed": 121,
    "disclosed_events": 80,
    "source_url": "https://www.wikidata.org/wiki/Q677085",
-   "generated_at": "2026-08-11T06:29:29.027Z"
-  },
-  {
-   "buyer_id": "symantec",
-   "name": "Symantec",
-   "median_deal_usd": 40875000,
-   "avg_deal_usd": 477997881,
-   "largest": {
-    "usd": 13520000000,
-    "target": "Veritas Software"
-   },
-   "smallest": {
-    "usd": 1,
-    "target": "Symantec"
-   },
-   "check_size_band": {
-    "low_usd": 2000000,
-    "high_usd": 1000000000
-   },
-   "events_indexed": 121,
-   "disclosed_events": 80,
-   "source_url": "https://www.wikidata.org/wiki/Q677085",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "yahoo",
@@ -269,7 +291,7 @@
    "events_indexed": 119,
    "disclosed_events": 49,
    "source_url": "https://www.wikidata.org/wiki/Q29231846",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "nokia",
@@ -288,10 +310,32 @@
     "low_usd": 50,
     "high_usd": 10000
    },
-   "events_indexed": 90,
+   "events_indexed": 96,
    "disclosed_events": 20,
    "source_url": "https://www.wikidata.org/wiki/Q1418",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
+  },
+  {
+   "buyer_id": "electronic-arts",
+   "name": "Electronic Arts",
+   "median_deal_usd": 400000000,
+   "avg_deal_usd": 716961538,
+   "largest": {
+    "usd": 2400000000,
+    "target": "Glu Mobile"
+   },
+   "smallest": {
+    "usd": 30000000,
+    "target": "Chillingo†"
+   },
+   "check_size_band": {
+    "low_usd": 20000000,
+    "high_usd": 2000000000
+   },
+   "events_indexed": 78,
+   "disclosed_events": 13,
+   "source_url": "https://www.wikidata.org/wiki/Q173941",
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "sap",
@@ -313,7 +357,7 @@
    "events_indexed": 75,
    "disclosed_events": 15,
    "source_url": "https://www.wikidata.org/wiki/Q552581",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "adobe",
@@ -337,7 +381,7 @@
    "events_indexed": 74,
    "disclosed_events": 4,
    "source_url": "https://www.wikidata.org/wiki/Q11463",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "ebay",
@@ -359,29 +403,7 @@
    "events_indexed": 72,
    "disclosed_events": 34,
    "source_url": "https://www.wikidata.org/wiki/Q58024",
-   "generated_at": "2026-08-11T06:29:29.027Z"
-  },
-  {
-   "buyer_id": "twitter",
-   "name": "Twitter",
-   "median_deal_usd": 72500000,
-   "avg_deal_usd": 116655004,
-   "largest": {
-    "usd": 479000000,
-    "target": "TellApart"
-   },
-   "smallest": {
-    "usd": 50,
-    "target": "Periscope"
-   },
-   "check_size_band": {
-    "low_usd": 5000000,
-    "high_usd": 500000000
-   },
-   "events_indexed": 70,
-   "disclosed_events": 14,
-   "source_url": "https://www.wikidata.org/wiki/Q1390577",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "embracer-group",
@@ -400,72 +422,32 @@
     "low_usd": 20000000,
     "high_usd": 2000000000
    },
-   "events_indexed": 68,
+   "events_indexed": 71,
    "disclosed_events": 10,
    "source_url": "https://www.wikidata.org/wiki/Q65083539",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
-   "buyer_id": "disney",
-   "name": "Disney",
-   "median_deal_usd": 790000000,
-   "avg_deal_usd": 7084122024,
+   "buyer_id": "twitter",
+   "name": "Twitter",
+   "median_deal_usd": 72500000,
+   "avg_deal_usd": 116655004,
    "largest": {
-    "usd": 71300000000,
-    "target": "21st Century Fox (entertainment assets, cable networks and international networks)"
+    "usd": 479000000,
+    "target": "TellApart"
    },
    "smallest": {
-    "usd": 562500,
-    "target": "Disneyland, Inc."
+    "usd": 50,
+    "target": "Periscope"
    },
    "check_size_band": {
-    "low_usd": 100000000,
-    "high_usd": 10000000000
+    "low_usd": 5000000,
+    "high_usd": 500000000
    },
-   "events_indexed": 58,
-   "disclosed_events": 21,
-   "source_url": "https://www.wikidata.org/wiki/Q7414",
-   "generated_at": "2026-08-11T06:29:29.027Z"
-  },
-  {
-   "buyer_id": "accenture",
-   "name": "Accenture",
-   "median_deal_usd": 345500000,
-   "avg_deal_usd": 345500000,
-   "largest": {
-    "usd": 375000000,
-    "target": "Procurian"
-   },
-   "smallest": {
-    "usd": 316000000,
-    "target": "Acquity Group"
-   },
-   "events_indexed": 57,
-   "disclosed_events": 2,
-   "source_url": "https://www.wikidata.org/wiki/Q338825",
-   "generated_at": "2026-08-11T06:29:29.027Z"
-  },
-  {
-   "buyer_id": "electronic-arts",
-   "name": "Electronic Arts",
-   "median_deal_usd": 400000000,
-   "avg_deal_usd": 716961538,
-   "largest": {
-    "usd": 2400000000,
-    "target": "Glu Mobile"
-   },
-   "smallest": {
-    "usd": 30000000,
-    "target": "Chillingo†"
-   },
-   "check_size_band": {
-    "low_usd": 20000000,
-    "high_usd": 2000000000
-   },
-   "events_indexed": 54,
-   "disclosed_events": 13,
-   "source_url": "https://www.wikidata.org/wiki/Q173941",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "events_indexed": 71,
+   "disclosed_events": 14,
+   "source_url": "https://www.wikidata.org/wiki/Q1390577",
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "take-two-interactive",
@@ -484,10 +466,28 @@
     "low_usd": 2000000,
     "high_usd": 500000000
    },
-   "events_indexed": 44,
+   "events_indexed": 66,
    "disclosed_events": 18,
    "source_url": "https://www.wikidata.org/wiki/Q94933",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
+  },
+  {
+   "buyer_id": "accenture",
+   "name": "Accenture",
+   "median_deal_usd": 345500000,
+   "avg_deal_usd": 345500000,
+   "largest": {
+    "usd": 375000000,
+    "target": "Procurian"
+   },
+   "smallest": {
+    "usd": 316000000,
+    "target": "Acquity Group"
+   },
+   "events_indexed": 57,
+   "disclosed_events": 2,
+   "source_url": "https://www.wikidata.org/wiki/Q338825",
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "dell",
@@ -506,10 +506,10 @@
     "low_usd": 2,
     "high_usd": 5000000000
    },
-   "events_indexed": 41,
+   "events_indexed": 46,
    "disclosed_events": 16,
    "source_url": "https://www.wikidata.org/wiki/Q30873",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "blackberry",
@@ -531,7 +531,7 @@
    "events_indexed": 32,
    "disclosed_events": 8,
    "source_url": "https://www.wikidata.org/wiki/Q502121",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "juniper-networks",
@@ -553,7 +553,7 @@
    "events_indexed": 28,
    "disclosed_events": 22,
    "source_url": "https://www.wikidata.org/wiki/Q1049080",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "vista-equity-partners",
@@ -564,7 +564,7 @@
    "events_indexed": 9,
    "disclosed_events": 0,
    "source_url": "https://www.wikidata.org/wiki/Q7936440",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "thoma-bravo",
@@ -575,7 +575,7 @@
    "events_indexed": 5,
    "disclosed_events": 0,
    "source_url": "https://www.wikidata.org/wiki/Q7786759",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "salesforce",
@@ -586,7 +586,7 @@
    "events_indexed": 4,
    "disclosed_events": 0,
    "source_url": "https://www.wikidata.org/wiki/Q941127",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   },
   {
    "buyer_id": "uber",
@@ -597,7 +597,7 @@
    "events_indexed": 3,
    "disclosed_events": 0,
    "source_url": "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
-   "generated_at": "2026-08-11T06:29:29.027Z"
+   "generated_at": "2026-08-13T07:06:05.912Z"
   }
  ]
 }
