@@ -1,33 +1,69 @@
 {
- "detected_at": "2026-08-14T07:25:38.435Z",
- "count": 3,
+ "detected_at": "2026-08-15T06:00:01.750Z",
+ "count": 7,
  "deltas": [
   {
    "buyer_id": "hilton-worldwide",
    "name": "Hilton Worldwide",
    "kind": "new_acquisition",
-   "before": "611",
-   "after": "612",
-   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-08-14T07:25:38.435Z"
+   "before": "612",
+   "after": "614",
+   "detail": "+2 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-08-15T06:00:01.749Z"
+  },
+  {
+   "buyer_id": "sap",
+   "name": "SAP",
+   "kind": "new_acquisition",
+   "before": "71",
+   "after": "75",
+   "detail": "+4 indexed event(s) · latest: Prior Labs",
+   "detected_at": "2026-08-15T06:00:01.749Z"
   },
   {
    "buyer_id": "sap",
    "name": "SAP",
    "kind": "cadence_shift",
-   "before": "4/12m",
-   "after": "3/12m",
+   "before": "3/12m",
+   "after": "4/12m",
    "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-08-14T07:25:38.435Z"
+   "detected_at": "2026-08-15T06:00:01.749Z"
   },
   {
-   "buyer_id": "human-security",
-   "name": "HUMAN Security",
+   "buyer_id": "flying-tiger-copenhagen",
+   "name": "Flying Tiger Copenhagen",
    "kind": "new_buyer",
    "before": "—",
    "after": "0 events",
    "detail": "buyer entered the index",
-   "detected_at": "2026-08-14T07:25:38.435Z"
+   "detected_at": "2026-08-15T06:00:01.749Z"
+  },
+  {
+   "buyer_id": "hobbycraft",
+   "name": "Hobbycraft",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-08-15T06:00:01.749Z"
+  },
+  {
+   "buyer_id": "the-original-factory-shop",
+   "name": "The Original Factory Shop",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-08-15T06:00:01.749Z"
+  },
+  {
+   "buyer_id": "tgjones",
+   "name": "TGJones",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "0 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-08-15T06:00:01.749Z"
   }
  ]
 }
