@@ -1,6 +1,6 @@
 {
- "as_of": "2026-08-15T06:00:00.320Z",
- "totalEvents": 3858,
+ "as_of": "2026-08-16T06:22:08.874Z",
+ "totalEvents": 3846,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1550,
+   "deals": 1538,
    "disclosedUsd": 383676561050
   },
   {
@@ -251,7 +251,7 @@
   {
    "from": "North America",
    "to": "Other",
-   "deals": 140
+   "deals": 139
   },
   {
    "from": "Other",
@@ -263,7 +263,7 @@
   {
    "buyer_id": "microsoft",
    "name": "Microsoft",
-   "deals": 394,
+   "deals": 385,
    "recentDeals": 6,
    "lastDate": "2026-04-18"
   },
@@ -354,7 +354,7 @@
   {
    "buyer_id": "meta-platforms",
    "name": "Meta Platforms",
-   "deals": 112,
+   "deals": 109,
    "recentDeals": 7,
    "lastDate": "2026-05-01"
   },
@@ -519,18 +519,18 @@
    "lastDate": "2021-09-01"
   },
   {
+   "buyer_id": "permira",
+   "name": "Permira",
+   "deals": 4,
+   "recentDeals": 1,
+   "lastDate": "2024-10-17"
+  },
+  {
    "buyer_id": "apax-partners",
    "name": "Apax Partners",
    "deals": 4,
    "recentDeals": 0,
    "lastDate": "2022-03-31"
-  },
-  {
-   "buyer_id": "ebay-inc",
-   "name": "eBay Inc.",
-   "deals": 4,
-   "recentDeals": 1,
-   "lastDate": "2025-01-01"
   },
   {
    "buyer_id": "hasbro",
