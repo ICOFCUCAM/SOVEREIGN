@@ -1,6 +1,6 @@
 {
- "as_of": "2026-08-16T06:22:08.874Z",
- "totalEvents": 3846,
+ "as_of": "2026-08-17T06:31:54.528Z",
+ "totalEvents": 3848,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1538,
+   "deals": 1540,
    "disclosedUsd": 383676561050
   },
   {
@@ -263,7 +263,7 @@
   {
    "buyer_id": "microsoft",
    "name": "Microsoft",
-   "deals": 385,
+   "deals": 394,
    "recentDeals": 6,
    "lastDate": "2026-04-18"
   },
@@ -389,9 +389,9 @@
   {
    "buyer_id": "sap",
    "name": "SAP",
-   "deals": 72,
-   "recentDeals": 7,
-   "lastDate": "2026-07-31"
+   "deals": 71,
+   "recentDeals": 6,
+   "lastDate": "2026-05-01"
   },
   {
    "buyer_id": "twitter",
@@ -505,13 +505,6 @@
    "lastDate": "2026-06-30"
   },
   {
-   "buyer_id": "google",
-   "name": "Google",
-   "deals": 6,
-   "recentDeals": 0,
-   "lastDate": "2014-08-01"
-  },
-  {
    "buyer_id": "apollo-global-management",
    "name": "Apollo Global Management",
    "deals": 5,
@@ -538,6 +531,13 @@
    "deals": 4,
    "recentDeals": 0,
    "lastDate": "1991-01-01"
+  },
+  {
+   "buyer_id": "pepsico",
+   "name": "PepsiCo",
+   "deals": 4,
+   "recentDeals": 0,
+   "lastDate": "2019-01-01"
   }
  ],
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)"

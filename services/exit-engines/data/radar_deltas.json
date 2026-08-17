@@ -1,24 +1,60 @@
 {
- "detected_at": "2026-08-16T06:22:10.355Z",
- "count": 2,
+ "detected_at": "2026-08-17T06:31:55.868Z",
+ "count": 6,
  "deltas": [
   {
-   "buyer_id": "permira",
-   "name": "Permira",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "medium",
-   "detail": "appetite low → medium",
-   "detected_at": "2026-08-16T06:22:10.354Z"
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
+   "kind": "new_acquisition",
+   "before": "385",
+   "after": "418",
+   "detail": "+33 indexed event(s) · latest: Fintool",
+   "detected_at": "2026-08-17T06:31:55.867Z"
   },
   {
-   "buyer_id": "permira",
-   "name": "Permira",
+   "buyer_id": "blackrock",
+   "name": "BlackRock",
    "kind": "new_acquisition",
-   "before": "4",
-   "after": "5",
-   "detail": "+1 indexed event(s) · latest: Squarespace",
-   "detected_at": "2026-08-16T06:22:10.354Z"
+   "before": "157",
+   "after": "158",
+   "detail": "+1 indexed event(s) · latest: Global Infrastructure Partners",
+   "detected_at": "2026-08-17T06:31:55.867Z"
+  },
+  {
+   "buyer_id": "sap",
+   "name": "SAP",
+   "kind": "cadence_shift",
+   "before": "4/12m",
+   "after": "3/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-08-17T06:31:55.867Z"
+  },
+  {
+   "buyer_id": "l3harris",
+   "name": "L3Harris",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-08-17T06:31:55.867Z"
+  },
+  {
+   "buyer_id": "l3harris",
+   "name": "L3Harris",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-08-17T06:31:55.867Z"
+  },
+  {
+   "buyer_id": "google",
+   "name": "Google",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-08-17T06:31:55.867Z"
   }
  ]
 }
