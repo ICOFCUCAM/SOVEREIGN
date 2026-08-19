@@ -1,6 +1,6 @@
 {
- "as_of": "2026-08-17T06:31:54.528Z",
- "totalEvents": 3848,
+ "as_of": "2026-08-19T06:34:23.429Z",
+ "totalEvents": 3830,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1540,
+   "deals": 1522,
    "disclosedUsd": 383676561050
   },
   {
@@ -251,7 +251,7 @@
   {
    "from": "North America",
    "to": "Other",
-   "deals": 139
+   "deals": 123
   },
   {
    "from": "Other",
@@ -263,7 +263,7 @@
   {
    "buyer_id": "microsoft",
    "name": "Microsoft",
-   "deals": 394,
+   "deals": 385,
    "recentDeals": 6,
    "lastDate": "2026-04-18"
   },
@@ -298,7 +298,7 @@
   {
    "buyer_id": "ibm",
    "name": "IBM",
-   "deals": 199,
+   "deals": 198,
    "recentDeals": 11,
    "lastDate": "2025-12-08"
   },
@@ -312,8 +312,8 @@
   {
    "buyer_id": "apple",
    "name": "Apple",
-   "deals": 149,
-   "recentDeals": 14,
+   "deals": 148,
+   "recentDeals": 13,
    "lastDate": "2026-03-16"
   },
   {
@@ -354,7 +354,7 @@
   {
    "buyer_id": "meta-platforms",
    "name": "Meta Platforms",
-   "deals": 109,
+   "deals": 112,
    "recentDeals": 7,
    "lastDate": "2026-05-01"
   },
@@ -491,18 +491,18 @@
    "lastDate": "2026-04-01"
   },
   {
-   "buyer_id": "blackrock",
-   "name": "BlackRock",
-   "deals": 7,
-   "recentDeals": 1,
-   "lastDate": "2024-01-01"
-  },
-  {
    "buyer_id": "axel-springer-se",
    "name": "Axel Springer SE",
    "deals": 7,
    "recentDeals": 2,
    "lastDate": "2026-06-30"
+  },
+  {
+   "buyer_id": "google",
+   "name": "Google",
+   "deals": 6,
+   "recentDeals": 0,
+   "lastDate": "2014-08-01"
   },
   {
    "buyer_id": "apollo-global-management",
