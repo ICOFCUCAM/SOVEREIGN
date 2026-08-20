@@ -1,276 +1,51 @@
 {
- "detected_at": "2026-08-19T06:34:24.809Z",
- "count": 30,
+ "detected_at": "2026-08-20T06:26:20.527Z",
+ "count": 5,
  "deltas": [
   {
-   "buyer_id": "meta-platforms",
-   "name": "Meta Platforms",
+   "buyer_id": "hilton-worldwide",
+   "name": "Hilton Worldwide",
    "kind": "new_acquisition",
-   "before": "109",
-   "after": "117",
-   "detail": "+8 indexed event(s) · latest: Assured Robot Intelligence",
-   "detected_at": "2026-08-19T06:34:24.809Z"
+   "before": "614",
+   "after": "616",
+   "detail": "+2 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-08-20T06:26:20.526Z"
   },
   {
-   "buyer_id": "adobe",
-   "name": "Adobe",
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
    "kind": "new_acquisition",
-   "before": "72",
-   "after": "74",
-   "detail": "+2 indexed event(s) · latest: Semrush",
-   "detected_at": "2026-08-19T06:34:24.809Z"
+   "before": "385",
+   "after": "418",
+   "detail": "+33 indexed event(s) · latest: Fintool",
+   "detected_at": "2026-08-20T06:26:20.526Z"
   },
   {
-   "buyer_id": "google",
-   "name": "Google",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "google",
-   "name": "Google",
+   "buyer_id": "ibm",
+   "name": "IBM",
    "kind": "new_acquisition",
-   "before": "0",
-   "after": "26",
-   "detail": "+26 indexed event(s) · latest: Terra Bella",
-   "detected_at": "2026-08-19T06:34:24.809Z"
+   "before": "198",
+   "after": "206",
+   "detail": "+8 indexed event(s) · latest: Confluent",
+   "detected_at": "2026-08-20T06:26:20.526Z"
   },
   {
-   "buyer_id": "bank-of-america",
-   "name": "Bank of America",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
+   "buyer_id": "sap",
+   "name": "SAP",
+   "kind": "new_acquisition",
+   "before": "71",
+   "after": "75",
+   "detail": "+4 indexed event(s) · latest: Prior Labs",
+   "detected_at": "2026-08-20T06:26:20.526Z"
   },
   {
-   "buyer_id": "berkshire-hathaway",
-   "name": "Berkshire Hathaway",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "best-buy",
-   "name": "Best Buy",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "blackrock",
-   "name": "BlackRock",
-   "kind": "appetite_change",
-   "before": "medium",
-   "after": "no_events",
-   "detail": "appetite medium → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "bny-mellon",
-   "name": "BNY Mellon",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "boeing",
-   "name": "Boeing",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "booking-holdings",
-   "name": "Booking Holdings",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "brownforman",
-   "name": "Brown–Forman",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "cadence-design-systems",
-   "name": "Cadence Design Systems",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "carnival-corporation",
-   "name": "Carnival Corporation",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "reddit",
-   "name": "Reddit",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "texas-instruments",
-   "name": "Texas Instruments",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "textron",
-   "name": "Textron",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "thermo-fisher-scientific",
-   "name": "Thermo Fisher Scientific",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "tko-group-holdings",
-   "name": "TKO Group Holdings",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "trimble-inc",
-   "name": "Trimble Inc.",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "truist-financial",
-   "name": "Truist Financial",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "tyson-foods",
-   "name": "Tyson Foods",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "us-bancorp",
-   "name": "U.S. Bancorp",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "uber",
-   "name": "Uber",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "united-airlines-holdings",
-   "name": "United Airlines Holdings",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "united-parcel-service",
-   "name": "United Parcel Service",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "unitedhealth-group",
-   "name": "UnitedHealth Group",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "valero-energy",
-   "name": "Valero Energy",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "veralto",
-   "name": "Veralto",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-08-19T06:34:24.809Z"
-  },
-  {
-   "buyer_id": "vivmark-residential",
-   "name": "Vivmark Residential",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-08-19T06:34:24.809Z"
+   "buyer_id": "sap",
+   "name": "SAP",
+   "kind": "cadence_shift",
+   "before": "3/12m",
+   "after": "4/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-08-20T06:26:20.526Z"
   }
  ]
 }
