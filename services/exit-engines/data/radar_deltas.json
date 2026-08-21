@@ -1,51 +1,42 @@
 {
- "detected_at": "2026-08-20T06:26:20.527Z",
- "count": 5,
+ "detected_at": "2026-08-21T06:33:32.821Z",
+ "count": 4,
  "deltas": [
   {
    "buyer_id": "hilton-worldwide",
    "name": "Hilton Worldwide",
    "kind": "new_acquisition",
-   "before": "614",
-   "after": "616",
-   "detail": "+2 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-08-20T06:26:20.526Z"
+   "before": "616",
+   "after": "617",
+   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
+   "detected_at": "2026-08-21T06:33:32.820Z"
   },
   {
-   "buyer_id": "microsoft",
-   "name": "Microsoft",
+   "buyer_id": "adobe",
+   "name": "Adobe",
    "kind": "new_acquisition",
-   "before": "385",
-   "after": "418",
-   "detail": "+33 indexed event(s) · latest: Fintool",
-   "detected_at": "2026-08-20T06:26:20.526Z"
+   "before": "72",
+   "after": "74",
+   "detail": "+2 indexed event(s) · latest: Semrush",
+   "detected_at": "2026-08-21T06:33:32.820Z"
   },
   {
-   "buyer_id": "ibm",
-   "name": "IBM",
+   "buyer_id": "silver-lake",
+   "name": "Silver Lake",
    "kind": "new_acquisition",
-   "before": "198",
-   "after": "206",
-   "detail": "+8 indexed event(s) · latest: Confluent",
-   "detected_at": "2026-08-20T06:26:20.526Z"
+   "before": "7",
+   "after": "8",
+   "detail": "+1 indexed event(s) · latest: Facile.it",
+   "detected_at": "2026-08-21T06:33:32.820Z"
   },
   {
-   "buyer_id": "sap",
-   "name": "SAP",
-   "kind": "new_acquisition",
-   "before": "71",
-   "after": "75",
-   "detail": "+4 indexed event(s) · latest: Prior Labs",
-   "detected_at": "2026-08-20T06:26:20.526Z"
-  },
-  {
-   "buyer_id": "sap",
-   "name": "SAP",
-   "kind": "cadence_shift",
-   "before": "3/12m",
-   "after": "4/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-08-20T06:26:20.526Z"
+   "buyer_id": "google",
+   "name": "Google",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-08-21T06:33:32.820Z"
   }
  ]
 }
