@@ -1,6 +1,6 @@
 {
- "as_of": "2026-08-21T06:33:31.420Z",
- "totalEvents": 3826,
+ "as_of": "2026-08-24T06:21:45.095Z",
+ "totalEvents": 3843,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -208,12 +208,12 @@
  "geoDensity": [
   {
    "region": "North America",
-   "deals": 1687,
+   "deals": 1688,
    "disclosedUsd": 898200939708
   },
   {
    "region": "Other",
-   "deals": 1518,
+   "deals": 1534,
    "disclosedUsd": 383676561050
   },
   {
@@ -263,7 +263,7 @@
   {
    "buyer_id": "microsoft",
    "name": "Microsoft",
-   "deals": 385,
+   "deals": 394,
    "recentDeals": 6,
    "lastDate": "2026-04-18"
   },
@@ -305,15 +305,15 @@
   {
    "buyer_id": "amazon",
    "name": "Amazon",
-   "deals": 158,
-   "recentDeals": 14,
-   "lastDate": "2026-03-25"
+   "deals": 159,
+   "recentDeals": 15,
+   "lastDate": "2026-04-07"
   },
   {
    "buyer_id": "apple",
    "name": "Apple",
-   "deals": 148,
-   "recentDeals": 13,
+   "deals": 149,
+   "recentDeals": 14,
    "lastDate": "2026-03-16"
   },
   {
@@ -498,6 +498,13 @@
    "lastDate": "2026-06-30"
   },
   {
+   "buyer_id": "google",
+   "name": "Google",
+   "deals": 6,
+   "recentDeals": 0,
+   "lastDate": "2014-08-01"
+  },
+  {
    "buyer_id": "apollo-global-management",
    "name": "Apollo Global Management",
    "deals": 5,
@@ -531,13 +538,6 @@
    "deals": 4,
    "recentDeals": 0,
    "lastDate": "2019-01-01"
-  },
-  {
-   "buyer_id": "cvc-capital-partners",
-   "name": "CVC Capital Partners",
-   "deals": 4,
-   "recentDeals": 1,
-   "lastDate": "2024-01-01"
   }
  ],
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)"

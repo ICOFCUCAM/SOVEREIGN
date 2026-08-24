@@ -1,5 +1,5 @@
 {
- "as_of": "2026-08-21T06:33:31.420Z",
+ "as_of": "2026-08-24T06:21:45.095Z",
  "buyers": [
   {
    "buyer_id": "microsoft",
@@ -16,7 +16,7 @@
     "target": "Fintool"
    },
    "source_url": "https://www.wikidata.org/wiki/Q2283",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   },
   {
    "buyer_id": "sony",
@@ -34,7 +34,7 @@
     "target": "Cosm"
    },
    "source_url": "https://www.wikidata.org/wiki/Q41187",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   },
   {
    "buyer_id": "alphabet",
@@ -52,7 +52,7 @@
     "target": "Prestige LLC"
    },
    "source_url": "https://www.wikidata.org/wiki/Q20800404",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   },
   {
    "buyer_id": "cisco",
@@ -70,7 +70,7 @@
     "target": "EzDubs, Inc."
    },
    "source_url": "https://www.wikidata.org/wiki/Q173395",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   },
   {
    "buyer_id": "ibm",
@@ -88,24 +88,24 @@
     "target": "Confluent"
    },
    "source_url": "https://www.wikidata.org/wiki/Q37156",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   },
   {
    "buyer_id": "amazon",
    "name": "Amazon",
    "appetite": "high",
-   "deals_12m": 5,
+   "deals_12m": 6,
    "currently_seeking": [
     "artificial intelligence",
     "amazon prime video",
     "digital creator economy"
    ],
    "last_acquisition": {
-    "date": "2026-03-25",
-    "target": "Fauna Robotics"
+    "date": "2026-04-07",
+    "target": "NLX"
    },
    "source_url": "https://www.wikidata.org/wiki/Q3884",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   },
   {
    "buyer_id": "apple",
@@ -123,7 +123,7 @@
     "target": "MotionVFX"
    },
    "source_url": "https://www.wikidata.org/wiki/Q312",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   },
   {
    "buyer_id": "hewlett-packard",
@@ -138,7 +138,7 @@
     "target": "Juniper Networks (by HPE)"
    },
    "source_url": "https://www.wikidata.org/wiki/Q80978",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   },
   {
    "buyer_id": "yahoo",
@@ -146,7 +146,6 @@
    "appetite": "medium",
    "deals_12m": 0,
    "currently_seeking": [
-    "financial social platform",
     "tech publication",
     "ai news app"
    ],
@@ -155,7 +154,7 @@
     "target": "Artifact"
    },
    "source_url": "https://www.wikidata.org/wiki/Q29231846",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   },
   {
    "buyer_id": "meta-platforms",
@@ -172,7 +171,7 @@
     "target": "Assured Robot Intelligence"
    },
    "source_url": "https://www.wikidata.org/wiki/Q380",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   },
   {
    "buyer_id": "electronic-arts",
@@ -187,7 +186,7 @@
     "target": "TRACAB Technologies"
    },
    "source_url": "https://www.wikidata.org/wiki/Q173941",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   },
   {
    "buyer_id": "ebay",
@@ -202,7 +201,7 @@
     "target": "Depop"
    },
    "source_url": "https://www.wikidata.org/wiki/Q58024",
-   "generated_at": "2026-08-21T06:33:32.547Z"
+   "generated_at": "2026-08-24T06:21:46.004Z"
   }
  ]
 }
