@@ -1,6 +1,6 @@
 {
- "as_of": "2026-08-25T06:34:30.214Z",
- "totalEvents": 3842,
+ "as_of": "2026-08-26T06:19:32.869Z",
+ "totalEvents": 3844,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1533,
+   "deals": 1535,
    "disclosedUsd": 383676561050
   },
   {
@@ -298,7 +298,7 @@
   {
    "buyer_id": "ibm",
    "name": "IBM",
-   "deals": 198,
+   "deals": 199,
    "recentDeals": 11,
    "lastDate": "2025-12-08"
   },
@@ -389,9 +389,9 @@
   {
    "buyer_id": "sap",
    "name": "SAP",
-   "deals": 71,
-   "recentDeals": 6,
-   "lastDate": "2026-05-01"
+   "deals": 72,
+   "recentDeals": 7,
+   "lastDate": "2026-07-31"
   },
   {
    "buyer_id": "twitter",
