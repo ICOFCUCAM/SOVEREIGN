@@ -1,5 +1,5 @@
 {
- "as_of": "2026-08-26T06:19:32.869Z",
+ "as_of": "2026-08-28T18:00:40.981Z",
  "totalEvents": 3844,
  "disclosedEvents": 1143,
  "totalDisclosedUsd": 1413912842501,
@@ -377,7 +377,7 @@
    "name": "Disney",
    "deals": 76,
    "recentDeals": 6,
-   "lastDate": "2026-01-31"
+   "lastDate": "2026-08-04"
   },
   {
    "buyer_id": "adobe",
