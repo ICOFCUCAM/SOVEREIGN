@@ -1,8 +1,8 @@
 {
- "as_of": "2026-08-28T18:00:40.981Z",
- "totalEvents": 3844,
- "disclosedEvents": 1143,
- "totalDisclosedUsd": 1413912842501,
+ "as_of": "2026-08-29T12:14:07.327Z",
+ "totalEvents": 3846,
+ "disclosedEvents": 1144,
+ "totalDisclosedUsd": 1414091542501,
  "sectorHeat": [
   {
    "token": "software",
@@ -25,14 +25,14 @@
    "disclosedUsd": 5083250000
   },
   {
+   "token": "video game",
+   "deals": 33,
+   "disclosedUsd": 6772700000
+  },
+  {
    "token": "computer networking",
    "deals": 32,
    "disclosedUsd": 31176000000
-  },
-  {
-   "token": "video game",
-   "deals": 32,
-   "disclosedUsd": 6594000000
   },
   {
    "token": "video games",
@@ -95,14 +95,14 @@
    "disclosedUsd": 10690000000
   },
   {
+   "token": "music publishing",
+   "deals": 13,
+   "disclosedUsd": 4409500000
+  },
+  {
    "token": "machine learning",
    "deals": 12,
    "disclosedUsd": 200000000
-  },
-  {
-   "token": "music publishing",
-   "deals": 12,
-   "disclosedUsd": 4409500000
   },
   {
    "token": "online advertising",
@@ -213,8 +213,8 @@
   },
   {
    "region": "Other",
-   "deals": 1535,
-   "disclosedUsd": 383676561050
+   "deals": 1537,
+   "disclosedUsd": 383855261050
   },
   {
    "region": "Europe",
@@ -270,9 +270,9 @@
   {
    "buyer_id": "sony",
    "name": "Sony",
-   "deals": 275,
-   "recentDeals": 48,
-   "lastDate": "2026-06-24"
+   "deals": 277,
+   "recentDeals": 50,
+   "lastDate": "2026-08-28"
   },
   {
    "buyer_id": "alphabet",
