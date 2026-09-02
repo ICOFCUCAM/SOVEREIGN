@@ -1,6 +1,6 @@
 {
- "as_of": "2026-09-01T10:42:50.130Z",
- "totalEvents": 3846,
+ "as_of": "2026-09-02T10:25:00.462Z",
+ "totalEvents": 3833,
  "disclosedEvents": 1144,
  "totalDisclosedUsd": 1414091542501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1537,
+   "deals": 1524,
    "disclosedUsd": 383855261050
   },
   {
@@ -263,7 +263,7 @@
   {
    "buyer_id": "microsoft",
    "name": "Microsoft",
-   "deals": 394,
+   "deals": 385,
    "recentDeals": 6,
    "lastDate": "2026-04-18"
   },
@@ -312,8 +312,8 @@
   {
    "buyer_id": "apple",
    "name": "Apple",
-   "deals": 149,
-   "recentDeals": 14,
+   "deals": 148,
+   "recentDeals": 13,
    "lastDate": "2026-03-16"
   },
   {
@@ -354,7 +354,7 @@
   {
    "buyer_id": "meta-platforms",
    "name": "Meta Platforms",
-   "deals": 112,
+   "deals": 109,
    "recentDeals": 7,
    "lastDate": "2026-05-01"
   },

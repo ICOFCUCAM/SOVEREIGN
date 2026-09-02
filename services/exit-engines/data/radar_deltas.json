@@ -1,33 +1,24 @@
 {
- "detected_at": "2026-09-01T10:42:51.558Z",
- "count": 3,
+ "detected_at": "2026-09-02T10:25:01.843Z",
+ "count": 2,
  "deltas": [
   {
    "buyer_id": "hilton-worldwide",
    "name": "Hilton Worldwide",
    "kind": "new_acquisition",
-   "before": "623",
-   "after": "625",
+   "before": "625",
+   "after": "627",
    "detail": "+2 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-09-01T10:42:51.558Z"
+   "detected_at": "2026-09-02T10:25:01.843Z"
   },
   {
-   "buyer_id": "adobe",
-   "name": "Adobe",
-   "kind": "appetite_change",
-   "before": "high",
-   "after": "medium",
-   "detail": "appetite high → medium",
-   "detected_at": "2026-09-01T10:42:51.558Z"
-  },
-  {
-   "buyer_id": "adobe",
-   "name": "Adobe",
-   "kind": "cadence_shift",
-   "before": "2/12m",
-   "after": "1/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-09-01T10:42:51.558Z"
+   "buyer_id": "permira",
+   "name": "Permira",
+   "kind": "new_acquisition",
+   "before": "5",
+   "after": "6",
+   "detail": "+1 indexed event(s) · latest: Squarespace",
+   "detected_at": "2026-09-02T10:25:01.843Z"
   }
  ]
 }
