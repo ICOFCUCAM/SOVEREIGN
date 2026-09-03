@@ -1,24 +1,24 @@
 {
- "detected_at": "2026-09-02T10:25:01.843Z",
+ "detected_at": "2026-09-03T10:35:52.172Z",
  "count": 2,
  "deltas": [
   {
-   "buyer_id": "hilton-worldwide",
-   "name": "Hilton Worldwide",
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
    "kind": "new_acquisition",
-   "before": "625",
-   "after": "627",
-   "detail": "+2 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-09-02T10:25:01.843Z"
+   "before": "385",
+   "after": "418",
+   "detail": "+33 indexed event(s) · latest: Fintool",
+   "detected_at": "2026-09-03T10:35:52.171Z"
   },
   {
-   "buyer_id": "permira",
-   "name": "Permira",
+   "buyer_id": "meta-platforms",
+   "name": "Meta Platforms",
    "kind": "new_acquisition",
-   "before": "5",
-   "after": "6",
-   "detail": "+1 indexed event(s) · latest: Squarespace",
-   "detected_at": "2026-09-02T10:25:01.843Z"
+   "before": "109",
+   "after": "117",
+   "detail": "+8 indexed event(s) · latest: Assured Robot Intelligence",
+   "detected_at": "2026-09-03T10:35:52.171Z"
   }
  ]
 }
