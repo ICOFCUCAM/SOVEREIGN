@@ -1,15 +1,42 @@
 {
- "detected_at": "2026-09-08T10:10:12.012Z",
- "count": 1,
+ "detected_at": "2026-09-09T10:31:28.432Z",
+ "count": 4,
  "deltas": [
   {
-   "buyer_id": "microsoft",
-   "name": "Microsoft",
-   "kind": "new_acquisition",
-   "before": "418",
-   "after": "419",
-   "detail": "+1 indexed event(s) · latest: Fintool",
-   "detected_at": "2026-09-08T10:10:12.011Z"
+   "buyer_id": "symantec",
+   "name": "Symantec",
+   "kind": "appetite_change",
+   "before": "medium",
+   "after": "low",
+   "detail": "appetite medium → low",
+   "detected_at": "2026-09-09T10:31:28.431Z"
+  },
+  {
+   "buyer_id": "ca-technologies",
+   "name": "CA Technologies",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-09-09T10:31:28.431Z"
+  },
+  {
+   "buyer_id": "3m",
+   "name": "3M",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-09-09T10:31:28.431Z"
+  },
+  {
+   "buyer_id": "abbvie",
+   "name": "AbbVie",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-09-09T10:31:28.431Z"
   }
  ]
 }
