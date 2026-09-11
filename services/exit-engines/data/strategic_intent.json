@@ -1,5 +1,5 @@
 {
- "as_of": "2026-09-10T10:27:11.929Z",
+ "as_of": "2026-09-11T10:14:13.890Z",
  "buyers": [
   {
    "buyer_id": "microsoft",
@@ -16,7 +16,7 @@
     "target": "Fintool"
    },
    "source_url": "https://www.wikidata.org/wiki/Q2283",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   },
   {
    "buyer_id": "sony",
@@ -34,7 +34,7 @@
     "target": "GungHo Online Entertainment"
    },
    "source_url": "https://www.wikidata.org/wiki/Q41187",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   },
   {
    "buyer_id": "alphabet",
@@ -52,7 +52,7 @@
     "target": "Prestige LLC"
    },
    "source_url": "https://www.wikidata.org/wiki/Q20800404",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   },
   {
    "buyer_id": "cisco",
@@ -70,7 +70,7 @@
     "target": "EzDubs, Inc."
    },
    "source_url": "https://www.wikidata.org/wiki/Q173395",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   },
   {
    "buyer_id": "ibm",
@@ -88,7 +88,7 @@
     "target": "Confluent"
    },
    "source_url": "https://www.wikidata.org/wiki/Q37156",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   },
   {
    "buyer_id": "amazon",
@@ -105,7 +105,7 @@
     "target": "NLX"
    },
    "source_url": "https://www.wikidata.org/wiki/Q3884",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   },
   {
    "buyer_id": "apple",
@@ -123,7 +123,7 @@
     "target": "MotionVFX"
    },
    "source_url": "https://www.wikidata.org/wiki/Q312",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   },
   {
    "buyer_id": "hewlett-packard",
@@ -138,7 +138,7 @@
     "target": "Juniper Networks (by HPE)"
    },
    "source_url": "https://www.wikidata.org/wiki/Q80978",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   },
   {
    "buyer_id": "yahoo",
@@ -153,24 +153,25 @@
     "target": "Artifact"
    },
    "source_url": "https://www.wikidata.org/wiki/Q29231846",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   },
   {
    "buyer_id": "meta-platforms",
    "name": "Meta Platforms",
    "appetite": "high",
-   "deals_12m": 5,
+   "deals_12m": 6,
    "currently_seeking": [
     "meta superintelligence labs",
     "meta training",
-    "inference accelerator"
+    "inference accelerator",
+    "meta business agent"
    ],
    "last_acquisition": {
-    "date": "2026-05-01",
-    "target": "Assured Robot Intelligence"
+    "date": "2026-09-09",
+    "target": "Stilla"
    },
    "source_url": "https://www.wikidata.org/wiki/Q380",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   },
   {
    "buyer_id": "electronic-arts",
@@ -185,7 +186,7 @@
     "target": "TRACAB Technologies"
    },
    "source_url": "https://www.wikidata.org/wiki/Q173941",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   },
   {
    "buyer_id": "ebay",
@@ -200,7 +201,7 @@
     "target": "Depop"
    },
    "source_url": "https://www.wikidata.org/wiki/Q58024",
-   "generated_at": "2026-09-10T10:27:13.477Z"
+   "generated_at": "2026-09-11T10:14:14.930Z"
   }
  ]
 }

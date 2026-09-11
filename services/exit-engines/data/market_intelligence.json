@@ -1,6 +1,6 @@
 {
- "as_of": "2026-09-10T10:27:11.929Z",
- "totalEvents": 3844,
+ "as_of": "2026-09-11T10:14:13.890Z",
+ "totalEvents": 3845,
  "disclosedEvents": 1144,
  "totalDisclosedUsd": 1414091542501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1533,
+   "deals": 1534,
    "disclosedUsd": 383855261050
   },
   {
@@ -354,9 +354,9 @@
   {
    "buyer_id": "meta-platforms",
    "name": "Meta Platforms",
-   "deals": 112,
-   "recentDeals": 7,
-   "lastDate": "2026-05-01"
+   "deals": 113,
+   "recentDeals": 8,
+   "lastDate": "2026-09-09"
   },
   {
    "buyer_id": "nokia",
