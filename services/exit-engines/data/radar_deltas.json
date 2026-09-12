@@ -1,33 +1,5 @@
 {
- "detected_at": "2026-09-11T10:14:15.178Z",
- "count": 3,
- "deltas": [
-  {
-   "buyer_id": "meta-platforms",
-   "name": "Meta Platforms",
-   "kind": "new_acquisition",
-   "before": "117",
-   "after": "118",
-   "detail": "+1 indexed event(s) · latest: Stilla",
-   "detected_at": "2026-09-11T10:14:15.177Z"
-  },
-  {
-   "buyer_id": "meta-platforms",
-   "name": "Meta Platforms",
-   "kind": "cadence_shift",
-   "before": "5/12m",
-   "after": "6/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-09-11T10:14:15.177Z"
-  },
-  {
-   "buyer_id": "adobe",
-   "name": "Adobe",
-   "kind": "new_acquisition",
-   "before": "72",
-   "after": "74",
-   "detail": "+2 indexed event(s) · latest: Semrush",
-   "detected_at": "2026-09-11T10:14:15.177Z"
-  }
- ]
+ "detected_at": "2026-09-12T10:04:47.393Z",
+ "count": 0,
+ "deltas": []
 }
