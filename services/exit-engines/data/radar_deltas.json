@@ -1,15 +1,33 @@
 {
- "detected_at": "2026-09-13T11:08:20.705Z",
- "count": 1,
+ "detected_at": "2026-09-14T11:29:01.075Z",
+ "count": 3,
  "deltas": [
   {
-   "buyer_id": "sap",
-   "name": "SAP",
-   "kind": "cadence_shift",
-   "before": "4/12m",
-   "after": "3/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-09-13T11:08:20.704Z"
+   "buyer_id": "ibm",
+   "name": "IBM",
+   "kind": "new_acquisition",
+   "before": "198",
+   "after": "206",
+   "detail": "+8 indexed event(s) · latest: Confluent",
+   "detected_at": "2026-09-14T11:29:01.074Z"
+  },
+  {
+   "buyer_id": "adobe",
+   "name": "Adobe",
+   "kind": "new_acquisition",
+   "before": "72",
+   "after": "74",
+   "detail": "+2 indexed event(s) · latest: Semrush",
+   "detected_at": "2026-09-14T11:29:01.074Z"
+  },
+  {
+   "buyer_id": "google",
+   "name": "Google",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-09-14T11:29:01.074Z"
   }
  ]
 }
