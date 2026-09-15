@@ -1,33 +1,33 @@
 {
- "detected_at": "2026-09-14T11:29:01.075Z",
+ "detected_at": "2026-09-15T10:50:42.169Z",
  "count": 3,
  "deltas": [
-  {
-   "buyer_id": "ibm",
-   "name": "IBM",
-   "kind": "new_acquisition",
-   "before": "198",
-   "after": "206",
-   "detail": "+8 indexed event(s) · latest: Confluent",
-   "detected_at": "2026-09-14T11:29:01.074Z"
-  },
-  {
-   "buyer_id": "adobe",
-   "name": "Adobe",
-   "kind": "new_acquisition",
-   "before": "72",
-   "after": "74",
-   "detail": "+2 indexed event(s) · latest: Semrush",
-   "detected_at": "2026-09-14T11:29:01.074Z"
-  },
   {
    "buyer_id": "google",
    "name": "Google",
    "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-09-15T10:50:42.169Z"
+  },
+  {
+   "buyer_id": "google",
+   "name": "Google",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "26",
+   "detail": "+26 indexed event(s) · latest: Terra Bella",
+   "detected_at": "2026-09-15T10:50:42.169Z"
+  },
+  {
+   "buyer_id": "salesforce",
+   "name": "Salesforce",
+   "kind": "appetite_change",
    "before": "low",
    "after": "no_events",
    "detail": "appetite low → no_events",
-   "detected_at": "2026-09-14T11:29:01.074Z"
+   "detected_at": "2026-09-15T10:50:42.169Z"
   }
  ]
 }

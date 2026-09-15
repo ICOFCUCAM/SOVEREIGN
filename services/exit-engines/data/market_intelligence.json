@@ -1,6 +1,6 @@
 {
- "as_of": "2026-09-14T11:28:59.418Z",
- "totalEvents": 3837,
+ "as_of": "2026-09-15T10:50:40.581Z",
+ "totalEvents": 3844,
  "disclosedEvents": 1144,
  "totalDisclosedUsd": 1414091542501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1526,
+   "deals": 1533,
    "disclosedUsd": 383855261050
   },
   {
@@ -312,8 +312,8 @@
   {
    "buyer_id": "apple",
    "name": "Apple",
-   "deals": 148,
-   "recentDeals": 13,
+   "deals": 149,
+   "recentDeals": 14,
    "lastDate": "2026-03-16"
   },
   {
@@ -498,6 +498,13 @@
    "lastDate": "2026-06-30"
   },
   {
+   "buyer_id": "google",
+   "name": "Google",
+   "deals": 6,
+   "recentDeals": 0,
+   "lastDate": "2014-08-01"
+  },
+  {
    "buyer_id": "apollo-global-management",
    "name": "Apollo Global Management",
    "deals": 5,
@@ -531,13 +538,6 @@
    "deals": 4,
    "recentDeals": 0,
    "lastDate": "2019-01-01"
-  },
-  {
-   "buyer_id": "cvc-capital-partners",
-   "name": "CVC Capital Partners",
-   "deals": 4,
-   "recentDeals": 1,
-   "lastDate": "2024-01-01"
   }
  ],
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)"
