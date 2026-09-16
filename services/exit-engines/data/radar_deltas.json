@@ -1,33 +1,24 @@
 {
- "detected_at": "2026-09-15T10:50:42.169Z",
- "count": 3,
+ "detected_at": "2026-09-16T10:44:08.564Z",
+ "count": 2,
  "deltas": [
-  {
-   "buyer_id": "google",
-   "name": "Google",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-09-15T10:50:42.169Z"
-  },
-  {
-   "buyer_id": "google",
-   "name": "Google",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "26",
-   "detail": "+26 indexed event(s) · latest: Terra Bella",
-   "detected_at": "2026-09-15T10:50:42.169Z"
-  },
   {
    "buyer_id": "salesforce",
    "name": "Salesforce",
    "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-09-15T10:50:42.169Z"
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-09-16T10:44:08.564Z"
+  },
+  {
+   "buyer_id": "salesforce",
+   "name": "Salesforce",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "4",
+   "detail": "+4 indexed event(s)",
+   "detected_at": "2026-09-16T10:44:08.564Z"
   }
  ]
 }
