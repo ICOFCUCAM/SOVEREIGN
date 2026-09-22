@@ -1,5 +1,5 @@
 {
- "as_of": "2026-09-16T10:44:07.517Z",
+ "as_of": "2026-09-22T10:29:32.953Z",
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)",
  "indexes": [
   {
@@ -81,14 +81,14 @@
   },
   {
    "sector": "Consumer",
-   "volume": 35,
+   "volume": 36,
    "volume12m": 0,
-   "volumePrior12m": 0,
-   "trendPct": null,
-   "activeBuyers": 9,
-   "disclosedDeals": 14,
-   "medianDealUsd": 181500000,
-   "totalDisclosedUsd": 4049250000
+   "volumePrior12m": 1,
+   "trendPct": -1,
+   "activeBuyers": 10,
+   "disclosedDeals": 15,
+   "medianDealUsd": 163000000,
+   "totalDisclosedUsd": 4165250000
   },
   {
    "sector": "Industrial Tech",

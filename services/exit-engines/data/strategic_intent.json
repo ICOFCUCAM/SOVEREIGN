@@ -1,5 +1,5 @@
 {
- "as_of": "2026-09-16T10:44:07.517Z",
+ "as_of": "2026-09-22T10:29:32.953Z",
  "buyers": [
   {
    "buyer_id": "microsoft",
@@ -16,7 +16,7 @@
     "target": "Fintool"
    },
    "source_url": "https://www.wikidata.org/wiki/Q2283",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   },
   {
    "buyer_id": "sony",
@@ -34,7 +34,7 @@
     "target": "GungHo Online Entertainment"
    },
    "source_url": "https://www.wikidata.org/wiki/Q41187",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   },
   {
    "buyer_id": "alphabet",
@@ -52,7 +52,7 @@
     "target": "Prestige LLC"
    },
    "source_url": "https://www.wikidata.org/wiki/Q20800404",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   },
   {
    "buyer_id": "cisco",
@@ -60,17 +60,17 @@
    "appetite": "high",
    "deals_12m": 2,
    "currently_seeking": [
-    "data analysis platform for real-time cybersecurity",
-    "full-stack observability",
-    "machine learning telemetry",
-    "cloud networking"
+    "cloud networking",
+    "security",
+    "cloud-native application security company",
+    "ai security"
    ],
    "last_acquisition": {
     "date": "2025-11-14",
     "target": "EzDubs, Inc."
    },
    "source_url": "https://www.wikidata.org/wiki/Q173395",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   },
   {
    "buyer_id": "ibm",
@@ -88,7 +88,7 @@
     "target": "Confluent"
    },
    "source_url": "https://www.wikidata.org/wiki/Q37156",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   },
   {
    "buyer_id": "amazon",
@@ -105,7 +105,7 @@
     "target": "NLX"
    },
    "source_url": "https://www.wikidata.org/wiki/Q3884",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   },
   {
    "buyer_id": "apple",
@@ -123,7 +123,7 @@
     "target": "MotionVFX"
    },
    "source_url": "https://www.wikidata.org/wiki/Q312",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   },
   {
    "buyer_id": "hewlett-packard",
@@ -131,14 +131,15 @@
    "appetite": "medium",
    "deals_12m": 0,
    "currently_seeking": [
-    "computer networking"
+    "computer networking",
+    "consumer electronics"
    ],
    "last_acquisition": {
-    "date": "2024-01-10",
-    "target": "Juniper Networks (by HPE)"
+    "date": "2025-02-18",
+    "target": "Humane Inc. (by HP Inc.)"
    },
    "source_url": "https://www.wikidata.org/wiki/Q80978",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   },
   {
    "buyer_id": "yahoo",
@@ -153,7 +154,7 @@
     "target": "Artifact"
    },
    "source_url": "https://www.wikidata.org/wiki/Q29231846",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   },
   {
    "buyer_id": "meta-platforms",
@@ -171,7 +172,7 @@
     "target": "Stilla"
    },
    "source_url": "https://www.wikidata.org/wiki/Q380",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   },
   {
    "buyer_id": "electronic-arts",
@@ -186,7 +187,7 @@
     "target": "TRACAB Technologies"
    },
    "source_url": "https://www.wikidata.org/wiki/Q173941",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   },
   {
    "buyer_id": "ebay",
@@ -201,7 +202,7 @@
     "target": "Depop"
    },
    "source_url": "https://www.wikidata.org/wiki/Q58024",
-   "generated_at": "2026-09-16T10:44:08.366Z"
+   "generated_at": "2026-09-22T10:29:33.973Z"
   }
  ]
 }

@@ -1,8 +1,8 @@
 {
- "as_of": "2026-09-16T10:44:07.517Z",
- "totalEvents": 3840,
- "disclosedEvents": 1144,
- "totalDisclosedUsd": 1414091542501,
+ "as_of": "2026-09-22T10:29:32.953Z",
+ "totalEvents": 3846,
+ "disclosedEvents": 1145,
+ "totalDisclosedUsd": 1414207542501,
  "sectorHeat": [
   {
    "token": "software",
@@ -208,12 +208,12 @@
  "geoDensity": [
   {
    "region": "North America",
-   "deals": 1690,
-   "disclosedUsd": 898200939708
+   "deals": 1691,
+   "disclosedUsd": 898316939708
   },
   {
    "region": "Other",
-   "deals": 1529,
+   "deals": 1534,
    "disclosedUsd": 383855261050
   },
   {
@@ -312,23 +312,23 @@
   {
    "buyer_id": "apple",
    "name": "Apple",
-   "deals": 148,
-   "recentDeals": 13,
+   "deals": 149,
+   "recentDeals": 14,
    "lastDate": "2026-03-16"
   },
   {
    "buyer_id": "oracle",
    "name": "Oracle",
-   "deals": 140,
+   "deals": 143,
    "recentDeals": 0,
    "lastDate": "2022-05-06"
   },
   {
    "buyer_id": "hewlett-packard",
    "name": "Hewlett-Packard",
-   "deals": 134,
-   "recentDeals": 1,
-   "lastDate": "2024-01-10"
+   "deals": 135,
+   "recentDeals": 2,
+   "lastDate": "2025-02-18"
   },
   {
    "buyer_id": "symantec",
@@ -389,9 +389,9 @@
   {
    "buyer_id": "sap",
    "name": "SAP",
-   "deals": 71,
-   "recentDeals": 6,
-   "lastDate": "2026-05-01"
+   "deals": 72,
+   "recentDeals": 7,
+   "lastDate": "2026-07-31"
   },
   {
    "buyer_id": "twitter",
