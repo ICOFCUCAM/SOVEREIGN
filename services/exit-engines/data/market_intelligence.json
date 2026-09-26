@@ -1,6 +1,6 @@
 {
- "as_of": "2026-09-22T10:29:32.953Z",
- "totalEvents": 3846,
+ "as_of": "2026-09-26T10:34:24.008Z",
+ "totalEvents": 3808,
  "disclosedEvents": 1145,
  "totalDisclosedUsd": 1414207542501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1534,
+   "deals": 1498,
    "disclosedUsd": 383855261050
   },
   {
@@ -222,14 +222,14 @@
    "disclosedUsd": 76487906327
   },
   {
-   "region": "Middle East",
-   "deals": 72,
-   "disclosedUsd": 47054076000
-  },
-  {
    "region": "Asia",
    "deals": 71,
    "disclosedUsd": 7057931001
+  },
+  {
+   "region": "Middle East",
+   "deals": 70,
+   "disclosedUsd": 47054076000
   },
   {
    "region": "Oceania",
@@ -256,7 +256,7 @@
   {
    "from": "Other",
    "to": "Other",
-   "deals": 15
+   "deals": 16
   }
  ],
  "topAcquirers": [
@@ -270,7 +270,7 @@
   {
    "buyer_id": "sony",
    "name": "Sony",
-   "deals": 277,
+   "deals": 273,
    "recentDeals": 50,
    "lastDate": "2026-08-28"
   },
@@ -326,20 +326,20 @@
   {
    "buyer_id": "hewlett-packard",
    "name": "Hewlett-Packard",
-   "deals": 135,
+   "deals": 132,
    "recentDeals": 2,
    "lastDate": "2025-02-18"
   },
   {
-   "buyer_id": "symantec",
-   "name": "Symantec",
-   "deals": 128,
-   "recentDeals": 1,
-   "lastDate": "2024-01-01"
-  },
-  {
    "buyer_id": "gen-digital",
    "name": "Gen Digital",
+   "deals": 121,
+   "recentDeals": 0,
+   "lastDate": "2021-08-11"
+  },
+  {
+   "buyer_id": "symantec",
+   "name": "Symantec",
    "deals": 121,
    "recentDeals": 0,
    "lastDate": "2021-08-11"
@@ -373,13 +373,6 @@
    "lastDate": "2020-04-30"
   },
   {
-   "buyer_id": "disney",
-   "name": "Disney",
-   "deals": 76,
-   "recentDeals": 6,
-   "lastDate": "2026-08-04"
-  },
-  {
    "buyer_id": "adobe",
    "name": "Adobe",
    "deals": 72,
@@ -396,7 +389,7 @@
   {
    "buyer_id": "twitter",
    "name": "Twitter",
-   "deals": 71,
+   "deals": 70,
    "recentDeals": 1,
    "lastDate": "2023-05-15"
   },
@@ -408,18 +401,18 @@
    "lastDate": "2026-02-18"
   },
   {
-   "buyer_id": "embracer-group",
-   "name": "Embracer Group",
-   "deals": 59,
-   "recentDeals": 10,
-   "lastDate": "2025-12-01"
+   "buyer_id": "disney",
+   "name": "Disney",
+   "deals": 57,
+   "recentDeals": 6,
+   "lastDate": "2026-08-04"
   },
   {
-   "buyer_id": "electronic-arts",
-   "name": "Electronic Arts",
-   "deals": 56,
-   "recentDeals": 1,
-   "lastDate": "2025-02-04"
+   "buyer_id": "embracer-group",
+   "name": "Embracer Group",
+   "deals": 57,
+   "recentDeals": 10,
+   "lastDate": "2025-12-01"
   },
   {
    "buyer_id": "accenture",
@@ -427,6 +420,13 @@
    "deals": 54,
    "recentDeals": 21,
    "lastDate": "2026-01-01"
+  },
+  {
+   "buyer_id": "electronic-arts",
+   "name": "Electronic Arts",
+   "deals": 54,
+   "recentDeals": 1,
+   "lastDate": "2025-02-04"
   },
   {
    "buyer_id": "citrix",
@@ -437,7 +437,7 @@
   {
    "buyer_id": "take-two-interactive",
    "name": "Take-Two Interactive",
-   "deals": 47,
+   "deals": 43,
    "recentDeals": 3,
    "lastDate": "2025-03-01"
   },
@@ -484,6 +484,13 @@
    "lastDate": "2024-01-01"
   },
   {
+   "buyer_id": "google",
+   "name": "Google",
+   "deals": 7,
+   "recentDeals": 0,
+   "lastDate": "2014-08-01"
+  },
+  {
    "buyer_id": "advent-international",
    "name": "Advent International",
    "deals": 7,
@@ -498,11 +505,11 @@
    "lastDate": "2026-06-30"
   },
   {
-   "buyer_id": "google",
-   "name": "Google",
-   "deals": 6,
-   "recentDeals": 0,
-   "lastDate": "2014-08-01"
+   "buyer_id": "permira",
+   "name": "Permira",
+   "deals": 5,
+   "recentDeals": 1,
+   "lastDate": "2024-10-17"
   },
   {
    "buyer_id": "apollo-global-management",
@@ -512,11 +519,11 @@
    "lastDate": "2021-09-01"
   },
   {
-   "buyer_id": "permira",
-   "name": "Permira",
-   "deals": 4,
+   "buyer_id": "cvc-capital-partners",
+   "name": "CVC Capital Partners",
+   "deals": 5,
    "recentDeals": 1,
-   "lastDate": "2024-10-17"
+   "lastDate": "2024-01-01"
   },
   {
    "buyer_id": "apax-partners",
@@ -531,13 +538,6 @@
    "deals": 4,
    "recentDeals": 0,
    "lastDate": "1991-01-01"
-  },
-  {
-   "buyer_id": "pepsico",
-   "name": "PepsiCo",
-   "deals": 4,
-   "recentDeals": 0,
-   "lastDate": "2019-01-01"
   }
  ],
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)"
