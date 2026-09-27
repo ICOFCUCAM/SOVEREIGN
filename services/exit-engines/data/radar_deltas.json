@@ -1,258 +1,195 @@
 {
- "detected_at": "2026-09-26T10:34:25.658Z",
- "count": 28,
+ "detected_at": "2026-09-27T11:02:24.509Z",
+ "count": 21,
  "deltas": [
   {
-   "buyer_id": "cisco",
-   "name": "Cisco",
+   "buyer_id": "sony",
+   "name": "Sony",
    "kind": "new_acquisition",
-   "before": "235",
-   "after": "236",
-   "detail": "+1 indexed event(s) · latest: EzDubs, Inc.",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "273",
+   "after": "307",
+   "detail": "+34 indexed event(s) · latest: GungHo Online Entertainment",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "amazon",
-   "name": "Amazon",
+   "buyer_id": "alphabet",
+   "name": "Alphabet",
    "kind": "new_acquisition",
-   "before": "178",
-   "after": "179",
-   "detail": "+1 indexed event(s) · latest: NLX",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "271",
+   "after": "286",
+   "detail": "+15 indexed event(s) · latest: Prestige LLC",
+   "detected_at": "2026-09-27T11:02:24.509Z"
+  },
+  {
+   "buyer_id": "disney",
+   "name": "Disney",
+   "kind": "new_acquisition",
+   "before": "59",
+   "after": "189",
+   "detail": "+130 indexed event(s) · latest: A+E Global Media",
+   "detected_at": "2026-09-27T11:02:24.509Z"
+  },
+  {
+   "buyer_id": "hewlett-packard",
+   "name": "Hewlett-Packard",
+   "kind": "new_acquisition",
+   "before": "132",
+   "after": "142",
+   "detail": "+10 indexed event(s) · latest: Humane Inc. (by HP Inc.)",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
    "buyer_id": "symantec",
    "name": "Symantec",
    "kind": "appetite_change",
-   "before": "medium",
-   "after": "low",
-   "detail": "appetite medium → low",
-   "detected_at": "2026-09-26T10:34:25.657Z"
-  },
-  {
-   "buyer_id": "google",
-   "name": "Google",
-   "kind": "new_acquisition",
-   "before": "26",
-   "after": "33",
-   "detail": "+7 indexed event(s) · latest: Terra Bella",
-   "detected_at": "2026-09-26T10:34:25.657Z"
-  },
-  {
-   "buyer_id": "cvc-capital-partners",
-   "name": "CVC Capital Partners",
-   "kind": "new_acquisition",
-   "before": "17",
-   "after": "18",
-   "detail": "+1 indexed event(s) · latest: Packeta",
-   "detected_at": "2026-09-26T10:34:25.657Z"
-  },
-  {
-   "buyer_id": "axel-springer-se",
-   "name": "Axel Springer SE",
-   "kind": "new_acquisition",
-   "before": "11",
-   "after": "12",
-   "detail": "+1 indexed event(s) · latest: Telegraph Media Group",
-   "detected_at": "2026-09-26T10:34:25.657Z"
-  },
-  {
-   "buyer_id": "eqt-ab",
-   "name": "EQT AB",
-   "kind": "appetite_change",
    "before": "low",
    "after": "medium",
    "detail": "appetite low → medium",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "eqt-ab",
-   "name": "EQT AB",
+   "buyer_id": "symantec",
+   "name": "Symantec",
    "kind": "new_acquisition",
-   "before": "6",
-   "after": "7",
-   "detail": "+1 indexed event(s) · latest: Universidad Europea",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "121",
+   "after": "129",
+   "detail": "+8 indexed event(s) · latest: Avast Limited",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "permira",
-   "name": "Permira",
+   "buyer_id": "nokia",
+   "name": "Nokia",
    "kind": "new_acquisition",
-   "before": "6",
-   "after": "7",
-   "detail": "+1 indexed event(s) · latest: Squarespace",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "90",
+   "after": "96",
+   "detail": "+6 indexed event(s) · latest: Infinera Corporation",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "fox-corporation",
-   "name": "Fox Corporation",
-   "kind": "appetite_change",
-   "before": "low",
-   "after": "medium",
-   "detail": "appetite low → medium",
-   "detected_at": "2026-09-26T10:34:25.657Z"
-  },
-  {
-   "buyer_id": "fox-corporation",
-   "name": "Fox Corporation",
+   "buyer_id": "electronic-arts",
+   "name": "Electronic Arts",
    "kind": "new_acquisition",
-   "before": "6",
-   "after": "7",
-   "detail": "+1 indexed event(s) · latest: Red Seat Ventures",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "54",
+   "after": "78",
+   "detail": "+24 indexed event(s) · latest: TRACAB Technologies",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "garmin",
-   "name": "Garmin",
+   "buyer_id": "embracer-group",
+   "name": "Embracer Group",
    "kind": "new_acquisition",
-   "before": "4",
-   "after": "5",
-   "detail": "+1 indexed event(s) · latest: AeroData",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "68",
+   "after": "71",
+   "detail": "+3 indexed event(s) · latest: Anime Limited",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "hewlett-packard-enterprise",
-   "name": "Hewlett Packard Enterprise",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-09-26T10:34:25.657Z"
-  },
-  {
-   "buyer_id": "hewlett-packard-enterprise",
-   "name": "Hewlett Packard Enterprise",
+   "buyer_id": "twitter",
+   "name": "Twitter",
    "kind": "new_acquisition",
-   "before": "0",
-   "after": "4",
-   "detail": "+4 indexed event(s)",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "70",
+   "after": "71",
+   "detail": "+1 indexed event(s) · latest: Laskie",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "cme-group",
-   "name": "CME Group",
+   "buyer_id": "take-two-interactive",
+   "name": "Take-Two Interactive",
    "kind": "new_acquisition",
-   "before": "2",
-   "after": "3",
-   "detail": "+1 indexed event(s) · latest: Kansas City Board of Trade",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "44",
+   "after": "66",
+   "detail": "+22 indexed event(s) · latest: Video Games Deluxe",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "mcdonalds",
-   "name": "McDonald's",
+   "buyer_id": "dell",
+   "name": "Dell",
    "kind": "new_acquisition",
-   "before": "2",
-   "after": "3",
-   "detail": "+1 indexed event(s) · latest: Boston Market",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "41",
+   "after": "46",
+   "detail": "+5 indexed event(s) · latest: Moogsoft",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "ancestrycom",
-   "name": "Ancestry.com",
-   "kind": "new_acquisition",
-   "before": "1",
-   "after": "2",
-   "detail": "+1 indexed event(s)",
-   "detected_at": "2026-09-26T10:34:25.657Z"
-  },
-  {
-   "buyer_id": "credo-ventures",
-   "name": "Credo Ventures",
+   "buyer_id": "reflex-capital",
+   "name": "Reflex Capital",
    "kind": "new_buyer",
    "before": "—",
-   "after": "2 events",
+   "after": "3 events",
    "detail": "buyer entered the index",
-   "detected_at": "2026-09-26T10:34:25.657Z"
-  },
-  {
-   "buyer_id": "reddit",
-   "name": "Reddit",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-09-26T10:34:25.657Z"
-  },
-  {
-   "buyer_id": "reddit",
-   "name": "Reddit",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s)",
-   "detected_at": "2026-09-26T10:34:25.657Z"
-  },
-  {
-   "buyer_id": "baring-private-equity-asia",
-   "name": "Baring Private Equity Asia",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-09-26T10:34:25.657Z"
-  },
-  {
-   "buyer_id": "baring-private-equity-asia",
-   "name": "Baring Private Equity Asia",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s) · latest: IMG Academy",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
    "buyer_id": "ca-technologies",
    "name": "CA Technologies",
    "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "baiterek-national-investment-holding",
-   "name": "Baiterek National Investment Holding",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "buyer_id": "ca-technologies",
+   "name": "CA Technologies",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "2",
+   "detail": "+2 indexed event(s) · latest: BlazeMeter",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
    "buyer_id": "3m",
    "name": "3M",
    "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-09-27T11:02:24.509Z"
+  },
+  {
+   "buyer_id": "3m",
+   "name": "3M",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s) · latest: Monta",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
    "buyer_id": "abbvie",
    "name": "AbbVie",
    "kind": "appetite_change",
-   "before": "low",
-   "after": "no_events",
-   "detail": "appetite low → no_events",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "hp-inc",
-   "name": "HP Inc.",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "buyer_id": "abbvie",
+   "name": "AbbVie",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   },
   {
-   "buyer_id": "kaya-vc",
-   "name": "KAYA VC",
-   "kind": "new_buyer",
-   "before": "—",
-   "after": "0 events",
-   "detail": "buyer entered the index",
-   "detected_at": "2026-09-26T10:34:25.657Z"
+   "buyer_id": "asda",
+   "name": "Asda",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-09-27T11:02:24.509Z"
+  },
+  {
+   "buyer_id": "asda",
+   "name": "Asda",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-09-27T11:02:24.509Z"
   }
  ]
 }

@@ -1,6 +1,6 @@
 {
- "as_of": "2026-09-26T10:34:24.008Z",
- "totalEvents": 3808,
+ "as_of": "2026-09-27T11:02:23.574Z",
+ "totalEvents": 3854,
  "disclosedEvents": 1145,
  "totalDisclosedUsd": 1414207542501,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1498,
+   "deals": 1544,
    "disclosedUsd": 383855261050
   },
   {
@@ -251,7 +251,7 @@
   {
    "from": "North America",
    "to": "Other",
-   "deals": 120
+   "deals": 122
   },
   {
    "from": "Other",
@@ -270,7 +270,7 @@
   {
    "buyer_id": "sony",
    "name": "Sony",
-   "deals": 273,
+   "deals": 277,
    "recentDeals": 50,
    "lastDate": "2026-08-28"
   },
@@ -326,20 +326,20 @@
   {
    "buyer_id": "hewlett-packard",
    "name": "Hewlett-Packard",
-   "deals": 132,
+   "deals": 135,
    "recentDeals": 2,
    "lastDate": "2025-02-18"
   },
   {
-   "buyer_id": "gen-digital",
-   "name": "Gen Digital",
-   "deals": 121,
-   "recentDeals": 0,
-   "lastDate": "2021-08-11"
-  },
-  {
    "buyer_id": "symantec",
    "name": "Symantec",
+   "deals": 128,
+   "recentDeals": 1,
+   "lastDate": "2024-01-01"
+  },
+  {
+   "buyer_id": "gen-digital",
+   "name": "Gen Digital",
    "deals": 121,
    "recentDeals": 0,
    "lastDate": "2021-08-11"
@@ -373,6 +373,13 @@
    "lastDate": "2020-04-30"
   },
   {
+   "buyer_id": "disney",
+   "name": "Disney",
+   "deals": 76,
+   "recentDeals": 6,
+   "lastDate": "2026-08-04"
+  },
+  {
    "buyer_id": "adobe",
    "name": "Adobe",
    "deals": 72,
@@ -389,7 +396,7 @@
   {
    "buyer_id": "twitter",
    "name": "Twitter",
-   "deals": 70,
+   "deals": 71,
    "recentDeals": 1,
    "lastDate": "2023-05-15"
   },
@@ -401,18 +408,18 @@
    "lastDate": "2026-02-18"
   },
   {
-   "buyer_id": "disney",
-   "name": "Disney",
-   "deals": 57,
-   "recentDeals": 6,
-   "lastDate": "2026-08-04"
-  },
-  {
    "buyer_id": "embracer-group",
    "name": "Embracer Group",
-   "deals": 57,
+   "deals": 59,
    "recentDeals": 10,
    "lastDate": "2025-12-01"
+  },
+  {
+   "buyer_id": "electronic-arts",
+   "name": "Electronic Arts",
+   "deals": 56,
+   "recentDeals": 1,
+   "lastDate": "2025-02-04"
   },
   {
    "buyer_id": "accenture",
@@ -420,13 +427,6 @@
    "deals": 54,
    "recentDeals": 21,
    "lastDate": "2026-01-01"
-  },
-  {
-   "buyer_id": "electronic-arts",
-   "name": "Electronic Arts",
-   "deals": 54,
-   "recentDeals": 1,
-   "lastDate": "2025-02-04"
   },
   {
    "buyer_id": "citrix",
@@ -437,7 +437,7 @@
   {
    "buyer_id": "take-two-interactive",
    "name": "Take-Two Interactive",
-   "deals": 43,
+   "deals": 47,
    "recentDeals": 3,
    "lastDate": "2025-03-01"
   },
