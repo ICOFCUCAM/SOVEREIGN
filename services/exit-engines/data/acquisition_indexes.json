@@ -1,5 +1,5 @@
 {
- "as_of": "2026-09-28T12:17:14.120Z",
+ "as_of": "2026-09-30T11:42:46.370Z",
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)",
  "indexes": [
   {
@@ -21,8 +21,8 @@
    "trendPct": 0,
    "activeBuyers": 20,
    "disclosedDeals": 100,
-   "medianDealUsd": 198000000,
-   "totalDisclosedUsd": 235372710050
+   "medianDealUsd": 188500000,
+   "totalDisclosedUsd": 234251710051
   },
   {
    "sector": "Cloud Infrastructure",
@@ -32,8 +32,8 @@
    "trendPct": null,
    "activeBuyers": 13,
    "disclosedDeals": 42,
-   "medianDealUsd": 410000000,
-   "totalDisclosedUsd": 103475788004
+   "medianDealUsd": 189500000,
+   "totalDisclosedUsd": 86611788021
   },
   {
    "sector": "Gaming",
@@ -42,9 +42,9 @@
    "volumePrior12m": 2,
    "trendPct": -0.5,
    "activeBuyers": 10,
-   "disclosedDeals": 28,
-   "medianDealUsd": 356000000,
-   "totalDisclosedUsd": 101872200000
+   "disclosedDeals": 27,
+   "medianDealUsd": 337000000,
+   "totalDisclosedUsd": 100669200000
   },
   {
    "sector": "Cybersecurity",
@@ -54,8 +54,8 @@
    "trendPct": -1,
    "activeBuyers": 13,
    "disclosedDeals": 37,
-   "medianDealUsd": 350000000,
-   "totalDisclosedUsd": 134441760002
+   "medianDealUsd": 115000000,
+   "totalDisclosedUsd": 75267760008
   },
   {
    "sector": "AI",
@@ -65,8 +65,8 @@
    "trendPct": 0.6,
    "activeBuyers": 14,
    "disclosedDeals": 18,
-   "medianDealUsd": 300000000,
-   "totalDisclosedUsd": 66987000000
+   "medianDealUsd": 200000000,
+   "totalDisclosedUsd": 7813000006
   },
   {
    "sector": "Developer Tools",
@@ -75,9 +75,9 @@
    "volumePrior12m": 0,
    "trendPct": null,
    "activeBuyers": 9,
-   "disclosedDeals": 15,
-   "medianDealUsd": 1121000000,
-   "totalDisclosedUsd": 20501500000
+   "disclosedDeals": 14,
+   "medianDealUsd": 283000000,
+   "totalDisclosedUsd": 14421500005
   },
   {
    "sector": "Consumer",
@@ -120,8 +120,8 @@
    "trendPct": null,
    "activeBuyers": 9,
    "disclosedDeals": 6,
-   "medianDealUsd": 171500000,
-   "totalDisclosedUsd": 2729000002
+   "medianDealUsd": 101500000,
+   "totalDisclosedUsd": 1623000003
   },
   {
    "sector": "Ecommerce",
@@ -142,8 +142,8 @@
    "trendPct": null,
    "activeBuyers": 8,
    "disclosedDeals": 5,
-   "medianDealUsd": 960000000,
-   "totalDisclosedUsd": 20785000000
+   "medianDealUsd": 585000000,
+   "totalDisclosedUsd": 2895000002
   },
   {
    "sector": "Fintech",
@@ -165,7 +165,7 @@
    "activeBuyers": 6,
    "disclosedDeals": 7,
    "medianDealUsd": 78411000,
-   "totalDisclosedUsd": 5207322000
+   "totalDisclosedUsd": 457322005
   },
   {
    "sector": "Marketplace",

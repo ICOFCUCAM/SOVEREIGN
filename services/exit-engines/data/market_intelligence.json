@@ -1,8 +1,8 @@
 {
- "as_of": "2026-09-28T12:17:14.120Z",
+ "as_of": "2026-09-30T11:42:46.370Z",
  "totalEvents": 3854,
- "disclosedEvents": 1145,
- "totalDisclosedUsd": 1414207542501,
+ "disclosedEvents": 1137,
+ "totalDisclosedUsd": 1152081542609,
  "sectorHeat": [
   {
    "token": "software",
@@ -32,7 +32,7 @@
   {
    "token": "computer networking",
    "deals": 32,
-   "disclosedUsd": 31176000000
+   "disclosedUsd": 21418000010
   },
   {
    "token": "video games",
@@ -92,7 +92,7 @@
   {
    "token": "computer security",
    "deals": 14,
-   "disclosedUsd": 10690000000
+   "disclosedUsd": 648000010
   },
   {
    "token": "music publishing",
@@ -112,7 +112,7 @@
   {
    "token": "data storage",
    "deals": 11,
-   "disclosedUsd": 12630688000
+   "disclosedUsd": 3680688008
   },
   {
    "token": "video on demand",
@@ -182,7 +182,7 @@
   {
    "token": "web conferencing",
    "deals": 7,
-   "disclosedUsd": 13718000000
+   "disclosedUsd": 3780000010
   },
   {
    "token": "telecommunications",
@@ -214,7 +214,7 @@
   {
    "region": "Other",
    "deals": 1544,
-   "disclosedUsd": 383855261050
+   "disclosedUsd": 121729261158
   },
   {
    "region": "Europe",
