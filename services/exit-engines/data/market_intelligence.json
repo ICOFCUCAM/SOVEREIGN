@@ -1,6 +1,6 @@
 {
- "as_of": "2026-10-01T12:17:03.020Z",
- "totalEvents": 3853,
+ "as_of": "2026-10-04T11:46:21.351Z",
+ "totalEvents": 3856,
  "disclosedEvents": 1137,
  "totalDisclosedUsd": 1152081542609,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1543,
+   "deals": 1546,
    "disclosedUsd": 121729261158
   },
   {
@@ -251,7 +251,7 @@
   {
    "from": "North America",
    "to": "Other",
-   "deals": 122
+   "deals": 124
   },
   {
    "from": "Other",
@@ -312,8 +312,8 @@
   {
    "buyer_id": "apple",
    "name": "Apple",
-   "deals": 148,
-   "recentDeals": 13,
+   "deals": 149,
+   "recentDeals": 14,
    "lastDate": "2026-03-16"
   },
   {

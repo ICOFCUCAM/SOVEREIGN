@@ -1,51 +1,42 @@
 {
- "detected_at": "2026-10-01T12:17:04.632Z",
- "count": 5,
+ "detected_at": "2026-10-04T11:46:22.407Z",
+ "count": 4,
  "deltas": [
   {
-   "buyer_id": "alphabet",
-   "name": "Alphabet",
-   "kind": "cadence_shift",
-   "before": "3/12m",
-   "after": "2/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-10-01T12:17:04.631Z"
-  },
-  {
-   "buyer_id": "advent-international",
-   "name": "Advent International",
-   "kind": "appetite_change",
-   "before": "high",
-   "after": "medium",
-   "detail": "appetite high → medium",
-   "detected_at": "2026-10-01T12:17:04.631Z"
-  },
-  {
-   "buyer_id": "advent-international",
-   "name": "Advent International",
-   "kind": "cadence_shift",
-   "before": "3/12m",
-   "after": "1/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-10-01T12:17:04.631Z"
-  },
-  {
-   "buyer_id": "central-european-media-enterprises",
-   "name": "Central European Media Enterprises",
+   "buyer_id": "disney",
+   "name": "Disney",
    "kind": "new_acquisition",
-   "before": "5",
-   "after": "6",
-   "detail": "+1 indexed event(s) · latest: CME Media Investments",
-   "detected_at": "2026-10-01T12:17:04.631Z"
+   "before": "189",
+   "after": "190",
+   "detail": "+1 indexed event(s) · latest: A+E Global Media",
+   "detected_at": "2026-10-04T11:46:22.407Z"
   },
   {
-   "buyer_id": "sherwin-williams",
-   "name": "Sherwin-Williams",
-   "kind": "cadence_shift",
-   "before": "1/12m",
-   "after": "0/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-10-01T12:17:04.631Z"
+   "buyer_id": "bain-capital",
+   "name": "Bain Capital",
+   "kind": "new_acquisition",
+   "before": "8",
+   "after": "9",
+   "detail": "+1 indexed event(s) · latest: Blue Coat Systems",
+   "detected_at": "2026-10-04T11:46:22.407Z"
+  },
+  {
+   "buyer_id": "kenvue",
+   "name": "Kenvue",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-04T11:46:22.407Z"
+  },
+  {
+   "buyer_id": "kenvue",
+   "name": "Kenvue",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s) · latest: Neutrogena",
+   "detected_at": "2026-10-04T11:46:22.407Z"
   }
  ]
 }
