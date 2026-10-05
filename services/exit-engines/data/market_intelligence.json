@@ -1,6 +1,6 @@
 {
- "as_of": "2026-10-04T11:46:21.351Z",
- "totalEvents": 3856,
+ "as_of": "2026-10-05T12:58:17.916Z",
+ "totalEvents": 3859,
  "disclosedEvents": 1137,
  "totalDisclosedUsd": 1152081542609,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1546,
+   "deals": 1549,
    "disclosedUsd": 121729261158
   },
   {
@@ -251,7 +251,7 @@
   {
    "from": "North America",
    "to": "Other",
-   "deals": 124
+   "deals": 126
   },
   {
    "from": "Other",
@@ -375,7 +375,7 @@
   {
    "buyer_id": "disney",
    "name": "Disney",
-   "deals": 76,
+   "deals": 77,
    "recentDeals": 6,
    "lastDate": "2026-08-04"
   },
