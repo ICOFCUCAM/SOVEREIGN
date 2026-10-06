@@ -1,5 +1,5 @@
 {
- "as_of": "2026-10-05T12:58:17.916Z",
+ "as_of": "2026-10-06T12:48:28.708Z",
  "totalEvents": 3859,
  "disclosedEvents": 1137,
  "totalDisclosedUsd": 1152081542609,
@@ -389,9 +389,9 @@
   {
    "buyer_id": "sap",
    "name": "SAP",
-   "deals": 72,
-   "recentDeals": 7,
-   "lastDate": "2026-07-31"
+   "deals": 71,
+   "recentDeals": 6,
+   "lastDate": "2026-05-01"
   },
   {
    "buyer_id": "twitter",
