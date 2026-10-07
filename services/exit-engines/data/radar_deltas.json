@@ -1,33 +1,42 @@
 {
- "detected_at": "2026-10-06T12:48:30.375Z",
- "count": 3,
+ "detected_at": "2026-10-07T12:27:09.139Z",
+ "count": 4,
  "deltas": [
   {
-   "buyer_id": "hilton-worldwide",
-   "name": "Hilton Worldwide",
+   "buyer_id": "sap",
+   "name": "SAP",
    "kind": "new_acquisition",
-   "before": "630",
-   "after": "631",
-   "detail": "+1 indexed event(s) · latest: Hilton Diagonal Mar Barcelona",
-   "detected_at": "2026-10-06T12:48:30.374Z"
+   "before": "71",
+   "after": "75",
+   "detail": "+4 indexed event(s) · latest: Prior Labs",
+   "detected_at": "2026-10-07T12:27:09.138Z"
   },
   {
    "buyer_id": "sap",
    "name": "SAP",
    "kind": "cadence_shift",
-   "before": "4/12m",
-   "after": "3/12m",
+   "before": "3/12m",
+   "after": "4/12m",
    "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-10-06T12:48:30.374Z"
+   "detected_at": "2026-10-07T12:27:09.138Z"
   },
   {
-   "buyer_id": "mutares",
-   "name": "Mutares",
+   "buyer_id": "icg-plc",
+   "name": "ICG plc",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-07T12:27:09.138Z"
+  },
+  {
+   "buyer_id": "icg-plc",
+   "name": "ICG plc",
    "kind": "new_acquisition",
-   "before": "1",
-   "after": "2",
-   "detail": "+1 indexed event(s) · latest: Magirus GmbH",
-   "detected_at": "2026-10-06T12:48:30.374Z"
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-10-07T12:27:09.138Z"
   }
  ]
 }
