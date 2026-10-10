@@ -116,10 +116,13 @@ const Audit: React.FC = () => {
                   </thead>
                   <tbody>
                     {shown.length === 0 && <tr><td colSpan={7} className="!py-8 text-center text-sd-text3">No loaded event matches “{quick}”.</td></tr>}
-                    {shown.map((e) => {
+                    {shown.map((e, i) => {
                       const isOpen = open === e.eventId;
+                      const day = new Date(e.ts).toLocaleDateString("en-GB", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+                      const newDay = i === 0 || new Date(shown[i - 1].ts).toDateString() !== new Date(e.ts).toDateString();
                       return (
                         <React.Fragment key={e.eventId}>
+                          {newDay && <tr className="!bg-transparent hover:!bg-transparent"><th scope="rowgroup" colSpan={7} className="!static !border-b-0 !bg-sd-sunken !py-1.5 text-left !text-[11px] !normal-case !tracking-normal !text-sd-text2">{day}</th></tr>}
                           <tr>
                             <td>
                               <button onClick={() => setOpen(isOpen ? null : e.eventId)} aria-expanded={isOpen} aria-controls={`ev-${e.eventId}`} aria-label={`${isOpen ? "Hide" : "Show"} details for ${e.action}`}
