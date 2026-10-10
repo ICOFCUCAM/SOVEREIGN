@@ -315,7 +315,12 @@ const BackLink: React.FC<{ archived?: boolean; printable?: boolean }> = ({ archi
     <Link to={archived ? "/console/archives" : "/console/library"} className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-sd-text3 hover:text-sd-text">
       <Icon.arrowLeft className="h-3.5 w-3.5" />{archived ? "Preservation" : "Official records"}
     </Link>
-    {printable && <Button size="sm" variant="ghost" onClick={() => window.print()} icon={<Icon.register />}>Print record file</Button>}
+    {printable && (
+      <span className="flex items-center gap-1">
+        <CopyButton value={window.location.href} label="link to this record file" className="h-8 px-2" />
+        <Button size="sm" variant="ghost" onClick={() => window.print()} icon={<Icon.register />}>Print record file</Button>
+      </span>
+    )}
   </div>
 );
 
