@@ -11,6 +11,12 @@ import { Icon } from "../components/console/icons";
 
 type Decision = "approve" | "reject" | "return";
 
+const applyFilter = (items: InboxItem[], filter: string): InboxItem[] => {
+  const f = filter.trim().toLowerCase();
+  if (!f) return items;
+  return items.filter((d) => [d.title, d.docType, recordTypeLabel(d.docType), d.currentAuthority, d.submittedByName, d.submittedBy, d.classification?.level].some((v) => v?.toLowerCase().includes(f)));
+};
+
 // The consequence of each decision, stated before it is taken. These restate the
 // engine's actual behaviour (dispatch-api decision handler + shared/governance):
 // approve satisfies this step; return sends the record back to draft; reject
@@ -40,10 +46,10 @@ const Review: React.FC = () => {
   const filterRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const load = async () => {
+  const load = async (): Promise<InboxItem[] | null> => {
     setLoading(true);
-    try { setItems((await approvalsInbox()).items); }
-    catch (e) { setErr(humanError(e, "The governance queue could not be loaded.")); }
+    try { const r = (await approvalsInbox()).items; setItems(r); return r; }
+    catch (e) { setErr(humanError(e, "The governance queue could not be loaded.")); return null; }
     finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
@@ -56,11 +62,7 @@ const Review: React.FC = () => {
     return () => { live = false; };
   }, [sel]);
 
-  const visible = useMemo(() => {
-    const f = filter.trim().toLowerCase();
-    if (!f) return items;
-    return items.filter((d) => [d.title, d.docType, recordTypeLabel(d.docType), d.currentAuthority, d.submittedByName, d.submittedBy, d.classification?.level].some((v) => v?.toLowerCase().includes(f)));
-  }, [items, filter]);
+  const visible = useMemo(() => applyFilter(items, filter), [items, filter]);
 
   const choose = (d: InboxItem) => { setSel(d); setMsg(null); setErr(null); setComment(""); };
   const move = (delta: number) => {
@@ -80,8 +82,13 @@ const Review: React.FC = () => {
       const verb = decision === "approve" ? "Approval" : decision === "return" ? "Return for revision" : "Rejection";
       const quorum = r.required > 0 ? ` · ${r.approvals}/${r.required} approvals` : "";
       setMsg(`${verb} recorded for “${title}”. Record is now ${lifecycleMeta(r.lifecycle).label}${quorum}.`);
+      const at = visible.findIndex((v) => v.documentId === sel.documentId);
       setSel(null); setComment(""); setConfirm(null);
-      await load();
+      // Move on to the record that now occupies the same place in the queue —
+      // selection only; every decision still needs its own explicit action.
+      const fresh = await load();
+      const next = fresh ? applyFilter(fresh, filter) : [];
+      if (next.length) setSel(next[Math.min(Math.max(at, 0), next.length - 1)]);
     } catch (e) { setErr(humanError(e, "The decision could not be recorded.")); setConfirm(null); }
     finally { setBusy(null); }
   };
@@ -96,7 +103,7 @@ const Review: React.FC = () => {
         title="Governance review"
         description="Each decision is bound to the record's approval chain and recorded to its evidence. Separation of duties is enforced — you cannot approve a record you submitted, and an approver is never its publisher."
         meta={<><span>Review · authority control</span>{!loading && <span className="text-sd-text2">{items.length} pending</span>}</>}
-        actions={<Button variant="ghost" icon={<Icon.refresh />} onClick={load} loading={loading}>Refresh queue</Button>}
+        actions={<Button variant="ghost" icon={<Icon.refresh />} onClick={() => { load(); }} loading={loading}>Refresh queue</Button>}
       />
 
       {msg && <Alert tone="ok" className="mb-4" onDismiss={() => setMsg(null)}>{msg}</Alert>}
