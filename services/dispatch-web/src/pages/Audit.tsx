@@ -155,15 +155,15 @@ const Audit: React.FC = () => {
                               <td />
                               <td colSpan={6} className="!py-3">
                                 <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2 xl:grid-cols-4">
-                                  <Fact label="Event ID" value={e.eventId} mono />
+                                  <Fact label="Event ID" value={e.eventId ? <span className="inline-flex items-start gap-1 break-all">{e.eventId}<CopyButton value={e.eventId} label="event id" /></span> : undefined} mono />
                                   <Fact label="Timestamp (ISO 8601)" value={e.ts} mono />
                                   <Fact label="Actor" value={e.actor} mono />
                                   <Fact label="Actor type" value={e.actorType} />
                                   <Fact label="Target type" value={e.targetType} />
-                                  <Fact label="Target ID" value={e.targetId} mono />
+                                  <Fact label="Target ID" value={e.targetId ? <span className="inline-flex items-start gap-1 break-all">{e.targetId}<CopyButton value={e.targetId} label="target id" /></span> : undefined} mono />
                                   <Fact label="Classification" value={e.classification} />
-                                  <Fact label="Request ID" value={e.requestId} mono />
-                                  <Fact label="Correlation ID" value={e.correlationId} mono />
+                                  <Fact label="Request ID" value={e.requestId ? <span className="inline-flex items-start gap-1 break-all">{e.requestId}<CopyButton value={e.requestId} label="request id" /></span> : undefined} mono />
+                                  <Fact label="Correlation ID" value={e.correlationId ? <span className="inline-flex items-start gap-1 break-all">{e.correlationId}<CopyButton value={e.correlationId} label="correlation id" /></span> : undefined} mono />
                                   {e.sha256 && <div className="sm:col-span-2 xl:col-span-4"><EvidenceValue label="SHA-256 digest recorded with this event" value={e.sha256} tone="gold"
                                     note="A digest identifies exact content: recomputing it from the same bytes yields the same value. It does not by itself establish authorship, and the console does not recompute it." /></div>}
                                 </dl>
