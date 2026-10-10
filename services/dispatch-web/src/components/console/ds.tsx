@@ -176,10 +176,13 @@ export const Fact: React.FC<{ label: string; value?: React.ReactNode; mono?: boo
 
 export const CopyButton: React.FC<{ value: string; label: string; className?: string }> = ({ value, label, className }) => {
   const [done, setDone] = useState<"ok" | "err" | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(timer.current), []);
   const copy = async () => {
     try { await navigator.clipboard.writeText(value); setDone("ok"); }
     catch { setDone("err"); }
-    setTimeout(() => setDone(null), 1600);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setDone(null), 1600);
   };
   return (
     <button type="button" onClick={copy} aria-label={`Copy ${label}`} title={`Copy ${label}`}
