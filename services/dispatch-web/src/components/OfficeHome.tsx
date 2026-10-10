@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { getMyAuthority, type MyAuthority } from "../lib/api";
 import { waited } from "../lib/format";
 import { recordTypeLabel } from "../lib/recordTypes";
-import { Badge, ClassificationMark, cx } from "./console/ds";
+import { Badge, ClassificationMark, Skeleton, cx } from "./console/ds";
 import { Icon } from "./console/icons";
 
 // THE OFFICE HOME — institutional operations made visible. In an institution,
@@ -31,7 +31,12 @@ const OfficeHome: React.FC<{ subject?: string; refreshKey?: number }> = ({ subje
 
   // A principal who holds no office (e.g. a pure author) has no office home — the
   // rest of the surface serves them. Render nothing rather than an empty shell.
-  if (!loaded || !a || a.offices.length === 0) return null;
+  if (!loaded) return (
+    <div role="status" aria-label="Loading your office" className="mb-6 rounded-xl border border-sd-line bg-sd-panel px-5 py-4">
+      <Skeleton className="h-3 w-40" /><Skeleton className="mt-3 h-6 w-64" /><Skeleton className="mt-2 h-3.5 w-52" />
+    </div>
+  );
+  if (!a || a.offices.length === 0) return null;
 
   const queue = a.underYourAuthority;
   const primary = a.offices[0];
