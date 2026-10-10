@@ -34,17 +34,17 @@ export function useBilling(): BillingCtx {
 
 /** Compact usage meter — records remaining + a bar, or "evaluation completed". */
 export const QuotaMeter: React.FC<{ b: Billing; className?: string }> = ({ b, className = "" }) => {
-  if (b.canDownload) return <div className={`text-[12px] font-semibold text-emerald-300 ${className}`}>Professional · unlimited records</div>;
+  if (b.canDownload) return <div className={`text-[12px] font-semibold text-[#75c9a1] ${className}`}>Professional · unlimited records</div>;
   const rem = Math.max(0, b.documentQuota - b.documentsUsed);
   const pct = Math.min(100, (b.documentsUsed / Math.max(1, b.documentQuota)) * 100);
   return (
     <div className={className}>
       <div className="flex items-center justify-between text-[12px]">
-        <span className="font-semibold text-white/80">{rem > 0 ? `${rem} official record${rem === 1 ? "" : "s"} remaining` : "Free evaluation completed"}</span>
-        <span className="tabular-nums text-white/40">{b.documentsUsed}/{b.documentQuota}</span>
+        <span className="font-semibold text-[#edf2f8]">{rem > 0 ? `${rem} official record${rem === 1 ? "" : "s"} remaining` : "Free evaluation completed"}</span>
+        <span className="font-mono tabular-nums text-[#8d9bb0]">{b.documentsUsed}/{b.documentQuota}</span>
       </div>
-      <div className="mt-1 h-1 overflow-hidden rounded bg-white/10">
-        <div className={`h-full transition-all ${rem > 0 ? "bg-seal-light" : "bg-amber-400"}`} style={{ width: `${pct}%` }} />
+      <div className="mt-1 h-1 overflow-hidden rounded bg-[#0d1520]" role="meter" aria-valuenow={b.documentsUsed} aria-valuemin={0} aria-valuemax={b.documentQuota} aria-label="Evaluation records used">
+        <div className={`h-full transition-all ${rem > 0 ? "bg-[#8dbbff]" : "bg-[#e6bd72]"}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -56,11 +56,11 @@ export const UsageBanner: React.FC<{ b: Billing; onUpgrade: () => void; classNam
   const rem = Math.max(0, b.documentQuota - b.documentsUsed);
   const done = rem === 0;
   return (
-    <div className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3 ${done ? "border-amber-500/40 bg-amber-500/[0.06]" : "border-white/10 bg-ink-800/60"} ${className}`}>
+    <div className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3 ${done ? "border-[#e6bd72]/45 bg-[#e6bd72]/[0.07]" : "border-[#263548] bg-[#111a26]"} ${className}`}>
       <div className="text-sm">
         {done
-          ? <><span className="font-semibold text-amber-200">Free evaluation completed.</span> <span className="text-white/55">Your next record requires a subscription.</span></>
-          : <><span className="font-semibold text-white">{rem} official record{rem === 1 ? "" : "s"} remaining</span> <span className="text-white/45">on your evaluation.</span></>}
+          ? <><span className="font-semibold text-amber-200">Free evaluation completed.</span> <span className="text-[#b4c0cf]">Your next record requires a subscription.</span></>
+          : <><span className="font-semibold text-white">{rem} official record{rem === 1 ? "" : "s"} remaining</span> <span className="text-[#b4c0cf]">on your evaluation.</span></>}
       </div>
       <Button variant="primary" className="shrink-0" onClick={onUpgrade}>Upgrade</Button>
     </div>
