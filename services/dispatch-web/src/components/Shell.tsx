@@ -109,10 +109,17 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
 
   // Mobile drawer: focus moves into it on open, Escape closes it, and focus
   // returns to the menu button — in both products.
+  const wasOpen = useRef(false);
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuOpen) {
+      // Restore focus only after the page behind is no longer inert.
+      if (wasOpen.current && window.matchMedia("(max-width: 1023px)").matches) menuBtnRef.current?.focus();
+      wasOpen.current = false;
+      return;
+    }
+    wasOpen.current = true;
     railRef.current?.querySelector<HTMLElement>("nav a")?.focus();
-    const h = (e: KeyboardEvent) => { if (e.key === "Escape") { setMenuOpen(false); menuBtnRef.current?.focus(); } };
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
   }, [menuOpen]);
@@ -194,7 +201,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
                 {n.group && n.group !== items[i - 1]?.group && (
                   <div className="px-2.5 pb-1 pt-4 text-[10.5px] font-bold uppercase tracking-[0.16em] text-sd-faint">{n.group}</div>
                 )}
-                <NavLink to={n.to} end={n.end} aria-current={inFile ? "page" : undefined}
+                <NavLink to={n.to} end={n.end}
                   className={({ isActive: a }) => { const isActive = a || inFile; return cx("group flex items-center gap-2.5 rounded-lg border px-2.5 py-[7px] text-[13px] font-medium transition-colors",
                     isActive ? "border-sd-accent/30 bg-[#16263a] text-sd-text" : "border-transparent text-sd-text2 hover:bg-sd-raised hover:text-sd-text"); }}>
                   {({ isActive: a }) => { const isActive = a || inFile; return (
