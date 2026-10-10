@@ -7,6 +7,13 @@ import { Icon } from "../components/console/icons";
 
 const LIMIT = 300;
 
+// Who acted: a person, a service credential, or the engine itself — labelled in
+// words so the distinction never depends on colour.
+const ActorType: React.FC<{ t?: string }> = ({ t }) => {
+  const tone = t === "person" ? "info" : t === "system" ? "gold" : "neutral";
+  return <Badge tone={tone} className="!px-1.5 !py-[2px] !text-[10.5px]">{t === "person" ? "Person" : t === "service" ? "Service" : t === "system" ? "Engine" : t ?? "—"}</Badge>;
+};
+
 // Append-only evidence chain (auditor scope). Filter by action or target; the
 // trail is tenant-scoped and read-only — the database blocks UPDATE/DELETE on
 // audit_events (M4 trigger) and the API exposes no mutation. Filters live in the
@@ -131,7 +138,7 @@ const Audit: React.FC = () => {
                               </button>
                             </td>
                             <td className="whitespace-nowrap font-mono text-[12px] text-sd-text2"><time dateTime={e.ts}>{fmtDateTime(e.ts)}</time></td>
-                            <td className="max-w-[220px]"><div className="truncate text-sd-text" title={e.actor}>{actorName(e.actor)}</div><div className="text-[11px] text-sd-text3">{e.actorType}</div></td>
+                            <td className="max-w-[220px]"><div className="truncate text-sd-text" title={e.actor}>{actorName(e.actor)}</div><div className="mt-0.5"><ActorType t={e.actorType} /></div></td>
                             <td><span className="rounded bg-sd-sunken px-1.5 py-0.5 font-mono text-[12px] text-sd-text">{e.action}</span></td>
                             <td className="font-mono text-[11.5px]">
                               {e.targetId ? (
