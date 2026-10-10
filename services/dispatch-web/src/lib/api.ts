@@ -18,6 +18,10 @@ export class DispatchError extends Error {
 
 let getToken: () => string | null = () => null;
 export function bindTokenGetter(fn: () => string | null) { getToken = fn; }
+// Called when the API rejects a bearer token (401) — the session is over, so the
+// auth layer can end it explicitly rather than leave every panel failing.
+let onUnauthorized: () => void = () => {};
+export function bindUnauthorized(fn: () => void) { onUnauthorized = fn; }
 
 // Institutional error language. An enterprise console never shows raw backend
 // strings ("missing Authorization", "bad secret"); it explains, in the user's
@@ -55,6 +59,7 @@ async function request<T>(method: string, path: string, opts: { body?: unknown; 
   if (opts.idem) headers["idempotency-key"] = opts.idem;
   if (opts.body !== undefined) headers["content-type"] = "application/json";
   const r = await fetch(BASE + path, { method, headers, body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined });
+  if (r.status === 401 && tok && path !== "/v1/token") onUnauthorized();
   const ct = r.headers.get("content-type") || "";
   if (!ct.includes("json")) {
     if (!r.ok) throw new DispatchError(r.status, { code: "HTTP_" + r.status, message: r.statusText });

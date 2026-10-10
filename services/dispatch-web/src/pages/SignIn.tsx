@@ -11,7 +11,7 @@ import { DispatchMark, FilmGrain } from "../components/brand";
 // secret) remain, but for MACHINES & integrations, not people — kept as a
 // secondary path. Human SSO and the machine path both resolve to the same session.
 const SignIn: React.FC = () => {
-  const { signIn, loading, error } = useAuth();
+  const { signIn, loading, error, notice } = useAuth();
   const [email, setEmail] = useState("");
   const [ssoErr, setSsoErr] = useState<string | null>(() => {
     const h = new URLSearchParams(window.location.hash.slice(1));
@@ -43,6 +43,7 @@ const SignIn: React.FC = () => {
           <p className="mt-1 text-sm text-white/50">From information to official record.</p>
         </div>
 
+        {notice && <div role="status" className="mb-4 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{notice}</div>}
         {ssoErr && <div className="mb-4 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{ssoErr}</div>}
 
         {/* primary — institutional sign-in (people) */}

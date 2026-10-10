@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { bindTokenGetter, exchangeToken , humanError} from "./api";
+import { bindTokenGetter, bindUnauthorized, exchangeToken , humanError} from "./api";
 import { bindAnalyticsTenant } from "./analytics";
 
 // Session model: a Dispatch service token (client-credentials) held in memory.
@@ -15,6 +15,8 @@ interface AuthCtx {
   has: (scope: string) => boolean;
   loading: boolean;
   error: string | null;
+  /** Why the last session ended, when it ended on its own (expiry / rejection). */
+  notice: string | null;
 }
 
 const Ctx = createContext<AuthCtx | null>(null);
@@ -32,6 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   // The api client pulls the current token through this getter on every request.
   // We bind ONCE to a ref that is updated synchronously during render (below),
@@ -45,6 +48,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     bindTokenGetter(() => sessionRef.current?.token ?? null);
     bindAnalyticsTenant(() => sessionRef.current?.tenantId ?? null);
+    bindUnauthorized(() => {
+      if (!sessionRef.current) return;
+      setSession(null);
+      setNotice("Your session is no longer accepted by the service. Sign in again to continue — work that was not submitted was not saved.");
+    });
   }, []);
 
   const signIn = useCallback(async (clientId: string, secret: string) => {
@@ -54,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { scopes, subject } = decodeScopes(r.access_token);
       setSession({ token: r.access_token, tenantId: r.tenantId, scopes: r.scopes?.length ? r.scopes : scopes,
         expiresAt: Date.now() + r.expiresIn * 1000, subject });
+      setNotice(null);
     } catch (e) {
       setError(humanError(e, "sign-in failed"));
       throw e;
@@ -67,6 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const p = decodePayload(token) as { tenant_id?: string; exp?: number };
     setSession({ token, tenantId: tenantId ?? p.tenant_id ?? "", scopes, subject,
       expiresAt: p.exp ? p.exp * 1000 : Date.now() + 3600_000 });
+    setNotice(null);
   }, []);
 
   // Consume an SSO redirect once, on load: #sso_token=…&tenant=… → a session,
@@ -80,19 +90,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     history.replaceState(null, "", window.location.pathname + window.location.search);
   }, [signInWithToken]);
 
-  const signOut = useCallback(() => setSession(null), []);
+  const signOut = useCallback(() => { setSession(null); setNotice(null); }, []);
 
   // Auto sign-out a moment before expiry so the UI doesn't 401 mid-action.
   useEffect(() => {
     if (!session) return;
     const ms = session.expiresAt - Date.now() - 5000;
-    const t = setTimeout(() => setSession(null), Math.max(ms, 0));
+    const t = setTimeout(() => { setSession(null); setNotice("Your session expired. Sign in again to continue — work that was not submitted was not saved."); }, Math.max(ms, 0));
     return () => clearTimeout(t);
   }, [session]);
 
   const has = useCallback((scope: string) => !!session?.scopes.includes(scope), [session]);
 
-  const value = useMemo<AuthCtx>(() => ({ session, signIn, signInWithToken, signOut, has, loading, error }), [session, signIn, signInWithToken, signOut, has, loading, error]);
+  const value = useMemo<AuthCtx>(() => ({ session, signIn, signInWithToken, signOut, has, loading, error, notice }), [session, signIn, signInWithToken, signOut, has, loading, error, notice]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 
