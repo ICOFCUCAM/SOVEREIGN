@@ -22,7 +22,7 @@ import { Icon } from "../components/console/icons";
 
 // "draft" is fetched so records RETURNED for revision (the engine moves them to
 // draft) are visible here — previously they vanished from the command surface.
-const ALL: Lifecycle[] = ["in_review", "approved", "rendered", "published", "rejected", "archived", "draft"];
+const ALL: Lifecycle[] = ["in_review", "approved", "rendered", "published", "rejected", "archived", "draft", "withdrawn"];
 const LIMIT = 100; // per-state page size; counts at the limit are shown as "100+"
 
 const Dashboard: React.FC = () => {
@@ -59,8 +59,8 @@ const Dashboard: React.FC = () => {
 
   const n = (s: string) => counts[s]?.length ?? 0;
   const capped = (s: string) => n(s) >= LIMIT;
-  const inReview = n("in_review"), approved = n("approved"), rendered = n("rendered"), published = n("published"), preserved = n("archived"), rejected = n("rejected"), drafts = n("draft");
-  const totalDocs = inReview + approved + rendered + published + preserved + rejected + drafts;
+  const inReview = n("in_review"), approved = n("approved"), rendered = n("rendered"), published = n("published"), preserved = n("archived"), rejected = n("rejected"), drafts = n("draft"), withdrawn = n("withdrawn");
+  const totalDocs = inReview + approved + rendered + published + preserved + rejected + drafts + withdrawn;
   const firstRun = !loading && !err && totalDocs === 0;
 
   // Governance health — derived from real compliance signals. A violation is a
@@ -109,6 +109,7 @@ const Dashboard: React.FC = () => {
             ]} offPath={[
               { state: "rejected", n: fmtN("rejected"), sub: "Off the publication path" },
               { state: "draft", n: fmtN("draft"), sub: "Returned or not submitted" },
+              { state: "withdrawn", n: fmtN("withdrawn"), sub: "Withdrawn from publication" },
             ]} />
             <p className="mt-2 text-[12px] text-sd-text3">Approval does not itself publish a record; publication follows the governing policy and is released only by the publication authority. Counts are per state, up to {LIMIT} each.</p>
           </Section>
@@ -245,11 +246,11 @@ const LifecycleStrip: React.FC<{ loading: boolean; stages: Stage[]; offPath: Sta
     );
   };
   return (
-    <div className="grid gap-3 xl:grid-cols-[minmax(0,5fr)_minmax(0,2fr)]">
+    <div className="grid gap-3 xl:grid-cols-[minmax(0,5fr)_minmax(0,3fr)]">
       <ol aria-label="Publication path" className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-sd-line bg-sd-line sm:grid-cols-3 md:grid-cols-5">
         {stages.map((s, i) => cell(s, i, true))}
       </ol>
-      <ol aria-label="Off the publication path" className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-dashed border-sd-line bg-sd-line">
+      <ol aria-label="Off the publication path" className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-dashed border-sd-line bg-sd-line">
         {offPath.map((s, i) => cell(s, i, false))}
       </ol>
     </div>
