@@ -137,7 +137,9 @@ const Review: React.FC = () => {
             )}
           </div>
           {loading ? <SkeletonRows rows={5} label="Loading the governance queue" />
-            : items.length === 0 ? <EmptyState icon={<Icon.check />} title="The review queue is empty">No records are awaiting a governance decision.</EmptyState>
+            : items.length === 0 ? <EmptyState icon={<Icon.check />} title="The review queue is empty"
+                action={<Link to="/console/library?state=rendered" className="text-[12.5px] font-semibold text-sd-accent hover:underline">Records awaiting publication →</Link>}>
+                No records are awaiting a governance decision. Publication is released from the record file by the publication authority, not from this queue.</EmptyState>
             : visible.length === 0 ? <EmptyState compact icon={<Icon.search />} title="No records match this filter" action={<Button size="sm" onClick={() => setFilter("")}>Clear filter</Button>} />
             : (
               <ul aria-label="Records awaiting a decision" className="max-h-[calc(100vh-280px)] min-h-[200px] divide-y divide-sd-soft overflow-auto">

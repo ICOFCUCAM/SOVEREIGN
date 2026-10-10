@@ -202,6 +202,12 @@ const DocumentView: React.FC = () => {
                 {canPublish && (lc === "published" || lc === "rendered") && (
                   <Button variant="ghost" className="border-sd-line" onClick={() => setConfirm("withdraw")} disabled={busy}>Withdraw</Button>
                 )}
+                {(lc === "in_review" || lc === "submitted") && has("dispatch:approve") && (
+                  <Link to="/console/review" className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-sd-accentbg px-3.5 text-[13px] font-semibold text-sd-accentink hover:bg-white"><Icon.review />Decide in governance review</Link>
+                )}
+                {(lc === "in_review" || lc === "submitted") && (
+                  <p className="text-[11.5px] leading-snug text-sd-text3">Decisions are recorded in Governance review, at the step the policy has open{doc.posture?.currentAuthority ? ` (${doc.posture.currentAuthority})` : ""}.</p>
+                )}
                 {!canPublish && (lc === "rendered" || lc === "published") && (
                   <p className="flex items-start gap-2 rounded-lg border border-sd-line bg-sd-sunken px-3 py-2 text-[12px] text-sd-text3"><Icon.lock className="mt-0.5 h-3.5 w-3.5 shrink-0" />Publication, preservation and withdrawal require the publish permission{pubAuth ? ` and are released by ${pubAuth}` : ""}.</p>
                 )}
