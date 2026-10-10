@@ -312,6 +312,7 @@ export const ConfirmDialog: React.FC<{
   }, [open]);
   return (
     <dialog ref={ref} aria-labelledby={hid} onCancel={(e) => { e.preventDefault(); if (!busy) onCancel(); }}
+      onClick={(e) => { if (e.target === ref.current && !busy) onCancel(); /* backdrop click */ }}
       className="w-[min(92vw,480px)] rounded-xl border border-sd-line bg-sd-panel p-0 text-sd-text shadow-[0_24px_70px_rgba(0,0,0,0.6)] backdrop:bg-[#05080dcc]">
       {open && (
         <div className="p-5">
