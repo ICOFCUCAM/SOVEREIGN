@@ -43,6 +43,14 @@ const Audit: React.FC = () => {
     setParams(next, { replace: true });
   };
   const clear = () => { setAction(""); setTarget(""); setParams(new URLSearchParams(), { replace: true }); };
+  // Narrow the loaded page instantly (actor, action, target, event id) without a
+  // round-trip; the exact server filters above still define what is loaded.
+  const [quick, setQuick] = useState("");
+  const shown = useMemo(() => {
+    const f = quick.trim().toLowerCase();
+    if (!f) return events;
+    return events.filter((e) => [e.actor, e.actorType, e.action, e.targetType, e.targetId, e.eventId, e.classification].some((v) => v?.toLowerCase().includes(f)));
+  }, [events, quick]);
   const knownActions = useMemo(() => Array.from(new Set(events.map((e) => e.action))).sort(), [events]);
   const digests = events.filter((e) => e.sha256).length;
   const filtered = !!(qAction || qTarget);
@@ -71,6 +79,17 @@ const Audit: React.FC = () => {
         <Segmented label="Row density" value={density} onChange={setDensity} options={[{ value: "comfortable", label: "Comfortable" }, { value: "compact", label: "Compact" }]} />
       </form>
 
+      {!loading && events.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <label htmlFor="ev-quick" className="sr-only">Narrow the loaded events</label>
+          <div className="relative w-full sm:w-80">
+            <Icon.search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-sd-text3" />
+            <input id="ev-quick" className={cx(controlCls, "h-8 pl-8 text-[12.5px]")} value={quick} onChange={(e) => setQuick(e.target.value)} placeholder="Narrow loaded events by actor, action or ID…" />
+          </div>
+          {quick && <span className="font-mono text-[12px] text-sd-text3">{shown.length} of {events.length} loaded</span>}
+        </div>
+      )}
+
       {err && <Alert tone="bad" title="Evidence unavailable" className="mb-3" action={<Button size="sm" onClick={load}>Try again</Button>}>{err}</Alert>}
 
       <Panel padded={false} className="overflow-hidden">
@@ -96,7 +115,8 @@ const Audit: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {events.map((e) => {
+                    {shown.length === 0 && <tr><td colSpan={7} className="!py-8 text-center text-sd-text3">No loaded event matches “{quick}”.</td></tr>}
+                    {shown.map((e) => {
                       const isOpen = open === e.eventId;
                       return (
                         <React.Fragment key={e.eventId}>
