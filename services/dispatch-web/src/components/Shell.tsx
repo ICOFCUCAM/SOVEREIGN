@@ -84,6 +84,8 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
   const mainRef = useRef<HTMLElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const railRef = useRef<HTMLElement>(null);
+  const wasOpen = useRef(false);
+  const focusPage = useRef(false);
   const product = PRODUCT[variant];
   const items = product.nav.filter((n) => !n.scope || has(n.scope));
   // The switcher only appears for principals who can actually use the other
@@ -97,7 +99,12 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
   const today = new Date().toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
 
   // Close the mobile drawer on navigation; move focus to the page for screen readers.
-  useEffect(() => { setMenuOpen(false); mainRef.current?.focus({ preventScroll: true }); mainRef.current?.scrollTo(0, 0); }, [pathname]);
+  // (navigating from the drawer sends focus to the page, not back to the menu button)
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0);
+    if (wasOpen.current) { focusPage.current = true; setMenuOpen(false); return; } // focus once the drawer has closed
+    mainRef.current?.focus({ preventScroll: true });
+  }, [pathname]);
 
   // Mobile browser chrome matches the console ground (the marketing site's is #070707).
   useEffect(() => {
@@ -109,11 +116,12 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
 
   // Mobile drawer: focus moves into it on open, Escape closes it, and focus
   // returns to the menu button — in both products.
-  const wasOpen = useRef(false);
   useEffect(() => {
     if (!menuOpen) {
       // Restore focus only after the page behind is no longer inert.
-      if (wasOpen.current && window.matchMedia("(max-width: 1023px)").matches) menuBtnRef.current?.focus();
+      if (focusPage.current) mainRef.current?.focus({ preventScroll: true });
+      else if (wasOpen.current && window.matchMedia("(max-width: 1023px)").matches) menuBtnRef.current?.focus();
+      focusPage.current = false;
       wasOpen.current = false;
       return;
     }
