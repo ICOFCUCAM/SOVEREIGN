@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { approvalsInbox, decide, getDocument, type DocumentDetail, type InboxItem, humanError } from "../lib/api";
+import { approvalsInbox, decide, getDocument, getMyAuthority, type DocumentDetail, type InboxItem, humanError } from "../lib/api";
 import { timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { recordTypeLabel } from "../lib/recordTypes";
@@ -43,6 +43,14 @@ const Review: React.FC = () => {
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
+  // The inbox lists every record in review; the engine only accepts a decision at
+  // the open step. Records whose open step is held by one of the caller's offices
+  // (from /v1/governance/my-authority) are marked and can be isolated.
+  const [mine, setMine] = useState<Set<string> | null>(null);
+  const [onlyMine, setOnlyMine] = useState(false);
+  useEffect(() => {
+    getMyAuthority().then((a) => setMine(new Set(a.underYourAuthority.filter((r) => r.action !== "publish").map((r) => r.documentId)))).catch(() => setMine(null));
+  }, [items]);
   const filterRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -62,7 +70,7 @@ const Review: React.FC = () => {
     return () => { live = false; };
   }, [sel]);
 
-  const visible = useMemo(() => applyFilter(items, filter), [items, filter]);
+  const visible = useMemo(() => applyFilter(items, filter).filter((d) => !onlyMine || !mine || mine.has(d.documentId)), [items, filter, onlyMine, mine]);
 
   const choose = (d: InboxItem) => { setSel(d); setMsg(null); setErr(null); setComment(""); };
   const move = (delta: number) => {
@@ -87,7 +95,7 @@ const Review: React.FC = () => {
       // Move on to the record that now occupies the same place in the queue —
       // selection only; every decision still needs its own explicit action.
       const fresh = await load();
-      const next = fresh ? applyFilter(fresh, filter) : [];
+      const next = fresh ? applyFilter(fresh, filter).filter((d) => !onlyMine || !mine || mine.has(d.documentId)) : [];
       if (next.length) setSel(next[Math.min(Math.max(at, 0), next.length - 1)]);
     } catch (e) { setErr(humanError(e, "The decision could not be recorded.")); setConfirm(null); }
     finally { setBusy(null); }
@@ -119,6 +127,12 @@ const Review: React.FC = () => {
               <Icon.search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-sd-text3" />
               <input id="rv-filter" ref={filterRef} className={cx(controlCls, "h-8 pl-8")} value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by title, type, authority or submitter…" />
             </div>
+            {mine && (
+              <label className="mt-2 flex cursor-pointer items-center gap-2 text-[12px] text-sd-text2">
+                <input type="checkbox" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} className="accent-[#8dbbff]" />
+                Only records at my office's step <span className="font-mono text-sd-text3">({items.filter((d) => mine.has(d.documentId)).length})</span>
+              </label>
+            )}
           </div>
           {loading ? <SkeletonRows rows={5} label="Loading the governance queue" />
             : items.length === 0 ? <EmptyState icon={<Icon.check />} title="The review queue is empty">No records are awaiting a governance decision.</EmptyState>
@@ -133,7 +147,10 @@ const Review: React.FC = () => {
                         className={cx("grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-3.5 py-2.5 text-left transition-colors", on ? "bg-sd-hover shadow-[inset_2px_0_0_#8dbbff]" : "hover:bg-sd-raised")}>
                         <ClassificationMark level={d.classification?.level} scheme={d.classification?.scheme} />
                         <span className="min-w-0">
-                          <span className="block truncate text-[13.5px] font-semibold text-sd-text">{d.title || "(untitled)"}</span>
+                          <span className="flex items-center gap-2">
+                            <span className="truncate text-[13.5px] font-semibold text-sd-text">{d.title || "(untitled)"}</span>
+                            {mine?.has(d.documentId) && <Badge tone="info" className="shrink-0">Your step</Badge>}
+                          </span>
                           <span className="block truncate text-[12px] text-sd-text3">
                             {recordTypeLabel(d.docType)}
                             {d.currentAuthority && <> · awaiting <span className="text-sd-text2">{d.currentAuthority}</span></>}
