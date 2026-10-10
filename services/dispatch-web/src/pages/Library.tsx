@@ -20,6 +20,17 @@ const SORTS: { value: SortKey; label: string }[] = [
 const STAGE_ORDER: Lifecycle[] = ["draft", "submitted", "in_review", "approved", "rendered", "published", "withdrawn", "archived", "rejected"];
 const ts = (iso?: string | null) => (iso ? new Date(iso).getTime() : 0);
 
+// A column header that sorts the register. Each column has one fixed direction
+// (the one the Sort menu describes); aria-sort reports it to assistive tech.
+const SortTh: React.FC<{ label: string; k: SortKey; sort: SortKey; setSort: (k: SortKey) => void }> = ({ label, k, sort, setSort }) => (
+  <th scope="col" aria-sort={sort === k ? (k === "waiting" || k === "retention" || k === "title" || k === "status" ? "ascending" : "descending") : undefined}>
+    <button type="button" onClick={() => setSort(sort === k ? "updated" : k)} className={cx("inline-flex items-center gap-1 uppercase tracking-[inherit] hover:text-sd-text", sort === k && "text-sd-text")}
+      title={sort === k ? "Sorted — click to return to last updated" : `Sort by ${label.toLowerCase()}`}>
+      {label}<Icon.chevronDown className={cx("h-3 w-3", sort === k ? "opacity-100" : "opacity-30")} />
+    </button>
+  </th>
+);
+
 // The governance facts for a record, adapted to where it lives in its life. The
 // same facts the previous card layout showed — now in scannable columns.
 function authorityCell(d: DocListItem): { primary: React.ReactNode; secondary?: React.ReactNode } {
@@ -158,13 +169,13 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
                   <caption className="sr-only">{title ?? "Official records"} — {rows.length} records. Use j and k to move, Enter to open.</caption>
                   <thead>
                     <tr>
-                      <th scope="col">Record</th>
+                      <SortTh label="Record" k="title" sort={sort} setSort={setSort} />
                       <th scope="col">Classification</th>
-                      <th scope="col">Lifecycle</th>
+                      <SortTh label="Lifecycle" k="status" sort={sort} setSort={setSort} />
                       <th scope="col">Authority</th>
                       <th scope="col">Policy</th>
-                      <th scope="col">{fixedState ? "Published" : "Waiting / published"}</th>
-                      <th scope="col">Retention until</th>
+                      <SortTh label={fixedState ? "Published" : "Waiting / published"} k="waiting" sort={sort} setSort={setSort} />
+                      <SortTh label="Retention until" k="retention" sort={sort} setSort={setSort} />
                     </tr>
                   </thead>
                   <tbody>
