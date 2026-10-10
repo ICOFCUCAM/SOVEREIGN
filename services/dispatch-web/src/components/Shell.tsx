@@ -231,7 +231,10 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
             <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sd-hover text-[11px] font-bold text-sd-text2">{initials}</span>
             <div className="min-w-0 flex-1 leading-tight">
               <div className="truncate text-[12px] font-semibold text-sd-text" title={session?.subject}>{session?.subject}</div>
-              <div className="text-[11px] text-sd-text3">{session?.scopes.length ?? 0} scope{session?.scopes.length === 1 ? "" : "s"} granted</div>
+              <details className="group text-[11px] text-sd-text3">
+                <summary className="cursor-pointer list-none hover:text-sd-text2">{session?.scopes.length ?? 0} permission{session?.scopes.length === 1 ? "" : "s"} granted <span aria-hidden className="inline-block transition-transform group-open:rotate-90">›</span></summary>
+                <ul className="mt-1 space-y-0.5 font-mono text-[10.5px] text-sd-text2">{session?.scopes.map((sc) => <li key={sc}>{sc}</li>)}</ul>
+              </details>
             </div>
             <Link to="/" aria-label="Sovereign Dispatch home" title="Home" className="rounded-md p-1.5 text-sd-text3 hover:bg-sd-hover hover:text-sd-text"><Icon.home /></Link>
             <button onClick={() => { signOut(); nav("/"); }} aria-label="Sign out" title="Sign out" className="rounded-md p-1.5 text-sd-text3 hover:bg-sd-hover hover:text-sd-text"><Icon.logout /></button>
