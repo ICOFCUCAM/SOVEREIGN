@@ -91,7 +91,7 @@ const Dashboard: React.FC = () => {
 
       {err && <Alert tone="bad" title="Overview unavailable" className="mb-5" action={<Button size="sm" onClick={refresh}>Try again</Button>}>{err}</Alert>}
 
-      <OfficeHome subject={session?.subject} />
+      <OfficeHome subject={session?.subject} refreshKey={tick} />
 
       {firstRun ? <FirstRun canAuthor={has("dispatch:render")} /> : (
         <>

@@ -24,10 +24,10 @@ const officeHeading = (label: string): string =>
   /\b(office|secretariat|bureau|division|directorate|registry|chancery)\b/i.test(label)
     ? label : `Office of the ${label}`;
 
-const OfficeHome: React.FC<{ subject?: string }> = ({ subject }) => {
+const OfficeHome: React.FC<{ subject?: string; refreshKey?: number }> = ({ subject, refreshKey = 0 }) => {
   const [a, setA] = useState<MyAuthority | null>(null);
   const [loaded, setLoaded] = useState(false);
-  useEffect(() => { let live = true; getMyAuthority().then((r) => live && setA(r)).catch(() => {}).finally(() => live && setLoaded(true)); return () => { live = false; }; }, []);
+  useEffect(() => { let live = true; getMyAuthority().then((r) => live && setA(r)).catch(() => {}).finally(() => live && setLoaded(true)); return () => { live = false; }; }, [refreshKey]);
 
   // A principal who holds no office (e.g. a pure author) has no office home — the
   // rest of the surface serves them. Render nothing rather than an empty shell.
