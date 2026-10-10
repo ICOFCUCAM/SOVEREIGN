@@ -303,7 +303,7 @@ const ActivityList: React.FC<{ events: AuditEvent[] }> = ({ events }) => (
         {events.map((e) => (
           <li key={e.eventId} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-0.5 px-4 py-2 sm:grid-cols-[150px_minmax(0,1fr)_minmax(0,220px)_auto]">
             <time dateTime={e.ts} title={fmtDateTime(e.ts)} className="hidden font-mono text-[11.5px] tabular-nums text-sd-text3 sm:block">{fmtDateTime(e.ts)}</time>
-            <span className="truncate font-mono text-[12px] text-sd-text">{e.action}</span>
+            <span className="flex min-w-0 items-center gap-2"><span className="truncate font-mono text-[12px] text-sd-text">{e.action}</span>{e.sha256 && <Badge tone="gold" glyph="#" title={`SHA-256 recorded: ${e.sha256}`}>Digest</Badge>}</span>
             <span className="hidden truncate text-[12px] text-sd-text2 sm:block">{actorName(e.actor)}</span>
             {e.targetType === "document" && e.targetId
               ? <Link to={`/console/documents/${e.targetId}`} className="text-[12px] font-semibold text-sd-accent hover:underline">{timeAgo(e.ts)} →</Link>

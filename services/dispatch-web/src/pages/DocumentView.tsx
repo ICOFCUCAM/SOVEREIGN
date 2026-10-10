@@ -233,7 +233,7 @@ const DocumentView: React.FC = () => {
 
           {/* provenance trail (auditor) */}
           {has("dispatch:audit") && (
-            <Panel headingLevel={2} title="Provenance trail" padded={false} aside={<Link to={`/console/audit?target=${id}`} className="font-semibold text-sd-accent hover:underline">Open in evidence chain →</Link>}>
+            <Panel headingLevel={2} title={<span className="flex items-center gap-2">Provenance trail<span className="rounded bg-sd-sunken px-1.5 py-0.5 font-mono text-[11px] text-sd-text2">{events.length}{events.length >= 100 ? "+" : ""}</span></span>} padded={false} aside={<Link to={`/console/audit?target=${id}`} className="font-semibold text-sd-accent hover:underline">Open in evidence chain →</Link>}>
               {events.length === 0 ? <EmptyState compact title="No events recorded for this record" /> : (
                 <ol className="divide-y divide-sd-soft">
                   {events.map((e) => (
