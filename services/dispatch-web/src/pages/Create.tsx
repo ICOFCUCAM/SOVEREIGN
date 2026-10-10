@@ -494,8 +494,8 @@ const Create: React.FC = () => {
                 const e = fieldErr(f.role, f.heading) ?? serverFieldErr(f.role);
                 return (
                   <FormField key={f.role} id={id} label={f.heading} required hint={KIND_HINT[f.kind]} error={e}
-                    after={<FieldAssist docType={spec.docType} heading={f.heading} kind={f.kind} value={values[f.role] ?? ""} classification={level} allowed={assistAllowed}
-                      onApply={(t) => set(f.role, t)} onInsert={(t) => set(f.role, (values[f.role] ? values[f.role] + "\n" : "") + t)} />}>
+                    after={<><FieldMeta kind={f.kind} value={values[f.role] ?? ""} /><FieldAssist docType={spec.docType} heading={f.heading} kind={f.kind} value={values[f.role] ?? ""} classification={level} allowed={assistAllowed}
+                      onApply={(t) => set(f.role, t)} onInsert={(t) => set(f.role, (values[f.role] ? values[f.role] + "\n" : "") + t)} /></>}>
                     <textarea id={id} aria-required="true" aria-invalid={!!e || undefined} aria-describedby={e ? `${id}-error` : KIND_HINT[f.kind] ? `${id}-hint` : undefined}
                       className={cx(controlCls, "resize-y leading-relaxed", f.kind === "bullets" || f.kind === "timeline" ? "min-h-[104px]" : "min-h-[84px]", e && "border-sd-bad/70")}
                       value={values[f.role] ?? ""} onChange={(ev) => set(f.role, ev.target.value)} placeholder={f.placeholder} />
@@ -583,6 +583,25 @@ const Create: React.FC = () => {
       </ConfirmDialog>
     </div>
   );
+};
+
+// How the composer will read this field — the same parsing buildRequest applies,
+// shown before submission so a list or timeline never surprises its author.
+const FieldMeta: React.FC<{ kind: Kind; value: string }> = ({ kind, value }) => {
+  if (!value.trim()) return null;
+  const lines = value.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+  if (kind === "bullets") return <p className="mt-1 text-[11.5px] text-sd-text3">{lines.length} item{lines.length === 1 ? "" : "s"}</p>;
+  if (kind === "timeline") {
+    const loose = lines.filter((l) => !l.includes("|")).length;
+    return (
+      <p className="mt-1 text-[11.5px] text-sd-text3">
+        {lines.length} event{lines.length === 1 ? "" : "s"}
+        {loose > 0 && <span className="text-sd-warn"> · {loose} line{loose === 1 ? " has" : "s have"} no “|” separator and will use the whole line as both time and label</span>}
+      </p>
+    );
+  }
+  const words = value.trim().split(/\s+/).length;
+  return <p className="mt-1 text-[11.5px] text-sd-text3">{words} word{words === 1 ? "" : "s"}</p>;
 };
 
 // A numbered institutional step header — gives the page the cadence of a governed
