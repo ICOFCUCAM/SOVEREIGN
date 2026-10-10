@@ -12,18 +12,21 @@ export function classBand(level?: string): { label: string; cls: string } {
   return { label: l || "UNCLASSIFIED", cls: "bg-cls-unclassified" };
 }
 
+// Light text on a dark chip with the band as an edge cue: the previous white-on-
+// band chip failed WCAG AA on the amber "sensitive" band (≈3.2:1).
 export const ClassBadge: React.FC<{ level?: string; scheme?: string }> = ({ level, scheme }) => {
   const b = classBand(level);
   return (
-    <span className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white ${b.cls}`} title={scheme ? `scheme: ${scheme}` : undefined}>
-      {b.label}
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded border border-[#263548] bg-[#0d1520] py-[3px] pl-1.5 pr-2 text-[10.5px] font-bold uppercase leading-none tracking-[0.08em] text-[#edf2f8]" title={scheme ? `scheme: ${scheme}` : undefined}>
+      <span aria-hidden className={`h-2.5 w-1 rounded-sm ${b.cls}`} />
+      <span className="sr-only">Classification: </span>{b.label}
     </span>
   );
 };
 
 const LIFECYCLE_STYLE: Record<Lifecycle, string> = {
-  draft: "bg-ink-600 text-white/70",
-  submitted: "bg-seal-light/20 text-seal-light",
+  draft: "bg-ink-600 text-white/80",
+  submitted: "bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/30",
   in_review: "bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/30",
   approved: "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30",
   rejected: "bg-red-500/15 text-red-300 ring-1 ring-red-500/30",
@@ -40,8 +43,9 @@ const LIFECYCLE_LABEL: Record<Lifecycle, string> = {
   submitted: "Submitted",
   in_review: "In Review",
   approved: "Approved",
-  rejected: "Returned",
-  rendered: "Ready",
+  // The engine sends a RETURN to "draft"; "rejected" is a rejection. Distinct.
+  rejected: "Rejected",
+  rendered: "Ready to publish",
   published: "Published",
   withdrawn: "Withdrawn",
   archived: "Archived",
@@ -54,28 +58,28 @@ export const LifecycleBadge: React.FC<{ state: Lifecycle }> = ({ state }) => (
 );
 
 export const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
-  <div className={`rounded-lg border border-white/10 bg-ink-800/60 ${className}`}>{children}</div>
+  <div className={`rounded-xl border border-[#263548] bg-[#111a26] ${className}`}>{children}</div>
 );
 
 export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" | "ok" }> = ({ variant = "primary", className = "", ...p }) => {
   const v = {
-    primary: "bg-seal hover:bg-seal-light text-white",
-    ghost: "bg-transparent hover:bg-white/5 text-white/80 ring-1 ring-white/15",
-    danger: "bg-cls-secret hover:opacity-90 text-white",
-    ok: "bg-emerald-600 hover:bg-emerald-500 text-white",
+    primary: "bg-[#d9e7f9] hover:bg-white text-[#15243a]",
+    ghost: "bg-transparent hover:bg-white/5 text-white/85 ring-1 ring-[#35465d]",
+    danger: "bg-[#5c2328] hover:bg-[#6b2a30] text-white ring-1 ring-[#8a3a41]",
+    ok: "bg-[#1f5c45] hover:bg-[#24694f] text-white ring-1 ring-[#2f7d5f]",
   }[variant];
-  return <button {...p} className={`inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed ${v} ${className}`} />;
+  return <button {...p} className={`inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed ${v} ${className}`} />;
 };
 
 export const Field: React.FC<{ label: string; children: React.ReactNode; hint?: string }> = ({ label, children, hint }) => (
   <label className="block">
-    <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/50">{label}</span>
+    <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/60">{label}</span>
     {children}
-    {hint && <span className="mt-1 block text-xs text-white/40">{hint}</span>}
+    {hint && <span className="mt-1 block text-xs text-white/55">{hint}</span>}
   </label>
 );
 
-export const inputCls = "w-full rounded-md border border-white/15 bg-ink-900/70 px-3 py-2 text-sm text-white placeholder-white/30 outline-none focus:border-seal-light focus:ring-1 focus:ring-seal-light/50";
+export const inputCls = "w-full rounded-lg border border-[#263548] bg-[#0d1520] px-3 py-2 text-sm text-white placeholder-[#7f8ea3] outline-none focus:border-[#8dbbff] focus:ring-2 focus:ring-[#8dbbff]/25";
 
 export function timeAgo(iso?: string): string {
   if (!iso) return "—";

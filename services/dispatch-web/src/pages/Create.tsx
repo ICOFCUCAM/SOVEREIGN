@@ -4,7 +4,8 @@ import { track } from "../lib/analytics";
 import { submitDocument, validateDocument, getGovernancePolicies, assistField, DispatchError, type ApiError, type GovernancePolicy, humanError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useBilling, UsageBanner, UpgradeModal } from "../lib/upsell";
-import { Button, Card, Field, inputCls, ClassBadge } from "../lib/ui";
+import { Alert, Button, ClassificationMark, ConfirmDialog, Fact, FormField, PageHeader, Panel, Spinner, controlCls, cx } from "../components/console/ds";
+import { Icon } from "../components/console/icons";
 import { GovernanceInstrument } from "../components/GovernanceInstrument";
 
 // CREATE — the institutional authoring department. Unlike Submit (raw DDM JSON),
@@ -299,6 +300,12 @@ const DOC_TYPES: DocTypeSpec[] = [
 
 const LEVELS = ["UNCLASSIFIED", "OFFICIAL", "OFFICIAL-SENSITIVE", "CONFIDENTIAL"];
 const today = (): string => new Date().toISOString().slice(0, 10);
+const KIND_HINT: Record<Kind, string | undefined> = {
+  bullets: "One item per line.",
+  timeline: "One event per line: time | label | detail",
+  callout: "Shown as a highlighted callout.",
+  paragraph: undefined,
+};
 
 const Create: React.FC = () => {
   const { session } = useAuth();
@@ -310,13 +317,17 @@ const Create: React.FC = () => {
   const [values, setValues] = useState<Record<string, string>>({});
   const [outputs, setOutputs] = useState<string[]>(["pdf"]);
   const [validation, setValidation] = useState<{ valid: boolean; errors: ApiError[]; warnings: unknown[] } | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<"validate" | "submit" | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [showJson, setShowJson] = useState(false);
+  const [typeFilter, setTypeFilter] = useState("");
+  const [pendingType, setPendingType] = useState<string | null>(null);
+  const [attempted, setAttempted] = useState(false);
   const { billing, refresh, setBilling } = useBilling();
   const [upgrade, setUpgrade] = useState(false);
   const [policies, setPolicies] = useState<GovernancePolicy[]>([]);
-  useEffect(() => { getGovernancePolicies().then((r) => setPolicies(r.policies)).catch(() => { /* non-fatal */ }); }, []);
+  const [policiesLoaded, setPoliciesLoaded] = useState(false);
+  useEffect(() => { getGovernancePolicies().then((r) => setPolicies(r.policies)).catch(() => { /* non-fatal */ }).finally(() => setPoliciesLoaded(true)); }, []);
   // Record-creation funnel: started on arrival, created on submit, abandoned if
   // the operator leaves the page before submitting their first record.
   const created = useRef(false);
@@ -362,15 +373,27 @@ const Create: React.FC = () => {
   // OFFICIAL-SENSITIVE and above so sensitive drafts are never sent to a model
   // (the server enforces the same guard authoritatively).
   const assistAllowed = !/SENSITIVE|CONFIDENTIAL|SECRET|RESTRICTED|COSMIC/i.test(level);
+  const hasContent = Object.values(values).some((v) => v.trim());
+  const blocked = missing.length > 0 || outputs.length === 0;
+  const fieldErr = (role: string, heading: string) => (attempted && !(values[role] ?? "").trim() ? `${heading} is required.` : null);
+  const serverFieldErr = (role: string) => validation?.errors?.find((e) => e.field && e.field.includes(role))?.message ?? null;
+
+  const chooseType = (t: string) => {
+    if (t === docTypeId) return;
+    if (hasContent) { setPendingType(t); return; } // changing type discards the authored sections — confirm first
+    setDocTypeId(t); setValues({}); setValidation(null); setAttempted(false);
+  };
 
   const onValidate = async (): Promise<void> => {
-    setErr(null); setValidation(null); setBusy(true);
+    setErr(null); setValidation(null); setBusy("validate"); setAttempted(true);
     try { setValidation(await validateDocument(buildRequest())); }
-    catch (e) { setErr(humanError(e, "validation failed")); }
-    finally { setBusy(false); }
+    catch (e) { setErr(humanError(e, "Validation could not be run.")); }
+    finally { setBusy(null); }
   };
   const onSubmit = async (): Promise<void> => {
-    setErr(null); setBusy(true);
+    setAttempted(true);
+    if (blocked) { window.document.getElementById("cr-checklist")?.focus(); return; }
+    setErr(null); setBusy("submit");
     try {
       const req = buildRequest();
       const r = await submitDocument(req, req.idempotencyKey);
@@ -380,131 +403,175 @@ const Create: React.FC = () => {
     }
     catch (e) {
       if (e instanceof DispatchError && e.status === 402) { setUpgrade(true); return; }
-      setErr(humanError(e, "submit failed"));
+      setErr(humanError(e, "The record could not be submitted."));
     }
-    finally { setBusy(false); }
+    finally { setBusy(null); }
   };
 
+  const types = DOC_TYPES.filter((d) => !typeFilter.trim() || `${d.label} ${d.blurb}`.toLowerCase().includes(typeFilter.trim().toLowerCase()));
+
   return (
-    <div className="mx-auto max-w-5xl">
+    <div>
       {upgrade && <UpgradeModal open reason="quota" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); refresh(); setUpgrade(false); }} />}
-      <header className="mb-7">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">Official Record</div>
-        <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Create Official Record</h1>
-        <p className="mt-2 max-w-2xl text-[14.5px] leading-relaxed text-white/55">
-          The front door to a governed publication system — not a document editor. Choose the record and see exactly how it
-          will be governed, who must approve it, who may publish it, and the proof it produces, before you submit.
-        </p>
-      </header>
-      {billing && <UsageBanner b={billing} onUpgrade={() => setUpgrade(true)} className="mb-6" />}
-      {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
+      <PageHeader
+        eyebrow="Record authoring · governed submission"
+        title="Create official record"
+        description="The front door to a governed publication system — not a document editor. Choose the record and see exactly how it will be governed, who must approve it, who may publish it, and the proof it produces, before you submit."
+        meta={<span>Create · governed procedure</span>}
+      />
+      {billing && <UsageBanner b={billing} onUpgrade={() => setUpgrade(true)} className="mb-5" />}
+      {err && <Alert tone="bad" title="Not submitted" className="mb-4" onDismiss={() => setErr(null)}>{err}</Alert>}
 
-      {/* STEP 1 — define the record (type + classification drive its governance) */}
-      <Step n="1" title="Define the record" sub="Type and classification determine the policy that will govern it." />
-      <div className="mb-7 grid gap-5 lg:grid-cols-[1fr_260px]">
-        <div>
-          <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">Record type</div>
-          <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
-            {DOC_TYPES.map((d) => {
-              const on = d.docType === docTypeId;
-              return (
-                <button key={d.docType} onClick={() => { setDocTypeId(d.docType); setValues({}); setValidation(null); }}
-                  className={`group rounded-xl border p-3.5 text-left transition ${on ? "border-seal-light/60 bg-gradient-to-b from-seal/20 to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]" : "border-white/10 bg-white/[0.015] hover:border-white/25 hover:bg-white/[0.03]"}`}>
-                  <div className="flex items-center justify-between">
-                    <div className={`text-[13.5px] font-bold tracking-tight ${on ? "text-white" : "text-white/85"}`}>{d.label}</div>
-                    {on && <span className="h-1.5 w-1.5 rounded-full bg-seal-light" aria-hidden />}
-                  </div>
-                  <div className="mt-1 text-[11.5px] leading-snug text-white/45">{d.blurb}</div>
-                </button>
-              );
-            })}
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_330px]">
+        <div className="min-w-0">
+          {/* STEP 1 — define the record (type + classification drive its governance) */}
+          <Step n="1" title="Define the record" sub="Type and classification determine the policy that will govern it." />
+          <div className="mb-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+            <fieldset className="min-w-0">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-[12px] font-semibold text-sd-text2">Record type <span className="font-normal text-sd-text3">· {DOC_TYPES.length} institutional types</span></legend>
+                <div className="relative w-full sm:w-56">
+                  <label htmlFor="cr-type-filter" className="sr-only">Filter record types</label>
+                  <Icon.search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-sd-text3" />
+                  <input id="cr-type-filter" className={cx(controlCls, "h-8 pl-8 text-[12.5px]")} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} placeholder="Filter types…" />
+                </div>
+              </div>
+              <div role="radiogroup" aria-label="Record type" className="grid max-h-[372px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2 2xl:grid-cols-3">
+                {types.map((d) => {
+                  const on = d.docType === docTypeId;
+                  return (
+                    <label key={d.docType} className={cx("relative flex cursor-pointer gap-2.5 rounded-lg border p-3 transition-colors", on ? "border-sd-accent/60 bg-[#16263a]" : "border-sd-line bg-sd-panel hover:border-[#35465d] hover:bg-sd-raised")}>
+                      <input type="radio" name="cr-type" value={d.docType} checked={on} onChange={() => chooseType(d.docType)} className="mt-0.5 accent-[#8dbbff]" />
+                      <span className="min-w-0">
+                        <span className="block text-[13px] font-semibold text-sd-text">{d.label}</span>
+                        <span className="mt-0.5 block text-[11.5px] leading-snug text-sd-text3">{d.blurb}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+                {types.length === 0 && <p className="col-span-full py-6 text-center text-[12.5px] text-sd-text3">No record type matches “{typeFilter}”.</p>}
+              </div>
+            </fieldset>
+            <div>
+              <FormField id="cr-class" label="Classification" hint="Marked on the record; gates who may read and approve it.">
+                <select id="cr-class" className={cx(controlCls, "h-9")} value={level} onChange={(e) => { setLevel(e.target.value); setValidation(null); }}>
+                  {LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
+              </FormField>
+              <div className="mt-3 rounded-lg border border-sd-line bg-sd-sunken px-3 py-2.5">
+                <ClassificationMark level={level} size="md" />
+                <p className={cx("mt-2 text-[11.5px] leading-snug", assistAllowed ? "text-sd-text3" : "text-sd-warn")}>
+                  {assistAllowed ? "AI drafting assist is available at this classification." : "AI drafting assist is disabled at this classification — sensitive drafts never leave your tenant."}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-        <div>
-          <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">Classification</div>
-          <select className={inputCls} value={level} onChange={(e) => { setLevel(e.target.value); setValidation(null); }}>
-            {LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
-          </select>
-          <div className="mt-3 flex items-center gap-2 rounded-lg border border-white/10 bg-ink-900/50 px-3 py-2.5">
-            <ClassBadge level={level} />
-            <span className="text-[11px] leading-snug text-white/40">Marked on the record; gates who may read and approve it.</span>
+
+          {/* STEP 2 — the governed publication procedure: the spine of the page */}
+          <Step n="2" title="The publication procedure" sub="What happens after you submit — read from the policy bound to this record, not fabricated." />
+          <div className="mb-8">
+            <GovernanceInstrument docTypeLabel={spec.label} classification={level} policy={policy} outputs={outputs} loading={!policiesLoaded} />
           </div>
-        </div>
-      </div>
 
-      {/* STEP 2 — the governed publication procedure: the spine of the page */}
-      <Step n="2" title="The publication procedure" sub="What happens after you submit — read from the policy bound to this record, not fabricated." />
-      <div className="mb-8">
-        <GovernanceInstrument docTypeLabel={spec.label} classification={level} policy={policy} outputs={outputs} />
-      </div>
-
-      {/* STEP 3 — author + submit */}
-      <Step n="3" title="Author the content" sub="Structured authoring — no formatting, markup, or technical knowledge required." />
-      <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
-        <Card className="space-y-4 p-5">
-          <Field label="Title"><input className={inputCls} value={title} onChange={(e) => { setTitle(e.target.value); setValidation(null); }} placeholder={`${spec.label} title`} /></Field>
-          {spec.fields.map((f) => (
-            <Field key={f.role} label={f.heading} hint={f.kind === "bullets" ? "One item per line." : f.kind === "timeline" ? "One event per line: time | label | detail" : f.kind === "callout" ? "Shown as a highlighted callout." : undefined}>
-              <textarea className={`${inputCls} ${f.kind === "bullets" || f.kind === "timeline" ? "h-24" : "h-20"} leading-relaxed`}
-                value={values[f.role] ?? ""} onChange={(e) => set(f.role, e.target.value)} placeholder={f.placeholder} />
-              <FieldAssist
-                docType={spec.docType} heading={f.heading} kind={f.kind} value={values[f.role] ?? ""} classification={level} allowed={assistAllowed}
-                onApply={(t) => set(f.role, t)}
-                onInsert={(t) => set(f.role, (values[f.role] ? values[f.role] + "\n" : "") + t)}
-              />
-            </Field>
-          ))}
-        </Card>
-
-        {/* submit rail */}
-        <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
-          <Card className="p-4">
-            <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-white/50">Outputs</h3>
-            <p className="mb-3 text-[11px] text-white/35">At least one format is required.</p>
-            <div className="flex flex-wrap gap-2">
-              {["pdf", "docx", "md"].map((o) => {
-                const on = outputs.includes(o);
+          {/* STEP 3 — author */}
+          <Step n="3" title="Author the content" sub="Structured authoring — no formatting, markup, or technical knowledge required." />
+          <Panel>
+            <div className="space-y-5">
+              <FormField id="cr-title" label="Title" hint={`Optional — defaults to “${spec.label}”.`}>
+                <input id="cr-title" className={cx(controlCls, "h-9")} value={title} onChange={(e) => { setTitle(e.target.value); setValidation(null); }} placeholder={`${spec.label} title`} />
+              </FormField>
+              {spec.fields.map((f) => {
+                const id = `cr-f-${f.role}`;
+                const e = fieldErr(f.role, f.heading) ?? serverFieldErr(f.role);
                 return (
-                  <button key={o} onClick={() => setOutputs((prev) => on ? prev.filter((x) => x !== o) : [...prev, o])}
-                    className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wide transition ${on ? "border-seal-light bg-seal/40 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]" : "border-white/12 bg-white/[0.02] text-white/45 hover:text-white/70"}`}>
-                    {on && <span className="text-emerald-300" aria-hidden>✓</span>}{o}
-                  </button>
+                  <FormField key={f.role} id={id} label={f.heading} required hint={KIND_HINT[f.kind]} error={e}
+                    after={<FieldAssist docType={spec.docType} heading={f.heading} kind={f.kind} value={values[f.role] ?? ""} classification={level} allowed={assistAllowed}
+                      onApply={(t) => set(f.role, t)} onInsert={(t) => set(f.role, (values[f.role] ? values[f.role] + "\n" : "") + t)} />}>
+                    <textarea id={id} aria-required="true" aria-invalid={!!e || undefined} aria-describedby={e ? `${id}-error` : KIND_HINT[f.kind] ? `${id}-hint` : undefined}
+                      className={cx(controlCls, "resize-y leading-relaxed", f.kind === "bullets" || f.kind === "timeline" ? "min-h-[104px]" : "min-h-[84px]", e && "border-sd-bad/70")}
+                      value={values[f.role] ?? ""} onChange={(ev) => set(f.role, ev.target.value)} placeholder={f.placeholder} />
+                  </FormField>
                 );
               })}
             </div>
-            {outputs.length === 0 && <p className="mt-2.5 text-[11px] text-amber-300/90">Select at least one output format to continue.</p>}
-          </Card>
+          </Panel>
 
-          {validation && (
-            <Card className={`p-4 ${validation.valid ? "border-emerald-500/30" : "border-red-500/30"}`}>
-              <div className={`text-sm font-semibold ${validation.valid ? "text-emerald-300" : "text-red-300"}`}>{validation.valid ? "✓ Valid — ready to submit" : "Validation errors"}</div>
-              {validation.errors?.length > 0 && (
-                <ul className="mt-2 space-y-1 text-[12px] text-red-300/90">{validation.errors.map((e, i) => <li key={i}>· {e.message}{e.field ? ` (${e.field})` : ""}</li>)}</ul>
-              )}
-            </Card>
+          {showJson && (
+            <Panel className="mt-4" title="Technical payload" aside="DDM document · exactly what is sent">
+              <pre className="max-h-96 overflow-auto font-mono text-[11.5px] leading-relaxed text-sd-text2">{JSON.stringify(document, null, 2)}</pre>
+            </Panel>
           )}
-
-          <Card className="p-4">
-            {(missing.length > 0 || outputs.length === 0) && (
-              <p className="mb-2.5 text-[12px] leading-snug text-amber-300/90">
-                Still needed: {[...missing, ...(outputs.length === 0 ? ["an output format"] : [])].join(", ")}
-              </p>
-            )}
-            <div className="flex gap-2">
-              <Button variant="ghost" onClick={onValidate} disabled={busy}>{busy ? "…" : "Validate"}</Button>
-              <Button className="flex-1" onClick={onSubmit} disabled={busy || missing.length > 0 || outputs.length === 0}>{busy ? "Submitting…" : "Submit for governance →"}</Button>
-            </div>
-            <p className="mt-2.5 text-[11px] leading-snug text-white/35">Submitting enters the approval chain above. Nothing is published until the policy is satisfied.</p>
-            <button onClick={() => setShowJson((s) => !s)} className="mt-2 text-[11px] uppercase tracking-wide text-white/25 hover:text-white/55">{showJson ? "Hide" : "Show"} technical payload</button>
-          </Card>
         </div>
+
+        {/* ── submission rail ── */}
+        <aside className="space-y-4 xl:sticky xl:top-2" aria-label="Submission">
+          <Panel headingLevel={2} title="Submission">
+            <dl className="grid grid-cols-2 gap-x-3 gap-y-2.5">
+              <Fact label="Record type" value={spec.label} className="col-span-2" />
+              <Fact label="Classification" value={<ClassificationMark level={level} />} />
+              <Fact label="Policy" value={!policiesLoaded ? "…" : policy ? <>{policy.name}{policy.policyVersion ? <span className="font-mono text-sd-text3"> v{policy.policyVersion}</span> : null}</> : "Platform default"} />
+            </dl>
+
+            <fieldset className="mt-4 border-t border-sd-soft pt-3">
+              <legend className="text-[12px] font-semibold text-sd-text2">Output formats <span className="font-normal text-sd-text3">· at least one</span></legend>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {["pdf", "docx", "md"].map((o) => {
+                  const on = outputs.includes(o);
+                  return (
+                    <label key={o} className={cx("inline-flex h-8 cursor-pointer items-center gap-2 rounded-lg border px-3 font-mono text-[12px] font-semibold uppercase", on ? "border-sd-accent/60 bg-[#16263a] text-sd-text" : "border-sd-line text-sd-text3 hover:text-sd-text")}>
+                      <input type="checkbox" checked={on} onChange={() => { setOutputs((prev) => on ? prev.filter((x) => x !== o) : [...prev, o]); setValidation(null); }} className="accent-[#8dbbff]" />{o}
+                    </label>
+                  );
+                })}
+              </div>
+              {outputs.length === 0 && <p className="mt-2 text-[11.5px] font-medium text-sd-warn">Select at least one output format to continue.</p>}
+            </fieldset>
+
+            <div id="cr-checklist" tabIndex={-1} className="mt-4 border-t border-sd-soft pt-3 outline-none" aria-live="polite">
+              <div className="mb-1.5 text-[12px] font-semibold text-sd-text2">Readiness <span className="font-mono font-normal text-sd-text3">{spec.fields.length - missing.length}/{spec.fields.length} sections</span></div>
+              <ul className="space-y-1">
+                {spec.fields.map((f) => {
+                  const ok = !!(values[f.role] ?? "").trim();
+                  return (
+                    <li key={f.role}>
+                      <a href={`#cr-f-${f.role}`} onClick={(e) => { e.preventDefault(); window.document.getElementById(`cr-f-${f.role}`)?.focus(); }}
+                        className={cx("flex min-h-[26px] items-center gap-2 rounded px-1 text-[12.5px] hover:bg-sd-raised", ok ? "text-sd-text2" : attempted ? "text-sd-bad" : "text-sd-text3")}>
+                        {ok ? <Icon.check className="h-3.5 w-3.5 text-sd-ok" /> : <span aria-hidden className="grid h-3.5 w-3.5 place-items-center"><span className="h-2.5 w-2.5 rounded-full border border-current" /></span>}
+                        <span className="sr-only">{ok ? "Complete:" : "Missing:"}</span>{f.heading}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+
+            {validation && (
+              <div className="mt-4">
+                {validation.valid
+                  ? <Alert tone="ok" title="Valid — ready to submit">The composed record passes server validation.</Alert>
+                  : <Alert tone="bad" title="Validation errors">
+                      <ul className="mt-1 space-y-0.5 text-[12px]">{validation.errors.map((e, i) => <li key={i}>· {e.message}{e.field ? <span className="font-mono text-sd-text3"> ({e.field})</span> : ""}</li>)}</ul>
+                    </Alert>}
+              </div>
+            )}
+
+            <div className="mt-4 flex gap-2">
+              <Button variant="secondary" onClick={onValidate} loading={busy === "validate"} disabled={!!busy}>Validate</Button>
+              <Button variant="primary" className="flex-1" onClick={onSubmit} loading={busy === "submit"} disabled={!!busy} aria-describedby="cr-submit-note" aria-disabled={blocked || undefined}>
+                Submit for governance <Icon.arrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            {blocked && attempted && <p className="mt-2 text-[12px] font-medium text-sd-warn">Still needed: {[...missing, ...(outputs.length === 0 ? ["an output format"] : [])].join(", ")}.</p>}
+            <p id="cr-submit-note" className="mt-2.5 text-[11.5px] leading-snug text-sd-text3">Submitting enters the approval chain. Nothing is published until the policy is satisfied and the publication authority releases it.</p>
+            <button onClick={() => setShowJson((s) => !s)} aria-expanded={showJson} className="mt-3 text-[11.5px] font-semibold text-sd-text3 hover:text-sd-text">{showJson ? "Hide" : "Show"} technical payload</button>
+          </Panel>
+        </aside>
       </div>
 
-      {showJson && (
-        <Card className="mt-4 p-4">
-          <pre className="max-h-80 overflow-auto font-mono text-[11px] leading-relaxed text-white/60">{JSON.stringify(document, null, 2)}</pre>
-        </Card>
-      )}
+      <ConfirmDialog open={!!pendingType} title="Change the record type?" confirmLabel="Change type and clear sections" variant="warn"
+        onCancel={() => setPendingType(null)} onConfirm={() => { if (pendingType) { setDocTypeId(pendingType); setValues({}); setValidation(null); setAttempted(false); } setPendingType(null); }}>
+        <p>Each record type has its own sections. Switching to <span className="font-semibold text-sd-text">{DOC_TYPES.find((d) => d.docType === pendingType)?.label}</span> clears the sections you have written for <span className="font-semibold text-sd-text">{spec.label}</span>. The title and classification are kept.</p>
+      </ConfirmDialog>
     </div>
   );
 };
@@ -512,11 +579,11 @@ const Create: React.FC = () => {
 // A numbered institutional step header — gives the page the cadence of a governed
 // procedure rather than a single flat form.
 const Step: React.FC<{ n: string; title: string; sub: string }> = ({ n, title, sub }) => (
-  <div className="mb-3 flex items-baseline gap-3">
-    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-seal/25 font-mono text-[12px] font-bold text-seal-light ring-1 ring-seal-light/30">{n}</span>
+  <div className="mb-3 flex items-start gap-3">
+    <span aria-hidden className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-sd-accent/45 font-mono text-[12px] font-bold text-sd-accent">{n}</span>
     <div>
-      <h2 className="text-[15px] font-bold tracking-tight text-white">{title}</h2>
-      <p className="text-[12px] text-white/45">{sub}</p>
+      <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-sd-text"><span className="sr-only">Step {n}: </span>{title}</h2>
+      <p className="text-[12.5px] text-sd-text3">{sub}</p>
     </div>
   </div>
 );
@@ -540,7 +607,7 @@ const FieldAssist: React.FC<{
   const [err, setErr] = useState<string | null>(null);
 
   if (!allowed) {
-    return <p className="mt-1.5 text-[11px] text-white/30">AI assist is off for {classification} — sensitive drafts never leave your tenant.</p>;
+    return <p className="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-sd-text3"><Icon.lock className="h-3 w-3" />AI assist is off for {classification} — sensitive drafts never leave your tenant.</p>;
   }
 
   const run = async (intent: "develop" | "polish" | "restructure" | "shorten") => {
@@ -555,27 +622,29 @@ const FieldAssist: React.FC<{
 
   return (
     <div className="mt-2">
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/30">AI assist</span>
+      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`AI assist for ${heading}`}>
+        <span className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-sd-text3">AI assist</span>
         {INTENTS.map(({ intent, label }) => (
           <button key={intent} type="button" onClick={() => run(intent)} disabled={!!busy}
-            className="rounded border border-white/12 bg-white/[0.02] px-2 py-0.5 text-[11px] font-medium text-white/55 transition hover:border-seal-light/40 hover:text-white disabled:opacity-40">
-            {busy === intent ? "…" : label}
+            className="inline-flex h-6 items-center gap-1 rounded-md border border-sd-line px-2 text-[11.5px] font-medium text-sd-text2 transition-colors hover:border-sd-accent/45 hover:text-sd-text disabled:opacity-50">
+            {busy === intent && <Spinner className="h-3 w-3" />}{label}
           </button>
         ))}
       </div>
-      {err && <p className="mt-1.5 text-[11px] text-amber-300/90">{err}</p>}
-      {suggestion !== null && (
-        <div className="mt-2 rounded-lg border border-seal-light/30 bg-seal/10 p-3">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-seal-light/80">Suggestion · you decide whether to use it</div>
-          <p className="mt-1.5 whitespace-pre-wrap text-[12.5px] leading-relaxed text-white/85">{suggestion}</p>
-          <div className="mt-2.5 flex flex-wrap gap-2">
-            <button type="button" onClick={() => { onApply(suggestion); setSuggestion(null); }} className="rounded bg-seal px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-seal-light">Replace</button>
-            <button type="button" onClick={() => { onInsert(suggestion); setSuggestion(null); }} className="rounded border border-white/15 px-2.5 py-1 text-[11px] font-semibold text-white/70 transition hover:text-white">Insert below</button>
-            <button type="button" onClick={() => setSuggestion(null)} className="rounded px-2.5 py-1 text-[11px] text-white/40 transition hover:text-white/70">Discard</button>
+      <div aria-live="polite">
+        {err && <p className="mt-1.5 text-[11.5px] text-sd-warn">{err}</p>}
+        {suggestion !== null && (
+          <div className="mt-2 rounded-lg border border-sd-accent/35 bg-sd-accent/[0.06] p-3">
+            <div className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-sd-accent">Suggestion · you decide whether to use it</div>
+            <p className="mt-1.5 whitespace-pre-wrap text-[12.5px] leading-relaxed text-sd-text">{suggestion}</p>
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              <Button size="sm" variant="primary" onClick={() => { onApply(suggestion); setSuggestion(null); }}>Replace</Button>
+              <Button size="sm" onClick={() => { onInsert(suggestion); setSuggestion(null); }}>Insert below</Button>
+              <Button size="sm" variant="ghost" onClick={() => setSuggestion(null)}>Discard</Button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

@@ -26,6 +26,29 @@ export default {
           600: "#a9852f",
           700: "#856722",
         },
+        // Operations console design tokens (dark institutional navy, not black).
+        // Text tones are contrast-checked: text3 ≥ 5.7:1 on every console surface;
+        // `faint` ≥ 4.5:1 on bg/panel only and is reserved for non-essential labels.
+        sd: {
+          bg: "#0b1018",
+          panel: "#111a26",
+          raised: "#162131",
+          hover: "#1b2a3d",
+          sunken: "#0d1520",
+          line: "#263548",
+          soft: "#1c2838",
+          text: "#edf2f8",
+          text2: "#b4c0cf",
+          text3: "#8d9bb0",
+          faint: "#7f8ea3",
+          accent: "#8dbbff",
+          accentbg: "#d9e7f9",
+          accentink: "#15243a",
+          gold: "#c9ad75",
+          ok: "#75c9a1",
+          warn: "#e6bd72",
+          bad: "#e28b8b",
+        },
         // classification banding
         cls: {
           unclassified: "#2f7d4f",

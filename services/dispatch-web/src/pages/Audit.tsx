@@ -1,76 +1,156 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { audit, type AuditEvent , humanError} from "../lib/api";
-import { Card, inputCls } from "../lib/ui";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { audit, type AuditEvent, humanError } from "../lib/api";
+import { actorName, fmtDateTime } from "../lib/format";
+import { Alert, Badge, Button, CopyButton, EmptyState, EvidenceValue, Fact, PageHeader, Panel, Segmented, SkeletonRows, controlCls, cx, useDensity } from "../components/console/ds";
+import { Icon } from "../components/console/icons";
 
-// Append-only audit trail (auditor scope). Filter by action or target; the
-// trail is tenant-scoped and read-only — the API blocks any mutation.
+const LIMIT = 300;
+
+// Append-only evidence chain (auditor scope). Filter by action or target; the
+// trail is tenant-scoped and read-only — the database blocks UPDATE/DELETE on
+// audit_events (M4 trigger) and the API exposes no mutation. Filters live in the
+// URL so a record file can link straight to its own evidence.
+//
+// Integrity wording: an event's `sha256` is a digest the engine RECORDED with
+// that event (e.g. a preservation or certificate proof). The console does not
+// recompute or verify it, so it is labelled "Digest recorded" — never "Verified".
 const Audit: React.FC = () => {
+  const [params, setParams] = useSearchParams();
+  const [action, setAction] = useState(params.get("action") ?? "");
+  const [target, setTarget] = useState(params.get("target") ?? "");
   const [events, setEvents] = useState<AuditEvent[]>([]);
-  const [action, setAction] = useState("");
-  const [target, setTarget] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [open, setOpen] = useState<string | null>(null);
+  const [density, setDensity] = useDensity("evidence", "compact");
 
+  const qAction = params.get("action") ?? "", qTarget = params.get("target") ?? "";
   const load = useCallback(async () => {
     setLoading(true); setErr(null);
-    try { setEvents((await audit({ action: action || undefined, target: target || undefined, limit: 300 })).events); }
-    catch (e) { setErr(humanError(e, "load failed")); }
+    try { setEvents((await audit({ action: qAction || undefined, target: qTarget || undefined, limit: LIMIT })).events); }
+    catch (e) { setErr(humanError(e, "The evidence chain could not be loaded.")); }
     finally { setLoading(false); }
-  }, [action, target]);
-  // Initial load only; subsequent loads are triggered by the filter form.
-  useEffect(() => { load(); /* eslint-disable-line react-hooks/exhaustive-deps */ }, []);
+  }, [qAction, qTarget]);
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => { setAction(qAction); setTarget(qTarget); }, [qAction, qTarget]);
+
+  const apply = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const next = new URLSearchParams();
+    if (action.trim()) next.set("action", action.trim());
+    if (target.trim()) next.set("target", target.trim());
+    setParams(next, { replace: true });
+  };
+  const clear = () => { setAction(""); setTarget(""); setParams(new URLSearchParams(), { replace: true }); };
+  const knownActions = useMemo(() => Array.from(new Set(events.map((e) => e.action))).sort(), [events]);
+  const digests = events.filter((e) => e.sha256).length;
+  const filtered = !!(qAction || qTarget);
 
   return (
     <div>
-      <header className="mb-6 flex items-end justify-between">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-seal-light">Evidence</div>
-          <h1 className="mt-1.5 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white">Evidence Chain</h1>
-          <p className="mt-1 text-sm text-white/50">An append-only, hash-stamped chain of proceedings — read-only, tenant-scoped, evidentiary by design.</p>
-        </div>
-        {!loading && <div className="text-right"><div className="font-mono text-2xl font-bold tabular-nums text-white">{events.length}</div><div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Proceedings</div></div>}
-      </header>
+      <PageHeader
+        eyebrow="Evidence chain"
+        title="Evidence chain"
+        description="An append-only chain of proceedings — read-only, tenant-scoped, evidentiary by design. Every governance act is recorded here; events that carry a cryptographic digest show it in full."
+        meta={<><span>Append-only · read-only</span>{!loading && <span className="text-sd-text2">{events.length}{events.length >= LIMIT ? "+" : ""} proceedings · {digests} with digest</span>}</>}
+      />
 
-      <form onSubmit={(e) => { e.preventDefault(); load(); }} className="mb-4 flex flex-wrap gap-2">
-        <input className={`${inputCls} w-56`} value={action} onChange={(e) => setAction(e.target.value)} placeholder="action (e.g. document.published)" />
-        <input className={`${inputCls} w-72`} value={target} onChange={(e) => setTarget(e.target.value)} placeholder="target id (uuid)" />
-        <button className="rounded-md bg-seal px-3.5 py-2 text-sm font-semibold text-white hover:bg-seal-light">Filter</button>
+      <form onSubmit={apply} className="mb-3 flex flex-wrap items-end gap-2" aria-label="Filter the evidence chain">
+        <div className="min-w-[200px] flex-1">
+          <label htmlFor="ev-action" className="mb-1 block text-[12px] font-semibold text-sd-text2">Action</label>
+          <input id="ev-action" list="ev-actions" className={cx(controlCls, "h-9 font-mono")} value={action} onChange={(e) => setAction(e.target.value)} placeholder="e.g. document.published" />
+          <datalist id="ev-actions">{knownActions.map((a) => <option key={a} value={a} />)}</datalist>
+        </div>
+        <div className="min-w-[240px] flex-[1.4]">
+          <label htmlFor="ev-target" className="mb-1 block text-[12px] font-semibold text-sd-text2">Target ID</label>
+          <input id="ev-target" className={cx(controlCls, "h-9 font-mono")} value={target} onChange={(e) => setTarget(e.target.value)} placeholder="Exact target UUID" />
+        </div>
+        <Button type="submit" variant="primary" icon={<Icon.search />}>Apply filters</Button>
+        {filtered && <Button variant="ghost" onClick={clear} icon={<Icon.close />}>Clear</Button>}
+        <Segmented label="Row density" value={density} onChange={setDensity} options={[{ value: "comfortable", label: "Comfortable" }, { value: "compact", label: "Compact" }]} />
       </form>
 
-      {err && <div className="mb-4 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{err}</div>}
+      {err && <Alert tone="bad" title="Evidence unavailable" className="mb-3" action={<Button size="sm" onClick={load}>Try again</Button>}>{err}</Alert>}
 
-      <Card>
-        {loading ? <p className="px-4 py-6 text-sm text-white/40">Loading…</p>
-          : events.length === 0 ? <p className="px-4 py-10 text-center text-sm text-white/30">No events.</p>
-          : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/10 text-left text-[11px] uppercase tracking-wide text-white/40">
-                  <th className="px-4 py-2 font-semibold">Timestamp</th>
-                  <th className="px-4 py-2 font-semibold">Actor</th>
-                  <th className="px-4 py-2 font-semibold">Action</th>
-                  <th className="px-4 py-2 font-semibold">Document</th>
-                  <th className="px-4 py-2 font-semibold">Evidence ID</th>
-                  <th className="px-4 py-2 font-semibold">Integrity</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {events.map((e) => (
-                  <tr key={e.eventId} className="hover:bg-white/5">
-                    <td className="px-4 py-2 text-xs text-white/40">{new Date(e.ts).toLocaleString()}</td>
-                    <td className="px-4 py-2 text-xs text-white/60">{e.actor} <span className="text-white/30">({e.actorType})</span></td>
-                    <td className="px-4 py-2"><span className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-xs text-white/80">{e.action}</span></td>
-                    <td className="px-4 py-2 font-mono text-[10px] text-white/45">{e.targetId ? <>{e.targetType ?? "target"}/{e.targetId.slice(0, 8)}…</> : <span className="text-white/25">—</span>}</td>
-                    <td className="px-4 py-2 font-mono text-[10px] text-white/45" title={e.eventId}>{e.eventId.slice(0, 8)}…</td>
-                    <td className="px-4 py-2 font-mono text-[10px] text-white/35" title={e.sha256 ? `sha256: ${e.sha256}` : undefined}>
-                      {e.sha256 ? <span className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400/70" />Verified</span> : <span className="text-white/25">—</span>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <Panel padded={false} className="overflow-hidden">
+        {loading ? <SkeletonRows rows={8} label="Loading the evidence chain" />
+          : events.length === 0 ? (
+            filtered
+              ? <EmptyState icon={<Icon.search />} title="No events match these filters" action={<Button onClick={clear}>Clear filters</Button>}>Action and target filters are exact matches.</EmptyState>
+              : <EmptyState icon={<Icon.evidence />} title="No events recorded yet">Events are appended as records move through governance.</EmptyState>
+          ) : (
+            <>
+              <div className="max-h-[calc(100vh-300px)] min-h-[240px] overflow-auto">
+                <table className="sd-table min-w-[860px]" data-density={density}>
+                  <caption className="sr-only">Evidence chain — {events.length} events, newest first. Expand a row for every recorded field.</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col" className="w-8"><span className="sr-only">Details</span></th>
+                      <th scope="col">Timestamp</th>
+                      <th scope="col">Actor</th>
+                      <th scope="col">Action</th>
+                      <th scope="col">Target</th>
+                      <th scope="col">Event ID</th>
+                      <th scope="col">Integrity</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {events.map((e) => {
+                      const isOpen = open === e.eventId;
+                      return (
+                        <React.Fragment key={e.eventId}>
+                          <tr>
+                            <td>
+                              <button onClick={() => setOpen(isOpen ? null : e.eventId)} aria-expanded={isOpen} aria-controls={`ev-${e.eventId}`} aria-label={`${isOpen ? "Hide" : "Show"} details for ${e.action}`}
+                                className="grid h-6 w-6 place-items-center rounded-md text-sd-text3 hover:bg-sd-hover hover:text-sd-text">
+                                <Icon.chevronRight className={cx("h-3.5 w-3.5 transition-transform", isOpen && "rotate-90")} />
+                              </button>
+                            </td>
+                            <td className="whitespace-nowrap font-mono text-[12px] text-sd-text2"><time dateTime={e.ts}>{fmtDateTime(e.ts)}</time></td>
+                            <td className="max-w-[220px]"><div className="truncate text-sd-text" title={e.actor}>{actorName(e.actor)}</div><div className="text-[11px] text-sd-text3">{e.actorType}</div></td>
+                            <td><span className="rounded bg-sd-sunken px-1.5 py-0.5 font-mono text-[12px] text-sd-text">{e.action}</span></td>
+                            <td className="font-mono text-[11.5px]">
+                              {e.targetId ? (
+                                e.targetType === "document"
+                                  ? <Link to={`/console/documents/${e.targetId}`} className="text-sd-accent hover:underline" title={e.targetId}>document/{e.targetId.slice(0, 8)}…</Link>
+                                  : <span className="text-sd-text2" title={e.targetId}>{e.targetType ?? "target"}/{e.targetId.slice(0, 8)}…</span>
+                              ) : <span className="text-sd-text3">—</span>}
+                            </td>
+                            <td className="whitespace-nowrap font-mono text-[11.5px] text-sd-text2"><span title={e.eventId}>{e.eventId.slice(0, 8)}…</span><CopyButton value={e.eventId} label="event ID" className="ml-1" /></td>
+                            <td>{e.sha256 ? <Badge tone="gold" glyph="#" title={`SHA-256 recorded with this event: ${e.sha256}`}>Digest recorded</Badge> : <span className="text-[12px] text-sd-text3">—</span>}</td>
+                          </tr>
+                          {isOpen && (
+                            <tr id={`ev-${e.eventId}`} className="!bg-sd-sunken">
+                              <td />
+                              <td colSpan={6} className="!py-3">
+                                <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2 xl:grid-cols-4">
+                                  <Fact label="Event ID" value={e.eventId} mono />
+                                  <Fact label="Timestamp (ISO 8601)" value={e.ts} mono />
+                                  <Fact label="Actor" value={e.actor} mono />
+                                  <Fact label="Actor type" value={e.actorType} />
+                                  <Fact label="Target type" value={e.targetType} />
+                                  <Fact label="Target ID" value={e.targetId} mono />
+                                  <Fact label="Classification" value={e.classification} />
+                                  <Fact label="Request ID" value={e.requestId} mono />
+                                  <Fact label="Correlation ID" value={e.correlationId} mono />
+                                  {e.sha256 && <div className="sm:col-span-2 xl:col-span-4"><EvidenceValue label="SHA-256 digest recorded with this event" value={e.sha256} tone="gold"
+                                    note="A digest identifies exact content: recomputing it from the same bytes yields the same value. It does not by itself establish authorship, and the console does not recompute it." /></div>}
+                                </dl>
+                                {e.targetId && <Link to={`/console/audit?target=${e.targetId}`} className="mt-3 inline-block text-[12px] font-semibold text-sd-accent hover:underline">All events for this target →</Link>}
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              {events.length >= LIMIT && <div className="border-t border-sd-soft px-4 py-2 text-[12px] text-sd-text3">Showing the newest {LIMIT} events. Filter by action or target to reach older proceedings.</div>}
+            </>
           )}
-      </Card>
+      </Panel>
     </div>
   );
 };
