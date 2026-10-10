@@ -494,7 +494,7 @@ const Create: React.FC = () => {
                 const e = fieldErr(f.role, f.heading) ?? serverFieldErr(f.role);
                 return (
                   <FormField key={f.role} id={id} label={f.heading} required hint={KIND_HINT[f.kind]} error={e}
-                    after={<><FieldMeta kind={f.kind} value={values[f.role] ?? ""} /><FieldAssist docType={spec.docType} heading={f.heading} kind={f.kind} value={values[f.role] ?? ""} classification={level} allowed={assistAllowed}
+                    after={<><FieldMeta kind={f.kind} value={values[f.role] ?? ""} /><FieldAssist key={`${f.role}-${assistAllowed ? "on" : "off"}`} docType={spec.docType} heading={f.heading} kind={f.kind} value={values[f.role] ?? ""} classification={level} allowed={assistAllowed}
                       onApply={(t) => set(f.role, t)} onInsert={(t) => set(f.role, (values[f.role] ? values[f.role] + "\n" : "") + t)} /></>}>
                     <textarea id={id} aria-required="true" aria-invalid={!!e || undefined} aria-describedby={e ? `${id}-error` : KIND_HINT[f.kind] ? `${id}-hint` : undefined}
                       className={cx(controlCls, "resize-y leading-relaxed", f.kind === "bullets" || f.kind === "timeline" ? "min-h-[104px]" : "min-h-[84px]", e && "border-sd-bad/70")}
