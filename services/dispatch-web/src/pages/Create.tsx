@@ -442,7 +442,13 @@ const Create: React.FC = () => {
                 <div className="relative w-full sm:w-56">
                   <label htmlFor="cr-type-filter" className="sr-only">Filter record types</label>
                   <Icon.search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-sd-text3" />
-                  <input id="cr-type-filter" className={cx(controlCls, "h-8 pl-8 text-[12.5px]")} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} placeholder="Filter types…" />
+                  <input id="cr-type-filter" className={cx(controlCls, "h-8 pl-8 text-[12.5px]")} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} placeholder="Filter types…"
+                    aria-describedby="cr-type-count"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { e.preventDefault(); if (types.length === 1) chooseType(types[0].docType); }
+                      if (e.key === "Escape" && typeFilter) { e.preventDefault(); setTypeFilter(""); }
+                    }} />
+                  <span id="cr-type-count" className="sr-only" aria-live="polite">{typeFilter ? `${types.length} matching record types${types.length === 1 ? ", press Enter to select" : ""}` : ""}</span>
                 </div>
               </div>
               <div role="radiogroup" aria-label="Record type" className="grid max-h-[372px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2 2xl:grid-cols-3">
