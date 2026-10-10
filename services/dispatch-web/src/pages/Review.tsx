@@ -126,7 +126,8 @@ const Review: React.FC = () => {
             <label htmlFor="rv-filter" className="sr-only">Filter the queue</label>
             <div className="relative">
               <Icon.search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-sd-text3" />
-              <input id="rv-filter" ref={filterRef} className={cx(controlCls, "h-8 pl-8")} value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by title, type, authority or submitter…" />
+              <input id="rv-filter" ref={filterRef} type="search" className={cx(controlCls, "h-8 pl-8")} value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by title, type, authority or submitter…"
+                onKeyDown={(e) => { if (e.key === "Escape") { if (filter) { e.preventDefault(); setFilter(""); } else filterRef.current?.blur(); } }} />
             </div>
             {mine && (
               <label className="mt-2 flex cursor-pointer items-center gap-2 text-[12px] text-sd-text2">
@@ -208,8 +209,9 @@ const Review: React.FC = () => {
                 {ownSubmission && (
                   <Alert tone="warn" className="mb-3" title="This appears to be your own submission">Separation of duties: the engine refuses an approval by the record's submitter.</Alert>
                 )}
-                <FormField id="rv-comment" label="Decision rationale" hint="Optional. Recorded with your decision on the approval record.">
-                  <textarea id="rv-comment" className={cx(controlCls, "h-20 resize-y")} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="The reasons for this decision…" />
+                <FormField id="rv-comment" label="Decision rationale" hint={<span className="flex justify-between gap-2"><span>Optional. Recorded with your decision on the approval record.</span><span className="font-mono">{comment.length}</span></span>}>
+                  <textarea id="rv-comment" aria-describedby="rv-comment-hint" className={cx(controlCls, "h-20 resize-y")} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="The reasons for this decision…"
+                    onKeyDown={(e) => { if (e.key === "Escape" && comment) { e.preventDefault(); setComment(""); } }} />
                 </FormField>
 
                 <div className="mt-4 space-y-2">
