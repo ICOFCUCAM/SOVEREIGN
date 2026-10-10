@@ -129,7 +129,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
       )}
 
       {/* institutional top line — product identity and the real session window */}
-      <header aria-label="Sovereign infrastructure" className="flex h-8 shrink-0 items-center gap-2.5 border-b border-sd-soft bg-[#0a0f16] px-4 text-[10.5px] font-bold uppercase tracking-[0.16em] text-sd-text3 sm:px-6">
+      <header aria-label="Sovereign infrastructure" className="sd-noprint flex h-8 shrink-0 items-center gap-2.5 border-b border-sd-soft bg-[#0a0f16] px-4 text-[10.5px] font-bold uppercase tracking-[0.16em] text-sd-text3 sm:px-6">
         <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-sd-gold" />
         <span>Sovereign infrastructure</span><span aria-hidden className="text-sd-faint">/</span><span className="text-sd-text2">Dispatch</span>
         <span className="ml-auto hidden items-center gap-1.5 tracking-[0.1em] sm:flex" title="Bearer token held in memory only; expires automatically">
@@ -143,7 +143,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
 
         {/* rail */}
         <aside id="sd-rail" aria-label={`${product.label} navigation`}
-          className={cx("z-40 flex w-[248px] shrink-0 flex-col border-r border-sd-soft bg-[#0c131d]",
+          className={cx("sd-noprint z-40 flex w-[248px] shrink-0 flex-col border-r border-sd-soft bg-[#0c131d]",
             "fixed inset-y-0 left-0 top-8 transition-transform lg:static lg:translate-x-0", menuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full")}>
           <div className="flex items-center gap-3 px-4 pb-4 pt-5">
             <span aria-hidden className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full border border-sd-gold/45 font-serif text-[15px] font-semibold text-sd-text">
@@ -220,7 +220,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
 
         {/* main */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <section aria-label="Workspace bar" className="flex h-12 shrink-0 items-center gap-3 border-b border-sd-soft px-4 sm:px-6">
+          <section aria-label="Workspace bar" className="sd-noprint flex h-12 shrink-0 items-center gap-3 border-b border-sd-soft px-4 sm:px-6">
             <button className="-ml-1 rounded-md p-1.5 text-sd-text2 hover:bg-sd-hover hover:text-sd-text lg:hidden" aria-label="Open navigation" aria-controls="sd-rail" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}><Icon.menu /></button>
             <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
               <ol className="flex items-center gap-2 text-[12.5px]">
@@ -258,7 +258,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
 
           <main id="sd-main" ref={mainRef} tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto outline-none">
             <div className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 lg:px-8 lg:py-7">{children}</div>
-            <footer className="mx-auto flex w-full max-w-[1480px] flex-wrap justify-between gap-2 border-t border-sd-soft px-4 py-4 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-sd-faint sm:px-6 lg:px-8">
+            <footer className="sd-noprint mx-auto flex w-full max-w-[1480px] flex-wrap justify-between gap-2 border-t border-sd-soft px-4 py-4 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-sd-faint sm:px-6 lg:px-8">
               <span><span className="text-sd-text3">Sovereign Dispatch</span> · Institutional record infrastructure</span>
               <span>Controlled access · append-only evidence</span>
             </footer>

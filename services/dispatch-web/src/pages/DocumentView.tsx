@@ -139,7 +139,7 @@ const DocumentView: React.FC = () => {
   return (
     <div>
       {upgrade && <UpgradeModal open reason="download" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); setUpgrade(false); }} />}
-      <BackLink archived={preserved} />
+      <BackLink archived={preserved} printable />
 
       {/* ── Record header — the institutional object's identity ── */}
       <header className="sd-cert relative mb-5 overflow-hidden rounded-xl border border-sd-line bg-sd-panel">
@@ -181,7 +181,7 @@ const DocumentView: React.FC = () => {
             </ol>
           </div>
 
-          <div className="flex shrink-0 flex-col items-stretch gap-2 lg:w-[240px]">
+          <div className="sd-noprint flex shrink-0 flex-col items-stretch gap-2 lg:w-[240px]">
             {preserved ? (
               <div className="flex items-center gap-2.5 rounded-lg border border-sd-gold/45 bg-sd-gold/[0.08] px-3 py-2.5">
                 <Icon.seal className="h-5 w-5 text-sd-gold" />
@@ -306,10 +306,13 @@ const DocumentView: React.FC = () => {
   );
 };
 
-const BackLink: React.FC<{ archived?: boolean }> = ({ archived }) => (
-  <Link to={archived ? "/console/archives" : "/console/library"} className="mb-3 inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-sd-text3 hover:text-sd-text">
-    <Icon.arrowLeft className="h-3.5 w-3.5" />{archived ? "Preservation" : "Official records"}
-  </Link>
+const BackLink: React.FC<{ archived?: boolean; printable?: boolean }> = ({ archived, printable }) => (
+  <div className="sd-noprint mb-3 flex items-center justify-between gap-3">
+    <Link to={archived ? "/console/archives" : "/console/library"} className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-sd-text3 hover:text-sd-text">
+      <Icon.arrowLeft className="h-3.5 w-3.5" />{archived ? "Preservation" : "Official records"}
+    </Link>
+    {printable && <Button size="sm" variant="ghost" onClick={() => window.print()} icon={<Icon.register />}>Print record file</Button>}
+  </div>
 );
 
 const RecordSkeleton: React.FC = () => (

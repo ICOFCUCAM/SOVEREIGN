@@ -191,3 +191,14 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 @media (forced-colors: active) {
   .sd-console a:focus-visible, .sd-console button:focus-visible { outline: 2px solid CanvasText; }
 }
+
+/* ── Print — a record file prints as a document: no chrome, dark-on-white ── */
+@media print {
+  .sd-noprint, .sd-skip { display: none !important; }
+  .sd-console, .sd-console * { background: #fff !important; color: #111 !important; border-color: #bbb !important; box-shadow: none !important; }
+  .sd-console { height: auto !important; }
+  .sd-console #sd-main { overflow: visible !important; }
+  .sd-console .sd-cert, .sd-console section, .sd-console table { break-inside: avoid; }
+  .sd-console a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 10px; }
+  .sd-console .sd-cert::before { border-color: #999 !important; }
+}
