@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { listDocuments, type DocListItem, type Lifecycle, humanError } from "../lib/api";
 import { recordTypeLabel } from "../lib/recordTypes";
 import { fmtDate, recordNo, waited } from "../lib/format";
-import { Alert, Button, ClassificationMark, EmptyState, LifecycleStatus, PageHeader, Panel, Segmented, SkeletonRows, controlCls, cx, lifecycleMeta, postureText, selectCls, useDensity, useHotkeys } from "../components/console/ds";
+import { Alert, Button, ClassificationMark, EmptyState, Highlight, LifecycleStatus, PageHeader, Panel, Segmented, SkeletonRows, controlCls, cx, lifecycleMeta, postureText, selectCls, useDensity, useHotkeys } from "../components/console/ds";
 import { Icon } from "../components/console/icons";
 
 const STATES: (Lifecycle | "")[] = ["", "in_review", "approved", "rendered", "published", "withdrawn", "archived", "rejected", "draft"];
@@ -197,7 +197,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
                       return (
                         <tr key={d.documentId} id={`reg-row-${i}`} aria-selected={cursor === i} className="cursor-pointer" onClick={() => nav(`/console/documents/${d.documentId}`)}>
                           <td className="min-w-[220px] max-w-[380px]">
-                            <Link to={`/console/documents/${d.documentId}`} onClick={(e) => e.stopPropagation()} className="block truncate font-serif text-[14px] font-semibold text-sd-text hover:underline">{d.title || "(untitled)"}</Link>
+                            <Link to={`/console/documents/${d.documentId}`} onClick={(e) => e.stopPropagation()} className="block truncate font-serif text-[14px] font-semibold text-sd-text hover:underline"><Highlight text={d.title || "(untitled)"} term={q} /></Link>
                             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11.5px] text-sd-text3">
                               <span className="font-mono text-sd-text2" title="Register reference derived from the document ID. The allocated official record ID is shown on the record file.">{recordNo(d.documentId, d.createdAt)}</span>
                               <span aria-hidden>·</span><span>{recordTypeLabel(d.docType)}</span>
@@ -234,7 +234,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
                           <ClassificationMark level={d.classification?.level} scheme={d.classification?.scheme} />
                           <LifecycleStatus state={d.lifecycle} />
                         </div>
-                        <div className="mt-1.5 font-serif text-[15px] font-semibold leading-snug text-sd-text">{d.title || "(untitled)"}</div>
+                        <div className="mt-1.5 font-serif text-[15px] font-semibold leading-snug text-sd-text"><Highlight text={d.title || "(untitled)"} term={q} /></div>
                         <div className="mt-0.5 text-[11.5px] text-sd-text3"><span className="font-mono text-sd-text2">{recordNo(d.documentId, d.createdAt)}</span> · {recordTypeLabel(d.docType)} · v{d.version}</div>
                         <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[12px]">
                           <div><dt className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-sd-text3">Authority</dt><dd className="text-sd-text2">{a.primary}</dd></div>

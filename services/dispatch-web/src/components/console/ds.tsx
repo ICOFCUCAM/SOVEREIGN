@@ -207,6 +207,15 @@ export const EvidenceValue: React.FC<{ label: string; value?: string | null; not
   </div>
 );
 
+// Highlights a search term within text (case-insensitive), for scanning results.
+export const Highlight: React.FC<{ text: string; term?: string }> = ({ text, term }) => {
+  const t = term?.trim();
+  if (!t) return <>{text}</>;
+  const esc = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${esc})`, "ig"));
+  return <>{parts.map((p, i) => (p.toLowerCase() === t.toLowerCase() ? <mark key={i} className="rounded-sm bg-sd-gold/25 px-0.5 text-sd-text">{p}</mark> : <React.Fragment key={i}>{p}</React.Fragment>))}</>;
+};
+
 // ── States ──────────────────────────────────────────────────────────────────
 export const Alert: React.FC<{ tone?: "info" | "ok" | "warn" | "bad"; title?: React.ReactNode; children?: React.ReactNode; onDismiss?: () => void; className?: string; action?: React.ReactNode }> = ({ tone = "info", title, children, onDismiss, className, action }) => {
   const s = {
