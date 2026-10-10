@@ -1,0 +1,5732 @@
+{
+ "capturedAt": "2026-10-10T07:15:18.611Z",
+ "scopes": [
+  "dispatch:validate",
+  "dispatch:render",
+  "dispatch:read",
+  "dispatch:approve",
+  "dispatch:publish",
+  "dispatch:audit",
+  "dispatch:admin"
+ ],
+ "tenantId": "7b5003cb-b3c0-4f0d-850d-9f95353cd9e8",
+ "singles": {
+  "/v1/billing": {
+   "status": 200,
+   "body": {
+    "plan": "paid",
+    "subscriptionStatus": "active",
+    "documentsUsed": 24,
+    "documentQuota": 3,
+    "quotaRemaining": 0,
+    "canDownload": true
+   }
+  },
+  "/v1/stats": {
+   "status": 200,
+   "body": {
+    "officialRecords": 24,
+    "artifactsGenerated": 10,
+    "approvalDecisions": 28,
+    "auditEvents": 131,
+    "published": 5
+   }
+  },
+  "/v1/governance/overview": {
+   "status": 200,
+   "body": {
+    "pending": [
+     {
+      "documentId": "2554fd33-861f-4525-87b7-425825245996",
+      "title": "Q4 Supplementary Estimates Briefing",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T00:45:28.060Z",
+      "awaiting": "Permanent Secretary",
+      "policyName": "Executive Briefing Policy"
+     },
+     {
+      "documentId": "97dc9136-639a-410f-bc48-25e541229727",
+      "title": "Capital Programme Re-profiling 2027",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T00:45:28.076Z",
+      "awaiting": "Permanent Secretary",
+      "policyName": "Executive Briefing Policy"
+     },
+     {
+      "documentId": "ea706b02-c27c-4037-a103-70c6c643c273",
+      "title": "Treasury Cash Management Update",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T00:45:28.086Z",
+      "awaiting": "Permanent Secretary",
+      "policyName": "Executive Briefing Policy"
+     },
+     {
+      "documentId": "143b3dbd-c1fd-4ba5-b034-01823310468c",
+      "title": "Director's Note: Spending Review Timetable",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T00:45:28.096Z",
+      "awaiting": "Director of Fiscal Policy",
+      "policyName": "Executive Briefing Policy"
+     },
+     {
+      "documentId": "c4fcbcd8-5bc0-404b-91fd-0100799c1e9b",
+      "title": "Public Sector Pay Envelope 2027",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T00:45:28.108Z",
+      "awaiting": "Permanent Secretary",
+      "policyName": "Executive Briefing Policy"
+     },
+     {
+      "documentId": "20fbbc21-87b3-4568-b0b2-f7049de110d0",
+      "title": "Debt Issuance Strategy H1",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T00:45:28.135Z",
+      "awaiting": "Permanent Secretary",
+      "policyName": "Executive Briefing Policy"
+     },
+     {
+      "documentId": "3f4f5fb7-7a10-43c2-b8c6-df5143fe813b",
+      "title": "UI verification briefing",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T01:17:32.853Z",
+      "awaiting": "Director of Fiscal Policy",
+      "policyName": "Executive Briefing Policy"
+     },
+     {
+      "documentId": "3f4bce6a-d7fe-4ad7-907c-09032fab3b2c",
+      "title": "UI verification briefing",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T01:25:57.880Z",
+      "awaiting": "Director of Fiscal Policy",
+      "policyName": "Executive Briefing Policy"
+     },
+     {
+      "documentId": "4400025c-30fb-4009-95db-be09a7e22efb",
+      "title": "Quarterly Liquidity Briefing",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T01:32:41.399Z",
+      "awaiting": "Permanent Secretary",
+      "policyName": "Executive Briefing Policy"
+     },
+     {
+      "documentId": "7aafe53b-4ade-400a-9995-17ca1452fd84",
+      "title": "Revenue Forecast Note",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T01:32:41.412Z",
+      "awaiting": "Director of Fiscal Policy",
+      "policyName": "Executive Briefing Policy"
+     },
+     {
+      "documentId": "49303c04-1879-45c0-98cc-a18d611467e7",
+      "title": "Debt Management Update",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T01:32:41.420Z",
+      "awaiting": "Director of Fiscal Policy",
+      "policyName": "Executive Briefing Policy"
+     },
+     {
+      "documentId": "83e0d085-b8a7-4d93-afea-9b57eb5801b6",
+      "title": "UI verification briefing",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedAt": "2026-10-10T01:34:50.578Z",
+      "awaiting": "Director of Fiscal Policy",
+      "policyName": "Executive Briefing Policy"
+     }
+    ],
+    "awaitingPublication": [
+     {
+      "documentId": "726e25b5-f6dc-4193-9461-58c73a27932b",
+      "title": "Grant Allocation Notice",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      }
+     },
+     {
+      "documentId": "e14137d8-1569-4af2-9615-ba7a0bb3960c",
+      "title": "Audit Response Briefing",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      }
+     }
+    ],
+    "delegations": [],
+    "compliance": {
+     "published": 7,
+     "preserved": 2,
+     "governed": 7,
+     "compliant": 7,
+     "complianceRate": 100,
+     "exceptions": 0,
+     "expiredAuthorities": 0
+    }
+   }
+  },
+  "/v1/governance/my-authority": {
+   "status": 200,
+   "body": {
+    "offices": [
+     {
+      "key": "director_policy",
+      "label": "Director of Fiscal Policy",
+      "department": "Budget & Fiscal Policy",
+      "delegated": false,
+      "order": 20
+     }
+    ],
+    "underYourAuthority": [
+     {
+      "documentId": "7aafe53b-4ade-400a-9995-17ca1452fd84",
+      "title": "Revenue Forecast Note",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_5052f753",
+      "lifecycle": "in_review",
+      "action": "decide",
+      "viaDelegation": false,
+      "policyName": "Executive Briefing Policy",
+      "policyVersion": 1,
+      "currentAuthority": "Director of Fiscal Policy",
+      "nextAuthority": "Permanent Secretary",
+      "currentRole": "director_policy",
+      "nextRole": "permanent_secretary",
+      "approvalAuthority": null,
+      "publicationAuthority": "Communications Office",
+      "publicationRole": "communications_office",
+      "waitingSince": "2026-10-10T01:32:41.412Z",
+      "status": "Awaiting Director of Fiscal Policy"
+     },
+     {
+      "documentId": "49303c04-1879-45c0-98cc-a18d611467e7",
+      "title": "Debt Management Update",
+      "docType": "executive_briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_5052f753",
+      "lifecycle": "in_review",
+      "action": "decide",
+      "viaDelegation": false,
+      "policyName": "Executive Briefing Policy",
+      "policyVersion": 1,
+      "currentAuthority": "Director of Fiscal Policy",
+      "nextAuthority": "Permanent Secretary",
+      "currentRole": "director_policy",
+      "nextRole": "permanent_secretary",
+      "approvalAuthority": null,
+      "publicationAuthority": "Communications Office",
+      "publicationRole": "communications_office",
+      "waitingSince": "2026-10-10T01:32:41.420Z",
+      "status": "Awaiting Director of Fiscal Policy"
+     }
+    ],
+    "identity": {
+     "name": "Director of Fiscal Policy (console)",
+     "institution": "Ministry of Finance",
+     "isMachine": true
+    },
+    "counts": {
+     "offices": 1,
+     "awaitingYou": 2
+    }
+   }
+  },
+  "/v1/governance/policies": {
+   "status": 200,
+   "body": {
+    "policies": [
+     {
+      "id": "36d2f5e7-a71e-4c10-a0b5-4762fd0d1483",
+      "name": "Executive Briefing Policy",
+      "docType": "executive_briefing",
+      "classificationLevel": null,
+      "requiredApprovals": 1,
+      "minApproverClearance": null,
+      "autoApproveService": false,
+      "autoApproveUser": false,
+      "reviewChain": [
+       {
+        "role": "director_policy",
+        "label": "Director of Fiscal Policy",
+        "quorum": 1
+       },
+       {
+        "role": "permanent_secretary",
+        "label": "Permanent Secretary",
+        "quorum": 1
+       }
+      ],
+      "approvalAuthority": null,
+      "publicationAuthority": "communications_office",
+      "retentionDays": 3650,
+      "active": true,
+      "updatedAt": "2026-10-10T00:45:27.875Z"
+     }
+    ]
+   }
+  },
+  "/v1/approvals?state=pending": {
+   "status": 200,
+   "body": {
+    "items": [
+     {
+      "documentId": "2554fd33-861f-4525-87b7-425825245996",
+      "docType": "executive_briefing",
+      "title": "Q4 Supplementary Estimates Briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T00:45:28.060Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_5052f753",
+      "submittedByName": "Budget Analyst (author)",
+      "currentAuthority": "Permanent Secretary",
+      "currentRole": "permanent_secretary"
+     },
+     {
+      "documentId": "97dc9136-639a-410f-bc48-25e541229727",
+      "docType": "executive_briefing",
+      "title": "Capital Programme Re-profiling 2027",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T00:45:28.076Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_5052f753",
+      "submittedByName": "Budget Analyst (author)",
+      "currentAuthority": "Permanent Secretary",
+      "currentRole": "permanent_secretary"
+     },
+     {
+      "documentId": "ea706b02-c27c-4037-a103-70c6c643c273",
+      "docType": "executive_briefing",
+      "title": "Treasury Cash Management Update",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T00:45:28.086Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_5052f753",
+      "submittedByName": "Budget Analyst (author)",
+      "currentAuthority": "Permanent Secretary",
+      "currentRole": "permanent_secretary"
+     },
+     {
+      "documentId": "143b3dbd-c1fd-4ba5-b034-01823310468c",
+      "docType": "executive_briefing",
+      "title": "Director's Note: Spending Review Timetable",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T00:45:28.096Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "submittedByName": "Director of Fiscal Policy (console)",
+      "currentAuthority": "Director of Fiscal Policy",
+      "currentRole": "director_policy"
+     },
+     {
+      "documentId": "c4fcbcd8-5bc0-404b-91fd-0100799c1e9b",
+      "docType": "executive_briefing",
+      "title": "Public Sector Pay Envelope 2027",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T00:45:28.108Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_5052f753",
+      "submittedByName": "Budget Analyst (author)",
+      "currentAuthority": "Permanent Secretary",
+      "currentRole": "permanent_secretary"
+     },
+     {
+      "documentId": "20fbbc21-87b3-4568-b0b2-f7049de110d0",
+      "docType": "executive_briefing",
+      "title": "Debt Issuance Strategy H1",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T00:45:28.135Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_5052f753",
+      "submittedByName": "Budget Analyst (author)",
+      "currentAuthority": "Permanent Secretary",
+      "currentRole": "permanent_secretary"
+     },
+     {
+      "documentId": "3f4f5fb7-7a10-43c2-b8c6-df5143fe813b",
+      "docType": "executive_briefing",
+      "title": "UI verification briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T01:17:32.853Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "submittedByName": "Director of Fiscal Policy (console)",
+      "currentAuthority": "Director of Fiscal Policy",
+      "currentRole": "director_policy"
+     },
+     {
+      "documentId": "3f4bce6a-d7fe-4ad7-907c-09032fab3b2c",
+      "docType": "executive_briefing",
+      "title": "UI verification briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T01:25:57.880Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "submittedByName": "Director of Fiscal Policy (console)",
+      "currentAuthority": "Director of Fiscal Policy",
+      "currentRole": "director_policy"
+     },
+     {
+      "documentId": "4400025c-30fb-4009-95db-be09a7e22efb",
+      "docType": "executive_briefing",
+      "title": "Quarterly Liquidity Briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T01:32:41.399Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_5052f753",
+      "submittedByName": "Budget Analyst (author)",
+      "currentAuthority": "Permanent Secretary",
+      "currentRole": "permanent_secretary"
+     },
+     {
+      "documentId": "7aafe53b-4ade-400a-9995-17ca1452fd84",
+      "docType": "executive_briefing",
+      "title": "Revenue Forecast Note",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T01:32:41.412Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_5052f753",
+      "submittedByName": "Budget Analyst (author)",
+      "currentAuthority": "Director of Fiscal Policy",
+      "currentRole": "director_policy"
+     },
+     {
+      "documentId": "49303c04-1879-45c0-98cc-a18d611467e7",
+      "docType": "executive_briefing",
+      "title": "Debt Management Update",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T01:32:41.420Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_5052f753",
+      "submittedByName": "Budget Analyst (author)",
+      "currentAuthority": "Director of Fiscal Policy",
+      "currentRole": "director_policy"
+     },
+     {
+      "documentId": "83e0d085-b8a7-4d93-afea-9b57eb5801b6",
+      "docType": "executive_briefing",
+      "title": "UI verification briefing",
+      "classification": {
+       "level": "UNCLASSIFIED",
+       "scheme": "none"
+      },
+      "lifecycle": "in_review",
+      "version": 1,
+      "submittedAt": "2026-10-10T01:34:50.578Z",
+      "submittedBy": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "submittedByName": "Director of Fiscal Policy (console)",
+      "currentAuthority": "Director of Fiscal Policy",
+      "currentRole": "director_policy"
+     }
+    ],
+    "count": 12
+   }
+  }
+ },
+ "documents": [
+  {
+   "documentId": "ea041b03-16f9-47de-8c5d-3b8b53024510",
+   "docType": "executive_briefing",
+   "title": "Expenditure Controls Memo",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "complete",
+   "lifecycle": "published",
+   "version": 1,
+   "submittedAt": "2026-10-10T01:32:41.440Z",
+   "publishedAt": "2026-10-10T01:34:57.208Z",
+   "retentionUntil": "2027-10-10T01:34:57.208Z",
+   "createdAt": "2026-10-10T01:32:41.440Z",
+   "updatedAt": "2026-10-10T01:34:57.208Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": null,
+   "nextAuthority": null,
+   "currentRole": null,
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T01:32:41.440Z",
+   "status": "Published"
+  },
+  {
+   "documentId": "83e0d085-b8a7-4d93-afea-9b57eb5801b6",
+   "docType": "executive_briefing",
+   "title": "UI verification briefing",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T01:34:50.578Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T01:34:50.578Z",
+   "updatedAt": "2026-10-10T01:34:50.578Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Director of Fiscal Policy",
+   "nextAuthority": "Permanent Secretary",
+   "currentRole": "director_policy",
+   "nextRole": "permanent_secretary",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T01:34:50.578Z",
+   "status": "Awaiting Director of Fiscal Policy"
+  },
+  {
+   "documentId": "e14137d8-1569-4af2-9615-ba7a0bb3960c",
+   "docType": "executive_briefing",
+   "title": "Audit Response Briefing",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "complete",
+   "lifecycle": "rendered",
+   "version": 1,
+   "submittedAt": "2026-10-10T01:32:41.433Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T01:32:41.433Z",
+   "updatedAt": "2026-10-10T01:32:42.424Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Communications Office",
+   "nextAuthority": null,
+   "currentRole": "communications_office",
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T01:32:41.433Z",
+   "status": "Awaiting Communications Office"
+  },
+  {
+   "documentId": "726e25b5-f6dc-4193-9461-58c73a27932b",
+   "docType": "executive_briefing",
+   "title": "Grant Allocation Notice",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "complete",
+   "lifecycle": "rendered",
+   "version": 1,
+   "submittedAt": "2026-10-10T01:32:41.426Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T01:32:41.426Z",
+   "updatedAt": "2026-10-10T01:32:42.224Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Communications Office",
+   "nextAuthority": null,
+   "currentRole": "communications_office",
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T01:32:41.426Z",
+   "status": "Awaiting Communications Office"
+  },
+  {
+   "documentId": "49303c04-1879-45c0-98cc-a18d611467e7",
+   "docType": "executive_briefing",
+   "title": "Debt Management Update",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T01:32:41.420Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T01:32:41.420Z",
+   "updatedAt": "2026-10-10T01:32:41.420Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Director of Fiscal Policy",
+   "nextAuthority": "Permanent Secretary",
+   "currentRole": "director_policy",
+   "nextRole": "permanent_secretary",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T01:32:41.420Z",
+   "status": "Awaiting Director of Fiscal Policy"
+  },
+  {
+   "documentId": "7aafe53b-4ade-400a-9995-17ca1452fd84",
+   "docType": "executive_briefing",
+   "title": "Revenue Forecast Note",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T01:32:41.412Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T01:32:41.412Z",
+   "updatedAt": "2026-10-10T01:32:41.412Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Director of Fiscal Policy",
+   "nextAuthority": "Permanent Secretary",
+   "currentRole": "director_policy",
+   "nextRole": "permanent_secretary",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T01:32:41.412Z",
+   "status": "Awaiting Director of Fiscal Policy"
+  },
+  {
+   "documentId": "4400025c-30fb-4009-95db-be09a7e22efb",
+   "docType": "executive_briefing",
+   "title": "Quarterly Liquidity Briefing",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T01:32:41.399Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T01:32:41.399Z",
+   "updatedAt": "2026-10-10T01:32:41.399Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Permanent Secretary",
+   "nextAuthority": "Communications Office",
+   "currentRole": "permanent_secretary",
+   "nextRole": "communications_office",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T01:32:41.399Z",
+   "status": "Awaiting Permanent Secretary"
+  },
+  {
+   "documentId": "674f99cd-207f-4c68-a9dc-b5e38a1a9708",
+   "docType": "executive_briefing",
+   "title": "Fiscal Risks Statement — October",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "complete",
+   "lifecycle": "published",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:28.159Z",
+   "publishedAt": "2026-10-10T01:26:04.097Z",
+   "retentionUntil": "2027-10-10T01:26:04.097Z",
+   "createdAt": "2026-10-10T00:45:28.159Z",
+   "updatedAt": "2026-10-10T01:26:04.097Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": null,
+   "nextAuthority": null,
+   "currentRole": null,
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:28.159Z",
+   "status": "Published"
+  },
+  {
+   "documentId": "3f4bce6a-d7fe-4ad7-907c-09032fab3b2c",
+   "docType": "executive_briefing",
+   "title": "UI verification briefing",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T01:25:57.880Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T01:25:57.880Z",
+   "updatedAt": "2026-10-10T01:25:57.880Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Director of Fiscal Policy",
+   "nextAuthority": "Permanent Secretary",
+   "currentRole": "director_policy",
+   "nextRole": "permanent_secretary",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T01:25:57.880Z",
+   "status": "Awaiting Director of Fiscal Policy"
+  },
+  {
+   "documentId": "54b34851-427e-4eeb-86ca-1da5884472fd",
+   "docType": "executive_briefing",
+   "title": "Departmental Budget Allocations Notice",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "complete",
+   "lifecycle": "published",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:29.621Z",
+   "publishedAt": "2026-10-10T01:17:39.200Z",
+   "retentionUntil": "2027-10-10T01:17:39.200Z",
+   "createdAt": "2026-10-10T00:45:29.621Z",
+   "updatedAt": "2026-10-10T01:17:39.200Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": null,
+   "nextAuthority": null,
+   "currentRole": null,
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:29.621Z",
+   "status": "Published"
+  },
+  {
+   "documentId": "3f4f5fb7-7a10-43c2-b8c6-df5143fe813b",
+   "docType": "executive_briefing",
+   "title": "UI verification briefing",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T01:17:32.853Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T01:17:32.853Z",
+   "updatedAt": "2026-10-10T01:17:32.853Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Director of Fiscal Policy",
+   "nextAuthority": "Permanent Secretary",
+   "currentRole": "director_policy",
+   "nextRole": "permanent_secretary",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T01:17:32.853Z",
+   "status": "Awaiting Director of Fiscal Policy"
+  },
+  {
+   "documentId": "8d7ee9cd-c8e6-49c9-bc26-d33ba334d293",
+   "docType": "executive_briefing",
+   "title": "Interim Guidance on Contingency Reserve",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "complete",
+   "lifecycle": "withdrawn",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:35.592Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T00:45:35.592Z",
+   "updatedAt": "2026-10-10T00:45:37.039Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": null,
+   "nextAuthority": null,
+   "currentRole": null,
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:35.592Z",
+   "status": "Withdrawn"
+  },
+  {
+   "documentId": "2301a694-60c3-4d40-a8a9-d9a22853b112",
+   "docType": "executive_briefing",
+   "title": "Infrastructure Levy Options Paper",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "draft",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:35.577Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T00:45:35.577Z",
+   "updatedAt": "2026-10-10T00:45:35.585Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": null,
+   "nextAuthority": null,
+   "currentRole": null,
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:35.577Z",
+   "status": "Draft"
+  },
+  {
+   "documentId": "60c0c5d0-8731-4673-81f2-8cb2dc4429ec",
+   "docType": "executive_briefing",
+   "title": "Proposal: Unfunded Tax Rebate Scheme",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "rejected",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:35.558Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T00:45:35.558Z",
+   "updatedAt": "2026-10-10T00:45:35.570Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": null,
+   "nextAuthority": null,
+   "currentRole": null,
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:35.558Z",
+   "status": "Returned for revision"
+  },
+  {
+   "documentId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+   "docType": "executive_briefing",
+   "title": "Procurement Thresholds Circular 2025",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "complete",
+   "lifecycle": "archived",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:34.025Z",
+   "publishedAt": "2026-10-10T00:45:35.473Z",
+   "retentionUntil": "2027-10-10T00:45:35.473Z",
+   "createdAt": "2026-10-10T00:45:34.025Z",
+   "updatedAt": "2026-10-10T00:45:35.549Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": null,
+   "nextAuthority": null,
+   "currentRole": null,
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:34.025Z",
+   "status": "Preserved"
+  },
+  {
+   "documentId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+   "docType": "executive_briefing",
+   "title": "Budget Execution Report FY2025",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "complete",
+   "lifecycle": "archived",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:33.273Z",
+   "publishedAt": "2026-10-10T00:45:34.009Z",
+   "retentionUntil": "2027-10-10T00:45:34.009Z",
+   "createdAt": "2026-10-10T00:45:33.273Z",
+   "updatedAt": "2026-10-10T00:45:34.016Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": null,
+   "nextAuthority": null,
+   "currentRole": null,
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:33.273Z",
+   "status": "Preserved"
+  },
+  {
+   "documentId": "56c6a3fe-e09b-4009-93cf-8e54befa419c",
+   "docType": "executive_briefing",
+   "title": "Grants Administration Circular 7/2026",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "complete",
+   "lifecycle": "published",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:31.818Z",
+   "publishedAt": "2026-10-10T00:45:33.263Z",
+   "retentionUntil": "2027-10-10T00:45:33.263Z",
+   "createdAt": "2026-10-10T00:45:31.818Z",
+   "updatedAt": "2026-10-10T00:45:33.263Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": null,
+   "nextAuthority": null,
+   "currentRole": null,
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:31.818Z",
+   "status": "Published"
+  },
+  {
+   "documentId": "b00c0b2f-f1d1-4336-89ca-2c31aef25b40",
+   "docType": "executive_briefing",
+   "title": "Medium-Term Fiscal Framework 2026–2029",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "complete",
+   "lifecycle": "published",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:30.358Z",
+   "publishedAt": "2026-10-10T00:45:31.805Z",
+   "retentionUntil": "2027-10-10T00:45:31.805Z",
+   "createdAt": "2026-10-10T00:45:30.358Z",
+   "updatedAt": "2026-10-10T00:45:31.805Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": null,
+   "nextAuthority": null,
+   "currentRole": null,
+   "nextRole": null,
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:30.358Z",
+   "status": "Published"
+  },
+  {
+   "documentId": "20fbbc21-87b3-4568-b0b2-f7049de110d0",
+   "docType": "executive_briefing",
+   "title": "Debt Issuance Strategy H1",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:28.135Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T00:45:28.135Z",
+   "updatedAt": "2026-10-10T00:45:28.135Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Permanent Secretary",
+   "nextAuthority": "Communications Office",
+   "currentRole": "permanent_secretary",
+   "nextRole": "communications_office",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:28.135Z",
+   "status": "Awaiting Permanent Secretary"
+  },
+  {
+   "documentId": "c4fcbcd8-5bc0-404b-91fd-0100799c1e9b",
+   "docType": "executive_briefing",
+   "title": "Public Sector Pay Envelope 2027",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:28.108Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T00:45:28.108Z",
+   "updatedAt": "2026-10-10T00:45:28.108Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Permanent Secretary",
+   "nextAuthority": "Communications Office",
+   "currentRole": "permanent_secretary",
+   "nextRole": "communications_office",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:28.108Z",
+   "status": "Awaiting Permanent Secretary"
+  },
+  {
+   "documentId": "143b3dbd-c1fd-4ba5-b034-01823310468c",
+   "docType": "executive_briefing",
+   "title": "Director's Note: Spending Review Timetable",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:28.096Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T00:45:28.096Z",
+   "updatedAt": "2026-10-10T00:45:28.096Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Director of Fiscal Policy",
+   "nextAuthority": "Permanent Secretary",
+   "currentRole": "director_policy",
+   "nextRole": "permanent_secretary",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:28.096Z",
+   "status": "Awaiting Director of Fiscal Policy"
+  },
+  {
+   "documentId": "ea706b02-c27c-4037-a103-70c6c643c273",
+   "docType": "executive_briefing",
+   "title": "Treasury Cash Management Update",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:28.086Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T00:45:28.086Z",
+   "updatedAt": "2026-10-10T00:45:28.086Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Permanent Secretary",
+   "nextAuthority": "Communications Office",
+   "currentRole": "permanent_secretary",
+   "nextRole": "communications_office",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:28.086Z",
+   "status": "Awaiting Permanent Secretary"
+  },
+  {
+   "documentId": "97dc9136-639a-410f-bc48-25e541229727",
+   "docType": "executive_briefing",
+   "title": "Capital Programme Re-profiling 2027",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:28.076Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T00:45:28.076Z",
+   "updatedAt": "2026-10-10T00:45:28.076Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Permanent Secretary",
+   "nextAuthority": "Communications Office",
+   "currentRole": "permanent_secretary",
+   "nextRole": "communications_office",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:28.076Z",
+   "status": "Awaiting Permanent Secretary"
+  },
+  {
+   "documentId": "2554fd33-861f-4525-87b7-425825245996",
+   "docType": "executive_briefing",
+   "title": "Q4 Supplementary Estimates Briefing",
+   "classification": {
+    "level": "UNCLASSIFIED",
+    "scheme": "none"
+   },
+   "renderStatus": "draft",
+   "lifecycle": "in_review",
+   "version": 1,
+   "submittedAt": "2026-10-10T00:45:28.060Z",
+   "publishedAt": null,
+   "retentionUntil": null,
+   "createdAt": "2026-10-10T00:45:28.060Z",
+   "updatedAt": "2026-10-10T00:45:28.060Z",
+   "policyName": "Executive Briefing Policy",
+   "policyVersion": 1,
+   "currentAuthority": "Permanent Secretary",
+   "nextAuthority": "Communications Office",
+   "currentRole": "permanent_secretary",
+   "nextRole": "communications_office",
+   "approvalAuthority": null,
+   "publicationAuthority": "Communications Office",
+   "publicationRole": "communications_office",
+   "waitingSince": "2026-10-10T00:45:28.060Z",
+   "status": "Awaiting Permanent Secretary"
+  }
+ ],
+ "details": {
+  "ea041b03-16f9-47de-8c5d-3b8b53024510": {
+   "id": "ea041b03-16f9-47de-8c5d-3b8b53024510",
+   "docType": "executive_briefing",
+   "title": "Expenditure Controls Memo",
+   "status": "complete",
+   "lifecycle": "published",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": "2026-10-10T01:34:57.208Z",
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T01:32:41.440Z"
+    }
+   ],
+   "latestResult": {
+    "error": null,
+    "jobId": "bb6f629a-70b2-408d-ac23-59e78b796ea4",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/ea041b03-16f9-47de-8c5d-3b8b53024510/26651fbd-325f-47ea-933b-5b60f7011ddb/22840544-3eda-4d68-a8c7-4721781558a7.pdf?expires=2026-10-17T01%3A32%3A42.629Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "2f5098071da4a6a3de7f797f0c017c861c68af6fa71c5d25d1916e4dad4957f4",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T01:32:42.629Z",
+      "sizeBytes": 91098,
+      "artifactId": "22840544-3eda-4d68-a8c7-4721781558a7",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "656323fe-3695-4f31-aeb1-0da229442e5e",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "createdAt": "2026-10-10T01:32:41.440Z",
+   "updatedAt": "2026-10-10T01:34:57.208Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": null,
+    "nextAuthority": null,
+    "currentRole": null,
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T01:32:41.440Z",
+    "status": "Published"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [
+      "Permanent Secretary"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "done"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": "SD-2026-00000034"
+  },
+  "83e0d085-b8a7-4d93-afea-9b57eb5801b6": {
+   "id": "83e0d085-b8a7-4d93-afea-9b57eb5801b6",
+   "docType": "executive_briefing",
+   "title": "UI verification briefing",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T01:34:50.578Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T01:34:50.578Z",
+   "updatedAt": "2026-10-10T01:34:50.578Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Director of Fiscal Policy",
+    "nextAuthority": "Permanent Secretary",
+    "currentRole": "director_policy",
+    "nextRole": "permanent_secretary",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T01:34:50.578Z",
+    "status": "Awaiting Director of Fiscal Policy"
+   },
+   "submittedBy": {
+    "name": "Director of Fiscal Policy (console)",
+    "office": "Director of Fiscal Policy"
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "pending"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "e14137d8-1569-4af2-9615-ba7a0bb3960c": {
+   "id": "e14137d8-1569-4af2-9615-ba7a0bb3960c",
+   "docType": "executive_briefing",
+   "title": "Audit Response Briefing",
+   "status": "complete",
+   "lifecycle": "rendered",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T01:32:41.433Z"
+    }
+   ],
+   "latestResult": {
+    "error": null,
+    "jobId": "0ed463b1-e713-4554-b1c4-23699c7ecdc5",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/e14137d8-1569-4af2-9615-ba7a0bb3960c/9eee5671-7803-46f3-a51b-3796eca1bd1e/3fb4e878-5255-4f72-a6e5-1c31b6aa69b1.pdf?expires=2026-10-17T01%3A32%3A42.421Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "8364c6e0743cb68b8e3b34080c8ce2db68173a66562c94ba9b1fc1597bc4d1d4",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T01:32:42.421Z",
+      "sizeBytes": 90482,
+      "artifactId": "3fb4e878-5255-4f72-a6e5-1c31b6aa69b1",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "464e4f4c-4a7f-4e41-8a5e-a7881b3231fb",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "createdAt": "2026-10-10T01:32:41.433Z",
+   "updatedAt": "2026-10-10T01:32:42.424Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Communications Office",
+    "nextAuthority": null,
+    "currentRole": "communications_office",
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T01:32:41.433Z",
+    "status": "Awaiting Communications Office"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [
+      "Permanent Secretary"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "current"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": "SD-2026-00000033"
+  },
+  "726e25b5-f6dc-4193-9461-58c73a27932b": {
+   "id": "726e25b5-f6dc-4193-9461-58c73a27932b",
+   "docType": "executive_briefing",
+   "title": "Grant Allocation Notice",
+   "status": "complete",
+   "lifecycle": "rendered",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T01:32:41.426Z"
+    }
+   ],
+   "latestResult": {
+    "error": null,
+    "jobId": "3e14bbef-1831-48d8-84f2-c263b180e984",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/726e25b5-f6dc-4193-9461-58c73a27932b/82e20c1f-ad24-4411-9720-f6618ec91e90/ee472c24-597e-4c58-901c-5a36bf941f9a.pdf?expires=2026-10-17T01%3A32%3A42.219Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "434007890e37843bd26aa5d0539976271256fe7dd96fb05a7dab018a08e2c1d9",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T01:32:42.219Z",
+      "sizeBytes": 90454,
+      "artifactId": "ee472c24-597e-4c58-901c-5a36bf941f9a",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "87566739-9c7d-4b0d-a391-5e3e998fe96e",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "createdAt": "2026-10-10T01:32:41.426Z",
+   "updatedAt": "2026-10-10T01:32:42.224Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Communications Office",
+    "nextAuthority": null,
+    "currentRole": "communications_office",
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T01:32:41.426Z",
+    "status": "Awaiting Communications Office"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [
+      "Permanent Secretary"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "current"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": "SD-2026-00000032"
+  },
+  "49303c04-1879-45c0-98cc-a18d611467e7": {
+   "id": "49303c04-1879-45c0-98cc-a18d611467e7",
+   "docType": "executive_briefing",
+   "title": "Debt Management Update",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T01:32:41.420Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T01:32:41.420Z",
+   "updatedAt": "2026-10-10T01:32:41.420Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Director of Fiscal Policy",
+    "nextAuthority": "Permanent Secretary",
+    "currentRole": "director_policy",
+    "nextRole": "permanent_secretary",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T01:32:41.420Z",
+    "status": "Awaiting Director of Fiscal Policy"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "pending"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "7aafe53b-4ade-400a-9995-17ca1452fd84": {
+   "id": "7aafe53b-4ade-400a-9995-17ca1452fd84",
+   "docType": "executive_briefing",
+   "title": "Revenue Forecast Note",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T01:32:41.412Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T01:32:41.412Z",
+   "updatedAt": "2026-10-10T01:32:41.412Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Director of Fiscal Policy",
+    "nextAuthority": "Permanent Secretary",
+    "currentRole": "director_policy",
+    "nextRole": "permanent_secretary",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T01:32:41.412Z",
+    "status": "Awaiting Director of Fiscal Policy"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "pending"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "4400025c-30fb-4009-95db-be09a7e22efb": {
+   "id": "4400025c-30fb-4009-95db-be09a7e22efb",
+   "docType": "executive_briefing",
+   "title": "Quarterly Liquidity Briefing",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T01:32:41.399Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T01:32:41.399Z",
+   "updatedAt": "2026-10-10T01:32:41.399Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Permanent Secretary",
+    "nextAuthority": "Communications Office",
+    "currentRole": "permanent_secretary",
+    "nextRole": "communications_office",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T01:32:41.399Z",
+    "status": "Awaiting Permanent Secretary"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "674f99cd-207f-4c68-a9dc-b5e38a1a9708": {
+   "id": "674f99cd-207f-4c68-a9dc-b5e38a1a9708",
+   "docType": "executive_briefing",
+   "title": "Fiscal Risks Statement — October",
+   "status": "complete",
+   "lifecycle": "published",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": "2026-10-10T01:26:04.097Z",
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:28.159Z"
+    }
+   ],
+   "latestResult": {
+    "error": null,
+    "jobId": "a01da322-bf02-4441-bd94-51ab16bc5d36",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/674f99cd-207f-4c68-a9dc-b5e38a1a9708/3697e0eb-0576-41f7-ad0f-eb254f210ba9/7374d0f2-a4f2-4ff2-8c1d-31369012fd70.pdf?expires=2026-10-17T00%3A45%3A29.012Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "c629e2cb8099400cf0627f62b0df4716118382aead2c01b69f257299f30651ef",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:29.012Z",
+      "sizeBytes": 95558,
+      "artifactId": "7374d0f2-a4f2-4ff2-8c1d-31369012fd70",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "c7048734-33f8-4201-bc5d-25eeecd564e4",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "createdAt": "2026-10-10T00:45:28.159Z",
+   "updatedAt": "2026-10-10T01:26:04.097Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": null,
+    "nextAuthority": null,
+    "currentRole": null,
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:28.159Z",
+    "status": "Published"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [
+      "Permanent Secretary"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "done"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": "SD-2026-00000025"
+  },
+  "3f4bce6a-d7fe-4ad7-907c-09032fab3b2c": {
+   "id": "3f4bce6a-d7fe-4ad7-907c-09032fab3b2c",
+   "docType": "executive_briefing",
+   "title": "UI verification briefing",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T01:25:57.880Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T01:25:57.880Z",
+   "updatedAt": "2026-10-10T01:25:57.880Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Director of Fiscal Policy",
+    "nextAuthority": "Permanent Secretary",
+    "currentRole": "director_policy",
+    "nextRole": "permanent_secretary",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T01:25:57.880Z",
+    "status": "Awaiting Director of Fiscal Policy"
+   },
+   "submittedBy": {
+    "name": "Director of Fiscal Policy (console)",
+    "office": "Director of Fiscal Policy"
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "pending"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "54b34851-427e-4eeb-86ca-1da5884472fd": {
+   "id": "54b34851-427e-4eeb-86ca-1da5884472fd",
+   "docType": "executive_briefing",
+   "title": "Departmental Budget Allocations Notice",
+   "status": "complete",
+   "lifecycle": "published",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": "2026-10-10T01:17:39.200Z",
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:29.621Z"
+    }
+   ],
+   "latestResult": {
+    "error": null,
+    "jobId": "e4b68898-ff2e-47db-ae6a-931b702c6c0b",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/54b34851-427e-4eeb-86ca-1da5884472fd/ad6465e8-4c1d-4066-8d81-25ee9798b759/adf9292a-d815-4c42-b6d3-2fcbc783e857.pdf?expires=2026-10-17T00%3A45%3A30.239Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "4113c2d5066c368715f9abd7ebb8ca3b5f53714d8e3d4d045b0f72975527e111",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:30.239Z",
+      "sizeBytes": 94376,
+      "artifactId": "adf9292a-d815-4c42-b6d3-2fcbc783e857",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "95db59fb-8418-4746-9565-2ca46102e0f9",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "createdAt": "2026-10-10T00:45:29.621Z",
+   "updatedAt": "2026-10-10T01:17:39.200Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": null,
+    "nextAuthority": null,
+    "currentRole": null,
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:29.621Z",
+    "status": "Published"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [
+      "Permanent Secretary"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "done"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": "SD-2026-00000026"
+  },
+  "3f4f5fb7-7a10-43c2-b8c6-df5143fe813b": {
+   "id": "3f4f5fb7-7a10-43c2-b8c6-df5143fe813b",
+   "docType": "executive_briefing",
+   "title": "UI verification briefing",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T01:17:32.853Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T01:17:32.853Z",
+   "updatedAt": "2026-10-10T01:17:32.853Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Director of Fiscal Policy",
+    "nextAuthority": "Permanent Secretary",
+    "currentRole": "director_policy",
+    "nextRole": "permanent_secretary",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T01:17:32.853Z",
+    "status": "Awaiting Director of Fiscal Policy"
+   },
+   "submittedBy": {
+    "name": "Director of Fiscal Policy (console)",
+    "office": "Director of Fiscal Policy"
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "pending"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "8d7ee9cd-c8e6-49c9-bc26-d33ba334d293": {
+   "id": "8d7ee9cd-c8e6-49c9-bc26-d33ba334d293",
+   "docType": "executive_briefing",
+   "title": "Interim Guidance on Contingency Reserve",
+   "status": "complete",
+   "lifecycle": "withdrawn",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:35.592Z"
+    }
+   ],
+   "latestResult": {
+    "error": null,
+    "jobId": "431a1ea7-9fc3-47f9-892d-719f50ceb406",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/8d7ee9cd-c8e6-49c9-bc26-d33ba334d293/6b355958-9419-437c-8f4c-fda95c3192ab/18484225-c989-4a31-8055-50b963b5e3fb.pdf?expires=2026-10-17T00%3A45%3A36.322Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "d9a98336d52316f04174077c13a7709aad516a772146137c854f845b04c48c3b",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:36.322Z",
+      "sizeBytes": 95200,
+      "artifactId": "18484225-c989-4a31-8055-50b963b5e3fb",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "90f0876a-75e4-4b03-8f7b-e8aa1fd6f2cc",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "createdAt": "2026-10-10T00:45:35.592Z",
+   "updatedAt": "2026-10-10T00:45:37.039Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": null,
+    "nextAuthority": null,
+    "currentRole": null,
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:35.592Z",
+    "status": "Withdrawn"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [
+      "Permanent Secretary"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": "SD-2026-00000031"
+  },
+  "2301a694-60c3-4d40-a8a9-d9a22853b112": {
+   "id": "2301a694-60c3-4d40-a8a9-d9a22853b112",
+   "docType": "executive_briefing",
+   "title": "Infrastructure Levy Options Paper",
+   "status": "draft",
+   "lifecycle": "draft",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:35.577Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T00:45:35.577Z",
+   "updatedAt": "2026-10-10T00:45:35.585Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": null,
+    "nextAuthority": null,
+    "currentRole": null,
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:35.577Z",
+    "status": "Draft"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [],
+     "state": "pending"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "pending"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "60c0c5d0-8731-4673-81f2-8cb2dc4429ec": {
+   "id": "60c0c5d0-8731-4673-81f2-8cb2dc4429ec",
+   "docType": "executive_briefing",
+   "title": "Proposal: Unfunded Tax Rebate Scheme",
+   "status": "draft",
+   "lifecycle": "rejected",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:35.558Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T00:45:35.558Z",
+   "updatedAt": "2026-10-10T00:45:35.570Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": null,
+    "nextAuthority": null,
+    "currentRole": null,
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:35.558Z",
+    "status": "Returned for revision"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [],
+     "state": "pending"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "pending"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": true,
+   "publicId": null
+  },
+  "c6363831-61b3-4363-ae8f-9acdc41419b8": {
+   "id": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+   "docType": "executive_briefing",
+   "title": "Procurement Thresholds Circular 2025",
+   "status": "complete",
+   "lifecycle": "archived",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": "2026-10-10T00:45:35.473Z",
+   "archivedAt": "2026-10-10T00:45:35.549Z",
+   "preservationSha256": "d03dd155926821baf318a8cb22d8853b35381e664c772480edd7c6c9b0b29969",
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:34.025Z"
+    }
+   ],
+   "latestResult": {
+    "error": null,
+    "jobId": "aa8367a4-6b02-4bf3-ba75-9ea4e800ef81",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/c6363831-61b3-4363-ae8f-9acdc41419b8/c32a07d6-8164-42a2-9870-c4239f8aa845/56707239-7624-4aa4-97dd-fc54f8b1a242.pdf?expires=2026-10-17T00%3A45%3A35.113Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "f424a8ebe3903f073ead0ad001c1271964940c0aea5ed5689bea3499e82a7360",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:35.113Z",
+      "sizeBytes": 95916,
+      "artifactId": "56707239-7624-4aa4-97dd-fc54f8b1a242",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "24cc25ed-8295-4416-81e8-f31266204c64",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "createdAt": "2026-10-10T00:45:34.025Z",
+   "updatedAt": "2026-10-10T00:45:35.549Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": null,
+    "nextAuthority": null,
+    "currentRole": null,
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:34.025Z",
+    "status": "Preserved"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [
+      "Permanent Secretary"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "done"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": "SD-2026-00000030"
+  },
+  "ead63547-23ee-4c9e-a4a3-8a4e47743917": {
+   "id": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+   "docType": "executive_briefing",
+   "title": "Budget Execution Report FY2025",
+   "status": "complete",
+   "lifecycle": "archived",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": "2026-10-10T00:45:34.009Z",
+   "archivedAt": "2026-10-10T00:45:34.016Z",
+   "preservationSha256": "f4ad35cfb5d843687b6251a62ca4a4f135871f2e926c9c60aadacfe93d65b782",
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:33.273Z"
+    }
+   ],
+   "latestResult": {
+    "error": null,
+    "jobId": "354d42fd-16b1-4977-88bd-1dfaa31fd153",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/ead63547-23ee-4c9e-a4a3-8a4e47743917/e190b758-cd39-4739-bcaf-4a1e6f19a7f7/e03a035d-1c16-463c-8c0a-d67af823c9b0.pdf?expires=2026-10-17T00%3A45%3A33.897Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "0329407ed4c30c383370a651c16b7ef43733043ce53da6d4fe9581fb95aedb0c",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:33.897Z",
+      "sizeBytes": 96276,
+      "artifactId": "e03a035d-1c16-463c-8c0a-d67af823c9b0",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "d67dea2c-558f-4d37-857f-0737128d60b1",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "createdAt": "2026-10-10T00:45:33.273Z",
+   "updatedAt": "2026-10-10T00:45:34.016Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": null,
+    "nextAuthority": null,
+    "currentRole": null,
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:33.273Z",
+    "status": "Preserved"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [
+      "Permanent Secretary"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "done"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": "SD-2026-00000029"
+  },
+  "56c6a3fe-e09b-4009-93cf-8e54befa419c": {
+   "id": "56c6a3fe-e09b-4009-93cf-8e54befa419c",
+   "docType": "executive_briefing",
+   "title": "Grants Administration Circular 7/2026",
+   "status": "complete",
+   "lifecycle": "published",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": "2026-10-10T00:45:33.263Z",
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:31.818Z"
+    }
+   ],
+   "latestResult": {
+    "error": null,
+    "jobId": "8d87a5f0-0b72-402d-8fcc-003de12e236e",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/56c6a3fe-e09b-4009-93cf-8e54befa419c/2ef6fce0-e679-453d-ae23-9a99ed55bfad/8476edcb-d468-4347-b281-de122c69d95c.pdf?expires=2026-10-17T00%3A45%3A32.690Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "d5aae4861e753893758eff96895948ba0b496ffb98e7c2d12a4ac0ac1e54e79e",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:32.690Z",
+      "sizeBytes": 95988,
+      "artifactId": "8476edcb-d468-4347-b281-de122c69d95c",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "aee20345-0601-4dd8-ba8f-11665ea795ee",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "createdAt": "2026-10-10T00:45:31.818Z",
+   "updatedAt": "2026-10-10T00:45:33.263Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": null,
+    "nextAuthority": null,
+    "currentRole": null,
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:31.818Z",
+    "status": "Published"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [
+      "Permanent Secretary"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "done"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": "SD-2026-00000028"
+  },
+  "b00c0b2f-f1d1-4336-89ca-2c31aef25b40": {
+   "id": "b00c0b2f-f1d1-4336-89ca-2c31aef25b40",
+   "docType": "executive_briefing",
+   "title": "Medium-Term Fiscal Framework 2026–2029",
+   "status": "complete",
+   "lifecycle": "published",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": "2026-10-10T00:45:31.805Z",
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:30.358Z"
+    }
+   ],
+   "latestResult": {
+    "error": null,
+    "jobId": "7bdfc7ba-ec3f-45cf-a544-0dd5a19d3cf0",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/b00c0b2f-f1d1-4336-89ca-2c31aef25b40/92240f0f-6de0-4e1e-9650-5296f34d565a/004f7749-7059-4954-aba3-4bdd87337160.pdf?expires=2026-10-17T00%3A45%3A31.464Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "139c41cc80a96cb2c445d4ea8cd5c781ae2ba15c6990fb093bbc243140c22ecd",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:31.464Z",
+      "sizeBytes": 96995,
+      "artifactId": "004f7749-7059-4954-aba3-4bdd87337160",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "35a0a70f-f3e2-48cd-af48-488fc67ed9cf",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "createdAt": "2026-10-10T00:45:30.358Z",
+   "updatedAt": "2026-10-10T00:45:31.805Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": null,
+    "nextAuthority": null,
+    "currentRole": null,
+    "nextRole": null,
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:30.358Z",
+    "status": "Published"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [
+      "Permanent Secretary"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "done"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": "SD-2026-00000027"
+  },
+  "20fbbc21-87b3-4568-b0b2-f7049de110d0": {
+   "id": "20fbbc21-87b3-4568-b0b2-f7049de110d0",
+   "docType": "executive_briefing",
+   "title": "Debt Issuance Strategy H1",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:28.135Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T00:45:28.135Z",
+   "updatedAt": "2026-10-10T00:45:28.135Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Permanent Secretary",
+    "nextAuthority": "Communications Office",
+    "currentRole": "permanent_secretary",
+    "nextRole": "communications_office",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:28.135Z",
+    "status": "Awaiting Permanent Secretary"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "c4fcbcd8-5bc0-404b-91fd-0100799c1e9b": {
+   "id": "c4fcbcd8-5bc0-404b-91fd-0100799c1e9b",
+   "docType": "executive_briefing",
+   "title": "Public Sector Pay Envelope 2027",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:28.108Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T00:45:28.108Z",
+   "updatedAt": "2026-10-10T00:45:28.108Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Permanent Secretary",
+    "nextAuthority": "Communications Office",
+    "currentRole": "permanent_secretary",
+    "nextRole": "communications_office",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:28.108Z",
+    "status": "Awaiting Permanent Secretary"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "143b3dbd-c1fd-4ba5-b034-01823310468c": {
+   "id": "143b3dbd-c1fd-4ba5-b034-01823310468c",
+   "docType": "executive_briefing",
+   "title": "Director's Note: Spending Review Timetable",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:28.096Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T00:45:28.096Z",
+   "updatedAt": "2026-10-10T00:45:28.096Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Director of Fiscal Policy",
+    "nextAuthority": "Permanent Secretary",
+    "currentRole": "director_policy",
+    "nextRole": "permanent_secretary",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:28.096Z",
+    "status": "Awaiting Director of Fiscal Policy"
+   },
+   "submittedBy": {
+    "name": "Director of Fiscal Policy (console)",
+    "office": "Director of Fiscal Policy"
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "pending"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "ea706b02-c27c-4037-a103-70c6c643c273": {
+   "id": "ea706b02-c27c-4037-a103-70c6c643c273",
+   "docType": "executive_briefing",
+   "title": "Treasury Cash Management Update",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:28.086Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T00:45:28.086Z",
+   "updatedAt": "2026-10-10T00:45:28.086Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Permanent Secretary",
+    "nextAuthority": "Communications Office",
+    "currentRole": "permanent_secretary",
+    "nextRole": "communications_office",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:28.086Z",
+    "status": "Awaiting Permanent Secretary"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "97dc9136-639a-410f-bc48-25e541229727": {
+   "id": "97dc9136-639a-410f-bc48-25e541229727",
+   "docType": "executive_briefing",
+   "title": "Capital Programme Re-profiling 2027",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:28.076Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T00:45:28.076Z",
+   "updatedAt": "2026-10-10T00:45:28.076Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Permanent Secretary",
+    "nextAuthority": "Communications Office",
+    "currentRole": "permanent_secretary",
+    "nextRole": "communications_office",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:28.076Z",
+    "status": "Awaiting Permanent Secretary"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  },
+  "2554fd33-861f-4525-87b7-425825245996": {
+   "id": "2554fd33-861f-4525-87b7-425825245996",
+   "docType": "executive_briefing",
+   "title": "Q4 Supplementary Estimates Briefing",
+   "status": "draft",
+   "lifecycle": "in_review",
+   "currentVersion": 1,
+   "correlationId": null,
+   "publishedAt": null,
+   "archivedAt": null,
+   "preservationSha256": null,
+   "versions": [
+    {
+     "versionNo": 1,
+     "ddmVersion": "1.0",
+     "template": "exec-brief",
+     "templateVersion": 1,
+     "engineVersion": null,
+     "createdAt": "2026-10-10T00:45:28.060Z"
+    }
+   ],
+   "latestResult": null,
+   "createdAt": "2026-10-10T00:45:28.060Z",
+   "updatedAt": "2026-10-10T00:45:28.060Z",
+   "posture": {
+    "policyName": "Executive Briefing Policy",
+    "policyVersion": 1,
+    "currentAuthority": "Permanent Secretary",
+    "nextAuthority": "Communications Office",
+    "currentRole": "permanent_secretary",
+    "nextRole": "communications_office",
+    "approvalAuthority": null,
+    "publicationAuthority": "Communications Office",
+    "publicationRole": "communications_office",
+    "waitingSince": "2026-10-10T00:45:28.060Z",
+    "status": "Awaiting Permanent Secretary"
+   },
+   "submittedBy": {
+    "name": "Budget Analyst (author)",
+    "office": null
+   },
+   "governanceChain": [
+    {
+     "label": "Director of Fiscal Policy",
+     "quorum": 1,
+     "by": [
+      "Director of Fiscal Policy (console)"
+     ],
+     "state": "done"
+    },
+    {
+     "label": "Permanent Secretary",
+     "quorum": 1,
+     "by": [],
+     "state": "current"
+    },
+    {
+     "label": "Communications Office",
+     "quorum": 1,
+     "by": [],
+     "publication": true,
+     "state": "pending"
+    }
+   ],
+   "governanceRejected": false,
+   "publicId": null
+  }
+ },
+ "jobs": {
+  "bb6f629a-70b2-408d-ac23-59e78b796ea4": {
+   "jobId": "bb6f629a-70b2-408d-ac23-59e78b796ea4",
+   "requestId": "656323fe-3695-4f31-aeb1-0da229442e5e",
+   "status": "succeeded",
+   "progress": 100,
+   "result": {
+    "error": null,
+    "jobId": "bb6f629a-70b2-408d-ac23-59e78b796ea4",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/ea041b03-16f9-47de-8c5d-3b8b53024510/26651fbd-325f-47ea-933b-5b60f7011ddb/22840544-3eda-4d68-a8c7-4721781558a7.pdf?expires=2026-10-17T01%3A32%3A42.629Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "2f5098071da4a6a3de7f797f0c017c861c68af6fa71c5d25d1916e4dad4957f4",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T01:32:42.629Z",
+      "sizeBytes": 91098,
+      "artifactId": "22840544-3eda-4d68-a8c7-4721781558a7",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "656323fe-3695-4f31-aeb1-0da229442e5e",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "error": null,
+   "createdAt": "2026-10-10T01:32:41.488Z",
+   "updatedAt": "2026-10-10T01:32:42.634Z"
+  },
+  "0ed463b1-e713-4554-b1c4-23699c7ecdc5": {
+   "jobId": "0ed463b1-e713-4554-b1c4-23699c7ecdc5",
+   "requestId": "464e4f4c-4a7f-4e41-8a5e-a7881b3231fb",
+   "status": "succeeded",
+   "progress": 100,
+   "result": {
+    "error": null,
+    "jobId": "0ed463b1-e713-4554-b1c4-23699c7ecdc5",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/e14137d8-1569-4af2-9615-ba7a0bb3960c/9eee5671-7803-46f3-a51b-3796eca1bd1e/3fb4e878-5255-4f72-a6e5-1c31b6aa69b1.pdf?expires=2026-10-17T01%3A32%3A42.421Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "8364c6e0743cb68b8e3b34080c8ce2db68173a66562c94ba9b1fc1597bc4d1d4",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T01:32:42.421Z",
+      "sizeBytes": 90482,
+      "artifactId": "3fb4e878-5255-4f72-a6e5-1c31b6aa69b1",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "464e4f4c-4a7f-4e41-8a5e-a7881b3231fb",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "error": null,
+   "createdAt": "2026-10-10T01:32:41.474Z",
+   "updatedAt": "2026-10-10T01:32:42.424Z"
+  },
+  "3e14bbef-1831-48d8-84f2-c263b180e984": {
+   "jobId": "3e14bbef-1831-48d8-84f2-c263b180e984",
+   "requestId": "87566739-9c7d-4b0d-a391-5e3e998fe96e",
+   "status": "succeeded",
+   "progress": 100,
+   "result": {
+    "error": null,
+    "jobId": "3e14bbef-1831-48d8-84f2-c263b180e984",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/726e25b5-f6dc-4193-9461-58c73a27932b/82e20c1f-ad24-4411-9720-f6618ec91e90/ee472c24-597e-4c58-901c-5a36bf941f9a.pdf?expires=2026-10-17T01%3A32%3A42.219Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "434007890e37843bd26aa5d0539976271256fe7dd96fb05a7dab018a08e2c1d9",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T01:32:42.219Z",
+      "sizeBytes": 90454,
+      "artifactId": "ee472c24-597e-4c58-901c-5a36bf941f9a",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "87566739-9c7d-4b0d-a391-5e3e998fe96e",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "error": null,
+   "createdAt": "2026-10-10T01:32:41.458Z",
+   "updatedAt": "2026-10-10T01:32:42.224Z"
+  },
+  "a01da322-bf02-4441-bd94-51ab16bc5d36": {
+   "jobId": "a01da322-bf02-4441-bd94-51ab16bc5d36",
+   "requestId": "c7048734-33f8-4201-bc5d-25eeecd564e4",
+   "status": "succeeded",
+   "progress": 100,
+   "result": {
+    "error": null,
+    "jobId": "a01da322-bf02-4441-bd94-51ab16bc5d36",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/674f99cd-207f-4c68-a9dc-b5e38a1a9708/3697e0eb-0576-41f7-ad0f-eb254f210ba9/7374d0f2-a4f2-4ff2-8c1d-31369012fd70.pdf?expires=2026-10-17T00%3A45%3A29.012Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "c629e2cb8099400cf0627f62b0df4716118382aead2c01b69f257299f30651ef",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:29.012Z",
+      "sizeBytes": 95558,
+      "artifactId": "7374d0f2-a4f2-4ff2-8c1d-31369012fd70",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "c7048734-33f8-4201-bc5d-25eeecd564e4",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "error": null,
+   "createdAt": "2026-10-10T00:45:28.180Z",
+   "updatedAt": "2026-10-10T00:45:29.017Z"
+  },
+  "e4b68898-ff2e-47db-ae6a-931b702c6c0b": {
+   "jobId": "e4b68898-ff2e-47db-ae6a-931b702c6c0b",
+   "requestId": "95db59fb-8418-4746-9565-2ca46102e0f9",
+   "status": "succeeded",
+   "progress": 100,
+   "result": {
+    "error": null,
+    "jobId": "e4b68898-ff2e-47db-ae6a-931b702c6c0b",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/54b34851-427e-4eeb-86ca-1da5884472fd/ad6465e8-4c1d-4066-8d81-25ee9798b759/adf9292a-d815-4c42-b6d3-2fcbc783e857.pdf?expires=2026-10-17T00%3A45%3A30.239Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "4113c2d5066c368715f9abd7ebb8ca3b5f53714d8e3d4d045b0f72975527e111",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:30.239Z",
+      "sizeBytes": 94376,
+      "artifactId": "adf9292a-d815-4c42-b6d3-2fcbc783e857",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "95db59fb-8418-4746-9565-2ca46102e0f9",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "error": null,
+   "createdAt": "2026-10-10T00:45:29.638Z",
+   "updatedAt": "2026-10-10T00:45:30.245Z"
+  },
+  "431a1ea7-9fc3-47f9-892d-719f50ceb406": {
+   "jobId": "431a1ea7-9fc3-47f9-892d-719f50ceb406",
+   "requestId": "90f0876a-75e4-4b03-8f7b-e8aa1fd6f2cc",
+   "status": "succeeded",
+   "progress": 100,
+   "result": {
+    "error": null,
+    "jobId": "431a1ea7-9fc3-47f9-892d-719f50ceb406",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/8d7ee9cd-c8e6-49c9-bc26-d33ba334d293/6b355958-9419-437c-8f4c-fda95c3192ab/18484225-c989-4a31-8055-50b963b5e3fb.pdf?expires=2026-10-17T00%3A45%3A36.322Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "d9a98336d52316f04174077c13a7709aad516a772146137c854f845b04c48c3b",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:36.322Z",
+      "sizeBytes": 95200,
+      "artifactId": "18484225-c989-4a31-8055-50b963b5e3fb",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "90f0876a-75e4-4b03-8f7b-e8aa1fd6f2cc",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "error": null,
+   "createdAt": "2026-10-10T00:45:35.607Z",
+   "updatedAt": "2026-10-10T00:45:36.326Z"
+  },
+  "aa8367a4-6b02-4bf3-ba75-9ea4e800ef81": {
+   "jobId": "aa8367a4-6b02-4bf3-ba75-9ea4e800ef81",
+   "requestId": "24cc25ed-8295-4416-81e8-f31266204c64",
+   "status": "succeeded",
+   "progress": 100,
+   "result": {
+    "error": null,
+    "jobId": "aa8367a4-6b02-4bf3-ba75-9ea4e800ef81",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/c6363831-61b3-4363-ae8f-9acdc41419b8/c32a07d6-8164-42a2-9870-c4239f8aa845/56707239-7624-4aa4-97dd-fc54f8b1a242.pdf?expires=2026-10-17T00%3A45%3A35.113Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "f424a8ebe3903f073ead0ad001c1271964940c0aea5ed5689bea3499e82a7360",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:35.113Z",
+      "sizeBytes": 95916,
+      "artifactId": "56707239-7624-4aa4-97dd-fc54f8b1a242",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "24cc25ed-8295-4416-81e8-f31266204c64",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "error": null,
+   "createdAt": "2026-10-10T00:45:34.038Z",
+   "updatedAt": "2026-10-10T00:45:35.119Z"
+  },
+  "354d42fd-16b1-4977-88bd-1dfaa31fd153": {
+   "jobId": "354d42fd-16b1-4977-88bd-1dfaa31fd153",
+   "requestId": "d67dea2c-558f-4d37-857f-0737128d60b1",
+   "status": "succeeded",
+   "progress": 100,
+   "result": {
+    "error": null,
+    "jobId": "354d42fd-16b1-4977-88bd-1dfaa31fd153",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/ead63547-23ee-4c9e-a4a3-8a4e47743917/e190b758-cd39-4739-bcaf-4a1e6f19a7f7/e03a035d-1c16-463c-8c0a-d67af823c9b0.pdf?expires=2026-10-17T00%3A45%3A33.897Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "0329407ed4c30c383370a651c16b7ef43733043ce53da6d4fe9581fb95aedb0c",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:33.897Z",
+      "sizeBytes": 96276,
+      "artifactId": "e03a035d-1c16-463c-8c0a-d67af823c9b0",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "d67dea2c-558f-4d37-857f-0737128d60b1",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "error": null,
+   "createdAt": "2026-10-10T00:45:33.287Z",
+   "updatedAt": "2026-10-10T00:45:33.901Z"
+  },
+  "8d87a5f0-0b72-402d-8fcc-003de12e236e": {
+   "jobId": "8d87a5f0-0b72-402d-8fcc-003de12e236e",
+   "requestId": "aee20345-0601-4dd8-ba8f-11665ea795ee",
+   "status": "succeeded",
+   "progress": 100,
+   "result": {
+    "error": null,
+    "jobId": "8d87a5f0-0b72-402d-8fcc-003de12e236e",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/56c6a3fe-e09b-4009-93cf-8e54befa419c/2ef6fce0-e679-453d-ae23-9a99ed55bfad/8476edcb-d468-4347-b281-de122c69d95c.pdf?expires=2026-10-17T00%3A45%3A32.690Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "d5aae4861e753893758eff96895948ba0b496ffb98e7c2d12a4ac0ac1e54e79e",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:32.690Z",
+      "sizeBytes": 95988,
+      "artifactId": "8476edcb-d468-4347-b281-de122c69d95c",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "aee20345-0601-4dd8-ba8f-11665ea795ee",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "error": null,
+   "createdAt": "2026-10-10T00:45:31.834Z",
+   "updatedAt": "2026-10-10T00:45:32.695Z"
+  },
+  "7bdfc7ba-ec3f-45cf-a544-0dd5a19d3cf0": {
+   "jobId": "7bdfc7ba-ec3f-45cf-a544-0dd5a19d3cf0",
+   "requestId": "35a0a70f-f3e2-48cd-af48-488fc67ed9cf",
+   "status": "succeeded",
+   "progress": 100,
+   "result": {
+    "error": null,
+    "jobId": "7bdfc7ba-ec3f-45cf-a544-0dd5a19d3cf0",
+    "status": "succeeded",
+    "warnings": [],
+    "artifacts": [
+     {
+      "url": "file:///tmp/claude-0/-home-user/371a8ca7-5813-5692-8a83-026a682cbb28/scratchpad/stack/artifacts/tenant/7b5003cb-b3c0-4f0d-850d-9f95353cd9e8/doc/b00c0b2f-f1d1-4336-89ca-2c31aef25b40/92240f0f-6de0-4e1e-9650-5296f34d565a/004f7749-7059-4954-aba3-4bdd87337160.pdf?expires=2026-10-17T00%3A45%3A31.464Z",
+      "role": "primary",
+      "pages": 3,
+      "format": "pdf",
+      "sha256": "139c41cc80a96cb2c445d4ea8cd5c781ae2ba15c6990fb093bbc243140c22ecd",
+      "storage": "signed_url",
+      "expiresAt": "2026-10-17T00:45:31.464Z",
+      "sizeBytes": 96995,
+      "artifactId": "004f7749-7059-4954-aba3-4bdd87337160",
+      "classification": "UNCLASSIFIED"
+     }
+    ],
+    "renderLog": {
+     "pages": null,
+     "blocksRendered": 4
+    },
+    "requestId": "35a0a70f-f3e2-48cd-af48-488fc67ed9cf",
+    "engineVersion": "dispatch-engine@1.0.0",
+    "schemaVersion": "1.0",
+    "templateBinding": {
+     "version": 1,
+     "template": "exec-brief"
+    }
+   },
+   "error": null,
+   "createdAt": "2026-10-10T00:45:30.375Z",
+   "updatedAt": "2026-10-10T00:45:31.468Z"
+  }
+ },
+ "certificates": {
+  "c6363831-61b3-4363-ae8f-9acdc41419b8": {
+   "certificate": {
+    "recordId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+    "docType": "executive_briefing",
+    "title": "Procurement Thresholds Circular 2025",
+    "classification": {
+     "level": "UNCLASSIFIED",
+     "scheme": "none"
+    },
+    "lifecycle": "archived",
+    "version": 1,
+    "publishedAt": "2026-10-10T00:45:35.473Z",
+    "archivedAt": "2026-10-10T00:45:35.549Z",
+    "recordHash": "82a26f62a31443109e84ab5bcb980471e23eedcd219e57dd3213ff84fe85348e",
+    "integrityProof": "d03dd155926821baf318a8cb22d8853b35381e664c772480edd7c6c9b0b29969",
+    "governancePolicy": {
+     "name": "Executive Briefing Policy",
+     "reviewChain": [
+      {
+       "role": "director_policy",
+       "label": "Director of Fiscal Policy",
+       "quorum": 1
+      },
+      {
+       "role": "permanent_secretary",
+       "label": "Permanent Secretary",
+       "quorum": 1
+      }
+     ],
+     "approvalAuthority": null,
+     "publicationAuthority": "communications_office"
+    },
+    "approvalChain": [
+     {
+      "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "decision": "approve",
+      "clearance": "none",
+      "ts": "2026-10-10T00:45:34.032Z"
+     },
+     {
+      "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+      "decision": "approve",
+      "clearance": "none",
+      "ts": "2026-10-10T00:45:34.038Z"
+     }
+    ]
+   }
+  },
+  "ead63547-23ee-4c9e-a4a3-8a4e47743917": {
+   "certificate": {
+    "recordId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+    "docType": "executive_briefing",
+    "title": "Budget Execution Report FY2025",
+    "classification": {
+     "level": "UNCLASSIFIED",
+     "scheme": "none"
+    },
+    "lifecycle": "archived",
+    "version": 1,
+    "publishedAt": "2026-10-10T00:45:34.009Z",
+    "archivedAt": "2026-10-10T00:45:34.016Z",
+    "recordHash": "44235bd3171b17a6d402d575bc38d6045913d0a9473f26afbf74b82d48a46b6f",
+    "integrityProof": "f4ad35cfb5d843687b6251a62ca4a4f135871f2e926c9c60aadacfe93d65b782",
+    "governancePolicy": {
+     "name": "Executive Briefing Policy",
+     "reviewChain": [
+      {
+       "role": "director_policy",
+       "label": "Director of Fiscal Policy",
+       "quorum": 1
+      },
+      {
+       "role": "permanent_secretary",
+       "label": "Permanent Secretary",
+       "quorum": 1
+      }
+     ],
+     "approvalAuthority": null,
+     "publicationAuthority": "communications_office"
+    },
+    "approvalChain": [
+     {
+      "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "decision": "approve",
+      "clearance": "none",
+      "ts": "2026-10-10T00:45:33.280Z"
+     },
+     {
+      "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+      "decision": "approve",
+      "clearance": "none",
+      "ts": "2026-10-10T00:45:33.287Z"
+     }
+    ]
+   }
+  }
+ },
+ "governanceCertificates": {
+  "ea041b03-16f9-47de-8c5d-3b8b53024510": {
+   "certificate": {
+    "recordId": "ea041b03-16f9-47de-8c5d-3b8b53024510",
+    "policyName": "Executive Briefing Policy",
+    "actualRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_3449a709"
+      ]
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_5515d61b"
+      ]
+     }
+    ],
+    "delegations": [],
+    "publishedBy": "svc:svc_ministry-of-finance-212f83_05d10c61",
+    "policyVersion": 1,
+    "requiredRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "quorum": 1
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "quorum": 1
+     }
+    ],
+    "integrityProof": "fa25957c39672447a063797467a1d8e136b6d1c561a4c123029d783a49e93170",
+    "approvalSequence": [
+     {
+      "role": "director_policy",
+      "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "decidedAt": "2026-10-10T01:32:41.481Z",
+      "onBehalfOf": null
+     },
+     {
+      "role": "permanent_secretary",
+      "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+      "decidedAt": "2026-10-10T01:32:41.488Z",
+      "onBehalfOf": null
+     }
+    ],
+    "complianceResult": "COMPLIANT",
+    "separationOfDuties": "enforced",
+    "publicationAuthority": "communications_office"
+   }
+  },
+  "674f99cd-207f-4c68-a9dc-b5e38a1a9708": {
+   "certificate": {
+    "recordId": "674f99cd-207f-4c68-a9dc-b5e38a1a9708",
+    "policyName": "Executive Briefing Policy",
+    "actualRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_3449a709"
+      ]
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_5515d61b"
+      ]
+     }
+    ],
+    "delegations": [],
+    "publishedBy": "svc:svc_ministry-of-finance-212f83_05d10c61",
+    "policyVersion": 1,
+    "requiredRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "quorum": 1
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "quorum": 1
+     }
+    ],
+    "integrityProof": "e02682db9697a6f8abf9c6dabee30ce551b260eafe20292a61e6cc3fbd8f07e8",
+    "approvalSequence": [
+     {
+      "role": "director_policy",
+      "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "decidedAt": "2026-10-10T00:45:28.170Z",
+      "onBehalfOf": null
+     },
+     {
+      "role": "permanent_secretary",
+      "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+      "decidedAt": "2026-10-10T00:45:28.180Z",
+      "onBehalfOf": null
+     }
+    ],
+    "complianceResult": "COMPLIANT",
+    "separationOfDuties": "enforced",
+    "publicationAuthority": "communications_office"
+   }
+  },
+  "54b34851-427e-4eeb-86ca-1da5884472fd": {
+   "certificate": {
+    "recordId": "54b34851-427e-4eeb-86ca-1da5884472fd",
+    "policyName": "Executive Briefing Policy",
+    "actualRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_3449a709"
+      ]
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_5515d61b"
+      ]
+     }
+    ],
+    "delegations": [],
+    "publishedBy": "svc:svc_ministry-of-finance-212f83_05d10c61",
+    "policyVersion": 1,
+    "requiredRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "quorum": 1
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "quorum": 1
+     }
+    ],
+    "integrityProof": "d8fef6cbe55ef32bc2bde3fadd8b86090e0ab430a206764ba6116e4587e269b7",
+    "approvalSequence": [
+     {
+      "role": "director_policy",
+      "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "decidedAt": "2026-10-10T00:45:29.631Z",
+      "onBehalfOf": null
+     },
+     {
+      "role": "permanent_secretary",
+      "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+      "decidedAt": "2026-10-10T00:45:29.638Z",
+      "onBehalfOf": null
+     }
+    ],
+    "complianceResult": "COMPLIANT",
+    "separationOfDuties": "enforced",
+    "publicationAuthority": "communications_office"
+   }
+  },
+  "c6363831-61b3-4363-ae8f-9acdc41419b8": {
+   "certificate": {
+    "recordId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+    "policyName": "Executive Briefing Policy",
+    "actualRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_3449a709"
+      ]
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_5515d61b"
+      ]
+     }
+    ],
+    "delegations": [],
+    "publishedBy": "svc:svc_ministry-of-finance-212f83_05d10c61",
+    "policyVersion": 1,
+    "requiredRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "quorum": 1
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "quorum": 1
+     }
+    ],
+    "integrityProof": "a77aa78ab43404e3d97538da7e5ef24feae91c4dff392cd35bea20db743a42e7",
+    "approvalSequence": [
+     {
+      "role": "director_policy",
+      "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "decidedAt": "2026-10-10T00:45:34.032Z",
+      "onBehalfOf": null
+     },
+     {
+      "role": "permanent_secretary",
+      "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+      "decidedAt": "2026-10-10T00:45:34.038Z",
+      "onBehalfOf": null
+     }
+    ],
+    "complianceResult": "COMPLIANT",
+    "separationOfDuties": "enforced",
+    "publicationAuthority": "communications_office"
+   }
+  },
+  "ead63547-23ee-4c9e-a4a3-8a4e47743917": {
+   "certificate": {
+    "recordId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+    "policyName": "Executive Briefing Policy",
+    "actualRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_3449a709"
+      ]
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_5515d61b"
+      ]
+     }
+    ],
+    "delegations": [],
+    "publishedBy": "svc:svc_ministry-of-finance-212f83_05d10c61",
+    "policyVersion": 1,
+    "requiredRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "quorum": 1
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "quorum": 1
+     }
+    ],
+    "integrityProof": "e7b02cff317716fb9c1c439d7dccc37ae0ab30837de0900c4f0d09b731398a2c",
+    "approvalSequence": [
+     {
+      "role": "director_policy",
+      "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "decidedAt": "2026-10-10T00:45:33.280Z",
+      "onBehalfOf": null
+     },
+     {
+      "role": "permanent_secretary",
+      "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+      "decidedAt": "2026-10-10T00:45:33.287Z",
+      "onBehalfOf": null
+     }
+    ],
+    "complianceResult": "COMPLIANT",
+    "separationOfDuties": "enforced",
+    "publicationAuthority": "communications_office"
+   }
+  },
+  "56c6a3fe-e09b-4009-93cf-8e54befa419c": {
+   "certificate": {
+    "recordId": "56c6a3fe-e09b-4009-93cf-8e54befa419c",
+    "policyName": "Executive Briefing Policy",
+    "actualRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_3449a709"
+      ]
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_5515d61b"
+      ]
+     }
+    ],
+    "delegations": [],
+    "publishedBy": "svc:svc_ministry-of-finance-212f83_05d10c61",
+    "policyVersion": 1,
+    "requiredRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "quorum": 1
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "quorum": 1
+     }
+    ],
+    "integrityProof": "ea709c92f45fe36bab1d2222a042092da1fd9d4a19ee24fb91f7c76965bf3d3e",
+    "approvalSequence": [
+     {
+      "role": "director_policy",
+      "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "decidedAt": "2026-10-10T00:45:31.828Z",
+      "onBehalfOf": null
+     },
+     {
+      "role": "permanent_secretary",
+      "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+      "decidedAt": "2026-10-10T00:45:31.834Z",
+      "onBehalfOf": null
+     }
+    ],
+    "complianceResult": "COMPLIANT",
+    "separationOfDuties": "enforced",
+    "publicationAuthority": "communications_office"
+   }
+  },
+  "b00c0b2f-f1d1-4336-89ca-2c31aef25b40": {
+   "certificate": {
+    "recordId": "b00c0b2f-f1d1-4336-89ca-2c31aef25b40",
+    "policyName": "Executive Briefing Policy",
+    "actualRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_3449a709"
+      ]
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "satisfiedBy": [
+       "svc:svc_ministry-of-finance-212f83_5515d61b"
+      ]
+     }
+    ],
+    "delegations": [],
+    "publishedBy": "svc:svc_ministry-of-finance-212f83_05d10c61",
+    "policyVersion": 1,
+    "requiredRoles": [
+     {
+      "role": "director_policy",
+      "step": 0,
+      "label": "Director of Fiscal Policy",
+      "quorum": 1
+     },
+     {
+      "role": "permanent_secretary",
+      "step": 1,
+      "label": "Permanent Secretary",
+      "quorum": 1
+     }
+    ],
+    "integrityProof": "d3b2b5818b5b1cc6dc9a80e0572b75e0291651efc3052bc5b21140b6cdd55d20",
+    "approvalSequence": [
+     {
+      "role": "director_policy",
+      "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+      "decidedAt": "2026-10-10T00:45:30.368Z",
+      "onBehalfOf": null
+     },
+     {
+      "role": "permanent_secretary",
+      "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+      "decidedAt": "2026-10-10T00:45:30.375Z",
+      "onBehalfOf": null
+     }
+    ],
+    "complianceResult": "COMPLIANT",
+    "separationOfDuties": "enforced",
+    "publicationAuthority": "communications_office"
+   }
+  }
+ },
+ "audit": [
+  {
+   "eventId": "e1d98167-33ae-44c3-a90d-3d50d2bb2329",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "governance.certificate_issued",
+   "targetType": "document",
+   "targetId": "ea041b03-16f9-47de-8c5d-3b8b53024510",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": "fa25957c39672447a063797467a1d8e136b6d1c561a4c123029d783a49e93170",
+   "ts": "2026-10-10T01:34:57.208515+00:00"
+  },
+  {
+   "eventId": "90a6beda-9aba-4f2a-a1d8-cb27dfa42bca",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "document.published",
+   "targetType": "document",
+   "targetId": "ea041b03-16f9-47de-8c5d-3b8b53024510",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:34:57.208515+00:00"
+  },
+  {
+   "eventId": "c66e9c8c-b69f-4d65-8758-8b1064397e1b",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "83e0d085-b8a7-4d93-afea-9b57eb5801b6",
+   "classification": null,
+   "requestId": "3b0417a3-2c2e-44ab-a0a3-c66c56a6fb47",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:34:50.578747+00:00"
+  },
+  {
+   "eventId": "0c347626-cfbf-49ae-a188-61a93e227599",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "4400025c-30fb-4009-95db-be09a7e22efb",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:34:41.475407+00:00"
+  },
+  {
+   "eventId": "0baa63fc-ade2-4e9f-9d17-846ca853be5f",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "4400025c-30fb-4009-95db-be09a7e22efb",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:34:41.475407+00:00"
+  },
+  {
+   "eventId": "47cf453b-c33e-4656-a95c-3f2d6f1fb6df",
+   "actor": "worker-4faa9ad9",
+   "actorType": "service",
+   "action": "render.succeeded",
+   "targetType": "job",
+   "targetId": "bb6f629a-70b2-408d-ac23-59e78b796ea4",
+   "classification": null,
+   "requestId": "656323fe-3695-4f31-aeb1-0da229442e5e",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:42.634502+00:00"
+  },
+  {
+   "eventId": "15d1eaaa-cf86-47d5-943a-a767c74b9080",
+   "actor": "worker-4faa9ad9",
+   "actorType": "service",
+   "action": "render.succeeded",
+   "targetType": "job",
+   "targetId": "0ed463b1-e713-4554-b1c4-23699c7ecdc5",
+   "classification": null,
+   "requestId": "464e4f4c-4a7f-4e41-8a5e-a7881b3231fb",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:42.424257+00:00"
+  },
+  {
+   "eventId": "66d1e047-91ed-4339-9255-9d6beb74077c",
+   "actor": "worker-4faa9ad9",
+   "actorType": "service",
+   "action": "render.succeeded",
+   "targetType": "job",
+   "targetId": "3e14bbef-1831-48d8-84f2-c263b180e984",
+   "classification": null,
+   "requestId": "87566739-9c7d-4b0d-a391-5e3e998fe96e",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:42.224145+00:00"
+  },
+  {
+   "eventId": "e3d42bcf-b7a0-4590-af4c-15ff2cab5c0f",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "ea041b03-16f9-47de-8c5d-3b8b53024510",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.488376+00:00"
+  },
+  {
+   "eventId": "e46c8a3d-cc2c-41fa-87bc-696b60717c43",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "render.queued",
+   "targetType": "job",
+   "targetId": "bb6f629a-70b2-408d-ac23-59e78b796ea4",
+   "classification": null,
+   "requestId": "656323fe-3695-4f31-aeb1-0da229442e5e",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.488376+00:00"
+  },
+  {
+   "eventId": "5ba1714a-d9e6-448a-b2d5-fa8a9c486d6b",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.policy_satisfied",
+   "targetType": "document",
+   "targetId": "ea041b03-16f9-47de-8c5d-3b8b53024510",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.488376+00:00"
+  },
+  {
+   "eventId": "edd6ca77-ec68-499a-806a-76a1a94d6707",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "ea041b03-16f9-47de-8c5d-3b8b53024510",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.488376+00:00"
+  },
+  {
+   "eventId": "b964e0dc-7be5-49bf-9290-9f62afe32d8e",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "ea041b03-16f9-47de-8c5d-3b8b53024510",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.481816+00:00"
+  },
+  {
+   "eventId": "2f5e1e3a-fb83-44b1-a703-f158e1f2893c",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "ea041b03-16f9-47de-8c5d-3b8b53024510",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.481816+00:00"
+  },
+  {
+   "eventId": "2f60f74c-a2f5-4d01-ae88-61f473bbc224",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "e14137d8-1569-4af2-9615-ba7a0bb3960c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.474097+00:00"
+  },
+  {
+   "eventId": "c02a650b-78d0-4551-ae70-2866caabd82e",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "render.queued",
+   "targetType": "job",
+   "targetId": "0ed463b1-e713-4554-b1c4-23699c7ecdc5",
+   "classification": null,
+   "requestId": "464e4f4c-4a7f-4e41-8a5e-a7881b3231fb",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.474097+00:00"
+  },
+  {
+   "eventId": "bf46a8b0-ff1d-42a5-8d61-32e664865aab",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.policy_satisfied",
+   "targetType": "document",
+   "targetId": "e14137d8-1569-4af2-9615-ba7a0bb3960c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.474097+00:00"
+  },
+  {
+   "eventId": "8d465f8b-e063-4d2f-8d22-4d51d2a1822f",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "e14137d8-1569-4af2-9615-ba7a0bb3960c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.474097+00:00"
+  },
+  {
+   "eventId": "4605a680-5fe0-40e9-a63e-3fd6dc1bbcfb",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "e14137d8-1569-4af2-9615-ba7a0bb3960c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.468772+00:00"
+  },
+  {
+   "eventId": "89bb2358-8739-4ead-8f52-49417a5cb964",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "e14137d8-1569-4af2-9615-ba7a0bb3960c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.468772+00:00"
+  },
+  {
+   "eventId": "557adb77-f03a-457d-b993-881d0ce27698",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "726e25b5-f6dc-4193-9461-58c73a27932b",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.458377+00:00"
+  },
+  {
+   "eventId": "1752a7c2-3e98-4b23-9b83-b148f786e84e",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "render.queued",
+   "targetType": "job",
+   "targetId": "3e14bbef-1831-48d8-84f2-c263b180e984",
+   "classification": null,
+   "requestId": "87566739-9c7d-4b0d-a391-5e3e998fe96e",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.458377+00:00"
+  },
+  {
+   "eventId": "3e500d74-21b0-4fb7-b0bf-0a515e2a04ce",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.policy_satisfied",
+   "targetType": "document",
+   "targetId": "726e25b5-f6dc-4193-9461-58c73a27932b",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.458377+00:00"
+  },
+  {
+   "eventId": "ffeb8d78-0020-456f-8bbd-3a0b72d424ed",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "726e25b5-f6dc-4193-9461-58c73a27932b",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.458377+00:00"
+  },
+  {
+   "eventId": "b1a664b0-3941-4ba2-8522-64562e0fac20",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "726e25b5-f6dc-4193-9461-58c73a27932b",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.450015+00:00"
+  },
+  {
+   "eventId": "9b6aa4b1-0e74-4c40-8995-3f0a4c1e4869",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "726e25b5-f6dc-4193-9461-58c73a27932b",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.450015+00:00"
+  },
+  {
+   "eventId": "008a4950-94a0-4b6d-83ad-f72a6a187a5f",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "ea041b03-16f9-47de-8c5d-3b8b53024510",
+   "classification": null,
+   "requestId": "524c1c55-3d0a-40e0-8d27-4b6703759675",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.440582+00:00"
+  },
+  {
+   "eventId": "97a80e01-961b-4fee-816b-f66998434db3",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "e14137d8-1569-4af2-9615-ba7a0bb3960c",
+   "classification": null,
+   "requestId": "cc50f180-bf36-4e89-a273-65b4f79f9fdb",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.433961+00:00"
+  },
+  {
+   "eventId": "79cb815f-2c51-42c4-b512-a7667deddfa6",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "726e25b5-f6dc-4193-9461-58c73a27932b",
+   "classification": null,
+   "requestId": "3ccdd71d-084e-4998-a0e7-7cb9f52fc74f",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.426341+00:00"
+  },
+  {
+   "eventId": "bccff268-e6d2-442f-909f-c4aec8df20c1",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "49303c04-1879-45c0-98cc-a18d611467e7",
+   "classification": null,
+   "requestId": "1ce16447-6fa8-402b-868c-9ed67fdc69d9",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.420391+00:00"
+  },
+  {
+   "eventId": "95197061-469c-40a1-b20a-41872303209d",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "7aafe53b-4ade-400a-9995-17ca1452fd84",
+   "classification": null,
+   "requestId": "c4e98a19-9fcc-4aae-b453-831f0ffd8931",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.412926+00:00"
+  },
+  {
+   "eventId": "5dffb7d2-5893-48ae-a66f-cbd9cd55e410",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "4400025c-30fb-4009-95db-be09a7e22efb",
+   "classification": null,
+   "requestId": "b0e57511-d073-4fea-a03b-d78068b60a62",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:32:41.399639+00:00"
+  },
+  {
+   "eventId": "a7496a13-bfac-4d96-a5ac-1a4c62759489",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "governance.certificate_issued",
+   "targetType": "document",
+   "targetId": "674f99cd-207f-4c68-a9dc-b5e38a1a9708",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": "e02682db9697a6f8abf9c6dabee30ce551b260eafe20292a61e6cc3fbd8f07e8",
+   "ts": "2026-10-10T01:26:04.097703+00:00"
+  },
+  {
+   "eventId": "bd7e82fb-ea3f-4d9b-98f5-ec75c7859c14",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "document.published",
+   "targetType": "document",
+   "targetId": "674f99cd-207f-4c68-a9dc-b5e38a1a9708",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:26:04.097703+00:00"
+  },
+  {
+   "eventId": "5a8aa8db-6774-462b-b0b5-a3ceb61a4713",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "3f4bce6a-d7fe-4ad7-907c-09032fab3b2c",
+   "classification": null,
+   "requestId": "d943340d-490d-49b0-87c4-e30c3a48ce11",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:25:57.880779+00:00"
+  },
+  {
+   "eventId": "7c4a09cd-a836-417d-a274-e071fac74686",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "ea706b02-c27c-4037-a103-70c6c643c273",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:25:48.815097+00:00"
+  },
+  {
+   "eventId": "03148cf8-a390-49ef-af2c-de29db0b99c0",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "ea706b02-c27c-4037-a103-70c6c643c273",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:25:48.815097+00:00"
+  },
+  {
+   "eventId": "beaa2e53-40f3-40fb-a66e-7df34db19ac0",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "document.published",
+   "targetType": "document",
+   "targetId": "54b34851-427e-4eeb-86ca-1da5884472fd",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:17:39.200163+00:00"
+  },
+  {
+   "eventId": "3eeef377-94b5-4998-a886-0356dbfa0045",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "governance.certificate_issued",
+   "targetType": "document",
+   "targetId": "54b34851-427e-4eeb-86ca-1da5884472fd",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": "d8fef6cbe55ef32bc2bde3fadd8b86090e0ab430a206764ba6116e4587e269b7",
+   "ts": "2026-10-10T01:17:39.200163+00:00"
+  },
+  {
+   "eventId": "2a934b1a-950c-4d85-97ab-afb687910e4b",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "3f4f5fb7-7a10-43c2-b8c6-df5143fe813b",
+   "classification": null,
+   "requestId": "b7ef208f-3f2b-4272-88f6-fd05800be6b3",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:17:32.853964+00:00"
+  },
+  {
+   "eventId": "01b3658b-09c2-4740-b8b7-9b92b3212e6d",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "97dc9136-639a-410f-bc48-25e541229727",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:17:23.784338+00:00"
+  },
+  {
+   "eventId": "ff07727d-fb4c-4500-ad1a-8d0ebba534d7",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "97dc9136-639a-410f-bc48-25e541229727",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:17:23.784338+00:00"
+  },
+  {
+   "eventId": "3fdc1d92-954f-4460-ac01-307394c2f17d",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "2554fd33-861f-4525-87b7-425825245996",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:16:13.955808+00:00"
+  },
+  {
+   "eventId": "550e4a65-ec57-4ba5-8f22-98f5c8e4796d",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "2554fd33-861f-4525-87b7-425825245996",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T01:16:13.955808+00:00"
+  },
+  {
+   "eventId": "71493400-3913-491a-a7f9-48d14424691b",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "document.withdrawn",
+   "targetType": "document",
+   "targetId": "8d7ee9cd-c8e6-49c9-bc26-d33ba334d293",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:37.039563+00:00"
+  },
+  {
+   "eventId": "ad63e58d-e475-4ee6-b679-1c737a056759",
+   "actor": "worker-4faa9ad9",
+   "actorType": "service",
+   "action": "render.succeeded",
+   "targetType": "job",
+   "targetId": "431a1ea7-9fc3-47f9-892d-719f50ceb406",
+   "classification": null,
+   "requestId": "90f0876a-75e4-4b03-8f7b-e8aa1fd6f2cc",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:36.326602+00:00"
+  },
+  {
+   "eventId": "5862f3c8-16e8-44e8-8c92-8393efc793bc",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.policy_satisfied",
+   "targetType": "document",
+   "targetId": "8d7ee9cd-c8e6-49c9-bc26-d33ba334d293",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.607828+00:00"
+  },
+  {
+   "eventId": "1e03813c-2b1f-4b02-9bf3-f211e2e376a7",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "render.queued",
+   "targetType": "job",
+   "targetId": "431a1ea7-9fc3-47f9-892d-719f50ceb406",
+   "classification": null,
+   "requestId": "90f0876a-75e4-4b03-8f7b-e8aa1fd6f2cc",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.607828+00:00"
+  },
+  {
+   "eventId": "de0d7b04-3e38-4182-baef-f6f68ec1a88f",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "8d7ee9cd-c8e6-49c9-bc26-d33ba334d293",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.607828+00:00"
+  },
+  {
+   "eventId": "85e24d4e-13cc-4f43-b365-e6963a9ac821",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "8d7ee9cd-c8e6-49c9-bc26-d33ba334d293",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.607828+00:00"
+  },
+  {
+   "eventId": "802f09fd-3ddc-46e0-af28-56ad499efe19",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "8d7ee9cd-c8e6-49c9-bc26-d33ba334d293",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.600715+00:00"
+  },
+  {
+   "eventId": "c7b08f4e-128b-4f81-8833-ed167d243a82",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "8d7ee9cd-c8e6-49c9-bc26-d33ba334d293",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.600715+00:00"
+  },
+  {
+   "eventId": "f54458a6-6e21-43dd-a13a-51a01e1d106f",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "8d7ee9cd-c8e6-49c9-bc26-d33ba334d293",
+   "classification": null,
+   "requestId": "22118f60-ed98-4165-a17d-0d81f71482cb",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.592627+00:00"
+  },
+  {
+   "eventId": "0616d86a-6ffb-4f4a-a238-bbcbe400b9a9",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.return",
+   "targetType": "document",
+   "targetId": "2301a694-60c3-4d40-a8a9-d9a22853b112",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.585668+00:00"
+  },
+  {
+   "eventId": "3b621267-2f7a-49b3-ac5d-fed792957954",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "2301a694-60c3-4d40-a8a9-d9a22853b112",
+   "classification": null,
+   "requestId": "576fa002-1611-479b-bfce-dc94a011712c",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.577018+00:00"
+  },
+  {
+   "eventId": "7c2bdba0-b99b-4a46-ac19-1df55f20e998",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.reject",
+   "targetType": "document",
+   "targetId": "60c0c5d0-8731-4673-81f2-8cb2dc4429ec",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.570085+00:00"
+  },
+  {
+   "eventId": "f8bf0a44-ea91-42c3-b90f-cf466c13794d",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "60c0c5d0-8731-4673-81f2-8cb2dc4429ec",
+   "classification": null,
+   "requestId": "c53bc5f1-3c18-4e21-a439-7c8a9e7df117",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.558478+00:00"
+  },
+  {
+   "eventId": "ae3858bd-895f-4c68-a8a1-686741b2fb52",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "document.preserved",
+   "targetType": "document",
+   "targetId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": "d03dd155926821baf318a8cb22d8853b35381e664c772480edd7c6c9b0b29969",
+   "ts": "2026-10-10T00:45:35.549575+00:00"
+  },
+  {
+   "eventId": "86d9b1d0-8110-4dde-a820-05648c57246a",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "document.published",
+   "targetType": "document",
+   "targetId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.47392+00:00"
+  },
+  {
+   "eventId": "fb4f075a-fd83-4ab2-8cc0-63db65c29cd2",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "governance.certificate_issued",
+   "targetType": "document",
+   "targetId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": "a77aa78ab43404e3d97538da7e5ef24feae91c4dff392cd35bea20db743a42e7",
+   "ts": "2026-10-10T00:45:35.47392+00:00"
+  },
+  {
+   "eventId": "9659ce4c-e3ad-4de5-88ec-d91fd73ea75b",
+   "actor": "worker-4faa9ad9",
+   "actorType": "service",
+   "action": "render.succeeded",
+   "targetType": "job",
+   "targetId": "aa8367a4-6b02-4bf3-ba75-9ea4e800ef81",
+   "classification": null,
+   "requestId": "24cc25ed-8295-4416-81e8-f31266204c64",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:35.119102+00:00"
+  },
+  {
+   "eventId": "4ce45a19-32e6-4632-877f-4e1487b2b015",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "render.queued",
+   "targetType": "job",
+   "targetId": "aa8367a4-6b02-4bf3-ba75-9ea4e800ef81",
+   "classification": null,
+   "requestId": "24cc25ed-8295-4416-81e8-f31266204c64",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:34.038777+00:00"
+  },
+  {
+   "eventId": "767d05a4-34a1-4b8b-86de-9ed6115de7aa",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.policy_satisfied",
+   "targetType": "document",
+   "targetId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:34.038777+00:00"
+  },
+  {
+   "eventId": "4f18d798-4296-40e5-87f7-6d4d88bb6dc9",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:34.038777+00:00"
+  },
+  {
+   "eventId": "db1c4b7b-a87b-4052-8b3b-5d998e482932",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:34.038777+00:00"
+  },
+  {
+   "eventId": "afd10fa9-cda2-4703-8889-1f03e13735c6",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:34.032552+00:00"
+  },
+  {
+   "eventId": "e4bb8ef7-ce33-4901-be8a-f3c922a89f8c",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:34.032552+00:00"
+  },
+  {
+   "eventId": "e025b9b1-98fa-49a4-a11b-5c2d95ed2f1a",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "c6363831-61b3-4363-ae8f-9acdc41419b8",
+   "classification": null,
+   "requestId": "40aefba9-5cdd-48f7-863e-319483167990",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:34.025884+00:00"
+  },
+  {
+   "eventId": "40dcb99f-80db-4053-b6c3-9bd140fd084c",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "document.preserved",
+   "targetType": "document",
+   "targetId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": "f4ad35cfb5d843687b6251a62ca4a4f135871f2e926c9c60aadacfe93d65b782",
+   "ts": "2026-10-10T00:45:34.016819+00:00"
+  },
+  {
+   "eventId": "923d27b6-402e-4471-9966-8fdf15d56beb",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "document.published",
+   "targetType": "document",
+   "targetId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:34.009567+00:00"
+  },
+  {
+   "eventId": "e24ac90d-c3ff-4381-b967-817ef9c1bbd8",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "governance.certificate_issued",
+   "targetType": "document",
+   "targetId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": "e7b02cff317716fb9c1c439d7dccc37ae0ab30837de0900c4f0d09b731398a2c",
+   "ts": "2026-10-10T00:45:34.009567+00:00"
+  },
+  {
+   "eventId": "3a919982-9c4f-4f91-a065-e3e624cfeecd",
+   "actor": "worker-4faa9ad9",
+   "actorType": "service",
+   "action": "render.succeeded",
+   "targetType": "job",
+   "targetId": "354d42fd-16b1-4977-88bd-1dfaa31fd153",
+   "classification": null,
+   "requestId": "d67dea2c-558f-4d37-857f-0737128d60b1",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:33.901214+00:00"
+  },
+  {
+   "eventId": "edf5eea5-79f1-46a2-b491-8e536c505089",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.policy_satisfied",
+   "targetType": "document",
+   "targetId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:33.287284+00:00"
+  },
+  {
+   "eventId": "d5b437ba-8f9b-43d9-a555-656cca14b384",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "render.queued",
+   "targetType": "job",
+   "targetId": "354d42fd-16b1-4977-88bd-1dfaa31fd153",
+   "classification": null,
+   "requestId": "d67dea2c-558f-4d37-857f-0737128d60b1",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:33.287284+00:00"
+  },
+  {
+   "eventId": "3df5c310-5994-46b8-9dcd-38cb138d88a8",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:33.287284+00:00"
+  },
+  {
+   "eventId": "b97799b7-bee5-4708-9a4e-d306b1f72b86",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:33.287284+00:00"
+  },
+  {
+   "eventId": "8b88f00e-2742-4a09-9e63-80786dc55e90",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:33.280602+00:00"
+  },
+  {
+   "eventId": "4c900f1e-f90e-4fed-8374-d7b9d54e1949",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:33.280602+00:00"
+  },
+  {
+   "eventId": "713037ff-0fa4-4b81-85cd-e303e6601d24",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "ead63547-23ee-4c9e-a4a3-8a4e47743917",
+   "classification": null,
+   "requestId": "29f90584-abe2-4534-991d-7d1bba018b3a",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:33.273205+00:00"
+  },
+  {
+   "eventId": "60794721-d2de-4a15-8a76-dad4c9635c9a",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "document.published",
+   "targetType": "document",
+   "targetId": "56c6a3fe-e09b-4009-93cf-8e54befa419c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:33.263352+00:00"
+  },
+  {
+   "eventId": "9d7dcef1-caeb-4d4b-9a94-dfa259c86597",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "governance.certificate_issued",
+   "targetType": "document",
+   "targetId": "56c6a3fe-e09b-4009-93cf-8e54befa419c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": "ea709c92f45fe36bab1d2222a042092da1fd9d4a19ee24fb91f7c76965bf3d3e",
+   "ts": "2026-10-10T00:45:33.263352+00:00"
+  },
+  {
+   "eventId": "11c70ff3-20a3-4822-bde4-0579dab62c87",
+   "actor": "worker-4faa9ad9",
+   "actorType": "service",
+   "action": "render.succeeded",
+   "targetType": "job",
+   "targetId": "8d87a5f0-0b72-402d-8fcc-003de12e236e",
+   "classification": null,
+   "requestId": "aee20345-0601-4dd8-ba8f-11665ea795ee",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:32.695014+00:00"
+  },
+  {
+   "eventId": "1618990b-01a0-442a-8a56-775e25ed733b",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.policy_satisfied",
+   "targetType": "document",
+   "targetId": "56c6a3fe-e09b-4009-93cf-8e54befa419c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:31.834001+00:00"
+  },
+  {
+   "eventId": "c319fee0-0eee-4e13-a7c2-111d899b182f",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "56c6a3fe-e09b-4009-93cf-8e54befa419c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:31.834001+00:00"
+  },
+  {
+   "eventId": "986032b6-1ce2-407b-a2e4-78124c202a5d",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "56c6a3fe-e09b-4009-93cf-8e54befa419c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:31.834001+00:00"
+  },
+  {
+   "eventId": "4d260328-5d14-4540-b676-aa19d6bcc028",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "render.queued",
+   "targetType": "job",
+   "targetId": "8d87a5f0-0b72-402d-8fcc-003de12e236e",
+   "classification": null,
+   "requestId": "aee20345-0601-4dd8-ba8f-11665ea795ee",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:31.834001+00:00"
+  },
+  {
+   "eventId": "95c04484-09bc-4431-ac57-017d28d57ab4",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "56c6a3fe-e09b-4009-93cf-8e54befa419c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:31.828385+00:00"
+  },
+  {
+   "eventId": "e31ce76d-3694-4e97-a92c-f6e57ff2b23e",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "56c6a3fe-e09b-4009-93cf-8e54befa419c",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:31.828385+00:00"
+  },
+  {
+   "eventId": "64064544-1736-457a-b9e4-619aa839045f",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "56c6a3fe-e09b-4009-93cf-8e54befa419c",
+   "classification": null,
+   "requestId": "bb409505-933f-446e-ba16-6d217476a617",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:31.81852+00:00"
+  },
+  {
+   "eventId": "297ba61b-1c30-4f08-8098-afe8f020a7bb",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "governance.certificate_issued",
+   "targetType": "document",
+   "targetId": "b00c0b2f-f1d1-4336-89ca-2c31aef25b40",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": "d3b2b5818b5b1cc6dc9a80e0572b75e0291651efc3052bc5b21140b6cdd55d20",
+   "ts": "2026-10-10T00:45:31.805893+00:00"
+  },
+  {
+   "eventId": "fc098fcf-ed75-4120-ba5d-ac8a0c54c2a1",
+   "actor": "svc:svc_ministry-of-finance-212f83_05d10c61",
+   "actorType": "service",
+   "action": "document.published",
+   "targetType": "document",
+   "targetId": "b00c0b2f-f1d1-4336-89ca-2c31aef25b40",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:31.805893+00:00"
+  },
+  {
+   "eventId": "0d937aff-43bc-4e8f-b5c4-7e0e1e9e597e",
+   "actor": "worker-4faa9ad9",
+   "actorType": "service",
+   "action": "render.succeeded",
+   "targetType": "job",
+   "targetId": "7bdfc7ba-ec3f-45cf-a544-0dd5a19d3cf0",
+   "classification": null,
+   "requestId": "35a0a70f-f3e2-48cd-af48-488fc67ed9cf",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:31.468929+00:00"
+  },
+  {
+   "eventId": "22b1fb6e-a489-46ed-95f1-a9c6e1986efb",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "b00c0b2f-f1d1-4336-89ca-2c31aef25b40",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:30.375605+00:00"
+  },
+  {
+   "eventId": "bade15f3-f3df-456f-8079-211290f7e056",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "render.queued",
+   "targetType": "job",
+   "targetId": "7bdfc7ba-ec3f-45cf-a544-0dd5a19d3cf0",
+   "classification": null,
+   "requestId": "35a0a70f-f3e2-48cd-af48-488fc67ed9cf",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:30.375605+00:00"
+  },
+  {
+   "eventId": "eb91a8db-1547-4e5e-b291-b1bb703ceecc",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.policy_satisfied",
+   "targetType": "document",
+   "targetId": "b00c0b2f-f1d1-4336-89ca-2c31aef25b40",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:30.375605+00:00"
+  },
+  {
+   "eventId": "f50d5c47-049a-4883-a5bd-d959aedf7754",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "b00c0b2f-f1d1-4336-89ca-2c31aef25b40",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:30.375605+00:00"
+  },
+  {
+   "eventId": "50941484-e623-458a-a754-04be8eef2c5d",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "b00c0b2f-f1d1-4336-89ca-2c31aef25b40",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:30.368193+00:00"
+  },
+  {
+   "eventId": "4716657b-9e3b-474c-ab7a-6fa3a697fc8c",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "b00c0b2f-f1d1-4336-89ca-2c31aef25b40",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:30.368193+00:00"
+  },
+  {
+   "eventId": "63ad967f-50c7-4a80-91db-07e5131f8912",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "b00c0b2f-f1d1-4336-89ca-2c31aef25b40",
+   "classification": null,
+   "requestId": "ce1dd4ec-1d58-418f-bfe8-9d34d316a3e6",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:30.358632+00:00"
+  },
+  {
+   "eventId": "64e0d686-1eeb-4d19-b4d0-ebd5c8bb9207",
+   "actor": "worker-4faa9ad9",
+   "actorType": "service",
+   "action": "render.succeeded",
+   "targetType": "job",
+   "targetId": "e4b68898-ff2e-47db-ae6a-931b702c6c0b",
+   "classification": null,
+   "requestId": "95db59fb-8418-4746-9565-2ca46102e0f9",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:30.245846+00:00"
+  },
+  {
+   "eventId": "98db9dea-1000-4c91-9a2d-150e6911f2e9",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "54b34851-427e-4eeb-86ca-1da5884472fd",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:29.638576+00:00"
+  },
+  {
+   "eventId": "0b091b30-30ad-4b03-992b-9635aefc78dc",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "54b34851-427e-4eeb-86ca-1da5884472fd",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:29.638576+00:00"
+  },
+  {
+   "eventId": "201a80ad-ffb7-4dc8-b742-ab3664eebd8e",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "render.queued",
+   "targetType": "job",
+   "targetId": "e4b68898-ff2e-47db-ae6a-931b702c6c0b",
+   "classification": null,
+   "requestId": "95db59fb-8418-4746-9565-2ca46102e0f9",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:29.638576+00:00"
+  },
+  {
+   "eventId": "777e6e2e-b4af-4763-9aec-d36b1265f930",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.policy_satisfied",
+   "targetType": "document",
+   "targetId": "54b34851-427e-4eeb-86ca-1da5884472fd",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:29.638576+00:00"
+  },
+  {
+   "eventId": "0915e0c8-bb96-45f7-b9c7-3800eec9441c",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "54b34851-427e-4eeb-86ca-1da5884472fd",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:29.631912+00:00"
+  },
+  {
+   "eventId": "ec30bfce-ce2f-4731-ac1c-303b36fac8b2",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "54b34851-427e-4eeb-86ca-1da5884472fd",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:29.631912+00:00"
+  },
+  {
+   "eventId": "97823b41-9fc1-4595-b571-845647a0d8f1",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "54b34851-427e-4eeb-86ca-1da5884472fd",
+   "classification": null,
+   "requestId": "3a1dca1a-eba0-499d-8a9f-0f6e318bb75a",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:29.621102+00:00"
+  },
+  {
+   "eventId": "66b5cf5b-f709-4ef4-ba74-7d17ab3e1aaf",
+   "actor": "worker-4faa9ad9",
+   "actorType": "service",
+   "action": "render.succeeded",
+   "targetType": "job",
+   "targetId": "a01da322-bf02-4441-bd94-51ab16bc5d36",
+   "classification": null,
+   "requestId": "c7048734-33f8-4201-bc5d-25eeecd564e4",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:29.017594+00:00"
+  },
+  {
+   "eventId": "d4627686-7761-4b2b-a9e3-a8a98f7af2d0",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "674f99cd-207f-4c68-a9dc-b5e38a1a9708",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.180622+00:00"
+  },
+  {
+   "eventId": "533fa471-7b10-47ba-94fd-36f292aac6e3",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "render.queued",
+   "targetType": "job",
+   "targetId": "a01da322-bf02-4441-bd94-51ab16bc5d36",
+   "classification": null,
+   "requestId": "c7048734-33f8-4201-bc5d-25eeecd564e4",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.180622+00:00"
+  },
+  {
+   "eventId": "8c8490ba-48c8-4ec1-9633-dea0aa920d52",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.policy_satisfied",
+   "targetType": "document",
+   "targetId": "674f99cd-207f-4c68-a9dc-b5e38a1a9708",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.180622+00:00"
+  },
+  {
+   "eventId": "19044fbf-97e8-47bf-9721-99ecaa53df73",
+   "actor": "svc:svc_ministry-of-finance-212f83_5515d61b",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "674f99cd-207f-4c68-a9dc-b5e38a1a9708",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.180622+00:00"
+  },
+  {
+   "eventId": "4f4e5c0a-31d2-49bb-9358-570137d5d982",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "674f99cd-207f-4c68-a9dc-b5e38a1a9708",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.170293+00:00"
+  },
+  {
+   "eventId": "b4608636-2f52-4fe0-a9b6-2c72bdd3d2d9",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "674f99cd-207f-4c68-a9dc-b5e38a1a9708",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.170293+00:00"
+  },
+  {
+   "eventId": "126878b7-16e6-4842-bce9-390271b4001a",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "674f99cd-207f-4c68-a9dc-b5e38a1a9708",
+   "classification": null,
+   "requestId": "cae29039-a709-4111-9c7f-c6932f37b3fd",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.159611+00:00"
+  },
+  {
+   "eventId": "2d69f119-fd8f-4b44-a821-26d8e5e997fc",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "20fbbc21-87b3-4568-b0b2-f7049de110d0",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.147653+00:00"
+  },
+  {
+   "eventId": "abe9befb-75aa-44e6-80d4-95e43e31aa20",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "20fbbc21-87b3-4568-b0b2-f7049de110d0",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.147653+00:00"
+  },
+  {
+   "eventId": "0154245b-df8b-49e1-950f-28085e8a1e1a",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "20fbbc21-87b3-4568-b0b2-f7049de110d0",
+   "classification": null,
+   "requestId": "f297864b-7967-4260-8e31-19f31f1fcbe0",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.135175+00:00"
+  },
+  {
+   "eventId": "73093d53-cc95-42c7-888e-b950a3371585",
+   "actor": "system",
+   "actorType": "system",
+   "action": "governance.step_satisfied",
+   "targetType": "document",
+   "targetId": "c4fcbcd8-5bc0-404b-91fd-0100799c1e9b",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.121056+00:00"
+  },
+  {
+   "eventId": "409ab603-6961-4d0a-98f4-b2e4f027941a",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "approval.approve",
+   "targetType": "document",
+   "targetId": "c4fcbcd8-5bc0-404b-91fd-0100799c1e9b",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.121056+00:00"
+  },
+  {
+   "eventId": "e761ba18-45a1-440b-a017-9f1f1ebcdbcc",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "c4fcbcd8-5bc0-404b-91fd-0100799c1e9b",
+   "classification": null,
+   "requestId": "a6cf1aae-f4cf-415f-af65-ee05d170a298",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.108558+00:00"
+  },
+  {
+   "eventId": "d41b4070-d500-4d8f-b44d-c4ee2dc020a7",
+   "actor": "svc:svc_ministry-of-finance-212f83_3449a709",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "143b3dbd-c1fd-4ba5-b034-01823310468c",
+   "classification": null,
+   "requestId": "23422a02-3f70-40aa-b856-8685cab83a1d",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.09649+00:00"
+  },
+  {
+   "eventId": "a900a07a-c0e4-48d0-9c77-b64781f4c2a4",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "ea706b02-c27c-4037-a103-70c6c643c273",
+   "classification": null,
+   "requestId": "56b107b1-fa9e-4f9d-a4fd-6f1ee28ba37f",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.086129+00:00"
+  },
+  {
+   "eventId": "c81ffbe8-0783-46e2-96c2-f4c0b76f40fe",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "97dc9136-639a-410f-bc48-25e541229727",
+   "classification": null,
+   "requestId": "422494e7-e859-4cfc-ab4d-96e3b234a00f",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.07655+00:00"
+  },
+  {
+   "eventId": "718d9d93-daab-4797-b371-04ea902491dd",
+   "actor": "svc:svc_ministry-of-finance-212f83_5052f753",
+   "actorType": "service",
+   "action": "document.submitted",
+   "targetType": "document",
+   "targetId": "2554fd33-861f-4525-87b7-425825245996",
+   "classification": null,
+   "requestId": "3a00b548-fe60-44a0-a9f8-7fadafab559e",
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:28.060956+00:00"
+  },
+  {
+   "eventId": "e589ad12-d994-4cd5-84a7-f23e535ee7af",
+   "actor": "operator:cli",
+   "actorType": "system",
+   "action": "client.issued",
+   "targetType": "service_client",
+   "targetId": "e127e6bd-cd7d-40c8-8c27-496e4763234b",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:27.790001+00:00"
+  },
+  {
+   "eventId": "5d556f36-9555-4553-9a38-53c41cb09e51",
+   "actor": "svc:svc_ministry-of-finance-212f83_e4207ab4",
+   "actorType": "service",
+   "action": "client.issued",
+   "targetType": "service_client",
+   "targetId": "425cb3ff-85c5-489b-81c4-e98ed196c3d4",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:27.68038+00:00"
+  },
+  {
+   "eventId": "0ad4248a-e9d7-451a-9372-6124091a0edc",
+   "actor": "svc:svc_ministry-of-finance-212f83_e4207ab4",
+   "actorType": "service",
+   "action": "client.issued",
+   "targetType": "service_client",
+   "targetId": "3bfca887-5c1d-46cd-96f2-db2b7aa2bc4f",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:27.632002+00:00"
+  },
+  {
+   "eventId": "053fbc54-b2d6-49a1-b19c-2cf584d2d905",
+   "actor": "svc:svc_ministry-of-finance-212f83_e4207ab4",
+   "actorType": "service",
+   "action": "client.issued",
+   "targetType": "service_client",
+   "targetId": "b7417755-2351-4fac-8cb0-1aea55c1e3da",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:27.581767+00:00"
+  },
+  {
+   "eventId": "7a7d282d-923b-4be7-ab9b-cdac3fe27542",
+   "actor": "billing",
+   "actorType": "system",
+   "action": "subscription.active",
+   "targetType": "tenant",
+   "targetId": "7b5003cb-b3c0-4f0d-850d-9f95353cd9e8",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:27.549458+00:00"
+  },
+  {
+   "eventId": "9e706290-7fd5-4aac-a678-907153012043",
+   "actor": "signup",
+   "actorType": "system",
+   "action": "tenant.signup",
+   "targetType": "tenant",
+   "targetId": "7b5003cb-b3c0-4f0d-850d-9f95353cd9e8",
+   "classification": null,
+   "requestId": null,
+   "correlationId": null,
+   "sha256": null,
+   "ts": "2026-10-10T00:45:27.427938+00:00"
+  }
+ ]
+}

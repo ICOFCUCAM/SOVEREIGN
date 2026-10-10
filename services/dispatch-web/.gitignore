@@ -7,3 +7,5 @@ dist
 
 # placeholder hero — replace with the real Dispatchhero.png artwork
 public/Dispatchhero.png
+test-results
+playwright-report

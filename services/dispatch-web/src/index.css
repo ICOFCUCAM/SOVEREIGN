@@ -132,3 +132,81 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   @keyframes sd-breathe { 0%,100% { box-shadow: 0 30px 80px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(201,162,75,.45), 0 0 40px -6px rgba(233,200,120,.35); } 50% { box-shadow: 0 30px 80px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(201,162,75,.6), 0 0 64px 0 rgba(233,200,120,.55); } }
   .sd-breathe { animation: sd-breathe 3.4s ease-in-out infinite; }
 }
+
+/* ══ Operations console design system (scoped to .sd-console) ═══════════════
+   The institutional workspace: dark navy ground, graphite panels, a restrained
+   blue for wayfinding and a muted gold reserved for seals, certificates and
+   evidence. Scoped so the public/marketing surfaces are untouched. */
+.sd-console {
+  background: #0b1018;
+  color: #edf2f8;
+  font-size: 13px;
+  line-height: 1.5;
+  font-feature-settings: "kern", "liga", "calt", "cv11";
+}
+.sd-console .sd-mono, .sd-console code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+/* one visible, consistent focus ring across every control */
+.sd-console a:focus-visible, .sd-console button:focus-visible, .sd-console [tabindex]:focus-visible,
+.sd-console summary:focus-visible {
+  outline: 2px solid #8dbbff; outline-offset: 2px; border-radius: 6px;
+}
+.sd-console input:focus-visible, .sd-console select:focus-visible, .sd-console textarea:focus-visible {
+  outline: none; border-color: #8dbbff; box-shadow: 0 0 0 3px rgba(141,187,255,0.22);
+}
+.sd-console ::placeholder { color: #7f8ea3; opacity: 1; }
+.sd-console select { color-scheme: dark; }
+
+/* skip link — visible only when focused */
+.sd-skip { position: absolute; left: 12px; top: -48px; z-index: 200; background: #d9e7f9; color: #15243a; padding: 8px 12px; border-radius: 8px; font-weight: 700; }
+.sd-skip:focus { top: 8px; }
+
+/* dense register tables */
+.sd-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.sd-table th { position: sticky; top: 0; z-index: 1; background: #131e2b; text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #8d9bb0; border-bottom: 1px solid #263548; white-space: nowrap; }
+.sd-table td { border-top: 1px solid #1c2838; vertical-align: top; color: #b4c0cf; }
+.sd-table tbody tr:first-child td { border-top: 0; }
+.sd-table tbody tr { transition: background-color .12s ease; }
+.sd-table tbody tr:hover { background: #162131; }
+.sd-table[data-density="compact"] th, .sd-table[data-density="compact"] td { padding: 6px 12px; }
+.sd-table[data-density="comfortable"] th, .sd-table[data-density="comfortable"] td { padding: 11px 14px; }
+.sd-table tr[aria-selected="true"] { background: #1b2a3d; box-shadow: inset 2px 0 0 #8dbbff; }
+
+/* loading skeleton — static when the user prefers reduced motion */
+.sd-skel { background: linear-gradient(90deg, #162131 0%, #1b2a3d 50%, #162131 100%); background-size: 200% 100%; border-radius: 6px; }
+@media (prefers-reduced-motion: no-preference) {
+  .sd-skel { animation: sd-shimmer 1.4s ease-in-out infinite; }
+  @keyframes sd-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  .sd-fade { animation: sd-fade-in .16s ease-out both; }
+  @keyframes sd-fade-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sd-console *, .sd-console *::before, .sd-console *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* the guilloché-like hairline that frames certificates — a print idiom, not decoration */
+.sd-cert { position: relative; }
+.sd-cert::before { content: ""; position: absolute; inset: 5px; border: 1px solid rgba(201,173,117,0.22); border-radius: 10px; pointer-events: none; }
+
+/* Windows high-contrast: keep borders and focus visible */
+@media (forced-colors: active) {
+  .sd-console a:focus-visible, .sd-console button:focus-visible { outline: 2px solid CanvasText; }
+}
+
+/* ── Print — a record file prints as a document: no chrome, dark-on-white ── */
+@media print {
+  .sd-noprint, .sd-skip { display: none !important; }
+  .sd-console, .sd-console * { background: #fff !important; color: #111 !important; border-color: #bbb !important; box-shadow: none !important; }
+  .sd-console { height: auto !important; }
+  .sd-console #sd-main { overflow: visible !important; }
+  .sd-console .sd-cert, .sd-console section, .sd-console table { break-inside: avoid; }
+  .sd-console a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 10px; }
+  .sd-console .sd-cert::before { border-color: #999 !important; }
+}
+.sd-printonly { display: none; }
+@media print { .sd-printonly { display: block !important; } }
+
+/* console scroll areas (register, queue, evidence) — a slim navy thumb, accent on hover */
+.sd-console ::-webkit-scrollbar { width: 10px; height: 10px; }
+.sd-console ::-webkit-scrollbar-thumb { background: #263548; border: 2px solid transparent; background-clip: padding-box; border-radius: 8px; }
+.sd-console ::-webkit-scrollbar-thumb:hover { background: #3b5374; background-clip: padding-box; }
+.sd-console * { scrollbar-color: #263548 transparent; }
