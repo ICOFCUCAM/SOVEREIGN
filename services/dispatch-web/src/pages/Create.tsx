@@ -378,6 +378,15 @@ const Create: React.FC = () => {
   const fieldErr = (role: string, heading: string) => (attempted && !(values[role] ?? "").trim() ? `${heading} is required.` : null);
   const serverFieldErr = (role: string) => validation?.errors?.find((e) => e.field && e.field.includes(role))?.message ?? null;
 
+  // Reloading or closing the tab ends the in-memory session AND discards the draft
+  // (nothing is stored client-side for classified material) — ask first.
+  useEffect(() => {
+    if (!hasContent || created.current) return;
+    const h = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", h);
+    return () => window.removeEventListener("beforeunload", h);
+  }, [hasContent]);
+
   const chooseType = (t: string) => {
     if (t === docTypeId) return;
     if (hasContent) { setPendingType(t); return; } // changing type discards the authored sections — confirm first
