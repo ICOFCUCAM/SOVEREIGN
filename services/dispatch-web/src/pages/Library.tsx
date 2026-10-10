@@ -20,6 +20,16 @@ const SORTS: { value: SortKey; label: string }[] = [
 const STAGE_ORDER: Lifecycle[] = ["draft", "submitted", "in_review", "approved", "rendered", "published", "withdrawn", "archived", "rejected"];
 const ts = (iso?: string | null) => (iso ? new Date(iso).getTime() : 0);
 
+// Retention is a disposal obligation: flag horizons that have passed or fall
+// within 30 days, in words as well as colour.
+const Retention: React.FC<{ iso?: string | null }> = ({ iso }) => {
+  if (!iso) return <span className="text-sd-text3">—</span>;
+  const days = Math.floor((ts(iso) - Date.now()) / 86_400_000);
+  if (days < 0) return <span className="text-sd-bad">{fmtDate(iso)}<span className="block font-sans text-[11px] font-semibold">Retention ended</span></span>;
+  if (days <= 30) return <span className="text-sd-warn">{fmtDate(iso)}<span className="block font-sans text-[11px] font-semibold">{days === 0 ? "Ends today" : `Ends in ${days} day${days === 1 ? "" : "s"}`}</span></span>;
+  return <span className="text-sd-text2">{fmtDate(iso)}</span>;
+};
+
 // A column header that sorts the register. Each column has one fixed direction
 // (the one the Sort menu describes); aria-sort reports it to assistive tech.
 const SortTh: React.FC<{ label: string; k: SortKey; sort: SortKey; setSort: (k: SortKey) => void }> = ({ label, k, sort, setSort }) => (
@@ -205,7 +215,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
                             {inReview ? <span className="text-sd-warn" title="Time with the current authority">{waited(d.waitingSince ?? d.submittedAt)}</span>
                               : d.publishedAt ? <span className="text-sd-text2">{fmtDate(d.publishedAt)}</span> : <span className="text-sd-text3">—</span>}
                           </td>
-                          <td className="whitespace-nowrap font-mono text-[12px] text-sd-text2">{fmtDate(d.retentionUntil)}</td>
+                          <td className="whitespace-nowrap font-mono text-[12px]"><Retention iso={d.retentionUntil} /></td>
                         </tr>
                       );
                     })}
@@ -231,7 +241,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
                           <div><dt className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-sd-text3">Policy</dt><dd className="text-sd-text2">{d.policyName ?? "—"}{d.policyVersion ? ` v${d.policyVersion}` : ""}</dd></div>
                           {(d.lifecycle === "in_review" || d.lifecycle === "submitted") && <div><dt className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-sd-text3">Waiting</dt><dd className="font-mono text-sd-warn">{waited(d.waitingSince ?? d.submittedAt)}</dd></div>}
                           {d.publishedAt && <div><dt className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-sd-text3">Published</dt><dd className="font-mono text-sd-text2">{fmtDate(d.publishedAt)}</dd></div>}
-                          {d.retentionUntil && <div><dt className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-sd-text3">Retention until</dt><dd className="font-mono text-sd-text2">{fmtDate(d.retentionUntil)}</dd></div>}
+                          {d.retentionUntil && <div><dt className="text-[10.5px] font-bold uppercase tracking-[0.08em] text-sd-text3">Retention until</dt><dd className="font-mono"><Retention iso={d.retentionUntil} /></dd></div>}
                         </dl>
                       </Link>
                     </li>
