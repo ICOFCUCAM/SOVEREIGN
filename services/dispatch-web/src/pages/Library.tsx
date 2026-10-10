@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { listDocuments, type DocListItem, type Lifecycle, humanError } from "../lib/api";
 import { recordTypeLabel } from "../lib/recordTypes";
+import { timeAgo } from "../lib/ui";
 import { fmtDate, recordNo, waited } from "../lib/format";
 import { Alert, Button, ClassificationMark, EmptyState, Highlight, LifecycleStatus, PageHeader, Panel, Segmented, SkeletonRows, controlCls, cx, lifecycleMeta, postureText, selectCls, useDensity, useHotkeys } from "../components/console/ds";
 import { Icon } from "../components/console/icons";
@@ -148,7 +149,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
         <select id="reg-sort" className={cx(selectCls, "h-9")} value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
           {SORTS.map((s) => <option key={s.value} value={s.value}>Sort: {s.label}</option>)}
         </select>
-        <Segmented label="Row density" value={density} onChange={setDensity} options={[{ value: "comfortable", label: "Comfortable" }, { value: "compact", label: "Compact" }]} />
+        <span className="hidden md:inline-flex"><Segmented label="Row density" value={density} onChange={setDensity} options={[{ value: "comfortable", label: "Comfortable" }, { value: "compact", label: "Compact" }]} /></span>
         {filtered && <Button variant="ghost" icon={<Icon.close />} onClick={() => { setDraftQ(""); const keep = new URLSearchParams(); if (params.get("sort")) keep.set("sort", params.get("sort")!); setParams(keep, { replace: true }); }}>Clear filters</Button>}
         <Button variant="ghost" icon={<Icon.refresh />} onClick={load} loading={loading} aria-label="Reload the register" />
       </div>
@@ -203,6 +204,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
                               <span className="font-mono text-sd-text2" title="Register reference derived from the document ID. The allocated official record ID is shown on the record file.">{recordNo(d.documentId, d.createdAt)}</span>
                               <span aria-hidden>·</span><span>{recordTypeLabel(d.docType)}</span>
                               <span aria-hidden>·</span><span>v{d.version}</span>
+                              {d.updatedAt && <><span aria-hidden>·</span><span title={`Updated ${fmtDate(d.updatedAt)}`}>updated {timeAgo(d.updatedAt)}</span></>}
                             </div>
                           </td>
                           <td><ClassificationMark level={d.classification?.level} scheme={d.classification?.scheme} /></td>
