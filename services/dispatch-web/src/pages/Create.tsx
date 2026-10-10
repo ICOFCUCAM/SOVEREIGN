@@ -520,7 +520,7 @@ const Create: React.FC = () => {
 
         {/* ── submission rail ── */}
         <aside className="space-y-4 xl:sticky xl:top-2" aria-label="Submission">
-          <Panel headingLevel={2} title="Submission">
+          <Panel headingLevel={2} title="Submission" aside={hasContent ? <span className="flex items-center gap-1.5 text-sd-warn" title="Drafts are never stored in the browser or on the server before submission"><Icon.alert className="h-3.5 w-3.5" />Unsaved draft</span> : undefined}>
             <dl className="grid grid-cols-2 gap-x-3 gap-y-2.5">
               <Fact label="Record type" value={spec.label} className="col-span-2" />
               <Fact label="Classification" value={<ClassificationMark level={level} />} />
@@ -577,7 +577,7 @@ const Create: React.FC = () => {
               </Button>
             </div>
             {blocked && <p id="cr-needed" className={cx("mt-2 text-[12px]", attempted ? "font-medium text-sd-warn" : "text-sd-text3")}>Still needed: {[...missing, ...(outputs.length === 0 ? ["an output format"] : [])].join(", ")}.</p>}
-            <p id="cr-submit-note" className="mt-2.5 text-[11.5px] leading-snug text-sd-text3">Submitting enters the approval chain. Nothing is published until the policy is satisfied and the publication authority releases it.</p>
+            <p id="cr-submit-note" className="mt-2.5 text-[11.5px] leading-snug text-sd-text3">This draft exists only in this tab until submitted. Submitting enters the approval chain. Nothing is published until the policy is satisfied and the publication authority releases it.</p>
             <button onClick={() => setShowJson((s) => !s)} aria-expanded={showJson} className="mt-3 text-[11.5px] font-semibold text-sd-text3 hover:text-sd-text">{showJson ? "Hide" : "Show"} technical payload</button>
           </Panel>
         </aside>
