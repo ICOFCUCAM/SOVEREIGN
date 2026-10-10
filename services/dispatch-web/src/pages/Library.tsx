@@ -132,7 +132,8 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
         <form role="search" onSubmit={(e) => { e.preventDefault(); setParam("q", draftQ.trim()); }} className="relative min-w-[220px] flex-1">
           <label htmlFor="reg-search" className="sr-only">Search the register by title</label>
           <Icon.search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-sd-text3" />
-          <input id="reg-search" ref={searchRef} className={cx(controlCls, "h-9 pl-8 pr-16")} value={draftQ} onChange={(e) => setDraftQ(e.target.value)} placeholder="Search by title… (press Enter)" />
+          <input id="reg-search" ref={searchRef} type="search" className={cx(controlCls, "h-9 pl-8 pr-16")} value={draftQ} onChange={(e) => setDraftQ(e.target.value)} placeholder="Search by title… (press Enter)"
+            onKeyDown={(e) => { if (e.key === "Escape") { if (draftQ || q) { e.preventDefault(); setDraftQ(""); setParam("q", ""); } else searchRef.current?.blur(); } }} />
           <span className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 text-[11px] text-sd-faint sm:block">/ to focus</span>
         </form>
         {!fixedState && (
