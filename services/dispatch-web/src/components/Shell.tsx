@@ -261,6 +261,9 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
             </div>
           )}
 
+          {/* announces the destination after client-side navigation */}
+          <div aria-live="polite" aria-atomic="true" className="sr-only">{crumb ? `${crumb} — ${product.label}` : product.label}</div>
+
           {remaining && remaining.minutes <= 2 && (
             <div role="alert" className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-sd-warn/40 bg-[#2a2314] px-4 py-2 text-[12.5px] text-sd-warn sm:px-6">
               <Icon.clock className="h-4 w-4 shrink-0" />
@@ -269,7 +272,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
             </div>
           )}
 
-          <main id="sd-main" ref={mainRef} tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto outline-none">
+          <main id="sd-main" ref={mainRef} tabIndex={-1} aria-label={crumb || product.label} className="min-h-0 flex-1 overflow-y-auto outline-none">
             <div className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 lg:px-8 lg:py-7">{children}</div>
             <footer className="sd-noprint mx-auto flex w-full max-w-[1480px] flex-wrap justify-between gap-2 border-t border-sd-soft px-4 py-4 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-sd-faint sm:px-6 lg:px-8">
               <span><span className="text-sd-text3">Sovereign Dispatch</span> · Institutional record infrastructure</span>
