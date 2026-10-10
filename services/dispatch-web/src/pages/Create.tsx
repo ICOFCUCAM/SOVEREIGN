@@ -566,11 +566,11 @@ const Create: React.FC = () => {
 
             <div className="mt-4 flex gap-2">
               <Button variant="secondary" onClick={onValidate} loading={busy === "validate"} disabled={!!busy}>Validate</Button>
-              <Button variant="primary" className="flex-1" onClick={onSubmit} loading={busy === "submit"} disabled={!!busy} aria-describedby="cr-submit-note" aria-disabled={blocked || undefined}>
+              <Button variant="primary" className="flex-1" onClick={onSubmit} loading={busy === "submit"} disabled={!!busy} aria-describedby={blocked ? "cr-needed cr-submit-note" : "cr-submit-note"}>
                 Submit for governance <Icon.arrowRight className="h-3.5 w-3.5" />
               </Button>
             </div>
-            {blocked && attempted && <p className="mt-2 text-[12px] font-medium text-sd-warn">Still needed: {[...missing, ...(outputs.length === 0 ? ["an output format"] : [])].join(", ")}.</p>}
+            {blocked && <p id="cr-needed" className={cx("mt-2 text-[12px]", attempted ? "font-medium text-sd-warn" : "text-sd-text3")}>Still needed: {[...missing, ...(outputs.length === 0 ? ["an output format"] : [])].join(", ")}.</p>}
             <p id="cr-submit-note" className="mt-2.5 text-[11.5px] leading-snug text-sd-text3">Submitting enters the approval chain. Nothing is published until the policy is satisfied and the publication authority releases it.</p>
             <button onClick={() => setShowJson((s) => !s)} aria-expanded={showJson} className="mt-3 text-[11.5px] font-semibold text-sd-text3 hover:text-sd-text">{showJson ? "Hide" : "Show"} technical payload</button>
           </Panel>
