@@ -159,7 +159,7 @@ export const Metric: React.FC<{ value?: React.ReactNode; label: string; sub?: st
   return (
     <div className="min-w-0">
       <div className={cx("font-mono text-[26px] font-semibold leading-none tracking-[-0.02em] tabular-nums", c)}>
-        {loading ? <span className="sd-skel inline-block h-6 w-10 align-middle" aria-label="Loading" /> : value ?? <span className="text-sd-faint" aria-label="Not available">—</span>}
+        {loading ? <span className="sd-skel inline-block h-6 w-10 align-middle" aria-label="Loading" /> : typeof value === "number" ? value.toLocaleString("en-GB") : value ?? <span className="text-sd-faint" aria-label="Not available">—</span>}
       </div>
       <div className="mt-2 text-[12px] font-semibold text-sd-text2">{label}</div>
       {sub && <div className="text-[11.5px] text-sd-text3">{sub}</div>}
