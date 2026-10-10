@@ -734,7 +734,13 @@ async function handleAudit(res, principal, query) {
   const target = query.get("target");
   const action = query.get("action");
   const limit = Math.min(Number(query.get("limit") || 200), 1000);
-  const rows = await withClaims(pool, govClaims(principal), async (c) => {
+  // The verified audit scope is expressed to RLS as the auditor role (as admin
+  // writes run as tenant_admin), so the M7 audit_read policy authorises the read
+  // for service and person principals alike — still confined to the caller's
+  // tenant, still read-only. Without this a service credential holding
+  // dispatch:audit received an empty trail (its RLS role is "service").
+  const claims = { ...govClaims(principal), dispatch_role: "auditor" };
+  const rows = await withClaims(pool, claims, async (c) => {
     const where = ["tenant_id = $1"]; const params = [principal.tenantId]; let i = 2;
     if (target) { where.push(`target_id = $${i++}`); params.push(target); }
     if (action) { where.push(`action = $${i++}`); params.push(action); }
