@@ -4,7 +4,7 @@ import { listDocuments, audit, getStats, getGovernanceOverview, type DocListItem
 import { timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { recordTypeLabel } from "../lib/recordTypes";
-import { actorName, fmtDateTime } from "../lib/format";
+import { actorName, fmtDateTime, waited } from "../lib/format";
 import OfficeHome from "../components/OfficeHome";
 import { Alert, Badge, Button, ClassificationMark, EmptyState, LifecycleStatus, Metric, PageHeader, Panel, Section, Skeleton, cx, lifecycleMeta } from "../components/console/ds";
 import { Icon } from "../components/console/icons";
@@ -124,11 +124,11 @@ const Dashboard: React.FC = () => {
           <Section title="Requires action">
             <div className="grid gap-4 lg:grid-cols-2">
               {has("dispatch:approve") && (
-                <Queue title="Awaiting approval" items={counts["in_review"] ?? []} loading={loading}
+                <Queue title="Awaiting approval" items={counts["in_review"] ?? []} loading={loading} oldestFirst
                   empty="No records awaiting approval — the governance queue is clear."
                   cta={{ to: "/console/review", label: "Open review queue" }} />
               )}
-              <Queue title="Ready for publication" items={counts["rendered"] ?? []} loading={loading}
+              <Queue title="Ready for publication" items={counts["rendered"] ?? []} loading={loading} oldestFirst
                 empty="Nothing ready to publish. No publication backlog."
                 cta={rendered > 0 ? { to: "/console/library?state=rendered", label: "View records" } : undefined} />
               {rejected > 0 && (
@@ -315,7 +315,12 @@ const ActivityList: React.FC<{ events: AuditEvent[] }> = ({ events }) => (
   </Panel>
 );
 
-const Queue: React.FC<{ title: string; items: DocListItem[]; empty: string; cta?: { to: string; label: string }; tone?: "default" | "warn" | "bad"; loading?: boolean }> = ({ title, items, empty, cta, tone = "default", loading }) => (
+// Action queues read oldest-first with the time each record has waited — the
+// longest-held record is the one an institution is most accountable for.
+const since = (d: DocListItem) => d.waitingSince ?? d.submittedAt ?? d.updatedAt;
+const Queue: React.FC<{ title: string; items: DocListItem[]; empty: string; cta?: { to: string; label: string }; tone?: "default" | "warn" | "bad"; loading?: boolean; oldestFirst?: boolean }> = ({ title, items: raw, empty, cta, tone = "default", loading, oldestFirst }) => {
+  const items = oldestFirst ? [...raw].sort((a, b) => new Date(since(a) ?? 0).getTime() - new Date(since(b) ?? 0).getTime()) : raw;
+  return (
   <Panel padded={false} tone={tone === "default" ? "default" : tone}
     title={<span className="flex items-center gap-2">{title}<span className="rounded bg-sd-sunken px-1.5 py-0.5 font-mono text-[11px] text-sd-text2">{loading ? "…" : items.length >= LIMIT ? `${LIMIT}+` : items.length}</span></span>}
     aside={cta && <Link to={cta.to} className="font-semibold text-sd-accent hover:underline">{cta.label} →</Link>}>
@@ -334,7 +339,9 @@ const Queue: React.FC<{ title: string; items: DocListItem[]; empty: string; cta?
                 <span className="block truncate text-[11.5px] text-sd-text3">{recordTypeLabel(d.docType)}{d.currentAuthority ? ` · ${d.currentAuthority}` : ""}</span>
               </span>
               <span className="hidden sm:block"><LifecycleStatus state={d.lifecycle} /></span>
-              <span className="w-14 text-right font-mono text-[11.5px] text-sd-text3">{timeAgo(d.updatedAt)}</span>
+              {oldestFirst
+                ? <span className="w-16 text-right font-mono text-[11.5px] text-sd-warn" title="Time waiting">{waited(since(d))}</span>
+                : <span className="w-16 text-right font-mono text-[11.5px] text-sd-text3" title={fmtDateTime(d.updatedAt)}>{timeAgo(d.updatedAt)}</span>}
             </Link>
           </li>
         ))}
@@ -342,6 +349,7 @@ const Queue: React.FC<{ title: string; items: DocListItem[]; empty: string; cta?
       </ul>
     )}
   </Panel>
-);
+  );
+};
 
 export default Dashboard;
