@@ -254,7 +254,8 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] text-sd-text2">
                 {items.filter((n) => n.key).map((n) => <span key={n.to} className="flex items-center gap-1.5"><Kbd>g</Kbd><Kbd>{n.key}</Kbd>{n.label}</span>)}
                 <span className="flex items-center gap-1.5"><Kbd>/</Kbd>Focus search</span>
-                <span className="flex items-center gap-1.5"><Kbd>j</Kbd><Kbd>k</Kbd>Move in queue</span>
+                <span className="flex items-center gap-1.5"><Kbd>j</Kbd><Kbd>k</Kbd>Move in queue / register</span>
+                <span className="flex items-center gap-1.5"><Kbd>o</Kbd>Open selected record (review)</span>
                 <span className="flex items-center gap-1.5"><Kbd>Esc</Kbd>Close</span>
                 <button onClick={() => setShortcuts(false)} className="ml-auto text-[12px] font-semibold text-sd-accent hover:underline">Close</button>
               </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { approvalsInbox, decide, getDocument, getMyAuthority, type DocumentDetail, type InboxItem, humanError } from "../lib/api";
 import { timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
@@ -32,6 +32,7 @@ const CONSEQUENCE: Record<Decision, string> = {
 // them and surfaces the resulting refusals rather than re-implementing them.
 const Review: React.FC = () => {
   const { session } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<InboxItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [sel, setSel] = useState<InboxItem | null>(null);
@@ -79,7 +80,7 @@ const Review: React.FC = () => {
     const next = visible[Math.max(0, Math.min(visible.length - 1, i + delta))];
     if (next) { choose(next); document.getElementById(`rv-${next.documentId}`)?.scrollIntoView({ block: "nearest" }); }
   };
-  useHotkeys({ j: () => move(1), k: () => move(-1), "/": () => filterRef.current?.focus() });
+  useHotkeys({ j: () => move(1), k: () => move(-1), "/": () => filterRef.current?.focus(), o: () => { if (sel) navigate(`/console/documents/${sel.documentId}`); } });
 
   const act = async (decision: Decision) => {
     if (!sel) return;
@@ -120,7 +121,7 @@ const Review: React.FC = () => {
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
         {/* the queue */}
         <Panel headingLevel={2} padded={false} title={<span className="flex items-center gap-2">Governance queue <span className="rounded bg-sd-sunken px-1.5 py-0.5 font-mono text-[11px] text-sd-text2">{loading ? "…" : visible.length}</span></span>}
-          aside={<span className="hidden items-center gap-1 sm:flex"><Kbd>j</Kbd><Kbd>k</Kbd> move</span>}>
+          aside={<span className="hidden items-center gap-1 sm:flex"><Kbd>j</Kbd><Kbd>k</Kbd> move · <Kbd>o</Kbd> open</span>}>
           <div className="border-b border-sd-soft p-2.5">
             <label htmlFor="rv-filter" className="sr-only">Filter the queue</label>
             <div className="relative">
