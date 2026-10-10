@@ -394,7 +394,7 @@ const GovernanceStanding: React.FC<{ p: NonNullable<DocumentDetail["posture"]>; 
       <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h2 className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-sd-text3">Governance standing</h2>
-          <div className="mt-1.5 flex items-center gap-2.5"><LifecycleStatus state={lifecycle} /><span className="font-serif text-[19px] font-semibold leading-tight text-sd-text">{postureText(lifecycle, p.status) || "—"}</span></div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5"><LifecycleStatus state={lifecycle} /><span className="min-w-0 font-serif text-[19px] font-semibold leading-tight text-sd-text">{postureText(lifecycle, p.status) || "—"}</span></div>
         </div>
         {p.policyName && (
           <div className="shrink-0 sm:text-right">
