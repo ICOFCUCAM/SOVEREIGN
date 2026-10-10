@@ -141,7 +141,7 @@ export const GovernanceInstrument: React.FC<{
                 ["Official Record", "A governed, versioned, classified instrument — not a file."],
                 ["Governance Certificate", "Records that the policy chain was satisfied in order, with a SHA-256 integrity proof."],
                 ["Preservation Certificate", "Tamper-evident SHA-256 seal; the record is permanent."],
-                ["Evidence Chain", "Every act, hash-stamped to an append-only trail."],
+                ["Evidence Chain", "Every act recorded to an append-only trail; sealing events carry their SHA-256 proofs."],
               ].map(([t, d]) => (
                 <li key={t} className="rounded-lg border border-sd-soft bg-sd-sunken px-3 py-2">
                   <div className="text-[12.5px] font-semibold text-sd-text">{t}</div>
