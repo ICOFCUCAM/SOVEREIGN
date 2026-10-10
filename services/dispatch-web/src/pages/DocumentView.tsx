@@ -52,6 +52,13 @@ const DocumentView: React.FC = () => {
   useEffect(() => { setDoc(null); setJob(null); setEvents([]); setCert(null); setGovCert(null); setErr(null); setDone(null); setLoadErr(null); }, [id]);
   useEffect(() => { load(); }, [load]);
   const lcFor = doc && doc.id === id ? doc.lifecycle : undefined;
+  // Name the tab after the record, so several open records stay distinguishable.
+  useEffect(() => {
+    if (!doc || doc.id !== id) return;
+    const prev = document.title;
+    document.title = `${doc.publicId || recordNo(doc.id, doc.createdAt)} · ${doc.title || "(untitled)"} — Sovereign Dispatch`;
+    return () => { document.title = prev; };
+  }, [doc, id]);
 
   // An archived record is a preserved artifact — pull its preservation certificate.
   useEffect(() => {
