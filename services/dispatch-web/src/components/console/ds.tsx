@@ -195,8 +195,8 @@ export const CopyButton: React.FC<{ value: string; label: string; className?: st
 
 // An identifier or digest shown in full (never truncated away), monospaced, with
 // copy. `note` states exactly what the value attests — no more than it proves.
-export const EvidenceValue: React.FC<{ label: string; value?: string | null; note?: React.ReactNode; tone?: "default" | "gold" }> = ({ label, value, note, tone = "default" }) => (
-  <div className="min-w-0">
+export const EvidenceValue: React.FC<{ label: string; value?: string | null; note?: React.ReactNode; tone?: "default" | "gold"; className?: string }> = ({ label, value, note, tone = "default", className }) => (
+  <div className={cx("min-w-0", className)}>
     <dt className="flex items-center justify-between gap-2 text-[10.5px] font-bold uppercase tracking-[0.1em] text-sd-text3">
       <span>{label}</span>
       {value && <CopyButton value={value} label={label} />}

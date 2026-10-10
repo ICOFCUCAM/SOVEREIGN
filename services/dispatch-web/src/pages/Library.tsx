@@ -178,7 +178,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
           ) : (
             <>
               {/* desktop / tablet: dense register table */}
-              <div className="hidden max-h-[calc(100vh-300px)] min-h-[240px] overflow-auto md:block">
+              <div className="hidden relative max-h-[calc(100vh-300px)] min-h-[240px] overflow-auto md:block">
                 <table className="sd-table" data-density={density}>
                   <caption className="sr-only">{title ?? "Official records"} — {rows.length} records. Use j and k to move, Enter to open.</caption>
                   <thead>

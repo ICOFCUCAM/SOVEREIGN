@@ -142,7 +142,7 @@ const Review: React.FC = () => {
                 No records are awaiting a governance decision. Publication is released from the record file by the publication authority, not from this queue.</EmptyState>
             : visible.length === 0 ? <EmptyState compact icon={<Icon.search />} title="No records match this filter" action={<Button size="sm" onClick={() => setFilter("")}>Clear filter</Button>} />
             : (
-              <ul aria-label="Records awaiting a decision" className="max-h-[calc(100vh-280px)] min-h-[200px] divide-y divide-sd-soft overflow-auto">
+              <ul aria-label="Records awaiting a decision" className="relative max-h-[calc(100vh-280px)] min-h-[200px] divide-y divide-sd-soft overflow-auto">
                 {visible.map((d) => {
                   const on = sel?.documentId === d.documentId;
                   return (

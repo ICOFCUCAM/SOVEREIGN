@@ -299,7 +299,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
             </div>
           )}
 
-          <main id="sd-main" ref={mainRef} tabIndex={-1} aria-label={crumb || product.label} className="min-h-0 flex-1 overflow-y-auto outline-none">
+          <main id="sd-main" ref={mainRef} tabIndex={-1} aria-label={crumb || product.label} className="relative min-h-0 flex-1 overflow-y-auto outline-none">
             <div className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 lg:px-8 lg:py-7">{children}</div>
             <footer className="sd-noprint mx-auto flex w-full max-w-[1480px] flex-wrap justify-between gap-2 border-t border-sd-soft px-4 py-4 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-sd-faint sm:px-6 lg:px-8">
               <span><span className="text-sd-text3">Sovereign Dispatch</span> · Institutional record infrastructure</span>

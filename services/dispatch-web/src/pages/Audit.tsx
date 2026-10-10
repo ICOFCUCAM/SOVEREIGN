@@ -107,7 +107,7 @@ const Audit: React.FC = () => {
               : <EmptyState icon={<Icon.evidence />} title="No events recorded yet">Events are appended as records move through governance.</EmptyState>
           ) : (
             <>
-              <div className="max-h-[calc(100vh-300px)] min-h-[240px] overflow-auto">
+              <div className="relative max-h-[calc(100vh-300px)] min-h-[240px] overflow-auto">
                 <table className="sd-table min-w-[860px]" data-density={density}>
                   <caption className="sr-only">Evidence chain — {events.length} events, newest first. Expand a row for every recorded field.</caption>
                   <thead>
@@ -164,8 +164,8 @@ const Audit: React.FC = () => {
                                   <Fact label="Classification" value={e.classification} />
                                   <Fact label="Request ID" value={e.requestId ? <span className="inline-flex items-start gap-1 break-all">{e.requestId}<CopyButton value={e.requestId} label="request id" /></span> : undefined} mono />
                                   <Fact label="Correlation ID" value={e.correlationId ? <span className="inline-flex items-start gap-1 break-all">{e.correlationId}<CopyButton value={e.correlationId} label="correlation id" /></span> : undefined} mono />
-                                  {e.sha256 && <div className="sm:col-span-2 xl:col-span-4"><EvidenceValue label="SHA-256 digest recorded with this event" value={e.sha256} tone="gold"
-                                    note="A digest identifies exact content: recomputing it from the same bytes yields the same value. It does not by itself establish authorship, and the console does not recompute it." /></div>}
+                                  {e.sha256 && <EvidenceValue className="sm:col-span-2 xl:col-span-4" label="SHA-256 digest recorded with this event" value={e.sha256} tone="gold"
+                                    note="A digest identifies exact content: recomputing it from the same bytes yields the same value. It does not by itself establish authorship, and the console does not recompute it." />}
                                 </dl>
                                 {e.targetId && <Link to={`/console/audit?target=${e.targetId}`} className="mt-3 inline-block text-[12px] font-semibold text-sd-accent hover:underline">All events for this target →</Link>}
                               </td>
