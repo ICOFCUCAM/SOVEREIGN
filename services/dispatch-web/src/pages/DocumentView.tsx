@@ -21,7 +21,7 @@ type LifecycleAct = "publish" | "archive" | "withdraw";
 // production and versions in a persistent right rail so context is never lost.
 const DocumentView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { has } = useAuth();
+  const { has, session } = useAuth();
   const [doc, setDoc] = useState<DocumentDetail | null>(null);
   const [job, setJob] = useState<JobView | null>(null);
   const [events, setEvents] = useState<AuditEvent[]>([]);
@@ -140,6 +140,10 @@ const DocumentView: React.FC = () => {
     <div>
       {upgrade && <UpgradeModal open reason="download" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); setUpgrade(false); }} />}
       <BackLink archived={preserved} printable />
+
+      <p className="sd-printonly mb-3 text-[11px]">
+        Printed {new Date().toLocaleString("en-GB")} from Sovereign Dispatch by {session?.subject ?? "—"} (tenant {session?.tenantId ?? "—"}). A printed copy is not the official record; verify it against the record ID{doc.publicId ? ` at /verify/${doc.publicId}` : ""}.
+      </p>
 
       {/* ── Record header — the institutional object's identity ── */}
       <header className="sd-cert relative mb-5 overflow-hidden rounded-xl border border-sd-line bg-sd-panel">
@@ -364,7 +368,7 @@ const RenderPanel: React.FC<{ job: JobView | null; artifacts: ArtifactRef[]; lc?
                     <span className="ml-2 text-[12px] text-sd-text3">{fmtBytes(a.sizeBytes)}{a.pages ? ` · ${a.pages} page${a.pages > 1 ? "s" : ""}` : ""}{a.role ? ` · ${a.role}` : ""}</span>
                     {a.classification && <div className="mt-1"><ClassificationMark level={a.classification} /></div>}
                   </div>
-                  <Button size="sm" onClick={() => onDownload(a)} loading={grantBusy === a.artifactId} icon={<Icon.download />} aria-label={`Download ${a.format.toUpperCase()} artifact`}>Download</Button>
+                  <Button size="sm" className="sd-noprint" onClick={() => onDownload(a)} loading={grantBusy === a.artifactId} icon={<Icon.download />} aria-label={`Download ${a.format.toUpperCase()} artifact`}>Download</Button>
                 </div>
                 <dl className="mt-2"><EvidenceValue label="Artifact SHA-256" value={a.sha256} /></dl>
               </li>

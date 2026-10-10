@@ -183,7 +183,7 @@ export const CopyButton: React.FC<{ value: string; label: string; className?: st
   };
   return (
     <button type="button" onClick={copy} aria-label={`Copy ${label}`} title={`Copy ${label}`}
-      className={cx("inline-flex h-6 shrink-0 items-center gap-1 rounded-md px-1.5 text-[11px] font-semibold text-sd-text3 transition-colors hover:bg-sd-hover hover:text-sd-text", className)}>
+      className={cx("sd-noprint inline-flex h-6 shrink-0 items-center gap-1 rounded-md px-1.5 text-[11px] font-semibold text-sd-text3 transition-colors hover:bg-sd-hover hover:text-sd-text", className)}>
       {done === "ok" ? <Icon.check className="h-3.5 w-3.5 text-sd-ok" /> : <Icon.copy className="h-3.5 w-3.5" />}
       <span aria-live="polite" className={done ? "" : "sr-only"}>{done === "ok" ? "Copied" : done === "err" ? "Copy unavailable" : ""}</span>
     </button>

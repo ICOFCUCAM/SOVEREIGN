@@ -202,3 +202,5 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   .sd-console a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 10px; }
   .sd-console .sd-cert::before { border-color: #999 !important; }
 }
+.sd-printonly { display: none; }
+@media print { .sd-printonly { display: block !important; } }
