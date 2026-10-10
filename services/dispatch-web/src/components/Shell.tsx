@@ -65,12 +65,12 @@ function crumbFor(pathname: string, nav: NavItem[]): string {
 }
 
 // Remaining session time — the real token expiry, not an invented "secure" claim.
-const useSessionClock = (expiresAt?: number): string | null => {
+const useSessionClock = (expiresAt?: number): { label: string; minutes: number } | null => {
   const [now, setNow] = useState(Date.now());
-  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 30_000); return () => clearInterval(t); }, []);
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 15_000); return () => clearInterval(t); }, []);
   if (!expiresAt) return null;
   const m = Math.max(0, Math.round((expiresAt - now) / 60000));
-  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
+  return { label: m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`, minutes: m };
 };
 
 const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVariant }> = ({ children, variant = "operations" }) => {
@@ -133,7 +133,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
         <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-sd-gold" />
         <span>Sovereign infrastructure</span><span aria-hidden className="text-sd-faint">/</span><span className="text-sd-text2">Dispatch</span>
         <span className="ml-auto hidden items-center gap-1.5 tracking-[0.1em] sm:flex" title="Bearer token held in memory only; expires automatically">
-          <Icon.lock className="h-3 w-3" /> Tenant-scoped session{remaining && <span className="font-mono normal-case tracking-normal text-sd-text2"> · expires in {remaining}</span>}
+          <Icon.lock className="h-3 w-3" /> Tenant-scoped session{remaining && <span className="font-mono normal-case tracking-normal text-sd-text2"> · expires in {remaining.label}</span>}
         </span>
       </header>
 
@@ -245,6 +245,14 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
                 <span className="flex items-center gap-1.5"><Kbd>Esc</Kbd>Close</span>
                 <button onClick={() => setShortcuts(false)} className="ml-auto text-[12px] font-semibold text-sd-accent hover:underline">Close</button>
               </div>
+            </div>
+          )}
+
+          {remaining && remaining.minutes <= 2 && (
+            <div role="alert" className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-sd-warn/40 bg-[#2a2314] px-4 py-2 text-[12.5px] text-sd-warn sm:px-6">
+              <Icon.clock className="h-4 w-4 shrink-0" />
+              <span className="font-semibold">Your session ends in {remaining.minutes <= 0 ? "under a minute" : `${remaining.minutes} min`}.</span>
+              <span className="text-sd-text2">The token is held in memory and cannot be extended; unsaved authoring will be lost. Submit or copy your work, then sign in again.</span>
             </div>
           )}
 
