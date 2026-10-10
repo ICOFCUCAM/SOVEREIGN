@@ -23,7 +23,7 @@ const ts = (iso?: string | null) => (iso ? new Date(iso).getTime() : 0);
 // A column header that sorts the register. Each column has one fixed direction
 // (the one the Sort menu describes); aria-sort reports it to assistive tech.
 const SortTh: React.FC<{ label: string; k: SortKey; sort: SortKey; setSort: (k: SortKey) => void }> = ({ label, k, sort, setSort }) => (
-  <th scope="col" aria-sort={sort === k ? (k === "waiting" || k === "retention" || k === "title" || k === "status" ? "ascending" : "descending") : undefined}>
+  <th scope="col" aria-sort={sort === k ? "ascending" : undefined}>
     <button type="button" onClick={() => setSort(sort === k ? "updated" : k)} className={cx("inline-flex items-center gap-1 uppercase tracking-[inherit] hover:text-sd-text", sort === k && "text-sd-text")}
       title={sort === k ? "Sorted — click to return to last updated" : `Sort by ${label.toLowerCase()}`}>
       {label}<Icon.chevronDown className={cx("h-3 w-3", sort === k ? "opacity-100" : "opacity-30")} />
@@ -58,7 +58,8 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
   const [items, setItems] = useState<DocListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortKey>("updated");
+  const urlSort = params.get("sort") as SortKey | null;
+  const sort: SortKey = urlSort && SORTS.some((x) => x.value === urlSort) ? urlSort : "updated";
   const [density, setDensity] = useDensity("register");
   const [cursor, setCursor] = useState(-1);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -74,6 +75,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
   useEffect(() => { setDraftQ(q); }, [q]);
   useEffect(() => { setCursor(-1); }, [items, sort]);
 
+  const setSort = (v: SortKey) => setParam("sort", v === "updated" ? "" : v);
   const setParam = (k: string, v: string) => {
     const next = new URLSearchParams(params);
     if (v) next.set(k, v); else next.delete(k);
@@ -136,7 +138,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
           {SORTS.map((s) => <option key={s.value} value={s.value}>Sort: {s.label}</option>)}
         </select>
         <Segmented label="Row density" value={density} onChange={setDensity} options={[{ value: "comfortable", label: "Comfortable" }, { value: "compact", label: "Compact" }]} />
-        {filtered && <Button variant="ghost" icon={<Icon.close />} onClick={() => { setDraftQ(""); setParams(new URLSearchParams(), { replace: true }); }}>Clear filters</Button>}
+        {filtered && <Button variant="ghost" icon={<Icon.close />} onClick={() => { setDraftQ(""); const keep = new URLSearchParams(); if (params.get("sort")) keep.set("sort", params.get("sort")!); setParams(keep, { replace: true }); }}>Clear filters</Button>}
         <Button variant="ghost" icon={<Icon.refresh />} onClick={load} loading={loading} aria-label="Reload the register" />
       </div>
 
@@ -157,7 +159,7 @@ const Library: React.FC<{ fixedState?: Lifecycle; title?: string; blurb?: string
         {loading ? <SkeletonRows rows={7} label="Loading the register" />
           : items.length === 0 ? (
             filtered
-              ? <EmptyState icon={<Icon.search />} title="No records match these filters" action={<Button onClick={() => { setDraftQ(""); setParams(new URLSearchParams(), { replace: true }); }}>Clear filters</Button>}>Search matches record titles. Records above your clearance are never listed.</EmptyState>
+              ? <EmptyState icon={<Icon.search />} title="No records match these filters" action={<Button onClick={() => { setDraftQ(""); const keep = new URLSearchParams(); if (params.get("sort")) keep.set("sort", params.get("sort")!); setParams(keep, { replace: true }); }}>Clear filters</Button>}>Search matches record titles. Records above your clearance are never listed.</EmptyState>
               : <EmptyState icon={fixedState ? <Icon.archive /> : <Icon.register />} title={fixedState ? "No records preserved yet" : "The register is empty"}>
                   {fixedState ? "Published records appear here once the publication authority preserves them for the record." : "Official records appear here once they are submitted for governance."}
                 </EmptyState>
