@@ -13,19 +13,35 @@ The console is organised around the publication lifecycle, not file editing:
 Submit → Govern → Approve → Render → Publish → Retrieve
 ```
 
-## Surfaces
+## Surfaces — Operations (`/console`)
 
 | Route | Page | Scope | Purpose |
 |-------|------|-------|---------|
-| `/` | Dashboard | read | Lifecycle queues; "needs my action" first |
-| `/submit` | Submit | render | Classify, choose outputs, dry-run validate, submit (DDM payload) |
-| `/review` | Review & Approve | approve | Approval inbox; approve / return / reject with comment |
-| `/library` | Library | read | Published + archived documents; filter by state/type/title |
-| `/documents/:id` | Document | read | Versions, render status, artifact download (grants), publish/withdraw, provenance |
-| `/audit` | Audit | audit | Append-only event trail, filterable |
+| `/console` | Command centre (`Dashboard`) | session | Office home, governance verdict, lifecycle counts, action queues, ledger, recent activity |
+| `/console/create` | Create official record | render | 27 structured record types, classification, policy-derived procedure, AI assist (non-sensitive only), validate, submit |
+| `/console/review` | Governance review | approve | Approval queue; approve / return / reject with rationale and confirmation |
+| `/console/library` | Official records | read | Sortable, filterable register (state, search, sort in the URL) |
+| `/console/archives` | Preservation | read | The register pinned to preserved records |
+| `/console/documents/:id` | Record file | read | Standing, chain of authority, certificates, render & artifacts, versions, provenance; publish / preserve / withdraw (publish) |
+| `/console/audit` | Evidence chain | audit | Append-only event trail, filterable, every recorded field |
+| `/console/polished` | Document studio | session | Doorway to Polished Pages (`VITE_POLISHED_PAGES_URL`) |
+
+Administration (`/admin`, `dispatch:admin`), Executive Evaluation (`/evaluate`) and
+Platform Operations (`/operator`, `dispatch:platform`) are separate products.
 
 Navigation is role-filtered: items appear only when the session's scopes permit
-them, so an author sees the operator surface and an auditor the governance one.
+them. The API is the authority on every call.
+
+## Design system
+
+The Operations console is built on `src/components/console/` (tokens in
+`tailwind.config.ts` → `sd.*`, scoped CSS under `.sd-console` in `src/index.css`).
+See `docs/OPERATIONS-CONSOLE-REDESIGN.md` for the inventory, preservation
+matrix, verification results and known defects.
+
+Keyboard: `g` then `1`–`7` jumps between surfaces, `/` focuses search, `j`/`k`
+move through the review queue and register, `o` opens the selected record, `?`
+lists shortcuts.
 
 ## Auth
 
