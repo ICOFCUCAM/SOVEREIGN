@@ -204,3 +204,9 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 }
 .sd-printonly { display: none; }
 @media print { .sd-printonly { display: block !important; } }
+
+/* console scroll areas (register, queue, evidence) — a slim navy thumb, accent on hover */
+.sd-console ::-webkit-scrollbar { width: 10px; height: 10px; }
+.sd-console ::-webkit-scrollbar-thumb { background: #263548; border: 2px solid transparent; background-clip: padding-box; border-radius: 8px; }
+.sd-console ::-webkit-scrollbar-thumb:hover { background: #3b5374; background-clip: padding-box; }
+.sd-console * { scrollbar-color: #263548 transparent; }
