@@ -56,6 +56,13 @@ const Dashboard: React.FC = () => {
     return () => { live = false; };
   }, [has, tick]);
   const refresh = useCallback(() => setTick((t) => t + 1), []);
+  // Returning to the tab after a while re-evaluates, so the command surface is
+  // never silently stale; the "Evaluated hh:mm" stamp always states the age.
+  useEffect(() => {
+    const h = () => { if (document.visibilityState === "visible" && evaluatedAt && Date.now() - evaluatedAt.getTime() > 60_000) refresh(); };
+    document.addEventListener("visibilitychange", h);
+    return () => document.removeEventListener("visibilitychange", h);
+  }, [evaluatedAt, refresh]);
 
   const n = (s: string) => counts[s]?.length ?? 0;
   const capped = (s: string) => n(s) >= LIMIT;
