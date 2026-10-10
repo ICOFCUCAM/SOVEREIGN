@@ -97,6 +97,10 @@ jobs:
         working-directory: services
         run: node test/billing.test.mjs
 
+      - name: Audit read — service credential with dispatch:audit, tenant-isolated (8)
+        working-directory: services
+        run: node test/audit-read.test.mjs
+
   # Operations console (services/dispatch-web): typecheck + production build, then
   # the browser suite against recorded API fixtures (no database required).
   console:
