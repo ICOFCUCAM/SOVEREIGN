@@ -166,24 +166,28 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
           </div>
 
           <nav className="flex-1 overflow-y-auto px-2.5 pb-3">
-            {items.map((n, i) => (
+            {items.map((n, i) => {
+              // A record file belongs to the register: keep "Official records" lit.
+              const inFile = n.to === "/console/library" && pathname.startsWith("/console/documents/");
+              return (
               <React.Fragment key={n.to}>
                 {n.group && n.group !== items[i - 1]?.group && (
                   <div className="px-2.5 pb-1 pt-4 text-[10.5px] font-bold uppercase tracking-[0.16em] text-sd-faint">{n.group}</div>
                 )}
-                <NavLink to={n.to} end={n.end}
-                  className={({ isActive }) => cx("group flex items-center gap-2.5 rounded-lg border px-2.5 py-[7px] text-[13px] font-medium transition-colors",
-                    isActive ? "border-sd-accent/30 bg-[#16263a] text-sd-text" : "border-transparent text-sd-text2 hover:bg-sd-raised hover:text-sd-text")}>
-                  {({ isActive }) => (
+                <NavLink to={n.to} end={n.end} aria-current={inFile ? "page" : undefined}
+                  className={({ isActive: a }) => { const isActive = a || inFile; return cx("group flex items-center gap-2.5 rounded-lg border px-2.5 py-[7px] text-[13px] font-medium transition-colors",
+                    isActive ? "border-sd-accent/30 bg-[#16263a] text-sd-text" : "border-transparent text-sd-text2 hover:bg-sd-raised hover:text-sd-text"); }}>
+                  {({ isActive: a }) => { const isActive = a || inFile; return (
                     <>
                       {n.icon ? React.createElement(Icon[n.icon], { className: cx("h-4 w-4 shrink-0", isActive ? "text-sd-accent" : "text-sd-text3 group-hover:text-sd-text2") }) : <span className="w-4" aria-hidden />}
                       <span className="truncate">{n.label}</span>
                       {variant === "operations" && n.key && <span aria-hidden className="ml-auto hidden font-mono text-[10px] text-sd-faint xl:inline">g {n.key}</span>}
                     </>
-                  )}
+                  ); }}
                 </NavLink>
               </React.Fragment>
-            ))}
+              );
+            })}
           </nav>
 
           {/* product switcher — only for principals with access to the other product */}
