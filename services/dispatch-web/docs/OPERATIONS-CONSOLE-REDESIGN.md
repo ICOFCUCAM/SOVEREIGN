@@ -164,18 +164,91 @@ covers only automatable checks.
 | D2 | Server posture `institutionalStatus("rejected")` returns "Returned for revision", while a Return decision moves the record to `draft`. Pinned by `test/posture.test.mjs`. | `shared/src/governance.mjs:252` | Change to "Rejected" (and the test). The console already labels truthfully |
 | D3 | `GET /v1/documents` (list) does not return `public_id`, so the register can only show the id-derived reference, which differs from the official record ID shown on the record file | `server.mjs` list query | Add `publicId` to the list response (additive) |
 | D4 | DOCX rendering is not deterministic across renders in one process (TOC bookmark ids `_Toc1` vs `_Toc8`) | `epic7-docx` "deterministic document.xml" 16/17 | Reset the bookmark counter per render |
-| D5 | `GET /v1/approvals` lists all in-review records to any approver, not only those at the caller's step; deciding out of turn is refused by the API (`STEP_NOT_OPEN`) | Live data | Optionally filter server-side; the console shows "awaiting <office>" on every row |
+| D6 | A malformed record id (e.g. `/v1/documents/undefined`) returns **500** rather than 400/404 | Live API, final verification | Validate the UUID before querying. The console shows a recoverable "could not be loaded" state |
+| D5 | `GET /v1/approvals` lists all in-review records to any approver, not only those at the caller's step; deciding out of turn is refused by the API (`STEP_NOT_OPEN`) | Live data | Optionally filter server-side; the console now marks "Your step" rows (from `/v1/governance/my-authority`) and can isolate them |
 
-## 7. Limitations register
+## 7. Optimisation series (50 commits after the redesign)
 
-* Dark theme only.
+Each commit was typechecked and linted before committing (helper refuses to commit
+on failure); browser verification was re-run at commits 25, 47 and 50 and two
+regressions it found were fixed in-series (commits 48–49).
+
+ 1. Create: stop describing every evidence event as hash-stamped
+ 2. Command: count withdrawn records as their own off-path state
+ 3. Shell: keep Official records highlighted inside a record file
+ 4. Shell: warn two minutes before the session token expires
+ 5. Create: confirm before a reload or tab close discards authored sections
+ 6. Create: show how each section will be composed (items, events, words)
+ 7. Review: select the next record after a decision is recorded
+ 8. Review: mark and isolate records at the reviewer's own step
+ 9. Command: Refresh also reloads the office queue
+10. Command: re-evaluate when the operator returns to the tab
+11. Command: placeholder while the office home loads
+12. Command: action queues list the longest-waiting records first
+13. Register: sort from the column headers
+14. Register: keep the sort order in the URL
+15. Register: flag retention horizons that have ended or end within 30 days
+16. Register: highlight the search term in matching titles
+17. Record file: title the browser tab with the record number and title
+18. Record file: print layout and Print action
+19. Record file: printed copies state their provenance and omit controls
+20. Auth: end the session explicitly when expired or rejected, and say why
+21. Shell: proper focus management for the mobile navigation drawer
+22. Shell: announce client-side navigation to screen readers
+23. Dialogs: clicking the backdrop cancels (never while an action is in flight)
+24. Copy buttons: clear their feedback timer on unmount and on repeat copies
+25. Upgrade modal: real modal dialog semantics, readable contrast
+26. Create: Submit no longer claims to be disabled while it explains what is missing
+27. Evidence chain: narrow the loaded events instantly
+28. Evidence chain: day separators in the event table
+29. Record file: copy a link to the record file
+30. Record file: governance standing wraps cleanly on phones
+31. Metrics: group thousands in ledger figures
+32. Create: discard open AI suggestions when the classification becomes sensitive
+33. Create: keyboard-complete the record type filter
+34. Review: 'o' opens the selected record's full file
+35. Register: Escape clears the search, a second Escape leaves the field
+36. Shell: mobile browser chrome matches the console
+37. Shell: show which permissions the session carries
+38. Provenance: event counts on the record file, digest markers in recent activity
+39. Evidence chain: label who acted — person, service credential or engine
+40. Register: show last update per row; hide the density switch where it does nothing
+41. Evidence chain: copy any identifier from an expanded event
+42. Review: rationale length, linked hint, and Escape to clear filter
+43. Billing: quota meter and usage banner on console tokens, exposed as a meter
+44. Console: scrollbars in the console palette
+45. Workflow links: from a record in review to the decision queue, and from an empty queue to publication
+46. Create: state that an unsubmitted draft exists only in this tab
+47. Docs: console README lists the actual routes, design system and shortcuts
+48. Shell: return focus to the menu button after the drawer closes
+49. Shell: after navigating from the mobile drawer, focus lands on the new page
+50. Docs: optimisation log and final verification (this section)
+
+### Final verification (after commit 49, live API)
+
+| Gate | Result |
+|---|---|
+| `vite build` / `tsc -b` | Pass |
+| ESLint | 21 errors / 3 warnings — identical to baseline; all in files not touched |
+| 14 views × 3 widths (42) | No horizontal overflow; no JavaScript errors (only the deliberate 404 of the unknown-record test) |
+| axe-core, 14 desktop views | 0 violations |
+| Workflow checks against the live API (approve, auto-advance, return-confirm cancel, self-approval refused by API and surfaced, create → validate → submit, publish with confirmation → certificate issued, preserve warns terminal, no page errors) | 18 / 18 pass |
+| Keyboard & session checks (`g`+digit, `/`, `j`, Enter, nav highlight in record file, 401 → sign-in with reason, drawer focus in/out, focus after drawer navigation) | 9 / 9 pass |
+| Print (record file → A4 PDF) | 4 pages, chrome hidden, certificates intact |
+
+Not exercised: the 15-minute natural expiry (the 401 path was simulated), real
+SSO person sessions, screen readers, non-Chromium browsers.
+
+## 8. Limitations register
+
+* Dark theme only (print renders dark-on-white).
 * Counts on Command are per-state pages of ≤100 (shown as "100+"), not server totals; the Ledger's totals come from `/v1/stats`.
 * Register sorting is client-side over the loaded page (≤200).
 * The self-submission warning in Review compares display subjects and is informational; separation of duties is enforced only by the API.
 * The uploaded HTML template is a static prototype and is not wired to anything.
 * Administration pages were not redesigned (only shell + shared primitives).
 
-## 8. Preview
+## 9. Preview
 
 ```bash
 # backend (local): see DISPATCH-TURNON.md for production; locally any Postgres with db/migrate.mjs
