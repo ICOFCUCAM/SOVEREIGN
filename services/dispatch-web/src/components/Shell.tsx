@@ -82,6 +82,8 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
   const [menuOpen, setMenuOpen] = useState(false);
   const [shortcuts, setShortcuts] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
+  const railRef = useRef<HTMLElement>(null);
   const product = PRODUCT[variant];
   const items = product.nav.filter((n) => !n.scope || has(n.scope));
   // The switcher only appears for principals who can actually use the other
@@ -96,6 +98,16 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
 
   // Close the mobile drawer on navigation; move focus to the page for screen readers.
   useEffect(() => { setMenuOpen(false); mainRef.current?.focus({ preventScroll: true }); mainRef.current?.scrollTo(0, 0); }, [pathname]);
+
+  // Mobile drawer: focus moves into it on open, Escape closes it, and focus
+  // returns to the menu button — in both products.
+  useEffect(() => {
+    if (!menuOpen) return;
+    railRef.current?.querySelector<HTMLElement>("nav a")?.focus();
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") { setMenuOpen(false); menuBtnRef.current?.focus(); } };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [menuOpen]);
 
   // "g" then a digit jumps between Operations surfaces; "?" lists shortcuts.
   useEffect(() => {
@@ -142,7 +154,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
         {menuOpen && <button aria-label="Close navigation" className="fixed inset-0 z-30 bg-[#05080daa] lg:hidden" onClick={() => setMenuOpen(false)} />}
 
         {/* rail */}
-        <aside id="sd-rail" aria-label={`${product.label} navigation`}
+        <aside id="sd-rail" ref={railRef} aria-label={`${product.label} navigation`}
           className={cx("sd-noprint z-40 flex w-[248px] shrink-0 flex-col border-r border-sd-soft bg-[#0c131d]",
             "fixed inset-y-0 left-0 top-8 transition-transform lg:static lg:translate-x-0", menuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full")}>
           <div className="flex items-center gap-3 px-4 pb-4 pt-5">
@@ -219,9 +231,10 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
         </aside>
 
         {/* main */}
-        <div className="flex min-w-0 flex-1 flex-col">
+        {/* While the mobile drawer is open the page behind it is inert (no stray focus). */}
+        <div className="flex min-w-0 flex-1 flex-col" {...(menuOpen ? { inert: "" } : {})}>
           <section aria-label="Workspace bar" className="sd-noprint flex h-12 shrink-0 items-center gap-3 border-b border-sd-soft px-4 sm:px-6">
-            <button className="-ml-1 rounded-md p-1.5 text-sd-text2 hover:bg-sd-hover hover:text-sd-text lg:hidden" aria-label="Open navigation" aria-controls="sd-rail" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}><Icon.menu /></button>
+            <button ref={menuBtnRef} className="-ml-1 rounded-md p-1.5 text-sd-text2 hover:bg-sd-hover hover:text-sd-text lg:hidden" aria-label="Open navigation" aria-controls="sd-rail" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}><Icon.menu /></button>
             <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
               <ol className="flex items-center gap-2 text-[12.5px]">
                 <li className="hidden text-sd-text3 sm:block">{product.label}</li>
