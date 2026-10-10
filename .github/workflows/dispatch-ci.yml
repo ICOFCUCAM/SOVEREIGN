@@ -96,3 +96,37 @@ jobs:
       - name: Billing — free plan + subscribe (14)
         working-directory: services
         run: node test/billing.test.mjs
+
+  # Operations console (services/dispatch-web): typecheck + production build, then
+  # the browser suite against recorded API fixtures (no database required).
+  console:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/dispatch-web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install console deps
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck + build
+        run: npm run build
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser suite (layout ×3 widths, axe, governance rules, keyboard)
+        run: npm run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: services/dispatch-web/playwright-report
+          retention-days: 7
