@@ -99,6 +99,14 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
   // Close the mobile drawer on navigation; move focus to the page for screen readers.
   useEffect(() => { setMenuOpen(false); mainRef.current?.focus({ preventScroll: true }); mainRef.current?.scrollTo(0, 0); }, [pathname]);
 
+  // Mobile browser chrome matches the console ground (the marketing site's is #070707).
+  useEffect(() => {
+    const m = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (!m) return;
+    const prev = m.content; m.content = "#0a0f16";
+    return () => { m.content = prev; };
+  }, []);
+
   // Mobile drawer: focus moves into it on open, Escape closes it, and focus
   // returns to the menu button — in both products.
   useEffect(() => {
