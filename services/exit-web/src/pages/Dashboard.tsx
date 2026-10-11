@@ -9,8 +9,8 @@ import {
 } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
 import { dealContextFor } from "../lib/deal-context";
-import { SAMPLE_NDAS, SAMPLE_OFFERS, LISTING_PRIVATE, OFFER_COMPARISON } from "../lib/engines";
-import { liquidityIndex, scenariosFor, heatFor, funnelFor, LIFECYCLE } from "../lib/liquidity-view";
+import { SAMPLE_NDAS, SAMPLE_OFFERS, LISTING_PRIVATE, OFFER_COMPARISON, NEGOTIATION_STATE } from "../lib/engines";
+import { liquidityIndex, scenariosFor, heatFor, funnelFor, LIFECYCLE, TWELVE_MONTH_MULTIPLIER } from "../lib/liquidity-view";
 import { Section, Metric, Provenance, Bar, ScrollRegion, ActionLink, Fact } from "../components/xo";
 import ExitProcessModal from "../components/ExitProcessModal";
 import BuyerInterestGate from "../components/BuyerInterestGate";
@@ -188,7 +188,8 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2">
             <div className="bg-xo-panel"><Metric label="Enterprise value" emphasis provenance="model" value={fmtMoney(m.companyValue)} sub={`strategic-buyer report mid · band ${fmtMoney(E.ctx.valuationBand.low)} – ${fmtMoney(E.ctx.valuationBand.high)}`} /></div>
             <div className="bg-xo-panel"><Metric label="Expected value" emphasis provenance="model" value={<span className="text-xo-verified">{fmtMoney(m.potential)}</span>} sub="strategic-buyer report mid after the priced readiness fixes" /></div>
-            <div className="bg-xo-panel"><Metric label="Close probability" value={`${m.exitProbability}%`} sub="likelihood of a completed transaction" /></div>
+            <div className="bg-xo-panel"><Metric label="Close-probability index" provenance="model" value={`${m.exitProbability}%`}
+              sub={<>Heuristic, not a measured likelihood: 0.35 × Exit Score ({E.ctx.exitScore}) + 0.40 × active buyers ({E.ctx.activeBuyers}/6, max 1) + 0.25 × negotiation leverage ({NEGOTIATION_STATE.leverage}; high = 1, medium = 0.6, low = 0.3; from sample offers).</>} /></div>
             <div className="bg-xo-panel"><Metric label="Time to liquidity" value={<>{m.timeToExitMonths}<span className="text-[13px] text-xo-faint"> mo</span></>} sub="once a buyer is engaged" /></div>
           </div>
         </Section>
@@ -196,7 +197,10 @@ const Dashboard: React.FC = () => {
           <ul className="divide-y divide-xo-line">
             {scenarios.map((sc) => (
               <li key={sc.key} className="flex items-baseline justify-between gap-3 px-4 py-3">
-                <span className="min-w-0"><span className="block text-[13px] font-medium text-xo-text">{sc.label}</span><span className="block text-[11px] text-xo-faint">{sc.basis}</span></span>
+                <span className="min-w-0">
+                  <span className="flex items-center gap-2 text-[13px] font-medium text-xo-text">{sc.label}{sc.key === "twelve" && <Provenance kind="prior">Assumption</Provenance>}</span>
+                  <span className="block text-[11px] text-xo-faint">{sc.key === "twelve" ? `the 6-month value × ${TWELVE_MONTH_MULTIPLIER} — a fixed multiplier, not a growth forecast` : sc.basis}</span>
+                </span>
                 <span className={`font-mono text-[18px] font-semibold tabular-nums ${sc.key === "today" ? "text-xo-text" : "text-xo-verified"}`}>{fmtMoney(sc.value)}</span>
               </li>
             ))}
@@ -211,8 +215,9 @@ const Dashboard: React.FC = () => {
             <p className="max-w-[60ch] text-[16px] font-semibold leading-snug text-xo-text">{m.recommendedAction}</p>
             <dl className="mt-3 flex flex-wrap gap-x-8 gap-y-2">
               <div><dt className="text-[11px] text-xo-faint">Expected value increase</dt><dd className="font-mono text-[16px] font-semibold tabular-nums text-xo-verified">+{fmtMoney(m.expectedIncreaseUsd)}</dd></div>
-              <div><dt className="text-[11px] text-xo-faint">Confidence</dt><dd className="font-mono text-[16px] font-semibold tabular-nums text-xo-text">{m.confidencePct}%</dd></div>
+              <div><dt className="text-[11px] text-xo-faint">Confidence index</dt><dd className="font-mono text-[16px] font-semibold tabular-nums text-xo-text">{m.confidencePct}%</dd></div>
             </dl>
+            <p className="mt-1 max-w-[60ch] text-[11px] text-xo-faint">Confidence index = 64 + 3 × active buyers + 12 × negotiation leverage (high = 1, medium = 0.6, low = 0.3; from sample offers), capped at 92. A heuristic; it is not the valuation confidence shown on the Intelligence Terminal.</p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Button onClick={() => navigate("/console/autopilot")}>Execute →</Button>
               <ActionLink to="/console/autopilot" className="text-[13px]">See the plan</ActionLink>
@@ -336,7 +341,8 @@ const Dashboard: React.FC = () => {
 
       {/* ── 6 · MARKET & DEAL FUNNEL ────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
-        <Section title="Market liquidity" eyebrow={`Buyer activity ${E.ctx.activeBuyers} · demand ${E.ctx.demandLabel.toLowerCase()}`} className="lg:col-span-4">
+        <Section title="Market liquidity index" eyebrow={`Buyer activity ${E.ctx.activeBuyers} · demand ${E.ctx.demandLabel.toLowerCase()}`} className="lg:col-span-4"
+          foot="Index = 70 + 4 × active buyers in the matched pool, capped at 98. A heuristic for this company's buyer pool, not a measure of market depth.">
           <div className="px-4 py-4">
             <div className="font-mono text-[32px] font-semibold leading-none tabular-nums text-xo-text">{liquidity}<span className="text-[14px] text-xo-faint"> / 100</span></div>
             <div className="mt-3"><Bar value={liquidity} width="w-full" /></div>

@@ -75,7 +75,7 @@ No loading (synchronous engines). Exit-run states: none / complete (card + Re-ru
 | G1 | **Always the demo company, unlabelled.** A founder who completed Value My Company still sees Helios Freight, presented as theirs ("operator pro"). The Terminal personalises; this page does not. | `Dashboard.tsx` imports `SAMPLE_COMPANY`; `lib/engines.ts`, `deal-context.ts` | Run the page's engines on `loadActiveCompany()` (functions exist and are pure; module constants for other pages untouched). Badge Demo data / Your intake. Parts still bound to fixtures (sample offers, NDAs, exit run) say so. | ☑ `32e7b78` |
 | G2 | **Two valuation models across pages.** EV $108.3M here (strategic-buyer report) vs $102.8M on the Terminal (institutional framework); confidence 92% vs 89%; "Implied price $186M" beside EV $108M. | dump above | Name the model on every value; one reconciliation note linking to the Terminal; "Implied price" renamed to what it is (ranking basis). Choosing one canonical valuation is an **owner decision (D1)**. | ☑ `872c0d1` |
 | G3 | **Fake live / fixed status.** Hard-coded "Mandate Active/Executing", "Market Open"; "Live" + pinging dots on the board and matches. | `Dashboard.tsx:84-88`, `CommandTiles`, `DashboardModules` | Status from real state (exit run none/complete; data state). No live indicators. Board rendered with `xo` components on this page (shared `CommandTiles` left for Page 05). | ☑ `d6cb117` |
-| G4 | **Heuristic indices presented as measurements.** Close probability 84%, Confidence 92% (capped), Market liquidity 98, "Optimize 12 months" ×1.27. | `commander-metrics.ts`, `DashboardModules.tsx` | Same numbers, labelled "index" / "assumption", with the formula on the page. | ☐ |
+| G4 | **Heuristic indices presented as measurements.** Close probability 84%, Confidence 92% (capped), Market liquidity 98, "Optimize 12 months" ×1.27. | `commander-metrics.ts`, `DashboardModules.tsx` | Same numbers, labelled "index" / "assumption", with the formula on the page. | ☑ G4-commit |
 | G5 | **Demo fixtures shown as "this deal's live state".** Funnel "Under NDA", "Offers in hand 3", "Leading bid"; exit-run card "NDAs pre-issued", "Leader: …". | `DashboardModules.tsx` funnel, run card | Split registry/model counts from demo fixtures; label fixtures as sample data in words. | ☐ |
 | G6 | **Exit Process writes demo data to production telemetry.** Each run emits the 3 sample offers as `offer` events and "nda_issued" buyer responses for real registry buyers although nothing is sent. Production now holds **6 of 7** offer events from sample IDs `o-001…o-003` and 6 `nda_issued` events (2 runs, 2026-06-03 and 06-18). | `lib/exit-process.ts:250-330`; Supabase read-only query | Stop emitting offer and buyer-response events for demo fixtures; step texts say "drafted, not sent" / "sample offers". Existing rows: **owner decision (D2)** — not deleted. | ☑ `c6bd5ad` |
 | G7 | **Mislabels / overclaims.** "Premium probability" shows the top premium payer; "Execute — one instruction dispatches the agents" only navigates; "Qualifying buyers 12" is the top-12 cap; probability caption describes a product, engine is a weighted sum. | code + dump | Correct labels and captions; Execute described as opening Autonomous Exit. | ☐ |
@@ -166,3 +166,17 @@ Repetition removed: the KPI row (strategic mid = EV; readiness; qualifying buyer
 | "Live" on the Liquidity board; pinging dot on matches | removed (the G9 page already dropped the pinging dot; this commit removes the last "Live" label) |
 
 *Verification:* `tsc -b`, eslint clean · Chromium: status before a run "Data Demo company · Exit process Not started · Buyer demand High · 8 active of 12 matched"; after a run "Exit process Run complete · 12s ago" · 0 pinging elements, 0 "Live" labels on the page · 0 page errors. The funnel's "live state" wording is G5.
+
+### G4 — Heuristic indices presented as measurements
+*Documented:* gap register row G4. *Closed by:* `pages/Dashboard.tsx` (labels and explanations only; `commanderMetrics` and `liquidity-view` formulas unchanged).
+
+| Before | After |
+|---|---|
+| "Close probability 84% — likelihood of a completed transaction" | "Close-probability index 84%" + formula with this company's inputs: 0.35 × Exit Score (55) + 0.40 × active buyers (8/6, max 1) + 0.25 × negotiation leverage (high = 1, medium = 0.6, low = 0.3; **from sample offers**) — "Heuristic, not a measured likelihood" |
+| "Confidence 92%" | "Confidence index 92%" + formula (64 + 3 × active buyers + 12 × leverage, capped at 92) and a note that it is **not** the Terminal's valuation confidence (89%) |
+| "Market liquidity 98/100" | "Market liquidity index" + formula (70 + 4 × active buyers, capped at 98) — "not a measure of market depth" |
+| "Optimize 12 months · fixes + a year of growth" | **Assumption** badge · "the 6-month value × 1.27 — a fixed multiplier, not a growth forecast" |
+
+Disclosed dependency: two indices use negotiation leverage derived from the sample offers for every company, including a founder's own intake.
+
+*Verification:* `tsc -b`, eslint clean · Chromium text checked (all four labels and formulas present) · recomputing from the stated formulas gives 84 / 92 / 98 — identical to the displayed values · axe 0 violations, no overflow (free/pro, 1440/390).
