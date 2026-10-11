@@ -64,6 +64,9 @@ function narrative(c: BuyerCandidate): string {
 
 const Intelligence: React.FC = () => {
   const { session } = useAuth();
+  // Buyers share this route; founder process data (sample NDAs and offers,
+  // the leading counterparty) and the founder's outreach action stay hidden.
+  const isBuyer = session?.role === "buyer";
   const bankerGate = requiredEngagement("/console/banker", session?.role ?? "founder", session?.plan ?? "free");
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<"probability" | "expected_outcome">("probability");
@@ -157,6 +160,7 @@ const Intelligence: React.FC = () => {
   return (
     <div data-page="acquisition-intelligence" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="Module 01 · Sourcing" title="Acquisition Intelligence Engine"
+        badge={isBuyer ? <span className="text-[12px] text-xo-muted">Buyer view — founder process data and outreach are not shown</span> : undefined}
         description={`Not a buyer directory. A layered engine that answers one question: which buyer is most likely to produce the best outcome — ranked by expected realized value against an implied price of ${fmtMoney(VALUATION_CANONICAL.headline.mid)}.`} />
 
       <Section title="Buyer discovery pipeline" className="border border-xo-line"
@@ -212,7 +216,7 @@ const Intelligence: React.FC = () => {
         </ol>
       </Section>
 
-      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-2">
+      <div className={`grid grid-cols-1 gap-px border border-xo-line bg-xo-line ${isBuyer ? "" : "lg:grid-cols-2"}`}>
         <Section title="Network discovery · hidden buyers" eyebrow="off-mandate acquirers reached through the co-acquisition graph">
           <ul className="divide-y divide-xo-line">
             {intel.hidden.map((h) => (
@@ -227,7 +231,7 @@ const Intelligence: React.FC = () => {
             {intel.hidden.length === 0 && <li className="px-4 py-3 text-[12px] text-xo-muted">No off-mandate adjacency found for this sector yet — the graph grows with every indexed deal.</li>}
           </ul>
         </Section>
-        <Section title="Process signals · sample records" eyebrow="from the demo company's sample NDAs and offers — demo data"
+        {!isBuyer && <Section title="Process signals · sample records" eyebrow="from the demo company's sample NDAs and offers — demo data"
           foot="Computed from seeded sample records, not from a process run on ExitOS. With real NDAs and offers these figures would come from your own records.">
           <ul className="divide-y divide-xo-line">
             {platformSignals.map((s) => (
@@ -243,7 +247,7 @@ const Intelligence: React.FC = () => {
               </li>
             ))}
           </ul>
-        </Section>
+        </Section>}
       </div>
 
       <Section title="Registry signals" eyebrow={`Snapshot · as of ${MARKET_INDEX_FMT.asOf}`} className="border border-xo-line"
@@ -258,7 +262,7 @@ const Intelligence: React.FC = () => {
         </ul>
       </Section>
 
-      {candidates[0] && (
+      {!isBuyer && candidates[0] && (
         <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
           right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(candidates[0].expectedOutcome.expectedClosingUsd)}</span>}>
           <div className="px-4 py-3">

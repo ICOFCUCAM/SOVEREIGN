@@ -38,7 +38,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 | G2 | **Invented "Outreach success +N%" lift** and the "live" radar. | Remove the lift figures; section becomes "Registry signals" with the snapshot date; no pulsing dot. | ☑ `5be318e` |
 | G3 | Mislabels: fit probability as "likelihood … signs"; appetite as "deploying capital / recent-12mo activity"; "live" EDGAR/Wikidata; demo-tenant stats as "Live data"; narrative unlabelled. | Accurate labels: fit probability (engine fit score); appetite (registry attribute); "fetched from EDGAR/Wikidata, snapshot as of …"; "Recorded stats · demo tenant"; "template sentence". | ☑ `920ac19` |
 | G4 | Banker's-take urgency and overclaim; hidden plan gate on the banker CTA. | Plain wording; `requiredEngagement` note. | ☑ `a87de75` |
-| G5 | **Buyer role sees founder process data** and the founder CTA. | For buyers: hide the sample-process signals and the banker's take; state the page shows the buyer landscape for the demo/listed company. Route unchanged. | ☐ |
+| G5 | **Buyer role sees founder process data** and the founder CTA. | For buyers: hide the sample-process signals and the banker's take; state the page shows the buyer landscape for the demo/listed company. Route unchanged. | ☑ G5-commit |
 | G6 | Duplicate NAV name "Acquisition Radar". | This page becomes **"Acquisition Intelligence"** in NAV (both roles) and in its `h1`. | ☐ |
 | G7 | Demo company unlabelled. | Run on `loadActiveCompany()` at its canonical value; badge. | ☐ |
 | G8 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `7e81471` |
@@ -74,3 +74,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 ### G4 — Banker's-take urgency, overclaim and hidden plan gate
 *Closed by:* `pages/Intelligence.tsx`. "Appetite windows close — active acquirers redeploy capital into the next target while you wait." → "The ranking reflects the registry snapshot; appetite can change, and nothing here tracks it over time." "ExitOS scores every buyer on live EDGAR/Wikidata signals and drafts the personalized intro." → "What ExitOS does — Scores every buyer on the registry snapshot (EDGAR / Wikidata / press). Outreach drafts are prepared on the Outreach page; nothing is sent from here." `requiredEngagement("/console/banker", …)` adds "Requires Active Mandate" beside "Hand it to the banker" for free and Preparation founders.
 *Verification:* `tsc -b`, eslint clean · Chromium: free and Preparation → "Requires Active Mandate"; Active Mandate → no note; 0 "redeploy" / "live EDGAR".
+
+### G5 — Buyer role saw founder process data
+*Closed by:* `pages/Intelligence.tsx`: for `role === "buyer"` the sample-process signals (NDA conversion, offers, "leading counterparty") and the banker's take with the founder's outreach link are not rendered; the header says "Buyer view — founder process data and outreach are not shown". The registry-derived ranking, provenance and table remain (they describe public acquisition history). Founder view unchanged. Route and NAV unchanged.
+*Verification:* `tsc -b`, eslint clean · Chromium buyer: 0 matches for Leading counterparty / Hand it to the banker / Process signals (before: "Microsoft Industry Solutions leads the field … 68/100"); founder still shows them · buyer free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
