@@ -5,7 +5,7 @@
 | Route | `/console/intake` |
 | Component | `src/pages/Intake.tsx` (154 lines) |
 | NAV | "Value My Company", group Mandate, role **founder**, no plan gate |
-| Status | Stage A audit — gaps documented below; each is closed in its own commit and marked here. |
+| Status | All seven gaps closed, each documented first and marked below. **Awaiting review — Page 04 not started.** |
 
 Process rule: **document a gap → close it → verify → mark it closed**, one at a time.
 
@@ -113,3 +113,23 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 - **Correction:** the G1 status line said "every console page now uses them" and the G3 line said the value is "the value every console page shows for your company". Both overclaimed — Readiness, Exit Timing, the Valuation desk and others still run on the demo company. They now read "See below for the pages that use them" and "The same institutional framework produces the value on every console page" (true since D1).
 
 *Verification:* `tsc -b`, eslint clean · Chromium: panel absent before saving; after editing the name it lists the six destinations, with "requires Preparation or Active Mandate" on Engagement Registry and Outreach Plan for a free founder; the Liquidity Command link opens `/console/command` showing "Acme Robotics" · 0 page errors.
+
+---
+
+## Final verification (after G1–G7)
+| Check | Result |
+|---|---|
+| `tsc -b` | pass |
+| `eslint src` | 0 errors, 2 pre-existing warnings |
+| `vitest run` | **32 files, 199/199** (new for this page: saved intake ×1, intake fields ×4, withdraw listing ×1) |
+| `vite build` | pass |
+| Chromium free + pro, 1440 / 390, reduced motion | 0 page errors · 1 `h1` · 17 tab stops, all with visible focus · no overflow · axe **0 violations** |
+| Behaviour | open saves nothing; edit saves; Clear my data returns every page to the demo · decimals/negatives/validation · list confirm/cancel/update/withdraw · usage panel links |
+| Regression | Page 01 and Page 02: axe 0, focus visible, no overflow (free/pro, 1440/390) |
+| Not verified | real screen reader; the "live exchange" listing path (no backend configured in this container) |
+
+## Known issues and limitations
+- Only six destinations read the founder's figures today; other pages show the demo company until their own redesign (stated on the page).
+- While a number field is invalid, the report uses the field's last valid value (the field says why).
+- Withdrawing removes the listing record; anything a buyer already saw (e.g. via a notification) is not recalled.
+- Free-text HQ country is not validated against ISO codes (unchanged).
