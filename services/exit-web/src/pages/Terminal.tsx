@@ -2,16 +2,17 @@ import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
-import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, fmtUsdShort } from "../lib/buyer-dna";
+import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, DNA_AS_OF, fmtUsdShort } from "../lib/buyer-dna";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
-import { Panel, CommandHeader, MarketTape, CommandState, Evidence } from "../lib/workstation";
+import { Panel, CommandHeader, CommandState, Evidence } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 
 // ── ACQUISITION INTELLIGENCE TERMINAL ───────────────────────────────
 // A single operating environment, not a page of cards. One framed
-// instrument: a command bar with the mandate + live status strip, then a
+// instrument: a command bar with the mandate + data-state strip, then a
 // dense grid of hairline-separated panels — buyer rankings, market signals,
 // an action queue, comparables, appetite, confidence and themes. Every
 // figure is composed from the engines on the active company; nothing new is
@@ -49,7 +50,8 @@ const Terminal: React.FC = () => {
 
   const leadPremium = lead?.profile.premium_pct ?? INST.premium.appliedPct;
   const leadCloseDays = lead?.profile.median_close_days ?? INST.timeToClose.lowDays;
-  const asOf = new Date().toISOString().slice(0, 10);
+  // The registry is a bundled snapshot — show its date, never "today".
+  const asOf = DNA_AS_OF.slice(0, 10);
   const tape = useMemo(() => buildMarketTape(), []);
 
   // action queue — recommended next moves, derived from the engines (not invented)
@@ -72,17 +74,17 @@ const Terminal: React.FC = () => {
     <div className="space-y-2">
       {plan === "free" && <BuyerInterestGate />}
 
-      {/* ── COMMAND BAR ── identity + live status strip, one framed instrument ── */}
+      {/* ── COMMAND BAR ── identity + data-state strip, one framed instrument ── */}
       <CommandHeader
         title={company.name}
         tag={SECTOR_LABEL[company.sector] ?? company.sector}
-        status="Active"
+        status={fromIntake ? "Your intake" : "Demo company"}
         meta={[
           { k: "ARR", v: fmtUsdShort(company.revenue.annualRecurringRevenueUsd) },
           { k: "TTM", v: fmtUsdShort(company.revenue.trailingTwelveMonthsRevenueUsd) },
           { k: "GROWTH", v: pct(company.growth.arrGrowthYoyPct) },
           { k: "EBITDA", v: pct(company.revenue.ebitdaMarginPct) },
-          { k: "AS OF", v: asOf },
+          { k: "REGISTRY AS OF", v: asOf },
         ]}
         metrics={[
           { k: "Enterprise value", v: fmtUsdShort(INST.headline.mid), accent: true, sub: `${fmtUsdShort(INST.headline.low)}–${fmtUsdShort(INST.headline.high)}` },
@@ -102,7 +104,7 @@ const Terminal: React.FC = () => {
         )}
       />
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={asOf} />
 
       <CommandState
         current={<>EV <span className="font-mono text-white">{fmtUsdShort(INST.headline.mid)}</span> · readiness <span className="font-mono text-white">{Math.round(ra.currentScore)}</span> · {INST.buyerUniverse.qualified} qualified buyers</>}
@@ -174,7 +176,7 @@ const Terminal: React.FC = () => {
 
         {/* right column — intelligence rail: telemetry · signals · actions */}
         <div className="flex flex-col gap-px bg-white/10 lg:col-span-4">
-          <Panel title="Intelligence rail · live telemetry" className="shrink-0">
+          <Panel title={`Registry extremes · as of ${asOf}`} className="shrink-0">
             <ReactorTelemetry />
           </Panel>
           <Panel title="Market signals · indexed" className="flex-1"
@@ -241,10 +243,10 @@ const Terminal: React.FC = () => {
           </table>
         </Panel>
 
-        {/* ACQUISITION REACTOR — live sector-volume telemetry */}
+        {/* ACQUISITION REACTOR — sector volume from the indexes snapshot */}
         <Panel title="Acquisition reactor · sector volume" className="lg:col-span-4"
           right={<span className="font-mono text-[9px] text-white/35">{ACTIVE.length} active</span>}
-          foot="Node size ∝ √volume · colour = 12-month trend · from the live sector indexes.">
+          foot={`Node size ∝ √volume · colour = 12-month trend · sector indexes snapshot as of ${asOf}. Rotation is decorative.`}>
           <AcquisitionReactor height={188} />
         </Panel>
 
@@ -280,7 +282,7 @@ const Terminal: React.FC = () => {
       </div>
 
       <p className="px-1 text-[10px] text-white/30">
-        {fromIntake ? "Personalized to your intake." : "Demo company — run "}{!fromIntake && <Link to="/console/intake" className="text-deal-300 hover:text-deal-200">Value My Company</Link>}{!fromIntake && " to personalize."} All figures composed live from the valuation framework, the buyer graph and {INST.comparablesUsed} comparable transactions — nothing asserted without evidence.
+        {fromIntake ? "Personalized to your intake." : "Demo company — run "}{!fromIntake && <Link to="/console/intake" className="text-deal-300 hover:text-deal-200">Value My Company</Link>}{!fromIntake && " to personalize."} All figures are computed from the valuation framework, the buyer graph and {INST.comparablesUsed} comparable transactions (registry snapshot as of {asOf}) — nothing asserted without evidence.
       </p>
     </div>
   );

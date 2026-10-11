@@ -67,7 +67,7 @@ Status: ☐ open · ☑ closed (commit noted)
 
 | # | Gap | Evidence | Fix (without changing any calculation) | Status |
 |---|---|---|---|---|
-| G1 | **Fake-live indicators.** Hard-coded `status="Active"`; "Intelligence rail · live telemetry"; pulsing "Tape" dot; "AS OF" = today's date. The data is a bundled snapshot (`DNA_AS_OF`, currently 2026-10-11). | `Terminal.tsx:79,85,177`; `workstation.tsx:75` | Replace with the real data state (*Personalised from your intake* / *Demo company*) and the real snapshot date (`DNA_AS_OF`); label registry panels "Indexed · as of …". No pulsing live dot. | ☐ |
+| G1 | **Fake-live indicators.** Hard-coded `status="Active"`; "Intelligence rail · live telemetry"; pulsing "Tape" dot; "AS OF" = today's date. The data is a bundled snapshot (`DNA_AS_OF`, currently 2026-10-11). | `Terminal.tsx:79,85,177`; `workstation.tsx:75` | Replace with the real data state (*Personalised from your intake* / *Demo company*) and the real snapshot date (`DNA_AS_OF`); label registry panels "Indexed · as of …". No pulsing live dot. | ☑ G1-commit |
 | G2 | **Mislabelled decision metrics.** "Typical premium" shows the *lead buyer's* premium; "Median close" shows the *lead buyer's* close days beside "12 comps". | `Terminal.tsx:50-51,91-92` | Label them as the lead buyer's figures and show the framework's applied premium (with its basis) and time-to-close range (`INST.timeToClose`) as separate, correctly named figures. | ☐ |
 | G3 | **Duplicate panel.** "Market signals · indexed" lists exactly the same `comps` as "Similar transactions". | `Terminal.tsx:180-192` vs `211-226` | One comparables table (with status, source, rationale). Replace the duplicate with real sector signals from `ACQ_INDEXES` (company's sector + largest movers). | ☐ |
 | G4 | **Provenance hidden.** Per-buyer confidence, source URL, events indexed/verified/disclosed, probability breakdown, comparable status/sourceRef, premium basis note, confidence note, disclaimer — computed but never shown. | engine/DNA fields above | Evidence drawer per buyer and a provenance/methodology section with the disclaimer. | ☐ |
@@ -83,6 +83,7 @@ Status: ☐ open · ☑ closed (commit noted)
 | X1 | **Security:** signing in with one hard-coded e-mail address grants `superadmin` + `pro` entirely client-side; any visitor can type it. The address is also personal data in source. | `src/lib/auth.tsx` `signIn` | Remove; derive roles server-side from the real auth provider. Needs owner decision. |
 | X2 | Client-side "auth" accepts any e-mail/password (demo session, `fakeToken`). | `src/lib/auth.tsx` | Expected for the demo; must not ship as production auth. |
 | X3 | Pre-existing lint errors (3). | see baseline | Separate clean-up. |
+| X4 | Shell ribbon shows "● ExitOS **Live**" with a pulsing dot on every console page, over snapshot data. | `src/components/InstitutionalRibbon.tsx:45` (shared chrome, all pages) | Relabel to the snapshot date when the shell is reviewed; not changed here because it is shared by every page. |
 
 ---
 
@@ -109,3 +110,19 @@ Components: `Provenance` (verified · registry · model · prior · your intake 
 Not changed: `lib/workstation.tsx` and the `ink`/`deal`/`loi`/`stage` tokens, so Buyer Graph, Acquisition Radar and Founder Inbox are unaffected.
 
 Verification: `tsc -b` pass · `eslint` on new files clean · `src/components/xo/xo.test.tsx` **6/6 pass** (bar label + clamping, disclosure state, labelled landmark, focusable region, provenance wording).
+
+### G1 — Fake-live indicators
+*Documented:* gap register row G1 (before the change). *Closed by:* `Terminal.tsx`, new `components/xo/RegistryTape.tsx`.
+
+| Before | After |
+|---|---|
+| `status="Active"` (hard-coded) | `Your intake` or `Demo company` — from `loadActiveCompany().fromIntake` |
+| `AS OF` = `new Date()` (today) | `REGISTRY AS OF` = `DNA_AS_OF` (snapshot date in `buyer_dna.json`) |
+| `MarketTape` — animated ticker, pinging "Tape" dot | `RegistryTape` — static, scrollable, keyboard-focusable strip; each entry dated; badge "Registry · as of …"; platform events labelled "Your activity" |
+| "Intelligence rail · live telemetry" | "Registry extremes · as of …" |
+| Reactor foot "from the live sector indexes" | "sector indexes snapshot as of … Rotation is decorative." |
+| Footer "composed live" | "computed from … (registry snapshot as of …)" |
+
+Shared `MarketTape`/`CommandHeader` were not edited (other pages still use them). The shell ribbon's "Live" label is outside this page → recorded as X4.
+
+Verification: `tsc -b` pass · eslint clean on changed files · Chromium free + pro at 1440/390: 0 page errors, no horizontal overflow; pro plan hides the buyer-interest gate as before.
