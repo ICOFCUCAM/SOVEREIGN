@@ -53,7 +53,7 @@ export const NAV: NavItem[] = [
   { to: "/console/buyer-copilot",      label: "Buyer Intelligence",   group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/buyers",             label: "Buyer Profiles",       group: "Market Intelligence", roles: ["founder"] },
   { to: "/console/marketplace",        label: "Anonymous Listings",   group: "Exchange", roles: ["founder"] },
-  { to: "/console/intelligence",       label: "Acquisition Radar",    group: "Market Intelligence", roles: ["founder"] },
+  { to: "/console/intelligence",       label: "Acquisition Intelligence", group: "Market Intelligence", roles: ["founder"] },
 
   // ── Engage (founder) ───────────────────────────────────────────
   { to: "/console/banker",             label: "Outreach",             group: "Exchange", roles: ["founder"], pro: true },
@@ -81,7 +81,7 @@ export const NAV: NavItem[] = [
 
   // ── Buyer · Marketplace ────────────────────────────────────────
   { to: "/console/marketplace",        label: "Browse Opportunities", group: "Marketplace", roles: ["buyer"] },
-  { to: "/console/intelligence",       label: "Acquisition Radar",    group: "Marketplace", roles: ["buyer"] },
+  { to: "/console/intelligence",       label: "Acquisition Intelligence", group: "Marketplace", roles: ["buyer"] },
   // ── Buyer · Deals ──────────────────────────────────────────────
   { to: "/console/deal-room",          label: "Deal Room",            group: "Deals", roles: ["buyer"], pro: true },
   { to: "/console/nda",                label: "Access Requests",      group: "Deals", roles: ["buyer"], pro: true },

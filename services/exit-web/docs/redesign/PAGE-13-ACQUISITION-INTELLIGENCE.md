@@ -39,7 +39,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 | G3 | Mislabels: fit probability as "likelihood … signs"; appetite as "deploying capital / recent-12mo activity"; "live" EDGAR/Wikidata; demo-tenant stats as "Live data"; narrative unlabelled. | Accurate labels: fit probability (engine fit score); appetite (registry attribute); "fetched from EDGAR/Wikidata, snapshot as of …"; "Recorded stats · demo tenant"; "template sentence". | ☑ `920ac19` |
 | G4 | Banker's-take urgency and overclaim; hidden plan gate on the banker CTA. | Plain wording; `requiredEngagement` note. | ☑ `a87de75` |
 | G5 | **Buyer role sees founder process data** and the founder CTA. | For buyers: hide the sample-process signals and the banker's take; state the page shows the buyer landscape for the demo/listed company. Route unchanged. | ☑ `cd0abe0` |
-| G6 | Duplicate NAV name "Acquisition Radar". | This page becomes **"Acquisition Intelligence"** in NAV (both roles) and in its `h1`. | ☐ |
+| G6 | Duplicate NAV name "Acquisition Radar". | This page becomes **"Acquisition Intelligence"** in NAV (both roles) and in its `h1`. | ☑ G6-commit |
 | G7 | Demo company unlabelled. | Run on `loadActiveCompany()` at its canonical value; badge. | ☐ |
 | G8 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `7e81471` |
 
@@ -78,3 +78,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 ### G5 — Buyer role saw founder process data
 *Closed by:* `pages/Intelligence.tsx`: for `role === "buyer"` the sample-process signals (NDA conversion, offers, "leading counterparty") and the banker's take with the founder's outreach link are not rendered; the header says "Buyer view — founder process data and outreach are not shown". The registry-derived ranking, provenance and table remain (they describe public acquisition history). Founder view unchanged. Route and NAV unchanged.
 *Verification:* `tsc -b`, eslint clean · Chromium buyer: 0 matches for Leading counterparty / Hand it to the banker / Process signals (before: "Microsoft Industry Solutions leads the field … 68/100"); founder still shows them · buyer free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G6 — Duplicate NAV name
+*Closed by:* `lib/access.ts` (labels only) and `pages/Intelligence.tsx`. Both NAV entries for `/console/intelligence` (founder, buyer) are now **"Acquisition Intelligence"**; "Acquisition Radar" stays with `/console/acquisition-radar` (Page 04). The page `h1` is "Acquisition Intelligence" (eyebrow keeps "Acquisition Intelligence Engine"). Routes, groups, roles and gates unchanged.
+*Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium sidebar: founder "Acquisition Radar → /console/acquisition-radar", "Acquisition Intelligence → /console/intelligence"; buyer the same pair.

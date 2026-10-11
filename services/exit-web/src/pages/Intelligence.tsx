@@ -159,7 +159,7 @@ const Intelligence: React.FC = () => {
 
   return (
     <div data-page="acquisition-intelligence" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="Module 01 · Sourcing" title="Acquisition Intelligence Engine"
+      <PageHeader eyebrow="Module 01 · Sourcing · Acquisition Intelligence Engine" title="Acquisition Intelligence"
         badge={isBuyer ? <span className="text-[12px] text-xo-muted">Buyer view — founder process data and outreach are not shown</span> : undefined}
         description={`Not a buyer directory. A layered engine that answers one question: which buyer is most likely to produce the best outcome — ranked by expected realized value against an implied price of ${fmtMoney(VALUATION_CANONICAL.headline.mid)}.`} />
 
