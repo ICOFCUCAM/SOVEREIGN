@@ -36,7 +36,7 @@ After the deal: what the founder walks away with (headline → preferences → t
 ## Gap register — Page 10
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Wrong leading offer** (id compared with a buyer name). | Match on `offerId`; the page follows the engine's leader. | ☐ |
+| G1 | **Wrong leading offer** (id compared with a buyer name). | Match on `offerId`; the page follows the engine's leader. | ☑ G1-commit |
 | G2 | **Cascade and tranches mislabelled and miscomputed** ("your" = founder group; "after preferences" = risk haircut; haircut × mix; escrow ignored; timings invented). | Cascade: headline → preference stack → founders' gross (named as the founder group) → risk-adjusted value (engine haircuts stated) → after the tax assumption. Tranches from the engine's nominal cash / stock / earnout for the founders; escrow held back from cash per the offer term; timings from the offer where present, else "not in the offer terms". | ☐ |
 | G3 | Tax assumption unlabelled. | State it wherever used: flat 23.8 % (US federal LTCG + NIIT), whole amount, no cost basis, no state tax, no QSBS. | ☐ |
 | G4 | **Invented statuses and a second allocation** ("Allocated", "Reserved", "Recommended", "Setup"; 12/30/8 … %). | One illustrative template (labelled "not a recommendation"); the topics list without invented amounts or statuses; family-office line states its $50M rule. | ☐ |
@@ -55,3 +55,7 @@ After the deal: what the founder walks away with (headline → preferences → t
 ### G8 — Design
 *Closed by:* `pages/Wealth.tsx` rebuilt on `xo` (`PageHeader` `h1` "Liquidity & Transition" — the navigation name; "WealthOS" was only the old header — three summary metrics, banker's take as a page-local definition list (shared `BankerTake` no longer used here), cascade as an ordered list, lifecycle topics as a list with `h3`s, tranches and allocation with decorative bars and values in text, after-the-wire cards with `h3`s). Content carried over verbatim; G1–G7 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium Active Mandate 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe 0, 12 tab stops all with visible focus.
+
+### G1 — Wrong leading offer
+*Closed by:* `pages/Wealth.tsx`: `o.buyerName === OFFER_COMPARISON.leader` → `o.offerId === OFFER_COMPARISON.leader` (`leader` is an offer id). The page now follows the engine's leader, **Microsoft Industry Solutions ($165M)**; before, it always fell back to the first sample offer (Vista, $132M).
+*Verification:* `tsc -b` pass · engine check (vitest scratch run): `leader = "o-002"` · Chromium: "What you walk away with · Microsoft Industry Solutions" (was Vista Enterprise Software Bolt-On).

@@ -22,7 +22,7 @@ const ALLOC: { label: string; pct: number; note: string; tint: string }[] = [
 ];
 
 const Wealth: React.FC = () => {
-  const leadingOffer = SAMPLE_OFFERS.find((o) => o.buyerName === OFFER_COMPARISON.leader) ?? SAMPLE_OFFERS[0];
+  const leadingOffer = SAMPLE_OFFERS.find((o) => o.offerId === OFFER_COMPARISON.leader) ?? SAMPLE_OFFERS[0];
   const wf = (OFFER_WATERFALLS.find((w) => w.offerId === leadingOffer.offerId) ?? OFFER_WATERFALLS[0]).waterfall;
 
   const founderGross = wf.distributions.filter((d) => d.role === "founder").reduce((s, d) => s + d.grossProceedsUsd, 0);
