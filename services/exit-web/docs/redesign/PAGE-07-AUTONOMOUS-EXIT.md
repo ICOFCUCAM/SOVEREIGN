@@ -32,7 +32,7 @@ A guided simulation of an end-to-end exit: eight agents (valuation, buyer discov
 ## Gap register — Page 07
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Preparation plan can run Active Mandate steps.** | Gate on the access policy (`needsUpgrade` for the outreach surface) instead of the retired `starter` key; Preparation stops after buyer discovery, as the copy already says. "Launch a mandate" states it is a demo plan switch. | ☑ G1-commit |
+| G1 | **Preparation plan can run Active Mandate steps.** | Gate on the access policy (`needsUpgrade` for the outreach surface) instead of the retired `starter` key; Preparation stops after buyer discovery, as the copy already says. "Launch a mandate" states it is a demo plan switch. | ☑ `955c0c0` |
 | G2 | **False "sent to the deal room".** | "Mark as ready" + a status that nothing leaves ExitOS in this simulation. | ☐ |
 | G3 | **Simulation overclaims** (uploads, "money arrives", "deal closed", "send"). | Every simulated outcome says so: "Simulation complete", "would be wired" etc.; no upload claims; decisions marked "(simulated)". | ☐ |
 | G4 | Demo company unlabelled. | Valuation and buyer discovery on `loadActiveCompany()`; steps still on demo fixtures (diligence findings, sample offers) labelled. | ☐ |
