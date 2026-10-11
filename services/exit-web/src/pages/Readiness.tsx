@@ -54,14 +54,14 @@ const Readiness: React.FC = () => {
         body: `${fmtMoney(left)} of upside is still fixable. Two to three quarters of prep lifts the headline before you ever run a process.` }
     : growthStrong && marketOpen
       ? { tone: "#34d399", label: "Window open — go",
-          body: "Growth and the market window are both working for you. Readiness is high enough — start the process now." }
+          body: "ARR growth and the company's market-growth input both clear the thresholds, and the value left is small enough — the rule says start the process now." }
       : { tone: "#94a3b8", label: "Monitor — hold",
-          body: "No urgent catalyst. Keep building and let ExitOS watch the readiness clock for the right moment." };
+          body: "Neither rule fires. Keep building and check this verdict again when your figures change." };
 
   const signals = [
     { label: "Exit Score", value: `${score.toFixed(0)}/100`, ok: score >= 60 },
     { label: "Growth momentum", value: `${Math.round(growthYoy * 100)}% YoY`, ok: growthStrong },
-    { label: "Market window", value: marketOpen ? "Open" : "Tightening", ok: marketOpen },
+    { label: "Market growth (company input)", value: `${Math.round(marketGrowth * 100)}%`, ok: marketOpen },
     { label: "Upside still on table", value: fmtMoney(left), ok: gapRatio <= 0.15 },
   ];
 
@@ -73,7 +73,7 @@ const Readiness: React.FC = () => {
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Exit Score {score.toFixed(0)}/100 · readiness engine {engineScore}/100 (<span className="capitalize">{band.replace(/_/g, " ")}</span>) · {verdict.label}</span></>}
         actions={<a href="/report/readiness" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Readiness Report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>}>
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-xo-line pt-2">
-          {([["Growth", `${Math.round(growthYoy * 100)}%`], ["Window", marketOpen ? "Open" : "Tightening"], ["Categories", String(categories.length)]] as const).map(([k, v]) => (
+          {([["ARR growth", `${Math.round(growthYoy * 100)}%`], ["Market growth (input)", `${Math.round(marketGrowth * 100)}%`], ["Categories", String(categories.length)]] as const).map(([k, v]) => (
             <div key={k} className="flex items-baseline gap-1.5"><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[12px] font-semibold tabular-nums">{v}</dd></div>
           ))}
         </dl>
@@ -81,8 +81,8 @@ const Readiness: React.FC = () => {
 
       <section aria-label="Readiness summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-5">
         <div className="bg-xo-panel"><Metric label="Exit Score (ten categories)" emphasis value={`${score.toFixed(0)}/100`} sub={`readiness engine ${engineScore}/100`} /></div>
-        <div className="bg-xo-panel"><Metric label="Current value" value={fmtMoney(current)} sub="strategic mid, today" /></div>
-        <div className="bg-xo-panel"><Metric label="Potential" value={<span className="text-xo-verified">{fmtMoney(potential)}</span>} sub="after fixes" /></div>
+        <div className="bg-xo-panel"><Metric label="Enterprise value" value={fmtMoney(current)} sub="enterprise value today" /></div>
+        <div className="bg-xo-panel"><Metric label="Value after fixes" value={<span className="text-xo-verified">{fmtMoney(potential)}</span>} sub="model: value + readiness uplift" /></div>
         <div className="bg-xo-panel"><Metric label="Value left" value={<span className="text-xo-caution">{fmtMoney(left)}</span>} sub={`+${upliftPct.toFixed(0)}% unclaimed`} /></div>
         <div className="bg-xo-panel"><Metric label="Top fix impact" value={topFix ? `+${fmtMoney(topFix.valuationUpliftUsd)}` : "—"} sub={topFix?.dimension} /></div>
       </section>
@@ -112,7 +112,7 @@ const Readiness: React.FC = () => {
           foot={topFix ? `Biggest single lever: ${topFix.dimension} · ${EFFORT_LABEL[topFix.effort] ?? topFix.effort} · ${topFix.recommendation.split(".")[0]}.` : undefined}>
           <div className="px-4 py-4">
             <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <CascadeStat label="Current valuation" value={fmtMoney(current)} sub="strategic mid, today" color="text-xo-text" />
+              <CascadeStat label="Enterprise value today" value={fmtMoney(current)} sub="institutional framework mid" color="text-xo-text" />
               <CascadeStat label="Potential after fixes" value={fmtMoney(potential)} sub="if the gaps close" color="text-xo-verified" />
               <CascadeStat label="Value left" value={fmtMoney(left)} sub={`+${upliftPct.toFixed(0)}% unclaimed`} color="text-xo-caution" />
             </dl>
@@ -127,7 +127,8 @@ const Readiness: React.FC = () => {
           </div>
         </Section>
 
-        <Section title="When to sell · monitor signal" eyebrow="Verdict" className="lg:col-span-4">
+        <Section title="When to sell · rule-based verdict" eyebrow="Verdict" className="lg:col-span-4"
+          foot="Rule: Prepare if the value left is over 25% of today's value; otherwise Go if ARR growth is at least 30% and market growth at least 5%; otherwise Monitor. Market growth is the figure entered for the company, not a market feed.">
           <div className="px-4 py-4">
             <p className="inline-flex items-center gap-2 border px-2.5 py-1 text-[13px] font-semibold" style={{ borderColor: verdict.tone, color: verdict.tone }}>{verdict.label}</p>
             <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">{verdict.body}</p>
@@ -143,8 +144,8 @@ const Readiness: React.FC = () => {
         </Section>
       </div>
 
-      <Section title="Exit Readiness AI · Value Impact Simulator" eyebrow={`Ten categories · total upside +${fmtMoney(left)}`} className="border border-xo-line"
-        foot={`Scored across the ten categories buyers underwrite — every fix priced. ${analysis.headline}`}>
+      <Section title="Ten categories · priced fixes" eyebrow={`Rule-based scores · value left +${fmtMoney(left)} allocated`} className="border border-xo-line"
+        foot={`Each category score is a fixed rule on the company's figures (for example, IP starts at 40 and adds points per patent). Each $ figure is the value left, shared out by how far the category sits below 85, weighted — a model allocation, not a buyer quote. ${analysis.weaknesses.length} weaknesses found by the readiness engine; the biggest lever is shown above.`}>
         <ol className="divide-y divide-xo-line">
           {categories.map((cat) => (
             <li key={cat.key} className="grid items-center gap-3 px-4 py-2.5 sm:grid-cols-[200px_1fr_130px]">
@@ -158,7 +159,7 @@ const Readiness: React.FC = () => {
               </div>
               <div className="text-right">
                 {cat.impactUsd > 0
-                  ? <Evidence align="right" meta={{ methodology: cat.fix, source: "readiness engine · value-impact simulator", confidence: `${cat.score}/100 category score` }}><span className="font-mono text-[14px] font-semibold tabular-nums text-xo-verified">+{fmtMoney(cat.impactUsd)}</span></Evidence>
+                  ? <Evidence align="right" meta={{ methodology: cat.fix, source: "rule-based category score · value left allocated by weighted gap to 85", confidence: `${cat.score}/100 category score (rule-based)` }}><span className="font-mono text-[14px] font-semibold tabular-nums text-xo-verified">+{fmtMoney(cat.impactUsd)}</span></Evidence>
                   : <span className="text-[12px] font-medium text-xo-verified">On track ✓</span>}
               </div>
             </li>

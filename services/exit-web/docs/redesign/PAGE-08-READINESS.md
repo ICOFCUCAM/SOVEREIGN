@@ -34,7 +34,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 |---|---|---|---|
 | G1 | **Two "readiness" numbers.** 55 here, 46 on Pages 01/02, both called readiness. | Name this one **Exit Score (ten categories)** and show the readiness-engine score beside it with one line on the difference. | ☑ `7b7e141` |
 | G2 | **Fake "Re-score".** | Remove the timer/toast; offer "Update your figures" (→ Value My Company), which is what actually changes the score. | ☑ `77f9e73` |
-| G3 | **Mislabels:** "Market window" is the company's market-growth input; "strategic mid, today" (D1); verdict thresholds and category scoring unexplained. | "Market growth (company input)"; "enterprise value today"; thresholds shown with the verdict; categories and impacts labelled rule-based. | ☐ |
+| G3 | **Mislabels:** "Market window" is the company's market-growth input; "strategic mid, today" (D1); verdict thresholds and category scoring unexplained. | "Market growth (company input)"; "enterprise value today"; thresholds shown with the verdict; categories and impacts labelled rule-based. | ☑ G3-commit |
 | G4 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` + analysis; badge. | ☑ `5fce4f0` |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 8 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `21b899c` |
@@ -58,3 +58,15 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 ### G4 — Demo company unlabelled
 *Closed by:* `pages/Readiness.tsx` — the Exit Score, ten categories, value now / after fixes / left, fixes, verdict inputs (growth, market growth) and the readiness-engine score all run on `loadActiveCompany()` through `dealContextFor`, `runReadiness` and `runReadinessAnalysis` (same formulas as the demo constants). Header eyebrow names the source ("Demo company: Helios Freight" / "Your intake: …") plus a **Demo data / Your intake** badge. `pages/Intake.tsx` lists Exit Readiness among the pages using the founder's figures. The linked PDF report already used the active company.
 *Verification:* `tsc -b`, eslint clean · Chromium: demo → DEMO DATA, Exit Score 55 · engine 46, current value $102,849,415; saved intake "Northwind Analytics" → YOUR INTAKE, Exit Score 60 · engine 52, $403,509,792 (matches Pages 05–07) · free 1440/390: 0 errors, axe 0, no overflow.
+
+### G3 — Mislabels
+*Closed by:* `pages/Readiness.tsx` (text only; thresholds and formulas unchanged).
+| Before | After |
+|---|---|
+| "Market window Open / Tightening"; header "Window" | "Market growth (company input) 12%" (the actual figure); header "Market growth (input)" |
+| "Current value / Current valuation — strategic mid, today" (D1) | "Enterprise value — enterprise value today"; cascade "Enterprise value today — institutional framework mid" |
+| "Potential — after fixes" | "Value after fixes — model: value + readiness uplift" |
+| "When to sell · monitor signal", thresholds hidden; "let ExitOS watch the readiness clock" (nothing watches) | "When to sell · rule-based verdict" with the rule in the foot (Prepare if value left > 25 %; else Go if ARR growth ≥ 30 % and market growth ≥ 5 %; else Monitor; market growth is the company's own figure); Monitor reads "check this verdict again when your figures change"; Go names the thresholds |
+| "Exit Readiness AI · Value Impact Simulator"; "Scored across the ten categories buyers underwrite — every fix priced" + engine headline ("% of current strategic mid") | "Ten categories · priced fixes", eyebrow "Rule-based scores · value left allocated"; foot explains the fixed rules (e.g. IP 40 + per patent) and the allocation (value left shared by weighted gap below 85 — a model allocation, not a buyer quote) |
+| Impact tooltip "readiness engine · value-impact simulator" | "rule-based category score · value left allocated by weighted gap to 85" |
+*Verification:* `tsc -b`, eslint clean · Chromium demo and intake: 0 matches for Market window / strategic mid / Simulator / Tightening / Exit Readiness AI / readiness clock · free 1440/390: 0 errors, axe 0, no overflow.
