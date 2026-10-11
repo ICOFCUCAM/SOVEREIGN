@@ -6,6 +6,8 @@ import {
 } from "../lib/company-intake";
 import { listCompany, listingFromCompany, unlistCompany, allListings } from "../lib/listings";
 import { listingDestination } from "../lib/exit-api";
+import { useAuth } from "../lib/auth";
+import { requiredEngagement } from "../lib/access";
 import { loadSavedIntake, saveIntake, clearIntake } from "../lib/active-company";
 import { NUMERIC_FIELDS, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
 import { Section, Metric, Provenance, ScrollRegion, ActionLink, Bar } from "../components/xo";
@@ -23,7 +25,19 @@ const usd = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$$
 const INPUT = "w-full rounded-sm border bg-xo-ink px-2.5 py-2 text-[13px] text-xo-text placeholder:text-xo-faint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
 const LABEL = "mb-1 block text-[12px] font-medium text-xo-muted";
 
+// Pages that read the saved figures today (loadActiveCompany). Others still
+// show the demo company until their own redesign turn.
+const USES_YOUR_FIGURES: readonly { to: string; label: string }[] = [
+  { to: "/console", label: "Intelligence Terminal" },
+  { to: "/console/command", label: "Liquidity Command" },
+  { to: "/console/engagement-registry", label: "Engagement Registry" },
+  { to: "/console/inbox", label: "Inbox" },
+  { to: "/console/outreach-plan", label: "Outreach Plan" },
+  { to: "/report", label: "Reports" },
+];
+
 const Intake: React.FC = () => {
+  const { session } = useAuth();
   // Saved only when the founder edits a field — opening the page saves nothing.
   const [inp, setInp] = useState<IntakeInputs>(() => loadSavedIntake() ?? SAMPLE_INTAKE);
   const [saved, setSaved] = useState<boolean>(() => loadSavedIntake() !== null);
@@ -148,7 +162,7 @@ const Intake: React.FC = () => {
             </fieldset>
             <p role="status" className="border-t border-xo-line pt-3 text-[12px] text-xo-muted">
               {saved
-                ? "Your figures are saved in this browser and every console page now uses them."
+                ? "Your figures are saved in this browser. See below for the pages that use them."
                 : `Showing the demo company (${SAMPLE_INTAKE.name}). Edit any field to value your own company; nothing is saved until you do.`}
             </p>
           </div>
@@ -167,7 +181,7 @@ const Intake: React.FC = () => {
               <p className="mt-3 max-w-[70ch] text-[13px] leading-relaxed text-xo-muted">
                 Midpoint = financial baseline {usd(report.financialBaseline.mid)} × (1 + {pct(report.premium.appliedPct)} strategic premium). {report.premium.note}
               </p>
-              <p className="mt-2 text-[12px] text-xo-faint">{saved ? "This is the value every console page shows for your company." : "Once you edit a field, this becomes the value every console page shows for your company."}</p>
+              <p className="mt-2 text-[12px] text-xo-faint">The same institutional framework produces the value on every console page.</p>
             </div>
           </Section>
 
@@ -255,6 +269,23 @@ const Intake: React.FC = () => {
           <Section tone="paper" title="Disclaimer" eyebrow={`Valuation Framework v${report.frameworkVersion}`}>
             <p className="px-4 py-3 text-[12px] leading-relaxed text-xo-paper-muted">{report.disclaimer}</p>
           </Section>
+
+          {saved && (
+            <Section title="Where your figures are used" eyebrow="Saved in this browser" className="border border-xo-verified/40"
+              foot="Other console pages still show the demo company until they are redesigned to read your figures.">
+              <ul className="flex flex-wrap gap-x-5 gap-y-2 px-4 py-3 text-[13px]">
+                {USES_YOUR_FIGURES.map((u) => {
+                  const gate = u.to.startsWith("/console") ? requiredEngagement(u.to, session?.role ?? "founder", session?.plan ?? "free") : null;
+                  return (
+                    <li key={u.to}>
+                      <ActionLink to={u.to}>{u.label} →</ActionLink>
+                      {gate && <span className="ml-1.5 text-[11px] text-xo-caution">requires {gate}</span>}
+                    </li>
+                  );
+                })}
+              </ul>
+            </Section>
+          )}
 
           <p className="px-1 text-[12px] text-xo-faint">
             Prepared under ExitOS Valuation Framework v{report.frameworkVersion}. This is the same institutional engine the whole platform runs on — explore the full breakdown in the <ActionLink to="/console/valuation">valuation desk</ActionLink> or the <ActionLink to="/console">Intelligence Terminal</ActionLink>.

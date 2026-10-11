@@ -52,7 +52,7 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 | G3 | **Mislabelled valuation.** "Enterprise value · strategic-buyer basis" — the figure is the institutional framework, the console value (D1). | `Intake.tsx` | Label it as the institutional framework, the same figure every page shows. | ☑ `87a03c7` |
 | G4 | **One click publishes, without saying what.** "List on the exchange" lists immediately, does not say which figures buyers will see (exact revenue, growth, EBITDA margin, sector, region) or where it is stored (exchange vs this browser), and offers no way back. | `listings.ts`, `exit-api.ts` | Confirmation step naming exactly what buyers see and where it is stored; result message says the same. Listing mechanics unchanged. | ☑ `6f7d042` |
 | G5 | **Evidence thin.** Comparable status/source and rationale, confidence drivers and the framework disclaimer are computed but not shown; buyers' source (curated registry) not named. | engine fields | Show them (as on the Terminal). | ☑ `e17e5be` |
-| G6 | **No path forward.** Nothing tells the founder that their saved figures now drive the Terminal and Liquidity Command. | page | A "your figures now drive…" panel linking to those pages (only when data is saved). | ☐ |
+| G6 | **No path forward.** Nothing tells the founder that their saved figures now drive the Terminal and Liquidity Command. | page | A "your figures now drive…" panel linking to those pages (only when data is saved). | ☑ G6-commit |
 | G7 | **Old design system and weak hierarchy.** Generic cards/KPI tiles; form labels in tiny uppercase; report and form compete. | screenshots | Rebuild on `xo`: form (with units and hints) beside a decision-first report: value → key figures → buyers → comparables → evidence. | ☑ `52719c6` |
 
 ---
@@ -106,3 +106,10 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 - New **Disclaimer** section on the light reading surface: the framework's full disclaimer.
 
 *Verification:* `tsc -b`, eslint clean · Chromium: all four sections render with the values above (e.g. DB Schenker → DSV "closed · 229d to close · Same sector (logistics freight) · completed transaction", source "press release"; confidence drivers 100/100/100/59/78 %) · axe 0, no overflow (free/pro, 1440/390) · 0 page errors.
+
+### G6 — No path forward (and a correction to G1/G3 wording)
+*Documented:* gap register row G6. *Closed by:* `pages/Intake.tsx`.
+- New **Where your figures are used** section (only once figures are saved), listing exactly the pages that read them today — found with `grep loadActiveCompany`: Intelligence Terminal, Liquidity Command, Engagement Registry, Inbox, Outreach Plan, Reports — with links and the engagement each requires (`requiredEngagement`), and the plain statement that other console pages still show the demo company until their redesign.
+- **Correction:** the G1 status line said "every console page now uses them" and the G3 line said the value is "the value every console page shows for your company". Both overclaimed — Readiness, Exit Timing, the Valuation desk and others still run on the demo company. They now read "See below for the pages that use them" and "The same institutional framework produces the value on every console page" (true since D1).
+
+*Verification:* `tsc -b`, eslint clean · Chromium: panel absent before saving; after editing the name it lists the six destinations, with "requires Preparation or Active Mandate" on Engagement Registry and Outreach Plan for a free founder; the Liquidity Command link opens `/console/command` showing "Acme Robotics" · 0 page errors.
