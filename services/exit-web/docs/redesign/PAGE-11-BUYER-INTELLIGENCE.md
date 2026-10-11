@@ -40,7 +40,7 @@ Preparation / Active Mandate: `h1` none · axe color-contrast ×40 (1440) · no 
 | G4 | Hidden plan gate on "Draft outreach". | `requiredEngagement` label for Preparation. | ☐ |
 | G5 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` and the company's own value; badge. | ☐ |
 | G6 | Fake live tape. | `RegistryTape`. | ☐ |
-| G7 | Design: no `h1`, 40 contrast failures, old primitives. | Rebuild on `xo`. | ☑ G7-commit |
+| G7 | Design: no `h1`, 40 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `90519d7` |
 
 ---
 
