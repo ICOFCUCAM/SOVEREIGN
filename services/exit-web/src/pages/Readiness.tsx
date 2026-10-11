@@ -4,7 +4,7 @@ import { fmtMoney, notify } from "../lib/ui";
 import { MarketTape, Evidence } from "../lib/workstation";
 import { PageHeader, Section, Metric, Bar } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { READINESS_ANALYSIS } from "../lib/engines";
+import { READINESS, READINESS_ANALYSIS } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { EXIT_SCORE, READINESS_BAND, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VALUE_LEFT_USD, READINESS_CATEGORIES } from "../lib/deal-context";
 
@@ -18,6 +18,10 @@ const EFFORT_LABEL: Record<string, string> = { weeks: "~weeks", months: "~months
 
 const Readiness: React.FC = () => {
   const score = EXIT_SCORE;
+  // The readiness engine's own overall score (shown as "Readiness" on the
+  // Terminal and Liquidity Command) is a different model from the ten-category
+  // Exit Score; both are named and shown so they are never confused.
+  const engineScore = Math.round(READINESS.overallScore);
   const current = CURRENT_VALUE_USD;
   const potential = POTENTIAL_VALUE_USD;
   const left = VALUE_LEFT_USD;
@@ -48,7 +52,7 @@ const Readiness: React.FC = () => {
           body: "No urgent catalyst. Keep building and let ExitOS watch the readiness clock for the right moment." };
 
   const signals = [
-    { label: "Readiness", value: `${score.toFixed(0)}/100`, ok: score >= 60 },
+    { label: "Exit Score", value: `${score.toFixed(0)}/100`, ok: score >= 60 },
     { label: "Growth momentum", value: `${Math.round(growthYoy * 100)}% YoY`, ok: growthStrong },
     { label: "Market window", value: marketOpen ? "Open" : "Tightening", ok: marketOpen },
     { label: "Upside still on table", value: fmtMoney(left), ok: gapRatio <= 0.15 },
@@ -67,7 +71,7 @@ const Readiness: React.FC = () => {
   return (
     <div data-page="readiness" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Readiness Desk" title="Exit Readiness"
-        badge={<span className="text-[12px] capitalize text-xo-muted">{READINESS_BAND.replace(/_/g, " ")} · {verdict.label}</span>}
+        badge={<span className="text-[12px] text-xo-muted">Exit Score {score.toFixed(0)}/100 · readiness engine {engineScore}/100 (<span className="capitalize">{READINESS_BAND.replace(/_/g, " ")}</span>) · {verdict.label}</span>}
         actions={<a href="/report/readiness" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Readiness Report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>}>
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-xo-line pt-2">
           {([["Growth", `${Math.round(growthYoy * 100)}%`], ["Window", marketOpen ? "Open" : "Tightening"], ["Categories", String(categories.length)]] as const).map(([k, v]) => (
@@ -77,7 +81,7 @@ const Readiness: React.FC = () => {
       </PageHeader>
 
       <section aria-label="Readiness summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-5">
-        <div className="bg-xo-panel"><Metric label="Readiness" emphasis value={`${score.toFixed(0)}/100`} sub={READINESS_BAND.replace(/_/g, " ")} /></div>
+        <div className="bg-xo-panel"><Metric label="Exit Score (ten categories)" emphasis value={`${score.toFixed(0)}/100`} sub={`readiness engine ${engineScore}/100`} /></div>
         <div className="bg-xo-panel"><Metric label="Current value" value={fmtMoney(current)} sub="strategic mid, today" /></div>
         <div className="bg-xo-panel"><Metric label="Potential" value={<span className="text-xo-verified">{fmtMoney(potential)}</span>} sub="after fixes" /></div>
         <div className="bg-xo-panel"><Metric label="Value left" value={<span className="text-xo-caution">{fmtMoney(left)}</span>} sub={`+${upliftPct.toFixed(0)}% unclaimed`} /></div>
@@ -87,7 +91,7 @@ const Readiness: React.FC = () => {
       <MarketTape items={tape} />
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
-        <Section title="Exit readiness" eyebrow="Score" className="lg:col-span-3"
+        <Section title="Exit Score" eyebrow="Ten categories" className="lg:col-span-3"
           right={<button type="button" onClick={rescore} disabled={scanning} className="rounded-sm border border-xo-line px-2 py-0.5 text-[11px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{scanning ? "Re-scoring…" : "Re-score"}</button>}>
           <div className="flex flex-col items-center justify-center py-4">
             <div className="relative flex h-36 w-36 items-center justify-center">
@@ -100,7 +104,7 @@ const Readiness: React.FC = () => {
                 <div className="text-[11px] text-xo-faint">/ 100</div>
               </div>
             </div>
-            <div className="mt-2 text-[12px] font-medium capitalize text-xo-muted">{READINESS_BAND.replace(/_/g, " ")}</div>
+            <p className="mt-2 max-w-[16rem] text-center text-[12px] leading-snug text-xo-muted">Weighted average of the ten categories below. The readiness engine scores the same company <span className="font-mono font-semibold tabular-nums text-xo-text">{engineScore}/100</span> (<span className="capitalize">{READINESS_BAND.replace(/_/g, " ")}</span>) — the number shown as Readiness on the Terminal; it uses its own dimensions and weights.</p>
           </div>
         </Section>
 

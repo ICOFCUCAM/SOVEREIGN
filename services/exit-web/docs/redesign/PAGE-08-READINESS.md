@@ -32,7 +32,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 ## Gap register — Page 08
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Two "readiness" numbers.** 55 here, 46 on Pages 01/02, both called readiness. | Name this one **Exit Score (ten categories)** and show the readiness-engine score beside it with one line on the difference. | ☐ |
+| G1 | **Two "readiness" numbers.** 55 here, 46 on Pages 01/02, both called readiness. | Name this one **Exit Score (ten categories)** and show the readiness-engine score beside it with one line on the difference. | ☑ G1-commit |
 | G2 | **Fake "Re-score".** | Remove the timer/toast; offer "Update your figures" (→ Value My Company), which is what actually changes the score. | ☐ |
 | G3 | **Mislabels:** "Market window" is the company's market-growth input; "strategic mid, today" (D1); verdict thresholds and category scoring unexplained. | "Market growth (company input)"; "enterprise value today"; thresholds shown with the verdict; categories and impacts labelled rule-based. | ☐ |
 | G4 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` + analysis; badge. | ☐ |
@@ -46,3 +46,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 ### G6 — Design
 *Closed by:* `pages/Readiness.tsx` rebuilt on `xo` (`PageHeader` `h1` + report link announced as new tab, five summary metrics, gauge (decorative SVG, number printed), value cascade as a definition list, verdict with ✓/! plus screen-reader words, ten categories as an ordered list with numeric bars). Shared `Evidence` tooltip gained an additive `align="right"` option so right-edge tooltips no longer widen the page (default unchanged; Terminal re-checked). Content carried over verbatim; G1–G5 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium free/pro 1440/390: 0 errors, `h1` 1, no overflow, axe **0** (was 8), all tab stops with visible focus.
+
+### G1 — Two "readiness" numbers
+*Closed by:* `pages/Readiness.tsx`. The page's number is now named **Exit Score (ten categories)** everywhere on the page (header badge, summary metric, gauge section, verdict signal). The readiness engine's overall score (`runReadiness().overallScore`, the "Readiness" on Pages 01/02) is shown beside it — "readiness engine 46/100" — with one line under the gauge: the Exit Score is the weighted average of the ten categories; the engine uses its own dimensions and weights. The band word ("seed acquisition") belongs to the engine score and is now shown with it, not with 55. No calculation changed.
+*Verification:* `tsc -b`, eslint clean · Chromium: "Exit Score 55/100 · readiness engine 46/100 (Seed Acquisition)" · free 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
