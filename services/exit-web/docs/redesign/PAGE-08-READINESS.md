@@ -36,7 +36,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 | G2 | **Fake "Re-score".** | Remove the timer/toast; offer "Update your figures" (→ Value My Company), which is what actually changes the score. | ☑ `77f9e73` |
 | G3 | **Mislabels:** "Market window" is the company's market-growth input; "strategic mid, today" (D1); verdict thresholds and category scoring unexplained. | "Market growth (company input)"; "enterprise value today"; thresholds shown with the verdict; categories and impacts labelled rule-based. | ☑ `576d827` |
 | G4 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` + analysis; badge. | ☑ `5fce4f0` |
-| G5 | Fake live tape. | `RegistryTape`. | ☐ |
+| G5 | Fake live tape. | `RegistryTape`. | ☑ G5-commit |
 | G6 | Design: no `h1`, 8 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `21b899c` |
 
 ---
@@ -70,3 +70,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 | "Exit Readiness AI · Value Impact Simulator"; "Scored across the ten categories buyers underwrite — every fix priced" + engine headline ("% of current strategic mid") | "Ten categories · priced fixes", eyebrow "Rule-based scores · value left allocated"; foot explains the fixed rules (e.g. IP 40 + per patent) and the allocation (value left shared by weighted gap below 85 — a model allocation, not a buyer quote) |
 | Impact tooltip "readiness engine · value-impact simulator" | "rule-based category score · value left allocated by weighted gap to 85" |
 *Verification:* `tsc -b`, eslint clean · Chromium demo and intake: 0 matches for Market window / strategic mid / Simulator / Tightening / Exit Readiness AI / readiness clock · free 1440/390: 0 errors, axe 0, no overflow.
+
+### G5 — Fake live tape
+*Closed by:* `pages/Readiness.tsx`: pinging `MarketTape` → dated `RegistryTape` ("Registry · as of 2026-10-11").
+*Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free/pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.

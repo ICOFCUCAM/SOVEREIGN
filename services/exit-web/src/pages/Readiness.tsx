@@ -1,7 +1,9 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { fmtMoney } from "../lib/ui";
-import { MarketTape, Evidence } from "../lib/workstation";
+import { Evidence } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, Bar, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { runReadiness, runReadinessAnalysis } from "@exit/engines";
@@ -87,7 +89,7 @@ const Readiness: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Top fix impact" value={topFix ? `+${fmtMoney(topFix.valuationUpliftUsd)}` : "—"} sub={topFix?.dimension} /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Exit Score" eyebrow="Ten categories" className="lg:col-span-3"
