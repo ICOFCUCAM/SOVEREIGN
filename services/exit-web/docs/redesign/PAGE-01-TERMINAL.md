@@ -288,3 +288,22 @@ Requested by the owner after the Page 01 review ("START FIXING"). Same rule: doc
 *Fix:* define `ink-950` (`#060b12`, the darkest step of the existing ink scale) so every intended background exists; raise the low-alpha label/link colours to ≥ 4.5:1; make the ribbon a named, focusable region; make the mobile top bar a `<header>`.
 
 *Verification:* `tsc -b` pass · eslint 0 errors · axe on shell chrome (Terminal content excluded) at 1440 and 390, page top and scrolled: **0 violations** (was: color-contrast ×13, scrollable-region-focusable, region) · Terminal regression (G8 script): still 0 violations, 56 tab stops all with visible focus · side effects of defining `ink-950` checked: "See your matches" CTA now dark text on emerald (`rgb(6,11,18)` on `rgb(16,185,129)`); Buyer profile page renders correctly with 0 contrast failures, 0 page errors. *Status:* ☑ `13b14af`
+
+### X6 — Buyer "High" confidence without any verified event
+*Documented before the fix.* `buyerConfidence()` (shown on the Terminal drawer, Buyer profile and generated reports) returns **High** for ≥ 40 indexed events and ≥ 4 disclosed values, ignoring `verified_events` (events confirmed by SEC EDGAR or corroborated — `exit-engines/src/scripts/dna/build.ts:43`). In the 2026-10-11 snapshot, **19 of the 22** "High" buyers have **0** verified events (e.g. Microsoft: 419 indexed, 0 verified).
+
+*Fix:* "High" additionally requires ≥ 1 verified event; deep but wholly unverified records are capped at "Moderate". Moderate/Developing thresholds unchanged. This only makes the label stricter; no score, probability or valuation changes. Expected effect on the snapshot: High 22 → 3, Moderate 38 → 57, Developing unchanged at 1,416.
+
+*Verification:* `tsc -b` pass · eslint clean · `vitest run` 29 files **180/180** (the confidence test now also asserts a deep-but-unverified buyer is Moderate) · measured distribution High **3** / Moderate **57** / Developing **1,416** (as predicted) · Chromium Terminal drawers: Microsoft (0 verified) → Moderate, Cisco (1 verified) → High, 0 page errors. *Status:* ☑ X6-commit
+
+### After X1–X6
+| Check | Result |
+|---|---|
+| `tsc -b` | pass |
+| `eslint src` | **0 errors**, 2 warnings (deliberately left, see X3) |
+| `vitest run` | 29 files, **180/180 pass** |
+| axe — Terminal content | 0 violations (free/pro, 1440/390) |
+| axe — shell chrome | 0 violations (1440/390, top and scrolled) |
+| axe — sign-in page | 0 violations (1280/390) |
+
+Still open, by design: real server-side authentication and roles (X1/X2 follow-up); git history still contains the removed e-mail address.

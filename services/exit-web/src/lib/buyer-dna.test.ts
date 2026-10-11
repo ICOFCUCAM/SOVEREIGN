@@ -163,8 +163,12 @@ describe("acquisition DNA (derived from ingested registries)", () => {
   });
 
   it("buyer confidence reflects data depth, never asserted", () => {
-    const deep = DNA_PROFILES.find((x) => x.events_indexed >= 40 && x.disclosed_events >= 4);
+    const deep = DNA_PROFILES.find((x) => x.events_indexed >= 40 && x.disclosed_events >= 4 && x.verified_events >= 1);
     if (deep) expect(buyerConfidence(deep)).toBe("High");
+    // depth without a single verified event is capped below High
+    const unverified = DNA_PROFILES.find((x) => x.events_indexed >= 40 && x.disclosed_events >= 4 && x.verified_events === 0);
+    expect(unverified).toBeDefined();
+    if (unverified) expect(buyerConfidence(unverified)).toBe("Moderate");
     const thin = DNA_PROFILES.find((x) => x.events_indexed > 0 && x.events_indexed < 10);
     if (thin) expect(buyerConfidence(thin)).toBe("Developing");
   });

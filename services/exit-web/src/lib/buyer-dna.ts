@@ -340,9 +340,11 @@ export function acquisitionAppetiteScore(p: DnaProfile): AppetiteScore {
 }
 
 // Per-buyer confidence in the forecast — a function of how much real data
-// backs it (events indexed + disclosed values). Honest, never asserted.
+// backs it (events indexed + disclosed values) and whether any of it is
+// independently verified (SEC EDGAR or corroborated). Depth alone, from
+// unverified sources, tops out at Moderate. Honest, never asserted.
 export function buyerConfidence(p: DnaProfile): "High" | "Moderate" | "Developing" {
-  if (p.events_indexed >= 40 && p.disclosed_events >= 4) return "High";
+  if (p.events_indexed >= 40 && p.disclosed_events >= 4 && p.verified_events >= 1) return "High";
   if (p.events_indexed >= 10) return "Moderate";
   return "Developing";
 }
