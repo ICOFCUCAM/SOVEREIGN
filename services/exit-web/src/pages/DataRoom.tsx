@@ -87,6 +87,8 @@ const DataRoom: React.FC = () => {
   const uploadedNames = new Set(docsForActive.map((d) => d.filename.toLowerCase()));
   const missingArtifacts = (active?.artifacts ?? []).filter((a) => a.required && !uploadedNames.has(a.filename.toLowerCase()));
 
+  // The illustrative-discount rule, with the weights each package actually gets.
+  const weightRule = DILIGENCE.documents.map((d) => `${d.title} ${Math.round((PKG_IMPACT_WEIGHT[d.kind] ?? 0.02) * 100)}%`).join(", ");
   const pctCls = (p: number): string => p >= 80 ? "text-xo-verified" : p >= 50 ? "text-xo-caution" : "text-xo-risk";
   const CLASS_CLS: Record<string, string> = { unclassified: "text-xo-verified", sensitive: "text-xo-caution", confidential: "text-xo-risk" };
 
@@ -102,7 +104,7 @@ const DataRoom: React.FC = () => {
 
       <section aria-label="Data room summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Completeness" emphasis value={<span className={pctCls(overallPct)}>{overallPct}%</span>} sub={`${requiredArtifacts} specs · ${DILIGENCE.documents.length} packages`} /></div>
-        <div className="bg-xo-panel"><Metric label="Value at risk" value={<span className="text-xo-risk">-{fmtMoney(atRiskUsd)}</span>} sub="while gaps stay open" /></div>
+        <div className="bg-xo-panel"><Metric label="Illustrative discount" value={<span className="text-xo-risk">-{fmtMoney(atRiskUsd)}</span>} sub="fixed-weight rule, see below" /></div>
         <div className="bg-xo-panel"><Metric label="Uploaded" value={String(uploaded.length)} sub={fmtBytes(uploadedTotalBytes)} /></div>
         <div className="bg-xo-panel"><Metric label="Confidential pkgs" value={String(confidentialCount)} sub="ring-1 access" /></div>
       </section>
@@ -121,16 +123,17 @@ const DataRoom: React.FC = () => {
       {error && <p role="alert" className="border border-xo-risk/50 bg-xo-panel px-4 py-3 text-[13px] text-xo-risk">{error}</p>}
 
       <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+        foot={`Illustrative discount rule: enterprise value × package weight × missing required artifacts. Weights: ${weightRule}. A fixed rule, not a measured buyer discount.`}
         right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-risk">-{fmtMoney(atRiskUsd)}</span>}>
         <div className="px-4 py-3">
           <p className="text-[14px] leading-relaxed">{worstPkg
             ? <>Upload the <span className="font-semibold">{worstPkg.missing} missing artifact{worstPkg.missing === 1 ? "" : "s"}</span> in {worstPkg.title} — the biggest gap in the room.</>
             : <>Room is complete — keep it current as new diligence requests land.</>}</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-risk">-{fmtMoney(atRiskUsd)}</span> at risk while gaps stay open · {overallPct}% complete.</TakeCell>
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-risk">-{fmtMoney(atRiskUsd)}</span> illustrative discount while gaps stay open (rule) · {overallPct}% complete.</TakeCell>
             <TakeCell k="If you wait">Every empty package lets a buyer discount the bid or stall in diligence until it's filled.</TakeCell>
             <TakeCell k="Buyer focus">A buyer in diligence probes the weakest package first{worstPkg ? <> — <span className="text-xo-text">{worstPkg.title}</span></> : null}.</TakeCell>
-            <TakeCell k="ExitOS does it">ExitOS maps every engine-required artifact, scores completeness and prices the dollar impact of each gap.</TakeCell>
+            <TakeCell k="What ExitOS does">Maps every engine-required artifact, scores completeness and applies a fixed-weight rule to show what each gap could cost. The rule is not measured from buyer behaviour.</TakeCell>
           </dl>
           <Link to="/console/diligence-ai" className="mt-3 inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Run the risk scan →</Link>
         </div>
@@ -205,7 +208,7 @@ const DataRoom: React.FC = () => {
                   <div className="mt-3">
                     <div className="flex flex-wrap items-center justify-between gap-2 text-[12px]">
                       <span className="text-xo-muted">Missing required artifacts</span>
-                      <span className="font-mono font-semibold text-xo-risk">est. impact -{fmtMoney(activePkg.impact)}</span>
+                      <span className="font-mono font-semibold text-xo-risk">illustrative impact -{fmtMoney(activePkg.impact)}</span>
                     </div>
                     <ul className="mt-2 space-y-1 text-[12px]">
                       {missingArtifacts.map((a) => (

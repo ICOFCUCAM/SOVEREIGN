@@ -35,7 +35,7 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Uploads land in a shared tenant visible to every user; the page implies confidentiality** (X12). | Warning panel above the uploader stating exactly who can see uploads; upload stays disabled until the founder ticks an acknowledgement; classification pills say "label only". Backend unchanged (X12 for the owner). | ☑ `ec30f99` |
-| G2 | **Invented "value at risk" weights.** | Label as a rule with the weights shown; "illustrative" not "at risk". | ☐ |
+| G2 | **Invented "value at risk" weights.** | Label as a rule with the weights shown; "illustrative" not "at risk". | ☑ G2-commit |
 | G3 | Mislabels: "Due Diligence AI" (rule-based), "ring-1 access", completeness rule unstated, raw list error. | "Diligence risk scan (rule-based)"; drop "ring-1 access"; state the completeness rule; plain error text. | ☐ |
 | G4 | Demo company unlabelled. | Engine specs, red flags and value on `loadActiveCompany()`; badge. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
@@ -52,3 +52,8 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 ### G1 — Uploads land in a shared tenant; the page implied confidentiality (UI mitigation for X12)
 *Closed by:* `pages/DataRoom.tsx`. A **"Shared storage — read before uploading"** panel above the room: "Files uploaded here are stored in a single demo workspace in ExitOS storage. Anyone using this app can list and download them. Per-founder access control is not built yet, and the confidential / sensitive labels do not restrict access. Do not upload confidential documents." Both upload buttons and the file input stay **disabled until the founder ticks** "I understand that anything I upload here is visible to every ExitOS user." (buttons point to the panel via `aria-describedby`). Upload classifications read "… (label only)". The upload and list calls, the backend and stored files are unchanged — X12 stays open for the owner.
 *Verification:* `tsc -b`, eslint clean · Chromium (Preparation, functions stubbed — **no real upload was sent**): before the tick Upload and the file input are disabled; after it Upload is enabled and choosing a file issues one (stubbed) upload call · 1440/390: 0 errors, axe 0, no overflow.
+
+### G2 — Invented "value at risk" weights
+*Closed by:* `pages/DataRoom.tsx` (labels and a foot; the rule itself unchanged). "Value at risk — while gaps stay open" → **"Illustrative discount — fixed-weight rule, see below"**; "est. impact" → "illustrative impact"; banker's take "… at risk" → "… illustrative discount while gaps stay open (rule)"; "ExitOS … prices the dollar impact of each gap" → "applies a fixed-weight rule to show what each gap could cost. The rule is not measured from buyer behaviour." The foot prints the rule and the **weights each package actually receives**, generated from the code: Financial 6 %, Market 2 %, User & growth 2 %, Technical architecture 2 %, Security 4 %, Legal 5 %, Commercial 3 %.
+*Finding (not changed):* `PKG_IMPACT_WEIGHT` lists `technical: 0.03`, but the package kind is `technical_architecture`, so it falls back to 2 %. The page now shows the effective 2 %; the mismatch is left for the owner since the weights themselves are a product choice.
+*Verification:* `tsc -b`, eslint clean · Chromium: weights line as above; 0 "Value at risk" / "est. impact" / "prices the dollar".
