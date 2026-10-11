@@ -37,7 +37,7 @@ The paid founder's command surface: value now and after fixes, odds, who is circ
 ## Gap register — Page 05
 | # | Gap | Fix (no calculation changed) | Status |
 |---|---|---|---|
-| G1 | Always the demo company, unlabelled. | Run on `loadActiveCompany()` via `dealContextFor` / `commanderMetrics(ctx, analysis)` (as Page 02); data badge. | ☐ |
+| G1 | Always the demo company, unlabelled. | Run on `loadActiveCompany()` via `dealContextFor` / `commanderMetrics(ctx, analysis)` (as Page 02); data badge. | ☑ G1-commit |
 | G2 | **Invented probability breakdown.** | Show the real index decomposition: 0.35 × Exit Score, 0.40 × buyer demand, 0.25 × negotiation leverage (sample offers), each with its points. | ☐ |
 | G3 | Fake live (tape, pinging dots, "Live", "live telemetry", "live market feed", "live engine state"). | Snapshot-dated labels, `RegistryTape`, no live dots. | ☐ |
 | G4 | Overclaims and mislabels: "What runs the moment you press Execute" ✓ list; "Buyer movement" from a static attribute; "qualified buyers" = top-12 cap; "Close probability" / "Confidence" / "Deal temperature" heuristics unlabelled; "Premium probability". | Plain wording: "What Autonomous Exit will prepare (each step needs your approval)"; "Buyer appetite (registry)"; "top 12 ranked"; indices named with formulas; "Top premium payer". | ☐ |
@@ -52,3 +52,8 @@ The paid founder's command surface: value now and after fixes, odds, who is circ
 *Closed by:* `pages/Commander.tsx` rebuilt on `xo`; `CommandTiles.tsx`, `ExitCommander.tsx`, `CommanderBlocks.tsx` removed (no other users after Page 02). Order: header (`h1` = company, Board Memorandum / Publishing links announced as new-tab) → Liquidity Board → recommended action + Execute beside the briefing register → probability breakdown, deal temperature, value gap → expected automation → buyer movement → acquirer-mix radar (SVG labelled with every count) + banker notes → layer links (`nav`) → tape and reactors. Content carried over verbatim; fixes follow in G1–G5.
 
 *Verification:* `tsc -b`, eslint clean, `vitest` 203/203 · Chromium Active Mandate 1440/390: 0 errors, `h1` 1, no overflow (was overflowing at 390), axe **0** (was 15), 20 tab stops all with visible focus.
+
+### G1 — Always the demo company
+*Closed by:* `pages/Commander.tsx` — runs `dealContextFor`, `runReadinessAnalysis` and `runBuyerDiscovery` on `loadActiveCompany()` and passes them to `commanderMetrics(ctx, analysis)` (formulas unchanged); `h1` = company, **Demo data / Your intake** badge. `pages/Intake.tsx`: "Where your figures are used" now lists Chief Investment Banker.
+
+*Verification:* `tsc -b`, eslint clean · Chromium (Active Mandate): demo → Helios Freight, DEMO DATA, EV $102,849,415 (unchanged); saved intake "Northwind Analytics" → YOUR INTAKE, EV $403,509,792, no Helios mentions · 0 errors.

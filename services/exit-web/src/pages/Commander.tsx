@@ -6,11 +6,11 @@ import { AcquisitionReactor, BuyerNetworkReactor, ReactorTelemetry } from "../co
 import { MARKET_INTEL } from "../lib/market-intel";
 import { Button, fmtMoney } from "../lib/ui";
 import { commanderMetrics } from "../lib/commander-metrics";
-import { CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VALUE_LEFT_USD, DEAL_BUYERS, ACTIVE_BUYERS, DEMAND_LABEL } from "../lib/deal-context";
+import { dealContextFor } from "../lib/deal-context";
 import { DEAL_INTEL_FMT } from "../lib/market-stats";
-import { BUYERS } from "../lib/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
-import { PageHeader, Section, Metric, Bar, ActionLink, Fact } from "../components/xo";
+import { runBuyerDiscovery, runReadiness, runReadinessAnalysis } from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
+import { PageHeader, Section, Metric, Bar, ActionLink, Fact, Provenance } from "../components/xo";
 
 // ── CHIEF INVESTMENT BANKER ─────────────────────────────────────────
 // Page 05 of the ExitOS institutional redesign (docs/redesign/PAGE-05-
@@ -20,7 +20,8 @@ import { PageHeader, Section, Metric, Bar, ActionLink, Fact } from "../component
 // The Liquidity Board, Morning Briefing and banker blocks that only this
 // page used are folded in here on the xo design system.
 
-const TYPE_AXES: { key: keyof typeof BUYERS.byType; label: string }[] = [
+type BuyerType = keyof ReturnType<typeof runBuyerDiscovery>["byType"];
+const TYPE_AXES: { key: BuyerType; label: string }[] = [
   { key: "strategic", label: "Strategic" },
   { key: "pe", label: "Private Equity" },
   { key: "vc", label: "Venture" },
@@ -62,7 +63,16 @@ const AcquirerMixRadar: React.FC<{ data: { label: string; n: number }[] }> = ({ 
 
 const Commander: React.FC = () => {
   const navigate = useNavigate();
-  const m = commanderMetrics();
+  // The founder's company when they have saved figures, else the demo company.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const E = useMemo(() => {
+    const analysis = runReadinessAnalysis(company, runReadiness(company));
+    return { ctx: dealContextFor(company), analysis, buyers: runBuyerDiscovery(company, { limit: 12 }) };
+  }, [company]);
+  const m = commanderMetrics(E.ctx, E.analysis);
+  const DEAL_BUYERS = E.ctx.dealBuyers, ACTIVE_BUYERS = E.ctx.activeBuyers, DEMAND_LABEL = E.ctx.demandLabel;
+  const CURRENT_VALUE_USD = E.ctx.currentValueUsd, POTENTIAL_VALUE_USD = E.ctx.potentialValueUsd, VALUE_LEFT_USD = E.ctx.valueLeftUsd;
+  const BUYERS = E.buyers;
   const tape = useMemo(() => buildMarketTape(), []);
 
   // carried over from CommanderBlocks (see the gap register for what follows)
@@ -97,8 +107,8 @@ const Commander: React.FC = () => {
 
   return (
     <div data-page="chief-investment-banker" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Chief Investment Banker · Transaction desk" title={SAMPLE_COMPANY.name}
-        badge={<span className="text-[12px] text-xo-muted">demand {m.demandLabel} · horizon {m.timeToExitMonths}mo · conf {m.confidencePct}%</span>}
+      <PageHeader eyebrow="◉ Chief Investment Banker · Transaction desk" title={company.name}
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">demand {m.demandLabel} · horizon {m.timeToExitMonths}mo · conf {m.confidencePct}%</span></>}
         actions={<>
           <a href="/report/board" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board Memorandum (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
           <a href="/report" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
@@ -117,7 +127,7 @@ const Commander: React.FC = () => {
 
       {/* ── the banker's brief + Execute (Morning Briefing) ────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
-        <Section title="Recommended action" eyebrow={`Morning Briefing · Chief Investment Banker · ${SAMPLE_COMPANY.name}`} className="lg:col-span-7">
+        <Section title="Recommended action" eyebrow={`Morning Briefing · Chief Investment Banker · ${company.name}`} className="lg:col-span-7">
           <div className="px-4 py-4">
             <p className="max-w-[60ch] text-[16px] font-semibold leading-snug">{m.recommendedAction}</p>
             <dl className="mt-3 flex flex-wrap gap-x-8 gap-y-2">

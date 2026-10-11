@@ -30,6 +30,7 @@ const LABEL = "mb-1 block text-[12px] font-medium text-xo-muted";
 const USES_YOUR_FIGURES: readonly { to: string; label: string }[] = [
   { to: "/console", label: "Intelligence Terminal" },
   { to: "/console/command", label: "Liquidity Command" },
+  { to: "/console/commander", label: "Chief Investment Banker" },
   { to: "/console/engagement-registry", label: "Engagement Registry" },
   { to: "/console/inbox", label: "Inbox" },
   { to: "/console/outreach-plan", label: "Outreach Plan" },
