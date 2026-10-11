@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, Kpi, SectionHeader, Field, inputCls, fmtMoney, Button } from "../lib/ui";
 import { runInstitutionalValuation } from "@exit/engines";
@@ -6,6 +6,7 @@ import {
   buildProfile, SECTORS, SAMPLE_INTAKE, type IntakeInputs, type Sector,
 } from "../lib/company-intake";
 import { listCompany } from "../lib/listings";
+import { loadSavedIntake, saveIntake, clearIntake } from "../lib/active-company";
 
 // COMPANY INTAKE → INSTANT REPORT — the success metric: a founder enters
 // their company and within seconds receives the institutional answer (who
@@ -13,20 +14,21 @@ import { listCompany } from "../lib/listings";
 // valuation constitution computed live on their inputs; the buyer universe
 // and comparables come from the registry, parameterized by their sector.
 
-const KEY = "exitos.intake.v1";
 const pct = (x: number): string => `${Math.round(x * 100)}%`;
 const usd = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`);
 
 const Intake: React.FC = () => {
-  const [inp, setInp] = useState<IntakeInputs>(() => {
-    try { const s = localStorage.getItem(KEY); if (s) return { ...SAMPLE_INTAKE, ...JSON.parse(s) }; } catch { /* ignore */ }
-    return SAMPLE_INTAKE;
-  });
-  useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify(inp)); } catch { /* ignore */ } }, [inp]);
+  // Saved only when the founder edits a field — opening the page saves nothing.
+  const [inp, setInp] = useState<IntakeInputs>(() => loadSavedIntake() ?? SAMPLE_INTAKE);
+  const [saved, setSaved] = useState<boolean>(() => loadSavedIntake() !== null);
 
   const report = useMemo(() => runInstitutionalValuation(buildProfile(inp)), [inp]);
   const [listed, setListed] = useState(false);
-  const set = <K extends keyof IntakeInputs>(k: K, v: IntakeInputs[K]): void => { setInp((p) => ({ ...p, [k]: v })); setListed(false); };
+  const set = <K extends keyof IntakeInputs>(k: K, v: IntakeInputs[K]): void => {
+    setInp((p) => { const next = { ...p, [k]: v }; saveIntake(next); return next; });
+    setSaved(true); setListed(false);
+  };
+  const clearMine = (): void => { clearIntake(); setInp(SAMPLE_INTAKE); setSaved(false); setListed(false); };
   const num = (k: keyof IntakeInputs, v: string, scale = 1): void => set(k, (parseFloat(v) || 0) * scale as never);
 
   const m = report.mandatoryOutputs;
@@ -40,7 +42,7 @@ const Intake: React.FC = () => {
         actions={
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => { listCompany(buildProfile(inp)); setListed(true); }}>{listed ? "✓ Listed (anonymized)" : "List on the exchange"}</Button>
-            <Button variant="ghost" onClick={() => { setInp(SAMPLE_INTAKE); setListed(false); }}>Reset to example</Button>
+            {saved && <Button variant="ghost" onClick={clearMine}>Clear my data</Button>}
           </div>
         }
       />
@@ -78,7 +80,11 @@ const Intake: React.FC = () => {
             <label className="flex items-center gap-2 text-[12px] text-white/70"><input type="checkbox" checked={inp.hasNetworkEffects} onChange={(e) => set("hasNetworkEffects", e.target.checked)} /> Network effects</label>
             <label className="flex items-center gap-2 text-[12px] text-white/70"><input type="checkbox" checked={inp.hasDataMoat} onChange={(e) => set("hasDataMoat", e.target.checked)} /> Data moat</label>
           </div>
-          <p className="text-[10px] text-white/35">The report recomputes live as you type. Saved to this browser only.</p>
+          <p role="status" className="text-[11px] text-white/60">
+            {saved
+              ? "Your figures are saved in this browser and every console page now uses them."
+              : `Showing the demo company (${SAMPLE_INTAKE.name}). Edit any field to value your own company; nothing is saved until you do.`}
+          </p>
         </Card>
 
         {/* ── instant report ── */}

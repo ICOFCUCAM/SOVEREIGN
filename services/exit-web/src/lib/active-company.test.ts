@@ -30,3 +30,18 @@ describe("active company", () => {
     expect(tokens.some((t) => /intelligence|machine learning|infrastructure/.test(t))).toBe(true);
   });
 });
+
+describe("saved intake", () => {
+  it("nothing is saved until the founder saves; clearing returns to the demo", async () => {
+    const { loadSavedIntake, saveIntake, clearIntake } = await import("./active-company.js");
+    const { SAMPLE_INTAKE } = await import("./company-intake.js");
+    expect(loadSavedIntake()).toBeNull();
+    expect(loadActiveCompany().fromIntake).toBe(false);
+    saveIntake({ ...SAMPLE_INTAKE, name: "Acme AI" });
+    expect(loadSavedIntake()?.name).toBe("Acme AI");
+    expect(loadActiveCompany()).toMatchObject({ fromIntake: true, company: { name: "Acme AI" } });
+    clearIntake();
+    expect(loadSavedIntake()).toBeNull();
+    expect(loadActiveCompany().fromIntake).toBe(false);
+  });
+});

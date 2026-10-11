@@ -47,10 +47,22 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 
 | # | Gap | Evidence | Fix (no calculation changed) | Status |
 |---|---|---|---|---|
-| G1 | **Opening the page turns the demo into "your data".** The save effect runs on mount, so a visit stores Helios Freight as the founder's intake; every page then labels demo figures "Your intake". "Reset to example" also saves the example as the founder's data. | measured above | Save only after the founder edits a field. "Reset to example" becomes "Clear my data" (removes the saved intake, back to the demo state). Show the data state on the page. | ☐ |
+| G1 | **Opening the page turns the demo into "your data".** The save effect runs on mount, so a visit stores Helios Freight as the founder's intake; every page then labels demo figures "Your intake". "Reset to example" also saves the example as the founder's data. | measured above | Save only after the founder edits a field. "Reset to example" becomes "Clear my data" (removes the saved intake, back to the demo state). Show the data state on the page. | ☑ G1-commit |
 | G2 | **Numbers cannot be entered correctly.** Decimal points are dropped (12.5 → 125), negative values are impossible, clearing a field forces 0, nothing is validated (e.g. 150 % margin, ARR > revenue unflagged). | measured above | Keep the typed text per field; parse decimals and negatives; validate with field-level messages (`aria-invalid`, `aria-describedby`); only valid values reach the engines. | ☐ |
 | G3 | **Mislabelled valuation.** "Enterprise value · strategic-buyer basis" — the figure is the institutional framework, the console value (D1). | `Intake.tsx` | Label it as the institutional framework, the same figure every page shows. | ☐ |
 | G4 | **One click publishes, without saying what.** "List on the exchange" lists immediately, does not say which figures buyers will see (exact revenue, growth, EBITDA margin, sector, region) or where it is stored (exchange vs this browser), and offers no way back. | `listings.ts`, `exit-api.ts` | Confirmation step naming exactly what buyers see and where it is stored; result message says the same. Listing mechanics unchanged. | ☐ |
 | G5 | **Evidence thin.** Comparable status/source and rationale, confidence drivers and the framework disclaimer are computed but not shown; buyers' source (curated registry) not named. | engine fields | Show them (as on the Terminal). | ☐ |
 | G6 | **No path forward.** Nothing tells the founder that their saved figures now drive the Terminal and Liquidity Command. | page | A "your figures now drive…" panel linking to those pages (only when data is saved). | ☐ |
 | G7 | **Old design system and weak hierarchy.** Generic cards/KPI tiles; form labels in tiny uppercase; report and form compete. | screenshots | Rebuild on `xo`: form (with units and hints) beside a decision-first report: value → key figures → buyers → comparables → evidence. | ☐ |
+
+---
+
+## Closure log
+
+### G1 — Opening the page turned the demo into "your data"
+*Documented:* gap register row G1. *Closed by:* `lib/active-company.ts` (`loadSavedIntake`, `saveIntake`, `clearIntake` + test) and `pages/Intake.tsx`.
+- The mount-time save effect is gone; a field edit saves.
+- "Reset to example" (which also saved the example as the founder's data) is replaced by **Clear my data**, shown only when data is saved; it removes the saved figures so every page returns to the demo company.
+- A status line says which state the page is in: demo company (nothing saved) or the founder's saved figures driving every page.
+
+*Verification:* `tsc -b`, eslint clean · `vitest run` **194/194** (new: nothing saved until saved; save → active company; clear → demo) · Chromium: open only → nothing stored, Terminal "DEMO DATA"; edit name → stored "Acme Robotics", Terminal "YOUR INTAKE · Acme Robotics"; Clear my data → nothing stored, button hidden, Terminal "DEMO DATA · Helios Freight"; 0 page errors.
