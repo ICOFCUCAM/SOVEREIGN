@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, BuyerNetworkReactor, ReactorTelemetry } from "../components/Reactor";
 import { MARKET_INTEL } from "../lib/market-intel";
@@ -28,6 +29,7 @@ const TYPE_AXES: { key: BuyerType; label: string }[] = [
   { key: "family_office", label: "Family Office" },
   { key: "sponsor", label: "Sponsor" },
 ];
+const AS_OF = DNA_AS_OF.slice(0, 10);   // registry snapshot date
 const AUTOMATION = ["Build buyer shortlist", "Generate teaser", "Prepare NDA", "Open diligence room", "Launch outreach", "Track responses"];
 
 /** Acquirer mix by type, drawn to scale on a radar; counts printed at each vertex. */
@@ -116,7 +118,7 @@ const Commander: React.FC = () => {
         </>} />
 
       {/* ── position (Founder Liquidity Board) ─────────────────────── */}
-      <Section title="Founder Liquidity Board" eyebrow="Position" right={<span className="text-[11px] text-xo-faint">Live</span>} className="border border-xo-line">
+      <Section title="Founder Liquidity Board" eyebrow="Position" className="border border-xo-line">
         <div className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-5">
           <div className="bg-xo-panel"><Metric label="Enterprise Value" emphasis value={fmtMoney(m.companyValue)} sub="strategic mid · engine-priced" /></div>
           <div className="bg-xo-panel"><Metric label="Expected Value" emphasis value={<span className="text-xo-verified">{fmtMoney(m.potential)}</span>} sub="after the priced readiness fixes" /></div>
@@ -203,7 +205,7 @@ const Commander: React.FC = () => {
       </Section>
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-2">
         <Section title="Acquisition radar" eyebrow={`${radarTotal} qualified buyers`}><div className="px-4 py-3"><AcquirerMixRadar data={radar} /></div></Section>
-        <Section title="Banker notes" eyebrow="From the deal context" foot="Computed from the live engine state and the source-referenced deal history">
+        <Section title="Banker notes" eyebrow="From the deal context" foot="Computed from the engines for this company and the source-referenced deal history.">
           <ul className="space-y-3 px-4 py-3">
             {notes.map((n) => <li key={n.t} className="flex gap-3 text-[13px]"><span className="w-12 shrink-0 font-mono text-[11px] text-xo-faint">{n.t}</span><span className="leading-snug">{n.text}</span></li>)}
           </ul>
@@ -220,11 +222,11 @@ const Commander: React.FC = () => {
           </Link>
         ))}
       </nav>
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={AS_OF} />
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-3">
-        <Section title="Acquisition reactor" foot="Sector acquisition volume across the network."><AcquisitionReactor height={196} /></Section>
-        <Section title="Buyer network reactor" foot="Active acquirers by 12-month cadence."><BuyerNetworkReactor height={196} /></Section>
-        <Section title="Live telemetry" foot="Real extrema from the registry + sector indexes."><ReactorTelemetry /></Section>
+        <Section title="Acquisition reactor" foot={`Sector acquisition volume in the indexed registry, snapshot as of ${AS_OF}. Rotation is decorative.`}><AcquisitionReactor height={196} /></Section>
+        <Section title="Buyer network reactor" foot={`Active acquirers by 12-month cadence, snapshot as of ${AS_OF}.`}><BuyerNetworkReactor height={196} /></Section>
+        <Section title="Registry extremes" eyebrow={`Snapshot · as of ${AS_OF}`} foot="Extremes from the registry and sector indexes."><ReactorTelemetry /></Section>
       </div>
     </div>
   );

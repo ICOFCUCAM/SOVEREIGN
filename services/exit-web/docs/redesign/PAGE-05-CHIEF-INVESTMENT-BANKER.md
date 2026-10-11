@@ -39,7 +39,7 @@ The paid founder's command surface: value now and after fixes, odds, who is circ
 |---|---|---|---|
 | G1 | Always the demo company, unlabelled. | Run on `loadActiveCompany()` via `dealContextFor` / `commanderMetrics(ctx, analysis)` (as Page 02); data badge. | ☑ `545da32` |
 | G2 | **Invented probability breakdown.** | Show the real index decomposition: 0.35 × Exit Score, 0.40 × buyer demand, 0.25 × negotiation leverage (sample offers), each with its points. | ☑ `70730b9` |
-| G3 | Fake live (tape, pinging dots, "Live", "live telemetry", "live market feed", "live engine state"). | Snapshot-dated labels, `RegistryTape`, no live dots. | ☐ |
+| G3 | Fake live (tape, pinging dots, "Live", "live telemetry", "live market feed", "live engine state"). | Snapshot-dated labels, `RegistryTape`, no live dots. | ☑ G3-commit |
 | G4 | Overclaims and mislabels: "What runs the moment you press Execute" ✓ list; "Buyer movement" from a static attribute; "qualified buyers" = top-12 cap; "Close probability" / "Confidence" / "Deal temperature" heuristics unlabelled; "Premium probability". | Plain wording: "What Autonomous Exit will prepare (each step needs your approval)"; "Buyer appetite (registry)"; "top 12 ranked"; indices named with formulas; "Top premium payer". | ☐ |
 | G5 | Plan gates hidden on layer links (Market map → Preparation or Pro). | `requiredEngagement` labels. | ☐ |
 | G6 | Design: no `h1`, 15 contrast failures, overflow at 390, old shared components. | Rebuild on `xo` as one page component; retire `CommandTiles`, `ExitCommander`, `CommanderBlocks` (no other users). | ☑ `03200b1` |
@@ -63,3 +63,8 @@ The paid founder's command surface: value now and after fixes, odds, who is circ
 The six invented factors (market conditions 26, buyer demand 21, technology moat 18, growth 14, readiness 11, risk −6 — fixed weights scaled to the total) are replaced by the index's actual parts, each with its points and maximum, a rounded total, and "a heuristic, not a measured likelihood".
 
 *Verification:* `vitest` (commander-metrics) pass · Chromium: demo "Exit Score 55/100 × 0.35 → 19.3/35 · Active buyers 8 of 6 (capped) × 0.40 → 40.0/40 · Negotiation leverage "high" × 0.25 (sample offers) → 25.0/25 · Total 84"; saved intake → Exit Score 60 → 21.0, total 86 · axe 0 · 0 errors.
+
+### G3 — Fake live
+*Closed by:* `pages/Commander.tsx`: "Live" removed from the Liquidity Board; `MarketTape` → `RegistryTape` (dated); "Live telemetry" → "Registry extremes · Snapshot · as of 2026-10-11"; reactor feet name the snapshot date ("Rotation is decorative"); banker notes "live engine state" → "the engines for this company". The pinging dot went with the G6 rebuild.
+
+*Verification:* Chromium (Active Mandate): 0 "live" words, 0 pinging elements on the page · eslint clean · 0 errors.
