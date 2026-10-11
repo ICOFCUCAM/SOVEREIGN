@@ -257,4 +257,4 @@ Requested by the owner after the Page 01 review ("START FIXING"). Same rule: doc
 
 *Consequence the owner should know:* in production nobody reaches the Admin console via this shortcut any more. Production admin access needs server-side roles (e.g. a Supabase `app_metadata.role` claim checked by the backend). The address remains in git history; rewriting history is a separate decision.
 
-*Verification:* `tsc -b` pass · eslint clean · `auth.test.ts` 2/2 · production `vite build` bundle contains neither the address nor the operator path · Chromium (dev server with `VITE_EXITOS_DEV_OPERATOR_EMAIL=ops@example.com`): the old address → founder console; `ops@example.com` → operator console; any other address → founder console. *Status:* ☑ X1-commit
+*Verification:* `tsc -b` pass · eslint clean · `auth.test.ts` 2/2 · production `vite build` bundle contains neither the address nor the operator path · Chromium (dev server with `VITE_EXITOS_DEV_OPERATOR_EMAIL=ops@example.com`): the old address → founder console; `ops@example.com` → operator console; any other address → founder console. *Status:* ☑ `e6900b6`
