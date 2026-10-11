@@ -1,8 +1,8 @@
-import React from "react";
-import { Card, fmtMoney } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import React, { useMemo } from "react";
+import { fmtMoney } from "../lib/ui";
+import { MarketTape } from "../lib/workstation";
+import { PageHeader, Section, Metric } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import BankerTake from "../components/BankerTake";
 import { OFFER_WATERFALLS, SAMPLE_OFFERS, OFFER_COMPARISON, CAPTABLE_ANALYSIS } from "../lib/engines";
 
 // Wealth Transition — the stage most M&A platforms ignore. The deal closes;
@@ -45,6 +45,7 @@ const Wealth: React.FC = () => {
   ];
 
   const portfolioUsd = afterTax * ALLOC[0].pct;
+  const tape = useMemo(() => buildMarketTape(), []);
 
   // WealthOS — the nine threads ExitOS keeps after the wire, owning the
   // founder lifecycle from exit into long-term wealth.
@@ -62,131 +63,134 @@ const Wealth: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Wealth · Liquidity"
-        title="WealthOS"
-        tag="After the wire"
-        metrics={[
-          { k: "After-tax net", v: fmtMoney(afterTax), accent: true, sub: leadingOffer.buyerName },
-          { k: "Tax reserve", v: fmtMoney(taxDue), sub: "set aside first" },
-          { k: "To portfolio", v: fmtMoney(portfolioUsd), accent: true, sub: "diversified" },
-        ]}
-      />
+    <div data-page="liquidity-transition" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Wealth · Liquidity" title="Liquidity &amp; Transition"
+        badge={<span className="text-[12px] text-xo-muted">After the wire</span>} />
 
-      <MarketTape items={buildMarketTape()} />
+      <section aria-label="Proceeds summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3">
+        <div className="bg-xo-panel"><Metric label="After-tax net" emphasis value={<span className="text-xo-verified">{fmtMoney(afterTax)}</span>} sub={leadingOffer.buyerName} /></div>
+        <div className="bg-xo-panel"><Metric label="Tax reserve" value={fmtMoney(taxDue)} sub="set aside first" /></div>
+        <div className="bg-xo-panel"><Metric label="To portfolio" value={fmtMoney(portfolioUsd)} sub="diversified" /></div>
+      </section>
 
-      <BankerTake
-        next={<>At lock-up, move <span className="text-white">{Math.round(ALLOC[0].pct * 100)}%</span> of your after-tax proceeds out of concentrated stock and into a diversified portfolio.</>}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(afterTax)}</span> after-tax net to you from the {leadingOffer.buyerName} deal.</>}
-        inaction={<>Holding the position concentrated re-exposes your liquidity to a single company's risk after you've already de-risked the exit.</>}
-        buyer={<>Reserve <span className="font-mono text-loi-300">{fmtMoney(taxDue)}</span> for taxes before allocating anything else.</>}
-        automate={<>ExitOS runs the waterfall, models the tax, schedules the liquidity and drafts the diversification plan.</>}
-        impact={<>{fmtMoney(portfolioUsd)}</>}
-      />
+      <MarketTape items={tape} />
 
-      {/* ── Proceeds cascade ─────────────────────────────────────── */}
-      <Card className="p-6">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-400">What you walk away with · {leadingOffer.buyerName}</div>
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {cascade.map((s, i) => (
-            <div key={s.label} className="relative">
-              {i > 0 && <span className="absolute -left-3 top-5 hidden text-white/20 sm:block">→</span>}
-              <div className="text-[10px] uppercase tracking-[0.18em] text-white/40">{s.label}</div>
-              <div className={`mt-1 font-mono text-2xl font-bold ${s.color}`}>{fmtMoney(s.value)}</div>
-              <div className="mt-0.5 text-[10px] text-white/40">{s.note}</div>
-            </div>
-          ))}
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+        right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(portfolioUsd)}</span>}>
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">At lock-up, move <span className="font-semibold">{Math.round(ALLOC[0].pct * 100)}%</span> of your after-tax proceeds out of concentrated stock and into a diversified portfolio.</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(afterTax)}</span> after-tax net to you from the {leadingOffer.buyerName} deal.</TakeCell>
+            <TakeCell k="If you wait">Holding the position concentrated re-exposes your liquidity to a single company's risk after you've already de-risked the exit.</TakeCell>
+            <TakeCell k="First">Reserve <span className="font-mono">{fmtMoney(taxDue)}</span> for taxes before allocating anything else.</TakeCell>
+            <TakeCell k="ExitOS does it">ExitOS runs the waterfall, models the tax, schedules the liquidity and drafts the diversification plan.</TakeCell>
+          </dl>
         </div>
-      </Card>
+      </Section>
 
-      {/* ── WealthOS tracker — nine lifecycle threads ────────────── */}
-      <h2 className="mt-8 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">WealthOS · founder lifecycle</h2>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {tracker.map((t) => (
-          <Card key={t.label} className="relative overflow-hidden p-5">
-            <div className="absolute inset-x-0 top-0 h-0.5" style={{ background: t.tint }} />
-            <div className="flex items-center justify-between">
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-white/45">{t.label}</div>
-              <span className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide" style={{ background: `${t.tint}1f`, color: t.tint }}>{t.pill}</span>
-            </div>
-            <div className="mt-2 font-mono text-xl font-bold text-white">{t.value}</div>
-            <div className="mt-1 text-[11px] text-white/45">{t.note}</div>
-          </Card>
-        ))}
-      </div>
+      <Section title={`What you walk away with · ${leadingOffer.buyerName}`} eyebrow="Proceeds cascade" className="border border-xo-line">
+        <ol className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+          {cascade.map((s, i) => (
+            <li key={s.label} className="bg-xo-panel px-4 py-3">
+              <div className="text-[11px] font-medium text-xo-muted"><span aria-hidden className="text-xo-faint">{i > 0 ? "→ " : ""}</span>{s.label}</div>
+              <div className={`mt-1 font-mono text-[20px] font-semibold tabular-nums ${i === cascade.length - 1 ? "text-xo-verified" : "text-xo-text"}`}>{fmtMoney(s.value)}</div>
+              <div className="mt-0.5 text-[11px] text-xo-faint">{s.note}</div>
+            </li>
+          ))}
+        </ol>
+      </Section>
 
-      {/* ── Liquidity timeline ───────────────────────────────────── */}
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_1fr]">
-        <Card className="p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">When your money lands</div>
-          <p className="mt-1 text-[11px] text-white/45">After-tax proceeds by consideration mix — {Math.round(leadingOffer.cashPct * 100)}% cash · {Math.round(leadingOffer.stockPct * 100)}% stock · {Math.round(leadingOffer.earnoutPct * 100)}% earnout.</p>
-          <div className="mt-5 space-y-4">
-            {tranches.map((t) => (
-              <div key={t.label}>
-                <div className="flex items-baseline justify-between text-[12px]">
-                  <span className="text-white/75">{t.label} <span className="text-white/40">· {t.when}</span></span>
-                  <span className="font-mono font-semibold" style={{ color: t.tint }}>{fmtMoney(t.usd)}</span>
-                </div>
-                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/5">
-                  <div className="h-full rounded-full" style={{ width: `${afterTax > 0 ? (t.usd / afterTax) * 100 : 0}%`, background: t.tint }} />
-                </div>
+      <Section title="WealthOS · founder lifecycle" className="border border-xo-line">
+        <ul className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-3">
+          {tracker.map((t) => (
+            <li key={t.label} className="bg-xo-panel px-4 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-[12px] font-semibold text-xo-muted">{t.label}</h3>
+                <span className="text-[11px] font-semibold text-xo-faint">{t.pill}</span>
               </div>
-            ))}
-          </div>
-          <div className="mt-5 border-t border-white/10 pt-3 text-[12px] text-white/55">
-            Liquid on day one: <span className="font-mono font-semibold text-deal-300">{fmtMoney(tranches[0].usd)}</span> — the rest unlocks as lock-ups lapse and earnout milestones clear.
-          </div>
-        </Card>
+              <div className="mt-1 font-mono text-[17px] font-semibold tabular-nums">{t.value}</div>
+              <div className="mt-0.5 text-[12px] text-xo-muted">{t.note}</div>
+            </li>
+          ))}
+        </ul>
+      </Section>
 
-        {/* ── Diversification plan ───────────────────────────────── */}
-        <Card className="p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Diversification plan</div>
-          <p className="mt-1 text-[11px] text-white/45">Illustrative allocation of {fmtMoney(afterTax)} after-tax — turn one concentrated position into durable wealth.</p>
-          <div className="mt-4 flex h-3 overflow-hidden rounded-full">
-            {ALLOC.map((a) => (
-              <div key={a.label} style={{ width: `${a.pct * 100}%`, background: a.tint }} />
-            ))}
-          </div>
-          <div className="mt-4 space-y-2.5">
-            {ALLOC.map((a) => (
-              <div key={a.label} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-sm" style={{ background: a.tint }} />
-                  <div>
-                    <div className="text-[13px] font-medium text-white">{a.label}</div>
-                    <div className="text-[10px] text-white/40">{a.note}</div>
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-2">
+        <Section title="When your money lands">
+          <div className="px-4 py-3">
+            <p className="text-[12px] text-xo-muted">After-tax proceeds by consideration mix — {Math.round(leadingOffer.cashPct * 100)}% cash · {Math.round(leadingOffer.stockPct * 100)}% stock · {Math.round(leadingOffer.earnoutPct * 100)}% earnout.</p>
+            <ol className="mt-3 space-y-3">
+              {tranches.map((t) => (
+                <li key={t.label}>
+                  <div className="flex items-baseline justify-between gap-3 text-[13px]">
+                    <span>{t.label} <span className="text-xo-faint">· {t.when}</span></span>
+                    <span className="font-mono font-semibold tabular-nums">{fmtMoney(t.usd)}</span>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-mono text-sm font-semibold text-white">{fmtMoney(afterTax * a.pct)}</div>
-                  <div className="text-[10px] text-white/40">{Math.round(a.pct * 100)}%</div>
-                </div>
-              </div>
-            ))}
+                  <div aria-hidden className="mt-1 h-1.5 overflow-hidden rounded-full bg-xo-line">
+                    <div className="h-full rounded-full bg-xo-action" style={{ width: `${afterTax > 0 ? (t.usd / afterTax) * 100 : 0}%` }} />
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-3 border-t border-xo-line pt-2 text-[12px] text-xo-muted">
+              Liquid on day one: <span className="font-mono font-semibold text-xo-verified">{fmtMoney(tranches[0].usd)}</span> — the rest unlocks as lock-ups lapse and earnout milestones clear.
+            </p>
           </div>
-        </Card>
+        </Section>
+
+        <Section title="Diversification plan">
+          <div className="px-4 py-3">
+            <p className="text-[12px] text-xo-muted">Illustrative allocation of {fmtMoney(afterTax)} after-tax — turn one concentrated position into durable wealth.</p>
+            <div aria-hidden className="mt-3 flex h-2.5 overflow-hidden rounded-full">
+              {ALLOC.map((a) => (
+                <div key={a.label} style={{ width: `${a.pct * 100}%`, background: a.tint }} />
+              ))}
+            </div>
+            <ul className="mt-3 divide-y divide-xo-line">
+              {ALLOC.map((a) => (
+                <li key={a.label} className="flex items-center justify-between gap-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <span aria-hidden className="h-2.5 w-2.5 rounded-sm" style={{ background: a.tint }} />
+                    <div>
+                      <div className="text-[13px] font-medium">{a.label}</div>
+                      <div className="text-[11px] text-xo-faint">{a.note}</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mono text-[13px] font-semibold tabular-nums">{fmtMoney(afterTax * a.pct)}</div>
+                    <div className="text-[11px] text-xo-faint">{Math.round(a.pct * 100)}%</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Section>
       </div>
 
-      {/* ── What's next ──────────────────────────────────────────── */}
-      <Card className="mt-8 p-6">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">After the wire</div>
-        <div className="mt-3 grid gap-4 sm:grid-cols-3">
+      <Section title="After the wire" className="border border-xo-line"
+        foot="Illustrative planning only — not tax, legal or investment advice.">
+        <ul className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-3">
           {[
             { h: "Tax & structure", b: `Reserve ${fmtMoney(taxDue)} now; explore QSBS exclusion, installment treatment on the earnout, and a DAF for the giving tranche.` },
             { h: "Diversify the position", b: `Stagger sales of any stock consideration through the lock-up; rebalance ${Math.round(ALLOC[0].pct * 100)}% into a diversified portfolio.` },
             { h: "The next chapter", b: "Reinvest the operator edge — angel checks, a holdco, or the next company. ExitOS keeps the readiness clock running for round two." },
           ].map((c) => (
-            <div key={c.h} className="rounded-lg border border-white/10 bg-ink-900/40 p-4">
-              <div className="text-[13px] font-bold text-white">{c.h}</div>
-              <p className="mt-1.5 text-[12px] leading-relaxed text-white/60">{c.b}</p>
-            </div>
+            <li key={c.h} className="bg-xo-panel px-4 py-3">
+              <h3 className="text-[13px] font-semibold">{c.h}</h3>
+              <p className="mt-1 text-[12px] leading-relaxed text-xo-muted">{c.b}</p>
+            </li>
           ))}
-        </div>
-        <p className="mt-4 text-[11px] text-white/40">Illustrative planning only — not tax, legal or investment advice.</p>
-      </Card>
+        </ul>
+      </Section>
     </div>
   );
 };
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
+  </div>
+);
 
 export default Wealth;

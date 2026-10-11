@@ -43,7 +43,7 @@ After the deal: what the founder walks away with (headline → preferences → t
 | G5 | Overclaims (runs/models/schedules/drafts; keeps threads; readiness clock for round two). | Plain wording. | ☐ |
 | G6 | Demo offers and cap table unlabelled. | Badge and line: sample offers and cap table (demo), also when an intake is saved (intake has no offers or cap table). | ☐ |
 | G7 | Fake live tape. | `RegistryTape`. | ☐ |
-| G8 | Design: no `h1`, old primitives. | Rebuild on `xo`. | ☐ |
+| G8 | Design: no `h1`, old primitives. | Rebuild on `xo`. | ☑ G8-commit |
 
 ### Observation (no visible effect today)
 `lib/engines.ts` and `lib/exit-process.ts` pass `OFFER_COMPARISON.leader` (an offer id) as `leadingBuyer` to `deriveNegotiationState`. No page displays `leadingBuyer`; left as is and re-checked on the Negotiator page.
@@ -51,3 +51,7 @@ After the deal: what the founder walks away with (headline → preferences → t
 ---
 
 ## Closure log
+
+### G8 — Design
+*Closed by:* `pages/Wealth.tsx` rebuilt on `xo` (`PageHeader` `h1` "Liquidity & Transition" — the navigation name; "WealthOS" was only the old header — three summary metrics, banker's take as a page-local definition list (shared `BankerTake` no longer used here), cascade as an ordered list, lifecycle topics as a list with `h3`s, tranches and allocation with decorative bars and values in text, after-the-wire cards with `h3`s). Content carried over verbatim; G1–G7 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Active Mandate 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe 0, 12 tab stops all with visible focus.
