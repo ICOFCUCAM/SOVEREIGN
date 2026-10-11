@@ -41,3 +41,15 @@ describe("listings repository — the supply side of the exchange", () => {
     expect(scored.some((m) => m.qualified)).toBe(true);   // AIco qualifies
   });
 });
+
+describe("withdrawing a listing", () => {
+  it("unlistCompany removes it and isListed reflects that", async () => {
+    const { unlistCompany, isListed } = await import("./listings.js");
+    const { buildProfile, SAMPLE_INTAKE } = await import("./company-intake.js");
+    const l = listCompany(buildProfile({ ...SAMPLE_INTAKE, name: "Withdraw Me Co" }));
+    expect(isListed(l.id)).toBe(true);
+    unlistCompany(l.id);
+    expect(isListed(l.id)).toBe(false);
+    expect(allListings().some((x) => x.id === l.id)).toBe(false);
+  });
+});

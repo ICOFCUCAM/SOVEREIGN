@@ -4,7 +4,8 @@ import { runInstitutionalValuation } from "@exit/engines";
 import {
   buildProfile, SECTORS, SAMPLE_INTAKE, type IntakeInputs, type Sector,
 } from "../lib/company-intake";
-import { listCompany } from "../lib/listings";
+import { listCompany, listingFromCompany, unlistCompany, allListings } from "../lib/listings";
+import { listingDestination } from "../lib/exit-api";
 import { loadSavedIntake, saveIntake, clearIntake } from "../lib/active-company";
 import { NUMERIC_FIELDS, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
 import { Section, Metric, Provenance, ScrollRegion, ActionLink } from "../components/xo";
@@ -28,10 +29,19 @@ const Intake: React.FC = () => {
   const [saved, setSaved] = useState<boolean>(() => loadSavedIntake() !== null);
 
   const report = useMemo(() => runInstitutionalValuation(buildProfile(inp)), [inp]);
-  const [listed, setListed] = useState(false);
+  // Listing: preview exactly what buyers will see, confirm, and allow withdrawal.
+  const preview = useMemo(() => listingFromCompany(buildProfile(inp)), [inp]);
+  const [, setListingVersion] = useState(0);   // re-render after list / withdraw
+  const stored = allListings().find((l) => l.id === preview.id);
+  const listed = !!stored;
+  const stale = !!stored && JSON.stringify(stored.publicView) !== JSON.stringify(preview.publicView);
+  const [confirming, setConfirming] = useState(false);
+  const destination = listingDestination();
+  const confirmListing = (): void => { listCompany(buildProfile(inp)); setConfirming(false); setListingVersion((v) => v + 1); };
+  const withdraw = (): void => { unlistCompany(preview.id); setConfirming(false); setListingVersion((v) => v + 1); };
   const set = <K extends keyof IntakeInputs>(k: K, v: IntakeInputs[K]): void => {
     setInp((p) => { const next = { ...p, [k]: v }; saveIntake(next); return next; });
-    setSaved(true); setListed(false);
+    setSaved(true);
   };
   // Number fields keep exactly what was typed; only valid values reach the engines.
   const [texts, setTexts] = useState<Record<NumericKey, string>>(() => textsFor(inp));
@@ -43,7 +53,7 @@ const Intake: React.FC = () => {
     setErrors((e) => { const n = { ...e }; if (res.ok) delete n[k]; else n[k] = res.error; return n; });
     if (res.ok) set(k, res.value as never);
   };
-  const clearMine = (): void => { clearIntake(); setInp(SAMPLE_INTAKE); setTexts(textsFor(SAMPLE_INTAKE)); setErrors({}); setSaved(false); setListed(false); };
+  const clearMine = (): void => { clearIntake(); setInp(SAMPLE_INTAKE); setTexts(textsFor(SAMPLE_INTAKE)); setErrors({}); setSaved(false); };
 
   const m = report.mandatoryOutputs;
 
@@ -60,10 +70,41 @@ const Intake: React.FC = () => {
           <p className="mt-1 text-[13px] text-xo-muted">Enter your company and receive the institutional answer in seconds — enterprise value, the buyers most likely to acquire you, comparable transactions and the evidence behind every figure.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={() => { listCompany(buildProfile(inp)); setListed(true); }}>{listed ? "✓ Listed (anonymized)" : "List on the exchange"}</Button>
+          {listed && <Button variant="ghost" onClick={withdraw}>Withdraw listing</Button>}
+          {(!listed || stale) && <Button onClick={() => setConfirming(true)} disabled={!saved} aria-expanded={confirming} aria-controls="listing-confirm" aria-describedby={saved ? undefined : "list-needs-data"}>{stale ? "Update listing" : "List on the exchange"}</Button>}
+          {!saved && !listed && <span id="list-needs-data" className="basis-full text-right text-[11px] text-xo-faint">Enter your figures to list — the demo company can't be listed.</span>}
           {saved && <Button variant="ghost" onClick={clearMine}>Clear my data</Button>}
         </div>
       </header>
+
+      {(confirming || listed) && (
+        <section id="listing-confirm" aria-label="Exchange listing" className="border border-xo-caution/50 bg-xo-panel px-4 py-3">
+          {listed && !confirming ? (
+            <p role="status" className="text-[13px] text-xo-text">
+              {destination === "exchange"
+                ? <>Listed anonymously on the exchange as <span className="font-mono">{preview.code}</span>. Buyers see the figures below, not your company name.</>
+                : <>Saved as an anonymous listing <span className="font-mono">{preview.code}</span> <strong>in this browser only</strong> — this build is not connected to the live exchange, so no buyer can see it yet.</>}
+            </p>
+          ) : (
+            <>
+              <h2 className="text-[14px] font-semibold">Before you list: this is what buyers will see</h2>
+              <p className="mt-1 text-[12px] text-xo-muted">Your company name is withheld. {destination === "exchange" ? "The listing is published to the live exchange." : "This build is not connected to the live exchange: the listing is saved in this browser only."} You can withdraw it at any time.</p>
+            </>
+          )}
+          <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-5">
+            {(() => { const pv = listed && !confirming && stored ? stored.publicView : preview.publicView; return ([["Sector", pv.sector], ["Region", pv.region], ["TTM revenue", fmtMoney(pv.revenueUsd)], ["Growth", pct(pv.growthPct)], ["EBITDA margin", pct(pv.ebitdaMarginPct)]] as const); })().map(([k, v]) => (
+              <div key={k}><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[13px] tabular-nums capitalize">{String(v).replace(/_/g, " ")}</dd></div>
+            ))}
+          </dl>
+          {listed && stale && !confirming && <p className="mt-2 text-[12px] text-xo-caution">Your figures changed since you listed. The listing still shows the earlier figures until you update it.</p>}
+          {confirming && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button onClick={confirmListing}>{listed ? "Confirm update" : "Confirm listing"}</Button>
+              <Button variant="ghost" onClick={() => setConfirming(false)}>Cancel</Button>
+            </div>
+          )}
+        </section>
+      )}
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[360px_minmax(0,1fr)]">
         {/* ── the form ───────────────────────────────────────────────── */}

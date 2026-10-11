@@ -410,6 +410,10 @@ let active: ExitApiClient = createExitApi();
 /** The live client, for query accessors. */
 export function backendClient(): ExitApiClient { return active; }
 
+/** Where a listing goes: the live exchange (Supabase backend) or only this
+ *  browser (the local backend used when no backend is configured). */
+export const listingDestination = (): "exchange" | "browser" => (active instanceof SupabaseExitApi ? "exchange" : "browser");
+
 /** Activate the live backend for a signed-in account: point every store at
  *  it so this session is durable and account-scoped. Called on sign-in.
  *

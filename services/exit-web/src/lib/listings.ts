@@ -145,3 +145,12 @@ export function listCompany(profile: CompanyProfile): Listing {
   emit();
   return l;
 }
+
+/** Withdraw a listing (the founder's way back after listing). */
+export function unlistCompany(id: string): void {
+  cache = load().filter((x) => x.id !== id);
+  adapter.write(cache);
+  emit();
+}
+
+export const isListed = (id: string): boolean => load().some((x) => x.id === id);
