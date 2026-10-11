@@ -36,7 +36,7 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 |---|---|---|---|
 | G1 | **Uploads land in a shared tenant visible to every user; the page implies confidentiality** (X12). | Warning panel above the uploader stating exactly who can see uploads; upload stays disabled until the founder ticks an acknowledgement; classification pills say "label only". Backend unchanged (X12 for the owner). | ☑ `ec30f99` |
 | G2 | **Invented "value at risk" weights.** | Label as a rule with the weights shown; "illustrative" not "at risk". | ☑ `2a1b6bd` |
-| G3 | Mislabels: "Due Diligence AI" (rule-based), "ring-1 access", completeness rule unstated, raw list error. | "Diligence risk scan (rule-based)"; drop "ring-1 access"; state the completeness rule; plain error text. | ☑ G3-commit |
+| G3 | Mislabels: "Due Diligence AI" (rule-based), "ring-1 access", completeness rule unstated, raw list error. | "Diligence risk scan (rule-based)"; drop "ring-1 access"; state the completeness rule; plain error text. | ☑ `5b74542` |
 | G4 | Demo company unlabelled. | Engine specs, red flags and value on `loadActiveCompany()`; badge. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `27888d1` |
