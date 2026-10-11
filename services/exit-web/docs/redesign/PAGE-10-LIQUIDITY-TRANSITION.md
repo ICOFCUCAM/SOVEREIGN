@@ -5,7 +5,7 @@
 | Route | `/console/wealth` |
 | Component | `src/pages/Wealth.tsx` (192 lines) |
 | NAV | "Liquidity & Transition", group Mandate, role founder, **Active Mandate (Pro)** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All eight gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `0ec8465`)
 
@@ -96,3 +96,14 @@ Arithmetic check (Microsoft offer): founders' cash $62.33M − escrow $15.58M = 
 ### G7 — Fake live tape
 *Closed by:* `pages/Wealth.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free/Preparation (Upgrade page) and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, 14 tab stops all with visible focus · free / Preparation: Upgrade page · demo label checked with and without a saved intake · arithmetic re-checked against the engine waterfall (tranches sum to after-tax).
+
+## Known issues
+- All figures are the demo company's sample offers and cap table (labelled); the intake has no offers or cap table to personalise from.
+- Tax is a flat assumption (labelled); ExitOS has no tax model.
+- "Founders' gross" is the founder group (three founders and founder warrants); the page cannot know which founder is viewing.
+- Escrow is assumed to come out of the cash consideration pro rata; the offer terms do not say.
