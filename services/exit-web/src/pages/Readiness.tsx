@@ -2,11 +2,11 @@ import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { fmtMoney } from "../lib/ui";
 import { MarketTape, Evidence } from "../lib/workstation";
-import { PageHeader, Section, Metric, Bar } from "../components/xo";
+import { PageHeader, Section, Metric, Bar, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { READINESS, READINESS_ANALYSIS } from "../lib/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
-import { EXIT_SCORE, READINESS_BAND, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VALUE_LEFT_USD, READINESS_CATEGORIES } from "../lib/deal-context";
+import { runReadiness, runReadinessAnalysis } from "@exit/engines";
+import { dealContextFor } from "../lib/deal-context";
+import { loadActiveCompany } from "../lib/active-company";
 
 // Exit Readiness Score — the category-defining surface. Not a generic score:
 // it ties the readiness number directly to money. Current valuation, the
@@ -17,18 +17,25 @@ import { EXIT_SCORE, READINESS_BAND, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD, VAL
 const EFFORT_LABEL: Record<string, string> = { weeks: "~weeks", months: "~months", quarters: "~quarters" };
 
 const Readiness: React.FC = () => {
-  const score = EXIT_SCORE;
+  // The founder's saved intake when there is one, else the demo company.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const { ctx, readiness, analysis } = useMemo(() => {
+    const readiness = runReadiness(company);
+    return { ctx: dealContextFor(company), readiness, analysis: runReadinessAnalysis(company, readiness) };
+  }, [company]);
+  const band = ctx.readinessBand;
+  const score = ctx.exitScore;
   // The readiness engine's own overall score (shown as "Readiness" on the
   // Terminal and Liquidity Command) is a different model from the ten-category
   // Exit Score; both are named and shown so they are never confused.
-  const engineScore = Math.round(READINESS.overallScore);
-  const current = CURRENT_VALUE_USD;
-  const potential = POTENTIAL_VALUE_USD;
-  const left = VALUE_LEFT_USD;
+  const engineScore = Math.round(readiness.overallScore);
+  const current = ctx.currentValueUsd;
+  const potential = ctx.potentialValueUsd;
+  const left = ctx.valueLeftUsd;
   const upliftPct = current > 0 ? (left / current) * 100 : 0;
-  const fixes = [...READINESS_ANALYSIS.weaknesses].sort((a, b) => b.valuationUpliftUsd - a.valuationUpliftUsd);
+  const fixes = [...analysis.weaknesses].sort((a, b) => b.valuationUpliftUsd - a.valuationUpliftUsd);
   const topFix = fixes[0];
-  const categories = [...READINESS_CATEGORIES].sort((a, b) => b.impactUsd - a.impactUsd);
+  const categories = [...ctx.readinessCategories].sort((a, b) => b.impactUsd - a.impactUsd);
 
   const scoreColor = score >= 70 ? "#34d399" : score >= 50 ? "#fbbf24" : "#f87171";
   const R = 52;
@@ -37,8 +44,8 @@ const Readiness: React.FC = () => {
   // "When to sell" — the monitor signal. ExitOS helps decide *when*, not just
   // run the process. Strong growth + open market window argue for going now;
   // a large, fixable readiness gap argues for two quarters of prep first.
-  const growthYoy = SAMPLE_COMPANY.growth.arrGrowthYoyPct;
-  const marketGrowth = SAMPLE_COMPANY.market.marketGrowthPct ?? 0;
+  const growthYoy = company.growth.arrGrowthYoyPct;
+  const marketGrowth = company.market.marketGrowthPct ?? 0;
   const gapRatio = current > 0 ? left / current : 0;
   const growthStrong = growthYoy >= 0.3;
   const marketOpen = marketGrowth >= 0.05;
@@ -62,8 +69,8 @@ const Readiness: React.FC = () => {
 
   return (
     <div data-page="readiness" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Readiness Desk" title="Exit Readiness"
-        badge={<span className="text-[12px] text-xo-muted">Exit Score {score.toFixed(0)}/100 · readiness engine {engineScore}/100 (<span className="capitalize">{READINESS_BAND.replace(/_/g, " ")}</span>) · {verdict.label}</span>}
+      <PageHeader eyebrow={fromIntake ? `◉ Readiness Desk · Your intake: ${company.name}` : `◉ Readiness Desk · Demo company: ${company.name}`} title="Exit Readiness"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Exit Score {score.toFixed(0)}/100 · readiness engine {engineScore}/100 (<span className="capitalize">{band.replace(/_/g, " ")}</span>) · {verdict.label}</span></>}
         actions={<a href="/report/readiness" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Readiness Report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>}>
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-xo-line pt-2">
           {([["Growth", `${Math.round(growthYoy * 100)}%`], ["Window", marketOpen ? "Open" : "Tightening"], ["Categories", String(categories.length)]] as const).map(([k, v]) => (
@@ -97,7 +104,7 @@ const Readiness: React.FC = () => {
                 <div className="text-[11px] text-xo-faint">/ 100</div>
               </div>
             </div>
-            <p className="mt-2 max-w-[16rem] text-center text-[12px] leading-snug text-xo-muted">Weighted average of the ten categories below. The readiness engine scores the same company <span className="font-mono font-semibold tabular-nums text-xo-text">{engineScore}/100</span> (<span className="capitalize">{READINESS_BAND.replace(/_/g, " ")}</span>) — the number shown as Readiness on the Terminal; it uses its own dimensions and weights.</p>
+            <p className="mt-2 max-w-[16rem] text-center text-[12px] leading-snug text-xo-muted">Weighted average of the ten categories below. The readiness engine scores the same company <span className="font-mono font-semibold tabular-nums text-xo-text">{engineScore}/100</span> (<span className="capitalize">{band.replace(/_/g, " ")}</span>) — the number shown as Readiness on the Terminal; it uses its own dimensions and weights.</p>
           </div>
         </Section>
 
@@ -137,7 +144,7 @@ const Readiness: React.FC = () => {
       </div>
 
       <Section title="Exit Readiness AI · Value Impact Simulator" eyebrow={`Ten categories · total upside +${fmtMoney(left)}`} className="border border-xo-line"
-        foot={`Scored across the ten categories buyers underwrite — every fix priced. ${READINESS_ANALYSIS.headline}`}>
+        foot={`Scored across the ten categories buyers underwrite — every fix priced. ${analysis.headline}`}>
         <ol className="divide-y divide-xo-line">
           {categories.map((cat) => (
             <li key={cat.key} className="grid items-center gap-3 px-4 py-2.5 sm:grid-cols-[200px_1fr_130px]">

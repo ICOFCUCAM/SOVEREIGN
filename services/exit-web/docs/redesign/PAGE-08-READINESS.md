@@ -35,7 +35,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 | G1 | **Two "readiness" numbers.** 55 here, 46 on Pages 01/02, both called readiness. | Name this one **Exit Score (ten categories)** and show the readiness-engine score beside it with one line on the difference. | ☑ `7b7e141` |
 | G2 | **Fake "Re-score".** | Remove the timer/toast; offer "Update your figures" (→ Value My Company), which is what actually changes the score. | ☑ `77f9e73` |
 | G3 | **Mislabels:** "Market window" is the company's market-growth input; "strategic mid, today" (D1); verdict thresholds and category scoring unexplained. | "Market growth (company input)"; "enterprise value today"; thresholds shown with the verdict; categories and impacts labelled rule-based. | ☐ |
-| G4 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` + analysis; badge. | ☐ |
+| G4 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` + analysis; badge. | ☑ G4-commit |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 8 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `21b899c` |
 
@@ -54,3 +54,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 ### G2 — Fake "Re-score"
 *Closed by:* `pages/Readiness.tsx`. The Re-score button (700 ms timer, then toast "Re-scored · 55/100 — 10 categories re-evaluated", nothing recomputed) is removed with its state and `notify` import. In its place: **Update your figures** (link to Value My Company, `/console/intake`) and a foot line: "There is no separate re-score step: the score is computed from the company's figures when the page opens. Changing the figures in Value My Company is what changes it." (Made true for saved intakes by G4.)
 *Verification:* eslint clean · Chromium: 0 "Re-scor…" matches, link present · free 1440/390: 0 errors, axe 0, no overflow.
+
+### G4 — Demo company unlabelled
+*Closed by:* `pages/Readiness.tsx` — the Exit Score, ten categories, value now / after fixes / left, fixes, verdict inputs (growth, market growth) and the readiness-engine score all run on `loadActiveCompany()` through `dealContextFor`, `runReadiness` and `runReadinessAnalysis` (same formulas as the demo constants). Header eyebrow names the source ("Demo company: Helios Freight" / "Your intake: …") plus a **Demo data / Your intake** badge. `pages/Intake.tsx` lists Exit Readiness among the pages using the founder's figures. The linked PDF report already used the active company.
+*Verification:* `tsc -b`, eslint clean · Chromium: demo → DEMO DATA, Exit Score 55 · engine 46, current value $102,849,415; saved intake "Northwind Analytics" → YOUR INTAKE, Exit Score 60 · engine 52, $403,509,792 (matches Pages 05–07) · free 1440/390: 0 errors, axe 0, no overflow.
