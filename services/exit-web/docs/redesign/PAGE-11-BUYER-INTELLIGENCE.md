@@ -36,7 +36,7 @@ Preparation / Active Mandate: `h1` none · axe color-contrast ×40 (1440) · no 
 |---|---|---|---|
 | G1 | **Invented Buyer DNA** (founder-friendly %, earnout, negotiation, integration, legal aggression, decision makers by type). | Remove; keep the typical premium with its source (disclosed average or framework prior, labelled). Say why the rest is absent. | ☑ `5f62647` |
 | G2 | **Unlabelled heuristics** ("likelihood", "expected range", "recommended open", risk, synergy) and the wrong ranking label. | Name each as a model or rule with its formula; "ranked by expected outcome"; fit probability "not a measured chance of a bid". | ☑ `274b5b7` |
-| G3 | Overclaims and invented urgency. | Plain wording. | ☐ |
+| G3 | Overclaims and invented urgency. | Plain wording. | ☑ G3-commit |
 | G4 | Hidden plan gate on "Draft outreach". | `requiredEngagement` label for Preparation. | ☐ |
 | G5 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` and the company's own value; badge. | ☐ |
 | G6 | Fake live tape. | `RegistryTape`. | ☐ |
@@ -65,3 +65,12 @@ Preparation / Active Mandate: `h1` none · axe color-contrast ×40 (1440) · no 
 | "Risk", "Synergy" | "Risk (rule)", "Synergy (rule)" |
 Dossier foot gives each rule: fit probability = the engine's weighted fit score, not a measured chance of a bid; range low = value × (0.82 + 0.12 × fit), high = value × (1 + premium: disclosed average or 12 % strategic / 4 % other, capped at 20 %); opening ask = high + 10 %; risk and synergy thresholds.
 *Verification:* `tsc -b`, eslint clean · Chromium: the only "likelihood" left is the G3 sentence; 0 "Expected range" / "Recommended open" / "anchor above" · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
+
+### G3 — Overclaims and invented urgency
+*Closed by:* `pages/BuyerCopilot.tsx` (text only).
+| Before | After |
+|---|---|
+| "If you wait — Acquisition windows close — {buyer} redeploys into the next target while you wait." | "The ranking reflects the registry snapshot; a buyer's appetite can change, and nothing here tracks it over time." |
+| "ExitOS does it — ExitOS scores likelihood, timing, risk and synergy for every buyer from their measured deal history." | "What ExitOS does — Ranks buyers with the discovery engine and applies the stated rules to each buyer's recorded deal history. Nothing is sent from this page." |
+| File comment "the things a founder could never see … acquisition likelihood … expected price range" | describes fit probability, indicative range and rules |
+*Verification:* eslint clean · Chromium: 0 matches for redeploys / could never see / measured deal history / likelihood.

@@ -8,11 +8,11 @@ import { VALUATION_CANONICAL } from "../lib/engines";
 import { DEAL_BUYERS } from "../lib/deal-context";
 import { type BuyerCandidate, VALUATION_FRAMEWORK } from "@exit/engines";
 
-// Buyer Copilot — buyer intelligence, not a directory. For every acquirer it
-// computes the things a founder could never see: acquisition likelihood, the
-// expected price range, time to close, deal risk, strategic synergy, how many
-// similar deals they've done, and the offer to open with. All derived from the
-// buyer-discovery engine's expected-outcome model and the acquirer's history.
+// Buyer Intelligence (Buyer Copilot) — for each top-ranked acquirer: the
+// discovery engine's fit probability, an indicative price range and opening
+// ask (stated rules), time to close, rule-based risk and synergy, recorded
+// deal count and close rate. From the buyer-discovery engine's
+// expected-outcome model and the acquirer's recorded history.
 
 interface Dossier {
   likelihood: number;
@@ -94,9 +94,9 @@ const BuyerCopilot: React.FC = () => {
             <p className="text-[14px] leading-relaxed">Open a conversation with <span className="font-semibold">{top.buyer.name}</span> — ranked first by expected outcome (fit probability {topD.likelihood}%).</p>
             <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
               <TakeCell k="At stake">Opening ask (rule) <span className="font-mono font-semibold text-xo-verified">{fmtMoney(topD.recommendedOpen)}</span> · indicative range {fmtMoney(topD.rangeLow)}–{fmtMoney(topD.rangeHigh)}.</TakeCell>
-              <TakeCell k="If you wait">Acquisition windows close — {top.buyer.name} redeploys into the next target while you wait.</TakeCell>
+              <TakeCell k="If you wait">The ranking reflects the registry snapshot; a buyer's appetite can change, and nothing here tracks it over time.</TakeCell>
               <TakeCell k="Pursue">{top.buyer.name} — fit probability {topD.likelihood}%, {topD.synergy.toLowerCase()} synergy, {topD.risk.toLowerCase()} risk (rules below).</TakeCell>
-              <TakeCell k="ExitOS does it">ExitOS scores likelihood, timing, risk and synergy for every buyer from their measured deal history.</TakeCell>
+              <TakeCell k="What ExitOS does">Ranks buyers with the discovery engine and applies the stated rules to each buyer's recorded deal history. Nothing is sent from this page.</TakeCell>
             </dl>
             <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft outreach →</Link>
           </div>
