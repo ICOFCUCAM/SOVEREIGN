@@ -1,10 +1,11 @@
 import React, { useMemo } from "react";
 import { fmtMoney } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { MarketTape } from "../lib/workstation";
+import { PageHeader, Section, Metric as XMetric } from "../components/xo";
+import { Link } from "react-router-dom";
 import { buildMarketTape } from "../lib/market-tape";
 import { VALUATION_CANONICAL } from "../lib/engines";
 import { DEAL_BUYERS } from "../lib/deal-context";
-import BankerTake from "../components/BankerTake";
 import { type BuyerCandidate, VALUATION_FRAMEWORK } from "@exit/engines";
 
 // Buyer Copilot — buyer intelligence, not a directory. For every acquirer it
@@ -84,14 +85,8 @@ function buyerDNA(c: BuyerCandidate): BuyerDNA {
   return { founderFriendly, typicalPremiumPct, ...rest };
 }
 
-const RISK_COLOR: Record<string, string> = { Low: "#34d399", Medium: "#fbbf24", High: "#f87171" };
-const SYN_COLOR: Record<string, string> = { High: "#34d399", Medium: "#fbbf24", Low: "#94a3b8" };
-const TYPE_STYLE: Record<string, string> = {
-  strategic: "bg-deal-600/20 text-deal-300 ring-deal-400/40",
-  pe: "bg-loi-500/15 text-loi-400 ring-loi-400/40",
-  family_office: "bg-stage-engaged/15 text-stage-engaged ring-stage-engaged/40",
-  sponsor: "bg-white/5 text-white/65 ring-white/15",
-};
+const RISK_CLS: Record<string, string> = { Low: "text-xo-verified", Medium: "text-xo-caution", High: "text-xo-risk" };
+const SYN_CLS: Record<string, string> = { High: "text-xo-verified", Medium: "text-xo-caution", Low: "text-xo-muted" };
 
 const BuyerCopilot: React.FC = () => {
   const candidates = DEAL_BUYERS.slice(0, 8);
@@ -100,87 +95,94 @@ const BuyerCopilot: React.FC = () => {
   const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Find Buyers"
-        title="Buyer Copilot"
-        tag="Buyer intelligence"
-        metrics={[
-          { k: "Acquirers scored", v: String(candidates.length), sub: "ranked by likelihood" },
-          { k: "Top likelihood", v: topD ? `${topD.likelihood}%` : "—", accent: true, sub: top?.buyer.name },
-          { k: "Expected range", v: topD ? `${fmtMoney(topD.rangeLow)}–${fmtMoney(topD.rangeHigh)}` : "—", sub: "lead buyer" },
-          { k: "Recommended open", v: topD ? fmtMoney(topD.recommendedOpen) : "—", accent: true, sub: "anchor above headline" },
-        ]}
-      />
+    <div data-page="buyer-intelligence" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Find Buyers" title="Buyer Intelligence"
+        badge={<span className="text-[12px] text-xo-muted">Buyer Copilot · buyer intelligence</span>} />
+
+      <section aria-label="Buyer summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-xo-panel"><XMetric label="Acquirers scored" value={String(candidates.length)} sub="ranked by likelihood" /></div>
+        <div className="bg-xo-panel"><XMetric label="Top likelihood" emphasis value={topD ? `${topD.likelihood}%` : "—"} sub={top?.buyer.name} /></div>
+        <div className="bg-xo-panel"><XMetric label="Expected range" value={topD ? `${fmtMoney(topD.rangeLow)}–${fmtMoney(topD.rangeHigh)}` : "—"} sub="lead buyer" /></div>
+        <div className="bg-xo-panel"><XMetric label="Recommended open" value={topD ? fmtMoney(topD.recommendedOpen) : "—"} sub="anchor above headline" /></div>
+      </section>
 
       <MarketTape items={tape} />
 
       {top && topD && (
-        <BankerTake
-          next={<>Open a conversation with <span className="text-white">{top.buyer.name}</span> — highest acquisition likelihood at {topD.likelihood}%.</>}
-          stake={<>Open at <span className="font-mono font-bold text-deal-300">{fmtMoney(topD.recommendedOpen)}</span> · expected range {fmtMoney(topD.rangeLow)}–{fmtMoney(topD.rangeHigh)}.</>}
-          inaction={<>Acquisition windows close — {top.buyer.name} redeploys into the next target while you wait.</>}
-          buyer={<><span className="text-white">{top.buyer.name}</span> — {topD.likelihood}% likelihood, {topD.synergy.toLowerCase()} synergy, {topD.risk.toLowerCase()} risk.</>}
-          automate={<>ExitOS scores likelihood, timing, risk and synergy for every buyer from their measured deal history.</>}
-          impact={<>{fmtMoney(topD.recommendedOpen)}</>}
-          cta={{ label: "Draft outreach", to: "/console/banker" }}
-        />
+        <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+          right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(topD.recommendedOpen)}</span>}>
+          <div className="px-4 py-3">
+            <p className="text-[14px] leading-relaxed">Open a conversation with <span className="font-semibold">{top.buyer.name}</span> — highest acquisition likelihood at {topD.likelihood}%.</p>
+            <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+              <TakeCell k="At stake">Open at <span className="font-mono font-semibold text-xo-verified">{fmtMoney(topD.recommendedOpen)}</span> · expected range {fmtMoney(topD.rangeLow)}–{fmtMoney(topD.rangeHigh)}.</TakeCell>
+              <TakeCell k="If you wait">Acquisition windows close — {top.buyer.name} redeploys into the next target while you wait.</TakeCell>
+              <TakeCell k="Pursue">{top.buyer.name} — {topD.likelihood}% likelihood, {topD.synergy.toLowerCase()} synergy, {topD.risk.toLowerCase()} risk.</TakeCell>
+              <TakeCell k="ExitOS does it">ExitOS scores likelihood, timing, risk and synergy for every buyer from their measured deal history.</TakeCell>
+            </dl>
+            <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft outreach →</Link>
+          </div>
+        </Section>
       )}
 
-      <Frame>
-        <Panel title="Acquirer dossiers · scored" className="lg:col-span-12">
-          <div className="grid grid-cols-1 gap-px bg-white/10 lg:grid-cols-2">
-            {candidates.map((c) => {
-              const d = dossier(c);
-              const dna = buyerDNA(c);
-              return (
-                <div key={c.buyer.name} className="bg-ink-900 p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-mono text-[15px] font-bold text-white">{c.buyer.name}</h3>
-                      <span className={`mt-0.5 inline-block rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ring-1 ${TYPE_STYLE[c.buyer.buyerType] ?? "bg-white/5 text-white/60 ring-white/15"}`}>{c.buyer.buyerType.replace(/_/g, " ")}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/40">Likelihood</div>
-                      <div className="font-mono text-2xl font-bold text-deal-300">{d.likelihood}%</div>
-                    </div>
+      <Section title="Acquirer dossiers · scored" className="border border-xo-line">
+        <ol className="grid grid-cols-1 gap-px bg-xo-line lg:grid-cols-2">
+          {candidates.map((c, i) => {
+            const d = dossier(c);
+            const dna = buyerDNA(c);
+            return (
+              <li key={c.buyer.name} className="bg-xo-panel px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="text-[15px] font-semibold"><span className="sr-only">Rank {i + 1}: </span>{c.buyer.name}</h3>
+                    <span className="mt-0.5 inline-block text-[11px] font-medium capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</span>
                   </div>
-                  <p className="mt-1.5 text-[11px] leading-snug text-white/55">{c.buyer.thesis}</p>
-                  <div className="mt-2 grid grid-cols-3 gap-x-3 gap-y-2 border-t border-white/10 pt-2 text-[10.5px]">
-                    <Metric label="Exp. range" value={`${fmtMoney(d.rangeLow)}–${fmtMoney(d.rangeHigh)}`} />
-                    <Metric label="To close" value={`${d.days}d`} />
-                    <Metric label="Prior deals" value={String(d.priorDeals)} />
-                    <Metric label="Risk" value={d.risk} color={RISK_COLOR[d.risk]} />
-                    <Metric label="Synergy" value={d.synergy} color={SYN_COLOR[d.synergy]} />
-                    <Metric label="Close rate" value={`${Math.round(c.expectedOutcome.closeRatePct * 100)}%`} />
+                  <div className="text-right">
+                    <div className="text-[11px] text-xo-faint">Likelihood</div>
+                    <div className="font-mono text-[22px] font-semibold tabular-nums text-xo-verified">{d.likelihood}%</div>
                   </div>
-                  <div className="mt-2 flex items-center justify-between rounded border border-deal-500/30 bg-deal-600/[0.07] px-3 py-1.5">
-                    <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-deal-300">Recommended open</div>
-                    <div className="font-mono text-[15px] font-bold text-deal-300">{fmtMoney(d.recommendedOpen)}</div>
-                  </div>
-                  <div className="mt-2 grid grid-cols-3 gap-x-3 gap-y-2 border-t border-white/10 pt-2 text-[10.5px]">
-                    <Metric label="Founder-friendly" value={`${dna.founderFriendly}%`} color="#34d399" />
-                    <Metric label="Typ. premium" value={`+${dna.typicalPremiumPct}%`} color="#34d399" />
-                    <Metric label="Earnout" value={dna.earnoutUsage} />
-                    <Metric label="Negotiation" value={dna.negotiationStyle} />
-                    <Metric label="Integration" value={dna.integration} />
-                    <Metric label="Legal" value={dna.legalAggression} />
-                  </div>
-                  <div className="mt-1.5 text-[10px] text-white/45">Decision makers: <span className="text-white/70">{dna.decisionMakers}</span></div>
                 </div>
-              );
-            })}
-          </div>
-        </Panel>
-      </Frame>
+                <p className="mt-1.5 text-[12px] leading-snug text-xo-muted">{c.buyer.thesis}</p>
+                <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-xo-line pt-2 sm:grid-cols-3">
+                  <Fact label="Exp. range" value={`${fmtMoney(d.rangeLow)}–${fmtMoney(d.rangeHigh)}`} />
+                  <Fact label="To close" value={`${d.days}d`} />
+                  <Fact label="Prior deals" value={String(d.priorDeals)} />
+                  <Fact label="Risk" value={d.risk} cls={RISK_CLS[d.risk]} />
+                  <Fact label="Synergy" value={d.synergy} cls={SYN_CLS[d.synergy]} />
+                  <Fact label="Close rate" value={`${Math.round(c.expectedOutcome.closeRatePct * 100)}%`} />
+                </dl>
+                <div className="mt-2 flex items-center justify-between border border-xo-line px-3 py-1.5">
+                  <div className="text-[11px] font-medium text-xo-muted">Recommended open</div>
+                  <div className="font-mono text-[15px] font-semibold tabular-nums text-xo-verified">{fmtMoney(d.recommendedOpen)}</div>
+                </div>
+                <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-xo-line pt-2 sm:grid-cols-3">
+                  <Fact label="Founder-friendly" value={`${dna.founderFriendly}%`} />
+                  <Fact label="Typ. premium" value={`+${dna.typicalPremiumPct}%`} />
+                  <Fact label="Earnout" value={dna.earnoutUsage} />
+                  <Fact label="Negotiation" value={dna.negotiationStyle} />
+                  <Fact label="Integration" value={dna.integration} />
+                  <Fact label="Legal" value={dna.legalAggression} />
+                </dl>
+                <p className="mt-1.5 text-[12px] text-xo-faint">Decision makers: <span className="text-xo-muted">{dna.decisionMakers}</span></p>
+              </li>
+            );
+          })}
+        </ol>
+      </Section>
     </div>
   );
 };
 
-const Metric: React.FC<{ label: string; value: string; color?: string }> = ({ label, value, color }) => (
-  <div>
-    <div className="text-[10px] uppercase tracking-wide text-white/40">{label}</div>
-    <div className="mt-0.5 font-semibold" style={color ? { color } : undefined}>{value}</div>
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
+  </div>
+);
+
+const Fact: React.FC<{ label: string; value: string; cls?: string }> = ({ label, value, cls }) => (
+  <div className="min-w-0">
+    <dt className="text-[11px] text-xo-faint">{label}</dt>
+    <dd className={`mt-0.5 text-[13px] font-semibold ${cls ?? "text-xo-text"}`}>{value}</dd>
   </div>
 );
 

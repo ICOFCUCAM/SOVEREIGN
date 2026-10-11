@@ -40,8 +40,12 @@ Preparation / Active Mandate: `h1` none · axe color-contrast ×40 (1440) · no 
 | G4 | Hidden plan gate on "Draft outreach". | `requiredEngagement` label for Preparation. | ☐ |
 | G5 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` and the company's own value; badge. | ☐ |
 | G6 | Fake live tape. | `RegistryTape`. | ☐ |
-| G7 | Design: no `h1`, 40 contrast failures, old primitives. | Rebuild on `xo`. | ☐ |
+| G7 | Design: no `h1`, 40 contrast failures, old primitives. | Rebuild on `xo`. | ☑ G7-commit |
 
 ---
 
 ## Closure log
+
+### G7 — Design
+*Closed by:* `pages/BuyerCopilot.tsx` rebuilt on `xo` (`PageHeader` `h1` "Buyer Intelligence" — the navigation name, "Buyer Copilot" kept in the badge — four summary metrics, banker's take as a page-local definition list (shared `BankerTake` no longer used here), dossiers as an ordered list with `h3` per buyer and definition lists; risk and synergy carry their word, not only colour). Content carried over verbatim; G1–G6 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe **0** (was 40), 13 tab stops all with visible focus.
