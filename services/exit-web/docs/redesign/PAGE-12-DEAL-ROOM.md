@@ -5,7 +5,7 @@
 | Route | `/console/deal-room` |
 | Component | `src/pages/DealRoom.tsx` (155 lines) + `lib/deal-room-activity.ts` |
 | NAV | founder: "Live Deal Room", group Exchange, **Active Mandate**; buyer: "Deal Room", group Deals, **Pro** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All five gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `cee53de`)
 
@@ -72,3 +72,12 @@ Founder Active Mandate: `h1` 1 · axe 0 · **overflow at 390** · 0 errors. Buye
 ### G4 — Demo company unlabelled
 *Closed by:* `pages/DealRoom.tsx` (founder view split into `FounderDealRoom`) and `lib/deal-room-activity.ts` (`dealRoomActivity(limit, candidates = BUYERS.candidates)` — additive, default unchanged). The simulation runs on `runBuyerDiscovery(loadActiveCompany(), { limit: 12 })`, the same call the demo constant uses. Eyebrow names the source; **Demo data / Your intake** badge beside "Simulated activity". `pages/Intake.tsx` lists "Deal Room (simulated)".
 *Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium: demo → DEMO DATA, highest simulated interest Flexport Strategic; intake "Northwind Analytics" → YOUR INTAKE, Vista Enterprise Software Bolt-On · buyer view unchanged.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium founder and buyer, free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · founder: simulated labels, personalisation demo vs intake · buyer: own view, no other bidders · 0 "live" words.
+
+## Known issues
+- Data-room telemetry does not exist; the founder view stays a labelled simulation until views, downloads and dwell are recorded.
+- The buyer view is informational; there is no buyer-side document room to show yet.

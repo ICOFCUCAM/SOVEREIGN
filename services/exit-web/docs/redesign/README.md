@@ -15,8 +15,8 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | 09 | `/console/exit-timing` | Exit Timing | `ExitTiming` | founder | Pro | ☑ done · awaiting final review |
 | 10 | `/console/wealth` | Liquidity & Transition | `Wealth` | founder | Pro | ☑ done · awaiting final review |
 | 11 | `/console/buyer-copilot` | Buyer Intelligence | `BuyerCopilot` | founder | Preparation or Pro | ☑ done · awaiting final review |
-| 12 | `/console/deal-room` | Live Deal Room / Deal Room | `DealRoom` | founder, buyer | Pro | ◐ in progress |
-| 13 | `/console/intelligence` | Acquisition Radar | `Intelligence` | founder, buyer | none | ☐ |
+| 12 | `/console/deal-room` | Deal Room (NAV label was "Live Deal Room") | `DealRoom` | founder, buyer | Pro | ☑ done · awaiting final review |
+| 13 | `/console/intelligence` | Acquisition Radar | `Intelligence` | founder, buyer | none | ◐ in progress |
 | 14 | `/console/data-room` | Data Room | `DataRoom` | founder | Preparation or Pro | ☐ |
 | 15 | `/console/buyers` | Buyer Profiles | `Buyers` | founder | none | ☐ |
 | 16 | `/console/buyer-graph` | Buyer Graph | `BuyerGraph` | founder | Preparation or Pro | ☐ |
