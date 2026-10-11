@@ -147,7 +147,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {/* ambient reactor layer — the homepage exchange DNA, inside the
               console: faint market grid, a top liquidity glow, and the
               transaction-ring watermark. Ambient intelligence, not decoration. */}
-          <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
             <div className="absolute inset-0 opacity-[0.05]"
               style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(120,170,255,0.7) 0 1px, transparent 1px 110px), repeating-linear-gradient(0deg, rgba(120,170,255,0.5) 0 1px, transparent 1px 110px)", maskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 70%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 70%)" }} />
             <div className="absolute -top-24 left-1/2 h-56 w-[70%] -translate-x-1/2 rounded-[50%] opacity-25 blur-[100px]"

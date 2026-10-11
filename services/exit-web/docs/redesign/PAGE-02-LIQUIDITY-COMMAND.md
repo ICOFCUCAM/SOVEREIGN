@@ -91,3 +91,11 @@ No loading (synchronous engines). Exit-run states: none / complete (card + Re-ru
 | # | Defect | Where | Plan |
 |---|---|---|---|
 | X7 | The shell's decorative ring SVG (`-right-32`) makes `<main>` scroll 128 px sideways on **every** console page (Page 01 included — my earlier overflow check measured the document, not `<main>`). | `components/Shell.tsx` ambient layer | One-class fix (`overflow-hidden` on the decorative layer); documented, fixed and verified separately. |
+
+---
+
+## Closure log
+
+### X7 — Shell decorative layer scrolls `<main>` sideways (all pages)
+*Documented above before the fix.* *Fix:* `overflow-hidden` on the `aria-hidden` ambient layer in `Shell.tsx`, so its off-edge ring is clipped instead of widening the scroll area. Nothing interactive lives in that layer.
+*Verification:* `tsc -b` pass · `<main>` scrollWidth = clientWidth at 1440 and 390 on `/console`, `/console/readiness` (was +128 px); `/console/command` keeps only its own G10 overflow at 390. *Status:* ☑ X7-commit
