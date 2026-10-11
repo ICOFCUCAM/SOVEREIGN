@@ -72,7 +72,7 @@ Status: ☐ open · ☑ closed (commit noted)
 | G3 | **Duplicate panel.** "Market signals · indexed" lists exactly the same `comps` as "Similar transactions". | `Terminal.tsx:180-192` vs `211-226` | One comparables table (with status, source, rationale). Replace the duplicate with real sector signals from `ACQ_INDEXES` (company's sector + largest movers). | ☑ `72f57f3` |
 | G4 | **Provenance hidden.** Per-buyer confidence, source URL, events indexed/verified/disclosed, probability breakdown, comparable status/sourceRef, premium basis note, confidence note, disclaimer — computed but never shown. | engine/DNA fields above | Evidence drawer per buyer and a provenance/methodology section with the disclaimer. | ☐ |
 | G5 | **Ambiguous expected value.** "Expected value $102M–$102M" is two different measures (close-weighted, offer) shown as a range; priors marked only by `*`. | `Terminal.tsx:152-154` | Separate "Expected offer" and "Close-weighted" columns; mark priors in words ("prior") with an explanation, not an asterisk alone. | ☑ `e66e427` |
-| G6 | **Weak hierarchy.** Seven metrics equally prominent; the decision (who to approach, what it's worth) competes with secondary telemetry. | screenshot | Mandate band → valuation hero with range → decision metrics → buyer intelligence as the centre → evidence → execution rail → supporting intelligence (progressive disclosure). | ☐ |
+| G6 | **Weak hierarchy.** Seven metrics equally prominent; the decision (who to approach, what it's worth) competes with secondary telemetry. | screenshot | Mandate band → valuation hero with range → decision metrics → buyer intelligence as the centre → evidence → execution rail → supporting intelligence (progressive disclosure). | ☑ G6-commit |
 | G7 | **Execution rail hides plan gates.** Outreach, NDA and Documents are Pro (or Starter) surfaces; a free founder clicking them hits the paywall unannounced. | `lib/access.ts` NAV `pro`/`starter` | Mark each action with its real access requirement using `needsUpgrade()`; links unchanged. | ☑ `fde2f99` |
 | G8 | **Accessibility.** 6 contrast failures, no `h1`, keyboard-unreachable scroll region, `why▾` lacks `aria-expanded`, probability bar is colour-only decoration. | axe baseline | Contrast-checked tokens, one `h1`, focusable scroll regions, proper disclosure buttons, numeric labels for every bar. | ☐ |
 | G9 | **No design system for ExitOS's next pages.** Shared `workstation.tsx` primitives serve 4 pages; restyling them would change pages not yet reviewed. | `workstation.tsx` header comment | Add an additive ExitOS design system (`xo` tokens + `src/components/xo/`) used by the Terminal only; other pages unchanged until their turn. | ☑ `7b04e58` |
@@ -176,3 +176,23 @@ Measured in Chromium (1440):
 | pro | none |
 
 Readiness actions are open to every founder and show no gate. Verification: `tsc -b` pass · eslint clean · 0 page errors. Known: buyer-table header contrast (3.82:1, pre-existing style; the new column adds one node) → G8.
+
+### G6 — Weak hierarchy
+*Documented:* gap register row G6. *Closed by:* `Terminal.tsx` layout rewritten on the `xo` system; the data/logic block above `return` is unchanged except where earlier gaps already changed it.
+
+New reading order (top → bottom):
+1. **Mandate** — `h1` company name, sector, data-state badge (Demo data / Your intake), firmographics as a definition list, one sentence on data state + registry snapshot date (absorbs the old footer note and its "Value My Company" link).
+2. **Value + decision metrics** — Enterprise value hero (midpoint 40 px, low/mid/high printed, band visual with the pre-premium baseline marked) beside six metrics, each with a provenance badge: most likely buyer, qualified buyers, confidence, applied premium, time to close, readiness.
+3. **Decision brief** — where you stand · market context · recommended next move · expected outcome (replaces `CommandState`).
+4. Lead-buyer sentence (thesis + their own disclosed record).
+5. **Buyer intelligence** (8 cols) beside **Next actions** + **Sector signals** (4 cols). Execution now sits next to the ranking it derives from.
+6. **Evidence** — comparable transactions + confidence drivers.
+7. **Supporting market intelligence** — collapsed `<details>` with the registry tape, appetite, reactor, registry extremes and themes.
+
+Corrections made while restructuring:
+- Decision brief said "**7 acquirers active in your space**" — `ACTIVE` is the global top-7 by appetite, so it was always 7 and not sector-specific. Now: "311 acquirers with indexed activity" (`activeAcquirers`), and the comparables line adds the latest comparable date from `provenanceSummary`.
+- The shared `CommandHeader`'s layer badge ("L II") is dropped on this page; the shell's layer bar already shows it.
+
+Functions preserved (checked): buyer links `/console/buyer/:id` (table, metric, brief, lead sentence, appetite list), Why disclosure per buyer, evidence tooltips, Full ranking → `/console/buyer-graph`, every action link, Market map → `/console/market-map`, Value My Company → `/console/intake`, `BuyerInterestGate` on free plan.
+
+Verification: `tsc -b` pass · eslint clean · Chromium free + pro at 1440/900/390: 0 page errors, no horizontal overflow · axe (1440, free and pro): `page-has-heading-one` and all `color-contrast` findings **gone**; one `scrollable-region-focusable` remains → G8.
