@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { NAV, PLAN_LABEL, needsUpgrade } from "../lib/access";
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
-import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, DNA_AS_OF, fmtUsdShort } from "../lib/buyer-dna";
+import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, buyerConfidence, DNA_PROFILES, DNA_AS_OF, fmtUsdShort } from "../lib/buyer-dna";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { Evidence } from "../lib/workstation";
-import { Section, Metric, Provenance, Bar, Disclosure, ScrollRegion, ActionLink } from "../components/xo";
+import { Section, Metric, Provenance, Bar, Disclosure, ScrollRegion, ActionLink, Fact } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { buildMarketTape } from "../lib/market-tape";
 import { sectorSignals } from "../lib/sector-signals";
@@ -239,7 +239,7 @@ const Terminal: React.FC = () => {
                         <th scope="row" className="px-4 py-2 text-left font-normal">
                           <Link to={`/console/buyer/${r.profile.buyer_id}`} className="font-semibold text-xo-text hover:text-xo-action hover:underline">{r.profile.name}</Link>
                           <Disclosure open={open} onToggle={() => setOpenWhy(open ? null : r.profile.buyer_id)} controls={whyId} className="ml-2">
-                            {open ? "Hide" : "Why"}<span className="sr-only"> {r.profile.name}</span>
+                            {open ? "Hide evidence" : "Evidence"}<span className="sr-only"> for {r.profile.name}</span>
                           </Disclosure>
                         </th>
                         <td className="px-2 py-2 text-right">
@@ -254,12 +254,42 @@ const Terminal: React.FC = () => {
                         <td className="px-4 py-2 text-right font-mono tabular-nums text-xo-muted">{days}{!daysKnown && <PriorTag />}</td>
                       </tr>
                       <tr id={whyId} hidden={!open} className="border-b border-xo-line/60 bg-xo-raise">
-                        <td colSpan={7} className="px-4 py-2.5">
-                          <ul className="grid gap-1.5 sm:grid-cols-2">
-                            {why.points.map((pt) => (
-                              <li key={pt.label} className="text-[12px] leading-snug"><span className="font-semibold text-xo-text">{pt.label}.</span> <span className="text-xo-muted">{pt.detail}</span></li>
-                            ))}
-                          </ul>
+                        <td colSpan={7} className="px-4 py-3">
+                          <div className="grid gap-4 md:grid-cols-3">
+                            <div className="md:col-span-1">
+                              <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-xo-faint">Why this buyer</h3>
+                              <ul className="mt-1.5 space-y-1.5">
+                                {why.points.map((pt) => (
+                                  <li key={pt.label} className="text-[12px] leading-snug"><span className="font-semibold text-xo-text">{pt.label}.</span> <span className="text-xo-muted">{pt.detail}</span></li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div>
+                              <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-xo-faint">Probability {r.probability.pct}% =</h3>
+                              <dl className="mt-1 divide-y divide-xo-line/60">
+                                <Fact k="Appetite (max 50)" v={r.probability.appetite} />
+                                <Fact k="Sector overlap (max 34)" v={r.probability.overlap} />
+                                <Fact k="Velocity (max 14)" v={r.probability.velocity} />
+                                <Fact k="Recency (max 10)" v={r.probability.recency} />
+                              </dl>
+                              <p className="mt-1 text-[11px] text-xo-faint">{r.probability.rationale}</p>
+                            </div>
+                            <div>
+                              <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-xo-faint">Evidence base</h3>
+                              <dl className="mt-1 divide-y divide-xo-line/60">
+                                <Fact k="Data confidence" v={buyerConfidence(r.profile)} />
+                                <Fact k="Events indexed" v={r.profile.events_indexed} />
+                                <Fact k="Verified events" v={r.profile.verified_events} />
+                                <Fact k="With disclosed value" v={r.profile.disclosed_events} />
+                                <Fact k="Last acquisition" v={r.profile.last_acquisition ? `${r.profile.last_acquisition.target} · ${r.profile.last_acquisition.date}` : "none dated"} />
+                              </dl>
+                              {r.profile.source_url && (
+                                <a href={r.profile.source_url} target="_blank" rel="noreferrer noopener" className="mt-1.5 inline-block text-[12px] text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">
+                                  Registry source<span className="sr-only"> for {r.profile.name} (opens in a new tab)</span> ↗
+                                </a>
+                              )}
+                            </div>
+                          </div>
                         </td>
                       </tr>
                     </React.Fragment>
@@ -368,7 +398,64 @@ const Terminal: React.FC = () => {
         </Section>
       </div>
 
-      {/* ── 6 · SUPPORTING INTELLIGENCE ─ progressive disclosure ────── */}
+      {/* ── 6 · PROVENANCE & METHODOLOGY ─ editorial reading surface ── */}
+      <Section tone="paper" title="How these figures were produced" eyebrow="Provenance & methodology"
+        right={<span className="text-[11px] text-xo-paper-muted">Framework v{INST.frameworkVersion}</span>}
+        foot={INST.disclaimer}>
+        <div className="grid gap-6 px-4 py-4 lg:grid-cols-3">
+          <div>
+            <h3 className="text-[13px] font-semibold text-xo-paper-text">Valuation methods</h3>
+            <ScrollRegion label="Valuation methods table" className="mt-1.5">
+              <table className="w-full text-[12px]">
+                <thead className="text-left text-[11px] text-xo-paper-muted">
+                  <tr className="border-b border-xo-paper-line">
+                    <th scope="col" className="py-1 pr-2 font-medium">Method</th>
+                    <th scope="col" className="px-2 py-1 text-right font-medium">Weight</th>
+                    <th scope="col" className="py-1 pl-2 text-right font-medium">Mid</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {INST.methodologies.map((m) => (
+                    <tr key={m.name} className="border-b border-xo-paper-line/70 last:border-0 align-top">
+                      <th scope="row" className="py-1.5 pr-2 text-left font-normal">
+                        <span className="font-medium text-xo-paper-text">{m.name}</span>
+                        <span className="block text-[11px] text-xo-paper-muted">{m.basis}{m.multiple != null ? ` · ${m.multiple.toFixed(1)}×` : ""}</span>
+                      </th>
+                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-xo-paper-text">{m.weightPct}%</td>
+                      <td className="py-1.5 pl-2 text-right font-mono tabular-nums text-xo-paper-text">{fmtUsdShort(m.band.mid)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </ScrollRegion>
+          </div>
+          <div className="space-y-3 text-[12.5px] leading-relaxed text-xo-paper-text">
+            <div>
+              <h3 className="text-[13px] font-semibold">Premium basis</h3>
+              <p className="mt-0.5 text-xo-paper-muted">{INST.premium.note}</p>
+            </div>
+            <div>
+              <h3 className="text-[13px] font-semibold">Confidence</h3>
+              <p className="mt-0.5 text-xo-paper-muted">{INST.confidence.note}</p>
+            </div>
+            <div>
+              <h3 className="text-[13px] font-semibold">Comparables</h3>
+              <p className="mt-0.5 text-xo-paper-muted">{INST.comparablesAnalysis.note}</p>
+            </div>
+          </div>
+          <div>
+            <h3 className="text-[13px] font-semibold text-xo-paper-text">Sources behind {INST.provenanceSummary.totalFigures} figures</h3>
+            <dl className="mt-1 divide-y divide-xo-paper-line">
+              {Object.entries(INST.provenanceSummary.bySource).sort((a, b) => b[1] - a[1]).map(([k, v]) => (
+                <Fact key={k} tone="paper" k={k.replace(/_/g, " ")} v={v} />
+              ))}
+            </dl>
+            <p className="mt-2 text-[12px] text-xo-paper-muted">{INST.provenanceSummary.note} Buyer registry snapshot as of {asOf}.</p>
+          </div>
+        </div>
+      </Section>
+
+      {/* ── 7 · SUPPORTING INTELLIGENCE ─ progressive disclosure ────── */}
       <details className="group border border-xo-line bg-xo-panel">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action">
           <span>
