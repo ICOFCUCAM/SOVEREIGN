@@ -53,36 +53,15 @@ function dossier(c: BuyerCandidate): Dossier {
   return { likelihood, rangeLow, rangeHigh, days, risk, synergy, priorDeals, recommendedOpen };
 }
 
-// Buyer DNA — the behavioral profile a founder could never assemble alone:
-// how this acquirer treats founders, prices, structures and integrates.
-interface BuyerDNA {
-  founderFriendly: number;     // 0..100
-  typicalPremiumPct: number;
-  earnoutUsage: "Low" | "Medium" | "High";
-  negotiationStyle: string;
-  integration: string;
-  legalAggression: "Low" | "Moderate" | "High";
-  decisionMakers: string;
-}
-
-const DNA_BY_TYPE: Record<string, Omit<BuyerDNA, "founderFriendly" | "typicalPremiumPct">> = {
-  strategic:     { earnoutUsage: "Low",    negotiationStyle: "Collaborative · synergy-led", integration: "Full integration",   legalAggression: "Moderate", decisionMakers: "Corp dev → BU GM → CFO" },
-  pe:            { earnoutUsage: "High",   negotiationStyle: "Disciplined · price-led",     integration: "Standalone platform", legalAggression: "High",     decisionMakers: "Deal partner → Investment committee" },
-  vc:            { earnoutUsage: "Medium", negotiationStyle: "Speed-led · founder-aligned", integration: "Light-touch",         legalAggression: "Low",      decisionMakers: "Partner → Fund principals" },
-  family_office: { earnoutUsage: "Low",    negotiationStyle: "Relationship-led · patient",  integration: "Hands-off / hold",    legalAggression: "Low",      decisionMakers: "Principal → Family board" },
-  sponsor:       { earnoutUsage: "High",   negotiationStyle: "Structured · returns-led",    integration: "Buy-and-build",       legalAggression: "High",     decisionMakers: "Operating partner → IC" },
-};
-
-function buyerDNA(c: BuyerCandidate): BuyerDNA {
+// Typical premium — the buyer's disclosed average (capped at 40%) when the
+// registry has one, else the Valuation Constitution's prior for its type.
+// Other behavioural traits (founder-friendliness, earnout use, negotiation
+// style, integration, legal posture) are not measured per buyer, so none are
+// shown.
+function typicalPremium(c: BuyerCandidate): { pct: number; source: "disclosed" | "prior" } {
+  if (c.outcomes.avgPremiumPct != null) return { pct: Math.round(Math.min(0.4, c.outcomes.avgPremiumPct) * 100), source: "disclosed" };
   const t = c.buyer.buyerType;
-  const baseFriendly: Record<string, number> = { strategic: 78, pe: 64, vc: 80, family_office: 90, sponsor: 60 };
-  const retrade = c.outcomes.avgRetradePct ?? 0;
-  const founderFriendly = Math.max(35, Math.min(96, Math.round((baseFriendly[t] ?? 70) + (retrade >= 0 ? 8 : retrade < -0.05 ? -16 : -6))));
-  // buyer-type premium priors are owned by the Valuation Constitution
-  const priorPct = Math.round((VALUATION_FRAMEWORK.buyerTypePremiumPriors[t] ?? VALUATION_FRAMEWORK.executionNeutrals.premiumPct) * 100);
-  const typicalPremiumPct = c.outcomes.avgPremiumPct != null ? Math.round(Math.min(0.4, c.outcomes.avgPremiumPct) * 100) : priorPct;
-  const rest = DNA_BY_TYPE[t] ?? DNA_BY_TYPE.strategic;
-  return { founderFriendly, typicalPremiumPct, ...rest };
+  return { pct: Math.round((VALUATION_FRAMEWORK.buyerTypePremiumPriors[t] ?? VALUATION_FRAMEWORK.executionNeutrals.premiumPct) * 100), source: "prior" };
 }
 
 const RISK_CLS: Record<string, string> = { Low: "text-xo-verified", Medium: "text-xo-caution", High: "text-xo-risk" };
@@ -124,11 +103,12 @@ const BuyerCopilot: React.FC = () => {
         </Section>
       )}
 
-      <Section title="Acquirer dossiers · scored" className="border border-xo-line">
+      <Section title="Acquirer dossiers · scored" className="border border-xo-line"
+        foot="Typical premium is the buyer's disclosed average (capped at 40%) or, where none is disclosed, the framework prior for its type. Founder-friendliness, earnout use, negotiation style, integration and legal posture are not measured for individual buyers, so they are not shown.">
         <ol className="grid grid-cols-1 gap-px bg-xo-line lg:grid-cols-2">
           {candidates.map((c, i) => {
             const d = dossier(c);
-            const dna = buyerDNA(c);
+            const prem = typicalPremium(c);
             return (
               <li key={c.buyer.name} className="bg-xo-panel px-4 py-3">
                 <div className="flex items-start justify-between gap-3">
@@ -155,14 +135,8 @@ const BuyerCopilot: React.FC = () => {
                   <div className="font-mono text-[15px] font-semibold tabular-nums text-xo-verified">{fmtMoney(d.recommendedOpen)}</div>
                 </div>
                 <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-xo-line pt-2 sm:grid-cols-3">
-                  <Fact label="Founder-friendly" value={`${dna.founderFriendly}%`} />
-                  <Fact label="Typ. premium" value={`+${dna.typicalPremiumPct}%`} />
-                  <Fact label="Earnout" value={dna.earnoutUsage} />
-                  <Fact label="Negotiation" value={dna.negotiationStyle} />
-                  <Fact label="Integration" value={dna.integration} />
-                  <Fact label="Legal" value={dna.legalAggression} />
+                  <Fact label={prem.source === "disclosed" ? "Typ. premium (disclosed avg)" : "Typ. premium (type prior)"} value={`+${prem.pct}%`} />
                 </dl>
-                <p className="mt-1.5 text-[12px] text-xo-faint">Decision makers: <span className="text-xo-muted">{dna.decisionMakers}</span></p>
               </li>
             );
           })}

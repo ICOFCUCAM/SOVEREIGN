@@ -34,7 +34,7 @@ Preparation / Active Mandate: `h1` none · axe color-contrast ×40 (1440) · no 
 ## Gap register — Page 11
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Invented Buyer DNA** (founder-friendly %, earnout, negotiation, integration, legal aggression, decision makers by type). | Remove; keep the typical premium with its source (disclosed average or framework prior, labelled). Say why the rest is absent. | ☐ |
+| G1 | **Invented Buyer DNA** (founder-friendly %, earnout, negotiation, integration, legal aggression, decision makers by type). | Remove; keep the typical premium with its source (disclosed average or framework prior, labelled). Say why the rest is absent. | ☑ G1-commit |
 | G2 | **Unlabelled heuristics** ("likelihood", "expected range", "recommended open", risk, synergy) and the wrong ranking label. | Name each as a model or rule with its formula; "ranked by expected outcome"; fit probability "not a measured chance of a bid". | ☐ |
 | G3 | Overclaims and invented urgency. | Plain wording. | ☐ |
 | G4 | Hidden plan gate on "Draft outreach". | `requiredEngagement` label for Preparation. | ☐ |
@@ -49,3 +49,7 @@ Preparation / Active Mandate: `h1` none · axe color-contrast ×40 (1440) · no 
 ### G7 — Design
 *Closed by:* `pages/BuyerCopilot.tsx` rebuilt on `xo` (`PageHeader` `h1` "Buyer Intelligence" — the navigation name, "Buyer Copilot" kept in the badge — four summary metrics, banker's take as a page-local definition list (shared `BankerTake` no longer used here), dossiers as an ordered list with `h3` per buyer and definition lists; risk and synergy carry their word, not only colour). Content carried over verbatim; G1–G6 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe **0** (was 40), 13 tab stops all with visible focus.
+
+### G1 — Invented Buyer DNA
+*Closed by:* `pages/BuyerCopilot.tsx`. `buyerDNA()` and `DNA_BY_TYPE` removed: founder-friendly % (type base ± retrade), earnout usage, negotiation style, integration, legal aggression and decision makers were one fixed profile per buyer *type* shown as each buyer's own. Kept: **typical premium** via `typicalPremium()`, labelled by source — "(disclosed avg)" capped at 40 %, or "(type prior)" from the Valuation Constitution. The dossier foot says the other traits are not measured per buyer and so are not shown.
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for Founder-friendly / Legal / Decision makers; "Typ. premium (disclosed avg) +40%" on the first dossier · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
