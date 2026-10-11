@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { RIBBON } from "../lib/market-ribbon";
 import { ACQ_INDEXES } from "../lib/market-intel";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 
-// A live micro-reactor: one sparkbar per sector, height/colour by its real
+// A micro-reactor: one sparkbar per sector, height/colour by its real
 // 12-month trend. The market's shape, in the corner of the eye.
 const SPARK = [...ACQ_INDEXES.indexes]
   .filter((i) => i.trendPct != null)
@@ -21,9 +22,9 @@ const RibbonSpark: React.FC = () => (
 );
 
 // The persistent institutional ribbon — a Bloomberg-style status bar pinned
-// above every workstation. Market vitals on the left of the eye, a live UTC
-// clock and session pulse on the far right. The clock and pulse are the only
-// live elements; the vitals are registry-derived and honest.
+// above every workstation. Market vitals on the left of the eye, a UTC clock
+// on the far right. The clock is the only live element; the vitals come from
+// the registry snapshot, whose date is shown at the start of the ribbon.
 
 const Clock: React.FC = () => {
   const [t, setT] = useState<string>(() => new Date().toISOString().slice(11, 19));
@@ -37,12 +38,9 @@ const Clock: React.FC = () => {
 const InstitutionalRibbon: React.FC = () => (
   <div className="flex items-stretch overflow-x-auto border-b border-white/10 bg-ink-950/92 backdrop-blur-sm">
     <div className="flex shrink-0 items-center gap-1.5 border-r border-white/10 px-3">
-      <span className="relative flex h-1.5 w-1.5">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-deal-400 opacity-75" />
-        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-deal-400" />
-      </span>
+      <span aria-hidden className="inline-flex h-1.5 w-1.5 rounded-full bg-deal-400" />
       <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-deal-300">ExitOS</span>
-      <span className="text-[8.5px] font-semibold uppercase tracking-[0.2em] text-white/35">Live</span>
+      <span className="text-[8.5px] font-semibold uppercase tracking-[0.2em] text-white/35" title="Market vitals come from the bundled acquisition registry snapshot">Registry · {DNA_AS_OF.slice(0, 10)}</span>
     </div>
 
     {RIBBON.map((s) => (

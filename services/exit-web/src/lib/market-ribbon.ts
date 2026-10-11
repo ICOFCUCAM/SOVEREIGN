@@ -27,7 +27,7 @@ const activeAcquirers = DNA_PROFILES.filter((p) => p.events_indexed > 0).length;
  *  refreshed whenever the underlying indexes are rebuilt. */
 export const RIBBON: readonly RibbonSegment[] = [
   { key: "MKT", label: "Market Status", value: marketUp ? "Expanding" : "Mixed", sub: `${expanding}/${withTrend.length} sectors ↑`, dir: marketUp ? "up" : null },
-  { key: "BUY", label: "Buyer Activity", value: String(MARKET.activeMandates), sub: `active · ${activeAcquirers} acquirers`, dir: "up" },
+  { key: "BUY", label: "Buyer Activity", value: String(MARKET.activeMandates), sub: `active · ${activeAcquirers} acquirers` },
   { key: "VEL", label: "Deal Velocity", value: DEAL_INTEL_FMT.medianClose, sub: "median close" },
   { key: "LIQ", label: "Sector Liquidity", value: HISTORY_FMT.disclosedValue, sub: `${HISTORY_STATS.events} events` },
   { key: "VOL", label: "Acquisition Volume", value: MARKET_INTEL.totalEvents.toLocaleString(), sub: "indexed" },
