@@ -51,7 +51,7 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 | G2 | **Numbers cannot be entered correctly.** Decimal points are dropped (12.5 → 125), negative values are impossible, clearing a field forces 0, nothing is validated (e.g. 150 % margin, ARR > revenue unflagged). | measured above | Keep the typed text per field; parse decimals and negatives; validate with field-level messages (`aria-invalid`, `aria-describedby`); only valid values reach the engines. | ☑ `6f44313` |
 | G3 | **Mislabelled valuation.** "Enterprise value · strategic-buyer basis" — the figure is the institutional framework, the console value (D1). | `Intake.tsx` | Label it as the institutional framework, the same figure every page shows. | ☑ `87a03c7` |
 | G4 | **One click publishes, without saying what.** "List on the exchange" lists immediately, does not say which figures buyers will see (exact revenue, growth, EBITDA margin, sector, region) or where it is stored (exchange vs this browser), and offers no way back. | `listings.ts`, `exit-api.ts` | Confirmation step naming exactly what buyers see and where it is stored; result message says the same. Listing mechanics unchanged. | ☑ `6f7d042` |
-| G5 | **Evidence thin.** Comparable status/source and rationale, confidence drivers and the framework disclaimer are computed but not shown; buyers' source (curated registry) not named. | engine fields | Show them (as on the Terminal). | ☐ |
+| G5 | **Evidence thin.** Comparable status/source and rationale, confidence drivers and the framework disclaimer are computed but not shown; buyers' source (curated registry) not named. | engine fields | Show them (as on the Terminal). | ☑ G5-commit |
 | G6 | **No path forward.** Nothing tells the founder that their saved figures now drive the Terminal and Liquidity Command. | page | A "your figures now drive…" panel linking to those pages (only when data is saved). | ☐ |
 | G7 | **Old design system and weak hierarchy.** Generic cards/KPI tiles; form labels in tiny uppercase; report and form compete. | screenshots | Rebuild on `xo`: form (with units and hints) beside a decision-first report: value → key figures → buyers → comparables → evidence. | ☑ `52719c6` |
 
@@ -97,3 +97,12 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 - Listing requires saved figures: with only the demo company showing, the button is disabled and says why (the original allowed listing the demo company as the founder's).
 
 *Verification:* `tsc -b`, eslint clean · `listings.test.ts` 6/6 (new: withdraw) · `vitest run` all pass · Chromium (local backend in this container): demo → List disabled; edit name → List → panel with the five public fields and "saved in this browser only"; Cancel → nothing stored; Confirm → stored `lst-acme-robotics` ($62M), status "Saved as an anonymous listing Project Atlas in this browser only…"; edit revenue → stale notice + Update listing; Update → stored $70M; Withdraw → removed · axe 0 · 0 page errors. The "live exchange" wording path (Supabase configured) was **not exercised** here — this container has no backend configured.
+
+### G5 — Evidence thin
+*Documented:* gap register row G5. *Closed by:* `pages/Intake.tsx` (fields the engine already returns).
+- Most likely acquirers: foot names the source — the curated buyer registry with its composition (demo: 31 acquirers: 15 strategic, 14 financial, 2 family office, 0 sovereign) — and that probability / time to cash are the framework's buyer model.
+- Comparable transactions: each row adds status, days to close and the engine's comparability rationale; a Source column (source type, full reference on hover); "undisclosed" instead of "—" for price.
+- New **Confidence** section: the five drivers with numeric bars and the engine's note.
+- New **Disclaimer** section on the light reading surface: the framework's full disclaimer.
+
+*Verification:* `tsc -b`, eslint clean · Chromium: all four sections render with the values above (e.g. DB Schenker → DSV "closed · 229d to close · Same sector (logistics freight) · completed transaction", source "press release"; confidence drivers 100/100/100/59/78 %) · axe 0, no overflow (free/pro, 1440/390) · 0 page errors.

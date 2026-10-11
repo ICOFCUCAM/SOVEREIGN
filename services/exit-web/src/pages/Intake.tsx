@@ -8,7 +8,7 @@ import { listCompany, listingFromCompany, unlistCompany, allListings } from "../
 import { listingDestination } from "../lib/exit-api";
 import { loadSavedIntake, saveIntake, clearIntake } from "../lib/active-company";
 import { NUMERIC_FIELDS, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
-import { Section, Metric, Provenance, ScrollRegion, ActionLink } from "../components/xo";
+import { Section, Metric, Provenance, ScrollRegion, ActionLink, Bar } from "../components/xo";
 
 // ── VALUE MY COMPANY ────────────────────────────────────────────────
 // Page 03 of the ExitOS institutional redesign (docs/redesign/PAGE-03-
@@ -178,7 +178,8 @@ const Intake: React.FC = () => {
             <div className="bg-xo-panel"><Metric label="Time to close" value={`${report.timeToClose.lowDays}–${report.timeToClose.highDays}d`} sub="expected" /></div>
           </section>
 
-          <Section title="Most likely acquirers" eyebrow="Ranked by fit-adjusted expected value" className="border border-xo-line">
+          <Section title="Most likely acquirers" eyebrow="Ranked by fit-adjusted expected value" className="border border-xo-line"
+            foot={`From the curated buyer registry (${report.buyerUniverse.registry} acquirers: ${report.buyerUniverse.strategic} strategic, ${report.buyerUniverse.financial} financial, ${report.buyerUniverse.family_office} family office, ${report.buyerUniverse.sovereign} sovereign); probability and time to cash are the framework's buyer model.`}>
             {report.mostLikelyBuyers.length ? (
               <ScrollRegion label="Most likely acquirers table">
                 <table className="w-full min-w-[420px] text-[13px]">
@@ -209,28 +210,50 @@ const Intake: React.FC = () => {
             foot={m.data_provenance_summary}>
             {report.comparableTransactions.length ? (
               <ScrollRegion label="Comparable transactions table">
-                <table className="w-full min-w-[520px] text-[13px]">
+                <table className="w-full min-w-[640px] text-[13px]">
                   <thead className="text-left text-[11px] text-xo-faint">
                     <tr className="border-b border-xo-line">
                       <th scope="col" className="px-4 py-2 font-medium">Target → buyer</th>
                       <th scope="col" className="px-2 py-2 text-right font-medium">Date</th>
                       <th scope="col" className="px-2 py-2 text-right font-medium">Premium</th>
-                      <th scope="col" className="px-4 py-2 text-right font-medium">Price</th>
+                      <th scope="col" className="px-2 py-2 text-right font-medium">Price</th>
+                      <th scope="col" className="px-4 py-2 text-right font-medium">Source</th>
                     </tr>
                   </thead>
                   <tbody>
                     {report.comparableTransactions.slice(0, 8).map((c, i) => (
                       <tr key={`${c.target}-${i}`} className="border-b border-xo-line/60 last:border-0">
-                        <td className="px-4 py-2"><span className="font-medium">{c.target}</span> <span className="text-xo-faint">→</span> <span className="text-xo-muted">{c.buyer}</span></td>
+                        <td className="px-4 py-2">
+                          <span className="font-medium">{c.target}</span> <span className="text-xo-faint">→</span> <span className="text-xo-muted">{c.buyer}</span>
+                          <span className="block text-[11px] text-xo-faint">{c.status}{c.closeDays != null ? ` · ${c.closeDays}d to close` : ""} · {c.rationale}</span>
+                        </td>
                         <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.date ?? "—"}</td>
                         <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.premiumPct != null ? `+${Math.round(c.premiumPct * 100)}%` : "—"}</td>
-                        <td className="px-4 py-2 text-right font-mono tabular-nums">{c.priceUsd != null ? usd(c.priceUsd) : "—"}</td>
+                        <td className="px-2 py-2 text-right font-mono tabular-nums">{c.priceUsd != null ? usd(c.priceUsd) : <span className="font-sans text-[11px] text-xo-faint">undisclosed</span>}</td>
+                        <td className="px-4 py-2 text-right font-mono text-[11px] text-xo-muted" title={c.sourceRef}>{c.sourceRef.split(":")[0].replace(/_/g, " ")}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </ScrollRegion>
             ) : <p className="px-4 py-3 text-[13px] text-xo-muted">No same-sector comparables indexed yet — the radar widens this with every ingest run.</p>}
+          </Section>
+
+          <Section title="Confidence" eyebrow="What the valuation rests on" className="border border-xo-line"
+            right={<span className="font-mono text-[14px] font-semibold">{report.confidence.score}% <span className="text-[11px] font-normal text-xo-faint">{report.confidence.tier}</span></span>}
+            foot={report.confidence.note}>
+            <ul className="grid gap-x-8 gap-y-2 px-4 py-3 sm:grid-cols-2">
+              {([["Data completeness", report.confidence.drivers.dataCompleteness], ["Comparable depth", report.confidence.drivers.comparableDepth], ["Sector maturity", report.confidence.drivers.sectorMaturity], ["Financial quality", report.confidence.drivers.financialQuality], ["Data freshness", report.confidence.drivers.dataFreshness]] as const).map(([k, v]) => (
+                <li key={k} className="flex items-center justify-between gap-3 text-[12px]">
+                  <span className="text-xo-muted">{k}</span>
+                  <Bar value={Math.round(v * 100)} label={`${Math.round(v * 100)}%`} tone="action" width="w-24" />
+                </li>
+              ))}
+            </ul>
+          </Section>
+
+          <Section tone="paper" title="Disclaimer" eyebrow={`Valuation Framework v${report.frameworkVersion}`}>
+            <p className="px-4 py-3 text-[12px] leading-relaxed text-xo-paper-muted">{report.disclaimer}</p>
           </Section>
 
           <p className="px-1 text-[12px] text-xo-faint">
