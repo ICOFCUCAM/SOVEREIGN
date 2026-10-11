@@ -39,7 +39,7 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 | G3 | Mislabels: "Due Diligence AI" (rule-based), "ring-1 access", completeness rule unstated, raw list error. | "Diligence risk scan (rule-based)"; drop "ring-1 access"; state the completeness rule; plain error text. | ☐ |
 | G4 | Demo company unlabelled. | Engine specs, red flags and value on `loadActiveCompany()`; badge. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, overflow at 390, old primitives. | Rebuild on `xo`. | ☑ G6-commit |
+| G6 | Design: no `h1`, overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `27888d1` |
 
 ---
 
