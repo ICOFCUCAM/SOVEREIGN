@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { NAV, PLAN_LABEL, needsUpgrade } from "../lib/access";
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
 import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, DNA_PROFILES, DNA_AS_OF, fmtUsdShort } from "../lib/buyer-dna";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
@@ -34,6 +35,14 @@ const PriorTag: React.FC = () => (
 const Terminal: React.FC = () => {
   const { session } = useAuth();
   const plan = session?.plan ?? "free";
+  const role = session?.role ?? "founder";
+  // The engagement an action's destination requires, read from the access
+  // policy — shown before the click, never enforced here (the route Guard does).
+  const gateFor = (to: string): string | null => {
+    if (!needsUpgrade(to, role, plan)) return null;
+    const e = NAV.find((n) => n.to === to && n.roles.includes("founder"));
+    return e?.starter ? `${PLAN_LABEL.prep} or ${PLAN_LABEL.pro}` : PLAN_LABEL.pro;
+  };
   const [openWhy, setOpenWhy] = useState<string | null>(null);
 
   const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
@@ -224,17 +233,21 @@ const Terminal: React.FC = () => {
           </Panel>
           <Panel title="Action queue" className="flex-1">
             <ul className="divide-y divide-white/5">
-              {actions.map((a) => (
+              {actions.map((a) => {
+                const gate = gateFor(a.to);
+                return (
                 <li key={a.label}>
                   <Link to={a.to} className="flex items-center justify-between gap-2 px-3 py-[7px] transition hover:bg-white/[0.03]">
                     <span className="min-w-0">
                       <span className="block truncate text-[12px] font-semibold text-white/90">{a.label}</span>
-                      <span className="block truncate text-[10px] text-white/40">{a.meta}</span>
+                      <span className="block truncate text-[10px] text-white/50">{a.meta}</span>
+                      {gate && <span className="mt-0.5 block text-[10px] font-semibold text-loi-300">Requires {gate}</span>}
                     </span>
-                    <span className="shrink-0 text-deal-300/70">→</span>
+                    <span className="shrink-0 text-deal-300/70" aria-hidden>{gate ? "🔒" : "→"}</span>
                   </Link>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </Panel>
         </div>

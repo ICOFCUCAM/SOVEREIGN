@@ -73,7 +73,7 @@ Status: ☐ open · ☑ closed (commit noted)
 | G4 | **Provenance hidden.** Per-buyer confidence, source URL, events indexed/verified/disclosed, probability breakdown, comparable status/sourceRef, premium basis note, confidence note, disclaimer — computed but never shown. | engine/DNA fields above | Evidence drawer per buyer and a provenance/methodology section with the disclaimer. | ☐ |
 | G5 | **Ambiguous expected value.** "Expected value $102M–$102M" is two different measures (close-weighted, offer) shown as a range; priors marked only by `*`. | `Terminal.tsx:152-154` | Separate "Expected offer" and "Close-weighted" columns; mark priors in words ("prior") with an explanation, not an asterisk alone. | ☑ `e66e427` |
 | G6 | **Weak hierarchy.** Seven metrics equally prominent; the decision (who to approach, what it's worth) competes with secondary telemetry. | screenshot | Mandate band → valuation hero with range → decision metrics → buyer intelligence as the centre → evidence → execution rail → supporting intelligence (progressive disclosure). | ☐ |
-| G7 | **Execution rail hides plan gates.** Outreach, NDA and Documents are Pro (or Starter) surfaces; a free founder clicking them hits the paywall unannounced. | `lib/access.ts` NAV `pro`/`starter` | Mark each action with its real access requirement using `needsUpgrade()`; links unchanged. | ☐ |
+| G7 | **Execution rail hides plan gates.** Outreach, NDA and Documents are Pro (or Starter) surfaces; a free founder clicking them hits the paywall unannounced. | `lib/access.ts` NAV `pro`/`starter` | Mark each action with its real access requirement using `needsUpgrade()`; links unchanged. | ☑ G7-commit |
 | G8 | **Accessibility.** 6 contrast failures, no `h1`, keyboard-unreachable scroll region, `why▾` lacks `aria-expanded`, probability bar is colour-only decoration. | axe baseline | Contrast-checked tokens, one `h1`, focusable scroll regions, proper disclosure buttons, numeric labels for every bar. | ☐ |
 | G9 | **No design system for ExitOS's next pages.** Shared `workstation.tsx` primitives serve 4 pages; restyling them would change pages not yet reviewed. | `workstation.tsx` header comment | Add an additive ExitOS design system (`xo` tokens + `src/components/xo/`) used by the Terminal only; other pages unchanged until their turn. | ☑ `7b04e58` |
 
@@ -161,3 +161,18 @@ Verification: `tsc -b` pass · eslint clean · `sector-signals.test.ts` **4/4 pa
 | Formula unstated | Foot states the formula with the actual baseline ($72M for the demo company) and the prior values (20 % / 55 %) |
 
 Verification: `tsc -b` pass · eslint clean · Chromium pro 1440/390: 0 errors, no overflow; rendered table text checked.
+
+### G7 — Execution rail hides plan gates
+*Documented:* gap register row G7. *Closed by:* `Terminal.tsx` (reads `NAV`, `PLAN_LABEL`, `needsUpgrade` from `lib/access.ts`; access policy itself not modified, route `Guard` still enforces).
+
+Each action shows "Requires …" and a lock instead of the arrow when `needsUpgrade(to, role, plan)` is true. The label comes from the NAV entry: `starter` surfaces → "Preparation or Active Mandate", other `pro` surfaces → "Active Mandate". Links are unchanged — a gated click still reaches the Upgrade page through the Guard.
+
+Measured in Chromium (1440):
+
+| Plan | Gates shown |
+|---|---|
+| free | Outreach → Active Mandate · NDA → Active Mandate · CIM/Documents → Preparation or Active Mandate |
+| prep | Outreach → Active Mandate · NDA → Active Mandate |
+| pro | none |
+
+Readiness actions are open to every founder and show no gate. Verification: `tsc -b` pass · eslint clean · 0 page errors. Known: buyer-table header contrast (3.82:1, pre-existing style; the new column adds one node) → G8.
