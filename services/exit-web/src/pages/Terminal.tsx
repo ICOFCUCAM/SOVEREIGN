@@ -26,6 +26,11 @@ const SECTOR_LABEL: Record<string, string> = {
   mobility: "Mobility", ai_infra: "AI Infrastructure", developer_tools: "Developer Tools", media_content: "Media · Content", other: "Diversified",
 };
 
+// A neutral assumption, named in words (not an asterisk) so it is read.
+const PriorTag: React.FC = () => (
+  <span className="ml-1 align-middle font-sans text-[9px] font-semibold uppercase tracking-wide text-loi-300" title="Not disclosed by this buyer — a labelled neutral assumption">prior</span>
+);
+
 const Terminal: React.FC = () => {
   const { session } = useAuth();
   const plan = session?.plan ?? "free";
@@ -133,21 +138,23 @@ const Terminal: React.FC = () => {
         {/* BUYER RANKINGS — the centerpiece */}
         <Panel title="Buyer rankings · by probability" className="lg:col-span-8"
           right={<Link to="/console/buyer-graph" className="text-[9px] uppercase tracking-wide text-white/35 hover:text-deal-300">full ranking →</Link>}
-          foot="Expected value = close-weighted to LOI offer. *premium/close not disclosed — neutral prior. Probability = appetite × sector overlap × velocity × recency.">
+          foot={<>Expected offer = financial baseline {fmtUsdShort(BASELINE)} × (1 + premium). Close-weighted = expected offer × close rate. <span className="font-semibold text-loi-300">prior</span> = the buyer has not disclosed it, so a labelled neutral assumption is used (premium 20%, close rate 55%, days = framework low end). Probability = appetite + sector overlap + velocity + recency.</>}>
           <table className="w-full text-[12px]">
             <thead className="sticky top-0 bg-ink-900 text-left text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">
               <tr className="border-b border-white/10">
                 <th className="px-3 py-1.5">Buyer</th>
                 <th className="px-2 py-1.5 text-right">Prob</th>
-                <th className="px-2 py-1.5 text-right">Expected value</th>
-                <th className="px-2 py-1.5 text-right">Prem</th>
-                <th className="px-2 py-1.5 text-right">Close</th>
+                <th className="px-2 py-1.5 text-right">Expected offer</th>
+                <th className="px-2 py-1.5 text-right">Close-weighted</th>
+                <th className="px-2 py-1.5 text-right">Premium</th>
+                <th className="px-2 py-1.5 text-right">Close rate</th>
                 <th className="px-3 py-1.5 text-right">Days</th>
               </tr>
             </thead>
             <tbody>
               {TOP.map((r) => {
                 const why = buyerRationale(r.profile, BASELINE, tokens, company.sector);
+                const daysKnown = r.profile.median_close_days != null;
                 const days = r.profile.median_close_days ?? INST.timeToClose.lowDays;
                 const open = openWhy === r.profile.buyer_id;
                 return (
@@ -165,14 +172,15 @@ const Terminal: React.FC = () => {
                           </Evidence>
                         </span>
                       </td>
-                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/85">{fmtUsdShort(r.exp.expectedClose)}–{fmtUsdShort(r.exp.expectedOffer)}</td>
-                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/65">+{Math.round(r.exp.premium * 100)}%{!r.exp.premiumKnown ? "*" : ""}</td>
-                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/65">{Math.round(r.exp.close * 100)}%{!r.exp.closeKnown ? "*" : ""}</td>
-                      <td className="px-3 py-1.5 text-right font-mono tabular-nums text-white/65">{days}</td>
+                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/85">{fmtUsdShort(r.exp.expectedOffer)}</td>
+                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/85">{fmtUsdShort(r.exp.expectedClose)}</td>
+                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/65">+{Math.round(r.exp.premium * 100)}%{!r.exp.premiumKnown && <PriorTag />}</td>
+                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/65">{Math.round(r.exp.close * 100)}%{!r.exp.closeKnown && <PriorTag />}</td>
+                      <td className="px-3 py-1.5 text-right font-mono tabular-nums text-white/65">{days}{!daysKnown && <PriorTag />}</td>
                     </tr>
                     {open && (
                       <tr className="border-b border-white/5 bg-white/[0.015]">
-                        <td colSpan={6} className="px-3 py-2">
+                        <td colSpan={7} className="px-3 py-2">
                           <ul className="grid gap-1 sm:grid-cols-2">
                             {why.points.map((pt) => (
                               <li key={pt.label} className="flex gap-1.5 text-[11px]"><span className="text-deal-400">·</span><span><span className="font-semibold text-white/80">{pt.label}.</span> <span className="text-white/50">{pt.detail}</span></span></li>
