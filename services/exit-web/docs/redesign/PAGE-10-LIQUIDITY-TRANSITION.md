@@ -43,7 +43,7 @@ After the deal: what the founder walks away with (headline → preferences → t
 | G5 | Overclaims (runs/models/schedules/drafts; keeps threads; readiness clock for round two). | Plain wording. | ☐ |
 | G6 | Demo offers and cap table unlabelled. | Badge and line: sample offers and cap table (demo), also when an intake is saved (intake has no offers or cap table). | ☐ |
 | G7 | Fake live tape. | `RegistryTape`. | ☐ |
-| G8 | Design: no `h1`, old primitives. | Rebuild on `xo`. | ☑ G8-commit |
+| G8 | Design: no `h1`, old primitives. | Rebuild on `xo`. | ☑ `641026d` |
 
 ### Observation (no visible effect today)
 `lib/engines.ts` and `lib/exit-process.ts` pass `OFFER_COMPARISON.leader` (an offer id) as `leadingBuyer` to `deriveNegotiationState`. No page displays `leadingBuyer`; left as is and re-checked on the Negotiator page.
