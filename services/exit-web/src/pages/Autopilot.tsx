@@ -259,11 +259,11 @@ const Autopilot: React.FC = () => {
   };
   const starterGated = isStarter && statuses[GATE] === "done";
 
-  // "Send" delivers the agent's work product into the deal process — it records
-  // the send and notifies, rather than downloading a raw .md to the founder.
+  // "Mark ready" records that the founder has signed off a deliverable. In
+  // this simulation nothing is delivered anywhere, and the toast says so.
   const send = (a: AgentDef): void => {
     setSent((prev) => new Set(prev).add(a.id));
-    notify(`${a.name} deliverable sent to the deal room`);
+    notify(`${a.name} deliverable marked ready — in this simulation nothing leaves ExitOS`);
   };
 
   const doneCount = statuses.filter((s) => s === "done").length;
@@ -293,7 +293,7 @@ const Autopilot: React.FC = () => {
           {reviewAgent.reportPath
             ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-deal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">Open board-ready PDF →</a>
             : <Button variant="ghost" onClick={() => downloadDeliverable(reviewAgent.deliverable.filename, reviewAgent.deliverable.build())}>Download draft (.md)</Button>}
-          <Button onClick={() => { send(reviewAgent); }}>{sent.has(reviewAgent.id) ? "Sent ✓ · resend" : "Send deliverable"}</Button>
+          <Button onClick={() => { send(reviewAgent); }}>{sent.has(reviewAgent.id) ? "✓ Marked ready" : "Mark ready"}</Button>
         </> : null}>
         {reviewAgent && (
           <div className="space-y-4">
@@ -307,7 +307,7 @@ const Autopilot: React.FC = () => {
               </div>
             ) : reviewAgent.detail}
             <div className="rounded-md border border-deal-500/30 bg-deal-600/[0.07] p-3 text-[12px] text-white/70">
-              Deliverable: <span className="font-mono text-deal-300">{reviewAgent.deliverable.filename}</span> — download to review, or send to attach it to the process.
+              Deliverable: <span className="font-mono text-deal-300">{reviewAgent.deliverable.filename}</span> — download to review, or mark it ready. Nothing is sent from this simulation.
             </div>
           </div>
         )}
@@ -420,7 +420,7 @@ const Autopilot: React.FC = () => {
                       {a.reportPath
                         ? <a className="text-[11px] font-semibold uppercase tracking-wide text-white/55 hover:text-white" href={a.reportPath} target="_blank" rel="noopener noreferrer">PDF →</a>
                         : <button className="text-[11px] font-semibold uppercase tracking-wide text-white/55 hover:text-white" onClick={() => downloadDeliverable(a.deliverable.filename, a.deliverable.build())}>Download .md</button>}
-                      <button className="text-[11px] font-semibold uppercase tracking-wide text-deal-300 hover:text-deal-200" onClick={() => send(a)}>{sent.has(a.id) ? "Sent ✓" : "Send"}</button>
+                      <button className="text-[11px] font-semibold uppercase tracking-wide text-deal-300 hover:text-deal-200" onClick={() => send(a)}>{sent.has(a.id) ? "✓ Ready" : "Mark ready"}</button>
                     </div>
                   )}
                 </div>
@@ -469,7 +469,7 @@ const Autopilot: React.FC = () => {
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <Button variant="ghost" className="text-[12px]" onClick={() => downloadDeliverable(a.deliverable.filename, a.deliverable.build())}>Download</Button>
-                  <Button className="text-[12px]" onClick={() => send(a)}>{sent.has(a.id) ? "Sent ✓ · resend" : "Send"}</Button>
+                  <Button className="text-[12px]" onClick={() => send(a)}>{sent.has(a.id) ? "✓ Marked ready" : "Mark ready"}</Button>
                 </div>
               </div>
             ))}

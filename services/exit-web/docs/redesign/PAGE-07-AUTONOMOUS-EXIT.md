@@ -33,7 +33,7 @@ A guided simulation of an end-to-end exit: eight agents (valuation, buyer discov
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Preparation plan can run Active Mandate steps.** | Gate on the access policy (`needsUpgrade` for the outreach surface) instead of the retired `starter` key; Preparation stops after buyer discovery, as the copy already says. "Launch a mandate" states it is a demo plan switch. | ☑ `955c0c0` |
-| G2 | **False "sent to the deal room".** | "Mark as ready" + a status that nothing leaves ExitOS in this simulation. | ☐ |
+| G2 | **False "sent to the deal room".** | "Mark as ready" + a status that nothing leaves ExitOS in this simulation. | ☑ G2-commit |
 | G3 | **Simulation overclaims** (uploads, "money arrives", "deal closed", "send"). | Every simulated outcome says so: "Simulation complete", "would be wired" etc.; no upload claims; decisions marked "(simulated)". | ☐ |
 | G4 | Demo company unlabelled. | Valuation and buyer discovery on `loadActiveCompany()`; steps still on demo fixtures (diligence findings, sample offers) labelled. | ☐ |
 | G5 | Old design system. | Rebuild on `xo` (header, mission control, agent steps as an ordered list with status words, deliverables). | ☐ |
@@ -45,3 +45,7 @@ A guided simulation of an end-to-end exit: eight agents (valuation, buyer discov
 ### G1 — Preparation plan could run Active Mandate steps (access)
 *Closed by:* `pages/Autopilot.tsx`. The step gate reads the access policy — `needsUpgrade("/console/banker", role, plan)` (outreach is an Active Mandate surface) — instead of `plan === "starter"`. Preparation (and the retired Starter key) stop after Buyer Discovery; locked steps read "Requires Active Mandate"; the description names the plan; "Launch a mandate & continue" now says "Demo: this switches your session to Active Mandate instantly — no payment is taken." (the same demo switch as the Upgrade page). Route access itself is unchanged.
 *Verification:* Chromium, Preparation: approves "Approve the ask", "Approve the list", then **no further approve button**, "Buyers found" panel with the demo note (before: "Send outreach" and "Approve gating" were approvable). Active Mandate: all 8 steps approvable. eslint clean · 0 errors.
+
+### G2 — False "sent to the deal room"
+*Closed by:* `pages/Autopilot.tsx`. "Send deliverable" / "Send" / "Sent ✓ · resend" → **Mark ready** / "✓ Marked ready" / "✓ Ready"; the toast reads "… deliverable marked ready — in this simulation nothing leaves ExitOS"; the review modal says "Nothing is sent from this simulation." The recorded state is the same as before.
+*Verification:* Chromium (Active Mandate): approve step 1 → Mark ready → toast "Valuation Agent deliverable marked ready — in this simulation nothing leaves ExitOS", button "✓ Ready" · eslint clean · 0 errors.
