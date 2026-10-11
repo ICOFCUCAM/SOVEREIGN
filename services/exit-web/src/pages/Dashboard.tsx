@@ -105,12 +105,12 @@ const Dashboard: React.FC = () => {
     setRun(null);
   };
 
+  // Status from real state only: the data source, whether an Exit Process
+  // run exists in this browser, and the engine's demand reading.
   const statusChips: Array<[string, string]> = [
-    ["Mandate", run?.status === "complete" ? "Executing" : "Active"],
-    ["Market", "Open"],
-    ["Buyer activity", m.demandLabel === "High" ? "Elevated" : m.demandLabel],
-    ["Expected outcome", fmtMoney(m.potential)],
-    ["Confidence", `${m.confidencePct}%`],
+    ["Data", fromIntake ? "Your intake" : "Demo company"],
+    ["Exit process", run?.status === "complete" ? `Run complete · ${timeAgo(run.finishedAt ?? run.startedAt)}` : run ? "Run in progress" : "Not started"],
+    ["Buyer demand", `${m.demandLabel} · ${m.activeBuyers} active of ${E.ctx.dealBuyers.length} matched`],
   ];
   const stageIdx = Math.max(0, LIFECYCLE.findIndex((x) => x.key === (run?.status === "complete" ? "run" : "monitor")));
   const scenarios = scenariosFor(E.ctx.currentValueUsd, E.ctx.potentialValueUsd);
@@ -183,7 +183,7 @@ const Dashboard: React.FC = () => {
       {/* ── 2 · LIQUIDITY POSITION ──────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Liquidity position" eyebrow="Founder Liquidity Board" className="lg:col-span-7"
-          right={<span className="text-[11px] text-xo-faint">Live</span>}
+
           foot={<>Values on this page use the <strong className="font-medium text-xo-muted">strategic-buyer valuation report</strong>. The <ActionLink to="/console">Intelligence Terminal</ActionLink> uses the institutional valuation framework, which puts the midpoint at <span className="font-mono tabular-nums text-xo-muted">{fmtMoney(E.institutional.headline.mid)}</span>. The two methods weight comparables and premiums differently.</>}>
           <div className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2">
             <div className="bg-xo-panel"><Metric label="Enterprise value" emphasis provenance="model" value={fmtMoney(m.companyValue)} sub={`strategic-buyer report mid · band ${fmtMoney(E.ctx.valuationBand.low)} – ${fmtMoney(E.ctx.valuationBand.high)}`} /></div>
