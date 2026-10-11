@@ -7,6 +7,7 @@ import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { Panel, CommandHeader, CommandState, Evidence } from "../lib/workstation";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { buildMarketTape } from "../lib/market-tape";
+import { sectorSignals } from "../lib/sector-signals";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 
@@ -62,6 +63,7 @@ const Terminal: React.FC = () => {
   // The registry is a bundled snapshot — show its date, never "today".
   const asOf = DNA_AS_OF.slice(0, 10);
   const tape = useMemo(() => buildMarketTape(), []);
+  const signals = useMemo(() => sectorSignals(company.sector), [company.sector]);
 
   // action queue — recommended next moves, derived from the engines (not invented)
   const actions: { label: string; meta: string; to: string }[] = [
@@ -191,18 +193,26 @@ const Terminal: React.FC = () => {
           <Panel title={`Registry extremes · as of ${asOf}`} className="shrink-0">
             <ReactorTelemetry />
           </Panel>
-          <Panel title="Market signals · indexed" className="flex-1"
-            right={<span className="font-mono text-[9px] text-white/35">{activeAcquirers} active acquirers</span>}>
-            {comps.length ? (
+          <Panel title={`Sector signals · indexes as of ${asOf}`} className="flex-1"
+            right={<span className="font-mono text-[9px] text-white/50">{activeAcquirers} active acquirers</span>}
+            foot="12-month acquisitions vs the prior 12 months. Samples are small — read the counts, not just the trend.">
+            {signals.length ? (
               <ul className="divide-y divide-white/5">
-                {comps.map((c, i) => (
-                  <li key={`${c.target}-${i}`} className="flex items-baseline justify-between gap-2 px-3 py-[7px] text-[11.5px]">
-                    <span className="min-w-0 truncate"><span className="font-medium text-white/90">{c.target}</span> <span className="text-white/30">→</span> <span className="text-white/65">{c.buyer}</span></span>
-                    <span className="shrink-0 font-mono tabular-nums text-white/45">{c.date ?? "—"}{c.premiumPct != null && <span className="ml-2 text-deal-300">+{Math.round(c.premiumPct * 100)}%</span>}</span>
+                {signals.map((x) => (
+                  <li key={x.sector} className="flex items-baseline justify-between gap-2 px-3 py-[7px] text-[11.5px]">
+                    <span className="min-w-0 truncate">
+                      <span className="font-medium text-white/90">{x.sector}</span>
+                      {x.yours && <span className="ml-1.5 text-[9px] font-semibold uppercase tracking-wide text-deal-300">your sector</span>}
+                      <span className="ml-1.5 text-white/50">{x.activeBuyers} buyers</span>
+                    </span>
+                    <span className="shrink-0 font-mono tabular-nums text-white/60">
+                      {x.volume12m} vs {x.volumePrior12m}
+                      {x.trendPct != null && <span className={`ml-2 ${x.trendPct >= 0 ? "text-deal-300" : "text-red-300"}`}>{x.trendPct >= 0 ? "▲ +" : "▼ "}{Math.round(x.trendPct * 100)}%</span>}
+                    </span>
                   </li>
                 ))}
               </ul>
-            ) : <div className="px-3 py-3 text-[11px] text-white/45">No same-sector signals indexed yet.</div>}
+            ) : <div className="px-3 py-3 text-[11px] text-white/50">No sector index activity in the snapshot.</div>}
           </Panel>
           <Panel title="Action queue" className="flex-1">
             <ul className="divide-y divide-white/5">
@@ -222,21 +232,40 @@ const Terminal: React.FC = () => {
         </div>
 
         {/* SIMILAR TRANSACTIONS */}
-        <Panel title="Similar transactions" className="lg:col-span-5" foot="Source-referenced precedents from the acquisition registry.">
+        <Panel title="Comparable transactions" className="lg:col-span-5"
+          right={<span className="font-mono text-[9px] text-white/50">{comps.length} of {INST.comparablesUsed}</span>}
+          foot="Source-referenced precedents from the acquisition registry. Hover a row's source for why it is comparable.">
           {comps.length ? (
             <table className="w-full text-[12px]">
+              <thead className="text-left text-[9px] font-semibold uppercase tracking-[0.14em] text-white/50">
+                <tr className="border-b border-white/10">
+                  <th className="px-3 py-1.5">Target → buyer</th>
+                  <th className="px-2 py-1.5 text-right">Date</th>
+                  <th className="px-2 py-1.5 text-right">Price</th>
+                  <th className="px-2 py-1.5 text-right">Prem</th>
+                  <th className="px-3 py-1.5 text-right">Source</th>
+                </tr>
+              </thead>
               <tbody>
                 {comps.map((c, i) => (
                   <tr key={`${c.target}-${i}`} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                    <td className="px-3 py-[7px]"><span className="font-medium text-white">{c.target}</span> <span className="text-white/30">→</span> <span className="text-white/70">{c.buyer}</span></td>
-                    <td className="px-2 py-[7px] text-right font-mono tabular-nums text-white/45">{c.date ?? "—"}</td>
+                    <td className="px-3 py-[7px]">
+                      <span className="font-medium text-white">{c.target}</span> <span className="text-white/40">→</span> <span className="text-white/70">{c.buyer}</span>
+                      <span className="block text-[10px] text-white/50">{c.status}{c.closeDays != null ? ` · ${c.closeDays}d to close` : ""}</span>
+                    </td>
+                    <td className="px-2 py-[7px] text-right font-mono tabular-nums text-white/60">{c.date ?? "—"}</td>
+                    <td className="px-2 py-[7px] text-right font-mono tabular-nums text-deal-300">{c.priceUsd != null ? fmtUsdShort(c.priceUsd) : "undisclosed"}</td>
                     <td className="px-2 py-[7px] text-right font-mono tabular-nums text-white/65">{c.premiumPct != null ? `+${Math.round(c.premiumPct * 100)}%` : "—"}</td>
-                    <td className="px-3 py-[7px] text-right font-mono tabular-nums text-deal-300">{c.priceUsd != null ? fmtUsdShort(c.priceUsd) : "—"}</td>
+                    <td className="px-3 py-[7px] text-right">
+                      <Evidence meta={{ methodology: c.rationale, source: c.sourceRef }}>
+                        <span className="font-mono text-[10px] text-white/60">{c.sourceRef.split(":")[0].replace("_", " ")}</span>
+                      </Evidence>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          ) : <div className="px-3 py-3 text-[11px] text-white/45">No same-sector comparables indexed yet.</div>}
+          ) : <div className="px-3 py-3 text-[11px] text-white/50">No same-sector comparables indexed yet.</div>}
         </Panel>
 
         {/* ACTIVE BUYERS · APPETITE */}

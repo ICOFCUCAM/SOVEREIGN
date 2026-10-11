@@ -69,7 +69,7 @@ Status: ☐ open · ☑ closed (commit noted)
 |---|---|---|---|---|
 | G1 | **Fake-live indicators.** Hard-coded `status="Active"`; "Intelligence rail · live telemetry"; pulsing "Tape" dot; "AS OF" = today's date. The data is a bundled snapshot (`DNA_AS_OF`, currently 2026-10-11). | `Terminal.tsx:79,85,177`; `workstation.tsx:75` | Replace with the real data state (*Personalised from your intake* / *Demo company*) and the real snapshot date (`DNA_AS_OF`); label registry panels "Indexed · as of …". No pulsing live dot. | ☑ `b11cc29` |
 | G2 | **Mislabelled decision metrics.** "Typical premium" shows the *lead buyer's* premium; "Median close" shows the *lead buyer's* close days beside "12 comps". | `Terminal.tsx:50-51,91-92` | Label them as the lead buyer's figures and show the framework's applied premium (with its basis) and time-to-close range (`INST.timeToClose`) as separate, correctly named figures. | ☑ `68f3512` |
-| G3 | **Duplicate panel.** "Market signals · indexed" lists exactly the same `comps` as "Similar transactions". | `Terminal.tsx:180-192` vs `211-226` | One comparables table (with status, source, rationale). Replace the duplicate with real sector signals from `ACQ_INDEXES` (company's sector + largest movers). | ☐ |
+| G3 | **Duplicate panel.** "Market signals · indexed" lists exactly the same `comps` as "Similar transactions". | `Terminal.tsx:180-192` vs `211-226` | One comparables table (with status, source, rationale). Replace the duplicate with real sector signals from `ACQ_INDEXES` (company's sector + largest movers). | ☑ G3-commit |
 | G4 | **Provenance hidden.** Per-buyer confidence, source URL, events indexed/verified/disclosed, probability breakdown, comparable status/sourceRef, premium basis note, confidence note, disclaimer — computed but never shown. | engine/DNA fields above | Evidence drawer per buyer and a provenance/methodology section with the disclaimer. | ☐ |
 | G5 | **Ambiguous expected value.** "Expected value $102M–$102M" is two different measures (close-weighted, offer) shown as a range; priors marked only by `*`. | `Terminal.tsx:152-154` | Separate "Expected offer" and "Close-weighted" columns; mark priors in words ("prior") with an explanation, not an asterisk alone. | ☐ |
 | G6 | **Weak hierarchy.** Seven metrics equally prominent; the decision (who to approach, what it's worth) competes with secondary telemetry. | screenshot | Mandate band → valuation hero with range → decision metrics → buyer intelligence as the centre → evidence → execution rail → supporting intelligence (progressive disclosure). | ☐ |
@@ -140,3 +140,12 @@ Observed on the demo company (Helios Freight) before the change: header "Typical
 | Expected outcome "close ~178d" | "close 27–257d" |
 
 Verification: `tsc -b` pass · eslint clean · Chromium pro 1440/390: 0 errors, no overflow; rendered text checked (above figures).
+
+### G3 — Duplicate panel
+*Documented:* gap register row G3. *Closed by:* `Terminal.tsx`, new `lib/sector-signals.ts` (+ test).
+
+- "Market signals · indexed" (a second copy of the comparables) is replaced by **Sector signals**: the company's sectors (explicit, reviewable map `SECTOR_INDEX_MAP` from intake keys to the index taxonomy; a test asserts every mapped name exists in the snapshot) followed by the busiest sectors in the last 12 months. Each row shows **counts (12m vs prior 12m)** before the trend, because samples are small.
+- Honest finding surfaced: for the demo company (logistics) the mapped sectors — Supply Chain, Transportation, Logistics — show **0 vs 0** acquisitions in the last 12 months of the snapshot. The old panel hid this.
+- The single **Comparable transactions** table now carries headers, status, days to close, "undisclosed" instead of "—" for price, and a per-row source (`sourceRef` type) with the engine's comparability rationale on hover/focus.
+
+Verification: `tsc -b` pass · eslint clean · `sector-signals.test.ts` **4/4 pass** · Chromium pro 1440/900/390: 0 errors, no overflow.
