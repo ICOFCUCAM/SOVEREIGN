@@ -33,7 +33,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Two "readiness" numbers.** 55 here, 46 on Pages 01/02, both called readiness. | Name this one **Exit Score (ten categories)** and show the readiness-engine score beside it with one line on the difference. | ☑ `7b7e141` |
-| G2 | **Fake "Re-score".** | Remove the timer/toast; offer "Update your figures" (→ Value My Company), which is what actually changes the score. | ☐ |
+| G2 | **Fake "Re-score".** | Remove the timer/toast; offer "Update your figures" (→ Value My Company), which is what actually changes the score. | ☑ G2-commit |
 | G3 | **Mislabels:** "Market window" is the company's market-growth input; "strategic mid, today" (D1); verdict thresholds and category scoring unexplained. | "Market growth (company input)"; "enterprise value today"; thresholds shown with the verdict; categories and impacts labelled rule-based. | ☐ |
 | G4 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` + analysis; badge. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
@@ -50,3 +50,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 ### G1 — Two "readiness" numbers
 *Closed by:* `pages/Readiness.tsx`. The page's number is now named **Exit Score (ten categories)** everywhere on the page (header badge, summary metric, gauge section, verdict signal). The readiness engine's overall score (`runReadiness().overallScore`, the "Readiness" on Pages 01/02) is shown beside it — "readiness engine 46/100" — with one line under the gauge: the Exit Score is the weighted average of the ten categories; the engine uses its own dimensions and weights. The band word ("seed acquisition") belongs to the engine score and is now shown with it, not with 55. No calculation changed.
 *Verification:* `tsc -b`, eslint clean · Chromium: "Exit Score 55/100 · readiness engine 46/100 (Seed Acquisition)" · free 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G2 — Fake "Re-score"
+*Closed by:* `pages/Readiness.tsx`. The Re-score button (700 ms timer, then toast "Re-scored · 55/100 — 10 categories re-evaluated", nothing recomputed) is removed with its state and `notify` import. In its place: **Update your figures** (link to Value My Company, `/console/intake`) and a foot line: "There is no separate re-score step: the score is computed from the company's figures when the page opens. Changing the figures in Value My Company is what changes it." (Made true for saved intakes by G4.)
+*Verification:* eslint clean · Chromium: 0 "Re-scor…" matches, link present · free 1440/390: 0 errors, axe 0, no overflow.

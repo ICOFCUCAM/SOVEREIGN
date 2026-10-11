@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { fmtMoney, notify } from "../lib/ui";
+import { fmtMoney } from "../lib/ui";
 import { MarketTape, Evidence } from "../lib/workstation";
 import { PageHeader, Section, Metric, Bar } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
@@ -58,14 +58,6 @@ const Readiness: React.FC = () => {
     { label: "Upside still on table", value: fmtMoney(left), ok: gapRatio <= 0.15 },
   ];
 
-  const [scanning, setScanning] = useState(false);
-  const rescore = (): void => {
-    setScanning(true);
-    setTimeout(() => {
-      setScanning(false);
-      notify(`Re-scored · ${EXIT_SCORE}/100 (${READINESS_BAND.replace(/_/g, " ")}) — ${READINESS_CATEGORIES.length} categories re-evaluated`);
-    }, 700);
-  };
   const tape = useMemo(() => buildMarketTape(), []);
 
   return (
@@ -92,7 +84,8 @@ const Readiness: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Exit Score" eyebrow="Ten categories" className="lg:col-span-3"
-          right={<button type="button" onClick={rescore} disabled={scanning} className="rounded-sm border border-xo-line px-2 py-0.5 text-[11px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{scanning ? "Re-scoring…" : "Re-score"}</button>}>
+          right={<Link to="/console/intake" className="inline-block rounded-sm border border-xo-line px-2 py-1 text-[11px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Update your figures</Link>}
+          foot="There is no separate re-score step: the score is computed from the company's figures when the page opens. Changing the figures in Value My Company is what changes it.">
           <div className="flex flex-col items-center justify-center py-4">
             <div className="relative flex h-36 w-36 items-center justify-center">
               <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90" aria-hidden>
