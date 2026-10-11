@@ -68,7 +68,7 @@ Status: ☐ open · ☑ closed (commit noted)
 | # | Gap | Evidence | Fix (without changing any calculation) | Status |
 |---|---|---|---|---|
 | G1 | **Fake-live indicators.** Hard-coded `status="Active"`; "Intelligence rail · live telemetry"; pulsing "Tape" dot; "AS OF" = today's date. The data is a bundled snapshot (`DNA_AS_OF`, currently 2026-10-11). | `Terminal.tsx:79,85,177`; `workstation.tsx:75` | Replace with the real data state (*Personalised from your intake* / *Demo company*) and the real snapshot date (`DNA_AS_OF`); label registry panels "Indexed · as of …". No pulsing live dot. | ☑ `b11cc29` |
-| G2 | **Mislabelled decision metrics.** "Typical premium" shows the *lead buyer's* premium; "Median close" shows the *lead buyer's* close days beside "12 comps". | `Terminal.tsx:50-51,91-92` | Label them as the lead buyer's figures and show the framework's applied premium (with its basis) and time-to-close range (`INST.timeToClose`) as separate, correctly named figures. | ☐ |
+| G2 | **Mislabelled decision metrics.** "Typical premium" shows the *lead buyer's* premium; "Median close" shows the *lead buyer's* close days beside "12 comps". | `Terminal.tsx:50-51,91-92` | Label them as the lead buyer's figures and show the framework's applied premium (with its basis) and time-to-close range (`INST.timeToClose`) as separate, correctly named figures. | ☑ G2-commit |
 | G3 | **Duplicate panel.** "Market signals · indexed" lists exactly the same `comps` as "Similar transactions". | `Terminal.tsx:180-192` vs `211-226` | One comparables table (with status, source, rationale). Replace the duplicate with real sector signals from `ACQ_INDEXES` (company's sector + largest movers). | ☐ |
 | G4 | **Provenance hidden.** Per-buyer confidence, source URL, events indexed/verified/disclosed, probability breakdown, comparable status/sourceRef, premium basis note, confidence note, disclaimer — computed but never shown. | engine/DNA fields above | Evidence drawer per buyer and a provenance/methodology section with the disclaimer. | ☐ |
 | G5 | **Ambiguous expected value.** "Expected value $102M–$102M" is two different measures (close-weighted, offer) shown as a range; priors marked only by `*`. | `Terminal.tsx:152-154` | Separate "Expected offer" and "Close-weighted" columns; mark priors in words ("prior") with an explanation, not an asterisk alone. | ☐ |
@@ -126,3 +126,17 @@ Verification: `tsc -b` pass · `eslint` on new files clean · `src/components/xo
 Shared `MarketTape`/`CommandHeader` were not edited (other pages still use them). The shell ribbon's "Live" label is outside this page → recorded as X4.
 
 Verification: `tsc -b` pass · eslint clean on changed files · Chromium free + pro at 1440/390: 0 page errors, no horizontal overflow; pro plan hides the buyer-interest gate as before.
+
+### G2 — Mislabelled decision metrics
+*Documented:* gap register row G2. *Closed by:* `Terminal.tsx` (labels and sources only; no calculation changed).
+
+Observed on the demo company (Helios Freight) before the change: header "Typical premium **+41%**" and "Median close **178d**" — both were Microsoft's own disclosed figures. The valuation framework actually applies **+43%** (market-wide prior, 14 precedents) and its time-to-close range is **27–257d**.
+
+| Before | After |
+|---|---|
+| Typical premium = `lead.profile.premium_pct ?? INST.premium.appliedPct` | **Applied premium** = `INST.premium.appliedPct`, qualifier names the basis (`in_sector` / `market_prior` / `neutral_prior`) with sample size and range |
+| Median close = `lead.profile.median_close_days ?? INST.timeToClose.lowDays`, sub "12 comps" | **Time to close** = `INST.timeToClose` low–high, sub "announced → closed · ranked acquirers" |
+| Lead buyer's figures unlabelled | Lead sentence: "Microsoft's own record: premium +41% · median close 178d" — or "not disclosed" (no silent fallback) |
+| Expected outcome "close ~178d" | "close 27–257d" |
+
+Verification: `tsc -b` pass · eslint clean · Chromium pro 1440/390: 0 errors, no overflow; rendered text checked (above figures).

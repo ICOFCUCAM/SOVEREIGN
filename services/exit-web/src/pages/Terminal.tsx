@@ -48,8 +48,17 @@ const Terminal: React.FC = () => {
   const uplift = Math.max(0, ra.projectedStrategicMid - ra.currentStrategicMid);
   const activeAcquirers = DNA_PROFILES.filter((p) => p.events_indexed > 0).length;
 
-  const leadPremium = lead?.profile.premium_pct ?? INST.premium.appliedPct;
-  const leadCloseDays = lead?.profile.median_close_days ?? INST.timeToClose.lowDays;
+  // Framework figures (what the valuation applies) and the lead buyer's own
+  // disclosed figures are different things — they are labelled separately.
+  const PREMIUM_BASIS: Record<typeof INST.premium.basis, string> = {
+    in_sector: `${INST.premium.inSectorSample} same-sector precedents`,
+    market_prior: `market-wide prior · ${INST.premium.marketSample} precedents`,
+    neutral_prior: "neutral prior (no precedents)",
+  };
+  const closeRange = INST.timeToClose.lowDays === INST.timeToClose.highDays
+    ? `${INST.timeToClose.lowDays}d` : `${INST.timeToClose.lowDays}–${INST.timeToClose.highDays}d`;
+  const leadPremium = lead?.profile.premium_pct;
+  const leadCloseDays = lead?.profile.median_close_days;
   // The registry is a bundled snapshot — show its date, never "today".
   const asOf = DNA_AS_OF.slice(0, 10);
   const tape = useMemo(() => buildMarketTape(), []);
@@ -90,8 +99,8 @@ const Terminal: React.FC = () => {
           { k: "Enterprise value", v: fmtUsdShort(INST.headline.mid), accent: true, sub: `${fmtUsdShort(INST.headline.low)}–${fmtUsdShort(INST.headline.high)}` },
           { k: "Qualified buyers", v: String(INST.buyerUniverse.qualified), sub: `of ${INST.buyerUniverse.scored} scored` },
           { k: "Top match", v: lead ? `${lead.probability.pct}%` : "—", accent: true, sub: lead?.profile.name },
-          { k: "Typical premium", v: `+${pct(leadPremium)}`, sub: `range ${pct(INST.premium.rangeLowPct)}–${pct(INST.premium.rangeHighPct)}` },
-          { k: "Median close", v: `${leadCloseDays}d`, sub: `${INST.comparablesUsed} comps` },
+          { k: "Applied premium", v: `+${pct(INST.premium.appliedPct)}`, sub: `${PREMIUM_BASIS[INST.premium.basis]} · range ${pct(INST.premium.rangeLowPct)}–${pct(INST.premium.rangeHighPct)}` },
+          { k: "Time to close", v: closeRange, sub: "announced → closed · ranked acquirers" },
           { k: "Readiness", v: `${Math.round(ra.currentScore)}`, sub: `→ ${Math.round(ra.projectedScore)} · +${fmtUsdShort(uplift)}` },
           { k: "Confidence", v: `${INST.confidence.score}%`, accent: true, sub: INST.confidence.tier },
         ]}
@@ -99,7 +108,10 @@ const Terminal: React.FC = () => {
           <>
             <Link to={`/console/buyer/${lead.profile.buyer_id}`} className="font-semibold text-deal-200 hover:underline">{lead.profile.name}</Link>{" "}
             is <span className="font-mono font-bold text-deal-200">{lead.probability.pct}%</span> likely to acquire a company like {company.name}.{" "}
-            <span className="text-white/45">{buyerRationale(lead.profile, BASELINE, tokens, company.sector).thesis}</span>
+            <span className="text-white/45">{buyerRationale(lead.profile, BASELINE, tokens, company.sector).thesis}</span>{" "}
+            <span className="text-white/60">
+              {lead.profile.name}'s own record: premium {leadPremium != null ? `+${pct(leadPremium)}` : "not disclosed"} · median close {leadCloseDays != null ? `${leadCloseDays}d` : "not disclosed"}.
+            </span>
           </>
         )}
       />
@@ -110,7 +122,7 @@ const Terminal: React.FC = () => {
         current={<>EV <span className="font-mono text-white">{fmtUsdShort(INST.headline.mid)}</span> · readiness <span className="font-mono text-white">{Math.round(ra.currentScore)}</span> · {INST.buyerUniverse.qualified} qualified buyers</>}
         changes={<>{ACTIVE.length} acquirers active in your space · {INST.comparablesUsed} comparable transactions indexed</>}
         action={lead ? <>Open outreach to <span className="font-semibold text-white">{lead.profile.name}</span> — {lead.probability.pct}% likely, exp. {fmtUsdShort(lead.exp.expectedClose)}</> : <>List on the exchange to surface the buyer set</>}
-        outcome={<>Strategic range <span className="font-mono text-white">{fmtUsdShort(INST.headline.low)}–{fmtUsdShort(INST.headline.high)}</span> · close ~{leadCloseDays}d · +{fmtUsdShort(uplift)} readiness uplift</>}
+        outcome={<>Strategic range <span className="font-mono text-white">{fmtUsdShort(INST.headline.low)}–{fmtUsdShort(INST.headline.high)}</span> · close {closeRange} · +{fmtUsdShort(uplift)} readiness uplift</>}
       />
 
       {/* ── WORKSTATION GRID ── hairline-separated panels in one frame ── */}
