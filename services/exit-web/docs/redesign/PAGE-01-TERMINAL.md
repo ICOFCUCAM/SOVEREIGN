@@ -277,3 +277,14 @@ Requested by the owner after the Page 01 review ("START FIXING"). Same rule: doc
 *Fix:* static dot, "ExitOS" + "Registry · <snapshot date>" (from `DNA_AS_OF`); remove the unconditional ▲ on Buyer Activity (Market Status keeps its arrow — it is computed from the sector trends).
 
 *Verification:* `tsc -b` pass · eslint clean · Chromium: ribbon reads "ExitOS · Registry · 2026-10-11 · Market Status Mixed · Buyer Activity 21 …" (no ▲), 0 pinging elements in the console, 0 page errors. *Status:* ☑ `c45a539`
+
+### X5 — Shell chrome accessibility
+*Documented before the fix* (axe on every console page, excluding the Terminal content, at 1440 and 390, page top and scrolled):
+- **Root cause found:** 13 classes use `ink-950` (ribbon `bg-ink-950/92`, layer bar `/80`, sub-nav `/70`, evidence tooltips `/95`, …) but the Tailwind palette defines only `ink-600…900`. Those backgrounds compile to **nothing** — the bars and tooltips are transparent, so text contrast depends on whatever scrolls behind them (axe: 2.7–4.45:1 once scrolled).
+- Ribbon: horizontally scrolling region with no keyboard access (`scrollable-region-focusable`).
+- Labels at `text-white/30–35` and sub-nav links at `text-white/45` are under 4.5:1 even on an opaque background.
+- 390 px: the mobile top bar sits outside any landmark (`region`).
+
+*Fix:* define `ink-950` (`#060b12`, the darkest step of the existing ink scale) so every intended background exists; raise the low-alpha label/link colours to ≥ 4.5:1; make the ribbon a named, focusable region; make the mobile top bar a `<header>`.
+
+*Verification:* `tsc -b` pass · eslint 0 errors · axe on shell chrome (Terminal content excluded) at 1440 and 390, page top and scrolled: **0 violations** (was: color-contrast ×13, scrollable-region-focusable, region) · Terminal regression (G8 script): still 0 violations, 56 tab stops all with visible focus · side effects of defining `ink-950` checked: "See your matches" CTA now dark text on emerald (`rgb(6,11,18)` on `rgb(16,185,129)`); Buyer profile page renders correctly with 0 contrast failures, 0 page errors. *Status:* ☑ X5-commit

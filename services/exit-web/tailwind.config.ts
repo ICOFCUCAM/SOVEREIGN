@@ -10,6 +10,9 @@ export default {
     extend: {
       colors: {
         ink: {
+          // 950 was referenced (bars, tooltips, button text) but never
+          // defined, so those classes compiled to nothing.
+          950: "#060b12",
           900: "#0a1018",
           800: "#0f1827",
           700: "#172238",

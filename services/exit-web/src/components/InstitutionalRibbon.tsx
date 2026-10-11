@@ -36,20 +36,21 @@ const Clock: React.FC = () => {
 };
 
 const InstitutionalRibbon: React.FC = () => (
-  <div className="flex items-stretch overflow-x-auto border-b border-white/10 bg-ink-950/92 backdrop-blur-sm">
+  <div role="region" aria-label="Market vitals" tabIndex={0}
+    className="flex items-stretch overflow-x-auto border-b border-white/10 bg-ink-950/92 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-deal-400">
     <div className="flex shrink-0 items-center gap-1.5 border-r border-white/10 px-3">
       <span aria-hidden className="inline-flex h-1.5 w-1.5 rounded-full bg-deal-400" />
       <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-deal-300">ExitOS</span>
-      <span className="text-[8.5px] font-semibold uppercase tracking-[0.2em] text-white/35" title="Market vitals come from the bundled acquisition registry snapshot">Registry · {DNA_AS_OF.slice(0, 10)}</span>
+      <span className="text-[8.5px] font-semibold uppercase tracking-[0.2em] text-white/60" title="Market vitals come from the bundled acquisition registry snapshot">Registry · {DNA_AS_OF.slice(0, 10)}</span>
     </div>
 
     {RIBBON.map((s) => (
       <div key={s.key} className="flex shrink-0 items-center gap-2 border-r border-white/[0.07] px-3 py-1">
-        <span className="text-[8px] font-semibold uppercase tracking-[0.16em] text-white/35">{s.label}</span>
+        <span className="text-[8px] font-semibold uppercase tracking-[0.16em] text-white/60">{s.label}</span>
         <span className={`font-mono text-[12px] font-bold tabular-nums ${s.dir === "up" ? "text-deal-300" : s.dir === "down" ? "text-red-300" : "text-white/90"}`}>
           {s.dir === "up" ? "▲" : s.dir === "down" ? "▼" : ""}{s.value}
         </span>
-        {s.sub && <span className="hidden text-[9px] text-white/35 lg:inline">{s.sub}</span>}
+        {s.sub && <span className="hidden text-[9px] text-white/60 lg:inline">{s.sub}</span>}
       </div>
     ))}
 
