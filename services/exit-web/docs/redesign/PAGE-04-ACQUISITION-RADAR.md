@@ -43,4 +43,13 @@ A buyer (or a founder looking from the buyer side) sets an acquisition mandate �
 | G3 | **Overclaims.** Toast "Mandate published — founders can now match it" and "matchable by founders" — nothing reads mandates. "Follow" logs "added to outreach" on follow **and** unfollow. | code | "Mandate saved" + plain note that founders don't see mandates yet; log only on follow. | ☐ |
 | G4 | **Inputs wrong or unvalidated.** "Min/Max check" actually filter company revenue; `2.5` → 25; min > max accepted; offers accept negatives and decimals are not guarded. | measured | Rename to "Target revenue (min/max, $M)"; reuse the Page 03 parsing rules; validate min ≤ max and offer > 0 with messages. | ☐ |
 | G5 | **Consequential actions without saying what happens.** "Express interest" sends an NDA request and opens a deal in one click; "Submit offer" records an indicative offer — neither says who sees what. | code | Inline confirmation naming the effect (founder receives the request/offer; identity revealed on NDA signature); same calls. | ☐ |
-| G6 | **Design system, hierarchy, accessibility.** No `h1`; 11 contrast failures; chip toggles without `aria-pressed`; old workstation primitives. | axe, code | Rebuild on `xo`: header with `h1` → mandate (left) → scored opportunities (centre) → sector watch; toggles with `aria-pressed`. | ☐ |
+| G6 | **Design system, hierarchy, accessibility.** No `h1`; 11 contrast failures; chip toggles without `aria-pressed`; old workstation primitives. | axe, code | Rebuild on `xo`: header with `h1` → mandate (left) → scored opportunities (centre) → sector watch; toggles with `aria-pressed`. | ☑ G6-commit |
+
+---
+
+## Closure log
+
+### G6 — Design system, hierarchy, accessibility
+*Closed by:* `pages/AcquisitionRadar.tsx` rebuilt on `xo`; new shared `PageHeader`, `Chip` (`aria-pressed`) and `XO_INPUT`/`XO_LABEL` in `components/xo` (+ 2 tests). Order: header (`h1`, mandate summary line) → four mandate metrics → decision brief → mandate form (left, `fieldset`/`legend`, labelled inputs) beside scored opportunities (centre, each an `h3`, match reasons with screen-reader "Meets/Does not meet") → reactor + sector watch table. All handlers, telemetry and API calls unchanged; labels carried over verbatim (fixed in G1–G5).
+
+*Verification:* `tsc -b`, eslint clean · xo tests 8/8 · Chromium founder free/pro 1440/390 and buyer free/pro 1440: 0 errors, `h1` 1, no overflow, axe **0** (was colour-contrast ×11), keyboard: every stop (80 sampled) has visible focus.

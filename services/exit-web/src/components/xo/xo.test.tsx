@@ -51,3 +51,16 @@ describe("xo design system", () => {
     expect(html(<Provenance kind="model" />).toLowerCase()).not.toContain("live");
   });
 });
+
+describe("xo page primitives", () => {
+  it("PageHeader renders exactly one h1", async () => {
+    const { PageHeader } = await import("./index.js");
+    const out = renderToStaticMarkup(<PageHeader eyebrow="E" title="Title" />);
+    expect(out.match(/<h1/g)?.length).toBe(1);
+  });
+  it("Chip announces its state", async () => {
+    const { Chip } = await import("./index.js");
+    expect(renderToStaticMarkup(<Chip pressed onToggle={() => {}}>AI</Chip>)).toContain('aria-pressed="true"');
+    expect(renderToStaticMarkup(<Chip pressed={false} onToggle={() => {}}>AI</Chip>)).toContain('aria-pressed="false"');
+  });
+});

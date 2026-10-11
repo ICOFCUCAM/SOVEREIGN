@@ -127,3 +127,41 @@ export const Fact: React.FC<{ k: string; v: React.ReactNode; tone?: "ink" | "pap
     <dd className={`text-right font-mono text-[12px] tabular-nums ${tone === "paper" ? "text-xo-paper-text" : "text-xo-text"}`}>{v}</dd>
   </div>
 );
+
+/** Page header: eyebrow, the page's single h1, optional badge, description
+ *  and actions. Every redesigned page opens with one. */
+export const PageHeader: React.FC<{
+  eyebrow: string;
+  title: React.ReactNode;
+  badge?: React.ReactNode;
+  description?: React.ReactNode;
+  actions?: React.ReactNode;
+  children?: React.ReactNode;
+}> = ({ eyebrow, title, badge, description, actions, children }) => (
+  <header className="border border-xo-line bg-xo-ink px-4 py-3">
+    <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+      <div className="min-w-0 max-w-[75ch]">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-xo-brass">{eyebrow}</div>
+        <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h1 className="font-serif text-[24px] font-semibold tracking-tight text-xo-text">{title}</h1>
+          {badge}
+        </div>
+        {description && <p className="mt-1 text-[13px] text-xo-muted">{description}</p>}
+      </div>
+      {actions && <div className="flex flex-wrap items-center justify-end gap-2">{actions}</div>}
+    </div>
+    {children}
+  </header>
+);
+
+/** A toggle chip whose state is announced (aria-pressed). */
+export const Chip: React.FC<{ pressed: boolean; onToggle: () => void; children: React.ReactNode }> = ({ pressed, onToggle, children }) => (
+  <button type="button" aria-pressed={pressed} onClick={onToggle}
+    className={`rounded-sm border px-2.5 py-1 text-[12px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${pressed ? "border-xo-verified/60 bg-xo-raise text-xo-text" : "border-xo-line text-xo-muted hover:text-xo-text"}`}>
+    {pressed && <span aria-hidden className="mr-1 text-xo-verified">✓</span>}{children}
+  </button>
+);
+
+/** Shared form styles for xo pages. */
+export const XO_INPUT = "w-full rounded-sm border border-xo-line bg-xo-ink px-2.5 py-2 text-[13px] text-xo-text placeholder:text-xo-faint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+export const XO_LABEL = "mb-1 block text-[12px] font-medium text-xo-muted";
