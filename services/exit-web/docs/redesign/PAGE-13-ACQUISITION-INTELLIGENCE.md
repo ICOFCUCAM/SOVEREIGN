@@ -40,7 +40,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 | G4 | Banker's-take urgency and overclaim; hidden plan gate on the banker CTA. | Plain wording; `requiredEngagement` note. | ☑ `a87de75` |
 | G5 | **Buyer role sees founder process data** and the founder CTA. | For buyers: hide the sample-process signals and the banker's take; state the page shows the buyer landscape for the demo/listed company. Route unchanged. | ☑ `cd0abe0` |
 | G6 | Duplicate NAV name "Acquisition Radar". | This page becomes **"Acquisition Intelligence"** in NAV (both roles) and in its `h1`. | ☑ `dc5acf3` |
-| G7 | Demo company unlabelled. | Run on `loadActiveCompany()` at its canonical value; badge. | ☐ |
+| G7 | Demo company unlabelled. | Run on `loadActiveCompany()` at its canonical value; badge. | ☑ G7-commit |
 | G8 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `7e81471` |
 
 ---
@@ -82,3 +82,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 ### G6 — Duplicate NAV name
 *Closed by:* `lib/access.ts` (labels only) and `pages/Intelligence.tsx`. Both NAV entries for `/console/intelligence` (founder, buyer) are now **"Acquisition Intelligence"**; "Acquisition Radar" stays with `/console/acquisition-radar` (Page 04). The page `h1` is "Acquisition Intelligence" (eyebrow keeps "Acquisition Intelligence Engine"). Routes, groups, roles and gates unchanged.
 *Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium sidebar: founder "Acquisition Radar → /console/acquisition-radar", "Acquisition Intelligence → /console/intelligence"; buyer the same pair.
+
+### G7 — Demo company unlabelled
+*Closed by:* `pages/Intelligence.tsx` — discovery, the intelligence pipeline and the narrative run on `loadActiveCompany()` at its canonical enterprise value (`canonicalValuationFor(company).headline.mid`, same function behind the demo constant); eyebrow names the source, **Demo data / Your intake** badge (buyers keep their "Buyer view" note beside it). `pages/Intake.tsx` lists Acquisition Intelligence.
+*Verification:* `tsc -b`, eslint clean · Chromium: demo → DEMO DATA, implied price $102,849,415; saved intake "Northwind Analytics" → YOUR INTAKE, $403,509,792, no Helios mentions · 0 errors.

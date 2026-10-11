@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
 import { fmtMoney, ConfidenceChip } from "../lib/ui";
-import { PageHeader, Section, Metric, ScrollRegion, Chip, XO_INPUT, XO_LABEL } from "../components/xo";
-import { VALUATION_CANONICAL } from "../lib/engines";
+import { PageHeader, Section, Metric, ScrollRegion, Chip, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
+import { loadActiveCompany } from "../lib/active-company";
 import { compareOutcomes, runBuyerDiscovery, runAcquisitionIntelligence, type BuyerCandidate } from "@exit/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
+import type { CompanyProfile } from "@exit/engines";
 import { fetchBuyerStats, mergeLiveStatsIntoCandidates, type BuyerLiveStat } from "../lib/buyer-stats";
 import { DEAL_INTEL_FMT } from "../lib/market-stats";
 import { computePlatformSignals } from "../lib/platform-signals";
@@ -48,7 +49,7 @@ const SIGNAL_TEXT: Record<SignalKind, string> = {
 // Compose a short strategic narrative from the candidate's real engine fields
 // — the strongest fit dimension, the buyer's thesis, and the company's sector —
 // so each card reads like a banker's one-line rationale, not a stat.
-function narrative(c: BuyerCandidate): string {
+function narrative(c: BuyerCandidate, company: CompanyProfile): string {
   const dims: [string, number][] = [
     ["sector overlap", c.fitDimensions.sectorFit],
     ["business-model fit", c.fitDimensions.modelFit],
@@ -58,8 +59,8 @@ function narrative(c: BuyerCandidate): string {
     ["M&A track record", c.fitDimensions.historyFit],
   ];
   const top = dims.sort((a, b) => b[1] - a[1])[0][0];
-  const sector = SAMPLE_COMPANY.sector.replace(/_/g, " ");
-  return `${c.buyer.name} likely values ${SAMPLE_COMPANY.name} for its ${sector} position — strongest on ${top}. ${c.buyer.thesis}`;
+  const sector = company.sector.replace(/_/g, " ");
+  return `${c.buyer.name} likely values ${company.name} for its ${sector} position — strongest on ${top}. ${c.buyer.thesis}`;
 }
 
 const Intelligence: React.FC = () => {
@@ -67,6 +68,9 @@ const Intelligence: React.FC = () => {
   // Buyers share this route; founder process data (sample NDAs and offers,
   // the leading counterparty) and the founder's outreach action stay hidden.
   const isBuyer = session?.role === "buyer";
+  // The founder's saved intake when there is one, else the demo company.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const impliedPriceUsd = useMemo(() => canonicalValuationFor(company).headline.mid, [company]);
   const bankerGate = requiredEngagement("/console/banker", session?.role ?? "founder", session?.plan ?? "free");
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<"probability" | "expected_outcome">("probability");
@@ -87,15 +91,15 @@ const Intelligence: React.FC = () => {
   // stats over the snapshot. The merge re-sorts by the same dimension
   // so live-data-bumped rankings settle correctly.
   const report = useMemo(
-    () => runBuyerDiscovery(SAMPLE_COMPANY, { impliedPriceUsd: VALUATION_CANONICAL.headline.mid, limit: 20, sortBy }),
-    [sortBy],
+    () => runBuyerDiscovery(company, { impliedPriceUsd, limit: 20, sortBy }),
+    [company, impliedPriceUsd, sortBy],
   );
 
   // The full acquisition-intelligence pipeline: registry → fit → pattern →
   // intent → outcome → expected result, plus graph-discovered hidden buyers.
   const intel = useMemo(
-    () => runAcquisitionIntelligence(SAMPLE_COMPANY, { impliedPriceUsd: VALUATION_CANONICAL.headline.mid, limit: 5 }),
-    [],
+    () => runAcquisitionIntelligence(company, { impliedPriceUsd, limit: 5 }),
+    [company, impliedPriceUsd],
   );
   const platformSignals = useMemo(() => computePlatformSignals(), []);
   const candidates = useMemo<readonly BuyerCandidate[]>(() => {
@@ -159,9 +163,9 @@ const Intelligence: React.FC = () => {
 
   return (
     <div data-page="acquisition-intelligence" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="Module 01 · Sourcing · Acquisition Intelligence Engine" title="Acquisition Intelligence"
-        badge={isBuyer ? <span className="text-[12px] text-xo-muted">Buyer view — founder process data and outreach are not shown</span> : undefined}
-        description={`Not a buyer directory. A layered engine that answers one question: which buyer is most likely to produce the best outcome — ranked by expected realized value against an implied price of ${fmtMoney(VALUATION_CANONICAL.headline.mid)}.`} />
+      <PageHeader eyebrow={`Module 01 · Sourcing · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Acquisition Intelligence"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} />{isBuyer && <span className="text-[12px] text-xo-muted">Buyer view — founder process data and outreach are not shown</span>}</>}
+        description={`Not a buyer directory. A layered engine that answers one question: which buyer is most likely to produce the best outcome — ranked by expected realized value against an implied price of ${fmtMoney(impliedPriceUsd)}.`} />
 
       <Section title="Buyer discovery pipeline" className="border border-xo-line"
         right={<span className="font-mono text-[11px] text-xo-faint">market index: {MARKET_INDEX_FMT.events} events · {MARKET_INDEX_FMT.buyers} buyers · as of {MARKET_INDEX_FMT.asOf}</span>}>
@@ -318,7 +322,7 @@ const Intelligence: React.FC = () => {
                 </ul>
                 <div className="mt-3 border border-xo-line px-3 py-2">
                   <h4 className="text-[11px] font-semibold text-xo-faint">Strategic narrative · template sentence</h4>
-                  <p className="mt-1 text-[12px] leading-relaxed text-xo-muted">{narrative(c)}</p>
+                  <p className="mt-1 text-[12px] leading-relaxed text-xo-muted">{narrative(c, company)}</p>
                 </div>
                 <div className="mt-2 flex items-center gap-2 text-[11px] text-xo-faint">
                   Confidence <ConfidenceChip tier={conf} sample={c.expectedOutcome.overallConfidence.sample} compact />
