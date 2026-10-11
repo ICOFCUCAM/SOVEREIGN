@@ -16,11 +16,13 @@ import { DEAL_INTEL_FMT, sectorEventCount } from "../lib/market-stats";
 // Every signal is computed from the valuation engine, the discovery pool and
 // the source-referenced acquisition history.
 
-type Impact = "tailwind" | "headwind" | "neutral";
+// "context" = a measured figure with no rule turning it into a verdict.
+type Impact = "tailwind" | "headwind" | "neutral" | "context";
 const IMPACT_STYLE: Record<Impact, { cls: string; glyph: string; label: string }> = {
   tailwind: { cls: "text-xo-verified", glyph: "▲", label: "Tailwind" },
   headwind: { cls: "text-xo-risk", glyph: "▼", label: "Headwind" },
   neutral:  { cls: "text-xo-muted", glyph: "■", label: "Neutral" },
+  context:  { cls: "text-xo-faint", glyph: "·", label: "Context" },
 };
 
 const EFFORT_MONTHS: Record<string, number> = { weeks: 2, months: 6, quarters: 9 };
@@ -39,7 +41,8 @@ const ExitTiming: React.FC = () => {
   const upliftPct = current > 0 ? Math.round((potential / current - 1) * 100) : 0;
   const growthYoy = company.growth.arrGrowthYoyPct;
   const activeBuyers = buyers.candidates.filter((c) => c.buyer.appetite === "active").length;
-  const dealCount = Math.min(40, buyers.candidates.reduce((s, c) => s + c.history.totalDeals, 0));
+  const dealCount = buyers.candidates.reduce((s, c) => s + c.history.totalDeals, 0);
+  const demand = activeBuyers >= 5 ? "High" : activeBuyers >= 2 ? "Medium" : "Low";
 
   // window to optimal exit — time to mature the highest-effort fixes
   const monthsToReady = Math.max(3, ...analysis.weaknesses.map((w) => EFFORT_MONTHS[w.effort] ?? 6));
@@ -55,21 +58,23 @@ const ExitTiming: React.FC = () => {
 
   const revMult = standard.methodologies.find((m) => m.multiple != null);
   const sectorExits = sectorEventCount(company.sector);
+  // Verdicts only where a stated rule exists; everything else is context.
   const signals: { label: string; value: string; trend: string; impact: Impact; note: string }[] = [
-    { label: "Industry multiples", value: revMult ? `${revMult.multiple?.toFixed(1)}× ${revMult.basis.toLowerCase().includes("ebitda") ? "EBITDA" : "revenue"}` : "—", trend: "engine mid-band", impact: "tailwind", note: `From the valuation engine's ${revMult?.name.toLowerCase() ?? "multiples"} methodology on your numbers.` },
-    { label: "Acquisition activity", value: `${dealCount} tracked deals`, trend: "measured", impact: "tailwind", note: "Strategics and sponsors are both active in the sector." },
-    { label: "Sector exits", value: `${sectorExits} on record`, trend: DEAL_INTEL_FMT.medianPremium + " median premium", impact: sectorExits > 0 ? "tailwind" : "neutral", note: "Comparable assets in your sector from the source-referenced history." },
-    { label: "Deal velocity", value: DEAL_INTEL_FMT.medianClose, trend: "announce → close", impact: "neutral", note: "Median time from announcement to close across tracked deals." },
-    { label: "Buyer demand", value: `${activeBuyers} in acquisition mode`, trend: "high", impact: "tailwind", note: "Active acquirers match your profile right now." },
-    { label: "Your trajectory", value: `${Math.round(growthYoy * 100)}% ARR growth`, trend: "compounding", impact: "tailwind", note: "Each quarter lifts the headline into a higher band." },
+    { label: "Industry multiples", value: revMult ? `${revMult.multiple?.toFixed(1)}× ${revMult.basis.toLowerCase().includes("ebitda") ? "EBITDA" : "revenue"}` : "—", trend: "standard valuation", impact: "context", note: `The multiple in the valuation engine's ${revMult?.name.toLowerCase() ?? "multiples"} methodology for this company. No trend over time is measured.` },
+    { label: "Acquisition activity", value: `${dealCount.toLocaleString()} acquisitions`, trend: "registry", impact: "context", note: "Recorded acquisitions by the 12 buyers ranked for this company, all years." },
+    { label: "Sector exits", value: `${sectorExits} on record`, trend: `${DEAL_INTEL_FMT.medianPremium} median premium, all sectors`, impact: sectorExits > 0 ? "tailwind" : "neutral", note: "Deals in the company's sector in the source-referenced history. Rule: tailwind if any are on record." },
+    { label: "Deal velocity", value: DEAL_INTEL_FMT.medianClose, trend: "announce → close", impact: "context", note: "Median time from announcement to close across tracked deals." },
+    { label: "Buyer demand", value: `${activeBuyers} with active appetite`, trend: demand, impact: activeBuyers >= 5 ? "tailwind" : activeBuyers >= 2 ? "neutral" : "headwind", note: "Among the 12 ranked buyers. Appetite is a registry attribute, not recent activity. Rule: high at 5 or more, medium at 2–4." },
+    { label: "Your trajectory", value: `${Math.round(growthYoy * 100)}% ARR growth`, trend: "company input", impact: growthYoy >= 0.3 ? "tailwind" : "neutral", note: "Year-on-year ARR growth entered for the company. Rule: tailwind at 30% or more (as on Exit Readiness)." },
   ];
+  const ruled = signals.filter((s) => s.impact !== "context").length;
   const tailwinds = signals.filter((s) => s.impact === "tailwind").length;
   const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div data-page="exit-timing" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={fromIntake ? `◉ Timing Desk · Your intake: ${company.name}` : `◉ Timing Desk · Demo company: ${company.name}`} title="Exit Timing"
-        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Monitor · {tailwinds}/{signals.length} tailwinds</span></>}>
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">{tailwinds} of {ruled} rule-based signals favourable</span></>}>
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-xo-line pt-2">
           {([["Growth", `${Math.round(growthYoy * 100)}%`], ["Buyers circling", String(activeBuyers)]] as const).map(([k, v]) => (
             <div key={k} className="flex items-baseline gap-1.5"><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[12px] font-semibold tabular-nums">{v}</dd></div>
@@ -82,7 +87,7 @@ const ExitTiming: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Projected uplift" value={<span className="text-xo-verified">+{upliftPct}%</span>} sub="value of waiting" /></div>
         <div className="bg-xo-panel"><Metric label="Sell today" value={fmtMoney(current)} sub="enterprise value today" /></div>
         <div className="bg-xo-panel"><Metric label="Sell at window" value={<span className="text-xo-verified">{fmtMoney(potential)}</span>} sub="after fixes · no growth assumed" /></div>
-        <div className="bg-xo-panel"><Metric label="Market signals" value={`${tailwinds}/${signals.length}`} sub="tailwinds" /></div>
+        <div className="bg-xo-panel"><Metric label="Signals favourable" value={`${tailwinds}/${ruled}`} sub="rule-based signals" /></div>
         <div className="bg-xo-panel"><Metric label="Buyers circling" value={String(activeBuyers)} sub="acquisition mode" /></div>
       </section>
 
@@ -93,10 +98,10 @@ const ExitTiming: React.FC = () => {
         <div className="px-4 py-3">
           <p className="text-[14px] leading-relaxed">Prepare now and target a sale in <span className="font-semibold">months {windowLo}–{windowHi}</span> — as the readiness gap closes and multiples hold.</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-            <TakeCell k="Today">Sell-today <span className="font-mono">{fmtMoney(current)}</span> · growth {Math.round(growthYoy * 100)}% · {tailwinds >= signals.length / 2 ? "conditions favourable" : "mixed conditions"}</TakeCell>
+            <TakeCell k="Today">Sell-today <span className="font-mono">{fmtMoney(current)}</span> · growth {Math.round(growthYoy * 100)}% · {tailwinds >= ruled / 2 ? "most rule-based signals favourable" : "mixed signals"}</TakeCell>
             <TakeCell k="At stake">Waiting to the window projects <span className="font-mono font-semibold text-xo-verified">+{upliftPct}%</span> · {fmtMoney(current)} → {fmtMoney(potential)}.</TakeCell>
             <TakeCell k="If you wait">Selling today leaves the readiness gap unclaimed; waiting too long risks the multiple cycle turning.</TakeCell>
-            <TakeCell k="Signals">{tailwinds} of {signals.length} market signals are tailwinds — conditions favor a near-term process.</TakeCell>
+            <TakeCell k="Signals">{tailwinds} of {ruled} rule-based signals are tailwinds; {signals.length - ruled} more are shown as context.</TakeCell>
             <TakeCell k="ExitOS does it">ExitOS monitors the market continuously and pings you when the window opens.</TakeCell>
             <TakeCell k="Outcome">At the window <span className="font-mono">{fmtMoney(potential)}</span> · +{upliftPct}% value of waiting (after fixes, no growth assumed)</TakeCell>
           </dl>

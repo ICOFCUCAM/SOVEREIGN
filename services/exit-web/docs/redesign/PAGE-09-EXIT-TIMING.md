@@ -33,7 +33,7 @@ Tells the founder *when* to sell: a recommended window in months, the value of w
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Invented forecast** (score +22/+38 per year, value ×1.3 per year, "Q2 {year}"). | Replace the three-year timeline with what the engines produce: now vs after fixes — readiness-engine score current → projected, value now → after fixes — and the window in months with its rule shown. No years or quarters. | ☑ `41a2b03` |
-| G2 | **Invented signal verdicts and mislabels** (fixed "tailwind", "high", 40-cap count, registry premium shown as sector's, static notes). | Verdicts only where a stated rule exists (ARR growth ≥ 30 %; buyer demand from the active-buyer count; sector exits > 0); the rest shown as context. Actual deal count of the top-12 buyers; premium labelled registry-wide; notes say what each figure is. | ☐ |
+| G2 | **Invented signal verdicts and mislabels** (fixed "tailwind", "high", 40-cap count, registry premium shown as sector's, static notes). | Verdicts only where a stated rule exists (ARR growth ≥ 30 %; buyer demand from the active-buyer count; sector exits > 0); the rest shown as context. Actual deal count of the top-12 buyers; premium labelled registry-wide; notes say what each figure is. | ☑ G2-commit |
 | G3 | **False monitoring claims** ("monitors continuously and pings you", "signals monitored", "buyers circling", "right now"). | Plain wording: computed when the page opens; no alerts exist. | ☐ |
 | G4 | Demo company unlabelled; "strategic mid" (D1). | Run on `loadActiveCompany()`; badge; "enterprise value today". | ☑ `913aca0` |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
@@ -61,3 +61,16 @@ Same defect as X9 in three shared components that do not use the shared `Button`
 ### G1 — Invented forecast
 *Closed by:* `pages/ExitTiming.tsx`. The three-year timeline (Exit Score +22 / +38 per year, value × 1.3 per year, window = first year ≥ 85, "Q2 {year}") is removed. In its place, two points the engines do produce: **Now** — readiness-engine score and enterprise value today; **After fixes · ~N months** — the engine's projected score (8 points per open fix, capped at 100) and value after fixes. "Sell at window" reads "after fixes · no growth assumed"; the outcome line drops "Q2 {year}". The curve's foot states the window rule (longest open fix: weeks ≈ 2, months ≈ 6, quarters ≈ 9, at least 3; window from 2 months before to 4 after — "a heuristic, not a forecast").
 *Verification:* `tsc -b`, eslint clean · Chromium: demo "Now 46/100 · $102,849,415 → After fixes ~9 months 70/100 · $161,305,495"; intake "52 → 76, $403,509,792 → $639,566,935"; 0 matches for "Q2 …" or a year · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
+
+### G2 — Invented signal verdicts and mislabels
+*Closed by:* `pages/ExitTiming.tsx`. Verdicts now come only from stated rules, shown on each card; the rest are marked **Context** (no verdict).
+| Signal | Before | After |
+|---|---|---|
+| Industry multiples | always "Tailwind", "engine mid-band" | Context · "standard valuation" · "No trend over time is measured." |
+| Acquisition activity | always "Tailwind"; "N tracked deals" capped at 40; "Strategics and sponsors are both active in the sector." | Context · actual count (demo 22, below the old cap) "acquisitions … by the 12 buyers ranked for this company, all years" |
+| Sector exits | tailwind if > 0; "+X median premium" (registry-wide, read as sector) | same rule, stated; "median premium, all sectors" |
+| Deal velocity | "Neutral" | Context (no rule) |
+| Buyer demand | always "Tailwind", trend "high" fixed; "in acquisition mode … right now" | rule: ≥ 5 active-appetite buyers tailwind (High), 2–4 neutral (Medium), else headwind (Low); "Appetite is a registry attribute, not recent activity." |
+| Your trajectory | always "Tailwind", "compounding", "Each quarter lifts the headline into a higher band." | rule: ARR growth ≥ 30 % tailwind (as on Exit Readiness), "company input" |
+Header, summary metric and banker's take count favourable signals over the three rule-based ones ("3 of 3 rule-based signals favourable"); "conditions favor a near-term process" removed.
+*Verification:* `tsc -b`, eslint clean · Chromium demo/intake: "3 of 3 rule-based signals favourable"; buyer demand demo 5 / intake 11 "High" · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
