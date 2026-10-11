@@ -36,7 +36,7 @@ Tells the founder *when* to sell: a recommended window in months, the value of w
 | G2 | **Invented signal verdicts and mislabels** (fixed "tailwind", "high", 40-cap count, registry premium shown as sector's, static notes). | Verdicts only where a stated rule exists (ARR growth ≥ 30 %; buyer demand from the active-buyer count; sector exits > 0); the rest shown as context. Actual deal count of the top-12 buyers; premium labelled registry-wide; notes say what each figure is. | ☑ `273bdbe` |
 | G3 | **False monitoring claims** ("monitors continuously and pings you", "signals monitored", "buyers circling", "right now"). | Plain wording: computed when the page opens; no alerts exist. | ☑ `e41fb80` |
 | G4 | Demo company unlabelled; "strategic mid" (D1). | Run on `loadActiveCompany()`; badge; "enterprise value today". | ☑ `913aca0` |
-| G5 | Fake live tape. | `RegistryTape`. | ☐ |
+| G5 | Fake live tape. | `RegistryTape`. | ☑ G5-commit |
 | G6 | Design: no `h1`, 5 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `bc00810` |
 
 ### X11 — Shared mid-green buttons (found here) — documented before the fix
@@ -84,3 +84,7 @@ Header, summary metric and banker's take count favourable signals over the three
 | "Buyers circling — acquisition mode" (header, metric) | "Active-appetite buyers — of 12 ranked · registry attribute" |
 | File comment "The engine monitors the market signals…" | describes the page-open computation; no background monitoring |
 *Verification:* Chromium demo/intake: the only "monitor…" match is the new "Nothing is monitored in the background"; 0 matches for pings / circling / right now / acquisition mode · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
+
+### G5 — Fake live tape
+*Closed by:* `pages/ExitTiming.tsx`: pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free/Preparation (Upgrade page) and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
