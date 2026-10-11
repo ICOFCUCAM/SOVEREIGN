@@ -98,7 +98,7 @@ const Commander: React.FC = () => {
   const notes = [
     { t: "Pool", text: `${ACTIVE_BUYERS} of ${DEAL_BUYERS.length} matched mandates are actively deploying against your profile.` },
     ...(top ? [{ t: "Lead", text: `${top.buyer.name} ranks first — ${Math.round(top.probability * 100)}% probability, est. check ${fmtMoney(top.estimatedCheck.low)}–${fmtMoney(top.estimatedCheck.high)}.` }] : []),
-    { t: "Value", text: `Readiness fixes add ${fmtMoney(VALUE_LEFT_USD)} to the strategic mid.` },
+    { t: "Value", text: `Readiness fixes add ${fmtMoney(VALUE_LEFT_USD)} to the enterprise value.` },
     { t: "Market", text: `Median disclosed premium across tracked deals: ${DEAL_INTEL_FMT.medianPremium}; median announce-to-close ${DEAL_INTEL_FMT.medianClose}.` },
   ];
   const layers = [
@@ -111,7 +111,7 @@ const Commander: React.FC = () => {
   return (
     <div data-page="chief-investment-banker" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Chief Investment Banker · Transaction desk" title={company.name}
-        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">demand {m.demandLabel} · horizon {m.timeToExitMonths}mo · conf {m.confidencePct}%</span></>}
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">demand {m.demandLabel} · horizon {m.timeToExitMonths}mo · confidence index {m.confidencePct}%</span></>}
         actions={<>
           <a href="/report/board" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board Memorandum (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
           <a href="/report" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
@@ -120,10 +120,10 @@ const Commander: React.FC = () => {
       {/* ── position (Founder Liquidity Board) ─────────────────────── */}
       <Section title="Founder Liquidity Board" eyebrow="Position" className="border border-xo-line">
         <div className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-5">
-          <div className="bg-xo-panel"><Metric label="Enterprise Value" emphasis value={fmtMoney(m.companyValue)} sub="strategic mid · engine-priced" /></div>
+          <div className="bg-xo-panel"><Metric label="Enterprise Value" emphasis value={fmtMoney(m.companyValue)} sub="institutional framework mid" /></div>
           <div className="bg-xo-panel"><Metric label="Expected Value" emphasis value={<span className="text-xo-verified">{fmtMoney(m.potential)}</span>} sub="after the priced readiness fixes" /></div>
           <div className="bg-xo-panel"><Metric label="Active Buyers" value={String(m.activeBuyers)} sub={`demand ${m.demandLabel.toLowerCase()} · mandates matching`} /></div>
-          <div className="bg-xo-panel"><Metric label="Close Probability" value={`${m.exitProbability}%`} sub="likelihood of a completed transaction" /></div>
+          <div className="bg-xo-panel"><Metric label="Close-probability index" value={`${m.exitProbability}%`} sub="heuristic — breakdown below" /></div>
           <div className="bg-xo-panel"><Metric label="Time to Liquidity" value={<>{m.timeToExitMonths}<span className="text-[13px] text-xo-faint"> mo</span></>} sub="once a buyer is engaged" /></div>
         </div>
       </Section>
@@ -135,13 +135,14 @@ const Commander: React.FC = () => {
             <p className="max-w-[60ch] text-[16px] font-semibold leading-snug">{m.recommendedAction}</p>
             <dl className="mt-3 flex flex-wrap gap-x-8 gap-y-2">
               <div><dt className="text-[11px] text-xo-faint">Expected value increase</dt><dd className="font-mono text-[16px] font-semibold tabular-nums text-xo-verified">+{fmtMoney(m.expectedIncreaseUsd)}</dd></div>
-              <div><dt className="text-[11px] text-xo-faint">Confidence</dt><dd className="font-mono text-[16px] font-semibold tabular-nums">{m.confidencePct}%</dd></div>
+              <div><dt className="text-[11px] text-xo-faint">Confidence index</dt><dd className="font-mono text-[16px] font-semibold tabular-nums">{m.confidencePct}%</dd></div>
             </dl>
+            <p className="mt-1 max-w-[60ch] text-[11px] text-xo-faint">Confidence index = 64 + 3 × active buyers + 12 × negotiation leverage (high = 1, medium = 0.6, low = 0.3; from sample offers), capped at 92 — a heuristic, not the valuation confidence.</p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Button onClick={() => navigate("/console/autopilot")}>Execute →</Button>
               <ActionLink to="/console/autopilot" className="text-[13px]">See the plan</ActionLink>
             </div>
-            <p className="mt-3 text-[12px] text-xo-faint">One instruction dispatches the agents — valuation, outreach and diligence start working.</p>
+            <p className="mt-3 text-[12px] text-xo-faint">Execute opens Autonomous Exit, where the agents' work is laid out step by step and each step waits for your approval. Nothing is sent from this page.</p>
           </div>
         </Section>
         <Section title="Briefing register" eyebrow="What the desk is watching" className="lg:col-span-5">
@@ -168,7 +169,7 @@ const Commander: React.FC = () => {
             <li className="flex justify-between border-t border-xo-line pt-2 text-[12px]"><span className="text-xo-muted">Total (rounded)</span><span className="font-mono tabular-nums">{m.exitProbability}</span></li>
           </ul>
         </Section>
-        <Section title="Deal temperature" eyebrow={tempLabel} className="lg:col-span-3">
+        <Section title="Deal temperature index" eyebrow={tempLabel} className="lg:col-span-3" foot="70 + 4 × active buyers, capped at 98 — a heuristic.">
           <div className="px-4 py-4">
             <div className="font-mono text-[28px] font-semibold tabular-nums">{temp}<span className="text-[13px] text-xo-faint"> /100</span></div>
             <div className="mt-2"><Bar value={temp} width="w-full" tone="brass" /></div>
@@ -185,14 +186,14 @@ const Commander: React.FC = () => {
         </Section>
       </div>
 
-      <Section title="Expected automation" eyebrow="What runs the moment you press Execute" className="border border-xo-line">
-        <ul className="grid gap-2 px-4 py-3 sm:grid-cols-2 lg:grid-cols-3">
-          {AUTOMATION.map((a) => <li key={a} className="flex items-center gap-2 border border-xo-line px-3 py-2 text-[13px]"><span aria-hidden className="text-xo-verified">✓</span>{a}</li>)}
-        </ul>
+      <Section title="What Autonomous Exit prepares" eyebrow="Each step waits for your approval" className="border border-xo-line">
+        <ol className="grid gap-2 px-4 py-3 sm:grid-cols-2 lg:grid-cols-3">
+          {AUTOMATION.map((a, i) => <li key={a} className="flex items-center gap-2 border border-xo-line px-3 py-2 text-[13px]"><span className="font-mono text-[11px] text-xo-faint">{i + 1}</span>{a}</li>)}
+        </ol>
       </Section>
 
       {/* ── who is circling ────────────────────────────────────────── */}
-      <Section title="Buyer movement" eyebrow="Top matched mandates" className="border border-xo-line">
+      <Section title="Buyer appetite" eyebrow="Your top-ranked mandates" className="border border-xo-line" foot="Appetite is a registry profile attribute of each buyer, not recent activity.">
         <ul className="grid gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-4">
           {moves.map((mv) => (
             <li key={mv.name} className="bg-xo-panel px-4 py-3">
@@ -204,7 +205,7 @@ const Commander: React.FC = () => {
         </ul>
       </Section>
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-2">
-        <Section title="Acquisition radar" eyebrow={`${radarTotal} qualified buyers`}><div className="px-4 py-3"><AcquirerMixRadar data={radar} /></div></Section>
+        <Section title="Acquirer mix" eyebrow={`Top ${radarTotal} ranked buyers by type (list capped at 12)`}><div className="px-4 py-3"><AcquirerMixRadar data={radar} /></div></Section>
         <Section title="Banker notes" eyebrow="From the deal context" foot="Computed from the engines for this company and the source-referenced deal history.">
           <ul className="space-y-3 px-4 py-3">
             {notes.map((n) => <li key={n.t} className="flex gap-3 text-[13px]"><span className="w-12 shrink-0 font-mono text-[11px] text-xo-faint">{n.t}</span><span className="leading-snug">{n.text}</span></li>)}

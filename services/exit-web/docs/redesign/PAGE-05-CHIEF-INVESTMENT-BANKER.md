@@ -40,7 +40,7 @@ The paid founder's command surface: value now and after fixes, odds, who is circ
 | G1 | Always the demo company, unlabelled. | Run on `loadActiveCompany()` via `dealContextFor` / `commanderMetrics(ctx, analysis)` (as Page 02); data badge. | ☑ `545da32` |
 | G2 | **Invented probability breakdown.** | Show the real index decomposition: 0.35 × Exit Score, 0.40 × buyer demand, 0.25 × negotiation leverage (sample offers), each with its points. | ☑ `70730b9` |
 | G3 | Fake live (tape, pinging dots, "Live", "live telemetry", "live market feed", "live engine state"). | Snapshot-dated labels, `RegistryTape`, no live dots. | ☑ `a0b5fec` |
-| G4 | Overclaims and mislabels: "What runs the moment you press Execute" ✓ list; "Buyer movement" from a static attribute; "qualified buyers" = top-12 cap; "Close probability" / "Confidence" / "Deal temperature" heuristics unlabelled; "Premium probability". | Plain wording: "What Autonomous Exit will prepare (each step needs your approval)"; "Buyer appetite (registry)"; "top 12 ranked"; indices named with formulas; "Top premium payer". | ☐ |
+| G4 | Overclaims and mislabels: "What runs the moment you press Execute" ✓ list; "Buyer movement" from a static attribute; "qualified buyers" = top-12 cap; "Close probability" / "Confidence" / "Deal temperature" heuristics unlabelled; "Premium probability". | Plain wording: "What Autonomous Exit will prepare (each step needs your approval)"; "Buyer appetite (registry)"; "top 12 ranked"; indices named with formulas; "Top premium payer". | ☑ G4-commit |
 | G5 | Plan gates hidden on layer links (Market map → Preparation or Pro). | `requiredEngagement` labels. | ☐ |
 | G6 | Design: no `h1`, 15 contrast failures, overflow at 390, old shared components. | Rebuild on `xo` as one page component; retire `CommandTiles`, `ExitCommander`, `CommanderBlocks` (no other users). | ☑ `03200b1` |
 
@@ -68,3 +68,19 @@ The six invented factors (market conditions 26, buyer demand 21, technology moat
 *Closed by:* `pages/Commander.tsx`: "Live" removed from the Liquidity Board; `MarketTape` → `RegistryTape` (dated); "Live telemetry" → "Registry extremes · Snapshot · as of 2026-10-11"; reactor feet name the snapshot date ("Rotation is decorative"); banker notes "live engine state" → "the engines for this company". The pinging dot went with the G6 rebuild.
 
 *Verification:* Chromium (Active Mandate): 0 "live" words, 0 pinging elements on the page · eslint clean · 0 errors.
+
+### G4 — Overclaims and mislabels
+*Closed by:* `pages/Commander.tsx` (text only).
+| Before | After |
+|---|---|
+| "Expected automation — What runs the moment you press Execute" with ✓ marks | "What Autonomous Exit prepares — Each step waits for your approval", numbered |
+| "One instruction dispatches the agents…" | "Execute opens Autonomous Exit, where … each step waits for your approval. Nothing is sent from this page." |
+| "Buyer movement — Actively deploying / Monitoring" | "Buyer appetite" + "Appetite is a registry profile attribute of each buyer, not recent activity." |
+| "Acquisition radar — 12 qualified buyers" | "Acquirer mix — Top 12 ranked buyers by type (list capped at 12)" |
+| "Close Probability — likelihood of a completed transaction" | "Close-probability index — heuristic, breakdown below" |
+| "Confidence 92%", header "conf 92%" | "Confidence index" + formula, "not the valuation confidence" |
+| "Deal temperature" | "Deal temperature index" + formula (70 + 4 × active buyers, capped at 98) |
+| EV "strategic mid · engine-priced"; note "…to the strategic mid" | "institutional framework mid"; "…to the enterprise value" (D1) |
+("Premium probability" was not on this page — its briefing never received that row.)
+
+*Verification:* Chromium: new texts present · axe 0, no overflow (1440/390) · 0 errors.
