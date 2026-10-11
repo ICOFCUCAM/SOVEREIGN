@@ -31,7 +31,7 @@ Shows the founder the platform's compounding data assets ("five moats"): the dea
 ## Gap register — Page 06
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Invented buyer attributes** (retention %, earnout tendency) and hard-coded buyer picks. | Show the active company's top two ranked buyers with measured fields only: expected days to cash, average disclosed premium (or the framework prior, labelled), and the implied ARR multiple labelled as a what-if. Retention and earnout tendency removed — no data. | ☑ G1-commit |
+| G1 | **Invented buyer attributes** (retention %, earnout tendency) and hard-coded buyer picks. | Show the active company's top two ranked buyers with measured fields only: expected days to cash, average disclosed premium (or the framework prior, labelled), and the implied ARR multiple labelled as a what-if. Retention and earnout tendency removed — no data. | ☑ `a48e5f6` |
 | G2 | **Overclaims** about agents and learning; "12+ acquirers measured" (top-12 cap); "live engine runs". | Factual wording: what the engines produced; registry sizes named correctly; learning claims limited to what exists. | ☐ |
 | G3 | Fake live tape. | `RegistryTape` with snapshot date. | ☐ |
 | G4 | Demo company unlabelled. | Run on `loadActiveCompany()`; badge. | ☐ |
