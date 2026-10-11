@@ -41,7 +41,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 | G5 | **Buyer role sees founder process data** and the founder CTA. | For buyers: hide the sample-process signals and the banker's take; state the page shows the buyer landscape for the demo/listed company. Route unchanged. | ☐ |
 | G6 | Duplicate NAV name "Acquisition Radar". | This page becomes **"Acquisition Intelligence"** in NAV (both roles) and in its `h1`. | ☐ |
 | G7 | Demo company unlabelled. | Run on `loadActiveCompany()` at its canonical value; badge. | ☐ |
-| G8 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☑ G8-commit |
+| G8 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `7e81471` |
 
 ---
 
