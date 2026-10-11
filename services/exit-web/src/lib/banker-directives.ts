@@ -198,7 +198,7 @@ export function applyToBuyers(candidates: readonly BuyerCandidate[], prefs: Mand
   const rows: AdjustedBuyer[] = candidates.map((c) => {
     const type = c.buyer.buyerType;
     let mult = 1; const reasons: string[] = [];
-    let excluded = prefs.excludedBuyerTypes.includes(type);
+    const excluded = prefs.excludedBuyerTypes.includes(type);
     if (excluded) reasons.push(`${TYPE_LABEL[type] ?? type} excluded by directive`);
 
     const tw = prefs.buyerTypeWeights[type];

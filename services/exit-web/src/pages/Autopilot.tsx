@@ -109,7 +109,7 @@ const Autopilot: React.FC = () => {
   const shortlist = useMemo(() => proposed.filter((b) => !excluded.has(b.buyer.name)), [proposed, excluded]);
   const toggle = (name: string): void => setExcluded((prev) => {
     const next = new Set(prev);
-    next.has(name) ? next.delete(name) : next.add(name);
+    if (next.has(name)) next.delete(name); else next.add(name);
     return next;
   });
 

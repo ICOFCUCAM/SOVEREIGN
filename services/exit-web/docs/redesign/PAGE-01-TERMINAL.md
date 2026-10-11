@@ -265,3 +265,8 @@ Requested by the owner after the Page 01 review ("START FIXING"). Same rule: doc
 *Fix (honesty, not new auth):* a visible demo-access notice on the sign-in page; provider buttons labelled "(demo)"; the reset confirmation states that no e-mail was sent and that any password works in the demo. All controls and flows are kept. Real authentication (e.g. Supabase e-mail/password or OAuth, with server-checked roles — this also completes X1) is a separate project and is **not** done here.
 
 *Verification:* `tsc -b` pass · eslint clean · Chromium 1280/390: notice visible, reset flow shows the no-e-mail message as a `status`, axe (WCAG A/AA) on the sign-in page 0 violations, 0 page errors. Sign-in itself is unchanged, and the screenshot scripts still sign in with it. *Status:* ☑ `412b48b` (honesty fix; real auth still outstanding)
+
+### X3 — Pre-existing lint errors
+*Documented before the fix.* `eslint src`: 3 errors — two `no-unused-expressions` (a ternary used as a statement to add/remove from a Set in `PublishComposer.tsx:23` and `Autopilot.tsx:112`) and one `prefer-const` (`banker-directives.ts:201`). *Fix:* rewrite the ternaries as `if/else` and make the binding `const`; no behaviour change. The 2 `exhaustive-deps` warnings (`DealActivity.tsx:32` and one more `useCallback`, both listed by `eslint src`) change memoisation if "fixed" mechanically, so they are left as warnings for the owning pages' reviews.
+
+*Verification:* `eslint src` **0 errors**, 2 warnings (left on purpose, above) · `tsc -b` pass · `vitest run` 29 files, **180/180 pass** (banker-directives tests included). *Status:* ☑ X3-commit
