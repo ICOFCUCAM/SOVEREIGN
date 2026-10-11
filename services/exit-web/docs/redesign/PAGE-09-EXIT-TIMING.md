@@ -45,3 +45,7 @@ Same defect as X9 in three shared components that do not use the shared `Button`
 ---
 
 ## Closure log
+
+### X11 — Shared mid-green buttons
+*Closed by:* `components/BankerTake.tsx` (CTA link and button), `components/Shell.tsx` ("Upgrade to Pro"), `lib/report-ui.tsx` ("Download PDF"): `bg-deal-600 hover:bg-deal-500` → `bg-deal-700 hover:bg-deal-600` (white text 5.5:1). No behaviour change.
+*Verification:* `tsc -b` pass · Chromium computed backgrounds: BankerTake CTA "See readiness fixes →" rgb(4,120,87) = deal-700; report "Download PDF →" rgb(4,120,87). (The Shell link renders only in a state not reached in this run; same class change — NOT VERIFIED in the browser.)

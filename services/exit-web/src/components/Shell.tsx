@@ -168,7 +168,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div className="border-b border-loi-400/30 bg-loi-500/10">
               <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
                 <span className="text-[13px] text-loi-100">🔔 <span className="font-semibold">Buyers are reviewing your listing.</span> Upgrade to Pro to open conversations, run outreach and continue with the agents.</span>
-                <Link to="/console/upgrade" className="ml-auto rounded-md bg-deal-600 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-deal-500">Upgrade to Pro →</Link>
+                <Link to="/console/upgrade" className="ml-auto rounded-md bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-deal-600">Upgrade to Pro →</Link>
                 <button onClick={() => setNoticeDismissed(true)} aria-label="Dismiss" className="rounded p-1 text-white/45 hover:text-white">✕</button>
               </div>
             </div>

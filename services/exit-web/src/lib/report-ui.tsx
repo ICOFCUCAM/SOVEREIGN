@@ -24,7 +24,7 @@ export const ReportFrame: React.FC<{ docType: string; company: string; framework
       <div className="no-print mx-auto mb-5 flex max-w-[840px] items-center justify-between px-4">
         <button onClick={() => nav(-1)} className="rounded-md border border-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/70 hover:bg-white/5">← Back</button>
         <div className="text-[12px] text-white/45">{docType} · {company}</div>
-        <button onClick={() => window.print()} className="rounded-md bg-deal-600 px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-500">Download PDF →</button>
+        <button onClick={() => window.print()} className="rounded-md bg-deal-700 px-4 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-600">Download PDF →</button>
       </div>
       <div className="rpt mx-auto text-[#0b1220]">
         <div className="rpt-fixed-header no-screen"><span className="flex items-center gap-1.5"><ExchangeMark size={11} tile={false} className="text-[#0e7a4f]" /> {company}</span><span>{docType}</span></div>
