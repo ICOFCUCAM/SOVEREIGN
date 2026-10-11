@@ -36,7 +36,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 |---|---|---|---|
 | G1 | **Fixture NDAs/offers presented as proprietary recorded behaviour.** | Title and foot say "sample process records (demo data)"; drop "no external database has this" and "live tension". | ☑ `f66e3f3` |
 | G2 | **Invented "Outreach success +N%" lift** and the "live" radar. | Remove the lift figures; section becomes "Registry signals" with the snapshot date; no pulsing dot. | ☑ `5be318e` |
-| G3 | Mislabels: fit probability as "likelihood … signs"; appetite as "deploying capital / recent-12mo activity"; "live" EDGAR/Wikidata; demo-tenant stats as "Live data"; narrative unlabelled. | Accurate labels: fit probability (engine fit score); appetite (registry attribute); "fetched from EDGAR/Wikidata, snapshot as of …"; "Recorded stats · demo tenant"; "template sentence". | ☐ |
+| G3 | Mislabels: fit probability as "likelihood … signs"; appetite as "deploying capital / recent-12mo activity"; "live" EDGAR/Wikidata; demo-tenant stats as "Live data"; narrative unlabelled. | Accurate labels: fit probability (engine fit score); appetite (registry attribute); "fetched from EDGAR/Wikidata, snapshot as of …"; "Recorded stats · demo tenant"; "template sentence". | ☑ G3-commit |
 | G4 | Banker's-take urgency and overclaim; hidden plan gate on the banker CTA. | Plain wording; `requiredEngagement` note. | ☐ |
 | G5 | **Buyer role sees founder process data** and the founder CTA. | For buyers: hide the sample-process signals and the banker's take; state the page shows the buyer landscape for the demo/listed company. Route unchanged. | ☐ |
 | G6 | Duplicate NAV name "Acquisition Radar". | This page becomes **"Acquisition Intelligence"** in NAV (both roles) and in its `h1`. | ☐ |
@@ -58,3 +58,15 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 ### G2 — Invented "Outreach success +N%" and the "live" radar
 *Closed by:* `pages/Intelligence.tsx`. The per-signal "lift" (min(6, deals × 2), min(4, active buyers), a fixed 2) and their sum shown as "Outreach success +N%" are removed — no outreach outcome is measured anywhere. "Acquisition Radar · live" (with the pulsing dot, already gone in G8) → **"Registry signals"**, eyebrow "Snapshot · as of {market-index date}". The signal texts are unchanged.
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for "Outreach success", "· live" or trailing "+N%"; 0 pinging elements. (Two remaining "live" words belong to G3/G4.)
+
+### G3 — Mislabels
+*Closed by:* `pages/Intelligence.tsx` (labels only).
+| Before | After |
+|---|---|
+| "N of M matched mandates are actively deploying capital"; KPI "Active acquirers — recent-12mo activity" | "… ranked buyers have an active appetite in the registry (a profile attribute, not recent activity)"; "Active-appetite buyers — registry attribute" |
+| "Ranked by acquisition probability — likelihood the buyer engages and signs"; sort "Probability"; "% match"; column "Match"; "Average match — probability × fit"; "qualifying ≥ 15% probability" | "Ranked by fit probability — the engine's weighted fit score, not a measured chance of a bid"; "Fit probability"; "fit probability"; "Fit"; "Average fit probability — engine fit score, 0–1"; "top by fit probability" |
+| "… the founder's actual take-home expectation" | "… the model's expected take-home" |
+| "deals from live EDGAR/Wikidata fetch" | "deals fetched from EDGAR/Wikidata (registry snapshot)" |
+| "Live data — … tenant-measured …" (demo tenant) | "Recorded stats · demo tenant — … recorded for the demo tenant (demo data)" |
+| "Strategic narrative" | "Strategic narrative · template sentence" |
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for deploying capital / recent-12mo / engages and signs / live EDGAR/Wikidata fetch / Live data / "% match" · free 1440/390: 0 errors, axe 0, no overflow. (The "Recorded stats" strip appears only when the stats function returns rows — not exercised here; NOT VERIFIED in the browser.)

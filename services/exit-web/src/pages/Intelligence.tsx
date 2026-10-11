@@ -131,7 +131,7 @@ const Intelligence: React.FC = () => {
     }));
   const radar: { tag: string; text: string }[] = [
     ...trackRecord,
-    { tag: "Active mandates", text: `${activeCount} of ${candidates.length} matched mandates are actively deploying capital.` },
+    { tag: "Active mandates", text: `${activeCount} of ${candidates.length} ranked buyers have an active appetite in the registry (a profile attribute, not recent activity).` },
     { tag: "Deal medians", text: `Across tracked deals: ${DEAL_INTEL_FMT.medianPremium} median disclosed premium, ${DEAL_INTEL_FMT.medianClose} announce-to-close.` },
   ];
   const provenance = (() => {
@@ -262,7 +262,7 @@ const Intelligence: React.FC = () => {
             <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
               <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(candidates[0].expectedOutcome.expectedClosingUsd)}</span> expected take-home from the best-fit buyer.</TakeCell>
               <TakeCell k="If you wait">Appetite windows close — active acquirers redeploy capital into the next target while you wait.</TakeCell>
-              <TakeCell k="Pursue">{candidates[0].buyer.name} — {(candidates[0].probability * 100).toFixed(0)}% match, {candidates[0].buyer.appetite} appetite.</TakeCell>
+              <TakeCell k="Pursue">{candidates[0].buyer.name} — {(candidates[0].probability * 100).toFixed(0)}% fit probability, {candidates[0].buyer.appetite} appetite.</TakeCell>
               <TakeCell k="ExitOS does it">ExitOS scores every buyer on live EDGAR/Wikidata signals and drafts the personalized intro.</TakeCell>
             </dl>
             <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Hand it to the banker →</Link>
@@ -273,17 +273,17 @@ const Intelligence: React.FC = () => {
       {provenance.verified + provenance.unverified + provenance.estimated > 0 && (
         <section aria-label="Data provenance" className="flex flex-wrap items-center gap-x-4 gap-y-1 border border-xo-line bg-xo-panel px-4 py-3 text-[12px] text-xo-muted">
           <span className="text-[11px] font-semibold text-xo-faint">Data provenance</span>
-          <span><span className="border border-xo-verified/50 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-xo-verified">Verified</span> <span className="font-mono text-xo-text">{provenance.verified}</span> deals from live EDGAR/Wikidata fetch</span>
+          <span><span className="border border-xo-verified/50 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-xo-verified">Verified</span> <span className="font-mono text-xo-text">{provenance.verified}</span> deals fetched from EDGAR/Wikidata (registry snapshot)</span>
           <span><span className="border border-xo-line px-1.5 py-0.5 font-mono text-[11px] font-semibold">Unverified</span> <span className="font-mono text-xo-text">{provenance.unverified}</span> curated, source-cited, not yet refreshed</span>
           {provenance.estimated > 0 && <span><span className="border border-xo-caution/50 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-xo-caution">Est.</span> <span className="font-mono text-xo-text">{provenance.estimated}</span> prices regex-extracted from filings</span>}
         </section>
       )}
 
       <section aria-label="Candidate summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Candidates ranked" value={String(candidates.length)} sub="qualifying ≥ 15% probability" /></div>
-        <div className="bg-xo-panel"><Metric label="Active acquirers" value={String(activeCount)} sub="recent-12mo activity" /></div>
+        <div className="bg-xo-panel"><Metric label="Candidates ranked" value={String(candidates.length)} sub="top by fit probability" /></div>
+        <div className="bg-xo-panel"><Metric label="Active-appetite buyers" value={String(activeCount)} sub="registry attribute" /></div>
         <div className="bg-xo-panel"><Metric label="Tracked deals" value={String(report.candidates.reduce((s, c) => s + c.history.totalDeals, 0))} sub="across registry · sourced" /></div>
-        <div className="bg-xo-panel"><Metric label="Average match" value={avgProb.toFixed(2)} sub="probability × fit" /></div>
+        <div className="bg-xo-panel"><Metric label="Average fit probability" value={avgProb.toFixed(2)} sub="engine fit score, 0–1" /></div>
       </section>
 
       <Section title="Buyer match explanations" eyebrow="Why these acquirers fit — ranked reasoning, not just a number." className="border border-xo-line">
@@ -297,7 +297,7 @@ const Intelligence: React.FC = () => {
                   <h3 className="text-[14px] font-semibold">{c.buyer.name}</h3>
                   <div className="text-right">
                     <div className="font-mono text-[18px] font-semibold tabular-nums text-xo-verified">{(c.probability * 100).toFixed(0)}%</div>
-                    <div className="text-[11px] text-xo-faint">match</div>
+                    <div className="text-[11px] text-xo-faint">fit probability</div>
                   </div>
                 </div>
                 <div className="text-[11px] capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</div>
@@ -308,7 +308,7 @@ const Intelligence: React.FC = () => {
                   ))}
                 </ul>
                 <div className="mt-3 border border-xo-line px-3 py-2">
-                  <h4 className="text-[11px] font-semibold text-xo-faint">Strategic narrative</h4>
+                  <h4 className="text-[11px] font-semibold text-xo-faint">Strategic narrative · template sentence</h4>
                   <p className="mt-1 text-[12px] leading-relaxed text-xo-muted">{narrative(c)}</p>
                 </div>
                 <div className="mt-2 flex items-center gap-2 text-[11px] text-xo-faint">
@@ -350,17 +350,17 @@ const Intelligence: React.FC = () => {
 
       {liveCoverage > 0 && (
         <p className="border border-xo-verified/40 bg-xo-panel px-4 py-3 text-[12px] text-xo-muted">
-          <span className="mr-2 border border-xo-verified/50 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-xo-verified">Live data</span>
-          <span className="text-xo-text">{liveCoverage}</span> buyer{liveCoverage === 1 ? "" : "s"} sharpened with tenant-measured close rate, time-to-cash, and retrade — overrides the static snapshot per buyer.
+          <span className="mr-2 border border-xo-caution/50 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-xo-caution">Recorded stats · demo tenant</span>
+          <span className="text-xo-text">{liveCoverage}</span> buyer{liveCoverage === 1 ? "" : "s"} adjusted with close rate, time-to-cash and retrade recorded for the demo tenant (demo data) — these override the registry snapshot per buyer.
         </p>
       )}
 
       <Section title="Top candidates" className="border border-xo-line"
         eyebrow={sortBy === "expected_outcome"
-          ? "Ranked by probability-weighted closing value — the founder's actual take-home expectation."
-          : "Ranked by acquisition probability — likelihood the buyer engages and signs."}
+          ? "Ranked by probability-weighted closing value — the model's expected take-home."
+          : "Ranked by fit probability — the engine's weighted fit score, not a measured chance of a bid."}
         right={<div role="group" aria-label="Sort by" className="flex gap-1.5">
-          <Chip pressed={sortBy === "probability"} onToggle={() => setSortBy("probability")}>Probability</Chip>
+          <Chip pressed={sortBy === "probability"} onToggle={() => setSortBy("probability")}>Fit probability</Chip>
           <Chip pressed={sortBy === "expected_outcome"} onToggle={() => setSortBy("expected_outcome")}>Expected outcome</Chip>
         </div>}>
         <div className="border-b border-xo-line px-4 py-3">
@@ -379,7 +379,7 @@ const Intelligence: React.FC = () => {
                 <th scope="col" className="px-4 py-2 font-medium">Signals</th>
                 <th scope="col" className="px-4 py-2 text-right font-medium">Outcomes</th>
                 <th scope="col" className="px-4 py-2 text-right font-medium">Expected close</th>
-                <th scope="col" className="px-4 py-2 text-right font-medium">Match</th>
+                <th scope="col" className="px-4 py-2 text-right font-medium">Fit</th>
               </tr>
             </thead>
             <tbody>
