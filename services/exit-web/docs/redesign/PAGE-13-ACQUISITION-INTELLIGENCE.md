@@ -34,7 +34,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 ## Gap register — Page 13
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Fixture NDAs/offers presented as proprietary recorded behaviour.** | Title and foot say "sample process records (demo data)"; drop "no external database has this" and "live tension". | ☑ G1-commit |
+| G1 | **Fixture NDAs/offers presented as proprietary recorded behaviour.** | Title and foot say "sample process records (demo data)"; drop "no external database has this" and "live tension". | ☑ `f66e3f3` |
 | G2 | **Invented "Outreach success +N%" lift** and the "live" radar. | Remove the lift figures; section becomes "Registry signals" with the snapshot date; no pulsing dot. | ☐ |
 | G3 | Mislabels: fit probability as "likelihood … signs"; appetite as "deploying capital / recent-12mo activity"; "live" EDGAR/Wikidata; demo-tenant stats as "Live data"; narrative unlabelled. | Accurate labels: fit probability (engine fit score); appetite (registry attribute); "fetched from EDGAR/Wikidata, snapshot as of …"; "Recorded stats · demo tenant"; "template sentence". | ☐ |
 | G4 | Banker's-take urgency and overclaim; hidden plan gate on the banker CTA. | Plain wording; `requiredEngagement` note. | ☐ |
