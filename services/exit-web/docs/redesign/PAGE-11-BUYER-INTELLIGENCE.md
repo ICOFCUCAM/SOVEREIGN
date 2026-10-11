@@ -34,7 +34,7 @@ Preparation / Active Mandate: `h1` none · axe color-contrast ×40 (1440) · no 
 ## Gap register — Page 11
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Invented Buyer DNA** (founder-friendly %, earnout, negotiation, integration, legal aggression, decision makers by type). | Remove; keep the typical premium with its source (disclosed average or framework prior, labelled). Say why the rest is absent. | ☑ G1-commit |
+| G1 | **Invented Buyer DNA** (founder-friendly %, earnout, negotiation, integration, legal aggression, decision makers by type). | Remove; keep the typical premium with its source (disclosed average or framework prior, labelled). Say why the rest is absent. | ☑ `5f62647` |
 | G2 | **Unlabelled heuristics** ("likelihood", "expected range", "recommended open", risk, synergy) and the wrong ranking label. | Name each as a model or rule with its formula; "ranked by expected outcome"; fit probability "not a measured chance of a bid". | ☐ |
 | G3 | Overclaims and invented urgency. | Plain wording. | ☐ |
 | G4 | Hidden plan gate on "Draft outreach". | `requiredEngagement` label for Preparation. | ☐ |
