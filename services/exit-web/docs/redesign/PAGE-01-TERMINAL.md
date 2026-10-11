@@ -258,3 +258,10 @@ Requested by the owner after the Page 01 review ("START FIXING"). Same rule: doc
 *Consequence the owner should know:* in production nobody reaches the Admin console via this shortcut any more. Production admin access needs server-side roles (e.g. a Supabase `app_metadata.role` claim checked by the backend). The address remains in git history; rewriting history is a separate decision.
 
 *Verification:* `tsc -b` pass · eslint clean · `auth.test.ts` 2/2 · production `vite build` bundle contains neither the address nor the operator path · Chromium (dev server with `VITE_EXITOS_DEV_OPERATOR_EMAIL=ops@example.com`): the old address → founder console; `ops@example.com` → operator console; any other address → founder console. *Status:* ☑ `e6900b6`
+
+### X2 — Demo sign-in presented as real authentication
+*Documented before the fix.* `auth.tsx` accepts any non-empty e-mail/password and builds the session in the browser. The sign-in page does not say so, and it implies two things that do not happen: "Continue with Google / Apple / Microsoft" never contacts those providers (it signs in as `founder@google.com` etc.), and "Send reset link" reports "a password-reset link is on its way" although nothing is sent.
+
+*Fix (honesty, not new auth):* a visible demo-access notice on the sign-in page; provider buttons labelled "(demo)"; the reset confirmation states that no e-mail was sent and that any password works in the demo. All controls and flows are kept. Real authentication (e.g. Supabase e-mail/password or OAuth, with server-checked roles — this also completes X1) is a separate project and is **not** done here.
+
+*Verification:* `tsc -b` pass · eslint clean · Chromium 1280/390: notice visible, reset flow shows the no-e-mail message as a `status`, axe (WCAG A/AA) on the sign-in page 0 violations, 0 page errors. Sign-in itself is unchanged, and the screenshot scripts still sign in with it. *Status:* ☑ X2-commit (honesty fix; real auth still outstanding)

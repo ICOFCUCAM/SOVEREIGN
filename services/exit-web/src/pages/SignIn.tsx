@@ -43,8 +43,8 @@ const SignIn: React.FC = () => {
           <div className="space-y-4 rounded-xl border border-white/10 bg-ink-800/60 p-6">
             {resetSent ? (
               <>
-                <div className="rounded-md border border-deal-500/30 bg-deal-600/10 px-4 py-3 text-[13px] text-deal-200">
-                  If an account exists for <span className="font-semibold">{email || "that address"}</span>, a password-reset link is on its way.
+                <div role="status" className="rounded-md border border-loi-400/40 bg-loi-500/10 px-4 py-3 text-[13px] text-loi-300">
+                  Password reset isn't available in this demo, so no e-mail was sent to <span className="font-semibold">{email || "that address"}</span>. Any password signs you in.
                 </div>
                 <Button className="w-full" onClick={() => { setMode("signin"); setResetSent(false); }}>Back to sign in</Button>
               </>
@@ -60,16 +60,19 @@ const SignIn: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4 rounded-xl border border-white/10 bg-ink-800/60 p-6">
+            <p role="note" className="rounded-md border border-loi-400/40 bg-loi-500/10 px-3 py-2 text-[12px] leading-snug text-loi-300">
+              Demo access: credentials aren't checked. Any e-mail and password, or a provider button, opens a demo session in this browser. No provider is contacted.
+            </p>
             {/* Social SSO */}
             <div className="space-y-2">
               <button onClick={() => sso("google")} className="flex w-full items-center justify-center gap-2.5 rounded-md border border-white/15 bg-white/[0.03] px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
-                <GoogleMark /> Continue with Google
+                <GoogleMark /> Continue with Google (demo)
               </button>
               <button onClick={() => sso("apple")} className="flex w-full items-center justify-center gap-2.5 rounded-md border border-white/15 bg-white/[0.03] px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
-                <AppleMark /> Continue with Apple
+                <AppleMark /> Continue with Apple (demo)
               </button>
               <button onClick={() => sso("microsoft")} className="flex w-full items-center justify-center gap-2.5 rounded-md border border-white/15 bg-white/[0.03] px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
-                <MicrosoftMark /> Continue with Microsoft
+                <MicrosoftMark /> Continue with Microsoft (demo)
               </button>
             </div>
 
