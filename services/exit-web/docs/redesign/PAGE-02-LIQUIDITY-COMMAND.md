@@ -5,7 +5,7 @@
 | Route | `/console/command` (route policy `/console`, the same as the Terminal) |
 | Component | `src/pages/Dashboard.tsx` (358 lines) |
 | NAV | "Liquidity Command", group Mandate, role **founder**, no plan gate. Free plan renders `BuyerInterestGate` above it. |
-| Status | Stage A audit — gaps documented below; each is closed in its own commit and marked here. |
+| Status | All ten gaps (G1–G10) and X7 closed, each documented first and marked below. **Awaiting review — Page 03 not started.** Owner decisions D1, D2 open. |
 
 Process rule (unchanged from Page 01): **document a gap → close it → verify → mark it closed**, one at a time.
 
@@ -212,3 +212,25 @@ Disclosed dependency: two indices use negotiation leverage derived from the samp
 Lifecycle locks are a lock glyph (`aria-hidden`) with screen-reader text ", requires Active Mandate" and a tooltip.
 
 *Verification:* `tsc -b`, eslint clean · `access.test.ts` 5/5 (new case covers free/prep/pro and an ungated route) · Chromium per plan as in the table · 0 page errors.
+
+---
+
+## Final verification (after G1–G10, X7)
+| Check | Result |
+|---|---|
+| `tsc -b` | pass |
+| `eslint src` | 0 errors, 2 pre-existing warnings (Page 01 X3) |
+| `vitest run` | **30 files, 188/188 pass** (Page 01 end: 180; new: deal-context equality ×2, liquidity-view ×5, requiredEngagement ×1) |
+| `vite build` | pass |
+| Chromium free + pro, 1440 / 390, reduced motion | 0 page errors · 1 `h1` · 15 headings · 16–17 tab stops, all with visible focus · `<main>` overflow none · axe (wcag2a/aa, 21a/aa, 22aa, best-practice, scoped to the page) **0 violations** |
+| Exit Process flow | run → Demo run card → Re-run → Reset → Start; Execute → `/console/autopilot`; telemetry = page views + run events only |
+| Shared components | Chief Investment Banker page text identical before/after G1; `CommandTiles`, `ExitCommander` unchanged |
+| Page 01 regression | Terminal: axe 0, 56 tab stops visible focus, free/pro 1440/390 |
+| Not verified | screen reader with a real AT (NVDA/VoiceOver); the live production deployment (not reachable from this container) |
+
+## Known issues and limitations
+- **D1** open: two valuation models across the console. This page names its model and shows the Terminal's figure; the numbers still differ.
+- **D2** open: 6 sample offer events and 6 `nda_issued` events from 2 demo runs remain in production telemetry.
+- The close-probability and confidence indices use negotiation leverage from the sample offers for every company, including a founder's intake (disclosed on the page).
+- The Exit Process run still uses the demo company and sample offers (disclosed when an intake exists).
+- `CommandTiles` and `ExitCommander` keep the old wording ("Live", "Close probability", "One instruction dispatches the agents") on the Chief Investment Banker page until Page 05.
