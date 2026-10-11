@@ -37,7 +37,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 | G1 | **Fixture NDAs/offers presented as proprietary recorded behaviour.** | Title and foot say "sample process records (demo data)"; drop "no external database has this" and "live tension". | ☑ `f66e3f3` |
 | G2 | **Invented "Outreach success +N%" lift** and the "live" radar. | Remove the lift figures; section becomes "Registry signals" with the snapshot date; no pulsing dot. | ☑ `5be318e` |
 | G3 | Mislabels: fit probability as "likelihood … signs"; appetite as "deploying capital / recent-12mo activity"; "live" EDGAR/Wikidata; demo-tenant stats as "Live data"; narrative unlabelled. | Accurate labels: fit probability (engine fit score); appetite (registry attribute); "fetched from EDGAR/Wikidata, snapshot as of …"; "Recorded stats · demo tenant"; "template sentence". | ☑ `920ac19` |
-| G4 | Banker's-take urgency and overclaim; hidden plan gate on the banker CTA. | Plain wording; `requiredEngagement` note. | ☐ |
+| G4 | Banker's-take urgency and overclaim; hidden plan gate on the banker CTA. | Plain wording; `requiredEngagement` note. | ☑ G4-commit |
 | G5 | **Buyer role sees founder process data** and the founder CTA. | For buyers: hide the sample-process signals and the banker's take; state the page shows the buyer landscape for the demo/listed company. Route unchanged. | ☐ |
 | G6 | Duplicate NAV name "Acquisition Radar". | This page becomes **"Acquisition Intelligence"** in NAV (both roles) and in its `h1`. | ☐ |
 | G7 | Demo company unlabelled. | Run on `loadActiveCompany()` at its canonical value; badge. | ☐ |
@@ -70,3 +70,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 | "Live data — … tenant-measured …" (demo tenant) | "Recorded stats · demo tenant — … recorded for the demo tenant (demo data)" |
 | "Strategic narrative" | "Strategic narrative · template sentence" |
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for deploying capital / recent-12mo / engages and signs / live EDGAR/Wikidata fetch / Live data / "% match" · free 1440/390: 0 errors, axe 0, no overflow. (The "Recorded stats" strip appears only when the stats function returns rows — not exercised here; NOT VERIFIED in the browser.)
+
+### G4 — Banker's-take urgency, overclaim and hidden plan gate
+*Closed by:* `pages/Intelligence.tsx`. "Appetite windows close — active acquirers redeploy capital into the next target while you wait." → "The ranking reflects the registry snapshot; appetite can change, and nothing here tracks it over time." "ExitOS scores every buyer on live EDGAR/Wikidata signals and drafts the personalized intro." → "What ExitOS does — Scores every buyer on the registry snapshot (EDGAR / Wikidata / press). Outreach drafts are prepared on the Outreach page; nothing is sent from here." `requiredEngagement("/console/banker", …)` adds "Requires Active Mandate" beside "Hand it to the banker" for free and Preparation founders.
+*Verification:* `tsc -b`, eslint clean · Chromium: free and Preparation → "Requires Active Mandate"; Active Mandate → no note; 0 "redeploy" / "live EDGAR".

@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../lib/auth";
+import { requiredEngagement } from "../lib/access";
 import { fmtMoney, ConfidenceChip } from "../lib/ui";
 import { PageHeader, Section, Metric, ScrollRegion, Chip, XO_INPUT, XO_LABEL } from "../components/xo";
 import { VALUATION_CANONICAL } from "../lib/engines";
@@ -61,6 +63,8 @@ function narrative(c: BuyerCandidate): string {
 }
 
 const Intelligence: React.FC = () => {
+  const { session } = useAuth();
+  const bankerGate = requiredEngagement("/console/banker", session?.role ?? "founder", session?.plan ?? "free");
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<"probability" | "expected_outcome">("probability");
   const [liveStats, setLiveStats] = useState<readonly BuyerLiveStat[]>([]);
@@ -261,11 +265,12 @@ const Intelligence: React.FC = () => {
             <p className="text-[14px] leading-relaxed">Open conversations with the <span className="font-semibold">{activeCount} active</span> acquirer{activeCount === 1 ? "" : "s"}, lead with the top-ranked fit.</p>
             <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
               <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(candidates[0].expectedOutcome.expectedClosingUsd)}</span> expected take-home from the best-fit buyer.</TakeCell>
-              <TakeCell k="If you wait">Appetite windows close — active acquirers redeploy capital into the next target while you wait.</TakeCell>
+              <TakeCell k="If you wait">The ranking reflects the registry snapshot; appetite can change, and nothing here tracks it over time.</TakeCell>
               <TakeCell k="Pursue">{candidates[0].buyer.name} — {(candidates[0].probability * 100).toFixed(0)}% fit probability, {candidates[0].buyer.appetite} appetite.</TakeCell>
-              <TakeCell k="ExitOS does it">ExitOS scores every buyer on live EDGAR/Wikidata signals and drafts the personalized intro.</TakeCell>
+              <TakeCell k="What ExitOS does">Scores every buyer on the registry snapshot (EDGAR / Wikidata / press). Outreach drafts are prepared on the Outreach page; nothing is sent from here.</TakeCell>
             </dl>
             <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Hand it to the banker →</Link>
+            {bankerGate && <span className="ml-3 text-[12px] text-xo-caution">Requires {bankerGate}</span>}
           </div>
         </Section>
       )}
