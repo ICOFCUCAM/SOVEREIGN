@@ -35,7 +35,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 | G1 | **Two "readiness" numbers.** 55 here, 46 on Pages 01/02, both called readiness. | Name this one **Exit Score (ten categories)** and show the readiness-engine score beside it with one line on the difference. | ☑ `7b7e141` |
 | G2 | **Fake "Re-score".** | Remove the timer/toast; offer "Update your figures" (→ Value My Company), which is what actually changes the score. | ☑ `77f9e73` |
 | G3 | **Mislabels:** "Market window" is the company's market-growth input; "strategic mid, today" (D1); verdict thresholds and category scoring unexplained. | "Market growth (company input)"; "enterprise value today"; thresholds shown with the verdict; categories and impacts labelled rule-based. | ☐ |
-| G4 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` + analysis; badge. | ☑ G4-commit |
+| G4 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` + analysis; badge. | ☑ `5fce4f0` |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 8 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `21b899c` |
 
