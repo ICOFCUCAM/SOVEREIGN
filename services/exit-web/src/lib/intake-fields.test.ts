@@ -32,3 +32,12 @@ describe("intake number fields", () => {
     }
   });
 });
+
+describe("parseNumber (shared)", () => {
+  it("applies the same rules with optional scale", async () => {
+    const { parseNumber } = await import("./intake-fields.js");
+    expect(parseNumber("2.5", { min: 0, max: 100 })).toEqual({ ok: true, value: 2.5 });
+    expect(parseNumber("2.5", { min: 0, max: 100, scale: 1e6 })).toEqual({ ok: true, value: 2_500_000 });
+    expect(parseNumber("0", { min: 0.01, max: 100 })).toMatchObject({ ok: false });
+  });
+});

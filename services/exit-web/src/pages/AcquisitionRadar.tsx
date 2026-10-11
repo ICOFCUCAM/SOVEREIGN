@@ -11,6 +11,7 @@ import { captureDealEvent } from "../lib/deal-events";
 import { requestNda, submitOffer, startDeal, advanceDeal, saveMandate, myMandate } from "../lib/exit-api";
 import PublishComposer from "../components/PublishComposer";
 import type { Region } from "@exit/engines";
+import { parseNumber } from "../lib/intake-fields";
 import { PageHeader, Section, Metric, ScrollRegion, ActionLink, Chip, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 
 // ── ACQUISITION RADAR · BUYER COMMAND CENTER ────────────────────────
@@ -31,6 +32,9 @@ const AcquisitionRadar: React.FC = () => {
   const [maxRevM, setMaxRevM] = useState(500);
   const [regions, setRegions] = useState<Region[]>(["North America", "Europe"]);
   const [minGrowth, setMinGrowth] = useState(20);
+  // revenue band fields keep the typed text; only valid numbers apply
+  const [revText, setRevText] = useState<{ min: string; max: string }>({ min: "5", max: "500" });
+  const [offerError, setOfferError] = useState<Record<string, string>>({});
   const [themes, setThemes] = useState("");                 // strategic themes, comma-separated
   const [requested, setRequested] = useState<Record<string, boolean>>({});
   const [offerInput, setOfferInput] = useState<Record<string, string>>({});
@@ -44,7 +48,8 @@ const AcquisitionRadar: React.FC = () => {
     void myMandate().then((m) => {
       if (!m) return;
       setSectors([...m.sectors]); setRegions([...m.regions] as Region[]);
-      setMinRevM(Math.round(m.minCheckUsd / 1e6)); setMaxRevM(Math.round(m.maxCheckUsd / 1e6));
+      setMinRevM(m.minCheckUsd / 1e6); setMaxRevM(m.maxCheckUsd / 1e6);
+      setRevText({ min: String(m.minCheckUsd / 1e6), max: String(m.maxCheckUsd / 1e6) });
       setMinGrowth(Math.round(m.minGrowthPct * 100)); setThemes(m.strategicThemes.join(", "));
       setSavedMandate(true);
     });
@@ -78,6 +83,15 @@ const AcquisitionRadar: React.FC = () => {
   const watch = ACQ_INDEXES.indexes.filter((i) => sectors.includes(i.sector));
   const watchVolume = watch.reduce((s, i) => s + i.volume, 0);
 
+  const REV = { min: 0, max: 100_000 };
+  const minRes = parseNumber(revText.min, REV), maxRes = parseNumber(revText.max, REV);
+  const bandError = minRes.ok && maxRes.ok && minRes.value > maxRes.value ? "Minimum is above maximum." : null;
+  const typeRev = (which: "min" | "max", text: string): void => {
+    const next = { ...revText, [which]: text };
+    setRevText(next); setSavedMandate(false);
+    const a = parseNumber(next.min, REV), b = parseNumber(next.max, REV);
+    if (a.ok && b.ok && a.value <= b.value) { setMinRevM(a.value); setMaxRevM(b.value); }
+  };
   const toggle = <T,>(arr: T[], v: T, set: (x: T[]) => void): void => set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
   const maxActiveBuyers = watch.reduce((m, i) => Math.max(m, i.activeBuyers), 0);
   const tape = useMemo(() => buildMarketTape(), []);
@@ -87,7 +101,7 @@ const AcquisitionRadar: React.FC = () => {
       <PageHeader eyebrow="◉ Buyer Console" title="Acquisition Command Center"
         description="Set an acquisition mandate; every listed company is scored against it. Identities stay withheld until an NDA is signed.">
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-xo-line pt-2">
-          {([["Sectors", sectors.length], ["Regions", regions.length], ["Revenue band", `$${minRevM}–${maxRevM}M`], ["Min growth", `${minGrowth}%`]] as const).map(([k, v]) => (
+          {([["Sectors", sectors.length], ["Regions", regions.length], ["Target revenue", `$${minRevM}–${maxRevM}M`], ["Min growth", `${minGrowth}%`]] as const).map(([k, v]) => (
             <div key={k} className="flex items-baseline gap-1.5"><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[12px] font-semibold tabular-nums">{v}</dd></div>
           ))}
         </dl>
@@ -128,8 +142,18 @@ const AcquisitionRadar: React.FC = () => {
                 </div>
               </fieldset>
               <div className="grid grid-cols-2 gap-3">
-                <div><label htmlFor="radar-min" className={XO_LABEL}>Min check ($M)</label><input id="radar-min" className={`${XO_INPUT} font-mono`} inputMode="numeric" value={minRevM} onChange={(e) => { setMinRevM(+e.target.value || 0); setSavedMandate(false); }} /></div>
-                <div><label htmlFor="radar-max" className={XO_LABEL}>Max check ($M)</label><input id="radar-max" className={`${XO_INPUT} font-mono`} inputMode="numeric" value={maxRevM} onChange={(e) => { setMaxRevM(+e.target.value || 0); setSavedMandate(false); }} /></div>
+                {(["min", "max"] as const).map((w) => {
+                  const res = w === "min" ? minRes : maxRes;
+                  const err = !res.ok ? res.error : w === "max" ? bandError : null;
+                  return (
+                    <div key={w}>
+                      <label htmlFor={`radar-${w}`} className={XO_LABEL}>Target revenue {w} ($M)</label>
+                      <input id={`radar-${w}`} className={`${XO_INPUT} font-mono ${err ? "!border-xo-risk" : ""}`} inputMode="decimal" value={revText[w]}
+                        onChange={(e) => typeRev(w, e.target.value)} aria-invalid={err ? true : undefined} aria-describedby={`radar-${w}-msg`} />
+                      <span id={`radar-${w}-msg`} className={`mt-1 block text-[11px] ${err ? "text-xo-risk" : "text-xo-faint"}`}>{err ?? (w === "min" ? "Listed company's TTM revenue." : "Scoring uses the last valid band.")}</span>
+                    </div>
+                  );
+                })}
               </div>
               <div>
                 <label htmlFor="radar-growth" className={XO_LABEL}>Min growth · <span className="font-mono">{minGrowth}%</span></label>
@@ -221,10 +245,13 @@ const AcquisitionRadar: React.FC = () => {
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px]">
                   <label htmlFor={`offer-${l.id}`} className="text-xo-muted">Indicative offer ($M)</label>
                   <input id={`offer-${l.id}`} className={`${XO_INPUT} w-28 py-1 font-mono`} inputMode="decimal" placeholder="M"
-                    value={offerInput[l.id] ?? ""} onChange={(e) => setOfferInput((st) => ({ ...st, [l.id]: e.target.value }))} />
+                    value={offerInput[l.id] ?? ""} onChange={(e) => { setOfferInput((st) => ({ ...st, [l.id]: e.target.value })); setOfferError((st) => ({ ...st, [l.id]: "" })); }}
+                    aria-invalid={offerError[l.id] ? true : undefined} aria-describedby={`offer-${l.id}-msg`} />
                   <button type="button"
                     onClick={() => {
-                      const m = parseFloat(offerInput[l.id] ?? ""); if (!m) return;
+                      const res = parseNumber(offerInput[l.id] ?? "", { min: 0.01, max: 1_000_000 });
+                      if (!res.ok) { setOfferError((st) => ({ ...st, [l.id]: res.error.startsWith("Must be at least") || res.error.startsWith("Cannot") ? "Enter an amount above zero." : res.error })); return; }
+                      const m = res.value;
                       void submitOffer(l.id, m * 1e6);
                       // open (or fetch) the deal and advance it to IOI — emits the loi telemetry
                       void startDeal(l.id).then((d) => { if (d) void advanceDeal(d, "ioi", "buyer", l.code); });
@@ -232,6 +259,7 @@ const AcquisitionRadar: React.FC = () => {
                     }}
                     className={`${SMALL_BTN} border-xo-line text-xo-text hover:bg-xo-raise`}
                     disabled={!!offered[l.id]}>{offered[l.id] ? "✓ Offer submitted" : "Submit offer"}</button>
+                  <span id={`offer-${l.id}-msg`} role={offerError[l.id] ? "alert" : undefined} className="text-[11px] text-xo-risk">{offerError[l.id]}</span>
                 </div>
               </li>
             ))}

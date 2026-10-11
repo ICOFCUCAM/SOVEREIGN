@@ -41,7 +41,7 @@ A buyer (or a founder looking from the buyer side) sets an acquisition mandate �
 | G1 | **Fake-live indicators.** Pinging "Tape", "Intelligence rail · live telemetry", "Live ExitOS Acquisition Indexes", "live listings", reactor "across the network". | `AcquisitionRadar.tsx`, shared `MarketTape` | Snapshot-dated labels; `RegistryTape`; "listings", not "live listings". | ☑ `ab60b00` |
 | G2 | **Demo and catalog listings shown as live opportunities.** The demo company and Sovereign product-catalog seeds appear in the scored pool unlabelled. | `listings.ts` SEEDS | Badge each: "Demo listing" / "Product catalog"; count founder listings separately. | ☑ `1118d65` |
 | G3 | **Overclaims.** Toast "Mandate published — founders can now match it" and "matchable by founders" — nothing reads mandates. "Follow" logs "added to outreach" on follow **and** unfollow. | code | "Mandate saved" + plain note that founders don't see mandates yet; log only on follow. | ☑ `61d8902` |
-| G4 | **Inputs wrong or unvalidated.** "Min/Max check" actually filter company revenue; `2.5` → 25; min > max accepted; offers accept negatives and decimals are not guarded. | measured | Rename to "Target revenue (min/max, $M)"; reuse the Page 03 parsing rules; validate min ≤ max and offer > 0 with messages. | ☐ |
+| G4 | **Inputs wrong or unvalidated.** "Min/Max check" actually filter company revenue; `2.5` → 25; min > max accepted; offers accept negatives and decimals are not guarded. | measured | Rename to "Target revenue (min/max, $M)"; reuse the Page 03 parsing rules; validate min ≤ max and offer > 0 with messages. | ☑ G4-commit |
 | G5 | **Consequential actions without saying what happens.** "Express interest" sends an NDA request and opens a deal in one click; "Submit offer" records an indicative offer — neither says who sees what. | code | Inline confirmation naming the effect (founder receives the request/offer; identity revealed on NDA signature); same calls. | ☐ |
 | G6 | **Design system, hierarchy, accessibility.** No `h1`; 11 contrast failures; chip toggles without `aria-pressed`; old workstation primitives. | axe, code | Rebuild on `xo`: header with `h1` → mandate (left) → scored opportunities (centre) → sector watch; toggles with `aria-pressed`. | ☑ `3c91fff` |
 
@@ -71,3 +71,11 @@ Left as is: the "Live market" **tag** on Sovereign product-catalog listings (`li
 *Closed by:* `pages/AcquisitionRadar.tsx`. "Publish mandate" → **Save mandate**; toast "Mandate published — founders can now match it" → "Mandate saved to your account"; "matchable by founders" → "Saved to your account and used for scoring here. Founders don't see buyer mandates yet." Follow records the `added_to_outreach` event only when following, not again on unfollow. `saveMandate` itself unchanged.
 
 *Verification:* Chromium (events read through the app's own `deal-events` module): before 0 → follow 1 → unfollow still 1 (was 2); Follow button `aria-pressed="true"` when following; new mandate wording shown · 0 errors.
+
+### G4 — Inputs wrong or unvalidated
+*Closed by:* `lib/intake-fields.ts` (`parseNumber`, the Page 03 rules generalised; `parseField` delegates to it; + test) and `pages/AcquisitionRadar.tsx`.
+- "Min/Max check ($M)" → **Target revenue min/max ($M)** with the hint "Listed company's TTM revenue" — that is what `matchCompanyToCriteria` filters. (The saved mandate still stores the values as `minCheckUsd/maxCheckUsd`; renaming the stored fields would change the backend contract and is not done.)
+- Text is kept as typed (decimals work); min > max shows "Minimum is above maximum." and scoring keeps the last valid band; header summary "Target revenue".
+- Indicative offer: zero/negative → "Enter an amount above zero." (`role="alert"`), nothing submitted; valid decimals submit as before.
+
+*Verification:* `tsc -b`, eslint clean · `intake-fields.test.ts` 5/5 · Chromium: min "2.5" → $2.5–500M (was 25); max "1" → error, band unchanged; max "600" → $2.5–600M; offer "-5" → error, not submitted; offer "12.5" → submitted · 0 errors.

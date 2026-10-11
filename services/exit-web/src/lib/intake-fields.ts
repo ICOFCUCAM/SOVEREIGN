@@ -35,6 +35,11 @@ export type ParseResult = { ok: true; value: number } | { ok: false; error: stri
 
 /** Parse what the founder typed into the stored value, or explain why not. */
 export function parseField(spec: FieldSpec, text: string): ParseResult {
+  return parseNumber(text, spec);
+}
+
+/** The shared rule set for typed numbers anywhere in the console. */
+export function parseNumber(text: string, spec: { min: number; max: number; scale?: number; integer?: boolean }): ParseResult {
   const t = text.trim().replace(/,/g, "");
   if (t === "") return { ok: false, error: "Enter a number." };
   if (!/^-?(\d+\.?\d*|\.\d+)$/.test(t)) return { ok: false, error: "Use digits only, e.g. 12.5." };
@@ -42,7 +47,7 @@ export function parseField(spec: FieldSpec, text: string): ParseResult {
   if (spec.integer && !Number.isInteger(n)) return { ok: false, error: "Enter a whole number." };
   if (n < spec.min) return { ok: false, error: spec.min === 0 ? "Cannot be negative." : `Must be at least ${spec.min}.` };
   if (n > spec.max) return { ok: false, error: `Must be at most ${spec.max.toLocaleString("en-US")}.` };
-  return { ok: true, value: n * spec.scale };
+  return { ok: true, value: n * (spec.scale ?? 1) };
 }
 
 /** The stored value as the founder would type it (no float noise). */
