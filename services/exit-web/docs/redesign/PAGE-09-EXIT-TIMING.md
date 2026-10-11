@@ -35,7 +35,7 @@ Tells the founder *when* to sell: a recommended window in months, the value of w
 | G1 | **Invented forecast** (score +22/+38 per year, value ×1.3 per year, "Q2 {year}"). | Replace the three-year timeline with what the engines produce: now vs after fixes — readiness-engine score current → projected, value now → after fixes — and the window in months with its rule shown. No years or quarters. | ☐ |
 | G2 | **Invented signal verdicts and mislabels** (fixed "tailwind", "high", 40-cap count, registry premium shown as sector's, static notes). | Verdicts only where a stated rule exists (ARR growth ≥ 30 %; buyer demand from the active-buyer count; sector exits > 0); the rest shown as context. Actual deal count of the top-12 buyers; premium labelled registry-wide; notes say what each figure is. | ☐ |
 | G3 | **False monitoring claims** ("monitors continuously and pings you", "signals monitored", "buyers circling", "right now"). | Plain wording: computed when the page opens; no alerts exist. | ☐ |
-| G4 | Demo company unlabelled; "strategic mid" (D1). | Run on `loadActiveCompany()`; badge; "enterprise value today". | ☑ G4-commit |
+| G4 | Demo company unlabelled; "strategic mid" (D1). | Run on `loadActiveCompany()`; badge; "enterprise value today". | ☑ `913aca0` |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 5 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `bc00810` |
 
