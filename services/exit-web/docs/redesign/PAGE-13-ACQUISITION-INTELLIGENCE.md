@@ -5,7 +5,7 @@
 | Route | `/console/intelligence` |
 | Component | `src/pages/Intelligence.tsx` (599 lines) |
 | NAV | founder: "Acquisition Radar", group Market Intelligence; buyer: "Acquisition Radar", group Marketplace; no plan gate |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All eight gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `d630582`)
 
@@ -86,3 +86,13 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 ### G7 — Demo company unlabelled
 *Closed by:* `pages/Intelligence.tsx` — discovery, the intelligence pipeline and the narrative run on `loadActiveCompany()` at its canonical enterprise value (`canonicalValuationFor(company).headline.mid`, same function behind the demo constant); eyebrow names the source, **Demo data / Your intake** badge (buyers keep their "Buyer view" note beside it). `pages/Intake.tsx` lists Acquisition Intelligence.
 *Verification:* `tsc -b`, eslint clean · Chromium: demo → DEMO DATA, implied price $102,849,415; saved intake "Northwind Analytics" → YOUR INTAKE, $403,509,792, no Helios mentions · 0 errors.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium founder free/Pro and buyer free 1440/390: 0 errors, `h1` 1, no overflow (was overflowing), axe 0, all tab stops with visible focus · 0 "live" words, 0 pinging elements · personalisation demo vs intake · buyer view without founder process data · plan note on the banker CTA.
+
+## Known issues
+- Process signals use the demo company's sample NDAs and offers (labelled).
+- The "Recorded stats · demo tenant" strip renders only when the stats function returns rows; that path was not exercised in the browser (NOT VERIFIED).
+- Buyers see the ranking computed for the founder's/demo company; a buyer-specific landscape does not exist yet.
