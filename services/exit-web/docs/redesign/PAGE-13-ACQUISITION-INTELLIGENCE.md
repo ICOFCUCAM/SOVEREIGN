@@ -41,8 +41,12 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 | G5 | **Buyer role sees founder process data** and the founder CTA. | For buyers: hide the sample-process signals and the banker's take; state the page shows the buyer landscape for the demo/listed company. Route unchanged. | ☐ |
 | G6 | Duplicate NAV name "Acquisition Radar". | This page becomes **"Acquisition Intelligence"** in NAV (both roles) and in its `h1`. | ☐ |
 | G7 | Demo company unlabelled. | Run on `loadActiveCompany()` at its canonical value; badge. | ☐ |
-| G8 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☐ |
+| G8 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☑ G8-commit |
 
 ---
 
 ## Closure log
+
+### G8 — Design
+*Closed by:* `pages/Intelligence.tsx` rebuilt on `xo` (`PageHeader` `h1`; pipeline as an ordered list; ranked outcomes as a list with `h3`s and definition lists; hidden buyers and platform signals side by side; radar; banker's take as a page-local definition list (shared `BankerTake` no longer used here); provenance strip; four metrics; match explanations with `h3`/`h4`; standouts as a definition list; filter with a real `<label>` and a polite live count; sort as two `Chip` toggle buttons with `aria-pressed`; the ranked table with row headers inside a keyboard-reachable `ScrollRegion`; signal tier chips carry screen-reader words). Content carried over verbatim; G1–G7 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium founder 1440/390 and buyer 390: 0 errors, `h1` 1, **no overflow** (was overflowing at 390), axe 0, all tab stops with visible focus.
