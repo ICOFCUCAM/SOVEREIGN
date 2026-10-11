@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { fmtMoney } from "../lib/ui";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, Provenance } from "../components/xo";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { loadActiveCompany } from "../lib/active-company";
@@ -96,7 +97,7 @@ const Wealth: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="To portfolio" value={fmtMoney(portfolioUsd)} sub={`illustrative template · ${Math.round(ALLOC[0].pct * 100)}%`} /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <Section title="Illustrative next step" eyebrow="Banker's take" className="border border-xo-line"
         right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(portfolioUsd)}</span>}>
