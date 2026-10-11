@@ -78,7 +78,7 @@ No loading (synchronous engines). Exit-run states: none / complete (card + Re-ru
 | G4 | **Heuristic indices presented as measurements.** Close probability 84%, Confidence 92% (capped), Market liquidity 98, "Optimize 12 months" ×1.27. | `commander-metrics.ts`, `DashboardModules.tsx` | Same numbers, labelled "index" / "assumption", with the formula on the page. | ☑ `c2f7654` |
 | G5 | **Demo fixtures shown as "this deal's live state".** Funnel "Under NDA", "Offers in hand 3", "Leading bid"; exit-run card "NDAs pre-issued", "Leader: …". | `DashboardModules.tsx` funnel, run card | Split registry/model counts from demo fixtures; label fixtures as sample data in words. | ☑ `34c6d7d` |
 | G6 | **Exit Process writes demo data to production telemetry.** Each run emits the 3 sample offers as `offer` events and "nda_issued" buyer responses for real registry buyers although nothing is sent. Production now holds **6 of 7** offer events from sample IDs `o-001…o-003` and 6 `nda_issued` events (2 runs, 2026-06-03 and 06-18). | `lib/exit-process.ts:250-330`; Supabase read-only query | Stop emitting offer and buyer-response events for demo fixtures; step texts say "drafted, not sent" / "sample offers". Existing rows: **owner decision (D2)** — not deleted. | ☑ `c6bd5ad` |
-| G7 | **Mislabels / overclaims.** "Premium probability" shows the top premium payer; "Execute — one instruction dispatches the agents" only navigates; "Qualifying buyers 12" is the top-12 cap; probability caption describes a product, engine is a weighted sum. | code + dump | Correct labels and captions; Execute described as opening Autonomous Exit. | ☐ |
+| G7 | **Mislabels / overclaims.** "Premium probability" shows the top premium payer; "Execute — one instruction dispatches the agents" only navigates; "Qualifying buyers 12" is the top-12 cap; probability caption describes a product, engine is a weighted sum. | code + dump | Correct labels and captions; Execute described as opening Autonomous Exit. | ☑ G7-commit |
 | G8 | **Plan gates hidden.** Execute / See the plan → Autonomous Exit (Preparation or Active Mandate); lifecycle Solicit, Negotiate, Execute, Transition → Active Mandate. | `lib/access.ts` | Show "Requires …" from `needsUpgrade()`, links unchanged (as Page 01 G7). | ☐ |
 | G9 | **Weak hierarchy / repetition.** Enterprise value appears 6 times (chip, board, briefing, KPI row, scenarios, valuation reports); ~4 screens long; decision buried. | screenshots | Decision-first order on `xo`: mandate → position (value now / after fixes / scenarios) → next instruction → buyers → readiness plan → process & funnel → evidence, each figure once. | ☑ `2b00b09` |
 | G10 | **Responsive overflow at 390 px.** Lifecycle strip (+21 px) and top-buyers card (+40 px). | overflow probe | Wrapping lifecycle; tables in `ScrollRegion`. | ☑ `2b00b09` (closed by the G9 restructure) |
@@ -187,3 +187,15 @@ Disclosed dependency: two indices use negotiation leverage derived from the samp
 - Exit-run card: **Demo run** badge; "NDAs pre-issued" → "NDA drafts (not sent)"; "Leader: o-002" (an offer ID, as before) → "Sample-offer leader: Microsoft Industry Solutions"; a line that the run uses the demo company and sample offers and nothing was sent to any buyer.
 
 *Verification:* `tsc -b`, eslint clean · Chromium: funnel text "Registry mandates 31 · Matched 15 · SAMPLE Under NDA 4 · SAMPLE Offers in hand 3 · SAMPLE Leading bid 1" with the fixture note; run card after a full run shows the badge, "5 NDA drafts (not sent)", "Sample-offer leader: Microsoft Industry Solutions" and the nothing-sent line · axe 0 violations · 0 page errors.
+
+### G7 — Mislabels / overclaims
+*Documented:* gap register row G7. *Closed by:* `pages/Dashboard.tsx` (text only).
+
+| Before | After | Why |
+|---|---|---|
+| "Premium probability: Amazon Strategic · +144% avg" | "Top premium payer: …" | it is the buyer with the highest average premium, not a probability |
+| "One instruction dispatches the agents — valuation, outreach and diligence start working." | "Execute opens Autonomous Exit, where the agents' work is laid out step by step and each step waits for your approval. Nothing is sent from this page." | the button only navigates; Autonomous Exit asks for approval per step (`Autopilot.tsx`) |
+| "12 qualifying buyers" | "Top 12 ranked buyers (list capped at 12)" | `runBuyerDiscovery(..., { limit: 12 })` caps the list |
+| "Probability scored by sector × check × geography × activity" | "Probability = weighted fit: sector 25%, acquisition history 22%, check size 20%, recent activity 15%, business model 10%, geography 8%" | the engine's weighted sum (`exit-engines/src/buyers/engine.ts`) |
+
+*Verification:* `tsc -b`, eslint clean · Chromium: all four new texts present; none of the old phrases remain · 0 page errors.

@@ -222,7 +222,7 @@ const Dashboard: React.FC = () => {
               <Button onClick={() => navigate("/console/autopilot")}>Execute →</Button>
               <ActionLink to="/console/autopilot" className="text-[13px]">See the plan</ActionLink>
             </div>
-            <p className="mt-3 text-[12px] text-xo-faint">One instruction dispatches the agents — valuation, outreach and diligence start working.</p>
+            <p className="mt-3 text-[12px] text-xo-faint">Execute opens Autonomous Exit, where the agents' work is laid out step by step and each step waits for your approval. Nothing is sent from this page.</p>
           </div>
         </Section>
         <Section title="Briefing register" eyebrow="What the desk is watching" className="lg:col-span-5">
@@ -230,7 +230,7 @@ const Dashboard: React.FC = () => {
             <Fact k="Value actions open" v={<Link to="/console/readiness" className="text-xo-action hover:underline">{m.fixCount} priced fixes · ~6 months</Link>} />
             <Fact k="Buyer activity" v={<Link to="/console/intelligence" className="text-xo-action hover:underline">{m.strategicActive > 0 ? `${m.strategicActive} strategic acquirer${m.strategicActive === 1 ? "" : "s"} in market` : "No strategic acquirer in market yet"}</Link>} />
             {briefing.highestIntent && <Fact k="Highest intent" v={<Link to="/console/intelligence" className="text-xo-action hover:underline">{briefing.highestIntent}</Link>} />}
-            {briefing.premiumPayer && <Fact k="Premium probability" v={<Link to="/console/intelligence" className="text-xo-action hover:underline">{briefing.premiumPayer}</Link>} />}
+            {briefing.premiumPayer && <Fact k="Top premium payer" v={<Link to="/console/intelligence" className="text-xo-action hover:underline">{briefing.premiumPayer}</Link>} />}
           </dl>
         </Section>
       </div>
@@ -256,9 +256,9 @@ const Dashboard: React.FC = () => {
 
       {/* ── 4 · WHO IS BUYING ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
-        <Section title="Top buyers · ranked" eyebrow={`${BUYERS.candidates.length} qualifying buyers · ${BUYERS.byType.strategic} strategic · ${BUYERS.byType.pe} PE · ${BUYERS.byType.family_office} family office`} className="lg:col-span-8"
+        <Section title="Top buyers · ranked" eyebrow={`Top ${BUYERS.candidates.length} ranked buyers (list capped at 12) · ${BUYERS.byType.strategic} strategic · ${BUYERS.byType.pe} PE · ${BUYERS.byType.family_office} family office`} className="lg:col-span-8"
           right={<ActionLink to="/console/intelligence">Open intelligence →</ActionLink>}
-          foot={<>Probability scored by sector × check × geography × activity. Check-size fit is tested against a rule-of-thumb price of {fmtMoney(BUYERS.companyHeadlineUsd)} (the largest of 6× ARR, 3× TTM revenue or $20M) — a ranking input, not a valuation.</>}>
+          foot={<>Probability = weighted fit: sector 25%, acquisition history 22%, check size 20%, recent activity 15%, business model 10%, geography 8%. Check-size fit is tested against a rule-of-thumb price of {fmtMoney(BUYERS.companyHeadlineUsd)} (the largest of 6× ARR, 3× TTM revenue or $20M) — a ranking input, not a valuation.</>}>
           <ScrollRegion label="Top buyers table">
             <table className="w-full min-w-[520px] text-[13px]">
               <thead className="text-left text-[11px] text-xo-faint">
