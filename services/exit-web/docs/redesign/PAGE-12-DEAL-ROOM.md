@@ -37,7 +37,7 @@ Founder Active Mandate: `h1` 1 · axe 0 · **overflow at 390** · 0 errors. Buye
 | G1 | **Simulated activity presented as live, recorded telemetry** (page copy, NAV label, "with NDA + access", recency, "this week"). | Say it is a simulation everywhere it shows: header and badge "Simulated activity", one line on what is not recorded yet, NAV "Deal Room"; buyers described as the top-ranked buyers the simulation uses (no NDA claim); fabricated recency and "this week" removed. | ☑ `7d78309` |
 | G2 | **Advice to act on simulated data** ("Call X now", decay warning, "ExitOS tracks every view…"). | Replace the banker's take with how to read the simulation; no call-to-action on a specific buyer; capability stated as it is (not recorded yet). | ☑ `9ba9337` |
 | G3 | **Buyers see the founder's view of other bidders.** | Buyer role gets its own view: no other bidders; what a buyer's deal room will hold and how access is granted (NDA → founder approval), with links to Access Requests and Browse Opportunities. Route and plan gate unchanged. | ☑ `2af6373` |
-| G4 | Demo company unlabelled. | Simulate on the active company's ranked buyers; badge. | ☐ |
+| G4 | Demo company unlabelled. | Simulate on the active company's ranked buyers; badge. | ☑ G4-commit |
 | G5 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `51ed348` |
 
 ---
@@ -68,3 +68,7 @@ Founder Active Mandate: `h1` 1 · axe 0 · **overflow at 390** · 0 errors. Buye
 ### G2 — Advice to act on simulated data
 *Closed by:* `pages/DealRoom.tsx`. The banker's take ("Call {buyer} now — … Likely moving to LOI", "Engagement decays fast …", "ExitOS tracks every view, download and dwell, scores intent …") is replaced by **How to read this**: what engagement means in a real room; "The ranking below shows how that will look — it says nothing about these buyers today."; "Highest simulated interest: {buyer} · N% (simulated)"; "What ExitOS does — Simulates this view today. Recording real views, downloads and dwell is not built yet; nothing here should drive a call to a buyer." The negotiator link stays as a secondary link.
 *Verification:* eslint clean · Chromium (founder): 0 matches for "Call {name}" / decays / tracks every · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
+
+### G4 — Demo company unlabelled
+*Closed by:* `pages/DealRoom.tsx` (founder view split into `FounderDealRoom`) and `lib/deal-room-activity.ts` (`dealRoomActivity(limit, candidates = BUYERS.candidates)` — additive, default unchanged). The simulation runs on `runBuyerDiscovery(loadActiveCompany(), { limit: 12 })`, the same call the demo constant uses. Eyebrow names the source; **Demo data / Your intake** badge beside "Simulated activity". `pages/Intake.tsx` lists "Deal Room (simulated)".
+*Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium: demo → DEMO DATA, highest simulated interest Flexport Strategic; intake "Northwind Analytics" → YOUR INTAKE, Vista Enterprise Software Bolt-On · buyer view unchanged.

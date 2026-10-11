@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
+import { runBuyerDiscovery } from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
 import { useAuth } from "../lib/auth";
 import { dealRoomActivity, documentAttention, fmtDuration, type BuyerActivity } from "../lib/deal-room-activity";
 
@@ -23,7 +25,14 @@ const DealRoom: React.FC = () => {
   // Buyers share this route but must never see the founder's view of other
   // bidders; they get their own view.
   if (session?.role === "buyer") return <BuyerDealRoom />;
-  const activity = dealRoomActivity(6);
+  return <FounderDealRoom />;
+};
+
+const FounderDealRoom: React.FC = () => {
+  // Simulated on the founder's saved intake when there is one, else the demo company.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const candidates = useMemo(() => runBuyerDiscovery(company, { limit: 12 }).candidates, [company]);
+  const activity = dealRoomActivity(6, candidates);
   const docs = documentAttention(activity);
   const top = activity[0];
   const totalMinutes = activity.reduce((s, a) => s + a.timeMinutes, 0);
@@ -32,8 +41,8 @@ const DealRoom: React.FC = () => {
 
   return (
     <div data-page="deal-room" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="Diligence · Buyer activity" title="Deal Room"
-        badge={<span className="border border-xo-caution/60 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-xo-caution">Simulated activity</span>}
+      <PageHeader eyebrow={fromIntake ? `Diligence · Buyer activity · Your intake: ${company.name}` : `Diligence · Buyer activity · Demo company: ${company.name}`} title="Deal Room"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="border border-xo-caution/60 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-xo-caution">Simulated activity</span></>}
         description="ExitOS does not record data-room sessions yet. This page shows what the room will report, using activity simulated from each buyer's fit probability. No buyer below has signed an NDA or opened a document." />
 
       {top && (
