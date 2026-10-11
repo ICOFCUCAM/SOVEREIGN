@@ -10,6 +10,7 @@ import {
 } from "../lib/deliverables";
 import { emitTelemetry } from "../lib/telemetry";
 import { useAuth } from "../lib/auth";
+import { needsUpgrade, PLAN_LABEL } from "../lib/access";
 import type { BuyerCandidate } from "@exit/engines";
 
 // Autonomous Exit Mode — "Sell my company," not "manage the sale." Seven
@@ -208,8 +209,10 @@ const Autopilot: React.FC = () => {
 
   const { session, upgradeTo } = useAuth();
   // Before an Active Mandate, the agents run only as far as "buyers found" —
-  // the Buyer Discovery gate — then the founder upgrades to engage.
-  const isStarter = session?.plan === "starter";
+  // the Buyer Discovery gate — then the founder upgrades to engage. Read from
+  // the access policy: outreach is an Active Mandate surface, so any plan that
+  // still needs an upgrade for it (Preparation, the retired Starter key) stops here.
+  const isStarter = needsUpgrade("/console/banker", session?.role ?? "founder", session?.plan ?? "free");
   const GATE = AGENTS.findIndex((a) => a.id === "discovery");
 
   const [started, setStarted] = useState(false);
@@ -275,7 +278,7 @@ const Autopilot: React.FC = () => {
         kicker="Phase 3 · Autonomous · Guided simulation"
         title="Autonomous Exit"
         description={isStarter
-          ? "On Starter, the agents take you from your uploads through valuation, listing and buyer discovery — and stop the moment buyers are found. Upgrade to Pro to run outreach, negotiation, closing and wealth."
+          ? `On ${PLAN_LABEL[session?.plan ?? "prep"]}, the agents take you through valuation and buyer discovery — and stop the moment buyers are found. An ${PLAN_LABEL.pro} runs outreach, negotiation, closing and wealth.`
           : "You uploaded revenue, financials and a cap table. ExitOS does the rest — value, readiness, buyers, data room, documents, outreach, negotiation, closing and wealth. Your job is three words: approve, approve, approve."}
       />
 
@@ -383,7 +386,7 @@ const Autopilot: React.FC = () => {
                       <span className="ml-2 text-[12px] text-white/45">{a.role}</span>
                     </div>
                     {locked
-                      ? <span className="rounded-full bg-loi-500/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-loi-300 ring-1 ring-loi-400/40">Pro</span>
+                      ? <span className="rounded-full bg-loi-500/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-loi-300 ring-1 ring-loi-400/40">Requires {PLAN_LABEL.pro}</span>
                       : <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${STATUS_STYLE[status]}`}>
                           {status === "working" ? "Working…" : STATUS_LABEL[status]}
                         </span>}
@@ -446,6 +449,7 @@ const Autopilot: React.FC = () => {
             </p>
             <div className="mt-4 flex flex-wrap gap-2.5">
               <Button onClick={unlockAndContinue}>Launch a mandate & continue →</Button>
+              <span className="basis-full text-[12px] text-white/60">Demo: this switches your session to {PLAN_LABEL.pro} instantly — no payment is taken.</span>
               <Link to="/pricing" className="inline-flex items-center rounded-md px-4 py-2 text-sm font-semibold text-white/70 ring-1 ring-white/15 transition hover:bg-white/5">See pricing</Link>
             </div>
           </div>
