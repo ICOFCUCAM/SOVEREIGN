@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { fmtMoney } from "../lib/ui";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric as XMetric, Provenance } from "../components/xo";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
@@ -92,7 +93,7 @@ const BuyerCopilot: React.FC = () => {
         <div className="bg-xo-panel"><XMetric label="Opening ask (rule) · #1" value={topD ? fmtMoney(topD.recommendedOpen) : "—"} sub="10% above the indicative high" /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       {top && topD && (
         <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"

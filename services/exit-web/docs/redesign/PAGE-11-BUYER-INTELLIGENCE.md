@@ -39,7 +39,7 @@ Preparation / Active Mandate: `h1` none · axe color-contrast ×40 (1440) · no 
 | G3 | Overclaims and invented urgency. | Plain wording. | ☑ `89052f8` |
 | G4 | Hidden plan gate on "Draft outreach". | `requiredEngagement` label for Preparation. | ☑ `6ca8038` |
 | G5 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` and the company's own value; badge. | ☑ `8bba928` |
-| G6 | Fake live tape. | `RegistryTape`. | ☐ |
+| G6 | Fake live tape. | `RegistryTape`. | ☑ G6-commit |
 | G7 | Design: no `h1`, 40 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `90519d7` |
 
 ---
@@ -82,3 +82,7 @@ Dossier foot gives each rule: fit probability = the engine's weighted fit score,
 ### G5 — Demo company unlabelled
 *Closed by:* `pages/BuyerCopilot.tsx` — the buyer list is `dealContextFor(loadActiveCompany()).dealBuyers` (same ranking as the demo constant) and the indicative ranges use that company's enterprise value (`dossier(c, ctx.valuationBand)` instead of the demo `VALUATION_CANONICAL`). Eyebrow names the source, **Demo data / Your intake** badge, enterprise value shown in the header. `pages/Intake.tsx` lists Buyer Intelligence.
 *Verification:* `tsc -b`, eslint clean · Chromium: demo → DEMO DATA, enterprise value $102,849,415, #1 Amazon Strategic 67 %; saved intake "Northwind Analytics" → YOUR INTAKE, $403,509,792, #1 Amazon Strategic 48 % (engine ranking for that profile) · 0 errors.
+
+### G6 — Fake live tape
+*Closed by:* `pages/BuyerCopilot.tsx`: pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
