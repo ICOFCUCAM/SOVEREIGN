@@ -12,7 +12,7 @@ import { useEngineStatus, usePublishHistory, ENGINE_ENDPOINT } from "../lib/dist
 interface Account { name: string; email: string; role: Role; plan: Plan; deals: number }
 
 const SEED: Account[] = [
-  { name: "Tcha Mer", email: "tchamer@aol.com", role: "superadmin", plan: "pro", deals: 0 },
+  { name: "Platform owner", email: "owner@example.com", role: "superadmin", plan: "pro", deals: 0 },
   { name: "James Okafor", email: "founder@helios.co", role: "founder", plan: "pro", deals: 1 },
   { name: "Dana Reyes", email: "dana@northwind.io", role: "founder", plan: "free", deals: 0 },
   { name: "Amazon Strategic", email: "corpdev@amazon-strategic.com", role: "buyer", plan: "pro", deals: 4 },

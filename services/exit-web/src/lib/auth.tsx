@@ -57,6 +57,22 @@ function fakeToken(email: string): string {
   return `dev.${payload}.dev`;
 }
 
+// ── Operator bootstrap ──────────────────────────────────────────────
+// This session is synthesized in the browser, so any role granted here can
+// be claimed by any visitor. Production builds therefore grant NO elevated
+// role from the sign-in form: `import.meta.env.DEV` is false there and the
+// branch is removed at build time. Locally, set VITE_EXITOS_DEV_OPERATOR_EMAIL
+// to exercise the operator console. Production admin access must come from
+// server-side roles once real auth is wired.
+export function devOperatorEmail(): string {
+  if (!import.meta.env.DEV) return "";
+  return String(import.meta.env.VITE_EXITOS_DEV_OPERATOR_EMAIL ?? "").trim().toLowerCase();
+}
+
+export function isDevOperator(email: string, operatorEmail: string): boolean {
+  return operatorEmail !== "" && email.trim().toLowerCase() === operatorEmail;
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
@@ -67,9 +83,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       if (!email || !password) throw new Error("email and password required");
       await new Promise((r) => setTimeout(r, 250));
-      // Bootstrap superadmin — the back-office owner. Created here (not on the
-      // sign-in wizard); admins are then provisioned from the Admin console.
-      const isSuper = email.trim().toLowerCase() === "tchamer@aol.com";
+      // Operator elevation is local-development only (see devOperatorEmail).
+      const isSuper = isDevOperator(email, devOperatorEmail());
       const finalRole: Role = isSuper ? "superadmin" : role;
       const finalPlan: Plan = isSuper ? "pro" : plan;
       setSession({

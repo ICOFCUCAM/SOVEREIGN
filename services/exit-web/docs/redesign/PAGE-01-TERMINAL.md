@@ -243,3 +243,18 @@ Not covered here: shell chrome findings (X5). Screen-reader testing with a real 
 | `vitest run` | **28 files, 178/178 pass** (baseline 168 + 6 design-system + 4 sector-signal tests) |
 | `vite build` | pass (existing chunk-size warning) |
 | Browser | see G8 table; also 900 px checked during G6 |
+
+---
+
+## Closing the defects found outside this page (X1–X6)
+
+Requested by the owner after the Page 01 review ("START FIXING"). Same rule: document → fix → verify → mark.
+
+### X1 — Client-side superadmin bootstrap by hard-coded e-mail (security)
+*Documented before the fix.* `src/lib/auth.tsx` grants `superadmin` + `pro` to anyone who signs in with one hard-coded address; auth is entirely in the browser, so any visitor can type it. The address (personal data) is also shipped in the production bundle and listed in `src/pages/Admin.tsx` sample data.
+
+*Fix:* no role can be secured in the browser, so the production build gets **no** e-mail-based elevation at all. A local-development operator path remains: `VITE_EXITOS_DEV_OPERATOR_EMAIL`, honoured only when `import.meta.env.DEV` is true (the branch is removed from production builds). The decision is a pure, tested function. The address is removed from source and from the Admin sample row.
+
+*Consequence the owner should know:* in production nobody reaches the Admin console via this shortcut any more. Production admin access needs server-side roles (e.g. a Supabase `app_metadata.role` claim checked by the backend). The address remains in git history; rewriting history is a separate decision.
+
+*Verification:* `tsc -b` pass · eslint clean · `auth.test.ts` 2/2 · production `vite build` bundle contains neither the address nor the operator path · Chromium (dev server with `VITE_EXITOS_DEV_OPERATOR_EMAIL=ops@example.com`): the old address → founder console; `ops@example.com` → operator console; any other address → founder console. *Status:* ☑ X1-commit
