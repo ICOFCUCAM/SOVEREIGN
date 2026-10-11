@@ -42,7 +42,7 @@ The paid founder's command surface: value now and after fixes, odds, who is circ
 | G3 | Fake live (tape, pinging dots, "Live", "live telemetry", "live market feed", "live engine state"). | Snapshot-dated labels, `RegistryTape`, no live dots. | ☐ |
 | G4 | Overclaims and mislabels: "What runs the moment you press Execute" ✓ list; "Buyer movement" from a static attribute; "qualified buyers" = top-12 cap; "Close probability" / "Confidence" / "Deal temperature" heuristics unlabelled; "Premium probability". | Plain wording: "What Autonomous Exit will prepare (each step needs your approval)"; "Buyer appetite (registry)"; "top 12 ranked"; indices named with formulas; "Top premium payer". | ☐ |
 | G5 | Plan gates hidden on layer links (Market map → Preparation or Pro). | `requiredEngagement` labels. | ☐ |
-| G6 | Design: no `h1`, 15 contrast failures, overflow at 390, old shared components. | Rebuild on `xo` as one page component; retire `CommandTiles`, `ExitCommander`, `CommanderBlocks` (no other users). | ☑ G6-commit |
+| G6 | Design: no `h1`, 15 contrast failures, overflow at 390, old shared components. | Rebuild on `xo` as one page component; retire `CommandTiles`, `ExitCommander`, `CommanderBlocks` (no other users). | ☑ `03200b1` |
 
 ---
 
