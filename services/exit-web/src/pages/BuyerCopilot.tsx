@@ -1,13 +1,13 @@
 import React, { useMemo } from "react";
 import { fmtMoney } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric as XMetric } from "../components/xo";
+import { PageHeader, Section, Metric as XMetric, Provenance } from "../components/xo";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
 import { buildMarketTape } from "../lib/market-tape";
-import { VALUATION_CANONICAL } from "../lib/engines";
-import { DEAL_BUYERS } from "../lib/deal-context";
+import { dealContextFor } from "../lib/deal-context";
+import { loadActiveCompany } from "../lib/active-company";
 import { type BuyerCandidate, VALUATION_FRAMEWORK } from "@exit/engines";
 
 // Buyer Intelligence (Buyer Copilot) — for each top-ranked acquirer: the
@@ -27,12 +27,11 @@ interface Dossier {
   recommendedOpen: number;
 }
 
-function dossier(c: BuyerCandidate): Dossier {
+function dossier(c: BuyerCandidate, base: { mid: number }): Dossier {
   const likelihood = Math.round(c.probability * 100);
   // Price the range off the strategic valuation band with a capped, type-aware
   // premium — keeps figures credible and consistent with the rest of the
   // console rather than tracking the raw historical-premium multiplier.
-  const base = VALUATION_CANONICAL.headline;
   const isStrategic = c.buyer.buyerType === "strategic";
   const round100k = (n: number): number => Math.round(n / 100_000) * 100_000;
   const prem = Math.min(0.2, Math.max(0, c.outcomes.avgPremiumPct ?? (isStrategic ? 0.12 : 0.04)));
@@ -70,9 +69,12 @@ const RISK_CLS: Record<string, string> = { Low: "text-xo-verified", Medium: "tex
 const SYN_CLS: Record<string, string> = { High: "text-xo-verified", Medium: "text-xo-caution", Low: "text-xo-muted" };
 
 const BuyerCopilot: React.FC = () => {
-  const candidates = DEAL_BUYERS.slice(0, 8);
+  // The founder's saved intake when there is one, else the demo company.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const ctx = useMemo(() => dealContextFor(company), [company]);
+  const candidates = ctx.dealBuyers.slice(0, 8);
   const top = candidates[0];
-  const topD = top ? dossier(top) : null;
+  const topD = top ? dossier(top, ctx.valuationBand) : null;
   const tape = useMemo(() => buildMarketTape(), []);
   const { session } = useAuth();
   // Outreach is an Active Mandate surface; say so before the click.
@@ -80,8 +82,8 @@ const BuyerCopilot: React.FC = () => {
 
   return (
     <div data-page="buyer-intelligence" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Find Buyers" title="Buyer Intelligence"
-        badge={<span className="text-[12px] text-xo-muted">Buyer Copilot · buyer intelligence</span>} />
+      <PageHeader eyebrow={fromIntake ? `◉ Find Buyers · Your intake: ${company.name}` : `◉ Find Buyers · Demo company: ${company.name}`} title="Buyer Intelligence"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Buyer Copilot · enterprise value {fmtMoney(ctx.valuationBand.mid)}</span></>} />
 
       <section aria-label="Buyer summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><XMetric label="Buyers shown" value={String(candidates.length)} sub="top ranked by expected outcome" /></div>
@@ -113,7 +115,7 @@ const BuyerCopilot: React.FC = () => {
         foot="Fit probability is the discovery engine's weighted fit score — not a measured chance of a bid. Indicative range: low = enterprise value × (0.82 + 0.12 × fit), high = enterprise value × (1 + premium), premium being the buyer's disclosed average or 12% for strategics and 4% otherwise, capped at 20%. Opening ask: 10% above the high. Risk: high if the buyer's average retrade is worse than −5%; low if model confidence is medium or high and retrade is better than −3%; otherwise medium. Synergy: mean of sector, model and history fit — high for strategics at 0.55 or more, medium at 0.40 or more. Typical premium is the buyer's disclosed average (capped at 40%) or, where none is disclosed, the framework prior for its type. Founder-friendliness, earnout use, negotiation style, integration and legal posture are not measured for individual buyers, so they are not shown.">
         <ol className="grid grid-cols-1 gap-px bg-xo-line lg:grid-cols-2">
           {candidates.map((c, i) => {
-            const d = dossier(c);
+            const d = dossier(c, ctx.valuationBand);
             const prem = typicalPremium(c);
             return (
               <li key={c.buyer.name} className="bg-xo-panel px-4 py-3">

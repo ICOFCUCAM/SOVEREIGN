@@ -38,7 +38,7 @@ Preparation / Active Mandate: `h1` none · axe color-contrast ×40 (1440) · no 
 | G2 | **Unlabelled heuristics** ("likelihood", "expected range", "recommended open", risk, synergy) and the wrong ranking label. | Name each as a model or rule with its formula; "ranked by expected outcome"; fit probability "not a measured chance of a bid". | ☑ `274b5b7` |
 | G3 | Overclaims and invented urgency. | Plain wording. | ☑ `89052f8` |
 | G4 | Hidden plan gate on "Draft outreach". | `requiredEngagement` label for Preparation. | ☑ `6ca8038` |
-| G5 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` and the company's own value; badge. | ☐ |
+| G5 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` and the company's own value; badge. | ☑ G5-commit |
 | G6 | Fake live tape. | `RegistryTape`. | ☐ |
 | G7 | Design: no `h1`, 40 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `90519d7` |
 
@@ -78,3 +78,7 @@ Dossier foot gives each rule: fit probability = the engine's weighted fit score,
 ### G4 — Hidden plan gate on "Draft outreach"
 *Closed by:* `pages/BuyerCopilot.tsx`: `requiredEngagement("/console/banker", role, plan)` drives a "Requires Active Mandate" note beside the button for Preparation founders. The link and route access are unchanged (the route still sends them to the Upgrade page).
 *Verification:* Chromium: Preparation → "Draft outreach → Requires Active Mandate"; Active Mandate → no note · Preparation 1440/390: 0 errors, axe 0, no overflow.
+
+### G5 — Demo company unlabelled
+*Closed by:* `pages/BuyerCopilot.tsx` — the buyer list is `dealContextFor(loadActiveCompany()).dealBuyers` (same ranking as the demo constant) and the indicative ranges use that company's enterprise value (`dossier(c, ctx.valuationBand)` instead of the demo `VALUATION_CANONICAL`). Eyebrow names the source, **Demo data / Your intake** badge, enterprise value shown in the header. `pages/Intake.tsx` lists Buyer Intelligence.
+*Verification:* `tsc -b`, eslint clean · Chromium: demo → DEMO DATA, enterprise value $102,849,415, #1 Amazon Strategic 67 %; saved intake "Northwind Analytics" → YOUR INTAKE, $403,509,792, #1 Amazon Strategic 48 % (engine ranking for that profile) · 0 errors.
