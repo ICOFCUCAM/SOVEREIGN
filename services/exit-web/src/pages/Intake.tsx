@@ -34,6 +34,7 @@ const USES_YOUR_FIGURES: readonly { to: string; label: string }[] = [
   { to: "/console/network", label: "Network Intelligence" },
   { to: "/console/autopilot", label: "Autonomous Exit (valuation and buyers)" },
   { to: "/console/readiness", label: "Exit Readiness" },
+  { to: "/console/exit-timing", label: "Exit Timing" },
   { to: "/console/engagement-registry", label: "Engagement Registry" },
   { to: "/console/inbox", label: "Inbox" },
   { to: "/console/outreach-plan", label: "Outreach Plan" },

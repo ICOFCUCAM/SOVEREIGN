@@ -35,7 +35,7 @@ Tells the founder *when* to sell: a recommended window in months, the value of w
 | G1 | **Invented forecast** (score +22/+38 per year, value ×1.3 per year, "Q2 {year}"). | Replace the three-year timeline with what the engines produce: now vs after fixes — readiness-engine score current → projected, value now → after fixes — and the window in months with its rule shown. No years or quarters. | ☐ |
 | G2 | **Invented signal verdicts and mislabels** (fixed "tailwind", "high", 40-cap count, registry premium shown as sector's, static notes). | Verdicts only where a stated rule exists (ARR growth ≥ 30 %; buyer demand from the active-buyer count; sector exits > 0); the rest shown as context. Actual deal count of the top-12 buyers; premium labelled registry-wide; notes say what each figure is. | ☐ |
 | G3 | **False monitoring claims** ("monitors continuously and pings you", "signals monitored", "buyers circling", "right now"). | Plain wording: computed when the page opens; no alerts exist. | ☐ |
-| G4 | Demo company unlabelled; "strategic mid" (D1). | Run on `loadActiveCompany()`; badge; "enterprise value today". | ☐ |
+| G4 | Demo company unlabelled; "strategic mid" (D1). | Run on `loadActiveCompany()`; badge; "enterprise value today". | ☑ G4-commit |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 5 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `bc00810` |
 
@@ -53,3 +53,7 @@ Same defect as X9 in three shared components that do not use the shared `Button`
 ### G6 — Design
 *Closed by:* `pages/ExitTiming.tsx` rebuilt on `xo` (`PageHeader` `h1`, six summary metrics, the banker's take as a page-local definition list with one CTA — the shared `BankerTake` is no longer used here — window and timing curve side by side (curve decorative, values in text), timeline as an ordered list, signals as a list with `h3` labels and ▲/▼/■ glyphs so impact is not colour-only). Content carried over verbatim; G1–G5 follow. (X11 commit: `a6371cf`.)
 *Verification:* `tsc -b`, eslint clean · Chromium Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe **0** (was 5), 14 tab stops all with visible focus · free / Preparation: Upgrade page.
+
+### G4 — Demo company unlabelled; "strategic mid"
+*Closed by:* `pages/ExitTiming.tsx` — value now / after fixes, Exit Score, fix efforts (window), buyer pool, standard-valuation multiple, growth and sector all run on `loadActiveCompany()` (`dealContextFor`, `runReadinessAnalysis`, `runBuyerDiscovery` limit 12, `runValuation` standard — same calls the demo constants use). Eyebrow names the source, **Demo data / Your intake** badge. "Sell today — strategic mid" → "enterprise value today" (D1). `pages/Intake.tsx` lists Exit Timing.
+*Verification:* `tsc -b`, eslint clean · Chromium (Active Mandate): demo → DEMO DATA, sell today $102,849,415; saved intake "Northwind Analytics" → YOUR INTAKE, $403,509,792 · 0 errors.

@@ -2,11 +2,11 @@ import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { fmtMoney } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric } from "../components/xo";
+import { PageHeader, Section, Metric, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { READINESS_ANALYSIS, BUYERS, VALUATION_STANDARD } from "../lib/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
-import { EXIT_SCORE, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD } from "../lib/deal-context";
+import { runBuyerDiscovery, runReadiness, runReadinessAnalysis, runValuation } from "@exit/engines";
+import { dealContextFor } from "../lib/deal-context";
+import { loadActiveCompany } from "../lib/active-company";
 import { DEAL_INTEL_FMT, sectorEventCount } from "../lib/market-stats";
 
 // Exit Timing Engine — most founders don't know *when* to sell. The engine
@@ -26,15 +26,23 @@ const IMPACT_STYLE: Record<Impact, { cls: string; glyph: string; label: string }
 const EFFORT_MONTHS: Record<string, number> = { weeks: 2, months: 6, quarters: 9 };
 
 const ExitTiming: React.FC = () => {
-  const current = CURRENT_VALUE_USD;
-  const potential = POTENTIAL_VALUE_USD;
+  // The founder's saved intake when there is one, else the demo company.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const { ctx, analysis, buyers, standard } = useMemo(() => ({
+    ctx: dealContextFor(company),
+    analysis: runReadinessAnalysis(company, runReadiness(company)),
+    buyers: runBuyerDiscovery(company, { limit: 12 }),
+    standard: runValuation(company, { reportType: "standard" }),
+  }), [company]);
+  const current = ctx.currentValueUsd;
+  const potential = ctx.potentialValueUsd;
   const upliftPct = current > 0 ? Math.round((potential / current - 1) * 100) : 0;
-  const growthYoy = SAMPLE_COMPANY.growth.arrGrowthYoyPct;
-  const activeBuyers = BUYERS.candidates.filter((c) => c.buyer.appetite === "active").length;
-  const dealCount = Math.min(40, BUYERS.candidates.reduce((s, c) => s + c.history.totalDeals, 0));
+  const growthYoy = company.growth.arrGrowthYoyPct;
+  const activeBuyers = buyers.candidates.filter((c) => c.buyer.appetite === "active").length;
+  const dealCount = Math.min(40, buyers.candidates.reduce((s, c) => s + c.history.totalDeals, 0));
 
   // window to optimal exit — time to mature the highest-effort fixes
-  const monthsToReady = Math.max(3, ...READINESS_ANALYSIS.weaknesses.map((w) => EFFORT_MONTHS[w.effort] ?? 6));
+  const monthsToReady = Math.max(3, ...analysis.weaknesses.map((w) => EFFORT_MONTHS[w.effort] ?? 6));
   const windowLo = Math.max(2, monthsToReady - 2);
   const windowHi = monthsToReady + 4;
   const sweet = monthsToReady;
@@ -43,7 +51,7 @@ const ExitTiming: React.FC = () => {
   // Score climbs as fixes mature (~+25 then +43 from base); value compounds
   // ~30%/yr (ARR growth tempered + the readiness lift).
   const baseYear = new Date().getFullYear();
-  const yearScores = [EXIT_SCORE, EXIT_SCORE + 22, EXIT_SCORE + 38].map((s) => Math.min(95, Math.round(s)));
+  const yearScores = [ctx.exitScore, ctx.exitScore + 22, ctx.exitScore + 38].map((s) => Math.min(95, Math.round(s)));
   const timeline = [0, 1, 2].map((i) => ({
     year: baseYear + i,
     score: yearScores[i],
@@ -52,8 +60,8 @@ const ExitTiming: React.FC = () => {
   const windowIdx = yearScores.findIndex((s) => s >= 85);
   const windowRow = timeline[windowIdx === -1 ? timeline.length - 1 : windowIdx];
 
-  const revMult = VALUATION_STANDARD.methodologies.find((m) => m.multiple != null);
-  const sectorExits = sectorEventCount(SAMPLE_COMPANY.sector);
+  const revMult = standard.methodologies.find((m) => m.multiple != null);
+  const sectorExits = sectorEventCount(company.sector);
   const signals: { label: string; value: string; trend: string; impact: Impact; note: string }[] = [
     { label: "Industry multiples", value: revMult ? `${revMult.multiple?.toFixed(1)}× ${revMult.basis.toLowerCase().includes("ebitda") ? "EBITDA" : "revenue"}` : "—", trend: "engine mid-band", impact: "tailwind", note: `From the valuation engine's ${revMult?.name.toLowerCase() ?? "multiples"} methodology on your numbers.` },
     { label: "Acquisition activity", value: `${dealCount} tracked deals`, trend: "measured", impact: "tailwind", note: "Strategics and sponsors are both active in the sector." },
@@ -67,8 +75,8 @@ const ExitTiming: React.FC = () => {
 
   return (
     <div data-page="exit-timing" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Timing Desk" title="Exit Timing"
-        badge={<span className="text-[12px] text-xo-muted">Monitor · {tailwinds}/{signals.length} tailwinds</span>}>
+      <PageHeader eyebrow={fromIntake ? `◉ Timing Desk · Your intake: ${company.name}` : `◉ Timing Desk · Demo company: ${company.name}`} title="Exit Timing"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Monitor · {tailwinds}/{signals.length} tailwinds</span></>}>
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-xo-line pt-2">
           {([["Growth", `${Math.round(growthYoy * 100)}%`], ["Buyers circling", String(activeBuyers)]] as const).map(([k, v]) => (
             <div key={k} className="flex items-baseline gap-1.5"><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[12px] font-semibold tabular-nums">{v}</dd></div>
@@ -79,7 +87,7 @@ const ExitTiming: React.FC = () => {
       <section aria-label="Timing summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3 xl:grid-cols-6">
         <div className="bg-xo-panel"><Metric label="Optimal window" emphasis value={`${windowLo}–${windowHi}mo`} sub="to start" /></div>
         <div className="bg-xo-panel"><Metric label="Projected uplift" value={<span className="text-xo-verified">+{upliftPct}%</span>} sub="value of waiting" /></div>
-        <div className="bg-xo-panel"><Metric label="Sell today" value={fmtMoney(current)} sub="strategic mid" /></div>
+        <div className="bg-xo-panel"><Metric label="Sell today" value={fmtMoney(current)} sub="enterprise value today" /></div>
         <div className="bg-xo-panel"><Metric label="Sell at window" value={<span className="text-xo-verified">{fmtMoney(potential)}</span>} sub={`Q2 ${windowRow.year}`} /></div>
         <div className="bg-xo-panel"><Metric label="Market signals" value={`${tailwinds}/${signals.length}`} sub="tailwinds" /></div>
         <div className="bg-xo-panel"><Metric label="Buyers circling" value={String(activeBuyers)} sub="acquisition mode" /></div>
