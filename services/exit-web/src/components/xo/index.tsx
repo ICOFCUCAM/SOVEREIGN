@@ -107,7 +107,7 @@ export const Bar: React.FC<{ value: number; max?: number; label?: string; tone?:
 /** A disclosure toggle with the state announced to assistive technology. */
 export const Disclosure: React.FC<{ open: boolean; onToggle: () => void; controls: string; children: React.ReactNode; className?: string }> = ({ open, onToggle, controls, children, className = "" }) => (
   <button type="button" aria-expanded={open} aria-controls={controls} onClick={onToggle}
-    className={`inline-flex items-center gap-1 rounded-sm px-1 text-[11px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${className}`}>
+    className={`inline-flex min-h-6 items-center gap-1 rounded-sm px-1.5 py-1 text-[11px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${className}`}>
     {children}
     <span aria-hidden className={`inline-block transition-transform ${open ? "rotate-180" : ""}`}>▾</span>
   </button>
