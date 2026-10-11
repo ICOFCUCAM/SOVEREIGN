@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { useAuth } from "../lib/auth";
 import { dealRoomActivity, documentAttention, fmtDuration, type BuyerActivity } from "../lib/deal-room-activity";
 
 // Live Deal Room — not storage, a command center. It shows who's in the room,
@@ -17,6 +18,10 @@ const STATUS_CLS: Record<string, string> = {
 };
 
 const DealRoom: React.FC = () => {
+  const { session } = useAuth();
+  // Buyers share this route but must never see the founder's view of other
+  // bidders; they get their own view.
+  if (session?.role === "buyer") return <BuyerDealRoom />;
   const activity = dealRoomActivity(6);
   const docs = documentAttention(activity);
   const top = activity[0];
@@ -107,6 +112,25 @@ const DealRoom: React.FC = () => {
     </div>
   );
 };
+
+// The buyer's side of the deal room: what it will hold and how access is
+// granted. No other bidder, and no founder-side engagement data, appears here.
+const BuyerDealRoom: React.FC = () => (
+  <div data-page="deal-room" className="space-y-3 text-xo-text">
+    <PageHeader eyebrow="Deals · Your access" title="Deal Room"
+      description="Where a founder shares diligence documents with you once your access request is approved under NDA." />
+    <Section title="Your deal rooms" className="border border-xo-line">
+      <div className="px-4 py-3 text-[13px] leading-relaxed text-xo-muted">
+        <p>No deal room has been opened for your account.</p>
+        <p className="mt-2">A room opens when a founder approves your access request under an NDA. It holds the documents that founder chooses to share with you. You see only your own room — never other bidders or their activity.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link to="/console/nda" className="inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Access requests →</Link>
+          <Link to="/console/marketplace" className="inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Browse opportunities</Link>
+        </div>
+      </div>
+    </Section>
+  </div>
+);
 
 const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
   <div className="bg-xo-panel px-3 py-2">

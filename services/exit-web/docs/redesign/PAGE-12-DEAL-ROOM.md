@@ -36,7 +36,7 @@ Founder Active Mandate: `h1` 1 · axe 0 · **overflow at 390** · 0 errors. Buye
 |---|---|---|---|
 | G1 | **Simulated activity presented as live, recorded telemetry** (page copy, NAV label, "with NDA + access", recency, "this week"). | Say it is a simulation everywhere it shows: header and badge "Simulated activity", one line on what is not recorded yet, NAV "Deal Room"; buyers described as the top-ranked buyers the simulation uses (no NDA claim); fabricated recency and "this week" removed. | ☐ |
 | G2 | **Advice to act on simulated data** ("Call X now", decay warning, "ExitOS tracks every view…"). | Replace the banker's take with how to read the simulation; no call-to-action on a specific buyer; capability stated as it is (not recorded yet). | ☐ |
-| G3 | **Buyers see the founder's view of other bidders.** | Buyer role gets its own view: no other bidders; what a buyer's deal room will hold and how access is granted (NDA → founder approval), with links to Access Requests and Browse Opportunities. Route and plan gate unchanged. | ☐ |
+| G3 | **Buyers see the founder's view of other bidders.** | Buyer role gets its own view: no other bidders; what a buyer's deal room will hold and how access is granted (NDA → founder approval), with links to Access Requests and Browse Opportunities. Route and plan gate unchanged. | ☑ G3-commit |
 | G4 | Demo company unlabelled. | Simulate on the active company's ranked buyers; badge. | ☐ |
 | G5 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `51ed348` |
 
@@ -47,3 +47,7 @@ Founder Active Mandate: `h1` 1 · axe 0 · **overflow at 390** · 0 errors. Buye
 ### G5 — Design
 *Closed by:* `pages/DealRoom.tsx` rebuilt on `xo` (`PageHeader` `h1`, banker's take as a page-local definition list (shared `BankerTake` no longer used here), four summary metrics, buyers as an ordered list with `h3`s, documents as a list with "downloaded"/"concern" words for screen readers, the attention table with row headers inside a keyboard-reachable `ScrollRegion`, concern list). Content carried over verbatim; G1–G4 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium Active Mandate 1440/390: 0 errors, `h1` 1, **no overflow** (was overflowing at 390), axe 0 (after renaming the scroll region so it does not duplicate the section's landmark name), all tab stops with visible focus.
+
+### G3 — Buyers saw the founder's view of other bidders
+*Closed by:* `pages/DealRoom.tsx`: for `session.role === "buyer"` the page renders `BuyerDealRoom` — `h1` "Deal Room", "No deal room has been opened for your account." and how a room opens (founder approves an access request under NDA; only the documents that founder shares; "never other bidders or their activity"), with links to Access requests (`/console/nda`) and Browse opportunities (`/console/marketplace`), both buyer routes. The founder view is unchanged. Route, NAV entries and plan gates unchanged.
+*Verification:* `tsc -b`, eslint clean · Chromium: buyer (Pro) → "Deal Room", "No deal room has been opened for your account", 0 other buyer names (before: "Call Flexport Strategic now"); founder (Active Mandate) unchanged · buyer 1440/390: 0 errors, `h1` 1, no overflow, axe 0, visible focus.
