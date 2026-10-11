@@ -5,7 +5,7 @@
 | Route | `/console/acquisition-radar` |
 | Component | `src/pages/AcquisitionRadar.tsx` (276 lines) |
 | NAV | "Acquisition Radar", group Market Intelligence, roles **founder, buyer**, no plan gate |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All six gaps closed (documented first, one commit each). Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `b0ab855`)
 
@@ -42,7 +42,7 @@ A buyer (or a founder looking from the buyer side) sets an acquisition mandate �
 | G2 | **Demo and catalog listings shown as live opportunities.** The demo company and Sovereign product-catalog seeds appear in the scored pool unlabelled. | `listings.ts` SEEDS | Badge each: "Demo listing" / "Product catalog"; count founder listings separately. | ☑ `1118d65` |
 | G3 | **Overclaims.** Toast "Mandate published — founders can now match it" and "matchable by founders" — nothing reads mandates. "Follow" logs "added to outreach" on follow **and** unfollow. | code | "Mandate saved" + plain note that founders don't see mandates yet; log only on follow. | ☑ `61d8902` |
 | G4 | **Inputs wrong or unvalidated.** "Min/Max check" actually filter company revenue; `2.5` → 25; min > max accepted; offers accept negatives and decimals are not guarded. | measured | Rename to "Target revenue (min/max, $M)"; reuse the Page 03 parsing rules; validate min ≤ max and offer > 0 with messages. | ☑ `c21e177` |
-| G5 | **Consequential actions without saying what happens.** "Express interest" sends an NDA request and opens a deal in one click; "Submit offer" records an indicative offer — neither says who sees what. | code | Inline confirmation naming the effect (founder receives the request/offer; identity revealed on NDA signature); same calls. | ☐ |
+| G5 | **Consequential actions without saying what happens.** "Express interest" sends an NDA request and opens a deal in one click; "Submit offer" records an indicative offer — neither says who sees what. | code | Inline confirmation naming the effect (founder receives the request/offer; identity revealed on NDA signature); same calls. | ☑ G5-commit |
 | G6 | **Design system, hierarchy, accessibility.** No `h1`; 11 contrast failures; chip toggles without `aria-pressed`; old workstation primitives. | axe, code | Rebuild on `xo`: header with `h1` → mandate (left) → scored opportunities (centre) → sector watch; toggles with `aria-pressed`. | ☑ `3c91fff` |
 
 ---
@@ -79,3 +79,25 @@ Left as is: the "Live market" **tag** on Sovereign product-catalog listings (`li
 - Indicative offer: zero/negative → "Enter an amount above zero." (`role="alert"`), nothing submitted; valid decimals submit as before.
 
 *Verification:* `tsc -b`, eslint clean · `intake-fields.test.ts` 5/5 · Chromium: min "2.5" → $2.5–500M (was 25); max "1" → error, band unchanged; max "600" → $2.5–600M; offer "-5" → error, not submitted; offer "12.5" → submitted · 0 errors.
+
+### G5 — Consequential actions without saying what happens (and false success)
+*Closed by:* `pages/AcquisitionRadar.tsx`.
+- **Express interest** and **Submit offer** open an inline confirmation (`role="group"`) that says what happens: an NDA request reaches the listing's founder and opens a deal they can see, identity revealed only if they sign; or an indicative, non-binding offer of $X M is recorded, the deal moves to indication of interest, and the founder sees it in their inbox. Confirm / Cancel.
+- **False success removed:** `requestNda` / `submitOffer` return `null` when the session isn't connected to an account backend; the page used to show "✓ NDA requested" / "✓ Offer submitted" regardless. Now the ✓ and the deal events are recorded only when a record was created; otherwise the card says "Not sent — this session isn't connected to the deal backend, so nothing reached the founder."
+- The same API calls and telemetry run as before, now after confirmation and success.
+
+*Verification:* Chromium: confirmation text shown; Cancel → 0 `nda_requested` events; Send → status "NDA request sent to the founder.", 1 event, ✓ shown, **1 NDA record on the listing** (read back via `ndaRequestsForListing`) · 0 errors. The "Not sent" path was **not exercised in the browser** (the session connects automatically here); it is the `if (!req)` / `if (!offer)` branch, checked by code review.
+
+---
+
+## Final verification (after G1–G6)
+| Check | Result |
+|---|---|
+| `tsc -b` / `eslint src` | pass / 0 errors |
+| `vitest run` | **203/203** |
+| Chromium founder free/pro 1440/390, buyer free 1440/390 | 0 errors, 1 `h1`, no overflow, axe **0** (was 11), visible focus on every sampled stop |
+
+## Known issues
+- X8: catalog listings all claim "North America" (owner data needed).
+- Buyer mandates are saved but no founder page reads them yet (stated on the page).
+- The 43 listings in this build are all seeds (1 demo + 42 catalog); labelled.

@@ -35,6 +35,10 @@ const AcquisitionRadar: React.FC = () => {
   // revenue band fields keep the typed text; only valid numbers apply
   const [revText, setRevText] = useState<{ min: string; max: string }>({ min: "5", max: "500" });
   const [offerError, setOfferError] = useState<Record<string, string>>({});
+  // consequential actions ask first, then report what really happened
+  const [pending, setPending] = useState<Record<string, "nda" | "offer" | undefined>>({});
+  const [actionMsg, setActionMsg] = useState<Record<string, string>>({});
+  const NOT_SENT = "Not sent — this session isn't connected to the deal backend, so nothing reached the founder.";
   const [themes, setThemes] = useState("");                 // strategic themes, comma-separated
   const [requested, setRequested] = useState<Record<string, boolean>>({});
   const [offerInput, setOfferInput] = useState<Record<string, string>>({});
@@ -227,17 +231,8 @@ const AcquisitionRadar: React.FC = () => {
                     }}
                     className={`${SMALL_BTN} border-xo-line text-xo-muted hover:text-xo-text`}>{watched[l.id] ? "★ Following" : "☆ Follow"}</button>
                   <button type="button" onClick={() => setPublish(l)} className={`${SMALL_BTN} border-xo-action/50 text-xo-action`}>↗ Publish</button>
-                  <button type="button"
-                    onClick={() => {
-                      // a single buyer action: captured telemetry the founder
-                      // sees on their listing, AND a first-class NDA request
-                      // record the founder resolves in their inbox.
-                      captureDealEvent({ actorRole: "buyer", kind: "expressed_interest", subjectType: "listing", subjectId: l.id, subjectName: l.code });
-                      captureDealEvent({ actorRole: "buyer", kind: "nda_requested", subjectType: "listing", subjectId: l.id, subjectName: l.code });
-                      void requestNda(l.id);
-                      void startDeal(l.id, "nda_requested");   // open the transaction
-                      setRequested((st) => ({ ...st, [l.id]: true }));
-                    }}
+                  <button type="button" onClick={() => setPending((st) => ({ ...st, [l.id]: "nda" }))}
+                    aria-expanded={pending[l.id] === "nda"} aria-controls={`confirm-${l.id}`}
                     className={`${SMALL_BTN} ml-auto border-xo-verified bg-xo-verified/90 text-ink-950 hover:bg-xo-verified`}
                     disabled={!!requested[l.id]}>{requested[l.id] ? "✓ NDA requested" : "Express interest (request NDA)"}</button>
                 </div>
@@ -251,16 +246,48 @@ const AcquisitionRadar: React.FC = () => {
                     onClick={() => {
                       const res = parseNumber(offerInput[l.id] ?? "", { min: 0.01, max: 1_000_000 });
                       if (!res.ok) { setOfferError((st) => ({ ...st, [l.id]: res.error.startsWith("Must be at least") || res.error.startsWith("Cannot") ? "Enter an amount above zero." : res.error })); return; }
-                      const m = res.value;
-                      void submitOffer(l.id, m * 1e6);
-                      // open (or fetch) the deal and advance it to IOI — emits the loi telemetry
-                      void startDeal(l.id).then((d) => { if (d) void advanceDeal(d, "ioi", "buyer", l.code); });
-                      setOffered((st) => ({ ...st, [l.id]: true }));
+                      setPending((st) => ({ ...st, [l.id]: "offer" }));
                     }}
                     className={`${SMALL_BTN} border-xo-line text-xo-text hover:bg-xo-raise`}
                     disabled={!!offered[l.id]}>{offered[l.id] ? "✓ Offer submitted" : "Submit offer"}</button>
                   <span id={`offer-${l.id}-msg`} role={offerError[l.id] ? "alert" : undefined} className="text-[11px] text-xo-risk">{offerError[l.id]}</span>
                 </div>
+                {pending[l.id] && (
+                  <div id={`confirm-${l.id}`} role="group" aria-label="Confirm action" className="mt-3 border border-xo-caution/50 bg-xo-ink px-3 py-2 text-[12px]">
+                    <p className="text-xo-text">{pending[l.id] === "nda"
+                      ? <>This sends an NDA request for <span className="font-mono">{l.code}</span> to its founder and opens a deal record they can see. The company's identity is revealed only if they sign.</>
+                      : <>This records an indicative offer of <span className="font-mono">${offerInput[l.id]}M</span> on <span className="font-mono">{l.code}</span> and moves the deal to indication of interest. The founder sees it in their inbox; it is not a binding offer.</>}</p>
+                    <div className="mt-2 flex gap-2">
+                      <button type="button" className={`${SMALL_BTN} border-xo-verified bg-xo-verified/90 text-ink-950`}
+                        onClick={async () => {
+                          const kind = pending[l.id];
+                          setPending((st) => ({ ...st, [l.id]: undefined }));
+                          if (kind === "nda") {
+                            const req = await requestNda(l.id);
+                            if (!req) { setActionMsg((st) => ({ ...st, [l.id]: NOT_SENT })); return; }
+                            // a single buyer action: telemetry the founder sees on
+                            // their listing, AND the NDA request record above.
+                            captureDealEvent({ actorRole: "buyer", kind: "expressed_interest", subjectType: "listing", subjectId: l.id, subjectName: l.code });
+                            captureDealEvent({ actorRole: "buyer", kind: "nda_requested", subjectType: "listing", subjectId: l.id, subjectName: l.code });
+                            void startDeal(l.id, "nda_requested");   // open the transaction
+                            setRequested((st) => ({ ...st, [l.id]: true }));
+                            setActionMsg((st) => ({ ...st, [l.id]: "NDA request sent to the founder." }));
+                          } else {
+                            const res = parseNumber(offerInput[l.id] ?? "", { min: 0.01, max: 1_000_000 });
+                            if (!res.ok) return;
+                            const offer = await submitOffer(l.id, res.value * 1e6);
+                            if (!offer) { setActionMsg((st) => ({ ...st, [l.id]: NOT_SENT })); return; }
+                            // open (or fetch) the deal and advance it to IOI — emits the loi telemetry
+                            void startDeal(l.id).then((d) => { if (d) void advanceDeal(d, "ioi", "buyer", l.code); });
+                            setOffered((st) => ({ ...st, [l.id]: true }));
+                            setActionMsg((st) => ({ ...st, [l.id]: "Indicative offer recorded and sent to the founder." }));
+                          }
+                        }}>{pending[l.id] === "nda" ? "Send NDA request" : "Submit offer"}</button>
+                      <button type="button" className={`${SMALL_BTN} border-xo-line text-xo-muted`} onClick={() => setPending((st) => ({ ...st, [l.id]: undefined }))}>Cancel</button>
+                    </div>
+                  </div>
+                )}
+                {actionMsg[l.id] && <p role="status" className={`mt-2 text-[12px] ${actionMsg[l.id] === NOT_SENT ? "text-xo-caution" : "text-xo-verified"}`}>{actionMsg[l.id]}</p>}
               </li>
             ))}
           </ol>
