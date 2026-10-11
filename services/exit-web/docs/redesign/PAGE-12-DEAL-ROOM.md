@@ -34,7 +34,7 @@ Founder Active Mandate: `h1` 1 · axe 0 · **overflow at 390** · 0 errors. Buye
 ## Gap register — Page 12
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Simulated activity presented as live, recorded telemetry** (page copy, NAV label, "with NDA + access", recency, "this week"). | Say it is a simulation everywhere it shows: header and badge "Simulated activity", one line on what is not recorded yet, NAV "Deal Room"; buyers described as the top-ranked buyers the simulation uses (no NDA claim); fabricated recency and "this week" removed. | ☐ |
+| G1 | **Simulated activity presented as live, recorded telemetry** (page copy, NAV label, "with NDA + access", recency, "this week"). | Say it is a simulation everywhere it shows: header and badge "Simulated activity", one line on what is not recorded yet, NAV "Deal Room"; buyers described as the top-ranked buyers the simulation uses (no NDA claim); fabricated recency and "this week" removed. | ☑ G1-commit |
 | G2 | **Advice to act on simulated data** ("Call X now", decay warning, "ExitOS tracks every view…"). | Replace the banker's take with how to read the simulation; no call-to-action on a specific buyer; capability stated as it is (not recorded yet). | ☐ |
 | G3 | **Buyers see the founder's view of other bidders.** | Buyer role gets its own view: no other bidders; what a buyer's deal room will hold and how access is granted (NDA → founder approval), with links to Access Requests and Browse Opportunities. Route and plan gate unchanged. | ☑ `2af6373` |
 | G4 | Demo company unlabelled. | Simulate on the active company's ranked buyers; badge. | ☐ |
@@ -51,3 +51,16 @@ Founder Active Mandate: `h1` 1 · axe 0 · **overflow at 390** · 0 errors. Buye
 ### G3 — Buyers saw the founder's view of other bidders
 *Closed by:* `pages/DealRoom.tsx`: for `session.role === "buyer"` the page renders `BuyerDealRoom` — `h1` "Deal Room", "No deal room has been opened for your account." and how a room opens (founder approves an access request under NDA; only the documents that founder shares; "never other bidders or their activity"), with links to Access requests (`/console/nda`) and Browse opportunities (`/console/marketplace`), both buyer routes. The founder view is unchanged. Route, NAV entries and plan gates unchanged.
 *Verification:* `tsc -b`, eslint clean · Chromium: buyer (Pro) → "Deal Room", "No deal room has been opened for your account", 0 other buyer names (before: "Call Flexport Strategic now"); founder (Active Mandate) unchanged · buyer 1440/390: 0 errors, `h1` 1, no overflow, axe 0, visible focus.
+
+### G1 — Simulated activity presented as live, recorded telemetry
+*Closed by:* `pages/DealRoom.tsx`, `lib/access.ts` (NAV label only).
+| Before | After |
+|---|---|
+| `h1` "Live Deal Room"; NAV "Live Deal Room" | "Deal Room" (both); badge **Simulated activity** |
+| "Every buyer's session, live: who viewed what …" | "ExitOS does not record data-room sessions yet. This page shows what the room will report, using activity simulated from each buyer's fit probability. No buyer below has signed an NDA or opened a document." |
+| "Buyers in the room — with NDA + access" | "Buyers simulated — top ranked · no NDA or access" |
+| "Documents downloaded — this week"; "Total time in room — across all buyers" | "Downloads — simulated"; "Time in room — simulated, all buyers" |
+| "active 12m ago / 1h ago / …" (fixed list) | removed |
+| "Hottest buyer", "Interest" | "Highest simulated interest", "Interest (sim.)" |
+| Section titles | "· simulated" on activity, attention and concern; activity foot gives the simulation formula |
+*Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium (founder): 0 matches for live / this week / with NDA / "… ago" / yesterday · Active Mandate 1440/390: 0 errors, axe 0, no overflow.

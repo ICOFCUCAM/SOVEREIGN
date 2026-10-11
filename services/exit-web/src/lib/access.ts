@@ -63,7 +63,7 @@ export const NAV: NavItem[] = [
   { to: "/console/activity",           label: "Deal Activity",        group: "Exchange", roles: ["founder", "buyer"] },
   { to: "/console/outreach-plan",      label: "Outreach Plan",        group: "Exchange", roles: ["founder"], pro: true, starter: true },
   { to: "/console/process-intel",      label: "Process Intelligence", group: "Exchange", roles: ["founder"], pro: true },
-  { to: "/console/deal-room",          label: "Live Deal Room",       group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/deal-room",          label: "Deal Room",            group: "Exchange", roles: ["founder"], pro: true },
 
   // ── Negotiate (founder) ────────────────────────────────────────
   { to: "/console/negotiator",         label: "Bid Room",             group: "Exchange", roles: ["founder"], pro: true },
