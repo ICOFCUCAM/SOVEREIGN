@@ -53,7 +53,7 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 | G4 | **One click publishes, without saying what.** "List on the exchange" lists immediately, does not say which figures buyers will see (exact revenue, growth, EBITDA margin, sector, region) or where it is stored (exchange vs this browser), and offers no way back. | `listings.ts`, `exit-api.ts` | Confirmation step naming exactly what buyers see and where it is stored; result message says the same. Listing mechanics unchanged. | ☐ |
 | G5 | **Evidence thin.** Comparable status/source and rationale, confidence drivers and the framework disclaimer are computed but not shown; buyers' source (curated registry) not named. | engine fields | Show them (as on the Terminal). | ☐ |
 | G6 | **No path forward.** Nothing tells the founder that their saved figures now drive the Terminal and Liquidity Command. | page | A "your figures now drive…" panel linking to those pages (only when data is saved). | ☐ |
-| G7 | **Old design system and weak hierarchy.** Generic cards/KPI tiles; form labels in tiny uppercase; report and form compete. | screenshots | Rebuild on `xo`: form (with units and hints) beside a decision-first report: value → key figures → buyers → comparables → evidence. | ☑ G7-commit |
+| G7 | **Old design system and weak hierarchy.** Generic cards/KPI tiles; form labels in tiny uppercase; report and form compete. | screenshots | Rebuild on `xo`: form (with units and hints) beside a decision-first report: value → key figures → buyers → comparables → evidence. | ☑ `52719c6` |
 
 ---
 
