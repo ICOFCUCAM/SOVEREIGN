@@ -39,7 +39,7 @@ A buyer (or a founder looking from the buyer side) sets an acquisition mandate �
 | # | Gap | Evidence | Fix (no scoring/engine change) | Status |
 |---|---|---|---|---|
 | G1 | **Fake-live indicators.** Pinging "Tape", "Intelligence rail · live telemetry", "Live ExitOS Acquisition Indexes", "live listings", reactor "across the network". | `AcquisitionRadar.tsx`, shared `MarketTape` | Snapshot-dated labels; `RegistryTape`; "listings", not "live listings". | ☑ `ab60b00` |
-| G2 | **Demo and catalog listings shown as live opportunities.** The demo company and Sovereign product-catalog seeds appear in the scored pool unlabelled. | `listings.ts` SEEDS | Badge each: "Demo listing" / "Product catalog"; count founder listings separately. | ☐ |
+| G2 | **Demo and catalog listings shown as live opportunities.** The demo company and Sovereign product-catalog seeds appear in the scored pool unlabelled. | `listings.ts` SEEDS | Badge each: "Demo listing" / "Product catalog"; count founder listings separately. | ☑ G2-commit |
 | G3 | **Overclaims.** Toast "Mandate published — founders can now match it" and "matchable by founders" — nothing reads mandates. "Follow" logs "added to outreach" on follow **and** unfollow. | code | "Mandate saved" + plain note that founders don't see mandates yet; log only on follow. | ☐ |
 | G4 | **Inputs wrong or unvalidated.** "Min/Max check" actually filter company revenue; `2.5` → 25; min > max accepted; offers accept negatives and decimals are not guarded. | measured | Rename to "Target revenue (min/max, $M)"; reuse the Page 03 parsing rules; validate min ≤ max and offer > 0 with messages. | ☐ |
 | G5 | **Consequential actions without saying what happens.** "Express interest" sends an NDA request and opens a deal in one click; "Submit offer" records an indicative offer — neither says who sees what. | code | Inline confirmation naming the effect (founder receives the request/offer; identity revealed on NDA signature); same calls. | ☐ |
@@ -59,3 +59,10 @@ A buyer (or a founder looking from the buyer side) sets an acquisition mandate �
 Left as is: the "Live market" **tag** on Sovereign product-catalog listings (`lib/sovereign-intel.ts`) — it describes products being on the market, not a data feed.
 
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 pinging elements, 2 snapshot-date mentions; remaining "live" text = the catalog tag only · axe 0 · 0 errors.
+
+### G2 — Demo and catalog listings shown as live opportunities
+*Closed by:* `lib/listings.ts` (`listingOrigin()`: founder / demo / catalog, + test) and `pages/AcquisitionRadar.tsx`. Each card carries **Demo listing** or **Product catalog**; the qualified-opportunities metric reads "of 43 listings · 0 from founders, 43 demo/catalog"; the section foot explains the seeds. Scoring unchanged.
+
+*Verification:* `listings.test.ts` 7/7 · Chromium: 1 demo + 42 catalog cards labelled; metric as above · 0 errors.
+
+**X8 (recorded, not changed):** all 42 catalog listings show region "North America" — including UK, Norway, Germany and other national marketplaces — because `sovereignProfile()` in `lib/listings.ts` builds every catalog entry with `jurisdiction: "US"`. The correct HQ per product is owner information; not guessed here.

@@ -154,3 +154,9 @@ export function unlistCompany(id: string): void {
 }
 
 export const isListed = (id: string): boolean => load().some((x) => x.id === id);
+
+/** Where a listing came from: a founder's own listing, the bundled demo
+ *  company, or the Sovereign product catalog (both seeded, not founders). */
+export type ListingOrigin = "founder" | "demo" | "catalog";
+export const listingOrigin = (l: Pick<Listing, "id">): ListingOrigin =>
+  l.id === "lst-demo-helios" ? "demo" : l.id.startsWith("lst-sov-") ? "catalog" : "founder";

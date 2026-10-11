@@ -6,12 +6,12 @@ import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
-import { allListings, subscribeListings, type Listing } from "../lib/listings";
+import { allListings, subscribeListings, listingOrigin, type Listing } from "../lib/listings";
 import { captureDealEvent } from "../lib/deal-events";
 import { requestNda, submitOffer, startDeal, advanceDeal, saveMandate, myMandate } from "../lib/exit-api";
 import PublishComposer from "../components/PublishComposer";
 import type { Region } from "@exit/engines";
-import { PageHeader, Section, Metric, ScrollRegion, ActionLink, Chip, XO_INPUT, XO_LABEL } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, ActionLink, Chip, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 
 // ── ACQUISITION RADAR · BUYER COMMAND CENTER ────────────────────────
 // Page 04 of the ExitOS institutional redesign (docs/redesign/PAGE-04-
@@ -71,6 +71,8 @@ const AcquisitionRadar: React.FC = () => {
     .map((l) => ({ listing: l, match: matchCompanyToCriteria(l.profile, criteria) }))
     .sort((a, b) => b.match.score - a.match.score), [listings, criteria]);
   const qualified = scored.filter((s) => s.match.qualified);
+  const founderCount = listings.filter((l) => listingOrigin(l) === "founder").length;
+  const seedCount = listings.length - founderCount;
 
   // buyer-lens market intelligence: the indexes for the buyer's sectors
   const watch = ACQ_INDEXES.indexes.filter((i) => sectors.includes(i.sector));
@@ -95,7 +97,7 @@ const AcquisitionRadar: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Target sectors" value={String(sectors.length)} sub="in your mandate" /></div>
         <div className="bg-xo-panel"><Metric label="Sector deal volume" value={watchVolume.toLocaleString()} sub="indexed acquisitions" /></div>
         <div className="bg-xo-panel"><Metric label="Active acquirers" value={String(maxActiveBuyers)} sub="competition · your space" /></div>
-        <div className="bg-xo-panel"><Metric label="Qualified opportunities" value={String(qualified.length)} sub={`of ${listings.length} listings`} /></div>
+        <div className="bg-xo-panel"><Metric label="Qualified opportunities" value={String(qualified.length)} sub={`of ${listings.length} listings · ${founderCount} from founders, ${seedCount} demo/catalog`} /></div>
       </section>
 
       <RegistryTape items={tape} asOf={AS_OF} />
@@ -151,7 +153,7 @@ const AcquisitionRadar: React.FC = () => {
 
         {/* ── opportunities ────────────────────────────────────────── */}
         <Section title="Opportunities · scored against your mandate" eyebrow={`${listings.length} listings`} className="min-w-0 self-start border border-xo-line"
-          foot="Identities withheld until NDA — buyers see sector, region, revenue band and growth. The pool grows as founders list; matching is the same engine at any scale.">
+          foot={`Identities withheld until NDA — buyers see sector, region, revenue and growth. ${founderCount} of ${listings.length} listings come from founders; the rest are the bundled demo company and Sovereign product-catalog entries, labelled on each card.`}>
           <ol className="divide-y divide-xo-line">
             {scored.map(({ listing: l, match }) => (
               <li key={l.id} className="px-4 py-4">
@@ -159,6 +161,8 @@ const AcquisitionRadar: React.FC = () => {
                   <h3 className="text-[16px] font-semibold">
                     {l.code} <span className="text-[12px] font-normal text-xo-muted">· {l.publicView.sector} · {l.publicView.region}</span>
                     {l.productMeta && <span className="ml-2 border border-xo-line px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-muted">{l.productMeta.category}</span>}
+                    {listingOrigin(l) === "demo" && <Provenance kind="demo" className="ml-2">Demo listing</Provenance>}
+                    {listingOrigin(l) === "catalog" && <Provenance kind="registry" className="ml-2">Product catalog</Provenance>}
                     {match.qualified && <span className="ml-2 border border-xo-verified/50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-verified">Qualified</span>}
                   </h3>
                   <span className="font-mono text-[22px] font-semibold tabular-nums text-xo-verified">{match.score}%<span className="sr-only"> match</span></span>

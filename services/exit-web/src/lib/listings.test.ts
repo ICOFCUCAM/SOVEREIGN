@@ -53,3 +53,13 @@ describe("withdrawing a listing", () => {
     expect(allListings().some((x) => x.id === l.id)).toBe(false);
   });
 });
+
+describe("listing origin", () => {
+  it("separates founder listings from the demo and catalog seeds", async () => {
+    const { listingOrigin } = await import("./listings.js");
+    const all = allListings();
+    expect(all.filter((l) => listingOrigin(l) === "demo").map((l) => l.id)).toEqual(["lst-demo-helios"]);
+    expect(all.filter((l) => listingOrigin(l) === "catalog").every((l) => l.id.startsWith("lst-sov-"))).toBe(true);
+    expect(listingOrigin({ id: "lst-acme" })).toBe("founder");
+  });
+});
