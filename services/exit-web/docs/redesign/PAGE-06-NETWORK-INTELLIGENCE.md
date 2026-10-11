@@ -33,7 +33,7 @@ Shows the founder the platform's compounding data assets ("five moats"): the dea
 |---|---|---|---|
 | G1 | **Invented buyer attributes** (retention %, earnout tendency) and hard-coded buyer picks. | Show the active company's top two ranked buyers with measured fields only: expected days to cash, average disclosed premium (or the framework prior, labelled), and the implied ARR multiple labelled as a what-if. Retention and earnout tendency removed — no data. | ☑ `a48e5f6` |
 | G2 | **Overclaims** about agents and learning; "12+ acquirers measured" (top-12 cap); "live engine runs". | Factual wording: what the engines produced; registry sizes named correctly; learning claims limited to what exists. | ☑ `231f41e` |
-| G3 | Fake live tape. | `RegistryTape` with snapshot date. | ☐ |
+| G3 | Fake live tape. | `RegistryTape` with snapshot date. | ☑ G3-commit |
 | G4 | Demo company unlabelled. | Run on `loadActiveCompany()`; badge. | ☐ |
 | G5 | Design: no `h1`, 3 contrast failures, card soup. | Rebuild on `xo`. | ☑ `47f2964` |
 
@@ -58,3 +58,7 @@ Shows the founder the platform's compounding data assets ("five moats"): the dea
 | "Buyer DNA on 12+ acquirers — measured, not guessed"; "Buyer dossiers 12 · live engine runs" | "Buyer DNA covers 1,476 acquirers in the registry (snapshot as of 2026-10-11); the ranking below uses the 31 curated mandates"; "Ranked buyers 12 · top 12 for this company" |
 | footer "…and the live engine runs" | "…and the engines for this company" |
 *Verification:* Chromium text checked · eslint clean · 0 errors.
+
+### G3 — Fake live tape
+*Closed by:* `pages/Network.tsx`: pinging `MarketTape` → dated `RegistryTape`; acquisition reactor foot names the snapshot date ("Rotation is decorative").
+*Verification:* Chromium (Active Mandate): 0 "live" words, 0 pinging elements · eslint clean · 0 errors.

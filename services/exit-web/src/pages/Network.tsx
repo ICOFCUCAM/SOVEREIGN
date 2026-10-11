@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
 import { PageHeader, Section, Metric, ActionLink } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, LiquidityReactor, BuyerNetworkReactor } from "../components/Reactor";
@@ -60,10 +60,10 @@ const Network: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Ranked buyers" value={String(buyerDnaCount)} sub="top 12 for this company" /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-3">
-        <Section title="Acquisition reactor" foot="Sector acquisition volume — the deal graph."><AcquisitionReactor height={200} /></Section>
+        <Section title="Acquisition reactor" foot={`Sector acquisition volume — the deal graph (snapshot as of ${DNA_AS_OF.slice(0, 10)}). Rotation is decorative.`}><AcquisitionReactor height={200} /></Section>
         <Section title="Liquidity reactor" foot="Disclosed capital depth per sector."><LiquidityReactor height={200} /></Section>
         <Section title="Buyer network reactor" foot="Active acquirers by cadence — the buyer graph."><BuyerNetworkReactor height={200} /></Section>
       </div>
