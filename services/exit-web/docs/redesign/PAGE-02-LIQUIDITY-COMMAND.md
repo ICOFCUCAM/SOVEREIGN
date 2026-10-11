@@ -77,7 +77,7 @@ No loading (synchronous engines). Exit-run states: none / complete (card + Re-ru
 | G3 | **Fake live / fixed status.** Hard-coded "Mandate Active/Executing", "Market Open"; "Live" + pinging dots on the board and matches. | `Dashboard.tsx:84-88`, `CommandTiles`, `DashboardModules` | Status from real state (exit run none/complete; data state). No live indicators. Board rendered with `xo` components on this page (shared `CommandTiles` left for Page 05). | ☐ |
 | G4 | **Heuristic indices presented as measurements.** Close probability 84%, Confidence 92% (capped), Market liquidity 98, "Optimize 12 months" ×1.27. | `commander-metrics.ts`, `DashboardModules.tsx` | Same numbers, labelled "index" / "assumption", with the formula on the page. | ☐ |
 | G5 | **Demo fixtures shown as "this deal's live state".** Funnel "Under NDA", "Offers in hand 3", "Leading bid"; exit-run card "NDAs pre-issued", "Leader: …". | `DashboardModules.tsx` funnel, run card | Split registry/model counts from demo fixtures; label fixtures as sample data in words. | ☐ |
-| G6 | **Exit Process writes demo data to production telemetry.** Each run emits the 3 sample offers as `offer` events and "nda_issued" buyer responses for real registry buyers although nothing is sent. Production now holds **6 of 7** offer events from sample IDs `o-001…o-003` and 6 `nda_issued` events (2 runs, 2026-06-03 and 06-18). | `lib/exit-process.ts:250-330`; Supabase read-only query | Stop emitting offer and buyer-response events for demo fixtures; step texts say "drafted, not sent" / "sample offers". Existing rows: **owner decision (D2)** — not deleted. | ☐ |
+| G6 | **Exit Process writes demo data to production telemetry.** Each run emits the 3 sample offers as `offer` events and "nda_issued" buyer responses for real registry buyers although nothing is sent. Production now holds **6 of 7** offer events from sample IDs `o-001…o-003` and 6 `nda_issued` events (2 runs, 2026-06-03 and 06-18). | `lib/exit-process.ts:250-330`; Supabase read-only query | Stop emitting offer and buyer-response events for demo fixtures; step texts say "drafted, not sent" / "sample offers". Existing rows: **owner decision (D2)** — not deleted. | ☑ G6-commit |
 | G7 | **Mislabels / overclaims.** "Premium probability" shows the top premium payer; "Execute — one instruction dispatches the agents" only navigates; "Qualifying buyers 12" is the top-12 cap; probability caption describes a product, engine is a weighted sum. | code + dump | Correct labels and captions; Execute described as opening Autonomous Exit. | ☐ |
 | G8 | **Plan gates hidden.** Execute / See the plan → Autonomous Exit (Preparation or Active Mandate); lifecycle Solicit, Negotiate, Execute, Transition → Active Mandate. | `lib/access.ts` | Show "Requires …" from `needsUpgrade()`, links unchanged (as Page 01 G7). | ☐ |
 | G9 | **Weak hierarchy / repetition.** Enterprise value appears 6 times (chip, board, briefing, KPI row, scenarios, valuation reports); ~4 screens long; decision buried. | screenshots | Decision-first order on `xo`: mandate → position (value now / after fixes / scenarios) → next instruction → buyers → readiness plan → process & funnel → evidence, each figure once. | ☐ |
@@ -99,3 +99,20 @@ No loading (synchronous engines). Exit-run states: none / complete (card + Re-ru
 ### X7 — Shell decorative layer scrolls `<main>` sideways (all pages)
 *Documented above before the fix.* *Fix:* `overflow-hidden` on the `aria-hidden` ambient layer in `Shell.tsx`, so its off-edge ring is clipped instead of widening the scroll area. Nothing interactive lives in that layer.
 *Verification:* `tsc -b` pass · `<main>` scrollWidth = clientWidth at 1440 and 390 on `/console`, `/console/readiness` (was +128 px); `/console/command` keeps only its own G10 overflow at 390. *Status:* ☑ `e4b46ae`
+
+### G6 — Exit Process writes demo data to production telemetry
+*Documented:* gap register row G6. *Closed by:* `lib/exit-process.ts`.
+- Removed the per-run `buyer_response` "nda_issued" events: the NDAs are drafts kept in this browser and never sent.
+- Removed the per-run `offer` events: the scored offers are `SAMPLE_OFFERS` fixtures.
+- `run_completed.artifactsSummary` no longer reports the sample-offer "leader".
+- Step texts: "NDA drafts prepared for top buyers (not sent)"; "sample offers scored (demo data)".
+- Run start/step/completion events and the page-view events are unchanged. No engine call changed; the run produces the same artifacts.
+
+*Verification* (Chromium, full Exit Process run, telemetry requests intercepted and answered locally so nothing reached production):
+
+| Code | Events sent per run |
+|---|---|
+| original | telemetry 3 · run_started 1 · run_step 20 · run_completed 1 · **buyer_response 5 (nda_issued)** · **offer 3 (scored)** |
+| fixed | telemetry 3 · run_started 1 · run_step 20 · run_completed 1 |
+
+`tsc -b` pass · eslint clean. Rows already in production are untouched pending **D2**.
