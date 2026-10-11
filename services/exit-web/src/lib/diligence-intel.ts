@@ -1,5 +1,5 @@
 import { SAMPLE_COMPANY } from "./profile";
-import { VALUATION_STRATEGIC } from "./engines";
+import { VALUATION_CANONICAL } from "./engines";
 
 // Diligence Intelligence Engine. Given the uploaded document set, discover
 // the risks a buyer's analyst would find — across Financial, Legal and
@@ -40,7 +40,7 @@ export const SOURCE_FILES: readonly SourceFile[] = [
   { key: "tax_filings",          label: "Tax filings",          note: "Federal & state returns" },
 ];
 
-const MID = VALUATION_STRATEGIC.headline.mid;
+const MID = VALUATION_CANONICAL.headline.mid;
 // w is a percentage of the strategic midpoint; round to the nearest $100k.
 const impact = (w: number) => Math.round((MID * (w / 100)) / 100_000) * 100_000;
 

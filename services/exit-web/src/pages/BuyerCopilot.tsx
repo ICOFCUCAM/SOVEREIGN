@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { fmtMoney } from "../lib/ui";
 import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
-import { VALUATION_STRATEGIC } from "../lib/engines";
+import { VALUATION_CANONICAL } from "../lib/engines";
 import { DEAL_BUYERS } from "../lib/deal-context";
 import BankerTake from "../components/BankerTake";
 import { type BuyerCandidate, VALUATION_FRAMEWORK } from "@exit/engines";
@@ -29,7 +29,7 @@ function dossier(c: BuyerCandidate): Dossier {
   // Price the range off the strategic valuation band with a capped, type-aware
   // premium — keeps figures credible and consistent with the rest of the
   // console rather than tracking the raw historical-premium multiplier.
-  const base = VALUATION_STRATEGIC.headline;
+  const base = VALUATION_CANONICAL.headline;
   const isStrategic = c.buyer.buyerType === "strategic";
   const round100k = (n: number): number => Math.round(n / 100_000) * 100_000;
   const prem = Math.min(0.2, Math.max(0, c.outcomes.avgPremiumPct ?? (isStrategic ? 0.12 : 0.04)));

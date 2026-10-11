@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Card, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
 import { CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
-import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_STRATEGIC } from "../lib/engines";
+import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_CANONICAL } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
 interface Reserve { minHeadlinePriceUsd: number; minCashPct: number; maxEarnoutPct: number; premiumOverride: number | null }
@@ -32,8 +32,8 @@ const LEV_STYLE: Record<string, string> = {
 // posture. Output is a ready-to-send response.
 type Offer = typeof OFFER_EVALUATIONS[number]["offer"];
 function generateCounter(offer: Offer, reserve: Reserve) {
-  const strategicMid = VALUATION_STRATEGIC.headline.mid;
-  const strategicHigh = VALUATION_STRATEGIC.headline.high;
+  const strategicMid = VALUATION_CANONICAL.headline.mid;
+  const strategicHigh = VALUATION_CANONICAL.headline.high;
   const lev = NEGOTIATION_STATE.leverage;
   // anchor: max of strategic-mid and the offer, plus a leverage-scaled premium
   // (or the founder's manual override from the Adjust counter modal)
@@ -87,7 +87,7 @@ function autonomousTerms(offer: Offer | undefined, t: Thresholds): { clauses: st
 const Negotiator: React.FC = () => {
   const [activeId, setActiveId] = useState(OFFER_EVALUATIONS[0]?.offer.offerId ?? "");
   const active = OFFER_EVALUATIONS.find((e) => e.offer.offerId === activeId) ?? OFFER_EVALUATIONS[0];
-  const reserveMid = VALUATION_STRATEGIC.headline.mid;
+  const reserveMid = VALUATION_CANONICAL.headline.mid;
   const [reserve, setReserve] = useState<Reserve>({
     minHeadlinePriceUsd: RESERVATION_LINES.minHeadlinePriceUsd,
     minCashPct: RESERVATION_LINES.minCashPct,
@@ -101,7 +101,7 @@ const Negotiator: React.FC = () => {
 
   const [walkUsd, setWalkUsd]   = useState(Math.round(RESERVATION_LINES.minHeadlinePriceUsd * 0.95));
   const [minUsd, setMinUsd]     = useState(RESERVATION_LINES.minHeadlinePriceUsd);
-  const [idealUsd, setIdealUsd] = useState(Math.round(VALUATION_STRATEGIC.headline.high));
+  const [idealUsd, setIdealUsd] = useState(Math.round(VALUATION_CANONICAL.headline.high));
   const terms = autonomousTerms(active?.offer, { minUsd, idealUsd, walkUsd });
 
   const draftText = active && counter

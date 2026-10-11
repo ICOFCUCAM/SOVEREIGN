@@ -153,7 +153,8 @@ export interface ReadinessReport {
 export function buildReadinessReport(company: CompanyProfile): ReadinessReport {
   const INST = runInstitutionalValuation(company);
   const ra = runReadinessAnalysis(company, runReadiness(company));
-  const cur = ra.currentStrategicMid, pot = ra.projectedStrategicMid, up = Math.max(0, pot - cur);
+  // D1: current value is the institutional mid; the fixes add the readiness uplift.
+  const up = Math.max(0, ra.projectedStrategicMid - ra.currentStrategicMid), cur = INST.headline.mid, pot = cur + up;
   return {
     meta: meta("Acquisition Readiness Report", company.name, INST.frameworkVersion),
     summary: { score: Math.round(ra.currentScore), band: ra.currentBand.replace(/_/g, " "), currentValue: fmtUsd(cur), potentialValue: fmtUsd(pot), uplift: fmtUsd(up), upliftPct: cur > 0 ? Math.round((up / cur) * 100) : 0, currentUsd: cur, potentialUsd: pot, upliftUsd: up },

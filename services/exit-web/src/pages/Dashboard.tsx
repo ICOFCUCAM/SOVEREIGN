@@ -56,8 +56,7 @@ const Dashboard: React.FC = () => {
       diligence: runDueDiligence(company),
       matches: matchBuyersToListing(listing, company, { limit: 15 }),
       ctx: dealContextFor(company),
-      // The Intelligence Terminal's valuation, computed the same way, so this
-      // page can name the difference instead of silently disagreeing.
+      // The console's single enterprise value (decision D1).
       institutional: runInstitutionalValuation(company),
     };
   }, [company]);
@@ -189,10 +188,10 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Liquidity position" eyebrow="Founder Liquidity Board" className="lg:col-span-7"
 
-          foot={<>Values on this page use the <strong className="font-medium text-xo-muted">strategic-buyer valuation report</strong>. The <ActionLink to="/console">Intelligence Terminal</ActionLink> uses the institutional valuation framework, which puts the midpoint at <span className="font-mono tabular-nums text-xo-muted">{fmtMoney(E.institutional.headline.mid)}</span>. The two methods weight comparables and premiums differently.</>}>
+          foot={<>Enterprise value is the institutional valuation framework's midpoint — the same figure as the <ActionLink to="/console">Intelligence Terminal</ActionLink> and the valuation report. Expected value adds the readiness engine's uplift (+{fmtMoney(E.ctx.potentialValueUsd - E.ctx.currentValueUsd)}).</>}>
           <div className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2">
-            <div className="bg-xo-panel"><Metric label="Enterprise value" emphasis provenance="model" value={fmtMoney(m.companyValue)} sub={`strategic-buyer report mid · band ${fmtMoney(E.ctx.valuationBand.low)} – ${fmtMoney(E.ctx.valuationBand.high)}`} /></div>
-            <div className="bg-xo-panel"><Metric label="Expected value" emphasis provenance="model" value={<span className="text-xo-verified">{fmtMoney(m.potential)}</span>} sub="strategic-buyer report mid after the priced readiness fixes" /></div>
+            <div className="bg-xo-panel"><Metric label="Enterprise value" emphasis provenance="model" value={fmtMoney(m.companyValue)} sub={`institutional framework mid · band ${fmtMoney(E.ctx.valuationBand.low)} – ${fmtMoney(E.ctx.valuationBand.high)}`} /></div>
+            <div className="bg-xo-panel"><Metric label="Expected value" emphasis provenance="model" value={<span className="text-xo-verified">{fmtMoney(m.potential)}</span>} sub="enterprise value + the priced readiness fixes" /></div>
             <div className="bg-xo-panel"><Metric label="Close-probability index" provenance="model" value={`${m.exitProbability}%`}
               sub={<>Heuristic, not a measured likelihood: 0.35 × Exit Score ({E.ctx.exitScore}) + 0.40 × active buyers ({E.ctx.activeBuyers}/6, max 1) + 0.25 × negotiation leverage ({NEGOTIATION_STATE.leverage}; high = 1, medium = 0.6, low = 0.3; from sample offers).</>} /></div>
             <div className="bg-xo-panel"><Metric label="Time to liquidity" value={<>{m.timeToExitMonths}<span className="text-[13px] text-xo-faint"> mo</span></>} sub="once a buyer is engaged" /></div>
@@ -326,7 +325,7 @@ const Dashboard: React.FC = () => {
         </Section>
         {READINESS_ANALYSIS.weaknesses.length > 0 && (
           <Section title="Readiness analysis · improvement plan" eyebrow={READINESS_ANALYSIS.headline} className="lg:col-span-8"
-            right={<span className="text-right text-[11px] text-xo-faint">Projected mid <span className="font-mono text-[13px] text-xo-verified">{fmtMoney(READINESS_ANALYSIS.projectedStrategicMid)}</span> vs current {fmtMoney(READINESS_ANALYSIS.currentStrategicMid)}</span>}>
+            right={<span className="text-right text-[11px] text-xo-faint">Projected mid <span className="font-mono text-[13px] text-xo-verified">{fmtMoney(E.ctx.potentialValueUsd)}</span> vs current {fmtMoney(E.ctx.currentValueUsd)}</span>}>
             <ol className="divide-y divide-xo-line">
               {READINESS_ANALYSIS.weaknesses.slice(0, 4).map((w) => (
                 <li key={w.dimension} className="px-4 py-3">
@@ -371,9 +370,9 @@ const Dashboard: React.FC = () => {
 
       {/* ── 7 · EVIDENCE ────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-3">
-        <Section title="Valuation reports" eyebrow="Low · mid · high">
+        <Section title="Valuation methods" eyebrow="Low · mid · high · the first row is the console value">
           <dl className="divide-y divide-xo-line px-4 py-1">
-            {([["Standard", VALUATION_STANDARD.headline], ["Strategic buyer", VALUATION_STRATEGIC.headline], ["Asset replacement", VALUATION_REPLACEMENT.headline]] as const).map(([k, v]) => (
+            {([["Institutional framework (console value)", E.institutional.headline], ["Standard", VALUATION_STANDARD.headline], ["Strategic buyer report", VALUATION_STRATEGIC.headline], ["Asset replacement", VALUATION_REPLACEMENT.headline]] as const).map(([k, v]) => (
               <Fact key={k} k={k} v={`${fmtMoney(v.low)} · ${fmtMoney(v.mid)} · ${fmtMoney(v.high)}`} />
             ))}
           </dl>

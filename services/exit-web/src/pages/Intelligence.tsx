@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, Kpi, SectionHeader, Field, inputCls, fmtMoney, ConfidenceChip } from "../lib/ui";
-import { VALUATION_STRATEGIC } from "../lib/engines";
+import { VALUATION_CANONICAL } from "../lib/engines";
 import { compareOutcomes, runBuyerDiscovery, runAcquisitionIntelligence, type BuyerCandidate } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { fetchBuyerStats, mergeLiveStatsIntoCandidates, type BuyerLiveStat } from "../lib/buyer-stats";
@@ -76,14 +76,14 @@ const Intelligence: React.FC = () => {
   // stats over the snapshot. The merge re-sorts by the same dimension
   // so live-data-bumped rankings settle correctly.
   const report = useMemo(
-    () => runBuyerDiscovery(SAMPLE_COMPANY, { impliedPriceUsd: VALUATION_STRATEGIC.headline.mid, limit: 20, sortBy }),
+    () => runBuyerDiscovery(SAMPLE_COMPANY, { impliedPriceUsd: VALUATION_CANONICAL.headline.mid, limit: 20, sortBy }),
     [sortBy],
   );
 
   // The full acquisition-intelligence pipeline: registry → fit → pattern →
   // intent → outcome → expected result, plus graph-discovered hidden buyers.
   const intel = useMemo(
-    () => runAcquisitionIntelligence(SAMPLE_COMPANY, { impliedPriceUsd: VALUATION_STRATEGIC.headline.mid, limit: 5 }),
+    () => runAcquisitionIntelligence(SAMPLE_COMPANY, { impliedPriceUsd: VALUATION_CANONICAL.headline.mid, limit: 5 }),
     [],
   );
   const platformSignals = useMemo(() => computePlatformSignals(), []);
@@ -138,7 +138,7 @@ const Intelligence: React.FC = () => {
       <SectionHeader
         kicker="Module 01 · Sourcing"
         title="Acquisition Intelligence Engine"
-        description={`Not a buyer directory. A layered engine that answers one question: which buyer is most likely to produce the best outcome — ranked by expected realized value against an implied price of ${fmtMoney(VALUATION_STRATEGIC.headline.mid)}.`}
+        description={`Not a buyer directory. A layered engine that answers one question: which buyer is most likely to produce the best outcome — ranked by expected realized value against an implied price of ${fmtMoney(VALUATION_CANONICAL.headline.mid)}.`}
       />
 
       {/* ── The pipeline — six layers, registry → expected result ── */}

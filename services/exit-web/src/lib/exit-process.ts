@@ -6,7 +6,7 @@
 // founder sees real progression rather than an instant cliff.
 
 import {
-  runValuation, strategicBuyerReport, assetReplacementReport,
+  runValuation, assetReplacementReport,
   runReadiness, runReadinessAnalysis, runBuyerDiscovery, runDueDiligence,
   createListing, compareOffers, deriveNegotiationState,
   STANDARD_TEMPLATES, issueNda,
@@ -20,6 +20,7 @@ import {
   type NdaInstance,
 } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile";
+import { canonicalValuationFor } from "./canonical-valuation";
 import { RESERVATION_LINES, SAMPLE_OFFERS } from "./engines";
 import { listDocuments } from "./data-room";
 import { emitRunStarted, emitRunStep, emitRunCompleted, flush } from "./telemetry";
@@ -184,7 +185,8 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
     // 2. Valuation
     const valuation = await runStep("valuation", () => ({
       standard:    runValuation(SAMPLE_COMPANY, { reportType: "standard" }),
-      strategic:   strategicBuyerReport(SAMPLE_COMPANY),
+      // D1: the run's headline value is the institutional framework's.
+      strategic:   canonicalValuationFor(SAMPLE_COMPANY),
       replacement: assetReplacementReport(SAMPLE_COMPANY),
     }), (v) => `Strategic mid $${(v.strategic.headline.mid / 1_000_000).toFixed(0)}M (band $${(v.strategic.headline.low / 1_000_000).toFixed(0)}M–$${(v.strategic.headline.high / 1_000_000).toFixed(0)}M)`);
     run.artifacts.valuation = valuation;

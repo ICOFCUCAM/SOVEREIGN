@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Button, Card, Modal, fmtMoney, notify } from "../lib/ui";
 import { CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
-import { useMemorandum, VALUATION_STRATEGIC } from "../lib/engines";
+import { useMemorandum, VALUATION_CANONICAL } from "../lib/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { docToMarkdown, docFilename, downloadDeliverable } from "../lib/deliverables";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
@@ -151,7 +151,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string; ac
         next={flags.length > 0
           ? <>Reconcile the <span className="text-white">{flags.length} Red Team flag{flags.length === 1 ? "" : "s"}</span> before this document reaches a buyer.</>
           : <>This draft is defensible — issue it to the process.</>}
-        stake={<>A <span className="font-mono font-bold text-deal-300">{fmtMoney(VALUATION_STRATEGIC.headline.mid)}</span> outcome hinges on a narrative buyers can't pick apart.</>}
+        stake={<>A <span className="font-mono font-bold text-deal-300">{fmtMoney(VALUATION_CANONICAL.headline.mid)}</span> outcome hinges on a narrative buyers can't pick apart.</>}
         inaction={<>Every unreconciled claim is a retrade lever a buyer's analyst finds in diligence.</>}
         buyer={<>The buyer's analyst reads this adversarially — close the gaps before they do.</>}
         automate={<>ExitOS generates each document from the engines and red-teams it against your real financials.</>}

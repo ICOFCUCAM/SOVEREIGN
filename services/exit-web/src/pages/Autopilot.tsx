@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Card, Modal, SectionHeader, fmtMoney, notify } from "../lib/ui";
-import { VALUATION_STRATEGIC, VALUATION_INSTITUTIONAL, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON, DILIGENCE } from "../lib/engines";
+import { VALUATION_INSTITUTIONAL, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON, DILIGENCE, VALUATION_STRATEGIC, VALUATION_CANONICAL } from "../lib/engines";
 import { discoverFindings, buildSellerReport } from "../lib/diligence-intel";
 import {
   institutionalValuationMemo, buyerShortlistMemo, riskReportDoc,
@@ -95,7 +95,7 @@ const BuyerRow: React.FC<{ b: BuyerCandidate; n: number; excluded?: boolean; onT
 };
 
 const Autopilot: React.FC = () => {
-  const mid = VALUATION_STRATEGIC.headline.mid;
+  const mid = VALUATION_CANONICAL.headline.mid;
   const allBuyers = BUYERS.candidates;
   const findings = useMemo(() => discoverFindings(), []);
   const high = findings.filter((f) => f.severity === "high").length;
@@ -116,7 +116,7 @@ const Autopilot: React.FC = () => {
   const AGENTS: AgentDef[] = [
     {
       id: "valuation", name: "Valuation Agent", role: "Prices the company across methodologies.",
-      work: <>Ran standard, strategic and asset-replacement models → strategic mid <span className="font-mono text-white">{fmtMoney(mid)}</span> (band {fmtMoney(VALUATION_STRATEGIC.headline.low)}–{fmtMoney(VALUATION_STRATEGIC.headline.high)}).</>,
+      work: <>Ran standard, strategic and asset-replacement models; console value (institutional framework) <span className="font-mono text-white">{fmtMoney(mid)}</span> (band {fmtMoney(VALUATION_CANONICAL.headline.low)}–{fmtMoney(VALUATION_CANONICAL.headline.high)}).</>,
       detail: (
         <div className="space-y-1.5">
           {VALUATION_STRATEGIC.methodologies.map((m) => (
@@ -478,7 +478,7 @@ const Autopilot: React.FC = () => {
           <div className="border-b border-white/10 bg-gradient-to-r from-deal-600/20 to-transparent px-6 py-5">
             <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Money arrives</div>
             <div className="mt-1 flex flex-wrap items-baseline gap-3">
-              <span className="font-mono text-3xl font-bold text-deal-300">{fmtMoney(VALUATION_STRATEGIC.headline.mid)}</span>
+              <span className="font-mono text-3xl font-bold text-deal-300">{fmtMoney(VALUATION_CANONICAL.headline.mid)}</span>
               <span className="text-[13px] text-white/60">wired to escrow → your account</span>
             </div>
           </div>

@@ -28,3 +28,22 @@ Correction to what I told the owner: I said "the documents use the institutional
 - Liquidity Command EV $108,252,000 → $102,849,415; expected value $166.7M → $161.3M; scenarios move accordingly.
 - Indices that depend on value only through the buyer pool (active buyers, close-probability, confidence, liquidity) may shift if the buyer pool changes with the new anchor price — reported in the verification, not hidden.
 - Offer scoring and the negotiator now anchor reservation/premium maths on $102.8M.
+
+## Implemented
+Files: `lib/canonical-valuation.ts` (new, + `canonical-valuation.test.ts`), `lib/engines.ts` (`VALUATION_CANONICAL`; offer scoring and memorandum generator use it), `lib/deal-context.ts`, `lib/exit-process.ts`, `lib/report-docs.ts`, `lib/diligence-intel.ts`, `lib/buyer-portal.ts`, pages Autopilot, Banker, BuyerCopilot, DataRoom, Documents, Intelligence, Negotiator, Network, Simulator (what-if runs now use `runInstitutionalValuation`), Dashboard (Liquidity Command).
+
+Liquidity Command: the "two models" note (Page 02 G2) is replaced by "Enterprise value is the institutional valuation framework's midpoint — the same figure as the Intelligence Terminal and the valuation report"; the methods table lists the institutional framework first as the console value, with standard / strategic-buyer report / asset replacement as methods.
+
+## Verification
+| Check | Result |
+|---|---|
+| `tsc -b`, `eslint src` | pass · 0 errors |
+| `vitest run` | 31 files, **193/193** — new D1 tests: canonical = Terminal headline; deal context and `commanderMetrics` use it; value after fixes = value + uplift; a founder's company gets its own institutional value; offer scoring still compares 3 offers |
+| Values shown per page (Chromium, demo company, Active Mandate) — occurrences of $108.3M → $102.8M | Terminal 0→0 / 3→3 · Liquidity Command 4→1\* / 1→4 · Valuation 0→0 / 4→4 · Readiness 4→0 / 0→4 · Exit Timing 7→0 / 0→7 · Chief Investment Banker 5→0 / 0→5 · Outreach (Banker) 2→0 / 0→2 · Bid Room 2→0 / 0→2 · Simulator 4→0 / 0→4 · Documents 1→0 / 2→3 |
+| Terminal vs Liquidity Command | demo: $103M / $102,849,415, uplift $58M / +$58,456,080, expected $161,305,495 · intake (test input): $404M / $403,509,792, uplift $236M / +$236,057,143 |
+| Simulator what-ifs | still move from the new baseline (e.g. $25M ARR → ▲ $19,709,808 on $102,849,415) |
+| Liquidity Command indices | unchanged: close-probability 84%, confidence 92%, liquidity 98, 8 active of 12 |
+| Liquidity Command a11y | axe 0, keyboard focus visible, no overflow (free/pro, 1440/390) |
+| Page errors | 0 on all 14 pages scanned |
+
+\* the remaining $108.3M on Liquidity Command is the "Strategic buyer report" row of the methods table, shown on purpose as a method, not as the company's value.

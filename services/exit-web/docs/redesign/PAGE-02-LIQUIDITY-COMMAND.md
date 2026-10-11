@@ -5,7 +5,7 @@
 | Route | `/console/command` (route policy `/console`, the same as the Terminal) |
 | Component | `src/pages/Dashboard.tsx` (358 lines) |
 | NAV | "Liquidity Command", group Mandate, role **founder**, no plan gate. Free plan renders `BuyerInterestGate` above it. |
-| Status | All ten gaps (G1–G10) and X7 closed, each documented first and marked below. **Awaiting review — Page 03 not started.** Owner decisions D1, D2 open. |
+| Status | All ten gaps (G1–G10) and X7 closed, each documented first and marked below. **Awaiting review — Page 03 not started.** Owner decisions: D1 implemented (one valuation), D2 keep for now. |
 
 Process rule (unchanged from Page 01): **document a gap → close it → verify → mark it closed**, one at a time.
 
@@ -229,8 +229,8 @@ Lifecycle locks are a lock glyph (`aria-hidden`) with screen-reader text ", requ
 | Not verified | screen reader with a real AT (NVDA/VoiceOver); the live production deployment (not reachable from this container) |
 
 ## Known issues and limitations
-- **D1** open: two valuation models across the console. This page names its model and shows the Terminal's figure; the numbers still differ.
-- **D2** open: 6 sample offer events and 6 `nda_issued` events from 2 demo runs remain in production telemetry.
+- **D1** decided 2026-10-11 ("use $103M everywhere") and implemented — see `DECISION-D1-ONE-VALUATION.md`. G2's two-model note is superseded.
+- **D2** decided: keep the 6 sample offer events and 6 `nda_issued` events in production telemetry for now; delete later.
 - The close-probability and confidence indices use negotiation leverage from the sample offers for every company, including a founder's intake (disclosed on the page).
 - The Exit Process run still uses the demo company and sample offers (disclosed when an intake exists).
 - `CommandTiles` and `ExitCommander` keep the old wording ("Live", "Close probability", "One instruction dispatches the agents") on the Chief Investment Banker page until Page 05.

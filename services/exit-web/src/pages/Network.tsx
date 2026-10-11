@@ -4,7 +4,7 @@ import { Card } from "../lib/ui";
 import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, LiquidityReactor, BuyerNetworkReactor } from "../components/Reactor";
-import { BUYERS, VALUATION_STRATEGIC, DILIGENCE } from "../lib/engines";
+import { BUYERS, DILIGENCE, VALUATION_CANONICAL } from "../lib/engines";
 import { VALUATION_FRAMEWORK } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { MARKET_FMT, HISTORY_FMT, DEAL_INTEL, DEAL_INTEL_FMT } from "../lib/market-stats";
@@ -23,7 +23,7 @@ function buyerDna(name: string, retentionBase: number, earnout: string) {
   // premium prior is owned by the Valuation Constitution, never inlined here
   const premiumDefault = VALUATION_FRAMEWORK.buyerTypePremiumPriors[c.buyer.buyerType] ?? VALUATION_FRAMEWORK.executionNeutrals.premiumPct;
   const prem = c.outcomes.avgPremiumPct != null ? Math.min(0.4, c.outcomes.avgPremiumPct) : premiumDefault;
-  const multiple = ((VALUATION_STRATEGIC.headline.mid * (1 + prem)) / ARR).toFixed(1);
+  const multiple = ((VALUATION_CANONICAL.headline.mid * (1 + prem)) / ARR).toFixed(1);
   const retention = Math.min(95, Math.max(45, Math.round(retentionBase + ((c.outcomes.avgRetradePct ?? 0) >= 0 ? 6 : -8))));
   return { name: c.buyer.name, days, multiple, retention, earnout };
 }

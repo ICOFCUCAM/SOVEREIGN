@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Button, Card, Modal, Field, inputCls, SectionHeader, fmtMoney, notify } from "../lib/ui";
-import { BUYERS, DILIGENCE, VALUATION_STRATEGIC, useMemorandum } from "../lib/engines";
+import { BUYERS, DILIGENCE, useMemorandum, VALUATION_CANONICAL } from "../lib/engines";
 import {
   docToMarkdown, docFilename, buyerIntroLetter, introFilename, buyerListCsv,
   structuredDoc, downloadDeliverable,
@@ -67,7 +67,7 @@ const Banker: React.FC = () => {
   const posture = useMemo(() => outreachPosture(preferences), [preferences]);
   const guardrail = useMemo(() => valuationGuardrail(preferences), [preferences]);
   const directiveActions = useMemo(() => recommendedActions(preferences), [preferences]);
-  const mid = VALUATION_STRATEGIC.headline.mid;
+  const mid = VALUATION_CANONICAL.headline.mid;
 
   // ── Interactive state ────────────────────────────────────────────
   const [briefOpen, setBriefOpen] = useState(false);
@@ -105,7 +105,7 @@ const Banker: React.FC = () => {
     { key: "teaser",   title: "Create teaser",            status: teaser ? "done" : "active", result: teaser ? `${teaser.wordCount}-word anonymized teaser ready` : "Writing anonymized teaser…" },
     { key: "cim",      title: "Create CIM",               status: "active", result: cim ? `${cim.sections.length}-section CIM drafted — final review` : "Drafting confidential memorandum…" },
     { key: "qa",       title: "Answer buyer questions",   status: "active", result: `${DILIGENCE.criticalQuestions.length} live buyer question${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} being handled` },
-    { key: "valuation", title: "Set valuation strategy",  status: "done",   result: `Anchoring the process at the strategic ${strategy.anchor} — ${fmtMoney(strategy.anchor === "high" ? VALUATION_STRATEGIC.headline.high : mid)}` },
+    { key: "valuation", title: "Set valuation strategy",  status: "done",   result: `Anchoring the process at the strategic ${strategy.anchor} — ${fmtMoney(strategy.anchor === "high" ? VALUATION_CANONICAL.headline.high : mid)}` },
     { key: "diligence", title: "Coordinate diligence",    status: "active", result: `${DILIGENCE.redFlags.length} red flag${DILIGENCE.redFlags.length === 1 ? "" : "s"} + ${DILIGENCE.criticalQuestions.length} critical Q${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} tracked to resolution` },
   ];
 
@@ -119,7 +119,7 @@ const Banker: React.FC = () => {
   const activity = [...extraActivity, ...baseActivity];
 
   const allApproved = stepIdx >= NEXT_STEPS.length;
-  const target = strategy.anchor === "high" ? VALUATION_STRATEGIC.headline.high : mid;
+  const target = strategy.anchor === "high" ? VALUATION_CANONICAL.headline.high : mid;
 
   // ── Handlers ─────────────────────────────────────────────────────
   const submitBrief = (): void => {
@@ -193,7 +193,7 @@ const Banker: React.FC = () => {
           <Field label="Valuation anchor">
             <select className={inputCls} value={strategy.anchor} onChange={(e) => setStrategy((s) => ({ ...s, anchor: e.target.value as "mid" | "high" }))}>
               <option value="mid">Strategic mid — {fmtMoney(mid)}</option>
-              <option value="high">Strategic high (stretch) — {fmtMoney(VALUATION_STRATEGIC.headline.high)}</option>
+              <option value="high">Strategic high (stretch) — {fmtMoney(VALUATION_CANONICAL.headline.high)}</option>
             </select>
           </Field>
           <Field label={`Cash floor — ${strategy.cashFloor}%`} hint="Minimum cash consideration to accept">
@@ -372,7 +372,7 @@ const Banker: React.FC = () => {
           { q: "Best timing", a: "Months 7–13 — after the readiness gap closes and while multiples hold." },
           { q: "Best structure", a: `Cash-heavy: ≥${strategy.cashFloor}% cash, earnout capped at 15% on audited milestones.` },
           { q: "Best outreach", a: `Anonymized teaser → ${strategy.shortlist}-buyer shortlist → competitive indications of interest.` },
-          { q: "Best valuation", a: `Anchor at the strategic ${strategy.anchor} — ${fmtMoney(mid)} mid, ${fmtMoney(VALUATION_STRATEGIC.headline.high)} stretch.` },
+          { q: "Best valuation", a: `Anchor at the strategic ${strategy.anchor} — ${fmtMoney(mid)} mid, ${fmtMoney(VALUATION_CANONICAL.headline.high)} stretch.` },
           { q: "Best negotiation", a: "Run all buyers in parallel; counter above strategic-mid with a leverage premium." },
           { q: "Best closing", a: "Escrow ≤8% released in 12 months; reverse break-fee; 30–45 day sign-to-close." },
         ];

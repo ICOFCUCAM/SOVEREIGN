@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Card, Field, fmtMoney, ConfidenceChip, inputCls } from "../lib/ui";
 import { CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
-import { runStrategySimulator, runValuation, type BuyerType, type CompanyProfile, type StrategyOutput } from "@exit/engines";
+import { runStrategySimulator, runInstitutionalValuation, type BuyerType, type CompanyProfile, type StrategyOutput } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
-import { VALUATION_STRATEGIC } from "../lib/engines";
+import { VALUATION_CANONICAL } from "../lib/engines";
 import { emitTelemetry } from "../lib/telemetry";
 import BankerTake from "../components/BankerTake";
 
@@ -13,7 +13,7 @@ import BankerTake from "../components/BankerTake";
 // is a deterministic transform of (company, target, constraints) that we
 // re-run through the same valuation + strategy engines, then diff against
 // the baseline. Nothing here is free-form — every number traces to
-// runValuation / runStrategySimulator over a mutated input.
+// runInstitutionalValuation (decision D1) / runStrategySimulator over a mutated input.
 
 const BUYER_TYPES: { value: BuyerType | "any"; label: string }[] = [
   { value: "any",           label: "Any" },
@@ -46,7 +46,7 @@ interface Trajectory {
 // One forward run of both engines over a candidate world-state.
 function simulate(company: CompanyProfile, target: number, c: SimConstraints): Trajectory {
   const sim = runStrategySimulator(company, { ...c, targetValueUsd: target });
-  const valuationMid = runValuation(company, { reportType: "strategic" }).headline.mid;
+  const valuationMid = runInstitutionalValuation(company).headline.mid;
   return { company, target, constraints: c, sim, valuationMid };
 }
 
@@ -69,7 +69,7 @@ function scaleCompany(c: CompanyProfile, arrFactor: number): CompanyProfile {
 }
 
 // Baseline valuation anchors (constant company → compute once).
-const BASE_STRATEGIC = runValuation(SAMPLE_COMPANY, { reportType: "strategic" }).headline;
+const BASE_STRATEGIC = runInstitutionalValuation(SAMPLE_COMPANY).headline;
 
 interface ScenarioDef {
   id: string;
@@ -89,7 +89,7 @@ const SCENARIOS: readonly ScenarioDef[] = [
       const g = SAMPLE_COMPANY.growth.arrGrowthYoyPct;
       const factor = Math.pow(1 + g, 0.5);                       // half a year of compounding
       const company = scaleCompany(base.company, factor);
-      const newMid = runValuation(company, { reportType: "strategic" }).headline.mid;
+      const newMid = runInstitutionalValuation(company).headline.mid;
       const target = Math.round(base.target * (newMid / BASE_STRATEGIC.mid));
       const newArrM = (company.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(1);
       return {
@@ -111,7 +111,7 @@ const SCENARIOS: readonly ScenarioDef[] = [
     apply: (base) => {
       const factor = 25_000_000 / SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd;
       const company = scaleCompany(base.company, factor);
-      const newMid = runValuation(company, { reportType: "strategic" }).headline.mid;
+      const newMid = runInstitutionalValuation(company).headline.mid;
       const target = Math.round(base.target * (newMid / BASE_STRATEGIC.mid));
       return {
         company, target,
@@ -200,7 +200,7 @@ const SCENARIOS: readonly ScenarioDef[] = [
 interface Metric { label: string; base: number; scen: number; fmt: (n: number) => string; higherIsBetter: boolean; }
 
 const Simulator: React.FC = () => {
-  const [targetUsd,     setTargetUsd]     = useState<number>(Math.round(VALUATION_STRATEGIC.headline.mid));
+  const [targetUsd,     setTargetUsd]     = useState<number>(Math.round(VALUATION_CANONICAL.headline.mid));
   const [minCashPct,    setMinCashPct]    = useState<number>(0.75);
   const [maxEarnoutPct, setMaxEarnoutPct] = useState<number>(0.15);
   const [maxTimelineDays, setMaxTimelineDays] = useState<number>(180);
@@ -269,7 +269,7 @@ const Simulator: React.FC = () => {
           <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Baseline trajectory</div>
 
           <div className="mt-5 space-y-5">
-            <Field label="Target value (USD)" hint={`Implied mid: ${fmtMoney(VALUATION_STRATEGIC.headline.mid)}`}>
+            <Field label="Target value (USD)" hint={`Implied mid: ${fmtMoney(VALUATION_CANONICAL.headline.mid)}`}>
               <input
                 type="number"
                 value={targetUsd}

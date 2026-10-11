@@ -1,8 +1,9 @@
-import { VALUATION_STRATEGIC, READINESS, READINESS_ANALYSIS } from "./engines";
+import { VALUATION_CANONICAL, READINESS, READINESS_ANALYSIS } from "./engines";
+import { canonicalValuationFor, valueAfterFixes } from "./canonical-valuation";
 import { exitReadinessCategories, type ReadinessCategory } from "./exit-readiness-ai";
 import { SAMPLE_COMPANY } from "./profile";
 import {
-  runBuyerDiscovery, strategicBuyerReport, runReadiness, runReadinessAnalysis,
+  runBuyerDiscovery, runReadiness, runReadinessAnalysis,
   type BuyerCandidate, type CompanyProfile, type ReadinessReport,
 } from "@exit/engines";
 
@@ -10,6 +11,8 @@ import {
 // so figures never drift between screens. One implied price, one valuation
 // band, one Exit Score, one buyer pool. Anything price-dependent (buyer
 // economics, opening offers, ranges) anchors to IMPLIED_PRICE_USD.
+// The value is the institutional framework's (decision D1); the value after
+// readiness fixes adds the readiness engine's uplift to it.
 //
 // `dealContextFor(company)` computes the same context for any company (the
 // founder's intake on pages that personalise). The exported constants below
@@ -40,8 +43,8 @@ interface ContextInputs {
 
 function build({ company, valuationBand, readiness, analysis }: ContextInputs): DealContext {
   const impliedPriceUsd = valuationBand.mid;
-  const currentValueUsd = analysis.currentStrategicMid;
-  const potentialValueUsd = analysis.projectedStrategicMid;
+  const currentValueUsd = valuationBand.mid;
+  const potentialValueUsd = valueAfterFixes(valuationBand.mid, analysis);
   const valueLeftUsd = Math.max(0, potentialValueUsd - currentValueUsd);
 
   // The ten readiness categories, priced off the value-left-on-the-table.
@@ -75,7 +78,7 @@ export function dealContextFor(company: CompanyProfile): DealContext {
   const readiness = runReadiness(company);
   return build({
     company,
-    valuationBand: strategicBuyerReport(company).headline,
+    valuationBand: canonicalValuationFor(company).headline,
     readiness,
     analysis: runReadinessAnalysis(company, readiness),
   });
@@ -84,7 +87,7 @@ export function dealContextFor(company: CompanyProfile): DealContext {
 /** The demo company's context, from the module-level engine runs. */
 export const DEMO_DEAL_CONTEXT: DealContext = build({
   company: SAMPLE_COMPANY,
-  valuationBand: VALUATION_STRATEGIC.headline,
+  valuationBand: VALUATION_CANONICAL.headline,
   readiness: READINESS,
   analysis: READINESS_ANALYSIS,
 });

@@ -6,7 +6,7 @@
 import { buyers } from "@exit/engines";
 import {
   LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES,
-  SAMPLE_OFFERS, VALUATION_STRATEGIC, DILIGENCE,
+  SAMPLE_OFFERS, VALUATION_CANONICAL, DILIGENCE,
   SAMPLE_NDAS,
 } from "./engines.js";
 import { sectorLabel } from "./market-stats.js";
@@ -95,7 +95,7 @@ export const PORTAL_NEGOTIATIONS: readonly PortalNegotiation[] = SEAT.offer
   ? [{
       code: LISTING_PUBLIC.title,
       offer: SEAT.offer.headlinePriceUsd,
-      premiumPct: Math.round((SEAT.offer.headlinePriceUsd / VALUATION_STRATEGIC.headline.mid - 1) * 100),
+      premiumPct: Math.round((SEAT.offer.headlinePriceUsd / VALUATION_CANONICAL.headline.mid - 1) * 100),
       stage: SEAT.offer.stage === "countered" ? "loi" : "engaged",
       status: SEAT.offer.stage === "countered" ? "Counter received" : "Offer submitted",
     }]

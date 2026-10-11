@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button, Card, fmtMoney } from "../lib/ui";
 import { CommandHeader, MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
-import { DILIGENCE, VALUATION_STRATEGIC } from "../lib/engines";
+import { DILIGENCE, VALUATION_CANONICAL } from "../lib/engines";
 import { listDocuments, uploadDocument, fmtBytes, type DataRoomDocument, type RoomKind } from "../lib/data-room";
 import BankerTake from "../components/BankerTake";
 
@@ -21,7 +21,7 @@ function completeness(uploaded: number, required: number) {
 }
 function missingImpactUsd(kind: string, missingRequired: number): number {
   const w = PKG_IMPACT_WEIGHT[kind] ?? 0.02;
-  return VALUATION_STRATEGIC.headline.mid * w * missingRequired;
+  return VALUATION_CANONICAL.headline.mid * w * missingRequired;
 }
 
 // Virtual Data Room — wired to Supabase storage via the exit-doc-upload
