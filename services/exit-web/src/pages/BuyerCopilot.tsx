@@ -79,10 +79,10 @@ const BuyerCopilot: React.FC = () => {
         badge={<span className="text-[12px] text-xo-muted">Buyer Copilot · buyer intelligence</span>} />
 
       <section aria-label="Buyer summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><XMetric label="Acquirers scored" value={String(candidates.length)} sub="ranked by likelihood" /></div>
-        <div className="bg-xo-panel"><XMetric label="Top likelihood" emphasis value={topD ? `${topD.likelihood}%` : "—"} sub={top?.buyer.name} /></div>
-        <div className="bg-xo-panel"><XMetric label="Expected range" value={topD ? `${fmtMoney(topD.rangeLow)}–${fmtMoney(topD.rangeHigh)}` : "—"} sub="lead buyer" /></div>
-        <div className="bg-xo-panel"><XMetric label="Recommended open" value={topD ? fmtMoney(topD.recommendedOpen) : "—"} sub="anchor above headline" /></div>
+        <div className="bg-xo-panel"><XMetric label="Buyers shown" value={String(candidates.length)} sub="top ranked by expected outcome" /></div>
+        <div className="bg-xo-panel"><XMetric label="Fit probability · #1" emphasis value={topD ? `${topD.likelihood}%` : "—"} sub={top?.buyer.name} /></div>
+        <div className="bg-xo-panel"><XMetric label="Indicative range · #1" value={topD ? `${fmtMoney(topD.rangeLow)}–${fmtMoney(topD.rangeHigh)}` : "—"} sub="heuristic, see below" /></div>
+        <div className="bg-xo-panel"><XMetric label="Opening ask (rule) · #1" value={topD ? fmtMoney(topD.recommendedOpen) : "—"} sub="10% above the indicative high" /></div>
       </section>
 
       <MarketTape items={tape} />
@@ -91,11 +91,11 @@ const BuyerCopilot: React.FC = () => {
         <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
           right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(topD.recommendedOpen)}</span>}>
           <div className="px-4 py-3">
-            <p className="text-[14px] leading-relaxed">Open a conversation with <span className="font-semibold">{top.buyer.name}</span> — highest acquisition likelihood at {topD.likelihood}%.</p>
+            <p className="text-[14px] leading-relaxed">Open a conversation with <span className="font-semibold">{top.buyer.name}</span> — ranked first by expected outcome (fit probability {topD.likelihood}%).</p>
             <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-              <TakeCell k="At stake">Open at <span className="font-mono font-semibold text-xo-verified">{fmtMoney(topD.recommendedOpen)}</span> · expected range {fmtMoney(topD.rangeLow)}–{fmtMoney(topD.rangeHigh)}.</TakeCell>
+              <TakeCell k="At stake">Opening ask (rule) <span className="font-mono font-semibold text-xo-verified">{fmtMoney(topD.recommendedOpen)}</span> · indicative range {fmtMoney(topD.rangeLow)}–{fmtMoney(topD.rangeHigh)}.</TakeCell>
               <TakeCell k="If you wait">Acquisition windows close — {top.buyer.name} redeploys into the next target while you wait.</TakeCell>
-              <TakeCell k="Pursue">{top.buyer.name} — {topD.likelihood}% likelihood, {topD.synergy.toLowerCase()} synergy, {topD.risk.toLowerCase()} risk.</TakeCell>
+              <TakeCell k="Pursue">{top.buyer.name} — fit probability {topD.likelihood}%, {topD.synergy.toLowerCase()} synergy, {topD.risk.toLowerCase()} risk (rules below).</TakeCell>
               <TakeCell k="ExitOS does it">ExitOS scores likelihood, timing, risk and synergy for every buyer from their measured deal history.</TakeCell>
             </dl>
             <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft outreach →</Link>
@@ -104,7 +104,7 @@ const BuyerCopilot: React.FC = () => {
       )}
 
       <Section title="Acquirer dossiers · scored" className="border border-xo-line"
-        foot="Typical premium is the buyer's disclosed average (capped at 40%) or, where none is disclosed, the framework prior for its type. Founder-friendliness, earnout use, negotiation style, integration and legal posture are not measured for individual buyers, so they are not shown.">
+        foot="Fit probability is the discovery engine's weighted fit score — not a measured chance of a bid. Indicative range: low = enterprise value × (0.82 + 0.12 × fit), high = enterprise value × (1 + premium), premium being the buyer's disclosed average or 12% for strategics and 4% otherwise, capped at 20%. Opening ask: 10% above the high. Risk: high if the buyer's average retrade is worse than −5%; low if model confidence is medium or high and retrade is better than −3%; otherwise medium. Synergy: mean of sector, model and history fit — high for strategics at 0.55 or more, medium at 0.40 or more. Typical premium is the buyer's disclosed average (capped at 40%) or, where none is disclosed, the framework prior for its type. Founder-friendliness, earnout use, negotiation style, integration and legal posture are not measured for individual buyers, so they are not shown.">
         <ol className="grid grid-cols-1 gap-px bg-xo-line lg:grid-cols-2">
           {candidates.map((c, i) => {
             const d = dossier(c);
@@ -117,21 +117,21 @@ const BuyerCopilot: React.FC = () => {
                     <span className="mt-0.5 inline-block text-[11px] font-medium capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</span>
                   </div>
                   <div className="text-right">
-                    <div className="text-[11px] text-xo-faint">Likelihood</div>
+                    <div className="text-[11px] text-xo-faint">Fit probability</div>
                     <div className="font-mono text-[22px] font-semibold tabular-nums text-xo-verified">{d.likelihood}%</div>
                   </div>
                 </div>
                 <p className="mt-1.5 text-[12px] leading-snug text-xo-muted">{c.buyer.thesis}</p>
                 <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-xo-line pt-2 sm:grid-cols-3">
-                  <Fact label="Exp. range" value={`${fmtMoney(d.rangeLow)}–${fmtMoney(d.rangeHigh)}`} />
+                  <Fact label="Indicative range" value={`${fmtMoney(d.rangeLow)}–${fmtMoney(d.rangeHigh)}`} />
                   <Fact label="To close" value={`${d.days}d`} />
                   <Fact label="Prior deals" value={String(d.priorDeals)} />
-                  <Fact label="Risk" value={d.risk} cls={RISK_CLS[d.risk]} />
-                  <Fact label="Synergy" value={d.synergy} cls={SYN_CLS[d.synergy]} />
+                  <Fact label="Risk (rule)" value={d.risk} cls={RISK_CLS[d.risk]} />
+                  <Fact label="Synergy (rule)" value={d.synergy} cls={SYN_CLS[d.synergy]} />
                   <Fact label="Close rate" value={`${Math.round(c.expectedOutcome.closeRatePct * 100)}%`} />
                 </dl>
                 <div className="mt-2 flex items-center justify-between border border-xo-line px-3 py-1.5">
-                  <div className="text-[11px] font-medium text-xo-muted">Recommended open</div>
+                  <div className="text-[11px] font-medium text-xo-muted">Opening ask (rule)</div>
                   <div className="font-mono text-[15px] font-semibold tabular-nums text-xo-verified">{fmtMoney(d.recommendedOpen)}</div>
                 </div>
                 <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-xo-line pt-2 sm:grid-cols-3">

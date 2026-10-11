@@ -35,7 +35,7 @@ Preparation / Active Mandate: `h1` none · axe color-contrast ×40 (1440) · no 
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Invented Buyer DNA** (founder-friendly %, earnout, negotiation, integration, legal aggression, decision makers by type). | Remove; keep the typical premium with its source (disclosed average or framework prior, labelled). Say why the rest is absent. | ☑ `5f62647` |
-| G2 | **Unlabelled heuristics** ("likelihood", "expected range", "recommended open", risk, synergy) and the wrong ranking label. | Name each as a model or rule with its formula; "ranked by expected outcome"; fit probability "not a measured chance of a bid". | ☐ |
+| G2 | **Unlabelled heuristics** ("likelihood", "expected range", "recommended open", risk, synergy) and the wrong ranking label. | Name each as a model or rule with its formula; "ranked by expected outcome"; fit probability "not a measured chance of a bid". | ☑ G2-commit |
 | G3 | Overclaims and invented urgency. | Plain wording. | ☐ |
 | G4 | Hidden plan gate on "Draft outreach". | `requiredEngagement` label for Preparation. | ☐ |
 | G5 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` and the company's own value; badge. | ☐ |
@@ -53,3 +53,15 @@ Preparation / Active Mandate: `h1` none · axe color-contrast ×40 (1440) · no 
 ### G1 — Invented Buyer DNA
 *Closed by:* `pages/BuyerCopilot.tsx`. `buyerDNA()` and `DNA_BY_TYPE` removed: founder-friendly % (type base ± retrade), earnout usage, negotiation style, integration, legal aggression and decision makers were one fixed profile per buyer *type* shown as each buyer's own. Kept: **typical premium** via `typicalPremium()`, labelled by source — "(disclosed avg)" capped at 40 %, or "(type prior)" from the Valuation Constitution. The dossier foot says the other traits are not measured per buyer and so are not shown.
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for Founder-friendly / Legal / Decision makers; "Typ. premium (disclosed avg) +40%" on the first dossier · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
+
+### G2 — Unlabelled heuristics and the wrong ranking label
+*Closed by:* `pages/BuyerCopilot.tsx` (labels and one foot; formulas unchanged).
+| Before | After |
+|---|---|
+| "Acquirers scored — ranked by likelihood" | "Buyers shown — top ranked by expected outcome" (the list's actual order) |
+| "Likelihood", "Top likelihood", "highest acquisition likelihood at X%" | "Fit probability", "Fit probability · #1", "ranked first by expected outcome (fit probability X%)" |
+| "Expected range", "Exp. range" | "Indicative range" ("heuristic, see below") |
+| "Recommended open — anchor above headline" | "Opening ask (rule) — 10% above the indicative high" |
+| "Risk", "Synergy" | "Risk (rule)", "Synergy (rule)" |
+Dossier foot gives each rule: fit probability = the engine's weighted fit score, not a measured chance of a bid; range low = value × (0.82 + 0.12 × fit), high = value × (1 + premium: disclosed average or 12 % strategic / 4 % other, capped at 20 %); opening ask = high + 10 %; risk and synergy thresholds.
+*Verification:* `tsc -b`, eslint clean · Chromium: the only "likelihood" left is the G3 sentence; 0 "Expected range" / "Recommended open" / "anchor above" · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
