@@ -5,7 +5,7 @@
 | Route | `/console/autopilot` |
 | Component | `src/pages/Autopilot.tsx` (502 lines) |
 | NAV | "Autonomous Exit", group Mandate, role founder, **Preparation or Active Mandate** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All five gaps closed, plus shared X9. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `dc113ca`)
 
@@ -72,3 +72,12 @@ The shared `Button` (`lib/ui.tsx`) primary/ok variants are white text on `deal-6
 ### G5 — Design system
 *Closed by:* `pages/Autopilot.tsx` — `PageHeader` (one `h1`, data-source eyebrow), page-local `Card` on `xo` surfaces, old white-alpha / ink classes mapped to `xo` tokens; structure and behaviour unchanged (the page already had a sound order and passed axe at rest). Two links on mid-green raised to `deal-700` for contrast.
 *Verification:* Chromium Preparation and Active Mandate, 1440/390: 0 errors, `h1` 1, no overflow, axe 0 at rest, **with steps revealed, and with the review dialog open** (after X9); all tab stops with visible focus; full 8-step run and Preparation gate re-checked.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` all pass · Chromium Preparation/Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0 at rest, mid-run and with the review dialog open · Preparation stops after buyer discovery; Active Mandate runs all 8 steps · personalisation demo vs intake checked.
+
+## Known issues
+- Diligence findings and offers are demo fixtures (labelled).
+- The whole flow is a simulation (stated in the banner, header, decisions and finale).
