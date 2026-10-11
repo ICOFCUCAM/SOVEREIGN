@@ -1,0 +1,45 @@
+# ExitOS redesign · Page 12 — Deal Room
+
+| | |
+|---|---|
+| Route | `/console/deal-room` |
+| Component | `src/pages/DealRoom.tsx` (155 lines) + `lib/deal-room-activity.ts` |
+| NAV | founder: "Live Deal Room", group Exchange, **Active Mandate**; buyer: "Deal Room", group Deals, **Pro** |
+| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+
+## Stage A — Audit (baseline commit `cee53de`)
+
+### Purpose
+For the founder: which buyers are in the data room, how long they spent, what they viewed and downloaded, which sensitive documents drew dwell, and whom to call. For the buyer (same route): their deal room.
+
+### What is real
+**Nothing on this page is recorded activity.** `lib/deal-room-activity.ts` says so in its header: "In demo mode there is no real session telemetry, so engagement is modelled deterministically from each buyer's acquisition probability." There is no deal-room telemetry anywhere in the codebase or backend (searched `deal_room`, `document_view`, `dealroom`).
+
+| Element | Source | Nature |
+|---|---|---|
+| "Every buyer's session, live: who viewed what …" | page copy | **False live claim** |
+| Six "buyers in the room — with NDA + access" | the top-6 *discovery* candidates of the demo company | **Fabricated** — none signed an NDA or entered a room |
+| Time in room, documents viewed, downloads, dwell, "concern signals" | formulas on fit probability (35 + 230 × p minutes; 2 + 6 × p documents; …), document set rotated per buyer | **Simulated** |
+| "Interest %", status ("Likely moving to LOI" …) | 44 + 52 × p + 8 × download ratio; thresholds | **Simulated** |
+| "active 12m ago / 1h ago / …"; "Documents downloaded — this week" | fixed list by index; label | **Fabricated recency** |
+| Banker's take "Call {buyer} now — … Likely moving to LOI"; "Engagement decays fast …"; "ExitOS tracks every view, download and dwell, scores intent …" | — | **Action advice on simulated data**; false capability claim |
+| "Documents drawing attention", "Causing concern — prep the rebuttal in the CIM" | aggregation of the simulated views | Simulated |
+| Buyer role | sees the **same founder view**: other buyers' names, simulated engagement and "Call Flexport Strategic now" | **Role-inappropriate content** (founder intelligence about other bidders shown to a buyer) |
+| NAV label "Live Deal Room" | `lib/access.ts` | False live claim |
+| Company | demo buyer pool | Demo, unlabelled |
+
+### Baseline
+Founder Active Mandate: `h1` 1 · axe 0 · **overflow at 390** · 0 errors. Buyer Pro: same founder page. Free (both roles): Upgrade page.
+
+## Gap register — Page 12
+| # | Gap | Fix | Status |
+|---|---|---|---|
+| G1 | **Simulated activity presented as live, recorded telemetry** (page copy, NAV label, "with NDA + access", recency, "this week"). | Say it is a simulation everywhere it shows: header and badge "Simulated activity", one line on what is not recorded yet, NAV "Deal Room"; buyers described as the top-ranked buyers the simulation uses (no NDA claim); fabricated recency and "this week" removed. | ☐ |
+| G2 | **Advice to act on simulated data** ("Call X now", decay warning, "ExitOS tracks every view…"). | Replace the banker's take with how to read the simulation; no call-to-action on a specific buyer; capability stated as it is (not recorded yet). | ☐ |
+| G3 | **Buyers see the founder's view of other bidders.** | Buyer role gets its own view: no other bidders; what a buyer's deal room will hold and how access is granted (NDA → founder approval), with links to Access Requests and Browse Opportunities. Route and plan gate unchanged. | ☐ |
+| G4 | Demo company unlabelled. | Simulate on the active company's ranked buyers; badge. | ☐ |
+| G5 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☐ |
+
+---
+
+## Closure log
