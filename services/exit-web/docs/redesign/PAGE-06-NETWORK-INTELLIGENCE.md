@@ -35,4 +35,12 @@ Shows the founder the platform's compounding data assets ("five moats"): the dea
 | G2 | **Overclaims** about agents and learning; "12+ acquirers measured" (top-12 cap); "live engine runs". | Factual wording: what the engines produced; registry sizes named correctly; learning claims limited to what exists. | ☐ |
 | G3 | Fake live tape. | `RegistryTape` with snapshot date. | ☐ |
 | G4 | Demo company unlabelled. | Run on `loadActiveCompany()`; badge. | ☐ |
-| G5 | Design: no `h1`, 3 contrast failures, card soup. | Rebuild on `xo`. | ☐ |
+| G5 | Design: no `h1`, 3 contrast failures, card soup. | Rebuild on `xo`. | ☑ G5-commit |
+
+---
+
+## Closure log
+
+### G5 — Design
+*Closed by:* `pages/Network.tsx` rebuilt on `xo` (`PageHeader` `h1`, four network metrics, reactors, each moat a labelled `Section`, buyer cards as `h3` + definition lists, lifecycle links). Content carried over verbatim; G1–G4 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe **0** (was 3), 12 tab stops all with visible focus.
