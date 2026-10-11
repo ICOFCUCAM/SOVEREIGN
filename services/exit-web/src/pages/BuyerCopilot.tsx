@@ -3,6 +3,8 @@ import { fmtMoney } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric as XMetric } from "../components/xo";
 import { Link } from "react-router-dom";
+import { useAuth } from "../lib/auth";
+import { requiredEngagement } from "../lib/access";
 import { buildMarketTape } from "../lib/market-tape";
 import { VALUATION_CANONICAL } from "../lib/engines";
 import { DEAL_BUYERS } from "../lib/deal-context";
@@ -72,6 +74,9 @@ const BuyerCopilot: React.FC = () => {
   const top = candidates[0];
   const topD = top ? dossier(top) : null;
   const tape = useMemo(() => buildMarketTape(), []);
+  const { session } = useAuth();
+  // Outreach is an Active Mandate surface; say so before the click.
+  const outreachGate = requiredEngagement("/console/banker", session?.role ?? "founder", session?.plan ?? "free");
 
   return (
     <div data-page="buyer-intelligence" className="space-y-3 text-xo-text">
@@ -99,6 +104,7 @@ const BuyerCopilot: React.FC = () => {
               <TakeCell k="What ExitOS does">Ranks buyers with the discovery engine and applies the stated rules to each buyer's recorded deal history. Nothing is sent from this page.</TakeCell>
             </dl>
             <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft outreach →</Link>
+            {outreachGate && <span className="ml-3 text-[12px] text-xo-caution">Requires {outreachGate}</span>}
           </div>
         </Section>
       )}
