@@ -8,7 +8,7 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | 02 | `/console/command` (guarded by `/console`) | Liquidity Command | `Dashboard` | founder | none | ☑ approved |
 | 03 | `/console/intake` | Value My Company | `Intake` | founder | none | ☑ approved |
 | 04 | `/console/acquisition-radar` | Acquisition Radar | `AcquisitionRadar` | founder, buyer | none | ☑ done · awaiting final review |
-| 05 | `/console/commander` | Chief Investment Banker | `Commander` | founder | Pro | ◐ in progress |
+| 05 | `/console/commander` | Chief Investment Banker | `Commander` | founder | Pro | ☑ done · awaiting final review |
 | 06 | `/console/network` | Network Intelligence | `Network` | founder | Pro | ☐ |
 | 07 | `/console/autopilot` | Autonomous Exit | `Autopilot` | founder | Preparation or Pro | ☐ |
 | 08 | `/console/readiness` | Readiness | `Readiness` | founder | none | ☐ |

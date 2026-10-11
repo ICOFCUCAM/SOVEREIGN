@@ -5,7 +5,7 @@
 | Route | `/console/commander` |
 | Component | `src/pages/Commander.tsx` (137 lines) + `components/CommandTiles.tsx`, `ExitCommander.tsx`, `CommanderBlocks.tsx` (now used **only** by this page — Page 02 stopped using them) |
 | NAV | "Chief Investment Banker", group Mandate, role founder, **Active Mandate (Pro)** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All gaps closed (G5 found not needed on verification). Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `dfa4175`)
 
@@ -41,7 +41,7 @@ The paid founder's command surface: value now and after fixes, odds, who is circ
 | G2 | **Invented probability breakdown.** | Show the real index decomposition: 0.35 × Exit Score, 0.40 × buyer demand, 0.25 × negotiation leverage (sample offers), each with its points. | ☑ `70730b9` |
 | G3 | Fake live (tape, pinging dots, "Live", "live telemetry", "live market feed", "live engine state"). | Snapshot-dated labels, `RegistryTape`, no live dots. | ☑ `a0b5fec` |
 | G4 | Overclaims and mislabels: "What runs the moment you press Execute" ✓ list; "Buyer movement" from a static attribute; "qualified buyers" = top-12 cap; "Close probability" / "Confidence" / "Deal temperature" heuristics unlabelled; "Premium probability". | Plain wording: "What Autonomous Exit will prepare (each step needs your approval)"; "Buyer appetite (registry)"; "top 12 ranked"; indices named with formulas; "Top premium payer". | ☑ `7dfc568` |
-| G5 | Plan gates hidden on layer links (Market map → Preparation or Pro). | `requiredEngagement` labels. | ☐ |
+| G5 | Plan gates hidden on layer links (Market map → Preparation or Pro). | `requiredEngagement` labels. | ☑ not needed — see log |
 | G6 | Design: no `h1`, 15 contrast failures, overflow at 390, old shared components. | Rebuild on `xo` as one page component; retire `CommandTiles`, `ExitCommander`, `CommanderBlocks` (no other users). | ☑ `03200b1` |
 
 ---
@@ -84,3 +84,20 @@ The six invented factors (market conditions 26, buyer demand 21, technology moat
 ("Premium probability" was not on this page — its briefing never received that row.)
 
 *Verification:* Chromium: new texts present · axe 0, no overflow (1440/390) · 0 errors.
+
+### G5 — Plan gates on layer links: **not needed** (verified)
+The page itself requires Active Mandate (`needsUpgrade("/console/commander")` is true for free and prep), and with Active Mandate `requiredEngagement` returns no requirement for any destination it links to (`/console`, `/market-map`, `/pipeline`, `/buyers`, `/autopilot`, `/readiness`, `/intelligence`). No label would ever show; nothing changed. Free and Preparation founders see the Upgrade page (checked in Chromium).
+
+---
+
+## Final verification (after G1–G6)
+| Check | Result |
+|---|---|
+| `tsc -b` / `eslint src` | pass / 0 errors |
+| `vitest run` | **204/204** (new: probability parts) |
+| Chromium Active Mandate 1440/390 | 0 errors, 1 `h1`, no overflow (was overflowing), axe **0** (was 15), 22 tab stops all with visible focus |
+| Free / Preparation | Upgrade page |
+| Personalisation | demo → $102,849,415; saved intake → own company and value |
+
+## Known issues
+- Close-probability and confidence indices still use negotiation leverage from the sample offers (disclosed on the page).
