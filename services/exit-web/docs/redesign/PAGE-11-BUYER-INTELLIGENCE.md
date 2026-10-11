@@ -5,7 +5,7 @@
 | Route | `/console/buyer-copilot` |
 | Component | `src/pages/BuyerCopilot.tsx` (187 lines) |
 | NAV | "Buyer Intelligence", group Market Intelligence, role founder, **Preparation or Active Mandate** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All seven gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `b2e9a16`)
 
@@ -86,3 +86,12 @@ Dossier foot gives each rule: fit probability = the engine's weighted fit score,
 ### G6 — Fake live tape
 *Closed by:* `pages/BuyerCopilot.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, 15 tab stops all with visible focus · free: Upgrade page · personalisation demo vs intake checked · Preparation sees the outreach requirement.
+
+## Known issues
+- Indicative ranges, opening ask, risk and synergy are rules (stated on the page), not calibrated against recorded outcomes.
+- Buyer behaviour beyond premium (founder-friendliness, earnouts, integration, legal posture) is not in the registry; nothing is shown for it.
