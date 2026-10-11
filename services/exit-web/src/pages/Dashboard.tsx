@@ -3,11 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button, Card, Kpi, fmtMoney, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import {
-  VALUATION_STANDARD, VALUATION_STRATEGIC, VALUATION_REPLACEMENT,
-  READINESS, READINESS_ANALYSIS, BUYERS, DILIGENCE,
-} from "../lib/engines";
-import { assessIntent } from "@exit/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
+  assessIntent, runValuation, strategicBuyerReport, assetReplacementReport,
+  runReadiness, runReadinessAnalysis, runBuyerDiscovery, runDueDiligence,
+  createListing, matchBuyersToListing,
+} from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
+import { dealContextFor } from "../lib/deal-context";
+import { Provenance } from "../components/xo";
 import ExitProcessModal from "../components/ExitProcessModal";
 import JourneyMap from "../components/JourneyMap";
 import ExitCommander from "../components/ExitCommander";
@@ -18,19 +20,20 @@ import { commanderMetrics } from "../lib/commander-metrics";
 import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
 import { emitTelemetry } from "../lib/telemetry";
 
-// Founder dashboard — wired to @exit/engines. The deterministic
-// engines (valuation, readiness, buyer discovery, diligence) all run
-// on module load against SAMPLE_COMPANY; the dashboard summarises the
-// run and links into the deep surfaces for each engine.
+// Founder dashboard — wired to @exit/engines. The deterministic engines
+// (valuation, readiness, buyer discovery, diligence, deal context) run on the
+// active company: the founder's intake when there is one, else the demo
+// company. Sample offers/NDAs and the Exit Process run remain demo fixtures.
 
-const BAND_LABEL: Record<typeof READINESS["band"], string> = {
+type Band = ReturnType<typeof runReadiness>["band"];
+const BAND_LABEL: Record<Band, string> = {
   not_ready:              "Not ready",
   seed_acquisition:       "Seed acquisition",
   growth_acquisition:     "Growth acquisition",
   strategic_acquisition:  "Strategic acquisition",
 };
 
-const BAND_STYLE: Record<typeof READINESS["band"], string> = {
+const BAND_STYLE: Record<Band, string> = {
   not_ready:              "text-white/60 bg-white/5 ring-white/15",
   seed_acquisition:       "text-loi-300 bg-loi-500/15 ring-loi-400/40",
   growth_acquisition:     "text-stage-engaged bg-stage-engaged/15 ring-stage-engaged/40",
@@ -39,13 +42,32 @@ const BAND_STYLE: Record<typeof READINESS["band"], string> = {
 
 const Dashboard: React.FC = () => {
   const { session } = useAuth();
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  // Every engine run below is for the active company (pure, deterministic).
+  const E = useMemo(() => {
+    const readiness = runReadiness(company);
+    const analysis = runReadinessAnalysis(company, readiness);
+    const listing = createListing(company, { visibility: "private_full" });
+    return {
+      standard: runValuation(company, { reportType: "standard" }),
+      strategic: strategicBuyerReport(company),
+      replacement: assetReplacementReport(company),
+      readiness, analysis,
+      buyers: runBuyerDiscovery(company, { limit: 12 }),
+      diligence: runDueDiligence(company),
+      matches: matchBuyersToListing(listing, company, { limit: 15 }),
+      ctx: dealContextFor(company),
+    };
+  }, [company]);
+  const VALUATION_STANDARD = E.standard, VALUATION_STRATEGIC = E.strategic, VALUATION_REPLACEMENT = E.replacement;
+  const READINESS = E.readiness, READINESS_ANALYSIS = E.analysis, BUYERS = E.buyers, DILIGENCE = E.diligence;
   const topBuyers = BUYERS.candidates.slice(0, 5);
   const criticalQs = DILIGENCE.criticalQuestions;
   const redFlags = DILIGENCE.redFlags;
-  const arrM = SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd / 1_000_000;
+  const arrM = company.revenue.annualRecurringRevenueUsd / 1_000_000;
 
   const navigate = useNavigate();
-  const m = commanderMetrics();
+  const m = commanderMetrics(E.ctx, E.analysis);
 
   // Highest-intent buyer + most-likely premium payer for the briefing memo —
   // computed from the same candidates the intelligence pipeline ranks.
@@ -59,7 +81,7 @@ const Dashboard: React.FC = () => {
       highestIntent: byIntent ? `${byIntent.c.buyer.name} · intent ${byIntent.intent.score}/100` : undefined,
       premiumPayer: byPremium ? `${byPremium.buyer.name} · +${Math.round((byPremium.outcomes.avgPremiumPct ?? 0) * 100)}% avg` : undefined,
     };
-  }, []);
+  }, [BUYERS]);
 
   const [run, setRun] = useState<ExitRun | null>(() => loadRun());
   const [modalOpen, setModalOpen] = useState(false);
@@ -99,9 +121,12 @@ const Dashboard: React.FC = () => {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-deal-400">Founder Liquidity Command</div>
-          <h1 className="mt-2 font-serif text-3xl font-bold leading-tight text-white sm:text-4xl">{SAMPLE_COMPANY.name}</h1>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <h1 className="font-serif text-3xl font-bold leading-tight text-white sm:text-4xl">{company.name}</h1>
+            <Provenance kind={fromIntake ? "company" : "demo"} />
+          </div>
           <div className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/45">
-            {SAMPLE_COMPANY.sector.replace(/_/g, " ")} · {arrM.toFixed(1)}M ARR · {SAMPLE_COMPANY.jurisdiction} · operator {session?.founderId ?? "founder"}
+            {company.sector.replace(/_/g, " ")} · {arrM.toFixed(1)}M ARR · {company.jurisdiction} · operator {session?.founderId ?? "founder"}
           </div>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
             {statusChips.map(([k, v, c]) => (
@@ -122,6 +147,7 @@ const Dashboard: React.FC = () => {
           ) : (
             <Button onClick={startExit}>Start Exit Process →</Button>
           )}
+          {fromIntake && <p className="basis-full text-right text-[11px] text-loi-300">The Exit Process run still uses the demo company and sample offers.</p>}
         </div>
       </div>
 
@@ -138,7 +164,7 @@ const Dashboard: React.FC = () => {
 
       <ExitCommander
         founderName={session?.founderId ?? "founder"}
-        companyName={SAMPLE_COMPANY.name}
+        companyName={company.name}
         valuationToday={m.companyValue}
         valuationPotential={m.potential}
         fixCount={m.fixCount}
@@ -179,12 +205,12 @@ const Dashboard: React.FC = () => {
 
       {/* Market position — liquidity, demand geography and who's looking now. */}
       <div className="mb-6 grid gap-4 lg:grid-cols-3">
-        <LiquidityScore />
-        <LiveBuyerActivity />
-        <AcquisitionHeatMap />
+        <LiquidityScore activeBuyers={E.ctx.activeBuyers} demandLabel={E.ctx.demandLabel} />
+        <LiveBuyerActivity matches={E.matches} />
+        <AcquisitionHeatMap dealBuyers={E.ctx.dealBuyers} />
       </div>
-      <div className="mb-6"><ValuationScenarios /></div>
-      <div className="mb-8"><ProbabilityFunnel /></div>
+      <div className="mb-6"><ValuationScenarios current={E.ctx.currentValueUsd} potential={E.ctx.potentialValueUsd} /></div>
+      <div className="mb-8"><ProbabilityFunnel matched={E.matches.matches.length} /></div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Kpi
@@ -311,7 +337,7 @@ const Dashboard: React.FC = () => {
             <ValRow label="Strategic buyer" v={VALUATION_STRATEGIC.headline} />
             <ValRow label="Asset replacement" v={VALUATION_REPLACEMENT.headline} />
           </div>
-          <p className="mt-4 text-[11px] text-white/45">Country adjustment for {SAMPLE_COMPANY.jurisdiction}: {(VALUATION_STRATEGIC.countryAdjustment * 100).toFixed(0)}%.</p>
+          <p className="mt-4 text-[11px] text-white/45">Country adjustment for {company.jurisdiction}: {(VALUATION_STRATEGIC.countryAdjustment * 100).toFixed(0)}%.</p>
         </Card>
 
         <Card className="p-6">

@@ -72,7 +72,7 @@ No loading (synchronous engines). Exit-run states: none / complete (card + Re-ru
 
 | # | Gap | Evidence | Fix (no calculation changed) | Status |
 |---|---|---|---|---|
-| G1 | **Always the demo company, unlabelled.** A founder who completed Value My Company still sees Helios Freight, presented as theirs ("operator pro"). The Terminal personalises; this page does not. | `Dashboard.tsx` imports `SAMPLE_COMPANY`; `lib/engines.ts`, `deal-context.ts` | Run the page's engines on `loadActiveCompany()` (functions exist and are pure; module constants for other pages untouched). Badge Demo data / Your intake. Parts still bound to fixtures (sample offers, NDAs, exit run) say so. | ☐ |
+| G1 | **Always the demo company, unlabelled.** A founder who completed Value My Company still sees Helios Freight, presented as theirs ("operator pro"). The Terminal personalises; this page does not. | `Dashboard.tsx` imports `SAMPLE_COMPANY`; `lib/engines.ts`, `deal-context.ts` | Run the page's engines on `loadActiveCompany()` (functions exist and are pure; module constants for other pages untouched). Badge Demo data / Your intake. Parts still bound to fixtures (sample offers, NDAs, exit run) say so. | ☑ G1-commit |
 | G2 | **Two valuation models across pages.** EV $108.3M here (strategic-buyer report) vs $102.8M on the Terminal (institutional framework); confidence 92% vs 89%; "Implied price $186M" beside EV $108M. | dump above | Name the model on every value; one reconciliation note linking to the Terminal; "Implied price" renamed to what it is (ranking basis). Choosing one canonical valuation is an **owner decision (D1)**. | ☐ |
 | G3 | **Fake live / fixed status.** Hard-coded "Mandate Active/Executing", "Market Open"; "Live" + pinging dots on the board and matches. | `Dashboard.tsx:84-88`, `CommandTiles`, `DashboardModules` | Status from real state (exit run none/complete; data state). No live indicators. Board rendered with `xo` components on this page (shared `CommandTiles` left for Page 05). | ☐ |
 | G4 | **Heuristic indices presented as measurements.** Close probability 84%, Confidence 92% (capped), Market liquidity 98, "Optimize 12 months" ×1.27. | `commander-metrics.ts`, `DashboardModules.tsx` | Same numbers, labelled "index" / "assumption", with the formula on the page. | ☐ |
@@ -116,3 +116,21 @@ No loading (synchronous engines). Exit-run states: none / complete (card + Re-ru
 | fixed | telemetry 3 · run_started 1 · run_step 20 · run_completed 1 |
 
 `tsc -b` pass · eslint clean. Rows already in production are untouched pending **D2**.
+
+### G1 — Always the demo company, unlabelled
+*Documented:* gap register row G1. *Closed by:* `lib/deal-context.ts`, `lib/commander-metrics.ts`, `lib/exit-readiness-ai.ts`, `components/DashboardModules.tsx`, `pages/Dashboard.tsx`.
+
+- `dealContextFor(company)` computes the deal context (valuation band, current/potential value, readiness categories, Exit Score, buyer pool, demand, time to close) for any company. The exported constants other pages import are now `DEMO_DEAL_CONTEXT`, built from the same module-level engine runs — **unchanged values**.
+- `exitReadinessCategories(valueLeft, company = SAMPLE_COMPANY)` and `commanderMetrics(ctx = DEMO_DEAL_CONTEXT, analysis = READINESS_ANALYSIS)` take optional inputs; defaults reproduce the old behaviour. Formulas untouched.
+- The page runs valuation (standard / strategic / replacement), readiness + analysis, buyer discovery, diligence, listing matches and the deal context on `loadActiveCompany()`; the page-only modules receive those values as props (defaults = old behaviour).
+- Header: company from the active profile with a **Demo data / Your intake** badge. With an intake, a line under the action states that the Exit Process run still uses the demo company and sample offers.
+- Still demo-bound (labelled in G4/G5): negotiation leverage (sample offers) inside the close-probability and confidence indices; sample NDAs/offers in the funnel; the Exit Process run.
+
+*Verification:*
+| Check | Result |
+|---|---|
+| `tsc -b`, eslint | pass / clean |
+| `vitest run` | 29 files, **182/182** — new: `dealContextFor(SAMPLE_COMPANY)` equals the shared demo constants and `commanderMetrics(fresh)` equals `commanderMetrics()`; a different company yields different figures |
+| Chromium, demo | h1 Helios Freight · badge DEMO DATA · EV **$108,252,000** · expected **$166,708,080** (identical to baseline) |
+| Chromium, saved intake "Northwind Analytics" (test input) | Terminal and this page both show Northwind Analytics · badge YOUR INTAKE · EV $437,142,857 · expected $673,200,000 · exit-run caveat shown |
+| Chief Investment Banker page (shares `commanderMetrics`) | rendered text **identical** before/after (clock and date stripped) |

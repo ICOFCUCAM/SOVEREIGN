@@ -11,8 +11,8 @@ import { MARKET } from "../lib/market-stats";
 // the funnel is this deal's actual stage-by-stage state.
 
 // ── Liquidity Score ───────────────────────────────────────────────
-export const LiquidityScore: React.FC = () => {
-  const score = Math.min(98, 70 + ACTIVE_BUYERS * 4);
+export const LiquidityScore: React.FC<{ activeBuyers?: number; demandLabel?: "High" | "Medium" | "Low" }> = ({ activeBuyers = ACTIVE_BUYERS, demandLabel = DEMAND_LABEL }) => {
+  const score = Math.min(98, 70 + activeBuyers * 4);
   const color = score >= 80 ? "#34d399" : score >= 60 ? "#fbbf24" : "#f87171";
   return (
     <Card className="p-6">
@@ -25,7 +25,7 @@ export const LiquidityScore: React.FC = () => {
         <div className="h-full rounded-full" style={{ width: `${score}%`, background: color }} />
       </div>
       <p className="mt-3 text-[12.5px] text-white/60">
-        {DEMAND_LABEL === "High" ? "Buyer demand is higher than supply — a seller's market for your profile." : "Balanced demand — a clean process still clears."}
+        {demandLabel === "High" ? "Buyer demand is higher than supply — a seller's market for your profile." : "Balanced demand — a clean process still clears."}
       </p>
     </Card>
   );
@@ -34,21 +34,21 @@ export const LiquidityScore: React.FC = () => {
 // ── Acquisition Heat Map ──────────────────────────────────────────
 // Demand by geography, tallied from where the matched mandates actually
 // deploy — each buyer in the pool counts toward its preferred geographies.
-const HEAT: { country: string; score: number }[] = (() => {
+const heatFor = (buyers: typeof DEAL_BUYERS): { country: string; score: number }[] => {
   const tally = new Map<string, number>();
-  for (const c of DEAL_BUYERS) for (const g of c.buyer.geographyPreferred) tally.set(g, (tally.get(g) || 0) + 1);
+  for (const c of buyers) for (const g of c.buyer.geographyPreferred) tally.set(g, (tally.get(g) || 0) + 1);
   const max = Math.max(1, ...tally.values());
   return [...tally.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([country, n]) => ({ country, score: Math.round((n / max) * 100) }));
-})();
-export const AcquisitionHeatMap: React.FC = () => (
+};
+export const AcquisitionHeatMap: React.FC<{ dealBuyers?: typeof DEAL_BUYERS }> = ({ dealBuyers = DEAL_BUYERS }) => (
   <Card className="p-6">
     <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">Acquisition heat map</div>
     <p className="mt-1 text-[11px] text-white/40">Where your matched mandates deploy</p>
     <div className="mt-4 space-y-2.5">
-      {HEAT.map((h) => (
+      {heatFor(dealBuyers).map((h) => (
         <div key={h.country}>
           <div className="flex items-baseline justify-between text-[12px]">
             <span className="text-white/75">{h.country}</span>
@@ -66,8 +66,8 @@ export const AcquisitionHeatMap: React.FC = () => (
 // ── Top Mandate Matches ───────────────────────────────────────────
 // The matching engine's actual top hits on the live listing — fit score
 // and the outreach path it recommends, not a simulated activity feed.
-export const LiveBuyerActivity: React.FC = () => {
-  const feed = LISTING_MATCHES.matches.slice(0, 4).map((m) => ({
+export const LiveBuyerActivity: React.FC<{ matches?: typeof LISTING_MATCHES }> = ({ matches = LISTING_MATCHES }) => {
+  const feed = matches.matches.slice(0, 4).map((m) => ({
     name: m.buyerName,
     action: `matched at ${Math.round(m.matchScore * 100)}% fit`,
     via: m.suggestedOutreach.replace(/_/g, " "),
@@ -91,11 +91,11 @@ export const LiveBuyerActivity: React.FC = () => {
 };
 
 // ── Valuation Scenarios ───────────────────────────────────────────
-export const ValuationScenarios: React.FC = () => {
+export const ValuationScenarios: React.FC<{ current?: number; potential?: number }> = ({ current = CURRENT_VALUE_USD, potential = POTENTIAL_VALUE_USD }) => {
   const scenarios = [
-    { label: "Sell today", value: CURRENT_VALUE_USD, sub: "current strategic mid", color: "text-white" },
-    { label: "Optimize 6 months", value: POTENTIAL_VALUE_USD, sub: "after the readiness fixes", color: "text-deal-300" },
-    { label: "Optimize 12 months", value: Math.round(POTENTIAL_VALUE_USD * 1.27), sub: "fixes + a year of growth", color: "text-deal-300" },
+    { label: "Sell today", value: current, sub: "current strategic mid", color: "text-white" },
+    { label: "Optimize 6 months", value: potential, sub: "after the readiness fixes", color: "text-deal-300" },
+    { label: "Optimize 12 months", value: Math.round(potential * 1.27), sub: "fixes + a year of growth", color: "text-deal-300" },
   ];
   return (
     <Card className="p-6">
@@ -121,14 +121,15 @@ export const ValuationScenarios: React.FC = () => {
 const ACTIVE_NDA_COUNT = SAMPLE_NDAS.filter(
   (n) => n.listingId === LISTING_PRIVATE.listingId && n.state === "active",
 ).length;
-const FUNNEL: { label: string; n: number }[] = [
+const funnelFor = (matched: number): { label: string; n: number }[] => [
   { label: "Registry mandates", n: MARKET.buyers },
-  { label: "Matched", n: LISTING_MATCHES.matches.length },
+  { label: "Matched", n: matched },
   { label: "Under NDA", n: ACTIVE_NDA_COUNT },
   { label: "Offers in hand", n: SAMPLE_OFFERS.length },
   { label: "Leading bid", n: OFFER_COMPARISON.leader ? 1 : 0 },
 ];
-export const ProbabilityFunnel: React.FC = () => {
+export const ProbabilityFunnel: React.FC<{ matched?: number }> = ({ matched = LISTING_MATCHES.matches.length }) => {
+  const FUNNEL = funnelFor(matched);
   const top = Math.max(1, FUNNEL[0].n);
   return (
     <Card className="p-6">
