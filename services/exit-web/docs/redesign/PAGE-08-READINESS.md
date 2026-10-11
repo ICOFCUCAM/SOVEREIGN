@@ -5,7 +5,7 @@
 | Route | `/console/readiness` |
 | Component | `src/pages/Readiness.tsx` (208 lines) |
 | NAV | "Readiness", group Mandate, role founder, no plan gate |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All six gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `40c3a67`)
 
@@ -74,3 +74,12 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 ### G5 — Fake live tape
 *Closed by:* `pages/Readiness.tsx`: pinging `MarketTape` → dated `RegistryTape` ("Registry · as of 2026-10-11").
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free/pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium free/pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, 38 tab stops all with visible focus · personalisation demo vs intake checked · 0 "live" words, 0 pinging elements.
+
+## Known issues
+- The ten category scores are fixed rules (now labelled as such); they are not calibrated against recorded deals.
+- The Exit Score and the readiness-engine score remain two models; both are shown and named. Unifying them is a product decision, not done here.
