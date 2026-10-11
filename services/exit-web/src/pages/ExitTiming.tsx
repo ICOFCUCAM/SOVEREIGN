@@ -47,18 +47,11 @@ const ExitTiming: React.FC = () => {
   const windowHi = monthsToReady + 4;
   const sweet = monthsToReady;
 
-  // ── Multi-year readiness timeline ────────────────────────────
-  // Score climbs as fixes mature (~+25 then +43 from base); value compounds
-  // ~30%/yr (ARR growth tempered + the readiness lift).
-  const baseYear = new Date().getFullYear();
-  const yearScores = [ctx.exitScore, ctx.exitScore + 22, ctx.exitScore + 38].map((s) => Math.min(95, Math.round(s)));
-  const timeline = [0, 1, 2].map((i) => ({
-    year: baseYear + i,
-    score: yearScores[i],
-    value: Math.round(current * Math.pow(1.3, i)),
-  }));
-  const windowIdx = yearScores.findIndex((s) => s >= 85);
-  const windowRow = timeline[windowIdx === -1 ? timeline.length - 1 : windowIdx];
+  // Now vs after fixes — both points come from the engines: the readiness
+  // engine's current and projected score, and value now vs after fixes.
+  // No year-by-year forecast is produced, so none is shown.
+  const scoreNow = Math.round(analysis.currentScore);
+  const scoreAfter = Math.round(analysis.projectedScore);
 
   const revMult = standard.methodologies.find((m) => m.multiple != null);
   const sectorExits = sectorEventCount(company.sector);
@@ -88,7 +81,7 @@ const ExitTiming: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Optimal window" emphasis value={`${windowLo}–${windowHi}mo`} sub="to start" /></div>
         <div className="bg-xo-panel"><Metric label="Projected uplift" value={<span className="text-xo-verified">+{upliftPct}%</span>} sub="value of waiting" /></div>
         <div className="bg-xo-panel"><Metric label="Sell today" value={fmtMoney(current)} sub="enterprise value today" /></div>
-        <div className="bg-xo-panel"><Metric label="Sell at window" value={<span className="text-xo-verified">{fmtMoney(potential)}</span>} sub={`Q2 ${windowRow.year}`} /></div>
+        <div className="bg-xo-panel"><Metric label="Sell at window" value={<span className="text-xo-verified">{fmtMoney(potential)}</span>} sub="after fixes · no growth assumed" /></div>
         <div className="bg-xo-panel"><Metric label="Market signals" value={`${tailwinds}/${signals.length}`} sub="tailwinds" /></div>
         <div className="bg-xo-panel"><Metric label="Buyers circling" value={String(activeBuyers)} sub="acquisition mode" /></div>
       </section>
@@ -105,7 +98,7 @@ const ExitTiming: React.FC = () => {
             <TakeCell k="If you wait">Selling today leaves the readiness gap unclaimed; waiting too long risks the multiple cycle turning.</TakeCell>
             <TakeCell k="Signals">{tailwinds} of {signals.length} market signals are tailwinds — conditions favor a near-term process.</TakeCell>
             <TakeCell k="ExitOS does it">ExitOS monitors the market continuously and pings you when the window opens.</TakeCell>
-            <TakeCell k="Outcome">At the window <span className="font-mono">{fmtMoney(potential)}</span> · +{upliftPct}% value of waiting · Q2 {windowRow.year}</TakeCell>
+            <TakeCell k="Outcome">At the window <span className="font-mono">{fmtMoney(potential)}</span> · +{upliftPct}% value of waiting (after fixes, no growth assumed)</TakeCell>
           </dl>
           <Link to="/console/readiness" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">See readiness fixes →</Link>
         </div>
@@ -127,7 +120,8 @@ const ExitTiming: React.FC = () => {
           </div>
         </Section>
 
-        <Section title="Timing curve" className="lg:col-span-7">
+        <Section title="Timing curve · now vs after fixes" className="lg:col-span-7"
+          foot="Window rule: the longest open fix sets the months to ready (weeks ≈ 2, months ≈ 6, quarters ≈ 9; at least 3); the window runs from 2 months before to 4 months after it. A heuristic, not a forecast. Scores are the readiness engine's current score and its projection (8 points per open fix, capped at 100); values are today's enterprise value and the value after fixes, with no growth assumed.">
           <div className="px-4 py-4">
             <div aria-hidden className="relative mt-2 h-2 rounded-full bg-xo-line">
               <div className="absolute h-full rounded-full bg-xo-verified/40" style={{ left: `${(windowLo / (windowHi + 6)) * 100}%`, width: `${((windowHi - windowLo) / (windowHi + 6)) * 100}%` }} />
@@ -137,21 +131,17 @@ const ExitTiming: React.FC = () => {
             <div className="mt-3 flex justify-between text-[12px] text-xo-muted">
               <span>Now · {fmtMoney(current)}</span><span className="text-xo-verified">Optimal window · months {windowLo}–{windowHi}</span><span>+{windowHi + 6}mo</span>
             </div>
-            <ol className="mt-5 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-3">
-              {timeline.map((t) => {
-                const isWindow = t.year === windowRow.year;
-                const c = t.score >= 85 ? "text-xo-verified" : t.score >= 60 ? "text-xo-caution" : "text-xo-risk";
-                return (
-                  <li key={t.year} className={`bg-xo-panel px-3 py-2 ${isWindow ? "ring-1 ring-inset ring-xo-verified/60" : ""}`}>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[15px] font-semibold tabular-nums">{t.year}</span>
-                      {isWindow && <span className="text-[11px] font-semibold text-xo-verified">Window</span>}
-                    </div>
-                    <div className={`mt-1 font-mono text-[20px] font-semibold tabular-nums ${c}`}>{t.score}<span className="text-[11px] text-xo-faint">/100</span></div>
-                    <div className="font-mono text-[12px] font-semibold tabular-nums text-xo-muted">{fmtMoney(t.value)}</div>
-                  </li>
-                );
-              })}
+            <ol className="mt-5 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2">
+              <li className="bg-xo-panel px-3 py-2">
+                <div className="text-[12px] font-semibold text-xo-muted">Now</div>
+                <div className="mt-1 font-mono text-[20px] font-semibold tabular-nums">{scoreNow}<span className="text-[11px] text-xo-faint">/100 readiness engine</span></div>
+                <div className="font-mono text-[12px] font-semibold tabular-nums text-xo-muted">{fmtMoney(current)}</div>
+              </li>
+              <li className="bg-xo-panel px-3 py-2 ring-1 ring-inset ring-xo-verified/60">
+                <div className="text-[12px] font-semibold text-xo-verified">After fixes · ~{sweet} months</div>
+                <div className="mt-1 font-mono text-[20px] font-semibold tabular-nums text-xo-verified">{scoreAfter}<span className="text-[11px] text-xo-faint">/100 projected</span></div>
+                <div className="font-mono text-[12px] font-semibold tabular-nums text-xo-muted">{fmtMoney(potential)}</div>
+              </li>
             </ol>
           </div>
         </Section>

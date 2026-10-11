@@ -32,7 +32,7 @@ Tells the founder *when* to sell: a recommended window in months, the value of w
 ## Gap register — Page 09
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Invented forecast** (score +22/+38 per year, value ×1.3 per year, "Q2 {year}"). | Replace the three-year timeline with what the engines produce: now vs after fixes — readiness-engine score current → projected, value now → after fixes — and the window in months with its rule shown. No years or quarters. | ☐ |
+| G1 | **Invented forecast** (score +22/+38 per year, value ×1.3 per year, "Q2 {year}"). | Replace the three-year timeline with what the engines produce: now vs after fixes — readiness-engine score current → projected, value now → after fixes — and the window in months with its rule shown. No years or quarters. | ☑ G1-commit |
 | G2 | **Invented signal verdicts and mislabels** (fixed "tailwind", "high", 40-cap count, registry premium shown as sector's, static notes). | Verdicts only where a stated rule exists (ARR growth ≥ 30 %; buyer demand from the active-buyer count; sector exits > 0); the rest shown as context. Actual deal count of the top-12 buyers; premium labelled registry-wide; notes say what each figure is. | ☐ |
 | G3 | **False monitoring claims** ("monitors continuously and pings you", "signals monitored", "buyers circling", "right now"). | Plain wording: computed when the page opens; no alerts exist. | ☐ |
 | G4 | Demo company unlabelled; "strategic mid" (D1). | Run on `loadActiveCompany()`; badge; "enterprise value today". | ☑ `913aca0` |
@@ -57,3 +57,7 @@ Same defect as X9 in three shared components that do not use the shared `Button`
 ### G4 — Demo company unlabelled; "strategic mid"
 *Closed by:* `pages/ExitTiming.tsx` — value now / after fixes, Exit Score, fix efforts (window), buyer pool, standard-valuation multiple, growth and sector all run on `loadActiveCompany()` (`dealContextFor`, `runReadinessAnalysis`, `runBuyerDiscovery` limit 12, `runValuation` standard — same calls the demo constants use). Eyebrow names the source, **Demo data / Your intake** badge. "Sell today — strategic mid" → "enterprise value today" (D1). `pages/Intake.tsx` lists Exit Timing.
 *Verification:* `tsc -b`, eslint clean · Chromium (Active Mandate): demo → DEMO DATA, sell today $102,849,415; saved intake "Northwind Analytics" → YOUR INTAKE, $403,509,792 · 0 errors.
+
+### G1 — Invented forecast
+*Closed by:* `pages/ExitTiming.tsx`. The three-year timeline (Exit Score +22 / +38 per year, value × 1.3 per year, window = first year ≥ 85, "Q2 {year}") is removed. In its place, two points the engines do produce: **Now** — readiness-engine score and enterprise value today; **After fixes · ~N months** — the engine's projected score (8 points per open fix, capped at 100) and value after fixes. "Sell at window" reads "after fixes · no growth assumed"; the outcome line drops "Q2 {year}". The curve's foot states the window rule (longest open fix: weeks ≈ 2, months ≈ 6, quarters ≈ 9, at least 3; window from 2 months before to 4 after — "a heuristic, not a forecast").
+*Verification:* `tsc -b`, eslint clean · Chromium: demo "Now 46/100 · $102,849,415 → After fixes ~9 months 70/100 · $161,305,495"; intake "52 → 76, $403,509,792 → $639,566,935"; 0 matches for "Q2 …" or a year · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
