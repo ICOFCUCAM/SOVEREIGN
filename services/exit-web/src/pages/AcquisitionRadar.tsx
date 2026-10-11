@@ -57,7 +57,7 @@ const AcquisitionRadar: React.FC = () => {
       minCheckUsd: minRevM * 1e6, maxCheckUsd: maxRevM * 1e6,
       minGrowthPct: minGrowth / 100,
       strategicThemes: themes.split(",").map((t) => t.trim()).filter(Boolean),
-    }).then((m) => { if (m) { setSavedMandate(true); notify("Mandate published — founders can now match it"); } });
+    }).then((m) => { if (m) { setSavedMandate(true); notify("Mandate saved to your account"); } });
   };
 
   const criteria: AcquisitionCriteria = useMemo(() => ({
@@ -143,8 +143,8 @@ const AcquisitionRadar: React.FC = () => {
               </fieldset>
               <div><label htmlFor="radar-themes" className={XO_LABEL}>Strategic themes</label><input id="radar-themes" className={XO_INPUT} placeholder="ai infra, payments, vertical saas…" value={themes} onChange={(e) => { setThemes(e.target.value); setSavedMandate(false); }} /></div>
               <div className="flex flex-wrap items-center gap-2 border-t border-xo-line pt-3">
-                <Button onClick={persistMandate}>{savedMandate ? "✓ Mandate published" : "Publish mandate"}</Button>
-                {savedMandate && <span className="text-[12px] text-xo-faint">matchable by founders</span>}
+                <Button onClick={persistMandate}>{savedMandate ? "✓ Mandate saved" : "Save mandate"}</Button>
+                <span className="text-[12px] text-xo-faint">Saved to your account and used for scoring here. Founders don't see buyer mandates yet.</span>
               </div>
             </div>
           </Section>
@@ -197,7 +197,8 @@ const AcquisitionRadar: React.FC = () => {
                       : <span className="font-mono tabular-nums">Revenue {fmtUsd(l.publicView.revenueUsd)} · Growth {Math.round(l.publicView.growthPct * 100)}%</span>}
                   <button type="button" aria-pressed={!!watched[l.id]}
                     onClick={() => {
-                      captureDealEvent({ actorRole: "buyer", kind: "added_to_outreach", subjectType: "listing", subjectId: l.id, subjectName: l.code });
+                      // record the follow once, not again when unfollowing
+                      if (!watched[l.id]) captureDealEvent({ actorRole: "buyer", kind: "added_to_outreach", subjectType: "listing", subjectId: l.id, subjectName: l.code });
                       setWatched((st) => ({ ...st, [l.id]: !st[l.id] }));
                     }}
                     className={`${SMALL_BTN} border-xo-line text-xo-muted hover:text-xo-text`}>{watched[l.id] ? "★ Following" : "☆ Follow"}</button>

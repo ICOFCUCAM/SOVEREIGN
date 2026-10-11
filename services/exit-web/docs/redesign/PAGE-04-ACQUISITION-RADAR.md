@@ -40,7 +40,7 @@ A buyer (or a founder looking from the buyer side) sets an acquisition mandate �
 |---|---|---|---|---|
 | G1 | **Fake-live indicators.** Pinging "Tape", "Intelligence rail · live telemetry", "Live ExitOS Acquisition Indexes", "live listings", reactor "across the network". | `AcquisitionRadar.tsx`, shared `MarketTape` | Snapshot-dated labels; `RegistryTape`; "listings", not "live listings". | ☑ `ab60b00` |
 | G2 | **Demo and catalog listings shown as live opportunities.** The demo company and Sovereign product-catalog seeds appear in the scored pool unlabelled. | `listings.ts` SEEDS | Badge each: "Demo listing" / "Product catalog"; count founder listings separately. | ☑ `1118d65` |
-| G3 | **Overclaims.** Toast "Mandate published — founders can now match it" and "matchable by founders" — nothing reads mandates. "Follow" logs "added to outreach" on follow **and** unfollow. | code | "Mandate saved" + plain note that founders don't see mandates yet; log only on follow. | ☐ |
+| G3 | **Overclaims.** Toast "Mandate published — founders can now match it" and "matchable by founders" — nothing reads mandates. "Follow" logs "added to outreach" on follow **and** unfollow. | code | "Mandate saved" + plain note that founders don't see mandates yet; log only on follow. | ☑ G3-commit |
 | G4 | **Inputs wrong or unvalidated.** "Min/Max check" actually filter company revenue; `2.5` → 25; min > max accepted; offers accept negatives and decimals are not guarded. | measured | Rename to "Target revenue (min/max, $M)"; reuse the Page 03 parsing rules; validate min ≤ max and offer > 0 with messages. | ☐ |
 | G5 | **Consequential actions without saying what happens.** "Express interest" sends an NDA request and opens a deal in one click; "Submit offer" records an indicative offer — neither says who sees what. | code | Inline confirmation naming the effect (founder receives the request/offer; identity revealed on NDA signature); same calls. | ☐ |
 | G6 | **Design system, hierarchy, accessibility.** No `h1`; 11 contrast failures; chip toggles without `aria-pressed`; old workstation primitives. | axe, code | Rebuild on `xo`: header with `h1` → mandate (left) → scored opportunities (centre) → sector watch; toggles with `aria-pressed`. | ☑ `3c91fff` |
@@ -66,3 +66,8 @@ Left as is: the "Live market" **tag** on Sovereign product-catalog listings (`li
 *Verification:* `listings.test.ts` 7/7 · Chromium: 1 demo + 42 catalog cards labelled; metric as above · 0 errors.
 
 **X8 (recorded, not changed):** all 42 catalog listings show region "North America" — including UK, Norway, Germany and other national marketplaces — because `sovereignProfile()` in `lib/listings.ts` builds every catalog entry with `jurisdiction: "US"`. The correct HQ per product is owner information; not guessed here.
+
+### G3 — Overclaims
+*Closed by:* `pages/AcquisitionRadar.tsx`. "Publish mandate" → **Save mandate**; toast "Mandate published — founders can now match it" → "Mandate saved to your account"; "matchable by founders" → "Saved to your account and used for scoring here. Founders don't see buyer mandates yet." Follow records the `added_to_outreach` event only when following, not again on unfollow. `saveMandate` itself unchanged.
+
+*Verification:* Chromium (events read through the app's own `deal-events` module): before 0 → follow 1 → unfollow still 1 (was 2); Follow button `aria-pressed="true"` when following; new mandate wording shown · 0 errors.
