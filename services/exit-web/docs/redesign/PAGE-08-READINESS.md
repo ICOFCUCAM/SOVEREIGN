@@ -63,7 +63,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 *Closed by:* `pages/Readiness.tsx` (text only; thresholds and formulas unchanged).
 | Before | After |
 |---|---|
-| "Market window Open / Tightening"; header "Window" | "Market growth (company input) 12%" (the actual figure); header "Market growth (input)" |
+| "Market window Open / Tightening"; header "Window" | "Market growth (company input) 6%" (the actual figure, demo); header "Market growth (input)" |
 | "Current value / Current valuation — strategic mid, today" (D1) | "Enterprise value — enterprise value today"; cascade "Enterprise value today — institutional framework mid" |
 | "Potential — after fixes" | "Value after fixes — model: value + readiness uplift" |
 | "When to sell · monitor signal", thresholds hidden; "let ExitOS watch the readiness clock" (nothing watches) | "When to sell · rule-based verdict" with the rule in the foot (Prepare if value left > 25 %; else Go if ARR growth ≥ 30 % and market growth ≥ 5 %; else Monitor; market growth is the company's own figure); Monitor reads "check this verdict again when your figures change"; Go names the thresholds |
