@@ -64,19 +64,19 @@ const Wealth: React.FC = () => {
   const portfolioUsd = afterTax * ALLOC[0].pct;
   const tape = useMemo(() => buildMarketTape(), []);
 
-  // WealthOS — the nine threads ExitOS keeps after the wire, owning the
-  // founder lifecycle from exit into long-term wealth.
+  // Topics to plan after the wire. Amounts only where the page computes one
+  // (the tax estimate); the family-office line applies a stated rule.
   const foViable = afterTax >= 50_000_000;
-  const tracker: { label: string; value: string; note: string; pill: string; tint: string }[] = [
-    { label: "Tax Planning",            value: fmtMoney(taxDue),                       note: `reserved · QSBS + installment review`,        pill: "Reserved",    tint: "#fbbf24" },
-    { label: "Trust Structures",        value: fmtMoney(Math.round(afterTax * 0.12)),  note: "GRAT / family trust for estate efficiency",   pill: "Recommended", tint: "#a78bfa" },
-    { label: "Family Office",           value: foViable ? "Single-family office" : "Multi-family office", note: foViable ? "liquidity supports a dedicated SFO" : "MFO / OCIO until scale", pill: "Setup", tint: "#60a5fa" },
-    { label: "Investment Opportunities", value: fmtMoney(Math.round(afterTax * 0.30)), note: "diversified market portfolio",                pill: "Allocated",   tint: "#34d399" },
-    { label: "Angel Investing",         value: fmtMoney(Math.round(afterTax * 0.08)),  note: "operator-edge angel checks",                  pill: "Allocated",   tint: "#34d399" },
-    { label: "Private Equity",          value: fmtMoney(Math.round(afterTax * 0.10)),  note: "co-invest / fund commitments",                pill: "Allocated",   tint: "#34d399" },
-    { label: "Real Estate",             value: fmtMoney(Math.round(afterTax * 0.12)),  note: "property · inflation hedge",                  pill: "Allocated",   tint: "#a78bfa" },
-    { label: "Philanthropy",            value: fmtMoney(Math.round(afterTax * 0.08)),  note: "donor-advised fund · tax-efficient",          pill: "Allocated",   tint: "#fbbf24" },
-    { label: "Next Venture",            value: fmtMoney(Math.round(afterTax * 0.10)),  note: "the next company · holdco",                   pill: "Reserved",    tint: "#60a5fa" },
+  const tracker: { label: string; value?: string; note: string }[] = [
+    { label: "Tax Planning",             value: fmtMoney(taxDue), note: "flat-rate estimate · review QSBS and instalment treatment of the earnout" },
+    { label: "Trust Structures",         note: "GRAT / family trust for estate efficiency" },
+    { label: "Family Office",            value: foViable ? "Single-family office" : "Multi-family office", note: `rule of thumb used here: a dedicated office at $50M or more after tax (${fmtMoney(afterTax)})` },
+    { label: "Investment Opportunities", note: "diversified market portfolio" },
+    { label: "Angel Investing",          note: "operator-edge angel checks" },
+    { label: "Private Equity",           note: "co-invest / fund commitments" },
+    { label: "Real Estate",              note: "property · inflation hedge" },
+    { label: "Philanthropy",             note: "donor-advised fund · tax-efficient" },
+    { label: "Next Venture",             note: "the next company · holdco" },
   ];
 
   return (
@@ -87,15 +87,15 @@ const Wealth: React.FC = () => {
       <section aria-label="Proceeds summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3">
         <div className="bg-xo-panel"><Metric label="After-tax, founder group" emphasis value={<span className="text-xo-verified">{fmtMoney(afterTax)}</span>} sub={leadingOffer.buyerName} /></div>
         <div className="bg-xo-panel"><Metric label="Tax reserve" value={fmtMoney(taxDue)} sub={`flat ${(TAX * 100).toFixed(1)}% assumption`} /></div>
-        <div className="bg-xo-panel"><Metric label="To portfolio" value={fmtMoney(portfolioUsd)} sub="diversified" /></div>
+        <div className="bg-xo-panel"><Metric label="To portfolio" value={fmtMoney(portfolioUsd)} sub={`illustrative template · ${Math.round(ALLOC[0].pct * 100)}%`} /></div>
       </section>
 
       <MarketTape items={tape} />
 
-      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+      <Section title="Illustrative next step" eyebrow="Banker's take" className="border border-xo-line"
         right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(portfolioUsd)}</span>}>
         <div className="px-4 py-3">
-          <p className="text-[14px] leading-relaxed">At lock-up, move <span className="font-semibold">{Math.round(ALLOC[0].pct * 100)}%</span> of your after-tax proceeds out of concentrated stock and into a diversified portfolio.</p>
+          <p className="text-[14px] leading-relaxed">Illustrative: once the stock can be sold, the template below moves <span className="font-semibold">{Math.round(ALLOC[0].pct * 100)}%</span> of after-tax proceeds out of a concentrated position into a diversified portfolio. A template, not a recommendation.</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
             <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(afterTax)}</span> after tax to the founder group from the {leadingOffer.buyerName} offer, if every tranche pays in full.</TakeCell>
             <TakeCell k="If you wait">Holding the position concentrated re-exposes your liquidity to a single company's risk after you've already de-risked the exit.</TakeCell>
@@ -119,15 +119,13 @@ const Wealth: React.FC = () => {
         <p className="border-t border-xo-line px-4 py-2 text-[12px] text-xo-muted">Risk-adjusted value (engine): <span className="font-mono font-semibold tabular-nums text-xo-text">{fmtMoney(riskAdjusted)}</span> before tax — stock discounted 15% for illiquidity and earnout 45% for the chance it does not pay. The figures above assume every tranche pays in full.</p>
       </Section>
 
-      <Section title="WealthOS · founder lifecycle" className="border border-xo-line">
+      <Section title="Topics to plan after the wire" eyebrow="Checklist" className="border border-xo-line"
+        foot="A checklist of topics, not a plan in progress: nothing here is allocated, reserved or set up.">
         <ul className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-3">
           {tracker.map((t) => (
             <li key={t.label} className="bg-xo-panel px-4 py-3">
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="text-[12px] font-semibold text-xo-muted">{t.label}</h3>
-                <span className="text-[11px] font-semibold text-xo-faint">{t.pill}</span>
-              </div>
-              <div className="mt-1 font-mono text-[17px] font-semibold tabular-nums">{t.value}</div>
+              <h3 className="text-[12px] font-semibold text-xo-muted">{t.label}</h3>
+              {t.value && <div className="mt-1 font-mono text-[17px] font-semibold tabular-nums">{t.value}</div>}
               <div className="mt-0.5 text-[12px] text-xo-muted">{t.note}</div>
             </li>
           ))}
@@ -157,9 +155,9 @@ const Wealth: React.FC = () => {
           </div>
         </Section>
 
-        <Section title="Diversification plan">
+        <Section title="Illustrative allocation template" foot="A fixed template (55 / 20 / 15 / 10) applied to the after-tax figure — not a recommendation for this founder.">
           <div className="px-4 py-3">
-            <p className="text-[12px] text-xo-muted">Illustrative allocation of {fmtMoney(afterTax)} after-tax — turn one concentrated position into durable wealth.</p>
+            <p className="text-[12px] text-xo-muted">The template applied to {fmtMoney(afterTax)} after tax.</p>
             <div aria-hidden className="mt-3 flex h-2.5 overflow-hidden rounded-full">
               {ALLOC.map((a) => (
                 <div key={a.label} style={{ width: `${a.pct * 100}%`, background: a.tint }} />
@@ -191,7 +189,7 @@ const Wealth: React.FC = () => {
         <ul className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-3">
           {[
             { h: "Tax & structure", b: `Reserve ${fmtMoney(taxDue)} now; explore QSBS exclusion, installment treatment on the earnout, and a DAF for the giving tranche.` },
-            { h: "Diversify the position", b: `Stagger sales of any stock consideration through the lock-up; rebalance ${Math.round(ALLOC[0].pct * 100)}% into a diversified portfolio.` },
+            { h: "Diversify the position", b: `Stagger sales of any stock consideration through the lock-up; the template rebalances ${Math.round(ALLOC[0].pct * 100)}% into a diversified portfolio.` },
             { h: "The next chapter", b: "Reinvest the operator edge — angel checks, a holdco, or the next company. ExitOS keeps the readiness clock running for round two." },
           ].map((c) => (
             <li key={c.h} className="bg-xo-panel px-4 py-3">

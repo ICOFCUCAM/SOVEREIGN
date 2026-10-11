@@ -39,7 +39,7 @@ After the deal: what the founder walks away with (headline → preferences → t
 | G1 | **Wrong leading offer** (id compared with a buyer name). | Match on `offerId`; the page follows the engine's leader. | ☑ `3f5e167` |
 | G2 | **Cascade and tranches mislabelled and miscomputed** ("your" = founder group; "after preferences" = risk haircut; haircut × mix; escrow ignored; timings invented). | Cascade: headline → preference stack → founders' gross (named as the founder group) → risk-adjusted value (engine haircuts stated) → after the tax assumption. Tranches from the engine's nominal cash / stock / earnout for the founders; escrow held back from cash per the offer term; timings from the offer where present, else "not in the offer terms". | ☑ `6d45072` |
 | G3 | Tax assumption unlabelled. | State it wherever used: flat 23.8 % (US federal LTCG + NIIT), whole amount, no cost basis, no state tax, no QSBS. | ☑ `ce122ae` |
-| G4 | **Invented statuses and a second allocation** ("Allocated", "Reserved", "Recommended", "Setup"; 12/30/8 … %). | One illustrative template (labelled "not a recommendation"); the topics list without invented amounts or statuses; family-office line states its $50M rule. | ☐ |
+| G4 | **Invented statuses and a second allocation** ("Allocated", "Reserved", "Recommended", "Setup"; 12/30/8 … %). | One illustrative template (labelled "not a recommendation"); the topics list without invented amounts or statuses; family-office line states its $50M rule. | ☑ G4-commit |
 | G5 | Overclaims (runs/models/schedules/drafts; keeps threads; readiness clock for round two). | Plain wording. | ☐ |
 | G6 | Demo offers and cap table unlabelled. | Badge and line: sample offers and cap table (demo), also when an intake is saved (intake has no offers or cap table). | ☐ |
 | G7 | Fake live tape. | `RegistryTape`. | ☐ |
@@ -72,3 +72,10 @@ Arithmetic check (Microsoft offer): founders' cash $62.33M − escrow $15.58M = 
 ### G3 — Tax assumption unlabelled
 *Closed by:* `pages/Wealth.tsx` (text only). Cascade note "~23.8% est. capital gains" → "flat 23.8% tax assumption"; tax reserve "set aside first" → "flat 23.8% assumption"; cascade foot: "Tax assumption: a flat 23.8% (US federal long-term capital gains 20% + net investment income tax 3.8%) on the whole amount — no cost basis, state tax, QSBS exclusion or instalment timing. ExitOS has no tax model; take tax advice."
 *Verification:* eslint clean · Chromium: foot present, 0 "est. capital gains" · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
+
+### G4 — Invented statuses and a second allocation
+*Closed by:* `pages/Wealth.tsx`.
+- "WealthOS · founder lifecycle" (nine cards with **Allocated / Reserved / Recommended / Setup** pills and amounts at 12 / 30 / 8 / 10 / 12 / 8 / 10 % of after-tax — a second plan inconsistent with the 55/20/15/10 template) → **"Topics to plan after the wire" · Checklist**, foot "A checklist of topics, not a plan in progress: nothing here is allocated, reserved or set up." Amounts only where computed (tax estimate); family office states its rule ("a dedicated office at $50M or more after tax").
+- "Diversification plan" → "Illustrative allocation template" + "A fixed template (55 / 20 / 15 / 10) applied to the after-tax figure — not a recommendation for this founder."
+- Banker's take "Recommended action — At lock-up, move 55 % …" → "Illustrative next step — … A template, not a recommendation."; metric "To portfolio — illustrative template · 55%".
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for Allocated / Reserved / Recommended / Setup / "At lock-up, move" · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
