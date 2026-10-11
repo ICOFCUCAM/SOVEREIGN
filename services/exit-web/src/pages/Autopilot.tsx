@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Card, Modal, SectionHeader, fmtMoney, notify } from "../lib/ui";
-import { VALUATION_INSTITUTIONAL, BUYERS, NEGOTIATION_STATE, OFFER_COMPARISON, DILIGENCE, VALUATION_STRATEGIC, VALUATION_CANONICAL } from "../lib/engines";
+import { NEGOTIATION_STATE, OFFER_COMPARISON } from "../lib/engines";
+import { runInstitutionalValuation, strategicBuyerReport, runBuyerDiscovery, runDueDiligence } from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { discoverFindings, buildSellerReport } from "../lib/diligence-intel";
 import {
   institutionalValuationMemo, buyerShortlistMemo, riskReportDoc,
@@ -33,6 +36,7 @@ interface AgentDef {
   approveLabel: string;
   deliverable: { filename: string; build: () => string };
   reportPath?: string;          // institutional A4 PDF document, where one exists
+  detailNote?: string;          // which inputs are still demo fixtures
 }
 
 const STATUS_STYLE: Record<AgentStatus, string> = {
@@ -96,6 +100,18 @@ const BuyerRow: React.FC<{ b: BuyerCandidate; n: number; excluded?: boolean; onT
 };
 
 const Autopilot: React.FC = () => {
+  // Valuation and buyer discovery run on the founder's company (or the demo
+  // company); diligence findings and offers are still demo fixtures.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const { VALUATION_INSTITUTIONAL, VALUATION_STRATEGIC, VALUATION_CANONICAL, BUYERS, DILIGENCE } = useMemo(() => {
+    const inst = runInstitutionalValuation(company);
+    const strategic = strategicBuyerReport(company);
+    return {
+      VALUATION_INSTITUTIONAL: inst, VALUATION_STRATEGIC: strategic,
+      VALUATION_CANONICAL: canonicalValuationFor(company, inst, strategic),
+      BUYERS: runBuyerDiscovery(company, { limit: 12 }), DILIGENCE: runDueDiligence(company),
+    };
+  }, [company]);
   const mid = VALUATION_CANONICAL.headline.mid;
   const allBuyers = BUYERS.candidates;
   const findings = useMemo(() => discoverFindings(), []);
@@ -170,13 +186,14 @@ const Autopilot: React.FC = () => {
           ))}
         </div>
       ),
+      ...(fromIntake ? { detailNote: "Diligence findings use the demo company's sample data." } : {}),
       decision: "Approve the pre-market remediation plan and disclosure schedule?", approveLabel: "Approve the plan",
       deliverable: { filename: "seller-diligence-report.md", build: () => riskReportDoc(sellerReport) },
       reportPath: "/report/readiness",
     },
     {
       id: "negotiation", name: "Negotiation Agent", role: "Scores offers and counters.",
-      work: <>Scoring <span className="font-mono text-white">{NEGOTIATION_STATE.activeOffers}</span> offers; leverage <span className="text-white">{NEGOTIATION_STATE.leverage}</span>{leaderName ? <> · <span className="text-white">{leaderName}</span> leads</> : null}.</>,
+      work: <>Scoring <span className="font-mono text-white">{NEGOTIATION_STATE.activeOffers}</span> sample offers (demo data); leverage <span className="text-white">{NEGOTIATION_STATE.leverage}</span>{leaderName ? <> · <span className="text-white">{leaderName}</span> leads</> : null}.</>,
       decision: leaderName ? `Approve the counter and drive ${leaderName} to a signed LOI?` : "Approve the counter strategy and drive to LOI?", approveLabel: "Approve the counter",
       deliverable: { filename: "offer-comparison.md", build: () => offerComparisonDoc({
         summary: OFFER_COMPARISON.summary,
@@ -275,7 +292,7 @@ const Autopilot: React.FC = () => {
   return (
     <div>
       <SectionHeader
-        kicker="Phase 3 · Autonomous · Guided simulation"
+        kicker={`Phase 3 · Autonomous · Guided simulation · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`}
         title="Autonomous Exit"
         description={isStarter
           ? `On ${PLAN_LABEL[session?.plan ?? "prep"]}, the agents take you through valuation and buyer discovery — and stop the moment buyers are found. An ${PLAN_LABEL.pro} runs outreach, negotiation, closing and wealth.`
@@ -390,6 +407,7 @@ const Autopilot: React.FC = () => {
                   {revealed && (
                     <div className="mt-2 text-[13px] leading-snug text-white/75">{a.work}</div>
                   )}
+                  {revealed && a.detailNote && <div className="mt-1 text-[12px] text-loi-300">{a.detailNote}</div>}
 
                   {/* Inline work product — show the buyer list right on the discovery row */}
                   {revealed && a.id === "discovery" && (

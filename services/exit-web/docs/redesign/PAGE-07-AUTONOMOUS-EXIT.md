@@ -35,7 +35,7 @@ A guided simulation of an end-to-end exit: eight agents (valuation, buyer discov
 | G1 | **Preparation plan can run Active Mandate steps.** | Gate on the access policy (`needsUpgrade` for the outreach surface) instead of the retired `starter` key; Preparation stops after buyer discovery, as the copy already says. "Launch a mandate" states it is a demo plan switch. | ☑ `955c0c0` |
 | G2 | **False "sent to the deal room".** | "Mark as ready" + a status that nothing leaves ExitOS in this simulation. | ☑ `3a20159` |
 | G3 | **Simulation overclaims** (uploads, "money arrives", "deal closed", "send"). | Every simulated outcome says so: "Simulation complete", "would be wired" etc.; no upload claims; decisions marked "(simulated)". | ☑ `482ad7f` |
-| G4 | Demo company unlabelled. | Valuation and buyer discovery on `loadActiveCompany()`; steps still on demo fixtures (diligence findings, sample offers) labelled. | ☐ |
+| G4 | Demo company unlabelled. | Valuation and buyer discovery on `loadActiveCompany()`; steps still on demo fixtures (diligence findings, sample offers) labelled. | ☑ G4-commit |
 | G5 | Old design system. | Rebuild on `xo` (header, mission control, agent steps as an ordered list with status words, deliverables). | ☐ |
 
 ---
@@ -61,3 +61,7 @@ A guided simulation of an end-to-end exit: eight agents (valuation, buyer discov
 | Finale "Money arrives — $X wired to escrow → your account"; "ExitOS ran your exit end to end … money in the bank" | "Simulation complete — $X enterprise value used in this walkthrough — no money moves"; "You approved 8 simulated decisions. In a live mandate these steps run with real buyers, documents and escrow; here each step was simulated on engine output." |
 | Gate: "took you from uploads to a priced, listed company" | "priced the company and matched N buyers" (no listing is created here) |
 *Verification:* Chromium (Active Mandate), full 8-step run: finale shows "Simulation complete"; 0 matches for money arrives / uploaded / deal closed / money in the bank / wired to escrow · eslint clean · 0 errors.
+
+### G4 — Demo company unlabelled
+*Closed by:* `pages/Autopilot.tsx` — valuation (institutional, strategic-report methodologies, the console value via `canonicalValuationFor`), buyer discovery and diligence document count run on `loadActiveCompany()`; the header names the data source ("Demo company: Helios Freight" / "Your intake: …"). Still on demo fixtures and labelled: the diligence findings step ("Diligence findings use the demo company's sample data." when an intake is saved) and the negotiation step ("sample offers (demo data)"). `pages/Intake.tsx` lists "Autonomous Exit (valuation and buyers)" among the pages using the founder's figures.
+*Verification:* Chromium (Active Mandate): demo → "Demo company: Helios Freight", value $102,849,415, first buyer Flexport Strategic; saved intake → "Your intake: Northwind Analytics", $403,509,792, Vista Enterprise · eslint clean · 0 errors.
