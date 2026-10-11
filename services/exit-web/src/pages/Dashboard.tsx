@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Card, Kpi, fmtMoney, timeAgo } from "../lib/ui";
+import { Button, fmtMoney, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import {
   assessIntent, runValuation, strategicBuyerReport, assetReplacementReport,
@@ -9,21 +9,25 @@ import {
 } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
 import { dealContextFor } from "../lib/deal-context";
-import { Provenance } from "../components/xo";
+import { SAMPLE_NDAS, SAMPLE_OFFERS, LISTING_PRIVATE, OFFER_COMPARISON } from "../lib/engines";
+import { liquidityIndex, scenariosFor, heatFor, funnelFor, LIFECYCLE } from "../lib/liquidity-view";
+import { Section, Metric, Provenance, Bar, ScrollRegion, ActionLink, Fact } from "../components/xo";
 import ExitProcessModal from "../components/ExitProcessModal";
-import JourneyMap from "../components/JourneyMap";
-import ExitCommander from "../components/ExitCommander";
-import { LiquidityScore, AcquisitionHeatMap, LiveBuyerActivity, ValuationScenarios, ProbabilityFunnel } from "../components/DashboardModules";
-import CommandTiles from "../components/CommandTiles";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 import { commanderMetrics } from "../lib/commander-metrics";
 import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
 import { emitTelemetry } from "../lib/telemetry";
 
-// Founder dashboard — wired to @exit/engines. The deterministic engines
-// (valuation, readiness, buyer discovery, diligence, deal context) run on the
-// active company: the founder's intake when there is one, else the demo
-// company. Sample offers/NDAs and the Exit Process run remain demo fixtures.
+// ── FOUNDER LIQUIDITY COMMAND ───────────────────────────────────────
+// Page 02 of the ExitOS institutional redesign (docs/redesign/PAGE-02-
+// LIQUIDITY-COMMAND.md). Reads as a decision: the mandate and its process
+// stage → the liquidity position (value now, after fixes, scenarios, odds)
+// → the recommended instruction → who is buying → readiness → the deal
+// funnel → the valuation evidence. The engines run on the active company
+// (the founder's intake, else the demo company); sample offers/NDAs and the
+// Exit Process run remain demo fixtures. The shared Liquidity Board and
+// Morning Briefing components are not used here (they also serve the Chief
+// Investment Banker page, which is redesigned in its own turn).
 
 type Band = ReturnType<typeof runReadiness>["band"];
 const BAND_LABEL: Record<Band, string> = {
@@ -32,13 +36,7 @@ const BAND_LABEL: Record<Band, string> = {
   growth_acquisition:     "Growth acquisition",
   strategic_acquisition:  "Strategic acquisition",
 };
-
-const BAND_STYLE: Record<Band, string> = {
-  not_ready:              "text-white/60 bg-white/5 ring-white/15",
-  seed_acquisition:       "text-loi-300 bg-loi-500/15 ring-loi-400/40",
-  growth_acquisition:     "text-stage-engaged bg-stage-engaged/15 ring-stage-engaged/40",
-  strategic_acquisition:  "text-deal-300 bg-deal-600/20 ring-deal-400/40",
-};
+const SEVERITY: Record<string, string> = { high: "text-xo-risk border-xo-risk/50", medium: "text-xo-caution border-xo-caution/50", low: "text-xo-muted border-xo-line" };
 
 const Dashboard: React.FC = () => {
   const { session } = useAuth();
@@ -104,281 +102,279 @@ const Dashboard: React.FC = () => {
     setRun(null);
   };
 
-  const statusChips: Array<[string, string, string]> = [
-    ["Mandate", run?.status === "complete" ? "Executing" : "Active", "#34d399"],
-    ["Market", "Open", "#34d399"],
-    ["Buyer activity", m.demandLabel === "High" ? "Elevated" : m.demandLabel, m.demandLabel === "High" ? "#34d399" : m.demandLabel === "Medium" ? "#fbbf24" : "#f87171"],
-    ["Expected outcome", fmtMoney(m.potential), "#34d399"],
-    ["Confidence", `${m.confidencePct}%`, "#e2e8f0"],
+  const statusChips: Array<[string, string]> = [
+    ["Mandate", run?.status === "complete" ? "Executing" : "Active"],
+    ["Market", "Open"],
+    ["Buyer activity", m.demandLabel === "High" ? "Elevated" : m.demandLabel],
+    ["Expected outcome", fmtMoney(m.potential)],
+    ["Confidence", `${m.confidencePct}%`],
   ];
+  const stageIdx = Math.max(0, LIFECYCLE.findIndex((x) => x.key === (run?.status === "complete" ? "run" : "monitor")));
+  const scenarios = scenariosFor(E.ctx.currentValueUsd, E.ctx.potentialValueUsd);
+  const liquidity = liquidityIndex(E.ctx.activeBuyers);
+  const heat = heatFor(E.ctx.dealBuyers);
+  const sampleNdas = SAMPLE_NDAS.filter((n) => n.listingId === LISTING_PRIVATE.listingId && n.state === "active").length;
+  const funnel = funnelFor(E.matches.matches.length, sampleNdas, SAMPLE_OFFERS.length, !!OFFER_COMPARISON.leader);
+  const funnelTop = Math.max(1, funnel[0].n);
+  const matchFeed = E.matches.matches.slice(0, 4);
 
   return (
-    <div>
+    <div data-page="liquidity-command" className="space-y-3 text-xo-text">
       {/* Listed Founder (free) — surface buyer interest behind the upgrade gate */}
       {(session?.plan ?? "free") === "free" && <BuyerInterestGate />}
 
-      {/* ── Founder Liquidity Command — a live market header, not a greeting ── */}
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-deal-400">Founder Liquidity Command</div>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h1 className="font-serif text-3xl font-bold leading-tight text-white sm:text-4xl">{company.name}</h1>
-            <Provenance kind={fromIntake ? "company" : "demo"} />
+      {/* ── 1 · MANDATE ─ identity, data state, process stage, the run ── */}
+      <header className="border border-xo-line bg-xo-ink px-4 py-3">
+        <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+          <div className="min-w-0">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-xo-brass">Founder Liquidity Command</div>
+            <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h1 className="font-serif text-[24px] font-semibold tracking-tight text-xo-text">{company.name}</h1>
+              <Provenance kind={fromIntake ? "company" : "demo"} />
+            </div>
+            <div className="mt-1 font-mono text-[12px] text-xo-muted">
+              {company.sector.replace(/_/g, " ")} · {arrM.toFixed(1)}M ARR · {company.jurisdiction} · operator {session?.founderId ?? "founder"}
+            </div>
           </div>
-          <div className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/45">
-            {company.sector.replace(/_/g, " ")} · {arrM.toFixed(1)}M ARR · {company.jurisdiction} · operator {session?.founderId ?? "founder"}
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {run?.status === "complete" ? (
+              <>
+                <Button variant="ghost" onClick={resetExit}>Reset</Button>
+                <Button onClick={startExit}>Re-run exit process</Button>
+              </>
+            ) : (
+              <Button onClick={startExit}>Start Exit Process →</Button>
+            )}
+            {fromIntake && <p className="basis-full text-right text-[11px] text-xo-caution">The Exit Process run still uses the demo company and sample offers.</p>}
           </div>
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
-            {statusChips.map(([k, v, c]) => (
-              <span key={k} className="flex items-baseline gap-1.5">
-                <span className="inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full" style={{ background: c }} />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">{k}</span>
-                <span className="font-mono text-[12px] font-bold tabular-nums text-white/90">{v}</span>
-              </span>
+        </div>
+        <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-xo-line pt-2">
+          {statusChips.map(([k, v]) => (
+            <div key={k} className="flex items-baseline gap-1.5">
+              <dt className="text-[11px] text-xo-faint">{k}</dt>
+              <dd className="font-mono text-[12px] font-semibold tabular-nums text-xo-text">{v}</dd>
+            </div>
+          ))}
+        </dl>
+        <nav aria-label="Mandate lifecycle" className="mt-3 border-t border-xo-line pt-2">
+          <ol className="flex flex-wrap gap-x-1 gap-y-1">
+            {LIFECYCLE.map((st, i) => {
+              const state = i < stageIdx ? "done" : i === stageIdx ? "current" : "future";
+              const body = (
+                <span className={`inline-flex items-baseline gap-1.5 rounded-sm px-2 py-1 text-[12px] ${state === "current" ? "bg-xo-raise text-xo-text ring-1 ring-xo-verified/50" : state === "done" ? "text-xo-muted" : "text-xo-faint"}`}>
+                  <span className="font-mono text-[11px]">{state === "done" ? "✓" : st.index}</span>
+                  <span className="font-medium">{st.label}</span>
+                  {state === "current" && <span className="sr-only">(current phase)</span>}
+                </span>
+              );
+              return (
+                <li key={st.key} aria-current={state === "current" ? "step" : undefined}>
+                  {st.to ? <Link to={st.to} className="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{body}</Link> : body}
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
+      </header>
+
+      {/* ── 2 · LIQUIDITY POSITION ──────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Liquidity position" eyebrow="Founder Liquidity Board" className="lg:col-span-7"
+          right={<span className="text-[11px] text-xo-faint">Live</span>}>
+          <div className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2">
+            <div className="bg-xo-panel"><Metric label="Enterprise value" emphasis value={fmtMoney(m.companyValue)} sub={`strategic mid · band ${fmtMoney(E.ctx.valuationBand.low)} – ${fmtMoney(E.ctx.valuationBand.high)}`} /></div>
+            <div className="bg-xo-panel"><Metric label="Expected value" emphasis value={<span className="text-xo-verified">{fmtMoney(m.potential)}</span>} sub="after the priced readiness fixes" /></div>
+            <div className="bg-xo-panel"><Metric label="Close probability" value={`${m.exitProbability}%`} sub="likelihood of a completed transaction" /></div>
+            <div className="bg-xo-panel"><Metric label="Time to liquidity" value={<>{m.timeToExitMonths}<span className="text-[13px] text-xo-faint"> mo</span></>} sub="once a buyer is engaged" /></div>
+          </div>
+        </Section>
+        <Section title="Valuation scenarios" eyebrow="Sell now or optimise" className="lg:col-span-5">
+          <ul className="divide-y divide-xo-line">
+            {scenarios.map((sc) => (
+              <li key={sc.key} className="flex items-baseline justify-between gap-3 px-4 py-3">
+                <span className="min-w-0"><span className="block text-[13px] font-medium text-xo-text">{sc.label}</span><span className="block text-[11px] text-xo-faint">{sc.basis}</span></span>
+                <span className={`font-mono text-[18px] font-semibold tabular-nums ${sc.key === "today" ? "text-xo-text" : "text-xo-verified"}`}>{fmtMoney(sc.value)}</span>
+              </li>
             ))}
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          {run?.status === "complete" ? (
-            <>
-              <Button variant="ghost" onClick={resetExit}>Reset</Button>
-              <Button onClick={startExit}>Re-run exit process</Button>
-            </>
-          ) : (
-            <Button onClick={startExit}>Start Exit Process →</Button>
-          )}
-          {fromIntake && <p className="basis-full text-right text-[11px] text-loi-300">The Exit Process run still uses the demo company and sample offers.</p>}
-        </div>
+          </ul>
+        </Section>
       </div>
 
-      <JourneyMap current={run?.status === "complete" ? "run" : "monitor"} />
-
-      <CommandTiles
-        companyValue={m.companyValue}
-        potential={m.potential}
-        exitProbability={m.exitProbability}
-        demandLabel={m.demandLabel}
-        buyersMatching={m.activeBuyers}
-        timeToExitMonths={m.timeToExitMonths}
-      />
-
-      <ExitCommander
-        founderName={session?.founderId ?? "founder"}
-        companyName={company.name}
-        valuationToday={m.companyValue}
-        valuationPotential={m.potential}
-        fixCount={m.fixCount}
-        horizonMonths={6}
-        strategicBuyersActive={m.strategicActive}
-        recommendedAction={m.recommendedAction}
-        expectedIncreaseUsd={m.expectedIncreaseUsd}
-        confidencePct={m.confidencePct}
-        {...(briefing.highestIntent ? { highestIntentName: briefing.highestIntent } : {})}
-        {...(briefing.premiumPayer ? { premiumPayerName: briefing.premiumPayer } : {})}
-        onExecute={() => navigate("/console/autopilot")}
-      />
+      {/* ── 3 · RECOMMENDED INSTRUCTION (the briefing) ──────────────── */}
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Recommended action" eyebrow={`Morning Briefing · Chief Investment Banker · ${company.name}`} className="lg:col-span-7">
+          <div className="px-4 py-4">
+            <p className="max-w-[60ch] text-[16px] font-semibold leading-snug text-xo-text">{m.recommendedAction}</p>
+            <dl className="mt-3 flex flex-wrap gap-x-8 gap-y-2">
+              <div><dt className="text-[11px] text-xo-faint">Expected value increase</dt><dd className="font-mono text-[16px] font-semibold tabular-nums text-xo-verified">+{fmtMoney(m.expectedIncreaseUsd)}</dd></div>
+              <div><dt className="text-[11px] text-xo-faint">Confidence</dt><dd className="font-mono text-[16px] font-semibold tabular-nums text-xo-text">{m.confidencePct}%</dd></div>
+            </dl>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <Button onClick={() => navigate("/console/autopilot")}>Execute →</Button>
+              <ActionLink to="/console/autopilot" className="text-[13px]">See the plan</ActionLink>
+            </div>
+            <p className="mt-3 text-[12px] text-xo-faint">One instruction dispatches the agents — valuation, outreach and diligence start working.</p>
+          </div>
+        </Section>
+        <Section title="Briefing register" eyebrow="What the desk is watching" className="lg:col-span-5">
+          <dl className="divide-y divide-xo-line px-4 py-1">
+            <Fact k="Value actions open" v={<Link to="/console/readiness" className="text-xo-action hover:underline">{m.fixCount} priced fixes · ~6 months</Link>} />
+            <Fact k="Buyer activity" v={<Link to="/console/intelligence" className="text-xo-action hover:underline">{m.strategicActive > 0 ? `${m.strategicActive} strategic acquirer${m.strategicActive === 1 ? "" : "s"} in market` : "No strategic acquirer in market yet"}</Link>} />
+            {briefing.highestIntent && <Fact k="Highest intent" v={<Link to="/console/intelligence" className="text-xo-action hover:underline">{briefing.highestIntent}</Link>} />}
+            {briefing.premiumPayer && <Fact k="Premium probability" v={<Link to="/console/intelligence" className="text-xo-action hover:underline">{briefing.premiumPayer}</Link>} />}
+          </dl>
+        </Section>
+      </div>
 
       {run?.status === "complete" && (
-        <Card className="mb-8 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-deal-600/20 text-deal-300 ring-1 ring-deal-400/40">✓</span>
-              <div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-400">Exit process active</div>
-                <div className="text-sm font-medium text-white">
-                  Initialized {timeAgo(run.startedAt)} · {run.steps.filter((s) => s.status === "done").length}/{run.steps.length} engines complete
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2 text-[11px]">
-              {run.artifacts.cim && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">CIM · {run.artifacts.cim.wordCount.toLocaleString()} words</span>}
-              {run.artifacts.teaser && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">Teaser ready</span>}
-              {run.artifacts.ndasIssued && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">{run.artifacts.ndasIssued.length} NDAs pre-issued</span>}
-              {run.artifacts.listing && <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-white/65 ring-1 ring-white/10">Listing {run.artifacts.listing.private.listingId.slice(0, 18)}…</span>}
-              {run.artifacts.offerLeaderName && <span className="rounded-full bg-deal-600/20 px-2.5 py-0.5 text-deal-300 ring-1 ring-deal-400/40">Leader: {run.artifacts.offerLeaderName}</span>}
-            </div>
+        <section aria-label="Exit process status" className="flex flex-wrap items-center justify-between gap-3 border border-xo-verified/40 bg-xo-panel px-4 py-3">
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-xo-verified">Exit process active</div>
+            <div className="text-[13px] text-xo-text">Initialized {timeAgo(run.startedAt)} · {run.steps.filter((x) => x.status === "done").length}/{run.steps.length} engines complete</div>
           </div>
-        </Card>
+          <ul className="flex flex-wrap gap-2 text-[11px]">
+            {run.artifacts.cim && <li className="border border-xo-line px-2 py-0.5 text-xo-muted">CIM · {run.artifacts.cim.wordCount.toLocaleString()} words</li>}
+            {run.artifacts.teaser && <li className="border border-xo-line px-2 py-0.5 text-xo-muted">Teaser ready</li>}
+            {run.artifacts.ndasIssued && <li className="border border-xo-line px-2 py-0.5 text-xo-muted">{run.artifacts.ndasIssued.length} NDAs pre-issued</li>}
+            {run.artifacts.listing && <li className="border border-xo-line px-2 py-0.5 text-xo-muted">Listing {run.artifacts.listing.private.listingId.slice(0, 18)}…</li>}
+            {run.artifacts.offerLeaderName && <li className="border border-xo-verified/50 px-2 py-0.5 text-xo-verified">Leader: {run.artifacts.offerLeaderName}</li>}
+          </ul>
+        </section>
       )}
 
       <ExitProcessModal open={modalOpen} onClose={() => setModalOpen(false)} />
 
-      {/* Market position — liquidity, demand geography and who's looking now. */}
-      <div className="mb-6 grid gap-4 lg:grid-cols-3">
-        <LiquidityScore activeBuyers={E.ctx.activeBuyers} demandLabel={E.ctx.demandLabel} />
-        <LiveBuyerActivity matches={E.matches} />
-        <AcquisitionHeatMap dealBuyers={E.ctx.dealBuyers} />
-      </div>
-      <div className="mb-6"><ValuationScenarios current={E.ctx.currentValueUsd} potential={E.ctx.potentialValueUsd} /></div>
-      <div className="mb-8"><ProbabilityFunnel matched={E.matches.matches.length} /></div>
-
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Kpi
-          label="Strategic valuation (mid)"
-          value={fmtMoney(VALUATION_STRATEGIC.headline.mid)}
-          sub={`band ${fmtMoney(VALUATION_STRATEGIC.headline.low)} – ${fmtMoney(VALUATION_STRATEGIC.headline.high)}`}
-          accent="#34d399"
-        />
-        <Kpi
-          label="Readiness"
-          value={`${READINESS.overallScore.toFixed(0)}/100`}
-          sub={BAND_LABEL[READINESS.band]}
-          accent="#fbbf24"
-        />
-        <Kpi
-          label="Qualifying buyers"
-          value={String(BUYERS.candidates.length)}
-          sub={`${BUYERS.byType.strategic} strategic · ${BUYERS.byType.pe} PE · ${BUYERS.byType.family_office} family office`}
-        />
-        <Kpi
-          label="Implied price"
-          value={fmtMoney(BUYERS.companyHeadlineUsd)}
-          sub="ranking basis"
-          accent="#10b981"
-        />
-      </div>
-
-      <div id="readiness" className="mt-10 grid gap-5 lg:grid-cols-3">
-        <Card className="p-6 lg:col-span-2">
-          <div className="mb-4 flex items-end justify-between">
-            <div>
-              <h2 className="font-serif text-xl font-bold text-white">Top buyers · ranked</h2>
-              <p className="text-xs text-white/45">Probability scored by sector × check × geography × activity.</p>
-            </div>
-            <Link to="/console/intelligence" className="text-[12px] font-semibold uppercase tracking-wide text-deal-400 hover:text-deal-300">
-              Open intelligence →
-            </Link>
-          </div>
-          <table className="w-full text-sm">
-            <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-              <tr className="border-b border-white/10">
-                <th className="py-3">Acquirer</th>
-                <th className="py-3">Type</th>
-                <th className="py-3 text-right">Check size</th>
-                <th className="py-3 text-right">Probability</th>
-              </tr>
-            </thead>
-            <tbody>
-              {topBuyers.map((c) => (
-                <tr key={c.buyer.name} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                  <td className="py-3.5 font-medium text-white">{c.buyer.name}</td>
-                  <td className="py-3.5 text-xs uppercase tracking-wide text-white/55">{c.buyer.buyerType.replace(/_/g, " ")}</td>
-                  <td className="py-3.5 text-right font-mono tabular-nums text-white/85">{fmtMoney(c.estimatedCheck.low)} – {fmtMoney(c.estimatedCheck.high)}</td>
-                  <td className="py-3.5 text-right font-mono tabular-nums text-deal-300">{(c.probability * 100).toFixed(0)}%</td>
+      {/* ── 4 · WHO IS BUYING ───────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Top buyers · ranked" eyebrow={`${BUYERS.candidates.length} qualifying buyers · ${BUYERS.byType.strategic} strategic · ${BUYERS.byType.pe} PE · ${BUYERS.byType.family_office} family office`} className="lg:col-span-8"
+          right={<ActionLink to="/console/intelligence">Open intelligence →</ActionLink>}
+          foot={<>Probability scored by sector × check × geography × activity. Implied price {fmtMoney(BUYERS.companyHeadlineUsd)} · ranking basis.</>}>
+          <ScrollRegion label="Top buyers table">
+            <table className="w-full min-w-[520px] text-[13px]">
+              <thead className="text-left text-[11px] text-xo-faint">
+                <tr className="border-b border-xo-line">
+                  <th scope="col" className="px-4 py-2 font-medium">Acquirer</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Type</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Check size</th>
+                  <th scope="col" className="px-4 py-2 text-right font-medium">Probability</th>
                 </tr>
+              </thead>
+              <tbody>
+                {topBuyers.map((c) => (
+                  <tr key={c.buyer.name} className="border-b border-xo-line/60 last:border-0 hover:bg-xo-raise/60">
+                    <th scope="row" className="px-4 py-2 text-left font-medium text-xo-text">{c.buyer.name}</th>
+                    <td className="px-2 py-2 text-[12px] capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</td>
+                    <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-text">{fmtMoney(c.estimatedCheck.low)} – {fmtMoney(c.estimatedCheck.high)}</td>
+                    <td className="px-4 py-2 text-right"><Bar value={Math.round(c.probability * 100)} label={`${(c.probability * 100).toFixed(0)}%`} width="w-12" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ScrollRegion>
+        </Section>
+        <div className="flex flex-col gap-px bg-xo-line lg:col-span-4">
+          <Section title="Top mandate matches" eyebrow="Matching engine on the listing">
+            <ul className="divide-y divide-xo-line">
+              {matchFeed.map((f) => (
+                <li key={f.buyerName} className="flex items-baseline justify-between gap-3 px-4 py-2 text-[12px]">
+                  <span className="min-w-0"><span className="font-semibold text-xo-text">{f.buyerName}</span> <span className="text-xo-muted">matched at {Math.round(f.matchScore * 100)}% fit</span></span>
+                  <span className="shrink-0 text-[11px] text-xo-faint">{f.suggestedOutreach.replace(/_/g, " ")}</span>
+                </li>
               ))}
-            </tbody>
-          </table>
-        </Card>
-
-        <Card className="p-6">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-serif text-xl font-bold text-white">Readiness</h2>
-            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ring-1 ${BAND_STYLE[READINESS.band]}`}>
-              {BAND_LABEL[READINESS.band]}
-            </span>
-          </div>
-          <div className="space-y-3">
-            {READINESS.dimensions.map((d) => (
-              <div key={d.name}>
-                <div className="mb-1 flex items-baseline justify-between text-[12px]">
-                  <span className="text-white/70">{d.name}</span>
-                  <span className="font-mono text-white/85">{d.score.toFixed(0)}/100</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
-                  <div className="h-full rounded-full bg-gradient-to-r from-deal-700 to-deal-400" style={{ width: `${Math.max(2, d.score)}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+            </ul>
+          </Section>
+          <Section title="Acquisition heat map" eyebrow="Where your matched mandates deploy" className="flex-1">
+            <ul className="space-y-2 px-4 py-3">
+              {heat.map((h) => (
+                <li key={h.country} className="flex items-center justify-between gap-3 text-[12px]">
+                  <span className="text-xo-muted">{h.country}</span>
+                  <Bar value={h.score} label={String(h.score)} width="w-24" />
+                </li>
+              ))}
+            </ul>
+          </Section>
+        </div>
       </div>
 
-      {READINESS_ANALYSIS.weaknesses.length > 0 && (
-        <Card className="mt-8 p-6">
-          <div className="mb-4 flex items-end justify-between">
-            <div>
-              <h2 className="font-serif text-xl font-bold text-white">Readiness analysis · improvement plan</h2>
-              <p className="text-xs text-white/45">{READINESS_ANALYSIS.headline}</p>
-            </div>
-            <div className="text-right text-[11px]">
-              <div className="text-white/40 uppercase tracking-[0.2em]">Projected mid</div>
-              <div className="font-mono text-lg text-deal-300">{fmtMoney(READINESS_ANALYSIS.projectedStrategicMid)}</div>
-              <div className="text-[10px] text-white/40">vs current {fmtMoney(READINESS_ANALYSIS.currentStrategicMid)}</div>
-            </div>
-          </div>
-          <div className="space-y-3">
-            {READINESS_ANALYSIS.weaknesses.slice(0, 4).map((w) => (
-              <div key={w.dimension} className="rounded border border-white/10 bg-ink-900/40 p-3">
-                <div className="flex items-baseline justify-between gap-3">
-                  <div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-white/45">{w.dimension}</span>
-                    <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${
-                      w.severity === 'high' ? 'bg-red-500/15 text-red-300 ring-red-400/40' :
-                      w.severity === 'medium' ? 'bg-loi-500/15 text-loi-300 ring-loi-400/40' :
-                      'bg-white/5 text-white/65 ring-white/15'
-                    }`}>{w.severity}</span>
-                  </div>
-                  <div className="font-mono text-[12px] text-deal-300">+{fmtMoney(w.valuationUpliftUsd)} <span className="text-white/40">· {w.effort}</span></div>
-                </div>
-                <p className="mt-1 text-[13px] text-white/70">{w.weakness}</p>
-                <p className="mt-1 text-[12px] text-white/55">→ {w.recommendation}</p>
-              </div>
+      {/* ── 5 · READINESS ───────────────────────────────────────────── */}
+      <div id="readiness" className="grid scroll-mt-32 grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Readiness" eyebrow={`${READINESS.overallScore.toFixed(0)}/100 · ${BAND_LABEL[READINESS.band]}`} className="lg:col-span-4">
+          <ul className="space-y-2 px-4 py-3">
+            {READINESS.dimensions.map((d) => (
+              <li key={d.name} className="flex items-center justify-between gap-3 text-[12px]">
+                <span className="text-xo-muted">{d.name}</span>
+                <Bar value={Math.max(2, d.score)} label={`${d.score.toFixed(0)}/100`} tone="action" width="w-20" />
+              </li>
             ))}
-          </div>
-        </Card>
-      )}
-
-      <div className="mt-8 grid gap-4 lg:grid-cols-3">
-        <Card className="p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Valuation reports</div>
-          <div className="mt-4 space-y-3 text-[13px]">
-            <ValRow label="Standard"        v={VALUATION_STANDARD.headline} />
-            <ValRow label="Strategic buyer" v={VALUATION_STRATEGIC.headline} />
-            <ValRow label="Asset replacement" v={VALUATION_REPLACEMENT.headline} />
-          </div>
-          <p className="mt-4 text-[11px] text-white/45">Country adjustment for {company.jurisdiction}: {(VALUATION_STRATEGIC.countryAdjustment * 100).toFixed(0)}%.</p>
-        </Card>
-
-        <Card className="p-6">
-          <h3 className="font-serif text-lg font-bold text-white">Critical diligence questions</h3>
-          {criticalQs.length === 0 ? (
-            <p className="mt-3 text-sm text-white/55">No critical questions surfaced — clean diligence posture.</p>
-          ) : (
-            <ul className="mt-4 space-y-3 text-sm text-white/75">
-              {criticalQs.map((q) => (
-                <li key={q} className="flex items-baseline gap-3">
-                  <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-loi-400" /> {q}
+          </ul>
+        </Section>
+        {READINESS_ANALYSIS.weaknesses.length > 0 && (
+          <Section title="Readiness analysis · improvement plan" eyebrow={READINESS_ANALYSIS.headline} className="lg:col-span-8"
+            right={<span className="text-right text-[11px] text-xo-faint">Projected mid <span className="font-mono text-[13px] text-xo-verified">{fmtMoney(READINESS_ANALYSIS.projectedStrategicMid)}</span> vs current {fmtMoney(READINESS_ANALYSIS.currentStrategicMid)}</span>}>
+            <ol className="divide-y divide-xo-line">
+              {READINESS_ANALYSIS.weaknesses.slice(0, 4).map((w) => (
+                <li key={w.dimension} className="px-4 py-3">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <span className="flex items-baseline gap-2">
+                      <span className="text-[13px] font-semibold text-xo-text">{w.dimension}</span>
+                      <span className={`border px-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${SEVERITY[w.severity] ?? SEVERITY.low}`}>{w.severity}</span>
+                    </span>
+                    <span className="font-mono text-[12px] tabular-nums text-xo-verified">+{fmtMoney(w.valuationUpliftUsd)} <span className="text-xo-faint">· {w.effort}</span></span>
+                  </div>
+                  <p className="mt-1 text-[13px] text-xo-muted">{w.weakness}</p>
+                  <p className="mt-0.5 text-[12px] text-xo-faint">→ {w.recommendation}</p>
                 </li>
               ))}
-            </ul>
-          )}
-        </Card>
+            </ol>
+          </Section>
+        )}
+      </div>
 
-        <Card className="p-6">
-          <h3 className="font-serif text-lg font-bold text-white">Red flags</h3>
-          {redFlags.length === 0 ? (
-            <p className="mt-3 text-sm text-white/55">No red flags. Buyer-facing posture is defensible.</p>
-          ) : (
-            <ul className="mt-4 space-y-3 text-sm text-white/75">
-              {redFlags.map((f) => (
-                <li key={f} className="flex items-baseline gap-3">
-                  <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-red-400" /> {f}
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
+      {/* ── 6 · MARKET & DEAL FUNNEL ────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Market liquidity" eyebrow={`Buyer activity ${E.ctx.activeBuyers} · demand ${E.ctx.demandLabel.toLowerCase()}`} className="lg:col-span-4">
+          <div className="px-4 py-4">
+            <div className="font-mono text-[32px] font-semibold leading-none tabular-nums text-xo-text">{liquidity}<span className="text-[14px] text-xo-faint"> / 100</span></div>
+            <div className="mt-3"><Bar value={liquidity} width="w-full" /></div>
+            <p className="mt-3 text-[13px] text-xo-muted">{E.ctx.demandLabel === "High" ? "Buyer demand is higher than supply — a seller's market for your profile." : "Balanced demand — a clean process still clears."}</p>
+          </div>
+        </Section>
+        <Section title="Deal funnel" eyebrow="From the registry to the leading bid — this deal's live state" className="lg:col-span-8"
+          foot="Counts are the engines' live state for this deal.">
+          <ol className="space-y-1.5 px-4 py-3">
+            {funnel.map((f) => (
+              <li key={f.label} className="grid grid-cols-[8rem_1fr] items-center gap-3 text-[12px]">
+                <span className="text-right text-xo-muted">{f.label}</span>
+                <Bar value={Math.max(4, Math.round((f.n / funnelTop) * 100))} label={f.n.toLocaleString()} width="w-full" />
+              </li>
+            ))}
+          </ol>
+        </Section>
+      </div>
+
+      {/* ── 7 · EVIDENCE ────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-3">
+        <Section title="Valuation reports" eyebrow="Low · mid · high">
+          <dl className="divide-y divide-xo-line px-4 py-1">
+            {([["Standard", VALUATION_STANDARD.headline], ["Strategic buyer", VALUATION_STRATEGIC.headline], ["Asset replacement", VALUATION_REPLACEMENT.headline]] as const).map(([k, v]) => (
+              <Fact key={k} k={k} v={`${fmtMoney(v.low)} · ${fmtMoney(v.mid)} · ${fmtMoney(v.high)}`} />
+            ))}
+          </dl>
+          <p className="px-4 pb-3 text-[11px] text-xo-faint">Country adjustment for {company.jurisdiction}: {(VALUATION_STRATEGIC.countryAdjustment * 100).toFixed(0)}%.</p>
+        </Section>
+        <Section title="Critical diligence questions" eyebrow="Diligence engine">
+          {criticalQs.length === 0
+            ? <p className="px-4 py-3 text-[13px] text-xo-muted">No critical questions surfaced — clean diligence posture.</p>
+            : <ul className="space-y-2 px-4 py-3 text-[13px] text-xo-text">{criticalQs.map((q) => <li key={q}>{q}</li>)}</ul>}
+        </Section>
+        <Section title="Red flags" eyebrow="Diligence engine">
+          {redFlags.length === 0
+            ? <p className="px-4 py-3 text-[13px] text-xo-muted">No red flags. Buyer-facing posture is defensible.</p>
+            : <ul className="space-y-2 px-4 py-3 text-[13px] text-xo-text">{redFlags.map((f) => <li key={f}>{f}</li>)}</ul>}
+        </Section>
       </div>
     </div>
   );
 };
-
-const ValRow: React.FC<{ label: string; v: { low: number; mid: number; high: number } }> = ({ label, v }) => (
-  <div className="flex items-baseline justify-between">
-    <span className="text-white/55">{label}</span>
-    <span className="font-mono text-white/85">{fmtMoney(v.low)} · {fmtMoney(v.mid)} · {fmtMoney(v.high)}</span>
-  </div>
-);
 
 export default Dashboard;
