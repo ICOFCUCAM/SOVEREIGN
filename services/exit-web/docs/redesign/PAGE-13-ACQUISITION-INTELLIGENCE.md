@@ -35,7 +35,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Fixture NDAs/offers presented as proprietary recorded behaviour.** | Title and foot say "sample process records (demo data)"; drop "no external database has this" and "live tension". | ☑ `f66e3f3` |
-| G2 | **Invented "Outreach success +N%" lift** and the "live" radar. | Remove the lift figures; section becomes "Registry signals" with the snapshot date; no pulsing dot. | ☐ |
+| G2 | **Invented "Outreach success +N%" lift** and the "live" radar. | Remove the lift figures; section becomes "Registry signals" with the snapshot date; no pulsing dot. | ☑ G2-commit |
 | G3 | Mislabels: fit probability as "likelihood … signs"; appetite as "deploying capital / recent-12mo activity"; "live" EDGAR/Wikidata; demo-tenant stats as "Live data"; narrative unlabelled. | Accurate labels: fit probability (engine fit score); appetite (registry attribute); "fetched from EDGAR/Wikidata, snapshot as of …"; "Recorded stats · demo tenant"; "template sentence". | ☐ |
 | G4 | Banker's-take urgency and overclaim; hidden plan gate on the banker CTA. | Plain wording; `requiredEngagement` note. | ☐ |
 | G5 | **Buyer role sees founder process data** and the founder CTA. | For buyers: hide the sample-process signals and the banker's take; state the page shows the buyer landscape for the demo/listed company. Route unchanged. | ☐ |
@@ -54,3 +54,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 ### G1 — Fixture NDAs/offers presented as proprietary recorded behaviour
 *Closed by:* `pages/Intelligence.tsx`, `lib/platform-signals.ts` (wording only; figures unchanged). Section "Proprietary platform signals — behavioural evidence from this workspace's own process records — no external database has this" → **"Process signals · sample records" — "from the demo company's sample NDAs and offers — demo data"**, foot: "Computed from seeded sample records, not from a process run on ExitOS. With real NDAs and offers these figures would come from your own records." Detail "counterparties engaging on counters — live tension" → "N sample offers are at the counter stage". Module comment updated. (`computePlatformSignals` has no other caller.)
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for Proprietary / no external database / live tension; new title present.
+
+### G2 — Invented "Outreach success +N%" and the "live" radar
+*Closed by:* `pages/Intelligence.tsx`. The per-signal "lift" (min(6, deals × 2), min(4, active buyers), a fixed 2) and their sum shown as "Outreach success +N%" are removed — no outreach outcome is measured anywhere. "Acquisition Radar · live" (with the pulsing dot, already gone in G8) → **"Registry signals"**, eyebrow "Snapshot · as of {market-index date}". The signal texts are unchanged.
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for "Outreach success", "· live" or trailing "+N%"; 0 pinging elements. (Two remaining "live" words belong to G3/G4.)

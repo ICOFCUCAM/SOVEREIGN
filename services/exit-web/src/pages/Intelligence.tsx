@@ -119,9 +119,8 @@ const Intelligence: React.FC = () => {
     ? candidates.reduce((s, c) => s + c.probability, 0) / candidates.length
     : 0;
 
-  // Acquisition Radar — signals computed from each candidate's measured
-  // acquisition history (EDGAR 8-K / Wikidata / press) and the tracked-deal
-  // medians. Lift is a heuristic over the measured track record.
+  // Registry signals — from each candidate's recorded acquisition history
+  // (EDGAR 8-K / Wikidata / press) and the tracked-deal medians.
   const trackRecord = candidates
     .filter((c) => c.history.totalDeals > 0)
     .sort((a, b) => b.history.dealsLast3Years - a.history.dealsLast3Years)
@@ -129,14 +128,12 @@ const Intelligence: React.FC = () => {
     .map((c) => ({
       tag: "Track record",
       text: `${c.buyer.name} — ${c.history.totalDeals} tracked acquisition${c.history.totalDeals === 1 ? "" : "s"}${c.history.lastTargetName ? `, most recently ${c.history.lastTargetName}${c.history.lastAcquiredAt ? ` (${c.history.lastAcquiredAt.slice(0, 4)})` : ""}` : ""}.`,
-      lift: Math.min(6, Math.max(1, c.history.dealsLast3Years * 2 || c.history.totalDeals)),
     }));
-  const radar: { tag: string; text: string; lift: number }[] = [
+  const radar: { tag: string; text: string }[] = [
     ...trackRecord,
-    { tag: "Active mandates", text: `${activeCount} of ${candidates.length} matched mandates are actively deploying capital.`, lift: Math.min(4, activeCount) },
-    { tag: "Deal medians", text: `Across tracked deals: ${DEAL_INTEL_FMT.medianPremium} median disclosed premium, ${DEAL_INTEL_FMT.medianClose} announce-to-close.`, lift: 2 },
+    { tag: "Active mandates", text: `${activeCount} of ${candidates.length} matched mandates are actively deploying capital.` },
+    { tag: "Deal medians", text: `Across tracked deals: ${DEAL_INTEL_FMT.medianPremium} median disclosed premium, ${DEAL_INTEL_FMT.medianClose} announce-to-close.` },
   ];
-  const radarLift = radar.reduce((s, r) => s + r.lift, 0);
   const provenance = (() => {
     const tally = { verified: 0, unverified: 0, estimated: 0 };
     for (const c of report.candidates) {
@@ -245,15 +242,13 @@ const Intelligence: React.FC = () => {
         </Section>
       </div>
 
-      <Section title="Acquisition Radar · live" className="border border-xo-line"
-        right={<span className="text-[12px] text-xo-muted">Outreach success <span className="font-mono font-semibold text-xo-verified">+{radarLift}%</span></span>}
+      <Section title="Registry signals" eyebrow={`Snapshot · as of ${MARKET_INDEX_FMT.asOf}`} className="border border-xo-line"
         foot="Signals computed from the source-referenced acquisition history (EDGAR 8-K / Wikidata / press).">
         <ul className="divide-y divide-xo-line">
           {radar.map((r) => (
             <li key={r.text} className="flex flex-wrap items-start gap-3 px-4 py-3">
               <span className="shrink-0 border border-xo-line px-2 py-0.5 text-[11px] font-medium text-xo-muted">{r.tag}</span>
               <span className="min-w-0 flex-1 text-[13px] leading-snug">{r.text}</span>
-              <span className="shrink-0 font-mono text-[12px] font-semibold text-xo-verified">+{r.lift}%</span>
             </li>
           ))}
         </ul>
