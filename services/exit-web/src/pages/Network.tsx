@@ -17,15 +17,14 @@ import { MARKET_FMT, HISTORY_FMT, DEAL_INTEL, DEAL_INTEL_FMT } from "../lib/mark
 
 const ARR = SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd;
 
-function buyerDna(name: string, retentionBase: number, earnout: string) {
-  const c = BUYERS.candidates.find((x) => x.buyer.name === name) ?? BUYERS.candidates[0];
-  const days = c.expectedOutcome.expectedDaysToCash;
-  // premium prior is owned by the Valuation Constitution, never inlined here
-  const premiumDefault = VALUATION_FRAMEWORK.buyerTypePremiumPriors[c.buyer.buyerType] ?? VALUATION_FRAMEWORK.executionNeutrals.premiumPct;
-  const prem = c.outcomes.avgPremiumPct != null ? Math.min(0.4, c.outcomes.avgPremiumPct) : premiumDefault;
-  const multiple = ((VALUATION_CANONICAL.headline.mid * (1 + prem)) / ARR).toFixed(1);
-  const retention = Math.min(95, Math.max(45, Math.round(retentionBase + ((c.outcomes.avgRetradePct ?? 0) >= 0 ? 6 : -8))));
-  return { name: c.buyer.name, days, multiple, retention, earnout };
+// A ranked buyer's measured figures only. The premium is the buyer's average
+// disclosed premium (capped at 40%) or, when none is disclosed, the
+// framework's prior for that buyer type — labelled as such.
+function buyerFacts(c: (typeof BUYERS.candidates)[number]) {
+  const disclosed = c.outcomes.avgPremiumPct != null;
+  const premium = disclosed ? Math.min(0.4, c.outcomes.avgPremiumPct as number) : (VALUATION_FRAMEWORK.buyerTypePremiumPriors[c.buyer.buyerType] ?? VALUATION_FRAMEWORK.executionNeutrals.premiumPct);
+  const multiple = ARR > 0 ? ((VALUATION_CANONICAL.headline.mid * (1 + premium)) / ARR).toFixed(1) : null;
+  return { name: c.buyer.name, days: c.expectedOutcome.expectedDaysToCash, premium, disclosed, multiple, probability: Math.round(c.probability * 100) };
 }
 
 const Stat: React.FC<{ value: string; label: string }> = ({ value, label }) => (
@@ -43,8 +42,8 @@ const Moat: React.FC<{ n: number; title: string; why: string; children: React.Re
 );
 
 const Network: React.FC = () => {
-  const buyerA = buyerDna("Amazon Strategic", 80, "Rare");
-  const buyerB = buyerDna("Pritzker Private Capital", 60, "Aggressive");
+  // the two top-ranked buyers for this company (no hand-picked names)
+  const topTwo = BUYERS.candidates.slice(0, 2).map(buyerFacts);
   const buyerDnaCount = BUYERS.candidates.length;
   const tape = useMemo(() => buildMarketTape(), []);
 
@@ -84,16 +83,16 @@ const Network: React.FC = () => {
       <Moat n={2} title="The Buyer Graph" why="Most marketplaces know sellers. Few know buyers." to="/console/buyer-copilot" cta="Buyer Copilot">
         <p className="text-[13px] text-xo-muted">Buyer DNA on <span className="text-xo-text">{buyerDnaCount}+ acquirers</span> — measured, not guessed.</p>
         <ul className="mt-3 grid gap-px border border-xo-line bg-xo-line sm:grid-cols-2">
-          {[buyerA, buyerB].map((b, i) => (
+          {topTwo.map((b, i) => (
             <li key={b.name} className="bg-xo-panel px-4 py-3">
-              <div className="text-[11px] text-xo-faint">Buyer {i === 0 ? "A" : "B"}</div>
+              <div className="text-[11px] text-xo-faint">Ranked #{i + 1} for this company · {b.probability}% probability</div>
               <h3 className="text-[14px] font-semibold">{b.name}</h3>
               <dl className="mt-2 grid grid-cols-3 gap-2">
-                <div><dt className="text-[11px] text-xo-faint">to close</dt><dd className="font-mono text-[15px] font-semibold tabular-nums">{b.days}d</dd></div>
-                <div><dt className="text-[11px] text-xo-faint">ARR</dt><dd className="font-mono text-[15px] font-semibold tabular-nums text-xo-verified">{b.multiple}×</dd></div>
-                <div><dt className="text-[11px] text-xo-faint">retention</dt><dd className="font-mono text-[15px] font-semibold tabular-nums">{b.retention}%</dd></div>
+                <div><dt className="text-[11px] text-xo-faint">Days to cash</dt><dd className="font-mono text-[15px] font-semibold tabular-nums">{b.days}d</dd></div>
+                <div><dt className="text-[11px] text-xo-faint">Premium {b.disclosed ? "(disclosed avg)" : "(prior)"}</dt><dd className="font-mono text-[15px] font-semibold tabular-nums">+{Math.round(b.premium * 100)}%</dd></div>
+                <div><dt className="text-[11px] text-xo-faint">What-if ARR multiple</dt><dd className="font-mono text-[15px] font-semibold tabular-nums text-xo-verified">{b.multiple ?? "—"}{b.multiple && "×"}</dd></div>
               </dl>
-              <p className="mt-2 text-[12px] text-xo-muted">Earnout tendency: <span className="text-xo-text">{b.earnout}</span></p>
+              <p className="mt-2 text-[11px] text-xo-faint">What-if: the company's value × (1 + this premium) ÷ its ARR. Retention and earnout behaviour are not measured, so they are not shown.</p>
             </li>
           ))}
         </ul>

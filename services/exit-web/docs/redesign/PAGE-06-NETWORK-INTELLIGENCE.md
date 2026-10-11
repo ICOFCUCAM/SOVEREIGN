@@ -31,7 +31,7 @@ Shows the founder the platform's compounding data assets ("five moats"): the dea
 ## Gap register — Page 06
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Invented buyer attributes** (retention %, earnout tendency) and hard-coded buyer picks. | Show the active company's top two ranked buyers with measured fields only: expected days to cash, average disclosed premium (or the framework prior, labelled), and the implied ARR multiple labelled as a what-if. Retention and earnout tendency removed — no data. | ☐ |
+| G1 | **Invented buyer attributes** (retention %, earnout tendency) and hard-coded buyer picks. | Show the active company's top two ranked buyers with measured fields only: expected days to cash, average disclosed premium (or the framework prior, labelled), and the implied ARR multiple labelled as a what-if. Retention and earnout tendency removed — no data. | ☑ G1-commit |
 | G2 | **Overclaims** about agents and learning; "12+ acquirers measured" (top-12 cap); "live engine runs". | Factual wording: what the engines produced; registry sizes named correctly; learning claims limited to what exists. | ☐ |
 | G3 | Fake live tape. | `RegistryTape` with snapshot date. | ☐ |
 | G4 | Demo company unlabelled. | Run on `loadActiveCompany()`; badge. | ☐ |
@@ -44,3 +44,7 @@ Shows the founder the platform's compounding data assets ("five moats"): the dea
 ### G5 — Design
 *Closed by:* `pages/Network.tsx` rebuilt on `xo` (`PageHeader` `h1`, four network metrics, reactors, each moat a labelled `Section`, buyer cards as `h3` + definition lists, lifecycle links). Content carried over verbatim; G1–G4 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe **0** (was 3), 12 tab stops all with visible focus.
+
+### G1 — Invented buyer attributes
+*Closed by:* `pages/Network.tsx`. `buyerDna(name, retentionBase, earnout)` (hard-coded "Amazon Strategic"/"Pritzker", retention 80/60 ± 6/8, earnout "Rare"/"Aggressive") replaced by `buyerFacts()` over the company's **two top-ranked buyers**: probability, expected days to cash, premium (the buyer's disclosed average capped at 40 %, else the framework prior for its type — labelled "(prior)"), and a "what-if ARR multiple" with its formula. Retention and earnout tendency are removed and the card says why ("not measured").
+*Verification:* Chromium demo: "Ranked #1 … 89% probability · Flexport Strategic · Days to cash 37d · Premium (prior) +28% · What-if ARR multiple 7.3×" · eslint clean · 0 errors.
