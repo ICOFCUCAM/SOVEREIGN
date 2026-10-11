@@ -36,6 +36,9 @@ const DataRoom: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [error, setError]       = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  // Uploads go to one demo tenant that every user can list and download (X12).
+  // Nothing is uploaded until the founder has acknowledged that.
+  const [ack, setAck] = useState(false);
 
   const active = DILIGENCE.documents.find((d) => d.kind === activeKind) ?? DILIGENCE.documents[0];
 
@@ -93,8 +96,8 @@ const DataRoom: React.FC = () => {
         badge={<span className="text-[12px] text-xo-muted">Diligence artifacts · {overallPct}% complete</span>}
         actions={<>
           <button type="button" onClick={refresh} disabled={loading} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{loading ? "Refreshing…" : "Refresh"}</button>
-          <button type="button" onClick={() => fileInput.current?.click()} disabled={uploading} className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{uploading ? "Uploading…" : `Upload to ${activeKind.replace(/_/g, " ")}`}</button>
-          <input ref={fileInput} type="file" className="hidden" onChange={onFile} disabled={uploading} aria-label={`Upload a file to the ${activeKind.replace(/_/g, " ")} package`} />
+          <button type="button" onClick={() => fileInput.current?.click()} disabled={uploading || !ack} aria-describedby="dr-shared" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{uploading ? "Uploading…" : `Upload to ${activeKind.replace(/_/g, " ")}`}</button>
+          <input ref={fileInput} type="file" className="hidden" onChange={onFile} disabled={uploading || !ack} aria-label={`Upload a file to the ${activeKind.replace(/_/g, " ")} package`} />
         </>} />
 
       <section aria-label="Data room summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
@@ -105,6 +108,15 @@ const DataRoom: React.FC = () => {
       </section>
 
       <MarketTape items={buildMarketTape()} />
+
+      <section id="dr-shared" aria-labelledby="dr-shared-h" className="border border-xo-caution/60 bg-xo-panel px-4 py-3">
+        <h2 id="dr-shared-h" className="text-[14px] font-semibold text-xo-caution">Shared storage — read before uploading</h2>
+        <p className="mt-1 text-[13px] leading-relaxed text-xo-muted">Files uploaded here are stored in a single demo workspace in ExitOS storage. <span className="text-xo-text">Anyone using this app can list and download them.</span> Per-founder access control is not built yet, and the confidential / sensitive labels do not restrict access. Do not upload confidential documents.</p>
+        <label className="mt-2 flex items-start gap-2 text-[13px]">
+          <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#047857]" />
+          <span>I understand that anything I upload here is visible to every ExitOS user.</span>
+        </label>
+      </section>
 
       {error && <p role="alert" className="border border-xo-risk/50 bg-xo-panel px-4 py-3 text-[13px] text-xo-risk">{error}</p>}
 
@@ -211,7 +223,7 @@ const DataRoom: React.FC = () => {
             {docsForActive.length === 0 ? (
               <div className="border border-dashed border-xo-line px-4 py-6 text-center text-[13px] text-xo-muted">
                 No documents uploaded to this package yet.<br />
-                <button type="button" onClick={() => fileInput.current?.click()} className="mt-2 inline-block py-1 text-[12px] font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Upload your first artifact →</button>
+                <button type="button" onClick={() => fileInput.current?.click()} disabled={!ack} aria-describedby="dr-shared" className="mt-2 inline-block py-1 disabled:opacity-60 text-[12px] font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Upload your first artifact →</button>
               </div>
             ) : (
               <ul className="space-y-2">
@@ -222,7 +234,7 @@ const DataRoom: React.FC = () => {
                       <div className="mt-0.5 text-[11px] text-xo-faint">{fmtBytes(d.bytes)} · {d.mime} · {new Date(d.uploaded_at).toLocaleString()}</div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`text-[11px] font-semibold capitalize ${CLASS_CLS[d.classification]}`}>{d.classification}</span>
+                      <span className={`text-[11px] font-semibold capitalize ${CLASS_CLS[d.classification]}`}>{d.classification} <span className="font-normal normal-case text-xo-faint">(label only)</span></span>
                       {d.downloadUrl && <a href={d.downloadUrl} target="_blank" rel="noreferrer" className="text-[12px] font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Download<span className="sr-only"> {d.filename} (opens in a new tab)</span></a>}
                     </div>
                   </li>
