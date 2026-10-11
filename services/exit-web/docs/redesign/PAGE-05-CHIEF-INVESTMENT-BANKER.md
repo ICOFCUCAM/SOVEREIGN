@@ -38,7 +38,7 @@ The paid founder's command surface: value now and after fixes, odds, who is circ
 | # | Gap | Fix (no calculation changed) | Status |
 |---|---|---|---|
 | G1 | Always the demo company, unlabelled. | Run on `loadActiveCompany()` via `dealContextFor` / `commanderMetrics(ctx, analysis)` (as Page 02); data badge. | ☑ `545da32` |
-| G2 | **Invented probability breakdown.** | Show the real index decomposition: 0.35 × Exit Score, 0.40 × buyer demand, 0.25 × negotiation leverage (sample offers), each with its points. | ☐ |
+| G2 | **Invented probability breakdown.** | Show the real index decomposition: 0.35 × Exit Score, 0.40 × buyer demand, 0.25 × negotiation leverage (sample offers), each with its points. | ☑ G2-commit |
 | G3 | Fake live (tape, pinging dots, "Live", "live telemetry", "live market feed", "live engine state"). | Snapshot-dated labels, `RegistryTape`, no live dots. | ☐ |
 | G4 | Overclaims and mislabels: "What runs the moment you press Execute" ✓ list; "Buyer movement" from a static attribute; "qualified buyers" = top-12 cap; "Close probability" / "Confidence" / "Deal temperature" heuristics unlabelled; "Premium probability". | Plain wording: "What Autonomous Exit will prepare (each step needs your approval)"; "Buyer appetite (registry)"; "top 12 ranked"; indices named with formulas; "Top premium payer". | ☐ |
 | G5 | Plan gates hidden on layer links (Market map → Preparation or Pro). | `requiredEngagement` labels. | ☐ |
@@ -57,3 +57,9 @@ The paid founder's command surface: value now and after fixes, odds, who is circ
 *Closed by:* `pages/Commander.tsx` — runs `dealContextFor`, `runReadinessAnalysis` and `runBuyerDiscovery` on `loadActiveCompany()` and passes them to `commanderMetrics(ctx, analysis)` (formulas unchanged); `h1` = company, **Demo data / Your intake** badge. `pages/Intake.tsx`: "Where your figures are used" now lists Chief Investment Banker.
 
 *Verification:* `tsc -b`, eslint clean · Chromium (Active Mandate): demo → Helios Freight, DEMO DATA, EV $102,849,415 (unchanged); saved intake "Northwind Analytics" → YOUR INTAKE, EV $403,509,792, no Helios mentions · 0 errors.
+
+### G2 — Invented probability breakdown
+*Closed by:* `lib/commander-metrics.ts` (new `exitProbabilityParts(ctx)`; `commanderMetrics` now computes the index through it — same formula, + test that parts sum to the index) and `pages/Commander.tsx`.
+The six invented factors (market conditions 26, buyer demand 21, technology moat 18, growth 14, readiness 11, risk −6 — fixed weights scaled to the total) are replaced by the index's actual parts, each with its points and maximum, a rounded total, and "a heuristic, not a measured likelihood".
+
+*Verification:* `vitest` (commander-metrics) pass · Chromium: demo "Exit Score 55/100 × 0.35 → 19.3/35 · Active buyers 8 of 6 (capped) × 0.40 → 40.0/40 · Negotiation leverage "high" × 0.25 (sample offers) → 25.0/25 · Total 84"; saved intake → Exit Score 60 → 21.0, total 86 · axe 0 · 0 errors.

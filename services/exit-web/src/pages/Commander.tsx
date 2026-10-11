@@ -5,7 +5,7 @@ import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, BuyerNetworkReactor, ReactorTelemetry } from "../components/Reactor";
 import { MARKET_INTEL } from "../lib/market-intel";
 import { Button, fmtMoney } from "../lib/ui";
-import { commanderMetrics } from "../lib/commander-metrics";
+import { commanderMetrics, exitProbabilityParts } from "../lib/commander-metrics";
 import { dealContextFor } from "../lib/deal-context";
 import { DEAL_INTEL_FMT } from "../lib/market-stats";
 import { runBuyerDiscovery, runReadiness, runReadinessAnalysis } from "@exit/engines";
@@ -83,12 +83,13 @@ const Commander: React.FC = () => {
   }));
   const temp = Math.min(98, 70 + ACTIVE_BUYERS * 4);
   const tempLabel = temp >= 80 ? "HOT" : temp >= 60 ? "WARM" : "COOL";
-  const base = [
-    { label: "Market conditions", w: 26 }, { label: "Buyer demand", w: 21 }, { label: "Technology moat", w: 18 },
-    { label: "Growth rate", w: 14 }, { label: "Readiness", w: 11 }, { label: "Risk factors", w: -6 },
+  // the index's real inputs, part by part (no invented factors)
+  const pp = exitProbabilityParts(E.ctx);
+  const factors = [
+    { label: `Exit Score ${pp.exitScore}/100 × 0.35`, v: pp.readiness, max: 35 },
+    { label: `Active buyers ${pp.activeBuyers} of 6 (capped) × 0.40`, v: pp.demand, max: 40 },
+    { label: `Negotiation leverage "${pp.leverageLabel}" × 0.25 (sample offers)`, v: pp.leverage, max: 25 },
   ];
-  const sum = base.reduce((s, f) => s + f.w, 0);
-  const factors = base.map((f) => ({ ...f, v: Math.round((f.w / sum) * m.exitProbability) }));
   const radar = TYPE_AXES.map((a) => ({ label: a.label, n: BUYERS.byType[a.key] ?? 0 }));
   const radarTotal = radar.reduce((s, d) => s + d.n, 0);
   const top = DEAL_BUYERS[0];
@@ -153,14 +154,16 @@ const Commander: React.FC = () => {
 
       {/* ── why the odds are what they are ─────────────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
-        <Section title="Exit probability breakdown" eyebrow={`${m.exitProbability}%`} className="lg:col-span-5">
+        <Section title="Exit probability breakdown" eyebrow={`Close-probability index ${m.exitProbability}%`} className="lg:col-span-5"
+          foot="These three parts are the index's only inputs. It is a heuristic, not a measured likelihood.">
           <ul className="space-y-2 px-4 py-3">
             {factors.map((f) => (
               <li key={f.label} className="flex items-center justify-between gap-3 text-[12px]">
                 <span className="text-xo-muted">{f.label}</span>
-                <span className="flex items-center gap-2"><Bar value={Math.min(100, Math.abs(f.v) * 3)} width="w-24" /><span className={`w-10 text-right font-mono tabular-nums ${f.v >= 0 ? "text-xo-verified" : "text-xo-risk"}`}>{f.v >= 0 ? "+" : ""}{f.v}</span></span>
+                <span className="flex shrink-0 items-center gap-2"><Bar value={f.v} max={f.max} width="w-20" /><span className="w-16 text-right font-mono tabular-nums">{f.v.toFixed(1)} / {f.max}</span></span>
               </li>
             ))}
+            <li className="flex justify-between border-t border-xo-line pt-2 text-[12px]"><span className="text-xo-muted">Total (rounded)</span><span className="font-mono tabular-nums">{m.exitProbability}</span></li>
           </ul>
         </Section>
         <Section title="Deal temperature" eyebrow={tempLabel} className="lg:col-span-3">

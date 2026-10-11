@@ -43,3 +43,12 @@ describe("personalised deal context", () => {
     expect(a.companyValue).not.toBe(commanderMetrics().companyValue);
   });
 });
+
+describe("exit probability parts", () => {
+  it("the three parts add up to the index (within rounding)", async () => {
+    const { exitProbabilityParts } = await import("./commander-metrics");
+    const p = exitProbabilityParts();
+    expect(Math.abs(p.readiness + p.demand + p.leverage - p.total)).toBeLessThanOrEqual(0.5);
+    expect(p.total).toBe(commanderMetrics().exitProbability);
+  });
+});
