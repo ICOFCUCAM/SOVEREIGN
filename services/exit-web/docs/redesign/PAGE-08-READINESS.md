@@ -37,7 +37,7 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 | G3 | **Mislabels:** "Market window" is the company's market-growth input; "strategic mid, today" (D1); verdict thresholds and category scoring unexplained. | "Market growth (company input)"; "enterprise value today"; thresholds shown with the verdict; categories and impacts labelled rule-based. | ☐ |
 | G4 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` + analysis; badge. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, 8 contrast failures, old primitives. | Rebuild on `xo`. | ☑ G6-commit |
+| G6 | Design: no `h1`, 8 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `21b899c` |
 
 ---
 
