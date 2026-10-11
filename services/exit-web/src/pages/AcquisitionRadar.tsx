@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Button, notify } from "../lib/ui";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
@@ -21,6 +22,7 @@ import { PageHeader, Section, Metric, ScrollRegion, ActionLink, Chip, XO_INPUT, 
 
 const REGIONS: readonly Region[] = ["North America", "Europe", "Asia", "Middle East", "Oceania", "Latin America", "Africa", "Other"];
 const SECTOR_OPTIONS = ACQ_INDEXES.indexes.map((i) => i.sector);
+const AS_OF = DNA_AS_OF.slice(0, 10);   // registry snapshot date (not a live feed)
 const SMALL_BTN = "rounded-sm border px-2.5 py-1 text-[12px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
 
 const AcquisitionRadar: React.FC = () => {
@@ -93,14 +95,14 @@ const AcquisitionRadar: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Target sectors" value={String(sectors.length)} sub="in your mandate" /></div>
         <div className="bg-xo-panel"><Metric label="Sector deal volume" value={watchVolume.toLocaleString()} sub="indexed acquisitions" /></div>
         <div className="bg-xo-panel"><Metric label="Active acquirers" value={String(maxActiveBuyers)} sub="competition · your space" /></div>
-        <div className="bg-xo-panel"><Metric label="Qualified opportunities" value={String(qualified.length)} sub={`of ${listings.length} live listings`} /></div>
+        <div className="bg-xo-panel"><Metric label="Qualified opportunities" value={String(qualified.length)} sub={`of ${listings.length} listings`} /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={AS_OF} />
 
       <section aria-label="Decision brief" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line md:grid-cols-2 xl:grid-cols-4">
         {[
-          { k: "Current state", body: <><span className="font-mono text-xo-text">{sectors.length}</span> target sectors · {listings.length} live listings · {regions.length} regions</> },
+          { k: "Current state", body: <><span className="font-mono text-xo-text">{sectors.length}</span> target sectors · {listings.length} listings · {regions.length} regions</> },
           { k: "Recent changes", body: <>{watchVolume.toLocaleString()} indexed acquisitions in your space · {maxActiveBuyers} competing acquirers</> },
           { k: "Recommended action", body: qualified[0] ? <>Express interest in <span className="font-semibold text-xo-text">{qualified[0].listing.code}</span> — {qualified[0].match.score}% match</> : <>Widen the mandate — no qualified listings yet</> },
           { k: "Expected outcome", body: <><span className="font-mono text-xo-text">{qualified.length}</span> qualified opportunities · identities reveal on NDA</> },
@@ -144,11 +146,11 @@ const AcquisitionRadar: React.FC = () => {
               </div>
             </div>
           </Section>
-          <Section title="Intelligence rail · live telemetry" eyebrow="Registry extremes" className="border border-xo-line"><ReactorTelemetry /></Section>
+          <Section title="Registry extremes" eyebrow={`Snapshot · as of ${AS_OF}`} className="border border-xo-line"><ReactorTelemetry /></Section>
         </div>
 
         {/* ── opportunities ────────────────────────────────────────── */}
-        <Section title="Opportunities · scored against your mandate" eyebrow={`${listings.length} live listings`} className="min-w-0 self-start border border-xo-line"
+        <Section title="Opportunities · scored against your mandate" eyebrow={`${listings.length} listings`} className="min-w-0 self-start border border-xo-line"
           foot="Identities withheld until NDA — buyers see sector, region, revenue band and growth. The pool grows as founders list; matching is the same engine at any scale.">
           <ol className="divide-y divide-xo-line">
             {scored.map(({ listing: l, match }) => (
@@ -235,11 +237,11 @@ const AcquisitionRadar: React.FC = () => {
       {/* ── sector watch ───────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Acquisition reactor · your sectors" eyebrow="Sector volume" className="lg:col-span-4"
-          foot="Sector acquisition volume across the network — node size ∝ √volume, colour = trend.">
+          foot={`Sector acquisition volume in the indexed registry (snapshot as of ${AS_OF}) — node size ∝ √volume, colour = 12-month trend. Rotation is decorative.`}>
           <AcquisitionReactor height={208} />
         </Section>
         <Section title="Sector watch · your space" eyebrow="Acquisition indexes" className="lg:col-span-8"
-          foot={<>Live ExitOS Acquisition Indexes for your mandate. Full set in <ActionLink to="/console/indexes">Acquisition Indexes</ActionLink>.</>}>
+          foot={<>ExitOS Acquisition Indexes for your mandate's sectors, snapshot as of {AS_OF}. Full set in <ActionLink to="/console/indexes">Acquisition Indexes</ActionLink>.</>}>
           {watch.length ? (
             <ScrollRegion label="Sector watch table">
               <table className="w-full min-w-[520px] text-[13px]">

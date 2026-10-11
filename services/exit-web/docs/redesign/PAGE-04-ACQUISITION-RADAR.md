@@ -38,7 +38,7 @@ A buyer (or a founder looking from the buyer side) sets an acquisition mandate �
 ## Gap register — Page 04
 | # | Gap | Evidence | Fix (no scoring/engine change) | Status |
 |---|---|---|---|---|
-| G1 | **Fake-live indicators.** Pinging "Tape", "Intelligence rail · live telemetry", "Live ExitOS Acquisition Indexes", "live listings", reactor "across the network". | `AcquisitionRadar.tsx`, shared `MarketTape` | Snapshot-dated labels; `RegistryTape`; "listings", not "live listings". | ☐ |
+| G1 | **Fake-live indicators.** Pinging "Tape", "Intelligence rail · live telemetry", "Live ExitOS Acquisition Indexes", "live listings", reactor "across the network". | `AcquisitionRadar.tsx`, shared `MarketTape` | Snapshot-dated labels; `RegistryTape`; "listings", not "live listings". | ☑ G1-commit |
 | G2 | **Demo and catalog listings shown as live opportunities.** The demo company and Sovereign product-catalog seeds appear in the scored pool unlabelled. | `listings.ts` SEEDS | Badge each: "Demo listing" / "Product catalog"; count founder listings separately. | ☐ |
 | G3 | **Overclaims.** Toast "Mandate published — founders can now match it" and "matchable by founders" — nothing reads mandates. "Follow" logs "added to outreach" on follow **and** unfollow. | code | "Mandate saved" + plain note that founders don't see mandates yet; log only on follow. | ☐ |
 | G4 | **Inputs wrong or unvalidated.** "Min/Max check" actually filter company revenue; `2.5` → 25; min > max accepted; offers accept negatives and decimals are not guarded. | measured | Rename to "Target revenue (min/max, $M)"; reuse the Page 03 parsing rules; validate min ≤ max and offer > 0 with messages. | ☐ |
@@ -53,3 +53,9 @@ A buyer (or a founder looking from the buyer side) sets an acquisition mandate �
 *Closed by:* `pages/AcquisitionRadar.tsx` rebuilt on `xo`; new shared `PageHeader`, `Chip` (`aria-pressed`) and `XO_INPUT`/`XO_LABEL` in `components/xo` (+ 2 tests). Order: header (`h1`, mandate summary line) → four mandate metrics → decision brief → mandate form (left, `fieldset`/`legend`, labelled inputs) beside scored opportunities (centre, each an `h3`, match reasons with screen-reader "Meets/Does not meet") → reactor + sector watch table. All handlers, telemetry and API calls unchanged; labels carried over verbatim (fixed in G1–G5).
 
 *Verification:* `tsc -b`, eslint clean · xo tests 8/8 · Chromium founder free/pro 1440/390 and buyer free/pro 1440: 0 errors, `h1` 1, no overflow, axe **0** (was colour-contrast ×11), keyboard: every stop (80 sampled) has visible focus.
+
+### G1 — Fake-live indicators
+*Closed by:* `pages/AcquisitionRadar.tsx`. Pinging `MarketTape` → static `RegistryTape` dated to the registry snapshot; "Intelligence rail · live telemetry" → "Registry extremes · Snapshot · as of 2026-10-11"; "live listings" → "listings" (3 places); reactor and sector-watch feet name the snapshot date ("Rotation is decorative").
+Left as is: the "Live market" **tag** on Sovereign product-catalog listings (`lib/sovereign-intel.ts`) — it describes products being on the market, not a data feed.
+
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 pinging elements, 2 snapshot-date mentions; remaining "live" text = the catalog tag only · axe 0 · 0 errors.
