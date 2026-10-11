@@ -294,7 +294,7 @@ Requested by the owner after the Page 01 review ("START FIXING"). Same rule: doc
 
 *Fix:* "High" additionally requires ≥ 1 verified event; deep but wholly unverified records are capped at "Moderate". Moderate/Developing thresholds unchanged. This only makes the label stricter; no score, probability or valuation changes. Expected effect on the snapshot: High 22 → 3, Moderate 38 → 57, Developing unchanged at 1,416.
 
-*Verification:* `tsc -b` pass · eslint clean · `vitest run` 29 files **180/180** (the confidence test now also asserts a deep-but-unverified buyer is Moderate) · measured distribution High **3** / Moderate **57** / Developing **1,416** (as predicted) · Chromium Terminal drawers: Microsoft (0 verified) → Moderate, Cisco (1 verified) → High, 0 page errors. *Status:* ☑ X6-commit
+*Verification:* `tsc -b` pass · eslint clean · `vitest run` 29 files **180/180** (the confidence test now also asserts a deep-but-unverified buyer is Moderate) · measured distribution High **3** / Moderate **57** / Developing **1,416** (as predicted) · Chromium Terminal drawers: Microsoft (0 verified) → Moderate, Cisco (1 verified) → High, 0 page errors. *Status:* ☑ `50e269a`
 
 ### After X1–X6
 | Check | Result |
