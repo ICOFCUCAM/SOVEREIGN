@@ -7,10 +7,10 @@ import { OFFER_WATERFALLS, SAMPLE_OFFERS, OFFER_COMPARISON, CAPTABLE_ANALYSIS } 
 
 // Wealth Transition — the stage most M&A platforms ignore. The deal closes;
 // the founder's job shifts from building a company to stewarding the
-// proceeds. This surface takes the leading offer's waterfall through tax,
-// lays out when each tranche actually becomes liquid (cash / lock-up /
-// earnout), and proposes a diversification plan. This is where ExitOS stops
-// being an acquisition tool and becomes the OS for founder liquidity.
+// proceeds. This surface takes the leading offer's waterfall through a flat
+// tax assumption, lays out when each tranche becomes liquid (cash, escrow,
+// stock, earnout) by the offer terms, and shows an illustrative allocation
+// template and a checklist of post-exit topics.
 
 const TAX = 0.238; // blended LTCG + NIIT estimate — illustrative; the engine has no tax model
 
@@ -100,7 +100,7 @@ const Wealth: React.FC = () => {
             <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(afterTax)}</span> after tax to the founder group from the {leadingOffer.buyerName} offer, if every tranche pays in full.</TakeCell>
             <TakeCell k="If you wait">Holding the position concentrated re-exposes your liquidity to a single company's risk after you've already de-risked the exit.</TakeCell>
             <TakeCell k="First">Reserve <span className="font-mono">{fmtMoney(taxDue)}</span> for taxes before allocating anything else.</TakeCell>
-            <TakeCell k="ExitOS does it">ExitOS runs the waterfall, models the tax, schedules the liquidity and drafts the diversification plan.</TakeCell>
+            <TakeCell k="What ExitOS does">Runs the cap-table waterfall on the leading offer, applies a flat tax assumption and lays out the tranches by the offer terms. Nothing is scheduled or executed.</TakeCell>
           </dl>
         </div>
       </Section>
@@ -190,7 +190,7 @@ const Wealth: React.FC = () => {
           {[
             { h: "Tax & structure", b: `Reserve ${fmtMoney(taxDue)} now; explore QSBS exclusion, installment treatment on the earnout, and a DAF for the giving tranche.` },
             { h: "Diversify the position", b: `Stagger sales of any stock consideration through the lock-up; the template rebalances ${Math.round(ALLOC[0].pct * 100)}% into a diversified portfolio.` },
-            { h: "The next chapter", b: "Reinvest the operator edge — angel checks, a holdco, or the next company. ExitOS keeps the readiness clock running for round two." },
+            { h: "The next chapter", b: "Reinvest the operator edge — angel checks, a holdco, or the next company. For a new company, start again from Value My Company." },
           ].map((c) => (
             <li key={c.h} className="bg-xo-panel px-4 py-3">
               <h3 className="text-[13px] font-semibold">{c.h}</h3>
