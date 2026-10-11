@@ -152,3 +152,13 @@ export function homeFor(role: Role): string {
 export const ROLE_LABEL: Record<Role, string> = {
   founder: "Founder", buyer: "Buyer", admin: "Admin", superadmin: "Superadmin",
 };
+
+/** The engagement a destination requires for this role/plan, in founder-
+ *  facing words — or null when it is already open. Display only: the route
+ *  Guard still enforces access. */
+export function requiredEngagement(path: string, role: Role, plan: Plan): string | null {
+  if (!needsUpgrade(path, role, plan)) return null;
+  const p = base(path);
+  const e = NAV.find((n) => base(n.to) === p && (role === "superadmin" || n.roles.includes(role)));
+  return e?.starter ? `${PLAN_LABEL.prep} or ${PLAN_LABEL.pro}` : PLAN_LABEL.pro;
+}

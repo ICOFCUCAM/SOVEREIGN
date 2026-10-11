@@ -79,7 +79,7 @@ No loading (synchronous engines). Exit-run states: none / complete (card + Re-ru
 | G5 | **Demo fixtures shown as "this deal's live state".** Funnel "Under NDA", "Offers in hand 3", "Leading bid"; exit-run card "NDAs pre-issued", "Leader: …". | `DashboardModules.tsx` funnel, run card | Split registry/model counts from demo fixtures; label fixtures as sample data in words. | ☑ `34c6d7d` |
 | G6 | **Exit Process writes demo data to production telemetry.** Each run emits the 3 sample offers as `offer` events and "nda_issued" buyer responses for real registry buyers although nothing is sent. Production now holds **6 of 7** offer events from sample IDs `o-001…o-003` and 6 `nda_issued` events (2 runs, 2026-06-03 and 06-18). | `lib/exit-process.ts:250-330`; Supabase read-only query | Stop emitting offer and buyer-response events for demo fixtures; step texts say "drafted, not sent" / "sample offers". Existing rows: **owner decision (D2)** — not deleted. | ☑ `c6bd5ad` |
 | G7 | **Mislabels / overclaims.** "Premium probability" shows the top premium payer; "Execute — one instruction dispatches the agents" only navigates; "Qualifying buyers 12" is the top-12 cap; probability caption describes a product, engine is a weighted sum. | code + dump | Correct labels and captions; Execute described as opening Autonomous Exit. | ☑ `58b6984` |
-| G8 | **Plan gates hidden.** Execute / See the plan → Autonomous Exit (Preparation or Active Mandate); lifecycle Solicit, Negotiate, Execute, Transition → Active Mandate. | `lib/access.ts` | Show "Requires …" from `needsUpgrade()`, links unchanged (as Page 01 G7). | ☐ |
+| G8 | **Plan gates hidden.** Execute / See the plan → Autonomous Exit (Preparation or Active Mandate); lifecycle Solicit, Negotiate, Execute, Transition → Active Mandate. | `lib/access.ts` | Show "Requires …" from `needsUpgrade()`, links unchanged (as Page 01 G7). | ☑ G8-commit |
 | G9 | **Weak hierarchy / repetition.** Enterprise value appears 6 times (chip, board, briefing, KPI row, scenarios, valuation reports); ~4 screens long; decision buried. | screenshots | Decision-first order on `xo`: mandate → position (value now / after fixes / scenarios) → next instruction → buyers → readiness plan → process & funnel → evidence, each figure once. | ☑ `2b00b09` |
 | G10 | **Responsive overflow at 390 px.** Lifecycle strip (+21 px) and top-buyers card (+40 px). | overflow probe | Wrapping lifecycle; tables in `ScrollRegion`. | ☑ `2b00b09` (closed by the G9 restructure) |
 
@@ -199,3 +199,16 @@ Disclosed dependency: two indices use negotiation leverage derived from the samp
 | "Probability scored by sector × check × geography × activity" | "Probability = weighted fit: sector 25%, acquisition history 22%, check size 20%, recent activity 15%, business model 10%, geography 8%" | the engine's weighted sum (`exit-engines/src/buyers/engine.ts`) |
 
 *Verification:* `tsc -b`, eslint clean · Chromium: all four new texts present; none of the old phrases remain · 0 page errors.
+
+### G8 — Plan gates hidden
+*Documented:* gap register row G8. *Closed by:* new `requiredEngagement(path, role, plan)` in `lib/access.ts` (additive, display-only, built on `needsUpgrade` + `NAV`; + test) and `pages/Dashboard.tsx`. Links and the route Guard are unchanged.
+
+| Plan | Execute / See the plan | Lifecycle locks |
+|---|---|---|
+| free | Requires Preparation or Active Mandate | Solicit, Negotiate, Execute, Transition → Active Mandate |
+| prep | — | Solicit, Negotiate, Execute, Transition → Active Mandate |
+| pro | — | none |
+
+Lifecycle locks are a lock glyph (`aria-hidden`) with screen-reader text ", requires Active Mandate" and a tooltip.
+
+*Verification:* `tsc -b`, eslint clean · `access.test.ts` 5/5 (new case covers free/prep/pro and an ungated route) · Chromium per plan as in the table · 0 page errors.

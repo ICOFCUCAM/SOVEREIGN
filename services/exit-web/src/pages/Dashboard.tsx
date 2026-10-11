@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, fmtMoney, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
+import { requiredEngagement } from "../lib/access";
 import {
   assessIntent, runValuation, strategicBuyerReport, assetReplacementReport, runInstitutionalValuation,
   runReadiness, runReadinessAnalysis, runBuyerDiscovery, runDueDiligence,
@@ -112,6 +113,9 @@ const Dashboard: React.FC = () => {
     ["Exit process", run?.status === "complete" ? `Run complete · ${timeAgo(run.finishedAt ?? run.startedAt)}` : run ? "Run in progress" : "Not started"],
     ["Buyer demand", `${m.demandLabel} · ${m.activeBuyers} active of ${E.ctx.dealBuyers.length} matched`],
   ];
+  // The engagement each destination needs (display only; the Guard enforces).
+  const gate = (to: string): string | null => requiredEngagement(to, session?.role ?? "founder", session?.plan ?? "free");
+  const executeGate = gate("/console/autopilot");
   const stageIdx = Math.max(0, LIFECYCLE.findIndex((x) => x.key === (run?.status === "complete" ? "run" : "monitor")));
   const scenarios = scenariosFor(E.ctx.currentValueUsd, E.ctx.potentialValueUsd);
   const liquidity = liquidityIndex(E.ctx.activeBuyers);
@@ -168,6 +172,7 @@ const Dashboard: React.FC = () => {
                   <span className="font-mono text-[11px]">{state === "done" ? "✓" : st.index}</span>
                   <span className="font-medium">{st.label}</span>
                   {state === "current" && <span className="sr-only">(current phase)</span>}
+                  {st.to && gate(st.to) && <span className="text-[11px] text-xo-caution" title={`Requires ${gate(st.to)}`}><span aria-hidden>🔒</span><span className="sr-only">, requires {gate(st.to)}</span></span>}
                 </span>
               );
               return (
@@ -221,6 +226,7 @@ const Dashboard: React.FC = () => {
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Button onClick={() => navigate("/console/autopilot")}>Execute →</Button>
               <ActionLink to="/console/autopilot" className="text-[13px]">See the plan</ActionLink>
+              {executeGate && <span className="text-[12px] font-medium text-xo-caution">Requires {executeGate}</span>}
             </div>
             <p className="mt-3 text-[12px] text-xo-faint">Execute opens Autonomous Exit, where the agents' work is laid out step by step and each step waits for your approval. Nothing is sent from this page.</p>
           </div>

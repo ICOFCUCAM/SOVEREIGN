@@ -36,3 +36,15 @@ describe("plan gating", () => {
     expect(needsUpgrade("/console/banker", "admin", "free")).toBe(false);
   });
 });
+
+describe("requiredEngagement", () => {
+  it("names the engagement only when an upgrade is needed", async () => {
+    const { requiredEngagement } = await import("./access");
+    expect(requiredEngagement("/console/autopilot", "founder", "free")).toBe("Preparation or Active Mandate");
+    expect(requiredEngagement("/console/banker", "founder", "free")).toBe("Active Mandate");
+    expect(requiredEngagement("/console/autopilot", "founder", "prep")).toBeNull();
+    expect(requiredEngagement("/console/banker", "founder", "prep")).toBe("Active Mandate");
+    expect(requiredEngagement("/console/readiness", "founder", "free")).toBeNull();
+    expect(requiredEngagement("/console/banker", "founder", "pro")).toBeNull();
+  });
+});
