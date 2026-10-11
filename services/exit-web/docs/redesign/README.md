@@ -5,7 +5,7 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | Page | Route | Label (NAV) | Component | Roles | Plan gate | Status |
 |---|---|---|---|---|---|---|
 | 01 | `/console` | Intelligence Terminal | `Terminal` | founder | none | ☑ approved |
-| 02 | `/console/command` (guarded by `/console`) | Liquidity Command | `Dashboard` | founder | none | ◐ in progress |
+| 02 | `/console/command` (guarded by `/console`) | Liquidity Command | `Dashboard` | founder | none | ◐ in review |
 | 03 | `/console/intake` | Value My Company | `Intake` | founder | none | ☐ |
 | 04 | `/console/acquisition-radar` | Acquisition Radar | `AcquisitionRadar` | founder, buyer | none | ☐ |
 | 05 | `/console/commander` | Chief Investment Banker | `Commander` | founder | Pro | ☐ |
