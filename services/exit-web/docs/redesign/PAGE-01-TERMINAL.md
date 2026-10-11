@@ -276,4 +276,4 @@ Requested by the owner after the Page 01 review ("START FIXING"). Same rule: doc
 
 *Fix:* static dot, "ExitOS" + "Registry · <snapshot date>" (from `DNA_AS_OF`); remove the unconditional ▲ on Buyer Activity (Market Status keeps its arrow — it is computed from the sector trends).
 
-*Verification:* `tsc -b` pass · eslint clean · Chromium: ribbon reads "ExitOS · Registry · 2026-10-11 · Market Status Mixed · Buyer Activity 21 …" (no ▲), 0 pinging elements in the console, 0 page errors. *Status:* ☑ X4-commit
+*Verification:* `tsc -b` pass · eslint clean · Chromium: ribbon reads "ExitOS · Registry · 2026-10-11 · Market Status Mixed · Buyer Activity 21 …" (no ▲), 0 pinging elements in the console, 0 page errors. *Status:* ☑ `c45a539`
