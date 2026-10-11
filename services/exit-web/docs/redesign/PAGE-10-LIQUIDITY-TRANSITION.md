@@ -40,7 +40,7 @@ After the deal: what the founder walks away with (headline → preferences → t
 | G2 | **Cascade and tranches mislabelled and miscomputed** ("your" = founder group; "after preferences" = risk haircut; haircut × mix; escrow ignored; timings invented). | Cascade: headline → preference stack → founders' gross (named as the founder group) → risk-adjusted value (engine haircuts stated) → after the tax assumption. Tranches from the engine's nominal cash / stock / earnout for the founders; escrow held back from cash per the offer term; timings from the offer where present, else "not in the offer terms". | ☑ `6d45072` |
 | G3 | Tax assumption unlabelled. | State it wherever used: flat 23.8 % (US federal LTCG + NIIT), whole amount, no cost basis, no state tax, no QSBS. | ☑ `ce122ae` |
 | G4 | **Invented statuses and a second allocation** ("Allocated", "Reserved", "Recommended", "Setup"; 12/30/8 … %). | One illustrative template (labelled "not a recommendation"); the topics list without invented amounts or statuses; family-office line states its $50M rule. | ☑ `f84988c` |
-| G5 | Overclaims (runs/models/schedules/drafts; keeps threads; readiness clock for round two). | Plain wording. | ☑ G5-commit |
+| G5 | Overclaims (runs/models/schedules/drafts; keeps threads; readiness clock for round two). | Plain wording. | ☑ `45169e6` |
 | G6 | Demo offers and cap table unlabelled. | Badge and line: sample offers and cap table (demo), also when an intake is saved (intake has no offers or cap table). | ☐ |
 | G7 | Fake live tape. | `RegistryTape`. | ☐ |
 | G8 | Design: no `h1`, old primitives. | Rebuild on `xo`. | ☑ `641026d` |
