@@ -34,7 +34,7 @@ Shows the founder the platform's compounding data assets ("five moats"): the dea
 | G1 | **Invented buyer attributes** (retention %, earnout tendency) and hard-coded buyer picks. | Show the active company's top two ranked buyers with measured fields only: expected days to cash, average disclosed premium (or the framework prior, labelled), and the implied ARR multiple labelled as a what-if. Retention and earnout tendency removed — no data. | ☑ `a48e5f6` |
 | G2 | **Overclaims** about agents and learning; "12+ acquirers measured" (top-12 cap); "live engine runs". | Factual wording: what the engines produced; registry sizes named correctly; learning claims limited to what exists. | ☑ `231f41e` |
 | G3 | Fake live tape. | `RegistryTape` with snapshot date. | ☑ `e365168` |
-| G4 | Demo company unlabelled. | Run on `loadActiveCompany()`; badge. | ☑ G4-commit |
+| G4 | Demo company unlabelled. | Run on `loadActiveCompany()`; badge. | ☑ `b914148` |
 | G5 | Design: no `h1`, 3 contrast failures, card soup. | Rebuild on `xo`. | ☑ `47f2964` |
 
 ---
