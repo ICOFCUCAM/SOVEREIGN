@@ -53,7 +53,7 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 | G4 | **One click publishes, without saying what.** "List on the exchange" lists immediately, does not say which figures buyers will see (exact revenue, growth, EBITDA margin, sector, region) or where it is stored (exchange vs this browser), and offers no way back. | `listings.ts`, `exit-api.ts` | Confirmation step naming exactly what buyers see and where it is stored; result message says the same. Listing mechanics unchanged. | ☐ |
 | G5 | **Evidence thin.** Comparable status/source and rationale, confidence drivers and the framework disclaimer are computed but not shown; buyers' source (curated registry) not named. | engine fields | Show them (as on the Terminal). | ☐ |
 | G6 | **No path forward.** Nothing tells the founder that their saved figures now drive the Terminal and Liquidity Command. | page | A "your figures now drive…" panel linking to those pages (only when data is saved). | ☐ |
-| G7 | **Old design system and weak hierarchy.** Generic cards/KPI tiles; form labels in tiny uppercase; report and form compete. | screenshots | Rebuild on `xo`: form (with units and hints) beside a decision-first report: value → key figures → buyers → comparables → evidence. | ☐ |
+| G7 | **Old design system and weak hierarchy.** Generic cards/KPI tiles; form labels in tiny uppercase; report and form compete. | screenshots | Rebuild on `xo`: form (with units and hints) beside a decision-first report: value → key figures → buyers → comparables → evidence. | ☑ G7-commit |
 
 ---
 
@@ -75,3 +75,12 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 - `buildProfile` is unchanged (its clamps remain as a second guard).
 
 *Verification:* `tsc -b`, eslint clean · `intake-fields.test.ts` 4/4 (decimals, negatives, rejections, round-trip of the demo values) · Chromium: "12.5" → shown 12.5, stored $12,500,000 (was 125 / $125M); "-50" → stored −0.5 (was 50); "150" gross margin → "Must be at most 100.", `aria-invalid`, not stored; empty ARR → "Enter a number.", not stored · axe 0 · 0 page errors.
+
+### G7 — Old design system and weak hierarchy
+*Documented:* gap register row G7. *Closed by:* `pages/Intake.tsx` rebuilt on `xo` (no logic change; `Card`/`Kpi`/`SectionHeader`/`Field` no longer used here).
+- Header: eyebrow, `h1`, data badge (Demo data / Your intake), description, List / Clear my data.
+- Left: "Your company" form — sentence-case labels tied to inputs, units shown, hints and errors under each number field, defensibility checkboxes in a `fieldset`, status line.
+- Right, in reading order: Enterprise value hero (mid, band, confidence, midpoint formula) → key figures → most likely acquirers (table with headers, `ScrollRegion`) → comparable transactions (table with headers, `ScrollRegion`, provenance line) → links to the valuation desk and Terminal.
+- Labels carried over unchanged in this commit; label/evidence fixes follow (G3, G5).
+
+*Verification:* `tsc -b`, eslint clean · Chromium free + pro at 1440/900/390: 0 errors, 1 `h1`, axe 0, no overflow · G1 cycle (open/edit/clear) and G2 entry checks re-run: unchanged results.

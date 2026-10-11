@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { Card, Kpi, SectionHeader, Field, inputCls, fmtMoney, Button } from "../lib/ui";
+import { fmtMoney, Button } from "../lib/ui";
 import { runInstitutionalValuation } from "@exit/engines";
 import {
   buildProfile, SECTORS, SAMPLE_INTAKE, type IntakeInputs, type Sector,
@@ -8,15 +7,20 @@ import {
 import { listCompany } from "../lib/listings";
 import { loadSavedIntake, saveIntake, clearIntake } from "../lib/active-company";
 import { NUMERIC_FIELDS, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
+import { Section, Metric, Provenance, ScrollRegion, ActionLink } from "../components/xo";
 
-// COMPANY INTAKE → INSTANT REPORT — the success metric: a founder enters
-// their company and within seconds receives the institutional answer (who
-// buys them, at what price, why, on what evidence). Every figure is the
-// valuation constitution computed live on their inputs; the buyer universe
-// and comparables come from the registry, parameterized by their sector.
+// ── VALUE MY COMPANY ────────────────────────────────────────────────
+// Page 03 of the ExitOS institutional redesign (docs/redesign/PAGE-03-
+// VALUE-MY-COMPANY.md). The founder enters their figures (left) and reads
+// the institutional answer (right): value → key figures → likely buyers →
+// comparable transactions → evidence. Every figure is the valuation
+// constitution computed live on the inputs; the figures are saved only when
+// the founder edits them, and then drive every console page.
 
 const pct = (x: number): string => `${Math.round(x * 100)}%`;
 const usd = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`);
+const INPUT = "w-full rounded-sm border bg-xo-ink px-2.5 py-2 text-[13px] text-xo-text placeholder:text-xo-faint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+const LABEL = "mb-1 block text-[12px] font-medium text-xo-muted";
 
 const Intake: React.FC = () => {
   // Saved only when the founder edits a field — opening the page saves nothing.
@@ -44,121 +48,151 @@ const Intake: React.FC = () => {
   const m = report.mandatoryOutputs;
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Acquisition Intelligence · Intake"
-        title="Value my company"
-        description="Enter your company and receive the institutional answer in seconds — enterprise value, the buyers most likely to acquire you, comparable transactions and the evidence behind every figure."
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={() => { listCompany(buildProfile(inp)); setListed(true); }}>{listed ? "✓ Listed (anonymized)" : "List on the exchange"}</Button>
-            {saved && <Button variant="ghost" onClick={clearMine}>Clear my data</Button>}
+    <div data-page="value-my-company" className="space-y-3 text-xo-text">
+      {/* ── header ─────────────────────────────────────────────────── */}
+      <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 border border-xo-line bg-xo-ink px-4 py-3">
+        <div className="min-w-0 max-w-[70ch]">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-xo-brass">Acquisition Intelligence · Intake</div>
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h1 className="font-serif text-[24px] font-semibold tracking-tight">Value my company</h1>
+            <Provenance kind={saved ? "company" : "demo"} />
           </div>
-        }
-      />
+          <p className="mt-1 text-[13px] text-xo-muted">Enter your company and receive the institutional answer in seconds — enterprise value, the buyers most likely to acquire you, comparable transactions and the evidence behind every figure.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button onClick={() => { listCompany(buildProfile(inp)); setListed(true); }}>{listed ? "✓ Listed (anonymized)" : "List on the exchange"}</Button>
+          {saved && <Button variant="ghost" onClick={clearMine}>Clear my data</Button>}
+        </div>
+      </header>
 
-      <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
-        {/* ── intake form ── */}
-        <Card className="space-y-4 p-5">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Your company</div>
-          <Field label="Company name"><input className={inputCls} value={inp.name} onChange={(e) => set("name", e.target.value)} /></Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Sector">
-              <select className={inputCls} value={inp.sector} onChange={(e) => set("sector", e.target.value as Sector)}>
-                {SECTORS.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
-              </select>
-            </Field>
-            <Field label="HQ (ISO)"><input className={inputCls} value={inp.jurisdiction} onChange={(e) => set("jurisdiction", e.target.value)} /></Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {NUMERIC_FIELDS.map((f) => {
-              const err = errors[f.key];
-              const id = `intake-${f.key}`;
-              return (
-                <div key={f.key}>
-                  <label htmlFor={id} className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/60">{f.label} ({f.unit === "customers" ? "count" : f.unit})</label>
-                  <input id={id} className={`${inputCls} ${err ? "border-red-400/70" : ""}`} inputMode={f.integer ? "numeric" : "decimal"}
-                    value={texts[f.key]} onChange={(e) => typeNumber(f.key, e.target.value)}
-                    aria-invalid={err ? true : undefined} aria-describedby={`${id}-msg`} />
-                  <span id={`${id}-msg`} className={`mt-1 block text-[11px] ${err ? "text-red-300" : "text-white/50"}`}>{err ?? f.hint}</span>
-                </div>
-              );
-            })}
-          </div>
-          <div className="flex gap-4 pt-1">
-            <label className="flex items-center gap-2 text-[12px] text-white/70"><input type="checkbox" checked={inp.hasNetworkEffects} onChange={(e) => set("hasNetworkEffects", e.target.checked)} /> Network effects</label>
-            <label className="flex items-center gap-2 text-[12px] text-white/70"><input type="checkbox" checked={inp.hasDataMoat} onChange={(e) => set("hasDataMoat", e.target.checked)} /> Data moat</label>
-          </div>
-          <p role="status" className="text-[11px] text-white/60">
-            {saved
-              ? "Your figures are saved in this browser and every console page now uses them."
-              : `Showing the demo company (${SAMPLE_INTAKE.name}). Edit any field to value your own company; nothing is saved until you do.`}
-          </p>
-        </Card>
-
-        {/* ── instant report ── */}
-        <div className="space-y-6">
-          <Card className="overflow-hidden border-deal-400/30 p-0">
-            <div className="bg-gradient-to-r from-deal-600/15 to-transparent px-6 py-5">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">Enterprise value · strategic-buyer basis</div>
-              <div className="mt-2 flex flex-wrap items-baseline gap-x-6 gap-y-1">
-                <span className="font-mono text-3xl font-bold tabular-nums text-white">{fmtMoney(report.headline.mid)}</span>
-                <span className="font-mono text-[15px] tabular-nums text-white/55">{fmtMoney(report.headline.low)} – {fmtMoney(report.headline.high)}</span>
-                <span className="rounded-full bg-deal-500/15 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide text-deal-300 ring-1 ring-deal-400/40">Confidence {report.confidence.score}% · {report.confidence.tier}</span>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[360px_minmax(0,1fr)]">
+        {/* ── the form ───────────────────────────────────────────────── */}
+        <Section title="Your company" eyebrow="Inputs · recomputes as you type" className="self-start border border-xo-line">
+          <div className="space-y-3 px-4 py-4">
+            <div>
+              <label htmlFor="intake-name" className={LABEL}>Company name</label>
+              <input id="intake-name" className={`${INPUT} border-xo-line`} value={inp.name} onChange={(e) => set("name", e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="intake-sector" className={LABEL}>Sector</label>
+                <select id="intake-sector" className={`${INPUT} border-xo-line capitalize`} value={inp.sector} onChange={(e) => set("sector", e.target.value as Sector)}>
+                  {SECTORS.map((x) => <option key={x} value={x}>{x.replace(/_/g, " ")}</option>)}
+                </select>
               </div>
-              <p className="mt-3 max-w-3xl text-[12.5px] leading-relaxed text-white/55">
+              <div>
+                <label htmlFor="intake-hq" className={LABEL}>HQ country (ISO)</label>
+                <input id="intake-hq" className={`${INPUT} border-xo-line uppercase`} value={inp.jurisdiction} onChange={(e) => set("jurisdiction", e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-3">
+              {NUMERIC_FIELDS.map((f) => {
+                const err = errors[f.key];
+                const id = `intake-${f.key}`;
+                return (
+                  <div key={f.key}>
+                    <label htmlFor={id} className={LABEL}>{f.label} <span className="text-xo-faint">({f.unit === "customers" ? "count" : f.unit})</span></label>
+                    <input id={id} className={`${INPUT} font-mono tabular-nums ${err ? "border-xo-risk" : "border-xo-line"}`} inputMode={f.integer ? "numeric" : "decimal"}
+                      value={texts[f.key]} onChange={(e) => typeNumber(f.key, e.target.value)}
+                      aria-invalid={err ? true : undefined} aria-describedby={`${id}-msg`} />
+                    <span id={`${id}-msg`} className={`mt-1 block text-[11px] leading-snug ${err ? "text-xo-risk" : "text-xo-faint"}`}>{err ?? f.hint}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <fieldset className="flex flex-wrap gap-x-5 gap-y-2 border-t border-xo-line pt-3">
+              <legend className="sr-only">Defensibility</legend>
+              <label className="flex items-center gap-2 text-[13px] text-xo-muted"><input type="checkbox" className="accent-emerald-500" checked={inp.hasNetworkEffects} onChange={(e) => set("hasNetworkEffects", e.target.checked)} /> Network effects</label>
+              <label className="flex items-center gap-2 text-[13px] text-xo-muted"><input type="checkbox" className="accent-emerald-500" checked={inp.hasDataMoat} onChange={(e) => set("hasDataMoat", e.target.checked)} /> Data moat</label>
+            </fieldset>
+            <p role="status" className="border-t border-xo-line pt-3 text-[12px] text-xo-muted">
+              {saved
+                ? "Your figures are saved in this browser and every console page now uses them."
+                : `Showing the demo company (${SAMPLE_INTAKE.name}). Edit any field to value your own company; nothing is saved until you do.`}
+            </p>
+          </div>
+        </Section>
+
+        {/* ── the report ─────────────────────────────────────────────── */}
+        <div className="min-w-0 space-y-3">
+          <Section title="Enterprise value" eyebrow="Enterprise value · strategic-buyer basis" className="border border-xo-line"
+            right={<Provenance kind="model" />}>
+            <div className="px-4 py-4">
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span className="font-mono text-[36px] font-semibold leading-none tabular-nums">{fmtMoney(report.headline.mid)}</span>
+                <span className="font-mono text-[14px] tabular-nums text-xo-muted">{fmtMoney(report.headline.low)} – {fmtMoney(report.headline.high)}</span>
+                <span className="text-[12px] text-xo-muted">Confidence <span className="font-mono text-xo-text">{report.confidence.score}%</span> · {report.confidence.tier}</span>
+              </div>
+              <p className="mt-3 max-w-[70ch] text-[13px] leading-relaxed text-xo-muted">
                 Midpoint = financial baseline {usd(report.financialBaseline.mid)} × (1 + {pct(report.premium.appliedPct)} strategic premium). {report.premium.note}
               </p>
             </div>
-          </Card>
+          </Section>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Kpi label="Strategic premium" value={`+${pct(report.premium.appliedPct)}`} sub={`range ${pct(report.premium.rangeLowPct)}–${pct(report.premium.rangeHighPct)}`} />
-            <Kpi label="Comparables" value={String(report.comparablesUsed)} sub="source-referenced" accent="#34d399" />
-            <Kpi label="Qualified buyers" value={String(report.buyerUniverse.qualified)} sub={`of ${report.buyerUniverse.scored} scored`} />
-            <Kpi label="Time to close" value={`${report.timeToClose.lowDays}–${report.timeToClose.highDays}d`} sub="expected" accent="#fbbf24" />
-          </div>
+          <section aria-label="Key figures" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <div className="bg-xo-panel"><Metric label="Strategic premium" value={`+${pct(report.premium.appliedPct)}`} sub={`range ${pct(report.premium.rangeLowPct)}–${pct(report.premium.rangeHighPct)}`} /></div>
+            <div className="bg-xo-panel"><Metric label="Comparables" value={String(report.comparablesUsed)} sub="source-referenced" /></div>
+            <div className="bg-xo-panel"><Metric label="Qualified buyers" value={String(report.buyerUniverse.qualified)} sub={`of ${report.buyerUniverse.scored} scored`} /></div>
+            <div className="bg-xo-panel"><Metric label="Time to close" value={`${report.timeToClose.lowDays}–${report.timeToClose.highDays}d`} sub="expected" /></div>
+          </section>
 
-          {/* most likely buyers */}
-          <Card className="overflow-hidden p-0">
-            <div className="border-b border-white/10 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-deal-300">Most likely acquirers · ranked by fit-adjusted expected value</div>
-            <table className="w-full text-[12.5px]">
-              <tbody>
-                {report.mostLikelyBuyers.map((b, i) => (
-                  <tr key={b.name} className="border-b border-white/5 last:border-0">
-                    <td className="px-5 py-2.5 font-mono text-white/40">{i + 1}</td>
-                    <td className="px-3 py-2.5 font-semibold text-white">{b.name}</td>
-                    <td className="px-3 py-2.5 text-right font-mono tabular-nums text-deal-300">{b.probabilityPct}%</td>
-                    <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/60">~{b.expectedDaysToCash}d to cash</td>
-                  </tr>
-                ))}
-                {report.mostLikelyBuyers.length === 0 && <tr><td className="px-5 py-3 text-white/45">No qualified buyers for this sector in the curated registry yet.</td></tr>}
-              </tbody>
-            </table>
-          </Card>
-
-          {/* comparable transactions */}
-          <Card className="overflow-hidden p-0">
-            <div className="border-b border-white/10 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-deal-300">Comparable transactions · {inp.sector.replace(/_/g, " ")}</div>
-            {report.comparableTransactions.length ? (
-              <table className="w-full text-[12.5px]">
-                <tbody>
-                  {report.comparableTransactions.slice(0, 8).map((c, i) => (
-                    <tr key={`${c.target}-${i}`} className="border-b border-white/5 last:border-0">
-                      <td className="px-5 py-2.5"><span className="font-medium text-white">{c.target}</span> <span className="text-white/40">→</span> <span className="text-white/70">{c.buyer}</span></td>
-                      <td className="px-3 py-2.5 text-right font-mono tabular-nums text-white/55">{c.date ?? "—"}</td>
-                      <td className="px-3 py-2.5 text-right font-mono tabular-nums text-white/70">{c.premiumPct != null ? `+${Math.round(c.premiumPct * 100)}%` : "—"}</td>
-                      <td className="px-5 py-2.5 text-right font-mono tabular-nums text-deal-300">{c.priceUsd != null ? usd(c.priceUsd) : "—"}</td>
+          <Section title="Most likely acquirers" eyebrow="Ranked by fit-adjusted expected value" className="border border-xo-line">
+            {report.mostLikelyBuyers.length ? (
+              <ScrollRegion label="Most likely acquirers table">
+                <table className="w-full min-w-[420px] text-[13px]">
+                  <thead className="text-left text-[11px] text-xo-faint">
+                    <tr className="border-b border-xo-line">
+                      <th scope="col" className="px-4 py-2 font-medium">#</th>
+                      <th scope="col" className="px-2 py-2 font-medium">Acquirer</th>
+                      <th scope="col" className="px-2 py-2 text-right font-medium">Probability</th>
+                      <th scope="col" className="px-4 py-2 text-right font-medium">Time to cash</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : <div className="px-5 py-4 text-[12px] text-white/45">No same-sector comparables indexed yet — the radar widens this with every ingest run.</div>}
-            <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">{m.data_provenance_summary}</div>
-          </Card>
+                  </thead>
+                  <tbody>
+                    {report.mostLikelyBuyers.map((b, i) => (
+                      <tr key={b.name} className="border-b border-xo-line/60 last:border-0">
+                        <td className="px-4 py-2 font-mono text-xo-faint">{i + 1}</td>
+                        <th scope="row" className="px-2 py-2 text-left font-semibold">{b.name}</th>
+                        <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-verified">{b.probabilityPct}%</td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums text-xo-muted">~{b.expectedDaysToCash}d</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </ScrollRegion>
+            ) : <p className="px-4 py-3 text-[13px] text-xo-muted">No qualified buyers for this sector in the curated registry yet.</p>}
+          </Section>
 
-          <p className="text-[11px] text-white/40">
-            Prepared under ExitOS Valuation Framework v{report.frameworkVersion}. This is the same institutional engine the whole platform runs on — explore the full breakdown in the <Link to="/console/valuation" className="text-deal-300 hover:text-deal-200">valuation desk</Link> or the <Link to="/console" className="text-deal-300 hover:text-deal-200">Intelligence Terminal</Link>.
+          <Section title="Comparable transactions" eyebrow={inp.sector.replace(/_/g, " ")} className="border border-xo-line"
+            foot={m.data_provenance_summary}>
+            {report.comparableTransactions.length ? (
+              <ScrollRegion label="Comparable transactions table">
+                <table className="w-full min-w-[520px] text-[13px]">
+                  <thead className="text-left text-[11px] text-xo-faint">
+                    <tr className="border-b border-xo-line">
+                      <th scope="col" className="px-4 py-2 font-medium">Target → buyer</th>
+                      <th scope="col" className="px-2 py-2 text-right font-medium">Date</th>
+                      <th scope="col" className="px-2 py-2 text-right font-medium">Premium</th>
+                      <th scope="col" className="px-4 py-2 text-right font-medium">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {report.comparableTransactions.slice(0, 8).map((c, i) => (
+                      <tr key={`${c.target}-${i}`} className="border-b border-xo-line/60 last:border-0">
+                        <td className="px-4 py-2"><span className="font-medium">{c.target}</span> <span className="text-xo-faint">→</span> <span className="text-xo-muted">{c.buyer}</span></td>
+                        <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.date ?? "—"}</td>
+                        <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.premiumPct != null ? `+${Math.round(c.premiumPct * 100)}%` : "—"}</td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums">{c.priceUsd != null ? usd(c.priceUsd) : "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </ScrollRegion>
+            ) : <p className="px-4 py-3 text-[13px] text-xo-muted">No same-sector comparables indexed yet — the radar widens this with every ingest run.</p>}
+          </Section>
+
+          <p className="px-1 text-[12px] text-xo-faint">
+            Prepared under ExitOS Valuation Framework v{report.frameworkVersion}. This is the same institutional engine the whole platform runs on — explore the full breakdown in the <ActionLink to="/console/valuation">valuation desk</ActionLink> or the <ActionLink to="/console">Intelligence Terminal</ActionLink>.
           </p>
         </div>
       </div>
