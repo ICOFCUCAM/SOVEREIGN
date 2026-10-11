@@ -8,6 +8,7 @@ import { BUYERS, DILIGENCE, VALUATION_CANONICAL } from "../lib/engines";
 import { VALUATION_FRAMEWORK } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { MARKET_FMT, HISTORY_FMT, DEAL_INTEL, DEAL_INTEL_FMT } from "../lib/market-stats";
+import { DNA_PROFILES, DNA_AS_OF } from "../lib/buyer-dna";
 
 // Network Intelligence — the five moats. Individual screens can be copied;
 // the compounding dataset cannot. This surface makes the moats tangible: the
@@ -56,7 +57,7 @@ const Network: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Acquirer mandates" value={MARKET_FMT.buyers} sub="profiled" /></div>
         <div className="bg-xo-panel"><Metric label="Acquisition events" value={HISTORY_FMT.events} sub="tracked" /></div>
         <div className="bg-xo-panel"><Metric label="Disclosed value" value={HISTORY_FMT.disclosedValue} sub="on record" /></div>
-        <div className="bg-xo-panel"><Metric label="Buyer dossiers" value={String(buyerDnaCount)} sub="live engine runs" /></div>
+        <div className="bg-xo-panel"><Metric label="Ranked buyers" value={String(buyerDnaCount)} sub="top 12 for this company" /></div>
       </section>
 
       <MarketTape items={tape} />
@@ -81,7 +82,7 @@ const Network: React.FC = () => {
       </Moat>
 
       <Moat n={2} title="The Buyer Graph" why="Most marketplaces know sellers. Few know buyers." to="/console/buyer-copilot" cta="Buyer Copilot">
-        <p className="text-[13px] text-xo-muted">Buyer DNA on <span className="text-xo-text">{buyerDnaCount}+ acquirers</span> — measured, not guessed.</p>
+        <p className="max-w-[75ch] text-[13px] text-xo-muted">Buyer DNA covers <span className="text-xo-text">{DNA_PROFILES.length.toLocaleString()} acquirers</span> in the registry (snapshot as of {DNA_AS_OF.slice(0, 10)}); the ranking below uses the {MARKET_FMT.buyers} curated mandates.</p>
         <ul className="mt-3 grid gap-px border border-xo-line bg-xo-line sm:grid-cols-2">
           {topTwo.map((b, i) => (
             <li key={b.name} className="bg-xo-panel px-4 py-3">
@@ -98,7 +99,7 @@ const Network: React.FC = () => {
         </ul>
       </Moat>
 
-      <Moat n={3} title="Deal Intelligence" why="Every acquisition teaches the system — the AI grows smarter than most advisors.">
+      <Moat n={3} title="Deal Intelligence" why="Measured from the source-referenced deal history.">
         <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
           <Stat value={DEAL_INTEL_FMT.medianClose} label="Median announce → close" />
           <Stat value={DEAL_INTEL_FMT.medianPremium} label="Median disclosed premium" />
@@ -106,19 +107,18 @@ const Network: React.FC = () => {
           <Stat value={String(DEAL_INTEL.measuredCloses)} label="Closes measured" />
         </div>
         <p className="mt-3 max-w-[75ch] text-[13px] leading-relaxed text-xo-muted">
-          The platform learns the patterns that win: LOI structures, SPA clauses, earnout models, escrow patterns and
-          negotiation outcomes — fed back into every recommendation.
+          These figures are recomputed from the deal history each time the registry is refreshed, and the valuation and
+          buyer engines use them. Deal terms — LOI structure, SPA clauses, earnouts, escrow — are not yet learned from recorded deals.
         </p>
       </Moat>
 
       <Moat n={4} title="Autonomous Agents" why="Competitors offer tools. ExitOS offers workers." to="/console/autopilot" cta="Autonomous Exit">
         <ul className="grid gap-px border border-xo-line bg-xo-line sm:grid-cols-2">
-          <li className="bg-xo-panel px-4 py-3 text-[13px] text-xo-muted">The <span className="text-xo-text">Outreach Agent</span> qualified {BUYERS.candidates.length} buyers from the registry.</li>
-          <li className="bg-xo-panel px-4 py-3 text-[13px] text-xo-muted">The <span className="text-xo-text">Diligence Agent</span> prepared {DILIGENCE.documents.length} packages and flagged {DILIGENCE.redFlags.length + DILIGENCE.criticalQuestions.length} open items.</li>
+          <li className="bg-xo-panel px-4 py-3 text-[13px] text-xo-muted"><span className="text-xo-text">Buyer discovery</span> ranks {BUYERS.candidates.length} buyers from the curated registry for this company.</li>
+          <li className="bg-xo-panel px-4 py-3 text-[13px] text-xo-muted"><span className="text-xo-text">Diligence checks</span> list {DILIGENCE.documents.length} document packages and flag {DILIGENCE.redFlags.length + DILIGENCE.criticalQuestions.length} open items.</li>
         </ul>
         <p className="mt-3 max-w-[75ch] text-[13px] leading-relaxed text-xo-muted">
-          Eight agents do the work — not "use the outreach tool" but "the agent contacted the buyers." The winner won't
-          be software; it will be software that does the work.
+          Autonomous Exit lays this work out as agent steps you approve one by one. Nothing is sent to a buyer without your approval.
         </p>
       </Moat>
 
@@ -140,7 +140,7 @@ const Network: React.FC = () => {
         <p className="mt-3 text-[13px] text-xo-muted">From startup creation through growth, exit and wealth — founders never leave.</p>
       </Moat>
 
-      <p className="px-1 text-[12px] text-xo-faint">All figures computed from the source-referenced acquisition history and the live engine runs.</p>
+      <p className="px-1 text-[12px] text-xo-faint">All figures are computed from the source-referenced acquisition history and the engines for this company.</p>
     </div>
   );
 };
