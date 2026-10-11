@@ -49,7 +49,7 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 |---|---|---|---|---|
 | G1 | **Opening the page turns the demo into "your data".** The save effect runs on mount, so a visit stores Helios Freight as the founder's intake; every page then labels demo figures "Your intake". "Reset to example" also saves the example as the founder's data. | measured above | Save only after the founder edits a field. "Reset to example" becomes "Clear my data" (removes the saved intake, back to the demo state). Show the data state on the page. | ☑ `3f26229` |
 | G2 | **Numbers cannot be entered correctly.** Decimal points are dropped (12.5 → 125), negative values are impossible, clearing a field forces 0, nothing is validated (e.g. 150 % margin, ARR > revenue unflagged). | measured above | Keep the typed text per field; parse decimals and negatives; validate with field-level messages (`aria-invalid`, `aria-describedby`); only valid values reach the engines. | ☑ `6f44313` |
-| G3 | **Mislabelled valuation.** "Enterprise value · strategic-buyer basis" — the figure is the institutional framework, the console value (D1). | `Intake.tsx` | Label it as the institutional framework, the same figure every page shows. | ☐ |
+| G3 | **Mislabelled valuation.** "Enterprise value · strategic-buyer basis" — the figure is the institutional framework, the console value (D1). | `Intake.tsx` | Label it as the institutional framework, the same figure every page shows. | ☑ G3-commit |
 | G4 | **One click publishes, without saying what.** "List on the exchange" lists immediately, does not say which figures buyers will see (exact revenue, growth, EBITDA margin, sector, region) or where it is stored (exchange vs this browser), and offers no way back. | `listings.ts`, `exit-api.ts` | Confirmation step naming exactly what buyers see and where it is stored; result message says the same. Listing mechanics unchanged. | ☐ |
 | G5 | **Evidence thin.** Comparable status/source and rationale, confidence drivers and the framework disclaimer are computed but not shown; buyers' source (curated registry) not named. | engine fields | Show them (as on the Terminal). | ☐ |
 | G6 | **No path forward.** Nothing tells the founder that their saved figures now drive the Terminal and Liquidity Command. | page | A "your figures now drive…" panel linking to those pages (only when data is saved). | ☐ |
@@ -84,3 +84,8 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 - Labels carried over unchanged in this commit; label/evidence fixes follow (G3, G5).
 
 *Verification:* `tsc -b`, eslint clean · Chromium free + pro at 1440/900/390: 0 errors, 1 `h1`, axe 0, no overflow · G1 cycle (open/edit/clear) and G2 entry checks re-run: unchanged results.
+
+### G3 — Mislabelled valuation
+*Documented:* gap register row G3. *Closed by:* `pages/Intake.tsx`. "Enterprise value · strategic-buyer basis" → "Institutional valuation framework · the console value", plus a line saying this is (or, once a field is edited, becomes) the value every console page shows. The figure was already `runInstitutionalValuation` — only the label was wrong.
+
+*Verification:* `tsc -b`, eslint clean · Chromium: demo EV $102,849,415 here equals the Terminal ($103M) and Liquidity Command ($102,849,415) · 0 page errors.

@@ -115,7 +115,7 @@ const Intake: React.FC = () => {
 
         {/* ── the report ─────────────────────────────────────────────── */}
         <div className="min-w-0 space-y-3">
-          <Section title="Enterprise value" eyebrow="Enterprise value · strategic-buyer basis" className="border border-xo-line"
+          <Section title="Enterprise value" eyebrow="Institutional valuation framework · the console value" className="border border-xo-line"
             right={<Provenance kind="model" />}>
             <div className="px-4 py-4">
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -126,6 +126,7 @@ const Intake: React.FC = () => {
               <p className="mt-3 max-w-[70ch] text-[13px] leading-relaxed text-xo-muted">
                 Midpoint = financial baseline {usd(report.financialBaseline.mid)} × (1 + {pct(report.premium.appliedPct)} strategic premium). {report.premium.note}
               </p>
+              <p className="mt-2 text-[12px] text-xo-faint">{saved ? "This is the value every console page shows for your company." : "Once you edit a field, this becomes the value every console page shows for your company."}</p>
             </div>
           </Section>
 
