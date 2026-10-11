@@ -1,12 +1,12 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { RegistryTape } from "../components/xo/RegistryTape";
-import { PageHeader, Section, Metric, ActionLink } from "../components/xo";
+import { PageHeader, Section, Metric, ActionLink, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, LiquidityReactor, BuyerNetworkReactor } from "../components/Reactor";
-import { BUYERS, DILIGENCE, VALUATION_CANONICAL } from "../lib/engines";
-import { VALUATION_FRAMEWORK } from "@exit/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
+import { VALUATION_FRAMEWORK, runBuyerDiscovery, runDueDiligence, type CompanyProfile } from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { MARKET_FMT, HISTORY_FMT, DEAL_INTEL, DEAL_INTEL_FMT } from "../lib/market-stats";
 import { DNA_PROFILES, DNA_AS_OF } from "../lib/buyer-dna";
 
@@ -16,15 +16,15 @@ import { DNA_PROFILES, DNA_AS_OF } from "../lib/buyer-dna";
 // the founder lifecycle. Every figure is computed from the source-referenced
 // acquisition history and the live engine runs.
 
-const ARR = SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd;
-
 // A ranked buyer's measured figures only. The premium is the buyer's average
 // disclosed premium (capped at 40%) or, when none is disclosed, the
 // framework's prior for that buyer type — labelled as such.
-function buyerFacts(c: (typeof BUYERS.candidates)[number]) {
+type Candidate = ReturnType<typeof runBuyerDiscovery>["candidates"][number];
+function buyerFacts(c: Candidate, company: CompanyProfile, valueMid: number) {
+  const ARR = company.revenue.annualRecurringRevenueUsd;
   const disclosed = c.outcomes.avgPremiumPct != null;
   const premium = disclosed ? Math.min(0.4, c.outcomes.avgPremiumPct as number) : (VALUATION_FRAMEWORK.buyerTypePremiumPriors[c.buyer.buyerType] ?? VALUATION_FRAMEWORK.executionNeutrals.premiumPct);
-  const multiple = ARR > 0 ? ((VALUATION_CANONICAL.headline.mid * (1 + premium)) / ARR).toFixed(1) : null;
+  const multiple = ARR > 0 ? ((valueMid * (1 + premium)) / ARR).toFixed(1) : null;
   return { name: c.buyer.name, days: c.expectedOutcome.expectedDaysToCash, premium, disclosed, multiple, probability: Math.round(c.probability * 100) };
 }
 
@@ -43,14 +43,22 @@ const Moat: React.FC<{ n: number; title: string; why: string; children: React.Re
 );
 
 const Network: React.FC = () => {
+  // The founder's company when they have saved figures, else the demo company.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const { BUYERS, DILIGENCE, valueMid } = useMemo(() => ({
+    BUYERS: runBuyerDiscovery(company, { limit: 12 }),
+    DILIGENCE: runDueDiligence(company),
+    valueMid: canonicalValuationFor(company).headline.mid,
+  }), [company]);
   // the two top-ranked buyers for this company (no hand-picked names)
-  const topTwo = BUYERS.candidates.slice(0, 2).map(buyerFacts);
+  const topTwo = BUYERS.candidates.slice(0, 2).map((c) => buyerFacts(c, company, valueMid));
   const buyerDnaCount = BUYERS.candidates.length;
   const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div data-page="network-intelligence" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ The moat · Five compounding assets" title="Network Intelligence"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"}>{fromIntake ? `Your intake · ${company.name}` : `Demo company · ${company.name}`}</Provenance></>}
         description="Individual screens can be copied; the compounding dataset cannot. The deal graph, the buyer graph, deal intelligence, the agent workforce and the founder lifecycle." />
 
       <section aria-label="Network size" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">

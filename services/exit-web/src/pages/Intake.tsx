@@ -31,6 +31,7 @@ const USES_YOUR_FIGURES: readonly { to: string; label: string }[] = [
   { to: "/console", label: "Intelligence Terminal" },
   { to: "/console/command", label: "Liquidity Command" },
   { to: "/console/commander", label: "Chief Investment Banker" },
+  { to: "/console/network", label: "Network Intelligence" },
   { to: "/console/engagement-registry", label: "Engagement Registry" },
   { to: "/console/inbox", label: "Inbox" },
   { to: "/console/outreach-plan", label: "Outreach Plan" },

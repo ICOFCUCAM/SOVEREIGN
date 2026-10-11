@@ -34,7 +34,7 @@ Shows the founder the platform's compounding data assets ("five moats"): the dea
 | G1 | **Invented buyer attributes** (retention %, earnout tendency) and hard-coded buyer picks. | Show the active company's top two ranked buyers with measured fields only: expected days to cash, average disclosed premium (or the framework prior, labelled), and the implied ARR multiple labelled as a what-if. Retention and earnout tendency removed — no data. | ☑ `a48e5f6` |
 | G2 | **Overclaims** about agents and learning; "12+ acquirers measured" (top-12 cap); "live engine runs". | Factual wording: what the engines produced; registry sizes named correctly; learning claims limited to what exists. | ☑ `231f41e` |
 | G3 | Fake live tape. | `RegistryTape` with snapshot date. | ☑ `e365168` |
-| G4 | Demo company unlabelled. | Run on `loadActiveCompany()`; badge. | ☐ |
+| G4 | Demo company unlabelled. | Run on `loadActiveCompany()`; badge. | ☑ G4-commit |
 | G5 | Design: no `h1`, 3 contrast failures, card soup. | Rebuild on `xo`. | ☑ `47f2964` |
 
 ---
@@ -62,3 +62,7 @@ Shows the founder the platform's compounding data assets ("five moats"): the dea
 ### G3 — Fake live tape
 *Closed by:* `pages/Network.tsx`: pinging `MarketTape` → dated `RegistryTape`; acquisition reactor foot names the snapshot date ("Rotation is decorative").
 *Verification:* Chromium (Active Mandate): 0 "live" words, 0 pinging elements · eslint clean · 0 errors.
+
+### G4 — Demo company unlabelled
+*Closed by:* `pages/Network.tsx` — buyer discovery, diligence and the console value (`canonicalValuationFor`) run on `loadActiveCompany()`; header badge "Demo company · Helios Freight" / "Your intake · {name}". `pages/Intake.tsx` "Where your figures are used" lists Network Intelligence.
+*Verification:* Chromium: demo → top buyer Flexport Strategic (logistics); saved intake "Northwind Analytics" (enterprise SaaS) → Vista Enterprise, YOUR INTAKE badge · 0 errors.
