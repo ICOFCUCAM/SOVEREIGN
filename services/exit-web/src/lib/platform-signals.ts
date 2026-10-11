@@ -1,7 +1,7 @@
 // ── LAYER 8 · PROPRIETARY PLATFORM SIGNALS ─────────────────────────
-// The moat layer: behavioural evidence no external database has, computed
-// from this workspace's OWN process records — the NDAs issued through the
-// protocol and the offers received on the live deal. Public history says
+// Process signals computed from the workspace's NDA and offer records. Today
+// these are the seeded sample NDAs and offers (demo data); the page labels
+// them so. Public history says
 // what a buyer did in the market; these signals say how counterparties
 // behave inside an ExitOS process: do they sign, how fast, do they bid.
 // Every figure carries its sample size — small-n is shown, not hidden.
@@ -67,7 +67,7 @@ export function computePlatformSignals(): readonly PlatformSignal[] {
       label: "Offers in negotiation",
       value: `${countered}/${offers.length}`,
       sample: `n=${offers.length} offers`,
-      detail: countered > 0 ? "counterparties engaging on counters — live tension" : "no counters in flight yet",
+      detail: countered > 0 ? `${countered} sample offer${countered === 1 ? " is" : "s are"} at the counter stage` : "no sample offers at the counter stage",
     },
     {
       label: "Leading counterparty",

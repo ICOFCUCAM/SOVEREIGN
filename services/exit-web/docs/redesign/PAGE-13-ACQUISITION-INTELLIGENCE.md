@@ -34,7 +34,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 ## Gap register — Page 13
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Fixture NDAs/offers presented as proprietary recorded behaviour.** | Title and foot say "sample process records (demo data)"; drop "no external database has this" and "live tension". | ☐ |
+| G1 | **Fixture NDAs/offers presented as proprietary recorded behaviour.** | Title and foot say "sample process records (demo data)"; drop "no external database has this" and "live tension". | ☑ G1-commit |
 | G2 | **Invented "Outreach success +N%" lift** and the "live" radar. | Remove the lift figures; section becomes "Registry signals" with the snapshot date; no pulsing dot. | ☐ |
 | G3 | Mislabels: fit probability as "likelihood … signs"; appetite as "deploying capital / recent-12mo activity"; "live" EDGAR/Wikidata; demo-tenant stats as "Live data"; narrative unlabelled. | Accurate labels: fit probability (engine fit score); appetite (registry attribute); "fetched from EDGAR/Wikidata, snapshot as of …"; "Recorded stats · demo tenant"; "template sentence". | ☐ |
 | G4 | Banker's-take urgency and overclaim; hidden plan gate on the banker CTA. | Plain wording; `requiredEngagement` note. | ☐ |
@@ -50,3 +50,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · **overflow at 390** · 0 errors.
 ### G8 — Design
 *Closed by:* `pages/Intelligence.tsx` rebuilt on `xo` (`PageHeader` `h1`; pipeline as an ordered list; ranked outcomes as a list with `h3`s and definition lists; hidden buyers and platform signals side by side; radar; banker's take as a page-local definition list (shared `BankerTake` no longer used here); provenance strip; four metrics; match explanations with `h3`/`h4`; standouts as a definition list; filter with a real `<label>` and a polite live count; sort as two `Chip` toggle buttons with `aria-pressed`; the ranked table with row headers inside a keyboard-reachable `ScrollRegion`; signal tier chips carry screen-reader words). Content carried over verbatim; G1–G7 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium founder 1440/390 and buyer 390: 0 errors, `h1` 1, **no overflow** (was overflowing at 390), axe 0, all tab stops with visible focus.
+
+### G1 — Fixture NDAs/offers presented as proprietary recorded behaviour
+*Closed by:* `pages/Intelligence.tsx`, `lib/platform-signals.ts` (wording only; figures unchanged). Section "Proprietary platform signals — behavioural evidence from this workspace's own process records — no external database has this" → **"Process signals · sample records" — "from the demo company's sample NDAs and offers — demo data"**, foot: "Computed from seeded sample records, not from a process run on ExitOS. With real NDAs and offers these figures would come from your own records." Detail "counterparties engaging on counters — live tension" → "N sample offers are at the counter stage". Module comment updated. (`computePlatformSignals` has no other caller.)
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for Proprietary / no external database / live tension; new title present.

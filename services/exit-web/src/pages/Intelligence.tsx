@@ -226,7 +226,8 @@ const Intelligence: React.FC = () => {
             {intel.hidden.length === 0 && <li className="px-4 py-3 text-[12px] text-xo-muted">No off-mandate adjacency found for this sector yet — the graph grows with every indexed deal.</li>}
           </ul>
         </Section>
-        <Section title="Proprietary platform signals" eyebrow="behavioural evidence from this workspace's own process records — no external database has this">
+        <Section title="Process signals · sample records" eyebrow="from the demo company's sample NDAs and offers — demo data"
+          foot="Computed from seeded sample records, not from a process run on ExitOS. With real NDAs and offers these figures would come from your own records.">
           <ul className="divide-y divide-xo-line">
             {platformSignals.map((s) => (
               <li key={s.label} className="flex items-center justify-between gap-3 px-4 py-3">
