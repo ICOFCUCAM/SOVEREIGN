@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Card, fmtMoney } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import { fmtMoney } from "../lib/ui";
+import { MarketTape } from "../lib/workstation";
+import { PageHeader, Section, Metric } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { DILIGENCE, VALUATION_CANONICAL } from "../lib/engines";
 import { listDocuments, uploadDocument, fmtBytes, type DataRoomDocument, type RoomKind } from "../lib/data-room";
-import BankerTake from "../components/BankerTake";
 
 // Completeness model — buyers care about how complete each package is, not how
 // many files were uploaded. Completeness = uploaded ÷ required specs (capped),
@@ -28,12 +28,6 @@ function missingImpactUsd(kind: string, missingRequired: number): number {
 // + exit-doc-list edge functions. Diligence-engine specs surface the
 // required artifacts per package; the uploader writes actual bytes to
 // the 'exit-data-room' bucket and the list refreshes against it.
-
-const CLASS_STYLE: Record<string, string> = {
-  unclassified: "bg-deal-600/20 text-deal-300 ring-deal-400/40",
-  sensitive:    "bg-loi-500/15 text-loi-400 ring-loi-400/40",
-  confidential: "bg-red-500/15 text-red-300 ring-red-400/40",
-};
 
 const DataRoom: React.FC = () => {
   const [activeKind, setActiveKind] = useState<RoomKind>((DILIGENCE.documents[0]?.kind as RoomKind) ?? "financial");
@@ -90,224 +84,188 @@ const DataRoom: React.FC = () => {
   const uploadedNames = new Set(docsForActive.map((d) => d.filename.toLowerCase()));
   const missingArtifacts = (active?.artifacts ?? []).filter((a) => a.required && !uploadedNames.has(a.filename.toLowerCase()));
 
+  const pctCls = (p: number): string => p >= 80 ? "text-xo-verified" : p >= 50 ? "text-xo-caution" : "text-xo-risk";
+  const CLASS_CLS: Record<string, string> = { unclassified: "text-xo-verified", sensitive: "text-xo-caution", confidential: "text-xo-risk" };
+
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Workspace · Data Room"
-        title="Virtual Data Room"
-        tag="Diligence artifacts"
-        status={`${overallPct}% complete`}
-        metrics={[
-          { k: "Completeness", v: `${overallPct}%`, accent: overallPct >= 80, sub: `${requiredArtifacts} specs · ${DILIGENCE.documents.length} packages` },
-          { k: "Value at risk", v: `-${fmtMoney(atRiskUsd)}`, sub: "while gaps stay open" },
-          { k: "Uploaded", v: String(uploaded.length), accent: true, sub: fmtBytes(uploadedTotalBytes) },
-          { k: "Confidential pkgs", v: String(confidentialCount), sub: "ring-1 access" },
-        ]}
-      />
+    <div data-page="data-room" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Workspace · Data Room" title="Virtual Data Room"
+        badge={<span className="text-[12px] text-xo-muted">Diligence artifacts · {overallPct}% complete</span>}
+        actions={<>
+          <button type="button" onClick={refresh} disabled={loading} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{loading ? "Refreshing…" : "Refresh"}</button>
+          <button type="button" onClick={() => fileInput.current?.click()} disabled={uploading} className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{uploading ? "Uploading…" : `Upload to ${activeKind.replace(/_/g, " ")}`}</button>
+          <input ref={fileInput} type="file" className="hidden" onChange={onFile} disabled={uploading} aria-label={`Upload a file to the ${activeKind.replace(/_/g, " ")} package`} />
+        </>} />
+
+      <section aria-label="Data room summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-xo-panel"><Metric label="Completeness" emphasis value={<span className={pctCls(overallPct)}>{overallPct}%</span>} sub={`${requiredArtifacts} specs · ${DILIGENCE.documents.length} packages`} /></div>
+        <div className="bg-xo-panel"><Metric label="Value at risk" value={<span className="text-xo-risk">-{fmtMoney(atRiskUsd)}</span>} sub="while gaps stay open" /></div>
+        <div className="bg-xo-panel"><Metric label="Uploaded" value={String(uploaded.length)} sub={fmtBytes(uploadedTotalBytes)} /></div>
+        <div className="bg-xo-panel"><Metric label="Confidential pkgs" value={String(confidentialCount)} sub="ring-1 access" /></div>
+      </section>
 
       <MarketTape items={buildMarketTape()} />
 
-      <div className="flex flex-wrap justify-end gap-2">
-        <Button variant="ghost" onClick={refresh} disabled={loading}>{loading ? "Refreshing…" : "Refresh"}</Button>
-        <Button onClick={() => fileInput.current?.click()} disabled={uploading}>{uploading ? "Uploading…" : `Upload to ${activeKind.replace(/_/g, " ")}`}</Button>
-        <input ref={fileInput} type="file" className="hidden" onChange={onFile} disabled={uploading} />
-      </div>
+      {error && <p role="alert" className="border border-xo-risk/50 bg-xo-panel px-4 py-3 text-[13px] text-xo-risk">{error}</p>}
 
-      {error && (
-        <div className="mb-6 rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-          {error}
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+        right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-risk">-{fmtMoney(atRiskUsd)}</span>}>
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">{worstPkg
+            ? <>Upload the <span className="font-semibold">{worstPkg.missing} missing artifact{worstPkg.missing === 1 ? "" : "s"}</span> in {worstPkg.title} — the biggest gap in the room.</>
+            : <>Room is complete — keep it current as new diligence requests land.</>}</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-risk">-{fmtMoney(atRiskUsd)}</span> at risk while gaps stay open · {overallPct}% complete.</TakeCell>
+            <TakeCell k="If you wait">Every empty package lets a buyer discount the bid or stall in diligence until it's filled.</TakeCell>
+            <TakeCell k="Buyer focus">A buyer in diligence probes the weakest package first{worstPkg ? <> — <span className="text-xo-text">{worstPkg.title}</span></> : null}.</TakeCell>
+            <TakeCell k="ExitOS does it">ExitOS maps every engine-required artifact, scores completeness and prices the dollar impact of each gap.</TakeCell>
+          </dl>
+          <Link to="/console/diligence-ai" className="mt-3 inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Run the risk scan →</Link>
         </div>
-      )}
+      </Section>
 
-      <BankerTake
-        next={worstPkg
-          ? <>Upload the <span className="text-white">{worstPkg.missing} missing artifact{worstPkg.missing === 1 ? "" : "s"}</span> in {worstPkg.title} — the biggest gap in the room.</>
-          : <>Room is complete — keep it current as new diligence requests land.</>}
-        stake={<><span className="font-mono font-bold text-red-300">-{fmtMoney(atRiskUsd)}</span> at risk while gaps stay open · {overallPct}% complete.</>}
-        inaction={<>Every empty package lets a buyer discount the bid or stall in diligence until it's filled.</>}
-        buyer={<>A buyer in diligence probes the weakest package first{worstPkg ? <> — <span className="text-white">{worstPkg.title}</span></> : null}.</>}
-        automate={<>ExitOS maps every engine-required artifact, scores completeness and prices the dollar impact of each gap.</>}
-        impact={<>-{fmtMoney(atRiskUsd)}</>}
-        cta={{ label: "Run the risk scan", to: "/console/diligence-ai" }}
-      />
-
-
-      {/* Due Diligence AI — instant risk readout on the package contents */}
-      <Card className="mt-8 overflow-hidden p-0">
-        <div className="flex items-center justify-between border-b border-white/10 bg-loi-500/10 px-5 py-3">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-loi-500/25 text-[12px] text-loi-200 ring-1 ring-loi-400/40">!</span>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-loi-200">Due Diligence AI · risk scan</span>
-          </div>
-          <Link to="/console/diligence-ai" className="text-[12px] font-semibold text-loi-200 hover:text-loi-100">Full report →</Link>
-        </div>
-        <div className="grid gap-px bg-white/10 sm:grid-cols-2">
-          {DILIGENCE.redFlags.length === 0 ? (
-            <div className="bg-ink-800/95 p-5 text-sm text-white/55 sm:col-span-2">No material risks detected in the current package — defensible buyer-facing posture.</div>
-          ) : (
-            DILIGENCE.redFlags.slice(0, 4).map((f) => {
+      <Section title="Due Diligence AI · risk scan" className="border border-xo-line"
+        right={<Link to="/console/diligence-ai" className="text-[12px] font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Full report →</Link>}>
+        {DILIGENCE.redFlags.length === 0 ? (
+          <p className="px-4 py-3 text-[13px] text-xo-muted">No material risks detected in the current package — defensible buyer-facing posture.</p>
+        ) : (
+          <ul className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2">
+            {DILIGENCE.redFlags.slice(0, 4).map((f) => {
               const fl = f.toLowerCase();
               const cat = fl.includes("concentration") ? "Customer concentration" : fl.includes("regulat") || fl.includes("compliance") ? "Compliance" : fl.includes("margin") || fl.includes("revenue") || fl.includes("retention") ? "Revenue" : "Legal";
               return (
-                <div key={f} className="bg-ink-800/95 p-4">
-                  <div className="text-[10px] font-semibold uppercase tracking-wide text-loi-300">{cat} risk</div>
-                  <div className="mt-1 text-[13px] leading-snug text-white/80">{f}</div>
-                </div>
+                <li key={f} className="bg-xo-panel px-4 py-3">
+                  <div className="text-[11px] font-semibold text-xo-caution">{cat} risk</div>
+                  <div className="mt-1 text-[13px] leading-snug">{f}</div>
+                </li>
               );
-            })
-          )}
-        </div>
-      </Card>
+            })}
+          </ul>
+        )}
+      </Section>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-[280px_1fr]">
-        <div className="space-y-2">
-          {DILIGENCE.documents.map((doc) => {
-            const pkg = perPkg.find((p) => p.kind === doc.kind);
-            const pct = pkg?.pct ?? 0;
-            const pc = pct >= 80 ? "#34d399" : pct >= 50 ? "#fbbf24" : "#f87171";
-            return (
-              <button
-                key={doc.kind}
-                onClick={() => setActiveKind(doc.kind as RoomKind)}
-                className={`block w-full rounded-lg border p-3 text-left transition ${
-                  activeKind === doc.kind
-                    ? "border-deal-400/50 bg-deal-600/10"
-                    : "border-white/10 bg-ink-800/40 hover:border-white/20 hover:bg-ink-800/60"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="text-sm font-medium leading-tight text-white">{doc.title}</div>
-                  <span className="shrink-0 font-mono text-[11px] font-bold" style={{ color: pc }}>{pct}%</span>
-                </div>
-                <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
-                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pc }} />
-                </div>
-                <div className="mt-1.5 flex items-baseline justify-between text-[10px] text-white/45">
-                  <span>{pkg?.up ?? 0}/{pkg?.req ?? 0} required</span>
-                  {pkg && pkg.missing > 0 && <span className="text-red-300/80">-{fmtMoney(pkg.impact)}</span>}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-[280px_1fr]">
+        <nav aria-label="Data room packages" className="bg-xo-panel p-2">
+          <ul className="space-y-1">
+            {DILIGENCE.documents.map((doc) => {
+              const pkg = perPkg.find((p) => p.kind === doc.kind);
+              const pct = pkg?.pct ?? 0;
+              const on = activeKind === doc.kind;
+              return (
+                <li key={doc.kind}>
+                  <button type="button" aria-current={on ? "true" : undefined} onClick={() => setActiveKind(doc.kind as RoomKind)}
+                    className={`block w-full border px-3 py-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${on ? "border-xo-verified/60 bg-xo-raise" : "border-xo-line hover:bg-xo-raise"}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-[13px] font-medium leading-tight">{doc.title}</span>
+                      <span className={`shrink-0 font-mono text-[12px] font-semibold ${pctCls(pct)}`}>{pct}%</span>
+                    </div>
+                    <div aria-hidden className="mt-1.5 h-1 overflow-hidden rounded-full bg-xo-line"><div className="h-full rounded-full bg-xo-action" style={{ width: `${pct}%` }} /></div>
+                    <div className="mt-1 flex items-baseline justify-between text-[11px] text-xo-faint">
+                      <span>{pkg?.up ?? 0}/{pkg?.req ?? 0} required</span>
+                      {pkg && pkg.missing > 0 && <span className="text-xo-risk">-{fmtMoney(pkg.impact)}</span>}
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
         {active && (
-          <div className="space-y-6">
-            <Card className="p-6">
-              <div className="mb-5 border-b border-white/10 pb-4">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-deal-400">{active.kind.replace(/_/g, " ")}</div>
-                <h2 className="mt-2 font-serif text-2xl font-bold text-white">{active.title}</h2>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-                  <span className={`rounded-full px-2.5 py-0.5 font-semibold uppercase tracking-wide ring-1 ${CLASS_STYLE[active.classification]}`}>
-                    {active.classification}
-                  </span>
-                  <span className="text-white/45">{active.artifacts.length} required specs · {docsForActive.length} uploaded</span>
-                </div>
+          <section aria-labelledby="dr-active" className="min-w-0 bg-xo-panel px-4 py-4">
+            <div className="border-b border-xo-line pb-3">
+              <div className="text-[11px] font-semibold capitalize text-xo-faint">{active.kind.replace(/_/g, " ")}</div>
+              <h2 id="dr-active" className="mt-1 font-serif text-[20px] font-semibold">{active.title}</h2>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-[12px]">
+                <span className={`font-semibold capitalize ${CLASS_CLS[active.classification]}`}>{active.classification}</span>
+                <span className="text-xo-faint">{active.artifacts.length} required specs · {docsForActive.length} uploaded</span>
               </div>
+            </div>
 
-              {/* completeness + missing artifacts with estimated impact */}
-              {activePkg && (
-                <div className="mb-6 rounded-lg border border-white/10 bg-ink-900/40 p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Package completeness</span>
-                    <span className="font-mono text-lg font-bold" style={{ color: activePkg.pct >= 80 ? "#34d399" : activePkg.pct >= 50 ? "#fbbf24" : "#f87171" }}>{activePkg.pct}%</span>
-                  </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full rounded-full" style={{ width: `${activePkg.pct}%`, background: activePkg.pct >= 80 ? "#34d399" : activePkg.pct >= 50 ? "#fbbf24" : "#f87171" }} />
-                  </div>
-                  {missingArtifacts.length > 0 ? (
-                    <div className="mt-3">
-                      <div className="flex items-center justify-between text-[12px]">
-                        <span className="text-white/55">Missing required artifacts</span>
-                        <span className="font-mono font-semibold text-red-300">est. impact -{fmtMoney(activePkg.impact)}</span>
-                      </div>
-                      <ul className="mt-2 space-y-1 text-[12px] text-white/70">
-                        {missingArtifacts.map((a) => (
-                          <li key={a.filename} className="flex items-baseline gap-2">
-                            <span className="mt-1 inline-block h-1 w-1 rounded-full bg-red-400" /><span className="font-mono">{a.filename}</span> <span className="text-white/40">— {a.description}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : (
-                    <div className="mt-3 text-[12px] text-deal-300">All required artifacts present for this package.</div>
-                  )}
+            {activePkg && (
+              <div className="mt-3 border border-xo-line px-3 py-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-medium text-xo-muted">Package completeness</span>
+                  <span className={`font-mono text-[17px] font-semibold ${pctCls(activePkg.pct)}`}>{activePkg.pct}%</span>
                 </div>
-              )}
-
-              <h3 className="mb-3 font-serif text-base font-bold text-white">Uploaded artifacts</h3>
-              {docsForActive.length === 0 ? (
-                <div className="rounded border border-dashed border-white/15 bg-ink-900/40 px-4 py-8 text-center text-sm text-white/45">
-                  No documents uploaded to this package yet.<br />
-                  <button onClick={() => fileInput.current?.click()} className="mt-3 inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wide text-deal-400 hover:text-deal-300">
-                    Upload your first artifact →
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {docsForActive.map((d) => (
-                    <div key={d.id} className="flex items-baseline justify-between rounded border border-white/10 bg-ink-900/40 px-3 py-2">
-                      <div>
-                        <div className="font-mono text-[12px] text-white">{d.filename}</div>
-                        <div className="mt-0.5 text-[11px] text-white/50">
-                          {fmtBytes(d.bytes)} · {d.mime} · {new Date(d.uploaded_at).toLocaleString()}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                          d.classification === "confidential" ? "bg-red-500/15 text-red-300" :
-                          d.classification === "sensitive"     ? "bg-loi-500/15 text-loi-400" :
-                                                                  "bg-deal-600/20 text-deal-300"
-                        }`}>{d.classification}</span>
-                        {d.downloadUrl && (
-                          <a href={d.downloadUrl} target="_blank" rel="noreferrer" className="text-[12px] font-semibold uppercase tracking-wide text-deal-400 hover:text-deal-300">
-                            Download
-                          </a>
-                        )}
-                      </div>
+                <div aria-hidden className="mt-2 h-2 overflow-hidden rounded-full bg-xo-line"><div className="h-full rounded-full bg-xo-action" style={{ width: `${activePkg.pct}%` }} /></div>
+                {missingArtifacts.length > 0 ? (
+                  <div className="mt-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-[12px]">
+                      <span className="text-xo-muted">Missing required artifacts</span>
+                      <span className="font-mono font-semibold text-xo-risk">est. impact -{fmtMoney(activePkg.impact)}</span>
                     </div>
-                  ))}
-                </div>
-              )}
-
-              <h3 className="mb-3 mt-7 font-serif text-base font-bold text-white">Required artifacts (engine spec)</h3>
-              <div className="space-y-2">
-                {active.artifacts.map((a) => (
-                  <div key={a.filename} className="flex items-baseline justify-between rounded border border-white/10 bg-ink-900/40 px-3 py-2">
-                    <div>
-                      <div className="font-mono text-[12px] text-white">{a.filename}</div>
-                      <div className="mt-0.5 text-[11px] text-white/50">{a.description}</div>
-                    </div>
-                    {a.required ? (
-                      <span className="rounded bg-loi-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-loi-400">Required</span>
-                    ) : (
-                      <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/45">Optional</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <h3 className="mb-3 mt-7 font-serif text-base font-bold text-white">Sections & questions</h3>
-              <div className="space-y-4">
-                {active.sections.map((s, i) => (
-                  <div key={`${i}-${s.heading}`}>
-                    <div className="font-medium text-white">{s.heading}</div>
-                    <ul className="mt-2 space-y-1 text-[12px] text-white/65">
-                      {s.questions.map((q) => (
-                        <li key={q} className="flex items-baseline gap-2">
-                          <span className="mt-1 inline-block h-1 w-1 rounded-full bg-deal-400" /> {q}
-                        </li>
+                    <ul className="mt-2 space-y-1 text-[12px]">
+                      {missingArtifacts.map((a) => (
+                        <li key={a.filename} className="break-words"><span className="font-mono">{a.filename}</span> <span className="text-xo-faint">— {a.description}</span></li>
                       ))}
                     </ul>
                   </div>
-                ))}
+                ) : (
+                  <p className="mt-3 text-[12px] text-xo-verified">All required artifacts present for this package.</p>
+                )}
               </div>
-            </Card>
-          </div>
+            )}
+
+            <h3 className="mb-2 mt-5 font-serif text-[15px] font-semibold">Uploaded artifacts</h3>
+            {docsForActive.length === 0 ? (
+              <div className="border border-dashed border-xo-line px-4 py-6 text-center text-[13px] text-xo-muted">
+                No documents uploaded to this package yet.<br />
+                <button type="button" onClick={() => fileInput.current?.click()} className="mt-2 inline-block py-1 text-[12px] font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Upload your first artifact →</button>
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {docsForActive.map((d) => (
+                  <li key={d.id} className="flex flex-wrap items-baseline justify-between gap-2 border border-xo-line px-3 py-2">
+                    <div className="min-w-0">
+                      <div className="break-all font-mono text-[12px]">{d.filename}</div>
+                      <div className="mt-0.5 text-[11px] text-xo-faint">{fmtBytes(d.bytes)} · {d.mime} · {new Date(d.uploaded_at).toLocaleString()}</div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-[11px] font-semibold capitalize ${CLASS_CLS[d.classification]}`}>{d.classification}</span>
+                      {d.downloadUrl && <a href={d.downloadUrl} target="_blank" rel="noreferrer" className="text-[12px] font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Download<span className="sr-only"> {d.filename} (opens in a new tab)</span></a>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <h3 className="mb-2 mt-5 font-serif text-[15px] font-semibold">Required artifacts (engine spec)</h3>
+            <ul className="space-y-2">
+              {active.artifacts.map((a) => (
+                <li key={a.filename} className="flex flex-wrap items-baseline justify-between gap-2 border border-xo-line px-3 py-2">
+                  <div className="min-w-0">
+                    <div className="break-all font-mono text-[12px]">{a.filename}</div>
+                    <div className="mt-0.5 text-[11px] text-xo-faint">{a.description}</div>
+                  </div>
+                  <span className={`text-[11px] font-semibold ${a.required ? "text-xo-caution" : "text-xo-faint"}`}>{a.required ? "Required" : "Optional"}</span>
+                </li>
+              ))}
+            </ul>
+
+            <h3 className="mb-2 mt-5 font-serif text-[15px] font-semibold">Sections & questions</h3>
+            <div className="space-y-3">
+              {active.sections.map((s, i) => (
+                <div key={`${i}-${s.heading}`}>
+                  <h4 className="text-[13px] font-medium">{s.heading}</h4>
+                  <ul className="mt-1 list-disc space-y-1 pl-5 text-[12px] text-xo-muted">
+                    {s.questions.map((q) => <li key={q}>{q}</li>)}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
       </div>
     </div>
   );
 };
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
+  </div>
+);
 
 export default DataRoom;

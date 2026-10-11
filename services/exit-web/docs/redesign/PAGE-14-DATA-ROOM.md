@@ -39,8 +39,12 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 | G3 | Mislabels: "Due Diligence AI" (rule-based), "ring-1 access", completeness rule unstated, raw list error. | "Diligence risk scan (rule-based)"; drop "ring-1 access"; state the completeness rule; plain error text. | ☐ |
 | G4 | Demo company unlabelled. | Engine specs, red flags and value on `loadActiveCompany()`; badge. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, overflow at 390, old primitives. | Rebuild on `xo`. | ☐ |
+| G6 | Design: no `h1`, overflow at 390, old primitives. | Rebuild on `xo`. | ☑ G6-commit |
 
 ---
 
 ## Closure log
+
+### G6 — Design
+*Closed by:* `pages/DataRoom.tsx` rebuilt on `xo` (`PageHeader` `h1` with Refresh and Upload as header actions, the hidden file input labelled; four metrics; errors in a `role="alert"` box; banker's take as a page-local definition list (shared `BankerTake` no longer used here); risk scan as a list; packages as a `nav` of buttons with `aria-current`; the active package as a labelled `section` with `h2`/`h3`/`h4`; long filenames wrap). Content carried over verbatim; G1–G5 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Preparation 1440/390: 0 errors, `h1` 1 (was 0), **no overflow** (was overflowing at 390), axe 0, all tab stops with visible focus.
