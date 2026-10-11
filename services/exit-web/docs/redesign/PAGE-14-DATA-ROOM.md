@@ -36,7 +36,7 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 |---|---|---|---|
 | G1 | **Uploads land in a shared tenant visible to every user; the page implies confidentiality** (X12). | Warning panel above the uploader stating exactly who can see uploads; upload stays disabled until the founder ticks an acknowledgement; classification pills say "label only". Backend unchanged (X12 for the owner). | ☑ `ec30f99` |
 | G2 | **Invented "value at risk" weights.** | Label as a rule with the weights shown; "illustrative" not "at risk". | ☑ `2a1b6bd` |
-| G3 | Mislabels: "Due Diligence AI" (rule-based), "ring-1 access", completeness rule unstated, raw list error. | "Diligence risk scan (rule-based)"; drop "ring-1 access"; state the completeness rule; plain error text. | ☐ |
+| G3 | Mislabels: "Due Diligence AI" (rule-based), "ring-1 access", completeness rule unstated, raw list error. | "Diligence risk scan (rule-based)"; drop "ring-1 access"; state the completeness rule; plain error text. | ☑ G3-commit |
 | G4 | Demo company unlabelled. | Engine specs, red flags and value on `loadActiveCompany()`; badge. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `27888d1` |
@@ -57,3 +57,13 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 *Closed by:* `pages/DataRoom.tsx` (labels and a foot; the rule itself unchanged). "Value at risk — while gaps stay open" → **"Illustrative discount — fixed-weight rule, see below"**; "est. impact" → "illustrative impact"; banker's take "… at risk" → "… illustrative discount while gaps stay open (rule)"; "ExitOS … prices the dollar impact of each gap" → "applies a fixed-weight rule to show what each gap could cost. The rule is not measured from buyer behaviour." The foot prints the rule and the **weights each package actually receives**, generated from the code: Financial 6 %, Market 2 %, User & growth 2 %, Technical architecture 2 %, Security 4 %, Legal 5 %, Commercial 3 %.
 *Finding (not changed):* `PKG_IMPACT_WEIGHT` lists `technical: 0.03`, but the package kind is `technical_architecture`, so it falls back to 2 %. The page now shows the effective 2 %; the mismatch is left for the owner since the weights themselves are a product choice.
 *Verification:* `tsc -b`, eslint clean · Chromium: weights line as above; 0 "Value at risk" / "est. impact" / "prices the dollar".
+
+### G3 — Mislabels
+*Closed by:* `pages/DataRoom.tsx` (text only).
+| Before | After |
+|---|---|
+| "Due Diligence AI · risk scan" | "Diligence risk scan · rule-based" — "Engine red flags, grouped by keyword" |
+| "Confidential pkgs — ring-1 access" (a CSS class in the copy) | "— engine classification" |
+| completeness rule unstated | under the package list: "files uploaded to a package ÷ its required artifacts, capped at 100% — any file counts. The missing list matches required filenames." |
+| raw errors "list failed: 200" / "upload failed" | "Could not load the uploaded documents (…). The engine checklist below still applies." / "The upload did not complete (…). Nothing was added." |
+*Verification:* `tsc -b`, eslint clean · Chromium (list stubbed to fail): new error text shown; 0 "Due Diligence AI" / "ring-1" · Preparation 1440/390: 0 errors, axe 0, no overflow.

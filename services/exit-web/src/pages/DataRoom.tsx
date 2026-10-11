@@ -45,7 +45,7 @@ const DataRoom: React.FC = () => {
   const refresh = async () => {
     setLoading(true); setError(null);
     try { setUploaded(await listDocuments()); }
-    catch (e) { setError(e instanceof Error ? e.message : "list failed"); }
+    catch (e) { setError(`Could not load the uploaded documents (${e instanceof Error ? e.message : "list failed"}). The engine checklist below still applies.`); }
     finally   { setLoading(false); }
   };
 
@@ -60,7 +60,7 @@ const DataRoom: React.FC = () => {
       if (fileInput.current) fileInput.current.value = "";
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "upload failed");
+      setError(`The upload did not complete (${err instanceof Error ? err.message : "upload failed"}). Nothing was added.`);
     } finally {
       setUploading(false);
     }
@@ -106,7 +106,7 @@ const DataRoom: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Completeness" emphasis value={<span className={pctCls(overallPct)}>{overallPct}%</span>} sub={`${requiredArtifacts} specs · ${DILIGENCE.documents.length} packages`} /></div>
         <div className="bg-xo-panel"><Metric label="Illustrative discount" value={<span className="text-xo-risk">-{fmtMoney(atRiskUsd)}</span>} sub="fixed-weight rule, see below" /></div>
         <div className="bg-xo-panel"><Metric label="Uploaded" value={String(uploaded.length)} sub={fmtBytes(uploadedTotalBytes)} /></div>
-        <div className="bg-xo-panel"><Metric label="Confidential pkgs" value={String(confidentialCount)} sub="ring-1 access" /></div>
+        <div className="bg-xo-panel"><Metric label="Confidential pkgs" value={String(confidentialCount)} sub="engine classification" /></div>
       </section>
 
       <MarketTape items={buildMarketTape()} />
@@ -139,7 +139,7 @@ const DataRoom: React.FC = () => {
         </div>
       </Section>
 
-      <Section title="Due Diligence AI · risk scan" className="border border-xo-line"
+      <Section title="Diligence risk scan · rule-based" eyebrow="Engine red flags, grouped by keyword" className="border border-xo-line"
         right={<Link to="/console/diligence-ai" className="text-[12px] font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Full report →</Link>}>
         {DILIGENCE.redFlags.length === 0 ? (
           <p className="px-4 py-3 text-[13px] text-xo-muted">No material risks detected in the current package — defensible buyer-facing posture.</p>
@@ -184,6 +184,7 @@ const DataRoom: React.FC = () => {
               );
             })}
           </ul>
+          <p className="mt-2 px-1 text-[11px] leading-snug text-xo-faint">Completeness: files uploaded to a package ÷ its required artifacts, capped at 100% — any file counts. The missing list matches required filenames.</p>
         </nav>
 
         {active && (
