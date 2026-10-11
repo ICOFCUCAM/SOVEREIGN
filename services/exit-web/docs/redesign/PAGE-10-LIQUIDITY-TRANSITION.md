@@ -38,7 +38,7 @@ After the deal: what the founder walks away with (headline → preferences → t
 |---|---|---|---|
 | G1 | **Wrong leading offer** (id compared with a buyer name). | Match on `offerId`; the page follows the engine's leader. | ☑ `3f5e167` |
 | G2 | **Cascade and tranches mislabelled and miscomputed** ("your" = founder group; "after preferences" = risk haircut; haircut × mix; escrow ignored; timings invented). | Cascade: headline → preference stack → founders' gross (named as the founder group) → risk-adjusted value (engine haircuts stated) → after the tax assumption. Tranches from the engine's nominal cash / stock / earnout for the founders; escrow held back from cash per the offer term; timings from the offer where present, else "not in the offer terms". | ☑ `6d45072` |
-| G3 | Tax assumption unlabelled. | State it wherever used: flat 23.8 % (US federal LTCG + NIIT), whole amount, no cost basis, no state tax, no QSBS. | ☐ |
+| G3 | Tax assumption unlabelled. | State it wherever used: flat 23.8 % (US federal LTCG + NIIT), whole amount, no cost basis, no state tax, no QSBS. | ☑ G3-commit |
 | G4 | **Invented statuses and a second allocation** ("Allocated", "Reserved", "Recommended", "Setup"; 12/30/8 … %). | One illustrative template (labelled "not a recommendation"); the topics list without invented amounts or statuses; family-office line states its $50M rule. | ☐ |
 | G5 | Overclaims (runs/models/schedules/drafts; keeps threads; readiness clock for round two). | Plain wording. | ☐ |
 | G6 | Demo offers and cap table unlabelled. | Badge and line: sample offers and cap table (demo), also when an intake is saved (intake has no offers or cap table). | ☐ |
@@ -68,3 +68,7 @@ After the deal: what the founder walks away with (headline → preferences → t
 - Summary metric "After-tax, founder group"; banker's take "after tax to the founder group … if every tranche pays in full".
 Arithmetic check (Microsoft offer): founders' cash $62.33M − escrow $15.58M = $46.74M × 0.762 = **$35,618,860** at close; tranches sum to $79,153,023 = after taxes.
 *Verification:* `tsc -b`, eslint clean · Chromium figures above · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
+
+### G3 — Tax assumption unlabelled
+*Closed by:* `pages/Wealth.tsx` (text only). Cascade note "~23.8% est. capital gains" → "flat 23.8% tax assumption"; tax reserve "set aside first" → "flat 23.8% assumption"; cascade foot: "Tax assumption: a flat 23.8% (US federal long-term capital gains 20% + net investment income tax 3.8%) on the whole amount — no cost basis, state tax, QSBS exclusion or instalment timing. ExitOS has no tax model; take tax advice."
+*Verification:* eslint clean · Chromium: foot present, 0 "est. capital gains" · Active Mandate 1440/390: 0 errors, axe 0, no overflow.

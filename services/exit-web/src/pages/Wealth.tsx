@@ -58,7 +58,7 @@ const Wealth: React.FC = () => {
     { label: "Offer headline",   value: leadingOffer.headlinePriceUsd, note: leadingOffer.buyerName },
     { label: "Preference stack", value: wf.preferenceTotalUsd,         note: "paid to preferred holders first" },
     { label: "Founders' gross",  value: founderGross,                  note: `${founders.length} founder holders · ${(CAPTABLE_ANALYSIS.ownershipByRole.founder * 100).toFixed(1)}% founder stake` },
-    { label: "After taxes",      value: afterTax,                      note: `~${(TAX * 100).toFixed(1)}% est. capital gains` },
+    { label: "After taxes",      value: afterTax,                      note: `flat ${(TAX * 100).toFixed(1)}% tax assumption` },
   ];
 
   const portfolioUsd = afterTax * ALLOC[0].pct;
@@ -86,7 +86,7 @@ const Wealth: React.FC = () => {
 
       <section aria-label="Proceeds summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3">
         <div className="bg-xo-panel"><Metric label="After-tax, founder group" emphasis value={<span className="text-xo-verified">{fmtMoney(afterTax)}</span>} sub={leadingOffer.buyerName} /></div>
-        <div className="bg-xo-panel"><Metric label="Tax reserve" value={fmtMoney(taxDue)} sub="set aside first" /></div>
+        <div className="bg-xo-panel"><Metric label="Tax reserve" value={fmtMoney(taxDue)} sub={`flat ${(TAX * 100).toFixed(1)}% assumption`} /></div>
         <div className="bg-xo-panel"><Metric label="To portfolio" value={fmtMoney(portfolioUsd)} sub="diversified" /></div>
       </section>
 
@@ -105,7 +105,8 @@ const Wealth: React.FC = () => {
         </div>
       </Section>
 
-      <Section title={`What you walk away with · ${leadingOffer.buyerName}`} eyebrow="Proceeds cascade" className="border border-xo-line">
+      <Section title={`What you walk away with · ${leadingOffer.buyerName}`} eyebrow="Proceeds cascade" className="border border-xo-line"
+        foot={`Tax assumption: a flat ${(TAX * 100).toFixed(1)}% (US federal long-term capital gains 20% + net investment income tax 3.8%) on the whole amount — no cost basis, state tax, QSBS exclusion or instalment timing. ExitOS has no tax model; take tax advice.`}>
         <ol className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
           {cascade.map((s, i) => (
             <li key={s.label} className="bg-xo-panel px-4 py-3">
