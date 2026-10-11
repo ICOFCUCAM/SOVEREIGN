@@ -279,7 +279,7 @@ const Autopilot: React.FC = () => {
         title="Autonomous Exit"
         description={isStarter
           ? `On ${PLAN_LABEL[session?.plan ?? "prep"]}, the agents take you through valuation and buyer discovery — and stop the moment buyers are found. An ${PLAN_LABEL.pro} runs outreach, negotiation, closing and wealth.`
-          : "You uploaded revenue, financials and a cap table. ExitOS does the rest — value, readiness, buyers, data room, documents, outreach, negotiation, closing and wealth. Your job is three words: approve, approve, approve."}
+          : "A walkthrough of how the agents would run an exit on the figures ExitOS holds — value, buyers, data room, documents, outreach, negotiation, closing and wealth. Each step waits for your approval."}
       />
 
       <div className="mt-2 flex items-start gap-2 rounded-lg border border-loi-400/30 bg-loi-500/[0.07] px-4 py-2.5 text-[12px] text-loi-100/90">
@@ -320,15 +320,10 @@ const Autopilot: React.FC = () => {
             <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-deal-400">One instruction</div>
             <h2 className="mt-2 font-serif text-3xl font-bold leading-tight text-white">"Sell my company."</h2>
             <p className="mt-3 text-[13.5px] leading-relaxed text-white/65">
-              ExitOS launches {AGENTS.length} agents — valuation, buyer discovery, outreach, data room, diligence,
-              negotiation, closing and wealth — and runs them autonomously. Each pauses only to put one decision in
-              front of you. Approve. Approve. Approve. Money arrives.
+              ExitOS lays out {AGENTS.length} agents — valuation, buyer discovery, outreach, data room, diligence,
+              negotiation, closing and wealth — in sequence. Each pauses to put one decision in front of you. In this
+              simulation nothing is sent, signed or wired.
             </p>
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {["revenue", "financials", "cap table"].map((u) => (
-                <span key={u} className="rounded-full bg-deal-600/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-deal-300 ring-1 ring-deal-400/30">✓ {u}</span>
-              ))}
-            </div>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               {!started && <Button onClick={start}>Start Exit Process →</Button>}
               {started && !allDone && (
@@ -338,7 +333,7 @@ const Autopilot: React.FC = () => {
               )}
               {allDone && (
                 <span className="inline-flex items-center gap-2 rounded-md bg-deal-600/20 px-3 py-2 text-[12px] font-semibold text-deal-200 ring-1 ring-deal-500/40">
-                  ✓ Deal closed · you approved {AGENTS.length} decisions
+                  ✓ Simulation complete · you approved {AGENTS.length} decisions
                 </span>
               )}
             </div>
@@ -403,7 +398,7 @@ const Autopilot: React.FC = () => {
 
                   {status === "awaiting" && (
                     <div className="mt-3 rounded-lg border border-deal-500/30 bg-deal-600/[0.07] p-4">
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">Your decision</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">Your decision · simulated</div>
                       <p className="mt-1 text-[13.5px] text-white/85">{a.decision}</p>
                       <div className="mt-3 flex flex-wrap gap-2.5">
                         <Button onClick={() => approve(i)}>{a.approveLabel}</Button>
@@ -443,7 +438,7 @@ const Autopilot: React.FC = () => {
           <div className="p-6">
             <h3 className="font-serif text-xl font-bold text-white">This is where listing ends — and the deal begins.</h3>
             <p className="mt-2 text-[13.5px] leading-relaxed text-white/65">
-              ExitOS took you from uploads to a priced, listed company with {shortlist.length} matched buyers. To open
+              ExitOS priced the company and matched {shortlist.length} buyers. To open
               conversations, run outreach, negotiate offers and close — and let the remaining agents finish the job —
               launch an Active Mandate.
             </p>
@@ -480,17 +475,17 @@ const Autopilot: React.FC = () => {
       {allDone && (
         <Card className="mt-8 overflow-hidden p-0">
           <div className="border-b border-white/10 bg-gradient-to-r from-deal-600/20 to-transparent px-6 py-5">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Money arrives</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Simulation complete</div>
             <div className="mt-1 flex flex-wrap items-baseline gap-3">
               <span className="font-mono text-3xl font-bold text-deal-300">{fmtMoney(VALUATION_CANONICAL.headline.mid)}</span>
-              <span className="text-[13px] text-white/60">wired to escrow → your account</span>
+              <span className="text-[13px] text-white/60">enterprise value used in this walkthrough — no money moves</span>
             </div>
           </div>
           <div className="p-6">
-            <h3 className="font-serif text-xl font-bold text-white">ExitOS ran your exit end to end.</h3>
+            <h3 className="font-serif text-xl font-bold text-white">That is the whole process, end to end.</h3>
             <p className="mt-2 text-[13.5px] leading-relaxed text-white/65">
-              {AGENTS.length} agents took the company from your uploads to money in the bank. You made {AGENTS.length} approval
-              decisions — the platform did the rest. Now WealthOS takes it from here.
+              You approved {AGENTS.length} simulated decisions. In a live mandate these steps run with real buyers, documents
+              and escrow; here each step was simulated on engine output. WealthOS covers what happens after a real close.
             </p>
             <div className="mt-4 flex flex-wrap gap-2.5">
               <Link to="/console/wealth" className="rounded-md bg-deal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">Open WealthOS →</Link>

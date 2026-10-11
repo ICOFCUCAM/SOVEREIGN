@@ -34,7 +34,7 @@ A guided simulation of an end-to-end exit: eight agents (valuation, buyer discov
 |---|---|---|---|
 | G1 | **Preparation plan can run Active Mandate steps.** | Gate on the access policy (`needsUpgrade` for the outreach surface) instead of the retired `starter` key; Preparation stops after buyer discovery, as the copy already says. "Launch a mandate" states it is a demo plan switch. | ☑ `955c0c0` |
 | G2 | **False "sent to the deal room".** | "Mark as ready" + a status that nothing leaves ExitOS in this simulation. | ☑ `3a20159` |
-| G3 | **Simulation overclaims** (uploads, "money arrives", "deal closed", "send"). | Every simulated outcome says so: "Simulation complete", "would be wired" etc.; no upload claims; decisions marked "(simulated)". | ☐ |
+| G3 | **Simulation overclaims** (uploads, "money arrives", "deal closed", "send"). | Every simulated outcome says so: "Simulation complete", "would be wired" etc.; no upload claims; decisions marked "(simulated)". | ☑ G3-commit |
 | G4 | Demo company unlabelled. | Valuation and buyer discovery on `loadActiveCompany()`; steps still on demo fixtures (diligence findings, sample offers) labelled. | ☐ |
 | G5 | Old design system. | Rebuild on `xo` (header, mission control, agent steps as an ordered list with status words, deliverables). | ☐ |
 
@@ -49,3 +49,15 @@ A guided simulation of an end-to-end exit: eight agents (valuation, buyer discov
 ### G2 — False "sent to the deal room"
 *Closed by:* `pages/Autopilot.tsx`. "Send deliverable" / "Send" / "Sent ✓ · resend" → **Mark ready** / "✓ Marked ready" / "✓ Ready"; the toast reads "… deliverable marked ready — in this simulation nothing leaves ExitOS"; the review modal says "Nothing is sent from this simulation." The recorded state is the same as before.
 *Verification:* Chromium (Active Mandate): approve step 1 → Mark ready → toast "Valuation Agent deliverable marked ready — in this simulation nothing leaves ExitOS", button "✓ Ready" · eslint clean · 0 errors.
+
+### G3 — Simulation overclaims
+*Closed by:* `pages/Autopilot.tsx` (text only).
+| Before | After |
+|---|---|
+| "You uploaded revenue, financials and a cap table. ExitOS does the rest … approve, approve, approve." + ✓ revenue / financials / cap table chips | "A walkthrough of how the agents would run an exit on the figures ExitOS holds … Each step waits for your approval." Chips removed (nothing was uploaded). |
+| "…runs them autonomously … Approve. Approve. Approve. Money arrives." | "…in sequence. Each pauses to put one decision in front of you. In this simulation nothing is sent, signed or wired." |
+| "Your decision" | "Your decision · simulated" |
+| "✓ Deal closed · you approved 8 decisions" | "✓ Simulation complete · you approved 8 decisions" |
+| Finale "Money arrives — $X wired to escrow → your account"; "ExitOS ran your exit end to end … money in the bank" | "Simulation complete — $X enterprise value used in this walkthrough — no money moves"; "You approved 8 simulated decisions. In a live mandate these steps run with real buyers, documents and escrow; here each step was simulated on engine output." |
+| Gate: "took you from uploads to a priced, listed company" | "priced the company and matched N buyers" (no listing is created here) |
+*Verification:* Chromium (Active Mandate), full 8-step run: finale shows "Simulation complete"; 0 matches for money arrives / uploaded / deal closed / money in the bank / wired to escrow · eslint clean · 0 errors.
