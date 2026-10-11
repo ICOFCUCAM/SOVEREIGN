@@ -34,7 +34,7 @@ Founder Active Mandate: `h1` 1 · axe 0 · **overflow at 390** · 0 errors. Buye
 ## Gap register — Page 12
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Simulated activity presented as live, recorded telemetry** (page copy, NAV label, "with NDA + access", recency, "this week"). | Say it is a simulation everywhere it shows: header and badge "Simulated activity", one line on what is not recorded yet, NAV "Deal Room"; buyers described as the top-ranked buyers the simulation uses (no NDA claim); fabricated recency and "this week" removed. | ☑ G1-commit |
+| G1 | **Simulated activity presented as live, recorded telemetry** (page copy, NAV label, "with NDA + access", recency, "this week"). | Say it is a simulation everywhere it shows: header and badge "Simulated activity", one line on what is not recorded yet, NAV "Deal Room"; buyers described as the top-ranked buyers the simulation uses (no NDA claim); fabricated recency and "this week" removed. | ☑ `7d78309` |
 | G2 | **Advice to act on simulated data** ("Call X now", decay warning, "ExitOS tracks every view…"). | Replace the banker's take with how to read the simulation; no call-to-action on a specific buyer; capability stated as it is (not recorded yet). | ☐ |
 | G3 | **Buyers see the founder's view of other bidders.** | Buyer role gets its own view: no other bidders; what a buyer's deal room will hold and how access is granted (NDA → founder approval), with links to Access Requests and Browse Opportunities. Route and plan gate unchanged. | ☑ `2af6373` |
 | G4 | Demo company unlabelled. | Simulate on the active company's ranked buyers; badge. | ☐ |
