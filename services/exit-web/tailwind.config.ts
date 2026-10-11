@@ -33,6 +33,32 @@ export default {
           500: "#f59e0b",
           600: "#d97706",
         },
+        // ── Acquisition Intelligence Workstation (`xo`) ──────────────
+        // The ExitOS institutional design system, adopted page by page
+        // (Terminal first). Additive: existing ink/deal/loi tokens are
+        // untouched so pages not yet redesigned do not move. Text tokens
+        // are contrast-checked (≥ 4.5:1) on xo-ink / xo-panel; paper-*
+        // tokens are for light editorial reading surfaces.
+        xo: {
+          ink: "#0b1220",        // command surface
+          panel: "#101a2b",      // raised panel on ink
+          raise: "#16233a",      // hover / selected row
+          line: "#22314b",       // hairline on dark
+          text: "#e8edf5",       // primary text on dark (14.8:1 on panel)
+          muted: "#a3b1c6",      // secondary text on dark (8.0:1)
+          faint: "#8796ad",      // labels / captions on dark (5.2:1 on raise)
+          paper: "#f6f4ef",      // editorial reading surface
+          "paper-line": "#ddd8cc",
+          "paper-text": "#1a2233", // on paper (14.5:1)
+          "paper-muted": "#4f5b6e", // on paper (6.3:1)
+          verified: "#34d399",   // verified / positive (emerald)
+          "verified-ink": "#047857", // emerald on paper
+          action: "#7cb2ff",     // semantic blue for actions on dark
+          "action-ink": "#1d4ed8", // action on paper
+          brass: "#c9a86a",      // restrained institutional accent
+          caution: "#fbbf24",    // assumption / prior / gated
+          risk: "#f87171",       // negative trend
+        },
         // Deal-stage bands for pipeline visualization
         stage: {
           sourcing:  "#475569",

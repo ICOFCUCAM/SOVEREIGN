@@ -28,13 +28,13 @@ A founder (or their advisor) evaluating a company for exit: *what is it worth, w
 | Comparable transactions (target, buyer, date, price, premium, **status, rationale, sourceRef**) | `INST.comparableTransactions` | **Registry records** (verification status per row) |
 | Disclaimer, provenance summary, methodologies | `INST.disclaimer`, `INST.provenanceSummary`, `INST.methodologies` | Required disclosures |
 | Readiness score → projected, weaknesses with uplift | `runReadinessAnalysis(company, runReadiness(company))` | Model-derived |
-| Ranked buyers (8) + probability breakdown (appetite, overlap, velocity, recency, rationale) | `rankedBuyers(8, tokens)` (`lib/buyer-dna.ts`) over `buyer_dna.json` (1,476 profiles, **as of 2026-10-08**) | Registry-derived score (transparent composite) |
+| Ranked buyers (8) + probability breakdown (appetite, overlap, velocity, recency, rationale) | `rankedBuyers(8, tokens)` (`lib/buyer-dna.ts`) over `buyer_dna.json` (`buyer_dna.json` `as_of`; **2026-10-08** at audit, refreshed to **2026-10-11** by the daily radar commit `f31cbb7`) | Registry-derived score (transparent composite) |
 | Expected offer / close-weighted value, premium & close known-vs-prior | `expectedOutcomeFor(profile, baselineMid)` | Model-derived; unknown premium (20%) and close rate (55%) are **labelled neutral priors** |
 | Buyer rationale (thesis + points) | `buyerRationale(...)` | Registry-derived |
 | Per-buyer data confidence, `source_url`, events indexed / verified / disclosed | `buyerConfidence(p)`, DNA profile fields | Registry provenance |
 | Appetite top 7 | `acquisitionAppetiteScore(p)` | Registry-derived |
 | Strategic themes | `strategicThemes(8)` | Registry-derived |
-| Market tape, reactor, telemetry | `buildMarketTape()`, `ACQ_INDEXES`, `MARKET_INTEL` | **Bundled registry snapshot** (`ingest_manifest.json` generated **2026-10-08T12:50Z**) — not a live feed |
+| Market tape, reactor, telemetry | `buildMarketTape()`, `ACQ_INDEXES`, `MARKET_INTEL` | **Bundled registry snapshot** (`ingest_manifest.json` `generated_at`, currently **2026-10-11T12:09Z**) — not a live feed |
 
 ### Sections (top → bottom)
 1. `BuyerInterestGate` (free plan only) — 12 buyer matches, upgrade CTA.
@@ -67,7 +67,7 @@ Status: ☐ open · ☑ closed (commit noted)
 
 | # | Gap | Evidence | Fix (without changing any calculation) | Status |
 |---|---|---|---|---|
-| G1 | **Fake-live indicators.** Hard-coded `status="Active"`; "Intelligence rail · live telemetry"; pulsing "Tape" dot; "AS OF" = today's date. The data is a bundled snapshot dated 2026-10-08. | `Terminal.tsx:79,85,177`; `workstation.tsx:75` | Replace with the real data state (*Personalised from your intake* / *Demo company*) and the real snapshot date (`DNA_AS_OF`); label registry panels "Indexed · as of …". No pulsing live dot. | ☐ |
+| G1 | **Fake-live indicators.** Hard-coded `status="Active"`; "Intelligence rail · live telemetry"; pulsing "Tape" dot; "AS OF" = today's date. The data is a bundled snapshot (`DNA_AS_OF`, currently 2026-10-11). | `Terminal.tsx:79,85,177`; `workstation.tsx:75` | Replace with the real data state (*Personalised from your intake* / *Demo company*) and the real snapshot date (`DNA_AS_OF`); label registry panels "Indexed · as of …". No pulsing live dot. | ☐ |
 | G2 | **Mislabelled decision metrics.** "Typical premium" shows the *lead buyer's* premium; "Median close" shows the *lead buyer's* close days beside "12 comps". | `Terminal.tsx:50-51,91-92` | Label them as the lead buyer's figures and show the framework's applied premium (with its basis) and time-to-close range (`INST.timeToClose`) as separate, correctly named figures. | ☐ |
 | G3 | **Duplicate panel.** "Market signals · indexed" lists exactly the same `comps` as "Similar transactions". | `Terminal.tsx:180-192` vs `211-226` | One comparables table (with status, source, rationale). Replace the duplicate with real sector signals from `ACQ_INDEXES` (company's sector + largest movers). | ☐ |
 | G4 | **Provenance hidden.** Per-buyer confidence, source URL, events indexed/verified/disclosed, probability breakdown, comparable status/sourceRef, premium basis note, confidence note, disclaimer — computed but never shown. | engine/DNA fields above | Evidence drawer per buyer and a provenance/methodology section with the disclaimer. | ☐ |
@@ -75,7 +75,7 @@ Status: ☐ open · ☑ closed (commit noted)
 | G6 | **Weak hierarchy.** Seven metrics equally prominent; the decision (who to approach, what it's worth) competes with secondary telemetry. | screenshot | Mandate band → valuation hero with range → decision metrics → buyer intelligence as the centre → evidence → execution rail → supporting intelligence (progressive disclosure). | ☐ |
 | G7 | **Execution rail hides plan gates.** Outreach, NDA and Documents are Pro (or Starter) surfaces; a free founder clicking them hits the paywall unannounced. | `lib/access.ts` NAV `pro`/`starter` | Mark each action with its real access requirement using `needsUpgrade()`; links unchanged. | ☐ |
 | G8 | **Accessibility.** 6 contrast failures, no `h1`, keyboard-unreachable scroll region, `why▾` lacks `aria-expanded`, probability bar is colour-only decoration. | axe baseline | Contrast-checked tokens, one `h1`, focusable scroll regions, proper disclosure buttons, numeric labels for every bar. | ☐ |
-| G9 | **No design system for ExitOS's next pages.** Shared `workstation.tsx` primitives serve 4 pages; restyling them would change pages not yet reviewed. | `workstation.tsx` header comment | Add an additive ExitOS design system (`xo` tokens + `src/components/xo/`) used by the Terminal only; other pages unchanged until their turn. | ☐ |
+| G9 | **No design system for ExitOS's next pages.** Shared `workstation.tsx` primitives serve 4 pages; restyling them would change pages not yet reviewed. | `workstation.tsx` header comment | Add an additive ExitOS design system (`xo` tokens + `src/components/xo/`) used by the Terminal only; other pages unchanged until their turn. | ☑ G9-commit |
 
 ### Defects found outside this page (recorded, not changed)
 | # | Defect | Where | Recommendation |
@@ -83,3 +83,29 @@ Status: ☐ open · ☑ closed (commit noted)
 | X1 | **Security:** signing in with one hard-coded e-mail address grants `superadmin` + `pro` entirely client-side; any visitor can type it. The address is also personal data in source. | `src/lib/auth.tsx` `signIn` | Remove; derive roles server-side from the real auth provider. Needs owner decision. |
 | X2 | Client-side "auth" accepts any e-mail/password (demo session, `fakeToken`). | `src/lib/auth.tsx` | Expected for the demo; must not ship as production auth. |
 | X3 | Pre-existing lint errors (3). | see baseline | Separate clean-up. |
+
+---
+
+## Gap closure log
+
+### G9 — ExitOS design system (additive)
+*Documented:* gap register row G9. *Closed by:* `tailwind.config.ts` `xo` palette + `src/components/xo/`.
+
+| Token | Hex | Use | Contrast (measured) |
+|---|---|---|---|
+| `xo-ink` / `xo-panel` / `xo-raise` | `#0b1220` / `#101a2b` / `#16233a` | command surfaces | — |
+| `xo-text` | `#e8edf5` | primary text on dark | 14.8:1 on panel |
+| `xo-muted` | `#a3b1c6` | secondary text | 8.0:1 on panel |
+| `xo-faint` | `#8796ad` | labels, captions | 5.2:1 on raise (worst case) |
+| `xo-verified` | `#34d399` | verified / positive | 9.1:1 |
+| `xo-action` | `#7cb2ff` | actions, links | 8.0:1 |
+| `xo-brass` | `#c9a86a` | restrained institutional accent | 7.7:1 |
+| `xo-caution` | `#fbbf24` | assumption / prior / plan gate | 10.4:1 |
+| `xo-risk` | `#f87171` | negative trend | 6.3:1 |
+| `xo-paper` + `paper-text` / `paper-muted` / `verified-ink` / `action-ink` | `#f6f4ef` + … | light editorial reading surface | 14.5 / 6.3 / 5.0 / 6.1 : 1 |
+
+Components: `Provenance` (verified · registry · model · prior · your intake · demo · snapshot — never "live"), `Section` (landmark + real heading), `ScrollRegion` (focusable), `Metric`, `Bar` (always numeric; fill `aria-hidden`), `Disclosure` (`aria-expanded`/`aria-controls`), `ActionLink`, `Fact`.
+
+Not changed: `lib/workstation.tsx` and the `ink`/`deal`/`loi`/`stage` tokens, so Buyer Graph, Acquisition Radar and Founder Inbox are unaffected.
+
+Verification: `tsc -b` pass · `eslint` on new files clean · `src/components/xo/xo.test.tsx` **6/6 pass** (bar label + clamping, disclosure state, labelled landmark, focusable region, provenance wording).
