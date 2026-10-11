@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button, fmtMoney, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import {
-  assessIntent, runValuation, strategicBuyerReport, assetReplacementReport,
+  assessIntent, runValuation, strategicBuyerReport, assetReplacementReport, runInstitutionalValuation,
   runReadiness, runReadinessAnalysis, runBuyerDiscovery, runDueDiligence,
   createListing, matchBuyersToListing,
 } from "@exit/engines";
@@ -55,6 +55,9 @@ const Dashboard: React.FC = () => {
       diligence: runDueDiligence(company),
       matches: matchBuyersToListing(listing, company, { limit: 15 }),
       ctx: dealContextFor(company),
+      // The Intelligence Terminal's valuation, computed the same way, so this
+      // page can name the difference instead of silently disagreeing.
+      institutional: runInstitutionalValuation(company),
     };
   }, [company]);
   const VALUATION_STANDARD = E.standard, VALUATION_STRATEGIC = E.strategic, VALUATION_REPLACEMENT = E.replacement;
@@ -180,10 +183,11 @@ const Dashboard: React.FC = () => {
       {/* ── 2 · LIQUIDITY POSITION ──────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Liquidity position" eyebrow="Founder Liquidity Board" className="lg:col-span-7"
-          right={<span className="text-[11px] text-xo-faint">Live</span>}>
+          right={<span className="text-[11px] text-xo-faint">Live</span>}
+          foot={<>Values on this page use the <strong className="font-medium text-xo-muted">strategic-buyer valuation report</strong>. The <ActionLink to="/console">Intelligence Terminal</ActionLink> uses the institutional valuation framework, which puts the midpoint at <span className="font-mono tabular-nums text-xo-muted">{fmtMoney(E.institutional.headline.mid)}</span>. The two methods weight comparables and premiums differently.</>}>
           <div className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2">
-            <div className="bg-xo-panel"><Metric label="Enterprise value" emphasis value={fmtMoney(m.companyValue)} sub={`strategic mid · band ${fmtMoney(E.ctx.valuationBand.low)} – ${fmtMoney(E.ctx.valuationBand.high)}`} /></div>
-            <div className="bg-xo-panel"><Metric label="Expected value" emphasis value={<span className="text-xo-verified">{fmtMoney(m.potential)}</span>} sub="after the priced readiness fixes" /></div>
+            <div className="bg-xo-panel"><Metric label="Enterprise value" emphasis provenance="model" value={fmtMoney(m.companyValue)} sub={`strategic-buyer report mid · band ${fmtMoney(E.ctx.valuationBand.low)} – ${fmtMoney(E.ctx.valuationBand.high)}`} /></div>
+            <div className="bg-xo-panel"><Metric label="Expected value" emphasis provenance="model" value={<span className="text-xo-verified">{fmtMoney(m.potential)}</span>} sub="strategic-buyer report mid after the priced readiness fixes" /></div>
             <div className="bg-xo-panel"><Metric label="Close probability" value={`${m.exitProbability}%`} sub="likelihood of a completed transaction" /></div>
             <div className="bg-xo-panel"><Metric label="Time to liquidity" value={<>{m.timeToExitMonths}<span className="text-[13px] text-xo-faint"> mo</span></>} sub="once a buyer is engaged" /></div>
           </div>
@@ -248,7 +252,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Top buyers · ranked" eyebrow={`${BUYERS.candidates.length} qualifying buyers · ${BUYERS.byType.strategic} strategic · ${BUYERS.byType.pe} PE · ${BUYERS.byType.family_office} family office`} className="lg:col-span-8"
           right={<ActionLink to="/console/intelligence">Open intelligence →</ActionLink>}
-          foot={<>Probability scored by sector × check × geography × activity. Implied price {fmtMoney(BUYERS.companyHeadlineUsd)} · ranking basis.</>}>
+          foot={<>Probability scored by sector × check × geography × activity. Check-size fit is tested against a rule-of-thumb price of {fmtMoney(BUYERS.companyHeadlineUsd)} (the largest of 6× ARR, 3× TTM revenue or $20M) — a ranking input, not a valuation.</>}>
           <ScrollRegion label="Top buyers table">
             <table className="w-full min-w-[520px] text-[13px]">
               <thead className="text-left text-[11px] text-xo-faint">
