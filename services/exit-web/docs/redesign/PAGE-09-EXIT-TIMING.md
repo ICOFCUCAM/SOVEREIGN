@@ -5,7 +5,7 @@
 | Route | `/console/exit-timing` |
 | Component | `src/pages/ExitTiming.tsx` (180 lines) |
 | NAV | "Exit Timing", group Mandate, role founder, **Active Mandate (Pro)** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All six gaps closed, plus shared X11. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `f550422`)
 
@@ -88,3 +88,13 @@ Header, summary metric and banker's take count favourable signals over the three
 ### G5 — Fake live tape
 *Closed by:* `pages/ExitTiming.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free/Preparation (Upgrade page) and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, 16 tab stops all with visible focus · free / Preparation: Upgrade page · personalisation demo vs intake checked · 0 "live" words, 0 pinging elements.
+
+## Known issues
+- The window is a rule-based heuristic from fix effort (stated on the page); no market-timing model exists.
+- "Value after fixes" assumes no growth; a growth-adjusted projection would need a forecast the engines do not produce.
+- Signal figures come from the registry snapshot; nothing tracks them over time.
