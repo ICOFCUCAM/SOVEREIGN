@@ -36,7 +36,7 @@ Tells the founder *when* to sell: a recommended window in months, the value of w
 | G2 | **Invented signal verdicts and mislabels** (fixed "tailwind", "high", 40-cap count, registry premium shown as sector's, static notes). | Verdicts only where a stated rule exists (ARR growth ≥ 30 %; buyer demand from the active-buyer count; sector exits > 0); the rest shown as context. Actual deal count of the top-12 buyers; premium labelled registry-wide; notes say what each figure is. | ☑ `273bdbe` |
 | G3 | **False monitoring claims** ("monitors continuously and pings you", "signals monitored", "buyers circling", "right now"). | Plain wording: computed when the page opens; no alerts exist. | ☑ `e41fb80` |
 | G4 | Demo company unlabelled; "strategic mid" (D1). | Run on `loadActiveCompany()`; badge; "enterprise value today". | ☑ `913aca0` |
-| G5 | Fake live tape. | `RegistryTape`. | ☑ G5-commit |
+| G5 | Fake live tape. | `RegistryTape`. | ☑ `1a0bfd9` |
 | G6 | Design: no `h1`, 5 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `bc00810` |
 
 ### X11 — Shared mid-green buttons (found here) — documented before the fix
