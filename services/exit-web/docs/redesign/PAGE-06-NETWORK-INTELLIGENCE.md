@@ -35,7 +35,7 @@ Shows the founder the platform's compounding data assets ("five moats"): the dea
 | G2 | **Overclaims** about agents and learning; "12+ acquirers measured" (top-12 cap); "live engine runs". | Factual wording: what the engines produced; registry sizes named correctly; learning claims limited to what exists. | ☐ |
 | G3 | Fake live tape. | `RegistryTape` with snapshot date. | ☐ |
 | G4 | Demo company unlabelled. | Run on `loadActiveCompany()`; badge. | ☐ |
-| G5 | Design: no `h1`, 3 contrast failures, card soup. | Rebuild on `xo`. | ☑ G5-commit |
+| G5 | Design: no `h1`, 3 contrast failures, card soup. | Rebuild on `xo`. | ☑ `47f2964` |
 
 ---
 
