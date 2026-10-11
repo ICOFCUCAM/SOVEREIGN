@@ -36,7 +36,7 @@ A guided simulation of an end-to-end exit: eight agents (valuation, buyer discov
 | G2 | **False "sent to the deal room".** | "Mark as ready" + a status that nothing leaves ExitOS in this simulation. | ☑ `3a20159` |
 | G3 | **Simulation overclaims** (uploads, "money arrives", "deal closed", "send"). | Every simulated outcome says so: "Simulation complete", "would be wired" etc.; no upload claims; decisions marked "(simulated)". | ☑ `482ad7f` |
 | G4 | Demo company unlabelled. | Valuation and buyer discovery on `loadActiveCompany()`; steps still on demo fixtures (diligence findings, sample offers) labelled. | ☑ `778208e` |
-| G5 | Old design system. | Rebuild on `xo` (header, mission control, agent steps as an ordered list with status words, deliverables). | ☐ |
+| G5 | Old design system. | Rebuild on `xo` (header, mission control, agent steps as an ordered list with status words, deliverables). | ☑ G5-commit |
 
 ---
 
@@ -68,3 +68,7 @@ A guided simulation of an end-to-end exit: eight agents (valuation, buyer discov
 
 ### X9 — Shared primary button contrast (all pages) — documented before the fix
 The shared `Button` (`lib/ui.tsx`) primary/ok variants are white text on `deal-600` (#059669): **3.77:1**, below 4.5:1 for 14 px text. axe reported it only inside the Autonomous Exit review dialog; on other pages it did not resolve the background and so did not report — a gap in the earlier scans, found here. *Fix:* `bg-deal-700` (#047857, 5.5:1 with white), hover `deal-600`. Affects every page's primary buttons (darker green, same text); no behaviour change.
+
+### G5 — Design system
+*Closed by:* `pages/Autopilot.tsx` — `PageHeader` (one `h1`, data-source eyebrow), page-local `Card` on `xo` surfaces, old white-alpha / ink classes mapped to `xo` tokens; structure and behaviour unchanged (the page already had a sound order and passed axe at rest). Two links on mid-green raised to `deal-700` for contrast.
+*Verification:* Chromium Preparation and Active Mandate, 1440/390: 0 errors, `h1` 1, no overflow, axe 0 at rest, **with steps revealed, and with the review dialog open** (after X9); all tab stops with visible focus; full 8-step run and Preparation gate re-checked.

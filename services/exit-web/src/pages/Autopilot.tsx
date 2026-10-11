@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Card, Modal, SectionHeader, fmtMoney, notify } from "../lib/ui";
+import { Button, Modal, fmtMoney, notify } from "../lib/ui";
+import { PageHeader } from "../components/xo";
+
+const Card: React.FC<{ className?: string; children: React.ReactNode }> = ({ className = "", children }) => (
+  <div className={`border border-xo-line bg-xo-panel ${className}`}>{children}</div>
+);
 import { NEGOTIATION_STATE, OFFER_COMPARISON } from "../lib/engines";
 import { runInstitutionalValuation, strategicBuyerReport, runBuyerDiscovery, runDueDiligence } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
@@ -40,7 +45,7 @@ interface AgentDef {
 }
 
 const STATUS_STYLE: Record<AgentStatus, string> = {
-  queued:   "bg-white/5 text-white/45 ring-white/15",
+  queued:   "bg-xo-raise text-xo-faint ring-xo-line",
   working:  "bg-loi-500/15 text-loi-200 ring-loi-400/40",
   awaiting: "bg-deal-600/20 text-deal-200 ring-deal-400/50",
   done:     "bg-deal-600/25 text-deal-200 ring-deal-400/50",
@@ -59,37 +64,37 @@ const Spinner: React.FC = () => (
 const Sig: React.FC<{ label: string; value: string; accent?: string }> = ({ label, value, accent }) => (
   <div className="min-w-0">
     <div className="font-mono text-[12px] font-bold leading-none" style={{ color: accent ?? "#cbd5e1" }}>{value}</div>
-    <div className="mt-0.5 text-[9px] uppercase tracking-wide text-white/35">{label}</div>
+    <div className="mt-0.5 text-[9px] uppercase tracking-wide text-xo-faint">{label}</div>
   </div>
 );
 
 const BuyerRow: React.FC<{ b: BuyerCandidate; n: number; excluded?: boolean; onToggle?: () => void }> = ({ b, n, excluded, onToggle }) => {
   const eo = b.expectedOutcome;
   return (
-    <div className={`rounded-lg border p-3.5 ${excluded ? "border-white/10 bg-ink-900/20 opacity-50" : "border-white/10 bg-ink-900/40"}`}>
+    <div className={`rounded-sm border p-3.5 ${excluded ? "border-xo-line bg-xo-ink opacity-50" : "border-xo-line bg-xo-ink"}`}>
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5 font-mono text-[11px] text-white/50">{n}</span>
+        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-xo-raise font-mono text-[11px] text-xo-muted">{n}</span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="truncate text-[13px] font-semibold text-white">{b.buyer.name}</span>
-            <span className="shrink-0 rounded-full bg-white/5 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/45 ring-1 ring-white/10">{b.buyer.buyerType.replace(/_/g, " ")}</span>
-            <span className="shrink-0 text-[9px] uppercase tracking-wide text-white/30">{eo.overallConfidence.tier} conf.</span>
+            <span className="truncate text-[13px] font-semibold text-xo-text">{b.buyer.name}</span>
+            <span className="shrink-0 rounded-full bg-xo-raise px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-xo-faint ring-1 ring-xo-line">{b.buyer.buyerType.replace(/_/g, " ")}</span>
+            <span className="shrink-0 text-[9px] uppercase tracking-wide text-xo-faint">{eo.overallConfidence.tier} conf.</span>
           </div>
-          <div className="mt-0.5 text-[11px] leading-snug text-white/45">{b.rationale}</div>
-          <div className="mt-1 truncate text-[10px] text-white/35">{b.buyer.sectorsActive.slice(0, 3).map((s) => s.replace(/_/g, " ")).join(" · ")} · {b.buyer.geographyPreferred.length ? b.buyer.geographyPreferred.slice(0, 4).join(" ") : "Global"}</div>
+          <div className="mt-0.5 text-[11px] leading-snug text-xo-faint">{b.rationale}</div>
+          <div className="mt-1 truncate text-[10px] text-xo-faint">{b.buyer.sectorsActive.slice(0, 3).map((s) => s.replace(/_/g, " ")).join(" · ")} · {b.buyer.geographyPreferred.length ? b.buyer.geographyPreferred.slice(0, 4).join(" ") : "Global"}</div>
         </div>
         <div className="shrink-0 text-right">
           <div className="font-mono text-[14px] font-bold text-deal-300">{Math.round(b.probability * 100)}%</div>
-          <div className="text-[10px] text-white/40">fit</div>
+          <div className="text-[10px] text-xo-faint">fit</div>
         </div>
         {onToggle && (
-          <button onClick={onToggle} className={`shrink-0 self-center rounded-md px-2 py-1 text-[11px] font-semibold ring-1 transition ${excluded ? "text-white/50 ring-white/15 hover:bg-white/5" : "text-deal-300 ring-deal-400/40 hover:bg-deal-600/10"}`}>
+          <button onClick={onToggle} className={`shrink-0 self-center rounded-md px-2 py-1 text-[11px] font-semibold ring-1 transition ${excluded ? "text-xo-muted ring-xo-line hover:bg-xo-raise" : "text-deal-300 ring-deal-400/40 hover:bg-deal-600/10"}`}>
             {excluded ? "Add" : "Remove"}
           </button>
         )}
       </div>
       {/* engine signals */}
-      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-white/5 pt-2.5 sm:grid-cols-4">
+      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-xo-line pt-2.5 sm:grid-cols-4">
         <Sig label="Expected offer" value={fmtMoney(eo.expectedHeadlineUsd)} accent="#7CFF9F" />
         <Sig label="Expected net" value={fmtMoney(eo.expectedClosingUsd)} />
         <Sig label="Days to close" value={`~${Math.round(eo.expectedDaysToCash)}d`} />
@@ -133,13 +138,13 @@ const Autopilot: React.FC = () => {
   const AGENTS: AgentDef[] = [
     {
       id: "valuation", name: "Valuation Agent", role: "Prices the company across methodologies.",
-      work: <>Ran standard, strategic and asset-replacement models; console value (institutional framework) <span className="font-mono text-white">{fmtMoney(mid)}</span> (band {fmtMoney(VALUATION_CANONICAL.headline.low)}–{fmtMoney(VALUATION_CANONICAL.headline.high)}).</>,
+      work: <>Ran standard, strategic and asset-replacement models; console value (institutional framework) <span className="font-mono text-xo-text">{fmtMoney(mid)}</span> (band {fmtMoney(VALUATION_CANONICAL.headline.low)}–{fmtMoney(VALUATION_CANONICAL.headline.high)}).</>,
       detail: (
         <div className="space-y-1.5">
           {VALUATION_STRATEGIC.methodologies.map((m) => (
-            <div key={m.name} className="flex items-center justify-between rounded-md border border-white/10 bg-ink-900/40 px-3 py-2 text-[12px]">
-              <span className="text-white/75">{m.name}</span>
-              <span className="font-mono text-white/85">{fmtMoney(m.band.low)}–{fmtMoney(m.band.high)} · {Math.round(m.weight * 100)}%</span>
+            <div key={m.name} className="flex items-center justify-between rounded-md border border-xo-line bg-xo-ink px-3 py-2 text-[12px]">
+              <span className="text-xo-text">{m.name}</span>
+              <span className="font-mono text-xo-text">{fmtMoney(m.band.low)}–{fmtMoney(m.band.high)} · {Math.round(m.weight * 100)}%</span>
             </div>
           ))}
         </div>
@@ -150,11 +155,11 @@ const Autopilot: React.FC = () => {
     },
     {
       id: "discovery", name: "Buyer Discovery Agent", role: "Finds and ranks acquirers.",
-      work: <>Scanned the buyer universe → <span className="font-mono text-white">{allBuyers.length}</span> qualified, shortlisted the top <span className="font-mono text-white">{shortlist.length}</span> by fit and outcome.</>,
+      work: <>Scanned the buyer universe → <span className="font-mono text-xo-text">{allBuyers.length}</span> qualified, shortlisted the top <span className="font-mono text-xo-text">{shortlist.length}</span> by fit and outcome.</>,
       detail: (
         <div className="space-y-2">
           {shortlist.map((b, i) => <BuyerRow key={b.buyer.name} b={b} n={i + 1} />)}
-          {shortlist.length === 0 && <div className="text-[12px] text-white/45">No buyers selected — add at least one in Adjust.</div>}
+          {shortlist.length === 0 && <div className="text-[12px] text-xo-faint">No buyers selected — add at least one in Adjust.</div>}
         </div>
       ),
       decision: `Approve the ${shortlist.length}-buyer target list?`, approveLabel: "Approve the list",
@@ -175,13 +180,13 @@ const Autopilot: React.FC = () => {
     },
     {
       id: "diligence", name: "Diligence Agent", role: "Finds the risks before buyers do.",
-      work: <>Ran the intelligence engine → <span className="font-mono text-white">{findings.length}</span> risks ({high} high-severity). Seller report drafted; ~{fmtMoney(sellerReport.totalImpactUsd)} of value to protect.</>,
+      work: <>Ran the intelligence engine → <span className="font-mono text-xo-text">{findings.length}</span> risks ({high} high-severity). Seller report drafted; ~{fmtMoney(sellerReport.totalImpactUsd)} of value to protect.</>,
       detail: (
         <div className="space-y-1.5">
           {sellerReport.points.map((p) => (
-            <div key={p.title} className="rounded-md border border-white/10 bg-ink-900/40 px-3 py-2">
-              <div className="text-[12px] font-semibold text-white">{p.title}</div>
-              <div className="mt-0.5 text-[11px] leading-snug text-white/55">{p.body}</div>
+            <div key={p.title} className="rounded-md border border-xo-line bg-xo-ink px-3 py-2">
+              <div className="text-[12px] font-semibold text-xo-text">{p.title}</div>
+              <div className="mt-0.5 text-[11px] leading-snug text-xo-muted">{p.body}</div>
             </div>
           ))}
         </div>
@@ -193,7 +198,7 @@ const Autopilot: React.FC = () => {
     },
     {
       id: "negotiation", name: "Negotiation Agent", role: "Scores offers and counters.",
-      work: <>Scoring <span className="font-mono text-white">{NEGOTIATION_STATE.activeOffers}</span> sample offers (demo data); leverage <span className="text-white">{NEGOTIATION_STATE.leverage}</span>{leaderName ? <> · <span className="text-white">{leaderName}</span> leads</> : null}.</>,
+      work: <>Scoring <span className="font-mono text-xo-text">{NEGOTIATION_STATE.activeOffers}</span> sample offers (demo data); leverage <span className="text-xo-text">{NEGOTIATION_STATE.leverage}</span>{leaderName ? <> · <span className="text-xo-text">{leaderName}</span> leads</> : null}.</>,
       decision: leaderName ? `Approve the counter and drive ${leaderName} to a signed LOI?` : "Approve the counter strategy and drive to LOI?", approveLabel: "Approve the counter",
       deliverable: { filename: "offer-comparison.md", build: () => offerComparisonDoc({
         summary: OFFER_COMPARISON.summary,
@@ -290,16 +295,16 @@ const Autopilot: React.FC = () => {
   const reviewAgent = reviewIdx != null ? AGENTS[reviewIdx] : null;
 
   return (
-    <div>
-      <SectionHeader
-        kicker={`Phase 3 · Autonomous · Guided simulation · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`}
+    <div data-page="autonomous-exit" className="space-y-3 text-xo-text">
+      <PageHeader
+        eyebrow={`Phase 3 · Autonomous · Guided simulation · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`}
         title="Autonomous Exit"
         description={isStarter
           ? `On ${PLAN_LABEL[session?.plan ?? "prep"]}, the agents take you through valuation and buyer discovery — and stop the moment buyers are found. An ${PLAN_LABEL.pro} runs outreach, negotiation, closing and wealth.`
           : "A walkthrough of how the agents would run an exit on the figures ExitOS holds — value, buyers, data room, documents, outreach, negotiation, closing and wealth. Each step waits for your approval."}
       />
 
-      <div className="mt-2 flex items-start gap-2 rounded-lg border border-loi-400/30 bg-loi-500/[0.07] px-4 py-2.5 text-[12px] text-loi-100/90">
+      <div className="mt-2 flex items-start gap-2 rounded-sm border border-loi-400/30 bg-loi-500/[0.07] px-4 py-2.5 text-[12px] text-loi-100/90">
         <span className="mt-0.5 shrink-0 rounded bg-loi-500/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-loi-200 ring-1 ring-loi-400/40">Simulated</span>
         <span>This is a guided walkthrough of the orchestration. Each step is illustrative and advances on your approval — no live outreach, escrow or wires are executed. The valuations, buyer lists and deliverables shown are real engine output.</span>
       </div>
@@ -308,22 +313,22 @@ const Autopilot: React.FC = () => {
       <Modal open={!!reviewAgent} onClose={() => setReviewIdx(null)} title={reviewAgent ? reviewAgent.name : ""} subtitle={reviewAgent?.role} size="lg"
         footer={reviewAgent ? <>
           {reviewAgent.reportPath
-            ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-deal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">Open board-ready PDF →</a>
+            ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-600">Open board-ready PDF →</a>
             : <Button variant="ghost" onClick={() => downloadDeliverable(reviewAgent.deliverable.filename, reviewAgent.deliverable.build())}>Download draft (.md)</Button>}
           <Button onClick={() => { send(reviewAgent); }}>{sent.has(reviewAgent.id) ? "✓ Marked ready" : "Mark ready"}</Button>
         </> : null}>
         {reviewAgent && (
           <div className="space-y-4">
-            <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3.5 text-[13px] leading-snug text-white/75">{reviewAgent.work}</div>
+            <div className="rounded-sm border border-xo-line bg-xo-ink p-3.5 text-[13px] leading-snug text-xo-text">{reviewAgent.work}</div>
             {reviewAgent.id === "discovery" ? (
               <div>
-                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">Shortlist · {shortlist.length} of {proposed.length} — remove any before approving</div>
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-xo-faint">Shortlist · {shortlist.length} of {proposed.length} — remove any before approving</div>
                 <div className="space-y-2">
                   {proposed.map((b, i) => <BuyerRow key={b.buyer.name} b={b} n={i + 1} excluded={excluded.has(b.buyer.name)} onToggle={() => toggle(b.buyer.name)} />)}
                 </div>
               </div>
             ) : reviewAgent.detail}
-            <div className="rounded-md border border-deal-500/30 bg-deal-600/[0.07] p-3 text-[12px] text-white/70">
+            <div className="rounded-md border border-deal-500/30 bg-deal-600/[0.07] p-3 text-[12px] text-xo-text">
               Deliverable: <span className="font-mono text-deal-300">{reviewAgent.deliverable.filename}</span> — download to review, or mark it ready. Nothing is sent from this simulation.
             </div>
           </div>
@@ -333,10 +338,10 @@ const Autopilot: React.FC = () => {
       {/* ── Mission control ──────────────────────────────────────── */}
       <Card className="overflow-hidden p-0">
         <div className="grid gap-0 lg:grid-cols-[1.4fr_1fr]">
-          <div className="border-b border-white/10 p-7 lg:border-b-0 lg:border-r">
+          <div className="border-b border-xo-line p-7 lg:border-b-0 lg:border-r">
             <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-deal-400">One instruction</div>
-            <h2 className="mt-2 font-serif text-3xl font-bold leading-tight text-white">"Sell my company."</h2>
-            <p className="mt-3 text-[13.5px] leading-relaxed text-white/65">
+            <h2 className="mt-2 font-serif text-3xl font-bold leading-tight text-xo-text">"Sell my company."</h2>
+            <p className="mt-3 text-[13.5px] leading-relaxed text-xo-muted">
               ExitOS lays out {AGENTS.length} agents — valuation, buyer discovery, outreach, data room, diligence,
               negotiation, closing and wealth — in sequence. Each pauses to put one decision in front of you. In this
               simulation nothing is sent, signed or wired.
@@ -355,22 +360,22 @@ const Autopilot: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="bg-ink-900/40 p-7">
+          <div className="bg-xo-ink p-7">
             <div className="flex items-center justify-between">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Process progress</div>
-              <div className="font-mono text-[11px] text-white/45">{doneCount}/{AGENTS.length}</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-xo-faint">Process progress</div>
+              <div className="font-mono text-[11px] text-xo-faint">{doneCount}/{AGENTS.length}</div>
             </div>
             <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
               <div className="h-full rounded-full bg-deal-500 transition-all duration-700" style={{ width: `${progressPct}%` }} />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-center">
-              <div className="rounded-lg border border-white/10 bg-ink-800/60 p-3">
+              <div className="rounded-sm border border-xo-line bg-xo-ink p-3">
                 <div className="font-mono text-2xl font-bold text-deal-300">{started ? doneCount : "—"}</div>
-                <div className="mt-0.5 text-[10px] uppercase tracking-wide text-white/40">Decisions approved</div>
+                <div className="mt-0.5 text-[10px] uppercase tracking-wide text-xo-faint">Decisions approved</div>
               </div>
-              <div className="rounded-lg border border-white/10 bg-ink-800/60 p-3">
+              <div className="rounded-sm border border-xo-line bg-xo-ink p-3">
                 <div className="font-mono text-2xl font-bold text-loi-300">{started && !allDone ? (awaitingIndex >= 0 ? 1 : 0) : 0}</div>
-                <div className="mt-0.5 text-[10px] uppercase tracking-wide text-white/40">Awaiting you</div>
+                <div className="mt-0.5 text-[10px] uppercase tracking-wide text-xo-faint">Awaiting you</div>
               </div>
             </div>
           </div>
@@ -387,15 +392,15 @@ const Autopilot: React.FC = () => {
             <Card key={a.id} className={`p-5 transition ${status === "awaiting" ? "ring-1 ring-deal-400/40" : ""} ${locked ? "opacity-55" : ""}`}>
               <div className="flex items-start gap-4">
                 <div className="flex flex-col items-center">
-                  <span className={`flex h-9 w-9 items-center justify-center rounded-xl text-[13px] font-bold ring-1 ${STATUS_STYLE[status]}`}>
+                  <span className={`flex h-9 w-9 items-center justify-center rounded-sm text-[13px] font-bold ring-1 ${STATUS_STYLE[status]}`}>
                     {locked ? "🔒" : status === "done" ? "✓" : status === "working" ? <Spinner /> : i + 1}
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <span className="text-sm font-bold text-white">{a.name}</span>
-                      <span className="ml-2 text-[12px] text-white/45">{a.role}</span>
+                      <span className="text-sm font-bold text-xo-text">{a.name}</span>
+                      <span className="ml-2 text-[12px] text-xo-faint">{a.role}</span>
                     </div>
                     {locked
                       ? <span className="rounded-full bg-loi-500/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-loi-300 ring-1 ring-loi-400/40">Requires {PLAN_LABEL.pro}</span>
@@ -405,7 +410,7 @@ const Autopilot: React.FC = () => {
                   </div>
 
                   {revealed && (
-                    <div className="mt-2 text-[13px] leading-snug text-white/75">{a.work}</div>
+                    <div className="mt-2 text-[13px] leading-snug text-xo-text">{a.work}</div>
                   )}
                   {revealed && a.detailNote && <div className="mt-1 text-[12px] text-loi-300">{a.detailNote}</div>}
 
@@ -415,9 +420,9 @@ const Autopilot: React.FC = () => {
                   )}
 
                   {status === "awaiting" && (
-                    <div className="mt-3 rounded-lg border border-deal-500/30 bg-deal-600/[0.07] p-4">
+                    <div className="mt-3 rounded-sm border border-deal-500/30 bg-deal-600/[0.07] p-4">
                       <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">Your decision · simulated</div>
-                      <p className="mt-1 text-[13.5px] text-white/85">{a.decision}</p>
+                      <p className="mt-1 text-[13.5px] text-xo-text">{a.decision}</p>
                       <div className="mt-3 flex flex-wrap gap-2.5">
                         <Button onClick={() => approve(i)}>{a.approveLabel}</Button>
                         <Button variant="ghost" onClick={() => setReviewIdx(i)}>Adjust / review</Button>
@@ -428,11 +433,11 @@ const Autopilot: React.FC = () => {
                   {status === "done" && (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className="text-[11px] font-semibold uppercase tracking-wide text-deal-300">✓ Approved</span>
-                      <span className="text-white/20">·</span>
-                      <button className="text-[11px] font-semibold uppercase tracking-wide text-white/55 hover:text-white" onClick={() => setReviewIdx(i)}>Review</button>
+                      <span className="text-xo-faint">·</span>
+                      <button className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" onClick={() => setReviewIdx(i)}>Review</button>
                       {a.reportPath
-                        ? <a className="text-[11px] font-semibold uppercase tracking-wide text-white/55 hover:text-white" href={a.reportPath} target="_blank" rel="noopener noreferrer">PDF →</a>
-                        : <button className="text-[11px] font-semibold uppercase tracking-wide text-white/55 hover:text-white" onClick={() => downloadDeliverable(a.deliverable.filename, a.deliverable.build())}>Download .md</button>}
+                        ? <a className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" href={a.reportPath} target="_blank" rel="noopener noreferrer">PDF →</a>
+                        : <button className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" onClick={() => downloadDeliverable(a.deliverable.filename, a.deliverable.build())}>Download .md</button>}
                       <button className="text-[11px] font-semibold uppercase tracking-wide text-deal-300 hover:text-deal-200" onClick={() => send(a)}>{sent.has(a.id) ? "✓ Ready" : "Mark ready"}</button>
                     </div>
                   )}
@@ -446,24 +451,24 @@ const Autopilot: React.FC = () => {
       {/* ── Starter gate — buyers found, upgrade to continue ─────── */}
       {starterGated && (
         <Card className="mt-8 overflow-hidden p-0 ring-1 ring-deal-400/40">
-          <div className="border-b border-white/10 bg-gradient-to-r from-deal-600/20 to-transparent px-6 py-5">
+          <div className="border-b border-xo-line bg-gradient-to-r from-deal-600/20 to-transparent px-6 py-5">
             <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Buyers found</div>
             <div className="mt-1 flex flex-wrap items-baseline gap-3">
               <span className="font-mono text-2xl font-bold text-deal-300">{shortlist.length} matched acquirers</span>
-              <span className="text-[13px] text-white/60">are ready to engage your listing</span>
+              <span className="text-[13px] text-xo-muted">are ready to engage your listing</span>
             </div>
           </div>
           <div className="p-6">
-            <h3 className="font-serif text-xl font-bold text-white">This is where listing ends — and the deal begins.</h3>
-            <p className="mt-2 text-[13.5px] leading-relaxed text-white/65">
+            <h3 className="font-serif text-xl font-bold text-xo-text">This is where listing ends — and the deal begins.</h3>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-xo-muted">
               ExitOS priced the company and matched {shortlist.length} buyers. To open
               conversations, run outreach, negotiate offers and close — and let the remaining agents finish the job —
               launch an Active Mandate.
             </p>
             <div className="mt-4 flex flex-wrap gap-2.5">
               <Button onClick={unlockAndContinue}>Launch a mandate & continue →</Button>
-              <span className="basis-full text-[12px] text-white/60">Demo: this switches your session to {PLAN_LABEL.pro} instantly — no payment is taken.</span>
-              <Link to="/pricing" className="inline-flex items-center rounded-md px-4 py-2 text-sm font-semibold text-white/70 ring-1 ring-white/15 transition hover:bg-white/5">See pricing</Link>
+              <span className="basis-full text-[12px] text-xo-muted">Demo: this switches your session to {PLAN_LABEL.pro} instantly — no payment is taken.</span>
+              <Link to="/pricing" className="inline-flex items-center rounded-md px-4 py-2 text-sm font-semibold text-xo-text ring-1 ring-xo-line transition hover:bg-xo-raise">See pricing</Link>
             </div>
           </div>
         </Card>
@@ -472,13 +477,13 @@ const Autopilot: React.FC = () => {
       {/* ── Deliverables produced ────────────────────────────────── */}
       {doneCount > 0 && (
         <Card className="mt-8 p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Deliverables produced</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-xo-faint">Deliverables produced</div>
           <div className="mt-4 space-y-2">
             {AGENTS.filter((_, i) => statuses[i] === "done").map((a) => (
-              <div key={a.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-ink-900/40 px-4 py-3">
+              <div key={a.id} className="flex items-center justify-between gap-3 rounded-sm border border-xo-line bg-xo-ink px-4 py-3">
                 <div className="min-w-0">
-                  <div className="text-[13px] font-semibold text-white">{a.name}</div>
-                  <div className="font-mono text-[11px] text-white/45">{a.deliverable.filename}</div>
+                  <div className="text-[13px] font-semibold text-xo-text">{a.name}</div>
+                  <div className="font-mono text-[11px] text-xo-faint">{a.deliverable.filename}</div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <Button variant="ghost" className="text-[12px]" onClick={() => downloadDeliverable(a.deliverable.filename, a.deliverable.build())}>Download</Button>
@@ -492,21 +497,21 @@ const Autopilot: React.FC = () => {
 
       {allDone && (
         <Card className="mt-8 overflow-hidden p-0">
-          <div className="border-b border-white/10 bg-gradient-to-r from-deal-600/20 to-transparent px-6 py-5">
+          <div className="border-b border-xo-line bg-gradient-to-r from-deal-600/20 to-transparent px-6 py-5">
             <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Simulation complete</div>
             <div className="mt-1 flex flex-wrap items-baseline gap-3">
               <span className="font-mono text-3xl font-bold text-deal-300">{fmtMoney(VALUATION_CANONICAL.headline.mid)}</span>
-              <span className="text-[13px] text-white/60">enterprise value used in this walkthrough — no money moves</span>
+              <span className="text-[13px] text-xo-muted">enterprise value used in this walkthrough — no money moves</span>
             </div>
           </div>
           <div className="p-6">
-            <h3 className="font-serif text-xl font-bold text-white">That is the whole process, end to end.</h3>
-            <p className="mt-2 text-[13.5px] leading-relaxed text-white/65">
+            <h3 className="font-serif text-xl font-bold text-xo-text">That is the whole process, end to end.</h3>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-xo-muted">
               You approved {AGENTS.length} simulated decisions. In a live mandate these steps run with real buyers, documents
               and escrow; here each step was simulated on engine output. WealthOS covers what happens after a real close.
             </p>
             <div className="mt-4 flex flex-wrap gap-2.5">
-              <Link to="/console/wealth" className="rounded-md bg-deal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">Open WealthOS →</Link>
+              <Link to="/console/wealth" className="rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-600">Open WealthOS →</Link>
               <Button variant="ghost" onClick={() => { setStarted(false); setStatuses(AGENTS.map(() => "queued")); setSent(new Set()); }}>Run again</Button>
             </div>
           </div>
