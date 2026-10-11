@@ -9,8 +9,8 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | 03 | `/console/intake` | Value My Company | `Intake` | founder | none | ☑ approved |
 | 04 | `/console/acquisition-radar` | Acquisition Radar | `AcquisitionRadar` | founder, buyer | none | ☑ done · awaiting final review |
 | 05 | `/console/commander` | Chief Investment Banker | `Commander` | founder | Pro | ☑ done · awaiting final review |
-| 06 | `/console/network` | Network Intelligence | `Network` | founder | Pro | ◐ in progress |
-| 07 | `/console/autopilot` | Autonomous Exit | `Autopilot` | founder | Preparation or Pro | ☐ |
+| 06 | `/console/network` | Network Intelligence | `Network` | founder | Pro | ☑ done · awaiting final review |
+| 07 | `/console/autopilot` | Autonomous Exit | `Autopilot` | founder | Preparation or Pro | ◐ in progress |
 | 08 | `/console/readiness` | Readiness | `Readiness` | founder | none | ☐ |
 | 09 | `/console/exit-timing` | Exit Timing | `ExitTiming` | founder | Pro | ☐ |
 | 10 | `/console/wealth` | Liquidity & Transition | `Wealth` | founder | Pro | ☐ |

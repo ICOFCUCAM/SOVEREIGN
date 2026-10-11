@@ -5,7 +5,7 @@
 | Route | `/console/network` |
 | Component | `src/pages/Network.tsx` (168 lines) |
 | NAV | "Network Intelligence", group Market Intelligence, role founder, **Active Mandate (Pro)** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All five gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `84c1cbb`)
 
@@ -66,3 +66,8 @@ Shows the founder the platform's compounding data assets ("five moats"): the dea
 ### G4 — Demo company unlabelled
 *Closed by:* `pages/Network.tsx` — buyer discovery, diligence and the console value (`canonicalValuationFor`) run on `loadActiveCompany()`; header badge "Demo company · Helios Freight" / "Your intake · {name}". `pages/Intake.tsx` "Where your figures are used" lists Network Intelligence.
 *Verification:* Chromium: demo → top buyer Flexport Strategic (logistics); saved intake "Northwind Analytics" (enterprise SaaS) → Vista Enterprise, YOUR INTAKE badge · 0 errors.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` all pass · Chromium Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · personalisation demo vs intake checked.
