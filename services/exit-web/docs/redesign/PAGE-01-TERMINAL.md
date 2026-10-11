@@ -269,4 +269,4 @@ Requested by the owner after the Page 01 review ("START FIXING"). Same rule: doc
 ### X3 — Pre-existing lint errors
 *Documented before the fix.* `eslint src`: 3 errors — two `no-unused-expressions` (a ternary used as a statement to add/remove from a Set in `PublishComposer.tsx:23` and `Autopilot.tsx:112`) and one `prefer-const` (`banker-directives.ts:201`). *Fix:* rewrite the ternaries as `if/else` and make the binding `const`; no behaviour change. The 2 `exhaustive-deps` warnings (`DealActivity.tsx:32` and one more `useCallback`, both listed by `eslint src`) change memoisation if "fixed" mechanically, so they are left as warnings for the owning pages' reviews.
 
-*Verification:* `eslint src` **0 errors**, 2 warnings (left on purpose, above) · `tsc -b` pass · `vitest run` 29 files, **180/180 pass** (banker-directives tests included). *Status:* ☑ X3-commit
+*Verification:* `eslint src` **0 errors**, 2 warnings (left on purpose, above) · `tsc -b` pass · `vitest run` 29 files, **180/180 pass** (banker-directives tests included). *Status:* ☑ `2804a21`
