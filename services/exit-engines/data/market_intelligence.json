@@ -1,6 +1,6 @@
 {
- "as_of": "2026-10-10T11:59:17.247Z",
- "totalEvents": 3847,
+ "as_of": "2026-10-11T12:09:15.115Z",
+ "totalEvents": 3855,
  "disclosedEvents": 1137,
  "totalDisclosedUsd": 1152081542609,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1537,
+   "deals": 1545,
    "disclosedUsd": 121729261158
   },
   {
@@ -251,7 +251,7 @@
   {
    "from": "North America",
    "to": "Other",
-   "deals": 123
+   "deals": 124
   },
   {
    "from": "Other",
@@ -298,7 +298,7 @@
   {
    "buyer_id": "ibm",
    "name": "IBM",
-   "deals": 198,
+   "deals": 199,
    "recentDeals": 11,
    "lastDate": "2025-12-08"
   },
@@ -389,9 +389,9 @@
   {
    "buyer_id": "sap",
    "name": "SAP",
-   "deals": 72,
-   "recentDeals": 7,
-   "lastDate": "2026-07-31"
+   "deals": 71,
+   "recentDeals": 6,
+   "lastDate": "2026-05-01"
   },
   {
    "buyer_id": "twitter",
@@ -484,6 +484,13 @@
    "lastDate": "2024-01-01"
   },
   {
+   "buyer_id": "google",
+   "name": "Google",
+   "deals": 7,
+   "recentDeals": 0,
+   "lastDate": "2014-08-01"
+  },
+  {
    "buyer_id": "advent-international",
    "name": "Advent International",
    "deals": 7,
@@ -531,13 +538,6 @@
    "deals": 4,
    "recentDeals": 0,
    "lastDate": "1991-01-01"
-  },
-  {
-   "buyer_id": "pepsico",
-   "name": "PepsiCo",
-   "deals": 4,
-   "recentDeals": 0,
-   "lastDate": "2019-01-01"
   }
  ],
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)"
