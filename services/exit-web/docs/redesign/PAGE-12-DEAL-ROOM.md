@@ -38,8 +38,12 @@ Founder Active Mandate: `h1` 1 · axe 0 · **overflow at 390** · 0 errors. Buye
 | G2 | **Advice to act on simulated data** ("Call X now", decay warning, "ExitOS tracks every view…"). | Replace the banker's take with how to read the simulation; no call-to-action on a specific buyer; capability stated as it is (not recorded yet). | ☐ |
 | G3 | **Buyers see the founder's view of other bidders.** | Buyer role gets its own view: no other bidders; what a buyer's deal room will hold and how access is granted (NDA → founder approval), with links to Access Requests and Browse Opportunities. Route and plan gate unchanged. | ☐ |
 | G4 | Demo company unlabelled. | Simulate on the active company's ranked buyers; badge. | ☐ |
-| G5 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☐ |
+| G5 | Design: overflow at 390, old primitives. | Rebuild on `xo`. | ☑ G5-commit |
 
 ---
 
 ## Closure log
+
+### G5 — Design
+*Closed by:* `pages/DealRoom.tsx` rebuilt on `xo` (`PageHeader` `h1`, banker's take as a page-local definition list (shared `BankerTake` no longer used here), four summary metrics, buyers as an ordered list with `h3`s, documents as a list with "downloaded"/"concern" words for screen readers, the attention table with row headers inside a keyboard-reachable `ScrollRegion`, concern list). Content carried over verbatim; G1–G4 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Active Mandate 1440/390: 0 errors, `h1` 1, **no overflow** (was overflowing at 390), axe 0 (after renaming the scroll region so it does not duplicate the section's landmark name), all tab stops with visible focus.
