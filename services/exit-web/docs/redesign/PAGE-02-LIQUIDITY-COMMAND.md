@@ -98,4 +98,4 @@ No loading (synchronous engines). Exit-run states: none / complete (card + Re-ru
 
 ### X7 — Shell decorative layer scrolls `<main>` sideways (all pages)
 *Documented above before the fix.* *Fix:* `overflow-hidden` on the `aria-hidden` ambient layer in `Shell.tsx`, so its off-edge ring is clipped instead of widening the scroll area. Nothing interactive lives in that layer.
-*Verification:* `tsc -b` pass · `<main>` scrollWidth = clientWidth at 1440 and 390 on `/console`, `/console/readiness` (was +128 px); `/console/command` keeps only its own G10 overflow at 390. *Status:* ☑ X7-commit
+*Verification:* `tsc -b` pass · `<main>` scrollWidth = clientWidth at 1440 and 390 on `/console`, `/console/readiness` (was +128 px); `/console/command` keeps only its own G10 overflow at 390. *Status:* ☑ `e4b46ae`
