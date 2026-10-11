@@ -48,7 +48,7 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 | # | Gap | Evidence | Fix (no calculation changed) | Status |
 |---|---|---|---|---|
 | G1 | **Opening the page turns the demo into "your data".** The save effect runs on mount, so a visit stores Helios Freight as the founder's intake; every page then labels demo figures "Your intake". "Reset to example" also saves the example as the founder's data. | measured above | Save only after the founder edits a field. "Reset to example" becomes "Clear my data" (removes the saved intake, back to the demo state). Show the data state on the page. | ☑ `3f26229` |
-| G2 | **Numbers cannot be entered correctly.** Decimal points are dropped (12.5 → 125), negative values are impossible, clearing a field forces 0, nothing is validated (e.g. 150 % margin, ARR > revenue unflagged). | measured above | Keep the typed text per field; parse decimals and negatives; validate with field-level messages (`aria-invalid`, `aria-describedby`); only valid values reach the engines. | ☐ |
+| G2 | **Numbers cannot be entered correctly.** Decimal points are dropped (12.5 → 125), negative values are impossible, clearing a field forces 0, nothing is validated (e.g. 150 % margin, ARR > revenue unflagged). | measured above | Keep the typed text per field; parse decimals and negatives; validate with field-level messages (`aria-invalid`, `aria-describedby`); only valid values reach the engines. | ☑ G2-commit |
 | G3 | **Mislabelled valuation.** "Enterprise value · strategic-buyer basis" — the figure is the institutional framework, the console value (D1). | `Intake.tsx` | Label it as the institutional framework, the same figure every page shows. | ☐ |
 | G4 | **One click publishes, without saying what.** "List on the exchange" lists immediately, does not say which figures buyers will see (exact revenue, growth, EBITDA margin, sector, region) or where it is stored (exchange vs this browser), and offers no way back. | `listings.ts`, `exit-api.ts` | Confirmation step naming exactly what buyers see and where it is stored; result message says the same. Listing mechanics unchanged. | ☐ |
 | G5 | **Evidence thin.** Comparable status/source and rationale, confidence drivers and the framework disclaimer are computed but not shown; buyers' source (curated registry) not named. | engine fields | Show them (as on the Terminal). | ☐ |
@@ -66,3 +66,12 @@ Edit any field (live recompute) · List on the exchange · Reset to example · l
 - A status line says which state the page is in: demo company (nothing saved) or the founder's saved figures driving every page.
 
 *Verification:* `tsc -b`, eslint clean · `vitest run` **194/194** (new: nothing saved until saved; save → active company; clear → demo) · Chromium: open only → nothing stored, Terminal "DEMO DATA"; edit name → stored "Acme Robotics", Terminal "YOUR INTAKE · Acme Robotics"; Clear my data → nothing stored, button hidden, Terminal "DEMO DATA · Helios Freight"; 0 page errors.
+
+### G2 — Numbers could not be entered correctly
+*Documented:* gap register row G2. *Closed by:* new `lib/intake-fields.ts` (+ 4 tests) and `pages/Intake.tsx`.
+- Each number field keeps the text as typed; `parseField` accepts decimals, a leading minus where it is meaningful (growth, EBITDA margin), and thousands separators, and rejects empty, non-numeric, out-of-range and fractional counts with a plain message.
+- Ranges: revenue and ARR ≥ 0 ($M), growth −100…1,000 %, gross margin 0…100 %, EBITDA margin −100…100 %, net retention 0…300 %, top-10 share 0…100 %, customers whole ≥ 1.
+- Only a valid value is saved and reaches the engines; while a field is invalid the report keeps the last valid value and the field says why (`aria-invalid`, message linked by `aria-describedby`). Each field has a visible unit and a hint; labels are tied to inputs with `for`/`id`.
+- `buildProfile` is unchanged (its clamps remain as a second guard).
+
+*Verification:* `tsc -b`, eslint clean · `intake-fields.test.ts` 4/4 (decimals, negatives, rejections, round-trip of the demo values) · Chromium: "12.5" → shown 12.5, stored $12,500,000 (was 125 / $125M); "-50" → stored −0.5 (was 50); "150" gross margin → "Must be at most 100.", `aria-invalid`, not stored; empty ARR → "Enter a number.", not stored · axe 0 · 0 page errors.

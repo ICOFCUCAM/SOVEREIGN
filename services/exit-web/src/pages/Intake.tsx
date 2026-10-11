@@ -7,6 +7,7 @@ import {
 } from "../lib/company-intake";
 import { listCompany } from "../lib/listings";
 import { loadSavedIntake, saveIntake, clearIntake } from "../lib/active-company";
+import { NUMERIC_FIELDS, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
 
 // COMPANY INTAKE → INSTANT REPORT — the success metric: a founder enters
 // their company and within seconds receives the institutional answer (who
@@ -28,8 +29,17 @@ const Intake: React.FC = () => {
     setInp((p) => { const next = { ...p, [k]: v }; saveIntake(next); return next; });
     setSaved(true); setListed(false);
   };
-  const clearMine = (): void => { clearIntake(); setInp(SAMPLE_INTAKE); setSaved(false); setListed(false); };
-  const num = (k: keyof IntakeInputs, v: string, scale = 1): void => set(k, (parseFloat(v) || 0) * scale as never);
+  // Number fields keep exactly what was typed; only valid values reach the engines.
+  const [texts, setTexts] = useState<Record<NumericKey, string>>(() => textsFor(inp));
+  const [errors, setErrors] = useState<Partial<Record<NumericKey, string>>>({});
+  const typeNumber = (k: NumericKey, text: string): void => {
+    setTexts((t) => ({ ...t, [k]: text }));
+    const spec = NUMERIC_FIELDS.find((f) => f.key === k)!;
+    const res = parseField(spec, text);
+    setErrors((e) => { const n = { ...e }; if (res.ok) delete n[k]; else n[k] = res.error; return n; });
+    if (res.ok) set(k, res.value as never);
+  };
+  const clearMine = (): void => { clearIntake(); setInp(SAMPLE_INTAKE); setTexts(textsFor(SAMPLE_INTAKE)); setErrors({}); setSaved(false); setListed(false); };
 
   const m = report.mandatoryOutputs;
 
@@ -61,20 +71,19 @@ const Intake: React.FC = () => {
             <Field label="HQ (ISO)"><input className={inputCls} value={inp.jurisdiction} onChange={(e) => set("jurisdiction", e.target.value)} /></Field>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="TTM revenue ($M)"><input className={inputCls} inputMode="decimal" value={inp.ttmRevenueUsd / 1e6} onChange={(e) => num("ttmRevenueUsd", e.target.value, 1e6)} /></Field>
-            <Field label="ARR ($M)"><input className={inputCls} inputMode="decimal" value={inp.arrUsd / 1e6} onChange={(e) => num("arrUsd", e.target.value, 1e6)} /></Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Growth YoY (%)"><input className={inputCls} inputMode="decimal" value={Math.round(inp.growthPct * 100)} onChange={(e) => num("growthPct", e.target.value, 0.01)} /></Field>
-            <Field label="Gross margin (%)"><input className={inputCls} inputMode="decimal" value={Math.round(inp.grossMarginPct * 100)} onChange={(e) => num("grossMarginPct", e.target.value, 0.01)} /></Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="EBITDA margin (%)"><input className={inputCls} inputMode="decimal" value={Math.round(inp.ebitdaMarginPct * 100)} onChange={(e) => num("ebitdaMarginPct", e.target.value, 0.01)} /></Field>
-            <Field label="Net retention (%)"><input className={inputCls} inputMode="decimal" value={Math.round(inp.netRetentionPct * 100)} onChange={(e) => num("netRetentionPct", e.target.value, 0.01)} /></Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Top-10 concentration (%)"><input className={inputCls} inputMode="decimal" value={Math.round(inp.customerConcentrationPct * 100)} onChange={(e) => num("customerConcentrationPct", e.target.value, 0.01)} /></Field>
-            <Field label="Customers"><input className={inputCls} inputMode="numeric" value={inp.totalCustomers} onChange={(e) => num("totalCustomers", e.target.value)} /></Field>
+            {NUMERIC_FIELDS.map((f) => {
+              const err = errors[f.key];
+              const id = `intake-${f.key}`;
+              return (
+                <div key={f.key}>
+                  <label htmlFor={id} className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/60">{f.label} ({f.unit === "customers" ? "count" : f.unit})</label>
+                  <input id={id} className={`${inputCls} ${err ? "border-red-400/70" : ""}`} inputMode={f.integer ? "numeric" : "decimal"}
+                    value={texts[f.key]} onChange={(e) => typeNumber(f.key, e.target.value)}
+                    aria-invalid={err ? true : undefined} aria-describedby={`${id}-msg`} />
+                  <span id={`${id}-msg`} className={`mt-1 block text-[11px] ${err ? "text-red-300" : "text-white/50"}`}>{err ?? f.hint}</span>
+                </div>
+              );
+            })}
           </div>
           <div className="flex gap-4 pt-1">
             <label className="flex items-center gap-2 text-[12px] text-white/70"><input type="checkbox" checked={inp.hasNetworkEffects} onChange={(e) => set("hasNetworkEffects", e.target.checked)} /> Network effects</label>
