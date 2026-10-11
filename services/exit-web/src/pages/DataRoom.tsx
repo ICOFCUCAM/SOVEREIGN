@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { fmtMoney } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric } from "../components/xo";
+import { PageHeader, Section, Metric, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { DILIGENCE, VALUATION_CANONICAL } from "../lib/engines";
+import { runDueDiligence } from "@exit/engines";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
+import { loadActiveCompany } from "../lib/active-company";
 import { listDocuments, uploadDocument, fmtBytes, type DataRoomDocument, type RoomKind } from "../lib/data-room";
 
 // Completeness model — buyers care about how complete each package is, not how
@@ -19,9 +21,9 @@ const PKG_IMPACT_WEIGHT: Record<string, number> = {
 function completeness(uploaded: number, required: number) {
   return required === 0 ? 100 : Math.min(100, Math.round((uploaded / required) * 100));
 }
-function missingImpactUsd(kind: string, missingRequired: number): number {
+function missingImpactUsd(kind: string, missingRequired: number, valueUsd: number): number {
   const w = PKG_IMPACT_WEIGHT[kind] ?? 0.02;
-  return VALUATION_CANONICAL.headline.mid * w * missingRequired;
+  return valueUsd * w * missingRequired;
 }
 
 // Virtual Data Room — wired to Supabase storage via the exit-doc-upload
@@ -30,6 +32,11 @@ function missingImpactUsd(kind: string, missingRequired: number): number {
 // the 'exit-data-room' bucket and the list refreshes against it.
 
 const DataRoom: React.FC = () => {
+  // The checklist and value follow the founder's saved intake when there is
+  // one, else the demo company. (Uploads always go to the shared demo tenant.)
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const DILIGENCE = useMemo(() => runDueDiligence(company), [company]);
+  const valueUsd = useMemo(() => canonicalValuationFor(company).headline.mid, [company]);
   const [activeKind, setActiveKind] = useState<RoomKind>((DILIGENCE.documents[0]?.kind as RoomKind) ?? "financial");
   const [uploaded, setUploaded] = useState<DataRoomDocument[]>([]);
   const [loading, setLoading]   = useState(false);
@@ -77,7 +84,7 @@ const DataRoom: React.FC = () => {
     const up = uploaded.filter((u) => u.room_kind === d.kind).length;
     const pct = completeness(up, req);
     const missing = Math.max(0, req - up);
-    return { kind: d.kind, title: d.title, pct, missing, impact: missingImpactUsd(d.kind, missing), req, up };
+    return { kind: d.kind, title: d.title, pct, missing, impact: missingImpactUsd(d.kind, missing, valueUsd), req, up };
   });
   const overallPct = perPkg.length ? Math.round(perPkg.reduce((s, p) => s + p.pct, 0) / perPkg.length) : 0;
   const atRiskUsd = perPkg.reduce((s, p) => s + p.impact, 0);
@@ -94,8 +101,8 @@ const DataRoom: React.FC = () => {
 
   return (
     <div data-page="data-room" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Workspace · Data Room" title="Virtual Data Room"
-        badge={<span className="text-[12px] text-xo-muted">Diligence artifacts · {overallPct}% complete</span>}
+      <PageHeader eyebrow={`◉ Workspace · Data Room · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Virtual Data Room"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Diligence artifacts · {overallPct}% complete</span></>}
         actions={<>
           <button type="button" onClick={refresh} disabled={loading} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{loading ? "Refreshing…" : "Refresh"}</button>
           <button type="button" onClick={() => fileInput.current?.click()} disabled={uploading || !ack} aria-describedby="dr-shared" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{uploading ? "Uploading…" : `Upload to ${activeKind.replace(/_/g, " ")}`}</button>

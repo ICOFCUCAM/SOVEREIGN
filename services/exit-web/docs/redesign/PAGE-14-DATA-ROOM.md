@@ -37,7 +37,7 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 | G1 | **Uploads land in a shared tenant visible to every user; the page implies confidentiality** (X12). | Warning panel above the uploader stating exactly who can see uploads; upload stays disabled until the founder ticks an acknowledgement; classification pills say "label only". Backend unchanged (X12 for the owner). | ☑ `ec30f99` |
 | G2 | **Invented "value at risk" weights.** | Label as a rule with the weights shown; "illustrative" not "at risk". | ☑ `2a1b6bd` |
 | G3 | Mislabels: "Due Diligence AI" (rule-based), "ring-1 access", completeness rule unstated, raw list error. | "Diligence risk scan (rule-based)"; drop "ring-1 access"; state the completeness rule; plain error text. | ☑ `5b74542` |
-| G4 | Demo company unlabelled. | Engine specs, red flags and value on `loadActiveCompany()`; badge. | ☐ |
+| G4 | Demo company unlabelled. | Engine specs, red flags and value on `loadActiveCompany()`; badge. | ☑ G4-commit |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `27888d1` |
 
@@ -67,3 +67,8 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 | completeness rule unstated | under the package list: "files uploaded to a package ÷ its required artifacts, capped at 100% — any file counts. The missing list matches required filenames." |
 | raw errors "list failed: 200" / "upload failed" | "Could not load the uploaded documents (…). The engine checklist below still applies." / "The upload did not complete (…). Nothing was added." |
 *Verification:* `tsc -b`, eslint clean · Chromium (list stubbed to fail): new error text shown; 0 "Due Diligence AI" / "ring-1" · Preparation 1440/390: 0 errors, axe 0, no overflow.
+
+### G4 — Demo company unlabelled
+*Closed by:* `pages/DataRoom.tsx` — the engine checklist and red flags (`runDueDiligence`) and the value behind the illustrative discount (`canonicalValuationFor(company).headline.mid`) run on `loadActiveCompany()`; `missingImpactUsd` takes the value as a parameter (same rule). Eyebrow names the source, **Demo data / Your intake** badge. Uploads still go to the shared demo tenant (G1 / X12). `pages/Intake.tsx` lists "Data Room (checklist)".
+*Verification:* `tsc -b`, eslint clean · Chromium (no uploads listed): demo → DEMO DATA, illustrative discount −$75,080,073; intake "Northwind Analytics" → YOUR INTAKE, −$294,562,149 · 0 errors.
+*Observation:* with nothing uploaded the rule sums to about 73 % of enterprise value (weight × count of missing artifacts, per package, uncapped). It is labelled as an illustrative rule, but the size of the number is a product issue for the owner (recalibrate or cap).
