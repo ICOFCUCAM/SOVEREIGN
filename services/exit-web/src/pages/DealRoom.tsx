@@ -37,17 +37,14 @@ const DealRoom: React.FC = () => {
         description="ExitOS does not record data-room sessions yet. This page shows what the room will report, using activity simulated from each buyer's fit probability. No buyer below has signed an NDA or opened a document." />
 
       {top && (
-        <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
-          right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{top.interestScore}%</span>}>
+        <Section title="How to read this" eyebrow="Banker's take" className="border border-xo-line">
           <div className="px-4 py-3">
-            <p className="text-[14px] leading-relaxed">Call <span className="font-semibold">{top.buyerName}</span> now — {fmtDuration(top.timeMinutes)} in the room and {top.interestScore}% interest. {top.status}.</p>
-            <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-              <TakeCell k="At stake">The hottest buyer is <span className="font-mono font-semibold text-xo-verified">{top.interestScore}%</span> engaged across {top.viewed.length} documents.</TakeCell>
-              <TakeCell k="If you wait">Engagement decays fast — a buyer this deep who hears nothing back cools within days.</TakeCell>
-              <TakeCell k="Pursue">{top.buyerName} — {top.status.toLowerCase()}, {top.downloads} downloads, {top.concerns.length} concern signal{top.concerns.length === 1 ? "" : "s"}.</TakeCell>
-              <TakeCell k="ExitOS does it">ExitOS tracks every view, download and dwell, scores intent and flags the documents drawing concern.</TakeCell>
+            <p className="text-[14px] leading-relaxed">In a real room, the buyer who works through the whole package and downloads it is usually the first call, and a buyer dwelling on sensitive documents has questions to answer. The ranking below shows how that will look — it says nothing about these buyers today.</p>
+            <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2">
+              <TakeCell k="Highest simulated interest">{top.buyerName} · <span className="font-mono">{top.interestScore}%</span> (simulated)</TakeCell>
+              <TakeCell k="What ExitOS does">Simulates this view today. Recording real views, downloads and dwell is not built yet; nothing here should drive a call to a buyer.</TakeCell>
             </dl>
-            <Link to="/console/negotiator" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open the negotiator →</Link>
+            <Link to="/console/negotiator" className="mt-3 inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open the negotiator →</Link>
           </div>
         </Section>
       )}
