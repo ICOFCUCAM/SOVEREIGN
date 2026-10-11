@@ -34,7 +34,7 @@ Tells the founder *when* to sell: a recommended window in months, the value of w
 |---|---|---|---|
 | G1 | **Invented forecast** (score +22/+38 per year, value ×1.3 per year, "Q2 {year}"). | Replace the three-year timeline with what the engines produce: now vs after fixes — readiness-engine score current → projected, value now → after fixes — and the window in months with its rule shown. No years or quarters. | ☑ `41a2b03` |
 | G2 | **Invented signal verdicts and mislabels** (fixed "tailwind", "high", 40-cap count, registry premium shown as sector's, static notes). | Verdicts only where a stated rule exists (ARR growth ≥ 30 %; buyer demand from the active-buyer count; sector exits > 0); the rest shown as context. Actual deal count of the top-12 buyers; premium labelled registry-wide; notes say what each figure is. | ☑ `273bdbe` |
-| G3 | **False monitoring claims** ("monitors continuously and pings you", "signals monitored", "buyers circling", "right now"). | Plain wording: computed when the page opens; no alerts exist. | ☐ |
+| G3 | **False monitoring claims** ("monitors continuously and pings you", "signals monitored", "buyers circling", "right now"). | Plain wording: computed when the page opens; no alerts exist. | ☑ G3-commit |
 | G4 | Demo company unlabelled; "strategic mid" (D1). | Run on `loadActiveCompany()`; badge; "enterprise value today". | ☑ `913aca0` |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 5 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `bc00810` |
@@ -74,3 +74,13 @@ Same defect as X9 in three shared components that do not use the shared `Button`
 | Your trajectory | always "Tailwind", "compounding", "Each quarter lifts the headline into a higher band." | rule: ARR growth ≥ 30 % tailwind (as on Exit Readiness), "company input" |
 Header, summary metric and banker's take count favourable signals over the three rule-based ones ("3 of 3 rule-based signals favourable"); "conditions favor a near-term process" removed.
 *Verification:* `tsc -b`, eslint clean · Chromium demo/intake: "3 of 3 rule-based signals favourable"; buyer demand demo 5 / intake 11 "High" · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
+
+### G3 — False monitoring claims
+*Closed by:* `pages/ExitTiming.tsx` (text only).
+| Before | After |
+|---|---|
+| "ExitOS does it — ExitOS monitors the market continuously and pings you when the window opens." | "What ExitOS does — Recomputes this page from the company's figures and the registry snapshot each time it opens. There are no alerts — check back after updating your figures." |
+| "Market signals monitored" + "All signals computed from … the discovery pool …" | "Market signals" + "Computed when the page opens from the valuation engine, the 12 ranked buyers and the source-referenced acquisition history (registry snapshot). Nothing is monitored in the background." |
+| "Buyers circling — acquisition mode" (header, metric) | "Active-appetite buyers — of 12 ranked · registry attribute" |
+| File comment "The engine monitors the market signals…" | describes the page-open computation; no background monitoring |
+*Verification:* Chromium demo/intake: the only "monitor…" match is the new "Nothing is monitored in the background"; 0 matches for pings / circling / right now / acquisition mode · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
