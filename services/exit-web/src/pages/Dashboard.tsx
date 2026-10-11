@@ -238,16 +238,17 @@ const Dashboard: React.FC = () => {
       {run?.status === "complete" && (
         <section aria-label="Exit process status" className="flex flex-wrap items-center justify-between gap-3 border border-xo-verified/40 bg-xo-panel px-4 py-3">
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-xo-verified">Exit process active</div>
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-xo-verified">Exit process active <Provenance kind="demo">Demo run</Provenance></div>
             <div className="text-[13px] text-xo-text">Initialized {timeAgo(run.startedAt)} · {run.steps.filter((x) => x.status === "done").length}/{run.steps.length} engines complete</div>
           </div>
           <ul className="flex flex-wrap gap-2 text-[11px]">
             {run.artifacts.cim && <li className="border border-xo-line px-2 py-0.5 text-xo-muted">CIM · {run.artifacts.cim.wordCount.toLocaleString()} words</li>}
             {run.artifacts.teaser && <li className="border border-xo-line px-2 py-0.5 text-xo-muted">Teaser ready</li>}
-            {run.artifacts.ndasIssued && <li className="border border-xo-line px-2 py-0.5 text-xo-muted">{run.artifacts.ndasIssued.length} NDAs pre-issued</li>}
+            {run.artifacts.ndasIssued && <li className="border border-xo-line px-2 py-0.5 text-xo-muted">{run.artifacts.ndasIssued.length} NDA drafts (not sent)</li>}
             {run.artifacts.listing && <li className="border border-xo-line px-2 py-0.5 text-xo-muted">Listing {run.artifacts.listing.private.listingId.slice(0, 18)}…</li>}
-            {run.artifacts.offerLeaderName && <li className="border border-xo-verified/50 px-2 py-0.5 text-xo-verified">Leader: {run.artifacts.offerLeaderName}</li>}
+            {run.artifacts.offerLeaderName && <li className="border border-xo-caution/50 px-2 py-0.5 text-xo-caution">Sample-offer leader: {SAMPLE_OFFERS.find((o) => o.offerId === run.artifacts.offerLeaderName)?.buyerName ?? run.artifacts.offerLeaderName}</li>}
           </ul>
+          <p className="basis-full text-[11px] text-xo-faint">The run uses the demo company and sample offers; nothing was sent to any buyer.</p>
         </section>
       )}
 
@@ -349,12 +350,12 @@ const Dashboard: React.FC = () => {
             <p className="mt-3 text-[13px] text-xo-muted">{E.ctx.demandLabel === "High" ? "Buyer demand is higher than supply — a seller's market for your profile." : "Balanced demand — a clean process still clears."}</p>
           </div>
         </Section>
-        <Section title="Deal funnel" eyebrow="From the registry to the leading bid — this deal's live state" className="lg:col-span-8"
-          foot="Counts are the engines' live state for this deal.">
+        <Section title="Deal funnel" eyebrow="From the buyer registry to the leading bid" className="lg:col-span-8"
+          foot="Registry and matches come from the engines for this company. The NDA, offer and bid stages are demo fixtures (sample NDAs and sample offers); they will reflect real activity only once buyers sign or bid.">
           <ol className="space-y-1.5 px-4 py-3">
             {funnel.map((f) => (
-              <li key={f.label} className="grid grid-cols-[8rem_1fr] items-center gap-3 text-[12px]">
-                <span className="text-right text-xo-muted">{f.label}</span>
+              <li key={f.label} className="grid grid-cols-[9.5rem_1fr] items-center gap-3 text-[12px]">
+                <span className="flex items-center justify-end gap-1.5 text-right text-xo-muted">{f.sample && <Provenance kind="demo">Sample</Provenance>}{f.label}</span>
                 <Bar value={Math.max(4, Math.round((f.n / funnelTop) * 100))} label={f.n.toLocaleString()} width="w-full" />
               </li>
             ))}

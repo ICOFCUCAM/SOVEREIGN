@@ -31,7 +31,7 @@ export function heatFor(buyers: readonly BuyerCandidate[]): { country: string; b
 export interface FunnelStage { readonly label: string; readonly n: number; readonly sample: boolean }
 /** Registry → matched come from the engines; NDA/offer stages come from demo fixtures. */
 export const funnelFor = (matched: number, sampleNdas: number, sampleOffers: number, hasLeader: boolean): FunnelStage[] => [
-  { label: "Registry mandates", n: MARKET.buyers, sample: false },
+  { label: "Registry mandates", n: MARKET.buyers, sample: false },  // curated buyer registry
   { label: "Matched", n: matched, sample: false },
   { label: "Under NDA", n: sampleNdas, sample: true },
   { label: "Offers in hand", n: sampleOffers, sample: true },
