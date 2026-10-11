@@ -1,7 +1,9 @@
 import React, { useMemo } from "react";
 import { fmtMoney } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric } from "../components/xo";
+import { PageHeader, Section, Metric, Provenance } from "../components/xo";
+import { SAMPLE_COMPANY } from "../lib/profile";
+import { loadActiveCompany } from "../lib/active-company";
 import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_WATERFALLS, SAMPLE_OFFERS, OFFER_COMPARISON, CAPTABLE_ANALYSIS } from "../lib/engines";
 
@@ -22,6 +24,9 @@ const ALLOC: { label: string; pct: number; note: string; tint: string }[] = [
 ];
 
 const Wealth: React.FC = () => {
+  // Offers and the cap table are the demo company's samples; an intake holds
+  // neither, so this page stays on demo data and says so.
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
   const leadingOffer = SAMPLE_OFFERS.find((o) => o.offerId === OFFER_COMPARISON.leader) ?? SAMPLE_OFFERS[0];
   const wf = (OFFER_WATERFALLS.find((w) => w.offerId === leadingOffer.offerId) ?? OFFER_WATERFALLS[0]).waterfall;
 
@@ -81,8 +86,9 @@ const Wealth: React.FC = () => {
 
   return (
     <div data-page="liquidity-transition" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Wealth · Liquidity" title="Liquidity &amp; Transition"
-        badge={<span className="text-[12px] text-xo-muted">After the wire</span>} />
+      <PageHeader eyebrow={`◉ Wealth · Liquidity · Demo company: ${SAMPLE_COMPANY.name}`} title="Liquidity &amp; Transition"
+        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">After the wire</span></>}
+        description={<>Sample offers and the sample cap table of the demo company ({SAMPLE_COMPANY.name}).{fromIntake ? " Your intake has no offers or cap table, so these figures are not yours." : ""}</>} />
 
       <section aria-label="Proceeds summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3">
         <div className="bg-xo-panel"><Metric label="After-tax, founder group" emphasis value={<span className="text-xo-verified">{fmtMoney(afterTax)}</span>} sub={leadingOffer.buyerName} /></div>
