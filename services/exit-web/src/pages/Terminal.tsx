@@ -115,7 +115,7 @@ const Terminal: React.FC = () => {
   const sectorLabel = SECTOR_LABEL[company.sector] ?? company.sector;
 
   return (
-    <div className="space-y-3 text-xo-text">
+    <div data-page="terminal" className="space-y-3 text-xo-text">
       {plan === "free" && <BuyerInterestGate />}
 
       {/* ── 1 · MANDATE ─ identity and data state ───────────────────── */}
@@ -174,7 +174,7 @@ const Terminal: React.FC = () => {
           {[
             <Metric key="m" label="Most likely buyer" emphasis provenance="registry"
               value={lead ? `${lead.probability.pct}%` : "—"}
-              sub={lead ? <><Link to={`/console/buyer/${lead.profile.buyer_id}`} className="text-xo-action hover:underline">{lead.profile.name}</Link> · acquisition probability</> : "No ranked buyer"} />,
+              sub={lead ? <><Link to={`/console/buyer/${lead.profile.buyer_id}`} className="text-xo-action hover:underline rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{lead.profile.name}</Link> · acquisition probability</> : "No ranked buyer"} />,
             <Metric key="q" label="Qualified buyers" provenance="model" value={String(INST.buyerUniverse.qualified)} sub={`of ${INST.buyerUniverse.scored} scored · ${activeAcquirers} active in the registry`} />,
             <Metric key="c" label="Confidence" provenance="model" value={`${INST.confidence.score}%`} sub={`${INST.confidence.tier} · ${INST.comparablesUsed} comparables`} />,
             <Metric key="p" label="Applied premium" provenance={INST.premium.basis === "neutral_prior" ? "prior" : "model"} value={`+${pct(INST.premium.appliedPct)}`} sub={`${PREMIUM_BASIS[INST.premium.basis]} · range ${pct(INST.premium.rangeLowPct)}–${pct(INST.premium.rangeHighPct)}`} />,
@@ -189,7 +189,7 @@ const Terminal: React.FC = () => {
         {[
           { k: "Where you stand", body: <>Strategic value <span className="font-mono text-xo-text">{fmtUsdShort(INST.headline.mid)}</span>, readiness <span className="font-mono text-xo-text">{Math.round(ra.currentScore)}</span>, {INST.buyerUniverse.qualified} qualified buyers.</> },
           { k: "Market context", body: <>{activeAcquirers} acquirers with indexed activity; {INST.comparablesUsed} comparable transactions on record (latest {INST.provenanceSummary.mostRecentDataDate ?? "—"}).</> },
-          { k: "Recommended next move", body: lead ? <>Open outreach to <Link to={`/console/buyer/${lead.profile.buyer_id}`} className="font-semibold text-xo-action hover:underline">{lead.profile.name}</Link> — {lead.probability.pct}% probability, close-weighted {fmtUsdShort(lead.exp.expectedClose)}.</> : <>List on the exchange to surface the buyer set.</> },
+          { k: "Recommended next move", body: lead ? <>Open outreach to <Link to={`/console/buyer/${lead.profile.buyer_id}`} className="font-semibold text-xo-action hover:underline rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{lead.profile.name}</Link> — {lead.probability.pct}% probability, close-weighted {fmtUsdShort(lead.exp.expectedClose)}.</> : <>List on the exchange to surface the buyer set.</> },
           { k: "Expected outcome", body: <>Strategic range <span className="font-mono text-xo-text">{fmtUsdShort(INST.headline.low)}–{fmtUsdShort(INST.headline.high)}</span>, close {closeRange}, +{fmtUsdShort(uplift)} from readiness.</> },
         ].map((c) => (
           <div key={c.k} className="bg-xo-panel px-4 py-3">
@@ -201,7 +201,7 @@ const Terminal: React.FC = () => {
 
       {lead && (
         <p className="border-l-2 border-xo-brass bg-xo-panel px-4 py-2.5 text-[13px] leading-relaxed text-xo-muted">
-          <Link to={`/console/buyer/${lead.profile.buyer_id}`} className="font-semibold text-xo-text hover:underline">{lead.profile.name}</Link>{" "}
+          <Link to={`/console/buyer/${lead.profile.buyer_id}`} className="font-semibold text-xo-text hover:underline rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{lead.profile.name}</Link>{" "}
           is <span className="font-mono font-semibold text-xo-verified">{lead.probability.pct}%</span> likely to acquire a company like {company.name}.{" "}
           {buyerRationale(lead.profile, BASELINE, tokens, company.sector).thesis}{" "}
           Their own record: premium {leadPremium != null ? <span className="font-mono text-xo-text">+{pct(leadPremium)}</span> : "not disclosed"} · median close {leadCloseDays != null ? <span className="font-mono text-xo-text">{leadCloseDays}d</span> : "not disclosed"}.
@@ -237,7 +237,7 @@ const Terminal: React.FC = () => {
                     <React.Fragment key={r.profile.buyer_id}>
                       <tr className={`border-b border-xo-line/60 ${open ? "bg-xo-raise" : "hover:bg-xo-raise/60"}`}>
                         <th scope="row" className="px-4 py-2 text-left font-normal">
-                          <Link to={`/console/buyer/${r.profile.buyer_id}`} className="font-semibold text-xo-text hover:text-xo-action hover:underline">{r.profile.name}</Link>
+                          <Link to={`/console/buyer/${r.profile.buyer_id}`} className="font-semibold text-xo-text hover:text-xo-action hover:underline rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{r.profile.name}</Link>
                           <Disclosure open={open} onToggle={() => setOpenWhy(open ? null : r.profile.buyer_id)} controls={whyId} className="ml-2">
                             {open ? "Hide evidence" : "Evidence"}<span className="sr-only"> for {r.profile.name}</span>
                           </Disclosure>
@@ -460,7 +460,7 @@ const Terminal: React.FC = () => {
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action">
           <span>
             <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-xo-faint">Supporting market intelligence</span>
-            <span className="block text-[14px] font-semibold text-xo-text">Appetite, sector volume, registry extremes, strategic themes and recent entries</span>
+            <h2 className="text-[14px] font-semibold text-xo-text">Appetite, sector volume, registry extremes, strategic themes and recent entries</h2>
           </span>
           <span aria-hidden className="text-xo-action transition-transform group-open:rotate-180">▾</span>
         </summary>
@@ -472,7 +472,7 @@ const Terminal: React.FC = () => {
               <ul className="divide-y divide-xo-line">
                 {ACTIVE.map(({ p, a }) => (
                   <li key={p.buyer_id} className="flex items-center justify-between gap-2 px-4 py-2 text-[12px]">
-                    <span className="min-w-0 truncate"><Link to={`/console/buyer/${p.buyer_id}`} className="font-semibold text-xo-text hover:text-xo-action hover:underline">{p.name}</Link> <span className="text-xo-faint">{p.deals_12m} in 12m</span></span>
+                    <span className="min-w-0 truncate"><Link to={`/console/buyer/${p.buyer_id}`} className="font-semibold text-xo-text hover:text-xo-action hover:underline rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{p.name}</Link> <span className="text-xo-faint">{p.deals_12m} in 12m</span></span>
                     <Bar value={a.score} label={String(a.score)} width="w-12" />
                   </li>
                 ))}

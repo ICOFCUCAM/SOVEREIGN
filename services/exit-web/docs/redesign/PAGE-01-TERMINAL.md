@@ -5,7 +5,7 @@
 | Route | `/console` (index route inside `/console/*`) |
 | Component | `src/pages/Terminal.tsx` |
 | Access policy | `/console` — role **founder** (`lib/access.ts` NAV "Intelligence Terminal"); no plan gate on the page itself. Free plan renders `BuyerInterestGate` above it. |
-| Status | Gaps documented below; each is closed in its own commit and marked here. |
+| Status | All nine gaps (G1–G9) closed, each in its own commit, marked below. **Awaiting review — Page 02 not started.** |
 
 Process rule for this page: **document a gap → close it → verify → mark it closed**, one at a time.
 
@@ -74,7 +74,7 @@ Status: ☐ open · ☑ closed (commit noted)
 | G5 | **Ambiguous expected value.** "Expected value $102M–$102M" is two different measures (close-weighted, offer) shown as a range; priors marked only by `*`. | `Terminal.tsx:152-154` | Separate "Expected offer" and "Close-weighted" columns; mark priors in words ("prior") with an explanation, not an asterisk alone. | ☑ `e66e427` |
 | G6 | **Weak hierarchy.** Seven metrics equally prominent; the decision (who to approach, what it's worth) competes with secondary telemetry. | screenshot | Mandate band → valuation hero with range → decision metrics → buyer intelligence as the centre → evidence → execution rail → supporting intelligence (progressive disclosure). | ☑ `16e31a3` |
 | G7 | **Execution rail hides plan gates.** Outreach, NDA and Documents are Pro (or Starter) surfaces; a free founder clicking them hits the paywall unannounced. | `lib/access.ts` NAV `pro`/`starter` | Mark each action with its real access requirement using `needsUpgrade()`; links unchanged. | ☑ `fde2f99` |
-| G8 | **Accessibility.** 6 contrast failures, no `h1`, keyboard-unreachable scroll region, `why▾` lacks `aria-expanded`, probability bar is colour-only decoration. | axe baseline | Contrast-checked tokens, one `h1`, focusable scroll regions, proper disclosure buttons, numeric labels for every bar. | ☐ |
+| G8 | **Accessibility.** 6 contrast failures, no `h1`, keyboard-unreachable scroll region, `why▾` lacks `aria-expanded`, probability bar is colour-only decoration. | axe baseline | Contrast-checked tokens, one `h1`, focusable scroll regions, proper disclosure buttons, numeric labels for every bar. | ☑ G8-commit |
 | G9 | **No design system for ExitOS's next pages.** Shared `workstation.tsx` primitives serve 4 pages; restyling them would change pages not yet reviewed. | `workstation.tsx` header comment | Add an additive ExitOS design system (`xo` tokens + `src/components/xo/`) used by the Terminal only; other pages unchanged until their turn. | ☑ `7b04e58` |
 
 ### Defects found outside this page (recorded, not changed)
@@ -209,3 +209,37 @@ Verification: `tsc -b` pass · eslint clean · Chromium free + pro at 1440/900/3
 Example (demo company, Microsoft): probability 74% = appetite 50 + overlap … ; data confidence High; 419 events indexed; **0 verified**; 130 with disclosed value — see X6.
 
 Verification: `tsc -b` pass · eslint clean · Chromium: drawer opens by keyboard (Enter), `aria-expanded` false → true, `aria-controls` points at the drawer row; section text checked (methods 60 % revenue multiple / 40 % EBITDA multiple; 34 figures by source; disclaimer present) · 0 page errors · axe on this page's content clean; remaining findings are shell chrome → X5.
+
+### G8 — Accessibility
+*Documented:* gap register row G8. *Closed by:* the `xo` primitives (G9) adopted in G6, plus this commit (heading in the supporting-intelligence summary, focus rings on in-text links, `data-page="terminal"` root used to scope checks).
+
+| Baseline finding | Now |
+|---|---|
+| `color-contrast` ×6 (table headers 3.82:1, gate text) | 0 on page content — all text uses `xo` tokens ≥ 5.2:1 |
+| `page-has-heading-one` | one `h1` (company name); h2 per region; h3 inside drawers, the methodology section and supporting panels |
+| `scrollable-region-focusable` (page tables) | tables sit in `ScrollRegion` (`role=region`, named, `tabIndex=0`) |
+| why▾ without state | `Disclosure` button: `aria-expanded`, `aria-controls`, screen-reader text "Evidence for {buyer}" |
+| colour-only bars | every `Bar` prints its number; fill is `aria-hidden`; EV band is `aria-hidden` with low/mid/high printed |
+| lock glyph | `aria-hidden`; requirement given in words ("Requires Active Mandate") |
+
+Measured (Chromium, `reducedMotion: reduce`, one evidence drawer and the supporting section open; axe 4 rules wcag2a/aa, 21a/aa, 22aa, best-practice, scoped to `[data-page=terminal]`):
+
+| Plan · width | Page errors | `h1` | axe violations | Tab stops | Without visible focus |
+|---|---|---|---|---|---|
+| free · 1440 | 0 | 1 | **0** | 56 | 0 |
+| free · 390 | 0 | 1 | **0** | 56 | 0 |
+| pro · 1440 | 0 | 1 | **0** | 56 | 0 |
+| pro · 390 | 0 | 1 | **0** | 56 | 0 |
+
+Not covered here: shell chrome findings (X5). Screen-reader testing with a real AT (NVDA/VoiceOver) was **not performed** — NOT VERIFIED.
+
+---
+
+## Final verification (after G1–G9)
+| Check | Result |
+|---|---|
+| `tsc -b` | pass |
+| `eslint src` | 3 errors / 2 warnings — the same pre-existing ones (X3); none in changed files |
+| `vitest run` | **28 files, 178/178 pass** (baseline 168 + 6 design-system + 4 sector-signal tests) |
+| `vite build` | pass (existing chunk-size warning) |
+| Browser | see G8 table; also 900 px checked during G6 |
