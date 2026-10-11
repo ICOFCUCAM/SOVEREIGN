@@ -37,4 +37,12 @@ Ties readiness to money: the score, value now vs after fixes, the value left, a 
 | G3 | **Mislabels:** "Market window" is the company's market-growth input; "strategic mid, today" (D1); verdict thresholds and category scoring unexplained. | "Market growth (company input)"; "enterprise value today"; thresholds shown with the verdict; categories and impacts labelled rule-based. | ☐ |
 | G4 | Demo company unlabelled. | `dealContextFor(loadActiveCompany())` + analysis; badge. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, 8 contrast failures, old primitives. | Rebuild on `xo`. | ☐ |
+| G6 | Design: no `h1`, 8 contrast failures, old primitives. | Rebuild on `xo`. | ☑ G6-commit |
+
+---
+
+## Closure log
+
+### G6 — Design
+*Closed by:* `pages/Readiness.tsx` rebuilt on `xo` (`PageHeader` `h1` + report link announced as new tab, five summary metrics, gauge (decorative SVG, number printed), value cascade as a definition list, verdict with ✓/! plus screen-reader words, ten categories as an ordered list with numeric bars). Shared `Evidence` tooltip gained an additive `align="right"` option so right-edge tooltips no longer widen the page (default unchanged; Terminal re-checked). Content carried over verbatim; G1–G5 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium free/pro 1440/390: 0 errors, `h1` 1, no overflow, axe **0** (was 8), all tab stops with visible focus.
