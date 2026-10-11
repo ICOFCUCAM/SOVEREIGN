@@ -41,7 +41,7 @@ After the deal: what the founder walks away with (headline → preferences → t
 | G3 | Tax assumption unlabelled. | State it wherever used: flat 23.8 % (US federal LTCG + NIIT), whole amount, no cost basis, no state tax, no QSBS. | ☑ `ce122ae` |
 | G4 | **Invented statuses and a second allocation** ("Allocated", "Reserved", "Recommended", "Setup"; 12/30/8 … %). | One illustrative template (labelled "not a recommendation"); the topics list without invented amounts or statuses; family-office line states its $50M rule. | ☑ `f84988c` |
 | G5 | Overclaims (runs/models/schedules/drafts; keeps threads; readiness clock for round two). | Plain wording. | ☑ `45169e6` |
-| G6 | Demo offers and cap table unlabelled. | Badge and line: sample offers and cap table (demo), also when an intake is saved (intake has no offers or cap table). | ☑ G6-commit |
+| G6 | Demo offers and cap table unlabelled. | Badge and line: sample offers and cap table (demo), also when an intake is saved (intake has no offers or cap table). | ☑ `ac40574` |
 | G7 | Fake live tape. | `RegistryTape`. | ☐ |
 | G8 | Design: no `h1`, old primitives. | Rebuild on `xo`. | ☑ `641026d` |
 
