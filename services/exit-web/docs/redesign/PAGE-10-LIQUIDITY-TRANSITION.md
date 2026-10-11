@@ -37,7 +37,7 @@ After the deal: what the founder walks away with (headline → preferences → t
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Wrong leading offer** (id compared with a buyer name). | Match on `offerId`; the page follows the engine's leader. | ☑ `3f5e167` |
-| G2 | **Cascade and tranches mislabelled and miscomputed** ("your" = founder group; "after preferences" = risk haircut; haircut × mix; escrow ignored; timings invented). | Cascade: headline → preference stack → founders' gross (named as the founder group) → risk-adjusted value (engine haircuts stated) → after the tax assumption. Tranches from the engine's nominal cash / stock / earnout for the founders; escrow held back from cash per the offer term; timings from the offer where present, else "not in the offer terms". | ☐ |
+| G2 | **Cascade and tranches mislabelled and miscomputed** ("your" = founder group; "after preferences" = risk haircut; haircut × mix; escrow ignored; timings invented). | Cascade: headline → preference stack → founders' gross (named as the founder group) → risk-adjusted value (engine haircuts stated) → after the tax assumption. Tranches from the engine's nominal cash / stock / earnout for the founders; escrow held back from cash per the offer term; timings from the offer where present, else "not in the offer terms". | ☑ G2-commit |
 | G3 | Tax assumption unlabelled. | State it wherever used: flat 23.8 % (US federal LTCG + NIIT), whole amount, no cost basis, no state tax, no QSBS. | ☐ |
 | G4 | **Invented statuses and a second allocation** ("Allocated", "Reserved", "Recommended", "Setup"; 12/30/8 … %). | One illustrative template (labelled "not a recommendation"); the topics list without invented amounts or statuses; family-office line states its $50M rule. | ☐ |
 | G5 | Overclaims (runs/models/schedules/drafts; keeps threads; readiness clock for round two). | Plain wording. | ☐ |
@@ -59,3 +59,12 @@ After the deal: what the founder walks away with (headline → preferences → t
 ### G1 — Wrong leading offer
 *Closed by:* `pages/Wealth.tsx`: `o.buyerName === OFFER_COMPARISON.leader` → `o.offerId === OFFER_COMPARISON.leader` (`leader` is an offer id). The page now follows the engine's leader, **Microsoft Industry Solutions ($165M)**; before, it always fell back to the first sample offer (Vista, $132M).
 *Verification:* `tsc -b` pass · engine check (vitest scratch run): `leader = "o-002"` · Chromium: "What you walk away with · Microsoft Industry Solutions" (was Vista Enterprise Software Bolt-On).
+
+### G2 — Cascade and tranches mislabelled and miscomputed
+*Closed by:* `pages/Wealth.tsx`.
+- **Cascade** now: Offer headline $165,000,000 → Preference stack $33,400,000 ("paid to preferred holders first") → **Founders' gross** $103,875,358 ("4 founder holders · 39.2% founder stake" — the founder group, not "you") → After taxes $79,153,023. The engine's **risk-adjusted value** ($94,526,575, stock −15 %, earnout −45 %) is shown on its own line, labelled, and no longer passed off as "after preferences".
+- **Tax base** is the founders' gross (nominal proceeds), not the risk-adjusted value. *Calculation change*, needed because the old base mixed a probability haircut into a tax estimate.
+- **Tranches** come from the engine's per-holder nominal cash / stock / earnout (before: after-tax risk-adjusted value × the mix again). **Escrow** from the offer term (15 % / 24 mo) is held back from cash at close and shown as its own tranche. Lock-up and earnout timing say "not in the offer terms" (were "~6–12 months", "~24 months").
+- Summary metric "After-tax, founder group"; banker's take "after tax to the founder group … if every tranche pays in full".
+Arithmetic check (Microsoft offer): founders' cash $62.33M − escrow $15.58M = $46.74M × 0.762 = **$35,618,860** at close; tranches sum to $79,153,023 = after taxes.
+*Verification:* `tsc -b`, eslint clean · Chromium figures above · Active Mandate 1440/390: 0 errors, axe 0, no overflow.

@@ -25,23 +25,40 @@ const Wealth: React.FC = () => {
   const leadingOffer = SAMPLE_OFFERS.find((o) => o.offerId === OFFER_COMPARISON.leader) ?? SAMPLE_OFFERS[0];
   const wf = (OFFER_WATERFALLS.find((w) => w.offerId === leadingOffer.offerId) ?? OFFER_WATERFALLS[0]).waterfall;
 
-  const founderGross = wf.distributions.filter((d) => d.role === "founder").reduce((s, d) => s + d.grossProceedsUsd, 0);
-  const afterPref = wf.netToFoundersUsd;
-  const taxDue = afterPref * TAX;
-  const afterTax = afterPref - taxDue;
+  // The founder group = every founder-role holder in the cap table (the
+  // engine's split). Nominal amounts first; the engine's risk-adjusted value
+  // (stock and earnout haircuts) is shown separately, never mixed in.
+  const founders = wf.distributions.filter((d) => d.role === "founder");
+  const sum = (f: (d: typeof founders[number]) => number): number => founders.reduce((s, d) => s + f(d), 0);
+  const founderGross = sum((d) => d.grossProceedsUsd);
+  const founderCash = sum((d) => d.cashUsd);
+  const founderStock = sum((d) => d.stockValueUsd);
+  const founderEarnout = sum((d) => d.earnoutValueUsd);
+  const riskAdjusted = wf.netToFoundersUsd;
+  const taxDue = founderGross * TAX;
+  const afterTax = founderGross - taxDue;
 
-  // Liquidity timeline — when each tranche actually lands, by consideration mix.
+  // Escrow is a term of the offer ("15% / 24mo"): that share of the price is
+  // held back from the cash at close, pro rata, until release.
+  const escrowTerm = leadingOffer.terms.find((t) => t.category === "escrow");
+  const escrowPct = escrowTerm?.numeric ?? 0;
+  const escrowMonths = escrowTerm?.value.match(/(\d+)\s*mo/)?.[1];
+  const founderEscrow = Math.min(founderCash, founderGross * escrowPct);
+  const net = 1 - TAX;
+
+  // Liquidity timeline — when each tranche lands (after the tax assumption).
   const tranches = [
-    { label: "Cash at close",      when: "Day 0",        usd: afterTax * leadingOffer.cashPct,    tint: "#34d399" },
-    { label: "Stock · lock-up",    when: "~6–12 months", usd: afterTax * leadingOffer.stockPct,   tint: "#60a5fa" },
-    { label: "Earnout · milestones", when: "~24 months", usd: afterTax * leadingOffer.earnoutPct, tint: "#fbbf24" },
+    { label: "Cash at close",  when: "day 0", usd: (founderCash - founderEscrow) * net },
+    { label: "Escrow release", when: escrowMonths ? `after ${escrowMonths} months, if no claims` : "per the escrow term", usd: founderEscrow * net },
+    { label: "Stock",          when: "lock-up not in the offer terms", usd: founderStock * net },
+    { label: "Earnout",        when: "milestones and timing not in the offer terms", usd: founderEarnout * net },
   ];
 
   const cascade = [
-    { label: "Offer headline",   value: leadingOffer.headlinePriceUsd, color: "text-white",     note: leadingOffer.buyerName },
-    { label: "Your gross",       value: founderGross,                  color: "text-white/85",  note: `${(CAPTABLE_ANALYSIS.ownershipByRole.founder * 100).toFixed(1)}% founder stake` },
-    { label: "After preferences", value: afterPref,                    color: "text-loi-300",   note: `pref stack ${fmtMoney(wf.preferenceTotalUsd)}` },
-    { label: "After taxes",      value: afterTax,                      color: "text-deal-300",  note: `~${(TAX * 100).toFixed(1)}% est. capital gains` },
+    { label: "Offer headline",   value: leadingOffer.headlinePriceUsd, note: leadingOffer.buyerName },
+    { label: "Preference stack", value: wf.preferenceTotalUsd,         note: "paid to preferred holders first" },
+    { label: "Founders' gross",  value: founderGross,                  note: `${founders.length} founder holders · ${(CAPTABLE_ANALYSIS.ownershipByRole.founder * 100).toFixed(1)}% founder stake` },
+    { label: "After taxes",      value: afterTax,                      note: `~${(TAX * 100).toFixed(1)}% est. capital gains` },
   ];
 
   const portfolioUsd = afterTax * ALLOC[0].pct;
@@ -68,7 +85,7 @@ const Wealth: React.FC = () => {
         badge={<span className="text-[12px] text-xo-muted">After the wire</span>} />
 
       <section aria-label="Proceeds summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3">
-        <div className="bg-xo-panel"><Metric label="After-tax net" emphasis value={<span className="text-xo-verified">{fmtMoney(afterTax)}</span>} sub={leadingOffer.buyerName} /></div>
+        <div className="bg-xo-panel"><Metric label="After-tax, founder group" emphasis value={<span className="text-xo-verified">{fmtMoney(afterTax)}</span>} sub={leadingOffer.buyerName} /></div>
         <div className="bg-xo-panel"><Metric label="Tax reserve" value={fmtMoney(taxDue)} sub="set aside first" /></div>
         <div className="bg-xo-panel"><Metric label="To portfolio" value={fmtMoney(portfolioUsd)} sub="diversified" /></div>
       </section>
@@ -80,7 +97,7 @@ const Wealth: React.FC = () => {
         <div className="px-4 py-3">
           <p className="text-[14px] leading-relaxed">At lock-up, move <span className="font-semibold">{Math.round(ALLOC[0].pct * 100)}%</span> of your after-tax proceeds out of concentrated stock and into a diversified portfolio.</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(afterTax)}</span> after-tax net to you from the {leadingOffer.buyerName} deal.</TakeCell>
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(afterTax)}</span> after tax to the founder group from the {leadingOffer.buyerName} offer, if every tranche pays in full.</TakeCell>
             <TakeCell k="If you wait">Holding the position concentrated re-exposes your liquidity to a single company's risk after you've already de-risked the exit.</TakeCell>
             <TakeCell k="First">Reserve <span className="font-mono">{fmtMoney(taxDue)}</span> for taxes before allocating anything else.</TakeCell>
             <TakeCell k="ExitOS does it">ExitOS runs the waterfall, models the tax, schedules the liquidity and drafts the diversification plan.</TakeCell>
@@ -98,6 +115,7 @@ const Wealth: React.FC = () => {
             </li>
           ))}
         </ol>
+        <p className="border-t border-xo-line px-4 py-2 text-[12px] text-xo-muted">Risk-adjusted value (engine): <span className="font-mono font-semibold tabular-nums text-xo-text">{fmtMoney(riskAdjusted)}</span> before tax — stock discounted 15% for illiquidity and earnout 45% for the chance it does not pay. The figures above assume every tranche pays in full.</p>
       </Section>
 
       <Section title="WealthOS · founder lifecycle" className="border border-xo-line">
@@ -118,7 +136,7 @@ const Wealth: React.FC = () => {
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-2">
         <Section title="When your money lands">
           <div className="px-4 py-3">
-            <p className="text-[12px] text-xo-muted">After-tax proceeds by consideration mix — {Math.round(leadingOffer.cashPct * 100)}% cash · {Math.round(leadingOffer.stockPct * 100)}% stock · {Math.round(leadingOffer.earnoutPct * 100)}% earnout.</p>
+            <p className="text-[12px] text-xo-muted">Founder group, after tax, by consideration mix — {Math.round(leadingOffer.cashPct * 100)}% cash · {Math.round(leadingOffer.stockPct * 100)}% stock · {Math.round(leadingOffer.earnoutPct * 100)}% earnout{escrowTerm ? <>; escrow {escrowTerm.value} held back from the cash</> : null}.</p>
             <ol className="mt-3 space-y-3">
               {tranches.map((t) => (
                 <li key={t.label}>
@@ -133,7 +151,7 @@ const Wealth: React.FC = () => {
               ))}
             </ol>
             <p className="mt-3 border-t border-xo-line pt-2 text-[12px] text-xo-muted">
-              Liquid on day one: <span className="font-mono font-semibold text-xo-verified">{fmtMoney(tranches[0].usd)}</span> — the rest unlocks as lock-ups lapse and earnout milestones clear.
+              Liquid on day one: <span className="font-mono font-semibold text-xo-verified">{fmtMoney(tranches[0].usd)}</span> — escrow, stock and earnout follow on their own terms.
             </p>
           </div>
         </Section>
