@@ -37,7 +37,7 @@ Tells the founder *when* to sell: a recommended window in months, the value of w
 | G3 | **False monitoring claims** ("monitors continuously and pings you", "signals monitored", "buyers circling", "right now"). | Plain wording: computed when the page opens; no alerts exist. | ☐ |
 | G4 | Demo company unlabelled; "strategic mid" (D1). | Run on `loadActiveCompany()`; badge; "enterprise value today". | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, 5 contrast failures, old primitives. | Rebuild on `xo`. | ☑ G6-commit |
+| G6 | Design: no `h1`, 5 contrast failures, old primitives. | Rebuild on `xo`. | ☑ `bc00810` |
 
 ### X11 — Shared mid-green buttons (found here) — documented before the fix
 Same defect as X9 in three shared components that do not use the shared `Button`: `BankerTake` CTA (used by 17 pages), the Shell "Upgrade to Pro" link and the report toolbar "Download PDF" (`lib/report-ui.tsx`) — white text on `deal-600`, 3.77:1. *Fix:* `bg-deal-700` with hover `deal-600`, as X9. Page-local copies (Documents, DiligenceAI) are fixed with their pages.
