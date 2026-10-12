@@ -8,6 +8,7 @@ import Instrument from "../components/Instrument";
 import LedgerTable from "../components/LedgerTable";
 import CountUp from "../components/CountUp";
 import ChapterRail from "../components/ChapterRail";
+import PhoneActionBar from "../components/PhoneActionBar";
 import ModulePreview from "../components/ModulePreview";
 import SignatureLine from "../components/SignatureLine";
 import AmbientVideo from "../components/AmbientVideo";
@@ -64,6 +65,7 @@ const Landing: React.FC = () => {
   return (
     <MarketingChrome active="home">
       <ChapterRail />
+      <PhoneActionBar />
       <div className="relative">
         <SignatureLine />
       {/* ===== 01 · HERO — the deal atlas (Z1/Z2, after the owner's index(8).html, on the homepage spec) ===== */}
