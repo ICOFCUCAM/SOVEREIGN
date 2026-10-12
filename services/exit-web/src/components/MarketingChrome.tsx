@@ -116,7 +116,12 @@ export const PageHero: React.FC<{ chapter: string; title: string; deck: React.Re
 
 /** A chapter label — "02 / The thesis" — in the accent colour, mono. */
 export const Chapter: React.FC<{ n: string; children: React.ReactNode; dark?: boolean }> = ({ n, children, dark }) => (
-  <div className={`font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] ${dark ? "text-blue-300" : "text-blue-600"}`}>{n} / {children}</div>
+  // the one chapter opener (EE13): the number set in the serif, a short rule, the label in mono
+  <div className={`flex items-center gap-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] ${dark ? "text-blue-300" : "text-blue-600"}`}>
+    <span className="font-editorial text-[15px] font-semibold not-italic tracking-normal tabular-nums">{n}</span>
+    <span aria-hidden className={`h-px w-8 shrink-0 ${dark ? "bg-blue-300/50" : "bg-blue-600/50"}`} />
+    <span className="sr-only">/</span><span>{children}</span>
+  </div>
 );
 
 /** Editorial headline lines: every line but the last in ink, the last in the

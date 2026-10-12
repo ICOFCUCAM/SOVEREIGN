@@ -119,9 +119,9 @@ const Landing: React.FC = () => {
         {/* the capability strip: a lit seam on top; each capability lights its own edge on hover (EE7) */}
         <ul aria-label={t("hx.strip")} className="ex-seam relative grid bg-ex-0/95 text-white sm:grid-cols-2 lg:grid-cols-5">
           {([["◎", 1], ["♧", 2], ["↗", 3], ["▤", 4], ["⌁", 5]] as const).map(([icon, k], i) => (
-            <li key={k} className={`group relative flex gap-4 px-5 py-6 transition-colors duration-300 hover:bg-white/[0.03] sm:px-8 lg:px-6 ${i ? "border-t border-white/10 sm:border-t-0 lg:border-l" : ""} ${i % 2 ? "sm:border-l" : ""} sm:border-white/10 lg:first:pl-[max(1.5rem,calc((100vw-1480px)/2+3rem))]`}>
+            <li key={k} className={`group relative flex gap-3.5 px-5 py-6 transition-colors duration-300 hover:bg-white/[0.03] sm:px-8 lg:px-5 ${i ? "border-t border-white/10 sm:border-t-0 lg:border-l" : ""} ${i % 2 ? "sm:border-l" : ""} sm:border-white/10 lg:first:pl-[max(1.5rem,calc((100vw-1480px)/2+3rem))]`}>
               <span aria-hidden className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-blue-400 transition-transform duration-500 group-hover:scale-x-100 motion-reduce:transition-none" />
-              <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-full font-editorial text-[19px] leading-none text-blue-300 ring-1 ring-white/10 transition duration-300 group-hover:ring-blue-400/60">{icon}</span>
+              <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-editorial text-[17px] leading-none text-blue-300 ring-1 ring-white/10 transition duration-300 group-hover:ring-blue-400/60">{icon}</span>
               <span>
                 <span className="block pt-0.5 font-editorial text-[17px] font-semibold">{t(`hx.s${k}`)}</span>
                 <span className="mt-1.5 block max-w-[200px] text-[12px] leading-relaxed text-blue-100/75">{t(`hx.s${k}d`)}</span>
