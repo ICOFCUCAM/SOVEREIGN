@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { fmtMoney, ConfidenceChip } from "../lib/ui";
-import { PageHeader, Section, Metric as XMetric, ScrollRegion, XO_INPUT, XO_LABEL } from "../components/xo";
+import { PageHeader, Section, Metric as XMetric, ScrollRegion, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 import { MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { runStrategySimulator, runInstitutionalValuation, type BuyerType, type CompanyProfile, type StrategyOutput } from "@exit/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
-import { VALUATION_CANONICAL } from "../lib/engines";
+import { loadActiveCompany } from "../lib/active-company";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { emitTelemetry } from "../lib/telemetry";
 import BankerTake from "../components/BankerTake";
 
@@ -208,7 +208,10 @@ const SCENARIOS: readonly ScenarioDef[] = [
 interface Metric { label: string; base: number; scen: number; fmt: (n: number) => string; higherIsBetter: boolean; }
 
 const Simulator: React.FC = () => {
-  const [targetUsd,     setTargetUsd]     = useState<number>(Math.round(VALUATION_CANONICAL.headline.mid));
+  // The founder's saved intake when there is one; the demo company otherwise.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const canonicalMid = useMemo(() => canonicalValuationFor(company).headline.mid, [company]);
+  const [targetUsd,     setTargetUsd]     = useState<number>(Math.round(canonicalMid));
   const [minCashPct,    setMinCashPct]    = useState<number>(0.75);
   const [maxEarnoutPct, setMaxEarnoutPct] = useState<number>(0.15);
   const [maxTimelineDays, setMaxTimelineDays] = useState<number>(180);
@@ -218,9 +221,9 @@ const Simulator: React.FC = () => {
 
   useEffect(() => { emitTelemetry("simulator_viewed", undefined, "/console/simulator"); }, []);
 
-  const baseline = useMemo<Trajectory>(() => simulate(SAMPLE_COMPANY, targetUsd, {
+  const baseline = useMemo<Trajectory>(() => simulate(company, targetUsd, {
     minCashPct, maxEarnoutPct, maxTimelineDays, preferredBuyerType: preferredType, minConfidence, targetBuyersToEngage: 5,
-  }), [targetUsd, minCashPct, maxEarnoutPct, maxTimelineDays, preferredType, minConfidence]);
+  }), [company, targetUsd, minCashPct, maxEarnoutPct, maxTimelineDays, preferredType, minConfidence]);
 
   const scenario = SCENARIOS.find((s) => s.id === activeScenario) ?? SCENARIOS[0];
   const applied = useMemo(() => scenario.apply(baseline), [scenario, baseline]);
@@ -251,8 +254,9 @@ const Simulator: React.FC = () => {
 
   return (
     <div data-page="simulator" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Decision Engine" title="Scenario Engine"
-        badge={<span className="text-[12px] text-xo-muted">Simulate futures</span>} />
+      <PageHeader eyebrow={`◉ Decision Engine · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Scenario Engine"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Simulate futures</span></>}
+        description={fromIntake ? "Runs on your saved intake." : "Runs on the demo company. Save an intake to simulate your own."} />
 
       <section aria-label="Baseline summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3">
         <div className="bg-xo-panel"><XMetric label="Best expected value in set" emphasis value={fmtMoney(baseline.sim.expectedRealizedValueUsd)} sub="baseline · the highest buyer, not an average" /></div>
@@ -280,7 +284,7 @@ const Simulator: React.FC = () => {
             <div>
               <label htmlFor="sim-target" className={LBL}>Target value (USD)</label>
               <input id="sim-target" type="number" value={targetUsd} onChange={(e) => setTargetUsd(Number(e.target.value))} step={1_000_000} min={0} aria-describedby="sim-target-hint" className={INP} />
-              <span id="sim-target-hint" className="mt-1 block text-[12px] text-xo-muted">Implied mid: {fmtMoney(VALUATION_CANONICAL.headline.mid)}</span>
+              <span id="sim-target-hint" className="mt-1 block text-[12px] text-xo-muted">Canonical midpoint: {fmtMoney(canonicalMid)}</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

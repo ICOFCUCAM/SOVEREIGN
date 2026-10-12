@@ -34,7 +34,7 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 | G1 | **Model outputs shown as facts (100 % close, best-of-set value).** | "Modelled close probability" with its assumptions (each buyer offers independently at its close rate; priors where undisclosed) and "best expected value in the set (maximum, not an average)"; the same in the scenario diff and summary. | ☑ `318272f` |
 | G2 | "Strategic valuation" is the canonical value. | "Valuation (canonical midpoint)". | ☑ `f154fcf` |
 | G3 | **Demo-specific and uncomputed scenario claims.** | Drivers built from the company's own figures (ARR before → after); the ARR scenario names a target above the company's ARR; uncomputed outcomes worded as expectations to check against the diff. | ☑ `c68ab55` |
-| G4 | Demo only, unlabelled. | Run on the active company; Demo data / Your intake badge. | ☐ |
+| G4 | Demo only, unlabelled. | Run on the active company; Demo data / Your intake badge. | ☑ G4-commit |
 | G5 | Unvalidated number inputs. | Text inputs parsed with `parseNumber` (units, ranges), messages, `aria-invalid`; only valid values reach the engines. | ☐ |
 | G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
 | G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☑ `ca01086` |
@@ -63,3 +63,7 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 - Marquee buyer: "What if Microsoft enters the process?" → "What if a marquee strategic (e.g. Microsoft) enters?"; drivers state exactly what the model changes (strategics only, top of the canonical band, cash floor ≥ 80 %) instead of "raises competitive tension … faster to close".
 The scenario transforms and their targets are unchanged: for the demo the six diffs are identical to before (e.g. wait six months $122,559,223, best value $199,158,737).
 *Verification:* `tsc -b`, eslint clean · Chromium Pro: each of the six scenarios selected in turn — drivers as above, 0 errors · 1440/390: `h1` 1, no overflow, axe 0.
+
+### G4 — Demo only, unlabelled
+*Closed by:* `pages/Simulator.tsx`. The baseline and every scenario run on `loadActiveCompany()` (the saved intake, or the demo company); the target starts at that company's canonical midpoint (`canonicalValuationFor`), and the hint reads "Canonical midpoint: $…" (was the demo's "Implied mid"). Eyebrow "Demo company: Helios Freight" / "Your intake: …", **Demo data** / **Your intake** badge, description "Runs on the demo company. Save an intake to simulate your own." / "Runs on your saved intake."
+*Verification:* `tsc -b`, eslint clean · Chromium Pro: demo unchanged (wait six months → $122,559,223); intake (Northwind Analytics, $42M ARR) → wait six months "$42.0M → $50.0M", valuation $480,837,410; the growth scenario becomes "What happens if revenue reaches $60M ARR?" ($42M × 1.4 rounded up to $60M), valuation $576,442,560; 0 errors · 1440/390: `h1` 1, no overflow, axe 0.
