@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
 import { buildMarketTape } from "../lib/market-tape";
 import { LiquidityReactor } from "../components/Reactor";
 import { TransactionHeatfield } from "../components/Heatfield";
@@ -40,7 +40,7 @@ const MarketMap: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Acquirers listed" value={String(m.topAcquirers.length)} sub="top by deal count" /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={m.as_of.slice(0, 10)} />
 
       <Section title="Transaction heatfield · by sector, snapshot" className="border border-xo-line"
         foot="Column height = acquisition volume · heat = disclosed value · cap = trend. Aggregated from the registry snapshot (mostly unverified, source-cited entries)."

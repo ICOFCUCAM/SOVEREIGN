@@ -30,7 +30,7 @@ Market-wide acquisition activity from the registry snapshot: totals, a sector he
 |---|---|---|---|
 | G1 | **"Verified registry … nothing modelled or estimated"** while most events are unverified. | State the source mix: most rows are source-cited but unverified list entries; a minority are verified against SEC EDGAR / Wikidata; values are as disclosed. | ☑ `5f4008a` |
 | G2 | Mislabels: list sizes as "active sectors / acquirers"; "where capital is moving"; hover-only values. | "Sectors shown", "Acquirers listed — by deal count"; "by sector, snapshot"; disclosed value printed in each sector cell. | ☑ `4f3f024` |
-| G3 | Fake live tape. | `RegistryTape`. | ☐ |
+| G3 | Fake live tape. | `RegistryTape`. | ☑ G3-commit |
 | G4 | Design: no `h1`, 5 contrast failures, old primitives. | Rebuild on `xo` (acquirers table with headers; decorative visuals hidden with text equivalents). | ☑ `a4476e4` |
 
 ---
@@ -48,3 +48,7 @@ Market-wide acquisition activity from the registry snapshot: totals, a sector he
 ### G2 — Mislabels and hover-only values
 *Closed by:* `pages/MarketMap.tsx`. "Active sectors — by deal volume" → "Sectors shown — top by deal volume"; "Active acquirers — top of registry" → "Acquirers listed — top by deal count" (both are list sizes in the extract); "Transaction heatfield · where capital is moving" → "· by sector, snapshot"; sector heat cells now print the disclosed value under the deal count (was a hover tooltip only), foot "Each cell shows deals and disclosed value."
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for Active sectors / Active acquirers / where capital is moving / Hover for · Preparation 1440/390: 0 errors, axe 0, no overflow.
+
+### G3 — Fake live tape
+*Closed by:* `pages/MarketMap.tsx`: pinging `MarketTape` → dated `RegistryTape` (snapshot date from the market-intelligence extract).
+*Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
