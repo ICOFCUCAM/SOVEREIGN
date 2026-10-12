@@ -222,6 +222,61 @@ U1 + U2 + U4 first: a live product moment, a signature look and visible proof, w
 | U4 | Numbered source notes | ☑ `c5460e24` |
 
 
+
+## Phase 4 — From well made to iconic (proposal, awaiting approval)
+Owner direction, 2026-10-12:
+- Asked "Do you think what you have produced is iconic and premium?"
+- Answered "yes" to writing this phase up and to moving sections between pages counting as **repositioning** (features kept, not replaced).
+
+The same locks apply: colours, the command board and its trading hall (M10), real or labelled data only, reduced motion, EN/FR/ES, and one documented commit per gap.
+
+### Honest assessment (why this phase)
+- **Length.** The homepage is 11,434 px at 1440 and 20,163 px at 390: 12 chapters plus the valuation strip, the ledger and the sources. It reads as "everything we have".
+- **Two visual languages in the hero.** The editorial serif headline sits beside a glowing live-style dashboard.
+- **Repetitive rhythm.** The same label → serif `h2` → hairline grid pattern appears about twelve times.
+- **Too many typefaces.** Four families (Sora, Source Serif 4, Inter, mono) and many small all-caps labels.
+- **Feature grids remain feature grids.**
+- **Already distinctive:** the ledger (U2), the source notes (U4) and the working valuation (U1).
+
+### Target homepage — six moments
+1. **Hero.** The editorial headline and **the command board, unchanged**, then the proof ribbon.
+2. **Value your company** (U1).
+3. **The thesis.** One very large statement ("Why founders lose millions on exit.") with a drop-cap paragraph (the real medians) and the Traditional vs ExitOS matrix set as a broadsheet table.
+4. **The ExitOS Ledger** (U2), the centrepiece, with the **confidence register** beside it as a newspaper sidebar ("How to read this record").
+5. **How a sale runs.** The eight lifecycle stages on a full-bleed navy band, as large numerals with their typical weeks. This is the page's one dark moment.
+6. **The next move.** The final call to action set as the broadsheet's back page.
+
+After these: **Sources & method** (U4), then the footer.
+
+### Where every other block goes (repositioned, not removed)
+| Block (current chapter) | New home | Placed as |
+|---|---|---|
+| Trust strip (hero) | Platform | under the Platform hero |
+| Workflow — 6 steps + Founder → Exit flow (03) | Platform | "From analysis to payout", beside the existing End-to-end flow |
+| Market structure — 5 counterparties (03) | Platform | "Who trades on the exchange" |
+| Data provenance — pipeline + 6 signal tiles (05) | Platform | "Sourced. Referenced. Auditable." (the confidence register stays on the homepage with the ledger) |
+| Data rooms — copy, checklist row, vault, 6 categories (08) | Platform | the Infrastructure chapter |
+| Governance & controls — 5 items (11) | Platform | before its final call to action |
+| Coverage — map, jurisdictions, stats (10) | Platform | "Global reach" (map pulses keep M8) |
+| Buyer intelligence — 5 registry cards (04) | Modules | Buyer side, after the module grid |
+| Negotiation desk — illustrative cross-bid table + 3 features (07) | Modules | Founder side, beside the Negotiator module ("Illustrative figures" kept) |
+| Marketplace — 4 example listings (09) | Modules | Buyer side, after the buyer cards ("Example listings" kept) |
+
+Every moved figure keeps its source note. Platform and Modules get the **Sources & method** section for the notes they carry. Texts, i18n keys, links and labels move unchanged.
+
+### Gap register — Phase 4
+| # | Gap | Fix | Status |
+|---|---|---|---|
+| V1 | **Homepage too long; blocks belong elsewhere.** | Move the ten blocks above to Platform and Modules (content verbatim, source notes and "Sources & method" on those pages). Homepage keeps the six moments. Targets: homepage ≤ 6,500 px at 1440 and ≤ 11,000 px at 390. | ☐ |
+| V2 | **No signature language.** | Carry the ledger's broadsheet treatment (double rule, masthead-style chapter heads, column rules, drop cap) through the thesis and the final call to action, so the homepage reads as one publication. | ☐ |
+| V3 | **Repetitive rhythm.** | Contrast of scale and ground: hero (photo + board) → compact valuation strip (white) → one giant statement on the page ground → dense ledger (white) → full-bleed navy lifecycle with large numerals → back-page call to action. No two consecutive moments share a layout. | ☐ |
+| V4 | **Four typefaces, label noise.** | Marketing pages use Source Serif 4 (expressive), Inter (body) and mono (figures only). Sora (`font-serif`) is removed from marketing pages; the console is unchanged. Small all-caps labels are reduced to one chapter label per moment. | ☐ |
+| V5 | **Hero competes with the board.** | Quieter headline column: the duplicated topline removed (the eyebrow is already in the header), the deck shortened to `hero.sub` with `hero.body` below it. **The board, its bezel, its hall and its size are untouched** (M10). | ☐ |
+| V6 | **Proof that nothing was lost.** | An inventory check (script plus a unit test over a block list) asserting that each of the 17 original blocks and U1, U2 and U4 renders on exactly one marketing page, every source note has a target, and all routes and entry points still resolve. Before/after heights, axe and keyboard on all four routes at 1440 and 390. | ☐ |
+
+### Order
+V1 (move) → V5 (hero) → V3 + V2 (homepage rhythm and broadsheet) → V4 (typography across the four pages) → V6 (inventory and review package).
+
 ---
 
 ## Closure log
