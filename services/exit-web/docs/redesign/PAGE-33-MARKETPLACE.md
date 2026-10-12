@@ -5,7 +5,7 @@
 | Route | `/console/marketplace` |
 | Component | `src/pages/Marketplace.tsx` (370 lines) + `lib/engines.ts` (`LISTING_PRIVATE`, `LISTING_PUBLIC`, `LISTING_MATCHES` = `createListing` / `matchBuyersToListing` on the demo company; `useMemorandum`), shared `BankerTake` |
 | NAV | Founder: "Anonymous Listings" (Exchange). Buyer: "Browse Opportunities" (Marketplace). No plan gate |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All seven gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `f55c055`)
 
@@ -75,3 +75,14 @@ Founder free and Pro, buyer free: `h1` none · axe **dlitem ×18** (`dt`/`dd` ou
 ### G6 — Shared `BankerTake`; fake live tape
 *Closed by:* `pages/Marketplace.tsx`. The shared `BankerTake` is replaced by a page-local "Recommended action" `Section` (headline by pack state; At stake — the canonical ask and band; If you wait; Top match — fit score; What ExitOS does — no publishing or contact; one action: "Prepare the sell-side pack" or, once prepared, "List on the exchange →"). Pinging `MarketTape` → dated `RegistryTape` in both the founder and buyer views.
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · founder and buyer free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · after preparing the pack: axe 0, no overflow.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 206/206 · Chromium founder and buyer free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 18), all tab stops with visible focus · adjust-preview dialog: role dialog, axe 0, validation announced, Escape returns focus · demo and intake both checked (ask $102,849,415 / $403,509,792 per D1).
+
+## Known issues
+- `matchBuyersToListing` sizes buyers on the strategic implied price ($108.3M for the demo) while the page shows the canonical band (D1) — engine change left for the owner.
+- The demo company carries three different code names across pages: "Project Beacon" (exchange listing), "Project Cipher" (teaser) and the anonymized title "Logistics Freight platform · ~$18M ARR". Not changed.
+- The buyer view shows only the demo listing's public view; the full set of exchange listings is on the Acquisition Radar (linked).
+- Preview adjustments (ask, note) are not saved anywhere (stated on the page).
