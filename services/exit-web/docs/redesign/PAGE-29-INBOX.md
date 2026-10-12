@@ -38,7 +38,7 @@ Founder free and Pro: `h1` none · axe color-contrast ×7 + link-in-text-block �
 | G3 | Match score shown as "%"; target revenue labelled "check". | "Match score N/100" with the rule (weights, qualified threshold); "target revenue $a–$b". | ☐ |
 | G4 | **Demo company unlabelled, and bound to the wrong listing.** With no intake the inbox derives `lst-helios-freight` ("Project Meridian", Draft), while the exchange carries the demo company as the seeded `lst-demo-helios` ("Project Beacon"). Buyer actions on the demo listing never reach the demo inbox (verified: a buyer NDA request and $90M offer on Project Beacon left the founder inbox at 0). | Demo data / Your intake badge and a line naming the listing; with no intake, track the seeded demo listing `lst-demo-helios` (same company, same profile). | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, 8 axe failures. | Rebuild on `xo`. | ☑ G6-commit |
+| G6 | Design: no `h1`, 8 axe failures. | Rebuild on `xo`. | ☑ `d8968ce` |
 
 ---
 
