@@ -30,7 +30,7 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 ## Gap register — Page 16
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Composite score labelled "probability".** | "Likelihood score (composite)" with its formula; "not a probability". | ☑ G1-commit |
+| G1 | **Composite score labelled "probability".** | "Likelihood score (composite)" with its formula; "not a probability". | ☑ `71c53d1` |
 | G2 | **Keyword-matched transactions presented as sector comparables; verification hidden.** | Title "Transactions matching the sector keywords"; per-row verification status; note that keyword matches can include unrelated deals. | ☐ |
 | G3 | Duplicate "Active acquirers — with live cadence"; recommended actions unlabelled. | Remove the duplicate; label actions "suggested (rule)". | ☐ |
 | G4 | Ranking and overlap fixed to the demo company. | Tokens from `sectorTokensFor(loadActiveCompany().sector)`; badge; transactions labelled as the demo sector when the company's sector differs. | ☐ |
