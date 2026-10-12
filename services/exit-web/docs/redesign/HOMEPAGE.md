@@ -448,7 +448,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE24 | Figures mix old-style and lining at random. | Old-style in running text, tabular lining in tables and statistics. | closed `687524cf` |
 | EE25 | Radii run from 4 to 12 px and shadows are one-off. | One radius scale and three shadow levels. | closed `d6a9e37f` |
 | EE26 | The share card and phone bar still use the old navy. | Repainted in the ink scale. | closed `572d6c85` |
-| EE27 | Pricing and other marketing pages do not use the new tokens. | Tokens carried to the marketing pages' darks. | open |
+| EE27 | Pricing and other marketing pages do not use the new tokens. | Tokens carried to the marketing pages' darks. | closed `d41ad6dd` |
 | EE28 | New colour pairs are unchecked. | A contrast audit of the new pairs (≥ 4.5:1 for text) with fixes. | open |
 | EE29 | The whole set needs one final verification. | Full checks: vitest, build, axe on marketing routes at 1440/390, keyboard, reduced motion, board identity. | open |
 | EE30 | The owner needs to see the result. | Design 20 preview with before/after, and this log. | open |
@@ -1053,6 +1053,9 @@ Radius scale ex-xs 3 / ex-sm 4 / ex-md 6 / ex-lg 10 px and shadows ex-1 (hairlin
 
 ### EE26 — closed 572d6c85
 Phone action bar on ex-1; the share card's ground on the ink field (ex-0 → ex-1 → ex-0) and its closing node in done-green; public/og/exitos-card.png regenerated from the live page (figures and edition read from chapter 02, unchanged).
+
+### EE27 — closed d41ad6dd
+Platform, Modules and Pricing (with the ExchangeBlocks they share) on the system: MK.navy and the blocks' NAVY are now the ink field, raised tiles ex-2, dark sections carry data-ink (the header takes the ink over them) and the lit seam, and MK.btn is the shared button base (size, arrow nudge, focus ring). HeroLab, an internal lab page, is left as is.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
