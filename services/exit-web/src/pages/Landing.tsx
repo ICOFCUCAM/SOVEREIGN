@@ -231,7 +231,7 @@ const Landing: React.FC = () => {
       <QuickValue n="04" />
 
       {/* ===== 05 · THE THESIS — one statement, set like a front page ===== */}
-      <section id="ch-05" className="border-b border-slate-200 bg-ex-paper">
+      <section id="ch-05" className="ex-light bg-ex-paper">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <Chapter n="05">{t("loss.eyebrow")}</Chapter>
           <h2 className="rv-h mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
@@ -263,7 +263,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ===== 06 · THE TRANSACTION RECORD — the ledger ===== */}
-      <section id="ch-06" className="border-b border-slate-200 bg-white">
+      <section id="ch-06" className="ex-light bg-white">
         <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
           <div>
             <Chapter n="06">{t("rec.eyebrow")}</Chapter>
@@ -342,7 +342,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ===== 07 · THE MODULES — the site's own catalogue, live engine stats (Z3) ===== */}
-      <section id="ch-07" aria-labelledby="mods-h" className="border-b border-slate-200 bg-white text-ink-900">
+      <section id="ch-07" aria-labelledby="mods-h" className="ex-light bg-white text-ink-900">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="border-t-4 border-double border-ink-900 pt-8">
             <Chapter n="07">{t("mods.eyebrow")}</Chapter>
@@ -374,7 +374,7 @@ const Landing: React.FC = () => {
       <ProofSection />
 
       {/* ===== 08 · QUESTIONS — what founders ask first, answered from the Pricing and Platform pages ===== */}
-      <section id="ch-08" aria-labelledby="faq-h" className="border-b border-slate-200 bg-ex-paper text-ink-900">
+      <section id="ch-08" aria-labelledby="faq-h" className="ex-light bg-ex-paper text-ink-900">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-[6vw]">
             <div className="border-t-4 border-double border-ink-900 pt-8">

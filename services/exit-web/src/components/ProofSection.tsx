@@ -11,7 +11,7 @@ const ProofSection: React.FC<{ proof?: Proof }> = ({ proof = PROOF }) => {
   if (!hasProof(proof)) return null;
   const q = proof.quotes[0];
   return (
-    <section aria-labelledby="proof-h" className="border-b border-slate-200 bg-ex-paper text-ink-900">
+    <section aria-labelledby="proof-h" className="ex-light bg-ex-paper text-ink-900">
       <div className="mx-auto w-full max-w-[1480px] px-5 py-16 sm:px-8 sm:py-20 lg:px-12">
         <div className="border-t-4 border-double border-ink-900 pt-8">
           <h2 id="proof-h" className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-600">{t("proof.eyebrow")}</h2>

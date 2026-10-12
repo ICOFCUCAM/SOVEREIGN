@@ -69,3 +69,7 @@ body {
 
 /* the lit seam (EE1): put .ex-seam on a relative dark chapter */
 .ex-seam::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 1px; background: var(--ex-seam); pointer-events: none; z-index: 1; }
+
+/* light chapters meet on a double hairline set to the text measure (EE14) */
+.ex-light { position: relative; }
+.ex-light + .ex-light::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: min(1384px, calc(100% - 40px)); height: 4px; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; pointer-events: none; }

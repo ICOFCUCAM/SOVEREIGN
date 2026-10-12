@@ -87,7 +87,7 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
   };
 
   return (
-    <section id={`ch-${n}`} aria-labelledby={`${id}-h`} className="border-b border-slate-200 bg-white">
+    <section id={`ch-${n}`} aria-labelledby={`${id}-h`} className="ex-light bg-white">
       <div className="mx-auto w-full max-w-[1480px] px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
         <div className="border-t-4 border-double border-ink-900 pt-8">
           <Chapter n={n}>{t("qv.eyebrow")}</Chapter>
