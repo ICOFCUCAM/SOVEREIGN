@@ -301,7 +301,7 @@ Owner, 2026-10-12: "when I talk of the dashboard I mean the big screen that is r
 
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| W1 | **Put Format B on the live homepage.** | Replace the homepage hero's staging (hall photograph, 3D `ex-bezel` mount, floor reflection) with `TradingHall`. The headline (eyebrow, `h1`, `hero.sub` **and `hero.body`**, both buttons) sits in the hall; the screen — the exchange ribbon and `CommandBoard`, **content unchanged** — is set into the wall frame; the proof figures (with their source notes 1–3) stand on the floor. Every other homepage moment, link and i18n key is unchanged. The hall photograph is no longer used on the homepage, so its `<link rel="preload">` in `index.html` goes too (the file stays in `public/`). | ☐ |
+| W1 | **Put Format B on the live homepage.** | Replace the homepage hero's staging (hall photograph, 3D `ex-bezel` mount, floor reflection) with `TradingHall`. The headline (eyebrow, `h1`, `hero.sub` **and `hero.body`**, both buttons) sits in the hall; the screen — the exchange ribbon and `CommandBoard`, **content unchanged** — is set into the wall frame; the proof figures (with their source notes 1–3) stand on the floor. Every other homepage moment, link and i18n key is unchanged. The hall photograph is no longer used on the homepage, so its `<link rel="preload">` in `index.html` goes too (the file stays in `public/`). | ☑ W1-commit |
 
 The headline and proof figures sit in the hall for B and C. `ExchangeWall` and `TradingHall` are imported only by the dev-only lab, so production is unchanged. Screens: `scratchpad/heroes/hero-{5,6,7}-{1440,390}.jpg`; all render with 0 errors and no overflow.
 
@@ -664,6 +664,23 @@ Kept in capitals by design: one chapter label per moment, table headers, the led
 | `/platform` | 2,559 → 6,626 px | 4,323 → 11,198 px |
 | `/modules` | 2,374 → 4,945 px | 4,224 → 8,806 px |
 | `/pricing` | unchanged (4,847 px) | unchanged (8,224 px) |
+
+### W1 — Format B on the live homepage
+*Closed by:*
+- **`pages/Landing.tsx`.** The hero is now `TradingHall` (`components/TradingHall.tsx`):
+  - **In the hall:** the eyebrow, the `h1` (white, last line in blue-300 italic), `hero.sub` in the editorial serif, `hero.body`, and **Access the Exchange** / **Deploy a Mandate**.
+  - **The screen:** the exchange ribbon and `CommandBoard`, carried over verbatim, set into the wall frame on its plinth between the pilasters, under the light cove, above the reflecting floor. The frame wrapper carries `data-hall-screen` for test scoping.
+  - **On the floor:** the proof figures, with source notes 1–3.
+  - Removed from the hero: the hall photograph, the 3D `ex-bezel` mount, the floor-reflection strip and the photo wash layers. Every other homepage moment is unchanged.
+- **`index.html`.** The `command-center.png` preload is gone; the image stays in `public/`.
+
+*Verification:*
+- A script compared the ribbon + board markup and the `CommandBoard` component with the original `20545a37`: both identical (export keyword aside).
+- `tsc -b`, eslint clean · `vitest` 243/243.
+- Chromium `/` 1440/390: 0 errors, `h1` 1, no overflow. axe 0 outside the screen. Keyboard: 113 stops, all with visible focus. Inventory: 0 missing blocks, notes 11/9/1, 0 missing targets.
+- **Honest note:** axe now reports 8 contrast items inside the screen at 1440 (7 at 390), up from 6. The board's own faint labels (`white/40–45`) sit on the frame's slightly darker ground. These are the board's text, left as built.
+- Height 6,664 px at 1440 and 10,710 px at 390.
+- Screens: `scratchpad/home/w1-*`.
 
 ---
 

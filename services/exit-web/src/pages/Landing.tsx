@@ -4,6 +4,7 @@ import { MarketingChrome, Mark, Arrow, Chapter, Editorial } from "../components/
 import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, LEDGER_ROWS, LEDGER_TIERS, LEDGER_PRICED, DEAL_INTEL_FMT, type BoardTx } from "../lib/market-stats";
 import { useI18n } from "../lib/i18n";
 import QuickValue from "../components/QuickValue";
+import TradingHall from "../components/TradingHall";
 import { Note, SourcesSection, type SourceId } from "../components/SourceNotes";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 
@@ -30,122 +31,69 @@ const Landing: React.FC = () => {
   const h1 = heroLines(t("hero.h1"));
   return (
     <MarketingChrome active="home">
-      {/* ===== 01 · HERO — editorial headline + the command board ===== */}
-      <section className="relative overflow-hidden border-b border-slate-200">
-        {/* trading-hall photograph as the hero environment */}
-        <div className="pointer-events-none absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/command-center.png)" }} aria-hidden />
-        {/* architectural framing: ceiling light grid + glass-wall mullions +
-            floor sheen, to read as an exchange hall rather than a stock office */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-40" aria-hidden
-          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(255,255,255,0.5) 0 2px, transparent 2px 96px)", maskImage: "linear-gradient(to bottom, #000, transparent)", WebkitMaskImage: "linear-gradient(to bottom, #000, transparent)" }} />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-2/3 opacity-[0.12]" aria-hidden
-          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(40,70,110,0.6) 0 1px, transparent 1px 140px), repeating-linear-gradient(0deg, rgba(40,70,110,0.4) 0 1px, transparent 1px 180px)" }} />
-        {/* sovereign data layer — a near-invisible transaction heat field rising
-            from the floor of the hall; reads as depth, not decoration */}
-        <div className="pointer-events-none absolute bottom-0 right-0 h-2/3 w-3/5 opacity-[0.07]" aria-hidden
-          style={{
-            backgroundImage: "repeating-linear-gradient(90deg, rgba(56,130,246,0.9) 0 10px, transparent 10px 34px)",
-            maskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 80%)",
-            WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 80%)",
-          }} />
-        {/* wash: strong on the left for the headline, light on the right so the
-            hall (desks, analysts, windows) stays visible around the board. */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/92 from-5% via-white/45 via-40% to-white/5" aria-hidden />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#eef2f7] via-[#eef2f7]/70 to-transparent" aria-hidden />
-        {/* floor sheen + ambient light the board emits onto the floor */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 opacity-50" aria-hidden style={{ background: "linear-gradient(to top, rgba(255,255,255,0.5), transparent)" }} />
-        <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-48 w-[48%] rounded-[50%] opacity-25 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.22), rgba(70,150,220,0) 70%)" }} aria-hidden />
-
-        <div className={`${WRAP} relative pb-12 pt-10 lg:pb-14 lg:pt-14`}>
-          <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">{t("hero.eyebrow")}</div>
-          <div className="mt-9 grid items-center gap-8 lg:grid-cols-[0.9fr_1.3fr]">
-            <div className="min-w-0">
-              <h1 className="font-editorial text-[clamp(3rem,5vw,5.1rem)] font-semibold leading-[0.9] tracking-[-0.045em] text-ink-900">
-                {h1.map((l, i) => (
-                  <span key={i} className={`block ${i === 1 ? "pl-[8%]" : ""} ${i === h1.length - 1 ? "italic text-blue-600" : ""}`}>{l}</span>
-                ))}
-              </h1>
-              <div className="mt-8 max-w-[440px] border-l-2 border-blue-600 bg-white/80 py-3 pl-4 pr-3 backdrop-blur-sm">
-                <p className="font-editorial text-[20px] font-semibold leading-snug text-ink-900">{t("hero.sub")}</p>
-                <p className="mt-3 text-[14.5px] leading-relaxed text-ink-800">{t("hero.body")}</p>
-              </div>
-              <div className="mt-7 flex flex-wrap gap-2.5">
-                <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("nav.access")} <Arrow /></button>
-                <button onClick={() => nav("/pricing")} className={`${BTN} border border-ink-900 bg-white/70 text-ink-900 hover:bg-ink-900 hover:text-white`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
-              </div>
-            </div>
-
-          {/* ---- MOUNTED ACQUISITION-EXCHANGE DISPLAY ---- */}
-          {/* pushed right + up, clear of the headline, with a light floor shadow */}
-          <div className="min-w-0 lg:translate-x-16 lg:-translate-y-6" style={{ perspective: "2000px" }}>
-            <div className="relative">
-              {/* structural mount / bezel behind the screen — the 3D mount
-                  rotation applies only at lg+; phones get the flat board */}
-              <div
-                className="ex-bezel relative rounded-[20px] p-2.5"
-                style={{
-                  background: "linear-gradient(145deg,#1c2c44,#0a1626)",
-                  boxShadow: "0 28px 48px -30px rgba(8,20,40,0.32), 0 10px 22px -18px rgba(8,20,40,0.26), inset 0 1px 0 rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                }}
-              >
-                {/* Bloomberg-style exchange ribbon */}
-                <div className="mb-1.5 flex items-center justify-between gap-3 rounded-md bg-black/25 px-3 py-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/90">ExitOS Acquisition Exchange</span>
-                    <span className="hidden items-center gap-1 rounded-sm bg-emerald-400/15 px-1.5 py-0.5 sm:inline-flex">
-                      <span className="h-1 w-1 animate-pulse rounded-full bg-emerald-400" />
-                      <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live Market</span>
-                    </span>
-                    <span className="hidden font-mono text-[9px] uppercase tracking-[0.14em] text-white/45 md:inline">{MARKET_FMT.activeMandates} mandates deploying · {MARKET_FMT.appetite} capacity · data as of {DATA_AS_OF}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/40">System Status</span>
-                    <span className="relative inline-flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    </span>
-                    <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live</span>
+      {/* ===== 01 · HERO — the exchange screen installed in the trading hall (W1) ===== */}
+      <section className="relative">
+        <TradingHall
+          head={
+            <div className={`${WRAP} relative pb-12 pt-16 text-white lg:pt-20`}>
+              <div className="grid items-end gap-8 lg:grid-cols-[1.4fr_1fr]">
+                <div>
+                  <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-blue-300">{t("hero.eyebrow")}</div>
+                  <h1 className="mt-5 font-editorial text-[clamp(3rem,6vw,6.4rem)] font-semibold leading-[0.9] tracking-[-0.045em]">
+                    {h1.map((l, i) => <span key={i} className={i === h1.length - 1 ? "italic text-blue-300" : ""}>{l}{i < h1.length - 1 ? " " : ""}</span>)}
+                  </h1>
+                </div>
+                <div className="lg:pb-3">
+                  <p className="max-w-md font-editorial text-[19px] leading-snug text-white">{t("hero.sub")}</p>
+                  <p className="mt-3 max-w-md text-[14.5px] leading-relaxed text-blue-100/85">{t("hero.body")}</p>
+                  <div className="mt-6 flex flex-wrap gap-2.5">
+                    <button onClick={() => nav("/console")} className={`${BTN} bg-white text-ink-900 hover:bg-blue-50`}>{t("nav.access")} <Arrow /></button>
+                    <button onClick={() => nav("/pricing")} className={`${BTN} border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
                   </div>
                 </div>
-                {/* live deal-activity ticker (motion layer) */}
-                <CommandBoard />
               </div>
-
-              {/* polished-floor reflection of the screen (lg+ only) */}
-              <div
-                aria-hidden
-                className="ex-reflection pointer-events-none absolute inset-x-0 top-full hidden h-28 overflow-hidden lg:block"
-                style={{
-                  opacity: 0.07,
-                  filter: "blur(4px)",
-                  WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
-                  maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
-                  background: "linear-gradient(180deg,#0a1626,#08203B)",
-                }}
-              />
+            </div>
+          }
+          foot={
+            <div className="relative mx-auto grid w-full max-w-[1320px] grid-cols-2 border-t border-white/15 px-5 pb-12 pt-6 text-white sm:grid-cols-4 sm:px-8 lg:-mt-28 lg:px-12">
+              {[
+                [MARKET_INDEX_FMT.events, t("ribbon.deals")],
+                [MARKET_FMT.buyers, t("ribbon.mandates")],
+                [HISTORY_FMT.disclosedValue, t("ribbon.value")],
+                [MARKET_FMT.activeMandates, t("ribbon.deploying")],
+              ].map(([v, l], i) => (
+                <div key={l} className="py-2">
+                  <div className="font-editorial text-[2rem] font-semibold leading-none">{v}</div>
+                  <div className="mt-2 text-[12px] text-blue-100/80">{l}<Note n={([1, 2, 3, 2] as SourceId[])[i]} first={i < 3} dark /></div>
+                </div>
+              ))}
+            </div>
+          }>
+          {/* the screen: exchange ribbon + board, content unchanged */}
+          <div data-hall-screen className="rounded-[6px] bg-[#0a1626] p-1.5">
+          {/* Bloomberg-style exchange ribbon */}
+          <div className="mb-1.5 flex items-center justify-between gap-3 rounded-md bg-black/25 px-3 py-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/90">ExitOS Acquisition Exchange</span>
+              <span className="hidden items-center gap-1 rounded-sm bg-emerald-400/15 px-1.5 py-0.5 sm:inline-flex">
+                <span className="h-1 w-1 animate-pulse rounded-full bg-emerald-400" />
+                <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live Market</span>
+              </span>
+              <span className="hidden font-mono text-[9px] uppercase tracking-[0.14em] text-white/45 md:inline">{MARKET_FMT.activeMandates} mandates deploying · {MARKET_FMT.appetite} capacity · data as of {DATA_AS_OF}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/40">System Status</span>
+              <span className="relative inline-flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              </span>
+              <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live</span>
             </div>
           </div>
+          {/* live deal-activity ticker (motion layer) */}
+          <CommandBoard />
           </div>
-
-          {/* hero index rule — the proof ribbon (real figures) */}
-          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-slate-300/80 pt-5">
-            <span aria-hidden className="hidden h-px w-10 bg-blue-600 sm:block" />
-            {[
-              [MARKET_INDEX_FMT.events, t("ribbon.deals")],
-              [MARKET_FMT.buyers, t("ribbon.mandates")],
-              [HISTORY_FMT.disclosedValue, t("ribbon.value")],
-              [MARKET_FMT.activeMandates, t("ribbon.deploying")],
-            ].map(([v, l], i) => (
-              <div key={l} className="flex items-baseline gap-2">
-                {i === 3 && <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />}
-                <span className="font-mono text-[15px] font-bold tabular-nums text-ink-900">{v}</span>
-                <span className="text-[12px] text-slate-600">{l}<Note n={([1, 2, 3, 2] as SourceId[])[i]} first={i < 3} /></span>
-              </div>
-            ))}
-          </div>
-        </div>
-
+        </TradingHall>
         <style>{`
           @keyframes exTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
           @keyframes exScan{0%{transform:translateY(-100%);opacity:0}8%{opacity:1}50%{opacity:.5}92%{opacity:1}100%{transform:translateY(2000%);opacity:0}}
