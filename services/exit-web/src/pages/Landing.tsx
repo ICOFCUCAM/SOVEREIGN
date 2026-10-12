@@ -347,15 +347,17 @@ const Landing: React.FC = () => {
                 <button onClick={() => nav("/pricing")} className={`${BUTTON.primaryInk} mt-5`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
               </div>
             </div>
-            <div className="flex flex-col gap-3">
+            {/* the questions as a ruled list, set like the modules: a bronze rule marks the open answer */}
+            <div className="border-t-4 border-double border-ink-900">
               {[1, 2, 3, 4, 5, 6].map((k) => (
-                <details key={k} className="group rounded-ex-sm border border-slate-300 bg-white shadow-ex-1 transition-shadow open:border-[#9A7E56] open:shadow-ex-2">
-                  <summary className="flex cursor-pointer list-none items-center gap-5 rounded-ex-sm px-5 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:px-6 [&::-webkit-details-marker]:hidden">
-                    <span className="font-mono text-[12px] font-semibold tabular-nums text-[#7A6344]">0{k}</span>
-                    <span className="flex-1 font-editorial text-[clamp(1.15rem,1.7vw,1.45rem)] font-semibold">{t(`faq.q${k}`)}</span>
-                    <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-slate-300 text-[18px] leading-none text-[#7A6344] transition group-open:rotate-45 group-open:border-[#9A7E56] group-open:bg-[#9A7E56] group-open:text-white">+</span>
+                <details key={k} className="group relative border-b border-slate-300">
+                  <span aria-hidden className="absolute -top-px left-0 h-px w-full origin-left scale-x-0 bg-[#9A7E56] transition-transform duration-500 group-open:scale-x-100 motion-reduce:transition-none" />
+                  <summary className="flex cursor-pointer list-none items-center gap-5 py-6 transition-colors hover:bg-[#F2ECE3]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:gap-6 [&::-webkit-details-marker]:hidden">
+                    <span className="w-6 font-mono text-[11px] font-semibold tabular-nums text-[#7A6344]">0{k}</span>
+                    <span className="flex-1 font-editorial text-[clamp(1.2rem,1.8vw,1.55rem)] font-semibold tracking-[-0.01em]">{t(`faq.q${k}`)}</span>
+                    <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-slate-300 text-[18px] leading-none text-[#7A6344] transition group-open:rotate-45 group-open:border-[#9A7E56] group-open:bg-[#9A7E56] group-open:text-white motion-reduce:transition-none">+</span>
                   </summary>
-                  <p className="max-w-[62ch] border-t border-slate-200 px-5 pb-6 pt-4 text-[15.5px] leading-relaxed text-slate-700 sm:ml-[52px] sm:border-t-0 sm:px-6 sm:pt-0">{t(`faq.a${k}`)}</p>
+                  <p className="max-w-[62ch] pb-7 pl-11 pr-12 text-[15.5px] leading-relaxed text-slate-700 sm:pl-12">{t(`faq.a${k}`)}</p>
                 </details>
               ))}
             </div>
