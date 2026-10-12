@@ -31,7 +31,7 @@ Per-sector indexes from the registry snapshot: volume, 12-month trend, buyers, m
 |---|---|---|---|
 | G1 | **Trends on tiny counts; "hottest sector" decided by a few deals.** | Show the counts beside each trend ("5 vs 3"); mark trends under 10 deals in both windows "small sample"; the hottest-sector metric shows its counts. | ☑ `c2b16f2` |
 | G2 | Mislabels: "Active buyers" (all-time distinct acquirers); "verified" comment; hover-only heatfield. | "Distinct acquirers (all years)"; comment corrected; heatfield hidden with the table as its text equivalent. | ☑ `14b90c8` |
-| G3 | Fake live tape. | `RegistryTape`. | ☑ G3-commit |
+| G3 | Fake live tape. | `RegistryTape`. | ☑ `b07d5b6` |
 | G4 | Design: no `h1`, contrast failures, unfocusable scroll region, sort semantics. | Rebuild on `xo` (`Chip` sort, `ScrollRegion`). | ☑ `6090ed3` |
 
 ---
