@@ -31,7 +31,7 @@ The cap table (fully-diluted ownership, signatory and board flags), signatory co
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Walk-away cascade mislabelled and mixed** (as Page 10). | Same correction as Page 10 G2/G3: headline → preference stack → founders' gross (founder group) → after the flat tax assumption on gross; risk-adjusted value shown separately and labelled; header metric renamed. | ☑ `c21bcf1` |
-| G2 | **"Added to the cap-table CRM"** — nothing is saved or calculated. | Say it: a contact list for this session, not saved, not in the cap table or waterfall. | ☐ |
+| G2 | **"Added to the cap-table CRM"** — nothing is saved or calculated. | Say it: a contact list for this session, not saved, not in the cap table or waterfall. | ☑ G2-commit |
 | G3 | Demo cap table and offers unlabelled. | Badge and line: sample cap table and offers of the demo company (intake has neither). | ☐ |
 | G4 | Fake live tape. | `RegistryTape`. | ☐ |
 | G5 | Design: no `h1`, contrast, unnamed select, unfocusable scroll regions, name mismatch. | Rebuild on `xo`; `h1` "Cap Table". | ☑ `d093efc` |
@@ -55,3 +55,7 @@ The cap table (fully-diluted ownership, signatory and board flags), signatory co
 *Closed by:* `pages/Investors.tsx`, the same correction as Page 10 G2/G3. Steps: Offer headline → **Preference stack** ("paid to preferred holders first") → **Founders' gross** ("4 founder holders · 39.2% founder stake") → After taxes (flat 23.8 % on the founders' gross). The engine's risk-adjusted value is shown on its own line with its discounts, and the tax assumption is stated (federal LTCG + NIIT, whole amount, no basis / state / QSBS, no tax model). Header metric "Net to founders" → "Founders' risk-adjusted value — engine NPV (stock −15%, earnout −45%)"; banker's take wording to match. *Calculation change:* tax base is nominal gross (was the risk-adjusted value), as on Page 10.
 Arithmetic check (Vista, the default selection): founders' gross $77.8M × 0.762 = $59.3M after tax; risk-adjusted $72.5M.
 *Verification:* `tsc -b`, eslint clean · Chromium: cascade as above · free 1440/390: 0 errors, axe 0, no overflow.
+
+### G2 — "Added to the cap-table CRM" implied a saved change
+*Closed by:* `pages/Investors.tsx` (text only; behaviour unchanged). Dialog subtitle "Adds a contact to the cap-table CRM roster" → "Adds a contact to this session's list. It is not saved and does not change the cap table, signatories or waterfall."; button "Add to CRM" → "Add to list"; toast → "Added {name} to this session's contact list (not saved)"; list title "Added to CRM" → "Contacts added this session", foot "Kept only until you leave or reload this page; not part of the cap table or any calculation."
+*Verification:* `tsc -b`, eslint clean · Chromium: adding "Dana Reyes" shows the new toast and "Contacts added this session · 1".

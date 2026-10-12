@@ -47,7 +47,7 @@ const Investors: React.FC = () => {
     setAdded((prev) => [{ name, role: draft.role, email: draft.email.trim() }, ...prev]);
     setDraft({ name: "", role: "investor", email: "" });
     setAddOpen(false);
-    notify(`Added ${name} to the cap-table CRM`);
+    notify(`Added ${name} to this session's contact list (not saved)`);
   };
 
   const tape = useMemo(() => buildMarketTape(), []);
@@ -67,8 +67,8 @@ const Investors: React.FC = () => {
 
       <MarketTape items={tape} />
 
-      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add stakeholder" subtitle="Adds a contact to the cap-table CRM roster" size="md"
-        footer={<><Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button><Button onClick={submitAdd}>Add to CRM</Button></>}>
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add stakeholder" subtitle="Adds a contact to this session's list. It is not saved and does not change the cap table, signatories or waterfall." size="md"
+        footer={<><Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button><Button onClick={submitAdd}>Add to list</Button></>}>
         <div className="space-y-4">
           <Field label="Name"><input className={inputCls} placeholder="e.g. Dana Reyes" value={draft.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} /></Field>
           <Field label="Role">
@@ -81,7 +81,7 @@ const Investors: React.FC = () => {
       </Modal>
 
       {added.length > 0 && (
-        <Section title={`Added to CRM · ${added.length}`} className="border border-xo-line">
+        <Section title={`Contacts added this session · ${added.length}`} className="border border-xo-line" foot="Kept only until you leave or reload this page; not part of the cap table or any calculation.">
           <ul className="divide-y divide-xo-line">
             {added.map((s, i) => (
               <li key={i} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-[12px]">
