@@ -361,6 +361,23 @@ The owner supplied a reference: a dark exchange map with low-poly continents, a 
 |---|---|---|
 | Z3: the hero and section 02 still carried the reference's own copy (four ticker statements, the "connected view" line, "What the exchange connects" with its four invented rows) instead of ExitOS data | Removed all of it (keys `tk.*`, `cap.*`, `hero.index` deleted). The four-cell row shows the four proof figures in the homepage's numeral design (serif figure, label, source note). Section 02 becomes "The modules", built from the site's own catalogue (`lib/module-list.ts`, now shared with Modules): Acquisition Radar, Valuation Engine, Buyer Intelligence, Data Room, each with its Modules description and live `MODULE_FACTS` stat. Kept from the reference: the layout only. Note: the Modules copy is English-only on the Modules page as well, so section 02 is English in FR/ES. || closed 4b1c1ac6 |
 
+## Phase 9 — Critique of the Z3 homepage, and its fixes (owner: "fix all and all criticism and cover the gaps")
+
+Self-critique of the homepage after Z3 (1440 px: 8,839 px tall; 390 px: 12,560 px), then one gap per finding.
+
+| # | Finding | Close by | Status |
+|---|---|---|---|
+| AA1 | The lifecycle is told twice: the hero map shows the eight stages with typical weeks, and section 06 repeats them as a navy grid. | The map becomes the lifecycle: its caption carries "The acquisition lifecycle · signal → closing" and the "Typical timeline" source note (6). Section 06 is removed. | open |
+| AA2 | The map implies a geography that does not exist (Signal in North America, Closing in Australia). Real regions are not available: the registry's `country` field is empty for 3,263 of 6,311 events and mixes formats, and the file (3.4 MB) is too large for the client. | Continents removed. The horizontal position becomes time: each stage sits at its typical week (square-root scale so the first weeks do not collide), in order from left to right; the vertical lanes only separate labels. | open |
+| AA3 | Three numbering systems: "No. 01" in the topline, "01 / Discover the field · 02 / Trace the path" and "/ 001" on the map, and chapters 02–07. "02 / Trace the path" and "02 / The modules" sit on one screen. | Only chapter numbers remain: "No. 01", the map's 01/02 labels and "/ 001" are removed. | open |
+| AA4 | The board — the real product — starts two screens down, behind an illustrative diagram and a module list. | New order: 01 hero · 02 the exchange (hall + board) · 03 value your company · 04 thesis · 05 ledger · 06 the modules · 07 back page. | open |
+| AA5 | Section 02's headline is the Modules page's title, word for word. The modules shown repeat figures shown elsewhere (31 mandates, $72.5B, 61 deals). Its copy is English-only in FR/ES. | Own headline ("The desk behind the screen."), four founder modules whose stats appear nowhere else on the page (Exit Readiness, Valuation Engine, Documents, Data Room), descriptions and stats in EN/FR/ES with the numbers taken from the engines. | open |
+| AA6 | Figures repeat: 21 mandates deploying (hero + board ribbon), 31 mandates and 21 jurisdictions (hero, thesis table, board), 61 recorded deals (three times in the ledger), 6,311 events (hero + ledger footnote). | Each figure once outside the board: the hero keeps three figures (6,311 · 31 · $379.1B); the ledger keeps its masthead count and drops the two repeats; the thesis table states the run without repeating the registry counts. The sources list keeps its method figures (it is the reference). | open |
+| AA7 | "What is your company worth?" reads as an afterthought: a thin row between the hall and the thesis, and a third "Access the Exchange" button. | A full chapter (03) right after the board: chapter label, large editorial headline, the form at full width with larger fields, the result as the section's centrepiece; the duplicate "Access the Exchange" button removed (Refine remains). | open |
+| AA8 | Three navy blocks compete (map, hall, lifecycle band), two nearly back to back. | AA1 removes the band; the map is set on paper (light ground, ink lines, blue route) like a printed chart, so the hall is the page's one dark moment. Palette unchanged (interchanged only). | open |
+| AA9 | The ledger heading reads as centred: it sits in the right-hand column of a two-column grid while every other heading is flush left. | Chapter label above a flush-left headline, as in every other chapter. | open |
+| AA10 | The "Sources & method" list is long for a homepage. | Collapsed by default under its heading; it opens automatically when a source note is followed, so every note still lands on its entry. | open |
+
 ## Closure log
 
 ### M1 — Rebuild on the `index(9)` skeleton
