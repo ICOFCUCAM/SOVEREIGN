@@ -36,7 +36,7 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe 0 · no overflow · 0 
 | G3 | **"Buyers would deduct" — an illustrative rule.** | "Illustrative discount (rule)": weights stated, every finding counted regardless of severity, % of the canonical midpoint; not a buyer estimate. | ☑ `7635ecb` |
 | G4 | "AI"; unsourced bank comparison. | "Diligence" (rule-based); remove the $40,000 / 4–6 weeks comparison and "would bill thousands". | ☑ `02e7f22` |
 | G5 | Demo only, unlabelled. | `discoverFindings(company)` (additive parameter) and `runDueDiligence(company)` for the active company; Demo data / Your intake badge. | ☑ `5517a45` |
-| G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☑ G6-commit |
+| G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☑ `ac0fc9f` |
 | G7 | Design: no `h1`; old components. | Rebuild on `xo`. | ☑ `a019bd1` |
 
 ---
