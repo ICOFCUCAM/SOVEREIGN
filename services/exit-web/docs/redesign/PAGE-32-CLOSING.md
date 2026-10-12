@@ -37,7 +37,7 @@ A closing checklist (12 items with owner, due day and status), a close-probabili
 | G3 | **False "Schedule", dial-in and tracking claims; wrong day.** | Remove "Schedule" and the dial-in line; the invite is a download the user imports and sends; the subtitle shows the invite's real date; no tracking or nudging claims; invite names the active company. | ☑ `2cc24ca` |
 | G4 | Invented item specifics (95 % threshold, Form 8023 / NJ-1054). | Neutral items: "Shareholder consent — at the threshold your documents require"; "Regulatory and tax filings — as counsel advises". | ☑ `ccdf650` |
 | G5 | Diligence on the demo company only, unlabelled. | `runDueDiligence(company)` for the active company; Demo data / Your intake badge. | ☑ `f53a7e9` |
-| G6 | Shared `BankerTake` and fake live tape. | Page-local recommended action; `RegistryTape`. | ☑ G6-commit |
+| G6 | Shared `BankerTake` and fake live tape. | Page-local recommended action; `RegistryTape`. | ☑ `0e7aa40` |
 | G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☑ `d8a0b6d` |
 
 ---
