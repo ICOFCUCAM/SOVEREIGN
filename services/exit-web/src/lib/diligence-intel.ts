@@ -42,7 +42,8 @@ export const SOURCE_FILES: readonly SourceFile[] = [
 ];
 
 const MID = VALUATION_CANONICAL.headline.mid;
-// w is a percentage of the strategic midpoint; round to the nearest $100k.
+// Illustrative rule: each finding carries a fixed share (w %) of the
+// canonical midpoint, whatever its severity; rounded to the nearest $100k.
 const impact = (w: number) => Math.round((MID * (w / 100)) / 100_000) * 100_000;
 
 // Discover the findings for the current company profile. Severities and
@@ -107,7 +108,7 @@ export function discoverFindings(): DiligenceFinding[] {
   // ── Legal ────────────────────────────────────────────────────
   out.push({
     id: "leg-contracts",
-    category: "Legal", subcategory: "Missing contracts",
+    category: "Legal", subcategory: "Contract coverage",
     title: "Confirm key customer & vendor agreements are in the data room",
     severity: "high",
     source: "Contracts",
@@ -118,7 +119,7 @@ export function discoverFindings(): DiligenceFinding[] {
   });
   out.push({
     id: "leg-ip",
-    category: "Legal", subcategory: "IP ownership gaps",
+    category: "Legal", subcategory: "IP ownership",
     title: `IP assignment unconfirmed (${C.product.intellectualProperty?.patentsGranted ?? 0} granted, ${C.product.intellectualProperty?.patentsPending ?? 0} pending)`,
     severity: "medium",
     source: "Employment agreements",
@@ -247,9 +248,9 @@ export function allReports(findings: readonly DiligenceFinding[]): NamedReport[]
   const readyPct = findings.length ? Math.round((1 - high.length / findings.length) * 100) : 100;
 
   return [
-    { key: "buyer", title: "Buyer Diligence Report", accent: "buyer", metric: `${m1(total)} sought`,
+    { key: "buyer", title: "Buyer Diligence Report", accent: "buyer", metric: `${m1(total)} illustrative`,
       headline: buyer.headline, points: buyer.points, recommendation: buyer.recommendation },
-    { key: "seller", title: "Seller Risk Report", accent: "seller", metric: `${m1(total)} protected`,
+    { key: "seller", title: "Seller Risk Report", accent: "seller", metric: `${m1(total)} illustrative`,
       headline: seller.headline, points: seller.points, recommendation: seller.recommendation },
     { key: "readiness", title: "Deal Readiness Report", accent: "seller", metric: `${readyPct}% ready`,
       headline: `${high.length} gating item${high.length === 1 ? "" : "s"} and ${findings.length - high.length} secondary. ${high.length === 0 ? "Clear to open the room." : "Resolve the gating items before buyer access."}`,
@@ -260,8 +261,8 @@ export function allReports(findings: readonly DiligenceFinding[]): NamedReport[]
       points: high.map((f) => ({ title: `${f.subcategory} — ${f.severity}`, body: f.detail })),
       recommendation: "Get ahead of every red flag with a disclosure and a mitigation in the CIM before buyers find them." },
     { key: "valuation", title: "Valuation Impact Report", accent: "buyer", metric: `-${m1(total)}`,
-      headline: `Unresolved findings carry an estimated ${m1(total)} discount to the headline.`,
-      points: byImpact.slice(0, 5).map((f) => ({ title: `${f.subcategory} · -${m1(f.impactUsd)}`, body: f.buyerView })),
+      headline: `The illustrative rule assigns ${m1(total)} across all findings — fixed shares of the headline, whatever their severity. Not an estimate of what a buyer would deduct.`,
+      points: byImpact.slice(0, 5).map((f) => ({ title: `${f.subcategory} · illustrative -${m1(f.impactUsd)}`, body: f.buyerView })),
       recommendation: "Fix the highest-impact items first — each one closes part of the discount a buyer would otherwise take." },
     { key: "legal", title: "Legal Exposure Report", accent: "seller", metric: `${legal.length} items`,
       headline: `${legal.length} legal item${legal.length === 1 ? "" : "s"} shape the reps, indemnity cap and escrow.`,
@@ -278,7 +279,7 @@ export function buildSellerReport(findings: readonly DiligenceFinding[]): RiskRe
   return {
     audience: "seller",
     title: "Seller Risk Report",
-    headline: `Fix these before buyers see the company. Resolving the ${bySeverity.high} high-severity items protects roughly ${(total / 1_000_000).toFixed(0)}M of value a buyer would otherwise discount.`,
+    headline: `Fix these before buyers see the company, starting with the ${bySeverity.high} high-severity items.`,
     totalImpactUsd: total,
     bySeverity,
     points: top.map((f) => ({ title: `${f.subcategory} — ${f.severity}`, body: f.sellerAction })),

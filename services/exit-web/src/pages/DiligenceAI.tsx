@@ -3,7 +3,7 @@ import { fmtMoney, downloadText, downloadJson } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric, Chip, Disclosure } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { DILIGENCE } from "../lib/engines";
+import { DILIGENCE, VALUATION_CANONICAL } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 import {
   discoverFindings, allReports, SOURCE_FILES,
@@ -37,6 +37,8 @@ const DiligenceAI: React.FC = () => {
 
   const high = findings.filter((f) => f.severity === "high").length;
   const buyerDiscount = findings.reduce((s, f) => s + f.impactUsd, 0);
+  const MID = VALUATION_CANONICAL.headline.mid;
+  const sharePct = (usd: number): string => String(Math.round((usd / MID) * 200) / 2);
   const report = reports.find((r) => r.key === reportKey) ?? reports[0];
 
   const reportMarkdown = (r: typeof report): string =>
@@ -60,7 +62,7 @@ const DiligenceAI: React.FC = () => {
       <section aria-label="Diligence summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Risks discovered" emphasis value={String(findings.length)} sub="across 3 categories" /></div>
         <div className="bg-xo-panel"><Metric label="High severity" value={String(high)} sub="resolve before access" /></div>
-        <div className="bg-xo-panel"><Metric label="Est. buyer discount" value={`-${fmtMoney(buyerDiscount)}`} sub="buyers would deduct" /></div>
+        <div className="bg-xo-panel"><Metric label="Illustrative discount (rule)" value={`-${fmtMoney(buyerDiscount)}`} sub={`${sharePct(buyerDiscount)}% of the ${fmtMoney(MID)} midpoint · not a buyer estimate`} /></div>
         <div className="bg-xo-panel"><Metric label="Critical questions" value={String(DILIGENCE.criticalQuestions.length)} sub="acquirers will ask" /></div>
       </section>
 
@@ -70,7 +72,7 @@ const DiligenceAI: React.FC = () => {
         next={high > 0
           ? <>Clear the <span className="text-white">{high} high-severity finding{high === 1 ? "" : "s"}</span> in the Seller Risk Report before opening the data room.</>
           : <>No high-severity risks — the package is clean enough to open to buyers.</>}
-        stake={<><span className="font-mono font-bold text-red-300">-{fmtMoney(buyerDiscount)}</span> is the discount a buyer would seek against these findings.</>}
+        stake={<><span className="font-mono font-bold text-red-300">-{fmtMoney(buyerDiscount)}</span> by the illustrative rule — not an estimate of what a buyer would deduct.</>}
         inaction={<>Buyers who discover these in their own diligence retrade or walk — surfacing them first protects the price.</>}
         buyer={<>Resolve founder dependency and customer concentration first — they drive the structure a buyer demands.</>}
         automate={<>ExitOS applies fixed checks to the company profile and drafts the reports. It does not read documents.</>}
@@ -111,6 +113,10 @@ const DiligenceAI: React.FC = () => {
           <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className={BTN}>Board-ready report (PDF) →</a>
         </div>
       </section>
+
+      <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">
+        <span className="font-semibold text-xo-text">Illustrative discount rule.</span> Each finding carries a fixed share of the canonical midpoint ({fmtMoney(MID)}), whatever its severity: {[...findings].sort((a, b) => b.impactUsd - a.impactUsd).map((f) => `${f.subcategory} ${sharePct(f.impactUsd)}%`).join(", ")} — {sharePct(buyerDiscount)}% in all. The shares are ExitOS assumptions, not measured buyer behaviour or a quote.
+      </p>
 
       {/* ── Discovered risks by category ─────────────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-3">
@@ -216,7 +222,7 @@ const FindingCard: React.FC<{ f: DiligenceFinding; audience: "buyer" | "seller" 
     <div className="mt-3 border border-xo-line bg-xo-ink p-2.5">
       <div className="flex items-center justify-between">
         <span className="text-[11px] font-semibold text-xo-muted">{audience === "buyer" ? "Buyer view" : "Your move"}</span>
-        <span className="font-mono text-[12px] text-xo-risk">-{fmtMoney(f.impactUsd)}</span>
+        <span className="font-mono text-[12px] text-xo-risk"><span className="font-sans text-[11px] text-xo-muted">illustrative </span>-{fmtMoney(f.impactUsd)}</span>
       </div>
       <p className="mt-1 text-[12px] leading-snug">{audience === "buyer" ? f.buyerView : f.sellerAction}</p>
     </div>
