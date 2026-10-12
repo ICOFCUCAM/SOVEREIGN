@@ -32,47 +32,77 @@ const Landing: React.FC = () => {
   const h1 = heroLines(t("hero.h1"));
   return (
     <MarketingChrome active="home">
-      {/* ===== 01 · HERO — the exchange (Y1): the statement, the map of the field, then the hall ===== */}
-      <section className="relative overflow-hidden text-white" style={{ background: "linear-gradient(180deg,#030a15 0%,#06182E 70%,#05101f 100%)" }}>
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(160,190,230,0.9) 0 1px, transparent 1px 180px)" }} />
-        <div className={`${WRAP} relative pb-14 pt-16 lg:pt-20`}>
-          <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.26em] text-blue-300"><span aria-hidden className="h-px w-10 bg-blue-300/70" />{t("hero.eyebrow")}</div>
-          <div className="mt-8 grid items-end gap-10 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-16">
-            <h1 className="max-w-[12ch] font-editorial text-[clamp(3.2rem,7vw,7.6rem)] font-semibold leading-[0.88] tracking-[-0.05em]">
-              {h1.map((l, i) => <span key={i} className={i === h1.length - 1 ? "italic text-blue-300" : ""}>{l}{i < h1.length - 1 ? " " : ""}</span>)}
+      {/* ===== 01 · HERO — the deal atlas (Z1, after the owner's index(8).html) ===== */}
+      <section className="border-b border-ink-900 bg-[#f6f8fb] text-ink-900">
+        <div className={`${WRAP} pt-8`}>
+          <div className="flex justify-between gap-6 border-b border-slate-300 pb-4 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
+            <span>{t("hero.eyebrow")}</span><span className="text-right">01 — {t("hero.asof")} {MARKET_INDEX_FMT.asOf}</span>
+          </div>
+          <div className="grid items-end gap-10 py-12 sm:py-14 lg:grid-cols-[minmax(0,1.4fr)_minmax(270px,0.6fr)] lg:gap-[6%] lg:py-16">
+            <h1 className="max-w-[11ch] text-[clamp(3.5rem,9.2vw,9.8rem)] font-medium leading-[0.84] tracking-[-0.075em]">
+              {h1.map((l, i) => i === h1.length - 1
+                ? <em key={i} className="block font-editorial font-normal italic tracking-[-0.05em] text-blue-700">{l}</em>
+                : <span key={i}>{l} </span>)}
             </h1>
-            <div className="lg:pb-3">
-              <p className="max-w-xl font-editorial text-[21px] leading-snug text-blue-50/90">{t("hero.sub")}</p>
-              <p className="mt-3 max-w-xl text-[14.5px] leading-relaxed text-blue-100/75">{t("hero.body")}</p>
-              <div className="mt-8 flex flex-wrap gap-2.5">
-                <button onClick={() => nav("/console")} className={`${BTN} bg-white text-ink-900 hover:bg-blue-50`}>{t("nav.access")} <Arrow /></button>
-                <button onClick={() => nav("/pricing")} className={`${BTN} border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
+            <div className="max-w-[420px] border-l border-blue-600 pl-6">
+              <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-blue-700"><span aria-hidden className="h-px w-6 bg-blue-600" />{t("hero.atlas")}</div>
+              <p className="mt-5 font-editorial text-[19px] leading-snug">{t("hero.sub")}</p>
+              <p className="mt-3 text-[14.5px] leading-relaxed text-slate-600">{t("hero.body")}</p>
+              <div className="mt-7 flex flex-wrap gap-2.5">
+                <button onClick={() => nav("/console")} className={`${BTN} border border-ink-900 bg-ink-900 text-white hover:border-blue-700 hover:bg-blue-700`}>{t("nav.access")} <Arrow /></button>
+                <button onClick={() => nav("/pricing")} className={`${BTN} border border-ink-900 text-ink-900 hover:border-blue-700 hover:bg-blue-700 hover:text-white`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
               </div>
+              <div className="mt-7 flex items-center gap-4 font-mono text-[10px] text-slate-600"><span aria-hidden className="h-px w-9 bg-slate-300" />{t("hero.index")}</div>
             </div>
           </div>
-          <div className="mt-14 grid grid-cols-2 gap-y-6 border-t border-white/10 pt-7 sm:grid-cols-4">
-            {[
-              [MARKET_INDEX_FMT.events, t("ribbon.deals")],
-              [MARKET_FMT.buyers, t("ribbon.mandates")],
-              [HISTORY_FMT.disclosedValue, t("ribbon.value")],
-              [MARKET_FMT.activeMandates, t("ribbon.deploying")],
-            ].map(([v, l], i) => (
-              <div key={l}>
-                <div className="font-editorial text-[1.9rem] font-semibold leading-none">{v}</div>
-                <div className="mt-1.5 text-[12px] text-blue-100/75">{l}<Note n={([1, 2, 3, 2] as SourceId[])[i]} first={i < 3} dark /></div>
+          {/* 01 / discover the field — the sale process as a route across the market */}
+          <ExchangeMap />
+          {/* four statements, each with the proof figure it rests on */}
+          <div className="grid grid-cols-2 sm:grid-cols-4">
+            {([
+              ["tk.1l", "tk.1", MARKET_INDEX_FMT.events, t("ribbon.deals"), 1, true],
+              ["tk.2l", "tk.2", MARKET_FMT.buyers, t("ribbon.mandates"), 2, true],
+              ["tk.3l", "tk.3", MARKET_FMT.activeMandates, t("ribbon.deploying"), 2, false],
+              ["tk.4l", "tk.4", HISTORY_FMT.disclosedValue, t("ribbon.value"), 3, true],
+            ] as const).map(([lk, sk, v, l, n, first], i) => (
+              <div key={lk} className={`py-6 pr-4 ${i % 2 ? "pl-4 sm:pl-5" : ""} ${i > 1 ? "sm:pl-5" : ""} ${i < 2 ? "border-b border-slate-300 sm:border-b-0" : ""} ${i % 2 === 0 ? "border-r border-slate-300" : "sm:border-r sm:border-slate-300"} ${i === 3 ? "sm:border-r-0" : ""}`}>
+                <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600"><span className="text-blue-700">0{i + 1}</span> / {t(lk)}</div>
+                <div className="mt-2.5 font-editorial text-[clamp(1.4rem,2.2vw,1.9rem)] leading-tight tracking-[-0.02em]">{t(sk)}</div>
+                <div className="mt-2 text-[12.5px] text-slate-600"><b className="font-semibold text-ink-900">{v}</b> {l}<Note n={n as SourceId} first={first} /></div>
               </div>
             ))}
           </div>
         </div>
-        {/* 01 / discover the field — the sale process as a route across the market */}
-        <ExchangeMap />
       </section>
 
-      {/* ===== THE EXCHANGE — the screen installed in the trading hall ===== */}
+      {/* ===== 02 · WHAT THE EXCHANGE CONNECTS (Z1) ===== */}
+      <section aria-labelledby="cap-h" className="border-b border-slate-200 bg-white text-ink-900">
+        <div className={`${WRAP} py-[clamp(72px,8vw,128px)]`}>
+          <div className="mb-12 grid items-end gap-7 lg:grid-cols-[1fr_0.7fr] lg:gap-[7%]">
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-blue-700">02 / {t("cap.index")}</div>
+              <h2 id="cap-h" className="mt-4 text-[clamp(2.9rem,6vw,5.5rem)] font-medium leading-[0.88] tracking-[-0.07em]">{t("cap.h2")}<em className="block font-editorial font-normal italic tracking-[-0.04em] text-blue-700">{t("cap.h2em")}</em></h2>
+            </div>
+            <p className="max-w-[380px] text-[14px] leading-[1.85] text-slate-600">{t("cap.body")}</p>
+          </div>
+          <div className="border-t border-ink-900">
+            {[1, 2, 3, 4].map((k) => (
+              <Link key={k} to="/modules" className="group grid grid-cols-[28px_1fr_22px] items-center gap-x-3 gap-y-1.5 border-b border-slate-300 py-6 transition-[background-color,padding] hover:bg-[#f6f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 motion-safe:hover:px-3 sm:grid-cols-[58px_1fr_0.85fr_35px] sm:gap-x-5 sm:py-7">
+                <span className="font-mono text-[10.5px] text-blue-700">0{k}</span>
+                <h3 className="text-[clamp(1.35rem,2.5vw,2.25rem)] font-medium tracking-[-0.05em]">{t(`cap.${k}`)}</h3>
+                <p className="col-start-2 row-start-2 max-w-[420px] text-[13px] leading-relaxed text-slate-600 sm:col-start-3 sm:row-start-1">{t(`cap.${k}d`)}</p>
+                <span aria-hidden className="col-start-3 row-span-2 row-start-1 text-right text-[22px] transition-transform group-hover:text-blue-700 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5 sm:col-start-4 sm:row-span-1">↗</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 03 · THE EXCHANGE — the screen installed in the trading hall ===== */}
       <section aria-labelledby="hall-h">
         <TradingHall head={
           <div className={`${WRAP} relative pb-24 pt-20 text-white`}>
-            <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.24em] text-blue-300"><span aria-hidden className="h-px w-12 bg-blue-300/70" /><span>02 / {t("xm.trace")} · {t("hall.eyebrow")}</span></div>
+            <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.24em] text-blue-300"><span aria-hidden className="h-px w-12 bg-blue-300/70" /><span>03 / {t("hall.eyebrow")}</span></div>
             <h2 id="hall-h" className="mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">{t("hall.h2")} <em className="italic text-blue-300">{t("hall.h2em")}</em></h2>
           </div>
         }>
@@ -112,10 +142,10 @@ const Landing: React.FC = () => {
       {/* ===== VALUE YOUR COMPANY — the working product moment ===== */}
       <QuickValue />
 
-      {/* ===== 02 · THE THESIS — one statement, set like a front page ===== */}
+      {/* ===== 04 · THE THESIS — one statement, set like a front page ===== */}
       <section className="border-b border-slate-200 bg-[#f6f8fb]">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
-          <Chapter n="02">{t("loss.eyebrow")}</Chapter>
+          <Chapter n="04">{t("loss.eyebrow")}</Chapter>
           <h2 className="mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
           <div className="mt-12 grid gap-10 border-t-4 border-double border-ink-900 pt-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] lg:gap-[5vw]">
             <p className="max-w-md text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-blue-700">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
@@ -144,11 +174,11 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 06 · THE TRANSACTION RECORD — the ledger ===== */}
+      {/* ===== 05 · THE TRANSACTION RECORD — the ledger ===== */}
       <section className="border-b border-slate-200 bg-white">
         <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
           <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
-            <Chapter n="03">{t("rec.eyebrow")}</Chapter>
+            <Chapter n="05">{t("rec.eyebrow")}</Chapter>
             <div className="flex flex-wrap items-end justify-between gap-6">
               <h2 className={`${H2} max-w-[20ch] text-ink-900`}><Editorial text={t("rec.h2")} /></h2>
               <p className="max-w-xs text-[13px] leading-relaxed text-slate-600">{t("rec.body")}</p>
@@ -246,12 +276,12 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 04 · HOW A SALE RUNS — the one dark moment ===== */}
+      {/* ===== 06 · HOW A SALE RUNS — the one dark moment ===== */}
       <section aria-labelledby="lifecycle-h" className="text-white" style={{ background: NAVY }}>
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
-              <Chapter n="04" dark>{t("lifecycle.live")}<Note n={6} first dark /></Chapter>
+              <Chapter n="06" dark>{t("lifecycle.live")}<Note n={6} first dark /></Chapter>
               <h2 id="lifecycle-h" className="mt-5 max-w-[20ch] font-editorial text-[clamp(2.4rem,4.8vw,4.6rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-white">{t("lifecycle.title")}</h2>
             </div>
           </div>
@@ -267,11 +297,11 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 05 · THE NEXT MOVE — the back page ===== */}
+      {/* ===== 07 · THE NEXT MOVE — the back page ===== */}
       <section className="bg-white">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="border-t-4 border-double border-ink-900 pt-8">
-            <Chapter n="05">{t("cta.eyebrow")}</Chapter>
+            <Chapter n="07">{t("cta.eyebrow")}</Chapter>
             <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1fr_auto]">
               <h2 className="font-editorial text-[clamp(3rem,7vw,7rem)] font-semibold leading-[0.94] tracking-[-0.05em] text-ink-900"><Editorial text={t("cta.h2")} /></h2>
               <div className="flex flex-wrap gap-2.5 lg:flex-col lg:items-stretch">

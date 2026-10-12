@@ -343,6 +343,12 @@ The owner supplied a reference: a dark exchange map with low-poly continents, a 
 |---|---|---|
 | Y1: the hero and the exchange are separate moments; the owner wants the exchange map and the trading hall both in the hero | One continuous hero: statement and calls to action (left/right split), the exchange map full width beneath ("01 / Discover the field"), its footer ("02 / Trace the path") leading straight into the hall with the board unchanged. Map strings move to i18n (EN/FR/ES). Board markup identical. | closed 4656593d |
 
+### Z1 — The deal-atlas hero and first section (owner's `index(8).html`)
+
+| Gap | Close by | Status |
+|---|---|---|
+| Z1: the owner wants the hero and first section of `public/index(8).html` ("The deal atlas") on the homepage, with the hall and the other sections placed in the body | Hero rebuilt on the reference's layout in the locked palette (red → blue-700/blue-600, paper → #f6f8fb/white, charcoal → navy): meta row, a split with the large two-face headline and a blue-ruled side column, the exchange map inside the page width, and a four-cell statement row that also carries the four proof figures and their notes. New section "02 / What the exchange connects" with four numbered rows to Modules. The hall with the unchanged board moves to 03; the later sections are renumbered 04–07. Our headline, copy, buttons and figures are kept; the reference's own copy is used only for the new labels and rows, with "Secure deal rooms" and "traceable" softened to match the removed security claims (M3). EN/FR/ES. | open |
+
 ## Closure log
 
 ### M1 — Rebuild on the `index(9)` skeleton
