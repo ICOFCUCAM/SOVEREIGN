@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MarketingChrome, Glyph, Arrow, Chapter, Editorial, MK, PageHero } from "../components/MarketingChrome";
+import { NegotiationDesk, BuyerIntelligence, ExampleListings } from "../components/ExchangeBlocks";
+import { SourcesSection } from "../components/SourceNotes";
 import { MODULE_FACTS } from "../lib/module-stats";
 
 // Modules — the marketing breakdown of what's inside the console, split by the
@@ -66,10 +68,14 @@ const Modules: React.FC = () => {
         </div>
       </section>
 
+      <NegotiationDesk n="03" />
+      <BuyerIntelligence n="04" />
+      <ExampleListings n="05" />
+
       <section className="text-white" style={{ background: MK.navy }}>
         <div className={`${MK.wrap} ${MK.section}`}>
           <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
-            <Chapter n="03" dark>Buyer side</Chapter>
+            <Chapter n="06" dark>Buyer side</Chapter>
             <h2 className={`${MK.h2} text-white`}><Editorial text="Find and win deals." dark /></h2>
           </div>
           <div className="mt-12 grid gap-px border-y border-white/20 bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
@@ -81,6 +87,7 @@ const Modules: React.FC = () => {
           </div>
         </div>
       </section>
+      <SourcesSection only={[2]} />
     </MarketingChrome>
   );
 };

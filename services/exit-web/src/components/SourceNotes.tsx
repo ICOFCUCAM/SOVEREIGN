@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useI18n } from "../lib/i18n";
 import { MARKET_FMT, HISTORY_FMT, LEDGER_PRICED, LEDGER_TIERS, DEAL_INTEL, DEAL_INTEL_FMT } from "../lib/market-stats";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
@@ -28,15 +28,25 @@ const SOURCES: ReadonlyArray<{ n: SourceId; title: string; body: string }> = [
   { n: 6, title: "Typical timeline", body: "The weeks shown for each lifecycle stage are ExitOS's planning assumptions for a run process, not measurements." },
 ];
 
-export const SourcesSection: React.FC = () => {
+export const SourcesSection: React.FC<{ only?: readonly SourceId[] }> = ({ only }) => {
   const { t } = useI18n();
+  const list = only ? SOURCES.filter((s) => only.includes(s.n)) : SOURCES;
+  // The back-link targets the first citation on this page; a page whose
+  // notes are not marked `first` gets the id on its first note here.
+  useEffect(() => {
+    for (const s of list) {
+      if (document.getElementById(`cite-${s.n}`)) continue;
+      const a = document.querySelector(`sup a[href="#source-${s.n}"]`);
+      if (a) a.id = `cite-${s.n}`;
+    }
+  }, [list]);
   return (
     <section aria-labelledby="sources-h" className="border-t border-slate-200 bg-white">
       <div className="mx-auto w-full max-w-[1480px] px-5 py-14 sm:px-8 lg:px-12">
         <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
           <h2 id="sources-h" className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-600">{t("src.title")}</h2>
           <ol className="border-t border-ink-900">
-            {SOURCES.map((s) => (
+            {list.map((s) => (
               <li key={s.n} id={`source-${s.n}`} className="grid scroll-mt-28 grid-cols-[32px_minmax(0,1fr)] gap-3 border-b border-slate-200 py-4 target:bg-blue-50/60">
                 <span className="font-mono text-[12px] font-semibold text-blue-700">{s.n}</span>
                 <div>

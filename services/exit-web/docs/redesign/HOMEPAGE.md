@@ -267,7 +267,7 @@ Every moved figure keeps its source note. Platform and Modules get the **Sources
 ### Gap register — Phase 4
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| V1 | **Homepage too long; blocks belong elsewhere.** | Move the ten blocks above to Platform and Modules (content verbatim, source notes and "Sources & method" on those pages). Homepage keeps the six moments. Targets: homepage ≤ 6,500 px at 1440 and ≤ 11,000 px at 390. | ☐ |
+| V1 | **Homepage too long; blocks belong elsewhere.** | Move the ten blocks above to Platform and Modules (content verbatim, source notes and "Sources & method" on those pages). Homepage keeps the six moments. Targets: homepage ≤ 6,500 px at 1440 and ≤ 11,000 px at 390. | ☑ V1-commit |
 | V2 | **No signature language.** | Carry the ledger's broadsheet treatment (double rule, masthead-style chapter heads, column rules, drop cap) through the thesis and the final call to action, so the homepage reads as one publication. | ☐ |
 | V3 | **Repetitive rhythm.** | Contrast of scale and ground: hero (photo + board) → compact valuation strip (white) → one giant statement on the page ground → dense ledger (white) → full-bleed navy lifecycle with large numerals → back-page call to action. No two consecutive moments share a layout. | ☐ |
 | V4 | **Four typefaces, label noise.** | Marketing pages use Source Serif 4 (expressive), Inter (body) and mono (figures only). Sora (`font-serif`) is removed from marketing pages; the console is unchanged. Small all-caps labels are reduced to one chapter label per moment. | ☐ |
@@ -550,6 +550,23 @@ Kept: "Access Requests — Request NDA-gated identity and packages, tracked end 
 - axe outside the board: 0 at 1440 and 390. Keyboard: 129 tab stops, all with visible focus. No overflow.
 - Height: 10,560 → 11,434 px at 1440; 18,868 → 20,163 px at 390.
 - Screens: `scratchpad/home/u4-sources.jpg`.
+
+### V1 — Sections repositioned off the homepage
+*Closed by:*
+- **`components/ExchangeBlocks.tsx` (new).** The ten sections moved out of `pages/Landing.tsx` verbatim (JSX, data constants, `OfferTable`, `Vault`, `WorldDots` with its reduced-motion hook): `TrustStrip`, `ExchangeSystem` (workflow, Founder → Exit flow, market structure), `DataProvenance` (pipeline and signal tiles), `NegotiationDesk`, `DataRooms`, `ExampleListings`, `GlobalReach`, `Governance`, `BuyerIntelligence`. Only the chapter number became a prop.
+- **`pages/Platform.tsx`.** Trust strip under the hero, then (after Infrastructure and End to end) 04 workflow, 05 provenance, 06 data rooms, 07 global reach, 08 governance, 09 the next move, and **Sources & method** (sources 2 and 3).
+- **`pages/Modules.tsx`.** After Founder side: 03 negotiation desk (navy), 04 buyer intelligence, 05 example listings, 06 Buyer side (navy, buttons), and **Sources & method** (source 2).
+- **`pages/Landing.tsx`.** Hero with the board (unchanged) and proof ribbon, Value your company, lifecycle band, thesis and matrix, the ledger, and the final call to action. The **confidence register** now sits under the ledger table; V2 restyles it as the sidebar.
+- **`components/SourceNotes.tsx`.**
+  - `SourcesSection` takes `only` (the sources a page cites).
+  - It gives the first note of each source on the page the `cite-n` id, so the back-links work on every page.
+
+*Verification:*
+- `tsc -b`, eslint 0 errors · `vitest` 222/222.
+- **Inventory** (`scratchpad/tools/inventory.mjs`, Chromium): each of the 17 original blocks and U1/U2 renders on exactly one page, and U4 sources on `/`, `/platform` and `/modules`.
+- Source notes: `/` 11, `/platform` 9, `/modules` 1; 0 missing targets, 0 missing back-links.
+- **Heights:** `/` 11,434 → **5,823 px** at 1440 (target ≤ 6,500) and 20,163 → **9,685 px** at 390 (target ≤ 11,000). `/platform` 6,620 / 11,175; `/modules` 4,937 / 8,781.
+- All four routes, 1440/390: 0 errors, `h1` 1, no overflow. axe 0 on Platform, Modules and Pricing; 0 on the homepage outside the board.
 
 ---
 

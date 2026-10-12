@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MarketingChrome, Glyph, Arrow, Chapter, Editorial, MK, PageHero } from "../components/MarketingChrome";
+import { TrustStrip, ExchangeSystem, DataProvenance, DataRooms, GlobalReach, Governance } from "../components/ExchangeBlocks";
+import { SourcesSection } from "../components/SourceNotes";
 import { MARKET_FMT } from "../lib/market-stats";
 
 // Platform — the marketing page for the acquisition infrastructure itself:
@@ -32,6 +34,8 @@ const Platform: React.FC = () => {
           <button onClick={() => nav("/console")} className={`${MK.btn} bg-ink-900 text-white hover:bg-ink-800`}>Launch ExitOS <Arrow /></button>
           <button onClick={() => nav("/modules")} className={`${MK.btn} border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white`}>Explore the modules <span aria-hidden>↗</span></button>
         </>} />
+
+      <TrustStrip />
 
       <section className="border-b border-slate-200 bg-[#f6f8fb]">
         <div className={`${MK.wrap} ${MK.section}`}>
@@ -71,11 +75,17 @@ const Platform: React.FC = () => {
         </div>
       </section>
 
+      <ExchangeSystem n="04" />
+      <DataProvenance n="05" />
+      <DataRooms n="06" />
+      <GlobalReach n="07" />
+      <Governance n="08" />
+
       <section className="bg-[#f6f8fb]">
         <div className={`${MK.wrap} ${MK.section}`}>
           <div className="grid items-end gap-10 lg:grid-cols-[1fr_auto]">
             <div>
-              <Chapter n="04">The next move</Chapter>
+              <Chapter n="09">The next move</Chapter>
               <h2 className={`${MK.h2} mt-5 text-ink-900`}><Editorial text="See the desk run a deal." /></h2>
               <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-slate-600">Open the console and walk through the agents — or talk to us about a private process.</p>
             </div>
@@ -86,6 +96,7 @@ const Platform: React.FC = () => {
           </div>
         </div>
       </section>
+      <SourcesSection only={[2, 3]} />
     </MarketingChrome>
   );
 };
