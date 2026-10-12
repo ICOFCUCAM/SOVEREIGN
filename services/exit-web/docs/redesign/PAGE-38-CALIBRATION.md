@@ -37,7 +37,7 @@ The page calls the production edge function. Tests stub that call with **synthet
 |---|---|---|---|
 | G1 | **Self-learning overclaims.** | Say the dashboard measures error for review; nothing feeds back into the engines automatically; re-calibration is a deliberate change. | ☐ |
 | G2 | **"Median \|error\|" shows the mean; sign and scope unstated.** | "Mean absolute error" (and the median error beside it); "error = (realized − predicted) ÷ predicted; negative = closed below the prediction"; "demo tenant"; the prediction recorded is the strategic-report midpoint (X21). | ☐ |
-| G3 | Design: old components; overflow at 390. | Rebuild on `xo`; tables in scroll regions. | ☑ G3-commit |
+| G3 | Design: old components; overflow at 390. | Rebuild on `xo`; tables in scroll regions. | ☑ `c576de8` |
 
 ---
 
