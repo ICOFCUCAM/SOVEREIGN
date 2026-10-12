@@ -65,16 +65,15 @@ const Landing: React.FC = () => {
           {/* 01 / discover the field — the sale process as a route across the market */}
           <ExchangeMap />
           {/* the proof figures, as the homepage has always set them: serif numerals, a label, the source note */}
-          <div className="grid grid-cols-2 sm:grid-cols-4">
+          <div className="grid grid-cols-3">
             {[
               [MARKET_INDEX_FMT.events, t("ribbon.deals")],
               [MARKET_FMT.buyers, t("ribbon.mandates")],
               [HISTORY_FMT.disclosedValue, t("ribbon.value")],
-              [MARKET_FMT.activeMandates, t("ribbon.deploying")],
             ].map(([v, l], i) => (
-              <div key={l} className={`py-6 pr-4 ${i % 2 ? "pl-4" : ""} ${i > 1 ? "sm:pl-5" : ""} ${i < 2 ? "border-b border-slate-300 sm:border-b-0" : ""} ${i % 2 === 0 ? "border-r border-slate-300" : "sm:border-r sm:border-slate-300"} ${i === 3 ? "sm:border-r-0" : ""}`}>
-                <div className="font-editorial text-[clamp(1.9rem,2.8vw,2.6rem)] font-semibold leading-none tracking-[-0.02em]">{v}</div>
-                <div className="mt-2 text-[12.5px] text-slate-600">{l}<Note n={([1, 2, 3, 2] as SourceId[])[i]} first={i < 3} /></div>
+              <div key={l} className={`py-6 pr-3 ${i ? "border-l border-slate-300 pl-3 sm:pl-5" : ""}`}>
+                <div className="font-editorial text-[clamp(1.6rem,2.8vw,2.6rem)] font-semibold leading-none tracking-[-0.02em]">{v}</div>
+                <div className="mt-2 text-[12.5px] text-slate-600">{l}<Note n={([1, 2, 3] as SourceId[])[i]} first /></div>
               </div>
             ))}
           </div>
@@ -243,7 +242,7 @@ const Landing: React.FC = () => {
                 </div>
               ))}
               <div className="border-t border-slate-200 py-3 text-[11px] text-slate-600">
-                {HISTORY_FMT.events} disclosed events on record · sources: SEC EDGAR 8-K filings, Wikidata, press disclosures · refreshed with the registry<Note n={3} />
+                Sources: SEC EDGAR 8-K filings, Wikidata, press disclosures · refreshed with the registry<Note n={3} />
               </div>
             </div>
           </aside>
@@ -251,7 +250,6 @@ const Landing: React.FC = () => {
           <p className="mt-3 text-[11.5px] leading-relaxed text-slate-600">
             Every entry is curated from the source shown. Record tier: {Object.entries(LEDGER_TIERS).map(([k, n]) => `${n} ${k}`).join(", ")} — not re-checked against the primary filing in this build.
           </p>
-          <div className="mt-5 text-[11px] text-slate-600">Market index: {MARKET_INDEX_FMT.events} acquisition events from {MARKET_INDEX_FMT.buyers} buyers (Wikipedia · Wikidata · SEC EDGAR, as of {MARKET_INDEX_FMT.asOf}) · benchmark set: {HISTORY_FMT.events} recorded deals ({LEDGER_PRICED} priced) · {HISTORY_FMT.disclosedValue} disclosed value<Note n={1} /><Note n={3} /></div>
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-slate-300 px-5 py-4">
             <span className="text-[13.5px] text-slate-700">{t("rec.bridge")}</span>
             <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("rec.run")} <Arrow /></button>
@@ -335,7 +333,7 @@ const ACTIVITY = MANDATE_ACTIVITY;
 // describe the role they play in a process).
 // why founders lose millions (problem → fix)
 const LOSSES = [
-  { dimension: "Buyer reach", problem: "A handful of known contacts", fix: `A run across ${MARKET_FMT.buyers} curated acquirer mandates in ${MARKET_FMT.geographies} jurisdictions` },
+  { dimension: "Buyer reach", problem: "A handful of known contacts", fix: "A run across every curated acquirer mandate in the registry" },
   { dimension: "Preparation", problem: "Negotiate unprepared", fix: "Deterministic valuation, comps and reservation lines up front" },
   { dimension: "Leverage", problem: "Leverage erodes mid-process", fix: "Registry signals + parallel offers hold tension" },
   { dimension: "Final price", problem: "Accept discounted offers", fix: "Offers compared on structure and certainty, not headline alone" },
