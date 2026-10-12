@@ -5,7 +5,7 @@
 | Route | `/console/documents` |
 | Component | `src/pages/Documents.tsx` (274 lines) |
 | NAV | "Documents", founder, **Preparation or Active Mandate** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All five gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `c452119`)
 
@@ -67,3 +67,12 @@ Generates five acquisition documents from the engines (CIM, executive summary, i
 ### G4 — Fake live tape
 *Closed by:* `pages/Documents.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow (was overflowing), axe 0, all tab stops with visible focus · library dialog accessible · personalisation demo vs intake (generated text names the intake company) · free: Upgrade page · 0 "live" words.
+
+## Known issues
+- Documents are template-generated; the consistency check covers four figures only (stated).
+- Downloaded drafts and PDF reports keep the "ExitOS Advisory" byline (product decision; noted in G2).
