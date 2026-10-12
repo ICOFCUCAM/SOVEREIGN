@@ -33,7 +33,7 @@ A kanban of deals across the negotiation stages, a "Deal Probability Engine" tab
 | G2 | **Invented stage-conversion benchmarks.** | Remove the figures; say no sourced benchmark exists yet. | ☐ |
 | G3 | "Prediction engine" and automation overclaims. | "Close-probability rule" with its formula; expected-days rule stated; plain "What ExitOS does". | ☐ |
 | G4 | Demo offers unlabelled. | Badge and line: sample offers of the demo company. | ☐ |
-| G5 | Design: no `h1`, 11 contrast failures, tape. | Rebuild on `xo`; `h1` "Active Processes"; `RegistryTape`. | ☑ G5-commit |
+| G5 | Design: no `h1`, 11 contrast failures, tape. | Rebuild on `xo`; `h1` "Active Processes"; `RegistryTape`. | ☑ `82783c3` |
 
 ---
 
