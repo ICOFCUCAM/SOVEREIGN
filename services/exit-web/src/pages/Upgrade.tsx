@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, SectionHeader, Button } from "../lib/ui";
+import { PageHeader } from "../components/xo";
 import { useAuth } from "../lib/auth";
 import { homeFor, type Plan } from "../lib/access";
 
@@ -52,62 +52,60 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
     navigate(homeFor(role));
   };
 
+  const BTN = "rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  const BTN_GHOST = "rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+
   return (
-    <div>
-      <SectionHeader
-        kicker="Select a mandate"
-        title="Choose your engagement"
+    <div data-page="upgrade" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="Select a mandate" title="Choose your engagement"
         description={feature
           ? `${feature} requires an active engagement. Preparation makes you market-ready; an Active Mandate runs the process and is paid on close.`
-          : "Listed Founder gets you discovered for free. Preparation makes you market-ready. An Active Mandate runs the live process — and is paid only when you close."}
-      />
+          : "Listed Founder gets you discovered for free. Preparation makes you market-ready. An Active Mandate runs the live process — and is paid only when you close."} />
 
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <ul className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         {TIERS.map((t) => {
-          const accent = t.contact ? "blue" : t.plan === "pro" ? "deal" : t.plan === "prep" ? "loi" : "muted";
           const isCurrent = !t.contact && t.plan === current && t.name !== "Institutional";
-          const head = accent === "deal" ? "from-deal-600/20" : accent === "loi" ? "from-loi-500/15" : accent === "blue" ? "from-blue-500/10" : "";
-          const kicker = accent === "deal" ? "text-deal-300" : accent === "loi" ? "text-loi-300" : accent === "blue" ? "text-blue-300" : "text-white/45";
+          const tone = t.contact ? "text-xo-action" : t.plan === "pro" ? "text-xo-verified" : t.plan === "prep" ? "text-xo-caution" : "text-xo-muted";
           return (
-            <Card key={t.name} className={`overflow-hidden p-0 ${t.highlight ? "ring-1 ring-deal-400/40" : ""}`}>
-              <div className={`px-6 py-5 ${head ? `bg-gradient-to-r ${head} to-transparent` : ""}`}>
-                <div className="flex items-center justify-between">
-                  <div className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${kicker}`}>{t.name}</div>
-                  {t.highlight && <span className="rounded-full bg-deal-500/20 px-2 py-0.5 text-[8.5px] font-bold uppercase tracking-wide text-deal-300 ring-1 ring-deal-400/40">Most selected</span>}
+            <li key={t.name} className={`flex flex-col bg-xo-panel ${t.highlight ? "ring-1 ring-inset ring-xo-verified/50" : ""}`}>
+              <div className="border-b border-xo-line px-4 py-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className={`text-[12px] font-semibold uppercase tracking-[0.14em] ${tone}`}>{t.name}</h2>
+                  {t.highlight && <span className="rounded-sm border border-xo-verified/50 px-1.5 py-px text-[11px] font-semibold text-xo-verified">Most selected</span>}
                 </div>
                 <div className="mt-1 flex items-baseline gap-2">
-                  <span className="font-mono text-3xl font-bold tabular-nums text-white">{t.price}</span>
-                  <span className="text-[12px] text-white/50">{t.priceSub}</span>
+                  <span className="font-mono text-3xl font-semibold tabular-nums">{t.price}</span>
+                  <span className="text-[12px] text-xo-muted">{t.priceSub}</span>
                 </div>
-                <div className="mt-1 text-[9.5px] font-semibold uppercase tracking-[0.18em] text-white/35">{t.purpose}</div>
-                <p className="mt-2 text-[12.5px] leading-relaxed text-white/55">{t.blurb}</p>
+                <div className="mt-1 text-[12px] font-semibold text-xo-muted">{t.purpose}</div>
+                <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">{t.blurb}</p>
               </div>
-              <div className="p-6">
-                <ul className="space-y-2 text-[13px] text-white/80">
+              <div className="flex flex-1 flex-col px-4 py-4">
+                <ul className="space-y-2 text-[13px]">
                   {t.features.map((f) => (
-                    <li key={f} className="flex items-baseline gap-2"><span className={`mt-0.5 ${t.name === "Listed Founder" ? "text-white/40" : "text-deal-300"}`}>{t.name === "Listed Founder" ? "•" : "✓"}</span>{f}</li>
+                    <li key={f} className="flex items-baseline gap-2"><span aria-hidden className={t.name === "Listed Founder" ? "text-xo-muted" : "text-xo-verified"}>{t.name === "Listed Founder" ? "•" : "✓"}</span>{f}</li>
                   ))}
                 </ul>
-                <div className="mt-6">
+                <div className="mt-auto pt-5">
                   {isCurrent ? (
-                    <div className="text-[11px] font-semibold uppercase tracking-wide text-white/40">Your current engagement</div>
+                    <p className="text-[12px] font-semibold text-xo-muted">Your current engagement</p>
                   ) : t.name === "Listed Founder" ? (
-                    <div className="text-[11px] uppercase tracking-wide text-white/35">Free — the exchange entry point</div>
+                    <p className="text-[12px] text-xo-muted">Free — the exchange entry point</p>
                   ) : (
-                    <Button variant={t.plan === "pro" && !t.contact ? "primary" : "ghost"} onClick={() => act(t)}>
+                    <button type="button" onClick={() => act(t)} className={t.plan === "pro" && !t.contact ? BTN : BTN_GHOST}>
                       {t.contact ? "Request a briefing →" : t.plan === "prep" ? "Prepare my company →" : "Launch a mandate →"}
-                    </Button>
+                    </button>
                   )}
                 </div>
               </div>
-            </Card>
+            </li>
           );
         })}
-      </div>
+      </ul>
 
-      <div className="mt-5 flex items-center gap-3">
-        <Button variant="ghost" onClick={() => navigate("/pricing")}>See full pricing</Button>
-        <p className="text-[11px] text-white/40">Demo: choosing an engagement switches your session instantly.</p>
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="button" onClick={() => navigate("/pricing")} className={BTN_GHOST}>See full pricing</button>
+        <p className="text-[12px] text-xo-muted">Demo: choosing an engagement switches your session instantly.</p>
       </div>
     </div>
   );
