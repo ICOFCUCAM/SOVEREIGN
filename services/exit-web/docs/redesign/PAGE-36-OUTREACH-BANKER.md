@@ -22,9 +22,9 @@
 | "**Approve next step**" → "Approved: I'll send the CIM to the engaged buyers …", toast "Approved — next step underway"; "All steps approved — the process is running" | local state | **Fake action** — nothing runs |
 | "**Send campaign**" ("Outreach campaign launched to the shortlist"), "**Send introduction**" ("Introduction sent to …"), teaser/summary "**Send**" ("Delivered to the buyer's data room") | `notify` + a local "Sent ✓" flag | **False sends** — nothing is sent or delivered |
 | Introduction letter signed "**Anne Kovac, CEO**" | `FROM_NAME` constant | **Invented person** (Buyer Profiles and Bid Room use "[Your name]") |
-| Strategy advice: "Best timing **Months 7–13**", "earnout capped at **15 %**", "Escrow **≤8 %** released in 12 months; reverse break-fee; 30–45 day sign-to-close", "fastest path to a $173.9M exit" | hard-coded text (only names and the anchor are computed) | Rules of thumb presented as computed advice |
+| Strategy advice: "Best timing **Months 7–13**", "earnout capped at **15 %**", "Escrow **≤8 %** released in 12 months; reverse break-fee; 30–45 day sign-to-close", "fastest path to a $173,889,733 exit" | hard-coded text (only names and the anchor are computed) | Rules of thumb presented as computed advice |
 | Anchor options "Strategic mid / Strategic high (stretch)" | `VALUATION_CANONICAL` headline | The canonical (institutional) band — mislabelled "strategic" (D1) |
-| Buyer cards "86 %" | discovery fit probability (re-weighted by directives) | Fit score shown as a probability |
+| Buyer cards "89 %" (Flexport Strategic), "88 %" … | discovery fit probability (re-weighted by directives) | Fit score shown as a probability |
 | Directives | `useDirectives()` — parsed deterministically, stored in this browser | Real ✓ ("stored against the mandate" — it is this browser only) |
 | Everything | demo company only | Demo **unlabelled** |
 
