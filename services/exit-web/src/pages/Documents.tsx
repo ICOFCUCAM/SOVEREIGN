@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, fmtMoney } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { useMemorandum, VALUATION_CANONICAL } from "../lib/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
+import { runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type CompanyProfile, type MemorandumInputs } from "@exit/engines";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
+import { loadActiveCompany } from "../lib/active-company";
 import { docToMarkdown, docFilename, downloadDeliverable } from "../lib/deliverables";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
 
@@ -18,10 +20,9 @@ interface RedFlag {
   readonly severity: "high" | "medium" | "low";
   readonly note: string;
 }
-function redTeam(doc: MemorandumDocument | null): RedFlag[] {
+function redTeam(doc: MemorandumDocument | null, C: CompanyProfile): RedFlag[] {
   if (!doc) return [];
   const text = doc.sections.map((s) => `${s.heading} ${s.body} ${(s.bullets ?? []).join(" ")}`).join(" ");
-  const C = SAMPLE_COMPANY;
   const flags: RedFlag[] = [];
   // truth values
   const truth = {
@@ -62,10 +63,26 @@ function redTeam(doc: MemorandumDocument | null): RedFlag[] {
 
 const Documents: React.FC = () => {
   const [kind, setKind] = useState<MemorandumKind>("cim");
-  const doc = useMemorandum(kind);
-  const flags = useMemo(() => redTeam(doc), [doc]);
+  // The founder's saved intake when there is one; the demo company otherwise
+  // (its engine runs are the hook's defaults, so no inputs are passed).
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const inputs = useMemo<Partial<MemorandumInputs> | undefined>(() => {
+    if (!fromIntake) return undefined;
+    const institutional = runInstitutionalValuation(company);
+    return {
+      company,
+      valuation: canonicalValuationFor(company, institutional),
+      constitution: institutional,
+      readiness: runReadiness(company),
+      buyers: runBuyerDiscovery(company, { limit: 12 }),
+      diligence: runDueDiligence(company),
+    };
+  }, [company, fromIntake]);
+  const doc = useMemorandum(kind, inputs);
+  const flags = useMemo(() => redTeam(doc, company), [doc, company]);
+  const valueUsd = inputs?.valuation?.headline.mid ?? VALUATION_CANONICAL.headline.mid;
   return (
-    <DocumentsView kind={kind} setKind={setKind} doc={doc} flags={flags} />
+    <DocumentsView kind={kind} setKind={setKind} doc={doc} flags={flags} company={company} fromIntake={fromIntake} valueUsd={valueUsd} />
   );
 };
 
@@ -74,7 +91,10 @@ const DocumentsView: React.FC<{
   setKind: (k: MemorandumKind) => void;
   doc: MemorandumDocument | null;
   flags: RedFlag[];
-}> = ({ kind, setKind, doc, flags }) => {
+  company: CompanyProfile;
+  fromIntake: boolean;
+  valueUsd: number;
+}> = ({ kind, setKind, doc, flags, company, fromIntake, valueUsd }) => {
 
 // Document Generator surface — wired to TemplateMemorandumGenerator
 // from @exit/engines. Selecting a kind triggers useMemorandum() which
@@ -93,8 +113,8 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
   const [libraryOpen, setLibraryOpen] = useState(false);
   return (
     <div data-page="documents" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Workspace · Documents" title="Document Generator"
-        badge={<span className="text-[12px] text-xo-muted">Engine-composed · {flags.length > 0 ? `${flags.length} consistency flags` : "no conflicts in the four checks"}</span>}
+      <PageHeader eyebrow={`◉ Workspace · Documents · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Document Generator"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Engine-composed · {flags.length > 0 ? `${flags.length} consistency flags` : "no conflicts in the four checks"}</span></>}
         actions={<>
           <span className="text-[12px] text-xo-faint">Nothing is sent from ExitOS — download a draft to share it.</span>
           <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>
@@ -137,7 +157,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
             ? <>Reconcile the <span className="font-semibold">{flags.length} consistency flag{flags.length === 1 ? "" : "s"}</span> before this document reaches a buyer.</>
             : <>No conflicts found in the four consistency checks — review the full draft before it reaches a buyer.</>}</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-            <TakeCell k="At stake">A <span className="font-mono font-semibold text-xo-verified">{fmtMoney(VALUATION_CANONICAL.headline.mid)}</span> outcome hinges on a narrative buyers can't pick apart.</TakeCell>
+            <TakeCell k="At stake">A <span className="font-mono font-semibold text-xo-verified">{fmtMoney(valueUsd)}</span> outcome hinges on a narrative buyers can't pick apart.</TakeCell>
             <TakeCell k="If you wait">Every unreconciled claim is a retrade lever a buyer's analyst finds in diligence.</TakeCell>
             <TakeCell k="Buyer">The buyer's analyst reads this adversarially — close the gaps before they do.</TakeCell>
             <TakeCell k="What ExitOS does">Generates each document from templates and the engines, then checks four figures (ARR growth, gross margin, net retention, a concentration disclosure) against the company profile.</TakeCell>

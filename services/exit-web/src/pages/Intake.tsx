@@ -42,6 +42,7 @@ const USES_YOUR_FIGURES: readonly { to: string; label: string }[] = [
   { to: "/console/buyers", label: "Buyer Profiles" },
   { to: "/console/buyer-graph", label: "Buyer Graph (ranking)" },
   { to: "/console/buyer/microsoft", label: "Each buyer's profile" },
+  { to: "/console/documents", label: "Documents" },
   { to: "/console/engagement-registry", label: "Engagement Registry" },
   { to: "/console/inbox", label: "Inbox" },
   { to: "/console/outreach-plan", label: "Outreach Plan" },
