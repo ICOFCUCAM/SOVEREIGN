@@ -4,9 +4,9 @@ import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
 import { fetchCalibration, type CalibrationSummary } from "../lib/calibration";
 
 // Calibration Dashboard — internal. Reads the exit_calibration view
-// via the service-role edge function. The point isn't to look pretty
-// today (the view is empty until close events accrue); the point is
-// to build the muscle the engine eventually self-corrects against.
+// via the service-role edge function. It measures prediction error; it
+// does not feed anything back into the engines (re-calibration is a
+// deliberate, manual change).
 //
 // Empty state is intentional: "no closes yet — calibration begins on
 // the first close event". The shape of the page is the artifact.
@@ -50,7 +50,7 @@ const Calibration: React.FC = () => {
   return (
     <div data-page="calibration" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="Internal · Engine Calibration" title="Predicted vs realized"
-        description="The valuation engine learns from every close. JOINs exit_runs.valuation_mid_usd against exit_close_events.final_price_usd; aggregates the spread by sector and buyer type so future predictions correct against measured error." />
+        description="Measures how far recorded predictions were from realized close prices: joins exit_runs.valuation_mid_usd to exit_close_events.final_price_usd and aggregates the spread by sector and buyer type. Nothing here feeds back into the engines automatically — re-calibrating them is a deliberate change made against these figures." />
 
       {loading && <p role="status" className="border border-xo-line bg-xo-panel p-6 text-center text-[13px] text-xo-muted">Loading calibration data…</p>}
 
@@ -78,12 +78,11 @@ const Calibration: React.FC = () => {
                   Every One-Click Exit run writes a prediction snapshot (strategic mid valuation, readiness score,
                   qualified buyer count) to <code className="rounded-sm bg-xo-ink px-1.5 py-0.5 text-[12px] text-xo-text">exit_runs</code>.
                   When a deal closes, the realized price lands in <code className="rounded-sm bg-xo-ink px-1.5 py-0.5 text-[12px] text-xo-text">exit_close_events</code> and
-                  this dashboard surfaces the spread. Until then this page is intentionally empty — the engine has
-                  not yet learned anything from itself.
+                  this dashboard surfaces the spread. Until then there is nothing to measure.
                 </p>
                 <p className="max-w-[75ch]">
-                  As real exits accrue, the by-sector and by-buyer-type breakdowns below populate and the valuation
-                  engine's sector multipliers can be re-calibrated against measured error rather than priors.
+                  As real exits accrue, the by-sector and by-buyer-type breakdowns populate. They do not change the
+                  engines by themselves; they are the evidence for re-calibrating the sector multipliers by hand.
                 </p>
               </div>
             </Section>

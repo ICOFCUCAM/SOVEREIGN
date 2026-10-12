@@ -35,7 +35,7 @@ The page calls the production edge function. Tests stub that call with **synthet
 ## Gap register — Page 38
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Self-learning overclaims.** | Say the dashboard measures error for review; nothing feeds back into the engines automatically; re-calibration is a deliberate change. | ☐ |
+| G1 | **Self-learning overclaims.** | Say the dashboard measures error for review; nothing feeds back into the engines automatically; re-calibration is a deliberate change. | ☑ G1-commit |
 | G2 | **"Median \|error\|" shows the mean; sign and scope unstated.** | "Mean absolute error" (and the median error beside it); "error = (realized − predicted) ÷ predicted; negative = closed below the prediction"; "demo tenant"; the prediction recorded is the strategic-report midpoint (X21). | ☐ |
 | G3 | Design: old components; overflow at 390. | Rebuild on `xo`; tables in scroll regions. | ☑ `c576de8` |
 
@@ -46,3 +46,7 @@ The page calls the production edge function. Tests stub that call with **synthet
 ### G3 — Design
 *Closed by:* `pages/Calibration.tsx` rebuilt on `xo` (`PageHeader` `h1`; four metrics; loading as a status and the failure as an alert; the empty state as a titled `Section`; the three tables with row headers and scoped column headers inside keyboard-reachable `ScrollRegion`s — fixes the overflow at 390; error tones on xo tokens with the value always in text). Content carried over verbatim; G1–G2 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium superadmin, stubbed edge function (empty, populated and error states) at 1440/390: 0 errors, `h1` 1, **no overflow** (was overflowing at 390 when populated), axe 0 (a duplicate region name found during the rebuild was fixed).
+
+### G1 — Self-learning overclaims
+*Closed by:* `pages/Calibration.tsx` (text). "The valuation engine learns from every close … so future predictions correct against measured error" → "Measures how far recorded predictions were from realized close prices … Nothing here feeds back into the engines automatically — re-calibrating them is a deliberate change made against these figures."; "the engine has not yet learned anything from itself" → "Until then there is nothing to measure."; "the valuation engine's sector multipliers can be re-calibrated against measured error rather than priors" → "They do not change the engines by themselves; they are the evidence for re-calibrating the sector multipliers by hand."; file comment ("the muscle the engine eventually self-corrects against") corrected.
+*Verification:* `tsc -b`, eslint clean · Chromium superadmin (stubbed, empty state): 0 "learns from every close", "correct against measured error", "learned anything", "self-correct"; the new description shown; 1440/390 axe 0, no overflow.
