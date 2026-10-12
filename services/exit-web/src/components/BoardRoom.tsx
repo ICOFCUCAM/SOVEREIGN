@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
+import { usePowerOn } from "../lib/use-power-on";
 
 // THE BOARDROOM WALL — the exchange screen mounted in a real room (owner:
 // "the wall looks unreal … more natural like it is in a house for real").
@@ -32,24 +33,6 @@ const STYLE = `
   @keyframes brOn { from { opacity: 0; } to { opacity: 1; } }
   @media (prefers-reduced-motion: no-preference) { .br-on { animation: brOn 1.6s ease-out .2s both; } }
 `;
-
-/** The display wakes when it comes into view, as a real one does: a dark panel
- *  fades off the glass. Skipped entirely when the reader prefers reduced motion
- *  or the observer is unavailable, so the board is never hidden. */
-const usePowerOn = (): [React.RefObject<HTMLDivElement>, boolean] => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [off, setOff] = useState(false);
-  useEffect(() => {
-    if (typeof IntersectionObserver === "undefined" || matchMedia("(prefers-reduced-motion: reduce)").matches || !ref.current) return;
-    const r = ref.current.getBoundingClientRect();
-    if (r.top < innerHeight * 0.75) return; // already in view on load: stay on
-    setOff(true);
-    const io = new IntersectionObserver(([e]) => { if (e && e.intersectionRatio > 0.35) { setOff(false); io.disconnect(); } }, { threshold: [0.35] });
-    io.observe(ref.current);
-    return () => io.disconnect();
-  }, []);
-  return [ref, off];
-};
 
 const BoardRoom: React.FC<{ children: React.ReactNode; head?: React.ReactNode }> = ({ children, head }) => {
   const [screen, off] = usePowerOn();
