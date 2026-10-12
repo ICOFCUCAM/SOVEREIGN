@@ -12,8 +12,8 @@ import indexFile from "../../../exit-engines/data/acquisition_index.json";
 const INDEX = indexFile as unknown as AcquisitionIndex;
 const REGIONS: readonly Region[] = ["North America", "Europe", "Asia", "Middle East", "Oceania", "Latin America", "Africa", "Other"];
 
-// EXITOS KNOWLEDGE GRAPH (Phase 3) — relationship query over verified deal
-// data: sector × geography × value × time × buyer. "Show me every buyer
+// EXITOS KNOWLEDGE GRAPH (Phase 3) — relationship query over the source-cited
+// acquisition index: sector × geography × value × time × buyer. "Show me every buyer
 // that acquired freight-tech in Europe between $10M and $500M in the last
 // 5 years." Every row is a source-tagged registry event; nothing invented.
 
@@ -68,7 +68,8 @@ const KnowledgeGraph: React.FC = () => {
   return (
     <div data-page="knowledge-graph" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Market Intelligence" title="Knowledge Graph"
-        badge={<span className="text-[12px] text-xo-muted">Query the registry</span>} />
+        badge={<span className="text-[12px] text-xo-muted">Query the registry · index as of {INDEX.as_of.slice(0, 10)} · {INDEX.count.toLocaleString()} events</span>}
+        description="Every row comes from a source-cited registry entry (Wikipedia acquisition lists or Wikidata, shown in the Source column). Rows are not individually verified here; values are as disclosed in those sources." />
 
       <section aria-label="Query result summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Matching deals" emphasis value={result.totalMatched.toLocaleString()} sub="for this query" /></div>
