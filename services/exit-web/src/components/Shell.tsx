@@ -98,7 +98,10 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           ? "bg-deal-600/20 text-white ring-1 ring-deal-400/40"
           : "text-white/70 hover:bg-white/5 hover:text-white"}`}
       >
-        <span className={locked ? "text-white/45" : ""}>{n.label}</span>
+        <span className="min-w-0">
+          <span className={`block ${locked ? "text-white/45" : ""}`}>{n.label}</span>
+          {n.name && !n.label.toLowerCase().includes(n.name.toLowerCase()) && <span className={`block text-[10.5px] font-normal ${locked ? "text-white/35" : "text-white/50"}`}>{n.name}</span>}
+        </span>
         {locked && <span aria-label="Pro feature" title="Upgrade to Pro" className="text-[10px] text-white/35">🔒</span>}
       </Link>
     );
