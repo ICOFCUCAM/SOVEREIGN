@@ -1,6 +1,6 @@
 import React from "react";
 import { polar } from "../lib/insignia";
-import { LAND_COAST, LAND_FILL, POLAR, parallel } from "../lib/polar-map";
+import { LAND_COAST, LAND_FILL, POLAR } from "../lib/polar-map";
 
 // ── THE LIVING INSTRUMENT (HX6) ─────────────────────────────────────
 // The hero's dial: the ExitOS insignia opened into a full instrument. It
@@ -19,13 +19,16 @@ import { LAND_COAST, LAND_FILL, POLAR, parallel } from "../lib/polar-map";
 //   dotted bezels    one turn per 900 s, anticlockwise
 //   inner dotted ring and its orbital point   one turn per 260 s, anticlockwise
 //   market-ring bead one turn per 180 s, clockwise
+//   capability points each orbits the core, 1.9 s per unit of radius (209–426 s
+//                    per turn), clockwise; they hold while one is named
+//   polar map        beneath the instrument, centred on the core (the North
+//                    Pole), one turn per 360 s under a fixed light
 //   light sweep      one turn per 48 s, very faint (hidden on phones)
 //   signal sequence  every 16 s: a light runs from the core to each
 //                    capability point in turn (01 → 05, 3.2 s apart); the
 //                    point answers with one soft pulse, and the outcome
 //                    indicator steps up one stage
 //   core             breathes over 7 s
-//   polar map        one turn per 360 s under a fixed light
 
 const C = 250; // the dial's centre in its 500-unit view box; bezel radius 245
 const P = (deg: number, r: number): [number, number] => polar(deg, r, C);
@@ -37,6 +40,16 @@ export const SIGNAL = { cycle: 16, stagger: 3.2 } as const;
 // the five capability points on the dial, in strip order (01 discover … 05 execute): bearing, radius,
 // and whether the point is drawn as a bronze orb or an ivory point (as the benchmark places them)
 const CAPS: ReadonlyArray<readonly [number, number, "orb" | "dot", number]> = [[331, 224, "dot", 2.8], [270, 185, "orb", 0.85], [317, 110, "dot", 2.3], [206, 161, "orb", 1], [32, 160, "orb", 1]];
+
+/** Orbit periods of the five points (seconds per turn, clockwise): the nearer the core, the faster. */
+const ORBIT = CAPS.map(([, r]) => Math.round(r * 1.9));
+
+/** The current bearing (degrees) of a turning layer, read from its computed transform. */
+const bearing = (el: SVGSVGElement | null): number => {
+  const m = el ? getComputedStyle(el).transform : "none";
+  const v = m.startsWith("matrix(") ? m.slice(7, -1).split(",").map(Number) : null;
+  return v ? (Math.atan2(v[1], v[0]) * 180) / Math.PI : 0;
+};
 
 const Orb: React.FC<{ at: [number, number]; s?: number }> = ({ at: [x, y], s = 1 }) => (
   <g>
@@ -51,9 +64,9 @@ const Dot: React.FC<{ at: [number, number]; r?: number }> = ({ at: [x, y], r = 2
 
 /** One layer of the instrument: a full-size SVG in the shared view box. `z` is its depth on pointer;
  *  `spin` (seconds per turn, negative for anticlockwise) makes it a slowly turning ring. */
-const Layer: React.FC<{ z?: number; spin?: number; className?: string; children: React.ReactNode }> = ({ z = 0, spin, className = "", children }) => (
+const Layer: React.FC<{ z?: number; spin?: number; className?: string; svgRef?: React.Ref<SVGSVGElement>; children: React.ReactNode }> = ({ z = 0, spin, className = "", svgRef, children }) => (
   <div className={`hx-z pointer-events-none absolute inset-0 ${className}`} style={{ ["--z" as string]: z }}>
-    <svg viewBox="0 0 500 500" fill="none" shapeRendering="geometricPrecision"
+    <svg ref={svgRef} viewBox="0 0 500 500" fill="none" shapeRendering="geometricPrecision"
       className={`hx-l absolute inset-0 h-full w-full overflow-visible ${spin ? "hx-spin" : ""}`}
       style={spin ? { ["--spin" as string]: `${Math.abs(spin)}s`, animationDirection: spin < 0 ? "reverse" : "normal" } : undefined}>
       {children}
@@ -67,8 +80,12 @@ const HORIZON = "M-330 392 Q-120 470 -5 533 T 150 640";
 
 export const Dial: React.FC<{ active: number | null; onPoint: (i: number | null) => void; labels: string[] }> = ({ active, onPoint, labels }) => {
   const [w1x, w1y] = P(28, 212), [w2x, w2y] = P(64, 212);
+  // while a point is named (hover on it or on its item in the rail) the orbits hold, so its name stays beside it
+  const orbit = React.useRef<Array<SVGSVGElement | null>>([]);
+  const [hold, setHold] = React.useState(0);
+  React.useLayoutEffect(() => { if (active !== null) setHold(bearing(orbit.current[active])); }, [active]);
   return (
-    <div className="hx-dial relative h-full w-full">
+    <div className="hx-dial relative h-full w-full" data-hold={active !== null ? "" : undefined}>
       {/* shared paints (gradients are referenced across the layers) */}
       <svg width="0" height="0" className="absolute" aria-hidden>
         <defs>
@@ -118,13 +135,19 @@ export const Dial: React.FC<{ active: number | null; onPoint: (i: number | null)
         </g>
       </Layer>
 
+      {/* the world beneath the instrument: the polar map centred on the core (the North Pole), its 60°S edge on
+          the outer market ring; the dial's rings and crosshairs are its graticule */}
+      <div className="hx-z pointer-events-none absolute inset-0" style={{ ["--z" as string]: 3 }}>
+        <PolarMap className="inset-[7.3%]" />
+      </div>
+
       {/* the light sweep: a faint trailing sector behind a hairline edge, one turn in 48 s */}
       <Layer z={3} spin={48} className="hx-sweep">
         {Array.from({ length: 14 }, (_, i) => {
           const a = -28 + i * 2, [x1, y1] = P(a, 204), [x2, y2] = P(a + 2.2, 204);
-          return <path key={i} d={`M${C} ${C} L${x1} ${y1} A204 204 0 0 1 ${x2} ${y2} Z`} fill="#E2CDA6" fillOpacity={(0.05 * (i + 1)) / 14} />;
+          return <path key={i} d={`M${C} ${C} L${x1} ${y1} A204 204 0 0 1 ${x2} ${y2} Z`} fill="#E2CDA6" fillOpacity={(0.028 * (i + 1)) / 14} />;
         })}
-        {(() => { const [a, b] = P(0, 62), [c, d] = P(0, 204); return <line x1={a} y1={b} x2={c} y2={d} stroke="#F1E3C8" strokeOpacity=".22" strokeWidth="1" />; })()}
+        {(() => { const [a, b] = P(0, 62), [c, d] = P(0, 204); return <line x1={a} y1={b} x2={c} y2={d} stroke="#F1E3C8" strokeOpacity=".14" strokeWidth="1" />; })()}
       </Layer>
 
       {/* the aperture: the lit wedge of the benchmark, its leading edge bright; fixed */}
@@ -180,33 +203,36 @@ export const Dial: React.FC<{ active: number | null; onPoint: (i: number | null)
         <Dot at={P(259, 59)} r={2.4} />
         <circle cx={P(121, 160)[0]} cy={P(121, 160)[1]} r="2" fill="#E8D7B8" fillOpacity=".6" />
 
-        {/* each path is barely there until a light runs along it, from the core out to its point */}
-        {CAPS.map(([d, r, kind, s], i) => {
-          const [a, b] = P(d, 17), [c, e] = P(d, r - (kind === "orb" ? 9 * s : 4 * s));
-          return (
-            <g key={d} style={{ ["--i" as string]: i }}>
+        {/* the hovered point's bearing line and name, drawn where the point stands (orbits hold while one is named) */}
+        {active !== null && (() => {
+          const [d, r] = CAPS[active], [x, y] = P(d + hold, r), out = P(d + hold, r + 26);
+          return <>
+            <line x1={C} y1={C} x2={x} y2={y} stroke="#E9D7B4" strokeOpacity=".55" strokeWidth="1" strokeDasharray="2 3" />
+            <text x={out[0]} y={out[1] + 3} textAnchor={out[0] < C - 8 ? "end" : out[0] > C + 8 ? "start" : "middle"} fill="#F1E9DC" fontSize="11" letterSpacing="1.6" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" style={{ textTransform: "uppercase" }}>{labels[active]}</text>
+          </>;
+        })()}
+      </Layer>
+
+      {/* the five capability points orbit the core, each on its own ring, the inner ones faster; each carries
+          its connecting path, which is barely there until a light runs along it from the core */}
+      {CAPS.map(([d, r, kind, s], i) => {
+        const at = P(d, r), [a, b] = P(d, 17), [c, e] = P(d, r - (kind === "orb" ? 9 * s : 4 * s));
+        return (
+          <Layer key={d} z={5} spin={ORBIT[i]} className="hx-orbit" svgRef={(el) => { orbit.current[i] = el; }}>
+            <g style={{ ["--i" as string]: i }}>
               <line x1={a} y1={b} x2={c} y2={e} stroke="#E9D7B4" strokeOpacity=".07" strokeWidth="1" />
               <line className="hx-light" pathLength={1} x1={a} y1={b} x2={c} y2={e} stroke="#F6E9D0" strokeWidth="1.2" strokeLinecap="round" />
             </g>
-          );
-        })}
-
-        {active !== null && (() => { const [x, y] = P(CAPS[active][0], CAPS[active][1]); return <line x1={C} y1={C} x2={x} y2={y} stroke="#E9D7B4" strokeOpacity=".55" strokeWidth="1" strokeDasharray="2 3" />; })()}
-        {CAPS.map(([d, r, kind, s], i) => {
-          const at = P(d, r), on = active === i;
-          const out = P(d, r + 26);
-          return (
-            <g key={d} className="hx-cap" style={{ ["--i" as string]: i }} onMouseEnter={() => onPoint(i)} onMouseLeave={() => onPoint(null)}>
+            <g className="hx-cap" style={{ ["--i" as string]: i }} onMouseEnter={() => onPoint(i)} onMouseLeave={() => onPoint(null)}>
               <circle cx={at[0]} cy={at[1]} r="24" fill="transparent" />
               <circle className="hx-flare" cx={at[0]} cy={at[1]} r={kind === "orb" ? 30 * s : 16} fill="url(#hx-flare)" />
               {kind === "orb" ? <Orb at={at} s={s} /> : <Dot at={at} r={s} />}
               <circle className="hx-pulse" cx={at[0]} cy={at[1]} r={kind === "orb" ? 9 * s : 5} stroke="#EAD8B6" strokeWidth="1" />
-              <circle cx={at[0]} cy={at[1]} r="15" stroke="#E9D7B4" strokeWidth="1" className="transition-opacity duration-300" opacity={on ? 0.9 : 0} />
-              {on && <text x={out[0]} y={out[1] + 3} textAnchor={out[0] < C - 8 ? "end" : out[0] > C + 8 ? "start" : "middle"} fill="#F1E9DC" fontSize="11" letterSpacing="1.6" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" style={{ textTransform: "uppercase" }}>{labels[i]}</text>}
+              <circle cx={at[0]} cy={at[1]} r="15" stroke="#E9D7B4" strokeWidth="1" className="transition-opacity duration-300" opacity={active === i ? 0.9 : 0} />
             </g>
-          );
-        })}
-      </Layer>
+          </Layer>
+        );
+      })}
 
       {/* the transaction node: ice-white in a blue-grey halo; the still point the layers move around */}
       <Layer>
@@ -235,22 +261,13 @@ export const OutcomeIndicator: React.FC = () => (
 );
 
 /** The world, seen from above the North Pole (azimuthal equidistant, Natural Earth land, cut at 60°S):
- *  champagne linework with a fine graticule, turning once in six minutes under a fixed light from the
+ *  champagne coastlines with a faint land tone, turning once in six minutes under a fixed light from the
  *  upper left. An original figure for the exchange's reach; not an emblem of any organisation. */
 export const PolarMap: React.FC<{ className?: string }> = ({ className = "" }) => {
-  const { size, c, r } = POLAR;
   const sheet = (lit: boolean) => (
-    <svg viewBox={`0 0 ${size} ${size}`} fill="none" className="hx-spin absolute inset-0 h-full w-full" style={{ ["--spin" as string]: "360s" }}>
-      {!lit && (
-        <g stroke="#C8B48F" strokeWidth=".3" strokeOpacity=".22">
-          {[60, 30, 0, -30].map((lat) => <circle key={lat} cx={c} cy={c} r={parallel(lat)} />)}
-          {Array.from({ length: 12 }, (_, i) => i * 30).map((d) => { const a = (d * Math.PI) / 180, r0 = parallel(75);
-            return <line key={d} x1={c + r0 * Math.sin(a)} y1={c + r0 * Math.cos(a)} x2={c + r * Math.sin(a)} y2={c + r * Math.cos(a)} />; })}
-          <circle cx={c} cy={c} r={r} strokeOpacity=".5" strokeWidth=".4" />
-        </g>
-      )}
-      {!lit && <path d={LAND_FILL} transform="scale(.1)" fill="#B49A75" fillOpacity=".07" />}
-      <path d={LAND_COAST} transform="scale(.1)" stroke={lit ? "#F0DDB8" : "#C9AE82"} strokeWidth={lit ? 4.5 : 3.5} strokeOpacity={lit ? ".7" : ".32"} strokeLinejoin="round" />
+    <svg viewBox={`0 0 ${POLAR.size} ${POLAR.size}`} fill="none" className="hx-spin absolute inset-0 h-full w-full" style={{ ["--spin" as string]: "360s" }}>
+      {!lit && <path d={LAND_FILL} transform="scale(.1)" fill="#B49A75" fillOpacity=".045" />}
+      <path d={LAND_COAST} transform="scale(.1)" stroke={lit ? "#F0DDB8" : "#C9AE82"} strokeWidth={lit ? 4.5 : 3.5} strokeOpacity={lit ? ".26" : ".17"} strokeLinejoin="round" />
     </svg>
   );
   return (
@@ -272,8 +289,8 @@ export const INSTRUMENT_CSS = `
   .hx-pulse,.hx-flare{transform-box:fill-box;transform-origin:center}
   /* the still state (reduced motion): the outcome indicator rests at its last stage */
   .hx-bead{transform:translateY(-100%)}
-  /* the map is a whole disc; only its outermost rim softens */
-  .hx-map{position:absolute;-webkit-mask-image:radial-gradient(circle,#000 64%,transparent 71%);mask-image:radial-gradient(circle,#000 64%,transparent 71%)}
+  /* the map is a whole disc; only its outermost rim softens into the market ring */
+  .hx-map{position:absolute;-webkit-mask-image:radial-gradient(circle,#000 60%,transparent 70.7%);mask-image:radial-gradient(circle,#000 60%,transparent 70.7%)}
   .hx-map-lit{-webkit-mask-image:radial-gradient(circle at 26% 30%,#000,transparent 52%);mask-image:radial-gradient(circle at 26% 30%,#000,transparent 52%)}
   /* depth on pointer: each layer moves by its own factor; the core does not move */
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference){
@@ -290,6 +307,7 @@ export const INSTRUMENT_CSS = `
     .hx-breath{animation:hxBreath 7s ease-in-out infinite}
   }
   /* paused while the page is hidden or the hero is off screen */
+  .hx-dial[data-hold] .hx-orbit .hx-spin{animation-play-state:paused}
   [data-hx-paused] :is(.hx-spin,.hx-glint,.hx-light,.hx-pulse,.hx-flare,.hx-bead,.hx-progress,.hx-breath){animation-play-state:paused}
   /* phones: the essential instrument only */
   @media (max-width: 639px){ .hx-sweep,.hx-light{display:none} }
