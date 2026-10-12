@@ -277,7 +277,7 @@ const Intelligence: React.FC = () => {
               <TakeCell k="Pursue">{candidates[0].buyer.name} — {(candidates[0].probability * 100).toFixed(0)}% fit probability, {candidates[0].buyer.appetite} appetite.</TakeCell>
               <TakeCell k="What ExitOS does">Scores every buyer on the registry snapshot (EDGAR / Wikidata / press). Outreach drafts are prepared on the Outreach page; nothing is sent from here.</TakeCell>
             </dl>
-            <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Hand it to the banker →</Link>
+            <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Hand it to the banker →</Link>
             {bankerGate && <span className="ml-3 text-[12px] text-xo-caution">Requires {bankerGate}</span>}
           </div>
         </Section>

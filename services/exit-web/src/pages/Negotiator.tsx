@@ -188,7 +188,7 @@ Best regards,
               <TakeCell k="Pursue">{leader ? <>Lead with <span className="text-xo-text">{leader.offer.buyerName}</span> — your strongest bid at {leader.score.toFixed(0)}/100.</> : null}{leader && leader.offer.offerId !== active.offer.offerId ? <> The counter shown is for {active.offer.buyerName}.</> : null}</TakeCell>
               <TakeCell k="What ExitOS does">Scores every offer and drafts a counter and a response from the stated rules. You review the draft and send it yourself.</TakeCell>
             </dl>
-            <button type="button" onClick={() => setDraftOpen(true)} className="mt-3 rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft the response →</button>
+            <button type="button" onClick={() => setDraftOpen(true)} className="mt-3 rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft the response →</button>
           </div>
         </Section>
       )}

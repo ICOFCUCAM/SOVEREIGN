@@ -170,7 +170,7 @@ const Readiness: React.FC = () => {
       </Section>
 
       <div className="flex flex-wrap gap-2 px-1">
-        <Link to="/console/valuation" className="rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">See the valuation model →</Link>
+        <Link to="/console/valuation" className="rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">See the valuation model →</Link>
         <Link to="/console/data-room" className="rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Close the gaps in the data room</Link>
       </div>
     </div>

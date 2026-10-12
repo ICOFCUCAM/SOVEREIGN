@@ -97,7 +97,7 @@ const BuyerAccessRequests: React.FC = () => {
               </ul>
             )}
           <div className="mt-3 flex flex-wrap gap-2">
-            <Link to="/console/acquisition-radar" className="inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Radar →</Link>
+            <Link to="/console/acquisition-radar" className="inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Radar →</Link>
             <Link to="/console/marketplace" className="inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Browse opportunities</Link>
             <Link to="/console/deal-room" className="inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Deal room</Link>
           </div>

@@ -28,6 +28,7 @@ export default {
           500: "#10b981",
           600: "#059669",
           700: "#047857",
+          800: "#065f46",
         },
         // Urgency / LOI / hot lead — amber
         loi: {

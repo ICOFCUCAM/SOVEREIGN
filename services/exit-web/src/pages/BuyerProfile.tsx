@@ -67,7 +67,7 @@ const BuyerProfile: React.FC = () => {
           <button type="button"
             onClick={() => { if (!interested) { captureDealEvent({ actorRole: "founder", kind: "expressed_interest", subjectType: "buyer", subjectId: p.buyer_id, subjectName: p.name }); setInterested(true); } }}
             disabled={interested}
-            className={`rounded-sm px-3 py-1.5 text-[12px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${interested ? "border border-xo-verified/50 text-xo-verified" : "bg-deal-700 text-white hover:bg-deal-600"}`}>
+            className={`rounded-sm px-3 py-1.5 text-[12px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${interested ? "border border-xo-verified/50 text-xo-verified" : "bg-deal-700 text-white hover:bg-deal-800"}`}>
             {interested ? "✓ Interest captured" : "Express interest"}
           </button>
           <a href={`/report/buyer/${p.buyer_id}`} target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Briefing Book (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>

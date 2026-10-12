@@ -106,7 +106,7 @@ const DataRoom: React.FC = () => {
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Diligence artifacts · {overallPct}% complete</span></>}
         actions={<>
           <button type="button" onClick={refresh} disabled={loading} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{loading ? "Refreshing…" : "Refresh"}</button>
-          <button type="button" onClick={() => fileInput.current?.click()} disabled={uploading || !ack} aria-describedby="dr-shared" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{uploading ? "Uploading…" : `Upload to ${activeKind.replace(/_/g, " ")}`}</button>
+          <button type="button" onClick={() => fileInput.current?.click()} disabled={uploading || !ack} aria-describedby="dr-shared" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60">{uploading ? "Uploading…" : `Upload to ${activeKind.replace(/_/g, " ")}`}</button>
           <input ref={fileInput} type="file" className="hidden" onChange={onFile} disabled={uploading || !ack} aria-label={`Upload a file to the ${activeKind.replace(/_/g, " ")} package`} />
         </>} />
 

@@ -147,7 +147,7 @@ const Pipeline: React.FC = () => {
               : "Re-engage the sourcing column to rebuild the funnel."}</TakeCell>
             <TakeCell k="What ExitOS does">Scores each offer and applies the stated close-probability rule. Counters are drafted in the Bid Room; follow-ups are not sequenced automatically.</TakeCell>
           </dl>
-          <Link to="/console/negotiator" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open the negotiator →</Link>
+          <Link to="/console/negotiator" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open the negotiator →</Link>
         </div>
       </Section>
 

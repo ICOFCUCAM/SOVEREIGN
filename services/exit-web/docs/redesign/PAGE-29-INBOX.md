@@ -70,3 +70,7 @@ Also, found while testing: the feed showed the raw kind "You walked_away" and th
 
 ### X18 — Shared primary-button hover contrast (found here) — documented before the fix
 X11 moved the shared primary buttons to `bg-deal-700` (white text 5.48:1) but kept `hover:bg-deal-600`: white on `#059669` is **3.76:1**, below 4.5:1 for 12–13px text. Axe catches it whenever the pointer rests on a button (here at 390 after clicking "Execute NDA…"). 23 occurrences in 18 files (`Shell`, `BankerTake`, `lib/ui`, `report-ui` and pages). *Fix:* add `deal-800 #065f46` to the Tailwind `deal` scale (additive) and change those hovers to `hover:bg-deal-800` (white 7.6:1 — hover goes darker). The two tinted `hover:bg-deal-600/10` hovers on transparent buttons are unaffected and unchanged.
+
+### X18 — Shared primary-button hover contrast
+*Closed by:* `tailwind.config` adds `deal-800 #065f46` to the `deal` scale (additive); `hover:bg-deal-600` → `hover:bg-deal-800` in all 23 places it sat on a `bg-deal-700` white-text button (18 files). The tinted `hover:bg-deal-600/10` hovers are unchanged.
+*Verification:* `tsc -b`, eslint 0 errors, `vitest` 204/204 · dev server restarted (the Tailwind config is read at start) — the generated CSS contains `hover:bg-deal-800` · Chromium hover on the primary buttons of Readiness and Bid Room: background `rgb(6, 95, 70)`, text white (7.6:1; was `rgb(5, 150, 105)`, 3.76:1) · Inbox at 390 with the pointer on "Execute NDA…" / "Accept…": axe 0 (was 1).

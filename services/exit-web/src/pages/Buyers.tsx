@@ -127,7 +127,7 @@ const Buyers: React.FC = () => {
                 <TakeCell k="Pursue">{top.buyer.name} — fit {it.label.toLowerCase()} at {it.pct}%, {top.buyer.buyerType.replace(/_/g, " ")}.</TakeCell>
                 <TakeCell k="What ExitOS does">Drafts a warm introduction for each buyer from its thesis and the company's figures. Nothing is sent from this page.</TakeCell>
               </dl>
-              <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link>
+              <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link>
               {outreachGate && <span className="ml-3 text-[12px] text-xo-caution">Requires {outreachGate}</span>}
             </div>
           </Section>
@@ -173,7 +173,7 @@ const Buyers: React.FC = () => {
       </Section>
 
       <Modal open={intro != null} onClose={() => setIntro(null)} title={`Warm introduction · ${intro?.name ?? ""}`} size="md"
-        footer={<>{outreachGate && <span className="mr-auto text-[12px] text-xo-caution">Outreach requires {outreachGate}</span>}<Button variant="ghost" onClick={() => intro && copyText(intro.text)}>Copy</Button><Link to="/console/banker" className="rounded-sm bg-deal-700 px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link></>}>
+        footer={<>{outreachGate && <span className="mr-auto text-[12px] text-xo-caution">Outreach requires {outreachGate}</span>}<Button variant="ghost" onClick={() => intro && copyText(intro.text)}>Copy</Button><Link to="/console/banker" className="rounded-sm bg-deal-700 px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link></>}>
         <p className="mb-3 text-[12px] text-xo-muted">A draft generated from the buyer's thesis and the company's figures. Nothing is sent from this page — copy it, or take it to Outreach.</p>
         <pre className="whitespace-pre-wrap border border-xo-line bg-xo-ink p-4 font-sans text-[13px] leading-relaxed text-xo-text">{intro?.text}</pre>
       </Modal>

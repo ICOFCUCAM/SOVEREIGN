@@ -49,10 +49,10 @@ export const Button: React.FC<
   React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" | "ok" }
 > = ({ variant = "primary", className = "", ...p }) => {
   const v = {
-    primary: "bg-deal-700 hover:bg-deal-600 text-white",
+    primary: "bg-deal-700 hover:bg-deal-800 text-white",
     ghost:   "bg-transparent hover:bg-white/5 text-white/80 ring-1 ring-white/15",
     danger:  "bg-red-600 hover:bg-red-500 text-white",
-    ok:      "bg-deal-700 hover:bg-deal-600 text-white",
+    ok:      "bg-deal-700 hover:bg-deal-800 text-white",
   }[variant];
   return (
     <button

@@ -120,7 +120,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
           <span className="text-[12px] text-xo-faint">Nothing is sent from ExitOS — download a draft to share it.</span>
           <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>
           <a href="/report" target="_blank" rel="noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
-          <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
+          <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
           {doc && <Button variant="ghost" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download draft (.md)</Button>}
         </>} />
 

@@ -313,7 +313,7 @@ const Autopilot: React.FC = () => {
       <Modal open={!!reviewAgent} onClose={() => setReviewIdx(null)} title={reviewAgent ? reviewAgent.name : ""} subtitle={reviewAgent?.role} size="lg"
         footer={reviewAgent ? <>
           {reviewAgent.reportPath
-            ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-600">Open board-ready PDF →</a>
+            ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-800">Open board-ready PDF →</a>
             : <Button variant="ghost" onClick={() => downloadDeliverable(reviewAgent.deliverable.filename, reviewAgent.deliverable.build())}>Download draft (.md)</Button>}
           <Button onClick={() => { send(reviewAgent); }}>{sent.has(reviewAgent.id) ? "✓ Marked ready" : "Mark ready"}</Button>
         </> : null}>
@@ -511,7 +511,7 @@ const Autopilot: React.FC = () => {
               and escrow; here each step was simulated on engine output. WealthOS covers what happens after a real close.
             </p>
             <div className="mt-4 flex flex-wrap gap-2.5">
-              <Link to="/console/wealth" className="rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-600">Open WealthOS →</Link>
+              <Link to="/console/wealth" className="rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-800">Open WealthOS →</Link>
               <Button variant="ghost" onClick={() => { setStarted(false); setStatuses(AGENTS.map(() => "queued")); setSent(new Set()); }}>Run again</Button>
             </div>
           </div>
