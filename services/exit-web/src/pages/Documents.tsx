@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Modal, fmtMoney, notify } from "../lib/ui";
+import { Button, Modal, fmtMoney } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
@@ -93,26 +93,16 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
 ];
 
   const [libraryOpen, setLibraryOpen] = useState(false);
-  const [sent, setSent] = useState<Set<string>>(new Set());
-  // "Send" delivers the document to the buyer's data room — it records the send
-  // and notifies, rather than dumping a raw .md to the founder's disk. The
-  // explicit "Download draft (.md)" / "Board-ready report (PDF)" actions remain
-  // for when the founder actually wants the file.
-  const markSent = (k: MemorandumKind): void => {
-    setSent((prev) => new Set(prev).add(k));
-    notify("Delivered to the buyer's data room");
-  };
-
   return (
     <div data-page="documents" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Workspace · Documents" title="Document Generator"
         badge={<span className="text-[12px] text-xo-muted">Engine-composed · {flags.length > 0 ? `${flags.length} flags` : "Defensible"}</span>}
         actions={<>
+          <span className="text-[12px] text-xo-faint">Nothing is sent from ExitOS — download a draft to share it.</span>
           <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>
           <a href="/report" target="_blank" rel="noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
           <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
           {doc && <Button variant="ghost" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download draft (.md)</Button>}
-          {doc && <Button onClick={() => markSent(doc.kind)}>{sent.has(doc.kind) ? "Sent ✓ · resend" : "Send to buyer"}</Button>}
         </>} />
 
       <section aria-label="Document summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
@@ -135,7 +125,6 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
                   <span className="mt-0.5 block text-[12px] leading-snug text-white/70">{k.description}</span>
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
-                  {sent.has(k.key) && <span className="text-[11px] font-semibold text-deal-300">Sent</span>}
                   {kind === k.key && <span className="text-[11px] font-semibold text-deal-300">Open ✓</span>}
                 </span>
               </button>
