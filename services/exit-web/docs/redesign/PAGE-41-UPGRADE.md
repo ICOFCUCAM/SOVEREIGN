@@ -5,7 +5,7 @@
 | Route | `/console/upgrade`, and rendered in place of any plan-gated page (`needsUpgrade` in `App.tsx`, with the gated feature's name) |
 | Component | `src/pages/Upgrade.tsx` (116 lines) + `lib/auth.tsx` (`upgradeTo`), `lib/access.ts` (gating) |
 | NAV | — (reached from gated pages and links), any signed-in role |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All four gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `d244555`)
 
@@ -54,3 +54,13 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · no overflow · 0 errors; old comp
 ### G3 — Buyers see founder tiers
 *Closed by:* `pages/Upgrade.tsx`. For `role === "buyer"` a note: "For buyers: the tiers below are written for founders. The Active Mandate plan unlocks the buyer Deal Room and Access Requests; Preparation unlocks nothing for buyers. Buyer pricing is not published yet." (per `access.ts`: the two buyer entries gated on Pro, no buyer entry opened by Preparation); the Preparation panel shows "For founders — unlocks nothing for buyers" instead of "Prepare my company →". Founders see no change.
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium buyer: the note shown, 0 "Prepare my company →", "Launch a mandate →" kept (the buyer end-to-end flow on Buyer Home still passes); founder: no buyer note, both buttons · buyer free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 206/206 · Chromium founder free/Pro and buyer free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · as the gate on plan-gated pages: same · the plan switch still works.
+
+## Known issues
+- Plan switching is a demo (stated): no billing exists. Real purchase and entitlement are backend work for the owner.
+- The marketing Pricing page still carries the original tier texts ("Most selected", "NDA automation", "AI negotiation", "net-to-founder math") — to align in the marketing redesign task.
+- Institutional tier service claims (dedicated MD, legal & escrow coordination, single-tenant deployment) are a commercial offer routed to pricing — not verifiable in the console.
