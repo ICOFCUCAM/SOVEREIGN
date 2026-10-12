@@ -6,25 +6,29 @@ import { buildMarketTape } from "../lib/market-tape";
 import { DILIGENCE, OFFER_EVALUATIONS } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
-// Deal Closing Center. The static closing checklist drives day-of
-// orchestration; the diligence engine surfaces pre-close critical
-// questions and red flags that the closing committee tracks.
+// Deal Closing Center. A closing-checklist template whose statuses the
+// user sets (saved in this browser); the diligence engine surfaces
+// pre-close critical questions and red flags.
 
-interface ChecklistItem { id: string; title: string; owner: "Founder" | "Counsel" | "Buyer" | "Banker"; status: "done" | "in_progress" | "blocked" | "pending"; due?: string }
+type ItemStatus = "done" | "in_progress" | "blocked" | "pending";
+interface TemplateItem { id: string; title: string; owner: "Founder" | "Counsel" | "Buyer" | "Banker" }
+interface ChecklistItem extends TemplateItem { status: ItemStatus }
 
-const CLOSING: readonly ChecklistItem[] = [
-  { id: "c-01", title: "SPA execution + signature pages",         owner: "Counsel",  status: "in_progress", due: "Fri" },
-  { id: "c-02", title: "Disclosure schedule final review",        owner: "Counsel",  status: "in_progress", due: "Thu" },
-  { id: "c-03", title: "Shareholder consent — 95% threshold",     owner: "Founder",  status: "in_progress", due: "Mon" },
-  { id: "c-04", title: "Bring-down certificate",                  owner: "Founder",  status: "pending",     due: "Tue (close)" },
-  { id: "c-05", title: "Escrow agent engagement",                 owner: "Banker",   status: "done" },
-  { id: "c-06", title: "Wire instructions — buyer side",          owner: "Buyer",    status: "done" },
-  { id: "c-07", title: "Closing escrow funding confirmation",     owner: "Banker",   status: "pending",     due: "Tue 9am" },
-  { id: "c-08", title: "Cap-table snapshot at closing",           owner: "Founder",  status: "pending",     due: "Tue (close)" },
-  { id: "c-09", title: "Regulatory filings — Form 8023 / NJ-1054", owner: "Counsel", status: "in_progress", due: "Tue" },
-  { id: "c-10", title: "Press / employee announcement coordination", owner: "Founder", status: "pending",   due: "Wed" },
-  { id: "c-11", title: "Buyer side board approval",               owner: "Buyer",    status: "in_progress", due: "Mon" },
-  { id: "c-12", title: "Closing call — agenda + dial-ins",        owner: "Banker",   status: "in_progress", due: "Tue 8am" },
+// A closing-checklist template. No deal has reached closing on ExitOS, so
+// nothing here has a status until the user sets one.
+const TEMPLATE: readonly TemplateItem[] = [
+  { id: "c-01", title: "SPA execution + signature pages",         owner: "Counsel" },
+  { id: "c-02", title: "Disclosure schedule final review",        owner: "Counsel" },
+  { id: "c-03", title: "Shareholder consent — 95% threshold",     owner: "Founder" },
+  { id: "c-04", title: "Bring-down certificate",                  owner: "Founder" },
+  { id: "c-05", title: "Escrow agent engagement",                 owner: "Banker" },
+  { id: "c-06", title: "Wire instructions — buyer side",          owner: "Buyer" },
+  { id: "c-07", title: "Closing escrow funding confirmation",     owner: "Banker" },
+  { id: "c-08", title: "Cap-table snapshot at closing",           owner: "Founder" },
+  { id: "c-09", title: "Regulatory filings — Form 8023 / NJ-1054", owner: "Counsel" },
+  { id: "c-10", title: "Press / employee announcement coordination", owner: "Founder" },
+  { id: "c-11", title: "Buyer side board approval",               owner: "Buyer" },
+  { id: "c-12", title: "Closing call — agenda + dial-ins",        owner: "Banker" },
 ];
 
 const STATUS_STYLE: Record<ChecklistItem["status"], string> = {
@@ -63,7 +67,23 @@ function openRisks(items: readonly ChecklistItem[]): { title: string; owner: str
     .sort((a, b) => (a.severity === "high" ? -1 : 1) - (b.severity === "high" ? -1 : 1));
 }
 
+const STATUS_LABEL: Record<ItemStatus, string> = { pending: "Not started", in_progress: "In progress", done: "Done", blocked: "Blocked" };
+const STATUS_KEY = "exitos.closing.v1";
+const loadStatuses = (): Record<string, ItemStatus> => {
+  try { return JSON.parse(globalThis.localStorage?.getItem(STATUS_KEY) ?? "{}") as Record<string, ItemStatus>; } catch { return {}; }
+};
+
 const Closing: React.FC = () => {
+  // statuses are the user's own, saved in this browser
+  const [statuses, setStatuses] = useState<Record<string, ItemStatus>>(loadStatuses);
+  const setStatus = (id: string, st: ItemStatus): void => {
+    setStatuses((cur) => {
+      const next = { ...cur, [id]: st };
+      try { globalThis.localStorage?.setItem(STATUS_KEY, JSON.stringify(next)); } catch { /* in-memory only */ }
+      return next;
+    });
+  };
+  const CLOSING: readonly ChecklistItem[] = TEMPLATE.map((t) => ({ ...t, status: statuses[t.id] ?? "pending" }));
   const done       = CLOSING.filter((c) => c.status === "done").length;
   const inProgress = CLOSING.filter((c) => c.status === "in_progress").length;
   const blocked    = CLOSING.filter((c) => c.status === "blocked").length;
@@ -112,8 +132,10 @@ const Closing: React.FC = () => {
           <button type="button" onClick={() => setCallOpen(true)} className={BTN}>Closing call</button>
         </>} />
 
+      <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">No deal has reached closing on ExitOS. This is a closing checklist template: set each item's status yourself as your counsel and the buyer report progress. Statuses are saved in this browser only.</p>
+
       <section aria-label="Closing summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Closing in" emphasis value="6 days" sub="Sentinel Holdings" /></div>
+        <div className="bg-xo-panel"><Metric label="Checklist" emphasis value={`${CLOSING.length} items`} sub="template · statuses set by you" /></div>
         <div className="bg-xo-panel"><Metric label="Done" emphasis value={`${done} / ${CLOSING.length}`} sub="signed off" /></div>
         <div className="bg-xo-panel"><Metric label="In progress" value={String(inProgress)} sub="active workstreams" /></div>
         <div className="bg-xo-panel"><Metric label="Blockers" value={String(blocked + redFlags.length)} sub="checklist + red flags" /></div>
@@ -145,7 +167,7 @@ const Closing: React.FC = () => {
         next={topRisk ? <>Clear <span className="text-white">{topRisk.title}</span> ({topRisk.owner}) — the top {topRisk.severity}-risk item gating the wire.</> : "Confirm escrow funding and hold the closing call."}
         stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(dealValue)}</span> transaction · <span className={probTone}>{Math.round(prob * 100)}%</span> modeled close probability.</>}
         inaction={<>{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</>}
-        buyer={<><span className="text-white">Sentinel Holdings</span> — in signing, 6 days to close.</>}
+        buyer={<>No deal in closing — the checklist is a template.</>}
         automate={<>ExitOS tracks every signature, escrow movement and filing, and nudges the owner before each due date.</>}
         impact={<span className={probTone}>{Math.round(prob * 100)}%</span>}
         cta={{ label: "Generate closing docs", to: "/console/documents" }}
@@ -186,7 +208,7 @@ const Closing: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
-        <Section title="Closing checklist — Sentinel Holdings" className="lg:col-span-8">
+        <Section title="Closing checklist (template)" className="lg:col-span-8">
           <div id="signatures" />
           <ScrollRegion label="Closing checklist">
             <table className="w-full min-w-[560px] text-[13px]">
@@ -195,7 +217,6 @@ const Closing: React.FC = () => {
                   <th scope="col" className="w-12 px-4 py-2 font-medium">#</th>
                   <th scope="col" className="px-2 py-2 font-medium">Item</th>
                   <th scope="col" className="px-2 py-2 font-medium">Owner</th>
-                  <th scope="col" className="px-2 py-2 font-medium">Due</th>
                   <th scope="col" className="px-4 py-2 font-medium">Status</th>
                 </tr>
               </thead>
@@ -205,8 +226,12 @@ const Closing: React.FC = () => {
                     <td className="px-4 py-2.5 font-mono text-[11px] text-xo-faint">{(i + 1).toString().padStart(2, "0")}</td>
                     <th scope="row" className="px-2 py-2.5 text-left font-normal">{c.title}</th>
                     <td className={`px-2 py-2.5 text-[12px] font-semibold ${OWNER_STYLE[c.owner]}`}>{c.owner}</td>
-                    <td className="px-2 py-2.5 text-[12px] text-xo-muted">{c.due ?? "—"}</td>
-                    <td className="px-4 py-2.5"><span className={`inline-block rounded-sm border px-1.5 py-px text-[11px] font-semibold ${STATUS_STYLE[c.status]}`}>{c.status.replace(/_/g, " ")}</span></td>
+                    <td className="px-4 py-2.5">
+                      <select aria-label={`Status of ${c.title}`} value={c.status} onChange={(e) => setStatus(c.id, e.target.value as ItemStatus)}
+                        className={`rounded-sm border bg-xo-ink px-1.5 py-1 text-[12px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${STATUS_STYLE[c.status]}`}>
+                        {(Object.keys(STATUS_LABEL) as ItemStatus[]).map((k) => <option key={k} value={k}>{STATUS_LABEL[k]}</option>)}
+                      </select>
+                    </td>
                   </tr>
                 ))}
               </tbody>
