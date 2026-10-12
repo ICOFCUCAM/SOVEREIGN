@@ -34,7 +34,7 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 | G3 | "Contact path" is a role; "Conf" rule unstated. | "Typical contact role"; "Contact confidence" with its rule (indexed deals, mostly unverified). | ☑ `d1f13e3` |
 | G4 | "Sequenced" implies a running programme. | Say it is a suggested plan: nothing is sent or scheduled; week labels are suggested timing. | ☑ `61bfec0` |
 | G5 | Demo unlabelled. | Demo data / Your intake badge and line. | ☑ `25f08d5` |
-| G6 | Fake live tape. | `RegistryTape`. | ☑ G6-commit |
+| G6 | Fake live tape. | `RegistryTape`. | ☑ `96a0784` |
 | G7 | Design: no `h1`, 26 contrast failures. | Rebuild on `xo`. | ☑ `edab625` |
 
 ---
