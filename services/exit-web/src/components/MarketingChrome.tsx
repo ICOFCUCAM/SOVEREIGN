@@ -193,13 +193,14 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
 
       <main>{children}</main>
 
-      <footer className="border-t border-slate-200 bg-[#f6f8fb]">
+      {/* the footer continues the close in the deepest ink (EE16) */}
+      <footer className="ex-seam relative overflow-hidden bg-ex-0 text-white">
         <div className={`${WRAP} py-12`}>
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
             <div>
-              <ExchangeLockup size={30} />
-              <p className="mt-4 max-w-xs text-[12.5px] leading-relaxed text-slate-600">{t("ft.tagline")}</p>
-              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-slate-600">
+              <ExchangeLockup size={30} dark />
+              <p className="mt-4 max-w-xs text-[12.5px] leading-relaxed text-blue-100/70">{t("ft.tagline")}</p>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-blue-100/70">
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.soc")}</span>
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.audit")}</span>
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.ndagated")}</span>
@@ -211,21 +212,21 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
               ["ft.acquirers", [["ft.browse", "/console"], ["ft.buyeraccess", "/pricing"], ["ft.requestnda", "/console"]]],
             ] as Array<[string, Array<[string, string]>]>).map(([titleKey, links]) => (
               <div key={titleKey}>
-                <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-600">{t(titleKey)}</div>
+                <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-300">{t(titleKey)}</div>
                 <ul className="mt-4 space-y-2.5 text-[13px]">
                   {links.map(([k, to]) => (
-                    <li key={k + to}><Link to={to} className="text-slate-600 hover:text-ink-900">{t(k)}</Link></li>
+                    <li key={k + to}><Link to={to} className="text-blue-100/75 transition-colors hover:text-white">{t(k)}</Link></li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
-          <div className="mt-10 border-t border-slate-200 pt-6">
-            <p className="max-w-3xl text-[11px] leading-relaxed text-slate-600">{t("ft.legal")}</p>
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-4 text-[12px] text-slate-600">
+          <div className="mt-10 border-t border-white/10 pt-6">
+            <p className="max-w-3xl text-[11px] leading-relaxed text-blue-100/60">{t("ft.legal")}</p>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-4 text-[12px] text-blue-100/70">
               <div>© {new Date().getFullYear()} ExitOS — A Sovereign Infrastructure</div>
               <div className="flex items-center gap-4">
-                <LocaleSwitch />
+                <LocaleSwitch dark />
                 <div className="font-mono">exit.sovereigndo.com</div>
               </div>
             </div>
