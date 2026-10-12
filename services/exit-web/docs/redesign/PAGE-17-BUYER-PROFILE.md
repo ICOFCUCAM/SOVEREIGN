@@ -32,7 +32,7 @@ One indexed buyer's dossier: likelihood for the founder's company and the buyer'
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Composite score labelled "probability".** | "Likelihood score N/100 (composite)" with the formula reference; forecast tile likewise. | ☑ `3bf0e42` |
-| G2 | **"Express interest" implies an effect it does not have.** | Say what it does: saved to deal activity on this browser; the buyer is not notified. Drop "sharpens engagement intelligence". | ☐ |
+| G2 | **"Express interest" implies an effect it does not have.** | Say what it does: saved to deal activity on this browser; the buyer is not notified. Drop "sharpens engagement intelligence". | ☑ G2-commit |
 | G3 | Snapshot wording ("currently exhibits", "node-side"). | "in the registry snapshot (as of …)"; "not in the bundled extract". | ☐ |
 | G4 | Demo company unlabelled. | Company, tokens and institutional baseline from `loadActiveCompany()` (as the Terminal does); badge. | ☐ |
 | G5 | Design: old primitives (found and not-found states). | Rebuild on `xo`. | ☑ `bc01f3f` |
@@ -51,3 +51,7 @@ The Terminal shows `rankedBuyers().probability.pct` as "N% likely", "N% probabil
 ### G1 — Composite score labelled "probability"
 *Closed by:* `pages/BuyerProfile.tsx` (labels). "Probability · your company N%" → **"Likelihood score · your company N/100"** with "Composite: appetite + sector overlap + velocity + recency — not a probability (formula on the Buyer Graph). Suggested (rule): …"; forecast tile "Probability N% — for a company like yours" → "Likelihood score N/100 — composite, not a probability". "Expected value" and "Expected to close" were "probability-weighted"; they are offer × close rate (`expectedOutcomeFor`), so now "close-rate-weighted".
 *Verification:* `tsc -b`, eslint clean · Chromium: the only "probability" on the page is "not a probability"; 0 "N%" likelihood values.
+
+### G2 — "Express interest" implied an effect it does not have
+*Closed by:* `pages/BuyerProfile.tsx` (text and a comment). "Captured to your deal activity — the behavioral signal that sharpens engagement intelligence." → **"'Express interest' and your visits to this page are saved to your deal activity in this browser only. {buyer} is not notified."** (Both events go to `captureDealEvent`, whose adapter is localStorage.) The code comment "capture the view forever — the behavioral data that becomes the moat" now says what happens. Behaviour unchanged.
+*Verification:* eslint clean · Chromium: new sentence present, 0 "sharpens".

@@ -23,7 +23,7 @@ const BuyerProfile: React.FC = () => {
   const p = buyerById(id);
   const [interested, setInterested] = useState(false);
 
-  // capture the view forever — the behavioral data that becomes the moat
+  // Record the view in the founder's deal activity (this browser's storage).
   useEffect(() => {
     if (p) captureDealEvent({ actorRole: "founder", kind: "viewed_buyer", subjectType: "buyer", subjectId: p.buyer_id, subjectName: p.name });
   }, [p]);
@@ -67,7 +67,7 @@ const BuyerProfile: React.FC = () => {
           </button>
           <a href={`/report/buyer/${p.buyer_id}`} target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Briefing Book (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
         </>}>
-        <p className="mt-2 text-[12px] text-xo-faint">Captured to your <Link to="/console/activity" className="text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">deal activity</Link> — the behavioral signal that sharpens engagement intelligence.</p>
+        <p className="mt-2 text-[12px] text-xo-faint">"Express interest" and your visits to this page are saved to your <Link to="/console/activity" className="text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">deal activity</Link> in this browser only. {p.name} is not notified.</p>
       </PageHeader>
 
       <section aria-label="Scores" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2">
