@@ -5,7 +5,7 @@
 | Route | `/console/outcomes` |
 | Component | `src/pages/OutcomeIntelligence.tsx` (121 lines) |
 | NAV | "Outcome Intelligence", founder, **Preparation or Active Mandate** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All four gaps closed; X15 (data) open for the owner. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `67e992e`)
 
@@ -63,3 +63,12 @@ Market-level outcomes: the buyers paying the highest premiums, the fastest close
 ### G3 — Fake live tape
 *Closed by:* `pages/OutcomeIntelligence.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 12), all tab stops with visible focus · free: Upgrade page · 0 "live" words.
+
+## Known issues
+- **X15 (data, open):** curated outcome records are attached by first-word name matching; five "General …" companies share one record in the fastest-closers list. Needs exact/alias matching in `exit-engines/src/scripts/dna/build.ts` and regenerated data — owner decision.
+- Premiums come from a small curated set (6 buyers); Amazon's +144 % is an average over its curated deals.
