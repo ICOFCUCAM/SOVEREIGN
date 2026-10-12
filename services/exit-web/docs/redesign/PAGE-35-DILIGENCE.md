@@ -5,7 +5,7 @@
 | Route | `/console/diligence-ai` |
 | Component | `src/pages/DiligenceAI.tsx` (244 lines) + `lib/diligence-intel.ts` (`discoverFindings`, `allReports`, `SOURCE_FILES`), `lib/engines.ts` (`DILIGENCE` on the demo company), shared `BankerTake` |
 | NAV | "Diligence", founder, **Preparation or Pro** (free: Upgrade page) |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All seven gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `4923cd8`)
 
@@ -74,3 +74,14 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe 0 · no overflow · 0 
 ### G6 — Shared `BankerTake`; fake live tape
 *Closed by:* `pages/DiligenceAI.tsx`. The shared `BankerTake` is replaced by a page-local "Recommended action" `Section` (headline by high-severity count; At stake — the illustrative rule, not a buyer estimate; If you wait; First — founder dependency and concentration; What ExitOS does — fixed checks on the profile, no document reading, with "Open the data room →"). Pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 206/206 · Chromium Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · free: Upgrade page · question-bank toggles and report switcher: axe 0 · demo and intake both checked; the printable report follows the active company.
+
+## Known issues
+- The illustrative discount rule (fixed shares, 45–48.5 % of the midpoint in total, every finding counted whatever its severity) is an ExitOS assumption — stated on the page; owner decision whether it should stay.
+- Several checks are generic prompts (contracts, IP assignment, litigation): ExitOS holds no documents, so they are worded as checks, not findings.
+- The printable report (`/report/diligence`) was only checked for company, totals and the carrier item; its wording is not reviewed here (report pages are outside the 41 console pages).
+- The page route is still `/console/diligence-ai` and the component `DiligenceAI` (unchanged; only the visible title changed).

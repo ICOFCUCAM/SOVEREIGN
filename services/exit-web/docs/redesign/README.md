@@ -38,8 +38,8 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | 32 | `/console/closing` | Closing Center / Signatures / Escrow | `Closing` | founder | Pro | ☑ done · awaiting final review |
 | 33 | `/console/marketplace` | Anonymous Listings / Browse Opportunities | `Marketplace` | founder, buyer | none | ☑ done · awaiting final review |
 | 34 | `/console/valuation` | Enterprise Value | `Valuation` | founder | none | ☑ done · awaiting final review |
-| 35 | `/console/diligence-ai` | Diligence | `DiligenceAI` | founder | Preparation or Pro | ◐ in progress |
-| 36 | `/console/banker` | Outreach | `Banker` | founder | Pro | ☐ |
+| 35 | `/console/diligence-ai` | Diligence | `DiligenceAI` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 36 | `/console/banker` | Outreach | `Banker` | founder | Pro | ◐ in progress |
 | 37 | `/console/buyer-portal` | Buyer Home | `BuyerPortal` | buyer | none | ☐ |
 | 38 | `/console/calibration` | Calibration | `Calibration` | admin | none | ☐ |
 | 39 | `/console/simulator` | Scenario Simulator | `Simulator` | founder | Pro | ☐ |
