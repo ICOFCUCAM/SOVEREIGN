@@ -1,9 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { fmtMoney, downloadText, downloadJson } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric, Chip, Disclosure } from "../components/xo";
+import { PageHeader, Section, Metric, Chip, Disclosure, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { DILIGENCE, VALUATION_CANONICAL } from "../lib/engines";
+import { DILIGENCE as DEMO_DILIGENCE, VALUATION_CANONICAL } from "../lib/engines";
+import { runDueDiligence } from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
 import BankerTake from "../components/BankerTake";
 import {
   discoverFindings, allReports, SOURCE_FILES,
@@ -30,14 +33,17 @@ const CATEGORIES: { key: RiskCategory; blurb: string }[] = [
 ];
 
 const DiligenceAI: React.FC = () => {
-  const findings = useMemo(() => discoverFindings(), []);
-  const reports = useMemo(() => allReports(findings), [findings]);
+  // The founder's saved intake when there is one; the demo company otherwise.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const MID = useMemo(() => (fromIntake ? canonicalValuationFor(company).headline.mid : VALUATION_CANONICAL.headline.mid), [company, fromIntake]);
+  const DILIGENCE = useMemo(() => (fromIntake ? runDueDiligence(company) : DEMO_DILIGENCE), [company, fromIntake]);
+  const findings = useMemo(() => discoverFindings(company, MID), [company, MID]);
+  const reports = useMemo(() => allReports(findings, MID), [findings, MID]);
   const [reportKey, setReportKey] = useState<string>("seller");
   const [open, setOpen] = useState<string | null>(DILIGENCE.documents[0]?.kind ?? null);
 
   const high = findings.filter((f) => f.severity === "high").length;
   const buyerDiscount = findings.reduce((s, f) => s + f.impactUsd, 0);
-  const MID = VALUATION_CANONICAL.headline.mid;
   const sharePct = (usd: number): string => String(Math.round((usd / MID) * 200) / 2);
   const report = reports.find((r) => r.key === reportKey) ?? reports[0];
 
@@ -55,9 +61,9 @@ const DiligenceAI: React.FC = () => {
 
   return (
     <div data-page="diligence" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Due Diligence · rule-based checks" title="Diligence"
-        badge={<span className="text-[12px] text-xo-muted">Buyer + Seller reports · <span className={high > 0 ? "text-xo-risk" : "text-xo-verified"}>{high > 0 ? `${high} high severity` : "Clean"}</span></span>}
-        description="Findings recompute from the company profile each time the page opens." />
+      <PageHeader eyebrow={`◉ Due Diligence · rule-based checks · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Diligence"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Buyer + Seller reports · <span className={high > 0 ? "text-xo-risk" : "text-xo-verified"}>{high > 0 ? `${high} high severity` : "Clean"}</span></span></>}
+        description={`Findings recompute from the company profile each time the page opens — ${fromIntake ? "your saved intake" : "the demo company; save an intake to check yours"}.`} />
 
       <section aria-label="Diligence summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Risks discovered" emphasis value={String(findings.length)} sub="across 3 categories" /></div>

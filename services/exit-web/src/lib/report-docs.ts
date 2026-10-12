@@ -5,6 +5,7 @@ import {
   acquisitionAppetiteScore, similarAcquisitionsBy,
 } from "./buyer-dna";
 import { activeTokens } from "./active-company";
+import { canonicalValuationFor } from "./canonical-valuation";
 import { discoverFindings, allReports, SOURCE_FILES, type DiligenceFinding, type Severity } from "./diligence-intel";
 import { ACQ_INDEXES, MARKET_INTEL, fmtUsd } from "./market-intel";
 import { MARKET } from "./market-stats";
@@ -242,8 +243,10 @@ export interface DiligenceReportModel {
 }
 export function buildDiligenceReport(company: CompanyProfile): DiligenceReportModel {
   const INST = runInstitutionalValuation(company);
-  const findings: DiligenceFinding[] = discoverFindings();
-  const reports = allReports(findings);
+  // findings and the illustrative shares are for this company (its canonical midpoint)
+  const mid = canonicalValuationFor(company, INST).headline.mid;
+  const findings: DiligenceFinding[] = discoverFindings(company, mid);
+  const reports = allReports(findings, mid);
   const bySev = (s: Severity): number => findings.filter((f) => f.severity === s).length;
   const totalImpactUsd = findings.reduce((acc, f) => acc + f.impactUsd, 0);
   const readiness = reports.find((r) => r.key === "readiness");

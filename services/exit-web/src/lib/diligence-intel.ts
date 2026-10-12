@@ -1,5 +1,6 @@
 import { SAMPLE_COMPANY } from "./profile";
 import { VALUATION_CANONICAL } from "./engines";
+import type { CompanyProfile } from "@exit/engines";
 
 // Diligence checks. From the company profile (no document is read), surface
 // the risks a buyer's analyst would probe — across Financial, Legal and
@@ -44,13 +45,12 @@ export const SOURCE_FILES: readonly SourceFile[] = [
 const MID = VALUATION_CANONICAL.headline.mid;
 // Illustrative rule: each finding carries a fixed share (w %) of the
 // canonical midpoint, whatever its severity; rounded to the nearest $100k.
-const impact = (w: number) => Math.round((MID * (w / 100)) / 100_000) * 100_000;
 
 // Discover the findings for the current company profile. Severities and
 // presence are computed from the real metrics (concentration, margins,
 // recurring mix, founder status, IP, regulatory risk, bench strength).
-export function discoverFindings(): DiligenceFinding[] {
-  const C = SAMPLE_COMPANY;
+export function discoverFindings(C: CompanyProfile = SAMPLE_COMPANY, mid: number = MID): DiligenceFinding[] {
+  const impact = (w: number): number => Math.round((mid * (w / 100)) / 100_000) * 100_000;
   const concentration = C.revenue.customerConcentrationTop10Pct ?? 0;
   const recurringPct = C.revenue.trailingTwelveMonthsRevenueUsd > 0
     ? C.revenue.annualRecurringRevenueUsd / C.revenue.trailingTwelveMonthsRevenueUsd
@@ -209,11 +209,11 @@ function tally(findings: readonly DiligenceFinding[]): Record<Severity, number> 
 }
 
 // Buyer Risk Report — the discount and protections a buyer's analyst lands on.
-export function buildBuyerReport(findings: readonly DiligenceFinding[]): RiskReport {
+export function buildBuyerReport(findings: readonly DiligenceFinding[], mid: number = MID): RiskReport {
   const bySeverity = tally(findings);
   const total = findings.reduce((s, f) => s + f.impactUsd, 0);
   const top = [...findings].sort((a, b) => SEV_RANK[b.severity] - SEV_RANK[a.severity] || b.impactUsd - a.impactUsd).slice(0, 4);
-  const escrowPct = Math.min(20, Math.round((total / MID) * 100));
+  const escrowPct = Math.min(20, Math.round((total / mid) * 100));
   return {
     audience: "buyer",
     title: "Buyer Diligence Report",
@@ -238,8 +238,8 @@ export interface NamedReport {
 
 const m1 = (n: number): string => `$${(n / 1_000_000).toFixed(1)}M`;
 
-export function allReports(findings: readonly DiligenceFinding[]): NamedReport[] {
-  const buyer = buildBuyerReport(findings);
+export function allReports(findings: readonly DiligenceFinding[], mid: number = MID): NamedReport[] {
+  const buyer = buildBuyerReport(findings, mid);
   const seller = buildSellerReport(findings);
   const high = findings.filter((f) => f.severity === "high");
   const legal = findings.filter((f) => f.category === "Legal");
