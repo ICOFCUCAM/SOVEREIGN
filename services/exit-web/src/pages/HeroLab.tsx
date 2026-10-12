@@ -7,6 +7,7 @@ import { MARKET_INDEX_FMT } from "../lib/market-index";
 import { useI18n } from "../lib/i18n";
 import ExchangeWall from "../components/ExchangeWall";
 import TradingHall from "../components/TradingHall";
+import ExchangeMap from "../components/ExchangeMap";
 
 // HERO LAB — development-only preview of hero concepts for the owner to
 // choose from (/hero-lab?v=1…7; not routed in production builds). 5–7 are the
@@ -350,7 +351,7 @@ const HeroMark: React.FC = () => {
 };
 
 /* ── 9 · THE HORIZON — a night statement, the hall's light on the horizon ── */
-const HeroHorizon: React.FC = () => {
+const HorizonTop: React.FC = () => {
   const { t, nav, h1, proof } = useHero();
   return (
     <>
@@ -374,12 +375,34 @@ const HeroHorizon: React.FC = () => {
         <div aria-hidden className="absolute inset-x-0 bottom-10 mx-auto h-[3px] w-[70%] rounded-full" style={{ background: "linear-gradient(90deg, transparent, rgba(225,238,255,1), transparent)", boxShadow: "0 0 40px 10px rgba(120,170,255,0.55)" }} />
         <div aria-hidden className="absolute inset-x-0 bottom-0 mx-auto h-24 w-[80%] rounded-[50%] opacity-50 blur-3xl" style={{ background: "radial-gradient(ellipse at bottom, rgba(56,130,246,0.6), transparent 70%)" }} />
       </section>
-      <HallSection />
     </>
   );
 };
 
-const VARIANTS: Record<string, React.FC> = { "1": HeroHall, "2": HeroNight, "3": HeroFrontPage, "4": HeroMonolith, "5": HeroWallInHall, "6": HeroHallClassic, "7": HeroHallWall, "8": HeroMark, "9": HeroHorizon };
+const HeroHorizon: React.FC = () => <><HorizonTop /><HallSection /></>;
+
+/* ── 10 · HORIZON + THE EXCHANGE MAP — the owner's reference, in ExitOS terms ── */
+const MapSection: React.FC = () => (
+  <section className="text-white" style={{ background: "#05101f" }}>
+    <div className="mx-auto w-full max-w-[1480px] px-5 pb-14 pt-24 sm:px-8 lg:px-12">
+      <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.24em] text-blue-300"><span aria-hidden className="h-px w-12 bg-blue-300/70" />The exchange</div>
+      <h2 className="mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">The whole market, <em className="italic text-blue-300">in one room.</em></h2>
+    </div>
+    <ExchangeMap />
+    <div className="mx-auto w-full max-w-[1320px] px-5 pb-24 pt-14 sm:px-8 lg:px-12">
+      <div className="mb-5 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-white/70">
+        <span><span className="text-blue-300">02</span> / Trace the path — the exchange screen</span>
+      </div>
+      <div className="rounded-[12px] p-2.5" style={{ background: "linear-gradient(180deg,#1a3358,#0b1a30)", boxShadow: "0 60px 90px -45px rgba(0,0,0,0.9), 0 0 0 1px rgba(160,195,240,0.14)" }}>
+        <div className="rounded-[8px] bg-[#0a1626] p-1.5"><ScreenFace /></div>
+      </div>
+    </div>
+  </section>
+);
+
+const HeroHorizonMap: React.FC = () => <><HorizonTop /><MapSection /></>;
+
+const VARIANTS: Record<string, React.FC> = { "1": HeroHall, "2": HeroNight, "3": HeroFrontPage, "4": HeroMonolith, "5": HeroWallInHall, "6": HeroHallClassic, "7": HeroHallWall, "8": HeroMark, "9": HeroHorizon, "10": HeroHorizonMap };
 
 const HeroLab: React.FC = () => {
   const [params] = useSearchParams();

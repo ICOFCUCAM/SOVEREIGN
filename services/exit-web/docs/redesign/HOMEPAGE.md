@@ -327,6 +327,16 @@ Nothing changes on the live homepage until the owner confirms. Screens: `scratch
 
 ---
 
+## Phase 8 — The exchange map (owner's reference, awaiting judgement)
+
+The owner supplied a reference: a dark exchange map with low-poly continents, a route joining process stages, a dashed survey grid, a corner tag ("Exchange map / 001") and a numbered footer ("01 / Discover the field · 02 / Trace the path"). Lab variant 10 (`/hero-lab?v=10`, dev only) translates it into the locked palette: `components/ExchangeMap.tsx`.
+
+- Kept from the reference: the map format, low-poly land (the coverage map's own `LANDMASS` outlines, now exported), ringed stage nodes on one route, dotted cross-links, the survey grid, the corner tag, the footer labels, the accent bar.
+- Changed: the red route becomes the locked blue light, turning emerald at Closing; the reference's invented stage names become the eight lifecycle stages and typical weeks already on the homepage (`lc.*`), labelled "Illustrative process topology". No figures are added.
+- The live exchange screen is unchanged and sits directly below as "02 / Trace the path", in a flat framed portal.
+- On a phone the map labels are too small to read, so the stages are repeated as a two-column list under the map; the corner tag is hidden.
+- If approved, this map replaces the trading-hall setting of the exchange section on the homepage. The board markup stays identical either way.
+
 ## Closure log
 
 ### M1 — Rebuild on the `index(9)` skeleton
