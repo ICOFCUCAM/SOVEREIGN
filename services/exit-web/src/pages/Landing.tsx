@@ -67,11 +67,11 @@ const Landing: React.FC = () => {
         <SignatureLine />
       {/* ===== 01 · HERO — after the owner's index(2).html (DD2), in the locked palette ===== */}
       <section id="ch-01" className="relative isolate flex min-h-[min(880px,calc(100vh-72px))] flex-col overflow-hidden">
-        {/* the field: ivory on the left, deep petrol ink on the right (owner, DD5 → DD7), stacked on phones; the seam eased (DD7) */}
-        <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(ellipse 55% 75% at 80% 38%, rgba(56,120,150,0.16), transparent 70%), linear-gradient(180deg,#0d2130 0%,#0a1a26 60%,#07131c 100%)" }} />
+        {/* the field: ivory on the left, the exchange ink on the right (owner, DD5 → EE2), stacked on phones; the seam eased (DD7) */}
+        <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(ellipse 50% 70% at 79% 40%, var(--ex-glow), transparent 70%), linear-gradient(180deg, var(--ex-1) 0%, #061629 60%, var(--ex-0) 100%)" }} />
         {/* a fine grain on the black, and the floor darkening toward the strip; the ivory is laid over both */}
         <div aria-hidden className="absolute inset-0 opacity-[0.07] mix-blend-screen" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
-        <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(4,12,18,0.55), transparent 22%)" }} />
+        <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(4,12,24,0.55), transparent 22%)" }} />
         <div aria-hidden className="absolute inset-0 hidden md:block" style={{ background: "linear-gradient(90deg, #f6f8fb 0%, #f6f8fb 30%, rgba(246,248,251,0.97) 35%, rgba(246,248,251,0.9) 40%, rgba(246,248,251,0.78) 44%, rgba(246,248,251,0.6) 48%, rgba(246,248,251,0.4) 52%, rgba(246,248,251,0.22) 56%, rgba(246,248,251,0.1) 60%, rgba(246,248,251,0.03) 64%, transparent 68%)" }} />
         <div aria-hidden className="absolute inset-0 md:hidden" style={{ background: "linear-gradient(180deg, rgba(246,248,251,0.99) 0%, rgba(246,248,251,0.96) 70%, rgba(246,248,251,0) 100%)" }} />
 
@@ -117,7 +117,7 @@ const Landing: React.FC = () => {
         </div>
 
         {/* the capability strip */}
-        <ul aria-label={t("hx.strip")} className="relative grid border-t border-white/15 bg-[#06111a]/95 text-white sm:grid-cols-2 lg:grid-cols-5">
+        <ul aria-label={t("hx.strip")} className="relative grid border-t border-white/15 bg-ex-0/95 text-white sm:grid-cols-2 lg:grid-cols-5">
           {([["◎", 1], ["♧", 2], ["↗", 3], ["▤", 4], ["⌁", 5]] as const).map(([icon, k], i) => (
             <li key={k} className={`flex gap-4 px-5 py-6 sm:px-8 lg:px-6 ${i ? "border-t border-white/10 sm:border-t-0 lg:border-l" : ""} ${i % 2 ? "sm:border-l" : ""} sm:border-white/10 lg:first:pl-[max(1.5rem,calc((100vw-1480px)/2+3rem))]`}>
               <span aria-hidden className="font-editorial text-[26px] leading-none text-blue-300">{icon}</span>
