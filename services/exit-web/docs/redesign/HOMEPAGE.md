@@ -433,7 +433,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE9 | The watermark appears flat on load. | A slow fade-up of the watermark on first load; none under reduced motion. | closed `16b04b1b` |
 | EE10 | Hero, chapter 02 box, board and band make four dark blocks in a row. | The chapter 02 chart presented as a framed ink panel on paper with its own lit edge, read as an object. | closed `17ca5886` |
 | EE11 | Board and band read as two separate dark slabs. | The instrument chapter (03 + band) set as one continuous ink chapter with a single floor gradient. | closed `821735ae` |
-| EE12 | Five thousand pixels of light in the middle with no dark pause. | The ledger's head: an ink strip of the three largest recorded deals (records only). | open |
+| EE12 | Five thousand pixels of light in the middle with no dark pause. | The ledger's head: an ink strip of the three largest recorded deals (records only). | closed `16769221` |
 | EE13 | Chapter openers vary in position and form. | One chapter opener: number, rule, label at the same measure everywhere. | open |
 | EE14 | Light chapters meet with bare background changes. | A double hairline between light chapters. | open |
 | EE15 | Every heading carries the blue italic word; the device is a formula. | The italic kept on four headings (hero, 04, 05, 09); others plain serif. | open |
@@ -1008,6 +1008,9 @@ Chapter 02's lifecycle chart set as an object on the ivory: an ex-0 bezel with a
 
 ### EE11 — closed 821735ae
 Board and band read as one ink chapter: the Instrument's floor (ex-0) runs straight into the band's top (ex-0); the full-width seam is replaced by a short centred rule with a diamond node; the band falls back to ex-0 before the white of chapter 04.
+
+### EE12 — closed 16769221
+The ledger's front page (the three latest recorded deals, unchanged data) is printed on ink under the masthead with a lit seam and a soft top glow: the dark pause between the light chapters 04–08. Status colours re-mapped for ink (closed done-green, announced amber-300, terminated slate-300). The planned 'three largest' strip was not added — the front page already carries three real records, and a second strip would repeat them.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
