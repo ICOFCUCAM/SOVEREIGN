@@ -887,7 +887,7 @@ Preview design 17 (AmbientVideo.tsx, public/media/). Playback checked in Chromiu
 BoardRoom.tsx removed (no imports anywhere since BB4). TradingHall.tsx stays for the dev-only hero lab. tsc, eslint 0 errors, vitest 243/243.
 
 ### CC1 — closed c0bcc3bd
-lib/buyer-pricing.ts is the one source. Pricing: buyer cards and section intro from it (Browsing is free; Buyer Access $299/mo adds NDA-gated diligence and the deal room; Premium $2,499/mo by request). Upgrade: buyers see the buyer ladder; the 'not published' note removed. Browser-checked as a demo buyer: ladder shown, 'Activate buyer access' sets plan pro and marks Buyer Access current. Unbuilt features removed (10-inquiry limit, saved searches, alerts, priority NDA, quarterly briefings). tsc, eslint, vitest 243/243; axe 0 on /pricing at 1440/390.
+lib/buyer-pricing.ts is the one source. Pricing: buyer cards and section intro from it (Browsing is free; Buyer Access $299/mo adds NDA-gated diligence and the deal room; Premium $2,499/mo by request). Upgrade: buyers see the buyer ladder; the 'not published' note removed. Browser-checked as a demo buyer: ladder shown, 'Activate buyer access' sets plan pro and marks Buyer Access current. Unbuilt features removed (10-inquiry limit, saved searches, alerts, priority NDA, quarterly briefings). tsc, eslint, vitest 243/243; axe 0 on /pricing at 1440/390 (note: the first scan used the homepage-only script and errored; re-run with a route-generic scanner, which found 0 — the whole homepage document, board included, also 0).
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
