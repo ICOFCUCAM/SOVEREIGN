@@ -35,7 +35,7 @@
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Invented process: live agent, contacts, interest, diligence, activity log, workstream statuses.** | Status says nothing has been sent and no buyer contacted; funnel shows only Identified and Shortlisted (Contacted / Interested / In diligence = 0, "none recorded"); activity lists only what the user did on this page; workstreams state what is drafted vs not started; "Approve next step" removed. | ☑ `0878da2` |
-| G2 | **False sends.** | Remove "Send campaign / introduction / Send"; downloads stay; say the user sends them. | ☐ |
+| G2 | **False sends.** | Remove "Send campaign / introduction / Send"; downloads stay; say the user sends them. | ☑ G2-commit |
 | G3 | Invented signer. | "[Your name]" as on Buyer Profiles and Bid Room. | ☐ |
 | G4 | **Rules of thumb as computed advice; "strategic" anchor; fit as %.** | Advice labelled "general guidance — not computed for this company" where not derived; anchor "Canonical midpoint / high"; "fit score N/100". | ☐ |
 | G5 | Demo only, unlabelled. | Buyers, memoranda and the canonical band for the active company; Demo data / Your intake badge; directives "saved in this browser". | ☐ |
@@ -65,3 +65,7 @@
 ### X20 — Shared `Modal` body not keyboard-scrollable
 *Closed by:* `lib/ui.tsx` `Modal`: the body is `role="region"`, `aria-labelledby` the dialog title, `tabIndex={0}`, with an inset focus ring.
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: the Banker's introduction dialog axe 1 → **0**; Escape still returns focus to "Draft introduction to Flexport Strategic" · other `Modal` dialogs re-checked — Closing call, Marketplace "Adjust preview", Bid Room "Draft the response", "Brief the banker": axe 0, Escape returns focus to the opener.
+
+### G2 — False sends
+*Closed by:* `pages/Banker.tsx`. Removed: "Send campaign" (toast "Outreach campaign launched to the shortlist"), "Send introduction" (toast "Introduction sent to …"), the teaser/summary "Send" (toast "Delivered to the buyer's data room") and every "Sent ✓ · resend" flag. Downloads stay and are now the primary action; the outreach tab says "A plan to run yourself — ExitOS does not send it."; the introduction dialog's subtitle says "download it and send it yourself; ExitOS does not send email" with "Close" / "Download draft"; the deliverables header reads "Drafts to review and download — ExitOS sends nothing." The "Held by directive" notice stays (the hold now only affects the wording of the posture). Found while testing: the introduction dialog's scrolling body was not keyboard-reachable — fixed for every dialog as X20.
+*Verification:* `tsc -b`, eslint clean · Chromium Pro: 0 "Send" / "Sent" buttons on the page; introduction dialog buttons "✕ / Close / Download draft", axe 0 (after X20), Escape returns focus to "Draft introduction to Flexport Strategic"; Teaser, Executive summary and Outreach campaign each offer only "Download" · 1440/390: 0 errors, `h1` 1, no overflow, axe 0.

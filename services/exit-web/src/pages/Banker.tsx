@@ -68,9 +68,6 @@ const Banker: React.FC = () => {
   const [strategy, setStrategy] = useState<{ anchor: "mid" | "high"; cashFloor: number; shortlist: number }>({ anchor: "high", cashFloor: 75, shortlist: 7 });
   const [extraActivity, setExtraActivity] = useState<{ when: string; text: string; tone: "good" | "info" | "warn" }[]>([]);
   const [introBuyer, setIntroBuyer] = useState<BuyerCandidate | null>(null);
-  const [sent, setSent] = useState<Set<string>>(new Set());
-  const isSent = (k: string): boolean => sent.has(k);
-  const flagSent = (k: string): void => setSent((prev) => new Set(prev).add(k));
 
   // The funnel: only ranking and the shortlist are real. ExitOS sends no
   // outreach, so nothing past the shortlist has happened.
@@ -182,10 +179,10 @@ const Banker: React.FC = () => {
       </Modal>
 
       {/* ── Draft introduction ────────────────────────────────────── */}
-      <Modal open={!!introBuyer} onClose={() => setIntroBuyer(null)} title={introBuyer ? `Introduction — ${introBuyer.buyer.name}` : ""} subtitle="Personalized from the buyer's match rationale" size="lg"
+      <Modal open={!!introBuyer} onClose={() => setIntroBuyer(null)} title={introBuyer ? `Introduction — ${introBuyer.buyer.name}` : ""} subtitle="Draft personalized from the buyer's match rationale — download it and send it yourself; ExitOS does not send email" size="lg"
         footer={introBuyer ? <>
-          <Button variant="ghost" onClick={() => downloadDeliverable(introFilename(introBuyer), introMd(introBuyer))}>Download</Button>
-          <Button onClick={() => { flagSent(`intro:${introBuyer.buyer.name}`); notify(`Introduction sent to ${introBuyer.buyer.name}`); }}>{isSent(`intro:${introBuyer.buyer.name}`) ? "Sent ✓ · resend" : "Send introduction"}</Button>
+          <Button variant="ghost" onClick={() => setIntroBuyer(null)}>Close</Button>
+          <Button onClick={() => downloadDeliverable(introFilename(introBuyer), introMd(introBuyer))}>Download draft</Button>
         </> : null}>
         {introBuyer && <pre className="whitespace-pre-wrap rounded-md border border-white/5 bg-black/40 p-4 text-[12.5px] leading-relaxed text-white/80">{introMd(introBuyer)}</pre>}
       </Modal>
@@ -345,7 +342,7 @@ const Banker: React.FC = () => {
 
       {/* ── Deliverables ─────────────────────────────────────────── */}
       <Section title="Deliverables" className="border border-xo-line"
-        right={<span className="text-[11px] text-xo-muted">Everything the banker has produced — review, download, and send.</span>}>
+        right={<span className="text-[11px] text-xo-muted">Drafts to review and download — ExitOS sends nothing.</span>}>
         <div className="px-4 py-3">
           <div role="group" aria-label="Deliverable" className="flex flex-wrap gap-2">
             {([["outreach", "Outreach campaign"], ["intros", "Buyer introductions"], ["teaser", "Teaser"], ["summary", "Executive summary"]] as [Tab, string][]).map(([k, l]) => (
@@ -362,8 +359,9 @@ const Banker: React.FC = () => {
                   </p>
                 )}
                 <div className="flex justify-end gap-2">
-                  <button type="button" onClick={() => downloadDeliverable("outreach-campaign.md", outreachMd())} className={BTN_GHOST}>Download</button>
-                  <button type="button" disabled={posture.held} onClick={() => { flagSent("outreach"); notify("Outreach campaign launched to the shortlist"); }} className={BTN}>{posture.held ? "Held by directive" : isSent("outreach") ? "Sent ✓ · resend" : "Send campaign"}</button>
+                  <span className="mr-auto self-center text-[12px] text-xo-muted">A plan to run yourself — ExitOS does not send it.</span>
+                  <button type="button" onClick={() => downloadDeliverable("outreach-campaign.md", outreachMd())} className={BTN}>Download</button>
+
                 </div>
                 <ol className="space-y-px bg-xo-line">
                   {SEQUENCE.map((s, i) => (
@@ -407,7 +405,6 @@ const Banker: React.FC = () => {
                     </p>
                     <div className="mt-3 flex items-center gap-2">
                       <button type="button" onClick={() => setIntroBuyer(b)} className={BTN_GHOST}>Draft introduction<span className="sr-only"> to {b.buyer.name}</span></button>
-                      {isSent(`intro:${b.buyer.name}`) && <span className="text-[12px] font-semibold text-xo-verified">Sent ✓</span>}
                     </div>
                   </li>
                   );
@@ -418,7 +415,6 @@ const Banker: React.FC = () => {
             {(tab === "teaser" || tab === "summary") && (() => {
               const doc = tab === "teaser" ? teaser : summary;
               if (!doc) return <p className="p-4 text-[13px] text-xo-muted">Generating…</p>;
-              const key = tab;
               return (
                 <article className="border border-xo-line bg-xo-ink p-5">
                   <div className="flex flex-wrap items-start justify-between gap-4">
@@ -428,8 +424,7 @@ const Banker: React.FC = () => {
                       <div className="mt-1 text-[12px] text-xo-muted">{doc.sections.length} sections · {doc.wordCount} words{doc.anonymized ? " · anonymized" : ""}</div>
                     </div>
                     <div className="flex shrink-0 gap-2">
-                      <button type="button" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))} className={BTN_GHOST}>Download</button>
-                      <button type="button" onClick={() => { flagSent(key); notify("Delivered to the buyer's data room"); }} className={BTN}>{isSent(key) ? "Sent ✓ · resend" : "Send"}</button>
+                      <button type="button" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))} className={BTN}>Download</button>
                     </div>
                   </div>
                   <div className="mt-4 space-y-4">
