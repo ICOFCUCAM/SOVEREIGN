@@ -92,7 +92,7 @@ const Banker: React.FC = () => {
     { key: "teaser",   title: "Create teaser",            status: teaser ? "done" : "active", result: teaser ? `${teaser.wordCount}-word anonymized teaser ready` : "Writing anonymized teaser…" },
     { key: "cim",      title: "Create CIM",               status: cim ? "done" : "active", result: cim ? `${cim.sections.length}-section CIM drafted — for your review` : "Drafting confidential memorandum…" },
     { key: "qa",       title: "Prepare for buyer questions", status: "queued", result: `${DILIGENCE.criticalQuestions.length} critical question${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} from diligence to prepare answers for — no buyer questions received` },
-    { key: "valuation", title: "Set valuation strategy",  status: "done",   result: `Anchoring the process at the strategic ${strategy.anchor} — ${fmtMoney(strategy.anchor === "high" ? VALUATION_CANONICAL.headline.high : mid)}` },
+    { key: "valuation", title: "Set valuation strategy",  status: "done",   result: `Anchor set at the canonical ${strategy.anchor === "high" ? "high" : "midpoint"} — ${fmtMoney(strategy.anchor === "high" ? VALUATION_CANONICAL.headline.high : mid)}` },
     { key: "diligence", title: "Coordinate diligence",    status: "queued", result: `${DILIGENCE.redFlags.length} red flag${DILIGENCE.redFlags.length === 1 ? "" : "s"} + ${DILIGENCE.criticalQuestions.length} critical Q${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} to resolve before buyers ask — not tracked automatically` },
   ];
 
@@ -165,8 +165,8 @@ const Banker: React.FC = () => {
         <div className="space-y-4">
           <Field label="Valuation anchor">
             <select className={inputCls} value={strategy.anchor} onChange={(e) => setStrategy((s) => ({ ...s, anchor: e.target.value as "mid" | "high" }))}>
-              <option value="mid">Strategic mid — {fmtMoney(mid)}</option>
-              <option value="high">Strategic high (stretch) — {fmtMoney(VALUATION_CANONICAL.headline.high)}</option>
+              <option value="mid">Canonical midpoint — {fmtMoney(mid)}</option>
+              <option value="high">Canonical high (stretch) — {fmtMoney(VALUATION_CANONICAL.headline.high)}</option>
             </select>
           </Field>
           <Field label={`Cash floor — ${strategy.cashFloor}%`} hint="Minimum cash consideration to accept">
@@ -308,20 +308,22 @@ const Banker: React.FC = () => {
       {/* ── Strategy advisory ────────────────────────────────────── */}
       {(() => {
         const bestBuyer = ranked[0]?.buyer.name ?? "the top strategic";
+        // general: a common rule of thumb, not computed for this company
         const advice = [
-          { q: "Best buyer", a: `${bestBuyer} — highest fit and expected outcome in the pool.` },
-          { q: "Best timing", a: "Months 7–13 — after the readiness gap closes and while multiples hold." },
-          { q: "Best structure", a: `Cash-heavy: ≥${strategy.cashFloor}% cash, earnout capped at 15% on audited milestones.` },
-          { q: "Best outreach", a: `Anonymized teaser → ${strategy.shortlist}-buyer shortlist → competitive indications of interest.` },
-          { q: "Best valuation", a: `Anchor at the strategic ${strategy.anchor} — ${fmtMoney(mid)} mid, ${fmtMoney(VALUATION_CANONICAL.headline.high)} stretch.` },
-          { q: "Best negotiation", a: "Run all buyers in parallel; counter above strategic-mid with a leverage premium." },
-          { q: "Best closing", a: "Escrow ≤8% released in 12 months; reverse break-fee; 30–45 day sign-to-close." },
+          { q: "Best buyer", general: false, a: `${bestBuyer} — highest fit score in the pool.` },
+          { q: "Best timing", general: true, a: "Months 7–13 — after the readiness gap closes and while multiples hold." },
+          { q: "Best structure", general: true, a: `Cash-heavy: ≥${strategy.cashFloor}% cash (your setting), earnout capped at 15% on audited milestones.` },
+          { q: "Best outreach", general: false, a: `Anonymized teaser → ${strategy.shortlist}-buyer shortlist (your setting) → competitive indications of interest.` },
+          { q: "Best valuation", general: false, a: `Anchor at the canonical ${strategy.anchor === "high" ? "high" : "midpoint"} — ${fmtMoney(mid)} midpoint, ${fmtMoney(VALUATION_CANONICAL.headline.high)} high.` },
+          { q: "Best negotiation", general: true, a: "Run all buyers in parallel; counter above the canonical midpoint with a leverage premium." },
+          { q: "Best closing", general: true, a: "Escrow ≤8% released in 12 months; reverse break-fee; 30–45 day sign-to-close." },
         ];
         return (
-          <Section title="Ask your banker" className="border border-xo-line">
+          <Section title="Ask your banker" className="border border-xo-line"
+            foot="Items marked general guidance are common rules of thumb, not computed for this company; the others use its ranking, its canonical valuation and your settings.">
             <div className="px-4 py-3">
               <div className="border border-xo-verified/40 bg-xo-ink p-3">
-                <div className="text-[12px] text-xo-muted">"What is the fastest path to a {fmtMoney(target)} exit?"</div>
+                <div className="text-[12px] text-xo-muted">"What is the fastest path to a {fmtMoney(target)} exit?" <span className="text-xo-caution">· general guidance</span></div>
                 <p className="mt-1.5 text-[14px] leading-relaxed">
                   Shortlist {strategy.shortlist} strategics, run a 6-week teaser → IOI → LOI process in parallel, and anchor at{" "}
                   <span className="font-mono font-semibold text-xo-verified">{fmtMoney(target)}</span>. Close cash-heavy (≥{strategy.cashFloor}%) with a tight escrow — the readiness fixes and competitive tension carry the rest.
@@ -330,7 +332,7 @@ const Banker: React.FC = () => {
               <dl className="mt-3 grid gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-3">
                 {advice.map((x) => (
                   <div key={x.q} className="bg-xo-panel p-3">
-                    <dt className="text-[11px] font-semibold text-xo-verified">{x.q}</dt>
+                    <dt className="text-[11px] font-semibold text-xo-verified">{x.q}{x.general && <span className="ml-1.5 font-normal text-xo-caution">· general guidance</span>}</dt>
                     <dd className="mt-1 text-[13px] leading-snug text-xo-muted">{x.a}</dd>
                   </div>
                 ))}
@@ -381,6 +383,8 @@ const Banker: React.FC = () => {
             )}
 
             {tab === "intros" && (
+              <>
+              <p className="mb-2 text-[12px] text-xo-muted">Fit score: the discovery engine's weighted fit, 0–100, re-weighted by your directives — not a measured chance of a bid.</p>
               <ul className="grid gap-px bg-xo-line sm:grid-cols-2">
                 {topBuyers.map((b) => {
                   const adj = adjustedById.get(b.buyer.name);
@@ -390,8 +394,8 @@ const Banker: React.FC = () => {
                     <div className="flex items-center justify-between gap-2">
                       <h3 className="text-[13px] font-semibold">{b.buyer.name}</h3>
                       <span className="text-right">
-                        <span className="font-mono text-[13px] font-semibold text-xo-verified">{Math.round((adj?.adjustedProbability ?? b.probability) * 100)}%</span>
-                        {moved && <span className="ml-1 font-mono text-[11px] text-xo-muted line-through">{Math.round(adj!.baseProbability * 100)}%</span>}
+                        <span className="sr-only">fit score </span><span className="font-mono text-[13px] font-semibold text-xo-verified">{Math.round((adj?.adjustedProbability ?? b.probability) * 100)}/100</span>
+                        {moved && <span className="ml-1 font-mono text-[11px] text-xo-muted line-through"><span className="sr-only">before directives </span>{Math.round(adj!.baseProbability * 100)}/100</span>}
                       </span>
                     </div>
                     <div className="text-[12px] text-xo-muted">{b.buyer.buyerType.replace(/_/g, " ")}</div>
@@ -410,6 +414,7 @@ const Banker: React.FC = () => {
                   );
                 })}
               </ul>
+              </>
             )}
 
             {(tab === "teaser" || tab === "summary") && (() => {

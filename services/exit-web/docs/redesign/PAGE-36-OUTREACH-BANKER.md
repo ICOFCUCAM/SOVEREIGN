@@ -37,7 +37,7 @@
 | G1 | **Invented process: live agent, contacts, interest, diligence, activity log, workstream statuses.** | Status says nothing has been sent and no buyer contacted; funnel shows only Identified and Shortlisted (Contacted / Interested / In diligence = 0, "none recorded"); activity lists only what the user did on this page; workstreams state what is drafted vs not started; "Approve next step" removed. | ☑ `0878da2` |
 | G2 | **False sends.** | Remove "Send campaign / introduction / Send"; downloads stay; say the user sends them. | ☑ `300ea01` |
 | G3 | Invented signer. | "[Your name]" as on Buyer Profiles and Bid Room. | ☑ `39dcab0` |
-| G4 | **Rules of thumb as computed advice; "strategic" anchor; fit as %.** | Advice labelled "general guidance — not computed for this company" where not derived; anchor "Canonical midpoint / high"; "fit score N/100". | ☐ |
+| G4 | **Rules of thumb as computed advice; "strategic" anchor; fit as %.** | Advice labelled "general guidance — not computed for this company" where not derived; anchor "Canonical midpoint / high"; "fit score N/100". | ☑ G4-commit |
 | G5 | Demo only, unlabelled. | Buyers, memoranda and the canonical band for the active company; Demo data / Your intake badge; directives "saved in this browser". | ☐ |
 | G6 | Design: old components. | Rebuild on `xo`. | ☑ `b98943f` |
 
@@ -73,3 +73,10 @@
 ### G3 — Invented signer
 *Closed by:* `pages/Banker.tsx`: `FROM_NAME` "Anne Kovac, CEO" → **"[Your name]"**, so every introduction letter (dialog and download) is signed by a placeholder the founder fills in — as on Buyer Profiles and the Bid Room. ("Anne Kovac" remains only as the demo company's representative inside the sample NDA fixtures and a unit test.)
 *Verification:* `tsc -b`, eslint clean · Chromium Pro: the introduction letter ends "Best regards, [Your name] — For and on behalf of the Company · c/o ExitOS Advisory"; dialog axe 0. The "c/o ExitOS Advisory" line comes from the shared letter builder (`lib/deliverables.ts`) — the same byline question already open for the owner (Page 24).
+
+### G4 — Rules of thumb as computed advice; "strategic" anchor; fit as %
+*Closed by:* `pages/Banker.tsx` (labels; nothing recomputed).
+- Advice: each item says whether it is computed. "Best timing (Months 7–13)", "Best structure (earnout ≤15 %)", "Best negotiation" and "Best closing (escrow ≤8 %, reverse break-fee, 30–45 days)" and the "fastest path" answer carry **"general guidance"**; "Best buyer", "Best outreach" and "Best valuation" use the ranking, your settings and the canonical band; foot "Items marked general guidance are common rules of thumb, not computed for this company; the others use its ranking, its canonical valuation and your settings."
+- Anchor options "Strategic mid / Strategic high (stretch)" → **"Canonical midpoint / Canonical high (stretch)"** ($102,849,415 / $173,889,733 — D1); the valuation workstream and advice follow; "counter above strategic-mid" → "above the canonical midpoint".
+- Buyer introductions "89%" → "fit score 89/100" (and the pre-directive value "/100", with screen-reader prefixes), with "Fit score: the discovery engine's weighted fit, 0–100, re-weighted by your directives — not a measured chance of a bid."
+*Verification:* `tsc -b`, eslint clean · Chromium Pro: 0 "strategic mid", "strategic high", "strategic-mid"; 6 "general guidance" markers (4 advice items, the fastest-path answer, the foot); strategy dialog options read "Canonical midpoint — $102,849,415" / "Canonical high (stretch) — $173,889,733"; Buyer introductions tab axe 0 · 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
