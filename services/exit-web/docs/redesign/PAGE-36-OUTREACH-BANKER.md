@@ -38,7 +38,7 @@
 | G2 | **False sends.** | Remove "Send campaign / introduction / Send"; downloads stay; say the user sends them. | ☑ `300ea01` |
 | G3 | Invented signer. | "[Your name]" as on Buyer Profiles and Bid Room. | ☑ `39dcab0` |
 | G4 | **Rules of thumb as computed advice; "strategic" anchor; fit as %.** | Advice labelled "general guidance — not computed for this company" where not derived; anchor "Canonical midpoint / high"; "fit score N/100". | ☑ `6191621` |
-| G5 | Demo only, unlabelled. | Buyers, memoranda and the canonical band for the active company; Demo data / Your intake badge; directives "saved in this browser". | ☑ G5-commit |
+| G5 | Demo only, unlabelled. | Buyers, memoranda and the canonical band for the active company; Demo data / Your intake badge; directives "saved in this browser". | ☑ `f4eb8a4` |
 | G6 | Design: old components. | Rebuild on `xo`. | ☑ `b98943f` |
 
 ---
