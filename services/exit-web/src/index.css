@@ -115,3 +115,19 @@ html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px s
 main p.font-editorial, main blockquote { font-variant-numeric: oldstyle-nums proportional-nums; }
 main :is(h1, h2, h3) { font-variant-numeric: lining-nums proportional-nums; }
 main :is(table, dl, time, figcaption, [data-edition], .tabular-nums) { font-variant-numeric: lining-nums tabular-nums; }
+
+/* print: the homepage as a document — no fixed furniture (header, chapter rail, reading bar, phone bar), no
+   film or motion, figures and rows kept whole across pages, and the ink chapters printed as designed */
+@media print {
+  .ex-site header { position: static !important; backdrop-filter: none !important; }
+  .ex-site nav[aria-label="Chapters"], .ex-site video, .ex-site .fixed { display: none !important; }
+  .ex-site *, .ex-site *::before, .ex-site *::after { animation: none !important; transition: none !important; }
+  .ex-site [data-ink], .ex-site footer, .ex-site #ch-01 { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ex-site :is(figure, table tr, details, dl > div) { break-inside: avoid; }
+  .ex-site h2, .ex-site h3 { break-after: avoid; }
+  /* what waits to be scrolled into view on screen is simply there on paper: chapter headings, and the board
+     with its power-on veil lifted */
+  .ex-site .rv-h { opacity: 1 !important; transform: none !important; }
+  .ex-site .pointer-events-none.absolute.inset-0.bg-\[\#02050a\] { display: none !important; }
+}
+
