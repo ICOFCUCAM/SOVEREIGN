@@ -429,7 +429,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE5 | Five greens and six blues outside the board. | Reduced to live green (#7CFF9F) and done green (emerald-300 on dark / emerald-700 on paper); blues to blue-600 (paper), blue-400/300 (dark). | closed `75b652a2` |
 | EE6 | Ivory and white alternate without a rule. | Paper rhythm: ivory for story chapters, white for working chapters; written down here. | closed `ea85105b` |
 | EE7 | The capability strip is a flat dark bar. | A lit top seam, hairline glyphs and a hover lift on each capability. | closed `d932ac13` |
-| EE8 | The headline's large type is set at default spacing. | Optical tightening on the display lines and a hanging 'T'. | open |
+| EE8 | The headline's large type is set at default spacing. | Optical tightening on the display lines and a hanging 'T'. | closed `78d94ba9` |
 | EE9 | The watermark appears flat on load. | A slow fade-up of the watermark on first load; none under reduced motion. | open |
 | EE10 | Hero, chapter 02 box, board and band make four dark blocks in a row. | The chapter 02 chart presented as a framed ink panel on paper with its own lit edge, read as an object. | open |
 | EE11 | Board and band read as two separate dark slabs. | The instrument chapter (03 + band) set as one continuous ink chapter with a single floor gradient. | open |
@@ -996,6 +996,9 @@ Paper rule written above the gates: ivory for story chapters (02, 05, proof, 08)
 
 ### EE7 — closed d932ac13
 Capability strip: the lit seam (.ex-seam) replaces the flat border; glyphs sit in hairline rings; on hover a capability's top edge draws in signal blue and its ring brightens (no transition under reduced motion).
+
+### EE8 — closed 78d94ba9
+Headline: the 'T' hung by its side bearing (-0.045em) so the stem aligns with the eyebrow and body; leading 0.97; kerning, ligatures and contextual alternates on; optical sizing from the Source Serif 4 opsz axis; the italic line tracked a touch looser than the roman.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
