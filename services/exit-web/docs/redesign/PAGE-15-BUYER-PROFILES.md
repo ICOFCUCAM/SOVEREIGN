@@ -33,7 +33,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 ## Gap register — Page 15
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **False "queued with the banker"; invented sender "James"; unchecked activity claim.** | Intro dialog offers Copy and "Open Outreach" (with plan note), states nothing is sent from here; sign-off placeholder "[Your name]"; "recent activity" sentence only when the buyer has deals in the last 3 years. | ☐ |
+| G1 | **False "queued with the banker"; invented sender "James"; unchecked activity claim.** | Intro dialog offers Copy and "Open Outreach" (with plan note), states nothing is sent from here; sign-off placeholder "[Your name]"; "recent activity" sentence only when the buyer has deals in the last 3 years. | ☑ G1-commit |
 | G2 | **Invented founder-friendliness; fit shown as "interest" with a pulsing dot; appetite/check mislabels.** | Remove founder-friendliness; "Fit · Hot/Warm/Cool" with thresholds, no pulse; "Active-appetite buyers — registry attribute"; "Check-size midpoint"; "median across these N buyers". | ☐ |
 | G3 | Banker's-take urgency and overclaim; hidden plan gate. | Plain wording; `requiredEngagement` note. | ☐ |
 | G4 | Demo company unlabelled. | Buyers and intro text on `loadActiveCompany()`; badge. | ☐ |
@@ -54,3 +54,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 ### G6 — Design
 *Closed by:* `pages/Buyers.tsx` rebuilt on `xo` (`PageHeader` `h1` **"Buyer Profiles"** — the NAV name; "Buyer Marketplace" kept in the eyebrow — four metrics, banker's take as a page-local definition list (shared `BankerTake` no longer used here), profiles as an ordered list with `h3`s and definition lists, Filter and Warm-intro as real buttons with accessible names; the warm intro now opens in the shared `Modal` (an accessible dialog after X13, commit `9188194`) instead of a bare overlay). Content carried over verbatim; G1–G5 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium free 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 24), all tab stops with visible focus; intro dialog axe 0, Escape closes, focus returns.
+
+### G1 — False "queued with the banker"; invented sender; unchecked activity claim
+*Closed by:* `pages/Buyers.tsx`. The intro dialog's "Send introduction →" (toast "Introduction to {buyer} queued with the banker" — nothing was queued) is replaced by **Copy** and **Open Outreach →** (a link to `/console/banker`), with "Outreach requires Active Mandate" for free and Preparation founders and the line "A draft generated from the buyer's thesis and the company's figures. Nothing is sent from this page — copy it, or take it to Outreach." The template's sign-off "Best, James" → "Best, [Your name]"; "your recent activity in the space" appears only when the registry records deals in the last three years, otherwise the sentence cites the check range alone.
+*Verification:* `tsc -b`, eslint clean · Chromium (free): dialog shows the note, "[Your name]", "Outreach requires Active Mandate", Copy, Open Outreach; no "queued" toast path remains; dialog axe 0.

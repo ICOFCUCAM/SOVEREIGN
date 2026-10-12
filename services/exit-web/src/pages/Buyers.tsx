@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from "react";
-import { Button, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
+import { Button, Modal, Field, inputCls, fmtMoney, copyText } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
 import { Link } from "react-router-dom";
+import { useAuth } from "../lib/auth";
+import { requiredEngagement } from "../lib/access";
 import { PageHeader, Section, Metric as XMetric } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { BUYERS } from "../lib/engines";
@@ -38,9 +40,13 @@ function warmIntro(c: BuyerCandidate): string {
     `Hi ${c.buyer.name} team,\n\n` +
     `I'm reaching out because ${co.name} aligns closely with your acquisition thesis: ${c.buyer.thesis} ` +
     `We're a ${sector} business at $${arrM}M ARR growing ${(co.growth.arrGrowthYoyPct * 100).toFixed(0)}% YoY, ` +
-    `and your recent activity in the space — plus a check range of ${fmtMoney(c.buyer.checkSizeLowUsd)}–${fmtMoney(c.buyer.checkSizeHighUsd)} — ` +
+    // Only mention recent activity when the registry records deals in the
+    // last three years.
+    (c.history.dealsLast3Years > 0
+      ? `and your recent activity in the space — plus a check range of ${fmtMoney(c.buyer.checkSizeLowUsd)}–${fmtMoney(c.buyer.checkSizeHighUsd)} — `
+      : `and your check range of ${fmtMoney(c.buyer.checkSizeLowUsd)}–${fmtMoney(c.buyer.checkSizeHighUsd)} `) +
     `makes a conversation worth both our time.\n\n` +
-    `Happy to share an anonymized teaser under NDA. Would the coming week work for a short call?\n\nBest,\nJames`
+    `Happy to share an anonymized teaser under NDA. Would the coming week work for a short call?\n\nBest,\n[Your name]`
   );
 }
 
@@ -63,6 +69,9 @@ const Buyers: React.FC = () => {
   const medianCheckUsd = medianCheck ? (medianCheck.buyer.checkSizeLowUsd + medianCheck.buyer.checkSizeHighUsd) / 2 : 0;
 
   const [intro, setIntro] = useState<{ name: string; text: string } | null>(null);
+  const { session } = useAuth();
+  // Outreach is an Active Mandate surface; say so before the click.
+  const outreachGate = requiredEngagement("/console/banker", session?.role ?? "founder", session?.plan ?? "free");
   const tape = useMemo(() => buildMarketTape(), []);
 
   return (
@@ -170,7 +179,8 @@ const Buyers: React.FC = () => {
       </Section>
 
       <Modal open={intro != null} onClose={() => setIntro(null)} title={`Warm introduction · ${intro?.name ?? ""}`} size="md"
-        footer={<><Button variant="ghost" onClick={() => intro && copyText(intro.text)}>Copy</Button><Button onClick={() => { const n = intro?.name; setIntro(null); notify(`Introduction to ${n} queued with the banker`); }}>Send introduction →</Button></>}>
+        footer={<>{outreachGate && <span className="mr-auto text-[12px] text-xo-caution">Outreach requires {outreachGate}</span>}<Button variant="ghost" onClick={() => intro && copyText(intro.text)}>Copy</Button><Link to="/console/banker" className="rounded-sm bg-deal-700 px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link></>}>
+        <p className="mb-3 text-[12px] text-xo-muted">A draft generated from the buyer's thesis and the company's figures. Nothing is sent from this page — copy it, or take it to Outreach.</p>
         <pre className="whitespace-pre-wrap border border-xo-line bg-xo-ink p-4 font-sans text-[13px] leading-relaxed text-xo-text">{intro?.text}</pre>
       </Modal>
     </div>
