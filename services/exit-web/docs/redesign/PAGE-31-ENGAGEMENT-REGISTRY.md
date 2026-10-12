@@ -5,7 +5,7 @@
 | Route | `/console/engagement-registry` |
 | Component | `src/pages/EngagementRegistry.tsx` (90 lines) + `lib/engagement-registry.ts`, `lib/buyer-contact.ts`, `lib/buyer-dna.ts` (`acquisitionAppetiteScore`) |
 | NAV | "Engagement Registry", founder, **Preparation or Pro** (free: Upgrade page) |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All five gaps closed (G1 is a calculation change). Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `3b2aba2`)
 
@@ -62,3 +62,13 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe color-contrast ×39 (1
 ### G4 — Fake live tape
 *Closed by:* `pages/EngagementRegistry.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 206/206 (2 new) · Chromium Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 39), all tab stops with visible focus · free: Upgrade page · 0 "live" words · search labelled and announced.
+
+## Known issues
+- G1 is a calculation change (response history counts buyers' own actions only) — flagged for the owner's review.
+- Engagement estimates rest on registry appetite data; indexed-deal counts include unverified entries and can be inflated by X15's name matching. Microsoft's registry close rate reads 100 %.
+- No code path records a buyer's own action against a buyer record yet, so "With response history" stays 0 for now.

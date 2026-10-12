@@ -34,8 +34,8 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | 28 | `/console/activity` | Deal Activity | `DealActivity` | founder, buyer | none | ☑ done · awaiting final review |
 | 29 | `/console/inbox` | Inbox | `FounderInbox` | founder | none | ☑ done · awaiting final review |
 | 30 | `/console/outreach-plan` | Outreach Plan | `OutreachPlan` | founder | Preparation or Pro | ☑ done · awaiting final review |
-| 31 | `/console/engagement-registry` | Engagement Registry | `EngagementRegistry` | founder | Preparation or Pro | ◐ in progress |
-| 32 | `/console/closing` | Closing Center / Signatures / Escrow | `Closing` | founder | Pro | ☐ |
+| 31 | `/console/engagement-registry` | Engagement Registry | `EngagementRegistry` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 32 | `/console/closing` | Closing Center / Signatures / Escrow | `Closing` | founder | Pro | ◐ in progress |
 | 33 | `/console/marketplace` | Anonymous Listings / Browse Opportunities | `Marketplace` | founder, buyer | none | ☐ |
 | 34 | `/console/valuation` | Enterprise Value | `Valuation` | founder | none | ☐ |
 | 35 | `/console/diligence-ai` | Diligence | `DiligenceAI` | founder | Preparation or Pro | ☐ |
