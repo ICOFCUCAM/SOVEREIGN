@@ -29,7 +29,7 @@ A kanban of deals across the negotiation stages, a "Deal Probability Engine" tab
 ## Gap register — Page 26
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Three invented deals** in the pipeline and its totals. | Remove them; the sourcing column shows the top ranked buyers from discovery as "candidates — not contacted", with no amount or probability, excluded from totals. | ☐ |
+| G1 | **Three invented deals** in the pipeline and its totals. | Remove them; the sourcing column shows the top ranked buyers from discovery as "candidates — not contacted", with no amount or probability, excluded from totals. | ☑ G1-commit |
 | G2 | **Invented stage-conversion benchmarks.** | Remove the figures; say no sourced benchmark exists yet. | ☐ |
 | G3 | "Prediction engine" and automation overclaims. | "Close-probability rule" with its formula; expected-days rule stated; plain "What ExitOS does". | ☐ |
 | G4 | Demo offers unlabelled. | Badge and line: sample offers of the demo company. | ☐ |
@@ -43,3 +43,8 @@ A kanban of deals across the negotiation stages, a "Deal Probability Engine" tab
 *Closed by:* `pages/Pipeline.tsx` rebuilt on `xo` (`PageHeader` `h1` **"Active Processes"** — the NAV name; "Acquisition Pipeline" in the eyebrow; five metrics; the command-state strip and banker's take merged into one page-local definition list (Today, At stake, If you wait, Pursue, What ExitOS does — shared `BankerTake`/`CommandState` no longer used here); probability table with row headers in a `ScrollRegion`; the kanban as labelled stage sections with `h3`s and lists; stage names as words; pinging tape kept until G-tape below). Content carried over; G1–G4 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium free 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 11), all tab stops with visible focus.
 *Completed in a follow-up commit (the G5 row includes the tape):* pinging `MarketTape` → dated `RegistryTape`. Chromium: 0 pinging elements; the 3 remaining "live" words are "live deals" (active deals, not live data) — renamed in G1.
+
+### G1 — Three invented deals
+*Closed by:* `pages/Pipeline.tsx`. The hard-coded "C.H. Robinson Bolt-on (engaged, $110M, 25 %)", "Pritzker Private Capital (sourcing, 5 %)" and "Walton Enterprises (sourcing, 4 %)" are removed. The sourcing column now lists the **top three discovery candidates that have not made an offer** (from `BUYERS`), dashed and marked "candidate — not contacted", with no amount or probability and not counted anywhere ("Sourcing 0 + 3 candidates"). "Live deals" → "Active deals — offers, excluding dead" (and "live deals" → "active deals" in the take — not live data).
+Totals now reflect only the sample offers: **2 active deals** (was 5), pipeline value **$297,000,000** (was $407M with the invented $110M), probability-weighted **$171,163,315**.
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 "C.H. Robinson" / "Walton" deals; Pritzker appears only as a discovery candidate; figures above · free 1440/390: 0 errors, axe 0, no overflow.

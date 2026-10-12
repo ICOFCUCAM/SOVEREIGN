@@ -6,12 +6,11 @@ import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { OFFER_EVALUATIONS, NEGOTIATION_STATE } from "../lib/engines";
+import { OFFER_EVALUATIONS, NEGOTIATION_STATE, BUYERS } from "../lib/engines";
 
 // Acquisition Pipeline — kanban over the six negotiation stages.
-// Live offers from evaluateOffer feed the LOI / engaged columns;
-// additional sourcing-stage candidates surface from the buyer
-// discovery (top matches not yet engaged). The negotiation engine's
+// Offers from evaluateOffer feed the stage columns; the sourcing column
+// lists top discovery candidates that have not been contacted. The negotiation engine's
 // derived state drives the leverage banner + forecast.
 
 interface PipelineDeal {
@@ -54,11 +53,13 @@ const DEALS: readonly PipelineDeal[] = [
     score: e.score,
     recommendation: e.recommendation,
   })),
-  // Sourcing/engaged candidates (placeholder until outreach engine ships)
-  { id: 'p-100', buyer: 'C.H. Robinson Bolt-on',     stage: 'engaged',   amount: 110_000_000, probability: 0.25, updatedAt: new Date(Date.now() - 12 * 86400_000).toISOString() },
-  { id: 'p-101', buyer: 'Pritzker Private Capital',  stage: 'sourcing',  probability: 0.05, updatedAt: new Date(Date.now() - 18 * 86400_000).toISOString() },
-  { id: 'p-102', buyer: 'Walton Enterprises',        stage: 'sourcing',  probability: 0.04, updatedAt: new Date(Date.now() - 22 * 86400_000).toISOString() },
 ];
+
+// Sourcing column: the top-ranked buyers from discovery that have not made an
+// offer. They are candidates only — not contacted, no amount, no probability,
+// and not counted in any total.
+const offerBuyers = new Set(OFFER_EVALUATIONS.map((e) => e.offer.buyerName));
+const CANDIDATES = BUYERS.candidates.filter((c) => !offerBuyers.has(c.buyer.name)).slice(0, 3).map((c) => c.buyer.name);
 
 // Deal Probability Engine — predicts close probability, expected close date and
 // the probability-adjusted value for each live deal, and surfaces the single
@@ -121,7 +122,7 @@ const Pipeline: React.FC = () => {
         badge={<span className="text-[12px] text-xo-muted">Six-stage process · Leverage {NEGOTIATION_STATE.leverage}</span>} />
 
       <section aria-label="Pipeline summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3 xl:grid-cols-5">
-        <div className="bg-xo-panel"><Metric label="Live deals" value={String(live.length)} sub="excluding dead" /></div>
+        <div className="bg-xo-panel"><Metric label="Active deals" value={String(live.length)} sub="offers, excluding dead" /></div>
         <div className="bg-xo-panel"><Metric label="Pipeline value" value={fmtMoney(live.reduce((s, d) => s + (d.amount ?? 0), 0))} sub="indicated" /></div>
         <div className="bg-xo-panel"><Metric label="Prob-weighted" emphasis value={<span className="text-xo-verified">{fmtMoney(totalWeighted)}</span>} sub="forecast" /></div>
         <div className="bg-xo-panel"><Metric label="Lead close" value={lead ? `${(lead.probability * 100).toFixed(0)}%` : "—"} sub={lead?.buyer} /></div>
@@ -135,8 +136,8 @@ const Pipeline: React.FC = () => {
         <div className="px-4 py-3">
           <p className="text-[14px] leading-relaxed">{NEGOTIATION_STATE.nextMove}</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-5">
-            <TakeCell k="Today"><span className="font-mono">{live.length}</span> live deals · prob-weighted {fmtMoney(totalWeighted)} · leverage {NEGOTIATION_STATE.leverage}{lead ? <> · lead {lead.buyer} at {(lead.probability * 100).toFixed(0)}%{leadF ? ` · ~${leadF.expectedDays}d to close` : ""}</> : null}</TakeCell>
-            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(totalWeighted)}</span> probability-weighted across {live.length} live deals.</TakeCell>
+            <TakeCell k="Today"><span className="font-mono">{live.length}</span> active deals · prob-weighted {fmtMoney(totalWeighted)} · leverage {NEGOTIATION_STATE.leverage}{lead ? <> · lead {lead.buyer} at {(lead.probability * 100).toFixed(0)}%{leadF ? ` · ~${leadF.expectedDays}d to close` : ""}</> : null}</TakeCell>
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(totalWeighted)}</span> probability-weighted across {live.length} active deals.</TakeCell>
             <TakeCell k="If you wait">{lead && leadF
               ? <>Your lead, <span className="text-xo-text">{lead.buyer}</span>, closes in ~{leadF.expectedDays}d. Lose tempo and a single-threaded process retrades the price.</>
               : <>No live offers — without competing bids you have no leverage to hold price.</>}</TakeCell>
@@ -210,10 +211,16 @@ const Pipeline: React.FC = () => {
               <section key={stage} aria-label={`${STAGE_LABEL[stage] ?? stage} stage`} className="min-w-0 bg-xo-panel p-3">
                 <div className="mb-1 flex items-center justify-between">
                   <h3 className="text-[12px] font-semibold"><StageWord stage={stage} /></h3>
-                  <span className="font-mono text-[11px] text-xo-faint">{list.length}</span>
+                  <span className="font-mono text-[11px] text-xo-faint">{list.length}{stage === "sourcing" && CANDIDATES.length > 0 ? ` + ${CANDIDATES.length} candidates` : ""}</span>
                 </div>
                 <div className="mb-2 font-mono text-[11px] text-xo-faint">{stageValue > 0 ? fmtMoney(stageValue) : "—"}</div>
                 <ul className="space-y-1.5">
+                  {stage === "sourcing" && CANDIDATES.map((name) => (
+                    <li key={`cand-${name}`} className="border border-dashed border-xo-line px-2 py-1.5">
+                      <div className="text-[12px] font-medium leading-tight">{name}</div>
+                      <div className="mt-0.5 text-[11px] text-xo-faint">candidate — not contacted</div>
+                    </li>
+                  ))}
                   {list.map((d) => {
                     const f = forecast(d);
                     return (
