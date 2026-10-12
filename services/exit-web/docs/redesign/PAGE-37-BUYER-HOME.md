@@ -34,7 +34,7 @@ The acquirer's home: a seat (name, mandate, rank), matched opportunities with a 
 | G1 | **Demo seat shown as the buyer's own.** | `h1` "Buyer Home"; the seat section labelled "Demo seat — Flexport Strategic, a registry buyer; not your account" with a Demo data badge. | ☑ `47e54a1` |
 | G2 | **The buyer's real activity is missing.** | "Your activity" section from the backend: your NDA requests (status), your deals (stage) and your saved mandate — with links to Access Requests and the Acquisition Radar; empty states that say how to start. | ☑ `b3dcb7c` |
 | G3 | **Dead buttons; unlock and submit claims.** | Replace with links to where the action exists (Acquisition Radar for NDA requests and offers, Access Requests for status); remove "unlock on NDA", "data room granted" and "submit an offer from an opportunity". | ☑ `1b6bbb5` |
-| G4 | D1 ask; fit as %; "strategic mid"; watchlist persistence unstated. | Ask = canonical midpoint (display); "fit score N/100"; "canonical midpoint"; "watchlist for this visit". | ☐ |
+| G4 | D1 ask; fit as %; "strategic mid"; watchlist persistence unstated. | Ask = canonical midpoint (display); "fit score N/100"; "canonical midpoint"; "watchlist for this visit". | ☑ G4-commit |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 7 axe failures. | Rebuild on `xo`. | ☑ `84463f9` |
 
@@ -57,3 +57,7 @@ The acquirer's home: a seat (name, mandate, rank), matched opportunities with a 
 ### G3 — Dead buttons; unlock and submit claims
 *Closed by:* `pages/BuyerPortal.tsx`. The handler-less "Request access" / "Open data room" → link **"Open on the Acquisition Radar →"**; diligence "Request NDA" / "Open" → "Request your own NDA on the Radar →" (with "NDA active" text when the demo seat has one); "Respond" removed. "identity and packages unlock on NDA" → "the demo seat has no NDA on this listing — nothing is shared automatically" (or "the demo seat's NDA is active · 7 diligence packages in the demo"); "No offers in motion. Submit an offer from an opportunity …" (no such control) → "The demo seat has no offers. Make your own indicative offers on the Acquisition Radar."
 *Verification:* `tsc -b`, eslint clean · Chromium buyer: every workstation view checked — 0 handler-less buttons, 0 "unlock on NDA", "data room granted", "Submit an offer from an opportunity", "Respond"; links go to `/console/acquisition-radar` · after switching to Opportunities, Diligence and Negotiations 1440/390: axe 0, no overflow, 0 errors.
+
+### G4 — D1 ask; fit as %; "strategic mid"; watchlist persistence unstated
+*Closed by:* `lib/buyer-portal.ts` (the opportunity's `ask` is now the canonical midpoint — display data; `buyer-portal.test.ts` unchanged and passing) and `pages/BuyerPortal.tsx` (labels). "Ask $108,252,000" (the listing engine's strategic mid) → **"Value (canonical midpoint) $102,849,415"** (D1, as on the Marketplace); "89% fit" → "fit score 89/100"; "+N% vs strategic mid" → "vs the canonical midpoint"; watchlist "tracked targets" → "this visit only — not saved".
+*Verification:* `tsc -b`, eslint clean, `buyer-portal.test.ts` 4/4 · Chromium buyer: Opportunities shows "fit score 89/100" and "Value (canonical midpoint) $102,849,415" · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.

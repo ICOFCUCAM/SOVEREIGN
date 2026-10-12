@@ -87,7 +87,7 @@ const BuyerPortal: React.FC = () => {
 
       <section aria-label="Demo seat summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Matched opportunities" emphasis value={String(PORTAL_STATS.opportunities)} sub="fit the demo seat's mandate" provenance="demo" /></div>
-        <div className="bg-xo-panel"><Metric label="Watchlist" value={String(watch.length)} sub="tracked targets" /></div>
+        <div className="bg-xo-panel"><Metric label="Watchlist" value={String(watch.length)} sub="this visit only — not saved" /></div>
         <div className="bg-xo-panel"><Metric label="Data-room access" value={String(PORTAL_STATS.inDiligence)} sub={`${PORTAL_STATS.diligencePackages} packages/room`} /></div>
         <div className="bg-xo-panel"><Metric label="Active negotiations" emphasis value={String(PORTAL_STATS.negotiations)} sub="offers in motion" /></div>
       </section>
@@ -123,12 +123,12 @@ const BuyerPortal: React.FC = () => {
                 <li key={o.code} className="bg-xo-panel p-3">
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="font-mono text-[13px] font-semibold">{o.code}</h3>
-                    <span className="font-mono text-[12px] font-semibold text-xo-verified">{o.fit}% fit</span>
+                    <span className="font-mono text-[12px] font-semibold text-xo-verified">fit score {o.fit}/100</span>
                   </div>
                   <div className="text-[12px] text-xo-muted">{o.sector} · {o.region} · readiness {o.readiness}/100</div>
                   <dl className="mt-2 grid grid-cols-3 gap-2 border-t border-xo-line pt-2 text-[12px]">
                     <div><dt className="text-xo-muted">Revenue</dt><dd className="font-mono">{o.revenue != null ? fmtMoney(o.revenue) : "NDA-gated"}</dd></div>
-                    <div><dt className="text-xo-muted">Ask</dt><dd className="font-mono">{fmtMoney(o.ask)}</dd></div>
+                    <div><dt className="text-xo-muted">Value (canonical midpoint)</dt><dd className="font-mono">{fmtMoney(o.ask)}</dd></div>
                     <div><dt className="text-xo-muted">Stage</dt><dd className="capitalize">{o.stage}</dd></div>
                   </dl>
                   <div className="mt-2 flex gap-2">
@@ -164,7 +164,7 @@ const BuyerPortal: React.FC = () => {
                 <li key={n.code} className="flex flex-wrap items-center justify-between gap-2 border-b border-xo-line py-2 last:border-0">
                   <div>
                     <h3 className="font-mono text-[13px] font-semibold">{n.code}</h3>
-                    <div className="text-[12px] text-xo-muted">Offer {fmtMoney(n.offer)} · {n.premiumPct >= 0 ? "+" : ""}{n.premiumPct}% vs strategic mid</div>
+                    <div className="text-[12px] text-xo-muted">Offer {fmtMoney(n.offer)} · {n.premiumPct >= 0 ? "+" : ""}{n.premiumPct}% vs the canonical midpoint</div>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-[12px] capitalize">{n.stage}</span>

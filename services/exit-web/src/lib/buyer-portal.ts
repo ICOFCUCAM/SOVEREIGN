@@ -72,7 +72,9 @@ export const PORTAL_OPPORTUNITIES: readonly PortalOpportunity[] = [
     ...(seatSees.headline.arrUsd ?? seatSees.headline.ttmRevenueUsd
       ? { revenue: seatSees.headline.arrUsd ?? seatSees.headline.ttmRevenueUsd }
       : {}),
-    ask: seatSees.askingPriceUsd.mid,
+    // D1: the console shows one value — the canonical (institutional) midpoint,
+    // not the listing engine's strategic ask
+    ask: VALUATION_CANONICAL.headline.mid,
     fit: Math.round(seatMatch.matchScore * 100),
     stage: SEAT.offer ? (SEAT.offer.stage === "countered" ? "loi" : "engaged") : "sourcing",
     readiness: Math.round(seatSees.readinessScore),
@@ -90,7 +92,7 @@ export interface PortalNegotiation {
   readonly status: string;
 }
 
-/** The seat's own offers on listings, with premium vs the strategic mid. */
+/** The seat's own offers on listings, with premium vs the canonical midpoint. */
 export const PORTAL_NEGOTIATIONS: readonly PortalNegotiation[] = SEAT.offer
   ? [{
       code: LISTING_PUBLIC.title,
