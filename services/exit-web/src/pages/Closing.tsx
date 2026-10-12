@@ -3,6 +3,7 @@ import { Button, Modal, fmtMoney, downloadText, notify } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
+import { loadActiveCompany } from "../lib/active-company";
 import { DILIGENCE, OFFER_EVALUATIONS } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
@@ -97,6 +98,10 @@ const Closing: React.FC = () => {
   // Closing call — agenda built from the open gating items + diligence flags,
   // plus a downloadable calendar invite.
   const [callOpen, setCallOpen] = useState(false);
+  const { company } = useMemo(() => loadActiveCompany(), []);
+  // the invite is for the day after tomorrow, 08:00 local time
+  const inviteAt = useMemo(() => { const d = new Date(); d.setDate(d.getDate() + 2); d.setHours(8, 0, 0, 0); return d; }, []);
+  const inviteLabel = inviteAt.toLocaleString(undefined, { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   const agenda: string[] = [
     "Confirm escrow funding and wire instructions (both sides)",
     ...risks.slice(0, 5).map((r) => `${r.severity === "high" ? "[gate] " : ""}${r.title} — owner ${r.owner}`),
@@ -104,13 +109,13 @@ const Closing: React.FC = () => {
     "Walk the signature sequence and confirm timing to the wire",
   ];
   const downloadInvite = (): void => {
-    const dt = new Date(); dt.setDate(dt.getDate() + 2); dt.setHours(8, 0, 0, 0);
+    const dt = inviteAt;
     const end = new Date(dt.getTime() + 60 * 60 * 1000);
     const z = (d: Date): string => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
     const ics = [
       "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ExitOS//Closing//EN", "BEGIN:VEVENT",
       `UID:closing-${Date.now()}@exitos`, `DTSTAMP:${z(new Date())}`, `DTSTART:${z(dt)}`, `DTEND:${z(end)}`,
-      "SUMMARY:Closing call — Helios Freight transaction",
+      `SUMMARY:Closing call — ${company.name} transaction`,
       `DESCRIPTION:${agenda.map((a) => "• " + a).join("\\n")}`,
       "END:VEVENT", "END:VCALENDAR",
     ].join("\r\n");
@@ -144,11 +149,11 @@ const Closing: React.FC = () => {
       <MarketTape items={tape} />
 
       {/* ── Closing call ──────────────────────────────────────────── */}
-      <Modal open={callOpen} onClose={() => setCallOpen(false)} title="Closing call" subtitle={`Tuesday 08:00 · checklist readiness ${Math.round(prob * 100)}%`}
-        footer={<><Button variant="ghost" onClick={downloadInvite}>Download invite (.ics)</Button><Button onClick={() => { setCallOpen(false); notify("Closing call scheduled"); }}>Schedule</Button></>}>
+      <Modal open={callOpen} onClose={() => setCallOpen(false)} title="Closing call" subtitle={`Invite for ${inviteLabel} · checklist readiness ${Math.round(prob * 100)}%`}
+        footer={<><Button variant="ghost" onClick={() => setCallOpen(false)}>Close</Button><Button onClick={downloadInvite}>Download invite (.ics)</Button></>}>
         <div className="space-y-4">
           <p className="rounded-sm border border-xo-line bg-xo-ink p-3 text-[12px] text-xo-muted">
-            Participants: Founder · Counsel · Banker · Buyer. Dial-in issued with the calendar invite.
+            Suggested participants: Founder · Counsel · Banker · Buyer. ExitOS does not send invitations or create a dial-in: download the invite, add a meeting link in your calendar and invite the participants yourself.
           </p>
           <div>
             <h3 className="mb-2 text-[12px] font-semibold text-xo-muted">Agenda — gated on the open items</h3>
@@ -168,7 +173,7 @@ const Closing: React.FC = () => {
         stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(dealValue)}</span> transaction · <span className={probTone}>checklist readiness {Math.round(prob * 100)}%</span> (a rule, not a probability).</>}
         inaction={<>{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</>}
         buyer={<>No deal in closing — the checklist is a template.</>}
-        automate={<>ExitOS tracks every signature, escrow movement and filing, and nudges the owner before each due date.</>}
+        automate={<>ExitOS keeps this checklist and builds the call agenda. It does not track signatures, escrow or filings, and sends no reminders.</>}
         impact={<span className={probTone}>{Math.round(prob * 100)}%</span>}
         cta={{ label: "Generate closing docs", to: "/console/documents" }}
       />
