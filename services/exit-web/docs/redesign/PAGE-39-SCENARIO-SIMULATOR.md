@@ -35,7 +35,7 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 | G2 | "Strategic valuation" is the canonical value. | "Valuation (canonical midpoint)". | ☑ `f154fcf` |
 | G3 | **Demo-specific and uncomputed scenario claims.** | Drivers built from the company's own figures (ARR before → after); the ARR scenario names a target above the company's ARR; uncomputed outcomes worded as expectations to check against the diff. | ☑ `c68ab55` |
 | G4 | Demo only, unlabelled. | Run on the active company; Demo data / Your intake badge. | ☑ `f8779b8` |
-| G5 | Unvalidated number inputs. | Text inputs parsed with `parseNumber` (units, ranges), messages, `aria-invalid`; only valid values reach the engines. | ☑ G5-commit |
+| G5 | Unvalidated number inputs. | Text inputs parsed with `parseNumber` (units, ranges), messages, `aria-invalid`; only valid values reach the engines. | ☑ `9d513be` |
 | G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
 | G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☑ `ca01086` |
 
