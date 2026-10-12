@@ -1,9 +1,10 @@
 import React, { useMemo } from "react";
-import { StageBadge, STAGE_ORDER, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape, CommandState, Evidence } from "../lib/workstation";
+import { Link } from "react-router-dom";
+import { STAGE_ORDER, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
+import { MarketTape, Evidence } from "../lib/workstation";
+import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, NEGOTIATION_STATE } from "../lib/engines";
-import BankerTake from "../components/BankerTake";
 
 // Acquisition Pipeline — kanban over the six negotiation stages.
 // Live offers from evaluateOffer feed the LOI / engaged columns;
@@ -101,7 +102,9 @@ function weighted(deals: readonly PipelineDeal[]): number {
   return deals.reduce((s, d) => s + (d.amount ?? 0) * d.probability, 0);
 }
 
-const LEV_TONE: Record<string, string> = { high: "text-deal-300", medium: "text-loi-300", low: "text-red-300" };
+const LEV_CLS: Record<string, string> = { high: "text-xo-verified", medium: "text-xo-caution", low: "text-xo-risk" };
+const STAGE_LABEL: Partial<Record<DealStage, string>> = { sourcing: "Sourcing", engaged: "Engaged", diligence: "Diligence", loi: "LOI", signed: "Signed", closed: "Closed", dead: "Dead" };
+const STAGE_CLS: Partial<Record<DealStage, string>> = { sourcing: "text-xo-muted", engaged: "text-xo-action", diligence: "text-xo-caution", loi: "text-xo-caution", signed: "text-xo-verified", closed: "text-xo-verified", dead: "text-xo-faint" };
 
 const Pipeline: React.FC = () => {
   const live = DEALS.filter((d) => d.stage !== 'dead');
@@ -111,152 +114,155 @@ const Pipeline: React.FC = () => {
   const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Exchange · Sourcing"
-        title="Acquisition Pipeline"
-        tag="Six-stage process"
-        status={`Leverage ${NEGOTIATION_STATE.leverage}`}
-        metrics={[
-          { k: "Live deals", v: String(live.length), sub: "excluding dead" },
-          { k: "Pipeline value", v: fmtMoney(live.reduce((s, d) => s + (d.amount ?? 0), 0)), sub: "indicated" },
-          { k: "Prob-weighted", v: fmtMoney(totalWeighted), accent: true, sub: "forecast" },
-          { k: "Lead close", v: lead ? `${(lead.probability * 100).toFixed(0)}%` : "—", accent: true, sub: lead?.buyer },
-          { k: "Leverage", v: NEGOTIATION_STATE.leverage, sub: "negotiation posture" },
-        ]}
-      />
+    <div data-page="active-processes" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Exchange · Sourcing · Acquisition Pipeline" title="Active Processes"
+        badge={<span className="text-[12px] text-xo-muted">Six-stage process · Leverage {NEGOTIATION_STATE.leverage}</span>} />
+
+      <section aria-label="Pipeline summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3 xl:grid-cols-5">
+        <div className="bg-xo-panel"><Metric label="Live deals" value={String(live.length)} sub="excluding dead" /></div>
+        <div className="bg-xo-panel"><Metric label="Pipeline value" value={fmtMoney(live.reduce((s, d) => s + (d.amount ?? 0), 0))} sub="indicated" /></div>
+        <div className="bg-xo-panel"><Metric label="Prob-weighted" emphasis value={<span className="text-xo-verified">{fmtMoney(totalWeighted)}</span>} sub="forecast" /></div>
+        <div className="bg-xo-panel"><Metric label="Lead close" value={lead ? `${(lead.probability * 100).toFixed(0)}%` : "—"} sub={lead?.buyer} /></div>
+        <div className="bg-xo-panel"><Metric label="Leverage" value={<span className="capitalize">{NEGOTIATION_STATE.leverage}</span>} sub="negotiation posture" /></div>
+      </section>
 
       <MarketTape items={tape} />
 
-      <CommandState
-        current={<><span className="font-mono text-white">{live.length}</span> live deals · prob-weighted {fmtMoney(totalWeighted)} · leverage {NEGOTIATION_STATE.leverage}</>}
-        changes={lead ? <>Lead {lead.buyer} at {(lead.probability * 100).toFixed(0)}%{leadF ? ` · ~${leadF.expectedDays}d to close` : ""}</> : <>No live offers in the funnel</>}
-        action={<>{NEGOTIATION_STATE.nextMove}</>}
-        outcome={lead && leadF ? <>Lead closes ~{leadF.expectedDays}d · adj. value <span className="font-mono text-white">{fmtMoney(leadF.adjustedValue)}</span></> : <>Rebuild the funnel to regain leverage</>}
-      />
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+        right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(totalWeighted)}</span>}>
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">{NEGOTIATION_STATE.nextMove}</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-5">
+            <TakeCell k="Today"><span className="font-mono">{live.length}</span> live deals · prob-weighted {fmtMoney(totalWeighted)} · leverage {NEGOTIATION_STATE.leverage}{lead ? <> · lead {lead.buyer} at {(lead.probability * 100).toFixed(0)}%{leadF ? ` · ~${leadF.expectedDays}d to close` : ""}</> : null}</TakeCell>
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(totalWeighted)}</span> probability-weighted across {live.length} live deals.</TakeCell>
+            <TakeCell k="If you wait">{lead && leadF
+              ? <>Your lead, <span className="text-xo-text">{lead.buyer}</span>, closes in ~{leadF.expectedDays}d. Lose tempo and a single-threaded process retrades the price.</>
+              : <>No live offers — without competing bids you have no leverage to hold price.</>}</TakeCell>
+            <TakeCell k="Pursue">{lead
+              ? <><span className="text-xo-text">{lead.buyer}</span> — {(lead.probability * 100).toFixed(0)}% close{lead.amount ? <>, {fmtMoney(lead.amount)} indicated</> : null}{leadF ? <> · adj. value {fmtMoney(leadF.adjustedValue)}</> : null}.</>
+              : "Re-engage the sourcing column to rebuild the funnel."}</TakeCell>
+            <TakeCell k="ExitOS does it">ExitOS scores every deal, drafts the counter and sequences buyer follow-ups automatically.</TakeCell>
+          </dl>
+          <Link to="/console/negotiator" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open the negotiator →</Link>
+        </div>
+      </Section>
 
-      <BankerTake
-        next={NEGOTIATION_STATE.nextMove}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(totalWeighted)}</span> probability-weighted across {live.length} live deals.</>}
-        inaction={lead && leadF
-          ? <>Your lead, <span className="text-white">{lead.buyer}</span>, closes in ~{leadF.expectedDays}d. Lose tempo and a single-threaded process retrades the price.</>
-          : <>No live offers — without competing bids you have no leverage to hold price.</>}
-        buyer={lead
-          ? <><span className="text-white">{lead.buyer}</span> — {(lead.probability * 100).toFixed(0)}% close{lead.amount ? <>, {fmtMoney(lead.amount)} indicated</> : null}.</>
-          : "Re-engage the sourcing column to rebuild the funnel."}
-        automate={<>ExitOS scores every deal, drafts the counter and sequences buyer follow-ups automatically.</>}
-        impact={<>{fmtMoney(totalWeighted)}</>}
-        cta={{ label: "Open the negotiator", to: "/console/negotiator" }}
-      />
-
-      <Frame>
-        <Panel title="Negotiation engine · posture" className="lg:col-span-4">
-          <div className="p-3">
-            <span className={`font-mono text-[13px] font-bold uppercase ${LEV_TONE[NEGOTIATION_STATE.leverage]}`}>{NEGOTIATION_STATE.leverage} leverage</span>
-            <p className="mt-1.5 text-[12.5px] text-white/85">{NEGOTIATION_STATE.nextMove}</p>
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Negotiation engine · posture" className="lg:col-span-4">
+          <div className="px-4 py-3">
+            <p className={`font-mono text-[13px] font-semibold uppercase ${LEV_CLS[NEGOTIATION_STATE.leverage] ?? ""}`}>{NEGOTIATION_STATE.leverage} leverage</p>
+            <p className="mt-1.5 text-[13px]">{NEGOTIATION_STATE.nextMove}</p>
             {NEGOTIATION_STATE.recommendations.length > 0 && (
-              <ul className="mt-2 space-y-1 text-[11.5px] text-white/60">
-                {NEGOTIATION_STATE.recommendations.map((r) => <li key={r} className="flex gap-1.5"><span className="text-deal-400">·</span>{r}</li>)}
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-[12px] text-xo-muted">
+                {NEGOTIATION_STATE.recommendations.map((r) => <li key={r}>{r}</li>)}
               </ul>
             )}
           </div>
-        </Panel>
+        </Section>
 
-        <Panel title="Deal Probability Engine" className="lg:col-span-8"
+        <Section title="Deal Probability Engine" className="lg:col-span-8"
           foot="Predicted close probability, expected close date and probability-adjusted value — derived from stage, offer score and posture.">
-          <table className="w-full text-[12px]">
-            <thead className="sticky top-0 bg-ink-900 text-left text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">
-              <tr className="border-b border-white/10">
-                <th className="px-3 py-1.5">Deal</th>
-                <th className="px-2 py-1.5">Stage</th>
-                <th className="px-2 py-1.5">Close prob</th>
-                <th className="px-2 py-1.5 text-right">Exp. close</th>
-                <th className="px-2 py-1.5 text-right">Adj. value</th>
-                <th className="px-3 py-1.5">Top risk</th>
-              </tr>
-            </thead>
-            <tbody>
-              {live.slice().sort((a, b) => b.probability - a.probability).map((d) => {
-                const f = forecast(d);
-                const pc = f.closeProbability >= 0.7 ? "#34d399" : f.closeProbability >= 0.4 ? "#fbbf24" : "#f87171";
-                return (
-                  <tr key={d.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                    <td className="px-3 py-1.5 font-medium text-white">{d.buyer}</td>
-                    <td className="px-2 py-1.5"><StageBadge stage={d.stage} /></td>
-                    <td className="px-2 py-1.5">
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-1 w-14 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full" style={{ width: `${f.closeProbability * 100}%`, background: pc }} /></div>
-                        <Evidence meta={{ methodology: f.risk, source: "stage progression · offer score · negotiation posture", confidence: `${d.stage} stage` }}>
-                          <span className="font-mono text-[12px] font-bold" style={{ color: pc }}>{(f.closeProbability * 100).toFixed(0)}%</span>
-                        </Evidence>
-                      </div>
-                    </td>
-                    <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/80">{f.expectedDays}d</td>
-                    <td className="px-2 py-1.5 text-right font-mono tabular-nums text-deal-300">{fmtMoney(f.adjustedValue)}</td>
-                    <td className="px-3 py-1.5 text-[11px] text-white/60">{f.risk}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </Panel>
-      </Frame>
-
-      {/* kanban — six negotiation stages */}
-      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-white/10 bg-white/10 sm:grid-cols-3 lg:grid-cols-6">
-        {STAGE_ORDER.map((stage) => {
-          const list = dealsByStage(stage);
-          const stageValue = list.reduce((s, d) => s + (d.amount ?? 0), 0);
-          return (
-            <div key={stage} className="bg-ink-900 p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <StageBadge stage={stage} />
-                <span className="font-mono text-[10px] text-white/40">{list.length}</span>
-              </div>
-              <div className="mb-2 font-mono text-[10px] text-white/45">{stageValue > 0 ? fmtMoney(stageValue) : '—'}</div>
-              <div className="space-y-1.5">
-                {list.map((d) => {
+          <ScrollRegion label="Deal probability table">
+            <table className="w-full min-w-[680px] text-[12px]">
+              <thead className="text-left text-[11px] text-xo-faint">
+                <tr className="border-b border-xo-line">
+                  <th scope="col" className="px-3 py-2 font-medium">Deal</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Stage</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Close prob</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Exp. close</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Adj. value</th>
+                  <th scope="col" className="px-3 py-2 font-medium">Top risk</th>
+                </tr>
+              </thead>
+              <tbody>
+                {live.slice().sort((a, b) => b.probability - a.probability).map((d) => {
                   const f = forecast(d);
-                  const pc = f.closeProbability >= 0.7 ? "#34d399" : f.closeProbability >= 0.4 ? "#fbbf24" : "#f87171";
+                  const pc = f.closeProbability >= 0.7 ? "text-xo-verified" : f.closeProbability >= 0.4 ? "text-xo-caution" : "text-xo-risk";
                   return (
-                  <div key={d.id} className="rounded border border-white/10 bg-ink-800/80 p-2">
-                    <div className="text-[12px] font-medium leading-tight text-white">{d.buyer}</div>
-                    <div className="mt-0.5 flex items-center justify-between text-[9px] text-white/45">
-                      <span className="font-mono">{d.amount ? fmtMoney(d.amount) : '—'}</span>
-                      <span>{timeAgo(d.updatedAt)}</span>
-                    </div>
-                    {d.stage !== "dead" && (
-                      <div className="mt-1 flex items-center justify-between text-[9px]">
-                        <span className="font-mono font-bold" style={{ color: pc }}>{(f.closeProbability * 100).toFixed(0)}%</span>
-                        <span className="text-white/45">~{f.expectedDays}d</span>
-                      </div>
-                    )}
-                  </div>
+                    <tr key={d.id} className="border-b border-xo-line last:border-0">
+                      <th scope="row" className="px-3 py-1.5 text-left font-medium">{d.buyer}</th>
+                      <td className="px-2 py-1.5"><StageWord stage={d.stage} /></td>
+                      <td className="px-2 py-1.5">
+                        <Evidence meta={{ methodology: f.risk, source: "stage progression · offer score · negotiation posture", confidence: `${d.stage} stage` }}>
+                          <span className={`font-mono text-[12px] font-semibold ${pc}`}>{(f.closeProbability * 100).toFixed(0)}%</span>
+                        </Evidence>
+                      </td>
+                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-xo-muted">{f.expectedDays}d</td>
+                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-xo-verified">{fmtMoney(f.adjustedValue)}</td>
+                      <td className="px-3 py-1.5 text-[12px] text-xo-muted">{f.risk}</td>
+                    </tr>
                   );
                 })}
-              </div>
-            </div>
-          );
-        })}
+              </tbody>
+            </table>
+          </ScrollRegion>
+        </Section>
       </div>
 
-      <Frame>
-        <Panel title="Stage conversion · benchmarks" className="lg:col-span-12">
-          <div className="grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-5">
-            {[
-              ['Sourcing → Engaged', '38%'], ['Engaged → Diligence', '42%'], ['Diligence → LOI', '55%'],
-              ['LOI → Signed', '61%'], ['Signed → Closed', '92%'],
-            ].map(([k, v]) => (
-              <div key={k} className="bg-ink-900 p-3">
-                <div className="text-[9px] uppercase tracking-[0.16em] text-white/40">{k}</div>
-                <div className="mt-0.5 font-mono text-[18px] font-bold tabular-nums text-deal-300">{v}</div>
-              </div>
-            ))}
-          </div>
-        </Panel>
-      </Frame>
+      <Section title="Pipeline by stage" className="border border-xo-line">
+        <div className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-3 lg:grid-cols-6">
+          {STAGE_ORDER.map((stage) => {
+            const list = dealsByStage(stage);
+            const stageValue = list.reduce((s, d) => s + (d.amount ?? 0), 0);
+            return (
+              <section key={stage} aria-label={`${STAGE_LABEL[stage] ?? stage} stage`} className="min-w-0 bg-xo-panel p-3">
+                <div className="mb-1 flex items-center justify-between">
+                  <h3 className="text-[12px] font-semibold"><StageWord stage={stage} /></h3>
+                  <span className="font-mono text-[11px] text-xo-faint">{list.length}</span>
+                </div>
+                <div className="mb-2 font-mono text-[11px] text-xo-faint">{stageValue > 0 ? fmtMoney(stageValue) : "—"}</div>
+                <ul className="space-y-1.5">
+                  {list.map((d) => {
+                    const f = forecast(d);
+                    return (
+                      <li key={d.id} className="border border-xo-line px-2 py-1.5">
+                        <div className="text-[12px] font-medium leading-tight">{d.buyer}</div>
+                        <div className="mt-0.5 flex items-center justify-between text-[11px] text-xo-faint">
+                          <span className="font-mono">{d.amount ? fmtMoney(d.amount) : "—"}</span>
+                          <span>{timeAgo(d.updatedAt)}</span>
+                        </div>
+                        {d.stage !== "dead" && (
+                          <div className="mt-0.5 flex items-center justify-between text-[11px]">
+                            <span className="font-mono font-semibold">{(f.closeProbability * 100).toFixed(0)}%</span>
+                            <span className="text-xo-faint">~{f.expectedDays}d</span>
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            );
+          })}
+        </div>
+      </Section>
+
+      <Section title="Stage conversion · benchmarks" className="border border-xo-line">
+        <dl className="grid grid-cols-2 gap-px bg-xo-line sm:grid-cols-5">
+          {[
+            ["Sourcing → Engaged", "38%"], ["Engaged → Diligence", "42%"], ["Diligence → LOI", "55%"],
+            ["LOI → Signed", "61%"], ["Signed → Closed", "92%"],
+          ].map(([k, v]) => (
+            <div key={k} className="bg-xo-panel px-3 py-2">
+              <dt className="text-[11px] text-xo-faint">{k}</dt>
+              <dd className="mt-0.5 font-mono text-[18px] font-semibold tabular-nums">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </Section>
     </div>
   );
 };
+
+const StageWord: React.FC<{ stage: DealStage }> = ({ stage }) => (
+  <span className={`text-[12px] font-semibold ${STAGE_CLS[stage] ?? "text-xo-muted"}`}>{STAGE_LABEL[stage] ?? stage}</span>
+);
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
+  </div>
+);
 
 export default Pipeline;

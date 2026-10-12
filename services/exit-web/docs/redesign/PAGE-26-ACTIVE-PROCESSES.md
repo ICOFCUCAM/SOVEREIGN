@@ -33,8 +33,12 @@ A kanban of deals across the negotiation stages, a "Deal Probability Engine" tab
 | G2 | **Invented stage-conversion benchmarks.** | Remove the figures; say no sourced benchmark exists yet. | ☐ |
 | G3 | "Prediction engine" and automation overclaims. | "Close-probability rule" with its formula; expected-days rule stated; plain "What ExitOS does". | ☐ |
 | G4 | Demo offers unlabelled. | Badge and line: sample offers of the demo company. | ☐ |
-| G5 | Design: no `h1`, 11 contrast failures, tape. | Rebuild on `xo`; `h1` "Active Processes"; `RegistryTape`. | ☐ |
+| G5 | Design: no `h1`, 11 contrast failures, tape. | Rebuild on `xo`; `h1` "Active Processes"; `RegistryTape`. | ☑ G5-commit |
 
 ---
 
 ## Closure log
+
+### G5 — Design
+*Closed by:* `pages/Pipeline.tsx` rebuilt on `xo` (`PageHeader` `h1` **"Active Processes"** — the NAV name; "Acquisition Pipeline" in the eyebrow; five metrics; the command-state strip and banker's take merged into one page-local definition list (Today, At stake, If you wait, Pursue, What ExitOS does — shared `BankerTake`/`CommandState` no longer used here); probability table with row headers in a `ScrollRegion`; the kanban as labelled stage sections with `h3`s and lists; stage names as words; pinging tape kept until G-tape below). Content carried over; G1–G4 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium free 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 11), all tab stops with visible focus.
