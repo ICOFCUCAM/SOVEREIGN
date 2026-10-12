@@ -313,3 +313,6 @@ Still open, by design: real server-side authentication and roles (X1/X2 follow-u
 *Fix:* the shared `xo` `Disclosure` button gets a 24 px minimum height and padding; the inline buyer link in the metric gets vertical padding so its target reaches 24 px.
 *Closed:* `components/xo/index.tsx` (`Disclosure`: `min-h-6`, `px-1.5 py-1`) and `pages/Terminal.tsx` (buyer links in the metric, decision brief, lead sentence and table rows: `inline-block py-1`).
 *Verification:* axe `target-size` at 390 px, all drawers closed: 0 (the failing link measured 60 × 16 px before) · Terminal free/pro 1440/390 axe 0 with visible focus on all 46–47 stops · regression run over Pages 02–08 (Active Mandate, 1440/390): all axe 0, no overflow, 0 errors. *Status:* ☑ `45e7f90`
+
+### X14 — The buyer composite was called a probability (documented on Page 17 before the fix)
+The Terminal displays `rankedBuyers().probability.pct` — the composite score (appetite + sector overlap + velocity + recency; Pages 16 G1 / 17 G1) — as "N% likely", "N% probability", "acquisition probability" and "Probability N% =". *Fix:* wording only — "likelihood score N/100", "composite, not a probability"; numbers, ranking and layout unchanged.
