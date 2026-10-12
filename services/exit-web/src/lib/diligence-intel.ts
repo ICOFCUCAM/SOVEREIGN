@@ -1,8 +1,8 @@
 import { SAMPLE_COMPANY } from "./profile";
 import { VALUATION_CANONICAL } from "./engines";
 
-// Diligence Intelligence Engine. Given the uploaded document set, discover
-// the risks a buyer's analyst would find — across Financial, Legal and
+// Diligence checks. From the company profile (no document is read), surface
+// the risks a buyer's analyst would probe — across Financial, Legal and
 // Operational categories — then frame the same findings two ways: a Buyer
 // Risk Report (what they'll diligence and discount) and a Seller Risk
 // Report (what to fix before buyers ever see the company). Every finding
@@ -31,7 +31,8 @@ export interface SourceFile {
   readonly note: string;
 }
 
-// The document set the engine ingests. Each finding cites one of these.
+// The documents a buyer would use to test each check. Each finding names
+// one; none of them is uploaded or read by this module.
 export const SOURCE_FILES: readonly SourceFile[] = [
   { key: "financial_statements", label: "Financial statements", note: "P&L, balance sheet, cash flow" },
   { key: "contracts",            label: "Contracts",            note: "Customer & vendor agreements" },

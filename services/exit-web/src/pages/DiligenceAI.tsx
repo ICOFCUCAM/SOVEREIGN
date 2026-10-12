@@ -10,10 +10,11 @@ import {
   type DiligenceFinding, type RiskCategory, type Severity,
 } from "../lib/diligence-intel";
 
-// Diligence Intelligence Engine — ingests the uploaded document set, discovers
-// the risks a buyer's analyst would find across Financial, Legal and
-// Operational categories, and produces dual Buyer / Seller risk reports from
-// the same findings, before any buyer sees the company.
+// Diligence — fixed checks on the company profile that surface the risks a
+// buyer's analyst would probe across Financial, Legal and Operational
+// categories, framed as Buyer / Seller risk reports from the same findings.
+// No document is uploaded or read here; each check names the document a
+// buyer would use to test it.
 
 const SEV_STYLE: Record<Severity, string> = {
   high:   "border-xo-risk/50 text-xo-risk",
@@ -80,25 +81,25 @@ const DiligenceAI: React.FC = () => {
         stake={<><span className="font-mono font-bold text-red-300">-{fmtMoney(buyerDiscount)}</span> is the discount a buyer would seek against these findings.</>}
         inaction={<>Buyers who discover these in their own diligence retrade or walk — surfacing them first protects the price.</>}
         buyer={<>Resolve founder dependency and customer concentration first — they drive the structure a buyer demands.</>}
-        automate={<>ExitOS reads every uploaded file, classifies the risk, prices the impact and drafts both risk reports.</>}
+        automate={<>ExitOS applies fixed checks to the company profile and drafts the reports. It does not read documents.</>}
         impact={<>-{fmtMoney(buyerDiscount)}</>}
         cta={{ label: "Open the data room", to: "/console/data-room" }}
       />
 
-      {/* ── Ingestion ────────────────────────────────────────────── */}
-      <section aria-label="Ingestion" className="grid grid-cols-2 gap-px border border-xo-line bg-xo-line sm:grid-cols-5">
-        {bySource.map((s) => (
-          <div key={s.key} className="bg-xo-panel px-4 py-3">
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-xo-verified">
-              <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-xo-verified" /> Analyzed
-            </div>
-            <div className="mt-1.5 text-[13px] font-semibold leading-tight">{s.label}</div>
-            <div className="mt-0.5 text-[11px] text-xo-muted">{s.note}</div>
-            <div className="mt-2 font-mono text-lg font-semibold">{s.count}</div>
-            <div className="text-[11px] text-xo-muted">finding{s.count === 1 ? "" : "s"}</div>
-          </div>
-        ))}
-      </section>
+      {/* ── Where a buyer would look ─────────────────────────────── */}
+      <Section title="Where a buyer would look" className="border border-xo-line"
+        foot="The findings are fixed checks on the company profile — no document is uploaded or read here. Each check names the document a buyer would use to test it; the counts are checks per document.">
+        <ul className="grid grid-cols-2 gap-px bg-xo-line sm:grid-cols-5">
+          {bySource.map((s) => (
+            <li key={s.key} className="bg-xo-panel px-4 py-3">
+              <div className="text-[13px] font-semibold leading-tight">{s.label}</div>
+              <div className="mt-0.5 text-[11px] text-xo-muted">{s.note}</div>
+              <div className="mt-2 font-mono text-lg font-semibold">{s.count}</div>
+              <div className="text-[11px] text-xo-muted">check{s.count === 1 ? "" : "s"} · not analysed</div>
+            </li>
+          ))}
+        </ul>
+      </Section>
 
       {/* Value prop — what a bank charges vs. what ExitOS just did */}
       <section aria-label="Comparison and exports" className="flex flex-wrap items-center justify-between gap-4 border border-xo-line bg-xo-panel px-4 py-3">
@@ -227,7 +228,7 @@ const FindingCard: React.FC<{ f: DiligenceFinding; audience: "buyer" | "seller" 
       </div>
       <p className="mt-1 text-[12px] leading-snug">{audience === "buyer" ? f.buyerView : f.sellerAction}</p>
     </div>
-    <div className="mt-2 text-[11px] text-xo-muted">Source: {f.source}</div>
+    <div className="mt-2 text-[11px] text-xo-muted">A buyer would check: {f.source}</div>
   </li>
 );
 
