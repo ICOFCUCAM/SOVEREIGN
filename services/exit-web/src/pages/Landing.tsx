@@ -85,6 +85,22 @@ const Landing: React.FC = () => {
             </div>
           </div>
         </div>
+        {/* the watermark on the navy side: the ExitOS mark and signature, faint (owner, DD4) */}
+        <div aria-hidden className="pointer-events-none absolute right-[9%] top-1/2 hidden -translate-y-[56%] select-none flex-col items-center md:flex">
+          <svg viewBox="0 0 100 100" className="h-[min(30vw,440px)] w-[min(30vw,440px)]" fill="none">
+            <circle cx="50" cy="50" r="33" stroke="rgba(147,197,253,0.16)" strokeWidth="1.1" />
+            <circle cx="50" cy="50" r="44" stroke="rgba(147,197,253,0.06)" strokeWidth="0.6" />
+            <g stroke="rgba(147,197,253,0.2)" strokeWidth="1.1" strokeLinecap="round">
+              <line x1="50" y1="11" x2="50" y2="21" /><line x1="50" y1="79" x2="50" y2="89" />
+              <line x1="11" y1="50" x2="21" y2="50" /><line x1="79" y1="50" x2="89" y2="50" />
+            </g>
+            <circle cx="50" cy="50" r="10.5" fill="rgba(52,211,153,0.16)" stroke="rgba(52,211,153,0.3)" strokeWidth="0.6" />
+          </svg>
+          <div className="-mt-[2vw] font-editorial font-semibold leading-none tracking-[-0.05em] text-transparent"
+            style={{ fontSize: "min(7.5vw, 112px)", backgroundImage: "linear-gradient(180deg, rgba(147,197,253,0.22), rgba(147,197,253,0.05))", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
+            Exit<span className="italic">OS</span>
+          </div>
+        </div>
         {/* the vertical note on the navy side */}
         <div aria-hidden className="absolute bottom-40 right-[3.5%] hidden flex-col items-center gap-4 lg:flex">
           <span className="font-mono text-[9.5px] uppercase tracking-[0.24em] text-blue-100/80" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>{t("hx.note")}</span>
