@@ -32,8 +32,12 @@ Per-sector indexes from the registry snapshot: volume, 12-month trend, buyers, m
 | G1 | **Trends on tiny counts; "hottest sector" decided by a few deals.** | Show the counts beside each trend ("5 vs 3"); mark trends under 10 deals in both windows "small sample"; the hottest-sector metric shows its counts. | ☐ |
 | G2 | Mislabels: "Active buyers" (all-time distinct acquirers); "verified" comment; hover-only heatfield. | "Distinct acquirers (all years)"; comment corrected; heatfield hidden with the table as its text equivalent. | ☐ |
 | G3 | Fake live tape. | `RegistryTape`. | ☐ |
-| G4 | Design: no `h1`, contrast failures, unfocusable scroll region, sort semantics. | Rebuild on `xo` (`Chip` sort, `ScrollRegion`). | ☐ |
+| G4 | Design: no `h1`, contrast failures, unfocusable scroll region, sort semantics. | Rebuild on `xo` (`Chip` sort, `ScrollRegion`). | ☑ G4-commit |
 
 ---
 
 ## Closure log
+
+### G4 — Design
+*Closed by:* `pages/Indexes.tsx` rebuilt on `xo` (`PageHeader` `h1` with source and as-of date; four metrics; heatfield and reactor hidden from assistive tech — the table carries the same figures; sort as `Chip` toggles with `aria-pressed`; table with row headers in a keyboard-reachable `ScrollRegion`; trend arrows carry "up/down" for screen readers). Content carried over verbatim; G1–G3 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Preparation 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 7 + 1), all tab stops with visible focus.
