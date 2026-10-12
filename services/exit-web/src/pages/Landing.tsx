@@ -579,9 +579,9 @@ const EXCHANGE_FLOW = [
 // why founders lose millions (problem → fix)
 const LOSSES = [
   { dimension: "Buyer reach", problem: "A handful of known contacts", fix: `A run across ${MARKET_FMT.buyers} curated acquirer mandates in ${MARKET_FMT.geographies} jurisdictions` },
-  { dimension: "Preparation", problem: "Negotiate unprepared", fix: "AI valuation, comps and reservation lines up front" },
+  { dimension: "Preparation", problem: "Negotiate unprepared", fix: "Deterministic valuation, comps and reservation lines up front" },
   { dimension: "Leverage", problem: "Leverage erodes mid-process", fix: "Registry signals + parallel offers hold tension" },
-  { dimension: "Final price", problem: "Accept discounted offers", fix: "Offer optimisation captures the premium" },
+  { dimension: "Final price", problem: "Accept discounted offers", fix: "Offers compared on structure and certainty, not headline alone" },
 ];
 // proof — representative transactions
 const heatGradient = (bars: number) =>
@@ -832,7 +832,7 @@ const LIFECYCLE: ReadonlyArray<[string, string]> = [
 // confidence register applied to estimates (mirrors the engines' tiers).
 const PROVENANCE_PIPELINE = [
   { stage: "Public record", detail: "SEC EDGAR 8-K · Wikidata · press disclosures" },
-  { stage: "Curated registry", detail: `${MARKET_FMT.buyers} verified acquirer mandates` },
+  { stage: "Curated registry", detail: `${MARKET_FMT.buyers} curated acquirer mandates` },
   { stage: "Deterministic pricing", detail: "same inputs, same answer — reproducible" },
   { stage: "The exchange", detail: "every figure on this page traces to the record" },
 ];

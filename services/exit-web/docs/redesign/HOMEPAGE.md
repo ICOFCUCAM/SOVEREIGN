@@ -107,7 +107,7 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 | M2 | **Fake live indicators.** | Remove the pings, pulses, rotating spotlight, session clock and the timer-driven score/heat oscillation. "Live Transactions" → "Disclosed transactions"; "Live Market"/"Live" → "Registry snapshot · as of {index date}"; `DATA_AS_OF` → the index's own date; "Live process" → "Typical timeline"; "live appetite", "24/7", "Live signals" reworded to what the data is. Figures and the drill-down stay. | ☑ `ce76fa8f` |
 | M3 | **Unverified security and compliance claims.** | Remove "SOC 2" and the audit-trail, access-log, "secured", encryption and verification claims. Each slot is kept and states what the product does (for example "Your own actions are recorded", "NDA-gated identity: listings show a codename and bands until an NDA is signed", "Founder approval at each agent step", "Record checks on each NDA, not identity or funds verification", "Data-room uploads: read who can see them before adding files"). Owner can restore any claim with evidence (open decision). | ☑ `53ade1c7` |
 | M4 | **Illustrative content shown as real.** | Visible "Illustrative" labels on the cross-bid table and the example listings; "Market Heat" shows the registry-derived heat label instead of a constant. | ☑ `d38267fd` |
-| M5 | **Overclaims in copy.** | "AI valuation" → "Deterministic valuation"; "Offer optimisation captures the premium" → "Offers compared on structure and certainty"; "verified acquirer mandates" → "curated acquirer mandates"; board "Match Score" → "Activity score". | ☐ |
+| M5 | **Overclaims in copy.** | "AI valuation" → "Deterministic valuation"; "Offer optimisation captures the premium" → "Offers compared on structure and certainty"; "verified acquirer mandates" → "curated acquirer mandates"; board "Match Score" → "Activity score". | ☑ M5-commit |
 | M6 | **Broken link** `/marketplace`. | Point "How the listing protocol works" to the marketplace inside the exchange (`/console/marketplace`; signed-out users see sign-in). | ☐ |
 | M7 | **Accessibility.** | A `main` landmark in the chrome (all marketing pages); contrast ≥ 4.5:1 for text (locked colours kept, opacities/shade steps within the same palette adjusted); the empty table header labelled; the drill-down as a real dialog (focus, Escape, `aria-modal`); the scrolling matrix keyboard-focusable; decorative map and graphics `aria-hidden`. Target: axe 0 on `/` at 1440 and 390. | ☐ |
 | M8 | **Motion ignores reduced-motion.** | All homepage animations (ticker, scan, travelling dots, SVG `animateMotion`) honour `prefers-reduced-motion: reduce` — no animation when set. | ☐ |
@@ -210,6 +210,19 @@ Kept: "Founder control — Eight approval gates" (Autonomous Exit's eight agent 
 
 These strings sit beside the page's other hard-coded English data constants (the tables and cards were never in i18n), so they are English in all locales, like their neighbours. The command board is untouched.
 *Verification:* `tsc -b`, eslint clean · Chromium `/` 1440/390: the three labels present; 0 errors, `h1` 1, no overflow.
+
+### M5 — Overclaims in copy
+*Closed by:*
+- `pages/Landing.tsx`, losses matrix:
+  - "AI valuation, comps and reservation lines up front" → "Deterministic valuation, comps and reservation lines up front".
+  - "Offer optimisation captures the premium" → "Offers compared on structure and certainty, not headline alone".
+- Provenance pipeline: "{n} verified acquirer mandates" → "curated".
+- `lib/i18n.tsx` (EN/FR/ES, M9):
+  - `ribbon.mandates` "Verified / vérifiés / verificados" → "Curated / sélectionnés / seleccionados".
+  - `prov.body` "curated and verified" → "curated" (FR "sélectionnés", ES "se seleccionan").
+
+**Not changed (owner decision):** the board's "Match Score" column stays, because the command board is kept as built. Also kept is the negotiation feature "Offer optimization — Maximise value and certainty", which describes the Bid Room's purpose rather than claiming a result.
+*Verification:* `tsc -b`, eslint clean · `vitest` 218/218 · Chromium `/`: "AI" now appears only in sector names ("AI Infrastructure") and registry theses; "verified" only in the confidence tier ("Disclosed in a public filing") and the "does not verify" line, in all three locales; 0 errors.
 
 ---
 

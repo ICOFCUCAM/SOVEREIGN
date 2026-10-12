@@ -28,7 +28,7 @@ const en: Dict = {
   "hero.deploy": "Deploy a Mandate",
   // proof ribbon
   "ribbon.deals": "Disclosed acquisitions indexed",
-  "ribbon.mandates": "Verified acquirer mandates",
+  "ribbon.mandates": "Curated acquirer mandates",
   "ribbon.value": "Transaction value tracked",
   "ribbon.deploying": "Mandates actively deploying",
   // trust strip
@@ -75,7 +75,7 @@ const en: Dict = {
   // provenance
   "prov.eyebrow": "Data provenance",
   "prov.h2": "Sourced. Referenced.\nAuditable.",
-  "prov.body": "Every figure on the exchange traces to a source on record. Transactions are indexed from public filings; mandates are curated and verified; estimates carry an explicit confidence tier backed by observation counts.",
+  "prov.body": "Every figure on the exchange traces to a source on record. Transactions are indexed from public filings; mandates are curated; estimates carry an explicit confidence tier backed by observation counts.",
   // data rooms
   "dr.eyebrow": "Diligence infrastructure",
   "dr.h2": "Institutional-grade\ndata rooms.",
@@ -155,7 +155,7 @@ const fr: Dict = {
   "hero.body": "Un seul système reliant fondateurs, acquéreurs, conseils et données de transaction — du signal initial jusqu'au closing.",
   "hero.deploy": "Déployer un mandat",
   "ribbon.deals": "Acquisitions publiées indexées",
-  "ribbon.mandates": "Mandats d'acquéreurs vérifiés",
+  "ribbon.mandates": "Mandats d'acquéreurs sélectionnés",
   "ribbon.value": "Valeur de transactions suivie",
   "ribbon.deploying": "Mandats en déploiement actif",
   "trust.network.m": "{n} mandats",
@@ -196,7 +196,7 @@ const fr: Dict = {
   "bi.link": "Voir tous les acquéreurs",
   "prov.eyebrow": "Provenance des données",
   "prov.h2": "Sourcé. Référencé.\nAuditable.",
-  "prov.body": "Chaque chiffre de la bourse renvoie à une source documentée. Les transactions sont indexées depuis les publications officielles ; les mandats sont sélectionnés et vérifiés ; les estimations portent un niveau de confiance explicite, étayé par le nombre d'observations.",
+  "prov.body": "Chaque chiffre de la bourse renvoie à une source documentée. Les transactions sont indexées depuis les publications officielles ; les mandats sont sélectionnés ; les estimations portent un niveau de confiance explicite, étayé par le nombre d'observations.",
   "dr.eyebrow": "Infrastructure de due diligence",
   "dr.h2": "Data rooms de niveau\ninstitutionnel.",
   "dr.body": "Organisées autour des documents que demandent les acquéreurs, avec la complétude suivie dossier par dossier.",
@@ -267,7 +267,7 @@ const es: Dict = {
   "hero.body": "Un solo sistema que conecta fundadores, compradores, asesores y datos de transacciones — desde la señal inicial hasta el cierre.",
   "hero.deploy": "Desplegar un mandato",
   "ribbon.deals": "Adquisiciones publicadas indexadas",
-  "ribbon.mandates": "Mandatos de adquirentes verificados",
+  "ribbon.mandates": "Mandatos de adquirentes seleccionados",
   "ribbon.value": "Valor de transacciones registrado",
   "ribbon.deploying": "Mandatos en despliegue activo",
   "trust.network.m": "{n} mandatos",
@@ -308,7 +308,7 @@ const es: Dict = {
   "bi.link": "Ver todos los compradores",
   "prov.eyebrow": "Procedencia de los datos",
   "prov.h2": "Con fuente. Referenciado.\nAuditable.",
-  "prov.body": "Cada cifra de la bolsa se remonta a una fuente registrada. Las transacciones se indexan desde registros públicos; los mandatos se curan y verifican; las estimaciones llevan un nivel de confianza explícito respaldado por el número de observaciones.",
+  "prov.body": "Cada cifra de la bolsa se remonta a una fuente registrada. Las transacciones se indexan desde registros públicos; los mandatos se seleccionan; las estimaciones llevan un nivel de confianza explícito respaldado por el número de observaciones.",
   "dr.eyebrow": "Infraestructura de due diligence",
   "dr.h2": "Data rooms de nivel\ninstitucional.",
   "dr.body": "Organizadas en torno a los documentos que piden los compradores, con la completitud seguida paquete por paquete.",
