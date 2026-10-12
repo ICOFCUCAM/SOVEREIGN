@@ -126,6 +126,9 @@ const en: Dict = {
   "cta.brief": "Request a Private Briefing",
   // quick value
   "ledger.read": "How to read this record",
+  "hall.eyebrow": "The exchange",
+  "hall.h2": "The whole market,",
+  "hall.h2em": "in one room.",
   "src.title": "Sources & method",
   "qv.eyebrow": "Value your company · 30 seconds",
   "qv.h2": "What is your company worth?",
@@ -256,6 +259,9 @@ const fr: Dict = {
   "cta.brief": "Demander un briefing privé",
   // quick value
   "ledger.read": "Comment lire ce registre",
+  "hall.eyebrow": "La bourse",
+  "hall.h2": "Tout le marché,",
+  "hall.h2em": "dans une seule salle.",
   "src.title": "Sources et méthode",
   "qv.eyebrow": "Valorisez votre entreprise · 30 secondes",
   "qv.h2": "Combien vaut votre entreprise ?",
@@ -385,6 +391,9 @@ const es: Dict = {
   "cta.brief": "Solicitar un briefing privado",
   // quick value
   "ledger.read": "Cómo leer este registro",
+  "hall.eyebrow": "La bolsa",
+  "hall.h2": "Todo el mercado,",
+  "hall.h2em": "en una sola sala.",
   "src.title": "Fuentes y método",
   "qv.eyebrow": "Valore su empresa · 30 segundos",
   "qv.h2": "¿Cuánto vale su empresa?",

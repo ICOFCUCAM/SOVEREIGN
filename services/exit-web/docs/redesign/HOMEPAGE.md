@@ -323,7 +323,7 @@ Nothing changes on the live homepage until the owner confirms. Screens: `scratch
 
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| X1 | **Put Option 9 on the live homepage.** | The hero becomes **The Horizon**: navy, centred editorial `h1`, ruled eyebrow, `hero.sub`, `hero.body` (kept so no content is lost), both buttons, the proof figures with source notes 1–3, and the light cove glowing on the horizon. Directly below it, the **trading hall** becomes its own section, with the label "The exchange" and the `h2` "The whole market, in one room." — new i18n keys `hall.eyebrow`, `hall.h2`, `hall.h2em` in EN/FR/ES. The screen (ribbon + `CommandBoard`) is unchanged. Every other moment keeps its order after the hall. | ☐ |
+| X1 | **Put Option 9 on the live homepage.** | The hero becomes **The Horizon**: navy, centred editorial `h1`, ruled eyebrow, `hero.sub`, `hero.body` (kept so no content is lost), both buttons, the proof figures with source notes 1–3, and the light cove glowing on the horizon. Directly below it, the **trading hall** becomes its own section, with the label "The exchange" and the `h2` "The whole market, in one room." — new i18n keys `hall.eyebrow`, `hall.h2`, `hall.h2em` in EN/FR/ES. The screen (ribbon + `CommandBoard`) is unchanged. Every other moment keeps its order after the hall. | ☑ X1-commit |
 
 ---
 
@@ -722,6 +722,20 @@ Kept in capitals by design: one chapter label per moment, table headers, the led
 - Entrance animations: 3 with no motion preference, **0 with reduced motion**.
 - **Honest note:** axe now reports 0 contrast items inside the screen (8 in W1). This is because the glass-sheen layer sits over the text, so axe can no longer measure it ("incomplete"). The board's faint labels are unchanged, so this is not a contrast fix.
 - Height 6,772 px at 1440 and 10,751 px at 390. Screens: `scratchpad/home/w2-hero-*`.
+
+### X1 — The Horizon hero, with the hall in the body
+*Closed by:*
+- **`pages/Landing.tsx`.**
+  - **The hero is the Horizon:** navy, ruled eyebrow, centred editorial `h1`, `hero.sub`, `hero.body`, both buttons, the proof figures with notes 1–3, and the glowing horizon line.
+  - **Below it, "The exchange" section:** `TradingHall` with the label and `h2` "The whole market, *in one room.*", the screen (ribbon + `CommandBoard`, carried over verbatim) and the keyframes.
+  - The rest of the page (Value your company, thesis, ledger, how a sale runs, the next move, sources) follows unchanged.
+- **`lib/i18n.tsx`.** `hall.eyebrow`, `hall.h2` and `hall.h2em` in EN ("The exchange / The whole market, / in one room."), FR ("La bourse / Tout le marché, / dans une seule salle.") and ES ("La bolsa / Todo el mercado, / en una sola sala.").
+
+*Verification:*
+- A script found the ribbon + board markup and `CommandBoard` identical to `20545a37`.
+- `tsc -b`, eslint clean · `vitest` 243/243 (including the inventory test).
+- Chromium `/` 1440/390: 0 errors, `h1` 1, no overflow; axe 0 outside the screen; 115 tab stops, all with visible focus; inventory 0 missing, notes 11/9/1 with 0 missing targets; the EN/FR/ES switch causes no errors.
+- Height: 7,593 px at 1440 and 11,176 px at 390. The hero is now a full screen and the hall is its own section, so the page is slightly above the Phase 4 targets (6,500 / 11,000).
 
 ---
 
