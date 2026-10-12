@@ -408,7 +408,7 @@ Owner: "I need the hero of the newly uploaded file … from hero to section two.
 
 | # | Gap | Close by | Status |
 |---|---|---|---|
-| DD1 | The lifecycle chart is drawn for the full page width; set in a half-width box its labels fall to about 8 px and its stage panel crowds. | A `compact` mode for `ExchangeMap`: larger label type and offsets for a narrower box, the stage panel stacked. | open |
+| DD1 | The lifecycle chart is drawn for the full page width; set in a half-width box its labels fall to about 8 px and its stage panel crowds. | A `compact` mode for `ExchangeMap`: larger label type and offsets for a narrower box, the stage panel stacked. | closed `cb3e3c23` |
 | DD2 | The homepage opening is not the owner's index(2) hero and section 2. | Hero from index(2): ivory-to-navy field, eyebrow "Intelligence · Opportunities · Execution", "The global acquisition exchange *for what's next.*", body, two actions ("Explore the platform" → /platform; the file's "Watch overview" has no film behind it → "Value my company" → chapter 04), the vertical note, and the five-part capability strip ("verified insights" → "sourced records", per M3). Section 2 "Intelligence meets *opportunity.*" with its copy and "Learn how it works" → /platform; the right-hand box carries our lifecycle graph (compact, interactive); the three proof figures and the edition line move under its copy. The board becomes chapter 03 and every later chapter moves down one (04 value · 05 thesis · 06 ledger · 07 modules · 08 questions · 09 next move); the rail, signature line, phone bar, share-card script and the inventory test follow. EN/FR/ES. | open |
 
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
@@ -908,6 +908,9 @@ PhoneActionBar.tsx: one full-width action, 'Value my company · 30 seconds' → 
 
 ### CC4 — closed 00ebbf7c
 lib/proof.ts (empty; every entry carries a permission field) and ProofSection.tsx ('In confidence': attributed quote, client names, press links), mounted before chapter 07; renders nothing while empty. 3 new tests: ships empty, renders null when empty, renders entries when supplied. Pre-launch gates G2 (proof) and G3 (photography/film spec) added. tsc, eslint, vitest 246/246.
+
+### DD1 — closed cb3e3c23
+ExchangeMap gains compact mode: label type ×1.5 (19/16 px in the 1200-unit chart), its own label lanes per stage (Management meetings set to the right of its node; Buyer discovery below) so nothing collides in a half-width box, larger axis ticks, the stage panel stacked, the corner tag hidden. Route, links and nodes follow the compact lanes. Browser-checked in section 2 at 1440 and 390: no label collisions, panel readable. tsc, vitest 246/246.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
