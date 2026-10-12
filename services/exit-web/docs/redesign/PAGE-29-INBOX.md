@@ -35,7 +35,7 @@ Founder free and Pro: `h1` none · axe color-contrast ×7 + link-in-text-block �
 |---|---|---|---|
 | G1 | **Identity-release, diligence, security and model-feeding overclaims.** | State what each action records: "Execute NDA" marks the request signed (no document is sent or signed; your identity is not revealed automatically); buyers stay anonymous on this page; security wording only for the exchange backend; advancing records an event; deals open on an NDA request or offer; "Open deals". | ☑ `5828adb` |
 | G2 | **Consequential actions without confirmation.** | Inline confirmation for Execute NDA, Accept, Decline and Withdraw, stating what is recorded and that it cannot be undone here. | ☑ `a7ecb98` |
-| G3 | Match score shown as "%"; target revenue labelled "check". | "Match score N/100" with the rule (weights, qualified threshold); "target revenue $a–$b". | ☑ G3-commit |
+| G3 | Match score shown as "%"; target revenue labelled "check". | "Match score N/100" with the rule (weights, qualified threshold); "target revenue $a–$b". | ☑ `22c7aad` |
 | G4 | **Demo company unlabelled, and bound to the wrong listing.** With no intake the inbox derives `lst-helios-freight` ("Project Meridian", Draft), while the exchange carries the demo company as the seeded `lst-demo-helios` ("Project Beacon"). Buyer actions on the demo listing never reach the demo inbox (verified: a buyer NDA request and $90M offer on Project Beacon left the founder inbox at 0). | Demo data / Your intake badge and a line naming the listing; with no intake, track the seeded demo listing `lst-demo-helios` (same company, same profile). | ☑ `75afa8c` |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 8 axe failures. | Rebuild on `xo`. | ☑ `d8968ce` |
