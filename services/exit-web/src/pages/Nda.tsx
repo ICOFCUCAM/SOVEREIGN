@@ -3,7 +3,7 @@ import { myNdaRequests, type NdaRequest } from "../lib/exit-api";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { Button, Modal, Field, inputCls, timeAgo, notify } from "../lib/ui";
-import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
@@ -161,7 +161,8 @@ const FounderNdaVault: React.FC = () => {
   return (
     <div data-page="nda" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Workspace · NDA" title="NDA Vault"
-        badge={<span className="text-[12px] text-xo-muted">Qualification gate · {roster.active} active</span>}
+        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">{roster.active} active</span></>}
+        description={`A sample NDA portfolio for the demo company (${FOUNDER_PARTY.name}), plus any NDAs you draft in this session.`}
         actions={<>
           <a href="/report/nda" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">NDA Package (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
           <Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button>
