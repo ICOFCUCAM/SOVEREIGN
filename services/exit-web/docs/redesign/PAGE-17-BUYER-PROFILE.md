@@ -35,7 +35,7 @@ One indexed buyer's dossier: likelihood for the founder's company and the buyer'
 | G2 | **"Express interest" implies an effect it does not have.** | Say what it does: saved to deal activity on this browser; the buyer is not notified. Drop "sharpens engagement intelligence". | ☐ |
 | G3 | Snapshot wording ("currently exhibits", "node-side"). | "in the registry snapshot (as of …)"; "not in the bundled extract". | ☐ |
 | G4 | Demo company unlabelled. | Company, tokens and institutional baseline from `loadActiveCompany()` (as the Terminal does); badge. | ☐ |
-| G5 | Design: old primitives (found and not-found states). | Rebuild on `xo`. | ☑ G5-commit |
+| G5 | Design: old primitives (found and not-found states). | Rebuild on `xo`. | ☑ `bc01f3f` |
 
 ### X14 — Terminal (Page 01, approved) calls the same composite a probability — documented here
 The Terminal shows `rankedBuyers().probability.pct` as "N% likely", "N% probability", "N% likely to acquire a company like {company}". It is the composite from Page 16 G1, not a probability. Fix after Page 17, in its own commit, logged in `PAGE-01-TERMINAL.md`: wording only, the same "likelihood score N/100" used on Pages 16 and 17.
