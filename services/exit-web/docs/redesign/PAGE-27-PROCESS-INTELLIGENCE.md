@@ -30,8 +30,12 @@ A funnel (matched → NDA → LOI → closed) with conversions and median times,
 | G1 | **Sample fixtures presented as real, live process telemetry.** | Badge and line: sample NDAs and offers of the demo company; the foot says what the figures will mean once real processes run; no PitchBook claim. | ☐ |
 | G2 | Mislabels ("qualified buyers engaged", "first touch"). | "Matched by the engine — not contacted"; "from match → …". | ☐ |
 | G3 | Fake live tape. | `RegistryTape`. | ☐ |
-| G4 | Design: no `h1`, 9 contrast failures. | Rebuild on `xo`. | ☐ |
+| G4 | Design: no `h1`, 9 contrast failures. | Rebuild on `xo`. | ☑ G4-commit |
 
 ---
 
 ## Closure log
+
+### G4 — Design
+*Closed by:* `pages/ProcessIntelligence.tsx` rebuilt on `xo` (`PageHeader` `h1`; four metrics; the funnel as an ordered list with decorative bars; the response table with row headers in a `ScrollRegion`; stages in words with colour). Content carried over verbatim; G1–G3 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Active Mandate 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 9), all tab stops with visible focus.
