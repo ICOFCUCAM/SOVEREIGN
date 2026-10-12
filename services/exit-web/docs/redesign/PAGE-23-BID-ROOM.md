@@ -39,7 +39,7 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 | G2 | **False "Counter sent".** | Copy only, and "Nothing is sent from ExitOS"; no sent state. | ☑ `b042c31` |
 | G3 | **Invented sender and hard-coded demo facts in the draft.** | "[Your name]"; company name and growth from the company profile; no "competitive process" claim beyond the offer count. | ☑ `6dc91dc` |
 | G4 | **"AI / autonomous" overclaims**; counter rule unexplained; "strategic mid" (D1). | "Standard negotiating positions (templates) — not legal advice"; counter rule stated; "enterprise value (institutional)". | ☑ `170d4db` |
-| G5 | Unvalidated amounts; demo offers unlabelled. | `parseNumber` with walk ≤ minimum ≤ ideal checks; badge and line for sample offers. | ☐ |
+| G5 | Unvalidated amounts; demo offers unlabelled. | `parseNumber` with walk ≤ minimum ≤ ideal checks; badge and line for sample offers. | ☑ G5-commit |
 | G6 | Design: old primitives, draft overlay not a dialog, tape. | Rebuild on `xo`; draft in the shared `Modal`; `RegistryTape`. | ☑ `2bf306b` |
 
 ---
@@ -73,3 +73,10 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 | "Accepting the first bid leaves the strategic premium on the table" | "… may leave value on the table; leverage is high on the offers in hand" |
 | "Strategic mid — valuation reference"; justification and draft "strategic-buyer valuation midpoint" (D1) | "Enterprise value — institutional framework · counter reference"; "enterprise value (institutional framework) is …"; draft "an enterprise value of …" |
 *Verification:* `tsc -b`, eslint clean · Chromium: the only "AI" on the page is the AI sector in the registry tape; 0 "autonomous" / "strategic-buyer" / "Strategic mid" / "junior banker" · Active Mandate 1440/390: 0 errors, axe 0, no overflow.
+
+### G5 — Unvalidated amounts; demo offers unlabelled
+*Closed by:* `pages/Negotiator.tsx`.
+- **Your lines** (walk-away, minimum, ideal) are typed in dollars and parsed with `parseNumber`; an invalid entry shows its error and the default stands in ("Use digits only, e.g. 12.5. Using $71,250,000."); the order is checked ("Walk-away is above your minimum.", "Minimum is above your ideal."); inputs carry `aria-invalid` and `aria-describedby`. Labels say "($)".
+- The reservation dialog's headline floor ignores non-numeric or negative input and its hint says it is recorded for reference — the counter rule does not use it (it uses cash, earnout and premium).
+- Eyebrow "Demo company: Helios Freight", **Demo data** badge, description "Sample offers of the demo company (Helios Freight)." — with a saved intake: "Your intake has no offers, so these are not yours."
+*Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium (Active Mandate): walk "abc" → error, default used; walk 200M → "above your minimum"; min 300M → "above your ideal"; demo label with and without intake · 1440/390: 0 errors, axe 0, no overflow; reservation dialog axe 0.

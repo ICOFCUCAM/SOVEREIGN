@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Button, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
-import { PageHeader, Section, Metric, XO_INPUT, XO_LABEL } from "../components/xo";
+import { PageHeader, Section, Metric, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import { parseNumber } from "../lib/intake-fields";
+import { loadActiveCompany } from "../lib/active-company";
 import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_CANONICAL } from "../lib/engines";
 
@@ -95,10 +97,22 @@ const Negotiator: React.FC = () => {
   const [draftOpen, setDraftOpen] = useState(false);
   const [reserveOpen, setReserveOpen] = useState(false);
 
-  const [walkUsd, setWalkUsd]   = useState(Math.round(RESERVATION_LINES.minHeadlinePriceUsd * 0.95));
-  const [minUsd, setMinUsd]     = useState(RESERVATION_LINES.minHeadlinePriceUsd);
-  const [idealUsd, setIdealUsd] = useState(Math.round(VALUATION_CANONICAL.headline.high));
+  // Your lines, typed in dollars. Invalid entries are flagged and the last
+  // default stands in; the order walk-away ≤ minimum ≤ ideal is checked.
+  const DEF = { walk: Math.round(RESERVATION_LINES.minHeadlinePriceUsd * 0.95), min: RESERVATION_LINES.minHeadlinePriceUsd, ideal: Math.round(VALUATION_CANONICAL.headline.high) };
+  const [walkTxt, setWalkTxt]   = useState(String(DEF.walk));
+  const [minTxt, setMinTxt]     = useState(String(DEF.min));
+  const [idealTxt, setIdealTxt] = useState(String(DEF.ideal));
+  const usd = (t: string) => parseNumber(t, { min: 0, max: 1e13 });
+  const walkP = usd(walkTxt), minP = usd(minTxt), idealP = usd(idealTxt);
+  const walkUsd = walkP.ok ? walkP.value : DEF.walk;
+  const minUsd = minP.ok ? minP.value : DEF.min;
+  const idealUsd = idealP.ok ? idealP.value : DEF.ideal;
+  const errWalk = !walkP.ok ? `${walkP.error} Using ${fmtMoney(DEF.walk)}.` : walkUsd > minUsd ? "Walk-away is above your minimum." : undefined;
+  const errMin = !minP.ok ? `${minP.error} Using ${fmtMoney(DEF.min)}.` : minUsd > idealUsd ? "Minimum is above your ideal." : undefined;
+  const errIdeal = !idealP.ok ? `${idealP.error} Using ${fmtMoney(DEF.ideal)}.` : undefined;
   const terms = autonomousTerms(active?.offer, { minUsd, idealUsd, walkUsd });
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
 
   const draftText = active && counter
     ? `Re: Acquisition of ${SAMPLE_COMPANY.name} — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
@@ -123,8 +137,9 @@ Best regards,
 
   return (
     <div data-page="bid-room" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Operator · Negotiation desk" title="Bid Room"
-        badge={<span className="text-[12px] text-xo-muted">Stage: {NEGOTIATION_STATE.stage} · Leverage {NEGOTIATION_STATE.leverage}</span>}
+      <PageHeader eyebrow={`◉ Operator · Negotiation desk · Demo company: ${SAMPLE_COMPANY.name}`} title="Bid Room"
+        description={<>Sample offers of the demo company ({SAMPLE_COMPANY.name}).{fromIntake ? " Your intake has no offers, so these are not yours." : ""}</>}
+        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">Stage: {NEGOTIATION_STATE.stage} · Leverage {NEGOTIATION_STATE.leverage}</span></>}
         actions={<>
           <Button variant="ghost" onClick={() => setReserveOpen(true)}>Edit reservation lines</Button>
           <Button onClick={() => setDraftOpen(true)}>Generate counter</Button>
@@ -142,8 +157,8 @@ Best regards,
       <Modal open={reserveOpen} onClose={() => setReserveOpen(false)} title="Reservation lines & counter" subtitle="These shape the counter price and structure" size="md"
         footer={<><Button variant="ghost" onClick={() => setReserve({ minHeadlinePriceUsd: RESERVATION_LINES.minHeadlinePriceUsd, minCashPct: RESERVATION_LINES.minCashPct, maxEarnoutPct: RESERVATION_LINES.maxEarnoutPct, premiumOverride: null })}>Reset</Button><Button onClick={() => { setReserveOpen(false); notify("Reservation lines updated"); }}>Apply</Button></>}>
         <div className="space-y-4">
-          <Field label="Headline floor (walk-away below this)">
-            <input type="number" step={1_000_000} min={0} value={reserve.minHeadlinePriceUsd} onChange={(e) => setReserve((r) => ({ ...r, minHeadlinePriceUsd: Number(e.target.value) }))} className={inputCls} />
+          <Field label="Headline floor (walk-away below this)" hint="Recorded for reference; the counter rule uses the cash, earnout and premium settings below.">
+            <input type="number" step={1_000_000} min={0} value={reserve.minHeadlinePriceUsd} onChange={(e) => { const n = Number(e.target.value); if (Number.isFinite(n) && n >= 0) setReserve((r) => ({ ...r, minHeadlinePriceUsd: n })); }} className={inputCls} />
           </Field>
           <Field label={`Minimum cash — ${(reserve.minCashPct * 100).toFixed(0)}%`}>
             <input type="range" min={50} max={100} step={5} value={reserve.minCashPct * 100} onChange={(e) => setReserve((r) => ({ ...r, minCashPct: Number(e.target.value) / 100 }))} className="w-full accent-deal-500" />
@@ -182,9 +197,9 @@ Best regards,
         <div className="px-4 py-3">
           <p className="text-[12px] text-xo-muted">Set your lines. The clauses, earnout alternatives and protections below are standard negotiating positions with fixed figures (for example a 4% reverse break fee) — a starting list to take to your advisers, not legal advice.</p>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <XField id="neg-walk" label="Walk away"><input id="neg-walk" type="number" value={walkUsd} step={1_000_000} min={0} onChange={(e) => setWalkUsd(Number(e.target.value))} className={XO_INPUT} /></XField>
-            <XField id="neg-min" label="Minimum"><input id="neg-min" type="number" value={minUsd} step={1_000_000} min={0} onChange={(e) => setMinUsd(Number(e.target.value))} className={XO_INPUT} /></XField>
-            <XField id="neg-ideal" label="Ideal"><input id="neg-ideal" type="number" value={idealUsd} step={1_000_000} min={0} onChange={(e) => setIdealUsd(Number(e.target.value))} className={XO_INPUT} /></XField>
+            <XField id="neg-walk" label="Walk away ($)" error={errWalk}><input id="neg-walk" inputMode="numeric" value={walkTxt} aria-invalid={errWalk ? true : undefined} aria-describedby={errWalk ? "neg-walk-err" : undefined} onChange={(e) => setWalkTxt(e.target.value)} className={XO_INPUT} /></XField>
+            <XField id="neg-min" label="Minimum ($)" error={errMin}><input id="neg-min" inputMode="numeric" value={minTxt} aria-invalid={errMin ? true : undefined} aria-describedby={errMin ? "neg-min-err" : undefined} onChange={(e) => setMinTxt(e.target.value)} className={XO_INPUT} /></XField>
+            <XField id="neg-ideal" label="Ideal ($)" error={errIdeal}><input id="neg-ideal" inputMode="numeric" value={idealTxt} aria-invalid={errIdeal ? true : undefined} aria-describedby={errIdeal ? "neg-ideal-err" : undefined} onChange={(e) => setIdealTxt(e.target.value)} className={XO_INPUT} /></XField>
           </div>
           <p className="mt-3 border border-xo-line px-3 py-2 text-[13px] text-xo-muted">
             Your lines: open at <span className="font-mono font-semibold text-xo-text">{fmtMoney(idealUsd)}</span>, concede no lower than <span className="font-mono font-semibold text-xo-text">{fmtMoney(minUsd)}</span>, and walk below <span className="font-mono font-semibold text-xo-risk">{fmtMoney(walkUsd)}</span>.
