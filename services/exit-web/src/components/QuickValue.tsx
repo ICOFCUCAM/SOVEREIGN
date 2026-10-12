@@ -1,4 +1,4 @@
-import React, { useId, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import { Link } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import { SECTORS, type Sector } from "../lib/company-intake";
@@ -28,6 +28,17 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
   const [mod, setMod] = useState<QV | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ low: number; mid: number; high: number; query: string } | null>(null);
+
+  // A worked example, computed by the same engine once the page is idle, so the
+  // chapter never opens on an empty form. Clearly labelled; replaced by the
+  // reader's own result.
+  const EX = { sector: "vertical_saas" as Sector, revenueUsd: 40e6, growthPct: 0.45 };
+  const [example, setExample] = useState<{ low: number; mid: number; high: number } | null>(null);
+  useEffect(() => {
+    const id = window.setTimeout(() => { void import("../lib/quick-value").then((m) => { setMod((x) => x ?? m); setExample(m.quickValue(EX)); }); }, 1200);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const load = async (): Promise<QV> => mod ?? import("../lib/quick-value").then((m) => { setMod(m); return m; });
 
@@ -108,6 +119,17 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
                       ))}
                     </dl>
                   </div>
+                </div>
+              ) : example ? (
+                <div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-[12.5px] text-slate-600">{t("qv.range")}</span>
+                    <span className="border border-slate-400 px-1.5 py-px font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-600">{t("qv.exampleTag")}</span>
+                  </div>
+                  <div className="mt-3 font-editorial text-[clamp(2.8rem,6.4vw,6rem)] font-semibold leading-none tabular-nums tracking-[-0.03em] text-slate-500">
+                    {usd(example.low)} <span aria-hidden className="text-slate-300">–</span> {usd(example.high)}
+                  </div>
+                  <p className="mt-3 text-[14px] text-slate-600">{t("qv.example", { s: sectorLabel(EX.sector), r: EX.revenueUsd / 1e6, g: Math.round(EX.growthPct * 100) })}</p>
                 </div>
               ) : (
                 <p className="text-[14px] text-slate-600">{t("qv.empty")}</p>
