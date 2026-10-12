@@ -119,14 +119,15 @@ const Buyers: React.FC = () => {
           <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
             right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(topCheck)}</span>}>
             <div className="px-4 py-3">
-              <p className="text-[14px] leading-relaxed">Fire a warm intro to the hottest buyer and open the conversation this week.</p>
+              <p className="text-[14px] leading-relaxed">Draft a warm intro to the best-fit buyer and take it to Outreach when you are ready.</p>
               <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
                 <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(topCheck)}</span> check-size midpoint for {top.buyer.name}; {activeBucket.length} active-appetite buyer{activeBucket.length === 1 ? "" : "s"} (registry).</TakeCell>
-                <TakeCell k="If you wait">Hot interest cools — buyers redeploy and the warm window closes without a touch.</TakeCell>
+                <TakeCell k="If you wait">The ranking reflects the registry snapshot; a buyer's appetite can change, and nothing here tracks it over time.</TakeCell>
                 <TakeCell k="Pursue">{top.buyer.name} — fit {it.label.toLowerCase()} at {it.pct}%, {top.buyer.buyerType.replace(/_/g, " ")}.</TakeCell>
-                <TakeCell k="ExitOS does it">ExitOS drafts a personalized warm introduction for each buyer and routes it through the banker.</TakeCell>
+                <TakeCell k="What ExitOS does">Drafts a warm introduction for each buyer from its thesis and the company's figures. Nothing is sent from this page.</TakeCell>
               </dl>
-              <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Send via The Banker →</Link>
+              <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link>
+              {outreachGate && <span className="ml-3 text-[12px] text-xo-caution">Requires {outreachGate}</span>}
             </div>
           </Section>
         );

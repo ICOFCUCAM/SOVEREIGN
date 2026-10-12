@@ -35,7 +35,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 |---|---|---|---|
 | G1 | **False "queued with the banker"; invented sender "James"; unchecked activity claim.** | Intro dialog offers Copy and "Open Outreach" (with plan note), states nothing is sent from here; sign-off placeholder "[Your name]"; "recent activity" sentence only when the buyer has deals in the last 3 years. | ☑ `add04ca` |
 | G2 | **Invented founder-friendliness; fit shown as "interest" with a pulsing dot; appetite/check mislabels.** | Remove founder-friendliness; "Fit · Hot/Warm/Cool" with thresholds, no pulse; "Active-appetite buyers — registry attribute"; "Check-size midpoint"; "median across these N buyers". | ☑ `2614240` |
-| G3 | Banker's-take urgency and overclaim; hidden plan gate. | Plain wording; `requiredEngagement` note. | ☐ |
+| G3 | Banker's-take urgency and overclaim; hidden plan gate. | Plain wording; `requiredEngagement` note. | ☑ G3-commit |
 | G4 | Demo company unlabelled. | Buyers and intro text on `loadActiveCompany()`; badge. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 24 contrast failures, header name differs from NAV, drawer not a dialog. | Rebuild on `xo`; `h1` "Buyer Profiles"; intro in the shared `Modal`. | ☑ `3cbfa63` |
@@ -62,3 +62,13 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 ### G2 — Invented founder-friendliness; fit shown as interest; mislabels
 *Closed by:* `pages/Buyers.tsx`. `friendliness()` (type base 78 / 88 / 64 ± retrade) and its "Founder-friendly" field and bar removed. Labels: "Hot · N%" → "Fit: Hot · N%" (the pulsing dot went with G6); filter "Interest level" → "Fit level" with "fit ≥ 60%" / "fit 35–59%"; "Active mandates — recent-12mo activity" → "Active-appetite buyers — registry attribute"; "Median target check — across registry" → "Median check midpoint — across these 12 buyers"; "Avg deal" → "Check midpoint"; "Match" → "Fit probability"; banker's take wording to match. The profiles foot states the thresholds, what appetite and check midpoint are, and that founder-friendliness is not measured.
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for Founder-friendly / recent-12mo / across registry / Avg deal / "interest at" · free 1440/390: 0 errors, axe 0, no overflow.
+
+### G3 — Banker's-take urgency, overclaim, hidden plan gate
+*Closed by:* `pages/Buyers.tsx` (text and a note).
+| Before | After |
+|---|---|
+| "Fire a warm intro to the hottest buyer and open the conversation this week." | "Draft a warm intro to the best-fit buyer and take it to Outreach when you are ready." |
+| "Hot interest cools — buyers redeploy and the warm window closes without a touch." | "The ranking reflects the registry snapshot; a buyer's appetite can change, and nothing here tracks it over time." |
+| "ExitOS drafts … and routes it through the banker." | "What ExitOS does — Drafts a warm introduction … Nothing is sent from this page." |
+| "Send via The Banker →" (no plan note) | "Open Outreach →" + "Requires Active Mandate" for free and Preparation |
+*Verification:* `tsc -b`, eslint clean · Chromium: free → "Requires Active Mandate"; Active Mandate → no note; 0 "redeploy" / "routes it".
