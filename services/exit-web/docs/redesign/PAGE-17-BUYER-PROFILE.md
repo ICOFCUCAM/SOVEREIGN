@@ -33,7 +33,7 @@ One indexed buyer's dossier: likelihood for the founder's company and the buyer'
 |---|---|---|---|
 | G1 | **Composite score labelled "probability".** | "Likelihood score N/100 (composite)" with the formula reference; forecast tile likewise. | ☑ `3bf0e42` |
 | G2 | **"Express interest" implies an effect it does not have.** | Say what it does: saved to deal activity on this browser; the buyer is not notified. Drop "sharpens engagement intelligence". | ☑ `77678ee` |
-| G3 | Snapshot wording ("currently exhibits", "node-side"). | "in the registry snapshot (as of …)"; "not in the bundled extract". | ☐ |
+| G3 | Snapshot wording ("currently exhibits", "node-side"). | "in the registry snapshot (as of …)"; "not in the bundled extract". | ☑ G3-commit |
 | G4 | Demo company unlabelled. | Company, tokens and institutional baseline from `loadActiveCompany()` (as the Terminal does); badge. | ☐ |
 | G5 | Design: old primitives (found and not-found states). | Rebuild on `xo`. | ☑ `bc01f3f` |
 
@@ -55,3 +55,7 @@ The Terminal shows `rankedBuyers().probability.pct` as "N% likely", "N% probabil
 ### G2 — "Express interest" implied an effect it does not have
 *Closed by:* `pages/BuyerProfile.tsx` (text and a comment). "Captured to your deal activity — the behavioral signal that sharpens engagement intelligence." → **"'Express interest' and your visits to this page are saved to your deal activity in this browser only. {buyer} is not notified."** (Both events go to `captureDealEvent`, whose adapter is localStorage.) The code comment "capture the view forever — the behavioral data that becomes the moat" now says what happens. Behaviour unchanged.
 *Verification:* eslint clean · Chromium: new sentence present, 0 "sharpens".
+
+### G3 — Snapshot wording
+*Closed by:* `pages/BuyerProfile.tsx` (text only). "{buyer} currently exhibits N acquisition signals." → "In the registry snapshot (as of 2026-10-11), {buyer} shows N acquisition signals."; "indexed node-side" → "none in the bundled extract" / "the full event history is not loaded in the browser".
+*Verification:* eslint clean · Chromium: "In the registry snapshot (as of 2026-10-11), Microsoft shows 7 acquisition signals."; 0 "currently exhibits" / "node-side".

@@ -93,7 +93,7 @@ const BuyerProfile: React.FC = () => {
         <dl className="grid grid-cols-1 gap-px border-t border-xo-line bg-xo-line lg:grid-cols-[1fr_1fr_auto]">
           <div className="bg-xo-panel px-4 py-3">
             <dt className="text-[11px] text-xo-faint">Similar acquisitions</dt>
-            <dd className="mt-1 text-[13px]">{similar.length ? similar.slice(0, 3).map((s) => s.target).join(" · ") : "indexed node-side"}</dd>
+            <dd className="mt-1 text-[13px]">{similar.length ? similar.slice(0, 3).map((s) => s.target).join(" · ") : "none in the bundled extract"}</dd>
           </div>
           <div className="bg-xo-panel px-4 py-3">
             <dt className="text-[11px] text-xo-faint">Strategic rationale</dt>
@@ -222,7 +222,7 @@ const BuyerProfile: React.FC = () => {
                 </table>
               </ScrollRegion>
             ) : (
-              <p className="px-4 py-3 text-[12px] text-xo-muted">No same-sector acquisitions in the bundled extract — full history indexed node-side.</p>
+              <p className="px-4 py-3 text-[12px] text-xo-muted">No same-sector acquisitions in the bundled extract; the full event history is not loaded in the browser.</p>
             )}
           </Section>
         </div>
@@ -230,7 +230,7 @@ const BuyerProfile: React.FC = () => {
         <Section title="Acquisition signals" right={<span className="font-mono text-[12px] font-semibold text-xo-verified">{activeCount} active</span>}
           foot={`Derived signals come from the acquisition registry. Feed signals (hiring, cash, executives, divisions) populate when those sources are connected — never inferred. As of ${DNA_AS_OF.slice(0, 10)}.`}>
           <div className="px-4 py-3">
-            <p className="text-[12px] text-xo-muted">{p.name} currently exhibits {activeCount} acquisition signal{activeCount === 1 ? "" : "s"}.</p>
+            <p className="text-[12px] text-xo-muted">In the registry snapshot (as of {DNA_AS_OF.slice(0, 10)}), {p.name} shows {activeCount} acquisition signal{activeCount === 1 ? "" : "s"}.</p>
             <div className="mt-3 border border-xo-line px-3 py-2">
               <div className="flex items-baseline justify-between">
                 <h3 className="text-[12px] font-semibold text-xo-muted">Appetite score</h3>
