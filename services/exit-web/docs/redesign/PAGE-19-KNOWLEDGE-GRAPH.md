@@ -30,7 +30,7 @@ Query the acquisition index (3,855 events, as of 2026-10-11) by sector keyword, 
 | G1 | **Numeric filters accept anything; bad input silently changes results.** | `parseNumber` for min/max ($M, ≥ 0) and year (1900–this year, whole); invalid fields are flagged and ignored; min > max flagged. | ☐ |
 | G2 | Provenance: index date not shown; "verified" in the code comment. | Show "Index as of …, N events"; state that rows are source-cited and not individually verified; comment corrected. | ☐ |
 | G3 | Fake live tape. | `RegistryTape`. | ☐ |
-| G4 | Design: no `h1`, 6 contrast failures, unreachable scroll areas, preset chips. | Rebuild on `xo` (labelled inputs, `ScrollRegion`s, table headers). | ☑ G4-commit |
+| G4 | Design: no `h1`, 6 contrast failures, unreachable scroll areas, preset chips. | Rebuild on `xo` (labelled inputs, `ScrollRegion`s, table headers). | ☑ `0510a75` |
 
 ---
 
