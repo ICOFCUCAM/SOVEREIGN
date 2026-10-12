@@ -297,6 +297,12 @@ Owner, 2026-10-12: "when I talk of the dashboard I mean the big screen that is r
 - **B — `/hero-lab?v=6`: the current screen** (exchange ribbon + `CommandBoard`, unchanged) installed in a **coded trading hall** (`components/TradingHall.tsx`): back-wall stone seams, a ceiling light grid in perspective, two fluted pilasters with lit capitals and bases, a light cove, the screen in a wall frame on a plinth, and a polished perspective floor that **reflects the live screen** (CSS `box-reflect`; browsers without it show only the floor glow).
 - **C — `/hero-lab?v=7`: both** — the redesigned screen inside the trading hall.
 
+**Owner's choice (2026-10-12): Format B** — shared as a screenshot of `/hero-lab?v=6` with "this seems better".
+
+| # | Gap | Fix | Status |
+|---|---|---|---|
+| W1 | **Put Format B on the live homepage.** | Replace the homepage hero's staging (hall photograph, 3D `ex-bezel` mount, floor reflection) with `TradingHall`. The headline (eyebrow, `h1`, `hero.sub` **and `hero.body`**, both buttons) sits in the hall; the screen — the exchange ribbon and `CommandBoard`, **content unchanged** — is set into the wall frame; the proof figures (with their source notes 1–3) stand on the floor. Every other homepage moment, link and i18n key is unchanged. The hall photograph is no longer used on the homepage, so its `<link rel="preload">` in `index.html` goes too (the file stays in `public/`). | ☐ |
+
 The headline and proof figures sit in the hall for B and C. `ExchangeWall` and `TradingHall` are imported only by the dev-only lab, so production is unchanged. Screens: `scratchpad/heroes/hero-{5,6,7}-{1440,390}.jpg`; all render with 0 errors and no overflow.
 
 ---
