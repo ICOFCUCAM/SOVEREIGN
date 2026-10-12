@@ -255,8 +255,9 @@ const Landing: React.FC = () => {
                 </h3>
                 <div className="mt-5 font-editorial text-[clamp(2.4rem,4vw,3.4rem)] font-semibold leading-none tabular-nums text-white">{c.value}</div>
                 <div className="mt-2 text-[12px] text-[#E8E0D2]/70">Disclosed value</div>
-                <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-[11px]">
-                  <div><dt className="text-[#E8E0D2]/70">vs reference</dt><dd className="font-mono text-[14px] font-bold text-[#C9B08A]">{c.premium}</dd></div>
+                {/* the premium over reference is shown only where the record measures one (no empty dashes) */}
+                <dl className={`mt-5 grid gap-2 border-t border-white/10 pt-4 text-[11px] ${c.premium && c.premium !== "—" ? "grid-cols-3" : "grid-cols-2"}`}>
+                  {c.premium && c.premium !== "—" && <div><dt className="text-[#E8E0D2]/70">vs reference</dt><dd className="font-mono text-[14px] font-bold text-[#C9B08A]">{c.premium}</dd></div>}
                   <div><dt className="text-[#E8E0D2]/70">Status</dt><dd className={`font-mono text-[14px] font-bold ${c.status === "Closed" ? "text-ex-done" : c.status === "Terminated" ? "text-slate-300" : "text-amber-300"}`}>{c.status}</dd></div>
                   <div><dt className="text-[#E8E0D2]/70">Source</dt><dd className="font-mono text-[12px] font-semibold text-white">{c.sources[0]?.kind ?? "—"}</dd></div>
                 </dl>
