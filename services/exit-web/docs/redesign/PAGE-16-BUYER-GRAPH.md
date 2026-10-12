@@ -30,7 +30,7 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 ## Gap register — Page 16
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Composite score labelled "probability".** | "Likelihood score (composite)" with its formula; "not a probability". | ☐ |
+| G1 | **Composite score labelled "probability".** | "Likelihood score (composite)" with its formula; "not a probability". | ☑ G1-commit |
 | G2 | **Keyword-matched transactions presented as sector comparables; verification hidden.** | Title "Transactions matching the sector keywords"; per-row verification status; note that keyword matches can include unrelated deals. | ☐ |
 | G3 | Duplicate "Active acquirers — with live cadence"; recommended actions unlabelled. | Remove the duplicate; label actions "suggested (rule)". | ☐ |
 | G4 | Ranking and overlap fixed to the demo company. | Tokens from `sectorTokensFor(loadActiveCompany().sector)`; badge; transactions labelled as the demo sector when the company's sector differs. | ☐ |
@@ -44,3 +44,7 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 ### G6 — Design
 *Closed by:* `pages/BuyerGraph.tsx` rebuilt on `xo` (`PageHeader` `h1` with the sources and as-of date in the badge and the PDF report announced as a new tab; five metrics; decorative reactor hidden from assistive tech; both tables with row headers inside keyboard-reachable `ScrollRegion`s; type filters as `Chip` toggles with `aria-pressed`; labelled search; DNA cards as a list with `h3`s and definition lists; source links named per buyer). Content carried over verbatim; G1–G5 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium Preparation 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 11 contrast + 1 unfocusable scroll region), all tab stops with visible focus.
+
+### G1 — Composite score labelled "probability"
+*Closed by:* `pages/BuyerGraph.tsx` (labels; `acquisitionProbability()` unchanged). "Acquisition probability · who is most likely to buy you" → "Acquisition likelihood score · …"; column "Prob" → "Score"; values "N%" → "N/100"; tooltip "composite score (appetite + overlap + velocity + recency), not a probability"; foot gives the formula: appetite (high 50, medium 32, low 14) + sector overlap × 0.34 (max 34) + deals per year × 2.5 (max 14) + recency (10 / 5 / 2 within 18 / 36 / 60 months) — "A composite score, not a probability."
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 "Acquisition probability" / "Prob"; header "Score" · Preparation 1440/390: 0 errors, axe 0, no overflow.

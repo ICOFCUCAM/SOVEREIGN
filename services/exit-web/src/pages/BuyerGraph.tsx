@@ -126,15 +126,15 @@ const BuyerGraph: React.FC = () => {
           foot="Active acquirers, node size ∝ 12-month cadence, green = ≥2 deals.">
           <div aria-hidden><BuyerNetworkReactor height={260} /></div>
         </Section>
-        <Section title="Acquisition probability · who is most likely to buy you" className="lg:col-span-9"
+        <Section title="Acquisition likelihood score · who is most likely to buy you" className="lg:col-span-9"
           right={<span className="text-[11px] text-xo-faint">top {RANKED.length} of {withEvents} active</span>}
-          foot={`Ranked for ${SAMPLE_COMPANY.name} — appetite × sector overlap × velocity × recency. Every buyer traces to a source on record.`}>
+          foot={`Ranked for ${SAMPLE_COMPANY.name}. Score out of 100 = appetite (high 50, medium 32, low 14) + sector overlap × 0.34 (max 34) + deals per year × 2.5 (max 14) + recency (10 if within 18 months, 5 within 36, 2 within 60). A composite score, not a probability. Every buyer traces to a source on record.`}>
           <ScrollRegion label="Ranked buyers table">
             <table className="w-full min-w-[760px] text-[12px]">
               <thead className="text-left text-[11px] text-xo-faint">
                 <tr className="border-b border-xo-line">
                   <th scope="col" className="px-3 py-2 font-medium">#</th><th scope="col" className="px-3 py-2 font-medium">Buyer</th>
-                  <th scope="col" className="px-2 py-2 text-right font-medium">Prob</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Score</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Cadence</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Median deal</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Avg prem</th>
@@ -147,8 +147,8 @@ const BuyerGraph: React.FC = () => {
                     <td className="px-3 py-1.5 font-mono text-xo-faint">{i + 1}</td>
                     <th scope="row" className="px-3 py-1.5 text-left font-normal"><Link to={`/console/buyer/${r.profile.buyer_id}`} className="font-semibold hover:text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{r.profile.name}</Link></th>
                     <td className="px-2 py-1.5 text-right">
-                      <Evidence align="right" meta={{ methodology: r.probability.rationale, source: "DNA engine · acquisition registry", confidence: "appetite × sector overlap × velocity × recency", asOf: MARKET_INDEX_FMT.asOf }}>
-                        <span className="font-mono font-semibold tabular-nums text-xo-verified">{r.probability.pct}%</span>
+                      <Evidence align="right" meta={{ methodology: r.probability.rationale, source: "DNA engine · acquisition registry", confidence: "composite score (appetite + overlap + velocity + recency), not a probability", asOf: MARKET_INDEX_FMT.asOf }}>
+                        <span className="font-mono font-semibold tabular-nums text-xo-verified">{r.probability.pct}<span className="text-[11px] text-xo-faint">/100</span></span>
                       </Evidence>
                     </td>
                     <td className="px-2 py-1.5 text-right font-mono tabular-nums text-xo-muted">{r.profile.frequency_per_year != null ? `${r.profile.frequency_per_year}/yr` : "—"}</td>
