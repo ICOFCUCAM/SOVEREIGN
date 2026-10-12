@@ -392,7 +392,7 @@ const Landing: React.FC = () => {
             {/* the desk — a framed instrument */}
             <div className="border border-white/15 bg-white/[0.03] p-4 sm:p-5">
               <div className="flex items-center justify-between border-b border-white/10 pb-3 font-mono text-[9.5px] uppercase tracking-[0.14em] text-blue-100/60">
-                <span>ExitOS / Negotiation desk</span><span>Cross-bid comparison</span>
+                <span>ExitOS / Negotiation desk</span><span className="text-loi-300">Illustrative figures</span>
               </div>
               <div className="mt-4"><OfferTable /></div>
             </div>
@@ -440,7 +440,8 @@ const Landing: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="mt-12 grid border-y border-ink-900 sm:grid-cols-2 lg:grid-cols-4">
+          <p className="mt-12 font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-500">Example listings — illustrative, not companies on the market</p>
+          <div className="mt-3 grid border-y border-ink-900 sm:grid-cols-2 lg:grid-cols-4">
             {OPPORTUNITIES.map((o, i) => (
               <div key={o.name} className={`py-6 pr-5 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-5" : ""} border-b border-slate-200 last:border-b-0 lg:border-b-0`}>
                 <div className="flex items-center justify-between gap-2">
@@ -448,7 +449,7 @@ const Landing: React.FC = () => {
                   <span className="font-mono text-[9.5px] uppercase tracking-wide text-slate-500">{o.stage}</span>
                 </div>
                 <div className="mt-4 font-editorial text-[22px] font-semibold text-ink-900">{o.name}</div>
-                <div className="mt-1 text-[10.5px] text-slate-500">Anonymized listing &middot; {o.region}</div>
+                <div className="mt-1 text-[10.5px] text-slate-500">Example listing &middot; {o.region}</div>
                 <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-200 pt-3 text-[11px]">
                   <div><div className="text-slate-500">Revenue band</div><div className="font-mono font-semibold text-ink-800">{o.rev}</div></div>
                   <div className="text-right"><div className="text-slate-500">EBITDA band</div><div className="font-mono font-semibold text-ink-800">{o.ebitda}</div></div>
@@ -862,7 +863,7 @@ const COMMAND_FEATURES = [
   { icon: "chart", value: HISTORY_FMT.events, title: "Disclosed Deals Indexed", body: "EDGAR + Wikidata sourced" },
   { icon: "users", value: MARKET_FMT.buyers, title: "Buyer Mandates", body: "intent monitoring" },
   { icon: "spark", value: MARKET_FMT.activeMandates, title: "Actively Deploying", body: "appetite flagged in the registry" },
-  { icon: "fire", value: "High", title: "Market Heat", body: "liquidity scores" },
+  { icon: "fire", value: SECTOR_DEMAND[0]?.[1] ?? "—", title: "Market Heat", body: `top sector: ${SECTOR_DEMAND[0]?.[0] ?? "—"}` },
   { icon: "globe", value: MARKET_FMT.appetite, title: "Acquisition Demand", body: "check capacity indexed" },
   { icon: "doc", value: MARKET_FMT.sectors, title: "Sectors Covered", body: "across the registry" },
 ];

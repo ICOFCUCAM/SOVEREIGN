@@ -106,7 +106,7 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 | M1 | **Design: rebuild on the `index(9)` skeleton.** | Rebuild `Landing.tsx` and `MarketingChrome.tsx` on the skeleton's anatomy, using the locked ExitOS colours and materials mapped as above. All 17 blocks and the chrome are kept and repositioned into the skeleton's chapters (mapping below), with content carried over verbatim; M2–M9 then correct content. The hero concept (the command board as the hero instrument, beside the headline) is kept. The trading-hall photo stays in the hero. Routes, i18n keys, auth entry points (`/console`) and pricing links are unchanged. | ☑ `dcf7bf6d` |
 | M2 | **Fake live indicators.** | Remove the pings, pulses, rotating spotlight, session clock and the timer-driven score/heat oscillation. "Live Transactions" → "Disclosed transactions"; "Live Market"/"Live" → "Registry snapshot · as of {index date}"; `DATA_AS_OF` → the index's own date; "Live process" → "Typical timeline"; "live appetite", "24/7", "Live signals" reworded to what the data is. Figures and the drill-down stay. | ☑ `ce76fa8f` |
 | M3 | **Unverified security and compliance claims.** | Remove "SOC 2" and the audit-trail, access-log, "secured", encryption and verification claims. Each slot is kept and states what the product does (for example "Your own actions are recorded", "NDA-gated identity: listings show a codename and bands until an NDA is signed", "Founder approval at each agent step", "Record checks on each NDA, not identity or funds verification", "Data-room uploads: read who can see them before adding files"). Owner can restore any claim with evidence (open decision). | ☑ `53ade1c7` |
-| M4 | **Illustrative content shown as real.** | Visible "Illustrative" labels on the cross-bid table and the example listings; "Market Heat" shows the registry-derived heat label instead of a constant. | ☐ |
+| M4 | **Illustrative content shown as real.** | Visible "Illustrative" labels on the cross-bid table and the example listings; "Market Heat" shows the registry-derived heat label instead of a constant. | ☑ M4-commit |
 | M5 | **Overclaims in copy.** | "AI valuation" → "Deterministic valuation"; "Offer optimisation captures the premium" → "Offers compared on structure and certainty"; "verified acquirer mandates" → "curated acquirer mandates"; board "Match Score" → "Activity score". | ☐ |
 | M6 | **Broken link** `/marketplace`. | Point "How the listing protocol works" to the marketplace inside the exchange (`/console/marketplace`; signed-out users see sign-in). | ☐ |
 | M7 | **Accessibility.** | A `main` landmark in the chrome (all marketing pages); contrast ≥ 4.5:1 for text (locked colours kept, opacities/shade steps within the same palette adjusted); the empty table header labelled; the drill-down as a real dialog (focus, Escape, `aria-modal`); the scrolling matrix keyboard-focusable; decorative map and graphics `aria-hidden`. Target: axe 0 on `/` at 1440 and 390. | ☐ |
@@ -201,6 +201,15 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 
 Kept: "Founder control — Eight approval gates" (Autonomous Exit's eight agent steps each wait for approval, Page 07); provenance "Auditable" (meaning every figure traces to a source); "One confidential process" and "List confidentially" (anonymous listings until NDA). "verified acquirer mandates" is M5. The command board is not touched.
 *Verification:* `tsc -b`, eslint clean · `vitest` 218/218 (including `i18n.test.tsx`) · Chromium `/` in EN, FR and ES: 0 "SOC 2", 0 "secured / sécurisé / seguro", "audit" only in the provenance heading; "verif" only in the registry wording (M5), the confidence tier "Verified" (disclosed in a public filing) and the new "does not verify" line; 0 errors.
+
+### M4 — Illustrative content shown as real
+*Closed by:* `pages/Landing.tsx`:
+- The negotiation desk's bar reads "Illustrative figures" (in `loi-300`, the existing caution amber) in place of a repeated "Cross-bid comparison". The table itself is unchanged.
+- The marketplace grid has a mono line above it: "Example listings — illustrative, not companies on the market". Each card reads "Example listing · {region}" instead of "Anonymized listing". Codenames, bands, stages and "Request NDA" are kept.
+- The signal tile "Market Heat" shows the registry-derived heat of the top sector (`SECTOR_DEMAND[0]`, today "Extreme · top sector: Enterprise SaaS") instead of the constant "High".
+
+These strings sit beside the page's other hard-coded English data constants (the tables and cards were never in i18n), so they are English in all locales, like their neighbours. The command board is untouched.
+*Verification:* `tsc -b`, eslint clean · Chromium `/` 1440/390: the three labels present; 0 errors, `h1` 1, no overflow.
 
 ---
 
