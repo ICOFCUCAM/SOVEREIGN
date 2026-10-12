@@ -3,7 +3,7 @@ import { buyerContactRegistry } from "./buyer-contact";
 
 // ── BUYER OUTREACH PLAN — the banker's target program ───────────────
 // Not a mass mailer. The disciplined ~20-qualified-buyers process a banker
-// runs: rank the buyers most likely to acquire this company, group them into
+// runs: rank the buyers by likelihood score for this company, group them into
 // sequenced waves that build competitive tension, and attach each one's
 // contact path and expected value. Every figure is engine-derived; the plan
 // is an ordered list of WHO to approach, in WHAT order, through WHICH path.
@@ -11,7 +11,8 @@ import { buyerContactRegistry } from "./buyer-contact";
 export interface PlanBuyer {
   readonly buyerId: string;
   readonly name: string;
-  readonly probabilityPct: number;
+  readonly probabilityPct: number;      // likelihood score 0–100 (composite, not a probability)
+  readonly sectorOverlapPts: number;    // the score's sector-overlap component (0 = no overlap)
   readonly expectedValueUsd: number;
   readonly contactPath: string;
   readonly confidence: "High" | "Medium" | "Low";
@@ -40,6 +41,7 @@ export function buildOutreachPlan(baselineUsd: number, tokens: readonly string[]
       buyerId: r.profile.buyer_id,
       name: r.profile.name,
       probabilityPct: r.probability.pct,
+      sectorOverlapPts: r.probability.overlap,
       expectedValueUsd: expectedOutcomeFor(r.profile, baselineUsd).expectedClose,
       contactPath: reg.outreachPaths[0]?.channel ?? reg.bestContactRole,
       confidence: reg.confidence.tier,
@@ -47,22 +49,22 @@ export function buildOutreachPlan(baselineUsd: number, tokens: readonly string[]
     };
   });
 
-  // sequence into waves: lead with the highest-probability anchors, run the
+  // sequence into waves: lead with the highest-scoring anchors, run the
   // core set in parallel to create tension, hold expansion in reserve
   const lead = buyers.slice(0, 4);
   const core = buyers.slice(4, 12);
   const expand = buyers.slice(12, limit);
 
   const waves: OutreachWave[] = ([
-    { tier: 1, label: "Lead bidders", timing: "Week 1", rationale: "Highest-probability acquirers — approach first to anchor the process and set the valuation reference.", buyers: lead },
+    { tier: 1, label: "Lead bidders", timing: "Week 1", rationale: "Highest likelihood scores — approach first to anchor the process and set the valuation reference.", buyers: lead },
     { tier: 2, label: "Competitive set", timing: "Week 2", rationale: "Run in parallel to create competitive tension before any single party gains leverage.", buyers: core },
-    { tier: 3, label: "Expansion", timing: "Week 3 · contingent", rationale: "Adjacency and lower-probability fits — engage only if the lead waves need broadening.", buyers: expand },
+    { tier: 3, label: "Expansion", timing: "Week 3 · contingent", rationale: "Adjacency and lower-scoring fits — engage only if the lead waves need broadening.", buyers: expand },
   ] as const).filter((w) => w.buyers.length > 0).map((w) => ({ ...w }));
 
   const top = buyers[0];
   const summary = top
-    ? `${buyers.length} qualified buyers across ${waves.length} sequenced waves. Lead with ${top.name} (${top.probabilityPct}%, exp. ${fmtUsdShort(top.expectedValueUsd)}); run the competitive set in parallel to hold leverage.`
-    : "No qualified buyers for this profile yet.";
+    ? `${buyers.length} ranked buyers across ${waves.length} sequenced waves. Lead with ${top.name} (likelihood score ${top.probabilityPct}/100, exp. ${fmtUsdShort(top.expectedValueUsd)}); run the competitive set in parallel to hold leverage.`
+    : "No ranked buyers for this profile yet.";
 
   return { waves, totalBuyers: buyers.length, summary };
 }

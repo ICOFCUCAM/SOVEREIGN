@@ -29,7 +29,7 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 ## Gap register — Page 30
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Likelihood score shown as a probability; "qualified buyers".** | "Likelihood score N/100 — composite, not a probability"; "Ranked buyers"; wave text without "probability"; show each buyer's sector overlap with this company (additive field) and say how many have none. | ☐ |
+| G1 | **Likelihood score shown as a probability; "qualified buyers".** | "Likelihood score N/100 — composite, not a probability"; "Ranked buyers"; wave text without "probability"; show each buyer's sector overlap with this company (additive field) and say how many have none. | ☑ G1-commit |
 | G2 | **Value per buyer unlabelled; priors untagged.** | "Close-weighted value" with the formula and baseline in the foot; PRIOR tag where premium or close rate is the neutral assumption (additive fields); the anchor metric labelled the same. | ☐ |
 | G3 | "Contact path" is a role; "Conf" rule unstated. | "Typical contact role"; "Contact confidence" with its rule (indexed deals, mostly unverified). | ☐ |
 | G4 | "Sequenced" implies a running programme. | Say it is a suggested plan: nothing is sent or scheduled; week labels are suggested timing. | ☐ |
@@ -44,3 +44,8 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 ### G7 — Design
 *Closed by:* `pages/OutreachPlan.tsx` rebuilt on `xo` (`PageHeader` `h1` "Buyer Outreach Plan" with the summary as description; four metrics; each wave a titled `Section` with its buyer table in a keyboard-reachable `ScrollRegion`, buyer names as row headers, column headers scoped; footer link underlined). Content carried over verbatim; G1–G6 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium Preparation and Pro 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 26), all tab stops with visible focus · free: Upgrade page.
+
+### G1 — Likelihood score shown as a probability; "qualified buyers"
+*Closed by:* `pages/OutreachPlan.tsx` and `lib/outreach-plan.ts` (labels; ranking unchanged). Column "Prob 74 %" → "Likelihood score 74/100"; "Qualified buyers — targeted, not mass" → "Ranked buyers — top 20 by likelihood score"; summary "20 qualified buyers … (74%, …)" → "20 ranked buyers … (likelihood score 74/100, …)"; wave rationales "Highest-probability acquirers" → "Highest likelihood scores", "lower-probability fits" → "lower-scoring fits"; a note above the waves: "Buyers are ranked by likelihood score — a composite of acquisition appetite, sector overlap with {company}, deal cadence and recency (0–100), not a probability. N of 20 have no sector overlap with this company and rank on appetite, cadence and recency alone."; each such row reads "· no sector overlap". `PlanBuyer` gains `sectorOverlapPts` (additive — the score's existing overlap component).
+*Finding:* for the demo company (Helios Freight, Logistics) **all 20** ranked buyers have no sector overlap — the plan is led by Microsoft, Alphabet, Cisco and IBM purely on appetite, cadence and recency. With the Northwind (enterprise SaaS) intake, 10 of 20 have none. The page now says so; the ranking rule is unchanged (owner decision whether overlap should gate the list).
+*Verification:* `tsc -b`, eslint clean, `outreach-plan.test.ts` 4/4 · Chromium: 0 "Prob" / "qualified buyers" / "probability" outside "not a probability"; demo "20 of 20 have no sector overlap", intake "10 of 20" · Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
