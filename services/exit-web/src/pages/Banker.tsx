@@ -12,13 +12,11 @@ import {
   type AdjustedBuyer,
 } from "../lib/banker-directives";
 
-// The Banker — a permanent, always-on investment banker working the deal for
-// the founder. It doesn't just list buyers; it runs the process: finds and
-// scores buyers, drafts outreach, writes the teaser and CIM, fields buyer
-// questions, sets valuation strategy and coordinates diligence — then reports
-// progress in the first person, like a service. Every number is engine-derived
-// (buyer discovery, diligence, valuation, memorandum); every button produces a
-// real, downloadable deliverable.
+// The Banker — ranks and shortlists buyers, drafts the outreach, the
+// introductions, the teaser and the executive summary, and applies the
+// founder's directives. It does not contact buyers or run a process: every
+// deliverable is a draft to download and send. Numbers are engine-derived
+// (buyer discovery, diligence, valuation, memorandum).
 
 type Tab = "outreach" | "intros" | "teaser" | "summary";
 type WorkStatus = "done" | "active" | "queued";
@@ -39,13 +37,6 @@ const SEQUENCE = [
   { step: "Management presentations", timing: "Week 2–3", body: "Schedule calls with engaged buyers; distribute the CIM." },
   { step: "Solicit indications", timing: "Week 4", body: "Request non-binding indications of interest; build the offer comparison." },
   { step: "Drive to LOI", timing: "Week 5–6", body: "Run a competitive process to a signed letter of intent." },
-];
-
-const NEXT_STEPS = [
-  "send the CIM to the engaged buyers and drive competing indications of interest",
-  "collect the indications of interest and build the offer comparison",
-  "open NDA-gated data rooms for the interested buyers",
-  "drive the leading buyer to a signed letter of intent",
 ];
 
 const Banker: React.FC = () => {
@@ -75,21 +66,19 @@ const Banker: React.FC = () => {
   const [briefText, setBriefText] = useState("");
   const [strategyOpen, setStrategyOpen] = useState(false);
   const [strategy, setStrategy] = useState<{ anchor: "mid" | "high"; cashFloor: number; shortlist: number }>({ anchor: "high", cashFloor: 75, shortlist: 7 });
-  const [stepIdx, setStepIdx] = useState(0);
   const [extraActivity, setExtraActivity] = useState<{ when: string; text: string; tone: "good" | "info" | "warn" }[]>([]);
   const [introBuyer, setIntroBuyer] = useState<BuyerCandidate | null>(null);
   const [sent, setSent] = useState<Set<string>>(new Set());
   const isSent = (k: string): boolean => sent.has(k);
   const flagSent = (k: string): void => setSent((prev) => new Set(prev).add(k));
 
-  // The agent's deal funnel — nested slices of the ranked buyer pool.
+  // The funnel: only ranking and the shortlist are real. ExitOS sends no
+  // outreach, so nothing past the shortlist has happened.
   const nId        = ranked.length;
   const nShort     = Math.min(strategy.shortlist, nId);
-  const nContact   = Math.min(4, nShort);
-  const nInterest  = Math.min(2, nContact);
-  const nDiligence = Math.min(1, nInterest);
-  const interested = ranked.slice(0, nInterest);
-  const interestedNames = interested.map((b) => b.buyer.name).join(" and ");
+  const nContact   = 0;
+  const nInterest  = 0;
+  const nDiligence = 0;
 
   const funnel: { label: string; n: number; accent: string }[] = [
     { label: "Identified",   n: nId,        accent: "#64748b" },
@@ -102,24 +91,17 @@ const Banker: React.FC = () => {
   const workstreams: { key: string; title: string; status: WorkStatus; result: string }[] = [
     { key: "find",     title: "Find buyers",              status: "done",   result: `${nId} acquirers identified across strategic & financial` },
     { key: "score",    title: "Score buyers",             status: "done",   result: "Ranked by sector × check size × geography × activity" },
-    { key: "outreach", title: "Draft outreach",           status: "done",   result: `${SEQUENCE.length}-step campaign drafted; teaser sent to ${nContact}` },
+    { key: "outreach", title: "Draft outreach",           status: "queued", result: `${SEQUENCE.length}-step campaign drafted — not sent; no buyer contacted` },
     { key: "teaser",   title: "Create teaser",            status: teaser ? "done" : "active", result: teaser ? `${teaser.wordCount}-word anonymized teaser ready` : "Writing anonymized teaser…" },
-    { key: "cim",      title: "Create CIM",               status: "active", result: cim ? `${cim.sections.length}-section CIM drafted — final review` : "Drafting confidential memorandum…" },
-    { key: "qa",       title: "Answer buyer questions",   status: "active", result: `${DILIGENCE.criticalQuestions.length} live buyer question${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} being handled` },
+    { key: "cim",      title: "Create CIM",               status: cim ? "done" : "active", result: cim ? `${cim.sections.length}-section CIM drafted — for your review` : "Drafting confidential memorandum…" },
+    { key: "qa",       title: "Prepare for buyer questions", status: "queued", result: `${DILIGENCE.criticalQuestions.length} critical question${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} from diligence to prepare answers for — no buyer questions received` },
     { key: "valuation", title: "Set valuation strategy",  status: "done",   result: `Anchoring the process at the strategic ${strategy.anchor} — ${fmtMoney(strategy.anchor === "high" ? VALUATION_CANONICAL.headline.high : mid)}` },
-    { key: "diligence", title: "Coordinate diligence",    status: "active", result: `${DILIGENCE.redFlags.length} red flag${DILIGENCE.redFlags.length === 1 ? "" : "s"} + ${DILIGENCE.criticalQuestions.length} critical Q${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} tracked to resolution` },
+    { key: "diligence", title: "Coordinate diligence",    status: "queued", result: `${DILIGENCE.redFlags.length} red flag${DILIGENCE.redFlags.length === 1 ? "" : "s"} + ${DILIGENCE.criticalQuestions.length} critical Q${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} to resolve before buyers ask — not tracked automatically` },
   ];
 
-  const baseActivity: { when: string; text: string; tone: "good" | "info" | "warn" }[] = [
-    { when: "2h ago",  tone: "good", text: `${interestedNames} are showing active interest — pushing both toward an indication of interest.` },
-    { when: "5h ago",  tone: "info", text: `Answered a buyer's diligence question on customer concentration with the cohort data.` },
-    { when: "1d ago",  tone: "info", text: `Sent the ${PROJECT} teaser to ${nContact} tier-1 targets; ${nInterest} replied.` },
-    { when: "2d ago",  tone: "info", text: `Shortlisted ${nShort} buyers from the ${nId} identified and drafted personalized intros.` },
-    { when: "3d ago",  tone: "good", text: `Recommended anchoring the ask at the strategic band, ${fmtMoney(mid)}.` },
-  ];
-  const activity = [...extraActivity, ...baseActivity];
+  // only what the user did on this page, this visit
+  const activity = extraActivity;
 
-  const allApproved = stepIdx >= NEXT_STEPS.length;
   const target = strategy.anchor === "high" ? VALUATION_CANONICAL.headline.high : mid;
 
   // ── Handlers ─────────────────────────────────────────────────────
@@ -141,14 +123,6 @@ const Banker: React.FC = () => {
     }
   };
 
-  const approveNext = (): void => {
-    if (allApproved) { notify("All steps approved — the process is running"); return; }
-    const stepText = NEXT_STEPS[stepIdx];
-    setExtraActivity((p) => [{ when: "just now", tone: "good", text: `Approved: I'll ${stepText}.` }, ...p]);
-    setStepIdx((i) => i + 1);
-    notify("Approved — next step underway");
-  };
-
   const applyStrategy = (): void => {
     setExtraActivity((p) => [{ when: "just now", tone: "info", text: `Strategy updated — anchor at the ${strategy.anchor} (${fmtMoney(target)}), cash floor ${strategy.cashFloor}%, ${strategy.shortlist}-buyer shortlist.` }, ...p]);
     setStrategyOpen(false);
@@ -160,7 +134,7 @@ const Banker: React.FC = () => {
     { heading: "Approach", body: `A ${SEQUENCE.length}-step competitive process anchored at ${fmtMoney(target)}, run against a ${nShort}-buyer shortlist to build leverage. Anonymized pre-NDA; identity and the data room unlock only on a signed NDA.` },
     { heading: "Sequence", table: { headers: ["Step", "Timing", "Action"], rows: SEQUENCE.map((s) => [s.step, s.timing, s.body]) } },
     { heading: "Status", bullets: [
-      `${nId} acquirers identified, ${nShort} shortlisted, ${nContact} contacted, ${nInterest} in active conversations`,
+      `${nId} acquirers identified and ${nShort} shortlisted; none contacted yet`,
       `Anchoring the process at ${fmtMoney(target)}`,
     ] },
   ]);
@@ -173,7 +147,7 @@ const Banker: React.FC = () => {
   return (
     <div data-page="banker" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="Always-on · Operator" title="The Banker"
-        description="Your permanent investment banker. It finds and scores buyers, drafts the outreach, writes the teaser and CIM, fields buyer questions, sets valuation strategy and coordinates diligence — then reports back, in the first person, like a service."
+        description="Ranks and shortlists buyers, drafts the outreach, introductions, teaser and executive summary, and applies your directives. It does not contact buyers or run a process — every deliverable is a draft for you to send."
         actions={<button type="button" onClick={() => setBriefOpen(true)} className={BTN}>Brief the banker</button>} />
 
       {/* ── Brief the banker ──────────────────────────────────────── */}
@@ -219,28 +193,22 @@ const Banker: React.FC = () => {
       {/* ── Agent status — first-person briefing ─────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="The Banker" eyebrow="Status" className="lg:col-span-7"
-          right={<span className="text-[12px] text-xo-verified">● Working the deal · live</span>}>
+          right={<span className="text-[12px] text-xo-muted">Not started · nothing sent</span>}>
           <div className="px-4 py-4">
             <p className="text-[15px] leading-relaxed">
-              I've identified <span className="font-semibold">{nId} qualified buyers</span>, shortlisted{" "}
-              <span className="font-semibold">{nShort}</span>, opened conversations with{" "}
-              <span className="font-semibold">{nContact}</span>, and{" "}
-              <span className="font-semibold text-xo-verified">{nInterest} are showing active interest</span>
-              {interestedNames ? <> — {interestedNames}</> : null}. One is in diligence.
+              I've ranked <span className="font-semibold">{nId} buyers</span> and shortlisted{" "}
+              <span className="font-semibold">{nShort}</span>. <span className="font-semibold">No buyer has been contacted</span> — ExitOS does not send outreach. The campaign, introductions, teaser and summary below are drafts for you to send.
             </p>
-            <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">
-              {allApproved
-                ? "Every step is approved — I'm running the process end to end and will report back as buyers move."
-                : <>Next, I'll <span className="text-xo-text">{NEXT_STEPS[stepIdx]}</span>.</>}
-            </p>
+            <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">Next: review the shortlist and the drafts, then send them yourself or through your adviser.</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <button type="button" onClick={approveNext} disabled={allApproved} className={BTN}>{allApproved ? "All steps approved ✓" : "Approve next step"}</button>
               <button type="button" onClick={() => setStrategyOpen(true)} className={BTN_GHOST}>Adjust strategy</button>
             </div>
           </div>
         </Section>
 
-        <Section title="Recent activity" className="lg:col-span-5">
+        <Section title="Your activity on this page" className="lg:col-span-5"
+          foot="Directives and strategy changes you make on this visit. Nothing here comes from buyers.">
+          {activity.length === 0 && <p className="px-4 py-3 text-[13px] text-xo-muted">Nothing yet — brief the banker or adjust the strategy and it is listed here.</p>}
           <ul className="space-y-3 px-4 py-3">
             {activity.map((a, i) => (
               <li key={i} className="flex items-start gap-2.5">
@@ -314,6 +282,7 @@ const Banker: React.FC = () => {
               <div className="flex items-baseline gap-2">
                 <span className="font-mono text-3xl font-semibold tabular-nums">{f.n}</span>
                 {i > 0 && <span className="text-[11px] text-xo-muted">of {funnel[i - 1].n}</span>}
+                {i >= 2 && <span className="text-[11px] text-xo-muted">none recorded</span>}
               </div>
               <div className="mt-1 text-[12px] font-semibold text-xo-muted">{f.label}</div>
               <div aria-hidden className="mt-2 h-1 overflow-hidden rounded-full bg-xo-line">
