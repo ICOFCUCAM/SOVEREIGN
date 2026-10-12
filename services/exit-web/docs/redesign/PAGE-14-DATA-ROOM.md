@@ -38,7 +38,7 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 | G2 | **Invented "value at risk" weights.** | Label as a rule with the weights shown; "illustrative" not "at risk". | ☑ `2a1b6bd` |
 | G3 | Mislabels: "Due Diligence AI" (rule-based), "ring-1 access", completeness rule unstated, raw list error. | "Diligence risk scan (rule-based)"; drop "ring-1 access"; state the completeness rule; plain error text. | ☑ `5b74542` |
 | G4 | Demo company unlabelled. | Engine specs, red flags and value on `loadActiveCompany()`; badge. | ☑ `1ab2210` |
-| G5 | Fake live tape. | `RegistryTape`. | ☑ G5-commit |
+| G5 | Fake live tape. | `RegistryTape`. | ☑ `4c98b2d` |
 | G6 | Design: no `h1`, overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `27888d1` |
 
 ---
