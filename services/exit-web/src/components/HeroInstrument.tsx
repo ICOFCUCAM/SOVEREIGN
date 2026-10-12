@@ -23,12 +23,12 @@ import { LAND_COAST, LAND_FILL, POLAR } from "../lib/polar-map";
 //                    per turn), clockwise; they hold while one is named
 //   polar map        beneath the instrument, centred on the core (the North
 //                    Pole), one turn per 360 s under a fixed light
-//   light sweep      one turn per 48 s, very faint (hidden on phones)
+//   aperture wedge   one full turn per 720 s, clockwise, from the benchmark's
+//                    bearing — slower than every orbiting point
 //   signal sequence  every 16 s: a light runs from the core to each
 //                    capability point in turn (01 → 05, 3.2 s apart); the
 //                    point answers with one soft pulse, and the outcome
 //                    indicator steps up one stage
-//   aperture wedge   fixed; its light breathes over 10 s (edge 0.8 s behind)
 //   core             breathes over 7 s
 
 const C = 250; // the dial's centre in its 500-unit view box; bezel radius 245
@@ -142,24 +142,11 @@ export const Dial: React.FC<{ active: number | null; onPoint: (i: number | null)
         <PolarMap className="inset-[7.3%]" />
       </div>
 
-      {/* the light sweep: a faint trailing sector behind a hairline edge, one turn in 48 s */}
-      <Layer z={3} spin={48} className="hx-sweep">
-        {Array.from({ length: 14 }, (_, i) => {
-          const a = -28 + i * 2, [x1, y1] = P(a, 204), [x2, y2] = P(a + 2.2, 204);
-          return <path key={i} d={`M${C} ${C} L${x1} ${y1} A204 204 0 0 1 ${x2} ${y2} Z`} fill="#E2CDA6" fillOpacity={(0.028 * (i + 1)) / 14} />;
-        })}
-        {(() => { const [a, b] = P(0, 62), [c, d] = P(0, 204); return <line x1={a} y1={b} x2={c} y2={d} stroke="#F1E3C8" strokeOpacity=".14" strokeWidth="1" />; })()}
-      </Layer>
-
-      {/* the aperture: the lit wedge of the benchmark, fixed in place; its light breathes (10 s), and its bright
-          leading edge answers a little behind */}
-      <Layer z={3} className="hx-wedge">
+      {/* the aperture: the lit wedge of the benchmark, its leading edge bright; it makes one slow full turn in
+          12 minutes, clockwise, from the benchmark's bearing (28°–64°): slower than any of the orbiting points */}
+      <Layer z={3} spin={720}>
         <path d={`M${C} ${C} L${w1x} ${w1y} A212 212 0 0 1 ${w2x} ${w2y} Z`} fill="url(#hx-wedge)" />
-      </Layer>
-      <Layer z={3}>
         <line x1={C} y1={C} x2={w1x} y2={w1y} stroke="#EFE2C9" strokeOpacity=".18" strokeWidth="1" />
-      </Layer>
-      <Layer z={3} className="hx-wedge-edge">
         <line x1={C} y1={C} x2={w2x} y2={w2y} stroke="#F4E8D2" strokeOpacity=".9" strokeWidth="1.5" />
       </Layer>
 
@@ -311,14 +298,12 @@ export const INSTRUMENT_CSS = `
     .hx-bead{animation:hxBead ${SIGNAL.cycle}s cubic-bezier(.5,0,.3,1) 1.2s infinite both}
     .hx-progress{animation:hxProgress ${SIGNAL.cycle}s cubic-bezier(.5,0,.3,1) 1.2s infinite both}
     .hx-breath{animation:hxBreath 7s ease-in-out infinite}
-    .hx-wedge{animation:hxWedge 10s ease-in-out infinite}
-    .hx-wedge-edge{animation:hxWedgeEdge 10s ease-in-out .8s infinite}
   }
   /* paused while the page is hidden or the hero is off screen */
   .hx-dial[data-hold] .hx-orbit .hx-spin{animation-play-state:paused}
-  [data-hx-paused] :is(.hx-wedge,.hx-wedge-edge,.hx-spin,.hx-glint,.hx-light,.hx-pulse,.hx-flare,.hx-bead,.hx-progress,.hx-breath){animation-play-state:paused}
+  [data-hx-paused] :is(.hx-spin,.hx-glint,.hx-light,.hx-pulse,.hx-flare,.hx-bead,.hx-progress,.hx-breath){animation-play-state:paused}
   /* phones: the essential instrument only */
-  @media (max-width: 639px){ .hx-sweep,.hx-light{display:none} }
+  @media (max-width: 639px){ .hx-light{display:none} }
   @keyframes hxSpin{to{transform:rotate(360deg)}}
   @keyframes hxGlint{0%{stroke-dashoffset:1;opacity:0}8%{opacity:.85}48%{opacity:.85}58%{stroke-dashoffset:.34;opacity:0}100%{stroke-dashoffset:.34;opacity:0}}
   /* the light leaves the core, reaches its point at ~11% of the cycle (1.8 s), and is gone */
@@ -332,8 +317,5 @@ export const INSTRUMENT_CSS = `
     67%{transform:translateY(-50%)}71%{transform:translateY(-75%)}87%{transform:translateY(-75%)}91%{transform:translateY(-100%);opacity:1}99%{transform:translateY(-100%);opacity:0}100%{transform:translateY(0);opacity:0}}
   @keyframes hxProgress{0%{transform:scaleY(0);opacity:0}6%{opacity:1}11%,27%{transform:scaleY(0)}31%,47%{transform:scaleY(.25)}51%,67%{transform:scaleY(.5)}
     71%,87%{transform:scaleY(.75)}91%{transform:scaleY(1);opacity:1}99%{transform:scaleY(1);opacity:0}100%{transform:scaleY(0);opacity:0}}
-  /* the wedge's light: from a dimmer rest to its full benchmark brightness and back (opacity of its own layer) */
-  @keyframes hxWedge{0%,100%{opacity:.55}50%{opacity:1}}
-  @keyframes hxWedgeEdge{0%,100%{opacity:.7}50%{opacity:1}}
   @keyframes hxBreath{0%,100%{opacity:.78}50%{opacity:1}}
 `;
