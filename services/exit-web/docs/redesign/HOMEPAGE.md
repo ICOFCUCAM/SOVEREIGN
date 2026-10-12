@@ -451,7 +451,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE27 | Pricing and other marketing pages do not use the new tokens. | Tokens carried to the marketing pages' darks. | closed `d41ad6dd` |
 | EE28 | New colour pairs are unchecked. | A contrast audit of the new pairs (≥ 4.5:1 for text) with fixes. | closed `d31d4ad4` |
 | EE29 | The whole set needs one final verification. | Full checks: vitest, build, axe on marketing routes at 1440/390, keyboard, reduced motion, board identity. | closed `b4b2af22` |
-| EE30 | The owner needs to see the result. | Design 20 preview with before/after, and this log. | open |
+| EE30 | The owner needs to see the result. | Design 20 preview with before/after, and this log. | closed `45d4a9b1` |
 
 ### The paper rule (EE6)
 
@@ -1072,6 +1072,9 @@ Contrast audit (axe color-contrast, every element on the page, after a full scro
 
 ### EE29 — closed b4b2af22
 Full verification recorded in 'Phase 13 verification' above: tsc, eslint, vitest 246/246, build, axe 0 on four routes at two widths and in the ink-header state, a full keyboard pass, reduced motion, board identity, phone overflow.
+
+### EE30 — closed 45d4a9b1
+Design 20 preview published (https://claude.ai/artifact/1bm87SCm3aQyuvXWY3NJZC); the before/after of designs 19 and 20 at full page saved beside this file as phase13-before-after.jpg.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
