@@ -111,7 +111,7 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 | M6 | **Broken link** `/marketplace`. | Point "How the listing protocol works" to the marketplace inside the exchange (`/console/marketplace`; signed-out users see sign-in). | ☑ `c53e38f1` |
 | M7 | **Accessibility.** | A `main` landmark in the chrome (all marketing pages); contrast ≥ 4.5:1 for text (locked colours kept, opacities/shade steps within the same palette adjusted); the empty table header labelled; the drill-down as a real dialog (focus, Escape, `aria-modal`); the scrolling matrix keyboard-focusable; decorative map and graphics `aria-hidden`. Target: axe 0 on `/` at 1440 and 390. | ☑ `1fbe0c4f` |
 | M8 | **Motion ignores reduced-motion.** | All homepage animations (ticker, scan, travelling dots, SVG `animateMotion`) honour `prefers-reduced-motion: reduce` — no animation when set. | ☑ `1797ccb2` |
-| M9 | **i18n.** | Every copy change above is made in EN, FR and ES together; new strings get keys in all three. | ☐ (closed with each gap) |
+| M9 | **i18n.** | Every copy change above is made in EN, FR and ES together; new strings get keys in all three. | ☑ with M2 `ce76fa8f`, M3 `53ade1c7`, M5 `868699d9` (EN/FR/ES changed together; M1, M4, M6–M8 changed no i18n text) |
 
 ### M1 mapping — current blocks into the skeleton's chapters
 | Skeleton slot | ExitOS content placed there |
