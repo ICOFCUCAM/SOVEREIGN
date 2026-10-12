@@ -42,28 +42,28 @@ const Landing: React.FC = () => {
   return (
     <MarketingChrome active="home">
       {/* ===== 01 · HERO — the deal atlas (Z1/Z2, after the owner's index(8).html, on the homepage spec) ===== */}
-      <section className="border-b border-ink-900 bg-[#f6f8fb] text-ink-900">
+      <section className="text-white" style={{ background: "linear-gradient(180deg,#030a15 0%,#06182E 70%,#05101f 100%)" }}>
         <div className={`${WRAP} pt-8`}>
-          <div className="flex justify-between gap-6 border-b border-ink-900 pb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
+          <div className="flex justify-between gap-6 border-b border-white/20 pb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-blue-100/75">
             <span>{t("hero.eyebrow")}</span><span className="text-right">{t("hero.asof")} {MARKET_INDEX_FMT.asOf}</span>
           </div>
           <div className="grid items-end gap-10 py-12 sm:py-14 lg:grid-cols-[minmax(0,1.4fr)_minmax(270px,0.6fr)] lg:gap-[6%] lg:py-16">
             <h1 className="max-w-[12ch] font-editorial text-[clamp(3.4rem,8.4vw,8.8rem)] font-semibold leading-[0.9] tracking-[-0.05em]">
               {h1.map((l, i) => i === h1.length - 1
-                ? <em key={i} className="block italic text-blue-600">{l}</em>
+                ? <em key={i} className="block italic text-blue-300">{l}</em>
                 : <span key={i}>{l} </span>)}
             </h1>
-            <div className="max-w-[420px] border-l border-blue-600 pl-6">
-              <p className="font-editorial text-[20px] leading-snug">{t("hero.sub")}</p>
-              <p className="mt-3 text-[14.5px] leading-relaxed text-slate-600">{t("hero.body")}</p>
+            <div className="max-w-[420px] border-l border-blue-300/60 pl-6">
+              <p className="font-editorial text-[20px] leading-snug text-blue-50/90">{t("hero.sub")}</p>
+              <p className="mt-3 text-[14.5px] leading-relaxed text-blue-100/75">{t("hero.body")}</p>
               <div className="mt-7 flex flex-wrap gap-2.5">
-                <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("nav.access")} <Arrow /></button>
-                <button onClick={() => nav("/pricing")} className={`${BTN} border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
+                <button onClick={() => nav("/console")} className={`${BTN} bg-white text-ink-900 hover:bg-blue-50`}>{t("nav.access")} <Arrow /></button>
+                <button onClick={() => nav("/pricing")} className={`${BTN} border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
               </div>
             </div>
           </div>
           {/* 01 / discover the field — the sale process as a route across the market */}
-          <ExchangeMap />
+          <ExchangeMap dark />
           {/* the proof figures, as the homepage has always set them: serif numerals, a label, the source note */}
           <div className="grid grid-cols-3">
             {[
@@ -71,9 +71,9 @@ const Landing: React.FC = () => {
               [MARKET_FMT.buyers, t("ribbon.mandates")],
               [HISTORY_FMT.disclosedValue, t("ribbon.value")],
             ].map(([v, l], i) => (
-              <div key={l} className={`py-6 pr-3 ${i ? "border-l border-slate-300 pl-3 sm:pl-5" : ""}`}>
+              <div key={l} className={`py-6 pr-3 ${i ? "border-l border-white/15 pl-3 sm:pl-5" : ""}`}>
                 <div className="font-editorial text-[clamp(1.6rem,2.8vw,2.6rem)] font-semibold leading-none tracking-[-0.02em]">{v}</div>
-                <div className="mt-2 text-[12.5px] text-slate-600">{l}<Note n={([1, 2, 3] as SourceId[])[i]} first /></div>
+                <div className="mt-2 text-[12.5px] text-blue-100/75">{l}<Note n={([1, 2, 3] as SourceId[])[i]} first dark /></div>
               </div>
             ))}
           </div>

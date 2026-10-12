@@ -16,14 +16,26 @@ const wx = (wk: number): number => X0 + (Math.sqrt(wk) / Math.sqrt(WK_MAX)) * (X
 const AXIS_Y = 478;
 const TICKS = [0, 1, 2, 4, 6, 8, 10];
 
-// colours: set on paper, like a printed chart, so the trading hall stays the
-// page's one dark moment (AA8). The palette is the locked one, interchanged.
-const C = {
+// colours: on paper (AA8, a printed chart) or on navy (the dark hero). The
+// palette is the locked one, interchanged.
+const PAPER = {
   ground: "#ffffff",
   grid: "rgba(10,16,24,0.06)", axis: "rgba(10,16,24,0.28)",
   link: "#2563eb", node: "#2563eb", end: "#059669", nodeEdge: "#ffffff",
   ring: "#2563eb", text: "#0a1018", sub: "#1d4ed8", halo: "#ffffff",
   routeA: "#1d4ed8", routeB: "#2563eb",
+};
+const NAVY = {
+  ground: "linear-gradient(180deg,#05101f,#071a31 60%,#05101f)",
+  grid: "rgba(160,190,230,0.08)", axis: "rgba(160,190,230,0.26)",
+  link: "#93c5fd", node: "#60a5fa", end: "#45E38A", nodeEdge: "#e8f1ff",
+  ring: "#93c5fd", text: "#e8edf5", sub: "#93c5fd", halo: "#05101f",
+  routeA: "#93c5fd", routeB: "#60a5fa",
+};
+// class sets for the HTML parts of the figure
+const K = {
+  paper: { fig: "border border-ink-900", rule: "border-slate-300", li: "text-ink-900", n: "text-blue-700", end: "text-emerald-700", wk: "text-slate-600", tag: "border-ink-900 bg-white text-ink-900", cap: "text-slate-600" },
+  navy: { fig: "border border-white/15", rule: "border-white/10", li: "text-white/85", n: "text-blue-300", end: "text-emerald-300", wk: "text-blue-200/80", tag: "border-white/30 text-white/80", cap: "text-blue-100/75" },
 };
 
 // stage, typical window (as shown), the week it is placed at, lane (y), label side
@@ -63,12 +75,13 @@ const STYLE = `
 `;
 const MONO = { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" };
 
-const ExchangeMap: React.FC = () => {
+const ExchangeMap: React.FC<{ dark?: boolean }> = ({ dark }) => {
   const { t } = useI18n();
+  const C = dark ? NAVY : PAPER, k = dark ? K.navy : K.paper;
   // "d 0" → "day 0", "wk 1–2" → "wk 1–2" in the reader's language
   const fmtWk = (w: string): string => w.startsWith("d ") ? `${t("xm.day")} ${w.slice(2)}` : `${t("xm.wk")} ${w.slice(3)}`;
   return (
-    <figure className="relative m-0 overflow-hidden border border-ink-900" style={{ background: C.ground }}>
+    <figure className={`relative m-0 overflow-hidden ${k.fig}`} style={{ background: C.ground }}>
       <style>{STYLE}</style>
       <svg viewBox={`0 ${TOP} ${W} ${H + 30}`} className="block w-full" role="img" aria-label={t("lifecycle.title")}>
         <defs>
@@ -112,20 +125,20 @@ const ExchangeMap: React.FC = () => {
         })}
       </svg>
       {/* on a phone the map labels are too small to read: the stages as a list */}
-      <ol className="grid grid-cols-2 gap-x-4 gap-y-2 border-t border-slate-300 px-4 py-4 font-mono text-[10px] uppercase tracking-[0.14em] sm:hidden">
+      <ol className={`grid grid-cols-2 gap-x-4 gap-y-2 border-t ${k.rule} px-4 py-4 font-mono text-[10px] uppercase tracking-[0.14em] sm:hidden`}>
         {STAGES.map(([key, wk], i) => (
-          <li key={key} className="text-ink-900"><span className={i === STAGES.length - 1 ? "text-emerald-700" : "text-blue-700"}>{String(i + 1).padStart(2, "0")}</span> {t(key)} <span className="block normal-case tracking-normal text-slate-600">{fmtWk(wk)}</span></li>
+          <li key={key} className={k.li}><span className={i === STAGES.length - 1 ? k.end : k.n}>{String(i + 1).padStart(2, "0")}</span> {t(key)} <span className={`block normal-case tracking-normal ${k.wk}`}>{fmtWk(wk)}</span></li>
         ))}
       </ol>
 
       {/* corner tag */}
       <div aria-hidden className="absolute right-6 top-6 hidden items-center sm:flex">
-        <span className="border border-ink-900 bg-white px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-900">{t("xm.tag")}</span>
+        <span className={`border ${k.tag} px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em]`}>{t("xm.tag")}</span>
         <span className="h-[34px] w-[10px] bg-blue-600" />
       </div>
       {/* footer row */}
-      <figcaption className="relative flex items-center gap-3 border-t border-slate-300 px-4 py-4 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600 sm:px-6">
-        <span aria-hidden className="h-4 w-4 shrink-0 bg-blue-600" /><span>{t("lifecycle.title")} · {t("lifecycle.live")}<Note n={6} first /></span>
+      <figcaption className={`relative flex items-center gap-3 border-t ${k.rule} ${k.cap} px-4 py-4 font-mono text-[10px] uppercase tracking-[0.2em] sm:px-6`}>
+        <span aria-hidden className="h-4 w-4 shrink-0 bg-blue-600" /><span>{t("lifecycle.title")} · {t("lifecycle.live")}<Note n={6} first dark={dark} /></span>
       </figcaption>
       <div aria-hidden className="h-1 bg-blue-600" />
     </figure>

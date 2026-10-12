@@ -3,7 +3,8 @@ import React from "react";
 // THE TRADING HALL — the architectural installation for the exchange screen
 // (HOMEPAGE.md Phase 6, W1/W2). A coffered ceiling with downlights runs back in
 // perspective; two fluted, full-height pilasters carry a lit architrave; the
-// screen sits in a recessed, stepped portal under volumetric light, on a
+// screen sits in a recessed, stepped portal (pilasters slimmed and set close
+// to the portal in matte stone, owner review) under volumetric light, on a
 // plinth, above a polished stone floor that reflects the live screen (CSS
 // box-reflect; browsers without it show the floor glow only). The screen's
 // own content is passed in unchanged. Locked palette: the navy gradients,
@@ -18,14 +19,18 @@ const STYLE = `
   }
 `;
 
-/** A fluted stone pilaster with a lit capital and a stepped base. */
-const Pilaster: React.FC = () => (
+/** A slim pilaster in dark matte stone: faint fluting, lit only along the
+ *  edge that faces the screen, a thin capital and a stepped base. */
+const Pilaster: React.FC<{ side: "l" | "r" }> = ({ side }) => (
   <div aria-hidden className="relative -mt-14 hidden flex-col lg:flex">
-    <div className="-mx-3 h-3 rounded-t-sm" style={{ background: "linear-gradient(180deg,#35598c,#1a3358)" }} />
-    <div className="-mx-2 h-4" style={{ background: "linear-gradient(180deg,#22416c,#12294a)", boxShadow: "0 0 22px 3px rgba(120,170,255,0.35)" }} />
-    <div className="flex-1" style={{ background: "repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 6px, rgba(160,195,240,0.10) 6px 7px, rgba(0,0,0,0.25) 7px 9px, rgba(255,255,255,0) 9px 16px), linear-gradient(90deg,#0a1b33 0%,#1c3860 46%,#22406b 52%,#0c1f3a 100%)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05), inset 0 -80px 70px -30px rgba(56,130,246,0.28)" }} />
-    <div className="-mx-2 h-3" style={{ background: "linear-gradient(180deg,#1a3358,#0f2341)" }} />
-    <div className="-mx-4 h-5 rounded-b-sm" style={{ background: "linear-gradient(180deg,#14294a,#091629)", boxShadow: "0 14px 24px -10px rgba(0,0,0,0.8)" }} />
+    <div className="-mx-2 h-2" style={{ background: "linear-gradient(180deg,#1d3557,#10223d)", boxShadow: "inset 0 1px 0 rgba(200,225,255,0.22)" }} />
+    <div className="-mx-1 h-2.5" style={{ background: "#0d1f38" }} />
+    <div className="flex-1" style={{
+      background: `repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 7px, rgba(160,195,240,0.05) 7px 8px, rgba(0,0,0,0.22) 8px 9px, rgba(255,255,255,0) 9px 15px), linear-gradient(${side === "l" ? "90deg" : "270deg"},#07111f 0%,#0c1c33 70%,#16304f 100%)`,
+      boxShadow: `inset ${side === "l" ? "-1px" : "1px"} 0 0 rgba(170,205,250,0.28), inset 0 -60px 50px -30px rgba(0,0,0,0.5)`,
+    }} />
+    <div className="-mx-1 h-2" style={{ background: "#0d1f38" }} />
+    <div className="-mx-2.5 h-4" style={{ background: "linear-gradient(180deg,#12253f,#081322)", boxShadow: "0 12px 20px -10px rgba(0,0,0,0.8)" }} />
   </div>
 );
 
@@ -42,10 +47,10 @@ const TradingHall: React.FC<{ children: React.ReactNode; head?: React.ReactNode;
       <div className="absolute inset-x-[-25%] bottom-0 h-[300%] origin-bottom"
         style={{
           transform: "rotateX(-74deg)",
-          backgroundImage: "radial-gradient(circle at 70px 70px, rgba(225,238,255,0.55) 0 3px, rgba(120,170,255,0.18) 4px 14px, transparent 22px), linear-gradient(90deg, rgba(150,190,255,0.20) 0 3px, transparent 3px), linear-gradient(0deg, rgba(150,190,255,0.14) 0 3px, transparent 3px)",
+          backgroundImage: "radial-gradient(circle at 70px 70px, rgba(225,238,255,0.35) 0 2px, rgba(120,170,255,0.10) 3px 12px, transparent 20px), linear-gradient(90deg, rgba(150,190,255,0.08) 0 2px, transparent 2px), linear-gradient(0deg, rgba(150,190,255,0.06) 0 2px, transparent 2px)",
           backgroundSize: "140px 140px",
-          maskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 70%)",
-          WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 70%)",
+          maskImage: "linear-gradient(to top, rgba(0,0,0,0.6), transparent 55%)",
+          WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.6), transparent 55%)",
         }} />
     </div>
 
@@ -62,12 +67,12 @@ const TradingHall: React.FC<{ children: React.ReactNode; head?: React.ReactNode;
 
     {head}
     <div className="relative mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12">
-      <div className="relative mx-auto grid max-w-[1340px] lg:grid-cols-[72px_minmax(0,1fr)_72px] lg:gap-8">
-        <Pilaster />
+      <div className="relative mx-auto grid max-w-[1340px] lg:grid-cols-[40px_minmax(0,1fr)_40px] lg:gap-5">
+        <Pilaster side="l" />
         <div className="relative min-w-0">
           {/* the architrave between the capitals, with a lit underside */}
-          <div aria-hidden className="absolute -left-[104px] -right-[104px] -top-14 hidden h-5 lg:block"
-            style={{ background: "linear-gradient(180deg,#22416c,#0f2341)", boxShadow: "0 8px 26px -4px rgba(120,170,255,0.45), inset 0 -1px 0 rgba(200,225,255,0.45)" }} />
+          <div aria-hidden className="absolute -left-[73px] -right-[73px] -top-[68px] hidden h-4 lg:block"
+            style={{ background: "linear-gradient(180deg,#183052,#0b1a30)", boxShadow: "0 10px 24px -8px rgba(0,0,0,0.7), inset 0 1px 0 rgba(200,225,255,0.18), inset 0 -1px 0 rgba(200,225,255,0.35)" }} />
           {/* volumetric light from the cove onto the screen */}
           <div aria-hidden className="th-glow pointer-events-none absolute inset-x-[6%] -top-8 hidden h-[70%] lg:block"
             style={{ background: "linear-gradient(180deg, rgba(200,225,255,0.10), transparent 75%)", clipPath: "polygon(8% 0, 92% 0, 100% 100%, 0 100%)", mixBlendMode: "screen" }} />
@@ -88,7 +93,7 @@ const TradingHall: React.FC<{ children: React.ReactNode; head?: React.ReactNode;
           {/* the plinth */}
           <div aria-hidden className="mx-auto hidden h-3.5 w-[94%] rounded-b-md lg:block" style={{ background: "linear-gradient(180deg,#22416c,#0a1a30)", boxShadow: "0 14px 32px -8px rgba(0,0,0,0.75)" }} />
         </div>
-        <Pilaster />
+        <Pilaster side="r" />
       </div>
       {/* floor space for the reflection */}
       <div aria-hidden className="hidden h-[230px] lg:block" />
