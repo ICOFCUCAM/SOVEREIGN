@@ -37,7 +37,7 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 | G3 | "Strategic-buyer basis"; acquirer fit shown as probability. | "Institutional framework — the console value (D1)"; "fit probability — not a measured chance of a bid". | ☐ |
 | G4 | Demo only, unlabelled. | `runInstitutionalValuation(company)` and `valuationFacts` for the active company; DCF base from it; Demo data / Your intake badge. | ☐ |
 | G5 | Shared `BankerTake` / `CommandState`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, 34 axe failures. | Rebuild on `xo`. | ☐ |
+| G6 | Design: no `h1`, 34 axe failures. | Rebuild on `xo`. | ☑ G6-commit |
 
 ---
 
@@ -49,3 +49,7 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 ### X19 — Shared `Evidence` tooltip widens the page
 *Closed by:* `lib/workstation.tsx` `Evidence`: the tooltip is `hidden` until `group-hover/ev:block` / `group-focus/ev:block` (was `invisible opacity-0`, which kept it in layout), capped at `max-w-[calc(100vw-2rem)]`; label 8px → 11px, body 10.5px / 9px → 11px, faint text `white/45` → `white/70`. Show-on-hover/focus behaviour unchanged.
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: Enterprise Value overflow 3 px / 58 px → **0** at 1440 / 390 (`scrollWidth` = `main` width); focusing the first Evidence figure shows its tooltip on Enterprise Value, Terminal and Readiness, with axe 0 while it is open (1440 and 390) · the other users (Readiness, Pipeline, Terminal, Buyer Graph, Outcome Intelligence) Pro 1440/390: 0 errors, no overflow, axe 0.
+
+### G6 — Design
+*Closed by:* `pages/Valuation.tsx` rebuilt on `xo` (`PageHeader` `h1` "Enterprise Value"; seven metrics; the command state as a definition list; the fact sheet as a real `dl` with Evidence tooltips; DCF sliders with `label`/`id` pairs; methodology bars `aria-hidden` beside their figures; acquirers and comparables as tables with row headers, comparables in a `ScrollRegion` (fixes scrollable-region-focusable); hex accents replaced by xo tokens). Content carried over verbatim; the shared `BankerTake` stays until G5; G1–G5 follow. The rebuilt fact sheet exposed a shared tooltip overflow, fixed first as X19.
+*Verification:* `tsc -b`, eslint clean · Chromium free/Pro 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 33 + 1), all tab stops with visible focus.
