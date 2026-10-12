@@ -341,7 +341,7 @@ The owner supplied a reference: a dark exchange map with low-poly continents, a 
 
 | Gap | Close by | Status |
 |---|---|---|
-| Y1: the hero and the exchange are separate moments; the owner wants the exchange map and the trading hall both in the hero | One continuous hero: statement and calls to action (left/right split), the exchange map full width beneath ("01 / Discover the field"), its footer ("02 / Trace the path") leading straight into the hall with the board unchanged. Map strings move to i18n (EN/FR/ES). Board markup identical. | open |
+| Y1: the hero and the exchange are separate moments; the owner wants the exchange map and the trading hall both in the hero | One continuous hero: statement and calls to action (left/right split), the exchange map full width beneath ("01 / Discover the field"), its footer ("02 / Trace the path") leading straight into the hall with the board unchanged. Map strings move to i18n (EN/FR/ES). Board markup identical. | closed 4656593d |
 
 ## Closure log
 
@@ -754,6 +754,9 @@ Kept in capitals by design: one chapter label per moment, table headers, the led
 - Height: 7,593 px at 1440 and 11,176 px at 390. The hero is now a full screen and the hall is its own section, so the page is slightly above the Phase 4 targets (6,500 / 11,000).
 
 ---
+
+### Y1 — closed 4656593d
+Hero rebuilt as statement → proof figures → exchange map → hall. Verified: tsc, eslint, vitest 243/243, build; axe 0 at 1440/390 (inside and outside the board); keyboard 115 tab stops, 0 without visible focus; reduced motion stops all motion outside the board; no overflow, 0 console errors, one h1; board ribbon, mount and CommandBoard identical to the original. Page height 7,889 px at 1440, 11,550 px at 390 (the map adds about 300 px).
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
