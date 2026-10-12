@@ -347,7 +347,7 @@ The owner supplied a reference: a dark exchange map with low-poly continents, a 
 
 | Gap | Close by | Status |
 |---|---|---|
-| Z1: the owner wants the hero and first section of `public/index(8).html` ("The deal atlas") on the homepage, with the hall and the other sections placed in the body | Hero rebuilt on the reference's layout in the locked palette (red → blue-700/blue-600, paper → #f6f8fb/white, charcoal → navy): meta row, a split with the large two-face headline and a blue-ruled side column, the exchange map inside the page width, and a four-cell statement row that also carries the four proof figures and their notes. New section "02 / What the exchange connects" with four numbered rows to Modules. The hall with the unchanged board moves to 03; the later sections are renumbered 04–07. Our headline, copy, buttons and figures are kept; the reference's own copy is used only for the new labels and rows, with "Secure deal rooms" and "traceable" softened to match the removed security claims (M3). EN/FR/ES. | open |
+| Z1: the owner wants the hero and first section of `public/index(8).html` ("The deal atlas") on the homepage, with the hall and the other sections placed in the body | Hero rebuilt on the reference's layout in the locked palette (red → blue-700/blue-600, paper → #f6f8fb/white, charcoal → navy): meta row, a split with the large two-face headline and a blue-ruled side column, the exchange map inside the page width, and a four-cell statement row that also carries the four proof figures and their notes. New section "02 / What the exchange connects" with four numbered rows to Modules. The hall with the unchanged board moves to 03; the later sections are renumbered 04–07. Our headline, copy, buttons and figures are kept; the reference's own copy is used only for the new labels and rows, with "Secure deal rooms" and "traceable" softened to match the removed security claims (M3). EN/FR/ES. || closed 49ee5ecd |
 
 ## Closure log
 
@@ -763,6 +763,9 @@ Kept in capitals by design: one chapter label per moment, table headers, the led
 
 ### Y1 — closed 4656593d
 Hero rebuilt as statement → proof figures → exchange map → hall. Verified: tsc, eslint, vitest 243/243, build; axe 0 at 1440/390 (inside and outside the board); keyboard 115 tab stops, 0 without visible focus; reduced motion stops all motion outside the board; no overflow, 0 console errors, one h1; board ribbon, mount and CommandBoard identical to the original. Page height 7,889 px at 1440, 11,550 px at 390 (the map adds about 300 px).
+
+### Z1 — closed 49ee5ecd
+Verified: tsc, eslint, vitest 243/243 (inventory test included), build; axe 0 at 1440/390 inside and outside the board; keyboard 127 tab stops, 0 without visible focus; reduced motion stops all motion outside the board; no overflow, 0 console errors, one h1; board ribbon, mount and CommandBoard identical to the original. Page height 8,889 px at 1440, 12,743 px at 390 (the new section adds about 1,000 px at 1440).
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
