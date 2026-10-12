@@ -443,7 +443,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE19 | No way back from the end of a long page. | A back-to-top control at the foot of the signature line. | closed `bc8519e6` |
 | EE20 | Footer status dots read as live indicators. | Steady done-green dots, labelled as statements, no pulse. | closed `c87073e0` |
 | EE21 | The header stays white over dark chapters. | The header turns ink over dark chapters (logo, links, CTA re-coloured). | closed `1d266593` |
-| EE22 | Primary and secondary buttons vary in size, weight and arrow. | One primary and one secondary button style used across the homepage. | open |
+| EE22 | Primary and secondary buttons vary in size, weight and arrow. | One primary and one secondary button style used across the homepage. | closed `002ad706` |
 | EE23 | Focus rings and link underlines vary. | One focus ring and one underline treatment in signal blue. | open |
 | EE24 | Figures mix old-style and lining at random. | Old-style in running text, tabular lining in tables and statistics. | open |
 | EE25 | Radii run from 4 to 12 px and shadows are one-off. | One radius scale and three shadow levels. | open |
@@ -1038,6 +1038,9 @@ The footer's three statements (deterministic engines, sourced market data, NDA-g
 
 ### EE21 — closed 1d266593
 The sticky header takes the ink (ex-1 at 85%, white lockup, light links, white CTA, dark locale switch) whenever an element marked data-ink spans its midline — chapter 03 with the lifecycle band, chapter 09 and the footer — and returns to white over paper; a 500 ms colour transition, none under reduced motion; stays light while the phone menu is open.
+
+### EE22 — closed 002ad706
+One button family exported from MarketingChrome (BUTTON.primary / secondary / primaryInk / secondaryInk): same padding, 12.5 px semibold, a nudging arrow on hover, one focus ring. The homepage's six buttons and the value form's submit use it; hover on paper is now signal blue everywhere (the ledger button was ink-800).
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
