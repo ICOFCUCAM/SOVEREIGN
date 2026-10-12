@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { buildMarketTape } from "../lib/market-tape";
@@ -33,7 +34,7 @@ const ProcessIntelligence: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Walk-aways" value={String(F.walkedAway)} sub="declined / lapsed" /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Process funnel" className="lg:col-span-4">
