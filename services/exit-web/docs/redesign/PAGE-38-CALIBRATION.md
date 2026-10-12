@@ -64,3 +64,5 @@ The page calls the production edge function. Tests stub that call with **synthet
 - **X21 (owner decision):** One-Click Exit records the strategic-report midpoint as the prediction; the console shows the canonical value (D1).
 - **X22 (security, backend):** `exit-calibration` returns any tenant's summary to any caller holding the public anon key and a tenant UUID; the admin gate is client-side only.
 - Real calibration data was not read: the page was tested only against stubbed responses, so the production demo tenant's actual figures are NOT VERIFIED here.
+
+*Correction (found on Page 40):* the Page 38 test script stubbed the calibration call but let other function calls through, so the shell's read-only status request `GET …/functions/v1/exit-social-dispatch` reached the production endpoint during these runs. Nothing was written; the calibration figures were all from fixtures. The script was corrected on Page 40.
