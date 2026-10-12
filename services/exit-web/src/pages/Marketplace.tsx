@@ -2,7 +2,8 @@ import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric, Chip, Provenance } from "../components/xo";
+import { PageHeader, Section, Metric, Chip, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
+import { parseNumber } from "../lib/intake-fields";
 import { useAuth } from "../lib/auth";
 import { buildMarketTape } from "../lib/market-tape";
 import { LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES, useMemorandum } from "../lib/engines";
@@ -98,7 +99,8 @@ const FounderMarketplace: React.FC = () => {
   const listing = override.askMid != null
     ? { ...baseListing, askingPriceUsd: { ...baseListing.askingPriceUsd, mid: override.askMid } }
     : baseListing;
-  const [editAsk, setEditAsk] = useState<number>(baseListing.askingPriceUsd.mid);
+  const [editAskText, setEditAskText] = useState<string>(String(Math.round(baseListing.askingPriceUsd.mid / 1e5) / 10));
+  const askParse = parseNumber(editAskText, { min: 0.1, max: 1_000_000, scale: 1e6 });
   const [editNote, setEditNote] = useState("");
 
   const teaserInputs = useMemo(() => ({ anonymize: true }), []);
@@ -270,9 +272,10 @@ const FounderMarketplace: React.FC = () => {
 
             <div className="mt-6 flex flex-wrap gap-2">
               <Link to="/console/intake" className={BTN}>List on the exchange →</Link>
-              <button type="button" onClick={() => { setEditAsk(listing.askingPriceUsd.mid); setEditNote(override.note); setEditOpen(true); }} className={BTN_GHOST}>Edit listing</button>
-              {view === "public" && <button type="button" className={BTN_GHOST}>Request NDA</button>}
+              <button type="button" onClick={() => { setEditAskText(String(Math.round(listing.askingPriceUsd.mid / 1e5) / 10)); setEditNote(override.note); setEditOpen(true); }} className={BTN_GHOST}>Adjust preview</button>
             </div>
+            {view === "public" && <p className="mt-3 text-[12px] text-xo-muted">This is the preview buyers would see. They request an NDA from the Acquisition Radar; there is nothing to request here.</p>}
+            {override.askMid != null && <p className="mt-3 text-[12px] text-xo-caution">Preview only: the asking mid shown is your adjustment ({fmtMoney(override.askMid)}). It is not saved or published.</p>}
             {override.note && view === "founder" && (
               <p className="mt-3 border border-xo-caution/40 bg-xo-ink px-3 py-2 text-[12px] text-xo-muted"><span className="font-semibold text-xo-caution">Founder note:</span> {override.note}</p>
             )}
@@ -307,16 +310,19 @@ const FounderMarketplace: React.FC = () => {
       </div>
 
       {/* ── Edit listing ────────────────────────────────────────── */}
-      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit listing" subtitle="Founder-side adjustments to the published opportunity" size="md"
-        footer={<><Button variant="ghost" onClick={() => { setOverride({ askMid: null, note: "" }); setEditOpen(false); notify("Listing reset to engine values"); }}>Reset</Button><Button onClick={() => { setOverride({ askMid: editAsk, note: editNote.trim() }); setEditOpen(false); notify("Listing updated"); }}>Save</Button></>}>
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Adjust preview" subtitle="Changes this page's preview only — not saved, not published" size="md"
+        footer={<><Button variant="ghost" onClick={() => { setOverride({ askMid: null, note: "" }); setEditOpen(false); notify("Preview reset to engine values"); }}>Reset</Button><Button disabled={!askParse.ok} onClick={() => { if (!askParse.ok) return; setOverride({ askMid: askParse.value, note: editNote.trim() }); setEditOpen(false); notify("Preview updated — not saved or published"); }}>Apply to preview</Button></>}>
         <div className="space-y-4">
           <p className="rounded-sm border border-xo-line bg-xo-ink p-3 text-[12px] text-xo-muted">
             Engine band: {fmtMoney(baseListing.askingPriceUsd.low)} – {fmtMoney(baseListing.askingPriceUsd.high)} · readiness {baseListing.readinessScore.toFixed(0)}/100 · {baseListing.sector.replace(/_/g, " ")}
           </p>
-          <Field label="Asking price (mid)" hint="Overrides the engine mid; band low/high unchanged">
-            <input type="number" step={1_000_000} min={baseListing.askingPriceUsd.low} value={editAsk} onChange={(e) => setEditAsk(Number(e.target.value))} className={inputCls} />
-          </Field>
-          <Field label="Founder note" hint="Shown on your founder view only">
+          <div>
+            <label htmlFor="mkt-ask" className={XO_LABEL}>Asking price, mid ($M)</label>
+            <input id="mkt-ask" inputMode="decimal" value={editAskText} onChange={(e) => setEditAskText(e.target.value)}
+              aria-invalid={!askParse.ok} aria-describedby="mkt-ask-msg" className={XO_INPUT} />
+            <span id="mkt-ask-msg" className={`mt-1 block text-[12px] ${askParse.ok ? "text-xo-muted" : "text-xo-risk"}`}>{askParse.ok ? "Overrides the engine mid in this preview; band low/high unchanged." : askParse.error}</span>
+          </div>
+          <Field label="Founder note" hint="Shown on your founder view of this page only; cleared when you leave">
             <textarea className={`${inputCls} min-h-[80px] resize-y`} placeholder="e.g. hold publication until the audit closes" value={editNote} onChange={(e) => setEditNote(e.target.value)} />
           </Field>
         </div>
