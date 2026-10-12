@@ -376,7 +376,7 @@ Self-critique of the homepage after Z3 (1440 px: 8,839 px tall; 390 px: 12,560 p
 | AA7 | "What is your company worth?" reads as an afterthought: a thin row between the hall and the thesis, and a third "Access the Exchange" button. | A full chapter (03) right after the board: chapter label, large editorial headline, the form at full width with larger fields, the result as the section's centrepiece; the duplicate "Access the Exchange" button removed (Refine remains). | closed `d3a1247d` |
 | AA8 | Three navy blocks compete (map, hall, lifecycle band), two nearly back to back. | AA1 removes the band; the map is set on paper (light ground, ink lines, blue route) like a printed chart, so the hall is the page's one dark moment. Palette unchanged (interchanged only). | closed `432bda73` |
 | AA9 | The ledger heading reads as centred: it sits in the right-hand column of a two-column grid while every other heading is flush left. | Chapter label above a flush-left headline, as in every other chapter. | closed `62c60936` |
-| AA10 | The "Sources & method" list is long for a homepage. | Collapsed by default under its heading; it opens automatically when a source note is followed, so every note still lands on its entry. | open |
+| AA10 | The "Sources & method" list is long for a homepage. | Collapsed by default under its heading; it opens automatically when a source note is followed, so every note still lands on its entry. | closed `94080f60` |
 
 ## Closure log
 
@@ -825,6 +825,9 @@ Value your company is chapter 03, right after the board: double rule, Chapter la
 
 ### AA9 — closed 62c60936
 The ledger's chapter label now sits above a flush-left headline (with its note to the right), as in every other chapter, instead of in a narrow left column that pushed the headline toward the centre. Verified: tsc, eslint, vitest 243/243.
+
+### AA10 — closed 94080f60
+SourcesSection gains a collapsed mode, used on the homepage only: the list folds under "Sources & method · 6" (a details/summary disclosure, keyboard-operable). Following a note opens it and scrolls to the entry (hashchange and deep links #source-n). The source markup still renders server-side, so the sources test holds. Also: note anchors get scroll-mt so "↩ back" no longer lands under the sticky header. Browser-checked: closed on load; note click → open, entry in view; back → citation; /#source-4 → open, entry at 112 px. Verified: tsc, eslint, vitest 243/243.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
