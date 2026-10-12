@@ -40,6 +40,9 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 24 contrast failures, header name differs from NAV, drawer not a dialog. | Rebuild on `xo`; `h1` "Buyer Profiles"; intro in the shared `Modal`. | ☐ |
 
+### X13 — Shared `Modal` is not an accessible dialog (found here) — documented before the fix
+`lib/ui.tsx` `Modal` renders a plain `div` overlay: no `role="dialog"`, no `aria-modal`, no accessible name, focus is not moved into it on open nor returned on close (Escape and backdrop click already close it), and its close button has no visible focus ring. Used by every page that opens a modal. *Fix (additive, same props and look):* `role="dialog"`, `aria-modal="true"`, `aria-labelledby` → the title; focus moves to the dialog panel on open and back to the previously focused element on close; Tab is kept inside the dialog; visible focus ring on the close button.
+
 ---
 
 ## Closure log
