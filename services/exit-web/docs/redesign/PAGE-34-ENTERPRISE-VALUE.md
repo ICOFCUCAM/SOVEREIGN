@@ -5,7 +5,7 @@
 | Route | `/console/valuation` |
 | Component | `src/pages/Valuation.tsx` (203 lines) + `lib/engines.ts` (`VALUATION_INSTITUTIONAL`, `VALUATION_FACTS` on the demo company), `VALUATION_FRAMEWORK`, shared `BankerTake`, `CommandState` |
 | NAV | "Enterprise Value", founder, no plan gate |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All six gaps closed, plus shared X19. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `31d61c6`)
 
@@ -74,3 +74,14 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 ### G5 — Shared `BankerTake` / `CommandState`; fake live tape
 *Closed by:* `pages/Valuation.tsx`. The command-state strip and the shared `BankerTake` are merged into one page-local "Recommended action" `Section`: anchor at the canonical band and midpoint; Today (midpoint, confidence, baseline, close window); If you price off the baseline (the premium gap); Evidence — "premium from 14 observed precedents (experimental evidence)" instead of "underwritten by … observed precedents"; Next — the top acquirer and "The same figures feed the CIM. Build the CIM →". Pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: 0 "underwritten", 0 "live" words, 0 pinging elements, snapshot date shown · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 206/206 · Chromium free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 34), all tab stops with visible focus · Evidence tooltips open on focus with axe 0 (after X19) · demo $102,849,415 and intake $403,509,792 (D1) both checked.
+
+## Known issues
+- The headline confidence reads 89 % "high" while the premium evidence is "experimental" (14 market-wide precedents, no in-sector reference price) — both engine outputs, shown side by side.
+- The DCF uses EBITDA as a cash-flow proxy (stated); it is a sensitivity, not part of the midpoint.
+- Value My Company (Page 03, approved) heads the acquirer column "Probability"; this page uses "Fit probability" — to align in the final review.
+- The intake valuation is run without the demo's (empty) market feed, as on every other personalised page.
