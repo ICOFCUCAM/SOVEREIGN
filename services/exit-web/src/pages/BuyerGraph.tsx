@@ -1,15 +1,16 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { MarketTape, Evidence } from "../lib/workstation";
-import { PageHeader, Section, Metric, ScrollRegion, Chip, XO_INPUT } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Chip, Provenance, XO_INPUT } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { BuyerNetworkReactor } from "../components/Reactor";
 import {
   DNA_PROFILES, DNA_AS_OF, SECTOR_TRANSACTIONS,
-  sectorOverlap, recommendedAction, fmtUsdShort, rankedBuyers, type DnaProfile,
+  sectorOverlap, sectorTokensFor, recommendedAction, fmtUsdShort, rankedBuyers, type DnaProfile,
 } from "../lib/buyer-dna";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import { loadActiveCompany } from "../lib/active-company";
 
 // BUYER GRAPH — the proprietary acquisition-intelligence layer. Founders
 // never see raw acquisition lists; they see Acquisition DNA: appetite,
@@ -26,8 +27,8 @@ const APPETITE_STYLE: Record<DnaProfile["appetite"], { label: string; cls: strin
   no_events: { label: "No events", cls: "text-xo-faint" },
 };
 
-const DnaCard: React.FC<{ p: DnaProfile }> = ({ p }) => {
-  const overlap = sectorOverlap(p);
+const DnaCard: React.FC<{ p: DnaProfile; tokens: readonly string[] }> = ({ p, tokens }) => {
+  const overlap = sectorOverlap(p, tokens);
   const ap = APPETITE_STYLE[p.appetite];
   return (
     <li className="min-w-0 bg-xo-panel px-4 py-3">
@@ -74,7 +75,7 @@ const DnaCard: React.FC<{ p: DnaProfile }> = ({ p }) => {
       </dl>
 
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-xo-line pt-2">
-        <span className="text-[12px] font-semibold text-xo-verified"><span className="font-normal text-xo-faint">Suggested (rule): </span>{recommendedAction(p)}</span>
+        <span className="text-[12px] font-semibold text-xo-verified"><span className="font-normal text-xo-faint">Suggested (rule): </span>{recommendedAction(p, tokens)}</span>
         <a href={p.source_url} target="_blank" rel="noreferrer" className="font-mono text-[11px] text-xo-faint hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">source ↗<span className="sr-only"> for {p.name} (opens in a new tab)</span></a>
       </div>
     </li>
@@ -102,13 +103,19 @@ const BuyerGraph: React.FC = () => {
 
   const withEvents = DNA_PROFILES.filter((p) => p.events_indexed > 0).length;
   const highAppetite = DNA_PROFILES.filter((p) => p.appetite === "high").length;
-  const RANKED = useMemo(() => rankedBuyers(12), []);
+  // Ranking and overlap follow the founder's saved intake when there is one,
+  // else the demo company.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const tokens = useMemo(() => sectorTokensFor(company.sector), [company]);
+  const RANKED = useMemo(() => rankedBuyers(12, tokens), [tokens]);
+  // The transaction file holds keyword matches for the demo company's sector only.
+  const txForDemoSector = company.sector !== SAMPLE_COMPANY.sector;
   const tape = useMemo(() => buildMarketTape(), []);
 
   return (
     <div data-page="buyer-graph" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Market Intelligence" title="Buyer Graph"
-        badge={<span className="text-[12px] text-xo-muted">The moat · as of {MARKET_INDEX_FMT.asOf} · Wikipedia · Wikidata · EDGAR</span>}
+      <PageHeader eyebrow={`◉ Market Intelligence · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Buyer Graph"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">The moat · as of {MARKET_INDEX_FMT.asOf} · Wikipedia · Wikidata · EDGAR</span></>}
         actions={<a href="/report/buyers" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Buyer Intelligence Report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>} />
 
       <section aria-label="Registry summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
@@ -127,7 +134,7 @@ const BuyerGraph: React.FC = () => {
         </Section>
         <Section title="Acquisition likelihood score · who is most likely to buy you" className="lg:col-span-9"
           right={<span className="text-[11px] text-xo-faint">top {RANKED.length} of {withEvents} active</span>}
-          foot={`Ranked for ${SAMPLE_COMPANY.name}. Score out of 100 = appetite (high 50, medium 32, low 14) + sector overlap × 0.34 (max 34) + deals per year × 2.5 (max 14) + recency (10 if within 18 months, 5 within 36, 2 within 60). A composite score, not a probability. Every buyer traces to a source on record.`}>
+          foot={`Ranked for ${company.name} (sector keywords: ${tokens.join(", ")}). Score out of 100 = appetite (high 50, medium 32, low 14) + sector overlap × 0.34 (max 34) + deals per year × 2.5 (max 14) + recency (10 if within 18 months, 5 within 36, 2 within 60). A composite score, not a probability. Every buyer traces to a source on record.`}>
           <ScrollRegion label="Ranked buyers table">
             <table className="w-full min-w-[760px] text-[12px]">
               <thead className="text-left text-[11px] text-xo-faint">
@@ -174,12 +181,12 @@ const BuyerGraph: React.FC = () => {
           <input id="bg-search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search buyer or sector token…" className={`${XO_INPUT} max-w-xs`} />
         </div>
         <ul className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((p) => <DnaCard key={p.buyer_id} p={p} />)}
+          {filtered.map((p) => <DnaCard key={p.buyer_id} p={p} tokens={tokens} />)}
           {filtered.length === 0 && <li className="bg-xo-panel px-4 py-6 text-[13px] text-xo-muted">No indexed buyer matches that filter.</li>}
         </ul>
       </Section>
 
-      <Section title={`Transactions matching the sector keywords · ${SAMPLE_COMPANY.sector.replace(/_/g, " ")}`} className="border border-xo-line"
+      <Section title={`Transactions matching the sector keywords · ${SAMPLE_COMPANY.sector.replace(/_/g, " ")}${txForDemoSector ? " (demo company's sector)" : ""}`} className="border border-xo-line"
         right={<span className="text-[11px] text-xo-faint">{SECTOR_TRANSACTIONS.length} keyword matches · {SECTOR_TRANSACTIONS.filter((t) => t.verification_status === "verified").length} verified</span>}
         foot={`Rows whose industry text contains one of the sector keywords — a keyword match can include unrelated deals (e.g. "delivery" in software). Each row traces to a source (Wikipedia acquisition lists; SEC-corroborated where an 8-K item 2.01 matches); the Verification column shows its status. As of ${DNA_AS_OF.slice(0, 10)}.`}>
         <ScrollRegion label="Similar transactions table">

@@ -94,8 +94,8 @@ export function sectorOverlap(p: DnaProfile, tokens: readonly string[] = COMPANY
 }
 
 /** Recommended action from measured appetite × overlap — stated as desk guidance. */
-export function recommendedAction(p: DnaProfile): string {
-  const { pct } = sectorOverlap(p);
+export function recommendedAction(p: DnaProfile, tokens?: readonly string[]): string {
+  const { pct } = sectorOverlap(p, tokens);
   if (p.appetite === "high" && pct > 0) return "Initiate NDA outreach";
   if (p.appetite === "high") return "Monitor — active acquirer, no sector evidence yet";
   if (p.appetite === "medium" && pct > 0) return "Warm introduction via the banker";
