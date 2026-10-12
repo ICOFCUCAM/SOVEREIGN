@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { fmtMoney, downloadJson } from "../lib/ui";
 import { MarketTape, Evidence } from "../lib/workstation";
-import { PageHeader, Section, Metric, ScrollRegion, XO_LABEL } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance, XO_LABEL } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { VALUATION_INSTITUTIONAL, VALUATION_FACTS } from "../lib/engines";
-import { VALUATION_FRAMEWORK } from "@exit/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
+import { VALUATION_FRAMEWORK, runInstitutionalValuation, valuationFacts } from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
 import BankerTake from "../components/BankerTake";
 
 // Enterprise Value — institutional valuation desk. The headline is the
@@ -14,27 +14,28 @@ import BankerTake from "../components/BankerTake";
 // confidence score and the buyer universe. The fact-sheet figures carry
 // their sources; the DCF is a sensitivity tool on the user's assumptions.
 
-const C = SAMPLE_COMPANY;
-const TTM = C.revenue.trailingTwelveMonthsRevenueUsd;
-const EBITDA = TTM * C.revenue.ebitdaMarginPct;
-const INST = VALUATION_INSTITUTIONAL;
 const pctStr = (x: number, d = 0): string => `${(x * 100).toFixed(d)}%`;
 
-function dcf(growth: number, discount: number, years = VALUATION_FRAMEWORK.dcf.years, terminal = VALUATION_FRAMEWORK.dcf.terminalGrowthPct) {
-  let pv = 0; let fcf = EBITDA;
+function dcf(ebitda: number, growth: number, discount: number, years = VALUATION_FRAMEWORK.dcf.years, terminal = VALUATION_FRAMEWORK.dcf.terminalGrowthPct) {
+  let pv = 0; let fcf = ebitda;
   for (let y = 1; y <= years; y++) { fcf = fcf * (1 + growth); pv += fcf / Math.pow(1 + discount, y); }
   const tv = (fcf * (1 + terminal)) / (discount - terminal);
   pv += tv / Math.pow(1 + discount, years);
   return pv;
 }
 
-const compPrices = INST.comparableTransactions.map((c) => c.priceUsd).filter((v): v is number => v != null);
-const compMid = compPrices.length ? [...compPrices].sort((a, b) => a - b)[Math.floor(compPrices.length / 2)]! : INST.financialBaseline.mid;
-
 const Valuation: React.FC = () => {
+  // The founder's saved intake when there is one; the demo company otherwise.
+  const { company: C, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const INST = useMemo(() => (fromIntake ? runInstitutionalValuation(C) : VALUATION_INSTITUTIONAL), [C, fromIntake]);
+  const FACTS = useMemo(() => (fromIntake ? valuationFacts(INST) : VALUATION_FACTS), [INST, fromIntake]);
+  const TTM = C.revenue.trailingTwelveMonthsRevenueUsd;
+  const EBITDA = TTM * C.revenue.ebitdaMarginPct;
+  const compPrices = INST.comparableTransactions.map((c) => c.priceUsd).filter((v): v is number => v != null);
+  const compMid = compPrices.length ? [...compPrices].sort((a, b) => a - b)[Math.floor(compPrices.length / 2)]! : INST.financialBaseline.mid;
   const [growth, setGrowth] = useState(Math.round(C.growth.arrGrowthYoyPct * 100));
   const [discount, setDiscount] = useState(Math.round(VALUATION_FRAMEWORK.dcf.defaultDiscountPct * 100));
-  const dcfValue = useMemo(() => dcf(growth / 100, discount / 100), [growth, discount]);
+  const dcfValue = useMemo(() => dcf(EBITDA, growth / 100, discount / 100), [EBITDA, growth, discount]);
   // bar scale: the largest figure drawn, so no bar is clipped
   const barMax = Math.max(dcfValue, INST.headline.high, ...INST.methodologies.map((m) => m.band.mid)) * 1.1;
   const premiumGap = INST.headline.mid - INST.financialBaseline.mid;
@@ -42,8 +43,9 @@ const Valuation: React.FC = () => {
 
   return (
     <div data-page="valuation" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Valuation Desk" title="Enterprise Value"
-        badge={<span className="text-[12px] text-xo-muted">Institutional framework — the console value · Conf {INST.confidence.score}% · {INST.confidence.tier} · framework v{INST.frameworkVersion} · {INST.comparablesUsed} comps · {INST.buyerUniverse.qualified} buyers</span>} />
+      <PageHeader eyebrow={`◉ Valuation Desk · ${fromIntake ? "Your intake" : "Demo company"}: ${C.name}`} title="Enterprise Value"
+        description={fromIntake ? "Valued from your saved intake." : "Valued for the demo company. Save an intake on Value My Company to value yours."}
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Institutional framework — the console value · Conf {INST.confidence.score}% · {INST.confidence.tier} · framework v{INST.frameworkVersion} · {INST.comparablesUsed} comps · {INST.buyerUniverse.qualified} buyers</span></>} />
 
       <section aria-label="Valuation summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <div className="bg-xo-panel"><Metric label="Midpoint" emphasis value={fmtMoney(INST.headline.mid)} sub={`${fmtMoney(INST.headline.low)}–${fmtMoney(INST.headline.high)}`} /></div>
@@ -78,12 +80,12 @@ const Valuation: React.FC = () => {
       {/* fact sheet — the institutional tear block */}
       <Section title="Valuation fact sheet · every figure traced to a source" className="border border-xo-line"
         right={<>
-          <button type="button" onClick={() => downloadJson("exitos-valuation-model.json", { company: C.name, institutional: INST, factSheet: VALUATION_FACTS, dcf: dcfValue, medianPrecedentDealSizeUsd: compMid, assumptions: { growthPct: growth, discountPct: discount } })} className="rounded-sm border border-xo-line px-2 py-1 text-[11px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Export data (.json)</button>
+          <button type="button" onClick={() => downloadJson("exitos-valuation-model.json", { company: C.name, institutional: INST, factSheet: FACTS, dcf: dcfValue, medianPrecedentDealSizeUsd: compMid, assumptions: { growthPct: growth, discountPct: discount } })} className="rounded-sm border border-xo-line px-2 py-1 text-[11px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Export data (.json)</button>
           <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-2 py-1 text-[11px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report (PDF) →</a>
         </>}
         foot="Hover or focus any figure for its methodology, source and last-updated date.">
         <dl className="grid grid-cols-2 gap-px bg-xo-line sm:grid-cols-3 lg:grid-cols-5">
-          {VALUATION_FACTS.map((f) => (
+          {FACTS.map((f) => (
             <div key={f.key} className="flex flex-col bg-xo-panel p-3">
               <dt className="order-1 text-[11px] text-xo-muted">{f.label}</dt>
               <dd className="order-2 mt-1 font-mono text-[15px] font-semibold">

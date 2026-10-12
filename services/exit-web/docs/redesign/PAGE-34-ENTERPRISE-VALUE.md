@@ -35,7 +35,7 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 | G1 | **"Blended $823M" and "Comparable $2.25B" presented as valuations.** | Remove the blended figure; show the comparable figure as "Median precedent deal size — other companies' deals, not a value for this company"; drop its methodology bar; bar scale from the canonical band. Calculation of the canonical value untouched. | ☑ `723221c` |
 | G2 | DCF presented without its simplification; "not assumption" claims. | "DCF sensitivity" — EBITDA used as a free-cash-flow proxy, assumptions set by you, not the valuation; remove "not assumption" / "no number without a source" claims; methodology title fixed. | ☑ `e019b34` |
 | G3 | "Strategic-buyer basis"; acquirer fit shown as probability. | "Institutional framework — the console value (D1)"; "fit probability — not a measured chance of a bid". | ☑ `50d9f27` |
-| G4 | Demo only, unlabelled. | `runInstitutionalValuation(company)` and `valuationFacts` for the active company; DCF base from it; Demo data / Your intake badge. | ☐ |
+| G4 | Demo only, unlabelled. | `runInstitutionalValuation(company)` and `valuationFacts` for the active company; DCF base from it; Demo data / Your intake badge. | ☑ G4-commit |
 | G5 | Shared `BankerTake` / `CommandState`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 34 axe failures. | Rebuild on `xo`. | ☑ `746abb0` |
 
@@ -66,3 +66,7 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 *Closed by:* `pages/Valuation.tsx` (labels). Header tag "Strategic-buyer basis" → "Institutional framework — the console value" (as Page 03 G3 did for the same figure, D1); the acquirers' "87 %" column is "Fit probability" (screen-reader prefix per value) and the foot opens "Fit probability is the discovery engine's weighted fit score — not a measured chance of a bid." (the wording used on Buyer Profiles and Buyer Intelligence).
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 "strategic-buyer basis"; the new tag and foot shown · free 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
 *Note:* Value My Company (Page 03, approved) still heads the same column "Probability" — flagged for the final review.
+
+### G4 — Demo only, unlabelled
+*Closed by:* `pages/Valuation.tsx`. With a saved intake the page runs `runInstitutionalValuation(company)` and `valuationFacts` for it (as Page 03 and the other personalised pages do); the DCF base (TTM revenue × EBITDA margin), the growth slider's start, the median precedent size and the export follow the same company. With no intake it keeps the module-level demo values. Eyebrow "Demo company: Helios Freight" / "Your intake: …", **Demo data** / **Your intake** badge and a description ("Valued for the demo company. Save an intake on Value My Company to value yours." / "Valued from your saved intake.").
+*Verification:* `tsc -b`, eslint clean · Chromium: demo midpoint $102,849,415, baseline $72,168,000, fact sheet $102.8M / $61.5M–$173.9M; intake (Northwind Analytics) midpoint **$403,509,792** (its D1 value), baseline $291,428,571, fact sheet $403.5M / $234.4M–$685.4M · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0; Evidence tooltip opens on focus, axe 0.
