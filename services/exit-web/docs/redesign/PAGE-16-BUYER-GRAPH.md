@@ -34,7 +34,7 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 | G2 | **Keyword-matched transactions presented as sector comparables; verification hidden.** | Title "Transactions matching the sector keywords"; per-row verification status; note that keyword matches can include unrelated deals. | ☑ `b06ece9` |
 | G3 | Duplicate "Active acquirers — with live cadence"; recommended actions unlabelled. | Remove the duplicate; label actions "suggested (rule)". | ☑ `b73b6d4` |
 | G4 | Ranking and overlap fixed to the demo company. | Tokens from `sectorTokensFor(loadActiveCompany().sector)`; badge; transactions labelled as the demo sector when the company's sector differs. | ☑ `8f9fac1` |
-| G5 | Fake live tape. | `RegistryTape`. | ☑ G5-commit |
+| G5 | Fake live tape. | `RegistryTape`. | ☑ `801dbc3` |
 | G6 | Design: no `h1`, 11 contrast failures, unfocusable scroll region, filter semantics. | Rebuild on `xo` (`Chip`s, labelled search, `ScrollRegion`). | ☑ `a1ba835` |
 
 ---
