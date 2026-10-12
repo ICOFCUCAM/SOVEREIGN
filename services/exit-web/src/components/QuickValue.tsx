@@ -45,6 +45,21 @@ const RangeBar: React.FC<{ low: number; mid: number; high: number; muted?: boole
   );
 };
 
+/** The engine's stated assumptions beside the range — the same list for the worked example and for the
+ *  reader's own figures. */
+const Assumptions: React.FC<{ rows: ReadonlyArray<readonly [string, string]>; label: string }> = ({ rows, label }) => (
+  <div className="lg:pt-2">
+    <div className="text-[13px] text-slate-600">{label}</div>
+    <dl className="mt-3 border-t border-ink-900 text-[13px]">
+      {rows.map(([k, v]) => (
+        <div key={k} className="flex justify-between gap-3 border-b border-slate-200 py-2.5">
+          <dt className="text-slate-600">{k}</dt><dd className="font-mono font-semibold tabular-nums text-ink-800">{v}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+);
+
 /** The navy card the range sits in: the page's one dark object in this chapter. */
 const CARD = "relative overflow-hidden rounded-ex-md p-6 text-white shadow-ex-3 sm:p-9";
 const CARD_BG = { background: "radial-gradient(ellipse 80% 120% at 0% 0%, rgba(180,154,117,0.35), transparent 60%), linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" };
@@ -141,19 +156,11 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
                       <Link to={`/console/intake${result.query}`} className="inline-flex items-center gap-5 bg-white px-5 py-3 text-[12px] font-semibold text-ink-900 transition hover:bg-[#F5F1E9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">{t("qv.refine")} <span aria-hidden>→</span></Link>
                     </div>
                   </div>
-                  <div>
-                    <div className="text-[12.5px] text-slate-600">{t("qv.assume")}</div>
-                    <dl className="mt-2 border-t border-slate-200 text-[12.5px]">
-                      {mod.QUICK_ASSUMPTIONS.map(([k, v]) => (
-                        <div key={k} className="flex justify-between gap-3 border-b border-slate-200 py-1.5">
-                          <dt className="text-slate-600">{k}</dt><dd className="font-mono font-semibold text-ink-800">{v}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </div>
+                  <Assumptions rows={mod.QUICK_ASSUMPTIONS} label={t("qv.assume")} />
                 </div>
               ) : example ? (
-                <div className={`${CARD} max-w-[860px]`} style={CARD_BG}>
+                <div className="grid items-start gap-8 lg:grid-cols-[1.35fr_1fr]">
+                <div className={CARD} style={CARD_BG}>
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="text-[12.5px] text-[#E8E0D2]/80">{t("qv.range")}</span>
                     <span className="rounded-sm border border-white/40 px-1.5 py-px font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-white/85">{t("qv.exampleTag")}</span>
@@ -163,6 +170,8 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
                   </div>
                   <RangeBar low={example.low} mid={example.mid} high={example.high} muted />
                   <p className="mt-2 text-[14px] text-[#E8E0D2]/80">{t("qv.example", { s: sectorLabel(EX.sector), r: EX.revenueUsd / 1e6, g: Math.round(EX.growthPct * 100) })}</p>
+                </div>
+                {mod && <Assumptions rows={mod.QUICK_ASSUMPTIONS} label={t("qv.assume")} />}
                 </div>
               ) : (
                 <p className="text-[14px] text-slate-600">{t("qv.empty")}</p>
