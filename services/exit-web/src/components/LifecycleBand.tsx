@@ -16,7 +16,7 @@ const LifecycleBand: React.FC = () => {
   const [eyebrow, heading = ""] = t("lifecycle.title").split(" · ");
   const last = LIFECYCLE.length - 1;
   return (
-    <section aria-labelledby="lc-h" className="relative isolate overflow-hidden text-white" style={{ background: "linear-gradient(180deg, var(--ex-0) 0%, var(--ex-1) 55%, var(--ex-0) 100%)" }}>
+    <section data-ink aria-labelledby="lc-h" className="relative isolate overflow-hidden text-white" style={{ background: "linear-gradient(180deg, var(--ex-0) 0%, var(--ex-1) 55%, var(--ex-0) 100%)" }}>
       {/* the board and the band are one ink chapter (EE11): the board's floor runs on into the band, marked
           only by a short centred rule with a node, the instrument's own punctuation */}
       <div aria-hidden className="absolute left-1/2 top-0 flex -translate-x-1/2 items-center gap-3">

@@ -141,32 +141,50 @@ export const Editorial: React.FC<{ text: string; dark?: boolean; quiet?: boolean
   ))}</>;
 };
 
+// The header takes the ink when it sits over a dark chapter (EE21): any element
+// marked data-ink that spans the header's midline turns it. Light again over paper.
+const useInkUnder = (): boolean => {
+  const [ink, setInk] = React.useState(false);
+  React.useEffect(() => {
+    let raf = 0;
+    const read = (): void => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => {
+      const y = 36;
+      setInk([...document.querySelectorAll<HTMLElement>("[data-ink]")].some((el) => { const r = el.getBoundingClientRect(); return r.top <= y && r.bottom >= y; }));
+    }); };
+    read();
+    addEventListener("scroll", read, { passive: true }); addEventListener("resize", read);
+    return () => { cancelAnimationFrame(raf); removeEventListener("scroll", read); removeEventListener("resize", read); };
+  }, []);
+  return ink;
+};
+
 export const MarketingChrome: React.FC<{ active?: string; children: React.ReactNode }> = ({ active, children }) => {
   const nav = useNavigate();
   const { t } = useI18n();
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const ink = useInkUnder() && !menuOpen;
   const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
   return (
     <div className="min-h-screen bg-[#f6f8fb] text-ink-900">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
+      <header className={`sticky top-0 z-40 border-b backdrop-blur transition-colors duration-500 motion-reduce:transition-none ${ink ? "border-white/10 bg-ex-1/85 text-white" : "border-slate-200 bg-white/90"}`}>
         <div className={`${WRAP} grid min-h-[72px] grid-cols-[1fr_auto] items-center gap-5 lg:grid-cols-[1fr_auto_1fr]`}>
           <div className="flex items-center gap-5">
-            <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={30} /></button>
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600 xl:inline">A Sovereign Infrastructure</span>
+            <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={30} dark={ink} /></button>
+            <span className={`hidden font-mono text-[10px] uppercase tracking-[0.16em] xl:inline ${ink ? "text-blue-100/60" : "text-slate-600"}`}>A Sovereign Infrastructure</span>
           </div>
           <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
             {NAV.map(([key, fallback, to]) => (
               <Link key={to} to={to} aria-current={active === fallback.toLowerCase() ? "page" : undefined}
-                className={`relative text-[13px] font-medium transition after:absolute after:-bottom-1.5 after:left-0 after:h-px after:bg-blue-600 after:transition-all hover:after:w-full ${active === fallback.toLowerCase() ? "font-semibold text-ink-900 after:w-full" : "text-slate-600 after:w-0 hover:text-ink-900"}`}>{t(key)}</Link>
+                className={`relative text-[13px] font-medium transition after:absolute after:-bottom-1.5 after:left-0 after:h-px after:transition-all hover:after:w-full ${ink ? "after:bg-blue-400" : "after:bg-blue-600"} ${active === fallback.toLowerCase() ? `font-semibold after:w-full ${ink ? "text-white" : "text-ink-900"}` : `after:w-0 ${ink ? "text-blue-100/75 hover:text-white" : "text-slate-600 hover:text-ink-900"}`}`}>{t(key)}</Link>
             ))}
           </nav>
           <div className="flex items-center justify-end gap-3">
-            <div className="hidden sm:block"><LocaleSwitch /></div>
-            <button onClick={() => nav("/console")} className="hidden text-[13px] font-medium text-slate-600 transition hover:text-ink-900 sm:inline-flex">{t("nav.login")}</button>
-            <button onClick={() => nav("/console")} className="inline-flex items-center gap-3 bg-ink-900 px-4 py-3 text-[12px] font-semibold text-white transition hover:bg-ink-800">{t("nav.access")} <span aria-hidden>↗</span></button>
+            <div className="hidden sm:block"><LocaleSwitch dark={ink} /></div>
+            <button onClick={() => nav("/console")} className={`hidden text-[13px] font-medium transition sm:inline-flex ${ink ? "text-blue-100/75 hover:text-white" : "text-slate-600 hover:text-ink-900"}`}>{t("nav.login")}</button>
+            <button onClick={() => nav("/console")} className={`inline-flex items-center gap-3 px-4 py-3 text-[12px] font-semibold transition ${ink ? "bg-white text-ink-900 hover:bg-blue-50" : "bg-ink-900 text-white hover:bg-ink-800"}`}>{t("nav.access")} <span aria-hidden>↗</span></button>
             {/* mobile menu toggle */}
             <button onClick={() => setMenuOpen((o) => !o)} aria-label="Menu" aria-expanded={menuOpen}
-              className="border border-slate-300 p-2 text-slate-700 lg:hidden">
+              className={`border p-2 lg:hidden ${ink ? "border-white/20 text-white" : "border-slate-300 text-slate-700"}`}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                 {menuOpen ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M3 6h18M3 12h18M3 18h18" />}
               </svg>
@@ -194,7 +212,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
       <main>{children}</main>
 
       {/* the footer continues the close in the deepest ink (EE16) */}
-      <footer className="ex-seam relative overflow-hidden bg-ex-0 text-white">
+      <footer data-ink className="ex-seam relative overflow-hidden bg-ex-0 text-white">
         <div className={`${WRAP} pb-10 pt-16 lg:pt-20`}>
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:gap-14">
             <div>

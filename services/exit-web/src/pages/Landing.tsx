@@ -174,7 +174,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ===== 03 · THE EXCHANGE — the board as the instrument ===== */}
-      <section id="ch-03" aria-labelledby="hall-h">
+      <section id="ch-03" data-ink aria-labelledby="hall-h">
         <Instrument head={
           <div className={`${WRAP} relative pb-16 pt-20 text-white`}>
             <Chapter n="03" dark>{t("hall.eyebrow")}</Chapter>
@@ -402,7 +402,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ===== 09 · THE NEXT MOVE — the back page ===== */}
-      <section id="ch-09" className="relative overflow-hidden text-white" style={{ background: "var(--ex-field)" }}>
+      <section id="ch-09" data-ink className="relative overflow-hidden text-white" style={{ background: "var(--ex-field)" }}>
         {/* a quiet film of a meeting under an ink veil (placeholder footage, pre-launch gate G1) */}
         <AmbientVideo src="/media/boardroom-loop.mp4" webm="/media/boardroom-loop.webm" poster="/media/boardroom-poster.jpg" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.38] mix-blend-luminosity" />
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, var(--ex-1) 0%, rgba(7,26,49,0.62) 28%, rgba(7,26,49,0.72) 62%, var(--ex-0) 100%), linear-gradient(90deg, rgba(4,12,24,0.85) 0%, rgba(4,12,24,0.35) 55%, rgba(4,12,24,0.6) 100%)" }} />
