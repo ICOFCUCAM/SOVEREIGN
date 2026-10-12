@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Button, Card, Modal, fmtMoney, downloadText, notify } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import React, { useMemo, useState } from "react";
+import { Button, Modal, fmtMoney, downloadText, notify } from "../lib/ui";
+import { MarketTape } from "../lib/workstation";
+import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { DILIGENCE, OFFER_EVALUATIONS } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
@@ -27,17 +28,17 @@ const CLOSING: readonly ChecklistItem[] = [
 ];
 
 const STATUS_STYLE: Record<ChecklistItem["status"], string> = {
-  done:        "bg-deal-600/20 text-deal-300 ring-deal-400/40",
-  in_progress: "bg-loi-500/15 text-loi-300 ring-loi-400/40",
-  pending:     "bg-white/5 text-white/60 ring-white/15",
-  blocked:     "bg-red-500/15 text-red-300 ring-red-400/40",
+  done:        "border-xo-verified/50 text-xo-verified",
+  in_progress: "border-xo-caution/50 text-xo-caution",
+  pending:     "border-xo-line text-xo-muted",
+  blocked:     "border-xo-risk/50 text-xo-risk",
 };
 
 const OWNER_STYLE: Record<ChecklistItem["owner"], string> = {
-  Founder: "text-deal-300",
-  Counsel: "text-loi-300",
-  Buyer:   "text-stage-engaged",
-  Banker:  "text-white/70",
+  Founder: "text-xo-verified",
+  Counsel: "text-xo-caution",
+  Buyer:   "text-xo-action",
+  Banker:  "text-xo-muted",
 };
 
 // Closing Risk Meter — a computed close probability and the live risks
@@ -70,7 +71,6 @@ const Closing: React.FC = () => {
   const redFlags = DILIGENCE.redFlags;
   const prob = closeProbability(done, inProgress, CLOSING.length, blocked, redFlags.length);
   const risks = openRisks(CLOSING);
-  const probColor = prob >= 0.8 ? "#34d399" : prob >= 0.6 ? "#fbbf24" : "#f87171";
   const dealValue = Math.max(0, ...OFFER_EVALUATIONS.map((e) => e.offer.headlinePriceUsd));
   const topRisk = risks[0];
 
@@ -98,41 +98,42 @@ const Closing: React.FC = () => {
     notify("Closing call invite downloaded");
   };
 
+  const probTone = prob >= 0.8 ? "text-xo-verified" : prob >= 0.6 ? "text-xo-caution" : "text-xo-risk";
+  const BTN = "rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  const BTN_GHOST = "rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  const tape = useMemo(() => buildMarketTape(), []);
+
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Operator · Closing"
-        title="Deal Closing Center"
-        tag="Sign · escrow · file"
-        status={`${Math.round(prob * 100)}% close prob`}
-        metrics={[
-          { k: "Closing in", v: "6 days", accent: true, sub: "Sentinel Holdings" },
-          { k: "Done", v: `${done} / ${CLOSING.length}`, accent: true, sub: "signed off" },
-          { k: "In progress", v: String(inProgress), sub: "active workstreams" },
-          { k: "Blockers", v: String(blocked + redFlags.length), sub: "checklist + red flags" },
-        ]}
-      />
+    <div data-page="closing" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Operator · Closing" title="Deal Closing Center"
+        badge={<span className="text-[12px] text-xo-muted">Sign · escrow · file · <span className={probTone}>{Math.round(prob * 100)}% close prob</span></span>}
+        actions={<>
+          <button type="button" onClick={() => window.print()} className={BTN_GHOST}>Print checklist</button>
+          <button type="button" onClick={() => setCallOpen(true)} className={BTN}>Closing call</button>
+        </>} />
 
-      <MarketTape items={buildMarketTape()} />
+      <section aria-label="Closing summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-xo-panel"><Metric label="Closing in" emphasis value="6 days" sub="Sentinel Holdings" /></div>
+        <div className="bg-xo-panel"><Metric label="Done" emphasis value={`${done} / ${CLOSING.length}`} sub="signed off" /></div>
+        <div className="bg-xo-panel"><Metric label="In progress" value={String(inProgress)} sub="active workstreams" /></div>
+        <div className="bg-xo-panel"><Metric label="Blockers" value={String(blocked + redFlags.length)} sub="checklist + red flags" /></div>
+      </section>
 
-      <div className="flex flex-wrap justify-end gap-2">
-        <Button variant="ghost" onClick={() => window.print()}>Print checklist</Button>
-        <Button onClick={() => setCallOpen(true)}>Closing call</Button>
-      </div>
+      <MarketTape items={tape} />
 
       {/* ── Closing call ──────────────────────────────────────────── */}
       <Modal open={callOpen} onClose={() => setCallOpen(false)} title="Closing call" subtitle={`Tuesday 08:00 · ${Math.round(prob * 100)}% modeled close probability`}
         footer={<><Button variant="ghost" onClick={downloadInvite}>Download invite (.ics)</Button><Button onClick={() => { setCallOpen(false); notify("Closing call scheduled"); }}>Schedule</Button></>}>
         <div className="space-y-4">
-          <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3 text-[12px] text-white/60">
+          <p className="rounded-sm border border-xo-line bg-xo-ink p-3 text-[12px] text-xo-muted">
             Participants: Founder · Counsel · Banker · Buyer. Dial-in issued with the calendar invite.
-          </div>
+          </p>
           <div>
-            <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-white/40">Agenda — gated on the open items</div>
+            <h3 className="mb-2 text-[12px] font-semibold text-xo-muted">Agenda — gated on the open items</h3>
             <ol className="space-y-1.5">
               {agenda.map((a, i) => (
-                <li key={i} className="flex items-baseline gap-2 text-[13px] text-white/75">
-                  <span className="font-mono text-[11px] text-white/40">{i + 1}.</span> {a}
+                <li key={i} className="flex items-baseline gap-2 text-[13px] text-xo-text">
+                  <span className="font-mono text-[11px] text-xo-faint">{i + 1}.</span> {a}
                 </li>
               ))}
             </ol>
@@ -142,115 +143,100 @@ const Closing: React.FC = () => {
 
       <BankerTake
         next={topRisk ? <>Clear <span className="text-white">{topRisk.title}</span> ({topRisk.owner}) — the top {topRisk.severity}-risk item gating the wire.</> : "Confirm escrow funding and hold the closing call."}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(dealValue)}</span> transaction · <span style={{ color: probColor }}>{Math.round(prob * 100)}%</span> modeled close probability.</>}
+        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(dealValue)}</span> transaction · <span className={probTone}>{Math.round(prob * 100)}%</span> modeled close probability.</>}
         inaction={<>{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</>}
         buyer={<><span className="text-white">Sentinel Holdings</span> — in signing, 6 days to close.</>}
         automate={<>ExitOS tracks every signature, escrow movement and filing, and nudges the owner before each due date.</>}
-        impact={<span style={{ color: probColor }}>{Math.round(prob * 100)}%</span>}
+        impact={<span className={probTone}>{Math.round(prob * 100)}%</span>}
         cta={{ label: "Generate closing docs", to: "/console/documents" }}
       />
 
-
       {/* Closing Risk Meter — close probability + the risks gating the wire */}
-      <Card className="mt-8 p-6" id="escrow">
-        <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-          <div className="flex flex-col items-center justify-center border-b border-white/10 pb-5 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Current close probability</div>
-            <div className="relative mt-3 flex h-32 w-32 items-center justify-center">
-              <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="9" />
-                <circle cx="50" cy="50" r="42" fill="none" stroke={probColor} strokeWidth="9" strokeLinecap="round"
+      <div id="escrow" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Current close probability" className="lg:col-span-4">
+          <div className="flex flex-col items-center px-4 py-4">
+            <div className="relative flex h-32 w-32 items-center justify-center">
+              <svg aria-hidden viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" className="text-xo-line" strokeWidth="9" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" className={probTone} strokeWidth="9" strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * 42}`} strokeDashoffset={`${2 * Math.PI * 42 * (1 - prob)}`} />
               </svg>
               <div className="absolute text-center">
-                <div className="font-mono text-3xl font-bold" style={{ color: probColor }}>{Math.round(prob * 100)}%</div>
-                <div className="text-[9px] uppercase tracking-wide text-white/40">to close</div>
+                <div className={`font-mono text-3xl font-semibold ${probTone}`}>{Math.round(prob * 100)}%</div>
+                <div className="text-[11px] text-xo-muted">to close</div>
               </div>
             </div>
-            <div className="mt-3 text-[11px] text-white/45">{done}/{CLOSING.length} items signed off</div>
+            <p className="mt-3 text-[12px] text-xo-muted">{done}/{CLOSING.length} items signed off</p>
           </div>
-          <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Risks gating the close</div>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {risks.slice(0, 6).map((r) => (
-                <div key={r.title} className="flex items-start gap-2.5 rounded-lg border border-white/10 bg-ink-900/40 p-3">
-                  <span className={`mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full ${r.severity === "high" ? "bg-red-400" : "bg-loi-400"}`} />
-                  <div>
-                    <div className="text-[12.5px] leading-snug text-white/85">{r.title}</div>
-                    <div className="text-[10px] uppercase tracking-wide text-white/40">{r.owner} · {r.severity} risk</div>
-                  </div>
+        </Section>
+        <Section title="Risks gating the close" className="lg:col-span-8"
+          foot={redFlags.length > 0 ? <span className="text-xo-risk">+ {redFlags.length} diligence red flag{redFlags.length === 1 ? "" : "s"} weighing on the close.</span> : undefined}>
+          <ul className="grid gap-px bg-xo-line sm:grid-cols-2">
+            {risks.slice(0, 6).map((r) => (
+              <li key={r.title} className="flex items-start gap-2.5 bg-xo-panel px-4 py-3">
+                <span aria-hidden className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${r.severity === "high" ? "bg-xo-risk" : "bg-xo-caution"}`} />
+                <div>
+                  <div className="text-[13px] leading-snug">{r.title}</div>
+                  <div className="text-[11px] text-xo-muted">{r.owner} · <span className={r.severity === "high" ? "text-xo-risk" : "text-xo-caution"}>{r.severity} risk</span></div>
                 </div>
-              ))}
-            </div>
-            {redFlags.length > 0 && (
-              <div className="mt-3 text-[12px] text-red-300/80">+ {redFlags.length} diligence red flag{redFlags.length === 1 ? "" : "s"} weighing on the close.</div>
-            )}
-          </div>
-        </div>
-      </Card>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      </div>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_320px]">
-        <div id="signatures">
-          <h2 className="mb-3 font-serif text-lg font-bold">Closing checklist — Sentinel Holdings</h2>
-          <Card>
-            <table className="w-full text-sm">
-              <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                <tr className="border-b border-white/10">
-                  <th className="px-5 py-3 w-12">#</th>
-                  <th className="px-5 py-3">Item</th>
-                  <th className="px-5 py-3">Owner</th>
-                  <th className="px-5 py-3">Due</th>
-                  <th className="px-5 py-3">Status</th>
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Closing checklist — Sentinel Holdings" className="lg:col-span-8">
+          <div id="signatures" />
+          <ScrollRegion label="Closing checklist">
+            <table className="w-full min-w-[560px] text-[13px]">
+              <thead className="text-left text-[11px] text-xo-muted">
+                <tr className="border-b border-xo-line">
+                  <th scope="col" className="w-12 px-4 py-2 font-medium">#</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Item</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Owner</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Due</th>
+                  <th scope="col" className="px-4 py-2 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {CLOSING.map((c, i) => (
-                  <tr key={c.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                    <td className="px-5 py-3.5 font-mono text-[11px] text-white/40">{(i + 1).toString().padStart(2, "0")}</td>
-                    <td className="px-5 py-3.5 text-white">{c.title}</td>
-                    <td className={`px-5 py-3.5 text-[12px] font-semibold uppercase tracking-wide ${OWNER_STYLE[c.owner]}`}>{c.owner}</td>
-                    <td className="px-5 py-3.5 text-xs text-white/60">{c.due ?? "—"}</td>
-                    <td className="px-5 py-3.5"><span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ring-1 ${STATUS_STYLE[c.status]}`}>{c.status.replace(/_/g, " ")}</span></td>
+                  <tr key={c.id} className="border-b border-xo-line last:border-0">
+                    <td className="px-4 py-2.5 font-mono text-[11px] text-xo-faint">{(i + 1).toString().padStart(2, "0")}</td>
+                    <th scope="row" className="px-2 py-2.5 text-left font-normal">{c.title}</th>
+                    <td className={`px-2 py-2.5 text-[12px] font-semibold ${OWNER_STYLE[c.owner]}`}>{c.owner}</td>
+                    <td className="px-2 py-2.5 text-[12px] text-xo-muted">{c.due ?? "—"}</td>
+                    <td className="px-4 py-2.5"><span className={`inline-block rounded-sm border px-1.5 py-px text-[11px] font-semibold ${STATUS_STYLE[c.status]}`}>{c.status.replace(/_/g, " ")}</span></td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </Card>
-        </div>
+          </ScrollRegion>
+        </Section>
 
-        <aside className="space-y-4">
-          <Card className="p-5">
-            <h3 className="font-serif text-base font-bold text-white">From diligence</h3>
-            <p className="mt-1 text-[11px] text-white/45">Surfaced by @exit/engines · runDueDiligence</p>
+        <Section title="From diligence" eyebrow="runDueDiligence" className="lg:col-span-4">
+          <div className="space-y-4 px-4 py-3">
             {redFlags.length > 0 && (
-              <div className="mt-4">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-red-300">Red flags</div>
-                <ul className="mt-2 space-y-2 text-[13px] text-white/75">
-                  {redFlags.map((f) => (
-                    <li key={f} className="flex items-baseline gap-2">
-                      <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-red-400" /> {f}
-                    </li>
-                  ))}
+              <div>
+                <h3 className="text-[12px] font-semibold text-xo-risk">Red flags</h3>
+                <ul className="mt-2 space-y-2 text-[13px]">
+                  {redFlags.map((f) => <li key={f} className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-xo-risk" /> {f}</li>)}
                 </ul>
               </div>
             )}
             {criticalQs.length > 0 && (
-              <div className="mt-4">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-loi-300">Critical questions</div>
-                <ul className="mt-2 space-y-2 text-[13px] text-white/75">
-                  {criticalQs.map((q) => (
-                    <li key={q} className="flex items-baseline gap-2">
-                      <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-loi-400" /> {q}
-                    </li>
-                  ))}
+              <div>
+                <h3 className="text-[12px] font-semibold text-xo-caution">Critical questions</h3>
+                <ul className="mt-2 space-y-2 text-[13px]">
+                  {criticalQs.map((q) => <li key={q} className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-xo-caution" /> {q}</li>)}
                 </ul>
               </div>
             )}
             {redFlags.length === 0 && criticalQs.length === 0 && (
-              <p className="mt-3 text-sm text-white/55">No diligence red flags or critical questions — clean buyer-facing posture.</p>
+              <p className="text-[13px] text-xo-muted">No diligence red flags or critical questions — clean buyer-facing posture.</p>
             )}
-          </Card>
-        </aside>
+          </div>
+        </Section>
       </div>
     </div>
   );

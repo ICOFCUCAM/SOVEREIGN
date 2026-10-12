@@ -38,8 +38,12 @@ A closing checklist (12 items with owner, due day and status), a close-probabili
 | G4 | Invented item specifics (95 % threshold, Form 8023 / NJ-1054). | Neutral items: "Shareholder consent — at the threshold your documents require"; "Regulatory and tax filings — as counsel advises". | ☐ |
 | G5 | Diligence on the demo company only, unlabelled. | `runDueDiligence(company)` for the active company; Demo data / Your intake badge. | ☐ |
 | G6 | Shared `BankerTake` and fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
-| G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☐ |
+| G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☑ G7-commit |
 
 ---
 
 ## Closure log
+
+### G7 — Design
+*Closed by:* `pages/Closing.tsx` rebuilt on `xo` (`PageHeader` `h1` "Deal Closing Center" with Print / Closing call actions; four metrics; the meter and gating risks as titled `Section`s — ring `aria-hidden`, figure in text; the checklist in a `ScrollRegion` with items as row headers; diligence flags and questions under `h3`s; status and severity in words with colour; shared `Card` and the hex colours replaced by xo tokens). Content carried over verbatim; the shared `BankerTake` stays until G6; G1–G6 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Pro 1440/390: 0 errors, `h1` 1 (was 0), **no overflow at 390** (was overflowing), axe 0, 27 tab stops with visible focus · closing-call dialog: role dialog, focus inside, axe 0, Escape closes and focus returns to "Closing call".
