@@ -29,7 +29,7 @@ Query the acquisition index (3,855 events, as of 2026-10-11) by sector keyword, 
 |---|---|---|---|
 | G1 | **Numeric filters accept anything; bad input silently changes results.** | `parseNumber` for min/max ($M, ≥ 0) and year (1900–this year, whole); invalid fields are flagged and ignored; min > max flagged. | ☑ `347c857` |
 | G2 | Provenance: index date not shown; "verified" in the code comment. | Show "Index as of …, N events"; state that rows are source-cited and not individually verified; comment corrected. | ☑ `5ef004c` |
-| G3 | Fake live tape. | `RegistryTape`. | ☐ |
+| G3 | Fake live tape. | `RegistryTape`. | ☑ G3-commit |
 | G4 | Design: no `h1`, 6 contrast failures, unreachable scroll areas, preset chips. | Rebuild on `xo` (labelled inputs, `ScrollRegion`s, table headers). | ☑ `0510a75` |
 
 ---
@@ -47,3 +47,7 @@ Query the acquisition index (3,855 events, as of 2026-10-11) by sector keyword, 
 ### G2 — Provenance
 *Closed by:* `pages/KnowledgeGraph.tsx`. Header badge "Query the registry · index as of 2026-10-11 · 3,855 events" (from the index file), and the description: "Every row comes from a source-cited registry entry (Wikipedia acquisition lists or Wikidata, shown in the Source column). Rows are not individually verified here; values are as disclosed in those sources." Code comment "verified deal data" → "source-cited acquisition index".
 *Verification:* `tsc -b`, eslint clean · Chromium: as-of date and count shown; description present.
+
+### G3 — Fake live tape
+*Closed by:* `pages/KnowledgeGraph.tsx`: pinging `MarketTape` → dated `RegistryTape` (index date).
+*Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.

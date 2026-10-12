@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
 import { PageHeader, Section, Metric, ScrollRegion, XO_INPUT, XO_LABEL } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { fmtUsd } from "../lib/market-intel";
@@ -78,7 +78,7 @@ const KnowledgeGraph: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Showing" value={String(result.events.length)} sub="top matches" /></div>
       </section>
 
-      <MarketTape items={buildMarketTape()} />
+      <RegistryTape items={buildMarketTape()} asOf={INDEX.as_of.slice(0, 10)} />
 
       <Section title="Query" className="border border-xo-line">
         <div className="px-4 py-3">
