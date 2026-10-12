@@ -22,8 +22,8 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | 16 | `/console/buyer-graph` | Buyer Graph | `BuyerGraph` | founder | Preparation or Pro | ☑ done · awaiting final review |
 | 17 | `/console/buyer/:id` (guarded by `/console/buyer-graph`) | Buyer Graph | `BuyerProfile` | founder | Preparation or Pro | ☑ done · awaiting final review |
 | 18 | `/console/market-map` | Market Map | `MarketMap` | founder | Preparation or Pro | ☑ done · awaiting final review |
-| 19 | `/console/knowledge-graph` | Knowledge Graph | `KnowledgeGraph` | founder | Preparation or Pro | ◐ in progress |
-| 20 | `/console/outcomes` | Outcome Intelligence | `OutcomeIntelligence` | founder | Preparation or Pro | ☐ |
+| 19 | `/console/knowledge-graph` | Knowledge Graph | `KnowledgeGraph` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 20 | `/console/outcomes` | Outcome Intelligence | `OutcomeIntelligence` | founder | Preparation or Pro | ◐ in progress |
 | 21 | `/console/indexes` | Acquisition Indexes | `Indexes` | founder | Preparation or Pro | ☐ |
 | 22 | `/console/investors` | Cap Table | `Investors` | founder | none | ☐ |
 | 23 | `/console/negotiator` | Bid Room | `Negotiator` | founder | Pro | ☐ |

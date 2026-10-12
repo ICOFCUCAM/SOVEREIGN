@@ -5,7 +5,7 @@
 | Route | `/console/knowledge-graph` |
 | Component | `src/pages/KnowledgeGraph.tsx` (157 lines) |
 | NAV | "Knowledge Graph", founder, **Preparation or Active Mandate** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All four gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `b57bb80`)
 
@@ -51,3 +51,12 @@ Query the acquisition index (3,855 events, as of 2026-10-11) by sector keyword, 
 ### G3 — Fake live tape
 *Closed by:* `pages/KnowledgeGraph.tsx`: pinging `MarketTape` → dated `RegistryTape` (index date).
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 6), all tab stops with visible focus · filter validation exercised (invalid min, min > max, invalid year) · free: Upgrade page · 0 "live" words.
+
+## Known issues
+- Results are capped at 150 rows and 60 buyers (unchanged; the "Showing" metric and the result note say so).
+- The index carries source but not verification status per row.
