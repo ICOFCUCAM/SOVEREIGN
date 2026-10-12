@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, Field, inputCls, fmtMoney, copyText } from "../lib/ui";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
@@ -79,7 +80,7 @@ const Buyers: React.FC = () => {
         <div className="bg-xo-panel"><XMetric label="Top fit probability" emphasis value={candidates[0] ? `${(candidates[0].probability * 100).toFixed(0)}%` : "—"} sub={candidates[0]?.buyer.name} /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <Modal open={filterOpen} onClose={() => setFilterOpen(false)} title="Filter buyers" subtitle={`${candidates.length} of ${all.length} match`} size="md"
         footer={<><Button variant="ghost" onClick={() => setFilter({ type: "all", appetite: "all", interest: "all" })}>Clear</Button><Button onClick={() => setFilterOpen(false)}>Done</Button></>}>
