@@ -288,6 +288,17 @@ A **development-only** page, `/hero-lab?v=1…4` (`pages/HeroLab.tsx`), renders 
 
 The live homepage is unchanged until the owner chooses. Screens: `scratchpad/heroes/hero-{1..4}-{1440,390}.jpg`; all eight render with 0 errors and no overflow.
 
+
+## Phase 6 — The big screen itself (owner's choice pending)
+Owner, 2026-10-12: "when I talk of the dashboard I mean the big screen that is real. I want it iconic … no design and architecture implementation in it". Then: "take 1, 2 and 3 and build three different formats for me to choose". Three formats were added to the dev-only hero lab:
+- **A — `/hero-lab?v=5`: the redesigned screen** (`components/ExchangeWall.tsx`) in the current trading-hall setting.
+  - It keeps the board's data and behaviour: sector drill-down across buyers and deals, the deal detail (now a labelled dialog that closes with Escape), the ticker, the clock, the heartbeat and the spotlight row.
+  - It restructures the screen into: a header strip; an **aggregate-capacity index** with four supporting figures; ranked strategic buyers; a **departures-style deal board** (date, target, acquirer, value, status lamp); **rising demand columns** that act as the sector switch; and the ticker.
+- **B — `/hero-lab?v=6`: the current screen** (exchange ribbon + `CommandBoard`, unchanged) installed in a **coded trading hall** (`components/TradingHall.tsx`): back-wall stone seams, a ceiling light grid in perspective, two fluted pilasters with lit capitals and bases, a light cove, the screen in a wall frame on a plinth, and a polished perspective floor that **reflects the live screen** (CSS `box-reflect`; browsers without it show only the floor glow).
+- **C — `/hero-lab?v=7`: both** — the redesigned screen inside the trading hall.
+
+The headline and proof figures sit in the hall for B and C. `ExchangeWall` and `TradingHall` are imported only by the dev-only lab, so production is unchanged. Screens: `scratchpad/heroes/hero-{5,6,7}-{1440,390}.jpg`; all render with 0 errors and no overflow.
+
 ---
 
 ## Closure log

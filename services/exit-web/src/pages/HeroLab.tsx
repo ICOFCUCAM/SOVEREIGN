@@ -5,9 +5,12 @@ import { CommandBoard } from "./Landing";
 import { MARKET_FMT, HISTORY_FMT } from "../lib/market-stats";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 import { useI18n } from "../lib/i18n";
+import ExchangeWall from "../components/ExchangeWall";
+import TradingHall from "../components/TradingHall";
 
-// HERO LAB — development-only preview of four hero concepts for the owner to
-// choose from (/hero-lab?v=1…4; not routed in production builds). The board
+// HERO LAB — development-only preview of hero concepts for the owner to
+// choose from (/hero-lab?v=1…7; not routed in production builds). 5–7 are the
+// big-screen formats: A redesigned screen, B coded hall, C both. The board
 // is the homepage's own `CommandBoard` with the same bezel and ribbon markup;
 // only its staging differs. Nothing here replaces the live homepage.
 
@@ -24,12 +27,9 @@ const KEYFRAMES = `
   @keyframes exFlash{0%,100%{background:transparent}50%{background:rgba(96,165,250,.10)}}
 `;
 
-/** The exchange display exactly as on the homepage: bezel, ribbon, board. */
-const Display: React.FC<{ mount?: "3d" | "flat"; reflection?: boolean }> = ({ mount = "flat", reflection = true }) => (
-  <div style={mount === "3d" ? { perspective: "2000px" } : undefined}>
-    <div className="relative">
-      <div className={`${mount === "3d" ? "ex-bezel " : ""}relative rounded-[20px] p-2.5`}
-        style={{ background: "linear-gradient(145deg,#1c2c44,#0a1626)", boxShadow: "0 28px 48px -30px rgba(8,20,40,0.32), 0 10px 22px -18px rgba(8,20,40,0.26), inset 0 1px 0 rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.10)" }}>
+/** The homepage screen's face: the exchange ribbon above the board. */
+const ScreenFace: React.FC = () => (
+  <>
         <div className="mb-1.5 flex items-center justify-between gap-3 rounded-md bg-black/25 px-3 py-1.5">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/90">ExitOS Acquisition Exchange</span>
@@ -49,6 +49,16 @@ const Display: React.FC<{ mount?: "3d" | "flat"; reflection?: boolean }> = ({ mo
           </div>
         </div>
         <CommandBoard />
+  </>
+);
+
+/** The exchange display as on the homepage: bezel around a screen face. */
+const Display: React.FC<{ mount?: "3d" | "flat"; reflection?: boolean; children?: React.ReactNode }> = ({ mount = "flat", reflection = true, children }) => (
+  <div style={mount === "3d" ? { perspective: "2000px" } : undefined}>
+    <div className="relative">
+      <div className={`${mount === "3d" ? "ex-bezel " : ""}relative rounded-[20px] p-2.5`}
+        style={{ background: "linear-gradient(145deg,#1c2c44,#0a1626)", boxShadow: "0 28px 48px -30px rgba(8,20,40,0.32), 0 10px 22px -18px rgba(8,20,40,0.26), inset 0 1px 0 rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.10)" }}>
+        {children ?? <ScreenFace />}
       </div>
       {reflection && (
         <div aria-hidden className={`${mount === "3d" ? "ex-reflection " : ""}pointer-events-none absolute inset-x-0 top-full hidden h-28 overflow-hidden lg:block`}
@@ -193,7 +203,88 @@ const HeroMonolith: React.FC = () => {
   );
 };
 
-const VARIANTS: Record<string, React.FC> = { "1": HeroHall, "2": HeroNight, "3": HeroFrontPage, "4": HeroMonolith };
+
+/* ── 5 · FORMAT A — the redesigned screen in the current trading hall ──── */
+const HeroWallInHall: React.FC = () => {
+  const { t, nav, h1, proof } = useHero();
+  return (
+    <section className="relative overflow-hidden border-b border-slate-200">
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/command-center.png)" }} />
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/95 from-10% via-white/60 via-40% to-white/0" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#eef2f7] via-[#eef2f7]/70 to-transparent" />
+      <div className={`${WRAP} relative grid min-h-[860px] items-center gap-10 py-16 xl:grid-cols-[0.62fr_1.58fr]`}>
+        <div className="min-w-0">
+          <div className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-slate-600">{t("hero.eyebrow")}</div>
+          <h1 className="mt-6 font-editorial text-[clamp(3rem,4.4vw,4.8rem)] font-semibold leading-[0.9] tracking-[-0.045em] text-ink-900">
+            {h1.map((l, i) => <span key={i} className={`block ${i === h1.length - 1 ? "italic text-blue-600" : ""}`}>{l}</span>)}
+          </h1>
+          <p className="mt-8 max-w-md border-l-2 border-blue-600 bg-white/80 py-2 pl-4 font-editorial text-[20px] leading-snug text-ink-900 backdrop-blur-sm">{t("hero.sub")}</p>
+          <div className="mt-8 flex flex-wrap gap-2.5">
+            <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("nav.access")} <Arrow /></button>
+            <button onClick={() => nav("/pricing")} className={`${BTN} border border-ink-900 bg-white/70 text-ink-900`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
+          </div>
+        </div>
+        <div className="min-w-0 xl:translate-x-10"><Display mount="3d"><ExchangeWall /></Display></div>
+      </div>
+      <div className={`${WRAP} relative flex flex-wrap gap-x-10 gap-y-3 border-t border-slate-300/80 py-5`}>
+        {proof.map(([v, l]) => <div key={l} className="flex items-baseline gap-2"><span className="font-mono text-[16px] font-bold text-ink-900">{v}</span><span className="text-[12px] text-slate-600">{l}</span></div>)}
+      </div>
+    </section>
+  );
+};
+
+/** Headline block for the hall formats (white on the dark hall). */
+const HallHeadline: React.FC = () => {
+  const { t, nav, h1 } = useHero();
+  return (
+    <div className="relative mx-auto w-full max-w-[1480px] px-5 pb-12 pt-16 text-white sm:px-8 lg:px-12 lg:pt-20">
+      <div className="grid items-end gap-8 lg:grid-cols-[1.4fr_1fr]">
+        <div>
+          <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-blue-300">{t("hero.eyebrow")}</div>
+          <h1 className="mt-5 font-editorial text-[clamp(3rem,6vw,6.4rem)] font-semibold leading-[0.9] tracking-[-0.045em]">
+            {h1.map((l, i) => <span key={i} className={i === h1.length - 1 ? "italic text-blue-300" : ""}>{l}{i < h1.length - 1 ? " " : ""}</span>)}
+          </h1>
+        </div>
+        <div className="lg:pb-3">
+          <p className="max-w-md text-[16px] leading-relaxed text-blue-100/85">{t("hero.sub")}</p>
+          <div className="mt-6 flex flex-wrap gap-2.5">
+            <button onClick={() => nav("/console")} className={`${BTN} bg-white text-ink-900 hover:bg-blue-50`}>{t("nav.access")} <Arrow /></button>
+            <button onClick={() => nav("/pricing")} className={`${BTN} border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const HallProof: React.FC = () => {
+  const { proof } = useHero();
+  return (
+    <div className="relative mx-auto -mt-28 grid w-full max-w-[1320px] grid-cols-2 border-t border-white/15 px-5 pb-12 pt-6 text-white sm:grid-cols-4 sm:px-8 lg:px-12">
+      {proof.map(([v, l]) => <div key={l} className="py-2"><div className="font-editorial text-[2rem] font-semibold leading-none">{v}</div><div className="mt-2 text-[12px] text-blue-100/70">{l}</div></div>)}
+    </div>
+  );
+};
+
+/* ── 6 · FORMAT B — the current screen, installed in the coded trading hall ── */
+const HeroHallClassic: React.FC = () => (
+  <section>
+    <TradingHall head={<HallHeadline />} foot={<HallProof />}>
+      <div className="rounded-[6px] bg-[#0a1626] p-1.5"><ScreenFace /></div>
+    </TradingHall>
+  </section>
+);
+
+/* ── 7 · FORMAT C — the redesigned screen in the coded trading hall ────── */
+const HeroHallWall: React.FC = () => (
+  <section>
+    <TradingHall head={<HallHeadline />} foot={<HallProof />}>
+      <ExchangeWall />
+    </TradingHall>
+  </section>
+);
+
+const VARIANTS: Record<string, React.FC> = { "1": HeroHall, "2": HeroNight, "3": HeroFrontPage, "4": HeroMonolith, "5": HeroWallInHall, "6": HeroHallClassic, "7": HeroHallWall };
 
 const HeroLab: React.FC = () => {
   const [params] = useSearchParams();
