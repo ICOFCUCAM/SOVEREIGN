@@ -471,7 +471,7 @@ Story chapters sit on ivory (`ex-paper`, #f6f8fb): 02 the opening argument, 05 t
 
 | # | Gap | Close by | Status |
 |---|---|---|---|
-| HX1 | The hero's grey wash between porcelain and navy reads as muddy; the radar and wordmark are too faint; the headline wraps into four lines at desktop; the capability strip uses mismatched glyphs and wraps; nothing marks the hero as ExitOS's own. | `HeroExchange.tsx`: two panels with one lit seam (no wash); the owner's palette as tokens (midnight, navy, signal, porcelain, ice); a three-line headline; one visual idea on the right — the acquisition aperture (graduated dial, rings, slow sweep, five points that light as it passes, a stronger wordmark); an understated secondary CTA; a capability rail with one icon family; phones stack the panels. | open |
+| HX1 | The hero's grey wash between porcelain and navy reads as muddy; the radar and wordmark are too faint; the headline wraps into four lines at desktop; the capability strip uses mismatched glyphs and wraps; nothing marks the hero as ExitOS's own. | `HeroExchange.tsx`: two panels with one lit seam (no wash); the owner's palette as tokens (midnight, navy, signal, porcelain, ice); a three-line headline; one visual idea on the right — the acquisition aperture (graduated dial, rings, slow sweep, five points that light as it passes, a stronger wordmark); an understated secondary CTA; a capability rail with one icon family; phones stack the panels. | closed `52ab54bc` |
 
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
 
@@ -1081,6 +1081,9 @@ Full verification recorded in 'Phase 13 verification' above: tsc, eslint, vitest
 
 ### EE30 — closed 45d4a9b1
 Design 20 preview published (https://claude.ai/artifact/1bm87SCm3aQyuvXWY3NJZC); the before/after of designs 19 and 20 at full page saved beside this file as phase13-before-after.jpg.
+
+### HX1 — closed 52ab54bc
+Hero moved into components/HeroExchange.tsx (same id ch-01, same copy keys, same links; Landing.tsx drops the old block and its two hero keyframes). Owner palette added as ex tokens and --hx variables. Porcelain editorial panel and navy instrument panel meet on a lit hairline seam with the porcelain's last glow, replacing the grey wash. Headline balanced into three lines (EN/FR/ES) at 1024–1920, signal-blue italic on its own line; body 16 px in a 6.6:1 slate; primary CTA filled, secondary an underlined link. The acquisition aperture: graduated 3° dial with 30° majors and four bearings, three rings, crosshair axes run out to the panel edges, a 16 s sweep, five opportunity points lit as the sweep passes (decorative, not data), a lit core; wordmark at higher contrast with its tagline. Capability rail: one 24-grid line-icon family, mono index, serif titles; five columns from 1024 with descriptions from 1360 (kept for screen readers below), a compact list below 1024. Motion: the sweep, node lighting and a 1.8 s entrance only when motion is allowed; none under reduced motion. Checked: tsc; eslint 0 errors (1 pre-existing warning); vitest 246/246; build; axe 0 on / and /pricing at 1440/390 (one finding — the rail's index numerals at 4.2:1 — fixed to ice/80); keyboard full pass 74 stops, 0 without focus; reduced motion 0 animations outside the board; no overflow at 1920/1440/1280/1024/768/390; both CTAs and the language switch exercised; hero meets the header and chapter 02 with no overlap; board identical. Before/after: hx1-before-after.jpg.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
