@@ -217,7 +217,7 @@ U1 + U2 + U4 first: a live product moment, a signature look and visible proof, w
 ### Gap register — Phase 3 (owner, 2026-10-12: "yes build" for U1, U2, U4)
 | # | Upgrade | Status |
 |---|---|---|
-| U1 | Value your company in 30 seconds | ☑ U1-commit |
+| U1 | Value your company in 30 seconds | ☑ `7e3680d0` |
 | U2 | The broadsheet ledger | ☐ |
 | U4 | Numbered source notes | ☐ |
 
