@@ -1,12 +1,12 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { runInstitutionalValuation } from "@exit/engines";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { buildOutreachPlan } from "../lib/outreach-plan";
-import { fmtUsdShort } from "../lib/buyer-dna";
+import { fmtUsdShort, DNA_AS_OF } from "../lib/buyer-dna";
+import { RegistryTape } from "../components/xo/RegistryTape";
 
 // BUYER OUTREACH PLAN — the banker's targeted program: ~20 qualified buyers
 // for one company, sequenced into waves that build competitive tension, each
@@ -45,7 +45,7 @@ const OutreachPlan: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Lead buyer · close-weighted" emphasis value={<>{fmtUsdShort(plan.waves[0]?.buyers[0]?.expectedValueUsd ?? 0)}{plan.waves[0]?.buyers[0] && (!plan.waves[0].buyers[0].premiumKnown || !plan.waves[0].buyers[0].closeKnown) && <PriorTag />}</>} sub={`${plan.waves[0]?.buyers[0]?.name ?? "—"} · expected offer × close rate`} /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">
         Buyers are ranked by <span className="font-semibold text-xo-text">likelihood score</span> — a composite of acquisition appetite, sector overlap with {company.name}, deal cadence and recency (0–100), not a probability.

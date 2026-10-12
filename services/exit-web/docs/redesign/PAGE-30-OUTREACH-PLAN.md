@@ -34,7 +34,7 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 | G3 | "Contact path" is a role; "Conf" rule unstated. | "Typical contact role"; "Contact confidence" with its rule (indexed deals, mostly unverified). | ☑ `d1f13e3` |
 | G4 | "Sequenced" implies a running programme. | Say it is a suggested plan: nothing is sent or scheduled; week labels are suggested timing. | ☑ `61bfec0` |
 | G5 | Demo unlabelled. | Demo data / Your intake badge and line. | ☑ `25f08d5` |
-| G6 | Fake live tape. | `RegistryTape`. | ☐ |
+| G6 | Fake live tape. | `RegistryTape`. | ☑ G6-commit |
 | G7 | Design: no `h1`, 26 contrast failures. | Rebuild on `xo`. | ☑ `edab625` |
 
 ---
@@ -66,3 +66,7 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 ### G5 — Demo unlabelled
 *Closed by:* `pages/OutreachPlan.tsx`. Eyebrow "Demo company: Helios Freight" / "Your intake: …" (was "Your mandate" or the bare name), **Demo data** / **Your intake** badge, and the description ends "Built for the demo company (Helios Freight); save an intake to build it for your company." or "Built for {company} from your saved intake."
 *Verification:* `tsc -b`, eslint clean · Chromium: demo → Demo data and the demo line; intake (Northwind Analytics) → Your intake and its line · Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G6 — Fake live tape
+*Closed by:* `pages/OutreachPlan.tsx`: pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
