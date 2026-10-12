@@ -5,7 +5,7 @@
 | Route | `/console/simulator` |
 | Component | `src/pages/Simulator.tsx` (519 lines) + `runStrategySimulator`, `runInstitutionalValuation` (`@exit/engines`), shared `BankerTake` |
 | NAV | "Scenario Simulator", founder, **Pro** (free: Upgrade page) |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All seven gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `f7c0ffd`)
 
@@ -75,3 +75,14 @@ The scenario transforms and their targets are unchanged: for the demo the six di
 ### G6 — Shared `BankerTake`; fake live tape
 *Closed by:* `pages/Simulator.tsx`. The shared `BankerTake` is replaced by a page-local "Recommended action" `Section` (stress-test before committing; Baseline — best expected value in the set, "the highest buyer, not an average"; Lead buyer — close rate, "prior where undisclosed"; If you skip this; What ExitOS does — "Scenarios are models, not forecasts."). Pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page) and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 206/206 · Chromium Pro 1440/390: 0 errors, `h1` 1, no overflow (was overflowing at 390), axe 0, all tab stops with visible focus · free: Upgrade page · all six scenarios exercised · input validation exercised · demo unchanged, intake checked.
+
+## Known issues
+- The strategy engine's close probability assumes independent offers from every buyer in the set and its value is the set's maximum (labelled); with five buyers it reads 100 % for the demo. Changing the model is an owner/engine decision.
+- The engine's summary sentence ("P(close)=100% over the set. Best expected realized …") is shown as the engine writes it, with the explanation beneath.
+- Scenario transforms (e.g. half a year of ARR compounding at the stated growth) are simple models (each states its assumption).
+- The page sends product telemetry (`simulator_viewed`, `simulator_scenario`) to the telemetry edge function; stubbed in tests.
