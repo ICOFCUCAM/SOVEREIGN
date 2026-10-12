@@ -46,3 +46,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 ---
 
 ## Closure log
+
+### X13 — Shared `Modal` accessibility
+*Closed by:* `lib/ui.tsx` `Modal` (additive; props and look unchanged): `role="dialog"`, `aria-modal="true"`, `aria-labelledby` the title (`useId`); focus moves to the panel on open, Tab and Shift+Tab cycle inside, focus returns to the opener on close; close button `type="button"` with a visible focus ring.
+*Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium (Buyer Profiles): warm-intro dialog found by role, focus inside on open, axe 0 inside the dialog, Escape closes it and focus returns to "Warm intro for Flexport Strategic"; the filter dialog likewise.

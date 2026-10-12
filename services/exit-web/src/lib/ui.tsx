@@ -124,23 +124,37 @@ export const Modal: React.FC<{
   size?: "md" | "lg" | "xl";
   children: React.ReactNode;
 }> = ({ open, onClose, title, subtitle, footer, size = "lg", children }) => {
+  const titleId = React.useId();
+  const panel = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent): void => { if (e.key === "Escape") onClose(); };
+    // Focus moves into the dialog and returns to the opener on close; Tab
+    // stays inside while it is open.
+    const opener = document.activeElement as HTMLElement | null;
+    panel.current?.focus();
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key !== "Tab" || !panel.current) return;
+      const f = [...panel.current.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')];
+      if (f.length === 0) { e.preventDefault(); return; }
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === panel.current)) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => { window.removeEventListener("keydown", onKey); opener?.focus?.(); };
   }, [open, onClose]);
   if (!open) return null;
   const maxW = size === "xl" ? "max-w-4xl" : size === "md" ? "max-w-lg" : "max-w-2xl";
   return (
     <div className="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-[6vh] backdrop-blur-sm" onClick={onClose}>
-      <div className={`w-full ${maxW} rounded-xl border border-white/10 bg-ink-800 shadow-2xl shadow-black/60`} onClick={(e) => e.stopPropagation()}>
+      <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={`w-full ${maxW} rounded-xl border border-white/10 bg-ink-800 shadow-2xl shadow-black/60 focus:outline-none`} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-4">
           <div className="min-w-0">
-            <h2 className="font-serif text-lg font-bold leading-tight text-white">{title}</h2>
+            <h2 id={titleId} className="font-serif text-lg font-bold leading-tight text-white">{title}</h2>
             {subtitle && <div className="mt-0.5 text-[12px] text-white/50">{subtitle}</div>}
           </div>
-          <button onClick={onClose} aria-label="Close" className="shrink-0 rounded-md p-1 text-white/50 transition hover:bg-white/5 hover:text-white">✕</button>
+          <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded-md p-1 text-white/50 transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">✕</button>
         </div>
         <div className="max-h-[64vh] overflow-y-auto px-6 py-5">{children}</div>
         {footer && <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-white/10 px-6 py-4">{footer}</div>}
