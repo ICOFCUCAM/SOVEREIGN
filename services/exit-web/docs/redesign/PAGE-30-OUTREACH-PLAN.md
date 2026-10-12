@@ -35,7 +35,7 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 | G4 | "Sequenced" implies a running programme. | Say it is a suggested plan: nothing is sent or scheduled; week labels are suggested timing. | ☐ |
 | G5 | Demo unlabelled. | Demo data / Your intake badge and line. | ☐ |
 | G6 | Fake live tape. | `RegistryTape`. | ☐ |
-| G7 | Design: no `h1`, 26 contrast failures. | Rebuild on `xo`. | ☑ G7-commit |
+| G7 | Design: no `h1`, 26 contrast failures. | Rebuild on `xo`. | ☑ `edab625` |
 
 ---
 
