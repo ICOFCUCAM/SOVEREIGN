@@ -1,17 +1,18 @@
 import React, { useMemo, useState } from "react";
 import { fmtMoney } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric, Chip } from "../components/xo";
+import { Link } from "react-router-dom";
+import { PageHeader, Section, Metric, Chip, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import {
   SEAT, SEAT_MANDATE, PORTAL_OPPORTUNITIES, PORTAL_NEGOTIATIONS, PORTAL_STATS,
 } from "../lib/buyer-portal";
 
-// Buyer Portal — the acquirer's side of the exchange. Founders run a sale;
-// buyers run a buy. The demo seat is the registry mandate the matching
-// engine ranks highest for the live listing, so this surface shows the same
-// deal the founder console shows — from the other chair. All figures come
-// from lib/buyer-portal.ts, derived from the live engine runs.
+// Buyer Home — the acquirer's side of the exchange. The workstation shows a
+// labelled DEMO seat: the registry buyer the matching engine ranks highest
+// for the demo listing, so it mirrors the founder console's demo deal from
+// the other chair. It is not the signed-in buyer's account. Figures come
+// from lib/buyer-portal.ts (demo listing, matches and sample offers).
 
 type Tab = "dashboard" | "watchlist" | "opportunities" | "diligence" | "negotiations";
 
@@ -27,11 +28,12 @@ const BuyerPortal: React.FC = () => {
 
   return (
     <div data-page="buyer-portal" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Buyer Console" title={SEAT.entry?.name ?? "Buyer Portal"}
-        badge={<span className="text-[12px] text-xo-muted">Acquirer seat · Rank #{SEAT.rank}</span>} />
+      <PageHeader eyebrow="◉ Buyer Console" title="Buyer Home"
+        badge={<Provenance kind="demo">Demo seat</Provenance>}
+        description={<>The workstation below shows a <span className="font-semibold text-xo-text">demo seat — {SEAT.entry?.name ?? "a registry buyer"}</span>, the registry buyer the matching engine ranks #{SEAT.rank} for the demo listing. It is not your account. Your own NDA requests are on <Link to="/console/nda" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Access Requests</Link>.</>} />
 
-      <section aria-label="Buyer summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Matched opportunities" emphasis value={String(PORTAL_STATS.opportunities)} sub="fit your mandate" /></div>
+      <section aria-label="Demo seat summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-xo-panel"><Metric label="Matched opportunities" emphasis value={String(PORTAL_STATS.opportunities)} sub="fit the demo seat's mandate" provenance="demo" /></div>
         <div className="bg-xo-panel"><Metric label="Watchlist" value={String(watch.length)} sub="tracked targets" /></div>
         <div className="bg-xo-panel"><Metric label="Data-room access" value={String(PORTAL_STATS.inDiligence)} sub={`${PORTAL_STATS.diligencePackages} packages/room`} /></div>
         <div className="bg-xo-panel"><Metric label="Active negotiations" emphasis value={String(PORTAL_STATS.negotiations)} sub="offers in motion" /></div>
@@ -39,7 +41,7 @@ const BuyerPortal: React.FC = () => {
 
       <MarketTape items={tape} />
 
-      <Section title="Buyer workstation" className="border border-xo-line"
+      <Section title={`Demo seat workstation · ${SEAT.entry?.name ?? "registry buyer"}`} className="border border-xo-line"
         right={<div role="group" aria-label="Workstation view" className="flex flex-wrap gap-1">
           {TABS.map(([k, l]) => <Chip key={k} pressed={tab === k} onToggle={() => setTab(k)}>{l}</Chip>)}
         </div>}>

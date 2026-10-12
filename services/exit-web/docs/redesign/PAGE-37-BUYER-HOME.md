@@ -31,7 +31,7 @@ The acquirer's home: a seat (name, mandate, rank), matched opportunities with a 
 ## Gap register — Page 37
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Demo seat shown as the buyer's own.** | `h1` "Buyer Home"; the seat section labelled "Demo seat — Flexport Strategic, a registry buyer; not your account" with a Demo data badge. | ☐ |
+| G1 | **Demo seat shown as the buyer's own.** | `h1` "Buyer Home"; the seat section labelled "Demo seat — Flexport Strategic, a registry buyer; not your account" with a Demo data badge. | ☑ G1-commit |
 | G2 | **The buyer's real activity is missing.** | "Your activity" section from the backend: your NDA requests (status), your deals (stage) and your saved mandate — with links to Access Requests and the Acquisition Radar; empty states that say how to start. | ☐ |
 | G3 | **Dead buttons; unlock and submit claims.** | Replace with links to where the action exists (Acquisition Radar for NDA requests and offers, Access Requests for status); remove "unlock on NDA", "data room granted" and "submit an offer from an opportunity". | ☐ |
 | G4 | D1 ask; fit as %; "strategic mid"; watchlist persistence unstated. | Ask = canonical midpoint (display); "fit score N/100"; "canonical midpoint"; "watchlist for this visit". | ☐ |
@@ -45,3 +45,7 @@ The acquirer's home: a seat (name, mandate, rank), matched opportunities with a 
 ### G6 — Design
 *Closed by:* `pages/BuyerPortal.tsx` rebuilt on `xo` (`PageHeader` `h1`; four metrics; the workstation as a titled `Section` whose view switcher is a labelled group of `Chip`s (`aria-pressed`); opportunities, diligence and negotiations as lists with `h3`s and `dl`s; stages in words; the watch toggle announces its state (`aria-pressed`); shared `Button`/`StageBadge` replaced; 24px+ targets). Content carried over verbatim; G1–G5 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium buyer free/Pro 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 4 contrast + 3 target-size), all tab stops with visible focus · after switching to Opportunities, Diligence, Negotiations and Watchlist: axe 0, no overflow.
+
+### G1 — Demo seat shown as the buyer's own
+*Closed by:* `pages/BuyerPortal.tsx`. `h1` "Flexport Strategic · Acquirer seat · Rank #1" → **"Buyer Home"** with a **Demo seat** badge and "The workstation below shows a demo seat — Flexport Strategic, the registry buyer the matching engine ranks #1 for the demo listing. It is not your account. Your own NDA requests are on Access Requests." (link); the workstation is titled "Demo seat workstation · Flexport Strategic"; the matched-opportunities metric carries a Demo data tag and "fit the demo seat's mandate"; file comment corrected.
+*Verification:* `tsc -b`, eslint clean · Chromium buyer: `h1` "Buyer Home", the demo-seat line shown · free 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
