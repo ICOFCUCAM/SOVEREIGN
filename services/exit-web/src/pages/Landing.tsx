@@ -313,9 +313,9 @@ const Landing: React.FC = () => {
           <div className="mt-12 border-t border-ink-900">
             {HOME_MODULES.map(([name, key, v], k) => (
               <details key={name} open={k === 0} className="group border-b border-slate-300">
-                <summary className="grid cursor-pointer list-none grid-cols-[28px_1fr_36px] items-center gap-x-3 gap-y-1.5 py-6 transition-colors hover:bg-[#F8F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:grid-cols-[58px_1fr_1fr_44px] sm:gap-x-5 sm:py-7 [&::-webkit-details-marker]:hidden">
+                <summary className="grid cursor-pointer list-none grid-cols-[28px_1fr_36px] items-center gap-x-3 gap-y-1.5 py-6 transition-colors hover:bg-[#F8F4EE] [&:hover_h3]:translate-x-1.5 [&:hover>span:last-child]:border-[#9A7E56] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:grid-cols-[58px_1fr_1fr_44px] sm:gap-x-5 sm:py-7 [&::-webkit-details-marker]:hidden">
                   <span className="font-mono text-[11px] text-[#7A6344]">0{k + 1}</span>
-                  <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em]">{name}</h3>
+                  <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em] transition-transform duration-500 ease-out motion-reduce:transition-none">{name}</h3>
                   <div className="col-start-2 row-start-2 max-w-[440px] sm:col-start-3 sm:row-start-1">
                     <p className="text-[14px] leading-relaxed text-slate-600">{t(`mod.${key}`)}</p>
                     <p className="mt-1.5 font-mono text-[11.5px] tabular-nums text-ink-900">{t(`mod.${key}.st`, v)}</p>
