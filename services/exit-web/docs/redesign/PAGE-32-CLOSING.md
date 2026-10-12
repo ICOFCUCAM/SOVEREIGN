@@ -37,7 +37,7 @@ A closing checklist (12 items with owner, due day and status), a close-probabili
 | G3 | **False "Schedule", dial-in and tracking claims; wrong day.** | Remove "Schedule" and the dial-in line; the invite is a download the user imports and sends; the subtitle shows the invite's real date; no tracking or nudging claims; invite names the active company. | ☑ `2cc24ca` |
 | G4 | Invented item specifics (95 % threshold, Form 8023 / NJ-1054). | Neutral items: "Shareholder consent — at the threshold your documents require"; "Regulatory and tax filings — as counsel advises". | ☑ `ccdf650` |
 | G5 | Diligence on the demo company only, unlabelled. | `runDueDiligence(company)` for the active company; Demo data / Your intake badge. | ☑ `f53a7e9` |
-| G6 | Shared `BankerTake` and fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
+| G6 | Shared `BankerTake` and fake live tape. | Page-local recommended action; `RegistryTape`. | ☑ G6-commit |
 | G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☑ `d8a0b6d` |
 
 ---
@@ -67,3 +67,7 @@ A closing checklist (12 items with owner, due day and status), a close-probabili
 ### G5 — Diligence on the demo company only, unlabelled
 *Closed by:* `pages/Closing.tsx`. Red flags and critical questions now come from `runDueDiligence(company)` for the active company (was the module-level demo `DILIGENCE`); eyebrow "Demo company: Helios Freight" / "Your intake: …", **Demo data** / **Your intake** badge; the diligence section names the company and says "From the diligence engine on the demo company; save an intake to run it on yours." / "… on your saved intake."
 *Verification:* `tsc -b`, eslint clean · Chromium Pro: demo → Demo data and the demo line; intake (Northwind) → Your intake and its line; for both the engine returns no red flags or critical questions ("clean buyer-facing posture") · 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G6 — Shared `BankerTake` and fake live tape
+*Closed by:* `pages/Closing.tsx`. The shared `BankerTake` is replaced by a page-local "Recommended action" `Section` (headline: clear the top gating item; Today — "No deal in closing — the checklist is a template. n/12 items done, checklist readiness N% (a rule, not a probability)"; If you wait; Next — with a link to generate the closing documents; What ExitOS does — no tracking or reminders). Its "At stake: **$165,000,000 transaction**" (the highest sample offer, presented as the deal in closing) is removed — no deal is in closing. Pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: 0 "$165" / "Sentinel" / "live" words, 0 pinging elements · free (Upgrade page) and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus (39 at 1440: 12 status selects added).

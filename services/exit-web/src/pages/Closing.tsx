@@ -1,12 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { Button, Modal, fmtMoney, downloadText, notify } from "../lib/ui";
-import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
+import { Button, Modal, downloadText, notify } from "../lib/ui";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance, ActionLink } from "../components/xo";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany } from "../lib/active-company";
-import { OFFER_EVALUATIONS } from "../lib/engines";
 import { runDueDiligence } from "@exit/engines";
-import BankerTake from "../components/BankerTake";
 
 // Deal Closing Center. A closing-checklist template whose statuses the
 // user sets (saved in this browser); the diligence engine surfaces
@@ -95,7 +94,6 @@ const Closing: React.FC = () => {
   const redFlags = DILIGENCE.redFlags;
   const prob = closeProbability(done, inProgress, CLOSING.length, blocked, redFlags.length);
   const risks = openRisks(CLOSING);
-  const dealValue = Math.max(0, ...OFFER_EVALUATIONS.map((e) => e.offer.headlinePriceUsd));
   const topRisk = risks[0];
 
   // Closing call — agenda built from the open gating items + diligence flags,
@@ -148,7 +146,7 @@ const Closing: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Blockers" value={String(blocked + redFlags.length)} sub="checklist + red flags" /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       {/* ── Closing call ──────────────────────────────────────────── */}
       <Modal open={callOpen} onClose={() => setCallOpen(false)} title="Closing call" subtitle={`Invite for ${inviteLabel} · checklist readiness ${Math.round(prob * 100)}%`}
@@ -170,15 +168,18 @@ const Closing: React.FC = () => {
         </div>
       </Modal>
 
-      <BankerTake
-        next={topRisk ? <>Clear <span className="text-white">{topRisk.title}</span> ({topRisk.owner}) — the top {topRisk.severity}-risk item gating the wire.</> : "Confirm escrow funding and hold the closing call."}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(dealValue)}</span> transaction · <span className={probTone}>checklist readiness {Math.round(prob * 100)}%</span> (a rule, not a probability).</>}
-        inaction={<>{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</>}
-        buyer={<>No deal in closing — the checklist is a template.</>}
-        automate={<>ExitOS keeps this checklist and builds the call agenda. It does not track signatures, escrow or filings, and sends no reminders.</>}
-        impact={<span className={probTone}>{Math.round(prob * 100)}%</span>}
-        cta={{ label: "Generate closing docs", to: "/console/documents" }}
-      />
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+        right={<span className={`font-mono text-[13px] font-semibold tabular-nums ${probTone}`}>readiness {Math.round(prob * 100)}%</span>}>
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">{topRisk ? <>Clear <span className="font-semibold">{topRisk.title}</span> ({topRisk.owner}) — the top {topRisk.severity}-risk item gating the wire.</> : "Confirm escrow funding and hold the closing call."}</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="Today">No deal in closing — the checklist is a template. {done}/{CLOSING.length} items done, checklist readiness <span className={probTone}>{Math.round(prob * 100)}%</span> (a rule, not a probability).</TakeCell>
+            <TakeCell k="If you wait">{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</TakeCell>
+            <TakeCell k="Next">Generate the closing documents, then work the gating items with counsel. <ActionLink to="/console/documents">Generate closing docs →</ActionLink></TakeCell>
+            <TakeCell k="What ExitOS does">Keeps this checklist and builds the call agenda. It does not track signatures, escrow or filings, and sends no reminders.</TakeCell>
+          </dl>
+        </div>
+      </Section>
 
       {/* Closing Risk Meter — checklist readiness + the risks gating the wire */}
       <div id="escrow" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
@@ -275,5 +276,12 @@ const Closing: React.FC = () => {
     </div>
   );
 };
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
+  </div>
+);
 
 export default Closing;
