@@ -10,6 +10,8 @@
   --ex-0: #040c18; --ex-1: #071a31; --ex-2: #0a2142; --ex-3: #163459;
   --ex-paper: #f6f8fb; --ex-live: #7CFF9F; --ex-done: #6ee7b7;
   --ex-hair: rgba(147,197,253,0.18);
+  /* the hero (HX1): owner palette */
+  --hx-midnight: #071426; --hx-navy: #10284B; --hx-signal: #326BFA; --hx-porcelain: #F4F6FA; --hx-ice: #91BFFF;
   --ex-glow: rgba(37,99,235,0.18);
   /* the field: a dark chapter's ground, top to floor */
   --ex-field: linear-gradient(180deg, #05101f 0%, #071a31 50%, #040c18 100%);

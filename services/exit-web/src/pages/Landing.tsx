@@ -9,6 +9,7 @@ import LedgerTable from "../components/LedgerTable";
 import CountUp from "../components/CountUp";
 import ChapterRail from "../components/ChapterRail";
 import LifecycleBand from "../components/LifecycleBand";
+import HeroExchange from "../components/HeroExchange";
 import PhoneActionBar from "../components/PhoneActionBar";
 import ProofSection from "../components/ProofSection";
 import ModulePreview from "../components/ModulePreview";
@@ -64,71 +65,8 @@ const Landing: React.FC = () => {
       <PhoneActionBar />
       <div className="relative">
         <SignatureLine />
-      {/* ===== 01 · HERO — after the owner's index(2).html (DD2), in the locked palette ===== */}
-      <section id="ch-01" className="relative isolate flex min-h-[min(880px,calc(100vh-72px))] flex-col overflow-hidden">
-        {/* the field: ivory on the left, the exchange ink on the right (owner, DD5 → EE2), stacked on phones; the seam eased (DD7) */}
-        <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(ellipse 50% 70% at 79% 40%, var(--ex-glow), transparent 70%), linear-gradient(180deg, var(--ex-1) 0%, #061629 60%, var(--ex-0) 100%)" }} />
-        {/* a fine grain on the black, and the floor darkening toward the strip; the ivory is laid over both */}
-        <div aria-hidden className="absolute inset-0 opacity-[0.07] mix-blend-screen" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
-        <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(4,12,24,0.55), transparent 22%)" }} />
-        <div aria-hidden className="absolute inset-0 hidden md:block" style={{ background: "linear-gradient(90deg, #f6f8fb 0%, #f6f8fb 30%, rgba(246,248,251,0.97) 35%, rgba(246,248,251,0.9) 40%, rgba(246,248,251,0.78) 44%, rgba(246,248,251,0.6) 48%, rgba(246,248,251,0.4) 52%, rgba(246,248,251,0.22) 56%, rgba(246,248,251,0.1) 60%, rgba(246,248,251,0.03) 64%, transparent 68%)" }} />
-        <div aria-hidden className="absolute inset-0 md:hidden" style={{ background: "linear-gradient(180deg, rgba(246,248,251,0.99) 0%, rgba(246,248,251,0.96) 70%, rgba(246,248,251,0) 100%)" }} />
-
-        <div className={`${WRAP} relative flex flex-1 items-center py-16 lg:py-20`}>
-          <div className="max-w-[640px] text-ink-900">
-            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.3em]"><span aria-hidden className="h-px w-7 bg-blue-600" />{t("hx.eyebrow")}</div>
-            <h1 className="mt-7 -ml-[0.045em] font-editorial text-[clamp(3.1rem,5.6vw,5.5rem)] font-semibold leading-[0.97] tracking-[-0.045em] [font-kerning:normal] [font-optical-sizing:auto] [font-feature-settings:'kern','liga','calt']">
-              {t("hx.h1")} <em className="-ml-[0.02em] italic tracking-[-0.035em] text-blue-600">{t("hx.h1em")}</em>
-            </h1>
-            <p className="mt-6 max-w-[440px] text-[15px] leading-[1.85] text-slate-700">{t("hx.body")}</p>
-            <div className="mt-8 flex flex-wrap gap-2.5">
-              <button onClick={() => nav("/platform")} className={BUTTON.primary}>{t("hx.explore")} <Arrow /></button>
-              <a href="#ch-04" className={`${BUTTON.secondary} md:bg-white/30 md:backdrop-blur-sm`}>{t("bar.value")} <span aria-hidden>↓</span></a>
-            </div>
-          </div>
-        </div>
-        {/* the watermark on the black side: the ExitOS mark and signature, faint (owner, DD4; refined DD7) */}
-        <div aria-hidden className="hx-mark pointer-events-none absolute right-[11%] top-1/2 hidden -translate-y-[56%] select-none flex-col items-center md:flex">
-          <svg viewBox="0 0 100 100" className="h-[min(28vw,420px)] w-[min(28vw,420px)]" fill="none">
-            <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.05)" strokeWidth="0.35" />
-            <circle cx="50" cy="50" r="33" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-            <circle cx="50" cy="50" r="22" stroke="rgba(255,255,255,0.05)" strokeWidth="0.35" strokeDasharray="0.6 2.2" />
-            <g stroke="rgba(255,255,255,0.08)" strokeWidth="0.3">
-              {Array.from({ length: 72 }, (_, k) => { const a = (k * 5 * Math.PI) / 180, r1 = k % 6 ? 42 : 40; return <line key={k} x1={50 + r1 * Math.cos(a)} y1={50 + r1 * Math.sin(a)} x2={50 + 44 * Math.cos(a)} y2={50 + 44 * Math.sin(a)} />; })}
-            </g>
-            <g stroke="rgba(255,255,255,0.16)" strokeWidth="0.5" strokeLinecap="round">
-              <line x1="50" y1="13" x2="50" y2="24" /><line x1="50" y1="76" x2="50" y2="87" />
-              <line x1="13" y1="50" x2="24" y2="50" /><line x1="76" y1="50" x2="87" y2="50" />
-            </g>
-            <circle cx="50" cy="50" r="1.6" fill="rgba(52,211,153,0.55)" />
-            <circle cx="50" cy="50" r="5" stroke="rgba(52,211,153,0.2)" strokeWidth="0.4" />
-          </svg>
-          <div className="-mt-[1.6vw] font-editorial font-semibold leading-none tracking-[-0.05em] text-transparent"
-            style={{ fontSize: "min(7vw, 104px)", backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04))", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
-            Exit<span className="italic">OS</span>
-          </div>
-          <div className="mt-4 flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.42em] text-white/20"><span className="h-px w-8 bg-white/15" />The acquisition exchange<span className="h-px w-8 bg-white/15" /></div>
-        </div>
-        {/* the vertical note on the black side */}
-        <div aria-hidden className="absolute bottom-40 right-[88px] hidden flex-col items-center gap-4 lg:flex">
-          <span className="font-mono text-[9.5px] uppercase tracking-[0.24em] text-white/55" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>{t("hx.note")}</span>
-          <span className="h-11 w-px bg-white/25" />
-        </div>
-
-        {/* the capability strip: a lit seam on top; each capability lights its own edge on hover (EE7) */}
-        <ul aria-label={t("hx.strip")} className="ex-seam relative grid bg-ex-0/95 text-white sm:grid-cols-2 lg:grid-cols-5">
-          {([["◎", 1], ["♧", 2], ["↗", 3], ["▤", 4], ["⌁", 5]] as const).map(([icon, k], i) => (
-            <li key={k} className={`group relative flex gap-3.5 px-5 py-6 transition-colors duration-300 hover:bg-white/[0.03] sm:px-8 lg:px-5 ${i ? "border-t border-white/10 sm:border-t-0 lg:border-l" : ""} ${i % 2 ? "sm:border-l" : ""} sm:border-white/10 lg:first:pl-[max(1.5rem,calc((100vw-1480px)/2+3rem))]`}>
-              <span aria-hidden className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-blue-400 transition-transform duration-500 group-hover:scale-x-100 motion-reduce:transition-none" />
-              <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full font-editorial text-[17px] leading-none text-blue-300 ring-1 ring-white/10 transition duration-300 group-hover:ring-blue-400/60">{icon}</span>
-              <span>
-                <span className="block pt-0.5 font-editorial text-[17px] font-semibold">{t(`hx.s${k}`)}</span>
-                <span className="mt-1.5 block max-w-[200px] text-[12px] leading-relaxed text-blue-100/75">{t(`hx.s${k}d`)}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* ===== 01 · HERO — the porcelain page and the acquisition aperture (owner brief, HX1) ===== */}
+      <HeroExchange />
 
       {/* ===== 02 · INTELLIGENCE MEETS OPPORTUNITY — index(2) section 2, with our lifecycle graph in its box (DD2) ===== */}
       <section id="ch-02" aria-labelledby="s2-h" className="border-b border-slate-200 bg-ex-paper text-ink-900">
@@ -212,9 +150,6 @@ const Landing: React.FC = () => {
           .rv-on [id^="ch-"]:not(.rv-in) .rv-h{opacity:0;transform:translateY(30px)}
           main h1,main h2,main h3{text-wrap:balance}
           main p{text-wrap:pretty;hanging-punctuation:first last}
-          @media (prefers-reduced-motion: no-preference){.hx-mark{animation:hxMark 2.4s cubic-bezier(.2,.7,.2,1) .3s both}.hx-mark svg{animation:hxDial 3.2s cubic-bezier(.2,.7,.2,1) .3s both}}
-          @keyframes hxMark{from{opacity:0;filter:blur(6px)}to{opacity:1;filter:none}}
-          @keyframes hxDial{from{transform:rotate(-24deg) scale(.96)}to{transform:none}}
           @media (prefers-reduced-motion: no-preference){.hero-rule{transform-origin:left;animation:heroRule .9s cubic-bezier(.2,.7,.2,1) both}}
           @keyframes exScan{0%{transform:translateY(-100%);opacity:0}8%{opacity:1}50%{opacity:.5}92%{opacity:1}100%{transform:translateY(2000%);opacity:0}}
           @keyframes exFlash{0%,100%{background:transparent}50%{background:rgba(96,165,250,.10)}}

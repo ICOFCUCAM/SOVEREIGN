@@ -467,6 +467,12 @@ Story chapters sit on ivory (`ex-paper`, #f6f8fb): 02 the opening argument, 05 t
 - Board: the ribbon and CommandBoard compared with the original, whitespace-normalised — identical.
 - Phones (390): hero, ledger and footer — no horizontal overflow, no console errors.
 
+## Phase 14 — The hero, to the owner's execution brief (2026-10-12)
+
+| # | Gap | Close by | Status |
+|---|---|---|---|
+| HX1 | The hero's grey wash between porcelain and navy reads as muddy; the radar and wordmark are too faint; the headline wraps into four lines at desktop; the capability strip uses mismatched glyphs and wraps; nothing marks the hero as ExitOS's own. | `HeroExchange.tsx`: two panels with one lit seam (no wash); the owner's palette as tokens (midnight, navy, signal, porcelain, ice); a three-line headline; one visual idea on the right — the acquisition aperture (graduated dial, rings, slow sweep, five points that light as it passes, a stronger wordmark); an understated secondary CTA; a capability rail with one icon family; phones stack the panels. | open |
+
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
 
 | # | Gate | Status |

@@ -77,6 +77,13 @@ export default {
           done: "#6ee7b7",       // closed / positive, on ink
           "done-ink": "#047857", // closed / positive, on paper
           hair: "rgba(147,197,253,0.18)", // hairline on ink
+          // the hero's instrument palette (owner brief, HX1)
+          midnight: "#071426",   // the hero's dark panel, its deepest
+          navy: "#10284B",       // the hero's dark panel where the light reaches it
+          signal: "#326BFA",     // the one accent: rule, italic, primary hover
+          porcelain: "#F4F6FA",  // the hero's editorial panel
+          ice: "#91BFFF",        // linework and labels on the dark panel
+          "slate-ink": "#4A5872", // secondary text on porcelain (6.6:1)
         },
         // Deal-stage bands for pipeline visualization
         stage: {
