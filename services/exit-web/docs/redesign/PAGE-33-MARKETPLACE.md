@@ -32,7 +32,7 @@ Founder free and Pro, buyer free: `h1` none · axe **dlitem ×18** (`dt`/`dd` ou
 ## Gap register — Page 33
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Simulated publishing and outreach presented as live.** | "Prepare the sell-side pack": generates the four real artefacts (teaser, CIM, anonymised view, matched buyers) and says outreach is **not started** and nothing is published here; link to "List on the exchange" (intake) and to the Outreach Plan; remove "Live", "in outreach", "data room indexed", "Shopify", the manifesto figures and the one-click claim. | ☑ G1-commit |
+| G1 | **Simulated publishing and outreach presented as live.** | "Prepare the sell-side pack": generates the four real artefacts (teaser, CIM, anonymised view, matched buyers) and says outreach is **not started** and nothing is published here; link to "List on the exchange" (intake) and to the Outreach Plan; remove "Live", "in outreach", "data room indexed", "Shopify", the manifesto figures and the one-click claim. | ☑ `ec4b220` |
 | G2 | **Buyers see the founder view (identity, ask, edit, matches).** | Buyer role gets its own view: the anonymised public listing only, no identity, no founder controls or matches; NDA requests go through the Acquisition Radar. | ☐ |
 | G3 | Dead "Request NDA"; "Edit listing" claims an update. | Founder public preview has no NDA button (it says buyers request from the Radar); edit is a "preview adjustment — not saved or published", validated with `parseNumber`. | ☐ |
 | G4 | **Ask band conflicts with D1; match score as %; false mechanics.** | Asking band and check size from `canonicalValuationFor` ($103M mid for the demo); "match score N/100"; mechanics stated truthfully (no data release on NDA; no engagement feed). | ☐ |
