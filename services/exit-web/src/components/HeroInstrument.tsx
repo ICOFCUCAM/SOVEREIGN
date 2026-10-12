@@ -28,6 +28,7 @@ import { LAND_COAST, LAND_FILL, POLAR } from "../lib/polar-map";
 //                    capability point in turn (01 → 05, 3.2 s apart); the
 //                    point answers with one soft pulse, and the outcome
 //                    indicator steps up one stage
+//   aperture wedge   fixed; its light breathes over 10 s (edge 0.8 s behind)
 //   core             breathes over 7 s
 
 const C = 250; // the dial's centre in its 500-unit view box; bezel radius 245
@@ -150,10 +151,15 @@ export const Dial: React.FC<{ active: number | null; onPoint: (i: number | null)
         {(() => { const [a, b] = P(0, 62), [c, d] = P(0, 204); return <line x1={a} y1={b} x2={c} y2={d} stroke="#F1E3C8" strokeOpacity=".14" strokeWidth="1" />; })()}
       </Layer>
 
-      {/* the aperture: the lit wedge of the benchmark, its leading edge bright; fixed */}
-      <Layer z={3}>
+      {/* the aperture: the lit wedge of the benchmark, fixed in place; its light breathes (10 s), and its bright
+          leading edge answers a little behind */}
+      <Layer z={3} className="hx-wedge">
         <path d={`M${C} ${C} L${w1x} ${w1y} A212 212 0 0 1 ${w2x} ${w2y} Z`} fill="url(#hx-wedge)" />
+      </Layer>
+      <Layer z={3}>
         <line x1={C} y1={C} x2={w1x} y2={w1y} stroke="#EFE2C9" strokeOpacity=".18" strokeWidth="1" />
+      </Layer>
+      <Layer z={3} className="hx-wedge-edge">
         <line x1={C} y1={C} x2={w2x} y2={w2y} stroke="#F4E8D2" strokeOpacity=".9" strokeWidth="1.5" />
       </Layer>
 
@@ -305,10 +311,12 @@ export const INSTRUMENT_CSS = `
     .hx-bead{animation:hxBead ${SIGNAL.cycle}s cubic-bezier(.5,0,.3,1) 1.2s infinite both}
     .hx-progress{animation:hxProgress ${SIGNAL.cycle}s cubic-bezier(.5,0,.3,1) 1.2s infinite both}
     .hx-breath{animation:hxBreath 7s ease-in-out infinite}
+    .hx-wedge{animation:hxWedge 10s ease-in-out infinite}
+    .hx-wedge-edge{animation:hxWedgeEdge 10s ease-in-out .8s infinite}
   }
   /* paused while the page is hidden or the hero is off screen */
   .hx-dial[data-hold] .hx-orbit .hx-spin{animation-play-state:paused}
-  [data-hx-paused] :is(.hx-spin,.hx-glint,.hx-light,.hx-pulse,.hx-flare,.hx-bead,.hx-progress,.hx-breath){animation-play-state:paused}
+  [data-hx-paused] :is(.hx-wedge,.hx-wedge-edge,.hx-spin,.hx-glint,.hx-light,.hx-pulse,.hx-flare,.hx-bead,.hx-progress,.hx-breath){animation-play-state:paused}
   /* phones: the essential instrument only */
   @media (max-width: 639px){ .hx-sweep,.hx-light{display:none} }
   @keyframes hxSpin{to{transform:rotate(360deg)}}
@@ -324,5 +332,8 @@ export const INSTRUMENT_CSS = `
     67%{transform:translateY(-50%)}71%{transform:translateY(-75%)}87%{transform:translateY(-75%)}91%{transform:translateY(-100%);opacity:1}99%{transform:translateY(-100%);opacity:0}100%{transform:translateY(0);opacity:0}}
   @keyframes hxProgress{0%{transform:scaleY(0);opacity:0}6%{opacity:1}11%,27%{transform:scaleY(0)}31%,47%{transform:scaleY(.25)}51%,67%{transform:scaleY(.5)}
     71%,87%{transform:scaleY(.75)}91%{transform:scaleY(1);opacity:1}99%{transform:scaleY(1);opacity:0}100%{transform:scaleY(0);opacity:0}}
+  /* the wedge's light: from a dimmer rest to its full benchmark brightness and back (opacity of its own layer) */
+  @keyframes hxWedge{0%,100%{opacity:.55}50%{opacity:1}}
+  @keyframes hxWedgeEdge{0%,100%{opacity:.7}50%{opacity:1}}
   @keyframes hxBreath{0%,100%{opacity:.78}50%{opacity:1}}
 `;
