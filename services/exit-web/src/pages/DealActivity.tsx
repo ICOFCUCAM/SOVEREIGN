@@ -5,11 +5,12 @@ import { PageHeader, Section, Metric } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { subscribe, allDealEvents, dealFlowFunnel, subjectsAtStage, clearDealEvents, type DealEvent } from "../lib/deal-events";
 import { networkStats } from "../lib/network-stats";
+import { listingDestination } from "../lib/exit-api";
 
-// DEAL ACTIVITY — the live capture feed. Every deal-flow action on the
-// platform is recorded here, forever: the behavioral + transaction data
-// that becomes ExitOS's proprietary moat. Today it persists to this browser;
-// behind a backend adapter it persists across the network, per account.
+// DEAL ACTIVITY — the record of deal-flow actions taken in ExitOS by this
+// user. Events persist in this browser, or in the signed-in account's own
+// event stream when the exchange backend is connected. The rates below are
+// computed from these events only; nothing is aggregated across users.
 
 const timeAgo = (iso: string): string => {
   const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
@@ -33,14 +34,16 @@ const DealActivity: React.FC = () => {
   const tape = useMemo(() => buildMarketTape(), [events.length]);
   const net = networkStats(events);
   const rate = (v: number | null): string => (v == null ? "—" : `${v}%`);
+  const where = listingDestination() === "exchange" ? "your account's stored events" : "this browser";
 
   return (
     <div data-page="deal-activity" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Exchange · Telemetry" title="Deal Activity"
-        badge={<span className="text-[12px] text-xo-muted">Capture spine · {events.length} events</span>} />
+        badge={<span className="text-[12px] text-xo-muted">{events.length} stored events</span>}
+        description={`Deal-flow actions you have taken in ExitOS (views, interest, NDA requests …), as recorded in ${where}. Counts and rates come from these events only.`} />
 
       <section aria-label="Activity summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Events captured" emphasis value={String(events.length)} sub="this session" /></div>
+        <div className="bg-xo-panel"><Metric label="Stored events" emphasis value={String(events.length)} sub="all recorded" /></div>
         <div className="bg-xo-panel"><Metric label="Buyers viewed" value={String(subjectsAtStage("viewed_buyer", events).length)} sub="distinct" /></div>
         <div className="bg-xo-panel"><Metric label="Interest expressed" value={String(subjectsAtStage("expressed_interest", events).length)} sub="distinct buyers" /></div>
         <div className="bg-xo-panel"><Metric label="NDAs in motion" value={String(subjectsAtStage("nda_requested", events).length)} sub="requested" /></div>
@@ -48,11 +51,11 @@ const DealActivity: React.FC = () => {
 
       <MarketTape items={tape} />
 
-      <Section title="Network effects · learned from captured transactions" className="border border-xo-line"
-        foot="Every completed action improves these rates — the response/close-rate moat no banker or database has. A rate stays null until the network produces the events to measure it; nothing is modelled.">
+      <Section title="Your rates · from recorded events" className="border border-xo-line"
+        foot="Computed from your own recorded events only — not across other users. A rate shows — until the events to measure it exist; nothing is modelled.">
         <dl className="grid grid-cols-2 gap-px bg-xo-line sm:grid-cols-3 lg:grid-cols-6">
           {[
-            { k: "Captured actions", v: String(net.actions), sub: "all-time" },
+            { k: "Recorded actions", v: String(net.actions), sub: "all stored" },
             { k: "Response rate", v: rate(net.responseRatePct), sub: "NDA signed / requested" },
             { k: "Meeting rate", v: rate(net.meetingRatePct), sub: "meetings / NDAs" },
             { k: "Close rate", v: rate(net.closeRatePct), sub: "closed / offers" },
@@ -69,9 +72,9 @@ const DealActivity: React.FC = () => {
       </Section>
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
-        <Section title="Deal-flow funnel · captured" className="lg:col-span-5"
+        <Section title="Deal-flow funnel · recorded" className="lg:col-span-5"
           right={events.length > 0 ? <button type="button" onClick={clearDealEvents} className="rounded-sm border border-xo-line px-2 py-1 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Clear</button> : undefined}
-          foot="With the exit-api, every event persists per account, network-wide — feeding response history and engagement for all participants.">
+          foot="Distinct buyers or listings that reached each stage in your recorded events.">
           <ol className="space-y-2 px-4 py-3">
             {funnel.map((s) => (
               <li key={s.kind}>
@@ -100,7 +103,7 @@ const DealActivity: React.FC = () => {
                 </li>
               ))}
             </ul>
-          ) : <p className="px-4 py-8 text-center text-[12px] text-xo-muted">No activity captured yet. Open a few buyer profiles or express interest to see the capture spine in action.</p>}
+          ) : <p className="px-4 py-8 text-center text-[12px] text-xo-muted">No activity recorded yet. Opening buyer profiles, expressing interest or requesting NDAs adds events here.</p>}
         </Section>
       </div>
     </div>

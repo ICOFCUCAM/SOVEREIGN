@@ -28,7 +28,7 @@ Founder and buyer (free): `h1` none · axe color-contrast ×14 (1440) · no over
 ## Gap register — Page 28
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **"Network-wide moat" overclaims; "this session".** | Say the figures are your own recorded actions (this browser, or your account when connected); "stored events"; no network claims. | ☐ |
+| G1 | **"Network-wide moat" overclaims; "this session".** | Say the figures are your own recorded actions (this browser, or your account when connected); "stored events"; no network claims. | ☑ G1-commit |
 | G2 | **"Clear" erases history without confirmation.** | Inline confirmation stating exactly what is erased (this browser's record, and the account's stored events when connected). | ☐ |
 | G3 | Buyer sees founder events recorded in the same browser. | Buyer view filters to events with `actorRole: "buyer"`. | ☐ |
 | G4 | Fake live tape. | `RegistryTape`. | ☐ |
@@ -41,3 +41,7 @@ Founder and buyer (free): `h1` none · axe color-contrast ×14 (1440) · no over
 ### G5 — Design
 *Closed by:* `pages/DealActivity.tsx` rebuilt on `xo` (`PageHeader` `h1` "Deal Activity"; four metrics; the rates as a definition list; the funnel as an ordered list with decorative bars; the feed as a list with links to buyer profiles; focus rings on every control). Content carried over verbatim; G1–G4 follow.
 *Verification:* `tsc -b`, eslint 0 errors (one pre-existing `useMemo` dependency warning on the tape, removed with the tape in G4) · Chromium free founder 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 14), 19 tab stops with visible focus.
+
+### G1 — "Network-wide moat" overclaims; "this session"
+*Closed by:* `pages/DealActivity.tsx` (text only; `networkStats` unchanged). Description: "Deal-flow actions you have taken in ExitOS …, as recorded in this browser" (or "your account's stored events" when `listingDestination()` is the exchange backend). "Network effects · learned from captured transactions" → "Your rates · from recorded events"; foot "… the response/close-rate moat no banker or database has … until the network produces the events" → "Computed from your own recorded events only — not across other users …"; funnel foot "every event persists per account, network-wide — feeding … all participants" → "Distinct buyers or listings that reached each stage in your recorded events."; "Events captured — this session" → "Stored events — all recorded"; "Capture spine" badge → "N stored events"; file comment corrected.
+*Verification:* `tsc -b`, eslint 0 errors · Chromium: 0 "network" / "moat" / "this session" / "capture spine"; free 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
