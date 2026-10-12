@@ -232,9 +232,10 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
             </div>
           </div>
         </div>
-        {/* the page closes with the mark it opened with: the hero's signature, faint, across the foot (EE17) */}
-        <div aria-hidden className="pointer-events-none -mb-[0.2em] select-none overflow-hidden text-center font-editorial font-semibold leading-[0.8] tracking-[-0.06em] text-transparent"
-          style={{ fontSize: "clamp(5rem, 21vw, 19rem)", backgroundImage: "linear-gradient(180deg, rgba(147,197,253,0.13), rgba(147,197,253,0.02) 80%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
+        {/* the sign-off: the page closes with the mark it opened with, across the foot of every page (EE17;
+            the homepage's own sign-off in chapter 09 moved here so there is one) */}
+        <div aria-hidden className="pointer-events-none mx-auto -mb-[0.2em] max-w-[1480px] select-none overflow-hidden px-5 font-editorial sm:px-8 lg:px-12 font-semibold leading-[0.8] tracking-[-0.06em] text-transparent"
+          style={{ fontSize: "clamp(6rem, 23vw, 21rem)", backgroundImage: "linear-gradient(180deg, rgba(147,197,253,0.42) 0%, rgba(147,197,253,0.05) 85%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
           Exit<span className="italic">OS</span>
         </div>
       </footer>

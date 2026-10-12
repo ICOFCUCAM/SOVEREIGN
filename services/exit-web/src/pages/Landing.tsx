@@ -424,12 +424,6 @@ const Landing: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* the sign-off: the wordmark, set at the width of the page */}
-        <div aria-hidden className={`${WRAP} relative select-none overflow-hidden pb-6`}>
-          <div className="font-editorial font-semibold leading-[0.8] tracking-[-0.06em] text-transparent" style={{ fontSize: "clamp(6rem, 24vw, 22rem)", backgroundImage: "linear-gradient(180deg, rgba(147,197,253,0.55) 0%, rgba(147,197,253,0.10) 85%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
-            Exit<span className="italic">OS</span>
-          </div>
-        </div>
       </section>
       </div>
       <SourcesSection collapsed />
