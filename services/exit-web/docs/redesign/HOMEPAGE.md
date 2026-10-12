@@ -442,7 +442,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE18 | Footer hierarchy is flat. | Footer columns with a heading rule, link hover, the legal line set small. | closed `30491847` |
 | EE19 | No way back from the end of a long page. | A back-to-top control at the foot of the signature line. | closed `bc8519e6` |
 | EE20 | Footer status dots read as live indicators. | Steady done-green dots, labelled as statements, no pulse. | closed `c87073e0` |
-| EE21 | The header stays white over dark chapters. | The header turns ink over dark chapters (logo, links, CTA re-coloured). | open |
+| EE21 | The header stays white over dark chapters. | The header turns ink over dark chapters (logo, links, CTA re-coloured). | closed `1d266593` |
 | EE22 | Primary and secondary buttons vary in size, weight and arrow. | One primary and one secondary button style used across the homepage. | open |
 | EE23 | Focus rings and link underlines vary. | One focus ring and one underline treatment in signal blue. | open |
 | EE24 | Figures mix old-style and lining at random. | Old-style in running text, tabular lining in tables and statistics. | open |
@@ -1035,6 +1035,9 @@ A 'Back to top ↑' control in the footer's bottom row (EN/FR/ES: ft.top), smoot
 
 ### EE20 — closed c87073e0
 The footer's three statements (deterministic engines, sourced market data, NDA-gated identity) are a list marked by small hollow done-green diamonds instead of filled green dots, set in mono: statements of how the exchange works, not status lights.
+
+### EE21 — closed 1d266593
+The sticky header takes the ink (ex-1 at 85%, white lockup, light links, white CTA, dark locale switch) whenever an element marked data-ink spans its midline — chapter 03 with the lifecycle band, chapter 09 and the footer — and returns to white over paper; a 500 ms colour transition, none under reduced motion; stays light while the phone menu is open.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
