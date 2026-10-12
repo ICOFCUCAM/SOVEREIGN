@@ -103,7 +103,7 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 ## Gap register — Homepage
 | # | Gap | Fix (colours locked; no feature removed) | Status |
 |---|---|---|---|
-| M1 | **Design: rebuild on the `index(9)` skeleton.** | Rebuild `Landing.tsx` and `MarketingChrome.tsx` on the skeleton's anatomy, using the locked ExitOS colours and materials mapped as above. All 17 blocks and the chrome are kept and repositioned into the skeleton's chapters (mapping below), with content carried over verbatim; M2–M9 then correct content. The hero concept (the command board as the hero instrument, beside the headline) is kept. The trading-hall photo stays in the hero. Routes, i18n keys, auth entry points (`/console`) and pricing links are unchanged. | ☐ |
+| M1 | **Design: rebuild on the `index(9)` skeleton.** | Rebuild `Landing.tsx` and `MarketingChrome.tsx` on the skeleton's anatomy, using the locked ExitOS colours and materials mapped as above. All 17 blocks and the chrome are kept and repositioned into the skeleton's chapters (mapping below), with content carried over verbatim; M2–M9 then correct content. The hero concept (the command board as the hero instrument, beside the headline) is kept. The trading-hall photo stays in the hero. Routes, i18n keys, auth entry points (`/console`) and pricing links are unchanged. | ☑ M1-commit |
 | M2 | **Fake live indicators.** | Remove the pings, pulses, rotating spotlight, session clock and the timer-driven score/heat oscillation. "Live Transactions" → "Disclosed transactions"; "Live Market"/"Live" → "Registry snapshot · as of {index date}"; `DATA_AS_OF` → the index's own date; "Live process" → "Typical timeline"; "live appetite", "24/7", "Live signals" reworded to what the data is. Figures and the drill-down stay. | ☐ |
 | M3 | **Unverified security and compliance claims.** | Remove "SOC 2" and the audit-trail, access-log, "secured", encryption and verification claims. Each slot is kept and states what the product does (for example "Your own actions are recorded", "NDA-gated identity: listings show a codename and bands until an NDA is signed", "Founder approval at each agent step", "Record checks on each NDA, not identity or funds verification", "Data-room uploads: read who can see them before adding files"). Owner can restore any claim with evidence (open decision). | ☐ |
 | M4 | **Illustrative content shown as real.** | Visible "Illustrative" labels on the cross-bid table and the example listings; "Market Heat" shows the registry-derived heat label instead of a constant. | ☐ |
@@ -138,6 +138,32 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 ---
 
 ## Closure log
+
+### M1 — Rebuild on the `index(9)` skeleton
+*Closed by:*
+- **`components/MarketingChrome.tsx`.**
+  - Skeleton top bar: logo, a mono topnote ("A Sovereign Infrastructure", from the footer), nav centred with an accent underline and `aria-current`, EN/FR/ES, Log in, and a square dark **Access the Exchange ↗** CTA. The mobile menu is unchanged.
+  - **A `main` landmark** around every marketing page's content.
+  - Footer re-laid on hairlines, with mono column heads in the accent; the same links, badges, legal text, locale switch and domain.
+  - New exports `Chapter` (the "02 / …" mono label) and `Editorial` (headline lines, last line or word in the accent italic). `Glyph` gained an optional `size` (additive).
+- **`tailwind.config`.** New font token `editorial` = Source Serif 4, already loaded by `index.css` (an existing ExitOS material). No colour token changed.
+- **`pages/Landing.tsx`.** The page component was rewritten on the skeleton's anatomy. All 17 blocks were kept and repositioned per the mapping table:
+  - Hero: mono topline; the `hero.h1` string in the editorial serif on offset lines, last line in blue-600 italic; the "01—" deck (`hero.sub`, `hero.body`); square **Access the Exchange** and **Deploy a Mandate**; the command board in its navy bezel as the artboard; the proof ribbon as the index rule; the trust strip in hairline cells; the trading-hall photo washed behind.
+  - Lifecycle as the navy band.
+  - Chapters 02 thesis + matrix, 03 workflow grid + flow + market structure, 04 buyers, 05 provenance, 06 record + bridge, 07–08 dark working environment (desk-framed cross-bid table, data rooms), 09 marketplace, 10 coverage, 11 governance, 12 final CTA.
+  - Data constants, `CommandBoard`, `OfferTable`, `Vault` and `WorldDots` are unchanged.
+  - Every text and figure was carried over verbatim (corrections follow in M2–M6). Colours are only the locked palette (`#f6f8fb`, white, `slate-*`, `ink-900/800`, `blue-600/300`, the navy gradients, the board colours, `emerald`).
+  - Routes and link targets are unchanged: `/console`, `/pricing`, `/modules`, `/platform`, and the existing `/marketplace` (M6).
+- No copy changed, so FR/ES are unaffected (M9 n/a).
+
+*Verification:*
+- `tsc -b`, eslint clean · `vitest` 218/218.
+- Chromium `/` 1440 and 390: 0 errors, `h1` 1, no overflow.
+- axe on `/`: **landmark-one-main and region ×155 gone**; colour-contrast 111 → 38 at 1440 (39 at 390, mostly the board's existing `white/40–45` labels, left for M7); empty-table-header and the 390 scrollable-region remain (M7).
+- `/platform`, `/modules`, `/pricing` (shared chrome) 1440/390: 0 errors, `h1` 1, no overflow; landmark/region issues gone; contrast 18 → 14, 12 → 8, 31 → 27 (their own content; later phase).
+- Page height: 1440 7,885 → 9,545 px (the skeleton's whitespace); 390 17,011 → 17,197 px.
+- "live" words and animations unchanged (M2, M8).
+- Screens: `scratchpad/home/m1b-*`.
 
 ---
 

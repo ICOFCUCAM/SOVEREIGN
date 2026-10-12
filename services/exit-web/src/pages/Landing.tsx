@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { MarketingChrome, Glyph, Mark, Arrow } from "../components/MarketingChrome";
+import { MarketingChrome, Glyph, Mark, Arrow, Chapter, Editorial } from "../components/MarketingChrome";
 import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS, TOP_JURISDICTIONS, type BoardTx } from "../lib/market-stats";
-import { useI18n, tLines } from "../lib/i18n";
+import { useI18n } from "../lib/i18n";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
-// marketing chrome (header nav → Platform / Modules / Pricing + footer). The
-// hero carries the coded "Acquisition Command Center" board. Figures are
-// illustrative. Company marks are brand-coloured monogram placeholders.
+// marketing chrome (header nav → Platform / Modules / Pricing + footer).
+// Editorial layout from the index(9) skeleton: an editorial-serif headline
+// beside the coded "Acquisition Command Center" board, a lifecycle band, then
+// numbered chapters on hairline rules. Colours are the locked ExitOS palette.
+// Company marks are brand-coloured monogram placeholders.
+
+const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
+const NAVY = "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)";
+const H2 = "font-editorial text-[clamp(2.25rem,4.6vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.035em]";
+const BTN = "inline-flex items-center gap-5 px-5 py-3.5 text-[12px] font-semibold transition";
+
+// The hero headline in the editorial serif: an all-caps i18n string reads in
+// sentence case on offset lines, the last line in the accent italic.
+const heroLines = (s: string): string[] =>
+  s.split("\n").map((l, i) => (l === l.toUpperCase() ? (i === 0 ? l.charAt(0) + l.slice(1).toLowerCase() : l.toLowerCase()) : l));
 
 const Landing: React.FC = () => {
   const nav = useNavigate();
@@ -19,92 +31,43 @@ const Landing: React.FC = () => {
     { icon: "users", metric: "100%", title: t("trust.control.t"), sub: t("trust.control.s") },
     { icon: "check", metric: t("trust.audit.m"), title: t("trust.audit.t"), sub: t("trust.audit.s") },
   ];
+  const h1 = heroLines(t("hero.h1"));
   return (
     <MarketingChrome active="home">
-      {/* ===== 01 · HERO ===== */}
-      {/* The board is NOT a floating UI card — it is a massive acquisition-
-          exchange display physically mounted inside the trading hall: large,
-          in perspective, with a structural mount, a big soft shadow, a polished
-          floor reflection and ambient light spilling onto the floor. */}
+      {/* ===== 01 · HERO — editorial headline + the command board ===== */}
       <section className="relative overflow-hidden border-b border-slate-200">
-        {/* trading-hall photograph as the hero environment */}
-        <div className="pointer-events-none absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/command-center.png)" }} aria-hidden />
-        {/* architectural framing: ceiling light grid + glass-wall mullions +
-            floor sheen, to read as an exchange hall rather than a stock office */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-40" aria-hidden
-          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(255,255,255,0.5) 0 2px, transparent 2px 96px)", maskImage: "linear-gradient(to bottom, #000, transparent)", WebkitMaskImage: "linear-gradient(to bottom, #000, transparent)" }} />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-2/3 opacity-[0.12]" aria-hidden
-          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(40,70,110,0.6) 0 1px, transparent 1px 140px), repeating-linear-gradient(0deg, rgba(40,70,110,0.4) 0 1px, transparent 1px 180px)" }} />
-        {/* sovereign data layer — a near-invisible transaction heat field rising
-            from the floor of the hall; reads as depth, not decoration */}
-        <div className="pointer-events-none absolute bottom-0 right-0 h-2/3 w-3/5 opacity-[0.07]" aria-hidden
-          style={{
-            backgroundImage: "repeating-linear-gradient(90deg, rgba(56,130,246,0.9) 0 10px, transparent 10px 34px)",
-            maskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 80%)",
-            WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 80%)",
-          }} />
-        {/* wash: strong on the left for the headline, light on the right so the
-            hall (desks, analysts, windows) stays visible around the board. */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/92 from-5% via-white/45 via-40% to-white/5" aria-hidden />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#eef2f7] via-[#eef2f7]/70 to-transparent" aria-hidden />
-        {/* floor sheen + ambient light the board emits onto the floor */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 opacity-50" aria-hidden style={{ background: "linear-gradient(to top, rgba(255,255,255,0.5), transparent)" }} />
-        <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-48 w-[48%] rounded-[50%] opacity-25 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.22), rgba(70,150,220,0) 70%)" }} aria-hidden />
-
-        {/* proof ribbon — institutional authority above the fold (real figures) */}
-        <div className="relative border-b border-slate-200/70 bg-white/70 backdrop-blur">
-          <div className="mx-auto grid max-w-[1480px] grid-cols-2 divide-x divide-slate-200/70 px-6 lg:grid-cols-4 lg:px-10">
-            {[
-              [MARKET_INDEX_FMT.events, t("ribbon.deals")],
-              [MARKET_FMT.buyers, t("ribbon.mandates")],
-              [HISTORY_FMT.disclosedValue, t("ribbon.value")],
-              [MARKET_FMT.activeMandates, t("ribbon.deploying")],
-            ].map(([v, l], i) => (
-              <div key={l} className="flex items-baseline gap-2.5 px-4 py-2.5">
-                {i === 3 && <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />}
-                <span className="font-mono text-[15px] font-bold tabular-nums text-ink-900">{v}</span>
-                <span className="text-[11px] leading-tight text-slate-500">{l}</span>
+        {/* the trading-hall photograph, washed to the page ground */}
+        <div className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: "url(/command-center.png)" }} aria-hidden />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#f6f8fb] from-30% via-[#f6f8fb]/90 via-55% to-[#f6f8fb]/70" aria-hidden />
+        <div className={`${WRAP} relative pb-12 pt-10 lg:pb-14 lg:pt-14`}>
+          <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+            <span>{t("hero.eyebrow")}</span>
+            <span className="text-blue-600">ExitOS · data as of {DATA_AS_OF}</span>
+          </div>
+          <div className="mt-9 grid items-end gap-10 lg:grid-cols-[1fr_1.08fr] lg:gap-12">
+            <div className="min-w-0">
+              <h1 className="font-editorial text-[clamp(3.2rem,6.4vw,6.6rem)] font-semibold leading-[0.9] tracking-[-0.045em] text-ink-900">
+                {h1.map((l, i) => (
+                  <span key={i} className={`block ${i === 1 ? "pl-[8%]" : ""} ${i === h1.length - 1 ? "italic text-blue-600" : ""}`}>{l}</span>
+                ))}
+              </h1>
+              <div className="mt-8 grid grid-cols-[44px_minmax(0,1fr)] gap-4 sm:grid-cols-[64px_minmax(0,440px)]">
+                <span className="pt-1 font-mono text-[11px] text-blue-600">01—</span>
+                <div>
+                  <p className="font-serif text-[18px] font-semibold leading-snug text-ink-900">{t("hero.sub")}</p>
+                  <p className="mt-3 text-[14.5px] leading-relaxed text-slate-600">{t("hero.body")}</p>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="relative mx-auto grid max-w-[1480px] items-center gap-8 px-6 py-16 lg:grid-cols-[0.9fr_1.3fr] lg:px-10 lg:py-20">
-          <div className="lg:pr-2">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-300/70 bg-white/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" /> {t("hero.eyebrow")}
+              <div className="mt-7 flex flex-wrap gap-2.5 sm:ml-[80px]">
+                <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("nav.access")} <Arrow /></button>
+                <button onClick={() => nav("/pricing")} className={`${BTN} border border-ink-900 bg-white/70 text-ink-900 hover:bg-ink-900 hover:text-white`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
+              </div>
             </div>
-            <h1 className="font-serif text-3xl font-bold leading-[1.04] tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
-              {tLines(t("hero.h1"))}
-            </h1>
-            <p className="mt-6 max-w-md font-serif text-xl font-semibold leading-snug text-ink-900">
-              {t("hero.sub")}
-            </p>
-            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-slate-600">
-              {t("hero.body")}
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-ink-800">{t("nav.access")} <Arrow /></button>
-              <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-6 py-3 text-sm font-semibold text-ink-900 backdrop-blur transition hover:border-slate-400 hover:bg-white">{t("hero.deploy")}</button>
-            </div>
-          </div>
 
-          {/* ---- MOUNTED ACQUISITION-EXCHANGE DISPLAY ---- */}
-          {/* pushed right + up, clear of the headline, with a light floor shadow */}
-          <div className="min-w-0 lg:translate-x-16 lg:-translate-y-6" style={{ perspective: "2000px" }}>
-            <div className="relative">
-              {/* structural mount / bezel behind the screen — the 3D mount
-                  rotation applies only at lg+; phones get the flat board */}
-              <div
-                className="ex-bezel relative rounded-[20px] p-2.5"
-                style={{
-                  background: "linear-gradient(145deg,#1c2c44,#0a1626)",
-                  boxShadow: "0 28px 48px -30px rgba(8,20,40,0.32), 0 10px 22px -18px rgba(8,20,40,0.26), inset 0 1px 0 rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                }}
-              >
-                {/* Bloomberg-style exchange ribbon */}
-                <div className="mb-1.5 flex items-center justify-between gap-3 rounded-md bg-black/25 px-3 py-1.5">
+            {/* ---- the acquisition-exchange display (the hero instrument) ---- */}
+            <div className="min-w-0">
+              <div className="relative p-2.5" style={{ background: "linear-gradient(145deg,#1c2c44,#0a1626)", boxShadow: "0 28px 48px -30px rgba(8,20,40,0.32), 0 10px 22px -18px rgba(8,20,40,0.26), inset 0 1px 0 rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.10)" }}>
+                <div className="mb-1.5 flex items-center justify-between gap-3 bg-black/25 px-3 py-1.5">
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/90">ExitOS Acquisition Exchange</span>
                     <span className="hidden items-center gap-1 rounded-sm bg-emerald-400/15 px-1.5 py-0.5 sm:inline-flex">
@@ -122,34 +85,37 @@ const Landing: React.FC = () => {
                     <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live</span>
                   </div>
                 </div>
-                {/* live deal-activity ticker (motion layer) */}
                 <CommandBoard />
               </div>
-
-              {/* polished-floor reflection of the screen (lg+ only) */}
-              <div
-                aria-hidden
-                className="ex-reflection pointer-events-none absolute inset-x-0 top-full hidden h-28 overflow-hidden lg:block"
-                style={{
-                  opacity: 0.07,
-                  filter: "blur(4px)",
-                  WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
-                  maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
-                  background: "linear-gradient(180deg,#0a1626,#08203B)",
-                }}
-              />
             </div>
+          </div>
+
+          {/* hero index rule — the proof ribbon (real figures) */}
+          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-slate-300/80 pt-5">
+            <span aria-hidden className="hidden h-px w-10 bg-blue-600 sm:block" />
+            {[
+              [MARKET_INDEX_FMT.events, t("ribbon.deals")],
+              [MARKET_FMT.buyers, t("ribbon.mandates")],
+              [HISTORY_FMT.disclosedValue, t("ribbon.value")],
+              [MARKET_FMT.activeMandates, t("ribbon.deploying")],
+            ].map(([v, l], i) => (
+              <div key={l} className="flex items-baseline gap-2">
+                {i === 3 && <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+                <span className="font-mono text-[15px] font-bold tabular-nums text-ink-900">{v}</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">{l}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* trust strip — 4 institutional metric cards, one full-width row */}
-        <div className="relative border-t border-slate-200/70 bg-white/55 backdrop-blur">
-          <div className="mx-auto grid max-w-[1480px] grid-cols-2 gap-px overflow-hidden px-6 lg:grid-cols-4 lg:px-10">
-            {heroTrust.map((c) => (
-              <div key={c.title} className="group flex items-center gap-3.5 px-5 py-5 transition hover:bg-white">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={c.icon} /></span>
+        {/* trust strip — four hairline-divided cells */}
+        <div className="relative border-t border-slate-200 bg-white/80 backdrop-blur">
+          <div className={`${WRAP} grid grid-cols-2 lg:grid-cols-4`}>
+            {heroTrust.map((c, i) => (
+              <div key={c.title} className={`flex items-center gap-3.5 py-5 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-6" : ""} ${i % 2 ? "border-l border-slate-200 pl-5 lg:pl-6" : ""}`}>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center text-blue-600 ring-1 ring-slate-200"><Glyph name={c.icon} /></span>
                 <div className="min-w-0">
-                  <div className="font-serif text-xl font-bold leading-none text-ink-900">{c.metric}</div>
+                  <div className="font-editorial text-[22px] font-semibold leading-none text-ink-900">{c.metric}</div>
                   <div className="mt-1 text-[12.5px] font-semibold leading-tight text-ink-800">{c.title}</div>
                   <div className="text-[11px] leading-snug text-slate-500">{c.sub}</div>
                 </div>
@@ -165,197 +131,206 @@ const Landing: React.FC = () => {
         `}</style>
       </section>
 
-      {/* ===== 1A · ACQUISITION LIFECYCLE RAIL ===== */}
-      <section className="border-b border-white/10" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
-        <div className="mx-auto max-w-[1480px] px-6 py-9 lg:px-10">
-          <div className="flex items-center justify-between">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-300">{t("lifecycle.title")}</div>
+      {/* ===== BAND · THE ACQUISITION LIFECYCLE ===== */}
+      <section aria-label={t("lifecycle.title")} className="text-white" style={{ background: NAVY }}>
+        <div className={`${WRAP} py-6`}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-300">{t("lifecycle.title")}</div>
             <div className="hidden items-center gap-1.5 sm:flex">
               <span className="relative inline-flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" /></span>
               <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-300">{t("lifecycle.live")}</span>
             </div>
           </div>
-          {/* one animated rail: a traveling pulse runs the full lifecycle */}
-          <div className="relative mt-7">
-            <div className="pointer-events-none absolute left-0 right-0 top-[11px] hidden h-px lg:block" style={{ background: "linear-gradient(90deg, transparent, rgba(96,165,250,.45) 6%, rgba(96,165,250,.45) 94%, transparent)" }} />
+          <div className="relative mt-5">
             <div className="pointer-events-none absolute top-[7px] hidden h-2 w-2 rounded-full lg:block" style={{ background: "#7CFF9F", boxShadow: "0 0 8px 2px rgba(124,255,159,.8)", animation: "exTravel 7s linear infinite" }} />
-            <ol className="grid grid-cols-2 gap-y-6 sm:grid-cols-4 lg:grid-cols-8">
+            <ol className="grid grid-cols-2 gap-y-4 border-t border-white/15 pt-4 sm:grid-cols-4 lg:grid-cols-8">
               {LIFECYCLE.map(([s, w], i) => (
-                <li key={s} className="relative flex flex-col items-center text-center">
-                  <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#0A1F3A] font-mono text-[10px] font-bold text-blue-200 ring-1 ring-blue-400/40">{i + 1}</span>
-                  <span className="mt-2.5 px-1 text-[11px] font-semibold leading-tight text-white/85">{t(s)}</span>
-                  <span className="mt-0.5 font-mono text-[9px] uppercase tracking-wide text-blue-300/60">{w}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 1B · MARKET STRUCTURE — the counterparties on the exchange ===== */}
-      <section id="solutions" className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-12 lg:px-10">
-          <div className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">{t("ms.eyebrow")}</div>
-          {/* horizontal institutional network — nodes joined by connecting lines */}
-          <div className="mt-8 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center">
-            {ECOSYSTEM.map((e, i) => (
-              <React.Fragment key={e.label}>
-                <div className="group flex flex-1 flex-col items-center rounded-lg border border-slate-200 bg-white px-3 py-4 text-center transition hover:border-blue-300">
-                  <span className="flex h-10 w-10 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={e.icon} small /></span>
-                  <div className="mt-2.5 text-[12px] font-semibold text-ink-800">{t(e.label)}</div>
-                  <div className="mt-0.5 text-[10px] text-slate-400">{t(e.meta, { n: e.n })}</div>
-                </div>
-                {i < ECOSYSTEM.length - 1 && (
-                  <div className="flex shrink-0 items-center justify-center text-blue-300">
-                    <span className="hidden h-px w-6 bg-blue-200 lg:block" /><span className="px-1 lg:px-0">&rarr;</span><span className="hidden h-px w-6 bg-blue-200 lg:block" />
-                  </div>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== ROW 5 · PIPELINE / WORKFLOW — futuristic horizontal stepper ===== */}
-      <section id="platform" className="relative overflow-hidden border-b border-white/10" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 55%,#0B2547 100%)" }}>
-        {/* ambient grid + glow */}
-        <div className="pointer-events-none absolute inset-0 opacity-[0.18]" aria-hidden
-          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(120,170,255,0.5) 0 1px, transparent 1px 120px), repeating-linear-gradient(0deg, rgba(120,170,255,0.35) 0 1px, transparent 1px 120px)", maskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 75%)" }} />
-        <div className="pointer-events-none absolute -top-20 left-1/2 h-48 w-[60%] -translate-x-1/2 rounded-[50%] opacity-30 blur-[90px]" aria-hidden style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.28), transparent 70%)" }} />
-
-        <div className="relative mx-auto max-w-[1320px] px-6 py-20 lg:px-10">
-          <div className="max-w-3xl">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-300">{t("wf.eyebrow")}</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white sm:text-[2.4rem]">{t("wf.h2")}</h2>
-          </div>
-
-          {/* 6 steps — one horizontal row, connected by a glowing rail */}
-          <div className="relative mt-14">
-            <div className="pointer-events-none absolute left-0 right-0 top-7 hidden h-px lg:block" aria-hidden style={{ background: "linear-gradient(90deg, transparent, rgba(96,165,250,0.55) 12%, rgba(96,165,250,0.55) 88%, transparent)" }} />
-            <ol className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
-              {STEPS.map((st, i) => (
-                <li key={st.title} className="relative flex flex-col items-center text-center">
-                  <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-lg text-white shadow-lg"
-                    style={{ background: "linear-gradient(145deg,#1b3a66,#0c244a)", boxShadow: "0 0 0 1px rgba(120,170,255,0.25), 0 8px 24px -10px rgba(56,130,246,0.7), inset 0 1px 0 rgba(255,255,255,0.12)" }}>
-                    <Glyph name={st.icon} />
-                    <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 font-mono text-[9px] font-bold text-white ring-2 ring-[#0A1F3A]">{i + 1}</span>
+                <li key={s} className="flex items-baseline gap-2 pr-3">
+                  <span className="font-mono text-[10px] text-blue-300">{String(i + 1).padStart(2, "0")}</span>
+                  <span>
+                    <span className="block font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-white/90">{t(s)}</span>
+                    <span className="block font-mono text-[9.5px] uppercase tracking-wide text-blue-300/70">{w}</span>
                   </span>
-                  <div className="mt-4 text-[13.5px] font-bold text-white">{st.title}</div>
-                  <div className="mt-1.5 text-[11.5px] leading-snug text-blue-100/55">{st.body}</div>
                 </li>
               ))}
             </ol>
           </div>
+        </div>
+      </section>
 
-          {/* Founder → Exit — compact horizontal flow */}
-          <div className="mt-16 flex flex-wrap items-center justify-center gap-x-2 gap-y-3 rounded-lg border border-white/10 bg-white/[0.04] px-5 py-4 backdrop-blur">
+      {/* ===== 02 · THE THESIS — why founders lose millions ===== */}
+      <section className="border-b border-slate-200 bg-white">
+        <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
+          <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
+            <Chapter n="02">{t("loss.eyebrow")}</Chapter>
+            <div>
+              <h2 className={`${H2} max-w-[18ch] text-ink-900`}><Editorial text={t("loss.h2")} /></h2>
+              <p className="mt-6 max-w-xl text-[14px] leading-relaxed text-slate-600">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}</p>
+            </div>
+          </div>
+          {/* comparison matrix: Traditional vs ExitOS */}
+          <div className="mt-12 overflow-x-auto border-y border-ink-900 lg:ml-[calc(27.5%+3vw)]">
+            <div className="min-w-[620px]">
+              <div className="grid grid-cols-[1.1fr_1fr_1fr] border-b border-slate-200">
+                <div className="px-4 py-3" />
+                <div className="px-4 py-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-500">Traditional Sale</div>
+                <div className="bg-ink-900 px-4 py-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white">With ExitOS</div>
+              </div>
+              {LOSSES.map((l) => (
+                <div key={l.problem} className="grid grid-cols-[1.1fr_1fr_1fr] border-b border-slate-200 last:border-0">
+                  <div className="flex items-center px-4 py-4 font-editorial text-[17px] font-semibold text-ink-900">{l.dimension}</div>
+                  <div className="flex items-center gap-2 px-4 py-4 text-[12.5px] text-slate-500">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center text-red-500"><Glyph name="x" small /></span>{l.problem}
+                  </div>
+                  <div className="flex items-center gap-2 bg-blue-50/40 px-4 py-4 text-[12.5px] font-medium text-ink-800">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center text-blue-600"><Glyph name="check" small /></span>{l.fix}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 03 · THE SYSTEM — founder → exit workflow ===== */}
+      <section id="platform" className="border-b border-slate-200">
+        <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div className="max-w-3xl">
+              <Chapter n="03">{t("wf.eyebrow")}</Chapter>
+              <h2 className={`${H2} mt-4 text-ink-900`}><Editorial text={t("wf.h2")} /></h2>
+            </div>
+          </div>
+          <ol className="mt-12 grid gap-px border-y border-ink-900 bg-slate-200 sm:grid-cols-2 lg:grid-cols-3">
+            {STEPS.map((st, i) => (
+              <li key={st.title} className="bg-[#f6f8fb] py-6 sm:px-6">
+                <span className="font-mono text-[10.5px] text-blue-600">{String(i + 1).padStart(2, "0")} /</span>
+                <div className="mt-5 text-blue-600"><Glyph name={st.icon} size={34} /></div>
+                <h3 className="mt-4 font-editorial text-[24px] font-semibold leading-tight text-ink-900">{st.title}</h3>
+                <p className="mt-2 max-w-xs text-[12.5px] leading-relaxed text-slate-600">{st.body}</p>
+              </li>
+            ))}
+          </ol>
+          {/* Founder → Exit — the flow in one mono line */}
+          <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-3">
             {EXCHANGE_FLOW.map((s, i) => (
               <React.Fragment key={s.title}>
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 ring-1 ring-blue-400/30"><Glyph name={s.icon} small /></span>
-                  <span className="text-[12px] font-semibold text-white/85">{s.title}</span>
+                  <span className="text-blue-600"><Glyph name={s.icon} small /></span>
+                  <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-800">{s.title}</span>
                 </div>
-                {i < EXCHANGE_FLOW.length - 1 && <span className="px-1 text-blue-300/50" aria-hidden>→</span>}
+                {i < EXCHANGE_FLOW.length - 1 && <span className="text-blue-600" aria-hidden>→</span>}
               </React.Fragment>
             ))}
+          </div>
+          {/* market structure — the counterparties on the exchange */}
+          <div id="solutions" className="mt-16">
+            <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t("ms.eyebrow")}</div>
+            <div className="mt-4 grid grid-cols-2 border-t border-slate-300 sm:grid-cols-3 lg:grid-cols-5">
+              {ECOSYSTEM.map((e, i) => (
+                <div key={e.label} className={`py-5 pr-4 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-5" : ""}`}>
+                  <span className="text-blue-600"><Glyph name={e.icon} /></span>
+                  <div className="mt-3 text-[13px] font-semibold text-ink-900">{t(e.label)}</div>
+                  <div className="mt-0.5 font-mono text-[10.5px] text-slate-500">{t(e.meta, { n: e.n })}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* ===== 04 · BUYER INTELLIGENCE ===== */}
       <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <div className="flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("bi.eyebrow")}</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("bi.h2"))}</h2>
-            <Link to="/console" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("bi.link")} &rarr;</Link>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {BUYERS.map((b) => (
-                <div key={b.name} className="rounded-md border border-slate-200 bg-white p-5 transition hover:border-blue-300">
-                  <div className="flex items-center gap-2.5">
-                    <Mark name={b.name} />
-                    <div>
-                      <div className="text-sm font-bold leading-tight text-ink-900">{b.name}</div>
-                      <div className="text-[10px] text-slate-400">{b.kind}</div>
-                    </div>
-                  </div>
-                  {/* appetite meter */}
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-slate-400">Acquisition Appetite</span>
-                      <span className="font-semibold text-blue-600">{b.appetite >= 90 ? "Very High" : "High"}</span>
-                    </div>
-                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                      <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-600" style={{ width: `${b.appetite}%` }} />
-                    </div>
-                  </div>
-                  <dl className="mt-3 space-y-2 text-[11px]">
-                    {b.rows.map((r) => (
-                      <div key={r[0]} className="flex items-baseline justify-between gap-2 border-t border-slate-100 pt-2">
-                        <dt className="text-slate-400">{r[0]}</dt>
-                        <dd className="text-right font-semibold text-ink-800">{r[1]}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </div>
-              ))}
+        <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
+          <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
+            <Chapter n="04">{t("bi.eyebrow")}</Chapter>
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <h2 className={`${H2} text-ink-900`}><Editorial text={t("bi.h2")} /></h2>
+              <Link to="/console" className="border-b border-blue-600 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-900">{t("bi.link")} ↗</Link>
             </div>
+          </div>
+          <div className="mt-12 grid border-y border-ink-900 sm:grid-cols-2 lg:grid-cols-5">
+            {BUYERS.map((b, i) => (
+              <div key={b.name} className={`py-6 pr-5 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-5" : ""} border-b border-slate-200 last:border-b-0 lg:border-b-0`}>
+                <div className="flex items-center gap-2.5">
+                  <Mark name={b.name} />
+                  <div>
+                    <div className="text-sm font-bold leading-tight text-ink-900">{b.name}</div>
+                    <div className="text-[10.5px] text-slate-500">{b.kind}</div>
+                  </div>
+                </div>
+                <div className="mt-5">
+                  <div className="flex items-center justify-between text-[10.5px]">
+                    <span className="text-slate-500">Acquisition Appetite</span>
+                    <span className="font-semibold text-blue-600">{b.appetite >= 90 ? "Very High" : "High"}</span>
+                  </div>
+                  <div className="mt-1.5 h-1 overflow-hidden bg-slate-100">
+                    <div className="h-full bg-blue-600" style={{ width: `${b.appetite}%` }} />
+                  </div>
+                </div>
+                <dl className="mt-4 space-y-2 text-[11px]">
+                  {b.rows.map((r) => (
+                    <div key={r[0]} className="flex items-baseline justify-between gap-2 border-t border-slate-100 pt-2">
+                      <dt className="text-slate-500">{r[0]}</dt>
+                      <dd className="text-right font-semibold text-ink-800">{r[1]}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ===== 05 · DATA PROVENANCE — where every number comes from ===== */}
+      {/* ===== 05 · DATA PROVENANCE ===== */}
       <section className="border-b border-slate-200">
-        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
-          <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
+          <div className="grid items-start gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-[6vw]">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("prov.eyebrow")}</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("prov.h2"))}</h2>
-              <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
-                {t("prov.body")}
-              </p>
-              <div className="mt-6 space-y-2.5">
+              <Chapter n="05">{t("prov.eyebrow")}</Chapter>
+              <h2 className={`${H2} mt-4 text-ink-900`}><Editorial text={t("prov.h2")} /></h2>
+              <p className="mt-6 max-w-md text-[14px] leading-relaxed text-slate-600">{t("prov.body")}</p>
+              <ol className="mt-8 border-t border-slate-300">
                 {PROVENANCE_PIPELINE.map((p, i) => (
-                  <div key={p.stage} className="flex items-center gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink-900 font-mono text-[10px] font-bold text-white">{i + 1}</span>
-                    <span className="text-[13px] font-semibold text-ink-800">{p.stage}</span>
-                    <span className="h-px flex-1 bg-slate-200" aria-hidden />
-                    <span className="text-[11.5px] text-slate-500">{p.detail}</span>
-                  </div>
+                  <li key={p.stage} className="flex items-baseline gap-4 border-b border-slate-200 py-3">
+                    <span className="font-mono text-[10.5px] text-blue-600">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="text-[13px] font-semibold text-ink-900">{p.stage}</span>
+                    <span className="ml-auto text-right text-[11.5px] text-slate-500">{p.detail}</span>
+                  </li>
                 ))}
-              </div>
+              </ol>
             </div>
             {/* confidence-tier register */}
-            <div className="overflow-hidden rounded-lg border border-slate-200">
-              <div className="flex items-center justify-between bg-ink-900 px-5 py-3">
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white">Confidence register</span>
-                <span className="text-[10px] uppercase tracking-wide text-white/50">applied to every estimate</span>
+            <div className="border-y border-ink-900">
+              <div className="flex items-center justify-between border-b border-slate-200 py-3">
+                <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-900">Confidence register</span>
+                <span className="font-mono text-[10px] uppercase tracking-wide text-slate-500">applied to every estimate</span>
               </div>
-              {CONFIDENCE_TIERS.map((t, i) => (
-                <div key={t.tier} className={"grid grid-cols-[110px_1fr] gap-4 px-5 py-4 " + (i % 2 ? "bg-slate-50/60" : "bg-white")}>
+              {CONFIDENCE_TIERS.map((ct) => (
+                <div key={ct.tier} className="grid grid-cols-[110px_1fr] gap-4 border-b border-slate-200 py-4 last:border-0">
                   <div>
-                    <span className="inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1" style={{ color: t.color, background: `${t.color}14`, borderColor: `${t.color}40` }}>{t.tier}</span>
+                    <span className="inline-block px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide ring-1" style={{ color: ct.color, background: `${ct.color}14`, borderColor: `${ct.color}40` }}>{ct.tier}</span>
                   </div>
                   <div>
-                    <div className="text-[13px] font-semibold text-ink-900">{t.basis}</div>
-                    <div className="mt-0.5 text-[12px] leading-snug text-slate-500">{t.detail}</div>
+                    <div className="text-[13px] font-semibold text-ink-900">{ct.basis}</div>
+                    <div className="mt-0.5 text-[12px] leading-snug text-slate-500">{ct.detail}</div>
                   </div>
                 </div>
               ))}
-              <div className="border-t border-slate-200 bg-slate-50 px-5 py-3 text-[11px] text-slate-500">
+              <div className="border-t border-slate-200 py-3 text-[11px] text-slate-500">
                 {HISTORY_FMT.events} disclosed events on record · sources: SEC EDGAR 8-K filings, Wikidata, press disclosures · refreshed with the registry
               </div>
             </div>
           </div>
-          {/* dense signal grid — one full-width row of live readouts */}
-          <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {COMMAND_FEATURES.map((f) => (
-              <div key={f.title} className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-blue-300">
+          {/* signal tiles — one hairline row */}
+          <div className="mt-14 grid grid-cols-2 border-y border-slate-300 sm:grid-cols-3 lg:grid-cols-6">
+            {COMMAND_FEATURES.map((f, i) => (
+              <div key={f.title} className={`py-5 pr-4 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-4" : ""}`}>
                 <div className="flex items-center justify-between">
-                  <span className="flex h-7 w-7 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={f.icon} small /></span>
-                  <span className="font-mono text-[14px] font-bold text-ink-900">{f.value}</span>
+                  <span className="text-blue-600"><Glyph name={f.icon} small /></span>
+                  <span className="font-mono text-[15px] font-bold text-ink-900">{f.value}</span>
                 </div>
-                <div className="mt-2.5 text-[12px] font-bold leading-tight text-ink-900">{f.title}</div>
+                <div className="mt-3 text-[12px] font-bold leading-tight text-ink-900">{f.title}</div>
                 <div className="text-[10.5px] leading-snug text-slate-500">{f.body}</div>
               </div>
             ))}
@@ -363,129 +338,158 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 06 · DATA ROOM INFRASTRUCTURE ===== */}
+      {/* ===== 06 · THE TRANSACTION RECORD ===== */}
       <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
-          {/* heading + a short, half-height vault panel on the right */}
-          <div className="grid items-center gap-10 lg:grid-cols-[1.4fr_1fr]">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("dr.eyebrow")}</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("dr.h2"))}</h2>
-              <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-600">{t("dr.body")}</p>
-              <Link to="/platform" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("dr.link")} &rarr;</Link>
-              {/* security posture row */}
-              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[11px] text-slate-500">
-                {[["lock", "Permission controls"], ["check", "Full audit trails"], ["shield", "Access logs"]].map(([ic, t]) => (
-                  <span key={t} className="flex items-center gap-1.5"><span className="text-blue-600"><Glyph name={ic} small /></span>{t}</span>
-                ))}
-              </div>
+        <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
+          <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
+            <Chapter n="06">{t("rec.eyebrow")}</Chapter>
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <h2 className={`${H2} max-w-[20ch] text-ink-900`}><Editorial text={t("rec.h2")} /></h2>
+              <p className="max-w-xs text-[13px] leading-relaxed text-slate-600">{t("rec.body")}</p>
             </div>
-            <div className="flex h-32 items-center justify-center rounded-lg bg-gradient-to-br from-[#0B2947] to-[#06182E]"><Vault /></div>
           </div>
-
-          {/* 6 document categories — one full-width row */}
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {DATA_ROOMS.map((d) => (
-              <div key={d.title} className="rounded-md border border-slate-200 bg-white p-3.5 transition hover:border-blue-300">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 text-ink-700"><Glyph name={d.icon} small /></span>
-                <div className="mt-2.5 text-[12px] font-semibold leading-tight text-ink-800">{d.title}</div>
-                <div className="mt-2 flex items-center gap-1.5 text-[9px] font-medium uppercase tracking-wide text-slate-400">
-                  <span className="flex items-center gap-1 text-emerald-600"><span className="h-1 w-1 rounded-full bg-emerald-500" /> Secured</span>
-                  <span className="text-slate-300">·</span><span>Audit trail</span>
+          <div className="mt-12 grid border-y border-ink-900 sm:grid-cols-3">
+            {TRANSACTIONS.slice(0, 3).map((c, i) => (
+              <div key={c.company} className={`py-8 pr-6 ${i > 0 ? "sm:border-l sm:border-slate-200 sm:pl-6" : ""} border-b border-slate-200 last:border-b-0 sm:border-b-0`}>
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{c.industry}</div>
+                <div className="mt-4 text-[11px] font-medium uppercase tracking-wide text-slate-500">{c.company} &mdash; acquired by</div>
+                <div className="mt-1 flex items-center gap-2 text-base font-bold text-ink-900"><Mark name={c.buyer} size={20} />{c.buyer}</div>
+                <div className="mt-6 font-editorial text-[clamp(2.4rem,4vw,3.4rem)] font-semibold leading-none tabular-nums text-ink-900">{c.offer}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Disclosed Value</div>
+                <div className="mt-6 grid grid-cols-3 gap-2 border-t border-slate-200 pt-4 text-[11px]">
+                  <div><div className="font-mono text-[14px] font-bold text-blue-600">{c.premium.replace(/ vs reference$/, "")}</div><div className="mt-0.5 text-slate-500">vs reference</div></div>
+                  <div><div className="font-mono text-[14px] font-bold text-ink-900">{c.status}</div><div className="mt-0.5 text-slate-500">Status</div></div>
+                  <div><div className="font-mono text-[14px] font-bold text-ink-900">{c.age}</div><div className="mt-0.5 text-slate-500">Period</div></div>
                 </div>
               </div>
             ))}
           </div>
+          <div className="mt-5 text-[11px] text-slate-500">Market index: {MARKET_INDEX_FMT.events} acquisition events from {MARKET_INDEX_FMT.buyers} buyers (Wikipedia · Wikidata · SEC EDGAR, as of {MARKET_INDEX_FMT.asOf}) · benchmark set: {HISTORY_FMT.events} priced events · {HISTORY_FMT.disclosedValue} disclosed value</div>
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-slate-300 px-5 py-4">
+            <span className="text-[13.5px] text-slate-700">{t("rec.bridge")}</span>
+            <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("rec.run")} <Arrow /></button>
+          </div>
         </div>
       </section>
 
-      {/* ===== 07 · NEGOTIATION ENGINE ===== */}
-      <section className="border-b border-slate-200">
-        <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <div className="grid flex-1 items-start gap-10 lg:grid-cols-[1.25fr_1fr]">
-            <OfferTable />
+      {/* ===== 07–08 · THE WORKING ENVIRONMENT (dark) — negotiation desk + data rooms ===== */}
+      <section className="text-white" style={{ background: NAVY }}>
+        <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
+          <div className="grid items-center gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-[6vw]">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("neg.eyebrow")}</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("neg.h2"))}</h2>
-              <p className="mt-3 text-base leading-relaxed text-slate-600">{t("neg.body")}</p>
-              <Link to="/modules" className="mt-3 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("neg.link")} &rarr;</Link>
-              <ul className="mt-7 space-y-5">
+              <Chapter n="07" dark>{t("neg.eyebrow")}</Chapter>
+              <h2 className={`${H2} mt-4 text-white`}><Editorial text={t("neg.h2")} dark /></h2>
+              <p className="mt-6 max-w-md text-[14px] leading-relaxed text-blue-100/70">{t("neg.body")}</p>
+              <Link to="/modules" className="mt-6 inline-block border-b border-blue-300 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-white">{t("neg.link")} ↗</Link>
+              <ul className="mt-8 border-t border-white/15">
                 {NEGOTIATION_FEATURES.map((f) => (
-                  <li key={f.title} className="flex gap-3">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={f.icon} small /></span>
+                  <li key={f.title} className="flex gap-3 border-b border-white/10 py-4">
+                    <span className="mt-0.5 text-blue-300"><Glyph name={f.icon} small /></span>
                     <div>
-                      <div className="text-sm font-bold text-ink-900">{f.title}</div>
-                      <div className="text-[12px] text-slate-500">{f.body}</div>
+                      <div className="text-sm font-bold text-white">{f.title}</div>
+                      <div className="text-[12px] text-blue-100/60">{f.body}</div>
                     </div>
                   </li>
                 ))}
               </ul>
             </div>
+            {/* the desk — a framed instrument */}
+            <div className="border border-white/15 bg-white/[0.03] p-4 sm:p-5">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3 font-mono text-[9.5px] uppercase tracking-[0.14em] text-blue-100/60">
+                <span>ExitOS / Negotiation desk</span><span>Cross-bid comparison</span>
+              </div>
+              <div className="mt-4"><OfferTable /></div>
+            </div>
           </div>
-        </div>
-      </section>
 
-      {/* ===== 08 · EXIT MARKETPLACE ===== */}
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <div className="flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("mp.eyebrow")}</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("mp.h2"))}</h2>
-            <p className="mt-3 max-w-md text-[13px] leading-relaxed text-slate-500">{t("mp.body")}</p>
-            <a href="/marketplace" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("mp.link")} &rarr;</a>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {OPPORTUNITIES.map((o) => (
-                <div key={o.name} className="rounded-md border border-slate-200 bg-white p-5 transition hover:border-blue-300">
-                  <div className="flex items-center justify-between">
-                    <div className="inline-block rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">{o.sector}</div>
-                    <span className="text-[9.5px] font-semibold uppercase tracking-wide text-slate-400">{o.stage}</span>
-                  </div>
-                  <div className="mt-3 font-mono text-sm font-bold tracking-tight text-ink-900">{o.name}</div>
-                  <div className="mt-1 text-[10px] text-slate-400">Anonymized listing &middot; {o.region}</div>
-                  <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 text-[11px]">
-                    <div><div className="text-slate-400">Revenue band</div><div className="font-semibold text-ink-800">{o.rev}</div></div>
-                    <div className="text-right"><div className="text-slate-400">EBITDA band</div><div className="font-semibold text-ink-800">{o.ebitda}</div></div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-                    <span className="flex items-center gap-1.5 text-[10px] font-medium text-slate-500"><Glyph name="lock" small /> Identity &amp; ask under NDA</span>
-                    <a href="/console" className="text-[12px] font-semibold text-blue-600 hover:text-blue-700">Request NDA &rarr;</a>
-                  </div>
+          {/* data rooms */}
+          <div className="mt-14 grid items-center gap-10 border-t border-white/15 pt-12 lg:mt-20 lg:pt-14 lg:grid-cols-[1.4fr_1fr] lg:gap-[6vw]">
+            <div>
+              <Chapter n="08" dark>{t("dr.eyebrow")}</Chapter>
+              <h2 className={`${H2} mt-4 text-white`}><Editorial text={t("dr.h2")} dark /></h2>
+              <p className="mt-6 max-w-lg text-[14px] leading-relaxed text-blue-100/70">{t("dr.body")}</p>
+              <Link to="/platform" className="mt-6 inline-block border-b border-blue-300 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-white">{t("dr.link")} ↗</Link>
+              <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-[11.5px] text-blue-100/70">
+                {[["lock", "Permission controls"], ["check", "Full audit trails"], ["shield", "Access logs"]].map(([ic, l]) => (
+                  <span key={l} className="flex items-center gap-1.5"><span className="text-blue-300"><Glyph name={ic} small /></span>{l}</span>
+                ))}
+              </div>
+            </div>
+            <div className="flex h-40 items-center justify-center border border-white/15"><Vault /></div>
+          </div>
+          <div className="mt-10 grid grid-cols-2 border-y border-white/15 sm:grid-cols-3 lg:grid-cols-6">
+            {DATA_ROOMS.map((d, i) => (
+              <div key={d.title} className={`py-5 pr-4 ${i > 0 ? "lg:border-l lg:border-white/10 lg:pl-4" : ""}`}>
+                <span className="text-blue-300"><Glyph name={d.icon} small /></span>
+                <div className="mt-3 text-[12.5px] font-semibold leading-tight text-white">{d.title}</div>
+                <div className="mt-2 flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wide text-blue-100/50">
+                  <span className="flex items-center gap-1 text-emerald-300"><span className="h-1 w-1 rounded-full bg-emerald-400" /> Secured</span>
+                  <span>·</span><span>Audit trail</span>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ===== 09 · GLOBAL REACH ===== */}
+      {/* ===== 09 · THE MARKETPLACE ===== */}
       <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-[1320px] items-center gap-0 lg:grid-cols-[1.05fr_1.35fr]">
-          {/* blue acquisition-network world map panel */}
-          <div className="relative overflow-hidden lg:rounded-r-2xl" style={{ background: "linear-gradient(135deg,#0a2a52 0%,#05182f 60%,#081f3a 100%)" }}>
-            <div className="px-6 py-12 lg:px-10 lg:py-16">
-              <WorldDots />
+        <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
+          <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
+            <Chapter n="09">{t("mp.eyebrow")}</Chapter>
+            <div>
+              <h2 className={`${H2} text-ink-900`}><Editorial text={t("mp.h2")} /></h2>
+              <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
+                <p className="max-w-md text-[14px] leading-relaxed text-slate-600">{t("mp.body")}</p>
+                <a href="/marketplace" className="border-b border-blue-600 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-900">{t("mp.link")} ↗</a>
+              </div>
             </div>
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent lg:block" aria-hidden />
           </div>
-          {/* headline + inline stats */}
-          <div className="px-6 py-14 lg:px-12 lg:py-20">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("cov.eyebrow")}</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("cov.h2"))}</h2>
-            <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
-              {t("cov.body", { g: MARKET_FMT.geographies })}
-            </p>
-            <div className="mt-5 flex flex-wrap gap-1.5">
+          <div className="mt-12 grid border-y border-ink-900 sm:grid-cols-2 lg:grid-cols-4">
+            {OPPORTUNITIES.map((o, i) => (
+              <div key={o.name} className={`py-6 pr-5 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-5" : ""} border-b border-slate-200 last:border-b-0 lg:border-b-0`}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-blue-600">{o.sector}</span>
+                  <span className="font-mono text-[9.5px] uppercase tracking-wide text-slate-500">{o.stage}</span>
+                </div>
+                <div className="mt-4 font-editorial text-[22px] font-semibold text-ink-900">{o.name}</div>
+                <div className="mt-1 text-[10.5px] text-slate-500">Anonymized listing &middot; {o.region}</div>
+                <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-200 pt-3 text-[11px]">
+                  <div><div className="text-slate-500">Revenue band</div><div className="font-mono font-semibold text-ink-800">{o.rev}</div></div>
+                  <div className="text-right"><div className="text-slate-500">EBITDA band</div><div className="font-mono font-semibold text-ink-800">{o.ebitda}</div></div>
+                </div>
+                <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-3">
+                  <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-slate-500"><Glyph name="lock" small /> Identity &amp; ask under NDA</span>
+                  <a href="/console" className="text-[12px] font-semibold text-blue-600 hover:text-blue-700">Request NDA &rarr;</a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 10 · COVERAGE — global reach ===== */}
+      <section className="border-b border-slate-200 bg-white">
+        <div className="grid items-stretch lg:grid-cols-[1.05fr_1.35fr]">
+          <div className="relative flex items-center overflow-hidden px-5 py-12 sm:px-8 lg:px-12 lg:py-16" style={{ background: "linear-gradient(135deg,#0a2a52 0%,#05182f 60%,#081f3a 100%)" }}>
+            <WorldDots />
+          </div>
+          <div className="px-5 py-16 sm:px-8 lg:px-14 lg:py-20">
+            <Chapter n="10">{t("cov.eyebrow")}</Chapter>
+            <h2 className={`${H2} mt-4 text-ink-900`}><Editorial text={t("cov.h2")} /></h2>
+            <p className="mt-6 max-w-md text-[14px] leading-relaxed text-slate-600">{t("cov.body", { g: MARKET_FMT.geographies })}</p>
+            <div className="mt-6 flex flex-wrap gap-1.5">
               {TOP_JURISDICTIONS.map(([code, n]) => (
-                <span key={code} className="inline-flex items-baseline gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-[11px] font-bold text-ink-800">
-                  {code} <span className="text-[9.5px] font-medium text-slate-400">{n} mandates</span>
+                <span key={code} className="inline-flex items-baseline gap-1.5 border border-slate-200 px-2.5 py-1 font-mono text-[11px] font-bold text-ink-800">
+                  {code} <span className="text-[9.5px] font-medium text-slate-500">{n} mandates</span>
                 </span>
               ))}
             </div>
-            <div className="mt-10 grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 gap-x-8 gap-y-8 border-t border-slate-300 pt-8 sm:grid-cols-4">
               {GLOBAL_STATS.map((s) => (
                 <div key={s.label}>
-                  <div className="font-serif text-3xl font-bold tabular-nums text-ink-900">{s.value}</div>
-                  <div className="mt-1 text-[12px] text-slate-500">{s.label}</div>
+                  <div className="font-editorial text-[2.2rem] font-semibold leading-none tabular-nums text-ink-900">{s.value}</div>
+                  <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -493,114 +497,42 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 9B · WHY FOUNDERS LOSE MILLIONS ===== */}
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-[1100px] px-6 py-16 lg:px-10">
-          <div className="text-center">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("loss.eyebrow")}</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{t("loss.h2")}</h2>
-            <p className="mx-auto mt-3 max-w-xl text-[13.5px] leading-relaxed text-slate-500">
-              {t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}
-            </p>
-          </div>
-          {/* comparison matrix: Traditional vs ExitOS — horizontally scrollable
-              on phones so the three columns stay readable */}
-          <div className="mt-10 overflow-x-auto rounded-lg border border-slate-200">
-            <div className="min-w-[620px]">
-            <div className="grid grid-cols-[1.1fr_1fr_1fr]">
-              <div className="bg-slate-50 px-5 py-4" />
-              <div className="bg-slate-100 px-5 py-4 text-center text-[12px] font-bold uppercase tracking-wide text-slate-500">Traditional Sale</div>
-              <div className="bg-ink-900 px-5 py-4 text-center text-[12px] font-bold uppercase tracking-wide text-white">With ExitOS</div>
-            </div>
-            {LOSSES.map((l, i) => (
-              <div key={l.problem} className={"grid grid-cols-[1.1fr_1fr_1fr] " + (i % 2 ? "bg-white" : "bg-slate-50/40")}>
-                <div className="flex items-center px-5 py-4 text-[13px] font-semibold text-ink-800">{l.dimension}</div>
-                <div className="flex items-center gap-2 border-l border-slate-100 px-5 py-4 text-[12.5px] text-slate-500">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500"><Glyph name="x" small /></span>{l.problem}
-                </div>
-                <div className="flex items-center gap-2 border-l border-slate-100 bg-blue-50/30 px-5 py-4 text-[12.5px] font-medium text-ink-800">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600"><Glyph name="check" small /></span>{l.fix}
-                </div>
-              </div>
-            ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 9C · PROOF · DISCLOSED TRANSACTION RECORD ===== */}
-      <section className="border-b border-slate-200 bg-[#f6f8fb]">
-        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("rec.eyebrow")}</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold tracking-tight text-ink-900">{t("rec.h2")}</h2>
-            </div>
-            <p className="max-w-sm text-[13px] leading-relaxed text-slate-500">{t("rec.body")}</p>
-          </div>
-          <div className="mt-10 grid gap-5 sm:grid-cols-3">
-            {TRANSACTIONS.slice(0, 3).map((c) => (
-              <div key={c.company} className="rounded-lg border border-slate-200 bg-white px-6 py-8 text-center transition">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">{c.industry}</div>
-                <div className="mt-4 text-[11px] font-medium uppercase tracking-wide text-slate-500">{c.company} &mdash; acquired by</div>
-                <div className="mt-1 flex items-center justify-center gap-2 text-base font-bold text-ink-900"><Mark name={c.buyer} size={20} />{c.buyer}</div>
-                <div className="mx-auto my-5 h-px w-12 bg-slate-200" />
-                <div className="font-serif text-4xl font-bold tabular-nums text-ink-900">{c.offer}</div>
-                <div className="mt-1 text-[11px] uppercase tracking-[0.2em] text-slate-400">Disclosed Value</div>
-                <div className="mt-6 grid grid-cols-3 gap-2 border-t border-slate-100 pt-5 text-[11px]">
-                  <div><div className="font-serif text-[15px] font-bold text-blue-600">{c.premium.replace(/ vs reference$/, "")}</div><div className="mt-0.5 text-slate-400">vs reference</div></div>
-                  <div><div className="font-serif text-[15px] font-bold text-ink-900">{c.status}</div><div className="mt-0.5 text-slate-400">Status</div></div>
-                  <div><div className="font-serif text-[15px] font-bold text-ink-900">{c.age}</div><div className="mt-0.5 text-slate-400">Period</div></div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 text-center text-[11px] text-slate-400">Market index: {MARKET_INDEX_FMT.events} acquisition events from {MARKET_INDEX_FMT.buyers} buyers (Wikipedia · Wikidata · SEC EDGAR, as of {MARKET_INDEX_FMT.asOf}) · benchmark set: {HISTORY_FMT.events} priced events · {HISTORY_FMT.disclosedValue} disclosed value</div>
-          <div className="mt-8 flex items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-6 py-4 sm:mx-auto sm:max-w-2xl">
-            <span className="text-[13px] text-slate-600">{t("rec.bridge")}</span>
-            <button onClick={() => nav("/console")} className="shrink-0 rounded-md bg-ink-900 px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-ink-800">{t("rec.run")} &rarr;</button>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 9D · GOVERNANCE & CONTROLS ===== */}
-      <section className="border-b border-white/10" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
-        <div className="mx-auto max-w-[1320px] px-6 py-12 lg:px-10">
+      {/* ===== 11 · GOVERNANCE & CONTROLS ===== */}
+      <section className="text-white" style={{ background: NAVY }}>
+        <div className={`${WRAP} py-16`}>
           <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-300">{t("gov.eyebrow")}</div>
-            <div className="text-[11px] text-white/40">{t("gov.note")}</div>
+            <Chapter n="11" dark>{t("gov.eyebrow")}</Chapter>
+            <div className="text-[11.5px] text-blue-100/60">{t("gov.note")}</div>
           </div>
-          <div className="mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-lg lg:grid-cols-5" style={{ background: "rgba(255,255,255,.08)" }}>
-            {GOVERNANCE.map((g) => (
-              <div key={g.title} className="px-5 py-5" style={{ background: "rgba(6,24,46,.92)" }}>
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/15 text-blue-300 ring-1 ring-blue-400/30"><Glyph name={g.icon} small /></span>
-                <div className="mt-3 text-[12.5px] font-bold text-white">{t(g.title)}</div>
-                <div className="mt-1 text-[11px] leading-snug text-white/50">{t(g.body)}</div>
+          <div className="mt-8 grid grid-cols-1 border-y border-white/15 sm:grid-cols-2 lg:grid-cols-5">
+            {GOVERNANCE.map((g, i) => (
+              <div key={g.title} className={`py-6 pr-5 ${i > 0 ? "lg:border-l lg:border-white/10 lg:pl-5" : ""}`}>
+                <span className="text-blue-300"><Glyph name={g.icon} /></span>
+                <h3 className="mt-4 font-editorial text-[19px] font-semibold text-white">{t(g.title)}</h3>
+                <p className="mt-1.5 text-[11.5px] leading-snug text-blue-100/60">{t(g.body)}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ===== 10 · FINAL CTA ===== */}
-      <section className="relative overflow-hidden bg-white">
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center gap-24 opacity-[0.05]" aria-hidden>
-          {[0, 1, 2, 3].map((i) => <div key={i} className="h-40 w-16 rounded-t bg-ink-900" />)}
-        </div>
-        <div className="relative mx-auto max-w-[1320px] px-6 py-24 text-center lg:px-10">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("cta.eyebrow")}</div>
-          <h2 className="mt-4 font-serif text-4xl font-bold tracking-tight text-ink-900 sm:text-5xl">{t("cta.h2")}</h2>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600">
-            {t("cta.body")}
-          </p>
-          <div className="mt-9 flex flex-wrap justify-center gap-3">
-            <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-ink-800">{t("cta.open")} <Arrow /></button>
-            <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-7 py-3.5 text-sm font-semibold text-ink-900 transition hover:border-slate-400 hover:bg-slate-50">{t("cta.brief")}</button>
+      {/* ===== 12 · THE NEXT MOVE — final CTA ===== */}
+      <section className="bg-[#f6f8fb]">
+        <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
+          <div className="grid items-end gap-10 lg:grid-cols-[1fr_auto]">
+            <div>
+              <Chapter n="12">{t("cta.eyebrow")}</Chapter>
+              <h2 className="mt-5 font-editorial text-[clamp(2.6rem,6vw,5.4rem)] font-semibold leading-[0.98] tracking-[-0.045em] text-ink-900"><Editorial text={t("cta.h2")} /></h2>
+              <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-slate-600">{t("cta.body")}</p>
+            </div>
+            <div className="flex flex-wrap gap-2.5 lg:flex-col lg:items-stretch">
+              <button onClick={() => nav("/console")} className={`${BTN} justify-between bg-ink-900 text-white hover:bg-ink-800`}>{t("cta.open")} <Arrow /></button>
+              <button onClick={() => nav("/pricing")} className={`${BTN} justify-between border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
+            </div>
           </div>
-          <p className="mt-6 text-[11.5px] text-slate-400">{t("cta.foot")}</p>
+          <p className="mt-10 border-t border-slate-300 pt-5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-slate-500">{t("cta.foot")}</p>
         </div>
       </section>
-
     </MarketingChrome>
   );
 };

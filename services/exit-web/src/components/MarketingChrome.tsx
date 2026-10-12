@@ -9,8 +9,8 @@ import { useI18n, LOCALES } from "../lib/i18n";
 
 export const Arrow = () => <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 
-export const Glyph: React.FC<{ name: string; small?: boolean }> = ({ name, small }) => {
-  const s = small ? 15 : 20;
+export const Glyph: React.FC<{ name: string; small?: boolean; size?: number }> = ({ name, small, size }) => {
+  const s = size ?? (small ? 15 : 20);
   const p: Record<string, React.ReactNode> = {
     chart: <><path d="M4 19V5M4 19h16M8 16v-4M12 16V9M16 16v-7" /></>,
     users: <><circle cx="9" cy="8" r="3" /><path d="M3 20c0-3 3-5 6-5s6 2 6 5M17 11a2.5 2.5 0 100-5M21 20c0-2.2-1.5-3.8-3.5-4.4" /></>,
@@ -87,27 +87,52 @@ export const LocaleSwitch: React.FC<{ dark?: boolean }> = ({ dark }) => {
   );
 };
 
+/** A chapter label — "02 / The thesis" — in the accent colour, mono. */
+export const Chapter: React.FC<{ n: string; children: React.ReactNode; dark?: boolean }> = ({ n, children, dark }) => (
+  <div className={`font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] ${dark ? "text-blue-300" : "text-blue-600"}`}>{n} / {children}</div>
+);
+
+/** Editorial headline lines: every line but the last in ink, the last in the
+ *  accent (italic). Single-line strings accent their last word. */
+export const Editorial: React.FC<{ text: string; dark?: boolean }> = ({ text, dark }) => {
+  const lines = text.split("\n");
+  const accent = dark ? "text-blue-300" : "text-blue-600";
+  if (lines.length === 1) {
+    const i = text.lastIndexOf(" ");
+    if (i < 0) return <em className={`not-italic ${accent}`}>{text}</em>;
+    return <>{text.slice(0, i + 1)}<em className={`italic ${accent}`}>{text.slice(i + 1)}</em></>;
+  }
+  return <>{lines.map((l, k) => (
+    <React.Fragment key={k}>{k === lines.length - 1 ? <em className={`italic ${accent}`}>{l}</em> : l}{k < lines.length - 1 && <br />}</React.Fragment>
+  ))}</>;
+};
+
 export const MarketingChrome: React.FC<{ active?: string; children: React.ReactNode }> = ({ active, children }) => {
   const nav = useNavigate();
   const { t } = useI18n();
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
   return (
     <div className="min-h-screen bg-[#f6f8fb] text-ink-900">
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-10">
-          <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={30} /></button>
-          <nav className="hidden items-center gap-8 lg:flex">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div className={`${WRAP} grid min-h-[72px] grid-cols-[1fr_auto] items-center gap-5 lg:grid-cols-[1fr_auto_1fr]`}>
+          <div className="flex items-center gap-5">
+            <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={30} /></button>
+            <span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500 xl:inline">A Sovereign Infrastructure</span>
+          </div>
+          <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
             {NAV.map(([key, fallback, to]) => (
-              <Link key={to} to={to} className={`text-[13px] font-medium transition ${active === fallback.toLowerCase() ? "font-semibold text-ink-900" : "text-slate-600 hover:text-ink-900"}`}>{t(key)}</Link>
+              <Link key={to} to={to} aria-current={active === fallback.toLowerCase() ? "page" : undefined}
+                className={`relative text-[13px] font-medium transition after:absolute after:-bottom-1.5 after:left-0 after:h-px after:bg-blue-600 after:transition-all hover:after:w-full ${active === fallback.toLowerCase() ? "font-semibold text-ink-900 after:w-full" : "text-slate-600 after:w-0 hover:text-ink-900"}`}>{t(key)}</Link>
             ))}
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-3">
             <div className="hidden sm:block"><LocaleSwitch /></div>
-            <button onClick={() => nav("/console")} className="hidden rounded-md border border-slate-300 px-4 py-2 text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50 sm:inline-flex">{t("nav.login")}</button>
-            <button onClick={() => nav("/console")} className="rounded-md bg-ink-900 px-3 py-2 text-[12.5px] font-semibold text-white transition hover:bg-ink-800 sm:px-4 sm:text-[13px]">{t("nav.access")}</button>
+            <button onClick={() => nav("/console")} className="hidden text-[13px] font-medium text-slate-600 transition hover:text-ink-900 sm:inline-flex">{t("nav.login")}</button>
+            <button onClick={() => nav("/console")} className="inline-flex items-center gap-3 bg-ink-900 px-4 py-3 text-[12px] font-semibold text-white transition hover:bg-ink-800">{t("nav.access")} <span aria-hidden>↗</span></button>
             {/* mobile menu toggle */}
             <button onClick={() => setMenuOpen((o) => !o)} aria-label="Menu" aria-expanded={menuOpen}
-              className="rounded-md border border-slate-300 p-2 text-slate-700 lg:hidden">
+              className="border border-slate-300 p-2 text-slate-700 lg:hidden">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                 {menuOpen ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M3 6h18M3 12h18M3 18h18" />}
               </svg>
@@ -116,34 +141,34 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
         </div>
         {/* mobile nav panel */}
         {menuOpen && (
-          <div className="border-t border-slate-200 bg-white px-4 py-4 lg:hidden">
-            <nav className="flex flex-col gap-1">
+          <div className="border-t border-slate-200 bg-white px-5 py-4 lg:hidden">
+            <nav aria-label="Main" className="flex flex-col gap-1">
               {NAV.map(([key, fallback, to]) => (
                 <Link key={to} to={to} onClick={() => setMenuOpen(false)}
-                  className={`rounded-md px-3 py-2.5 text-[14px] font-medium ${active === fallback.toLowerCase() ? "bg-slate-100 font-semibold text-ink-900" : "text-slate-600"}`}>{t(key)}</Link>
+                  className={`px-3 py-2.5 text-[14px] font-medium ${active === fallback.toLowerCase() ? "bg-slate-100 font-semibold text-ink-900" : "text-slate-600"}`}>{t(key)}</Link>
               ))}
-              <Link to="/console" onClick={() => setMenuOpen(false)} className="rounded-md px-3 py-2.5 text-[14px] font-medium text-slate-600">{t("nav.login")}</Link>
+              <Link to="/console" onClick={() => setMenuOpen(false)} className="px-3 py-2.5 text-[14px] font-medium text-slate-600">{t("nav.login")}</Link>
             </nav>
             <div className="mt-3 flex items-center gap-3 border-t border-slate-100 px-3 pt-3">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{t("nav.language")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{t("nav.language")}</span>
               <LocaleSwitch />
             </div>
           </div>
         )}
       </header>
 
-      {children}
+      <main>{children}</main>
 
       <footer className="border-t border-slate-200 bg-[#f6f8fb]">
-        <div className="mx-auto max-w-[1320px] px-6 py-10 lg:px-10">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className={`${WRAP} py-12`}>
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
             <div>
               <ExchangeLockup size={30} />
-              <p className="mt-3 max-w-xs text-[12.5px] leading-relaxed text-slate-500">{t("ft.tagline")}</p>
-              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[10.5px] text-slate-400">
-                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.soc")}</span>
-                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.audit")}</span>
-                <span className="flex items-center gap-1"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.ndagated")}</span>
+              <p className="mt-4 max-w-xs text-[12.5px] leading-relaxed text-slate-600">{t("ft.tagline")}</p>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">
+                <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.soc")}</span>
+                <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.audit")}</span>
+                <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.ndagated")}</span>
               </div>
             </div>
             {([
@@ -152,8 +177,8 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
               ["ft.acquirers", [["ft.browse", "/console"], ["ft.buyeraccess", "/pricing"], ["ft.requestnda", "/console"]]],
             ] as Array<[string, Array<[string, string]>]>).map(([titleKey, links]) => (
               <div key={titleKey}>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{t(titleKey)}</div>
-                <ul className="mt-3 space-y-2 text-[13px]">
+                <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-600">{t(titleKey)}</div>
+                <ul className="mt-4 space-y-2.5 text-[13px]">
                   {links.map(([k, to]) => (
                     <li key={k + to}><Link to={to} className="text-slate-600 hover:text-ink-900">{t(k)}</Link></li>
                   ))}
@@ -161,9 +186,9 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
               </div>
             ))}
           </div>
-          <div className="mt-8 border-t border-slate-200 pt-6">
-            <p className="max-w-3xl text-[10.5px] leading-relaxed text-slate-400">{t("ft.legal")}</p>
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-4 text-[12px] text-slate-400">
+          <div className="mt-10 border-t border-slate-200 pt-6">
+            <p className="max-w-3xl text-[11px] leading-relaxed text-slate-500">{t("ft.legal")}</p>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-4 text-[12px] text-slate-500">
               <div>© {new Date().getFullYear()} ExitOS — A Sovereign Infrastructure</div>
               <div className="flex items-center gap-4">
                 <LocaleSwitch />

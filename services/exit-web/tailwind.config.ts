@@ -80,6 +80,9 @@ export default {
         // headings use a bold geometric display sans (was Fraunces serif); the
         // `serif` token is kept so existing font-serif classes pick it up.
         serif: ["Sora", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        // the editorial serif already loaded in index.css (Source Serif 4) —
+        // the marketing site's display headlines.
+        editorial: ['"Source Serif 4"', "Georgia", "serif"],
       },
     },
   },
