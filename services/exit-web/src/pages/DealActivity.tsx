@@ -1,7 +1,8 @@
 import React, { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric } from "../components/xo";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { subscribe, allDealEvents, dealFlowFunnel, subjectsAtStage, clearDealEvents, type DealEvent } from "../lib/deal-events";
 import { networkStats } from "../lib/network-stats";
@@ -37,7 +38,8 @@ const DealActivity: React.FC = () => {
   const funnel = dealFlowFunnel(events);
   const recent = [...events].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 60);
   const max = Math.max(...funnel.map((f) => f.count), 1);
-  const tape = useMemo(() => buildMarketTape(), [events.length]);
+  // a buyer's tape omits the "your activity" entries, which come from all stored events
+  const tape = useMemo(() => buildMarketTape().filter((t) => !isBuyer || t.kind !== "MANDATE"), [isBuyer]);
   const net = networkStats(events);
   const rate = (v: number | null): string => (v == null ? "—" : `${v}%`);
   const [confirming, setConfirming] = useState(false);
@@ -58,7 +60,7 @@ const DealActivity: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="NDAs in motion" value={String(subjectsAtStage("nda_requested", events).length)} sub="requested" /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <Section title="Your rates · from recorded events" className="border border-xo-line"
         foot="Computed from your own recorded events only — not across other users. A rate shows — until the events to measure it exist; nothing is modelled.">

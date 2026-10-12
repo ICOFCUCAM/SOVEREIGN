@@ -31,7 +31,7 @@ Founder and buyer (free): `h1` none · axe color-contrast ×14 (1440) · no over
 | G1 | **"Network-wide moat" overclaims; "this session".** | Say the figures are your own recorded actions (this browser, or your account when connected); "stored events"; no network claims. | ☑ `ed8522d` |
 | G2 | **"Clear" erases history without confirmation.** | Inline confirmation stating exactly what is erased (this browser's record, and the account's stored events when connected). | ☑ `bf9815d` |
 | G3 | Buyer sees founder events recorded in the same browser. | Buyer view filters to events with `actorRole: "buyer"`. | ☑ `aecff92` |
-| G4 | Fake live tape. | `RegistryTape`. | ☐ |
+| G4 | Fake live tape. | `RegistryTape`. | ☑ G4-commit |
 | G5 | Design: no `h1`, 14 contrast failures. | Rebuild on `xo`. | ☑ `f8a9ca3` |
 
 ---
@@ -53,3 +53,7 @@ Founder and buyer (free): `h1` none · axe color-contrast ×14 (1440) · no over
 ### G3 — Buyer sees founder events
 *Closed by:* `pages/DealActivity.tsx`. With `session.role === "buyer"` the page uses only events whose `actorRole` is `"buyer"`; the description says "Buyer-side deal-flow actions … Founder actions are not shown."; the "Clear history…" control is not offered to buyers (erasing would also delete founder events stored in the same record). Founder view unchanged.
 *Verification:* `tsc -b`, eslint 0 errors · Chromium, one browser and one email in both roles: as founder, two "founder viewed Microsoft" events; then as buyer, an NDA request from the Acquisition Radar — the buyer page lists only "buyer expressed interest in / requested NDA with Project Beacon" (2 events) while the stored record holds 4; 0 Clear buttons for the buyer · buyer free 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G4 — Fake live tape
+*Closed by:* `pages/DealActivity.tsx`: pinging `MarketTape` → dated `RegistryTape` ("Registry · as of" the snapshot date). For buyers the tape omits the "Your activity" entries (they are built from all stored events, so they could show founder actions — same rule as G3). The `useMemo` dependency warning is gone.
+*Verification:* `tsc -b`, eslint clean (0 warnings) · Chromium: 0 "live" words, snapshot date shown; same-browser test — founder tape shows "Your activity · founder viewed Microsoft" ×2, buyer tape shows none · founder free/Pro and buyer free 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
