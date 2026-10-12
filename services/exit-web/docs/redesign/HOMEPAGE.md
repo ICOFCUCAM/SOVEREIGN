@@ -147,7 +147,7 @@ Measured (Chromium, 1440/390, after M1/M7 chrome): 0 errors, `h1` 1, no overflow
 | # | Gap | Fix (colours locked; no block removed) | Status |
 |---|---|---|---|
 | R1 | **Design: the three pages on the skeleton.** | Rebuild each page with the homepage system: editorial-serif `h1` (last line or word in the accent italic), mono chapter labels ("01 / …"), hairline grids instead of rounded cards, square buttons, the navy band where a page has a dark block. Content and links verbatim; `MODULE_FACTS`, prices, tiers, and every `/console`, `/pricing`, `/modules`, `/platform` entry point unchanged. | ☑ `14735c26` |
-| R2 | **Platform overclaims.** | "live exchange" → "exchange"; "one audit trail" → "one record"; Institutional security pillar → "Data rooms and records — a document checklist with completeness per package, NDA-gated identity, and your deal actions recorded."; Autonomous execution → "Agents walk through sourcing, outreach, data room, negotiation and closing; each step waits for your approval, and nothing is sent for you."; "the live deal room" → "the deal room"; "watch the agents work" → "walk through the agents". | ☐ |
+| R2 | **Platform overclaims.** | "live exchange" → "exchange"; "one audit trail" → "one record"; Institutional security pillar → "Data rooms and records — a document checklist with completeness per package, NDA-gated identity, and your deal actions recorded."; Autonomous execution → "Agents walk through sourcing, outreach, data room, negotiation and closing; each step waits for your approval, and nothing is sent for you."; "the live deal room" → "the deal room"; "watch the agents work" → "walk through the agents". | ☑ R2-commit |
 | R3 | **Modules overclaims.** | "recomputed live" → "recomputed from your figures"; Outreach "run by the banker agent" → "drafted by the banker for you to send"; Data Room "Permissioned" → "A document checklist"; Closing Center → "The closing checklist: signatures, escrow and filings, item by item."; Radar "Live sector signals" → "Sector signals from the registry"; Deal Room "once trust and NDA clear" → "for companies that accept your NDA request". | ☐ |
 | R4 | **Pricing not aligned with Upgrade; fixed teaser number.** | Tier texts as Upgrade (Page 41 G2): "Recommended for a live process", "Buyer outreach drafts & NDA requests", "Rule-based negotiation (Bid Room), bid & process management", "Closing Center checklist", "Receive buyer interest in your Inbox"; `h1` → "Priced like a bank. Success fee only when you close."; teaser → "Buyers that match your company are shown once you list." (no fixed number); table "NDA requests & register", "Rule-based scoring & counters", "Buyer signals — Registry radar (snapshot)"; "runs around the clock" removed. Buyer tiers unchanged (open decision). | ☐ |
 | R5 | **Contrast** on Platform (6) and Pricing (19). | Shade steps within the same palette (as M7). Target: axe 0 on all three at 1440 and 390. | ☐ |
@@ -281,6 +281,18 @@ Every text, price, `MODULE_FACTS`/`ENGINE_COUNTS` stat and link target was carri
 - axe: Platform 6 → **0**, Modules **0**, Pricing 19 → 17 (tier labels in `slate-400`, plus the table's sideways scroll on phones — R5).
 - Height: Platform 2,154 → 2,559 px, Modules 2,118 → 2,374 px, Pricing 4,028 → 4,759 px at 1440; at 390 roughly unchanged.
 - Screens: `scratchpad/home/r1p-*`, `r1pl-*`.
+
+### R2 — Platform overclaims
+*Closed by:* `pages/Platform.tsx` (text only):
+- Pillar "one **live** exchange" → "one exchange".
+- "Autonomous execution — Agents run … You approve; the desk does the work." → "Agents walk through sourcing, outreach, data room, negotiation and closing. Each step waits for your approval, and nothing is sent for you." (Pages 07, 36)
+- "Institutional security — Permissioned data rooms, full audit trails and access logs. Every action and artifact is accountable." → "**Data rooms and records** — A document checklist with completeness per package, NDA-gated identity, and your deal actions recorded." (Pages 14, 28; X12)
+- Flow "the **live** deal room" → "the deal room".
+- Hero "one **audit trail**" → "one record".
+- CTA "**watch** the agents work" → "walk through the agents".
+
+No page section was removed.
+*Verification:* `tsc -b`, eslint clean · Chromium `/platform`: 0 "live", "audit", "permission", "watch" or "security"; 1440/390: 0 errors, `h1` 1, no overflow.
 
 ---
 

@@ -4,19 +4,19 @@ import { MarketingChrome, Glyph, Arrow, Chapter, Editorial, MK, PageHero } from 
 import { MARKET_FMT } from "../lib/market-stats";
 
 // Platform — the marketing page for the acquisition infrastructure itself:
-// one exchange, one audit trail, end to end.
+// one exchange, one record, end to end.
 
 const PILLARS = [
-  { icon: "globe", title: "Acquisition exchange", body: `${MARKET_FMT.buyers} curated acquirer mandates on one live exchange — strategics, PE, family offices and corporate development, across ${MARKET_FMT.geographies} jurisdictions.` },
+  { icon: "globe", title: "Acquisition exchange", body: `${MARKET_FMT.buyers} curated acquirer mandates on one exchange — strategics, PE, family offices and corporate development, across ${MARKET_FMT.geographies} jurisdictions.` },
   { icon: "chart", title: "Intelligence engines", body: "Valuation, readiness, buyer discovery and diligence run deterministically on your numbers — not slideware." },
-  { icon: "spark", title: "Autonomous execution", body: "Agents run sourcing, outreach, data room, negotiation and closing. You approve; the desk does the work." },
-  { icon: "lock", title: "Institutional security", body: "Permissioned data rooms, full audit trails and access logs. Every action and artifact is accountable." },
+  { icon: "spark", title: "Autonomous execution", body: "Agents walk through sourcing, outreach, data room, negotiation and closing. Each step waits for your approval, and nothing is sent for you." },
+  { icon: "lock", title: "Data rooms and records", body: "A document checklist with completeness per package, NDA-gated identity, and your deal actions recorded." },
 ];
 
 const FLOW = [
   { icon: "chart", title: "Prepare", body: "Valuation, Exit Readiness Score and the priced fix list." },
   { icon: "globe", title: "Discover", body: "Buyer intelligence, the marketplace and the acquisition radar." },
-  { icon: "users", title: "Engage", body: "Outreach, NDAs, pipeline and the live deal room." },
+  { icon: "users", title: "Engage", body: "Outreach, NDAs, pipeline and the deal room." },
   { icon: "spark", title: "Negotiate", body: "Offer scoring, counters, clauses and scenario simulation." },
   { icon: "lock", title: "Close", body: "Signatures, escrow, documents and the closing checklist." },
   { icon: "check", title: "Transition", body: "WealthOS — proceeds, taxes, trusts and reinvestment." },
@@ -27,7 +27,7 @@ const Platform: React.FC = () => {
   return (
     <MarketingChrome active="platform">
       <PageHero chapter="The platform" title={"One acquisition infrastructure.\nSourcing to wire."}
-        deck="ExitOS replaces the patchwork of bankers, data rooms and CRMs with a single exchange — one audit trail, one source of truth, from the first conversation to money in the bank."
+        deck="ExitOS replaces the patchwork of bankers, data rooms and CRMs with a single exchange — one record, one source of truth, from the first conversation to money in the bank."
         actions={<>
           <button onClick={() => nav("/console")} className={`${MK.btn} bg-ink-900 text-white hover:bg-ink-800`}>Launch ExitOS <Arrow /></button>
           <button onClick={() => nav("/modules")} className={`${MK.btn} border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white`}>Explore the modules <span aria-hidden>↗</span></button>
@@ -77,7 +77,7 @@ const Platform: React.FC = () => {
             <div>
               <Chapter n="04">The next move</Chapter>
               <h2 className={`${MK.h2} mt-5 text-ink-900`}><Editorial text="See the desk run a deal." /></h2>
-              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-slate-600">Open the console and watch the agents work — or talk to us about a private process.</p>
+              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-slate-600">Open the console and walk through the agents — or talk to us about a private process.</p>
             </div>
             <div className="flex flex-wrap gap-2.5 lg:flex-col lg:items-stretch">
               <button onClick={() => nav("/console")} className={`${MK.btn} justify-between bg-ink-900 text-white hover:bg-ink-800`}>Launch ExitOS <Arrow /></button>
