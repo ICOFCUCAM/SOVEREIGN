@@ -20,9 +20,9 @@ const b = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: pr
 const p = await b.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
 await p.goto(`${BASE}/`); await p.waitForTimeout(2500);
 const facts = await p.evaluate(() => {
-  const hero = document.querySelector("#ch-01");
+  const hero = document.querySelector("#ch-02"); // the figures and edition line sit in chapter 02 (DD2)
   const figs = [...hero.querySelectorAll(".hero-rule + div")].map((d) => ({ v: d.querySelector(".sr-only")?.textContent ?? d.textContent, l: d.nextElementSibling?.childNodes[0]?.textContent?.trim() }));
-  const ed = hero.querySelector(".justify-end")?.textContent?.trim();
+  const ed = hero.querySelector("[data-edition]")?.textContent?.trim();
   return { figs, ed };
 });
 console.log(JSON.stringify(facts));
@@ -50,7 +50,7 @@ h1 em{display:block;font-style:italic;color:#93c5fd}
 ${[[10,150],[130,220],[200,60],[250,170],[340,60],[420,190],[460,110]].map(([x,y],i,a)=>`<circle cx="${x}" cy="${y}" r="7" fill="${i===a.length-1?'#45E38A':'#60a5fa'}" stroke="#e8f1ff" stroke-width="2"/><circle cx="${x}" cy="${y}" r="15" fill="none" stroke="${i===a.length-1?'#45E38A':'#93c5fd'}" opacity=".5"/>`).join("")}
 </svg>
 <div class="wrap"><div class="top"><b>ExitOS</b><span>The global acquisition exchange</span></div>
-<h1>Institutional acquisition<em>infrastructure</em></h1></div>
+<h1>The global acquisition exchange <em>for what\u2019s next.</em></h1></div>
 <div class="ed">${facts.ed ?? ""}</div>
 <div class="figs">${fig}</div><div class="bar"></div></body></html>`;
 const c = await b.newPage({ viewport: { width: 1200, height: 630 } });

@@ -18,7 +18,7 @@ const text = (C: React.FC): string =>
     .replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'").replace(/\s+/g, " ");
 
 const BLOCKS: Record<string, string> = {
-  "hero headline": "Institutional acquisition infrastructure",
+  "hero headline": "The global acquisition exchange", // owner's index(2) hero (HOMEPAGE.md DD2)
   "command board": "ExitOS Acquisition Exchange",
   "proof ribbon": "Disclosed acquisitions indexed",
   "trust strip": "Curated Acquirer Network",

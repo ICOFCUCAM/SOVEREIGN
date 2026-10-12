@@ -3,11 +3,11 @@ import { useI18n } from "../lib/i18n";
 
 // The chapter index: a slim rail at the left edge on wide screens. The chapter
 // in view is marked; each number jumps to its chapter, and its name shows on
-// hover or focus. Reads the sections by id (ch-01 … ch-08).
+// hover or focus. Reads the sections by id (ch-01 … ch-09).
 
 const CHAPTERS: ReadonlyArray<[string, string]> = [
-  ["01", "hero.eyebrow"], ["02", "hall.eyebrow"], ["03", "qv.eyebrow"], ["04", "loss.eyebrow"],
-  ["05", "rec.eyebrow"], ["06", "mods.eyebrow"], ["07", "faq.eyebrow"], ["08", "cta.eyebrow"],
+  ["01", "hx.eyebrow"], ["02", "s2.kicker"], ["03", "hall.eyebrow"], ["04", "qv.eyebrow"], ["05", "loss.eyebrow"],
+  ["06", "rec.eyebrow"], ["07", "mods.eyebrow"], ["08", "faq.eyebrow"], ["09", "cta.eyebrow"],
 ];
 
 const ChapterRail: React.FC = () => {

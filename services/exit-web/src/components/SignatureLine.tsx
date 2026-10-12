@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 
 // THE SIGNATURE LINE — the route of a sale, run through the whole page. A fine
-// line in the right-hand margin joins the chapters (ch-01 … ch-08) and draws
+// line in the right-hand margin joins the chapters (ch-01 … ch-09) and draws
 // itself as you read; each chapter is a node that fills once passed. Wide
 // screens only; drawn complete when the reader prefers reduced motion.
 
-const IDS = ["01", "02", "03", "04", "05", "06", "07", "08"];
+const IDS = ["01", "02", "03", "04", "05", "06", "07", "08", "09"];
 
 const SignatureLine: React.FC = () => {
   const box = useRef<HTMLDivElement>(null);

@@ -38,10 +38,6 @@ const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
 const H2 = "font-editorial text-[clamp(2.25rem,4.6vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.035em]";
 const BTN = "inline-flex items-center gap-5 px-5 py-3.5 text-[12px] font-semibold transition";
 
-// The hero headline in the editorial serif: an all-caps i18n string reads in
-// sentence case on offset lines, the last line in the accent italic.
-const heroLines = (s: string): string[] =>
-  s.split("\n").map((l, i) => (l === l.toUpperCase() ? (i === 0 ? l.charAt(0) + l.slice(1).toLowerCase() : l.toLowerCase()) : l));
 
 /** Chapter arrivals: each chapter's headline rises into place the first time it
  *  enters the view. Chapters already in view on load are shown at once; nothing
@@ -62,58 +58,89 @@ const Landing: React.FC = () => {
   useChapterReveal();
   const nav = useNavigate();
   const { t } = useI18n();
-  const h1 = heroLines(t("hero.h1"));
   return (
     <MarketingChrome active="home">
       <ChapterRail />
       <PhoneActionBar />
       <div className="relative">
         <SignatureLine />
-      {/* ===== 01 · HERO — the deal atlas (Z1/Z2, after the owner's index(8).html, on the homepage spec) ===== */}
-      <section id="ch-01" className="text-white" style={{ background: "linear-gradient(180deg,#030a15 0%,#06182E 70%,#05101f 100%)" }}>
-        <div className={`${WRAP} pt-8`}>
-          <div className="flex justify-between gap-6 border-b border-white/20 pb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-blue-100/75">
-            <span>{t("hero.eyebrow")}</span><span className="flex items-center justify-end gap-2 text-right"><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />{t("hero.fresh", { d: MARKET_INDEX_FMT.asOf })}</span>
-          </div>
-          <div className="grid items-end gap-10 py-12 sm:py-14 lg:grid-cols-[minmax(0,1.4fr)_minmax(270px,0.6fr)] lg:gap-[6%] lg:py-16">
-            <h1 className="max-w-[12ch] font-editorial text-[clamp(3.4rem,8.4vw,8.8rem)] font-semibold leading-[0.9] tracking-[-0.05em]">
-              {h1.map((l, i) => i === h1.length - 1
-                ? <em key={i} className="block italic text-blue-300">{l}</em>
-                : <span key={i}>{l} </span>)}
+      {/* ===== 01 · HERO — after the owner's index(2).html (DD2), in the locked palette ===== */}
+      <section id="ch-01" className="relative isolate flex min-h-[min(880px,calc(100vh-72px))] flex-col overflow-hidden">
+        {/* the field: ivory on the left, deep navy on the right (stacked on phones) */}
+        <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(ellipse 50% 70% at 82% 40%, rgba(37,99,235,0.22), transparent 70%), linear-gradient(180deg,#06182E 0%,#041120 70%,#030a15 100%)" }} />
+        <div aria-hidden className="absolute inset-0 hidden md:block" style={{ background: "linear-gradient(90deg, rgba(246,248,251,0.98) 0%, rgba(246,248,251,0.94) 28%, rgba(246,248,251,0.38) 45%, rgba(3,17,27,0.08) 61%, rgba(3,17,27,0.32) 100%)" }} />
+        <div aria-hidden className="absolute inset-0 md:hidden" style={{ background: "linear-gradient(180deg, rgba(246,248,251,0.99) 0%, rgba(246,248,251,0.96) 70%, rgba(246,248,251,0) 100%)" }} />
+        <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(3,15,23,0.62), transparent 20%, transparent 75%, rgba(2,12,19,0.12))" }} />
+
+        <div className={`${WRAP} relative flex flex-1 items-center py-16 lg:py-20`}>
+          <div className="max-w-[640px] text-ink-900">
+            <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.3em]"><span aria-hidden className="h-px w-7 bg-blue-600" />{t("hx.eyebrow")}</div>
+            <h1 className="mt-7 font-editorial text-[clamp(3.1rem,5.6vw,5.5rem)] font-semibold leading-[0.99] tracking-[-0.045em]">
+              {t("hx.h1")} <em className="italic text-blue-600">{t("hx.h1em")}</em>
             </h1>
-            <div className="max-w-[420px] border-l border-blue-300/60 pl-6">
-              <p className="font-editorial text-[20px] leading-snug text-blue-50/90">{t("hero.sub")}</p>
-              <p className="mt-3 text-[14.5px] leading-relaxed text-blue-100/75">{t("hero.body")}</p>
-              <div className="mt-7 flex flex-wrap gap-2.5">
-                <button onClick={() => nav("/console")} className={`${BTN} bg-white text-ink-900 hover:bg-blue-50`}>{t("nav.access")} <Arrow /></button>
-                <button onClick={() => nav("/pricing")} className={`${BTN} border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
-              </div>
+            <p className="mt-6 max-w-[440px] text-[15px] leading-[1.85] text-slate-700">{t("hx.body")}</p>
+            <div className="mt-8 flex flex-wrap gap-2.5">
+              <button onClick={() => nav("/platform")} className={`${BTN} bg-ink-900 text-white hover:bg-blue-700`}>{t("hx.explore")} <Arrow /></button>
+              <a href="#ch-04" className={`${BTN} border border-ink-900/70 text-ink-900 hover:bg-ink-900 hover:text-white md:border-ink-900/40 md:bg-white/30 md:backdrop-blur-sm`}>{t("bar.value")} <span aria-hidden>↓</span></a>
             </div>
           </div>
-          {/* 01 / discover the field — the sale process as a route across the market */}
-          <ExchangeMap dark interactive />
-          {/* the proof figures, as the homepage has always set them: serif numerals, a label, the source note */}
-          <div className="grid grid-cols-3">
-            {[
-              [MARKET_INDEX_FMT.events, t("ribbon.deals")],
-              [MARKET_FMT.buyers, t("ribbon.mandates")],
-              [HISTORY_FMT.disclosedValue, t("ribbon.value")],
-            ].map(([v, l], i) => (
-              <div key={l} className={`relative py-7 pr-3 ${i ? "border-l border-white/15 pl-3 sm:pl-6" : ""}`}>
-                <span aria-hidden className={`hero-rule absolute top-0 h-[2px] bg-blue-400 ${i ? "left-3 right-3 sm:left-6" : "left-0 right-3"}`} style={{ animationDelay: `${0.2 + i * 0.15}s` }} />
-                <div className="font-editorial text-[clamp(2.1rem,4.4vw,4rem)] font-semibold leading-none tracking-[-0.03em]"><CountUp value={v} /></div>
-                <div className="mt-2.5 text-[13px] text-blue-100/80">{l}<Note n={([1, 2, 3] as SourceId[])[i]} first dark /></div>
-              </div>
-            ))}
+        </div>
+        {/* the vertical note on the navy side */}
+        <div aria-hidden className="absolute bottom-40 right-[3.5%] hidden flex-col items-center gap-4 lg:flex">
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.24em] text-blue-100/80" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>{t("hx.note")}</span>
+          <span className="h-11 w-px bg-blue-300" />
+        </div>
+
+        {/* the capability strip */}
+        <ul aria-label={t("hx.strip")} className="relative grid border-t border-blue-600/70 bg-[#030a15]/95 text-white sm:grid-cols-2 lg:grid-cols-5">
+          {([["◎", 1], ["♧", 2], ["↗", 3], ["▤", 4], ["⌁", 5]] as const).map(([icon, k], i) => (
+            <li key={k} className={`flex gap-4 px-5 py-6 sm:px-8 lg:px-6 ${i ? "border-t border-white/10 sm:border-t-0 lg:border-l" : ""} ${i % 2 ? "sm:border-l" : ""} sm:border-white/10 lg:first:pl-[max(1.5rem,calc((100vw-1480px)/2+3rem))]`}>
+              <span aria-hidden className="font-editorial text-[26px] leading-none text-blue-300">{icon}</span>
+              <span>
+                <span className="block font-editorial text-[17px] font-semibold">{t(`hx.s${k}`)}</span>
+                <span className="mt-1.5 block max-w-[200px] text-[12px] leading-relaxed text-blue-100/75">{t(`hx.s${k}d`)}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* ===== 02 · INTELLIGENCE MEETS OPPORTUNITY — index(2) section 2, with our lifecycle graph in its box (DD2) ===== */}
+      <section id="ch-02" aria-labelledby="s2-h" className="border-b border-slate-200 bg-[#f6f8fb] text-ink-900">
+        <div className={`${WRAP} grid items-center gap-12 py-20 sm:py-24 lg:grid-cols-[0.85fr_1.15fr] lg:gap-[clamp(40px,5vw,84px)] lg:py-28`}>
+          <div>
+            <Chapter n="02">{t("s2.kicker")}</Chapter>
+            <h2 id="s2-h" className="rv-h mt-6 font-editorial text-[clamp(2.6rem,4.2vw,4rem)] font-semibold leading-[1.04] tracking-[-0.035em]">{t("s2.h2")} <em className="italic text-blue-600">{t("s2.h2em")}</em></h2>
+            <p className="mt-6 max-w-[460px] text-[15px] leading-[1.85] text-slate-600">{t("s2.body")}</p>
+            {/* the proof figures, with their notes */}
+            <div className="mt-9 grid grid-cols-3 border-t border-ink-900">
+              {[
+                [MARKET_INDEX_FMT.events, t("ribbon.deals")],
+                [MARKET_FMT.buyers, t("ribbon.mandates")],
+                [HISTORY_FMT.disclosedValue, t("ribbon.value")],
+              ].map(([v, l], i) => (
+                <div key={l} className={`relative pr-3 pt-5 ${i ? "border-l border-slate-300 pl-3 sm:pl-5" : ""}`}>
+                  <span aria-hidden className={`hero-rule absolute -top-px h-[2px] bg-blue-600 ${i ? "left-3 right-3 sm:left-5" : "left-0 right-3"}`} style={{ animationDelay: `${0.2 + i * 0.15}s` }} />
+                  <div className="font-editorial text-[clamp(1.7rem,2.6vw,2.5rem)] font-semibold leading-none tracking-[-0.03em]"><CountUp value={v} /></div>
+                  <div className="mt-2 text-[12.5px] text-slate-600">{l}<Note n={([1, 2, 3] as SourceId[])[i]} first /></div>
+                </div>
+              ))}
+            </div>
+            <p data-edition className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600"><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />{t("hero.fresh", { d: MARKET_INDEX_FMT.asOf })}</p>
+            <Link to="/platform" className="mt-8 inline-flex items-center gap-3 border-b border-blue-600 pb-2.5 text-[13px] font-semibold text-ink-900 transition hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">{t("s2.link")} <span aria-hidden>→</span></Link>
+          </div>
+          {/* the right-hand box: the sale process, stage by stage */}
+          <div className="min-w-0 shadow-[0_40px_80px_-40px_rgba(6,24,46,0.6)]">
+            <ExchangeMap dark interactive compact />
           </div>
         </div>
       </section>
 
-      {/* ===== 02 · THE EXCHANGE — the screen installed in the trading hall ===== */}
-      <section id="ch-02" aria-labelledby="hall-h">
+      {/* ===== 03 · THE EXCHANGE — the board as the instrument ===== */}
+      <section id="ch-03" aria-labelledby="hall-h">
         <Instrument head={
           <div className={`${WRAP} relative pb-16 pt-20 text-white`}>
-            <Chapter n="02" dark>{t("hall.eyebrow")}</Chapter>
+            <Chapter n="03" dark>{t("hall.eyebrow")}</Chapter>
             <h2 id="hall-h" className="rv-h mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">{t("hall.h2")} <em className="italic text-blue-300">{t("hall.h2em")}</em></h2>
           </div>
         }>
@@ -157,13 +184,13 @@ const Landing: React.FC = () => {
         `}</style>
       </section>
 
-      {/* ===== 03 · VALUE YOUR COMPANY — the working product moment ===== */}
-      <QuickValue />
+      {/* ===== 04 · VALUE YOUR COMPANY — the working product moment ===== */}
+      <QuickValue n="04" />
 
-      {/* ===== 04 · THE THESIS — one statement, set like a front page ===== */}
-      <section id="ch-04" className="border-b border-slate-200 bg-[#f6f8fb]">
+      {/* ===== 05 · THE THESIS — one statement, set like a front page ===== */}
+      <section id="ch-05" className="border-b border-slate-200 bg-[#f6f8fb]">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
-          <Chapter n="04">{t("loss.eyebrow")}</Chapter>
+          <Chapter n="05">{t("loss.eyebrow")}</Chapter>
           <h2 className="rv-h mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
           <div className="mt-12 grid gap-10 border-t-4 border-double border-ink-900 pt-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] lg:gap-[5vw]">
             <p className="max-w-md text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-blue-700">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
@@ -192,11 +219,11 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 05 · THE TRANSACTION RECORD — the ledger ===== */}
-      <section id="ch-05" className="border-b border-slate-200 bg-white">
+      {/* ===== 06 · THE TRANSACTION RECORD — the ledger ===== */}
+      <section id="ch-06" className="border-b border-slate-200 bg-white">
         <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
           <div>
-            <Chapter n="05">{t("rec.eyebrow")}</Chapter>
+            <Chapter n="06">{t("rec.eyebrow")}</Chapter>
             <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
               <h2 className={`rv-h ${H2} max-w-[20ch] text-ink-900`}><Editorial text={t("rec.h2")} /></h2>
               <p className="max-w-xs text-[13px] leading-relaxed text-slate-600">{t("rec.body")}</p>
@@ -271,11 +298,11 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 06 · THE MODULES — the site's own catalogue, live engine stats (Z3) ===== */}
-      <section id="ch-06" aria-labelledby="mods-h" className="border-b border-slate-200 bg-white text-ink-900">
+      {/* ===== 07 · THE MODULES — the site's own catalogue, live engine stats (Z3) ===== */}
+      <section id="ch-07" aria-labelledby="mods-h" className="border-b border-slate-200 bg-white text-ink-900">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="border-t-4 border-double border-ink-900 pt-8">
-            <Chapter n="06">{t("mods.eyebrow")}</Chapter>
+            <Chapter n="07">{t("mods.eyebrow")}</Chapter>
             <h2 id="mods-h" className="rv-h mt-6 max-w-[22ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("mods.h2")} /></h2>
           </div>
           <div className="mt-12 border-t border-ink-900">
@@ -303,12 +330,12 @@ const Landing: React.FC = () => {
       {/* real client proof — renders nothing until lib/proof.ts holds entries (CC4, gate G2) */}
       <ProofSection />
 
-      {/* ===== 07 · QUESTIONS — what founders ask first, answered from the Pricing and Platform pages ===== */}
-      <section id="ch-07" aria-labelledby="faq-h" className="border-b border-slate-200 bg-[#f6f8fb] text-ink-900">
+      {/* ===== 08 · QUESTIONS — what founders ask first, answered from the Pricing and Platform pages ===== */}
+      <section id="ch-08" aria-labelledby="faq-h" className="border-b border-slate-200 bg-[#f6f8fb] text-ink-900">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-[6vw]">
             <div className="border-t-4 border-double border-ink-900 pt-8">
-              <Chapter n="07">{t("faq.eyebrow")}</Chapter>
+              <Chapter n="08">{t("faq.eyebrow")}</Chapter>
               <h2 id="faq-h" className="rv-h mt-6 font-editorial text-[clamp(2.75rem,5.2vw,5rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("faq.h2")} /></h2>
               <div className="mt-10 rounded-[4px] p-6 text-white" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
                 <p className="font-editorial text-[1.35rem] font-semibold leading-snug">{t("faq.more")}</p>
@@ -331,8 +358,8 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 08 · THE NEXT MOVE — the back page ===== */}
-      <section id="ch-08" className="relative overflow-hidden text-white" style={{ background: "linear-gradient(180deg,#05101f 0%,#06182E 55%,#030a15 100%)" }}>
+      {/* ===== 09 · THE NEXT MOVE — the back page ===== */}
+      <section id="ch-09" className="relative overflow-hidden text-white" style={{ background: "linear-gradient(180deg,#05101f 0%,#06182E 55%,#030a15 100%)" }}>
         {/* a quiet film of a meeting under a navy veil (placeholder footage, pre-launch gate G1) */}
         <AmbientVideo src="/media/boardroom-loop.mp4" webm="/media/boardroom-loop.webm" poster="/media/boardroom-poster.jpg" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.38] mix-blend-luminosity" />
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg,#05101f 0%,rgba(6,24,46,0.62) 28%,rgba(6,24,46,0.72) 62%,#030a15 100%), linear-gradient(90deg,rgba(3,10,21,0.85) 0%,rgba(3,10,21,0.35) 55%,rgba(3,10,21,0.6) 100%)" }} />
@@ -340,7 +367,7 @@ const Landing: React.FC = () => {
         <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 h-[70%] w-[80%] -translate-x-1/2 rounded-[50%] opacity-40 blur-[110px]" style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.55), transparent 70%)" }} />
         <div className={`${WRAP} relative py-20 sm:py-24 lg:py-32`}>
           <div className="border-t-4 border-double border-white/50 pt-8">
-            <Chapter n="08" dark>{t("cta.eyebrow")}</Chapter>
+            <Chapter n="09" dark>{t("cta.eyebrow")}</Chapter>
             <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1fr_auto]">
               <h2 className="rv-h font-editorial text-[clamp(3rem,7vw,7rem)] font-semibold leading-[0.94] tracking-[-0.05em] text-white"><Editorial text={t("cta.h2")} dark /></h2>
               <div className="flex flex-wrap gap-2.5 lg:flex-col lg:items-stretch">
