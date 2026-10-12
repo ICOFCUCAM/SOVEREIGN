@@ -311,6 +311,14 @@ The headline and proof figures sit in the hall for B and C. `ExchangeWall` and `
 |---|---|---|---|
 | W2 | **The hall reads as a stage set, not a grand space.** | `components/TradingHall.tsx` and the hero headline: - **coffered ceiling** in perspective, replacing the light lines;; **full-height pilasters** with lit capitals, rising into the ceiling;; the screen set in a **recessed stepped portal** (two frames and an inner shadow);; **volumetric light** falling from the cove onto the screen, and a faint **glass sheen** over the screen (decorative, `pointer-events: none`, above the content, not changing it);; **stone floor** seams and a vignette;; a slow **entrance** (the screen rises and fades in once, motion-safe only);; an editorial **rule before the eyebrow**. Verify: board markup identical, axe outside the screen 0, reduced motion = no entrance animation, 1440/390 screens. | ☑ `8135d22f` |
 
+
+### Phase 7 — A calm hero, the hall in the body (awaiting the owner's confirmation)
+Owner, 2026-10-12: asked whether the hall should move into the body with a different hero; then "go on and send me screenshot to confirm". (A reference image was mentioned but none arrived, so the options follow the brief: one statement, calm, iconic, locked colours.) Two dev-only options in the hero lab, each followed by the hall as a body section ("The exchange — The whole market, in one room."; the screen unchanged):
+- **`/hero-lab?v=8` — The Mark.** On the page ground: a monumental editorial headline, a rule, `hero.sub` and both buttons, and the ExitOS mark drawn as fine line art on the right (ring, inner ring, registry ticks, emerald core; it turns slowly, motion-safe). The proof figures run along the bottom.
+- **`/hero-lab?v=9` — The Horizon.** Navy: a centred headline with ruled eyebrow, `hero.sub`, both buttons and the proof figures, with the hall's light cove glowing on the horizon at the bottom, leading the eye down into the hall.
+
+Nothing changes on the live homepage until the owner confirms. Screens: `scratchpad/heroes/hero-{8,9}-{fold,hall}-{1440,390}.jpg`.
+
 ---
 
 ## Closure log

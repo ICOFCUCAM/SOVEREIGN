@@ -284,7 +284,102 @@ const HeroHallWall: React.FC = () => (
   </section>
 );
 
-const VARIANTS: Record<string, React.FC> = { "1": HeroHall, "2": HeroNight, "3": HeroFrontPage, "4": HeroMonolith, "5": HeroWallInHall, "6": HeroHallClassic, "7": HeroHallWall };
+/** The trading hall as a body section (the screen unchanged), for 8 and 9. */
+const HallSection: React.FC = () => (
+  <section>
+    <TradingHall head={
+      <div className="relative mx-auto w-full max-w-[1480px] px-5 pb-24 pt-24 text-white sm:px-8 lg:px-12">
+        <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.24em] text-blue-300"><span aria-hidden className="h-px w-12 bg-blue-300/70" />The exchange</div>
+        <h2 className="mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">The whole market, <em className="italic text-blue-300">in one room.</em></h2>
+      </div>
+    }>
+      <div className="rounded-[6px] bg-[#0a1626] p-1.5"><ScreenFace /></div>
+    </TradingHall>
+  </section>
+);
+
+/* ── 8 · THE MARK — one statement, one sigil ──────────────────────────── */
+const HeroMark: React.FC = () => {
+  const { t, nav, h1, proof } = useHero();
+  return (
+    <>
+      <section className="relative overflow-hidden border-b border-slate-200 bg-[#f6f8fb]">
+        <div className={`${WRAP} relative grid min-h-[calc(100vh-72px)] items-center gap-10 py-16 lg:grid-cols-[1.25fr_0.75fr]`}>
+          <div className="min-w-0">
+            <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.24em] text-slate-600"><span aria-hidden className="h-px w-12 bg-blue-600" />{t("hero.eyebrow")}</div>
+            <h1 className="mt-8 font-editorial text-[clamp(3.6rem,8.2vw,9.2rem)] font-semibold leading-[0.86] tracking-[-0.05em] text-ink-900">
+              {h1.map((l, i) => <span key={i} className={`block ${i === 1 ? "pl-[10%]" : ""} ${i === h1.length - 1 ? "italic text-blue-600" : ""}`}>{l}</span>)}
+            </h1>
+            <div className="mt-12 grid gap-8 border-t border-ink-900 pt-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+              <p className="max-w-md font-editorial text-[20px] leading-snug text-ink-900">{t("hero.sub")}</p>
+              <div className="flex flex-wrap gap-2.5">
+                <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("nav.access")} <Arrow /></button>
+                <button onClick={() => nav("/pricing")} className={`${BTN} border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
+              </div>
+            </div>
+          </div>
+          <div className="relative hidden justify-center lg:flex" aria-hidden>
+            <div className="absolute inset-0 m-auto h-[460px] w-[460px] rounded-full opacity-60 blur-3xl" style={{ background: "radial-gradient(circle, rgba(56,130,246,0.18), transparent 70%)" }} />
+            {/* the ExitOS mark drawn as fine line art: ring, inner ring, registry ticks, live core */}
+            <svg viewBox="0 0 100 100" className="relative h-[480px] w-[480px]" fill="none">
+              <g className="origin-center motion-safe:[animation:spin_160s_linear_infinite]" style={{ transformBox: "fill-box" }}>
+                <circle cx="50" cy="50" r="44" stroke="#0a1018" strokeWidth="0.25" opacity="0.35" strokeDasharray="0.6 1.4" />
+                <circle cx="50" cy="50" r="33" stroke="#0a1018" strokeWidth="0.9" />
+                <circle cx="50" cy="50" r="22" stroke="#2563eb" strokeWidth="0.35" opacity="0.7" />
+                <g stroke="#0a1018" strokeWidth="0.9" strokeLinecap="round">
+                  <line x1="50" y1="9" x2="50" y2="21" /><line x1="50" y1="79" x2="50" y2="91" />
+                  <line x1="9" y1="50" x2="21" y2="50" /><line x1="79" y1="50" x2="91" y2="50" />
+                </g>
+                <g stroke="#2563eb" strokeWidth="0.45" strokeLinecap="round" opacity="0.8">
+                  <line x1="22" y1="22" x2="26" y2="26" /><line x1="78" y1="22" x2="74" y2="26" />
+                  <line x1="22" y1="78" x2="26" y2="74" /><line x1="78" y1="78" x2="74" y2="74" />
+                </g>
+              </g>
+              <circle cx="50" cy="50" r="4.2" fill="#34d399" />
+              <circle cx="50" cy="50" r="8" stroke="#34d399" strokeWidth="0.3" opacity="0.6" />
+            </svg>
+          </div>
+        </div>
+        <div className={`${WRAP} grid grid-cols-2 border-t border-slate-300 py-6 sm:grid-cols-4`}>
+          {proof.map(([v, l]) => <div key={l} className="py-1"><div className="font-editorial text-[1.9rem] font-semibold leading-none text-ink-900">{v}</div><div className="mt-1.5 text-[12px] text-slate-600">{l}</div></div>)}
+        </div>
+      </section>
+      <HallSection />
+    </>
+  );
+};
+
+/* ── 9 · THE HORIZON — a night statement, the hall's light on the horizon ── */
+const HeroHorizon: React.FC = () => {
+  const { t, nav, h1, proof } = useHero();
+  return (
+    <>
+      <section className="relative overflow-hidden text-white" style={{ background: "linear-gradient(180deg,#030a15 0%,#06182E 60%,#0A1F3A 100%)" }}>
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(160,190,230,0.9) 0 1px, transparent 1px 180px)" }} />
+        <div className={`${WRAP} relative flex min-h-[calc(100vh-72px)] flex-col items-center justify-center pb-32 pt-16 text-center`}>
+          <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.26em] text-blue-300"><span aria-hidden className="h-px w-10 bg-blue-300/70" />{t("hero.eyebrow")}<span aria-hidden className="h-px w-10 bg-blue-300/70" /></div>
+          <h1 className="mt-8 max-w-[13ch] font-editorial text-[clamp(3.4rem,8vw,8.6rem)] font-semibold leading-[0.88] tracking-[-0.05em]">
+            {h1.map((l, i) => <span key={i} className={i === h1.length - 1 ? "italic text-blue-300" : ""}>{l}{i < h1.length - 1 ? " " : ""}</span>)}
+          </h1>
+          <p className="mt-8 max-w-xl font-editorial text-[21px] leading-snug text-blue-50/90">{t("hero.sub")}</p>
+          <div className="mt-9 flex flex-wrap justify-center gap-2.5">
+            <button onClick={() => nav("/console")} className={`${BTN} bg-white text-ink-900 hover:bg-blue-50`}>{t("nav.access")} <Arrow /></button>
+            <button onClick={() => nav("/pricing")} className={`${BTN} border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
+          </div>
+          <div className="mt-16 grid w-full max-w-4xl grid-cols-2 gap-y-6 sm:grid-cols-4">
+            {proof.map(([v, l]) => <div key={l}><div className="font-editorial text-[1.9rem] font-semibold leading-none">{v}</div><div className="mt-1.5 text-[12px] text-blue-100/70">{l}</div></div>)}
+          </div>
+        </div>
+        {/* the horizon: the hall's light cove glimpsed below the fold */}
+        <div aria-hidden className="absolute inset-x-0 bottom-10 mx-auto h-[3px] w-[70%] rounded-full" style={{ background: "linear-gradient(90deg, transparent, rgba(225,238,255,1), transparent)", boxShadow: "0 0 40px 10px rgba(120,170,255,0.55)" }} />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 mx-auto h-24 w-[80%] rounded-[50%] opacity-50 blur-3xl" style={{ background: "radial-gradient(ellipse at bottom, rgba(56,130,246,0.6), transparent 70%)" }} />
+      </section>
+      <HallSection />
+    </>
+  );
+};
+
+const VARIANTS: Record<string, React.FC> = { "1": HeroHall, "2": HeroNight, "3": HeroFrontPage, "4": HeroMonolith, "5": HeroWallInHall, "6": HeroHallClassic, "7": HeroHallWall, "8": HeroMark, "9": HeroHorizon };
 
 const HeroLab: React.FC = () => {
   const [params] = useSearchParams();
