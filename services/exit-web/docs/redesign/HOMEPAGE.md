@@ -457,6 +457,16 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 
 Story chapters sit on ivory (`ex-paper`, #f6f8fb): 02 the opening argument, 05 the thesis, the proof section, 08 questions. Working chapters, where the reader does something, sit on white: 04 value your company, 06 the ledger, 07 the modules. Dark chapters are ink: the hero's right field, 03 the board with the lifecycle band, 09 the close and the footer.
 
+### Phase 13 verification (EE29)
+
+- `tsc --noEmit` clean; `eslint src` 0 errors (1 pre-existing warning in FounderInbox.tsx, untouched).
+- vitest 38 files, 246/246; `vite build` OK.
+- axe (wcag2a/aa, 2.1aa, 2.2aa, best-practice) after a full scroll: /, /pricing, /platform, /modules at 1440 and 390 — 0 violations; colour contrast with the header in its ink state — 0.
+- Keyboard: a full pass to the footer's back-to-top — / 74 stops, /pricing 35, none without a visible focus indicator. (The earlier "129" was a 160-press cap wrapping the page; the harness now stops at the end.)
+- Reduced motion: no CSS animation outside the board (cssOutside 0); the watermark entrance, the travelling light, link arrows and the header fade are all off.
+- Board: the ribbon and CommandBoard compared with the original, whitespace-normalised — identical.
+- Phones (390): hero, ledger and footer — no horizontal overflow, no console errors.
+
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
 
 | # | Gate | Status |
