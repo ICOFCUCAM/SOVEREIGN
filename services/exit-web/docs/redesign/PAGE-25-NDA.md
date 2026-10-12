@@ -31,7 +31,7 @@ Founder Active Mandate: `h1` none · axe empty-table-header ×1 · **overflow at
 |---|---|---|---|
 | G1 | **Buyers see the founder's NDA register.** | Buyer role gets its own "Access Requests" view: no other counterparties; how access requests work; links to Browse Opportunities and Deal Room. | ☑ `ba6399b` |
 | G2 | **Fake verification gates** ("identity / history / funds verified", "Verified" tier). | Gates named for what they check (NDA executed, signature recorded, named representative, liquidated-damages clause); "N of 4 record checks"; state that ExitOS does not verify identity, funds or track record. | ☑ `c941d4e` |
-| G3 | **False data-room gating; "issued" implies sent; sample breach evidence looks real.** | Plain wording: no data room gating exists; NDAs are drafted in this session and not sent; breach allegations and evidence references marked illustrative. | ☐ |
+| G3 | **False data-room gating; "issued" implies sent; sample breach evidence looks real.** | Plain wording: no data room gating exists; NDAs are drafted in this session and not sent; breach allegations and evidence references marked illustrative. | ☑ G3-commit |
 | G4 | Demo NDAs unlabelled. | Badge and line: sample NDA portfolio of the demo company. | ☐ |
 | G5 | Design: no `h1`, overflow at 390, empty header, tape. | Rebuild on `xo`; `RegistryTape`. | ☑ `e4d0401` |
 
@@ -57,3 +57,13 @@ Founder Active Mandate: `h1` none · axe empty-table-header ×1 · **overflow at
 | `h1` "NDA & Buyer Trust" | "NDA Vault" (the NAV name) |
 | "Pursue Verified-tier buyers first — they've cleared all four trust gates." | "Start with counterparties whose NDA record meets all four checks — then do your own diligence on who they are and how they fund deals." |
 *Verification:* `tsc -b`, eslint clean · Chromium (founder): the only "verified" left is the banker's take data-room line handled in G3; 0 "Buyer Trust" / "trust gates".
+
+### G3 — False data-room gating; "issued" implied sent; breach evidence looked real
+*Closed by:* `pages/Nda.tsx` (text only).
+| Before | After |
+|---|---|
+| "ExitOS … gates data-room access automatically"; "… cleared for the data room"; "data-room access restricted until trust clears"; "qualified for full data-room access"; "lift each buyer into the room" | "What ExitOS does — Tracks each NDA's status and four record checks. It does not control access to any data room — no such gate exists yet."; "N counterparties meet all four record checks"; "N record check(s) not met. ExitOS does not gate data-room access on these." |
+| "An unqualified buyer in the data room is an information leak …" | "Sharing materials before an NDA is executed risks an information leak." |
+| Issue dialog "Generates a pending-signature NDA against the live listing"; toast "NDA issued to {buyer} — pending countersignature" | "Drafts a pending-signature NDA for this session against the demo listing. Nothing is sent — share the NDA package yourself."; "NDA drafted for {buyer} — pending signature, not sent" |
+| "Sample breach notice — Generated draft" | "… illustrative allegations and evidence references, not real events" |
+*Verification:* `tsc -b`, eslint clean · Chromium (founder): 0 matches for verified / issued to / live listing / lift each buyer.

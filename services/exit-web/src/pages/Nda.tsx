@@ -132,7 +132,7 @@ const FounderNdaVault: React.FC = () => {
     setIssued((prev) => [nda, ...prev]);
     setIssueOpen(false);
     setForm({ templateId: STANDARD_TEMPLATES[0].id, buyerName: "", rep: "" });
-    notify(`NDA issued to ${buyerName} — pending countersignature`);
+    notify(`NDA drafted for ${buyerName} — pending signature, not sent`);
     setOpenId(nda.id);
   };
 
@@ -201,7 +201,7 @@ const FounderNdaVault: React.FC = () => {
         </ul>
       </Modal>
 
-      <Modal open={issueOpen} onClose={() => setIssueOpen(false)} title="Issue an NDA" subtitle="Generates a pending-signature NDA against the live listing" size="md"
+      <Modal open={issueOpen} onClose={() => setIssueOpen(false)} title="Issue an NDA" subtitle="Drafts a pending-signature NDA for this session against the demo listing. Nothing is sent — share the NDA package yourself." size="md"
         footer={<><Button variant="ghost" onClick={() => setIssueOpen(false)}>Cancel</Button><Button onClick={submitIssue}>Issue NDA</Button></>}>
         <div className="space-y-4">
           <Field label="Template">
@@ -226,13 +226,13 @@ const FounderNdaVault: React.FC = () => {
       <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line">
         <div className="px-4 py-3">
           <p className="text-[14px] leading-relaxed">{roster.pending > 0
-            ? <>Chase countersignatures on the <span className="font-semibold">{roster.pending} pending NDA{roster.pending === 1 ? "" : "s"}</span> to lift each buyer into the room.</>
-            : <>All NDAs executed — qualification gates are the gating step now.</>}</p>
+            ? <>Chase countersignatures on the <span className="font-semibold">{roster.pending} pending NDA{roster.pending === 1 ? "" : "s"}</span>.</>
+            : <>All NDAs executed.</>}</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{verifiedCount}</span> fully-verified buyer{verifiedCount === 1 ? "" : "s"} cleared for the data room; {roster.active} active.</TakeCell>
-            <TakeCell k="If you wait">An unqualified buyer in the data room is an information leak and a wasted slot in your process.</TakeCell>
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{verifiedCount}</span> counterpart{verifiedCount === 1 ? "y meets" : "ies meet"} all four record checks; {roster.active} active NDA{roster.active === 1 ? "" : "s"}.</TakeCell>
+            <TakeCell k="If you wait">Sharing materials before an NDA is executed risks an information leak.</TakeCell>
             <TakeCell k="Pursue">Start with counterparties whose NDA record meets all four checks — then do your own diligence on who they are and how they fund deals.</TakeCell>
-            <TakeCell k="ExitOS does it">ExitOS scores every counterparty on four verification gates and gates data-room access automatically.</TakeCell>
+            <TakeCell k="What ExitOS does">Tracks each NDA's status and four record checks. It does not control access to any data room — no such gate exists yet.</TakeCell>
           </dl>
         </div>
       </Section>
@@ -279,8 +279,8 @@ const FounderNdaVault: React.FC = () => {
           <Section title={`Record checks · ${openNda.receiving.name}`} eyebrow="From the NDA record — ExitOS does not verify identity, funds or acquisition history" className="border border-xo-line"
             right={<span className={`font-mono text-[18px] font-semibold ${TIER_CLS[trust.tier]}`}>{trust.gates.filter((g) => g.cleared).length}/4 · {TIER_LABEL[trust.tier]}</span>}
             foot={trust.tier === "Verified"
-              ? "All gates cleared — buyer qualified for full data-room access."
-              : `${trust.gates.filter((g) => !g.cleared).length} gate(s) outstanding — data-room access restricted until trust clears.`}>
+              ? "All four record checks met."
+              : `${trust.gates.filter((g) => !g.cleared).length} record check(s) not met. ExitOS does not gate data-room access on these.`}>
             <ul className="grid gap-px bg-xo-line sm:grid-cols-2">
               {trust.gates.map((g) => (
                 <li key={g.label} className="flex items-start gap-2.5 bg-xo-panel px-4 py-3">
@@ -316,7 +316,7 @@ const FounderNdaVault: React.FC = () => {
             </Section>
 
             {sampleBreach && (
-              <Section title="Sample breach notice" eyebrow="Generated draft">
+              <Section title="Sample breach notice" eyebrow="Generated draft — illustrative allegations and evidence references, not real events">
                 <ScrollRegion label="Sample breach notice text" className="max-h-96 overflow-y-auto">
                   <pre className="whitespace-pre-wrap px-4 py-3 font-sans text-[12px] leading-relaxed text-xo-muted">{sampleBreach.body}</pre>
                 </ScrollRegion>
