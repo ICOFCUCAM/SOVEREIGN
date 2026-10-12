@@ -159,9 +159,9 @@ const Landing: React.FC = () => {
       {/* ===== 05 · THE TRANSACTION RECORD — the ledger ===== */}
       <section className="border-b border-slate-200 bg-white">
         <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
-          <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
+          <div>
             <Chapter n="05">{t("rec.eyebrow")}</Chapter>
-            <div className="flex flex-wrap items-end justify-between gap-6">
+            <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
               <h2 className={`${H2} max-w-[20ch] text-ink-900`}><Editorial text={t("rec.h2")} /></h2>
               <p className="max-w-xs text-[13px] leading-relaxed text-slate-600">{t("rec.body")}</p>
             </div>
