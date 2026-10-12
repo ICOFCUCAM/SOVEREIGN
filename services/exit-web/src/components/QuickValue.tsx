@@ -139,7 +139,9 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
               </div>
             </form>
 
-            <div aria-live="polite" className="mt-10 border-t border-ink-900 pt-8">
+            {/* the space the worked example will take is held from the first paint, so the page below does not
+                jump when it arrives */}
+            <div aria-live="polite" className="mt-10 min-h-[690px] border-t border-ink-900 pt-8 sm:min-h-[640px] lg:min-h-[350px]">
               {result && mod ? (
                 <div className="grid items-start gap-8 lg:grid-cols-[1.35fr_1fr]">
                   <div className={CARD} style={CARD_BG}>
