@@ -1,12 +1,13 @@
 import React, { useMemo } from "react";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
+import { SAMPLE_COMPANY } from "../lib/profile";
 import { buildMarketTape } from "../lib/market-tape";
 import { BUYER_RESPONSES, PROCESS_FUNNEL } from "../lib/process-intel";
 
-// PROCESS INTELLIGENCE — buyer-response telemetry for the live mandate.
-// Matched → NDA → LOI → Close, with observed conversions and timings, all
-// derived from real process events. The moat that grows with every deal.
+// PROCESS INTELLIGENCE — the buyer-response funnel (matched → NDA → LOI →
+// close) with conversions and timings. Today it runs on the demo company's
+// sample NDAs and offers; the page labels it as such.
 
 const F = PROCESS_FUNNEL;
 const stages: ReadonlyArray<{ label: string; n: number; note: string }> = [
@@ -22,7 +23,8 @@ const ProcessIntelligence: React.FC = () => {
   return (
     <div data-page="process-intelligence" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Exchange · Execution" title="Process Intelligence"
-        badge={<span className="text-[12px] text-xo-muted">Buyer-response moat</span>} />
+        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">Buyer-response funnel</span></>}
+        description={`Built from the demo company's sample NDAs and offers (${SAMPLE_COMPANY.name}) — no real process has run yet. Saved intakes hold no NDAs or offers.`} />
 
       <section aria-label="Process summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Median time to NDA" emphasis value={F.medianTimeToNdaDays != null ? `${F.medianTimeToNdaDays}d` : "—"} sub="first touch → signed" /></div>
@@ -49,7 +51,7 @@ const ProcessIntelligence: React.FC = () => {
         </Section>
 
         <Section title="Buyer response · this mandate" className="lg:col-span-8"
-          foot="Derived from the platform's own NDA and offer events. As real processes run across the network, these times aggregate per buyer — buyer-response intelligence neither a banker nor PitchBook has.">
+          foot="Derived from the sample NDA and offer records and their timestamps. Once real processes run on ExitOS, the same table will show measured response times per buyer.">
           <ScrollRegion label="Buyer response table">
             <table className="w-full min-w-[520px] text-[12px]">
               <thead className="text-left text-[11px] text-xo-faint">
