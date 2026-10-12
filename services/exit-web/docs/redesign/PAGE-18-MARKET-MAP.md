@@ -30,7 +30,7 @@ Market-wide acquisition activity from the registry snapshot: totals, a sector he
 |---|---|---|---|
 | G1 | **"Verified registry … nothing modelled or estimated"** while most events are unverified. | State the source mix: most rows are source-cited but unverified list entries; a minority are verified against SEC EDGAR / Wikidata; values are as disclosed. | ☑ `5f4008a` |
 | G2 | Mislabels: list sizes as "active sectors / acquirers"; "where capital is moving"; hover-only values. | "Sectors shown", "Acquirers listed — by deal count"; "by sector, snapshot"; disclosed value printed in each sector cell. | ☑ `4f3f024` |
-| G3 | Fake live tape. | `RegistryTape`. | ☑ G3-commit |
+| G3 | Fake live tape. | `RegistryTape`. | ☑ `f5b6c2b` |
 | G4 | Design: no `h1`, 5 contrast failures, old primitives. | Rebuild on `xo` (acquirers table with headers; decorative visuals hidden with text equivalents). | ☑ `a4476e4` |
 
 ---
