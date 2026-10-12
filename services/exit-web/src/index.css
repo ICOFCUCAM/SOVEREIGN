@@ -53,6 +53,10 @@ html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px s
 }
 /* paper: the porcelain chapters carry a fine, static grain, as printed stock does (no motion, under 4% ink) */
 .ex-site .bg-ex-paper { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .27 0 0 0 0 .2 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E"); }
+/* native controls (selects and their menus, search fields, scrollbars) follow the ground they sit on: light on
+   porcelain and white chapters, dark on ink */
+.ex-site { color-scheme: light; }
+.ex-site :where([data-ink], footer) { color-scheme: dark; }
 .ex-site ::selection { background: rgba(180,154,117,0.32); color: inherit; }
 .ex-site :where([data-ink], footer) ::selection { background: rgba(201,176,138,0.4); color: #fff; }
 
