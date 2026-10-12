@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MarketingChrome, Mark, Arrow, BUTTON, Chapter, Editorial } from "../components/MarketingChrome";
-import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, LEDGER_ROWS, LEDGER_TIERS, LEDGER_PRICED, DEAL_INTEL_FMT, type BoardTx } from "../lib/market-stats";
+import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, LEDGER_ROWS, LEDGER_TIERS, LEDGER_PRICED, DEAL_INTEL, DEAL_INTEL_FMT, type BoardTx } from "../lib/market-stats";
 import { useI18n } from "../lib/i18n";
 import QuickValue from "../components/QuickValue";
 import Instrument from "../components/Instrument";
@@ -169,7 +169,23 @@ const Landing: React.FC = () => {
           <Chapter n="05">{t("loss.eyebrow")}</Chapter>
           <h2 className="rv-h mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
           <div className="mt-12 grid gap-10 border-t-4 border-double border-ink-900 pt-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] lg:gap-[5vw]">
-            <p className="max-w-md text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-[#6A5539]">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
+            <div className="max-w-md">
+            <p className="text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-[#6A5539]">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
+            {/* the record's own medians, set as figures (sample sizes shown) */}
+            <dl className="mt-9 grid grid-cols-3 border-t border-ink-900">
+              {([
+                [DEAL_INTEL_FMT.medianPremium, t("loss.f1"), DEAL_INTEL.measuredPremiums],
+                [DEAL_INTEL.medianCloseDays != null ? String(Math.round(DEAL_INTEL.medianCloseDays)) : "—", t("loss.f2"), DEAL_INTEL.measuredCloses],
+                [DEAL_INTEL_FMT.closedRate, t("loss.f3"), null],
+              ] as const).map(([v, l, n], i) => (
+                <div key={l} className={`flex flex-col pr-3 pt-4 ${i ? "border-l border-slate-300 pl-3 sm:pl-4" : ""}`}>
+                  <dt className="order-2 mt-2 text-[12px] leading-snug text-slate-600">{l}</dt>
+                  <dd className="order-1 font-editorial text-[clamp(1.7rem,2.6vw,2.4rem)] font-semibold leading-none tracking-[-0.03em] text-ink-900">{v}</dd>
+                  {n != null && <dd className="order-3 mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">{t("loss.n", { n })}</dd>}
+                </div>
+              ))}
+            </dl>
+            </div>
             {/* comparison matrix, set as a broadsheet table */}
             {/* phones: each dimension as its own entry, the two ways of selling one above the other */}
             <dl className="border-t border-ink-900 sm:hidden">
