@@ -37,8 +37,12 @@ The page calls the production edge function. Tests stub that call with **synthet
 |---|---|---|---|
 | G1 | **Self-learning overclaims.** | Say the dashboard measures error for review; nothing feeds back into the engines automatically; re-calibration is a deliberate change. | ☐ |
 | G2 | **"Median \|error\|" shows the mean; sign and scope unstated.** | "Mean absolute error" (and the median error beside it); "error = (realized − predicted) ÷ predicted; negative = closed below the prediction"; "demo tenant"; the prediction recorded is the strategic-report midpoint (X21). | ☐ |
-| G3 | Design: old components; overflow at 390. | Rebuild on `xo`; tables in scroll regions. | ☐ |
+| G3 | Design: old components; overflow at 390. | Rebuild on `xo`; tables in scroll regions. | ☑ G3-commit |
 
 ---
 
 ## Closure log
+
+### G3 — Design
+*Closed by:* `pages/Calibration.tsx` rebuilt on `xo` (`PageHeader` `h1`; four metrics; loading as a status and the failure as an alert; the empty state as a titled `Section`; the three tables with row headers and scoped column headers inside keyboard-reachable `ScrollRegion`s — fixes the overflow at 390; error tones on xo tokens with the value always in text). Content carried over verbatim; G1–G2 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium superadmin, stubbed edge function (empty, populated and error states) at 1440/390: 0 errors, `h1` 1, **no overflow** (was overflowing at 390 when populated), axe 0 (a duplicate region name found during the rebuild was fixed).
