@@ -11,8 +11,8 @@ import BankerTake from "../components/BankerTake";
 // Enterprise Value — institutional valuation desk. The headline is the
 // financial baseline (multiples) uplifted by an EVIDENCE-BASED strategic
 // premium from observed precedents, shown beside the comparable set, a
-// confidence score, the buyer universe and an interactive DCF. Every figure
-// traces to source data, not assumption.
+// confidence score and the buyer universe. The fact-sheet figures carry
+// their sources; the DCF is a sensitivity tool on the user's assumptions.
 
 const C = SAMPLE_COMPANY;
 const TTM = C.revenue.trailingTwelveMonthsRevenueUsd;
@@ -49,7 +49,7 @@ const Valuation: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Midpoint" emphasis value={fmtMoney(INST.headline.mid)} sub={`${fmtMoney(INST.headline.low)}–${fmtMoney(INST.headline.high)}`} /></div>
         <div className="bg-xo-panel"><Metric label="Strategic premium" value={`+${pctStr(INST.premium.appliedPct)}`} sub={`range ${pctStr(INST.premium.rangeLowPct)}–${pctStr(INST.premium.rangeHighPct)}`} /></div>
         <div className="bg-xo-panel"><Metric label="Financial baseline" value={fmtMoney(INST.financialBaseline.mid)} sub="pre-premium" /></div>
-        <div className="bg-xo-panel"><Metric label="DCF" value={fmtMoney(dcfValue)} sub={`${growth}% g · ${discount}% WACC`} /></div>
+        <div className="bg-xo-panel"><Metric label="DCF sensitivity" value={fmtMoney(dcfValue)} sub={`${growth}% g · ${discount}% WACC · your assumptions`} /></div>
         <div className="bg-xo-panel"><Metric label="Median precedent deal size" value={fmtMoney(compMid)} sub={`${INST.comparablesUsed} precedents · other companies' deals, not a value for this company`} /></div>
         <div className="bg-xo-panel"><Metric label="Time to close" value={`${INST.timeToClose.lowDays}–${INST.timeToClose.highDays}d`} sub="expected" /></div>
       </section>
@@ -81,7 +81,7 @@ const Valuation: React.FC = () => {
           <button type="button" onClick={() => downloadJson("exitos-valuation-model.json", { company: C.name, institutional: INST, factSheet: VALUATION_FACTS, dcf: dcfValue, medianPrecedentDealSizeUsd: compMid, assumptions: { growthPct: growth, discountPct: discount } })} className="rounded-sm border border-xo-line px-2 py-1 text-[11px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Export data (.json)</button>
           <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-2 py-1 text-[11px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report (PDF) →</a>
         </>}
-        foot="Hover any figure for its methodology, source and last-updated date. No number on this page exists without one.">
+        foot="Hover or focus any figure for its methodology, source and last-updated date.">
         <dl className="grid grid-cols-2 gap-px bg-xo-line sm:grid-cols-3 lg:grid-cols-5">
           {VALUATION_FACTS.map((f) => (
             <div key={f.key} className="flex flex-col bg-xo-panel p-3">
@@ -100,7 +100,8 @@ const Valuation: React.FC = () => {
 
       {/* DCF · methodology · buyer universe */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
-        <Section title="DCF assumptions" className="lg:col-span-3">
+        <Section title="DCF sensitivity · your assumptions" className="lg:col-span-3"
+          foot={`Projects EBITDA as a proxy for free cash flow (capex, tax and working capital are not deducted), grows it ${VALUATION_FRAMEWORK.dcf.years} years at your growth rate, discounts at your WACC and adds a terminal value at ${(VALUATION_FRAMEWORK.dcf.terminalGrowthPct * 100).toFixed(1)}% growth. A sensitivity on your assumptions — not the valuation, which is the midpoint above.`}>
           <div className="space-y-4 px-4 py-3">
             <div>
               <label htmlFor="val-growth" className={XO_LABEL}>Annual growth · {growth}%</label>
@@ -118,9 +119,10 @@ const Valuation: React.FC = () => {
           </div>
         </Section>
 
-        <Section title="Methodology bands · normalized weights sum to 100%" className="lg:col-span-5">
+        <Section title="Methodology bands" className="lg:col-span-5"
+          foot="The framework's weighted methods (weights sum to 100%) beside your DCF sensitivity, which carries no weight in the midpoint.">
           <div className="space-y-3.5 px-4 py-3">
-            <MethodBar name="DCF (5yr + terminal)" basis={`${growth}% growth · ${discount}% WACC`} mid={dcfValue} max={barMax} tone="bg-xo-verified" />
+            <MethodBar name="DCF sensitivity (not weighted)" basis={`${growth}% growth · ${discount}% WACC · your assumptions`} mid={dcfValue} max={barMax} tone="bg-xo-verified" />
             {INST.methodologies.map((m) => (
               <MethodBar key={m.name} name={`${m.name} · ${m.weightPct}%`} basis={m.evidence} mid={m.band.mid} max={barMax} tone="bg-xo-brass" />
             ))}
