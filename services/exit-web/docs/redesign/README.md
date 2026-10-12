@@ -17,8 +17,8 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | 11 | `/console/buyer-copilot` | Buyer Intelligence | `BuyerCopilot` | founder | Preparation or Pro | ☑ done · awaiting final review |
 | 12 | `/console/deal-room` | Deal Room (NAV label was "Live Deal Room") | `DealRoom` | founder, buyer | Pro | ☑ done · awaiting final review |
 | 13 | `/console/intelligence` | Acquisition Intelligence (NAV was "Acquisition Radar") | `Intelligence` | founder, buyer | none | ☑ done · awaiting final review |
-| 14 | `/console/data-room` | Data Room | `DataRoom` | founder | Preparation or Pro | ◐ in progress |
-| 15 | `/console/buyers` | Buyer Profiles | `Buyers` | founder | none | ☐ |
+| 14 | `/console/data-room` | Data Room | `DataRoom` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 15 | `/console/buyers` | Buyer Profiles | `Buyers` | founder | none | ◐ in progress |
 | 16 | `/console/buyer-graph` | Buyer Graph | `BuyerGraph` | founder | Preparation or Pro | ☐ |
 | 17 | `/console/buyer/:id` (guarded by `/console/buyer-graph`) | Buyer Graph | `BuyerProfile` | founder | Preparation or Pro | ☐ |
 | 18 | `/console/market-map` | Market Map | `MarketMap` | founder | Preparation or Pro | ☐ |

@@ -5,7 +5,7 @@
 | Route | `/console/data-room` |
 | Component | `src/pages/DataRoom.tsx` (313 lines) + `lib/data-room.ts` |
 | NAV | "Data Room", founder, **Preparation or Active Mandate** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All six gaps closed; X12 (shared tenant) open for the owner. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `7455dda`)
 
@@ -76,3 +76,13 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 ### G5 — Fake live tape
 *Closed by:* `pages/DataRoom.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow (was overflowing), axe 0, all tab stops with visible focus · free: Upgrade page · upload gate checked with stubbed functions (no real upload sent) · personalisation demo vs intake.
+
+## Known issues
+- **X12 (security, open):** uploads go to one shared demo tenant that anyone can list and download; the page now says so and requires acknowledgement, but per-founder storage and authenticated edge functions are needed. Owner decision.
+- The illustrative-discount rule is uncapped (≈ 73 % of value with an empty room) and the `technical` weight key does not match `technical_architecture`.
+- The real upload and list round-trip against production storage was not exercised (functions stubbed in tests) — NOT VERIFIED.
