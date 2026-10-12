@@ -9,9 +9,9 @@ import { premiumLeague, speedLeague, DNA_AS_OF } from "../lib/buyer-dna";
 
 // OUTCOME INTELLIGENCE (Tier 2) — answers "how much are they likely to pay?"
 // at the market level: which buyers pay the highest premiums, which close
-// fastest, and which sectors command the strongest multiples. Every row is
-// a DISCLOSED figure from the registry / framework — sparse by design,
-// never fabricated, and it widens as coverage grows.
+// fastest, and the framework's sector multiple priors. Premiums and close
+// times come from ExitOS's curated outcome records, attached to registry
+// buyers by name (see X15); multiples are framework priors.
 
 // strongest-multiple sectors — from the framework's institutional priors
 const SECTOR_MULT = Object.entries(MULTIPLES)
@@ -36,7 +36,7 @@ const OutcomeIntelligence: React.FC = () => {
         badge={<span className="text-[12px] text-xo-muted">Who pays · who closes · as of {DNA_AS_OF.slice(0, 10)}</span>} />
 
       <section aria-label="Coverage" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Disclosed premium" value={String(premium.length)} sub="buyers on record" /></div>
+        <div className="bg-xo-panel"><Metric label="Premium on record" value={String(premium.length)} sub="buyers with a curated outcome record" /></div>
         <div className="bg-xo-panel"><Metric label="Close-time data" value={String(speed.length)} sub="median announced→closed" /></div>
         <div className="bg-xo-panel"><Metric label="Sectors benchmarked" value={String(SECTOR_MULT.length)} sub="multiple bands" /></div>
         <div className="bg-xo-panel"><Metric label="Top premium" emphasis value={premium[0] ? `${Math.round((premium[0].premium_pct ?? 0) * 100)}%` : "—"} sub={premium[0]?.name} /></div>
@@ -49,11 +49,11 @@ const OutcomeIntelligence: React.FC = () => {
           <div aria-hidden><BuyerNetworkReactor height={220} /></div>
         </Section>
         <Section title="Highest premium payers" className="lg:col-span-5"
-          foot="Premium over disclosed reference price. Only buyers with a priced, referenced deal appear.">
+          foot="Average premium over the reference price, from ExitOS's curated outcome records — attached to registry buyers by name, so a record can be mis-attributed (e.g. several 'General …' companies share one). 'Registry deals disclosed' counts priced deals in the registry, a separate source; it is not this premium's sample.">
           <ScrollRegion label="Highest premium payers table">
             <table className="w-full min-w-[360px] text-[12px]">
               <thead className="text-left text-[11px] text-xo-faint">
-                <tr className="border-b border-xo-line"><th scope="col" className="px-3 py-2 font-medium">#</th><th scope="col" className="px-2 py-2 font-medium">Buyer</th><th scope="col" className="px-2 py-2 text-right font-medium">Premium</th><th scope="col" className="px-3 py-2 text-right font-medium">Disclosed</th></tr>
+                <tr className="border-b border-xo-line"><th scope="col" className="px-3 py-2 font-medium">#</th><th scope="col" className="px-2 py-2 font-medium">Buyer</th><th scope="col" className="px-2 py-2 text-right font-medium">Premium</th><th scope="col" className="px-3 py-2 text-right font-medium">Registry deals disclosed</th></tr>
               </thead>
               <tbody>
                 {premium.map((p, i) => (
@@ -61,18 +61,18 @@ const OutcomeIntelligence: React.FC = () => {
                     <td className="px-3 py-1.5 font-mono text-xo-faint">{i + 1}</td>
                     <th scope="row" className="px-2 py-1.5 text-left font-normal"><Link to={`/console/buyer/${p.buyer_id}`} className="font-semibold hover:text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{p.name}</Link></th>
                     <td className="px-2 py-1.5 text-right font-mono font-semibold tabular-nums text-xo-verified">
-                      <Evidence align="right" meta={{ methodology: "premium over the disclosed reference price", source: "acquisition registry (disclosed deals only)", sample: p.disclosed_events, asOf: DNA_AS_OF.slice(0, 10) }}>
+                      <Evidence align="right" meta={{ methodology: "premium over the disclosed reference price", source: "curated outcome record, matched to this buyer by name", asOf: DNA_AS_OF.slice(0, 10) }}>
                         +{Math.round((p.premium_pct ?? 0) * 100)}%
                       </Evidence>
                     </td>
-                    <td className="px-3 py-1.5 text-right font-mono tabular-nums text-xo-muted">{p.disclosed_events} disc.</td>
+                    <td className="px-3 py-1.5 text-right font-mono tabular-nums text-xo-muted">{p.disclosed_events}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </ScrollRegion>
         </Section>
-        <Section title="Fastest closers" className="lg:col-span-4" foot="Median announced→closed duration on completed deals.">
+        <Section title="Fastest closers" className="lg:col-span-4" foot="Median announced→closed days and close rate from the curated outcome records, matched by buyer name. Identical figures across similarly named buyers (e.g. General Motors, General Mills) come from one record attributed to all of them — a known data defect.">
           <ScrollRegion label="Fastest closers table">
             <table className="w-full min-w-[320px] text-[12px]">
               <thead className="text-left text-[11px] text-xo-faint">
