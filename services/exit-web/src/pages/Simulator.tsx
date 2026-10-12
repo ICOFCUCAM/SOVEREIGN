@@ -226,8 +226,8 @@ const Simulator: React.FC = () => {
 
   const metrics: Metric[] = [
     { label: "Strategic valuation",  base: baseline.valuationMid,                     scen: variant.valuationMid,                     fmt: fmtMoney,             higherIsBetter: true },
-    { label: "Close probability",    base: baseline.sim.expectedCloseProbability,     scen: variant.sim.expectedCloseProbability,     fmt: (n) => `${(n * 100).toFixed(0)}%`, higherIsBetter: true },
-    { label: "Expected realized",    base: baseline.sim.expectedRealizedValueUsd,     scen: variant.sim.expectedRealizedValueUsd,     fmt: fmtMoney,             higherIsBetter: true },
+    { label: "Modelled close probability", base: baseline.sim.expectedCloseProbability,     scen: variant.sim.expectedCloseProbability,     fmt: (n) => `${(n * 100).toFixed(0)}%`, higherIsBetter: true },
+    { label: "Best expected value in set", base: baseline.sim.expectedRealizedValueUsd,     scen: variant.sim.expectedRealizedValueUsd,     fmt: fmtMoney,             higherIsBetter: true },
     { label: "Time to cash",         base: baseline.sim.expectedTimeToCashDays,       scen: variant.sim.expectedTimeToCashDays,       fmt: (n) => `${FMT_MS(n)}d`,            higherIsBetter: false },
     { label: "Buyers in set",        base: baseline.sim.recommendedBuyers.length,     scen: variant.sim.recommendedBuyers.length,     fmt: (n) => String(n),                  higherIsBetter: true },
   ];
@@ -248,7 +248,7 @@ const Simulator: React.FC = () => {
         badge={<span className="text-[12px] text-xo-muted">Simulate futures</span>} />
 
       <section aria-label="Baseline summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3">
-        <div className="bg-xo-panel"><XMetric label="Baseline realized" emphasis value={fmtMoney(baseline.sim.expectedRealizedValueUsd)} sub="today's trajectory" /></div>
+        <div className="bg-xo-panel"><XMetric label="Best expected value in set" emphasis value={fmtMoney(baseline.sim.expectedRealizedValueUsd)} sub="baseline · the highest buyer, not an average" /></div>
         <div className="bg-xo-panel"><XMetric label="Lead buyer close" value={baseline.sim.recommendedBuyers[0] ? `${(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}%` : "—"} sub={baseline.sim.recommendedBuyers[0]?.buyer.name} /></div>
         <div className="bg-xo-panel"><XMetric label="Buyers in set" value={String(baseline.sim.recommendedBuyers.length)} sub="clearing constraints" /></div>
       </section>
@@ -320,13 +320,14 @@ const Simulator: React.FC = () => {
 
         {/* ── Scenario engine ─────────────────────────────────── */}
         <div className="flex flex-col gap-px bg-xo-line lg:col-span-8">
-          <Section title="Current trajectory">
+          <Section title="Current trajectory"
+            foot="Model outputs. Close probability = 1 − Π(1 − close rate) across the set — it assumes every buyer in the set makes an offer, independently; close rates use priors where a buyer has not disclosed one. The value is the highest buyer's expected closing value, so it sits above what a typical buyer would pay.">
             <div className="px-4 py-3">
               <p className="text-[13px]">{result.summary}</p>
               <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <Stat label="Close probability" value={`${(result.expectedCloseProbability * 100).toFixed(0)}%`} sub={`P(≥1 of ${result.recommendedBuyers.length})`} tone="text-xo-verified" />
+                <Stat label="Modelled close probability" value={`${(result.expectedCloseProbability * 100).toFixed(0)}%`} sub={`P(≥1 of ${result.recommendedBuyers.length}), independence assumed`} />
                 <Stat label="Time to cash"       value={`${FMT_MS(result.expectedTimeToCashDays)}d`} sub="median across set" />
-                <Stat label="Expected realized"  value={fmtMoney(result.expectedRealizedValueUsd)} sub="best of set" tone="text-xo-verified" />
+                <Stat label="Best expected value in set"  value={fmtMoney(result.expectedRealizedValueUsd)} sub="maximum across the set" />
                 <Stat label="Strategic value"    value={fmtMoney(baseline.valuationMid)} sub="mid band, today" />
               </dl>
             </div>

@@ -31,7 +31,7 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 ## Gap register — Page 39
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Model outputs shown as facts (100 % close, best-of-set value).** | "Modelled close probability" with its assumptions (each buyer offers independently at its close rate; priors where undisclosed) and "best expected value in the set (maximum, not an average)"; the same in the scenario diff and summary. | ☐ |
+| G1 | **Model outputs shown as facts (100 % close, best-of-set value).** | "Modelled close probability" with its assumptions (each buyer offers independently at its close rate; priors where undisclosed) and "best expected value in the set (maximum, not an average)"; the same in the scenario diff and summary. | ☑ G1-commit |
 | G2 | "Strategic valuation" is the canonical value. | "Valuation (canonical midpoint)". | ☐ |
 | G3 | **Demo-specific and uncomputed scenario claims.** | Drivers built from the company's own figures (ARR before → after); the ARR scenario names a target above the company's ARR; uncomputed outcomes worded as expectations to check against the diff. | ☐ |
 | G4 | Demo only, unlabelled. | Run on the active company; Demo data / Your intake badge. | ☐ |
@@ -46,3 +46,7 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 ### G7 — Design
 *Closed by:* `pages/Simulator.tsx` rebuilt on `xo` (`PageHeader` `h1` "Scenario Engine"; three metrics; the inputs with `label`/`id` pairs and described hints; trajectory, scenario picker and diff as titled `Section`s; the six scenarios as `aria-pressed` buttons in a labelled group; stats and diffs as `dl`s; the buyer table with row headers in a `ScrollRegion` (fixes the 390 overflow); hex accents replaced). Content carried over verbatim; the shared `BankerTake` stays until G6; G1–G6 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium Pro 1440/390: 0 errors, `h1` 1 (was 0), **no overflow** (was overflowing at 390), axe 0, all tab stops with visible focus · after selecting the PE-only scenario: axe 0, no overflow · free: Upgrade page.
+
+### G1 — Model outputs shown as facts
+*Closed by:* `pages/Simulator.tsx` (labels; engine unchanged). "Close probability 100% — P(≥1 of 5)" → **"Modelled close probability — P(≥1 of 5), independence assumed"** (also in the scenario diff); "Expected realized — best of set" / "Baseline realized" → **"Best expected value in set — maximum across the set"** / "baseline · the highest buyer, not an average"; the trajectory foot states the model: "Close probability = 1 − Π(1 − close rate) across the set — it assumes every buyer in the set makes an offer, independently; close rates use priors where a buyer has not disclosed one. The value is the highest buyer's expected closing value, so it sits above what a typical buyer would pay." (the formula and the maximum confirmed in `exit-engines/src/buyers/strategy.ts`). The engine's own summary sentence ("P(close)=100% over the set. Best expected realized …") is shown unchanged above that foot; the per-buyer "Expected realized" column is a per-buyer figure and stays.
+*Verification:* `tsc -b`, eslint clean · Chromium Pro: the new labels (2 modelled close probability, 3 best expected value) and the foot shown · 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
