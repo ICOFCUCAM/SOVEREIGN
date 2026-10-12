@@ -74,7 +74,7 @@ const DnaCard: React.FC<{ p: DnaProfile }> = ({ p }) => {
       </dl>
 
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-xo-line pt-2">
-        <span className="text-[12px] font-semibold text-xo-verified">{recommendedAction(p)}</span>
+        <span className="text-[12px] font-semibold text-xo-verified"><span className="font-normal text-xo-faint">Suggested (rule): </span>{recommendedAction(p)}</span>
         <a href={p.source_url} target="_blank" rel="noreferrer" className="font-mono text-[11px] text-xo-faint hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">source ↗<span className="sr-only"> for {p.name} (opens in a new tab)</span></a>
       </div>
     </li>
@@ -111,12 +111,11 @@ const BuyerGraph: React.FC = () => {
         badge={<span className="text-[12px] text-xo-muted">The moat · as of {MARKET_INDEX_FMT.asOf} · Wikipedia · Wikidata · EDGAR</span>}
         actions={<a href="/report/buyers" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Buyer Intelligence Report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>} />
 
-      <section aria-label="Registry summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3 xl:grid-cols-5">
+      <section aria-label="Registry summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Buyers indexed" value={MARKET_INDEX_FMT.buyers} sub="corporates · PE · sovereign" /></div>
         <div className="bg-xo-panel"><Metric label="With acquisition DNA" emphasis value={String(withEvents)} sub="≥1 indexed event" /></div>
         <div className="bg-xo-panel"><Metric label="High appetite" value={String(highAppetite)} sub="≥2 deals / 12m" /></div>
         <div className="bg-xo-panel"><Metric label="Events indexed" value={MARKET_INDEX_FMT.events} sub={`as of ${MARKET_INDEX_FMT.asOf}`} /></div>
-        <div className="bg-xo-panel"><Metric label="Active acquirers" value={String(withEvents)} sub="with live cadence" /></div>
       </section>
 
       <MarketTape items={tape} />
@@ -164,6 +163,7 @@ const BuyerGraph: React.FC = () => {
       </div>
 
       <Section title="Acquisition DNA" eyebrow={`${filtered.length} shown (up to 30)`} className="border border-xo-line"
+        foot="Suggested actions are rules on appetite and your sector overlap: high appetite with overlap → NDA outreach; high without overlap → monitor; medium with overlap → warm introduction; no indexed events → registry presence only; otherwise deprioritise."
         right={<div role="group" aria-label="Buyer type" className="flex flex-wrap gap-1.5">
           {([["all", "All"], ["corporate", "Strategic"], ["private_equity", "Private Equity"], ["sovereign_fund", "Sovereign Funds"], ["family_office", "Family Offices"]] as [TypeFilter, string][]).map(([k, l]) => (
             <Chip key={k} pressed={type === k} onToggle={() => setType(k)}>{l}</Chip>

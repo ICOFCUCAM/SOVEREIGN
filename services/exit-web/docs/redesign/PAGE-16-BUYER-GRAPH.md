@@ -32,7 +32,7 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 |---|---|---|---|
 | G1 | **Composite score labelled "probability".** | "Likelihood score (composite)" with its formula; "not a probability". | ☑ `71c53d1` |
 | G2 | **Keyword-matched transactions presented as sector comparables; verification hidden.** | Title "Transactions matching the sector keywords"; per-row verification status; note that keyword matches can include unrelated deals. | ☑ `b06ece9` |
-| G3 | Duplicate "Active acquirers — with live cadence"; recommended actions unlabelled. | Remove the duplicate; label actions "suggested (rule)". | ☐ |
+| G3 | Duplicate "Active acquirers — with live cadence"; recommended actions unlabelled. | Remove the duplicate; label actions "suggested (rule)". | ☑ G3-commit |
 | G4 | Ranking and overlap fixed to the demo company. | Tokens from `sectorTokensFor(loadActiveCompany().sector)`; badge; transactions labelled as the demo sector when the company's sector differs. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 11 contrast failures, unfocusable scroll region, filter semantics. | Rebuild on `xo` (`Chip`s, labelled search, `ScrollRegion`). | ☑ `a1ba835` |
@@ -52,3 +52,7 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 ### G2 — Keyword matches presented as sector comparables; verification hidden
 *Closed by:* `pages/BuyerGraph.tsx`. "Similar transactions · {sector} — N matching your sector" → **"Transactions matching the sector keywords · {sector}" — "17 keyword matches · 0 verified"**. New **Verification** column per row (the record's `verification_status`, linked to its source; all 17 are "unverified" in the snapshot). The foot says rows match on industry text and can include unrelated deals (e.g. "delivery" in software — Cameyo, virtual app delivery, is one of them), then the source note and as-of date.
 *Verification:* `tsc -b`, eslint clean · Chromium: "17 keyword matches · 0 verified"; 0 "matching your sector" · Preparation 1440/390: 0 errors, axe 0, no overflow.
+
+### G3 — Duplicate metric; unlabelled suggested actions
+*Closed by:* `pages/BuyerGraph.tsx`. "Active acquirers — with live cadence" removed (it repeated "With acquisition DNA" and claimed "live"). Each card's action reads "Suggested (rule): …", and the DNA section foot lists the rule (high appetite with overlap → NDA outreach; high without overlap → monitor; medium with overlap → warm introduction; no indexed events → registry presence only; otherwise deprioritise) — matching `recommendedAction()`.
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 "live cadence"; "Suggested (rule): …" on cards.
