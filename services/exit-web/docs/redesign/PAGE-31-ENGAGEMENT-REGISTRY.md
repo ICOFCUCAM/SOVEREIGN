@@ -36,8 +36,12 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe color-contrast ×39 (1
 | G2 | **Score shown as a percentage and "likely to respond"; rule hidden.** | "Engagement estimate N/100"; rule stated on the page (appetite × contact-confidence factor; tiers); "High engagement — estimate ≥ 65". | ☐ |
 | G3 | Not company-specific; column sources unstated. | Say the ranking is the same for every company; "Indexed deals · last 12m" (mostly unverified); "Typical contact role"; "Contact confidence" with its rule; "Close rate (registry, where disclosed)"; "Intent (stated themes)". | ☐ |
 | G4 | Fake live tape. | `RegistryTape`. | ☐ |
-| G5 | Design: no `h1`, 39 contrast failures, unlabelled search. | Rebuild on `xo`; labelled search. | ☐ |
+| G5 | Design: no `h1`, 39 contrast failures, unlabelled search. | Rebuild on `xo`; labelled search. | ☑ G5-commit |
 
 ---
 
 ## Closure log
+
+### G5 — Design
+*Closed by:* `pages/EngagementRegistry.tsx` rebuilt on `xo` (`PageHeader` `h1` "Engagement Registry"; four metrics; the table in a keyboard-reachable `ScrollRegion` with buyer names as row headers and scoped column headers; the search is a labelled `type="search"` field ("Search buyer") with a polite status "N of 40 buyers shown" and an empty state). Content carried over verbatim; G1–G4 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Preparation and Pro 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 39), 42 tab stops with visible focus · search "micro" → 1 row, status "1 of 40 buyers shown"; "zzzz" → 0 rows and the empty state; axe 0 in both, 1440 and 390.
