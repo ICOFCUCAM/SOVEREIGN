@@ -1,12 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { fmtMoney, downloadJson } from "../lib/ui";
-import { MarketTape, Evidence } from "../lib/workstation";
-import { PageHeader, Section, Metric, ScrollRegion, Provenance, XO_LABEL } from "../components/xo";
+import { Evidence } from "../lib/workstation";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance, ActionLink, XO_LABEL } from "../components/xo";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { VALUATION_INSTITUTIONAL, VALUATION_FACTS } from "../lib/engines";
 import { VALUATION_FRAMEWORK, runInstitutionalValuation, valuationFacts } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
-import BankerTake from "../components/BankerTake";
 
 // Enterprise Value — institutional valuation desk. The headline is the
 // financial baseline (multiples) uplifted by an EVIDENCE-BASED strategic
@@ -56,26 +57,20 @@ const Valuation: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Time to close" value={`${INST.timeToClose.lowDays}–${INST.timeToClose.highDays}d`} sub="expected" /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
-      <section aria-label="Command state" className="border border-xo-line bg-xo-panel">
-        <dl className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-          <TakeCell k="Current">Midpoint <span className="font-mono text-xo-text">{fmtMoney(INST.headline.mid)}</span> · confidence {INST.confidence.score}% · baseline {fmtMoney(INST.financialBaseline.mid)}</TakeCell>
-          <TakeCell k="What changes it">{INST.comparablesUsed} comparables · premium evidence n={INST.premium.observedPremiums.length} ({INST.premium.confidence.tier})</TakeCell>
-          <TakeCell k="Action">Anchor at the strategic band — make buyers defend +{pctStr(INST.premium.appliedPct)}, not debate it</TakeCell>
-          <TakeCell k="Outcome">Range <span className="font-mono text-xo-text">{fmtMoney(INST.headline.low)}–{fmtMoney(INST.headline.high)}</span> · +{fmtMoney(premiumGap)} premium vs baseline · close {INST.timeToClose.lowDays}–{INST.timeToClose.highDays}d</TakeCell>
-        </dl>
-      </section>
-
-      <BankerTake
-        next={<>Anchor the process at the <span className="text-white">strategic</span> band — the {pctStr(INST.premium.appliedPct)} premium is underwritten by {INST.premium.observedPremiums.length} observed precedents, so make buyers defend it, not debate it.</>}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(INST.headline.mid)}</span> midpoint · {INST.confidence.score}% confidence · {INST.comparablesUsed} comps.</>}
-        inaction={<>Pricing off the financial baseline leaves <span className="font-mono text-red-300">{fmtMoney(premiumGap)}</span> of strategic premium unclaimed.</>}
-        buyer={<><span className="text-white">{INST.mostLikelyBuyers[0]?.name ?? "Strategic acquirers"}</span> leads the qualified universe of {INST.buyerUniverse.qualified} buyers on fit-adjusted expected value.</>}
-        automate={<>ExitOS recomputes baseline, premium and buyer universe from the registries and packages it straight into the CIM.</>}
-        impact={<>+{fmtMoney(premiumGap)}</>}
-        cta={{ label: "Build the CIM", to: "/console/documents" }}
-      />
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+        right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">+{fmtMoney(premiumGap)}</span>}>
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">Anchor the process at the band <span className="font-mono">{fmtMoney(INST.headline.low)}–{fmtMoney(INST.headline.high)}</span>, midpoint <span className="font-mono">{fmtMoney(INST.headline.mid)}</span> — make buyers argue against the +{pctStr(INST.premium.appliedPct)} premium rather than start from the baseline.</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="Today">Midpoint <span className="font-mono text-xo-text">{fmtMoney(INST.headline.mid)}</span> · confidence {INST.confidence.score}% · baseline {fmtMoney(INST.financialBaseline.mid)} · close {INST.timeToClose.lowDays}–{INST.timeToClose.highDays}d.</TakeCell>
+            <TakeCell k="If you price off the baseline">The <span className="font-mono text-xo-risk">{fmtMoney(premiumGap)}</span> premium is not asked for.</TakeCell>
+            <TakeCell k="Evidence">{INST.comparablesUsed} comparables · premium from {INST.premium.observedPremiums.length} observed precedents ({INST.premium.confidence.tier} evidence).</TakeCell>
+            <TakeCell k="Next">{INST.mostLikelyBuyers[0] ? <>{INST.mostLikelyBuyers[0].name} leads the {INST.buyerUniverse.qualified} qualified buyers. </> : null}The same figures feed the CIM. <ActionLink to="/console/documents">Build the CIM →</ActionLink></TakeCell>
+          </dl>
+        </div>
+      </Section>
 
       {/* fact sheet — the institutional tear block */}
       <Section title="Valuation fact sheet · every figure traced to a source" className="border border-xo-line"
