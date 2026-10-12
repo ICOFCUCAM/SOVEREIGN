@@ -374,7 +374,7 @@ Self-critique of the homepage after Z3 (1440 px: 8,839 px tall; 390 px: 12,560 p
 | AA5 | Section 02's headline is the Modules page's title, word for word. The modules shown repeat figures shown elsewhere (31 mandates, $72.5B, 61 deals). Its copy is English-only in FR/ES. | Own headline ("The desk behind the screen."), four founder modules whose stats appear nowhere else on the page (Exit Readiness, Valuation Engine, Documents, Data Room), descriptions and stats in EN/FR/ES with the numbers taken from the engines. | open |
 | AA6 | Figures repeat: 21 mandates deploying (hero + board ribbon), 31 mandates and 21 jurisdictions (hero, thesis table, board), 61 recorded deals (three times in the ledger), 6,311 events (hero + ledger footnote). | Each figure once outside the board: the hero keeps three figures (6,311 · 31 · $379.1B); the ledger keeps its masthead count and drops the two repeats; the thesis table states the run without repeating the registry counts. The sources list keeps its method figures (it is the reference). | open |
 | AA7 | "What is your company worth?" reads as an afterthought: a thin row between the hall and the thesis, and a third "Access the Exchange" button. | A full chapter (03) right after the board: chapter label, large editorial headline, the form at full width with larger fields, the result as the section's centrepiece; the duplicate "Access the Exchange" button removed (Refine remains). | open |
-| AA8 | Three navy blocks compete (map, hall, lifecycle band), two nearly back to back. | AA1 removes the band; the map is set on paper (light ground, ink lines, blue route) like a printed chart, so the hall is the page's one dark moment. Palette unchanged (interchanged only). | open |
+| AA8 | Three navy blocks compete (map, hall, lifecycle band), two nearly back to back. | AA1 removes the band; the map is set on paper (light ground, ink lines, blue route) like a printed chart, so the hall is the page's one dark moment. Palette unchanged (interchanged only). | closed `432bda73` |
 | AA9 | The ledger heading reads as centred: it sits in the right-hand column of a two-column grid while every other heading is flush left. | Chapter label above a flush-left headline, as in every other chapter. | open |
 | AA10 | The "Sources & method" list is long for a homepage. | Collapsed by default under its heading; it opens automatically when a source note is followed, so every note still lands on its entry. | open |
 
@@ -801,6 +801,9 @@ Verified: tsc, eslint, vitest 243/243 (inventory test included), build; axe 0 at
 
 ### AA2 — closed 01ce06c1
 Continents removed from the exchange map; stages placed by typical week on a square-root time axis with week ticks along the foot. Verified: tsc, eslint, vitest 243/243; rendered at 1440 with no overflow or errors.
+
+### AA8 — closed 432bda73
+The exchange map is set on paper (white ground, ink grid and labels, blue-600/700 route, emerald-600 close), so the trading hall is the page's one dark moment; LANDMASS returns to module scope. Verified: tsc, eslint, vitest 243/243; rendered at 1440 and 390, no overflow or errors.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
