@@ -76,34 +76,11 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 02 · THE MODULES — the site's own catalogue, live engine stats (Z3) ===== */}
-      <section aria-labelledby="mods-h" className="border-b border-slate-200 bg-white text-ink-900">
-        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
-          <div className="border-t-4 border-double border-ink-900 pt-8">
-            <Chapter n="02">The modules</Chapter>
-            <h2 id="mods-h" className="mt-6 max-w-[22ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text="Every module a sell-side desk needs." /></h2>
-          </div>
-          <div className="mt-12 border-t border-ink-900">
-            {HOME_MODULES.map((m, k) => (
-              <Link key={m.name} to="/modules" className="group grid grid-cols-[28px_1fr_22px] items-center gap-x-3 gap-y-1.5 border-b border-slate-300 py-6 transition-[background-color,padding] hover:bg-[#f6f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 motion-safe:hover:px-3 sm:grid-cols-[58px_1fr_1fr_35px] sm:gap-x-5 sm:py-7">
-                <span className="font-mono text-[11px] text-blue-600">0{k + 1}</span>
-                <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em]">{m.name}</h3>
-                <div className="col-start-2 row-start-2 max-w-[440px] sm:col-start-3 sm:row-start-1">
-                  <p className="text-[14px] leading-relaxed text-slate-600">{m.body}</p>
-                  {m.stat && <p className="mt-1.5 font-mono text-[11.5px] tabular-nums text-ink-900">{m.stat}</p>}
-                </div>
-                <span aria-hidden className="col-start-3 row-span-2 row-start-1 text-right text-[22px] transition-transform group-hover:text-blue-600 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5 sm:col-start-4 sm:row-span-1">↗</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 03 · THE EXCHANGE — the screen installed in the trading hall ===== */}
+      {/* ===== 02 · THE EXCHANGE — the screen installed in the trading hall ===== */}
       <section aria-labelledby="hall-h">
         <TradingHall head={
           <div className={`${WRAP} relative pb-24 pt-20 text-white`}>
-            <Chapter n="03" dark>{t("hall.eyebrow")}</Chapter>
+            <Chapter n="02" dark>{t("hall.eyebrow")}</Chapter>
             <h2 id="hall-h" className="mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">{t("hall.h2")} <em className="italic text-blue-300">{t("hall.h2em")}</em></h2>
           </div>
         }>
@@ -273,6 +250,29 @@ const Landing: React.FC = () => {
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-slate-300 px-5 py-4">
             <span className="text-[13.5px] text-slate-700">{t("rec.bridge")}</span>
             <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("rec.run")} <Arrow /></button>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 06 · THE MODULES — the site's own catalogue, live engine stats (Z3) ===== */}
+      <section aria-labelledby="mods-h" className="border-b border-slate-200 bg-white text-ink-900">
+        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
+          <div className="border-t-4 border-double border-ink-900 pt-8">
+            <Chapter n="06">The modules</Chapter>
+            <h2 id="mods-h" className="mt-6 max-w-[22ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text="Every module a sell-side desk needs." /></h2>
+          </div>
+          <div className="mt-12 border-t border-ink-900">
+            {HOME_MODULES.map((m, k) => (
+              <Link key={m.name} to="/modules" className="group grid grid-cols-[28px_1fr_22px] items-center gap-x-3 gap-y-1.5 border-b border-slate-300 py-6 transition-[background-color,padding] hover:bg-[#f6f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 motion-safe:hover:px-3 sm:grid-cols-[58px_1fr_1fr_35px] sm:gap-x-5 sm:py-7">
+                <span className="font-mono text-[11px] text-blue-600">0{k + 1}</span>
+                <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em]">{m.name}</h3>
+                <div className="col-start-2 row-start-2 max-w-[440px] sm:col-start-3 sm:row-start-1">
+                  <p className="text-[14px] leading-relaxed text-slate-600">{m.body}</p>
+                  {m.stat && <p className="mt-1.5 font-mono text-[11.5px] tabular-nums text-ink-900">{m.stat}</p>}
+                </div>
+                <span aria-hidden className="col-start-3 row-span-2 row-start-1 text-right text-[22px] transition-transform group-hover:text-blue-600 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5 sm:col-start-4 sm:row-span-1">↗</span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
