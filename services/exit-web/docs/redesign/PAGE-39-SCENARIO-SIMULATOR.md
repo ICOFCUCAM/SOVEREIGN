@@ -33,7 +33,7 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 |---|---|---|---|
 | G1 | **Model outputs shown as facts (100 % close, best-of-set value).** | "Modelled close probability" with its assumptions (each buyer offers independently at its close rate; priors where undisclosed) and "best expected value in the set (maximum, not an average)"; the same in the scenario diff and summary. | ☑ `318272f` |
 | G2 | "Strategic valuation" is the canonical value. | "Valuation (canonical midpoint)". | ☑ `f154fcf` |
-| G3 | **Demo-specific and uncomputed scenario claims.** | Drivers built from the company's own figures (ARR before → after); the ARR scenario names a target above the company's ARR; uncomputed outcomes worded as expectations to check against the diff. | ☐ |
+| G3 | **Demo-specific and uncomputed scenario claims.** | Drivers built from the company's own figures (ARR before → after); the ARR scenario names a target above the company's ARR; uncomputed outcomes worded as expectations to check against the diff. | ☑ G3-commit |
 | G4 | Demo only, unlabelled. | Run on the active company; Demo data / Your intake badge. | ☐ |
 | G5 | Unvalidated number inputs. | Text inputs parsed with `parseNumber` (units, ranges), messages, `aria-invalid`; only valid values reach the engines. | ☐ |
 | G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
@@ -54,3 +54,12 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 ### G2 — "Strategic valuation" is the canonical value
 *Closed by:* `pages/Simulator.tsx` (labels). The figure is `runInstitutionalValuation(…).headline.mid` — the canonical value (D1). "Strategic valuation" (scenario diff) and "Strategic value — mid band, today" (trajectory) → **"Valuation (canonical midpoint)"** ("today — the console value").
 *Verification:* `tsc -b`, eslint clean · Chromium Pro: "Valuation (canonical midpoint) $102,849,415"; the only remaining "strategic valuation" text is in the scenario drivers, reworded in G3.
+
+### G3 — Demo-specific and uncomputed scenario claims
+*Closed by:* `pages/Simulator.tsx`. Scenarios now read the trajectory's own company (not the demo constant) and their drivers are computed or worded as what to check in the diff:
+- Wait six months: "ARR compounds about 6 months at 42% a year: $18.0M → $21.4M"; "The valuation is re-run on the larger revenue base — see the diff above" (was "Higher revenue base lifts the strategic valuation band").
+- Growth: the question names the destination — $25M ARR, or 40 % above today rounded up to the next $5M when the company is already past $25M; "ARR goes from $18.0M to $25M"; "The buyer set is re-filtered at the new size — compare Buyers in set" (was "crosses the scale threshold buyers reward", "Larger check size opens up upper-bracket acquirers"); the assumption names the same destination.
+- Remove the earnout / 90-day close / PE-only: outcomes such as "Buyers who structure around earnouts (often PE) fall out of the set", "Slower acquirers drop out", "Faster, more repeatable diligence" → "may drop out — compare Buyers in set", "generally …" wording.
+- Marquee buyer: "What if Microsoft enters the process?" → "What if a marquee strategic (e.g. Microsoft) enters?"; drivers state exactly what the model changes (strategics only, top of the canonical band, cash floor ≥ 80 %) instead of "raises competitive tension … faster to close".
+The scenario transforms and their targets are unchanged: for the demo the six diffs are identical to before (e.g. wait six months $122,559,223, best value $199,158,737).
+*Verification:* `tsc -b`, eslint clean · Chromium Pro: each of the six scenarios selected in turn — drivers as above, 0 errors · 1440/390: `h1` 1, no overflow, axe 0.

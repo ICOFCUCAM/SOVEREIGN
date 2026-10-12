@@ -69,37 +69,42 @@ function scaleCompany(c: CompanyProfile, arrFactor: number): CompanyProfile {
   };
 }
 
-// Baseline valuation anchors (constant company → compute once).
-const BASE_STRATEGIC = runInstitutionalValuation(SAMPLE_COMPANY).headline;
-
 interface ScenarioDef {
   id: string;
   tag: string;
-  question: string;
+  question: (company: CompanyProfile) => string;
   // Given the baseline trajectory, return the mutated world + the
-  // human-readable drivers of the change and a modelling assumption.
+  // drivers of the change (computed from the company, or worded as what
+  // to check in the diff) and a modelling assumption.
   apply: (base: Trajectory) => { company: CompanyProfile; target: number; constraints: SimConstraints; drivers: string[]; assumption: string };
 }
+
+const arrM = (c: CompanyProfile): number => c.revenue.annualRecurringRevenueUsd / 1_000_000;
+// The growth scenario's destination: $25M ARR, or 40% above today when
+// the company is already past it (rounded up to the next $5M).
+const growthTargetArr = (c: CompanyProfile): number => {
+  const cur = c.revenue.annualRecurringRevenueUsd;
+  return cur < 25_000_000 ? 25_000_000 : Math.ceil((cur * 1.4) / 5_000_000) * 5_000_000;
+};
 
 const SCENARIOS: readonly ScenarioDef[] = [
   {
     id: "wait6",
     tag: "Timing",
-    question: "What happens if I wait six months?",
+    question: () => "What happens if I wait six months?",
     apply: (base) => {
-      const g = SAMPLE_COMPANY.growth.arrGrowthYoyPct;
+      const g = base.company.growth.arrGrowthYoyPct;
       const factor = Math.pow(1 + g, 0.5);                       // half a year of compounding
       const company = scaleCompany(base.company, factor);
       const newMid = runInstitutionalValuation(company).headline.mid;
-      const target = Math.round(base.target * (newMid / BASE_STRATEGIC.mid));
-      const newArrM = (company.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(1);
+      const target = Math.round(base.target * (newMid / base.valuationMid));
       return {
         company, target,
         constraints: { ...base.constraints, maxTimelineDays: base.constraints.maxTimelineDays + 180 },
         drivers: [
-          `ARR compounds ~6 months at ${FMT_PCT(g)} YoY → $${newArrM}M`,
-          "Higher revenue base lifts the strategic valuation band",
-          "Cash lands ~180 days later — carries market-timing risk",
+          `ARR compounds about 6 months at ${FMT_PCT(g)} a year: $${arrM(base.company).toFixed(1)}M → $${arrM(company).toFixed(1)}M`,
+          "The valuation is re-run on the larger revenue base — see the diff above",
+          "Cash lands about 180 days later, with market-timing risk",
         ],
         assumption: "Holds margins, retention and buyer pool constant; only the top line compounds. Does not price in multiple compression if the market turns.",
       };
@@ -108,36 +113,37 @@ const SCENARIOS: readonly ScenarioDef[] = [
   {
     id: "arr25",
     tag: "Growth",
-    question: "What happens if revenue reaches $25M ARR?",
+    question: (c) => `What happens if revenue reaches $${Math.round(growthTargetArr(c) / 1_000_000)}M ARR?`,
     apply: (base) => {
-      const factor = 25_000_000 / SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd;
+      const dest = growthTargetArr(base.company);
+      const factor = dest / base.company.revenue.annualRecurringRevenueUsd;
       const company = scaleCompany(base.company, factor);
       const newMid = runInstitutionalValuation(company).headline.mid;
-      const target = Math.round(base.target * (newMid / BASE_STRATEGIC.mid));
+      const target = Math.round(base.target * (newMid / base.valuationMid));
       return {
         company, target,
         constraints: base.constraints,
         drivers: [
-          "ARR steps from $18M to $25M — crosses the scale threshold buyers reward",
-          "Strategic band re-prices off the larger recurring base",
-          "Larger check size opens up upper-bracket acquirers",
+          `ARR goes from $${arrM(base.company).toFixed(1)}M to $${(dest / 1_000_000).toFixed(0)}M`,
+          "The valuation is re-run on the larger recurring base — see the diff above",
+          "The buyer set is re-filtered at the new size — compare Buyers in set",
         ],
-        assumption: "Models the destination, not the path — assumes you reach $25M at today's margins and concentration. Time and burn to get there are out of scope.",
+        assumption: `Models the destination, not the path — assumes you reach $${(dest / 1_000_000).toFixed(0)}M at today's margins and concentration. Time and burn to get there are out of scope.`,
       };
     },
   },
   {
     id: "noearnout",
     tag: "Structure",
-    question: "What if I remove the earnout?",
+    question: () => "What if I remove the earnout?",
     apply: (base) => ({
       company: base.company,
       target: base.target,
       constraints: { ...base.constraints, maxEarnoutPct: 0, minCashPct: Math.max(0.9, base.constraints.minCashPct) },
       drivers: [
-        "All-cash demand — earnout ceiling drops to 0%",
-        "Buyers who structure around earnouts (often PE) fall out of the set",
-        "Realized value equals headline — no contingent claw-back risk",
+        "All-cash demand — earnout ceiling 0%, cash floor at least 90%",
+        "Buyers whose expected structure needs an earnout may drop out — compare Buyers in set",
+        "Realized value then equals the headline — no contingent component",
       ],
       assumption: "Same buyer universe, stricter terms. An all-cash structure de-risks proceeds but can thin the field and shave the top-end offer.",
     }),
@@ -145,37 +151,38 @@ const SCENARIOS: readonly ScenarioDef[] = [
   {
     id: "microsoft",
     tag: "Marquee buyer",
-    question: "What if Microsoft enters the process?",
+    question: () => "What if a marquee strategic (e.g. Microsoft) enters?",
     apply: (base) => {
       // Model the effect of a deep-pocketed strategic entrant: the field
-      // narrows to strategics, the anchor moves to the top of the
-      // strategic band, and a cash-heavy structure becomes achievable.
-      const target = Math.round(base.target * (BASE_STRATEGIC.high / BASE_STRATEGIC.mid));
+      // narrows to strategics, the anchor moves to the top of the band,
+      // and a cash-heavy structure is demanded.
+      const head = runInstitutionalValuation(base.company).headline;
+      const target = Math.round(base.target * (head.high / head.mid));
       return {
         company: base.company,
         target,
         constraints: { ...base.constraints, preferredBuyerType: "strategic", minCashPct: Math.max(0.8, base.constraints.minCashPct) },
         drivers: [
-          "A marquee strategic tightens the field and raises competitive tension",
-          "Anchor moves to the top of the strategic band",
-          "Deep balance sheet → cash-heavy structure, faster to close",
+          "The field narrows to strategic buyers",
+          "The target moves to the top of the canonical band",
+          "Cash floor rises to at least 80%",
         ],
-        assumption: "Models the effect of a hyperscaler entrant (top-of-band anchor + auction tension), not a literal new logo in the registry.",
+        assumption: "Models the effect of a deep-pocketed strategic entrant (top-of-band target, strategics only, cash-heavy), not a literal new buyer in the registry.",
       };
     },
   },
   {
     id: "fast90",
     tag: "Speed",
-    question: "What if I force a 90-day close?",
+    question: () => "What if I force a 90-day close?",
     apply: (base) => ({
       company: base.company,
       target: base.target,
       constraints: { ...base.constraints, maxTimelineDays: 90 },
       drivers: [
-        "Hard 90-day timeline — only fast-moving buyers survive",
-        "Slower acquirers drop out, thinning the set",
-        "Speed protects momentum but sacrifices auction tension",
+        "Hard 90-day timeline",
+        "Buyers with slower historical closes drop out — compare Buyers in set",
+        "Speed generally trades price discovery for certainty",
       ],
       assumption: "Filters the pool on historical close speed. A compressed timeline trades price discovery for certainty and de-risks deal fatigue.",
     }),
@@ -183,15 +190,15 @@ const SCENARIOS: readonly ScenarioDef[] = [
   {
     id: "peonly",
     tag: "Path",
-    question: "What if I run a PE-only process?",
+    question: () => "What if I run a PE-only process?",
     apply: (base) => ({
       company: base.company,
       target: base.target,
       constraints: { ...base.constraints, preferredBuyerType: "pe", minCashPct: Math.min(base.constraints.minCashPct, 0.6) },
       drivers: [
         "Restricts the field to financial sponsors",
-        "More earnout / rollover structure, lower cash floor",
-        "Faster, more repeatable diligence — sponsors transact for a living",
+        "Cash floor capped at 60% — more rollover or earnout allowed",
+        "Sponsors generally price off cash flow rather than synergy — compare the value diff",
       ],
       assumption: "Sponsors price off cash flow, not synergy — expect tighter headlines than a strategic but a cleaner, more predictable process.",
     }),
@@ -235,7 +242,7 @@ const Simulator: React.FC = () => {
   const handleScenario = (id: string): void => {
     setActiveScenario(id);
     const s = SCENARIOS.find((x) => x.id === id);
-    emitTelemetry("simulator_scenario", { scenario: id, question: s?.question }, "/console/simulator");
+    emitTelemetry("simulator_scenario", { scenario: id, question: s?.question(baseline.company) }, "/console/simulator");
   };
 
   const tape = useMemo(() => buildMarketTape(), []);
@@ -342,7 +349,7 @@ const Simulator: React.FC = () => {
                   <button key={s.id} type="button" aria-pressed={active} onClick={() => handleScenario(s.id)}
                     className={`p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action ${active ? "bg-xo-raise" : "bg-xo-panel hover:bg-xo-raise"}`}>
                     <div className={`text-[11px] font-semibold ${active ? "text-xo-verified" : "text-xo-muted"}`}>{active && <span aria-hidden>✓ </span>}{s.tag}</div>
-                    <div className="mt-1 text-[13px] font-medium leading-snug">{s.question}</div>
+                    <div className="mt-1 text-[13px] font-medium leading-snug">{s.question(baseline.company)}</div>
                   </button>
                 );
               })}
@@ -350,7 +357,7 @@ const Simulator: React.FC = () => {
           </Section>
 
           {/* Scenario diff */}
-          <Section title={scenario.question} eyebrow="Scenario vs. baseline">
+          <Section title={scenario.question(baseline.company)} eyebrow="Scenario vs. baseline">
             <div className="px-4 py-3">
               <dl className="grid gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-3">
                 {metrics.map((m) => {
