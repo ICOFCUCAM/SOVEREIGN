@@ -33,7 +33,7 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 | G2 | **Value per buyer unlabelled; priors untagged.** | "Close-weighted value" with the formula and baseline in the foot; PRIOR tag where premium or close rate is the neutral assumption (additive fields); the anchor metric labelled the same. | ☑ `d88eadb` |
 | G3 | "Contact path" is a role; "Conf" rule unstated. | "Typical contact role"; "Contact confidence" with its rule (indexed deals, mostly unverified). | ☑ `d1f13e3` |
 | G4 | "Sequenced" implies a running programme. | Say it is a suggested plan: nothing is sent or scheduled; week labels are suggested timing. | ☑ `61bfec0` |
-| G5 | Demo unlabelled. | Demo data / Your intake badge and line. | ☑ G5-commit |
+| G5 | Demo unlabelled. | Demo data / Your intake badge and line. | ☑ `25f08d5` |
 | G6 | Fake live tape. | `RegistryTape`. | ☐ |
 | G7 | Design: no `h1`, 26 contrast failures. | Rebuild on `xo`. | ☑ `edab625` |
 
