@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { MarketTape } from "../lib/workstation";
+import { PageHeader, Section, Metric } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany } from "../lib/active-company";
 import { listingFromCompany, allListings } from "../lib/listings";
@@ -34,14 +34,14 @@ const timeAgo = (iso: string): string => {
 const usd = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`);
 
 const INCOMING: Record<string, { verb: string; tone: string }> = {
-  listing_viewed: { verb: "viewed your listing", tone: "text-white/55" },
-  expressed_interest: { verb: "expressed interest", tone: "text-deal-300" },
-  nda_requested: { verb: "requested an NDA", tone: "text-amber-300" },
-  nda_signed: { verb: "— NDA executed, identity released", tone: "text-emerald-300" },
-  loi_issued: { verb: "submitted an offer", tone: "text-deal-300" },
+  listing_viewed: { verb: "viewed your listing", tone: "text-xo-muted" },
+  expressed_interest: { verb: "expressed interest", tone: "text-xo-action" },
+  nda_requested: { verb: "requested an NDA", tone: "text-xo-caution" },
+  nda_signed: { verb: "— NDA executed, identity released", tone: "text-xo-verified" },
+  loi_issued: { verb: "submitted an offer", tone: "text-xo-action" },
 };
 const OFFER_TONE: Record<string, string> = {
-  submitted: "text-deal-300", accepted: "text-emerald-300", rejected: "text-red-300", withdrawn: "text-white/40",
+  submitted: "text-xo-action", accepted: "text-xo-verified", rejected: "text-xo-risk", withdrawn: "text-xo-muted",
 };
 
 const FounderInbox: React.FC = () => {
@@ -94,164 +94,157 @@ const FounderInbox: React.FC = () => {
     void resolveOffer(offer.id, status).then(refresh);
   };
 
-  return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Founder · Demand"
-        title={company.name}
-        tag={listing.publicView.sector}
-        status={isLive ? "Listed" : "Draft"}
-        meta={[
-          { k: "CODE", v: listing.code },
-          { k: "REGION", v: listing.publicView.region },
-          { k: "REV", v: usd(listing.publicView.revenueUsd) },
-        ]}
-        metrics={[
-          { k: "Qualified buyers", v: String(matched.filter((x) => x.qualified).length), accent: true, sub: `of ${matched.length} matching mandates` },
-          { k: "Live deals", v: String(deals.length), sub: `${deals.filter((d) => d.stage === "closed").length} closed` },
-          { k: "Interest expressed", v: String(interested), sub: "from buyers" },
-          { k: "NDA requests", v: String(ndas.length), sub: `${pendingNdas.length} awaiting · ${executedNdas.length} done` },
-          { k: "NDAs executed", v: String(executedNdas.length), accent: true, sub: "identity released" },
-          { k: "Offers", v: String(offers.length), sub: `${openOffers.length} open` },
-        ]}
-      />
+  const BTN = "rounded-sm bg-deal-700 px-3 py-1 text-[12px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  const BTN_GHOST = "rounded-sm border border-xo-line px-3 py-1 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  const tape = useMemo(() => buildMarketTape(), []);
 
-      <MarketTape items={useMemo(() => buildMarketTape(), [])} />
+  return (
+    <div data-page="inbox" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Founder · Demand" title="Inbox"
+        badge={<span className={`rounded-sm border px-1.5 py-px text-[11px] font-semibold ${isLive ? "border-xo-verified/50 text-xo-verified" : "border-xo-caution/50 text-xo-caution"}`}>{isLive ? "Listed" : "Draft"}</span>}
+        description={<>{company.name} · <span className="font-mono">{listing.code}</span> · {listing.publicView.sector} · {listing.publicView.region} · revenue {usd(listing.publicView.revenueUsd)}</>} />
+
+      <section aria-label="Inbox summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3 xl:grid-cols-6">
+        <div className="bg-xo-panel"><Metric label="Qualified buyers" emphasis value={String(matched.filter((x) => x.qualified).length)} sub={`of ${matched.length} matching mandates`} /></div>
+        <div className="bg-xo-panel"><Metric label="Live deals" value={String(deals.length)} sub={`${deals.filter((d) => d.stage === "closed").length} closed`} /></div>
+        <div className="bg-xo-panel"><Metric label="Interest expressed" value={String(interested)} sub="from buyers" /></div>
+        <div className="bg-xo-panel"><Metric label="NDA requests" value={String(ndas.length)} sub={`${pendingNdas.length} awaiting · ${executedNdas.length} done`} /></div>
+        <div className="bg-xo-panel"><Metric label="NDAs executed" value={String(executedNdas.length)} sub="identity released" /></div>
+        <div className="bg-xo-panel"><Metric label="Offers" value={String(offers.length)} sub={`${openOffers.length} open`} /></div>
+      </section>
+
+      <MarketTape items={tape} />
 
       {!isLive && (
-        <div className="rounded-lg border border-amber-400/30 bg-amber-500/[0.04] px-4 py-2.5 text-[12px] text-white/70">
-          <span className="font-semibold text-amber-300">Not listed yet.</span> Your company isn’t on the exchange, so buyers can’t discover it.{" "}
-          <Link to="/console/intake" className="text-deal-300 hover:text-deal-200">List on the exchange</Link> to start receiving interest — the panels below populate as soon as buyers act on <span className="font-mono text-white/80">{listing.code}</span>.
-        </div>
+        <p role="note" className="border border-xo-caution/40 bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">
+          <span className="font-semibold text-xo-caution">Not listed yet.</span> Your company isn’t on the exchange, so buyers can’t discover it.{" "}
+          <Link to="/console/intake" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">List on the exchange</Link> to start receiving interest — the panels below populate as soon as buyers act on <span className="font-mono text-xo-text">{listing.code}</span>.
+        </p>
       )}
 
       {/* marketplace liquidity — qualified buyer mandates matching this listing */}
-      <Frame>
-        <Panel title="Qualified buyers · mandates matching your listing" className="lg:col-span-12"
-          foot="Buyers who published an acquisition mandate that matches your sector, geography, check size and growth. Identities stay withheld until they sign — this is your demand, before you run a process.">
-          {matched.length ? (
-            <ul className="divide-y divide-white/5">
-              {matched.map(({ m, score, qualified }) => (
-                <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 text-[12px]">
-                  <div className="min-w-0">
-                    <span className="font-semibold text-white">Buyer mandate</span>
-                    {qualified && <span className="ml-2 rounded bg-deal-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-deal-300 ring-1 ring-deal-400/30">Qualified</span>}
-                    <div className="text-[10px] text-white/45">{m.sectors.slice(0, 4).join(" · ") || "any sector"} · {usdShort(m.minCheckUsd)}–{usdShort(m.maxCheckUsd)} check · {m.regions.slice(0, 3).join(", ") || "any region"}{m.strategicThemes.length ? ` · themes: ${m.strategicThemes.slice(0, 2).join(", ")}` : ""}</div>
-                  </div>
-                  <span className="shrink-0 font-mono text-[15px] font-bold tabular-nums text-deal-300">{score}%</span>
-                </li>
-              ))}
-            </ul>
-          ) : <div className="px-3 py-6 text-center text-[12px] text-white/40">No published mandates match yet. As buyers publish acquisition mandates on the radar, qualified demand appears here before you ever run a process.</div>}
-        </Panel>
-      </Frame>
+      <Section title="Qualified buyers · mandates matching your listing" className="border border-xo-line"
+        foot="Buyers who published an acquisition mandate that matches your sector, geography, check size and growth. Identities stay withheld until they sign — this is your demand, before you run a process.">
+        {matched.length ? (
+          <ul>
+            {matched.map(({ m, score, qualified }) => (
+              <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-xo-line px-4 py-2 text-[12px] last:border-0">
+                <div className="min-w-0">
+                  <span className="font-semibold">Buyer mandate</span>
+                  {qualified && <span className="ml-2 rounded-sm border border-xo-verified/50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-verified">Qualified</span>}
+                  <div className="mt-0.5 text-[11px] text-xo-muted">{m.sectors.slice(0, 4).join(" · ") || "any sector"} · {usdShort(m.minCheckUsd)}–{usdShort(m.maxCheckUsd)} check · {m.regions.slice(0, 3).join(", ") || "any region"}{m.strategicThemes.length ? ` · themes: ${m.strategicThemes.slice(0, 2).join(", ")}` : ""}</div>
+                </div>
+                <span className="shrink-0 font-mono text-[15px] font-semibold tabular-nums">{score}%</span>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No published mandates match yet. As buyers publish acquisition mandates on the radar, qualified demand appears here before you ever run a process.</p>}
+      </Section>
 
       {/* deal pipeline — advance each transaction through the lifecycle */}
-      <Frame>
-        <Panel title="Deal pipeline · advance each transaction" className="lg:col-span-12"
-          foot="One deal per buyer. Advancing a stage captures telemetry that feeds buyer DNA, response and close-rate models. Buyers stay anonymous until they sign.">
-          {deals.length ? (
-            <ul className="divide-y divide-white/5">
-              {deals.map((d) => {
-                const idx = dealStageIndex(d.stage);
-                const next = DEAL_STAGES[idx + 1];
-                const isClosed = d.stage === "closed";
-                const isWithdrawn = d.stage === "withdrawn";
-                return (
-                  <li key={d.id} className="px-3 py-2.5">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-[11px] text-white/40">{idx >= 0 ? `${idx + 1}/${DEAL_STAGES.length}` : "—"}</span>
-                        <span className="text-[12px] font-semibold text-white">A buyer</span>
-                        <span className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${isClosed ? "bg-emerald-500/15 text-emerald-300" : isWithdrawn ? "bg-white/5 text-white/40" : "bg-deal-500/15 text-deal-300"} ring-1 ring-white/10`}>{DEAL_STAGES[idx]?.label ?? d.stage}</span>
-                        <span className="font-mono text-[10px] text-white/30">{timeAgo(d.updatedAt)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {next && !isWithdrawn && <Button onClick={() => advance(d, next.stage)} className="!px-3 !py-1 !text-[11px]">Advance → {next.label}</Button>}
-                        {!isClosed && !isWithdrawn && <button onClick={() => advance(d, "withdrawn")} className="rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/40 ring-1 ring-white/10 transition hover:text-red-300">Withdraw</button>}
-                      </div>
+      <Section title="Deal pipeline · advance each transaction" className="border border-xo-line"
+        foot="One deal per buyer. Advancing a stage captures telemetry that feeds buyer DNA, response and close-rate models. Buyers stay anonymous until they sign.">
+        {deals.length ? (
+          <ul>
+            {deals.map((d) => {
+              const idx = dealStageIndex(d.stage);
+              const next = DEAL_STAGES[idx + 1];
+              const isClosed = d.stage === "closed";
+              const isWithdrawn = d.stage === "withdrawn";
+              return (
+                <li key={d.id} className="border-b border-xo-line px-4 py-2.5 last:border-0">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2 text-[12px]">
+                      <span className="font-mono text-[11px] text-xo-faint">{idx >= 0 ? `Stage ${idx + 1} of ${DEAL_STAGES.length}` : "—"}</span>
+                      <span className="font-semibold">A buyer</span>
+                      <span className={`rounded-sm border px-1.5 py-px text-[11px] font-semibold ${isClosed ? "border-xo-verified/50 text-xo-verified" : isWithdrawn ? "border-xo-line text-xo-muted" : "border-xo-action/50 text-xo-action"}`}>{DEAL_STAGES[idx]?.label ?? d.stage}</span>
+                      <span className="font-mono text-[11px] text-xo-faint">{timeAgo(d.updatedAt)}</span>
                     </div>
-                    {/* stage track */}
-                    <div className="mt-2 flex gap-0.5">
-                      {DEAL_STAGES.map((s, i) => (
-                        <span key={s.stage} title={s.label} className={`h-1 flex-1 rounded-sm ${i <= idx && !isWithdrawn ? "bg-deal-500" : "bg-white/10"}`} />
-                      ))}
+                    <div className="flex items-center gap-2">
+                      {next && !isWithdrawn && <button type="button" onClick={() => advance(d, next.stage)} className={BTN}>Advance → {next.label}</button>}
+                      {!isClosed && !isWithdrawn && <button type="button" onClick={() => advance(d, "withdrawn")} className={BTN_GHOST}>Withdraw</button>}
                     </div>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : <div className="px-3 py-6 text-center text-[12px] text-white/40">No open deals yet. A deal opens the moment a buyer expresses interest in {listing.code}.</div>}
-        </Panel>
-      </Frame>
+                  </div>
+                  {/* stage track */}
+                  <div aria-hidden className="mt-2 flex gap-0.5">
+                    {DEAL_STAGES.map((s, i) => (
+                      <span key={s.stage} className={`h-1 flex-1 rounded-sm ${i <= idx && !isWithdrawn ? "bg-xo-action" : "bg-xo-line"}`} />
+                    ))}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No open deals yet. A deal opens the moment a buyer expresses interest in {listing.code}.</p>}
+      </Section>
 
-      <Frame>
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-2">
         {/* pending NDA requests — first-class records to resolve */}
-        <Panel title="NDA requests · awaiting you" className="lg:col-span-6"
+        <Section title="NDA requests · awaiting you"
           foot="Executing releases your identity to the requesting buyer and opens diligence. Counterparties stay anonymous to you until they sign.">
           {pendingNdas.length ? (
             <ul>
               {pendingNdas.map((r) => (
-                <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 px-3 py-2 last:border-0">
+                <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-xo-line px-4 py-2 last:border-0">
                   <div className="text-[12px]">
-                    <span className="font-semibold text-white">A buyer</span> <span className="text-white/55">requested an NDA</span>
-                    <span className="ml-2 font-mono text-[10px] text-white/35">{timeAgo(r.requestedAt)}</span>
+                    <span className="font-semibold">A buyer</span> <span className="text-xo-muted">requested an NDA</span>
+                    <span className="ml-2 font-mono text-[11px] text-xo-faint">{timeAgo(r.requestedAt)}</span>
                   </div>
-                  <Button onClick={() => execute(r)} className="!px-3 !py-1 !text-[11px]">Execute NDA</Button>
+                  <button type="button" onClick={() => execute(r)} className={BTN}>Execute NDA</button>
                 </li>
               ))}
             </ul>
-          ) : <div className="px-3 py-6 text-center text-[12px] text-white/40">No NDA requests awaiting you.</div>}
-        </Panel>
+          ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No NDA requests awaiting you.</p>}
+        </Section>
 
         {/* offers — first-class records to accept / decline */}
-        <Panel title="Offers" className="lg:col-span-6">
+        <Section title="Offers">
           {offers.length ? (
             <ul>
               {offers.map((o) => (
-                <li key={o.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 px-3 py-2 last:border-0">
+                <li key={o.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-xo-line px-4 py-2 last:border-0">
                   <div className="text-[12px]">
-                    <span className="font-mono text-[15px] font-bold tabular-nums text-white">{usd(o.amountUsd)}</span>
-                    <span className={`ml-3 text-[10px] font-semibold uppercase tracking-wide ${OFFER_TONE[o.status] ?? "text-white/50"}`}>{o.status}</span>
-                    <span className="ml-2 font-mono text-[10px] text-white/35">{timeAgo(o.createdAt)}</span>
+                    <span className="font-mono text-[15px] font-semibold tabular-nums">{usd(o.amountUsd)}</span>
+                    <span className={`ml-3 text-[11px] font-semibold uppercase tracking-[0.08em] ${OFFER_TONE[o.status] ?? "text-xo-muted"}`}>{o.status}</span>
+                    <span className="ml-2 font-mono text-[11px] text-xo-faint">{timeAgo(o.createdAt)}</span>
                   </div>
                   {o.status === "submitted" && (
                     <div className="flex gap-2">
-                      <Button onClick={() => decide(o, "accepted")} className="!px-3 !py-1 !text-[11px]">Accept</Button>
-                      <Button variant="ghost" onClick={() => decide(o, "rejected")} className="!px-3 !py-1 !text-[11px]">Decline</Button>
+                      <button type="button" onClick={() => decide(o, "accepted")} className={BTN}>Accept</button>
+                      <button type="button" onClick={() => decide(o, "rejected")} className={BTN_GHOST}>Decline</button>
                     </div>
                   )}
                 </li>
               ))}
             </ul>
-          ) : <div className="px-3 py-6 text-center text-[12px] text-white/40">No offers yet.</div>}
-        </Panel>
+          ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No offers yet.</p>}
+        </Section>
+      </div>
 
-        {/* incoming activity feed */}
-        <Panel title={`Incoming activity · ${listing.code}`} className="lg:col-span-12"
-          foot="Buyer identities stay withheld until they sign — you see the interest and the request, never scraped contact data. Every NDA and offer is a record resolved through the exit-api under owner-scoped security.">
-          {events.length ? (
-            <ul>
-              {events.map((e) => {
-                const d = INCOMING[e.kind] ?? { verb: e.kind, tone: "text-white/55" };
-                return (
-                  <li key={e.id} className="flex items-baseline justify-between gap-3 border-b border-white/5 px-3 py-1.5 text-[12px] last:border-0">
-                    <span className="min-w-0">
-                      <span className="text-white/50">{e.actorRole === "founder" ? "You" : "A buyer"}</span>{" "}
-                      <span className={d.tone}>{d.verb}</span>
-                    </span>
-                    <span className="shrink-0 font-mono text-[10px] text-white/35">{timeAgo(e.at)}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <div className="px-3 py-8 text-center text-[12px] text-white/45">
-              No interest yet. When a buyer on the <Link to="/console/acquisition-radar" className="text-deal-300 hover:text-deal-200">Acquisition Radar</Link> expresses interest in {listing.code}, it lands here.
-            </div>
-          )}
-        </Panel>
-      </Frame>
+      {/* incoming activity feed */}
+      <Section title={`Incoming activity · ${listing.code}`} className="border border-xo-line"
+        foot="Buyer identities stay withheld until they sign — you see the interest and the request, never scraped contact data. Every NDA and offer is a record resolved through the exit-api under owner-scoped security.">
+        {events.length ? (
+          <ul>
+            {events.map((e) => {
+              const d = INCOMING[e.kind] ?? { verb: e.kind, tone: "text-xo-muted" };
+              return (
+                <li key={e.id} className="flex items-baseline justify-between gap-3 border-b border-xo-line px-4 py-1.5 text-[12px] last:border-0">
+                  <span className="min-w-0">
+                    <span className="text-xo-muted">{e.actorRole === "founder" ? "You" : "A buyer"}</span>{" "}
+                    <span className={d.tone}>{d.verb}</span>
+                  </span>
+                  <span className="shrink-0 font-mono text-[11px] text-xo-faint">{timeAgo(e.at)}</span>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="px-4 py-8 text-center text-[12px] text-xo-muted">
+            No interest yet. When a buyer on the <Link to="/console/acquisition-radar" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Radar</Link> expresses interest in {listing.code}, it lands here.
+          </p>
+        )}
+      </Section>
     </div>
   );
 };

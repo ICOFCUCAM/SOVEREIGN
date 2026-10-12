@@ -38,8 +38,12 @@ Founder free and Pro: `h1` none · axe color-contrast ×7 + link-in-text-block �
 | G3 | Match score shown as "%"; target revenue labelled "check". | "Match score N/100" with the rule (weights, qualified threshold); "target revenue $a–$b". | ☐ |
 | G4 | **Demo company unlabelled, and bound to the wrong listing.** With no intake the inbox derives `lst-helios-freight` ("Project Meridian", Draft), while the exchange carries the demo company as the seeded `lst-demo-helios` ("Project Beacon"). Buyer actions on the demo listing never reach the demo inbox (verified: a buyer NDA request and $90M offer on Project Beacon left the founder inbox at 0). | Demo data / Your intake badge and a line naming the listing; with no intake, track the seeded demo listing `lst-demo-helios` (same company, same profile). | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, 8 axe failures. | Rebuild on `xo`. | ☐ |
+| G6 | Design: no `h1`, 8 axe failures. | Rebuild on `xo`. | ☑ G6-commit |
 
 ---
 
 ## Closure log
+
+### G6 — Design
+*Closed by:* `pages/FounderInbox.tsx` rebuilt on `xo` (`PageHeader` `h1` **"Inbox"** — the NAV name — with Listed/Draft badge and the company, code, sector, region and revenue in the description; six metrics; mandates, deals, NDA requests, offers and the activity feed as titled `Section`s with lists; real `<button>`s with focus rings; the stage track `aria-hidden` beside "Stage n of 9" text; links underlined in body text). Content carried over verbatim; G1–G5 follow.
+*Verification:* `tsc -b`, eslint 0 errors (one pre-existing `useCallback` dependency warning, `listing.profile`) · Chromium free/Pro 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 8), 23 tab stops with visible focus. The populated panels are exercised after G4 (with no intake nothing reaches this inbox until then).
