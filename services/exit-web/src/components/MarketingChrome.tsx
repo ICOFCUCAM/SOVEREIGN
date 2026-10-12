@@ -270,9 +270,10 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
           </div>
         </div>
         {/* the sign-off: the page closes with the mark it opened with, across the foot of every page (EE17;
-            the homepage's own sign-off in chapter 09 moved here so there is one) */}
+            the homepage's own sign-off in chapter 09 moved here so there is one), in the hero signature's
+            ivory-to-bronze, fading into the floor */}
         <div aria-hidden className="pointer-events-none mx-auto -mb-[0.2em] max-w-[1480px] select-none overflow-hidden px-5 font-editorial sm:px-8 lg:px-12 font-semibold leading-[0.8] tracking-[-0.06em] text-transparent"
-          style={{ fontSize: "clamp(6rem, 23vw, 21rem)", backgroundImage: "linear-gradient(180deg, rgba(220,205,179,0.42) 0%, rgba(220,205,179,0.05) 85%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
+          style={{ fontSize: "clamp(6rem, 23vw, 21rem)", backgroundImage: "linear-gradient(180deg, rgba(242,233,218,0.5) 0%, rgba(220,205,179,0.32) 30%, rgba(179,158,126,0.12) 62%, rgba(179,158,126,0) 88%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
           Exit<span className="italic">OS</span>
         </div>
       </footer>
