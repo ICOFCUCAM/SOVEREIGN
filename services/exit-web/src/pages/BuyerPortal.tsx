@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { fmtMoney } from "../lib/ui";
-import { MarketTape } from "../lib/workstation";
 import { Link } from "react-router-dom";
 import { myNdaRequests, dealsForBuyer, myMandate, DEAL_STAGES, type NdaRequest, type Deal, type Mandate } from "../lib/exit-api";
 import { allListings } from "../lib/listings";
 import { subscribe } from "../lib/deal-events";
 import { PageHeader, Section, Metric, Chip, Provenance } from "../components/xo";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import {
   SEAT, SEAT_MANDATE, PORTAL_OPPORTUNITIES, PORTAL_NEGOTIATIONS, PORTAL_STATS,
@@ -92,7 +93,7 @@ const BuyerPortal: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Active negotiations" emphasis value={String(PORTAL_STATS.negotiations)} sub="offers in motion" /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <Section title={`Demo seat workstation · ${SEAT.entry?.name ?? "registry buyer"}`} className="border border-xo-line"
         right={<div role="group" aria-label="Workstation view" className="flex flex-wrap gap-1">
@@ -104,7 +105,7 @@ const BuyerPortal: React.FC = () => {
               <div className="bg-xo-panel p-3">
                 <dt className="text-[12px] font-semibold text-xo-muted">Mandate</dt>
                 <dd className="mt-1.5 text-[13px]">{SEAT_MANDATE}</dd>
-                <dd className="mt-2 text-[12px] text-xo-muted">Ranked #{SEAT.rank} of {PORTAL_STATS.competingMatches} mandates matched to the live listing.</dd>
+                <dd className="mt-2 text-[12px] text-xo-muted">Ranked #{SEAT.rank} of {PORTAL_STATS.competingMatches} mandates matched to the demo listing.</dd>
               </div>
               <div className="bg-xo-panel p-3">
                 <dt className="text-[12px] font-semibold text-xo-muted">Pipeline by stage</dt>

@@ -35,7 +35,7 @@ The acquirer's home: a seat (name, mandate, rank), matched opportunities with a 
 | G2 | **The buyer's real activity is missing.** | "Your activity" section from the backend: your NDA requests (status), your deals (stage) and your saved mandate — with links to Access Requests and the Acquisition Radar; empty states that say how to start. | ☑ `b3dcb7c` |
 | G3 | **Dead buttons; unlock and submit claims.** | Replace with links to where the action exists (Acquisition Radar for NDA requests and offers, Access Requests for status); remove "unlock on NDA", "data room granted" and "submit an offer from an opportunity". | ☑ `1b6bbb5` |
 | G4 | D1 ask; fit as %; "strategic mid"; watchlist persistence unstated. | Ask = canonical midpoint (display); "fit score N/100"; "canonical midpoint"; "watchlist for this visit". | ☑ `97476dc` |
-| G5 | Fake live tape. | `RegistryTape`. | ☐ |
+| G5 | Fake live tape. | `RegistryTape`. | ☑ G5-commit |
 | G6 | Design: no `h1`, 7 axe failures. | Rebuild on `xo`. | ☑ `84463f9` |
 
 ---
@@ -61,3 +61,7 @@ The acquirer's home: a seat (name, mandate, rank), matched opportunities with a 
 ### G4 — D1 ask; fit as %; "strategic mid"; watchlist persistence unstated
 *Closed by:* `lib/buyer-portal.ts` (the opportunity's `ask` is now the canonical midpoint — display data; `buyer-portal.test.ts` unchanged and passing) and `pages/BuyerPortal.tsx` (labels). "Ask $108,252,000" (the listing engine's strategic mid) → **"Value (canonical midpoint) $102,849,415"** (D1, as on the Marketplace); "89% fit" → "fit score 89/100"; "+N% vs strategic mid" → "vs the canonical midpoint"; watchlist "tracked targets" → "this visit only — not saved".
 *Verification:* `tsc -b`, eslint clean, `buyer-portal.test.ts` 4/4 · Chromium buyer: Opportunities shows "fit score 89/100" and "Value (canonical midpoint) $102,849,415" · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+### G5 — Fake live tape
+*Closed by:* `pages/BuyerPortal.tsx`: pinging `MarketTape` → dated `RegistryTape`; the last "live" word ("Ranked #1 of 15 mandates matched to the live listing") → "… the demo listing".
+*Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium buyer: 0 "live" words, 0 pinging elements, snapshot date shown · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
