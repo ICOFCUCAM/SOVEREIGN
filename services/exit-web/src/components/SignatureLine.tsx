@@ -39,10 +39,15 @@ const SignatureLine: React.FC = () => {
           <line x1="24" y1={nodes[0] ?? 0} x2="24" y2={Math.max(nodes[0] ?? 0, Math.min(y, nodes[nodes.length - 1] ?? height))} stroke="#B49A75" strokeWidth="1.5" />
           {nodes.map((ny, i) => {
             const on = y >= ny;
+            const here = on && (i === nodes.length - 1 || y < nodes[i + 1]);
+            // passed: a lit point in a bronze ring; the current chapter: a larger bronze disc; ahead: a hollow point
             return (
               <g key={i}>
-                {on && <circle cx="24" cy={ny} r="9" fill="rgba(59,130,246,0.18)" />}
-                <circle cx="24" cy={ny} r="4" fill={on ? "#B49A75" : "#F8F4EE"} stroke="#B49A75" strokeWidth="1.5" />
+                {on && <circle cx="24" cy={ny} r={here ? 14 : 11} fill="rgba(180,154,117,0.22)" />}
+                {here ? <circle cx="24" cy={ny} r="10" fill="#8C7656" stroke="#B49A75" strokeWidth="1.2" />
+                  : on ? <circle cx="24" cy={ny} r="6.5" fill="#2E2A24" stroke="#B49A75" strokeWidth="1.2" />
+                  : <circle cx="24" cy={ny} r="4" fill="#F8F4EE" stroke="#B49A75" strokeWidth="1.5" />}
+                {on && <circle cx="24" cy={ny} r="3.6" fill="#FFF8EC" />}
               </g>
             );
           })}

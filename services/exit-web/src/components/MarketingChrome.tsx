@@ -177,7 +177,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
   const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
   return (
     <div className="min-h-screen bg-[#f6f8fb] text-ink-900">
-      <header className={`sticky top-0 z-40 border-b backdrop-blur transition-colors duration-200 motion-reduce:transition-none ${ink ? "border-white/10 bg-ex-1/85 text-white" : "border-slate-200 bg-white/90"}`}>
+      <header className={`sticky top-0 z-40 border-b backdrop-blur transition-colors duration-200 motion-reduce:transition-none ${ink ? "border-white/10 bg-ex-1/85 text-white" : "border-[#E7E1D7] bg-[#F7F4EF]/92"}`}>
         <div className={`${WRAP} grid min-h-[72px] grid-cols-[1fr_auto] items-center gap-5 lg:grid-cols-[1fr_auto_1fr]`}>
           <div className="flex items-center gap-5">
             <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={34} dark={ink} /></button>

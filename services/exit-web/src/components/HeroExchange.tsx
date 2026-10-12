@@ -21,11 +21,12 @@ const RING = "#C8B48F", BR = "#B49A75";
 const Orb: React.FC<{ at: [number, number]; s?: number }> = ({ at: [x, y], s = 1 }) => (
   <g>
     <circle cx={x} cy={y} r={26 * s} fill="url(#hx-orb)" />
+    <circle cx={x} cy={y} r={8.5 * s} stroke="#C9AE82" strokeOpacity=".8" strokeWidth={1.1 * s} />
     <circle cx={x} cy={y} r={4 * s} fill="#FFF8EC" />
   </g>
 );
 const Dot: React.FC<{ at: [number, number]; r?: number }> = ({ at: [x, y], r = 2.5 }) => (
-  <g><circle cx={x} cy={y} r={r * 3.5} fill="#FFFFFF" fillOpacity=".16" /><circle cx={x} cy={y} r={r * 1.2} fill="#F6F4F2" /></g>
+  <g><circle cx={x} cy={y} r={r * 3} fill="url(#hx-pt)" /><circle cx={x} cy={y} r={r} fill="#FBF8F2" /></g>
 );
 
 const Dial: React.FC = () => {
@@ -35,10 +36,11 @@ const Dial: React.FC = () => {
     <svg viewBox="0 0 500 500" className="h-full w-full overflow-visible" fill="none" aria-hidden>
       <defs>
         <radialGradient id="hx-orb"><stop offset="0" stopColor="#F8EAD0" stopOpacity="1" /><stop offset=".3" stopColor="#C9AE82" stopOpacity=".55" /><stop offset="1" stopColor={BR} stopOpacity="0" /></radialGradient>
-        <radialGradient id="hx-halo"><stop offset="0" stopColor="#6E8796" stopOpacity=".75" /><stop offset=".7" stopColor="#4C5F6D" stopOpacity=".45" /><stop offset="1" stopColor="#4C5F6D" stopOpacity="0" /></radialGradient>
+        <radialGradient id="hx-pt"><stop offset="0" stopColor="#F3E6CF" stopOpacity=".55" /><stop offset="1" stopColor="#F3E6CF" stopOpacity="0" /></radialGradient>
+        <radialGradient id="hx-halo"><stop offset="0" stopColor="#5C7383" stopOpacity=".8" /><stop offset=".75" stopColor="#47596A" stopOpacity=".55" /><stop offset="1" stopColor="#47596A" stopOpacity="0" /></radialGradient>
         <radialGradient id="hx-glow"><stop offset="0" stopColor="#FFFFFF" stopOpacity=".7" /><stop offset="1" stopColor="#FFFFFF" stopOpacity="0" /></radialGradient>
         <linearGradient id="hx-wedge" gradientUnits="userSpaceOnUse" x1={C} y1={C} x2={mx} y2={my}>
-          <stop offset="0" stopColor="#EADBBF" stopOpacity=".08" /><stop offset=".55" stopColor="#EADBBF" stopOpacity=".24" /><stop offset="1" stopColor="#EADBBF" stopOpacity=".5" />
+          <stop offset="0" stopColor="#C7A97C" stopOpacity=".06" /><stop offset=".55" stopColor="#C7A97C" stopOpacity=".2" /><stop offset="1" stopColor="#D2B68A" stopOpacity=".32" />
         </linearGradient>
         <filter id="hx-bloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7" /></filter>
         <filter id="hx-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.2" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
@@ -77,21 +79,23 @@ const Dial: React.FC = () => {
       </g>
 
       {/* bezel and graduated ring */}
-      <circle cx={C} cy={C} r="245" stroke="#E2D6BF" strokeOpacity=".8" strokeWidth="1.7" strokeDasharray="0.1 4.2" strokeLinecap="round" />
+      <circle cx={C} cy={C} r="266" stroke="#E2D6BF" strokeOpacity=".28" strokeWidth="1.1" strokeDasharray="0.1 6" strokeLinecap="round" />
+      <circle cx={C} cy={C} r="246" stroke="#E2D6BF" strokeOpacity=".5" strokeWidth="1.2" strokeDasharray="0.1 4.4" strokeLinecap="round" />
+      <circle cx={C} cy={C} r="233" stroke={RING} strokeOpacity=".62" strokeWidth="1.1" />
       <g stroke="#D9CCB4" strokeLinecap="round">
         {Array.from({ length: 180 }, (_, i) => i * 2).map((d) => {
-          const major = d % 10 === 0;
-          const [x1, y1] = P(d, major ? 217 : 221), [x2, y2] = P(d, major ? 231 : 228);
-          return <line key={d} x1={x1} y1={y1} x2={x2} y2={y2} strokeOpacity={major ? 0.7 : 0.36} strokeWidth={major ? 1.1 : 0.8} />;
+          const major = d % 30 === 0 && d % 90 !== 0;
+          const [x1, y1] = P(d, major ? 210 : 216), [x2, y2] = P(d, major ? 228 : 223);
+          return <line key={d} x1={x1} y1={y1} x2={x2} y2={y2} strokeOpacity={major ? 0.85 : 0.3} strokeWidth={major ? 1.3 : 0.7} />;
         })}
       </g>
 
       {/* market rings */}
-      <circle cx={C} cy={C} r="207" stroke={RING} strokeOpacity=".55" strokeWidth="1.1" />
+      <circle cx={C} cy={C} r="205" stroke={RING} strokeOpacity=".5" strokeWidth="1" />
       <circle cx={C} cy={C} r="160" stroke="#C9B08A" strokeOpacity=".95" strokeWidth="1.4" />
-      <circle cx={C} cy={C} r="110" stroke={RING} strokeOpacity=".7" strokeWidth="1.5" strokeDasharray="0.1 4.5" strokeLinecap="round" />
-      <circle cx={C} cy={C} r="80" stroke={RING} strokeOpacity=".4" strokeWidth="1.2" strokeDasharray="0.1 5" strokeLinecap="round" />
-      <circle cx={C} cy={C} r="59" stroke="#D2BA92" strokeOpacity="1" strokeWidth="1.6" />
+      <circle cx={C} cy={C} r="118" stroke={RING} strokeOpacity=".32" strokeWidth=".9" />
+      <circle cx={C} cy={C} r="88" stroke={RING} strokeOpacity=".6" strokeWidth="1.3" strokeDasharray="0.1 4.4" strokeLinecap="round" />
+      <circle cx={C} cy={C} r="60" stroke="#D2BA92" strokeOpacity=".95" strokeWidth="1.5" />
 
       {/* the aperture: a lit wedge, its leading edge bright */}
       <path d={`M${C} ${C} L${w1x} ${w1y} A212 212 0 0 1 ${w2x} ${w2y} Z`} fill="url(#hx-wedge)" filter="url(#hx-bloom)" />
@@ -113,10 +117,10 @@ const Dial: React.FC = () => {
       <circle cx={P(121, 160)[0]} cy={P(121, 160)[1]} r="2" fill="#E8D7B8" fillOpacity=".6" />
 
       {/* the transaction node: ice-white in a blue-grey halo */}
-      <circle cx={C} cy={C} r="44" fill="url(#hx-halo)" />
-      <circle cx={C} cy={C} r="30" fill="url(#hx-glow)" />
-      <circle cx={C} cy={C} r="15" stroke="#E4EFF7" strokeWidth="2.2" />
-      <circle cx={C} cy={C} r="7.5" fill="#FFFFFF" />
+      <circle cx={C} cy={C} r="32" fill="url(#hx-halo)" />
+      <circle cx={C} cy={C} r="13" fill="url(#hx-glow)" />
+      <circle cx={C} cy={C} r="14" stroke="#DCEAF3" strokeOpacity=".95" strokeWidth="1.4" />
+      <circle cx={C} cy={C} r="6.5" fill="#FFFFFF" />
     </svg>
   );
 };
@@ -150,12 +154,12 @@ const HeroExchange: React.FC = () => {
         {/* the editorial page */}
         <div className="relative z-10 flex items-center">
           <div className="w-full px-5 py-12 sm:px-8 sm:py-20 lg:py-14 lg:pl-[max(4.5rem,calc((100vw-1480px)/2+3.5rem))] lg:pr-[clamp(1.5rem,3vw,3.5rem)]">
-            <p className="flex items-center gap-4 font-mono text-[10.5px] font-medium uppercase tracking-[0.24em] text-[#2B2B2A] sm:text-[11px] xl:tracking-[0.32em]">
+            <p className="flex items-center gap-4 font-mono text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[#1F1F1E] sm:text-[11.5px] xl:tracking-[0.28em]">
               <span aria-hidden className="h-px w-10 bg-ex-bronze" />{t("hx.eyebrow")}
             </p>
-            <h1 id="hx-h" className="mt-8 max-w-[9.4em] font-editorial text-[clamp(2.7rem,4.6vw,5.25rem)] font-semibold leading-[1.02] tracking-[-0.032em] text-[#15171A] [font-feature-settings:'kern','liga','calt'] [font-kerning:normal] [text-wrap:balance] lg:-ml-[0.04em]">
+            <h1 id="hx-h" className="mt-8 max-w-[9.4em] font-editorial text-[clamp(2.7rem,4.85vw,5.5rem)] font-medium leading-[1.02] tracking-[-0.032em] text-[#15171A] [font-feature-settings:'kern','liga','calt'] [font-kerning:normal] [text-wrap:balance] lg:-ml-[0.04em]">
               {t("hx.h1")}{" "}
-              <em className="mt-[0.04em] block font-normal italic tracking-[-0.025em] text-[#9C8058]">{t("hx.h1em")}</em>
+              <em className="mt-[0.04em] block font-medium italic tracking-[-0.025em] text-[#9A7E56]">{t("hx.h1em")}</em>
             </h1>
             <p className="mt-8 max-w-[36rem] text-[16px] leading-[1.65] text-[#3D3F41] sm:text-[17px]">{t("hx.body")}</p>
             <div className="mt-10 flex flex-wrap items-center gap-3.5">
@@ -173,13 +177,13 @@ const HeroExchange: React.FC = () => {
         {/* the signature: the insignia's instrument and the wordmark */}
         <div aria-hidden className="hx-sig relative flex flex-col items-center justify-center pb-12 pt-20 sm:pb-16 lg:pb-[3.5%] lg:pt-[1.5%]">
           <div className="hx-mark relative flex flex-col items-center">
-            <div className="h-[min(78vw,330px)] w-[min(78vw,330px)] sm:h-[420px] sm:w-[420px] lg:h-[min(30.6vw,560px)] lg:w-[min(30.6vw,560px)]"><Dial /></div>
+            <div className="h-[min(78vw,330px)] w-[min(78vw,330px)] sm:h-[420px] sm:w-[420px] lg:h-[min(29.4vw,540px)] lg:w-[min(29.4vw,540px)]"><Dial /></div>
             <div className="mt-[0.05em] font-editorial font-medium leading-none tracking-[-0.025em] text-transparent"
               style={{ fontSize: "clamp(3rem, 5.4vw, 6rem)", backgroundImage: "linear-gradient(180deg, #F2E9DA 0%, #DCCDB3 50%, #B39E7E 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", filter: "drop-shadow(0 0 22px rgba(232,220,200,0.14))" }}>
-              ExitOS
+              Exit<span className="italic">OS</span>
             </div>
-            <div className="mt-4 flex items-center gap-5 font-mono text-[10px] uppercase tracking-[0.36em] text-[#ECE5D8] sm:text-[11.5px]">
-              <span className="h-px w-10 bg-[#E3DCCF]/55 sm:w-12" />The acquisition exchange<span className="h-px w-10 bg-[#E3DCCF]/55 sm:w-12" />
+            <div className="mt-3 flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.3em] text-[#ECE5D8] sm:text-[11px]">
+              <span className="h-px w-12 bg-[#E3DCCF]/55 sm:w-16" />The acquisition exchange<span className="h-px w-12 bg-[#E3DCCF]/55 sm:w-16" />
             </div>
           </div>
 
