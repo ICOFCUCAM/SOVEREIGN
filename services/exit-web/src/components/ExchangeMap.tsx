@@ -55,6 +55,11 @@ const STAGE_MODULE: Readonly<Record<string, string>> = {
   "lc.signal": "Acquisition Radar", "lc.discovery": "Buyer Intelligence", "lc.nda": "Access Requests", "lc.cim": "Documents",
   "lc.meetings": "Outreach", "lc.loi": "Negotiator", "lc.diligence": "Data Room", "lc.closing": "Closing Center",
 };
+// compact mode (DD1): the chart set in a half-width box. Larger type, and its own
+// label lanes so nothing collides: [lane y, label side] per stage.
+const COMPACT: ReadonlyArray<[number, "above" | "below" | "right"]> = [
+  [270, "above"], [380, "below"], [130, "above"], [330, "below"], [215, "right"], [120, "above"], [370, "below"], [250, "below"],
+];
 const P = STAGES.map(([, , wk, y]) => [wx(wk), y] as [number, number]);
 
 /** A smooth curve through the points (Catmull-Rom → cubic Bézier). */
@@ -82,9 +87,10 @@ const STYLE = `
 `;
 const MONO = { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" };
 
-const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean }> = ({ dark, interactive }) => {
+const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean; compact?: boolean }> = ({ dark, interactive, compact }) => {
   const { t } = useI18n();
   const [sel, setSel] = useState(0);
+  const PT: ReadonlyArray<[number, number]> = compact ? P.map(([px], i) => [px, COMPACT[i]![0]] as [number, number]) : P;
   const pick = (i: number) => (e: React.KeyboardEvent | React.MouseEvent): void => {
     if ("key" in e && e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault(); setSel(i);
@@ -111,18 +117,19 @@ const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean }> = ({ dark
           {TICKS.map((wk) => <line key={wk} x1={wx(wk)} y1={TOP} x2={wx(wk)} y2={AXIS_Y} />)}
         </g>
         <line x1={0} y1={AXIS_Y} x2={W} y2={AXIS_Y} stroke={C.axis} strokeWidth="1" />
-        <g fill={C.sub} fontSize="11" letterSpacing="1.5" style={MONO}>
+        <g fill={C.sub} fontSize={compact ? 15 : 11} letterSpacing="1.5" style={MONO}>
           {TICKS.map((wk) => <text key={wk} x={wx(wk)} y={AXIS_Y + 18} textAnchor="middle">{wk === 0 ? `${t("xm.wk")} 0` : wk}</text>)}
         </g>
         {/* cross-links */}
         <g fill="none" stroke={C.link} strokeWidth="1.4" opacity="0.45">
-          {LINKS.map(([a, b, lift, kind], i) => <path key={i} d={arc(P[a]!, P[b]!, lift)} strokeDasharray={kind === "dot" ? "1.5 5" : "6 6"} strokeLinecap="round" />)}
+          {LINKS.map(([a, b, lift, kind], i) => <path key={i} d={arc(PT[a]!, PT[b]!, lift)} strokeDasharray={kind === "dot" ? "1.5 5" : "6 6"} strokeLinecap="round" />)}
         </g>
         {/* the route, in stage order */}
-        <path className="xm-route" d={route(P)} pathLength={1} fill="none" stroke="url(#xm-route)" strokeWidth="2.2" strokeLinecap="round" />
+        <path className="xm-route" d={route(PT)} pathLength={1} fill="none" stroke="url(#xm-route)" strokeWidth="2.2" strokeLinecap="round" />
         {/* stages */}
-        {STAGES.map(([key, wk, , , side], i) => {
-          const [x, y] = P[i]!;
+        {STAGES.map(([key, wk, , , baseSide], i) => {
+          const [x, y] = PT[i]!;
+          const side = compact ? COMPACT[i]![1] : baseSide;
           const last = i === STAGES.length - 1;
           return (
             <g key={key} {...(interactive ? { role: "button", tabIndex: 0, "aria-pressed": sel === i, "aria-label": `${t(key)}, ${fmtWk(wk)}`, onClick: pick(i), onKeyDown: pick(i), className: "xm-stage cursor-pointer outline-none" } : {})}>
@@ -133,10 +140,10 @@ const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean }> = ({ dark
               </>}
               <circle className="xm-ring" cx={x} cy={y} r="17" fill="none" stroke={last ? C.end : C.ring} strokeWidth="1" />
               <circle cx={x} cy={y} r="7.5" fill={last ? C.end : C.node} stroke={C.nodeEdge} strokeWidth="1.5" />
-              <text x={x} y={side === "above" ? y - 42 : y + 40} textAnchor="middle" fill={C.text} fontSize="12.5" letterSpacing="2.6" stroke={C.halo} strokeWidth="5" paintOrder="stroke" strokeLinejoin="round" style={{ ...MONO, textTransform: "uppercase" }}>
+              <text x={side === "right" ? x + 30 : x} y={side === "right" ? y - 2 : side === "above" ? y - (compact ? 58 : 42) : y + (compact ? 56 : 40)} textAnchor={side === "right" ? "start" : "middle"} fill={C.text} fontSize={compact ? 19 : 12.5} letterSpacing={compact ? 1.2 : 2.6} stroke={C.halo} strokeWidth="5" paintOrder="stroke" strokeLinejoin="round" style={{ ...MONO, textTransform: "uppercase" }}>
                 {String(i + 1).padStart(2, "0")} · {t(key)}
               </text>
-              <text x={x} y={side === "above" ? y - 26 : y + 56} textAnchor="middle" fill={C.sub} fontSize="11" letterSpacing="1.5" stroke={C.halo} strokeWidth="4" paintOrder="stroke" style={MONO}>{fmtWk(wk)}</text>
+              <text x={side === "right" ? x + 30 : x} y={side === "right" ? y + 22 : side === "above" ? y - (compact ? 34 : 26) : y + (compact ? 80 : 56)} textAnchor={side === "right" ? "start" : "middle"} fill={C.sub} fontSize={compact ? 16 : 11} letterSpacing={compact ? 1 : 1.5} stroke={C.halo} strokeWidth="4" paintOrder="stroke" style={MONO}>{fmtWk(wk)}</text>
             </g>
           );
         })}
@@ -163,7 +170,7 @@ const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean }> = ({ dark
         return (
           <div className={`relative border-t ${k.rule} px-4 py-7 sm:px-8 sm:py-9`}
             style={{ background: dark ? "linear-gradient(100deg, rgba(37,99,235,0.28) 0%, rgba(37,99,235,0.08) 45%, rgba(5,16,31,0) 80%)" : "linear-gradient(100deg, rgba(37,99,235,0.10), transparent 70%)" }}>
-            <div aria-live="polite" className="grid gap-6 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-12">
+            <div aria-live="polite" className={`grid gap-6 ${compact ? "" : "lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-12"}`}>
               <div className="flex items-center gap-5">
                 <span className={`font-editorial text-[clamp(3.6rem,6vw,5.6rem)] font-semibold leading-none tabular-nums ${last ? "text-emerald-300" : "text-blue-300"}`}>{String(sel + 1).padStart(2, "0")}</span>
                 <span>
@@ -191,7 +198,7 @@ const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean }> = ({ dark
       })()}
 
       {/* corner tag */}
-      <div aria-hidden className="absolute right-6 top-6 hidden items-center sm:flex">
+      <div aria-hidden className={`absolute right-6 top-6 hidden items-center ${compact ? "" : "sm:flex"}`}>
         <span className={`border ${k.tag} px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em]`}>{t("xm.tag")}</span>
         <span className="h-[34px] w-[10px] bg-blue-600" />
       </div>
