@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { fmtMoney } from "../lib/ui";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { runDueDiligence } from "@exit/engines";
@@ -116,7 +117,7 @@ const DataRoom: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Confidential pkgs" value={String(confidentialCount)} sub="engine classification" /></div>
       </section>
 
-      <MarketTape items={buildMarketTape()} />
+      <RegistryTape items={buildMarketTape()} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <section id="dr-shared" aria-labelledby="dr-shared-h" className="border border-xo-caution/60 bg-xo-panel px-4 py-3">
         <h2 id="dr-shared-h" className="text-[14px] font-semibold text-xo-caution">Shared storage — read before uploading</h2>

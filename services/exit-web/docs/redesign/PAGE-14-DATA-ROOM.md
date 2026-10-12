@@ -38,7 +38,7 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 | G2 | **Invented "value at risk" weights.** | Label as a rule with the weights shown; "illustrative" not "at risk". | ☑ `2a1b6bd` |
 | G3 | Mislabels: "Due Diligence AI" (rule-based), "ring-1 access", completeness rule unstated, raw list error. | "Diligence risk scan (rule-based)"; drop "ring-1 access"; state the completeness rule; plain error text. | ☑ `5b74542` |
 | G4 | Demo company unlabelled. | Engine specs, red flags and value on `loadActiveCompany()`; badge. | ☑ `1ab2210` |
-| G5 | Fake live tape. | `RegistryTape`. | ☐ |
+| G5 | Fake live tape. | `RegistryTape`. | ☑ G5-commit |
 | G6 | Design: no `h1`, overflow at 390, old primitives. | Rebuild on `xo`. | ☑ `27888d1` |
 
 ---
@@ -72,3 +72,7 @@ Preparation: `h1` none · axe 0 · **overflow at 390** · 0 errors · list call 
 *Closed by:* `pages/DataRoom.tsx` — the engine checklist and red flags (`runDueDiligence`) and the value behind the illustrative discount (`canonicalValuationFor(company).headline.mid`) run on `loadActiveCompany()`; `missingImpactUsd` takes the value as a parameter (same rule). Eyebrow names the source, **Demo data / Your intake** badge. Uploads still go to the shared demo tenant (G1 / X12). `pages/Intake.tsx` lists "Data Room (checklist)".
 *Verification:* `tsc -b`, eslint clean · Chromium (no uploads listed): demo → DEMO DATA, illustrative discount −$75,080,073; intake "Northwind Analytics" → YOUR INTAKE, −$294,562,149 · 0 errors.
 *Observation:* with nothing uploaded the rule sums to about 73 % of enterprise value (weight × count of missing artifacts, per package, uncapped). It is labelled as an illustrative rule, but the size of the number is a product issue for the owner (recalibrate or cap).
+
+### G5 — Fake live tape
+*Closed by:* `pages/DataRoom.tsx`: pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
