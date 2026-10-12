@@ -30,7 +30,7 @@ A kanban of deals across the negotiation stages, a "Deal Probability Engine" tab
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Three invented deals** in the pipeline and its totals. | Remove them; the sourcing column shows the top ranked buyers from discovery as "candidates — not contacted", with no amount or probability, excluded from totals. | ☑ `bc3aef0` |
-| G2 | **Invented stage-conversion benchmarks.** | Remove the figures; say no sourced benchmark exists yet. | ☐ |
+| G2 | **Invented stage-conversion benchmarks.** | Remove the figures; say no sourced benchmark exists yet. | ☑ G2-commit |
 | G3 | "Prediction engine" and automation overclaims. | "Close-probability rule" with its formula; expected-days rule stated; plain "What ExitOS does". | ☐ |
 | G4 | Demo offers unlabelled. | Badge and line: sample offers of the demo company. | ☐ |
 | G5 | Design: no `h1`, 11 contrast failures, tape. | Rebuild on `xo`; `h1` "Active Processes"; `RegistryTape`. | ☑ `82783c3` |
@@ -48,3 +48,7 @@ A kanban of deals across the negotiation stages, a "Deal Probability Engine" tab
 *Closed by:* `pages/Pipeline.tsx`. The hard-coded "C.H. Robinson Bolt-on (engaged, $110M, 25 %)", "Pritzker Private Capital (sourcing, 5 %)" and "Walton Enterprises (sourcing, 4 %)" are removed. The sourcing column now lists the **top three discovery candidates that have not made an offer** (from `BUYERS`), dashed and marked "candidate — not contacted", with no amount or probability and not counted anywhere ("Sourcing 0 + 3 candidates"). "Live deals" → "Active deals — offers, excluding dead" (and "live deals" → "active deals" in the take — not live data).
 Totals now reflect only the sample offers: **2 active deals** (was 5), pipeline value **$297,000,000** (was $407M with the invented $110M), probability-weighted **$171,163,315**.
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 "C.H. Robinson" / "Walton" deals; Pritzker appears only as a discovery candidate; figures above · free 1440/390: 0 errors, axe 0, no overflow.
+
+### G2 — Invented stage-conversion benchmarks
+*Closed by:* `pages/Pipeline.tsx`. The five hard-coded rates (Sourcing → Engaged 38 %, Engaged → Diligence 42 %, Diligence → LOI 55 %, LOI → Signed 61 %, Signed → Closed 92 %) had no source anywhere in the codebase and are removed. The section stays and says: "No sourced stage-conversion benchmark is available yet, so none is shown. Conversion rates will appear here once they can be measured from recorded processes or cited from a source."
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 "38%" / "92%"; the note is shown.

@@ -247,17 +247,7 @@ const Pipeline: React.FC = () => {
       </Section>
 
       <Section title="Stage conversion · benchmarks" className="border border-xo-line">
-        <dl className="grid grid-cols-2 gap-px bg-xo-line sm:grid-cols-5">
-          {[
-            ["Sourcing → Engaged", "38%"], ["Engaged → Diligence", "42%"], ["Diligence → LOI", "55%"],
-            ["LOI → Signed", "61%"], ["Signed → Closed", "92%"],
-          ].map(([k, v]) => (
-            <div key={k} className="bg-xo-panel px-3 py-2">
-              <dt className="text-[11px] text-xo-faint">{k}</dt>
-              <dd className="mt-0.5 font-mono text-[18px] font-semibold tabular-nums">{v}</dd>
-            </div>
-          ))}
-        </dl>
+        <p className="px-4 py-3 text-[13px] text-xo-muted">No sourced stage-conversion benchmark is available yet, so none is shown. Conversion rates will appear here once they can be measured from recorded processes or cited from a source.</p>
       </Section>
     </div>
   );
