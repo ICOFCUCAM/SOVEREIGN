@@ -79,5 +79,5 @@ Founder Active Mandate: `h1` none · axe empty-table-header ×1 · **overflow at
 
 ## Known issues
 - NDA register is a sample portfolio; drafted NDAs live only for the session and are not sent.
-- The buyer request list with real data was not exercised (would write to the connected backend) — NOT VERIFIED.
+- ~~The buyer request list with real data was not exercised — NOT VERIFIED.~~ **Corrected (during Page 28):** the dev server has no Supabase configuration, so it runs the browser-local backend (`LocalStorageExitApi`) and the flow was safe to test. Verified in Chromium: a buyer (Pro) sent an NDA request from the Acquisition Radar ("Send NDA request"), and `/console/nda` then listed "Your requests — Listing lst-demo-helios · Awaiting the founder · requested 10/12/2026"; 0 errors. The only external request besides fonts was `functions/v1/exit-social-dispatch`, which the test script fulfils locally, so it never reached the network. Not verified against the Supabase backend.
 - No data-room gating exists (stated on the page).
