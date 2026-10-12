@@ -36,7 +36,7 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 | G3 | **Demo-specific and uncomputed scenario claims.** | Drivers built from the company's own figures (ARR before → after); the ARR scenario names a target above the company's ARR; uncomputed outcomes worded as expectations to check against the diff. | ☑ `c68ab55` |
 | G4 | Demo only, unlabelled. | Run on the active company; Demo data / Your intake badge. | ☑ `f8779b8` |
 | G5 | Unvalidated number inputs. | Text inputs parsed with `parseNumber` (units, ranges), messages, `aria-invalid`; only valid values reach the engines. | ☑ `9d513be` |
-| G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
+| G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☑ G6-commit |
 | G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☑ `ca01086` |
 
 ---
@@ -71,3 +71,7 @@ The scenario transforms and their targets are unchanged: for the demo the six di
 ### G5 — Unvalidated number inputs
 *Closed by:* `pages/Simulator.tsx`. The four numeric inputs keep the typed text and parse it with `parseNumber` (the intake's parser): target in **$M** (0.1–1,000,000; was raw dollars), min cash % and max earnout % (0–100), max timeline (whole days, 1–3,650). Invalid text shows the parser's message plus "The last valid value is used.", sets `aria-invalid` and is described to assistive technology; only valid values reach the engines (before, clearing a field silently ran the engines with 0). The target hint shows the canonical midpoint and the value in use.
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium Pro 1440/390: target starts at "102.8" ($102,849,415); "abc" → "Use digits only, e.g. 12.5. The last valid value is used.", `aria-invalid` true, best value unchanged ($144,654,185); "120" → "using $120,000,000", best value $168,775,896; cash "150" → "Must be at most 100."; timeline "0" → "Must be at least 1."; "12.5" → "Enter a whole number."; axe 0; 0 errors.
+
+### G6 — Shared `BankerTake`; fake live tape
+*Closed by:* `pages/Simulator.tsx`. The shared `BankerTake` is replaced by a page-local "Recommended action" `Section` (stress-test before committing; Baseline — best expected value in the set, "the highest buyer, not an average"; Lead buyer — close rate, "prior where undisclosed"; If you skip this; What ExitOS does — "Scenarios are models, not forecasts."). Pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page) and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.

@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { fmtMoney, ConfidenceChip } from "../lib/ui";
 import { PageHeader, Section, Metric as XMetric, ScrollRegion, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { runStrategySimulator, runInstitutionalValuation, type BuyerType, type CompanyProfile, type StrategyOutput } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
 import { parseNumber } from "../lib/intake-fields";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { emitTelemetry } from "../lib/telemetry";
-import BankerTake from "../components/BankerTake";
 
 // ExitOS Scenario Engine — the founder simulates futures. The baseline
 // trajectory is whatever the founder inputs describe today; each scenario
@@ -293,18 +293,21 @@ const Simulator: React.FC = () => {
         <div className="bg-xo-panel"><XMetric label="Buyers in set" value={String(baseline.sim.recommendedBuyers.length)} sub="clearing constraints" /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
-      <BankerTake
-        next={<>Stress-test the plan before you commit — model waiting, scaling to $25M ARR, or a marquee entrant.</>}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(baseline.sim.expectedRealizedValueUsd)}</span> expected realized on today's baseline trajectory.</>}
-        inaction={<>The default path is rarely the optimal one — unexamined timing and structure leave value unmodeled.</>}
-        buyer={baseline.sim.recommendedBuyers[0]
-          ? <><span className="text-white">{baseline.sim.recommendedBuyers[0].buyer.name}</span> leads the baseline set at {(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}% close.</>
-          : <>No buyers clear the baseline constraints — loosen them to rebuild the set.</>}
-        automate={<>ExitOS re-runs valuation and strategy for every scenario and diffs the outcome against your baseline.</>}
-        impact={<>{fmtMoney(baseline.sim.expectedRealizedValueUsd)}</>}
-      />
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line">
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">Stress-test the plan before you commit — compare waiting, growing, removing the earnout or a marquee entrant against the baseline below.</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="Baseline">Best expected value in the set <span className="font-mono text-xo-text">{fmtMoney(baseline.sim.expectedRealizedValueUsd)}</span> — the highest buyer, not an average.</TakeCell>
+            <TakeCell k="Lead buyer">{baseline.sim.recommendedBuyers[0]
+              ? <>{baseline.sim.recommendedBuyers[0].buyer.name} — close rate {(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}% (prior where undisclosed).</>
+              : <>No buyer clears the constraints — loosen them to rebuild the set.</>}</TakeCell>
+            <TakeCell k="If you skip this">Timing and structure choices go untested against the model.</TakeCell>
+            <TakeCell k="What ExitOS does">Re-runs the valuation and strategy engines for each scenario and shows the difference from your baseline. Scenarios are models, not forecasts.</TakeCell>
+          </dl>
+        </div>
+      </Section>
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         {/* ── Baseline inputs ─────────────────────────────────── */}
@@ -497,6 +500,13 @@ const Stat: React.FC<{ label: string; value: string; sub?: string; tone?: string
     <dt className="order-1 text-[12px] font-semibold text-xo-muted">{label}</dt>
     <dd className={`order-2 mt-1 text-2xl font-semibold tabular-nums ${tone ?? ""}`}>{value}</dd>
     {sub && <dd className="order-3 mt-0.5 text-[12px] text-xo-muted">{sub}</dd>}
+  </div>
+);
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
   </div>
 );
 
