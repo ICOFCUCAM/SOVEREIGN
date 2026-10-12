@@ -9,16 +9,16 @@ import type { Role } from "./access";
 const KEY = "exitos.guide.v1";
 const EVENT = "exitos:guide";
 
-interface GuideState { visited: string[]; hidden: boolean }
+interface GuideState { visited: string[]; hidden: boolean; tipsHidden: boolean }
 
-const EMPTY: GuideState = { visited: [], hidden: false };
+const EMPTY: GuideState = { visited: [], hidden: false, tipsHidden: false };
 
 function read(): GuideState {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return EMPTY;
     const s = JSON.parse(raw) as Partial<GuideState>;
-    return { visited: Array.isArray(s.visited) ? s.visited.filter((v) => typeof v === "string") : [], hidden: s.hidden === true };
+    return { visited: Array.isArray(s.visited) ? s.visited.filter((v) => typeof v === "string") : [], hidden: s.hidden === true, tipsHidden: s.tipsHidden === true };
   } catch { return EMPTY; }
 }
 
@@ -38,6 +38,10 @@ export function markVisited(path: string): void {
 
 export function setGuideHidden(hidden: boolean): void {
   write({ ...read(), hidden });
+}
+
+export function setTipsHidden(tipsHidden: boolean): void {
+  write({ ...read(), tipsHidden });
 }
 
 /** Re-render when the guide state changes (in this tab). */

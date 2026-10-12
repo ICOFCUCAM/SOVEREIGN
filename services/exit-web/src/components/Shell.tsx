@@ -8,7 +8,8 @@ import InstitutionalRibbon from "./InstitutionalRibbon";
 import LayerBar from "./LayerBar";
 import LayerSubNav from "./LayerSubNav";
 import TermsDialog from "./TermsDialog";
-import { guideState, markVisited, onGuideChange, setGuideHidden, ESSENTIALS, loadAllToolsOpen, saveAllToolsOpen } from "../lib/onboarding";
+import PageTip from "./PageTip";
+import { guideState, markVisited, onGuideChange, setGuideHidden, setTipsHidden, ESSENTIALS, loadAllToolsOpen, saveAllToolsOpen } from "../lib/onboarding";
 
 // Role-aware console rail. The navigation is driven by the access policy:
 // founders, buyers, admins and superadmins see different command centers, and
@@ -46,7 +47,8 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // A plan-gated page shows the upgrade screen instead, so it is not marked.
   useEffect(() => { if (!needsUpgrade(loc.pathname, role, plan)) markVisited(loc.pathname); }, [loc.pathname, role, plan]);
   const [guideHidden, setGuideHiddenState] = useState(() => guideState().hidden);
-  useEffect(() => onGuideChange(() => setGuideHiddenState(guideState().hidden)), []);
+  const [tipsHidden, setTipsHiddenState] = useState(() => guideState().tipsHidden);
+  useEffect(() => onGuideChange(() => { const g = guideState(); setGuideHiddenState(g.hidden); setTipsHiddenState(g.tipsHidden); }), []);
   const showGuideLink = guideHidden && (role === "founder" || role === "buyer");
 
   // Close the mobile drawer whenever the route changes.
@@ -169,6 +171,10 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </div>
             <button type="button" onClick={() => setTermsOpen(true)}
               className="mb-2 block rounded text-xs font-semibold text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">Plain-language terms</button>
+            {tipsHidden && (
+              <button type="button" onClick={() => setTipsHidden(false)}
+                className="mb-2 block rounded text-xs font-semibold text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">Show page tips</button>
+            )}
             {showGuideLink && (
               <Link to={role === "buyer" ? "/console/buyer-portal" : "/console"} onClick={() => setGuideHidden(false)}
                 className="mb-2 block text-xs font-semibold text-white/70 hover:text-white">Show the Start-here guide</Link>
@@ -216,6 +222,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </div>
             </div>
           )}
+          {!tipsHidden && <div className="relative"><PageTip onHide={() => setTipsHidden(true)} /></div>}
           {WORKSTATION_ROUTES.has(loc.pathname)
             ? <div className="px-3 py-3 sm:px-4 lg:px-5 lg:py-4">{children}</div>   /* full-bleed command centers */
             : <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</div>}

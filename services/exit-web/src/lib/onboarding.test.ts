@@ -16,7 +16,7 @@ beforeEach(() => {
 describe("onboarding guide state", () => {
 
   it("starts empty and visible", () => {
-    expect(guideState()).toEqual({ visited: [], hidden: false });
+    expect(guideState()).toEqual({ visited: [], hidden: false, tipsHidden: false });
   });
 
   it("records each opened page once", () => {
@@ -34,7 +34,7 @@ describe("onboarding guide state", () => {
 
   it("ignores a corrupt stored value", () => {
     localStorage.setItem("exitos.guide.v1", "{not json");
-    expect(guideState()).toEqual({ visited: [], hidden: false });
+    expect(guideState()).toEqual({ visited: [], hidden: false, tipsHidden: false });
   });
 
   it("gives founders and buyers their own steps", () => {
