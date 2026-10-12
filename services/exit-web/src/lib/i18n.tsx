@@ -103,6 +103,7 @@ const en: Dict = {
   "loss.f2": "Median days, announce to close",
   "loss.f3": "Of indexed deals closed",
   "loss.n": "{n} measured",
+  "loss.rec": "of {n} recorded",
   "loss.body": "Across the disclosed transactions we index, the median premium over reference is {p} and the median announce-to-close period is {d}. Preparation and leverage decide which side of the median you land on.",
   // transaction record
   "rec.eyebrow": "The transaction record",
@@ -314,6 +315,7 @@ const fr: Dict = {
   "loss.f2": "Jours médians, de l’annonce au closing",
   "loss.f3": "Des opérations indexées conclues",
   "loss.n": "{n} mesurées",
+  "loss.rec": "sur {n} enregistrées",
   "loss.body": "Sur les transactions publiées que nous indexons, la prime médiane sur la valeur de référence est de {p} et le délai médian entre annonce et closing est de {d}. La préparation et le rapport de force décident de quel côté de la médiane vous terminez.",
   "rec.eyebrow": "Le registre des transactions",
   "rec.h2": "Acquisitions publiées sur le marché que nous indexons.",
@@ -521,6 +523,7 @@ const es: Dict = {
   "loss.f2": "Días medianos, del anuncio al cierre",
   "loss.f3": "De las operaciones indexadas cerradas",
   "loss.n": "{n} medidas",
+  "loss.rec": "de {n} registradas",
   "loss.body": "En las transacciones publicadas que indexamos, la prima mediana sobre la referencia es {p} y el plazo mediano entre anuncio y cierre es {d}. La preparación y la posición negociadora deciden de qué lado de la mediana termina usted.",
   "rec.eyebrow": "El registro de transacciones",
   "rec.h2": "Adquisiciones publicadas en el mercado que indexamos.",
