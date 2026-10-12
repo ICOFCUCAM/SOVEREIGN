@@ -30,7 +30,7 @@ Per-sector indexes from the registry snapshot: volume, 12-month trend, buyers, m
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Trends on tiny counts; "hottest sector" decided by a few deals.** | Show the counts beside each trend ("5 vs 3"); mark trends under 10 deals in both windows "small sample"; the hottest-sector metric shows its counts. | ☑ `c2b16f2` |
-| G2 | Mislabels: "Active buyers" (all-time distinct acquirers); "verified" comment; hover-only heatfield. | "Distinct acquirers (all years)"; comment corrected; heatfield hidden with the table as its text equivalent. | ☐ |
+| G2 | Mislabels: "Active buyers" (all-time distinct acquirers); "verified" comment; hover-only heatfield. | "Distinct acquirers (all years)"; comment corrected; heatfield hidden with the table as its text equivalent. | ☑ G2-commit |
 | G3 | Fake live tape. | `RegistryTape`. | ☐ |
 | G4 | Design: no `h1`, contrast failures, unfocusable scroll region, sort semantics. | Rebuild on `xo` (`Chip` sort, `ScrollRegion`). | ☑ `6090ed3` |
 
@@ -45,3 +45,7 @@ Per-sector indexes from the registry snapshot: volume, 12-month trend, buyers, m
 ### G1 — Trends on tiny counts
 *Closed by:* `pages/Indexes.tsx` (display only; trend formula and sort unchanged). Every trend shows its counts — "▲ 67% (5 vs 3, small sample)" — and windows with fewer than 10 deals in both are marked **small sample**; sectors with no prior-window deals show "— (N vs 0)". Column header "12m trend (deals vs prior 12m)". "Hottest sector" → **"Largest 12-month change"** with "· 5 vs 3 deals (small sample)". Table foot explains the counts and the threshold.
 *Verification:* `tsc -b`, eslint clean · Chromium: "Largest 12-month change Software +67% 12m · 5 vs 3 deals (small sample)" · Preparation 1440/390: 0 errors, axe 0, no overflow.
+
+### G2 — Mislabels
+*Closed by:* `pages/Indexes.tsx` (labels). "Active buyers" → **"Distinct acquirers (all years)"** (what `activeBuyers` counts in `exit-engines/src/market/indexes.ts`); header description adds "mostly source-cited entries that are not yet verified"; heatfield foot "Hover a sector for figures" → "The same figures are in the index table below." (the heatfield is hidden from assistive tech since G4); file comment "verified registry events" corrected.
+*Verification:* eslint clean · Chromium: 0 "Active buyers" / "Hover a sector"; new header present.

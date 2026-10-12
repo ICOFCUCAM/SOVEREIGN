@@ -8,9 +8,9 @@ import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 
 // EXITOS ACQUISITION INDEXES (Stage 8) — Bloomberg has indexes; so does
 // ExitOS. Per ExitOS sector, the aggregate the whole network produces:
-// acquisition volume and its trend, active buyers, deal size and disclosed
-// value — every figure from verified registry events. As the network
-// ingests more deals, the indexes sharpen for everyone.
+// acquisition volume and its trend, distinct acquirers, deal size and
+// disclosed value — every figure from the registry snapshot (mostly
+// source-cited, unverified entries; see the Market Map).
 
 const { indexes, as_of } = ACQ_INDEXES;
 const totalVol = indexes.reduce((s, i) => s + i.volume, 0);
@@ -41,7 +41,7 @@ const Indexes: React.FC = () => {
     <div data-page="acquisition-indexes" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Market Intelligence" title="Acquisition Indexes"
         badge={<span className="text-[12px] text-xo-muted">Sector tape · as of {as_of.slice(0, 10)}</span>}
-        description={`Source: ${ACQ_INDEXES.source}`} />
+        description={`Source: ${ACQ_INDEXES.source} — mostly source-cited entries that are not yet verified.`} />
 
       <section aria-label="Index totals" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Sector indexes" value={String(indexes.length)} /></div>
@@ -53,7 +53,7 @@ const Indexes: React.FC = () => {
       <MarketTape items={tape} />
 
       <Section title="Transaction heatfield · volume × disclosed value" className="border border-xo-line"
-        foot="Column height = acquisition volume · heat = disclosed value · cap colour = 12-month trend. Hover a sector for figures.">
+        foot="Column height = acquisition volume · heat = disclosed value · cap colour = 12-month trend. The same figures are in the index table below.">
         <div aria-hidden><TransactionHeatfield height={200} /></div>
       </Section>
 
@@ -76,7 +76,7 @@ const Indexes: React.FC = () => {
                   <th scope="col" className="px-3 py-2 font-medium">Index</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Volume</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">12m trend (deals vs prior 12m)</th>
-                  <th scope="col" className="px-2 py-2 text-right font-medium">Active buyers</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Distinct acquirers (all years)</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Median deal</th>
                   <th scope="col" className="px-3 py-2 text-right font-medium">Disclosed value</th>
                 </tr>
